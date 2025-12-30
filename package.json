@@ -8,14 +8,15 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "prepare": "husky"
+    "prepare": "husky",
+    "format": "prettier --write src/"
   },
   "lint-staged": {
-    "**/*.{ts,tsx,js,jsx}": [
+    "src/**/*.{ts,tsx,js,jsx}": [
       "eslint --fix",
       "prettier --write"
     ],
-    "**/*.{json,css,md}": [
+    "src/**/*.{json,css,md}": [
       "prettier --write"
     ]
   },
