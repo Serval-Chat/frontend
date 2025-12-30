@@ -1,0 +1,9 @@
+@import 'tailwindcss';
+
+@layer base {
+  body {
+    @apply bg-[#242424] text-white/87 antialiased;
+    line-height: 1.5;
+    font-weight: 400;
+  }
+}
