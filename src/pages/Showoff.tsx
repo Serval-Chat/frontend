@@ -4,6 +4,7 @@ import {
     TableOfContents,
     type TOCProps,
 } from '@/ui/components/TableOfContents';
+import { BouncingDots } from '@/ui/components/BouncingDots';
 
 function Showoff() {
     const [normalButtonText, normalButtonFlash] = useFlashText(
@@ -11,7 +12,17 @@ function Showoff() {
         'Clicked!',
         2500
     );
+    const [normalButtonText2, normalButtonFlash2] = useFlashText(
+        'Normal Button',
+        'Clicked!',
+        2500
+    );
     const [cautionButtonText, cautionButtonFlash] = useFlashText(
+        'Caution Button',
+        'Clicked!',
+        2500
+    );
+    const [cautionButtonText2, cautionButtonFlash2] = useFlashText(
         'Caution Button',
         'Clicked!',
         2500
@@ -27,24 +38,16 @@ function Showoff() {
         2500
     );
 
-    const normalProcessing = useFlashText(
-        'Normal Processing',
-        'Processing...',
-        2500
-    );
+    const normalProcessing = useFlashText('Normal Processing', 'Loading', 2500);
     const cautionProcessing = useFlashText(
         'Caution Processing',
-        'Processing...',
+        'Loading',
         2500
     );
-    const dangerProcessing = useFlashText(
-        'Danger Processing',
-        'Processing...',
-        2500
-    );
+    const dangerProcessing = useFlashText('Danger Processing', 'Loading', 2500);
     const successProcessing = useFlashText(
         'Success Processing',
-        'Processing...',
+        'Loading',
         2500
     );
 
@@ -67,6 +70,19 @@ function Showoff() {
                 { id: 'caution-processing', title: 'Caution Processing' },
                 { id: 'danger-processing', title: 'Danger Processing' },
                 { id: 'success-processing', title: 'Success Processing' },
+            ],
+        },
+        {
+            id: 'animations',
+            title: 'Animations',
+            children: [{ id: 'bouncing-dots', title: 'Bouncing Dots' }],
+        },
+        {
+            id: 'retain-size-buttons',
+            title: 'Retain Size buttons (lock size after text change)',
+            children: [
+                { id: 'normal-retain', title: 'Normal Retain' },
+                { id: 'caution-retain', title: 'Caution Retain' },
             ],
         },
     ];
@@ -128,7 +144,7 @@ function Showoff() {
                         <Button
                             buttonType="normal"
                             onClick={normalProcessing[1]}
-                            loading={normalProcessing[0] === 'Processing...'}
+                            loading={normalProcessing[0] === 'Loading'}
                         >
                             {normalProcessing[0]}
                         </Button>
@@ -137,7 +153,7 @@ function Showoff() {
                         <Button
                             buttonType="caution"
                             onClick={cautionProcessing[1]}
-                            loading={cautionProcessing[0] === 'Processing...'}
+                            loading={cautionProcessing[0] === 'Loading'}
                         >
                             {cautionProcessing[0]}
                         </Button>
@@ -146,7 +162,7 @@ function Showoff() {
                         <Button
                             buttonType="danger"
                             onClick={dangerProcessing[1]}
-                            loading={dangerProcessing[0] === 'Processing...'}
+                            loading={dangerProcessing[0] === 'Loading'}
                         >
                             {dangerProcessing[0]}
                         </Button>
@@ -155,9 +171,49 @@ function Showoff() {
                         <Button
                             buttonType="success"
                             onClick={successProcessing[1]}
-                            loading={successProcessing[0] === 'Processing...'}
+                            loading={successProcessing[0] === 'Loading'}
                         >
                             {successProcessing[0]}
+                        </Button>
+                    </div>
+                </div>
+            </div>
+
+            {/* Animations */}
+            <div id="animations" className="p-md font-sans">
+                <h2 className="text-lg font-semibold mb-md">Animations</h2>
+                <div className="flex flex-col gap-md">
+                    <div id="bouncing-dots" className="p-xs">
+                        <h3 className="text-md font-medium mb-sm">
+                            Bouncing Dots (Wave)
+                        </h3>
+                        <BouncingDots size={4} />
+                    </div>
+                </div>
+            </div>
+
+            {/* Retain Size buttons */}
+            <div id="retain-size-buttons" className="p-md font-sans">
+                <h2 className="text-lg font-semibold mb-md">
+                    Retain Size buttons (lock size after text change)
+                </h2>
+                <div className="flex flex-wrap gap-xs">
+                    <div id="normal-retain" className="p-xs">
+                        <Button
+                            buttonType="normal"
+                            onClick={normalButtonFlash2}
+                            retainSize={true}
+                        >
+                            {normalButtonText2}
+                        </Button>
+                    </div>
+                    <div id="caution-retain" className="p-xs">
+                        <Button
+                            buttonType="caution"
+                            onClick={cautionButtonFlash2}
+                            retainSize={true}
+                        >
+                            {cautionButtonText2}
                         </Button>
                     </div>
                 </div>

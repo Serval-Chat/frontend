@@ -2,7 +2,7 @@
  * @description A button component. Quite versatile.
  */
 
-import React from 'react';
+import React, { useLayoutEffect, useRef, useState } from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/utils/cn';
 
@@ -57,27 +57,65 @@ export interface ButtonProps
     children: React.ReactNode;
     buttonType: VariantProps<typeof buttonVariants>['variant'];
     loading?: boolean;
+    retainSize?: boolean;
 }
+
+import { BouncingDots } from './BouncingDots';
 
 export const Button: React.FC<ButtonProps> = ({
     children,
     className,
     buttonType,
     loading,
+    retainSize,
     disabled,
     ...props
 }) => {
+    const buttonRef = useRef<HTMLButtonElement>(null);
+    const [dimensions, setDimensions] = useState<{
+        width: number | string;
+        height: number | string;
+    }>({ width: 'auto', height: 'auto' });
+
+    useLayoutEffect(() => {
+        if (!loading && buttonRef.current) {
+            const { width, height } = buttonRef.current.getBoundingClientRect();
+
+            setDimensions((prev) => {
+                if (retainSize && prev.width !== 'auto') {
+                    return prev;
+                }
+                return { width, height };
+            });
+        }
+    }, [loading, children, retainSize]);
+
     const finalVariant = buttonType;
 
     return (
         <button
+            ref={buttonRef}
+            style={
+                loading || retainSize
+                    ? {
+                          width: dimensions.width,
+                          height: dimensions.height,
+                      }
+                    : undefined
+            }
             className={cn(
+                'relative',
                 buttonVariants({ variant: finalVariant, loading, className })
             )}
             disabled={loading || disabled}
             {...props}
         >
-            {children}
+            <span className={cn(loading && 'opacity-0')}>{children}</span>
+            {loading && (
+                <div className="absolute inset-0 flex items-center justify-center">
+                    <BouncingDots size={4} color="bg-current" />
+                </div>
+            )}
         </button>
     );
 };
