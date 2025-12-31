@@ -4,7 +4,7 @@ import {
     TableOfContents,
     type TOCProps,
 } from '@/ui/components/TableOfContents';
-import { BouncingDots } from '@/ui/components/BouncingDots';
+import { BouncingDots } from '@/ui/animations/BouncingDots';
 
 function Showoff() {
     const [normalButtonText, normalButtonFlash] = useFlashText(

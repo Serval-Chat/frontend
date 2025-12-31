@@ -60,7 +60,7 @@ export interface ButtonProps
     retainSize?: boolean;
 }
 
-import { BouncingDots } from './BouncingDots';
+import { BouncingDots } from '../animations/BouncingDots';
 
 export const Button: React.FC<ButtonProps> = ({
     children,
