@@ -1,0 +1,15 @@
+@import 'tailwindcss';
+@import './design-tokens.css';
+
+@theme {
+    /* Tailwind v4 automatically picks up --color-*, --spacing-*, --font-*, etc. from :root */
+    /* We only need to define things here if we want to override or add things not in :root */
+}
+
+@layer base {
+    body {
+        @apply bg-[#242424] text-white/87 antialiased font-sans;
+        line-height: 1.5;
+        font-weight: 400;
+    }
+}

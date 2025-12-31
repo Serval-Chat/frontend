@@ -1,5 +1,11 @@
+/**
+ * @description A component to show table of contents
+ */
+
 import React, { useState } from 'react';
-import { useAutoHighlight } from '../../hooks/useAutoHighlight';
+import { useAutoHighlight } from '@/hooks/useAutoHighlight';
+
+import { cn } from '@/utils/cn';
 
 export interface TOCSection {
     id: string;
@@ -22,7 +28,9 @@ const TOCItem: React.FC<{ section: TOCSection }> = ({ section }) => {
                 {hasChildren && (
                     <button
                         onClick={() => setIsOpen(!isOpen)}
-                        className="w-4 h-4 flex items-center justify-center text-sm text-gray-500 hover:text-gray-700"
+                        className={cn(
+                            'w-4 h-4 flex items-center justify-center text-sm text-gray-500 hover:text-gray-700'
+                        )}
                     >
                         {isOpen ? '▾' : '▸'}
                     </button>
@@ -30,14 +38,16 @@ const TOCItem: React.FC<{ section: TOCSection }> = ({ section }) => {
                 {!hasChildren && <span className="w-4 h-4 shrink-0" />}
                 <a
                     href={`#${section.id}`}
-                    className="hover:text-blue-500 hover:underline transition-colors duration-150"
+                    className={cn(
+                        'hover:text-primary hover:underline transition-colors duration-150 font-sans'
+                    )}
                 >
                     {section.title}
                 </a>
             </div>
 
             {hasChildren && isOpen && (
-                <ul className="ml-5 mt-1 space-y-1">
+                <ul className="ml-lg mt-xs space-y-xs">
                     {section.children!.map((child) => (
                         <TOCItem key={child.id} section={child} />
                     ))}
@@ -64,9 +74,9 @@ export const TableOfContents: React.FC<TOCProps> = ({ sections }) => {
     useAutoHighlight(allIds);
 
     return (
-        <nav>
-            <h2 className="text-lg font-semibold mb-4">Table of Contents</h2>
-            <ul className="space-y-2">
+        <nav className="font-sans">
+            <h2 className="text-lg font-semibold mb-md">Table of Contents</h2>
+            <ul className="space-y-sm">
                 {sections.map((section) => (
                     <TOCItem key={section.id} section={section} />
                 ))}

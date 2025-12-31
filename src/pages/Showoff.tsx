@@ -1,9 +1,9 @@
-import { Button } from '../ui/components/Button';
-import { useFlashText } from '../hooks/useFlashText';
+import { Button } from '@/ui/components/Button';
+import { useFlashText } from '@/hooks/useFlashText';
 import {
     TableOfContents,
     type TOCProps,
-} from '../ui/components/TableOfContents';
+} from '@/ui/components/TableOfContents';
 
 function Showoff() {
     const [normalButtonText, normalButtonFlash] = useFlashText(
@@ -75,23 +75,23 @@ function Showoff() {
         <>
             <TableOfContents sections={sections} />
 
-            <h1 className="my-4 text-xl font-bold">
+            <h1 className="my-md text-xl font-bold font-sans">
                 Show off of elements (because I work on core elements now, right
                 UI and logic will be later added).
             </h1>
 
             {/* Flash buttons */}
-            <div id="flash-buttons" className="p-4 mb-6">
-                <h2 className="text-lg font-semibold mb-4">
+            <div id="flash-buttons" className="p-md mb-lg font-sans">
+                <h2 className="text-lg font-semibold mb-md">
                     Flash buttons (change text after click)
                 </h2>
-                <div className="flex flex-wrap gap-2">
-                    <div id="normal-flash" className="p-1">
+                <div className="flex flex-wrap gap-xs">
+                    <div id="normal-flash" className="p-xs">
                         <Button buttonType="normal" onClick={normalButtonFlash}>
                             {normalButtonText}
                         </Button>
                     </div>
-                    <div id="caution-flash" className="p-1">
+                    <div id="caution-flash" className="p-xs">
                         <Button
                             buttonType="caution"
                             onClick={cautionButtonFlash}
@@ -99,7 +99,7 @@ function Showoff() {
                             {cautionButtonText}
                         </Button>
                     </div>
-                    <div id="dangerous-flash" className="p-1">
+                    <div id="dangerous-flash" className="p-xs">
                         <Button
                             buttonType="danger"
                             onClick={dangerousButtonFlash}
@@ -107,7 +107,7 @@ function Showoff() {
                             {dangerousButtonText}
                         </Button>
                     </div>
-                    <div id="success-flash" className="p-1">
+                    <div id="success-flash" className="p-xs">
                         <Button
                             buttonType="success"
                             onClick={successButtonFlash}
@@ -119,12 +119,12 @@ function Showoff() {
             </div>
 
             {/* Processing buttons */}
-            <div id="processing-buttons" className="p-4">
-                <h2 className="text-lg font-semibold mb-4">
+            <div id="processing-buttons" className="p-md font-sans">
+                <h2 className="text-lg font-semibold mb-md">
                     Processing buttons (graying out)
                 </h2>
-                <div className="flex flex-wrap gap-2">
-                    <div id="normal-processing" className="p-1">
+                <div className="flex flex-wrap gap-xs">
+                    <div id="normal-processing" className="p-xs">
                         <Button
                             buttonType="normal"
                             onClick={normalProcessing[1]}
@@ -133,7 +133,7 @@ function Showoff() {
                             {normalProcessing[0]}
                         </Button>
                     </div>
-                    <div id="caution-processing" className="p-1">
+                    <div id="caution-processing" className="p-xs">
                         <Button
                             buttonType="caution"
                             onClick={cautionProcessing[1]}
@@ -142,7 +142,7 @@ function Showoff() {
                             {cautionProcessing[0]}
                         </Button>
                     </div>
-                    <div id="danger-processing" className="p-1">
+                    <div id="danger-processing" className="p-xs">
                         <Button
                             buttonType="danger"
                             onClick={dangerProcessing[1]}
@@ -151,7 +151,7 @@ function Showoff() {
                             {dangerProcessing[0]}
                         </Button>
                     </div>
-                    <div id="success-processing" className="p-1">
+                    <div id="success-processing" className="p-xs">
                         <Button
                             buttonType="success"
                             onClick={successProcessing[1]}

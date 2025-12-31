@@ -1,0 +1,47 @@
+@theme {
+    /* Main Colors */
+    --color-primary: hsl(220 90% 56%);
+    --color-primary-hover: hsl(220 90% 48%);
+    --color-danger: hsl(0 84% 60%);
+    --color-danger-hover: hsl(0 84% 52%);
+    --color-caution: hsl(45 93% 47%);
+    --color-caution-hover: hsl(45 93% 39%);
+    --color-success: hsl(142 71% 45%);
+    --color-success-hover: hsl(142 71% 37%);
+
+    /* Muted variants */
+    --color-primary-muted: hsl(220 90% 85%);
+    --color-primary-muted-text: hsl(220 90% 25%);
+    --color-danger-muted: hsl(0 84% 85%);
+    --color-danger-muted-text: hsl(0 84% 25%);
+    --color-caution-muted: hsl(45 93% 85%);
+    --color-caution-muted-text: hsl(45 93% 25%);
+    --color-success-muted: hsl(142 71% 85%);
+    --color-success-muted-text: hsl(142 71% 25%);
+
+    /* Spacing */
+    --spacing-xs: 0.25rem;
+    --spacing-sm: 0.5rem;
+    --spacing-md: 1rem;
+    --spacing-lg: 1.5rem;
+    --spacing-xl: 2rem;
+
+    /* Typography */
+    --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    --font-mono: 'Fira Code', 'Courier New', monospace;
+
+    /* Shadows */
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+
+    /* Border Radius */
+    --radius-sm: 0.25rem;
+    --radius-md: 0.5rem;
+    --radius-lg: 0.75rem;
+}
+
+.dark {
+    --color-primary: hsl(220 90% 66%);
+    --color-primary-hover: hsl(220 90% 58%);
+}

@@ -1,9 +1,9 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import './index.css';
-import App from './pages/App.tsx';
-import Showoff from './pages/Showoff.tsx';
+import '@/styles/index.css';
+import App from '@/pages/App';
+import Showoff from '@/pages/Showoff';
 
 createRoot(document.getElementById('root')!).render(
     <StrictMode>
