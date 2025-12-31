@@ -1,4 +1,5 @@
 import { Button } from '@/ui/components/Button';
+import { Input } from '@/ui/components/Input';
 import { useFlashText } from '@/hooks/useFlashText';
 import {
     TableOfContents,
@@ -83,6 +84,15 @@ function Showoff() {
             children: [
                 { id: 'normal-retain', title: 'Normal Retain' },
                 { id: 'caution-retain', title: 'Caution Retain' },
+            ],
+        },
+        {
+            id: 'input-elements',
+            title: 'Input elements',
+            children: [
+                { id: 'input-normal', title: 'Normal Input' },
+                { id: 'input-disabled', title: 'Disabled Input' },
+                { id: 'input-width', title: 'Width Constrained Input' },
             ],
         },
     ];
@@ -215,6 +225,35 @@ function Showoff() {
                         >
                             {cautionButtonText2}
                         </Button>
+                    </div>
+                </div>
+            </div>
+
+            {/* Input elements */}
+            <div id="input-elements" className="p-md font-sans">
+                <h2 className="text-lg font-semibold mb-md">Input elements</h2>
+                <div className="flex flex-col gap-md max-w-sm">
+                    <div id="input-normal" className="p-xs">
+                        <h3 className="text-md font-medium mb-sm">
+                            Normal Input
+                        </h3>
+                        <Input placeholder="Type something..." />
+                    </div>
+                    <div id="input-disabled" className="p-xs">
+                        <h3 className="text-md font-medium mb-sm">
+                            Disabled Input
+                        </h3>
+                        <Input disabled placeholder="Can't type here..." />
+                    </div>
+                    <div id="input-width" className="p-xs">
+                        <h3 className="text-md font-medium mb-sm">
+                            Width Constrained (min: 200px, max: 300px)
+                        </h3>
+                        <Input
+                            minWidth={200}
+                            maxWidth={300}
+                            placeholder="I have width limits..."
+                        />
                     </div>
                 </div>
             </div>

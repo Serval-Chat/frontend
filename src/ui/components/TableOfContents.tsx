@@ -29,7 +29,7 @@ const TOCItem: React.FC<{ section: TOCSection }> = ({ section }) => {
                     <button
                         onClick={() => setIsOpen(!isOpen)}
                         className={cn(
-                            'w-4 h-4 flex items-center justify-center text-sm text-gray-500 hover:text-gray-700'
+                            'w-4 h-4 flex items-center justify-center text-sm text-muted-foreground hover:text-muted-foreground-hover'
                         )}
                     >
                         {isOpen ? '▾' : '▸'}

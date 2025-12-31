@@ -11,10 +11,12 @@ const buttonVariants = cva(
     {
         variants: {
             variant: {
-                normal: 'bg-primary text-white hover:bg-primary-hover',
-                danger: 'bg-danger text-white hover:bg-danger-hover',
-                caution: 'bg-caution text-white hover:bg-caution-hover',
-                success: 'bg-success text-white hover:bg-success-hover',
+                normal: 'bg-primary text-foreground-inverse hover:bg-primary-hover',
+                danger: 'bg-danger text-foreground-inverse hover:bg-danger-hover',
+                caution:
+                    'bg-caution text-foreground-inverse hover:bg-caution-hover',
+                success:
+                    'bg-success text-foreground-inverse hover:bg-success-hover',
             },
             loading: {
                 true: '',

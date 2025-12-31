@@ -19,6 +19,16 @@
     --color-success-muted: hsl(142 71% 85%);
     --color-success-muted-text: hsl(142 71% 25%);
 
+    /* Colors */
+    --color-background: #242424;
+    --color-foreground: #faf9f6;
+    --color-foreground-inverse: #ffffff;
+    --color-muted-foreground: #6b7280;
+    --color-muted-foreground-hover: #374151;
+    --color-border-subtle: rgb(255 255 255 / 0.1);
+    --color-bg-subtle: rgb(255 255 255 / 0.05);
+    --color-placeholder: rgb(255 255 255 / 0.4);
+
     /* Spacing */
     --spacing-xs: 0.25rem;
     --spacing-sm: 0.5rem;
