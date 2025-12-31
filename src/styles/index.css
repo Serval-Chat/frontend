@@ -1,10 +1,6 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap');
 @import 'tailwindcss';
 @import './design-tokens.css';
-
-@theme {
-    /* Tailwind v4 automatically picks up --color-*, --spacing-*, --font-*, etc. from :root */
-    /* We only need to define things here if we want to override or add things not in :root */
-}
 
 @layer base {
     body {

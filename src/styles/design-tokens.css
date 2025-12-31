@@ -27,7 +27,7 @@
     --spacing-xl: 2rem;
 
     /* Typography */
-    --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    --font-sans: 'Noto Sans', system-ui, -apple-system, Roboto, sans-serif;
     --font-mono: 'Fira Code', 'Courier New', monospace;
 
     /* Shadows */
