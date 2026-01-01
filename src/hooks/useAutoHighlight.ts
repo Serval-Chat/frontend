@@ -9,7 +9,7 @@ export const useAutoHighlight = (sectionIds: string[]) => {
     useEffect(() => {
         const hash = location.hash.substring(1);
 
-        // Only highlight if this is a new hash
+        // only highlight if this is a new hash
         if (
             !hash ||
             !sectionIds.includes(hash) ||
@@ -22,14 +22,21 @@ export const useAutoHighlight = (sectionIds: string[]) => {
         const element = document.getElementById(hash);
         if (!element) return;
 
-        // highlight ring
-        element.style.transition = 'box-shadow 0.3s, outline 0.3s';
-        element.style.outline = '4px solid rgba(59, 130, 246, 0.6)';
-        element.style.outlineOffset = '2px';
-        element.style.boxShadow = '0 10px 15px -3px rgba(59, 130, 246, 0.2)';
-        element.style.borderRadius = '0.5rem';
+        const highlightClasses = [
+            'transition-[box-shadow,outline]',
+            'duration-300',
+            'outline-4',
+            'outline-primary/60',
+            'outline-offset-2',
+            'shadow-lg',
+            'shadow-primary/20',
+            'rounded-md',
+        ];
 
-        //background pulse animation
+        // apply highlight
+        element.classList.add(...highlightClasses);
+
+        // background pulse animation
         animate(
             element,
             {
@@ -44,11 +51,12 @@ export const useAutoHighlight = (sectionIds: string[]) => {
 
         // remove highlight after animation
         const timeout = setTimeout(() => {
-            element.style.outline = '';
-            element.style.outlineOffset = '';
-            element.style.boxShadow = '';
+            element.classList.remove(...highlightClasses);
         }, 1500);
 
-        return () => clearTimeout(timeout);
+        return () => {
+            clearTimeout(timeout);
+            element.classList.remove(...highlightClasses);
+        };
     }, [location.hash, sectionIds]);
 };
