@@ -3,10 +3,15 @@ import { Input } from '@/ui/components/Input';
 import { Button } from '@/ui/components/Button';
 import { DefaultBackground } from '@/ui/components/DefaultBackground';
 import { StatusMessage } from '@/ui/components/StatusMessage';
+import { Heading } from '@/ui/components/Heading';
+import { NormalText } from '@/ui/components/NormalText';
+import { MutedText } from '@/ui/components/MutedText';
+import { FormContent } from '@/ui/components/FormContent';
+import { InputWrapper } from '@/ui/components/InputWrapper';
 import { useLoginForm } from '@/hooks/useLoginForm';
 
 /**
- * @description Login page for Serchat
+ * @description Login page
  */
 const Login: React.FC = () => {
     const {
@@ -23,25 +28,23 @@ const Login: React.FC = () => {
             <DefaultBackground />
 
             {/* Login Box */}
-            <div className="relative z-10 w-full max-w-110 p-lg bg-bg-subtle/50 backdrop-blur-xl border border-border-subtle rounded-lg shadow-lg space-y-xl flex-shrink-0">
+            <FormContent>
                 <div className="text-center space-y-sm">
-                    <h1 className="text-3xl font-bold tracking-tight text-foreground">
-                        HELLO!
-                    </h1>
-                    <p className="text-muted-foreground">
+                    <Heading variant="page">HELLO!</Heading>
+                    <NormalText>
                         If you see this, you need to log in to chat on this
                         server.
-                    </p>
-                    <p className="text-sm text-muted-foreground/80">
+                    </NormalText>
+                    <MutedText>
                         Not invited yet? Ask the owner (<b>catflare</b>).
-                    </p>
-                    <p className="text-sm font-medium text-primary">
+                    </MutedText>
+                    <NormalText>
                         Got your login info? Enter it below!
-                    </p>
+                    </NormalText>
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-md">
-                    <div className="space-y-xs">
+                    <InputWrapper>
                         <Input
                             type="text"
                             placeholder="Login"
@@ -49,8 +52,8 @@ const Login: React.FC = () => {
                             onChange={(e) => setLoginInput(e.target.value)}
                             className="bg-background/50"
                         />
-                    </div>
-                    <div className="space-y-xs">
+                    </InputWrapper>
+                    <InputWrapper>
                         <Input
                             type="password"
                             placeholder="Password"
@@ -58,7 +61,7 @@ const Login: React.FC = () => {
                             onChange={(e) => setPassword(e.target.value)}
                             className="bg-background/50"
                         />
-                    </div>
+                    </InputWrapper>
                     <Button
                         type="submit"
                         buttonType="normal"
@@ -69,7 +72,7 @@ const Login: React.FC = () => {
                 </form>
 
                 <StatusMessage message={status.message} type={status.type} />
-            </div>
+            </FormContent>
         </div>
     );
 };

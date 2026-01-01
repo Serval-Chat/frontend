@@ -1,28 +1,26 @@
 import { StatusMessage } from '@/ui/components/StatusMessage';
+import { Stack } from '@/ui/components/Stack';
 import { DemoSection } from './DemoSection';
+import { DemoItem } from './DemoItem';
 import { SHOWOFF_SECTIONS } from './config';
 
 export function StatusMessages() {
     return (
         <DemoSection id={SHOWOFF_SECTIONS.status} title="Status Messages">
-            <div className="flex flex-col gap-md max-w-sm w-full">
-                <div id="status-error" className="p-xs">
-                    <h3 className="text-md font-medium mb-sm">Error Message</h3>
+            <Stack className="max-w-sm w-full">
+                <DemoItem id="status-error" title="Error Message">
                     <StatusMessage
                         type="error"
                         message="Something went wrong. Please try again."
                     />
-                </div>
-                <div id="status-success" className="p-xs">
-                    <h3 className="text-md font-medium mb-sm">
-                        Success Message
-                    </h3>
+                </DemoItem>
+                <DemoItem id="status-success" title="Success Message">
                     <StatusMessage
                         type="success"
                         message="Action completed successfully!"
                     />
-                </div>
-            </div>
+                </DemoItem>
+            </Stack>
         </DemoSection>
     );
 }

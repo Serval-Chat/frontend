@@ -3,10 +3,14 @@ import { Input } from '@/ui/components/Input';
 import { Button } from '@/ui/components/Button';
 import { DefaultBackground } from '@/ui/components/DefaultBackground';
 import { StatusMessage } from '@/ui/components/StatusMessage';
+import { Heading } from '@/ui/components/Heading';
+import { NormalText } from '@/ui/components/NormalText';
+import { FormContent } from '@/ui/components/FormContent';
+import { InputWrapper } from '@/ui/components/InputWrapper';
 import { useRegisterForm } from '@/hooks/useRegisterForm';
 
 /**
- * @description Register page for Serchat
+ * @description Register page
  */
 const Register: React.FC = () => {
     const {
@@ -27,19 +31,17 @@ const Register: React.FC = () => {
             <DefaultBackground />
 
             {/* Register Box */}
-            <div className="relative z-10 w-full max-w-110 p-lg bg-bg-subtle/50 backdrop-blur-xl border border-border-subtle rounded-lg shadow-lg space-y-xl flex-shrink-0">
+            <FormContent>
                 <div className="text-center space-y-sm">
-                    <h1 className="text-3xl font-bold tracking-tight text-foreground">
-                        Create an account
-                    </h1>
-                    <p className="text-muted-foreground">
+                    <Heading variant="page">Create an account</Heading>
+                    <NormalText>
                         Welcome! You'll need an invite token to join this chat
                         server.
-                    </p>
+                    </NormalText>
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-md">
-                    <div className="space-y-xs">
+                    <InputWrapper>
                         <Input
                             type="text"
                             placeholder="Login"
@@ -47,8 +49,8 @@ const Register: React.FC = () => {
                             onChange={(e) => setLogin(e.target.value)}
                             className="bg-background/50"
                         />
-                    </div>
-                    <div className="space-y-xs">
+                    </InputWrapper>
+                    <InputWrapper>
                         <Input
                             type="text"
                             placeholder="Username (display name)"
@@ -56,8 +58,8 @@ const Register: React.FC = () => {
                             onChange={(e) => setUsername(e.target.value)}
                             className="bg-background/50"
                         />
-                    </div>
-                    <div className="space-y-xs">
+                    </InputWrapper>
+                    <InputWrapper>
                         <Input
                             type="password"
                             placeholder="Password"
@@ -65,8 +67,8 @@ const Register: React.FC = () => {
                             onChange={(e) => setPassword(e.target.value)}
                             className="bg-background/50"
                         />
-                    </div>
-                    <div className="space-y-xs">
+                    </InputWrapper>
+                    <InputWrapper>
                         <Input
                             type="text"
                             placeholder="Invite Token"
@@ -74,7 +76,7 @@ const Register: React.FC = () => {
                             onChange={(e) => setInviteToken(e.target.value)}
                             className="bg-background/50"
                         />
-                    </div>
+                    </InputWrapper>
                     <Button
                         type="submit"
                         buttonType="normal"
@@ -85,7 +87,7 @@ const Register: React.FC = () => {
                 </form>
 
                 <StatusMessage message={status.message} type={status.type} />
-            </div>
+            </FormContent>
         </div>
     );
 };

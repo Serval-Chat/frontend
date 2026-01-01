@@ -9,6 +9,7 @@ import { Animations } from '@/ui/components/showoff/Animations';
 import { StatusMessages } from '@/ui/components/showoff/StatusMessages';
 import { RetainSizeButtons } from '@/ui/components/showoff/RetainSizeButtons';
 import { InputsDemo } from '@/ui/components/showoff/InputsDemo';
+import { Heading } from '@/ui/components/Heading';
 
 function Showoff() {
     const sections: TOCProps['sections'] = [
@@ -68,10 +69,10 @@ function Showoff() {
         <>
             <TableOfContents sections={sections} />
 
-            <h1 className="my-md text-xl font-bold font-sans">
+            <Heading variant="section">
                 Show off of elements (because I work on core elements now, right
                 UI and logic will be later added).
-            </h1>
+            </Heading>
 
             <FlashButtons />
             <ProcessingButtons />

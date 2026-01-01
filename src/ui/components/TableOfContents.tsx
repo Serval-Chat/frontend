@@ -1,11 +1,12 @@
 /**
- * @description A component to show table of contents
+ * @description Table of contents component
  */
 
 import React, { useState } from 'react';
 import { useAutoHighlight } from '@/hooks/useAutoHighlight';
 
 import { cn } from '@/utils/cn';
+import { Heading } from '@/ui/components/Heading';
 
 export interface TOCSection {
     id: string;
@@ -75,7 +76,9 @@ export const TableOfContents: React.FC<TOCProps> = ({ sections }) => {
 
     return (
         <nav className="font-sans">
-            <h2 className="text-lg font-semibold mb-md">Table of Contents</h2>
+            <Heading level={2} variant="sub">
+                Table of Contents
+            </Heading>
             <ul className="space-y-sm">
                 {sections.map((section) => (
                     <TOCItem key={section.id} section={section} />

@@ -8,7 +8,7 @@ import { cn } from '@/utils/cn';
 import { BouncingDots } from '@/ui/animations/BouncingDots';
 
 const buttonVariants = cva(
-    'px-xs py-xs inline-flex items-center justify-center rounded-md transition-colors duration-300 disabled:pointer-events-none disabled:opacity-50 font-sans',
+    'px-xs py-xs inline-flex items-center justify-center rounded-md transition-colors duration-300 disabled:pointer-events-none disabled:opacity-50 font-sans whitespace-nowrap',
     {
         variants: {
             variant: {
@@ -97,7 +97,7 @@ export const Button: React.FC<ButtonProps> = ({
         <button
             ref={buttonRef}
             style={
-                loading
+                (loading || retainSize) && dimensions.width !== 'auto'
                     ? { width: dimensions.width, height: dimensions.height }
                     : undefined
             }

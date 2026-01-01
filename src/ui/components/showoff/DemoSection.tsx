@@ -1,4 +1,5 @@
 import React from 'react';
+import { Heading } from '@/ui/components/Heading';
 
 interface DemoSectionProps {
     id: string;
@@ -9,7 +10,9 @@ interface DemoSectionProps {
 export function DemoSection({ id, title, children }: DemoSectionProps) {
     return (
         <section id={id} className="p-md font-sans">
-            <h2 className="text-lg font-semibold mb-md">{title}</h2>
+            <Heading level={2} variant="sub">
+                {title}
+            </Heading>
             {children}
         </section>
     );

@@ -1,5 +1,6 @@
 import { Button } from '@/ui/components/Button';
 import { useFlashGroup } from '@/hooks/useFlashText';
+import { Stack } from '@/ui/components/Stack';
 import { DemoSection } from './DemoSection';
 import { SHOWOFF_SECTIONS, BUTTON_VARIANTS } from './config';
 
@@ -16,7 +17,7 @@ export function FlashButtons() {
             id={SHOWOFF_SECTIONS.flash}
             title="Flash buttons (change text after click)"
         >
-            <div className="flex flex-wrap gap-xs">
+            <Stack direction="row" gap="xs" wrap>
                 {BUTTON_VARIANTS.map(({ id, type }) => (
                     <div key={id} id={`${id}-flash`} className="p-xs">
                         <Button
@@ -33,7 +34,7 @@ export function FlashButtons() {
                         </Button>
                     </div>
                 ))}
-            </div>
+            </Stack>
         </DemoSection>
     );
 }

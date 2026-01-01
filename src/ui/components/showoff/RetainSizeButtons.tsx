@@ -1,5 +1,6 @@
 import { Button } from '@/ui/components/Button';
 import { useFlashGroup } from '@/hooks/useFlashText';
+import { Stack } from '@/ui/components/Stack';
 import { DemoSection } from './DemoSection';
 import { SHOWOFF_SECTIONS } from './config';
 
@@ -14,7 +15,7 @@ export function RetainSizeButtons() {
             id={SHOWOFF_SECTIONS.retain}
             title="Retain Size buttons (lock size after text change)"
         >
-            <div className="flex flex-wrap gap-xs">
+            <Stack direction="row" gap="xs" wrap>
                 <Button
                     buttonType="normal"
                     onClick={flashButtons.normal.trigger}
@@ -29,7 +30,7 @@ export function RetainSizeButtons() {
                 >
                     {flashButtons.caution.label}
                 </Button>
-            </div>
+            </Stack>
         </DemoSection>
     );
 }
