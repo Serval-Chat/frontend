@@ -5,9 +5,10 @@
 import React, { useLayoutEffect, useRef, useState } from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/utils/cn';
+import { BouncingDots } from '@/ui/animations/BouncingDots';
 
 const buttonVariants = cva(
-    'inline-flex items-center justify-center rounded-md transition-colors duration-300 disabled:pointer-events-none disabled:opacity-50 px-sm py-xs font-sans',
+    'px-xs py-xs inline-flex items-center justify-center rounded-md transition-colors duration-300 disabled:pointer-events-none disabled:opacity-50 font-sans',
     {
         variants: {
             variant: {
@@ -62,8 +63,6 @@ export interface ButtonProps
     retainSize?: boolean;
 }
 
-import { BouncingDots } from '../animations/BouncingDots';
-
 export const Button: React.FC<ButtonProps> = ({
     children,
     className,
@@ -98,11 +97,8 @@ export const Button: React.FC<ButtonProps> = ({
         <button
             ref={buttonRef}
             style={
-                loading || retainSize
-                    ? {
-                          width: dimensions.width,
-                          height: dimensions.height,
-                      }
+                loading
+                    ? { width: dimensions.width, height: dimensions.height }
                     : undefined
             }
             className={cn(

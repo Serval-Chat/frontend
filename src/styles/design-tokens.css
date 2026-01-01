@@ -30,11 +30,25 @@
     --color-placeholder: rgb(255 255 255 / 0.4);
 
     /* Spacing */
-    --spacing-xs: 0.25rem;
-    --spacing-sm: 0.5rem;
-    --spacing-md: 1rem;
-    --spacing-lg: 1.5rem;
-    --spacing-xl: 2rem;
+    --spacing: 0.25rem;
+    --spacing-xs: calc(var(--spacing) * 1);
+    --spacing-sm: calc(var(--spacing) * 2);
+    --spacing-md: calc(var(--spacing) * 4);
+    --spacing-lg: calc(var(--spacing) * 6);
+    --spacing-xl: calc(var(--spacing) * 8);
+
+    /* Max Widths */
+    --max-width-xs: 20rem;
+    --max-width-sm: 24rem;
+    --max-width-md: 28rem;
+    --max-width-lg: 32rem;
+    --max-width-xl: 36rem;
+    --max-width-2xl: 42rem;
+    --max-width-3xl: 48rem;
+    --max-width-4xl: 56rem;
+    --max-width-5xl: 64rem;
+    --max-width-6xl: 72rem;
+    --max-width-7xl: 80rem;
 
     /* Typography */
     --font-sans: 'Noto Sans', system-ui, -apple-system, Roboto, sans-serif;

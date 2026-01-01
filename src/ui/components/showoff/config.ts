@@ -1,0 +1,15 @@
+export const SHOWOFF_SECTIONS = {
+    flash: 'flash-buttons',
+    processing: 'processing-buttons',
+    animations: 'animations',
+    status: 'status-messages',
+    retain: 'retain-size-buttons',
+    inputs: 'input-elements',
+} as const;
+
+export const BUTTON_VARIANTS = [
+    { id: 'normal', type: 'normal', label: 'Normal' },
+    { id: 'caution', type: 'caution', label: 'Caution' },
+    { id: 'danger', type: 'danger', label: 'Danger' },
+    { id: 'success', type: 'success', label: 'Success' },
+] as const;
