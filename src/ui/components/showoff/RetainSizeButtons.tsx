@@ -17,14 +17,14 @@ export function RetainSizeButtons() {
         >
             <Stack direction="row" gap="xs" wrap>
                 <Button
-                    buttonType="normal"
+                    variant="normal"
                     onClick={flashButtons.normal.trigger}
                     retainSize={true}
                 >
                     {flashButtons.normal.label}
                 </Button>
                 <Button
-                    buttonType="caution"
+                    variant="caution"
                     onClick={flashButtons.caution.trigger}
                     retainSize={true}
                 >

@@ -79,7 +79,7 @@ const Register: React.FC = () => {
                     </InputWrapper>
                     <Button
                         type="submit"
-                        buttonType="normal"
+                        variant="normal"
                         className="w-full py-sm text-lg font-semibold"
                     >
                         Register

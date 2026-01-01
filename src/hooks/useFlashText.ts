@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useCallback, useMemo, useEffect } from 'react';
 
 export function useFlashText(
     initialText: string,
@@ -6,12 +6,27 @@ export function useFlashText(
     duration: number
 ) {
     const [text, setText] = useState(initialText);
+    const initialRef = useRef(initialText);
 
-    const flash = () => {
-        const oldText = text;
+    useEffect(() => {
+        initialRef.current = initialText;
+    }, [initialText]);
+    const timeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(
+        undefined
+    );
+
+    const flash = useCallback(() => {
+        clearTimeout(timeoutRef.current);
         setText(flashText);
-        setTimeout(() => setText(oldText), duration);
-    };
+        timeoutRef.current = setTimeout(
+            () => setText(initialRef.current),
+            duration
+        );
+    }, [flashText, duration]);
+
+    useEffect(() => {
+        return () => clearTimeout(timeoutRef.current);
+    }, []);
 
     return [text, flash] as const;
 }
@@ -30,13 +45,56 @@ type FlashConfig = {
 export function useFlashGroup<T extends string>(
     configs: Record<T, FlashConfig>
 ) {
-    const entries = Object.entries(configs) as [T, FlashConfig][];
-    const results = {} as Record<T, ReturnType<typeof useFlash>>;
+    const [flashing, setFlashing] = useState<Partial<Record<T, boolean>>>({});
+    const configsRef = useRef(configs);
 
-    for (const [key, cfg] of entries) {
-        // eslint-disable-next-line react-hooks/rules-of-hooks
-        results[key] = useFlash(cfg.initial, cfg.flash, cfg.duration ?? 2500);
-    }
+    useEffect(() => {
+        configsRef.current = configs;
+    }, [configs]);
+
+    const timeoutsRef = useRef<Record<string, ReturnType<typeof setTimeout>>>(
+        {}
+    );
+
+    const trigger = useCallback((key: T) => {
+        const cfg = configsRef.current[key];
+
+        // clear existing timeout for this key
+        if (timeoutsRef.current[key]) {
+            clearTimeout(timeoutsRef.current[key]);
+        }
+
+        setFlashing((prev) => ({ ...prev, [key]: true }));
+
+        timeoutsRef.current[key] = setTimeout(() => {
+            setFlashing((prev) => ({ ...prev, [key]: false }));
+            delete timeoutsRef.current[key];
+        }, cfg.duration ?? 2500);
+    }, []);
+
+    // cleanup on unmount
+    useEffect(() => {
+        const timeouts = timeoutsRef.current;
+        return () => {
+            Object.values(timeouts).forEach(clearTimeout);
+        };
+    }, []);
+
+    const results = useMemo(() => {
+        const res = {} as Record<T, ReturnType<typeof useFlash>>;
+        for (const key in configs) {
+            const k = key as T;
+            const cfg = configs[k];
+            const isFlashing = flashing[k] ?? false;
+            const label = isFlashing ? cfg.flash : cfg.initial;
+            res[k] = {
+                label,
+                trigger: () => trigger(k),
+                isFlashing,
+            };
+        }
+        return res;
+    }, [flashing, trigger, configs]);
 
     return results;
 }

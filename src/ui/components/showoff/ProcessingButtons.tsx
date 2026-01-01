@@ -21,7 +21,7 @@ export function ProcessingButtons() {
                 {BUTTON_VARIANTS.map(({ id, type }) => (
                     <div key={id} id={`${id}-processing`} className="p-xs">
                         <Button
-                            buttonType={type}
+                            variant={type}
                             onClick={
                                 processingButtons[
                                     id as keyof typeof processingButtons

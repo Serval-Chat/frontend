@@ -21,7 +21,7 @@ export function FlashButtons() {
                 {BUTTON_VARIANTS.map(({ id, type }) => (
                     <div key={id} id={`${id}-flash`} className="p-xs">
                         <Button
-                            buttonType={type}
+                            variant={type}
                             onClick={
                                 flashButtons[id as keyof typeof flashButtons]
                                     .trigger
