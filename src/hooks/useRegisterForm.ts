@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import type { StatusState } from '@/ui/types';
 
-export const useLoginForm = () => {
-    const [loginInput, setLoginInput] = useState('');
+export const useRegisterForm = () => {
+    const [login, setLogin] = useState('');
+    const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const [inviteToken, setInviteToken] = useState('');
     const [status, setStatus] = useState<StatusState>({
         message: '',
         type: '',
@@ -13,19 +15,25 @@ export const useLoginForm = () => {
         e.preventDefault();
         setStatus({ message: '', type: '' });
 
-        if (!loginInput || !password) {
+        if (!login || !username || !password || !inviteToken) {
             setStatus({ message: 'Please fill in all fields.', type: 'error' });
             return;
         }
 
-        // todo: add the api for logging in but really? theres no use for it for now.
+        setStatus({ message: 'Hewwo', type: 'success' });
+
+        // todo: add the api for registering but really? theres no use for it for now.
     };
 
     return {
-        loginInput,
-        setLoginInput,
+        login,
+        setLogin,
+        username,
+        setUsername,
         password,
         setPassword,
+        inviteToken,
+        setInviteToken,
         status,
         setStatus,
         handleSubmit,
