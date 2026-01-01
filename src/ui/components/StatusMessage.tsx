@@ -1,16 +1,16 @@
 import React from 'react';
 import { cn } from '@/utils/cn';
 import { motion, AnimatePresence } from 'framer-motion';
+import type { StatusType } from '@/ui/types';
 
 export interface StatusMessageProps {
     message: string;
-    type: 'error' | 'success' | '';
+    type: StatusType;
     className?: string;
 }
 
 /**
- * @description A component to display status messages with animations.
- * Uses framer-motion for smooth transitions.
+ * @description Status message component
  */
 export const StatusMessage: React.FC<StatusMessageProps> = ({
     message,

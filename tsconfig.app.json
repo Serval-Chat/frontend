@@ -55,5 +55,5 @@
   },
   "include": [
     "src"
-  ]
+, "src/main.tsx"  ]
 }
