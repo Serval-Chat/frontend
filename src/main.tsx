@@ -5,6 +5,7 @@ import '@/styles/index.css';
 import App from '@/pages/App';
 import Showoff from '@/pages/Showoff';
 import Login from '@/pages/Login';
+import NotFound from '@/pages/NotFound';
 
 createRoot(document.getElementById('root')!).render(
     <StrictMode>
@@ -13,6 +14,7 @@ createRoot(document.getElementById('root')!).render(
                 <Route path="/" element={<App />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/showoff" element={<Showoff />} />
+                <Route path="*" element={<NotFound />} />
             </Routes>
         </BrowserRouter>
     </StrictMode>
