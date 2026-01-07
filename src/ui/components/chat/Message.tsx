@@ -1,9 +1,9 @@
 import React from 'react';
 
 import type { User } from '@/api/users/users.types';
+import { UserProfilePicture } from '@/ui/components/common/UserProfilePicture';
+import { cn } from '@/utils/cn';
 
-import { cn } from '../../../utils/cn';
-import { UserProfilePicture } from '../common/UserProfilePicture';
 import { MessageContent } from './MessageContent';
 import { MessageHeader } from './MessageHeader';
 import { ReplyPreview } from './ReplyPreview';

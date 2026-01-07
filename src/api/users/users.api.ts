@@ -1,4 +1,5 @@
-import { apiClient } from '../client';
+import { apiClient } from '@/api/client';
+
 import type { User } from './users.types';
 
 export const usersApi = {

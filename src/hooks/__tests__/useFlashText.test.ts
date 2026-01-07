@@ -1,7 +1,7 @@
 import { act, renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { useFlashGroup, useFlashText } from '../useFlashText';
+import { useFlashGroup, useFlashText } from '@/hooks/useFlashText';
 
 describe('useFlashText', () => {
     beforeEach(() => {

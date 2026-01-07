@@ -1,4 +1,4 @@
-import type { User } from '../users/users.types';
+import type { User } from '@/api/users/users.types';
 
 export interface ChatMessage {
     _id: string;

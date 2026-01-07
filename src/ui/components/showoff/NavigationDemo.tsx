@@ -2,9 +2,9 @@ import React from 'react';
 
 import type { Friend } from '@/api/friends/friends.types';
 import type { Server } from '@/api/servers/servers.types';
+import { UserItem } from '@/ui/components/common/UserItem';
+import { ServerIcon } from '@/ui/components/servers/ServerIcon';
 
-import { UserItem } from '../common/UserItem';
-import { ServerIcon } from '../servers/ServerIcon';
 import { DemoItem } from './DemoItem';
 import { DemoSection } from './DemoSection';
 import { SHOWOFF_SECTIONS } from './config';
