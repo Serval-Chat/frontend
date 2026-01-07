@@ -1,7 +1,8 @@
 import React from 'react';
 
-import { MessagesList } from '../chat/MessagesList';
-import { NormalText } from '../common/NormalText';
+import { MessagesList } from '@/ui/components/chat/MessagesList';
+import { NormalText } from '@/ui/components/common/NormalText';
+
 import { DemoSection } from './DemoSection';
 
 const MOCK_USERS = {

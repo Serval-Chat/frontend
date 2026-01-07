@@ -1,8 +1,7 @@
 import React from 'react';
 
 import { useFriends } from '@/api/friends/friends.queries';
-
-import { UserItem } from '../common/UserItem';
+import { UserItem } from '@/ui/components/common/UserItem';
 
 export const FriendList: React.FC = () => {
     const { data: friends, isLoading } = useFriends();

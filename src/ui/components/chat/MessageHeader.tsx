@@ -1,7 +1,6 @@
 import type { User } from '@/api/users/users.types';
-
-import { formatDiscordTimestamp } from '../../../utils/timestamp';
-import { StyledUserName } from '../common/StyledUserName';
+import { StyledUserName } from '@/ui/components/common/StyledUserName';
+import { formatDiscordTimestamp } from '@/utils/timestamp';
 
 interface MessageHeaderProps {
     user: User;

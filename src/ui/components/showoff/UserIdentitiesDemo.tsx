@@ -1,9 +1,9 @@
 import React from 'react';
 
 import type { User } from '@/api/users/users.types';
+import { StyledUserName } from '@/ui/components/common/StyledUserName';
+import { UserProfilePicture } from '@/ui/components/common/UserProfilePicture';
 
-import { StyledUserName } from '../common/StyledUserName';
-import { UserProfilePicture } from '../common/UserProfilePicture';
 import { DemoItem } from './DemoItem';
 import { DemoSection } from './DemoSection';
 import { SHOWOFF_SECTIONS } from './config';

@@ -1,9 +1,10 @@
 import React from 'react';
 
-import { GradientText } from '../common/GradientText';
-import { Heading } from '../common/Heading';
-import { MutedText } from '../common/MutedText';
-import { NormalText } from '../common/NormalText';
+import { GradientText } from '@/ui/components/common/GradientText';
+import { Heading } from '@/ui/components/common/Heading';
+import { MutedText } from '@/ui/components/common/MutedText';
+import { NormalText } from '@/ui/components/common/NormalText';
+
 import { DemoItem } from './DemoItem';
 import { DemoSection } from './DemoSection';
 import { SHOWOFF_SECTIONS } from './config';
