@@ -1,7 +1,9 @@
 import React from 'react';
+
 import type { User } from '@/api/users/users.types';
-import { NormalText } from './NormalText';
 import { cn } from '@/utils/cn';
+
+import { NormalText } from './NormalText';
 
 interface StyledUserNameProps {
     user?: User;

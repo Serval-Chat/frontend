@@ -1,5 +1,7 @@
 import React from 'react';
+
 import type { User } from '@/api/users/users.types';
+
 import { StyledUserName } from '../common/StyledUserName';
 
 interface ReplyPreviewProps {

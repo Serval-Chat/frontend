@@ -1,10 +1,12 @@
 import React from 'react';
-import { DemoSection } from './DemoSection';
-import { DemoItem } from './DemoItem';
-import { SHOWOFF_SECTIONS } from './config';
-import { UserProfilePicture } from '../common/UserProfilePicture';
-import { StyledUserName } from '../common/StyledUserName';
+
 import type { User } from '@/api/users/users.types';
+
+import { StyledUserName } from '../common/StyledUserName';
+import { UserProfilePicture } from '../common/UserProfilePicture';
+import { DemoItem } from './DemoItem';
+import { DemoSection } from './DemoSection';
+import { SHOWOFF_SECTIONS } from './config';
 
 export const UserIdentitiesDemo: React.FC = () => {
     // Mock users

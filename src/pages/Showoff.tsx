@@ -1,22 +1,21 @@
-import {
-    TableOfContents,
-    type TOCProps,
-} from '@/ui/components/showoff/TableOfContents';
-import { SHOWOFF_SECTIONS } from '@/ui/components/showoff/config';
-import { FlashButtons } from '@/ui/components/showoff/FlashButtons';
-import { ProcessingButtons } from '@/ui/components/showoff/ProcessingButtons';
-import { Animations } from '@/ui/components/showoff/Animations';
-import { StatusMessages } from '@/ui/components/showoff/StatusMessages';
-import { RetainSizeButtons } from '@/ui/components/showoff/RetainSizeButtons';
-import { InputsDemo } from '@/ui/components/showoff/InputsDemo';
 import { Heading } from '@/ui/components/common/Heading';
+import { Animations } from '@/ui/components/showoff/Animations';
+import { ChatDemo } from '@/ui/components/showoff/ChatDemo';
 import { DividerPresentation } from '@/ui/components/showoff/DividerPresentation';
+import { FlashButtons } from '@/ui/components/showoff/FlashButtons';
+import { InputsDemo } from '@/ui/components/showoff/InputsDemo';
+import { NavigationDemo } from '@/ui/components/showoff/NavigationDemo';
+import { ProcessingButtons } from '@/ui/components/showoff/ProcessingButtons';
+import { RetainSizeButtons } from '@/ui/components/showoff/RetainSizeButtons';
 import { SpecializedButtons } from '@/ui/components/showoff/SpecializedButtons';
-
+import { StatusMessages } from '@/ui/components/showoff/StatusMessages';
+import {
+    type TOCProps,
+    TableOfContents,
+} from '@/ui/components/showoff/TableOfContents';
 import { TypographyDemo } from '@/ui/components/showoff/TypographyDemo';
 import { UserIdentitiesDemo } from '@/ui/components/showoff/UserIdentitiesDemo';
-import { NavigationDemo } from '@/ui/components/showoff/NavigationDemo';
-import { ChatDemo } from '@/ui/components/showoff/ChatDemo';
+import { SHOWOFF_SECTIONS } from '@/ui/components/showoff/config';
 
 function Showoff() {
     const sections: TOCProps['sections'] = [

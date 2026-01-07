@@ -1,5 +1,7 @@
 import React from 'react';
-import { motion, type Variants } from 'framer-motion';
+
+import { type Variants, motion } from 'framer-motion';
+
 import { cn } from '@/utils/cn';
 
 export interface BouncingDotsProps {

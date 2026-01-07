@@ -1,9 +1,9 @@
 import React, { useEffect, useRef } from 'react';
-import { MessageItem } from './MessageItem';
-
-import { VerticalSpacer } from '../layout/VerticalSpacer';
 
 import type { ChatMessage } from '@/api/chat/chat.types';
+
+import { VerticalSpacer } from '../layout/VerticalSpacer';
+import { MessageItem } from './MessageItem';
 
 interface MessagesListProps {
     messages: ChatMessage[];

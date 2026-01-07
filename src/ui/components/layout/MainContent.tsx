@@ -1,4 +1,5 @@
 import React from 'react';
+
 import { NormalText } from '@/ui/components/common/NormalText';
 import { cn } from '@/utils/cn';
 

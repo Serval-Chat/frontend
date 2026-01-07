@@ -1,11 +1,12 @@
 /**
  * @description A button component. Quite versatile.
  */
-
 import React, { useLayoutEffect, useRef, useState } from 'react';
-import { cva, type VariantProps } from 'class-variance-authority';
-import { cn } from '@/utils/cn';
+
+import { type VariantProps, cva } from 'class-variance-authority';
+
 import { BouncingDots } from '@/ui/animations/BouncingDots';
+import { cn } from '@/utils/cn';
 
 const mutedClasses = {
     normal: 'bg-primary-muted text-primary-muted-text hover:bg-primary-muted',

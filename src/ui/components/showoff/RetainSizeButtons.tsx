@@ -1,6 +1,7 @@
-import { Button } from '@/ui/components/common/Button';
 import { useFlashGroup } from '@/hooks/useFlashText';
+import { Button } from '@/ui/components/common/Button';
 import { Stack } from '@/ui/components/layout/Stack';
+
 import { DemoSection } from './DemoSection';
 import { SHOWOFF_SECTIONS } from './config';
 

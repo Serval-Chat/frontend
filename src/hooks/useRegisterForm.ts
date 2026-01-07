@@ -1,9 +1,11 @@
 import { useState } from 'react';
+
 import { isAxiosError } from 'axios';
 import { useNavigate } from 'react-router-dom';
+
 import { authApi } from '@/api/auth/auth.api';
-import { setAuthToken } from '@/utils/authToken';
 import type { StatusState } from '@/ui/types';
+import { setAuthToken } from '@/utils/authToken';
 
 export const useRegisterForm = () => {
     const [login, setLogin] = useState('');

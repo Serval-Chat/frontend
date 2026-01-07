@@ -1,8 +1,10 @@
 import React from 'react';
+
 import { Link } from 'react-router-dom';
-import { DefaultBackground } from '@/ui/components/layout/DefaultBackground';
+
 import { Heading } from '@/ui/components/common/Heading';
 import { NormalText } from '@/ui/components/common/NormalText';
+import { DefaultBackground } from '@/ui/components/layout/DefaultBackground';
 import { PageWrapper } from '@/ui/components/layout/PageWrapper';
 import { VerticalSpacer } from '@/ui/components/layout/VerticalSpacer';
 

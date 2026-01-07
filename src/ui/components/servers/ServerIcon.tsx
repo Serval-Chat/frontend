@@ -1,7 +1,8 @@
 import React from 'react';
-import { cn } from '@/utils/cn';
+
 import type { Server } from '@/api/servers/servers.types';
 import { resolveApiUrl } from '@/utils/apiUrl';
+import { cn } from '@/utils/cn';
 
 interface ServerIconProps {
     server: Server;

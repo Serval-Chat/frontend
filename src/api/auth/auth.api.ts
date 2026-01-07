@@ -1,13 +1,13 @@
 import { apiClient } from '../client';
 import type {
+    ChangeLoginRequest,
+    ChangeLoginResponse,
+    ChangePasswordRequest,
+    ChangePasswordResponse,
     LoginRequest,
     LoginResponse,
     RegisterRequest,
     RegisterResponse,
-    ChangePasswordRequest,
-    ChangePasswordResponse,
-    ChangeLoginRequest,
-    ChangeLoginResponse,
 } from './auth.types';
 
 export const authApi = {

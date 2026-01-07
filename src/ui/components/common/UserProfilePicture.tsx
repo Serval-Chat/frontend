@@ -1,10 +1,12 @@
 import React from 'react';
+
+import { cn } from '@/utils/cn';
+
 import { UserProfilePictureIcon } from './UserProfilePictureIcon';
 import {
     UserProfileStatusIndicator,
     type UserStatus,
 } from './UserProfileStatusIndicator';
-import { cn } from '@/utils/cn';
 
 interface UserProfilePictureProps {
     src?: string | null;

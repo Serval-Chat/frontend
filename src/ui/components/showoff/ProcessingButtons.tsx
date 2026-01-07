@@ -1,8 +1,9 @@
-import { Button } from '@/ui/components/common/Button';
 import { useFlashGroup } from '@/hooks/useFlashText';
+import { Button } from '@/ui/components/common/Button';
 import { Stack } from '@/ui/components/layout/Stack';
+
 import { DemoSection } from './DemoSection';
-import { SHOWOFF_SECTIONS, BUTTON_VARIANTS } from './config';
+import { BUTTON_VARIANTS, SHOWOFF_SECTIONS } from './config';
 
 export function ProcessingButtons() {
     const processingButtons = useFlashGroup({

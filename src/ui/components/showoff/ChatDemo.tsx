@@ -1,7 +1,8 @@
 import React from 'react';
+
 import { MessagesList } from '../chat/MessagesList';
-import { DemoSection } from './DemoSection';
 import { NormalText } from '../common/NormalText';
+import { DemoSection } from './DemoSection';
 
 const MOCK_USERS = {
     catflare: {

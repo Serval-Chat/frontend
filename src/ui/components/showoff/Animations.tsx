@@ -1,7 +1,8 @@
 import { BouncingDots } from '@/ui/animations/BouncingDots';
 import { Stack } from '@/ui/components/layout/Stack';
-import { DemoSection } from './DemoSection';
+
 import { DemoItem } from './DemoItem';
+import { DemoSection } from './DemoSection';
 import { SHOWOFF_SECTIONS } from './config';
 
 export function Animations() {

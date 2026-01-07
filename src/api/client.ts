@@ -1,4 +1,5 @@
 import axios from 'axios';
+
 import { getAuthToken } from '@/utils/authToken';
 
 export const apiClient = axios.create({

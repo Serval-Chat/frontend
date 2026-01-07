@@ -1,7 +1,9 @@
 import React from 'react';
-import { cn } from '@/utils/cn';
-import { motion, AnimatePresence } from 'framer-motion';
+
+import { AnimatePresence, motion } from 'framer-motion';
+
 import type { StatusType } from '@/ui/types';
+import { cn } from '@/utils/cn';
 
 export interface StatusMessageProps {
     message: string;

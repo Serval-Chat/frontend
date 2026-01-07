@@ -1,8 +1,10 @@
 import React from 'react';
+
 import { useServers } from '@/api/servers/servers.queries';
-import { ServerItem } from './ServerItem';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { setSelectedServerId } from '@/store/slices/navSlice';
+
+import { ServerItem } from './ServerItem';
 
 /**
  * @description A component that fetches and lists the user's servers.

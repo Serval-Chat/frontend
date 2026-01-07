@@ -1,11 +1,13 @@
 import React from 'react';
-import { DemoSection } from './DemoSection';
-import { DemoItem } from './DemoItem';
-import { SHOWOFF_SECTIONS } from './config';
-import { ServerIcon } from '../servers/ServerIcon';
-import { UserItem } from '../common/UserItem';
-import type { Server } from '@/api/servers/servers.types';
+
 import type { Friend } from '@/api/friends/friends.types';
+import type { Server } from '@/api/servers/servers.types';
+
+import { UserItem } from '../common/UserItem';
+import { ServerIcon } from '../servers/ServerIcon';
+import { DemoItem } from './DemoItem';
+import { DemoSection } from './DemoSection';
+import { SHOWOFF_SECTIONS } from './config';
 
 export const NavigationDemo: React.FC = () => {
     const mockServer: Server = {

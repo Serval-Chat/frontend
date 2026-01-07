@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
-import { useLocation } from 'react-router-dom';
+
 import { animate } from 'framer-motion';
+import { useLocation } from 'react-router-dom';
 
 export const useAutoHighlight = (sectionIds: string[]) => {
     const location = useLocation();

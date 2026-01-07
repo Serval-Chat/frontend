@@ -1,12 +1,11 @@
 /**
  * @description Table of contents component
  */
-
 import React, { useState } from 'react';
-import { useAutoHighlight } from '@/hooks/useAutoHighlight';
 
-import { cn } from '@/utils/cn';
+import { useAutoHighlight } from '@/hooks/useAutoHighlight';
 import { Heading } from '@/ui/components/common/Heading';
+import { cn } from '@/utils/cn';
 
 export interface TOCSection {
     id: string;

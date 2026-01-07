@@ -1,8 +1,9 @@
 import React from 'react';
-import { Message } from './Message';
-import { shouldGroupMessages } from '../../../utils/timestamp';
 
 import type { ChatMessage } from '@/api/chat/chat.types';
+
+import { shouldGroupMessages } from '../../../utils/timestamp';
+import { Message } from './Message';
 
 interface MessageItemProps {
     message: ChatMessage;

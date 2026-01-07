@@ -1,11 +1,12 @@
 import React from 'react';
-import { DemoSection } from './DemoSection';
-import { DemoItem } from './DemoItem';
-import { SHOWOFF_SECTIONS } from './config';
-import { Heading } from '../common/Heading';
-import { NormalText } from '../common/NormalText';
-import { MutedText } from '../common/MutedText';
+
 import { GradientText } from '../common/GradientText';
+import { Heading } from '../common/Heading';
+import { MutedText } from '../common/MutedText';
+import { NormalText } from '../common/NormalText';
+import { DemoItem } from './DemoItem';
+import { DemoSection } from './DemoSection';
+import { SHOWOFF_SECTIONS } from './config';
 
 export const TypographyDemo: React.FC = () => {
     return (

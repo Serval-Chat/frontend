@@ -1,6 +1,8 @@
 import React from 'react';
+
 import type { Server } from '@/api/servers/servers.types';
 import { cn } from '@/utils/cn';
+
 import { ServerIcon } from './ServerIcon';
 
 interface ServerItemProps {

@@ -1,6 +1,7 @@
 import React from 'react';
-import { cn } from '@/utils/cn';
+
 import { resolveApiUrl } from '@/utils/apiUrl';
+import { cn } from '@/utils/cn';
 
 interface UserProfilePictureIconProps {
     src?: string | null;

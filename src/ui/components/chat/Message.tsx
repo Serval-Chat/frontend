@@ -1,10 +1,12 @@
 import React from 'react';
+
 import type { User } from '@/api/users/users.types';
-import { UserProfilePicture } from '../common/UserProfilePicture';
-import { MessageHeader } from './MessageHeader';
-import { MessageContent } from './MessageContent';
-import { ReplyPreview } from './ReplyPreview';
+
 import { cn } from '../../../utils/cn';
+import { UserProfilePicture } from '../common/UserProfilePicture';
+import { MessageContent } from './MessageContent';
+import { MessageHeader } from './MessageHeader';
+import { ReplyPreview } from './ReplyPreview';
 
 interface MessageProps {
     message: {

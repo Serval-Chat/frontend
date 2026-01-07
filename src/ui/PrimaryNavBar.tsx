@@ -1,11 +1,12 @@
 import React from 'react';
-import { cn } from '@/utils/cn';
-import { Divider } from '@/ui/components/common/Divider';
-import { HomeButton } from '@/ui/buttons/HomeButton';
-import { SettingsButton } from '@/ui/buttons/SettingsButton';
-import { ServerList } from '@/ui/components/servers/ServerList';
+
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { setNavMode } from '@/store/slices/navSlice';
+import { HomeButton } from '@/ui/buttons/HomeButton';
+import { SettingsButton } from '@/ui/buttons/SettingsButton';
+import { Divider } from '@/ui/components/common/Divider';
+import { ServerList } from '@/ui/components/servers/ServerList';
+import { cn } from '@/utils/cn';
 
 export const PrimaryNavBar: React.FC = () => {
     const dispatch = useAppDispatch();

@@ -1,8 +1,10 @@
 import React from 'react';
-import { UserProfilePicture } from './UserProfilePicture';
-import { cn } from '@/utils/cn';
+
 import { useUserById } from '@/api/users/users.queries';
+import { cn } from '@/utils/cn';
+
 import { StyledUserName } from './StyledUserName';
+import { UserProfilePicture } from './UserProfilePicture';
 
 interface UserItemProps {
     userId: string;

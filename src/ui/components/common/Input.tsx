@@ -1,8 +1,9 @@
 import React from 'react';
-import { cva, type VariantProps } from 'class-variance-authority';
-import { cn } from '@/utils/cn';
 
-import { ChevronUp, ChevronDown } from 'lucide-react';
+import { type VariantProps, cva } from 'class-variance-authority';
+import { ChevronDown, ChevronUp } from 'lucide-react';
+
+import { cn } from '@/utils/cn';
 
 const inputVariants = cva(
     'h-10 w-full rounded-md border border-border-subtle bg-bg-subtle px-3 py-2 text-sm text-foreground placeholder:text-placeholder focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1 transition-all duration-200',

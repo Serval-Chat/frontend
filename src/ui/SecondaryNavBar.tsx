@@ -1,7 +1,8 @@
 import React from 'react';
-import { cn } from '@/utils/cn';
+
 import { useAppSelector } from '@/store/hooks';
 import { FriendList } from '@/ui/components/friends/FriendList';
+import { cn } from '@/utils/cn';
 
 /**
  * @description Secondary navigation bar
