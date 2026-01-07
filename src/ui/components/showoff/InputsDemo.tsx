@@ -14,6 +14,12 @@ export function InputsDemo() {
                 <DemoItem id="input-disabled" title="Disabled Input">
                     <Input disabled placeholder="Can't type here..." />
                 </DemoItem>
+                <DemoItem id="input-password" title="Password Input">
+                    <Input type="password" placeholder="Enter your secret..." />
+                </DemoItem>
+                <DemoItem id="input-number" title="Number Input">
+                    <Input type="number" placeholder="Enter a number..." />
+                </DemoItem>
                 <DemoItem
                     id="input-width"
                     title="Width Constrained (min: 200px, max: 300px)"

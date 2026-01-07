@@ -5,6 +5,9 @@ export const SHOWOFF_SECTIONS = {
     status: 'status-messages',
     retain: 'retain-size-buttons',
     inputs: 'input-elements',
+    typography: 'typography',
+    userIdentities: 'user-identities',
+    navigation: 'navigation',
 } as const;
 
 export const BUTTON_VARIANTS = [

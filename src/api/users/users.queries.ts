@@ -8,10 +8,13 @@ export const useMe = () => {
     });
 };
 
-export const useUserById = (id: string) => {
+export const useUserById = (
+    id: string,
+    options: { enabled?: boolean } = {}
+) => {
     return useQuery({
         queryKey: ['user', id],
         queryFn: () => usersApi.getById(id),
-        enabled: !!id,
+        enabled: (options.enabled ?? true) && !!id,
     });
 };

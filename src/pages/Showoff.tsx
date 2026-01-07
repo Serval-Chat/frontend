@@ -13,8 +13,24 @@ import { Heading } from '@/ui/components/common/Heading';
 import { DividerPresentation } from '@/ui/components/showoff/DividerPresentation';
 import { SpecializedButtons } from '@/ui/components/showoff/SpecializedButtons';
 
+import { TypographyDemo } from '@/ui/components/showoff/TypographyDemo';
+import { UserIdentitiesDemo } from '@/ui/components/showoff/UserIdentitiesDemo';
+import { NavigationDemo } from '@/ui/components/showoff/NavigationDemo';
+
 function Showoff() {
     const sections: TOCProps['sections'] = [
+        {
+            id: SHOWOFF_SECTIONS.typography,
+            title: 'Typography & Text System',
+        },
+        {
+            id: SHOWOFF_SECTIONS.userIdentities,
+            title: 'User Identities & Avatars',
+        },
+        {
+            id: SHOWOFF_SECTIONS.navigation,
+            title: 'Navigation Components',
+        },
         {
             id: SHOWOFF_SECTIONS.flash,
             title: 'Flash buttons (change text after click)',
@@ -62,6 +78,8 @@ function Showoff() {
             children: [
                 { id: 'input-normal', title: 'Normal Input' },
                 { id: 'input-disabled', title: 'Disabled Input' },
+                { id: 'input-password', title: 'Password Input' },
+                { id: 'input-number', title: 'Number Input' },
                 { id: 'input-width', title: 'Width Constrained Input' },
             ],
         },
@@ -76,6 +94,9 @@ function Showoff() {
                 UI and logic will be later added).
             </Heading>
 
+            <TypographyDemo />
+            <UserIdentitiesDemo />
+            <NavigationDemo />
             <FlashButtons />
             <ProcessingButtons />
             <Animations />

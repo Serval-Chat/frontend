@@ -1,6 +1,6 @@
 import React from 'react';
 import { useFriends } from '@/api/friends/friends.queries';
-import { FriendItem } from './FriendItem';
+import { UserItem } from '../common/UserItem';
 
 export const FriendList: React.FC = () => {
     const { data: friends, isLoading } = useFriends();
@@ -18,7 +18,11 @@ export const FriendList: React.FC = () => {
                 </div>
             ) : (
                 friends?.map((friend) => (
-                    <FriendItem key={friend._id} friend={friend} />
+                    <UserItem
+                        key={friend._id}
+                        userId={friend._id}
+                        initialData={friend}
+                    />
                 ))
             )}
         </div>
