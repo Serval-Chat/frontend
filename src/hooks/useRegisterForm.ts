@@ -1,4 +1,8 @@
 import { useState } from 'react';
+import { isAxiosError } from 'axios';
+import { useNavigate } from 'react-router-dom';
+import { authApi } from '@/api/auth/auth.api';
+import { setAuthToken } from '@/utils/authToken';
 import type { StatusState } from '@/ui/types';
 
 export const useRegisterForm = () => {
@@ -10,8 +14,9 @@ export const useRegisterForm = () => {
         message: '',
         type: '',
     });
+    const navigate = useNavigate();
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setStatus({ message: '', type: '' });
 
@@ -20,9 +25,25 @@ export const useRegisterForm = () => {
             return;
         }
 
-        setStatus({ message: 'Hewwo', type: 'success' });
-
-        // todo: add the api for registering but really? theres no use for it for now.
+        try {
+            const data = await authApi.register({
+                login,
+                username,
+                password,
+                invite: inviteToken,
+            });
+            setAuthToken(data.token);
+            navigate('/chat');
+        } catch (error: unknown) {
+            let errorMessage = 'Registration failed';
+            if (isAxiosError(error)) {
+                errorMessage = error.response?.data?.message || errorMessage;
+            }
+            setStatus({
+                message: errorMessage,
+                type: 'error',
+            });
+        }
     };
 
     return {

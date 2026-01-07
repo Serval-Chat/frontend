@@ -28,6 +28,7 @@
     --color-border-subtle: rgb(255 255 255 / 0.1);
     --color-bg-subtle: rgb(255 255 255 / 0.05);
     --color-placeholder: rgb(255 255 255 / 0.4);
+    --color-divider: rgb(255 255 255 / 0.15);
 
     /* Spacing */
     --spacing: 0.25rem;

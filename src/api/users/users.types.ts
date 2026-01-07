@@ -1,0 +1,65 @@
+export interface UsernameGradient {
+    enabled: boolean;
+    colors: string[];
+    angle: number;
+}
+
+export interface UsernameGlow {
+    enabled: boolean;
+    color: string;
+    intensity: number;
+}
+
+export interface CustomStatus {
+    text: string;
+    emoji?: string;
+    expiresAt: Date | null;
+    updatedAt: Date;
+}
+
+export interface UserSettings {
+    muteNotifications?: boolean;
+    useDiscordStyleMessages?: boolean;
+    ownMessagesAlign?: 'left' | 'right';
+    otherMessagesAlign?: 'left' | 'right';
+    showYouLabel?: boolean;
+    ownMessageColor?: string;
+    otherMessageColor?: string;
+}
+
+export interface AdminPermissions {
+    adminAccess?: boolean;
+    viewUsers?: boolean;
+    manageUsers?: boolean;
+    manageBadges?: boolean;
+    banUsers?: boolean;
+    viewBans?: boolean;
+    warnUsers?: boolean;
+    viewLogs?: boolean;
+    manageServer?: boolean;
+    manageInvites?: boolean;
+}
+
+export interface User {
+    _id: string;
+    login: string;
+    username: string;
+    displayName?: string;
+    profilePicture?: string;
+    usernameFont?: string;
+    usernameGradient?: UsernameGradient;
+    usernameGlow?: UsernameGlow;
+    language?: string;
+    customStatus?: CustomStatus | null;
+    createdAt: Date;
+    permissions?: AdminPermissions;
+    deletedAt?: Date;
+    deletedReason?: string;
+    anonymizedUsername?: string;
+    tokenVersion?: number;
+    bio?: string;
+    pronouns?: string;
+    badges?: string[];
+    settings?: UserSettings;
+    banner?: string;
+}

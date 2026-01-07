@@ -10,6 +10,8 @@ import { StatusMessages } from '@/ui/components/showoff/StatusMessages';
 import { RetainSizeButtons } from '@/ui/components/showoff/RetainSizeButtons';
 import { InputsDemo } from '@/ui/components/showoff/InputsDemo';
 import { Heading } from '@/ui/components/Heading';
+import { DividerPresentation } from '@/ui/components/showoff/DividerPresentation';
+import { SpecializedButtons } from '@/ui/components/showoff/SpecializedButtons';
 
 function Showoff() {
     const sections: TOCProps['sections'] = [
@@ -79,6 +81,9 @@ function Showoff() {
             <Animations />
             <StatusMessages />
             <RetainSizeButtons />
+            <DividerPresentation />
+            <SpecializedButtons />
+
             <InputsDemo />
         </>
     );

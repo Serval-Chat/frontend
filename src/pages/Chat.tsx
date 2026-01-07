@@ -1,16 +1,30 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { DefaultBackground } from '@/ui/components/DefaultBackground';
+import { PrimaryNavBar } from '@/ui/PrimaryNavBar';
 import { NormalText } from '@/ui/components/NormalText';
+import { useMe } from '@/api/users/users.queries';
 
 /**
  * @description Chat page
  */
 const Chat: React.FC = () => {
-    return (
-        <div className="min-h-screen w-full flex flex-col items-center justify-center bg-background relative overflow-hidden">
-            <DefaultBackground />
+    const { data: user, error } = useMe();
 
-            <div className="relative z-10">
+    useEffect(() => {
+        if (user) {
+            console.log('Current user:', user);
+        }
+        if (error) {
+            console.error('Error fetching user:', error);
+        }
+    }, [user, error]);
+
+    return (
+        <div className="h-screen w-full flex bg-background overflow-hidden">
+            <PrimaryNavBar />
+
+            <div className="flex-1 flex flex-col items-center justify-center relative z-10">
+                <DefaultBackground />
                 <NormalText>nothing here yet but us servals~!</NormalText>
             </div>
         </div>
