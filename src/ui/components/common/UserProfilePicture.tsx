@@ -11,6 +11,7 @@ interface UserProfilePictureProps {
     username: string;
     status?: UserStatus;
     size?: 'sm' | 'md' | 'lg';
+    noIndicator?: boolean;
     className?: string;
 }
 
@@ -19,12 +20,13 @@ export const UserProfilePicture: React.FC<UserProfilePictureProps> = ({
     username,
     status = 'offline',
     size = 'md',
+    noIndicator = false,
     className,
 }) => {
     return (
         <div className={cn('relative inline-block', className)}>
             <UserProfilePictureIcon src={src} username={username} size={size} />
-            <UserProfileStatusIndicator status={status} />
+            {!noIndicator && <UserProfileStatusIndicator status={status} />}
         </div>
     );
 };

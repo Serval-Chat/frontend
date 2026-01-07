@@ -41,19 +41,24 @@ export const StyledUserName: React.FC<StyledUserNameProps> = ({
           }
         : { visibility: 'hidden' };
 
-    const gradientStyle: React.CSSProperties = hasGradient
-        ? {
-              backgroundImage: `linear-gradient(${usernameGradient.angle}deg, ${
-                  usernameGradient.colors.length === 1
-                      ? `${usernameGradient.colors[0]}, ${usernameGradient.colors[0]}`
-                      : usernameGradient.colors.join(', ')
-              })`,
-              backgroundClip: 'text',
-              WebkitBackgroundClip: 'text',
-              color: 'transparent',
-              WebkitTextFillColor: 'transparent',
-          }
-        : {};
+    const gradientFunction = usernameGradient?.repeating
+        ? 'repeating-linear-gradient'
+        : 'linear-gradient';
+
+    const gradientStyle: React.CSSProperties =
+        hasGradient && usernameGradient
+            ? {
+                  backgroundImage: `${gradientFunction}(${usernameGradient.angle}deg, ${
+                      usernameGradient.colors.length === 1
+                          ? `${usernameGradient.colors[0]}, ${usernameGradient.colors[0]}`
+                          : usernameGradient.colors.join(', ')
+                  })`,
+                  backgroundClip: 'text',
+                  WebkitBackgroundClip: 'text',
+                  color: 'transparent',
+                  WebkitTextFillColor: 'transparent',
+              }
+            : {};
 
     return (
         <NormalText

@@ -2,6 +2,7 @@ export interface UsernameGradient {
     enabled: boolean;
     colors: string[];
     angle: number;
+    repeating?: boolean;
 }
 
 export interface UsernameGlow {

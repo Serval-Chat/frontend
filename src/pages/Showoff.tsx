@@ -16,6 +16,7 @@ import { SpecializedButtons } from '@/ui/components/showoff/SpecializedButtons';
 import { TypographyDemo } from '@/ui/components/showoff/TypographyDemo';
 import { UserIdentitiesDemo } from '@/ui/components/showoff/UserIdentitiesDemo';
 import { NavigationDemo } from '@/ui/components/showoff/NavigationDemo';
+import { ChatDemo } from '@/ui/components/showoff/ChatDemo';
 
 function Showoff() {
     const sections: TOCProps['sections'] = [
@@ -30,6 +31,10 @@ function Showoff() {
         {
             id: SHOWOFF_SECTIONS.navigation,
             title: 'Navigation Components',
+        },
+        {
+            id: SHOWOFF_SECTIONS.chatMessages,
+            title: 'Chat Message Components',
         },
         {
             id: SHOWOFF_SECTIONS.flash,
@@ -97,6 +102,7 @@ function Showoff() {
             <TypographyDemo />
             <UserIdentitiesDemo />
             <NavigationDemo />
+            <ChatDemo />
             <FlashButtons />
             <ProcessingButtons />
             <Animations />

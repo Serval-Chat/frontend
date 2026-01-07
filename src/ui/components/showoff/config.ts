@@ -8,6 +8,7 @@ export const SHOWOFF_SECTIONS = {
     typography: 'typography',
     userIdentities: 'user-identities',
     navigation: 'navigation',
+    chatMessages: 'chat-messages',
 } as const;
 
 export const BUTTON_VARIANTS = [

@@ -5,6 +5,7 @@ import { SHOWOFF_SECTIONS } from './config';
 import { Heading } from '../common/Heading';
 import { NormalText } from '../common/NormalText';
 import { MutedText } from '../common/MutedText';
+import { GradientText } from '../common/GradientText';
 
 export const TypographyDemo: React.FC = () => {
     return (
@@ -44,21 +45,29 @@ export const TypographyDemo: React.FC = () => {
 
             <DemoItem id="text-weights" title="Text Weights & Sizes">
                 <div className="flex flex-col gap-2">
-                    <NormalText className="font-light text-xs">
+                    <NormalText weight="light" size="xs">
                         Light Tiny Text
                     </NormalText>
-                    <NormalText className="font-normal text-sm">
+                    <NormalText weight="normal" size="sm">
                         Normal Small Text
                     </NormalText>
-                    <NormalText className="font-medium text-base">
+                    <NormalText weight="medium" size="base">
                         Medium Base Text
                     </NormalText>
-                    <NormalText className="font-semibold text-lg">
+                    <NormalText weight="semibold" size="lg">
                         Semibold Large Text
                     </NormalText>
-                    <NormalText className="font-bold text-xl">
+                    <NormalText weight="bold" size="xl">
                         Bold Extra Large Text
                     </NormalText>
+                    <GradientText
+                        colors={['#D60270', '#9B4F96', '#0038A8 10%']}
+                        angle={45}
+                        repeating={true}
+                        className="text-[1.25rem]"
+                    >
+                        Repeating Gradient Text Example
+                    </GradientText>
                 </div>
             </DemoItem>
         </DemoSection>
