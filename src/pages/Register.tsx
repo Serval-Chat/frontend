@@ -1,12 +1,12 @@
 import React from 'react';
-import { Input } from '@/ui/components/Input';
-import { Button } from '@/ui/components/Button';
-import { DefaultBackground } from '@/ui/components/DefaultBackground';
-import { StatusMessage } from '@/ui/components/StatusMessage';
-import { Heading } from '@/ui/components/Heading';
-import { NormalText } from '@/ui/components/NormalText';
-import { FormContent } from '@/ui/components/FormContent';
-import { InputWrapper } from '@/ui/components/InputWrapper';
+import { Input } from '@/ui/components/common/Input';
+import { Button } from '@/ui/components/common/Button';
+import { DefaultBackground } from '@/ui/components/layout/DefaultBackground';
+import { StatusMessage } from '@/ui/components/common/StatusMessage';
+import { Heading } from '@/ui/components/common/Heading';
+import { NormalText } from '@/ui/components/common/NormalText';
+import { FormContent } from '@/ui/components/auth/FormContent';
+import { InputWrapper } from '@/ui/components/common/InputWrapper';
 import { useRegisterForm } from '@/hooks/useRegisterForm';
 
 /**

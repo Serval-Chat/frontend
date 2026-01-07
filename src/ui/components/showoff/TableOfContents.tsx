@@ -6,7 +6,7 @@ import React, { useState } from 'react';
 import { useAutoHighlight } from '@/hooks/useAutoHighlight';
 
 import { cn } from '@/utils/cn';
-import { Heading } from '@/ui/components/Heading';
+import { Heading } from '@/ui/components/common/Heading';
 
 export interface TOCSection {
     id: string;

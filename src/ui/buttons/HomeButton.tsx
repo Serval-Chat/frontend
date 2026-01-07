@@ -1,6 +1,6 @@
 import React from 'react';
 import { Home } from 'lucide-react';
-import { Button } from '@/ui/components/Button';
+import { Button } from '@/ui/components/common/Button';
 
 interface HomeButtonProps {
     onClick?: () => void;

@@ -1,10 +1,10 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { DefaultBackground } from '@/ui/components/DefaultBackground';
-import { Heading } from '@/ui/components/Heading';
-import { NormalText } from '@/ui/components/NormalText';
-import { PageWrapper } from '@/ui/components/PageWrapper';
-import { VerticalSpacer } from '@/ui/components/VerticalSpacer';
+import { DefaultBackground } from '@/ui/components/layout/DefaultBackground';
+import { Heading } from '@/ui/components/common/Heading';
+import { NormalText } from '@/ui/components/common/NormalText';
+import { PageWrapper } from '@/ui/components/layout/PageWrapper';
+import { VerticalSpacer } from '@/ui/components/layout/VerticalSpacer';
 
 /**
  * @description 404 Not Found page

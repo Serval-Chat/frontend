@@ -1,5 +1,5 @@
 import { BouncingDots } from '@/ui/animations/BouncingDots';
-import { Stack } from '@/ui/components/Stack';
+import { Stack } from '@/ui/components/layout/Stack';
 import { DemoSection } from './DemoSection';
 import { DemoItem } from './DemoItem';
 import { SHOWOFF_SECTIONS } from './config';

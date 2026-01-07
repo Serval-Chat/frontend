@@ -1,7 +1,7 @@
 import {
     TableOfContents,
     type TOCProps,
-} from '@/ui/components/TableOfContents';
+} from '@/ui/components/showoff/TableOfContents';
 import { SHOWOFF_SECTIONS } from '@/ui/components/showoff/config';
 import { FlashButtons } from '@/ui/components/showoff/FlashButtons';
 import { ProcessingButtons } from '@/ui/components/showoff/ProcessingButtons';
@@ -9,7 +9,7 @@ import { Animations } from '@/ui/components/showoff/Animations';
 import { StatusMessages } from '@/ui/components/showoff/StatusMessages';
 import { RetainSizeButtons } from '@/ui/components/showoff/RetainSizeButtons';
 import { InputsDemo } from '@/ui/components/showoff/InputsDemo';
-import { Heading } from '@/ui/components/Heading';
+import { Heading } from '@/ui/components/common/Heading';
 import { DividerPresentation } from '@/ui/components/showoff/DividerPresentation';
 import { SpecializedButtons } from '@/ui/components/showoff/SpecializedButtons';
 

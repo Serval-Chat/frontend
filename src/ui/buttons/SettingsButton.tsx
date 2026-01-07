@@ -1,6 +1,6 @@
 import React from 'react';
 import { Settings } from 'lucide-react';
-import { Button } from '@/ui/components/Button';
+import { Button } from '@/ui/components/common/Button';
 
 interface SettingsButtonProps {
     onClick?: () => void;

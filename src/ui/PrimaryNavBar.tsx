@@ -1,8 +1,9 @@
 import React from 'react';
 import { cn } from '@/utils/cn';
-import { Divider } from '@/ui/components/Divider';
+import { Divider } from '@/ui/components/common/Divider';
 import { HomeButton } from '@/ui/buttons/HomeButton';
 import { SettingsButton } from '@/ui/buttons/SettingsButton';
+import { ServerList } from '@/ui/components/servers/ServerList';
 
 export const PrimaryNavBar: React.FC = () => {
     return (
@@ -19,10 +20,7 @@ export const PrimaryNavBar: React.FC = () => {
 
             <Divider />
 
-            <div className="flex-1 w-full flex flex-col items-center gap-3">
-                <div className="w-12 h-12 rounded-[--radius-md] bg-[--color-bg-subtle] hover:bg-[--color-primary] transition-colors duration-200 cursor-pointer" />
-                <div className="w-12 h-12 rounded-[--radius-md] bg-[--color-bg-subtle] hover:bg-[--color-primary] transition-colors duration-200 cursor-pointer" />
-            </div>
+            <ServerList />
 
             <Divider />
 

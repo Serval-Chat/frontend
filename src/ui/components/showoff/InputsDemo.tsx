@@ -1,5 +1,5 @@
-import { Input } from '@/ui/components/Input';
-import { Stack } from '@/ui/components/Stack';
+import { Input } from '@/ui/components/common/Input';
+import { Stack } from '@/ui/components/layout/Stack';
 import { DemoSection } from './DemoSection';
 import { DemoItem } from './DemoItem';
 import { SHOWOFF_SECTIONS } from './config';

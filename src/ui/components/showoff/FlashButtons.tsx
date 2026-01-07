@@ -1,6 +1,6 @@
-import { Button } from '@/ui/components/Button';
+import { Button } from '@/ui/components/common/Button';
 import { useFlashGroup } from '@/hooks/useFlashText';
-import { Stack } from '@/ui/components/Stack';
+import { Stack } from '@/ui/components/layout/Stack';
 import { DemoSection } from './DemoSection';
 import { SHOWOFF_SECTIONS, BUTTON_VARIANTS } from './config';
 

@@ -1,5 +1,5 @@
-import { StatusMessage } from '@/ui/components/StatusMessage';
-import { Stack } from '@/ui/components/Stack';
+import { StatusMessage } from '@/ui/components/common/StatusMessage';
+import { Stack } from '@/ui/components/layout/Stack';
 import { DemoSection } from './DemoSection';
 import { DemoItem } from './DemoItem';
 import { SHOWOFF_SECTIONS } from './config';
