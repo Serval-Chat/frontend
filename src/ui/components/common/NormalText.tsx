@@ -1,7 +1,7 @@
 import React from 'react';
 import { cn } from '@/utils/cn';
 
-interface NormalTextProps {
+interface NormalTextProps extends React.HTMLAttributes<HTMLParagraphElement> {
     children: React.ReactNode;
     className?: string;
 }
@@ -12,6 +12,16 @@ interface NormalTextProps {
 export const NormalText: React.FC<NormalTextProps> = ({
     children,
     className,
+    style,
+    ...props
 }) => {
-    return <p className={cn('text-foreground', className)}>{children}</p>;
+    return (
+        <p
+            className={cn('text-foreground', className)}
+            style={style}
+            {...props}
+        >
+            {children}
+        </p>
+    );
 };

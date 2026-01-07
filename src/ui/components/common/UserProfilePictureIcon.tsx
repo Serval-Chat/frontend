@@ -1,0 +1,52 @@
+import React from 'react';
+import { cn } from '@/utils/cn';
+import { resolveApiUrl } from '@/utils/apiUrl';
+
+interface UserProfilePictureIconProps {
+    src?: string | null;
+    username: string;
+    size?: 'sm' | 'md' | 'lg';
+    className?: string;
+}
+
+export const UserProfilePictureIcon: React.FC<UserProfilePictureIconProps> = ({
+    src,
+    username,
+    size = 'md',
+    className,
+}) => {
+    const iconUrl = resolveApiUrl(src || undefined);
+
+    const initials = username
+        .split(' ')
+        .map((word) => word[0])
+        .join('')
+        .slice(0, 2)
+        .toUpperCase();
+
+    const sizeClasses = {
+        sm: 'w-8 h-8 text-xs',
+        md: 'w-10 h-10 text-sm',
+        lg: 'w-12 h-12 text-base',
+    };
+
+    return (
+        <div
+            className={cn(
+                'flex items-center justify-center rounded-full overflow-hidden bg-[--color-bg-subtle] text-foreground-muted font-bold shrink-0',
+                sizeClasses[size],
+                className
+            )}
+        >
+            {iconUrl ? (
+                <img
+                    src={iconUrl}
+                    alt={username}
+                    className="w-full h-full object-cover"
+                />
+            ) : (
+                <span>{initials}</span>
+            )}
+        </div>
+    );
+};

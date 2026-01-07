@@ -7,7 +7,6 @@ export interface UsernameGradient {
 export interface UsernameGlow {
     enabled: boolean;
     color: string;
-    intensity: number;
 }
 
 export interface CustomStatus {

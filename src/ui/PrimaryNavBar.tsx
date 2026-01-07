@@ -4,8 +4,13 @@ import { Divider } from '@/ui/components/common/Divider';
 import { HomeButton } from '@/ui/buttons/HomeButton';
 import { SettingsButton } from '@/ui/buttons/SettingsButton';
 import { ServerList } from '@/ui/components/servers/ServerList';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { setNavMode } from '@/store/slices/navSlice';
 
 export const PrimaryNavBar: React.FC = () => {
+    const dispatch = useAppDispatch();
+    const navMode = useAppSelector((state) => state.nav.navMode);
+
     return (
         <nav
             className={cn(
@@ -15,7 +20,10 @@ export const PrimaryNavBar: React.FC = () => {
             )}
         >
             <div>
-                <HomeButton />
+                <HomeButton
+                    isActive={navMode === 'friends'}
+                    onClick={() => dispatch(setNavMode('friends'))}
+                />
             </div>
 
             <Divider />

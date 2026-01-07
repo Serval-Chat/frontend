@@ -1,12 +1,18 @@
 import React from 'react';
 import { useServers } from '@/api/servers/servers.queries';
 import { ServerItem } from './ServerItem';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { setSelectedServerId } from '@/store/slices/navSlice';
 
 /**
  * @description A component that fetches and lists the user's servers.
  */
 export const ServerList: React.FC = () => {
     const { data: servers, isLoading } = useServers();
+    const dispatch = useAppDispatch();
+    const selectedServerId = useAppSelector(
+        (state) => state.nav.selectedServerId
+    );
 
     return (
         <div className="flex-1 w-full flex flex-col items-center gap-3 overflow-y-auto no-scrollbar">
@@ -14,7 +20,14 @@ export const ServerList: React.FC = () => {
                 <div className="w-12 h-12 rounded-[1.2rem] bg-white/5 animate-pulse" />
             ) : (
                 servers?.map((server) => (
-                    <ServerItem key={server._id} server={server} />
+                    <ServerItem
+                        key={server._id}
+                        server={server}
+                        isActive={selectedServerId === server._id}
+                        onClick={() =>
+                            dispatch(setSelectedServerId(server._id))
+                        }
+                    />
                 ))
             )}
         </div>
