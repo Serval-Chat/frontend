@@ -1,5 +1,6 @@
 import React from 'react';
 
+import type { Role } from '@/api/servers/servers.types';
 import { useUserById } from '@/api/users/users.queries';
 import { cn } from '@/utils/cn';
 
@@ -18,6 +19,8 @@ interface UserItemProps {
     onClick?: () => void;
     className?: string;
     noFetch?: boolean;
+    role?: Role;
+    disableCustomFonts?: boolean;
 }
 
 /**
@@ -30,6 +33,8 @@ export const UserItem: React.FC<UserItemProps> = ({
     onClick,
     className,
     noFetch,
+    role,
+    disableCustomFonts,
 }) => {
     const { data: userProfile } = useUserById(userId, { enabled: !noFetch });
 
@@ -57,7 +62,11 @@ export const UserItem: React.FC<UserItemProps> = ({
                 size="sm"
             />
             <div className="flex-1 min-w-0">
-                <StyledUserName user={userProfile}>
+                <StyledUserName
+                    user={userProfile}
+                    role={role}
+                    disableCustomFonts={disableCustomFonts}
+                >
                     {displayName || username}
                 </StyledUserName>
                 {(customStatus?.text || customStatus?.emoji) && (

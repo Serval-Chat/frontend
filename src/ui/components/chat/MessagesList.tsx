@@ -1,77 +1,141 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
-import type { ChatMessage } from '@/api/chat/chat.types';
+import type { ProcessedChatMessage } from '@/types/chat.ui';
+import { MessageItem } from '@/ui/components/chat/MessageItem';
+import { LoadingSpinner } from '@/ui/components/common/LoadingSpinner';
 import { VerticalSpacer } from '@/ui/components/layout/VerticalSpacer';
 
-import { MessageItem } from './MessageItem';
-
 interface MessagesListProps {
-    messages: ChatMessage[];
-    scrollToId?: string | null;
+    messages: ProcessedChatMessage[];
+    onLoadMore?: () => void;
+    hasMore?: boolean;
+    isLoadingMore?: boolean;
     onReplyClick?: (messageId: string) => void;
+    activeHighlightId?: string | null;
+    disableCustomFonts?: boolean;
 }
 
+/**
+ * @description List of messages with scroll management and loading more functionality.
+ */
 export const MessagesList: React.FC<MessagesListProps> = ({
     messages,
-    scrollToId,
+    onLoadMore,
+    hasMore,
+    isLoadingMore,
     onReplyClick,
+    activeHighlightId,
+    disableCustomFonts,
 }) => {
-    const scrollRef = useRef<HTMLDivElement>(null);
-    const [internalHighlightId, setInternalHighlightId] = React.useState<
-        string | null
-    >(null);
-
-    const activeHighlightId = scrollToId || internalHighlightId;
+    const scrollContainerRef = useRef<HTMLDivElement>(null);
+    const [isAtBottom, setIsAtBottom] = useState(true);
+    const lastScrollHeightRef = useRef<number>(0);
+    const [highlightId, setInternalHighlightId] = useState<string | null>(
+        activeHighlightId || null
+    );
 
     const handleReplyClick = (messageId: string) => {
         setInternalHighlightId(messageId);
         // Clear highlight after animation
         setTimeout(() => setInternalHighlightId(null), 2000);
 
-        // Call external handler if provided
         onReplyClick?.(messageId);
     };
 
-    const scrollToBottom = () => {
-        if (scrollRef.current) {
-            scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    const handleScroll = () => {
+        const container = scrollContainerRef.current;
+        if (!container) return;
+
+        const { scrollTop, scrollHeight, clientHeight } = container;
+        const atBottom = scrollHeight - scrollTop - clientHeight < 50;
+        setIsAtBottom(atBottom);
+
+        // Trigger load more when reaching top
+        if (scrollTop === 0 && hasMore && !isLoadingMore) {
+            onLoadMore?.();
         }
     };
 
-    // Handle explicit scroll requests (navigation)
-    useEffect(() => {
-        if (activeHighlightId) {
-            const el = document.getElementById(`message-${activeHighlightId}`);
-            if (el) {
-                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    // Use layout effect to preserve scroll position when new messages arrive at the top
+    useLayoutEffect(() => {
+        const container = scrollContainerRef.current;
+        if (!container || messages.length === 0) return;
+
+        const newScrollHeight = container.scrollHeight;
+
+        // If at bottom, stay at bottom
+        if (isAtBottom) {
+            container.scrollTop = newScrollHeight;
+            lastScrollHeightRef.current = newScrollHeight;
+            return;
+        }
+
+        // If messages were added at the top (pagination), preserve relative position
+        if (lastScrollHeightRef.current !== 0 && messages.length > 0) {
+            const heightDiff = newScrollHeight - lastScrollHeightRef.current;
+            if (heightDiff > 0) {
+                container.scrollTop += heightDiff;
             }
         }
-    }, [activeHighlightId]);
 
+        lastScrollHeightRef.current = newScrollHeight;
+    }, [messages, activeHighlightId, isAtBottom]);
+
+    // Handle explicit scroll requests
     useEffect(() => {
-        // Only auto-scroll to bottom if we are NOT navigating to a specific message
-        if (!activeHighlightId) {
-            scrollToBottom();
-            const timeout = setTimeout(scrollToBottom, 100);
-            return () => clearTimeout(timeout);
+        if (!activeHighlightId) return;
+
+        const el = document.getElementById(`message-${activeHighlightId}`);
+        if (el) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
-    }, [messages, activeHighlightId]);
+
+        const highlightTimeout = setTimeout(() => {
+            setInternalHighlightId(activeHighlightId);
+        }, 0);
+
+        const clearHighlightTimeout = setTimeout(() => {
+            setInternalHighlightId(null);
+        }, 2000);
+
+        return () => {
+            clearTimeout(highlightTimeout);
+            clearTimeout(clearHighlightTimeout);
+        };
+    }, [activeHighlightId]);
 
     return (
         <div
-            ref={scrollRef}
-            className="flex flex-col flex-1 overflow-y-auto overflow-x-hidden min-h-0 custom-scrollbar"
+            ref={scrollContainerRef}
+            onScroll={handleScroll}
+            className="flex-1 overflow-y-auto min-h-0 relative custom-scrollbar flex flex-col pt-4"
         >
+            {hasMore && (
+                <div className="flex justify-center py-4">
+                    {isLoadingMore ? (
+                        <LoadingSpinner size="sm" />
+                    ) : (
+                        <button
+                            onClick={onLoadMore}
+                            className="text-xs text-foreground-muted hover:text-foreground transition-colors"
+                        >
+                            Load older messages
+                        </button>
+                    )}
+                </div>
+            )}
+
             {messages.map((msg, index) => (
                 <MessageItem
                     key={msg._id}
                     message={msg}
+                    role={msg.role}
                     prevMessage={index > 0 ? messages[index - 1] : undefined}
-                    isHighlighted={msg._id === activeHighlightId}
+                    isHighlighted={highlightId === msg._id}
                     onReplyClick={handleReplyClick}
+                    disableCustomFonts={disableCustomFonts}
                 />
             ))}
-            {/* Scroll anchor / spacer */}
             <VerticalSpacer verticalSpace={16} />
         </div>
     );

@@ -1,20 +1,26 @@
 import React from 'react';
 
+import type { Role } from '@/api/servers/servers.types';
 import type { User } from '@/api/users/users.types';
 import { StyledUserName } from '@/ui/components/common/StyledUserName';
+import { resolveApiUrl } from '@/utils/apiUrl';
 
 interface ReplyPreviewProps {
     user: User;
+    role?: Role;
     text: string;
     replyToId?: string;
     onClick?: (messageId: string) => void;
+    disableCustomFonts?: boolean;
 }
 
 export const ReplyPreview: React.FC<ReplyPreviewProps> = ({
     user,
+    role,
     text,
     replyToId,
     onClick,
+    disableCustomFonts,
 }) => {
     return (
         <div
@@ -26,9 +32,9 @@ export const ReplyPreview: React.FC<ReplyPreviewProps> = ({
 
             <div className="flex items-center gap-1.5 overflow-hidden min-w-0">
                 <div className="w-4 h-4 rounded-full bg-white/10 overflow-hidden flex-shrink-0 ring-1 ring-white/5">
-                    {user.profilePicture ? (
+                    {resolveApiUrl(user.profilePicture) ? (
                         <img
-                            src={user.profilePicture}
+                            src={resolveApiUrl(user.profilePicture)!}
                             alt=""
                             className="w-full h-full object-cover"
                         />
@@ -40,6 +46,8 @@ export const ReplyPreview: React.FC<ReplyPreviewProps> = ({
                 </div>
                 <StyledUserName
                     user={user}
+                    role={role}
+                    disableCustomFonts={disableCustomFonts}
                     className="text-xs font-bold whitespace-nowrap opacity-90"
                 >
                     {user.displayName || user.username}
