@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 
 import { friendsApi } from './friends.api';
 
@@ -8,5 +8,11 @@ export const useFriends = () => {
     return useQuery({
         queryKey: FRIENDS_QUERY_KEY,
         queryFn: friendsApi.getFriends,
+    });
+};
+
+export const useSendFriendRequest = () => {
+    return useMutation({
+        mutationFn: friendsApi.sendFriendRequest,
     });
 };

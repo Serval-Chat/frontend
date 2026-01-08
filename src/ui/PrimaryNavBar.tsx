@@ -1,10 +1,9 @@
-import React from 'react';
+import { Home, Settings } from 'lucide-react';
 
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { setNavMode } from '@/store/slices/navSlice';
-import { HomeButton } from '@/ui/buttons/HomeButton';
-import { SettingsButton } from '@/ui/buttons/SettingsButton';
 import { Divider } from '@/ui/components/common/Divider';
+import { IconButton } from '@/ui/components/common/IconButton';
 import { ServerList } from '@/ui/components/servers/ServerList';
 import { cn } from '@/utils/cn';
 
@@ -21,7 +20,8 @@ export const PrimaryNavBar: React.FC = () => {
             )}
         >
             <div>
-                <HomeButton
+                <IconButton
+                    icon={Home}
                     isActive={navMode === 'friends'}
                     onClick={() => dispatch(setNavMode('friends'))}
                 />
@@ -34,7 +34,7 @@ export const PrimaryNavBar: React.FC = () => {
             <Divider />
 
             <div>
-                <SettingsButton />
+                <IconButton icon={Settings} />
             </div>
         </nav>
     );

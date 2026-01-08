@@ -7,4 +7,8 @@ export const friendsApi = {
         const response = await apiClient.get<Friend[]>('/api/v1/friends');
         return response.data;
     },
+
+    sendFriendRequest: async (username: string): Promise<void> => {
+        await apiClient.post('/api/v1/friends', { username });
+    },
 };

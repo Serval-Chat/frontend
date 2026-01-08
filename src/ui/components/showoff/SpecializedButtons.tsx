@@ -1,13 +1,14 @@
 import React from 'react';
 
-import { HomeButton } from '@/ui/buttons/HomeButton';
-import { SettingsButton } from '@/ui/buttons/SettingsButton';
+import { Home, Settings } from 'lucide-react';
+
+import { IconButton } from '@/ui/components/common/IconButton';
 
 export const SpecializedButtons: React.FC = () => {
     return (
         <div className="p-4 bg-[--color-background] border border-[--color-border-subtle] rounded-md my-4 flex gap-4">
-            <HomeButton />
-            <SettingsButton />
+            <IconButton icon={Home} />
+            <IconButton icon={Settings} />
         </div>
     );
 };
