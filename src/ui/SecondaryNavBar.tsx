@@ -2,13 +2,8 @@ import React from 'react';
 
 import { useAppSelector } from '@/store/hooks';
 import { FriendsSection } from '@/ui/components/friends/FriendsSection';
+import { ServerSection } from '@/ui/components/servers/ServerSection';
 import { cn } from '@/utils/cn';
-
-const ServersPlaceholder = () => (
-    <div className="p-4 text-foreground-muted text-sm italic">
-        Server navigation coming soon...
-    </div>
-);
 
 /**
  * @description Secondary navigation bar
@@ -19,13 +14,13 @@ export const SecondaryNavBar: React.FC = () => {
     return (
         <aside
             className={cn(
-                'h-full w-[240px] shrink-0 flex flex-col overflow-y-auto no-scrollbar',
+                'h-full w-[240px] shrink-0 flex flex-col no-scrollbar',
                 'bg-linear-to-r from-[--color-background] from-0% to-bg-secondary to-10%'
             )}
         >
-            <div className="flex-1 flex flex-col">
+            <div className="flex-1 flex flex-col min-h-0 relative">
                 {navMode === 'friends' && <FriendsSection />}
-                {navMode === 'servers' && <ServersPlaceholder />}
+                {navMode === 'servers' && <ServerSection />}
             </div>
         </aside>
     );

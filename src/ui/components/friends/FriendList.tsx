@@ -1,10 +1,20 @@
 import React from 'react';
 
 import { useFriends } from '@/api/friends/friends.queries';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { setSelectedFriendId } from '@/store/slices/navSlice';
 import { UserItem } from '@/ui/components/common/UserItem';
 
 export const FriendList: React.FC = () => {
     const { data: friends, isLoading } = useFriends();
+    const dispatch = useAppDispatch();
+    const selectedFriendId = useAppSelector(
+        (state) => state.nav.selectedFriendId
+    );
+
+    const handleFriendClick = (friendId: string) => {
+        dispatch(setSelectedFriendId(friendId));
+    };
 
     return (
         <div className="flex flex-col gap-1 p-2">
@@ -23,6 +33,8 @@ export const FriendList: React.FC = () => {
                         key={friend._id}
                         userId={friend._id}
                         initialData={friend}
+                        isActive={selectedFriendId === friend._id}
+                        onClick={() => handleFriendClick(friend._id)}
                     />
                 ))
             )}

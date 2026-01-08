@@ -1,11 +1,13 @@
 import React from 'react';
 
+import type { User } from '@/api/users/users.types';
+import type { ProcessedChatMessage } from '@/types/chat.ui';
 import { MessagesList } from '@/ui/components/chat/MessagesList';
 import { NormalText } from '@/ui/components/common/NormalText';
 
 import { DemoSection } from './DemoSection';
 
-const MOCK_USERS = {
+const MOCK_USERS: Record<string, User> = {
     catflare: {
         _id: 'u1',
         login: 'catflare',
@@ -77,18 +79,20 @@ const MOCK_USERS = {
     },
 };
 
-const MOCK_MESSAGES = [
+const MOCK_MESSAGES: ProcessedChatMessage[] = [
     {
         _id: '0',
         text: 'Hello everyone! I hope you guys like Serchat uwu',
         createdAt: new Date(Date.now() - 3600000).toISOString(),
         user: MOCK_USERS.catflare,
+        senderId: MOCK_USERS.catflare._id,
     },
     {
         _id: '1',
         text: 'Yas! I love this place',
         createdAt: new Date(Date.now() - 3550000).toISOString(),
         user: MOCK_USERS.hexagon,
+        senderId: MOCK_USERS.hexagon._id,
         replyTo: {
             _id: '0',
             user: MOCK_USERS.catflare,
@@ -100,18 +104,21 @@ const MOCK_MESSAGES = [
         text: "Please fix this bug. I can't change default role for my members!",
         createdAt: new Date(Date.now() - 3500000).toISOString(),
         user: MOCK_USERS.evalyn,
+        senderId: MOCK_USERS.evalyn._id,
     },
     {
         _id: '3',
         text: 'I forgot my password. Could you plz reset it thx',
         createdAt: new Date(Date.now() - 3450000).toISOString(),
         user: MOCK_USERS.mintsuki,
+        senderId: MOCK_USERS.mintsuki._id,
     },
     {
         _id: '4',
         text: 'Eh fine but I got no reset password feature :sob:',
         createdAt: new Date(Date.now() - 3400000).toISOString(),
         user: MOCK_USERS.catflare,
+        senderId: MOCK_USERS.catflare._id,
         replyTo: {
             _id: '3',
             user: MOCK_USERS.mintsuki,
@@ -123,6 +130,7 @@ const MOCK_MESSAGES = [
         text: 'Anyways @everyone I have to reload the server. New update incoming :333',
         createdAt: new Date(Date.now() - 3350000).toISOString(),
         user: MOCK_USERS.catflare,
+        senderId: MOCK_USERS.catflare._id,
     },
 ];
 

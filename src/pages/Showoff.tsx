@@ -4,6 +4,7 @@ import { ChatDemo } from '@/ui/components/showoff/ChatDemo';
 import { DividerPresentation } from '@/ui/components/showoff/DividerPresentation';
 import { FlashButtons } from '@/ui/components/showoff/FlashButtons';
 import { InputsDemo } from '@/ui/components/showoff/InputsDemo';
+import { LoadingSpinnerDemo } from '@/ui/components/showoff/LoadingSpinnerDemo';
 import { NavigationDemo } from '@/ui/components/showoff/NavigationDemo';
 import { ProcessingButtons } from '@/ui/components/showoff/ProcessingButtons';
 import { RetainSizeButtons } from '@/ui/components/showoff/RetainSizeButtons';
@@ -87,6 +88,15 @@ function Showoff() {
                 { id: 'input-width', title: 'Width Constrained Input' },
             ],
         },
+        {
+            id: SHOWOFF_SECTIONS.loadingSpinner,
+            title: 'Loading Spinner',
+            children: [
+                { id: 'spinner-sm', title: 'Small' },
+                { id: 'spinner-md', title: 'Medium' },
+                { id: 'spinner-lg', title: 'Large' },
+            ],
+        },
     ];
 
     return (
@@ -111,6 +121,7 @@ function Showoff() {
             <SpecializedButtons />
 
             <InputsDemo />
+            <LoadingSpinnerDemo />
         </>
     );
 }

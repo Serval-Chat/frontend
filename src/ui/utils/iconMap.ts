@@ -1,0 +1,58 @@
+import React from 'react';
+
+import {
+    Bell,
+    BookCheck,
+    Calendar,
+    Camera,
+    Code,
+    Dices,
+    Film,
+    Gamepad2,
+    Hash,
+    Headphones,
+    Heart,
+    Info,
+    Laptop,
+    Megaphone,
+    Mic,
+    Music,
+    Newspaper,
+    Palette,
+    Pin,
+    Scroll,
+    Settings,
+    Star,
+    Trophy,
+    Volume2,
+} from 'lucide-react';
+
+/**
+ * @description Map of icon strings from the backend to Lucide icon components.
+ */
+export const ICON_MAP: Record<string, React.ElementType> = {
+    hashtag: Hash,
+    speech_bubble: Volume2,
+    megaphone: Megaphone,
+    bell: Bell,
+    newspaper: Newspaper,
+    info_mark: Info,
+    book_with_checkmark: BookCheck,
+    scroll: Scroll,
+    microphone: Mic,
+    headphones: Headphones,
+    camera: Camera,
+    pallete: Palette,
+    film_roll: Film,
+    music_note: Music,
+    game_pad: Gamepad2,
+    dice: Dices,
+    trophy: Trophy,
+    code_brackets: Code,
+    laptop: Laptop,
+    gear: Settings,
+    heart: Heart,
+    star: Star,
+    calendar: Calendar,
+    pin: Pin,
+};

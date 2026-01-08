@@ -9,6 +9,7 @@ export const SHOWOFF_SECTIONS = {
     userIdentities: 'user-identities',
     navigation: 'navigation',
     chatMessages: 'chat-messages',
+    loadingSpinner: 'loading-spinner',
 } as const;
 
 export const BUTTON_VARIANTS = [

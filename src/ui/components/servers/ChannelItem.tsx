@@ -1,0 +1,59 @@
+import React from 'react';
+
+import { Hash, Volume2 } from 'lucide-react';
+
+import type { ChannelType } from '@/api/servers/servers.types';
+import { ICON_MAP } from '@/ui/utils/iconMap';
+import { cn } from '@/utils/cn';
+
+interface ChannelItemProps {
+    name: string;
+    type: ChannelType;
+    icon?: string;
+    isActive?: boolean;
+    onClick?: () => void;
+}
+
+/**
+ * @description Renders a single channel item with an icon.
+ */
+export const ChannelItem: React.FC<ChannelItemProps> = ({
+    name,
+    type,
+    icon,
+    isActive,
+    onClick,
+}) => {
+    const CustomIcon = icon ? ICON_MAP[icon] : null;
+    const Icon = CustomIcon || (type === 'text' ? Hash : Volume2);
+
+    return (
+        <button
+            onClick={onClick}
+            className={cn(
+                'group flex items-center w-full px-2 py-1.5 rounded-md transition-all',
+                'hover:bg-white/5 cursor-pointer text-left',
+                isActive
+                    ? 'bg-white/10 text-foreground'
+                    : 'text-foreground-muted'
+            )}
+        >
+            <Icon
+                className={cn(
+                    'w-[18px] h-[18px] mr-1.5 shrink-0 transition-colors',
+                    isActive
+                        ? 'text-foreground'
+                        : 'text-foreground-muted group-hover:text-foreground/80'
+                )}
+            />
+            <span
+                className={cn(
+                    'text-[15px] font-medium truncate',
+                    isActive && 'text-foreground'
+                )}
+            >
+                {name}
+            </span>
+        </button>
+    );
+};
