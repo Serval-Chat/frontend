@@ -10,10 +10,12 @@ export const SHOWOFF_SECTIONS = {
     navigation: 'navigation',
     chatMessages: 'chat-messages',
     loadingSpinner: 'loading-spinner',
+    colorPalette: 'color-palette',
 } as const;
 
 export const BUTTON_VARIANTS = [
     { id: 'normal', type: 'normal', label: 'Normal' },
+    { id: 'primary', type: 'primary', label: 'Primary (Gold)' },
     { id: 'caution', type: 'caution', label: 'Caution' },
     { id: 'danger', type: 'danger', label: 'Danger' },
     { id: 'success', type: 'success', label: 'Success' },

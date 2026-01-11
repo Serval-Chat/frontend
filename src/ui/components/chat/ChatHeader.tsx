@@ -21,7 +21,7 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
     selectedChannel,
 }) => {
     return (
-        <header className="h-12 flex items-center px-4 border-b border-white/5 bg-bg-secondary/50 backdrop-blur-sm shrink-0">
+        <header className="h-12 flex items-center px-4 border-b border-white/5 bg-[var(--bg-chat-header)] backdrop-blur-sm shrink-0">
             <div className="flex items-center gap-2 overflow-hidden">
                 <div className="text-foreground-muted shrink-0">
                     {selectedFriendId ? (
@@ -45,7 +45,7 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
                         ? friendUser?.displayName ||
                           friendUser?.username ||
                           '...'
-                        : selectedChannel?.name || 'Channel'}
+                        : selectedChannel?.name || 'No Channel'}
                 </div>
             </div>
         </header>

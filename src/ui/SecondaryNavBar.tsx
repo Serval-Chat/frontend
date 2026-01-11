@@ -14,8 +14,7 @@ export const SecondaryNavBar: React.FC = () => {
     return (
         <aside
             className={cn(
-                'h-full w-[240px] shrink-0 flex flex-col no-scrollbar',
-                'bg-linear-to-r from-[--color-background] from-0% to-bg-secondary to-10%'
+                'h-full w-[240px] shrink-0 flex flex-col no-scrollbar bg-[var(--secondary-bg)]'
             )}
         >
             <div className="flex-1 flex flex-col min-h-0 relative">

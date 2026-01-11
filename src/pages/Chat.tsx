@@ -22,7 +22,7 @@ const Chat: React.FC = () => {
     }, [user, error]);
 
     return (
-        <div className="h-screen w-full flex bg-background overflow-hidden">
+        <div className="h-screen w-full flex bg-[var(--chat-bg)] overflow-hidden">
             <PrimaryNavBar />
             <SecondaryNavBar />
             <MainContent />

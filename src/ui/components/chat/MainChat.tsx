@@ -10,11 +10,14 @@ import { useMe, useUserById } from '@/api/users/users.queries';
 import { useMemberMaps } from '@/hooks/chat/useMemberMaps';
 import { usePaginatedMessages } from '@/hooks/chat/usePaginatedMessages';
 import { useProcessedMessages } from '@/hooks/chat/useProcessedMessages';
+import { useChatWS } from '@/hooks/ws/useChatWS';
 import { useAppSelector } from '@/store/hooks';
 import { ChatEmptyState } from '@/ui/components/chat/ChatEmptyState';
 import { ChatHeader } from '@/ui/components/chat/ChatHeader';
 import { ChatLoadingState } from '@/ui/components/chat/ChatLoadingState';
+import { MessageInput } from '@/ui/components/chat/MessageInput';
 import { MessagesList } from '@/ui/components/chat/MessagesList';
+import { TypingIndicator } from '@/ui/components/chat/TypingIndicator';
 
 /**
  * @description Main chat area component that displays messages for the selected conversation.
@@ -69,8 +72,23 @@ export const MainChat: React.FC = () => {
         highestRoleMap
     );
 
+    const { typingUsers } = useChatWS(
+        selectedFriendId ?? undefined,
+        selectedServerId ?? undefined,
+        selectedChannelId ?? undefined
+    );
+
     if (!selectedFriendId && !selectedChannelId) {
-        return <ChatEmptyState />;
+        return (
+            <div>
+                <ChatHeader
+                    selectedFriendId={''}
+                    friendUser={undefined}
+                    selectedChannel={undefined}
+                />
+                <ChatEmptyState />
+            </div>
+        );
     }
 
     return (
@@ -81,7 +99,7 @@ export const MainChat: React.FC = () => {
                 selectedChannel={selectedChannel}
             />
 
-            <div className="flex-1 flex flex-col min-h-0 bg-background/50">
+            <div className="flex-1 flex flex-col min-h-0">
                 {isLoading ? (
                     <ChatLoadingState />
                 ) : (
@@ -94,6 +112,9 @@ export const MainChat: React.FC = () => {
                     />
                 )}
             </div>
+
+            <TypingIndicator typingUsers={typingUsers} />
+            <MessageInput />
         </div>
     );
 };

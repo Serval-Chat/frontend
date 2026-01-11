@@ -16,17 +16,19 @@ const mutedClasses = {
 };
 
 const buttonVariants = cva(
-    'px-xs py-xs inline-flex items-center justify-center rounded-md transition-colors duration-300 disabled:pointer-events-none disabled:opacity-50 font-sans whitespace-nowrap cursor-pointer',
+    'bg-background px-xs py-xs inline-flex items-center justify-center rounded-md transition-colors duration-300 disabled:pointer-events-none disabled:opacity-50 font-sans whitespace-nowrap cursor-pointer',
     {
         variants: {
             variant: {
-                normal: 'bg-primary text-foreground-inverse hover:bg-primary-hover',
+                normal: 'text-foreground border border-border-subtle hover:bg-bg-secondary hover:border-primary/40',
+                primary:
+                    'bg-primary text-foreground-inverse hover:bg-primary-hover',
                 danger: 'bg-danger text-foreground-inverse hover:bg-danger-hover',
                 caution:
                     'bg-caution text-foreground-inverse hover:bg-caution-hover',
                 success:
                     'bg-success text-foreground-inverse hover:bg-success-hover',
-                nav: 'bg-white/5 text-[#f4f4f4] w-12 h-12 p-0 rounded-[1.2rem] transition-all duration-200 hover:bg-[--color-primary] hover:rounded-[0.75rem]',
+                nav: 'bg-bg-secondary text-[#f4f4f4] w-12 h-12 p-0 rounded-[1.2rem] transition-all duration-200 hover:bg-primary hover:text-foreground-inverse hover:rounded-[0.75rem]',
             },
         },
         compoundVariants: Object.entries(mutedClasses).map(

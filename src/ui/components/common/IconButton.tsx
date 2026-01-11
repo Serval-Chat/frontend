@@ -19,7 +19,7 @@ export const IconButton: React.FC<IconButtonProps> = ({
     return (
         <Button
             variant="nav"
-            className={cn(className, isActive && 'bg-white/10 text-white')}
+            className={cn(className, isActive && 'bg-primary/20 text-primary')}
             {...props}
         >
             <Icon size={iconSize} />

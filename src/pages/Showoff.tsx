@@ -1,6 +1,7 @@
 import { Heading } from '@/ui/components/common/Heading';
 import { Animations } from '@/ui/components/showoff/Animations';
 import { ChatDemo } from '@/ui/components/showoff/ChatDemo';
+import { ColorPalette } from '@/ui/components/showoff/ColorPalette';
 import { DividerPresentation } from '@/ui/components/showoff/DividerPresentation';
 import { FlashButtons } from '@/ui/components/showoff/FlashButtons';
 import { InputsDemo } from '@/ui/components/showoff/InputsDemo';
@@ -97,6 +98,10 @@ function Showoff() {
                 { id: 'spinner-lg', title: 'Large' },
             ],
         },
+        {
+            id: SHOWOFF_SECTIONS.colorPalette,
+            title: 'Leptailurus Serval Color Palette',
+        },
     ];
 
     return (
@@ -122,6 +127,7 @@ function Showoff() {
 
             <InputsDemo />
             <LoadingSpinnerDemo />
+            <ColorPalette />
         </>
     );
 }

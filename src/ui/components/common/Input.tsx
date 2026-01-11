@@ -62,8 +62,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
                     disabled={disabled || undefined}
                     className={cn(
                         inputVariants({ disabled, className }),
-                        isNumber &&
-                            'pr-9 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none'
+                        isNumber && 'pr-9 [appearance:textfield]'
                     )}
                     ref={internalRef}
                     {...props}

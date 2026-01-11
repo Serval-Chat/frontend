@@ -11,22 +11,25 @@ import Register from '@/pages/Register';
 import Showoff from '@/pages/Showoff';
 import { QueryProvider } from '@/providers/QueryProvider';
 import { StoreProvider } from '@/providers/StoreProvider';
+import { WebSocketProvider } from '@/providers/WebSocketProvider';
 import '@/styles/index.css';
 
 createRoot(document.getElementById('root')!).render(
     <StrictMode>
         <StoreProvider>
             <QueryProvider>
-                <BrowserRouter>
-                    <Routes>
-                        <Route path="/" element={<App />} />
-                        <Route path="/login" element={<Login />} />
-                        <Route path="/register" element={<Register />} />
-                        <Route path="/chat" element={<Chat />} />
-                        <Route path="/showoff" element={<Showoff />} />
-                        <Route path="*" element={<NotFound />} />
-                    </Routes>
-                </BrowserRouter>
+                <WebSocketProvider>
+                    <BrowserRouter>
+                        <Routes>
+                            <Route path="/" element={<App />} />
+                            <Route path="/login" element={<Login />} />
+                            <Route path="/register" element={<Register />} />
+                            <Route path="/chat" element={<Chat />} />
+                            <Route path="/showoff" element={<Showoff />} />
+                            <Route path="*" element={<NotFound />} />
+                        </Routes>
+                    </BrowserRouter>
+                </WebSocketProvider>
             </QueryProvider>
         </StoreProvider>
     </StrictMode>

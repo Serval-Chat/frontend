@@ -6,10 +6,12 @@ export const getAuthToken = (): string | null => {
 
 export const setAuthToken = (token: string): void => {
     localStorage.setItem(AUTH_TOKEN_KEY, token);
+    window.dispatchEvent(new Event('auth-change'));
 };
 
 export const removeAuthToken = (): void => {
     localStorage.removeItem(AUTH_TOKEN_KEY);
+    window.dispatchEvent(new Event('auth-change'));
 };
 
 export const hasAuthToken = (): boolean => {

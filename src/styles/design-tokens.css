@@ -1,37 +1,31 @@
 @theme {
-    /* Main Colors */
-    --color-primary: hsl(220 90% 56%);
-    --color-primary-hover: hsl(220 90% 48%);
-    --color-danger: hsl(0 84% 60%);
-    --color-danger-hover: hsl(0 84% 52%);
-    --color-caution: hsl(45 93% 47%);
-    --color-caution-hover: hsl(45 93% 39%);
-    --color-success: hsl(142 71% 45%);
-    --color-success-hover: hsl(142 71% 37%);
+    --color-primary: hsl(45 100% 50%);
+    --color-primary-hover: hsl(45 100% 40%);
+    --color-danger: hsl(15 90% 55%);
+    --color-danger-hover: hsl(15 90% 45%);
+    --color-caution: hsl(30 95% 60%);
+    --color-caution-hover: hsl(30 95% 50%);
+    --color-success: hsl(80 70% 40%);
+    --color-success-hover: hsl(80 70% 30%);
+    --color-primary-muted: hsl(45 100% 15%);
+    --color-primary-muted-text: hsl(45 100% 70%);
+    --color-danger-muted: hsl(15 90% 15%);
+    --color-danger-muted-text: hsl(15 90% 70%);
+    --color-caution-muted: hsl(30 95% 15%);
+    --color-caution-muted-text: hsl(30 95% 70%);
+    --color-success-muted: hsl(80 70% 15%);
+    --color-success-muted-text: hsl(80 70% 70%);
+    --color-background: #2e1d13;
+    --color-foreground: #fffbf0;
+    --color-foreground-inverse: #000000;
+    --color-muted-foreground: #bcaaa4;
+    --color-muted-foreground-hover: #e6dedb;
+    --color-border-subtle: rgb(255 190 0 / 0.2);
+    --color-bg-subtle: rgb(255 190 0 / 0.08);
+    --color-bg-secondary: rgb(255 190 0 / 0.12);
+    --color-placeholder: rgb(188 170 164 / 0.4);
+    --color-divider: rgb(255 190 0 / 0.15);
 
-    /* Muted variants */
-    --color-primary-muted: hsl(220 90% 85%);
-    --color-primary-muted-text: hsl(220 90% 25%);
-    --color-danger-muted: hsl(0 84% 85%);
-    --color-danger-muted-text: hsl(0 84% 25%);
-    --color-caution-muted: hsl(45 93% 85%);
-    --color-caution-muted-text: hsl(45 93% 25%);
-    --color-success-muted: hsl(142 71% 85%);
-    --color-success-muted-text: hsl(142 71% 25%);
-
-    /* Colors */
-    --color-background: #242424;
-    --color-foreground: #faf9f6;
-    --color-foreground-inverse: #ffffff;
-    --color-muted-foreground: #6b7280;
-    --color-muted-foreground-hover: #374151;
-    --color-border-subtle: rgb(255 255 255 / 0.1);
-    --color-bg-subtle: rgb(255 255 255 / 0.05);
-    --color-bg-secondary: rgb(255 255 255 / 0.01);
-    --color-placeholder: rgb(255 255 255 / 0.4);
-    --color-divider: rgb(255 255 255 / 0.15);
-
-    /* Spacing */
     --spacing: 0.25rem;
     --spacing-xs: calc(var(--spacing) * 1);
     --spacing-sm: calc(var(--spacing) * 2);
@@ -39,7 +33,6 @@
     --spacing-lg: calc(var(--spacing) * 6);
     --spacing-xl: calc(var(--spacing) * 8);
 
-    /* Max Widths */
     --max-width-xs: 20rem;
     --max-width-sm: 24rem;
     --max-width-md: 28rem;
@@ -52,22 +45,21 @@
     --max-width-6xl: 72rem;
     --max-width-7xl: 80rem;
 
-    /* Typography */
     --font-sans: 'Noto Sans', system-ui, -apple-system, Roboto, sans-serif;
     --font-mono: 'Fira Code', 'Courier New', monospace;
 
-    /* Shadows */
-    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.4);
 
-    /* Border Radius */
     --radius-sm: 0.25rem;
     --radius-md: 0.5rem;
     --radius-lg: 0.75rem;
-}
 
-.dark {
-    --color-primary: hsl(220 90% 66%);
-    --color-primary-hover: hsl(220 90% 58%);
+    --tertiary-bg: var(--color-background);
+    --secondary-bg: var(--color-background);
+    --bg-chat-header: var(--color-background);
+    --chat-bg: color-mix(in srgb, black 25%, var(--color-bg-secondary));
+    --primary-bg: color-mix(in srgb, black 25%, var(--color-bg-secondary));
+    --bg-msg-input: var(--color-background);
 }
