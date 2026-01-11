@@ -2,6 +2,7 @@ import React from 'react';
 
 import { useAppSelector } from '@/store/hooks';
 import { FriendsSection } from '@/ui/components/friends/FriendsSection';
+import { MiniProfile } from '@/ui/components/profile/MiniProfile';
 import { ServerSection } from '@/ui/components/servers/ServerSection';
 import { cn } from '@/utils/cn';
 
@@ -21,6 +22,8 @@ export const SecondaryNavBar: React.FC = () => {
                 {navMode === 'friends' && <FriendsSection />}
                 {navMode === 'servers' && <ServerSection />}
             </div>
+
+            <MiniProfile />
         </aside>
     );
 };

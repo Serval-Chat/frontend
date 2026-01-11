@@ -9,7 +9,7 @@ import {
     setOnlineUsers,
     setUserOffline,
     setUserOnline,
-    updateUserStatus,
+    updateUserStatusByUsername,
 } from '@/store/slices/presenceSlice';
 
 import { wsClient } from './client';
@@ -99,7 +99,19 @@ export const setupGlobalWsHandlers = (
     });
 
     wsClient.on<IStatusUpdatedEvent>(WsEvents.STATUS_UPDATED, (payload) => {
-        dispatch(updateUserStatus(payload));
+        const statusText = payload.status?.text || undefined;
+
+        // Update presence state by username
+        dispatch(
+            updateUserStatusByUsername({
+                username: payload.username,
+                customStatus: statusText,
+            })
+        );
+
+        if (currentUser && payload.username === currentUser.username) {
+            queryClient.invalidateQueries({ queryKey: ['me'] });
+        }
     });
 };
 

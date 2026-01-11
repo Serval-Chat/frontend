@@ -112,9 +112,13 @@ export interface IUserOfflineEvent {
  * @description Status updated.
  */
 export interface IStatusUpdatedEvent {
-    userId: string;
     username: string;
-    status: string;
+    status: {
+        text: string;
+        emoji?: string | null;
+        expiresAt: string | null;
+        updatedAt: string;
+    } | null;
 }
 
 /**
@@ -165,7 +169,7 @@ export const WsEvents = {
     USER_ONLINE: 'user_online',
     USER_OFFLINE: 'user_offline',
     SET_STATUS: 'set_status',
-    STATUS_UPDATED: 'status_updated',
+    STATUS_UPDATED: 'status_update',
 
     // Friends
     FRIEND_ADDED: 'friend_added',

@@ -10,4 +10,17 @@ export const usersApi = {
 
     updateMe: (data: Partial<User>) =>
         apiClient.patch<User>('/api/v1/profile/me', data).then((r) => r.data),
+
+    updateStatus: (data: {
+        text?: string;
+        emoji?: string;
+        expiresAt?: string | null;
+        expiresInMinutes?: number;
+        clear?: boolean;
+    }) =>
+        apiClient
+            .patch<{
+                customStatus: User['customStatus'];
+            }>('/api/v1/profile/status', data)
+            .then((r) => r.data),
 };

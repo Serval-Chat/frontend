@@ -4,6 +4,7 @@ export type UserPresenceStatus = 'online' | 'offline';
 
 interface UserPresence {
     userId: string;
+    username?: string;
     status: UserPresenceStatus;
     customStatus?: string;
 }
@@ -30,6 +31,7 @@ const presenceSlice = createSlice({
             action.payload.forEach((user) => {
                 state.users[user.userId] = {
                     userId: user.userId,
+                    username: user.username,
                     status: 'online',
                     customStatus: user.status,
                 };
@@ -45,6 +47,7 @@ const presenceSlice = createSlice({
         ) => {
             state.users[action.payload.userId] = {
                 userId: action.payload.userId,
+                username: action.payload.username,
                 status: 'online',
                 customStatus: action.payload.status,
             };
@@ -58,6 +61,7 @@ const presenceSlice = createSlice({
             } else {
                 state.users[action.payload.userId] = {
                     userId: action.payload.userId,
+                    username: action.payload.username,
                     status: 'offline',
                 };
             }
@@ -81,6 +85,21 @@ const presenceSlice = createSlice({
                 };
             }
         },
+        updateUserStatusByUsername: (
+            state,
+            action: PayloadAction<{
+                username: string;
+                customStatus: string | undefined;
+            }>
+        ) => {
+            // Find users by username and update their custom status
+            Object.values(state.users).forEach((user) => {
+                if (user.username === action.payload.username) {
+                    state.users[user.userId].customStatus =
+                        action.payload.customStatus;
+                }
+            });
+        },
     },
 });
 
@@ -89,5 +108,6 @@ export const {
     setUserOnline,
     setUserOffline,
     updateUserStatus,
+    updateUserStatusByUsername,
 } = presenceSlice.actions;
 export default presenceSlice.reducer;
