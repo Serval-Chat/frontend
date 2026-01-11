@@ -18,6 +18,7 @@ export const TertiarySidebar: React.FC = () => {
         members,
         isLoadingMembers,
         memberRoleMap,
+        roles,
     } = useTertiarySidebarData();
 
     return (
@@ -39,6 +40,7 @@ export const TertiarySidebar: React.FC = () => {
                         isLoading={isLoadingMembers}
                         memberRoleMap={memberRoleMap}
                         serverDetails={serverDetails}
+                        roles={roles}
                     />
                 )}
             </div>
