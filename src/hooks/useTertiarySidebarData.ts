@@ -68,5 +68,6 @@ export const useTertiarySidebarData = () => {
         members,
         isLoadingMembers,
         memberRoleMap,
+        roles,
     };
 };

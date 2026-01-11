@@ -32,12 +32,15 @@ export const setupGlobalWsHandlers = (
     queryClient: QueryClient,
     dispatch: Dispatch
 ) => {
+    let currentUser: { id: string; username: string } | null = null;
+
     wsClient.on<IWsErrorEvent>(WsEvents.ERROR, (payload) => {
         console.error('[WS] Global Error:', payload.message);
     });
 
     wsClient.on<IWsAuthenticatedEvent>(WsEvents.AUTHENTICATED, (payload) => {
         if (payload.user) {
+            currentUser = payload.user;
             dispatch(
                 setUserOnline({
                     userId: payload.user.id,
@@ -71,7 +74,20 @@ export const setupGlobalWsHandlers = (
 
     // Presence events
     wsClient.on<IPresenceSyncEvent>(WsEvents.PRESENCE_SYNC, (payload) => {
-        dispatch(setOnlineUsers(payload.online));
+        const onlineUsers = [...payload.online];
+
+        if (
+            currentUser &&
+            !onlineUsers.some((u) => u.userId === currentUser!.id)
+        ) {
+            onlineUsers.push({
+                userId: currentUser.id,
+                username: currentUser.username,
+                status: undefined,
+            });
+        }
+
+        dispatch(setOnlineUsers(onlineUsers));
     });
 
     wsClient.on<IUserOnlineEvent>(WsEvents.USER_ONLINE, (payload) => {
