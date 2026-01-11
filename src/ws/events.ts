@@ -14,14 +14,14 @@ export interface IWsEnvelope<T = unknown> {
 }
 
 /**
- * @description Authentication event payload.
+ * @description Authentication event.
  */
 export interface IWsAuthenticateEvent {
     token: string; // JWT
 }
 
 /**
- * @description Successful authentication event payload.
+ * @description Successful authentication event.
  */
 export interface IWsAuthenticatedEvent {
     user: {
@@ -33,7 +33,7 @@ export interface IWsAuthenticatedEvent {
 }
 
 /**
- * @description Error event payload.
+ * @description Error event.
  */
 export interface IWsErrorEvent {
     code: string;
@@ -42,7 +42,7 @@ export interface IWsErrorEvent {
 }
 
 /**
- * @description Direct Message payload.
+ * @description Direct Message.
  */
 export interface IMessageDm {
     messageId: string;
@@ -63,7 +63,7 @@ export interface IMessageDm {
 }
 
 /**
- * @description Server message payload.
+ * @description Server message.
  */
 export interface IMessageServer {
     messageId: string;
@@ -78,6 +78,43 @@ export interface IMessageServer {
     isWebhook: boolean;
     webhookUsername?: string;
     webhookAvatarUrl?: string;
+}
+
+/**
+ * @description Presence sync.
+ */
+export interface IPresenceSyncEvent {
+    online: Array<{
+        userId: string;
+        username: string;
+        status?: string;
+    }>;
+}
+
+/**
+ * @description User online.
+ */
+export interface IUserOnlineEvent {
+    userId: string;
+    username: string;
+    status?: string;
+}
+
+/**
+ * @description User offline.
+ */
+export interface IUserOfflineEvent {
+    userId: string;
+    username: string;
+}
+
+/**
+ * @description Status updated.
+ */
+export interface IStatusUpdatedEvent {
+    userId: string;
+    username: string;
+    status: string;
 }
 
 /**
@@ -129,6 +166,12 @@ export const WsEvents = {
     USER_OFFLINE: 'user_offline',
     SET_STATUS: 'set_status',
     STATUS_UPDATED: 'status_updated',
+
+    // Friends
+    FRIEND_ADDED: 'friend_added',
+    FRIEND_REMOVED: 'friend_removed',
+    INCOMING_REQUEST_ADDED: 'incoming_request_added',
+    INCOMING_REQUEST_REMOVED: 'incoming_request_removed',
 } as const;
 
 export type WsEventType = (typeof WsEvents)[keyof typeof WsEvents];

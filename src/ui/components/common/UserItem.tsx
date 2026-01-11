@@ -9,7 +9,7 @@ import {
 } from '@/api/friends/friends.queries';
 import type { Role } from '@/api/servers/servers.types';
 import { useMe, useUserById } from '@/api/users/users.queries';
-import { useAppDispatch } from '@/store/hooks';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { setSelectedFriendId } from '@/store/slices/navSlice';
 import { cn } from '@/utils/cn';
 
@@ -105,6 +105,10 @@ export const UserItem: React.FC<UserItemProps> = ({
 
     const contextMenuItems = items;
 
+    const presence = useAppSelector((state) => state.presence.users[userId]);
+    const presenceStatus = presence?.status || 'offline';
+    const presenceCustomText = presence?.customStatus || customStatus?.text;
+
     return (
         <ContextMenu items={contextMenuItems} className="w-full">
             <div
@@ -122,6 +126,7 @@ export const UserItem: React.FC<UserItemProps> = ({
                     src={profilePicture}
                     username={displayName || username}
                     size="sm"
+                    status={presenceStatus}
                 />
                 <div className="flex-1 min-w-0">
                     <StyledUserName
@@ -131,16 +136,16 @@ export const UserItem: React.FC<UserItemProps> = ({
                     >
                         {displayName || username}
                     </StyledUserName>
-                    {(customStatus?.text || customStatus?.emoji) && (
+                    {(presenceCustomText || customStatus?.emoji) && (
                         <div className="text-xs text-foreground-muted truncate flex items-center gap-1">
-                            {customStatus.emoji && (
+                            {customStatus?.emoji && (
                                 <span className="shrink-0">
                                     {customStatus.emoji}
                                 </span>
                             )}
-                            {customStatus.text && (
+                            {presenceCustomText && (
                                 <span className="truncate">
-                                    {customStatus.text}
+                                    {presenceCustomText}
                                 </span>
                             )}
                         </div>

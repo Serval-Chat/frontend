@@ -1,5 +1,8 @@
 import React, { useEffect, useState } from 'react';
 
+import { useQueryClient } from '@tanstack/react-query';
+
+import { useAppDispatch } from '@/store/hooks';
 import { getAuthToken, hasAuthToken } from '@/utils/authToken';
 import { setupGlobalWsHandlers, wsClient } from '@/ws';
 
@@ -14,10 +17,12 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
     children,
 }) => {
     const [isAuthenticated, setIsAuthenticated] = useState(hasAuthToken());
+    const queryClient = useQueryClient();
+    const dispatch = useAppDispatch();
 
     useEffect(() => {
-        setupGlobalWsHandlers();
-    }, []);
+        setupGlobalWsHandlers(queryClient, dispatch);
+    }, [queryClient, dispatch]);
 
     useEffect(() => {
         // Listen for storage changes (login/logout)
