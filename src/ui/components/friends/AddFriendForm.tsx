@@ -41,14 +41,15 @@ export const AddFriendForm: React.FC = () => {
                         setStatus(undefined);
                     }}
                     onKeyDown={(e) => e.key === 'Enter' && submit()}
-                    className="bg-bg-tertiary border-none h-9"
+                    className="bg-bg-tertiary border-none h-8"
                 />
                 <IconButton
                     icon={Plus}
-                    iconSize={18}
+                    iconSize={16}
                     onClick={submit}
                     disabled={isPending || !username}
-                    className="shrink-0"
+                    variant="normal"
+                    className="shrink-0 h-8 w-8 p-0 bg-bg-secondary border-none hover:bg-primary hover:text-foreground-inverse transition-all duration-200"
                 />
             </div>
 
