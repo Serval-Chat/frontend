@@ -16,3 +16,9 @@ export const useSendFriendRequest = () => {
         mutationFn: friendsApi.sendFriendRequest,
     });
 };
+
+export const useRemoveFriend = () => {
+    return useMutation({
+        mutationFn: friendsApi.removeFriend,
+    });
+};
