@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import {
     useCategories,
@@ -30,6 +30,22 @@ export const ServerSection: React.FC = () => {
         useChannels(selectedServerId);
     const { data: categories, isLoading: isLoadingCategories } =
         useCategories(selectedServerId);
+
+    useEffect(() => {
+        if (
+            !isLoadingChannels &&
+            channels &&
+            channels.length > 0 &&
+            !selectedChannelId
+        ) {
+            // Default to first channel by position
+            const sorted = [...channels].sort(
+                (a, b) => a.position - b.position
+            );
+            const defaultChannel = sorted[0];
+            dispatch(setSelectedChannelId(defaultChannel._id));
+        }
+    }, [isLoadingChannels, channels, selectedChannelId, dispatch]);
 
     const handleChannelSelect = (channelId: string) => {
         dispatch(setSelectedChannelId(channelId));
