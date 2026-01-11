@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 import { ChevronDown } from 'lucide-react';
 
@@ -30,6 +30,22 @@ export const ChannelList: React.FC<ChannelListProps> = ({
         (a, b) => a.position - b.position
     );
 
+    const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(
+        new Set()
+    );
+
+    const toggleCategory = (categoryId: string) => {
+        setCollapsedCategories((prev) => {
+            const next = new Set(prev);
+            if (next.has(categoryId)) {
+                next.delete(categoryId);
+            } else {
+                next.add(categoryId);
+            }
+            return next;
+        });
+    };
+
     // Group channels by categoryId
     const channelsByCategory = sortedChannels.reduce(
         (acc, channel) => {
@@ -57,28 +73,48 @@ export const ChannelList: React.FC<ChannelListProps> = ({
                 ))}
             </div>
 
-            {sortedCategories.map((category) => (
-                <div key={category._id} className="space-y-1">
-                    <div className="flex items-center px-1 group cursor-default">
-                        <ChevronDown className="w-3 h-3 mr-0.5 text-foreground-muted" />
-                        <span className="text-[12px] font-bold text-foreground-muted uppercase tracking-wider group-hover:text-foreground/80 transition-colors">
-                            {category.name}
-                        </span>
-                    </div>
-                    <div className="space-y-0.5">
-                        {channelsByCategory[category._id]?.map((channel) => (
-                            <ChannelItem
-                                key={channel._id}
-                                name={channel.name}
-                                type={channel.type}
-                                icon={channel.icon}
-                                isActive={selectedChannelId === channel._id}
-                                onClick={() => onChannelSelect(channel._id)}
+            {sortedCategories.map((category) => {
+                const isCollapsed = collapsedCategories.has(category._id);
+
+                return (
+                    <div key={category._id} className="space-y-1">
+                        <div
+                            className="flex items-center px-1 group cursor-pointer"
+                            onClick={() => toggleCategory(category._id)}
+                        >
+                            <ChevronDown
+                                className={`w-3 h-3 mr-0.5 text-foreground-muted transition-transform duration-200 ${
+                                    isCollapsed ? '-rotate-90' : ''
+                                }`}
                             />
-                        ))}
+                            <span className="text-[12px] font-bold text-foreground-muted uppercase tracking-wider group-hover:text-foreground/80 transition-colors">
+                                {category.name}
+                            </span>
+                        </div>
+                        {!isCollapsed && (
+                            <div className="space-y-0.5">
+                                {channelsByCategory[category._id]?.map(
+                                    (channel) => (
+                                        <ChannelItem
+                                            key={channel._id}
+                                            name={channel.name}
+                                            type={channel.type}
+                                            icon={channel.icon}
+                                            isActive={
+                                                selectedChannelId ===
+                                                channel._id
+                                            }
+                                            onClick={() =>
+                                                onChannelSelect(channel._id)
+                                            }
+                                        />
+                                    )
+                                )}
+                            </div>
+                        )}
                     </div>
-                </div>
-            ))}
+                );
+            })}
         </div>
     );
 };
