@@ -100,7 +100,7 @@ export const ServerSidebarSection: React.FC<ServerSidebarSectionProps> = ({
     }, [members, roles, presenceMap]);
 
     return (
-        <div className="space-y-6 pb-4">
+        <div className="space-y-4 pb-4">
             {isLoading ? (
                 <div className="flex justify-center py-4">
                     <LoadingSpinner />
@@ -109,7 +109,7 @@ export const ServerSidebarSection: React.FC<ServerSidebarSectionProps> = ({
                 <>
                     {groups.map((group) => (
                         <div key={group.id} className="space-y-1">
-                            <div className="flex items-center justify-between px-3 mb-2">
+                            <div className="flex items-center justify-between px-3 mb-1">
                                 <div className="text-xs font-semibold text-foreground-muted uppercase tracking-wider">
                                     {group.name} — {group.members.length}
                                 </div>
@@ -119,8 +119,12 @@ export const ServerSidebarSection: React.FC<ServerSidebarSectionProps> = ({
                                     <UserItem
                                         key={member._id}
                                         userId={member.userId}
-                                        initialData={member.user}
+                                        user={member.user}
                                         role={memberRoleMap.get(member.userId)}
+                                        allRoles={roles?.filter((r) =>
+                                            member.roles.includes(r._id)
+                                        )}
+                                        joinedAt={member.joinedAt}
                                         disableCustomFonts={
                                             serverDetails?.disableCustomFonts
                                         }

@@ -3,12 +3,16 @@ import React from 'react';
 import {
     Bell,
     BookCheck,
+    Bug,
     Calendar,
     Camera,
+    Cat,
     Code,
+    Crown,
     Dices,
     Film,
     Gamepad2,
+    Hammer,
     Hash,
     Headphones,
     Heart,
@@ -22,9 +26,11 @@ import {
     Pin,
     Scroll,
     Settings,
+    Shield,
     Star,
     Trophy,
     Volume2,
+    Zap,
 } from 'lucide-react';
 
 /**
@@ -55,4 +61,10 @@ export const ICON_MAP: Record<string, React.ElementType> = {
     star: Star,
     calendar: Calendar,
     pin: Pin,
+    cat: Cat,
+    crown: Crown,
+    shield: Shield,
+    zap: Zap,
+    bug: Bug,
+    hammer: Hammer,
 };

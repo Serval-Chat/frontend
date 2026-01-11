@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import type { LucideIcon } from 'lucide-react';
 import { createPortal } from 'react-dom';
 
+import { useSmartPosition } from '@/hooks/useSmartPosition';
 import { cn } from '@/utils/cn';
 
 export type ContextMenuItem =
@@ -31,44 +32,24 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
     className,
 }) => {
     const [isOpen, setIsOpen] = useState(false);
-    const [position, setPosition] = useState({ x: 0, y: 0 });
+    const [clickPosition, setClickPosition] = useState({ x: 0, y: 0 });
     const menuRef = useRef<HTMLDivElement>(null);
 
     const handleContextMenu = (e: React.MouseEvent) => {
         e.preventDefault();
-        setPosition({ x: e.clientX, y: e.clientY });
+        setClickPosition({ x: e.clientX, y: e.clientY });
         setIsOpen(true);
     };
 
     const closeMenu = () => setIsOpen(false);
 
-    // Make sure we dont overflow.
-    React.useLayoutEffect(() => {
-        if (isOpen && menuRef.current) {
-            const menuRect = menuRef.current.getBoundingClientRect();
-            const { innerWidth, innerHeight } = window;
-
-            let { x, y } = position;
-
-            // Check horizontal overflow
-            if (x + menuRect.width > innerWidth) {
-                x = innerWidth - menuRect.width - 8;
-            }
-
-            // Check vertical overflow
-            if (y + menuRect.height > innerHeight) {
-                y = innerHeight - menuRect.height - 8;
-            }
-
-            // Ensure not negative
-            x = Math.max(8, x);
-            y = Math.max(8, y);
-
-            if (x !== position.x || y !== position.y) {
-                setPosition({ x, y });
-            }
-        }
-    }, [isOpen, position]);
+    const position = useSmartPosition({
+        isOpen,
+        elementRef: menuRef,
+        position: clickPosition,
+        padding: 8,
+        offset: 0,
+    });
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {

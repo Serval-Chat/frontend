@@ -18,6 +18,7 @@ import {
 } from '@/ui/components/showoff/TableOfContents';
 import { TypographyDemo } from '@/ui/components/showoff/TypographyDemo';
 import { UserIdentitiesDemo } from '@/ui/components/showoff/UserIdentitiesDemo';
+import { UserProfilePopupDemo } from '@/ui/components/showoff/UserProfilePopupDemo';
 import { SHOWOFF_SECTIONS } from '@/ui/components/showoff/config';
 
 function Showoff() {
@@ -104,6 +105,11 @@ function Showoff() {
             title: 'Context Menu Dropdown',
         },
         {
+            id: SHOWOFF_SECTIONS.userProfilePopup,
+            title: 'User Profile Popup',
+        },
+
+        {
             id: SHOWOFF_SECTIONS.colorPalette,
             title: 'Leptailurus Serval Color Palette',
         },
@@ -131,6 +137,7 @@ function Showoff() {
             <SpecializedButtons />
 
             <ContextMenuDemo />
+            <UserProfilePopupDemo />
 
             <InputsDemo />
             <LoadingSpinnerDemo />
