@@ -11,6 +11,7 @@ export const SHOWOFF_SECTIONS = {
     chatMessages: 'chat-messages',
     loadingSpinner: 'loading-spinner',
     colorPalette: 'color-palette',
+    contextMenu: 'context-menu',
 } as const;
 
 export const BUTTON_VARIANTS = [

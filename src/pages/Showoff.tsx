@@ -2,6 +2,7 @@ import { Heading } from '@/ui/components/common/Heading';
 import { Animations } from '@/ui/components/showoff/Animations';
 import { ChatDemo } from '@/ui/components/showoff/ChatDemo';
 import { ColorPalette } from '@/ui/components/showoff/ColorPalette';
+import { ContextMenuDemo } from '@/ui/components/showoff/ContextMenuDemo';
 import { DividerPresentation } from '@/ui/components/showoff/DividerPresentation';
 import { FlashButtons } from '@/ui/components/showoff/FlashButtons';
 import { InputsDemo } from '@/ui/components/showoff/InputsDemo';
@@ -99,6 +100,10 @@ function Showoff() {
             ],
         },
         {
+            id: SHOWOFF_SECTIONS.contextMenu,
+            title: 'Context Menu Dropdown',
+        },
+        {
             id: SHOWOFF_SECTIONS.colorPalette,
             title: 'Leptailurus Serval Color Palette',
         },
@@ -124,6 +129,8 @@ function Showoff() {
             <RetainSizeButtons />
             <DividerPresentation />
             <SpecializedButtons />
+
+            <ContextMenuDemo />
 
             <InputsDemo />
             <LoadingSpinnerDemo />

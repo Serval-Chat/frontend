@@ -8,6 +8,7 @@ import { BUTTON_VARIANTS, SHOWOFF_SECTIONS } from './config';
 export function FlashButtons() {
     const flashButtons = useFlashGroup({
         normal: { initial: 'Normal Button', flash: 'Clicked!' },
+        primary: { initial: 'Primary Button', flash: 'Clicked!' },
         caution: { initial: 'Caution Button', flash: 'Clicked!' },
         danger: { initial: 'Dangerous Button', flash: 'Clicked!' },
         success: { initial: 'Success Button', flash: 'Clicked!' },

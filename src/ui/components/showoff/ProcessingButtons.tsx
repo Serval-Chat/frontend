@@ -8,6 +8,7 @@ import { BUTTON_VARIANTS, SHOWOFF_SECTIONS } from './config';
 export function ProcessingButtons() {
     const processingButtons = useFlashGroup({
         normal: { initial: 'Normal Processing', flash: 'Loading' },
+        primary: { initial: 'Primary Processing', flash: 'Loading' },
         caution: { initial: 'Caution Processing', flash: 'Loading' },
         danger: { initial: 'Danger Processing', flash: 'Loading' },
         success: { initial: 'Success Processing', flash: 'Loading' },
