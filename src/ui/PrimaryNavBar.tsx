@@ -1,7 +1,9 @@
+import React from 'react';
+
 import { Home, Settings } from 'lucide-react';
 
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { setNavMode } from '@/store/slices/navSlice';
+import { setNavMode, setSelectedFriendId } from '@/store/slices/navSlice';
 import { Divider } from '@/ui/components/common/Divider';
 import { IconButton } from '@/ui/components/common/IconButton';
 import { ServerList } from '@/ui/components/servers/ServerList';
@@ -10,6 +12,14 @@ import { cn } from '@/utils/cn';
 export const PrimaryNavBar: React.FC = () => {
     const dispatch = useAppDispatch();
     const navMode = useAppSelector((state) => state.nav.navMode);
+
+    const handleHomeClick = () => {
+        if (navMode === 'friends') {
+            dispatch(setSelectedFriendId(null));
+        } else {
+            dispatch(setNavMode('friends'));
+        }
+    };
 
     return (
         <nav
@@ -23,7 +33,7 @@ export const PrimaryNavBar: React.FC = () => {
                 <IconButton
                     icon={Home}
                     isActive={navMode === 'friends'}
-                    onClick={() => dispatch(setNavMode('friends'))}
+                    onClick={handleHomeClick}
                 />
             </div>
 
