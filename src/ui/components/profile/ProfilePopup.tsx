@@ -169,14 +169,15 @@ export const ProfilePopup: React.FC<ProfilePopupProps> = ({
                                 )}
                             </div>
 
-                            {(presenceCustomText || presenceCustomEmoji) && (
-                                <div className="mb-4 text-sm text-[var(--color-foreground/80)] flex items-center gap-2">
-                                    {presenceCustomEmoji && (
-                                        <span>{presenceCustomEmoji}</span>
-                                    )}
-                                    <span>{presenceCustomText}</span>
-                                </div>
-                            )}
+                            {(presenceCustomText || presenceCustomEmoji) &&
+                                presenceStatus !== 'offline' && (
+                                    <div className="mb-4 text-sm text-[var(--color-foreground/80)] flex items-center gap-2">
+                                        {presenceCustomEmoji && (
+                                            <span>{presenceCustomEmoji}</span>
+                                        )}
+                                        <span>{presenceCustomText}</span>
+                                    </div>
+                                )}
 
                             <div className="h-px bg-[var(--color-divider)] w-full my-3" />
 

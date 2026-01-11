@@ -180,20 +180,21 @@ export const UserItem: React.FC<UserItemProps> = ({
                         >
                             {displayName || username}
                         </StyledUserName>
-                        {(presenceCustomText || customStatus?.emoji) && (
-                            <div className="text-xs text-foreground-muted truncate flex items-center gap-1">
-                                {customStatus?.emoji && (
-                                    <span className="shrink-0">
-                                        {customStatus.emoji}
-                                    </span>
-                                )}
-                                {presenceCustomText && (
-                                    <span className="truncate">
-                                        {presenceCustomText}
-                                    </span>
-                                )}
-                            </div>
-                        )}
+                        {(presenceCustomText || customStatus?.emoji) &&
+                            presenceStatus !== 'offline' && (
+                                <div className="text-xs text-foreground-muted truncate flex items-center gap-1">
+                                    {customStatus?.emoji && (
+                                        <span className="shrink-0">
+                                            {customStatus.emoji}
+                                        </span>
+                                    )}
+                                    {presenceCustomText && (
+                                        <span className="truncate">
+                                            {presenceCustomText}
+                                        </span>
+                                    )}
+                                </div>
+                            )}
                     </div>
                 </div>
             </ContextMenu>
