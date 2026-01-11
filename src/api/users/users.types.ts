@@ -40,6 +40,16 @@ export interface AdminPermissions {
     manageInvites?: boolean;
 }
 
+export interface Badge {
+    _id: string;
+    id: string;
+    name: string;
+    description: string;
+    icon: string;
+    color: string;
+    createdAt: string;
+}
+
 export interface User {
     _id: string;
     login: string;
@@ -59,7 +69,8 @@ export interface User {
     tokenVersion?: number;
     bio?: string;
     pronouns?: string;
-    badges?: string[];
+    badges?: Badge[];
+
     settings?: UserSettings;
     banner?: string;
 }

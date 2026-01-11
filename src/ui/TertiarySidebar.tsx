@@ -27,7 +27,7 @@ export const TertiarySidebar: React.FC = () => {
                 'h-full w-[240px] shrink-0 overflow-y-auto overflow-x-hidden custom-scrollbar bg-[var(--tertiary-bg)]'
             )}
         >
-            <div className="p-4 flex flex-col gap-6">
+            <div className="p-3 flex flex-col gap-4">
                 {/* DM Context */}
                 {selectedFriendId && friend && me && (
                     <DMSidebarSection friend={friend} me={me} />

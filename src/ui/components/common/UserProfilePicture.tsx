@@ -12,9 +12,10 @@ interface UserProfilePictureProps {
     src?: string | null;
     username: string;
     status?: UserStatus;
-    size?: 'sm' | 'md' | 'lg';
+    size?: 'sm' | 'md' | 'lg' | 'xl';
     noIndicator?: boolean;
     className?: string;
+    onClick?: (e: React.MouseEvent) => void;
 }
 
 export const UserProfilePicture: React.FC<UserProfilePictureProps> = ({
@@ -24,11 +25,21 @@ export const UserProfilePicture: React.FC<UserProfilePictureProps> = ({
     size = 'md',
     noIndicator = false,
     className,
+    onClick,
 }) => {
     return (
-        <div className={cn('relative inline-block', className)}>
+        <div
+            className={cn(
+                'relative inline-block',
+                onClick && 'cursor-pointer',
+                className
+            )}
+            onClick={onClick}
+        >
             <UserProfilePictureIcon src={src} username={username} size={size} />
-            {!noIndicator && <UserProfileStatusIndicator status={status} />}
+            {!noIndicator && (
+                <UserProfileStatusIndicator status={status} size={size} />
+            )}
         </div>
     );
 };

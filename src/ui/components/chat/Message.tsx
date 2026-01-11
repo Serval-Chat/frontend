@@ -4,6 +4,7 @@ import type { Role } from '@/api/servers/servers.types';
 import type { User } from '@/api/users/users.types';
 import type { ProcessedChatMessage } from '@/types/chat.ui';
 import { UserProfilePicture } from '@/ui/components/common/UserProfilePicture';
+import { ProfilePopup } from '@/ui/components/profile/ProfilePopup';
 import { cn } from '@/utils/cn';
 
 import { MessageContent } from './MessageContent';
@@ -29,6 +30,9 @@ export const Message: React.FC<MessageProps> = ({
     onReplyClick,
     disableCustomFonts,
 }) => {
+    const [showProfile, setShowProfile] = React.useState(false);
+    const avatarRef = React.useRef<HTMLDivElement>(null);
+
     return (
         <div
             id={`message-${message._id}`}
@@ -52,13 +56,17 @@ export const Message: React.FC<MessageProps> = ({
 
             <div className="flex gap-1">
                 {/* Avatar */}
-                <div className="w-12 flex-shrink-0 flex justify-center mt-1">
+                <div
+                    ref={avatarRef}
+                    className="w-12 flex-shrink-0 flex justify-center mt-1"
+                >
                     {isGroupStart ? (
                         <UserProfilePicture
                             src={user.profilePicture}
                             username={user.username}
                             size="md"
                             noIndicator={true}
+                            onClick={() => setShowProfile(true)}
                         />
                     ) : (
                         <span className="opacity-0 group-hover:opacity-40 text-[10px] text-white/50 font-medium select-none mt-1">
@@ -83,6 +91,7 @@ export const Message: React.FC<MessageProps> = ({
                         timestamp={message.createdAt}
                         isGroupStart={isGroupStart}
                         disableCustomFonts={disableCustomFonts}
+                        onClickName={() => setShowProfile(true)}
                     />
                     <MessageContent text={message.text} />
                 </div>
@@ -94,6 +103,15 @@ export const Message: React.FC<MessageProps> = ({
                     {/* Actions will go here but none for now uwu */}
                 </div>
             </div>
+
+            <ProfilePopup
+                userId={user._id}
+                user={user}
+                role={role}
+                isOpen={showProfile}
+                onClose={() => setShowProfile(false)}
+                triggerRef={avatarRef}
+            />
         </div>
     );
 };

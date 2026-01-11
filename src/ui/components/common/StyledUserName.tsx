@@ -115,6 +115,18 @@ export const StyledUserName: React.FC<StyledUserNameProps> = ({
           }
         : {};
 
+    // If neither effect is active, render simply
+    if (!hasGlow && !hasGradient) {
+        return (
+            <NormalText
+                className={cn('font-medium truncate text-sm w-fit', className)}
+                style={containerStyle}
+            >
+                {children}
+            </NormalText>
+        );
+    }
+
     return (
         <NormalText
             className={cn(
@@ -123,13 +135,15 @@ export const StyledUserName: React.FC<StyledUserNameProps> = ({
             )}
             style={containerStyle}
         >
-            <span
-                className="col-start-1 row-start-1 select-none pointer-events-none"
-                style={glowStyle}
-                aria-hidden="true"
-            >
-                {children}
-            </span>
+            {hasGlow && (
+                <span
+                    className="col-start-1 row-start-1 select-none pointer-events-none"
+                    style={glowStyle}
+                    aria-hidden="true"
+                >
+                    {children}
+                </span>
+            )}
             <span
                 className="col-start-1 row-start-1 relative"
                 style={gradientStyle}
