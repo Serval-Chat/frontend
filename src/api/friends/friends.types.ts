@@ -10,3 +10,10 @@ export interface Friend {
     } | null;
     latestMessageAt?: string | null;
 }
+
+export interface FriendRequest {
+    _id: string;
+    from?: string;
+    fromId?: string;
+    createdAt: string;
+}
