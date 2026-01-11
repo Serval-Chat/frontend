@@ -42,6 +42,34 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
 
     const closeMenu = () => setIsOpen(false);
 
+    // Make sure we dont overflow.
+    React.useLayoutEffect(() => {
+        if (isOpen && menuRef.current) {
+            const menuRect = menuRef.current.getBoundingClientRect();
+            const { innerWidth, innerHeight } = window;
+
+            let { x, y } = position;
+
+            // Check horizontal overflow
+            if (x + menuRect.width > innerWidth) {
+                x = innerWidth - menuRect.width - 8;
+            }
+
+            // Check vertical overflow
+            if (y + menuRect.height > innerHeight) {
+                y = innerHeight - menuRect.height - 8;
+            }
+
+            // Ensure not negative
+            x = Math.max(8, x);
+            y = Math.max(8, y);
+
+            if (x !== position.x || y !== position.y) {
+                setPosition({ x, y });
+            }
+        }
+    }, [isOpen, position]);
+
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (

@@ -11,4 +11,8 @@ export const friendsApi = {
     sendFriendRequest: async (username: string): Promise<void> => {
         await apiClient.post('/api/v1/friends', { username });
     },
+
+    removeFriend: async (friendId: string): Promise<void> => {
+        await apiClient.delete(`/api/v1/friends/${friendId}`);
+    },
 };
