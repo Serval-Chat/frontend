@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 
 import type { Role } from '@/api/servers/servers.types';
 import type { User } from '@/api/users/users.types';
+import { ParsedText } from '@/ui/components/common/ParsedText';
 import { StyledUserName } from '@/ui/components/common/StyledUserName';
 import { resolveApiUrl } from '@/utils/apiUrl';
+import { ParserPresets, parseText } from '@/utils/textParser/parser';
 
 interface ReplyPreviewProps {
     user: User;
@@ -22,6 +24,7 @@ export const ReplyPreview: React.FC<ReplyPreviewProps> = ({
     onClick,
     disableCustomFonts,
 }) => {
+    const nodes = useMemo(() => parseText(text, ParserPresets.MESSAGE), [text]);
     return (
         <div
             onClick={() => replyToId && onClick?.(replyToId)}
@@ -53,7 +56,7 @@ export const ReplyPreview: React.FC<ReplyPreviewProps> = ({
                     {user.displayName || user.username}
                 </StyledUserName>
                 <span className="text-xs text-white/50 truncate font-medium">
-                    {text}
+                    <ParsedText nodes={nodes} />
                 </span>
             </div>
         </div>

@@ -19,7 +19,11 @@ export const IconButton: React.FC<IconButtonProps> = ({
     return (
         <Button
             variant="nav"
-            className={cn(className, isActive && 'bg-primary/20 text-primary')}
+            className={cn(
+                'rounded-xl hover:rounded-lg transition-all duration-200',
+                className,
+                isActive && 'bg-primary/20 text-primary'
+            )}
             {...props}
         >
             <Icon size={iconSize} />

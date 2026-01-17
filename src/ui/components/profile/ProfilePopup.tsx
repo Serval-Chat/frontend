@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import { useMemo } from 'react';
 
 import { AnimatePresence, motion } from 'framer-motion';
 import { Calendar } from 'lucide-react';
@@ -9,10 +10,12 @@ import { useUserById } from '@/api/users/users.queries';
 import type { User } from '@/api/users/users.types';
 import { useSmartPosition } from '@/hooks/useSmartPosition';
 import { useAppSelector } from '@/store/hooks';
+import { ParsedText } from '@/ui/components/common/ParsedText';
 import { StyledUserName } from '@/ui/components/common/StyledUserName';
 import { UserBadge } from '@/ui/components/common/UserBadge';
 import { UserProfilePicture } from '@/ui/components/common/UserProfilePicture';
 import { resolveApiUrl } from '@/utils/apiUrl';
+import { ParserPresets, parseText } from '@/utils/textParser/parser';
 
 // We'll treat the popup as a fixed overlay that can be positioned
 interface ProfilePopupProps {
@@ -53,6 +56,11 @@ export const ProfilePopup: React.FC<ProfilePopupProps> = ({
     const presenceCustomText =
         presence?.customStatus || user?.customStatus?.text;
     const presenceCustomEmoji = user?.customStatus?.emoji;
+    const userBio = user?.bio;
+    const bioNodes = useMemo(
+        () => (userBio ? parseText(userBio, ParserPresets.BIO) : []),
+        [userBio]
+    );
 
     const coords = useSmartPosition({
         isOpen,
@@ -187,7 +195,7 @@ export const ProfilePopup: React.FC<ProfilePopupProps> = ({
                                         About Me
                                     </h3>
                                     <div className="text-sm text-[var(--color-foreground/90)] whitespace-pre-wrap leading-relaxed">
-                                        {user.bio}
+                                        <ParsedText nodes={bioNodes} />
                                     </div>
                                 </div>
                             )}
