@@ -30,22 +30,21 @@ export const BouncingDots: React.FC<BouncingDotsProps> = ({
     color = 'bg-primary',
     size = 8,
     count = 3,
-}) => {
-    return (
-        <div className={cn('flex items-center space-x-1', className)}>
-            {Array.from({ length: count }).map((_, i) => (
-                <motion.div
-                    key={i}
-                    custom={i}
-                    variants={dotVariants}
-                    animate="animate"
-                    className={cn('rounded-full', color, dotClassName)}
-                    style={{
-                        width: size,
-                        height: size,
-                    }}
-                />
-            ))}
-        </div>
-    );
-};
+}) => (
+    <div className={cn('flex items-center space-x-1', className)}>
+        {Array.from({ length: count }).map((_, i) => (
+            <motion.div
+                animate="animate"
+                className={cn('rounded-full', color, dotClassName)}
+                custom={i}
+                // eslint-disable-next-line react/no-array-index-key
+                key={i}
+                style={{
+                    width: size,
+                    height: size,
+                }}
+                variants={dotVariants}
+            />
+        ))}
+    </div>
+);

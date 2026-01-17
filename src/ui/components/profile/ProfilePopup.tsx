@@ -1,5 +1,4 @@
-import React, { useEffect, useRef } from 'react';
-import { useMemo } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 
 import { AnimatePresence, motion } from 'framer-motion';
 import { Calendar } from 'lucide-react';
@@ -10,10 +9,13 @@ import { useUserById } from '@/api/users/users.queries';
 import type { User } from '@/api/users/users.types';
 import { useSmartPosition } from '@/hooks/useSmartPosition';
 import { useAppSelector } from '@/store/hooks';
+import { Heading } from '@/ui/components/common/Heading';
 import { ParsedText } from '@/ui/components/common/ParsedText';
 import { StyledUserName } from '@/ui/components/common/StyledUserName';
+import { Text } from '@/ui/components/common/Text';
 import { UserBadge } from '@/ui/components/common/UserBadge';
 import { UserProfilePicture } from '@/ui/components/common/UserProfilePicture';
+import { Box } from '@/ui/components/layout/Box';
 import { resolveApiUrl } from '@/utils/apiUrl';
 import { ParserPresets, parseText } from '@/utils/textParser/parser';
 
@@ -71,7 +73,7 @@ export const ProfilePopup: React.FC<ProfilePopupProps> = ({
 
     // Close on click outside
     useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
+        const handleClickOutside = (event: MouseEvent): void => {
             if (
                 popupRef.current &&
                 !popupRef.current.contains(event.target as Node)
@@ -90,7 +92,7 @@ export const ProfilePopup: React.FC<ProfilePopupProps> = ({
 
     // Close on escape
     useEffect(() => {
-        const handleKeyDown = (event: KeyboardEvent) => {
+        const handleKeyDown = (event: KeyboardEvent): void => {
             if (event.key === 'Escape') onClose();
         };
         if (isOpen) window.addEventListener('keydown', handleKeyDown);
@@ -105,21 +107,21 @@ export const ProfilePopup: React.FC<ProfilePopupProps> = ({
     return createPortal(
         <AnimatePresence>
             {isOpen && (
-                <div className="fixed inset-0 z-50 pointer-events-none">
+                <Box className="fixed inset-0 z-50 pointer-events-none">
                     <motion.div
-                        ref={popupRef}
-                        initial={{ opacity: 0, scale: 0.95, y: 10 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
+                        className="pointer-events-auto w-[340px] max-h-[calc(100vh-32px)] bg-[var(--color-background)] rounded-2xl shadow-2xl flex flex-col overflow-y-auto overflow-x-hidden custom-scrollbar border border-[var(--color-border-subtle)]"
                         exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                        transition={{ duration: 0.15, ease: 'easeOut' }}
+                        initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                        ref={popupRef}
                         style={{
                             position: 'absolute',
                             left: coords.x,
                             top: coords.y,
                         }}
-                        className="pointer-events-auto w-[340px] max-h-[calc(100vh-32px)] bg-[var(--color-background)] rounded-2xl shadow-2xl flex flex-col overflow-y-auto overflow-x-hidden custom-scrollbar border border-[var(--color-border-subtle)]"
+                        transition={{ duration: 0.15, ease: 'easeOut' }}
                     >
-                        <div
+                        <Box
                             className="h-[120px] sticky top-0 z-0 w-full overflow-hidden shrink-0"
                             style={{
                                 backgroundColor: bannerColor,
@@ -127,90 +129,106 @@ export const ProfilePopup: React.FC<ProfilePopupProps> = ({
                         >
                             {user?.banner && user.banner.trim() !== '' && (
                                 <img
-                                    src={resolveApiUrl(user.banner) || ''}
                                     alt="User Banner"
                                     className="w-full h-full object-cover"
+                                    src={resolveApiUrl(user.banner) || ''}
                                 />
                             )}
-                        </div>
+                        </Box>
 
-                        <div className="relative z-10 -mt-[50px] px-4">
-                            <div className="p-1.5 bg-[var(--color-background)] rounded-full inline-block">
+                        <Box className="relative z-10 -mt-[50px] px-4">
+                            <Box className="p-1.5 bg-[var(--color-background)] rounded-full inline-block">
                                 <UserProfilePicture
-                                    src={user?.profilePicture}
-                                    username={user?.username || ''}
-                                    size="xl"
-                                    status={presenceStatus}
                                     noIndicator={false}
+                                    size="xl"
+                                    src={user?.profilePicture}
+                                    status={presenceStatus}
+                                    username={user?.username || ''}
                                 />
-                            </div>
-                        </div>
+                            </Box>
+                        </Box>
 
-                        <div className="p-4 pt-2">
-                            <div className="mb-4">
+                        <Box className="p-4 pt-2">
+                            <Box className="mb-4">
                                 <StyledUserName
-                                    user={user}
-                                    role={role}
                                     className="text-xl font-bold leading-tight w-full truncate"
+                                    role={role}
+                                    user={user}
                                 >
                                     {user?.displayName || user?.username}
                                 </StyledUserName>
 
-                                <div className="text-sm text-[var(--color-muted-foreground)] font-medium select-text">
+                                <Box className="text-sm text-[var(--color-muted-foreground)] font-medium select-text">
                                     @{user?.username}
                                     {user?.pronouns && (
-                                        <span className="ml-2 text-[var(--color-muted-foreground/60)]">
+                                        <Text
+                                            as="span"
+                                            className="ml-2 text-[var(--color-muted-foreground/60)]"
+                                        >
                                             • {user.pronouns}
-                                        </span>
+                                        </Text>
                                     )}
-                                </div>
+                                </Box>
 
                                 {user?.badges && user.badges.length > 0 && (
-                                    <div className="flex flex-wrap gap-1.5 mt-2">
+                                    <Box className="flex flex-wrap gap-1.5 mt-2">
                                         {user.badges.map((badge) => (
                                             <UserBadge
-                                                key={badge._id}
                                                 badge={badge}
+                                                key={badge._id}
                                             />
                                         ))}
-                                    </div>
+                                    </Box>
                                 )}
-                            </div>
+                            </Box>
 
                             {(presenceCustomText || presenceCustomEmoji) &&
                                 presenceStatus !== 'offline' && (
-                                    <div className="mb-4 text-sm text-[var(--color-foreground/80)] flex items-center gap-2">
+                                    <Box className="mb-4 text-sm text-[var(--color-foreground/80)] flex items-center gap-2">
                                         {presenceCustomEmoji && (
-                                            <span>{presenceCustomEmoji}</span>
+                                            <Text as="span">
+                                                {presenceCustomEmoji}
+                                            </Text>
                                         )}
-                                        <span>{presenceCustomText}</span>
-                                    </div>
+                                        <Text as="span">
+                                            {presenceCustomText}
+                                        </Text>
+                                    </Box>
                                 )}
 
-                            <div className="h-px bg-[var(--color-divider)] w-full my-3" />
+                            <Box className="h-px bg-[var(--color-divider)] w-full my-3" />
 
                             {user?.bio && (
-                                <div className="mb-4">
-                                    <h3 className="uppercase text-xs font-bold text-[var(--color-muted-foreground)] mb-2">
+                                <Box className="mb-4">
+                                    <Heading
+                                        className="uppercase text-xs font-bold text-[var(--color-muted-foreground)] mb-2"
+                                        level={3}
+                                    >
                                         About Me
-                                    </h3>
-                                    <div className="text-sm text-[var(--color-foreground/90)] whitespace-pre-wrap leading-relaxed">
-                                        <ParsedText nodes={bioNodes} />
-                                    </div>
-                                </div>
+                                    </Heading>
+                                    <Box className="text-sm text-[var(--color-foreground/90)] whitespace-pre-wrap leading-relaxed">
+                                        <ParsedText
+                                            nodes={bioNodes}
+                                            size="xs"
+                                        />
+                                    </Box>
+                                </Box>
                             )}
 
-                            <div className="flex gap-4 mb-4">
-                                <div className="flex-1 min-w-0">
-                                    <h3 className="uppercase text-xs font-bold text-[var(--color-muted-foreground)] mb-2">
+                            <Box className="flex gap-4 mb-4">
+                                <Box className="flex-1 min-w-0">
+                                    <Heading
+                                        className="uppercase text-xs font-bold text-[var(--color-muted-foreground)] mb-2"
+                                        level={3}
+                                    >
                                         Member Since
-                                    </h3>
-                                    <div className="text-sm text-[var(--color-foreground/80)] flex items-center gap-2">
+                                    </Heading>
+                                    <Box className="text-sm text-[var(--color-foreground/80)] flex items-center gap-2">
                                         <Calendar
-                                            size={14}
                                             className="shrink-0"
+                                            size={14}
                                         />
-                                        <span className="truncate">
+                                        <Text as="span" className="truncate">
                                             {user?.createdAt &&
                                                 new Date(
                                                     user.createdAt
@@ -219,21 +237,27 @@ export const ProfilePopup: React.FC<ProfilePopupProps> = ({
                                                     month: 'short',
                                                     year: 'numeric',
                                                 })}
-                                        </span>
-                                    </div>
-                                </div>
+                                        </Text>
+                                    </Box>
+                                </Box>
 
                                 {joinedAt && (
-                                    <div className="flex-1 min-w-0">
-                                        <h3 className="uppercase text-xs font-bold text-[var(--color-muted-foreground)] mb-2 truncate">
+                                    <Box className="flex-1 min-w-0">
+                                        <Heading
+                                            className="uppercase text-xs font-bold text-[var(--color-muted-foreground)] mb-2 truncate"
+                                            level={3}
+                                        >
                                             Joined Server
-                                        </h3>
-                                        <div className="text-sm text-[var(--color-foreground/80)] flex items-center gap-2">
+                                        </Heading>
+                                        <Box className="text-sm text-[var(--color-foreground/80)] flex items-center gap-2">
                                             <Calendar
-                                                size={14}
                                                 className="shrink-0"
+                                                size={14}
                                             />
-                                            <span className="truncate">
+                                            <Text
+                                                as="span"
+                                                className="truncate"
+                                            >
                                                 {new Date(
                                                     joinedAt
                                                 ).toLocaleDateString('en-GB', {
@@ -241,29 +265,32 @@ export const ProfilePopup: React.FC<ProfilePopupProps> = ({
                                                     month: 'short',
                                                     year: 'numeric',
                                                 })}
-                                            </span>
-                                        </div>
-                                    </div>
+                                            </Text>
+                                        </Box>
+                                    </Box>
                                 )}
-                            </div>
+                            </Box>
 
                             {roles && roles.length > 0 && (
-                                <div className="mb-4">
-                                    <h3 className="uppercase text-xs font-bold text-[var(--color-muted-foreground)] mb-2">
+                                <Box className="mb-4">
+                                    <Heading
+                                        className="uppercase text-xs font-bold text-[var(--color-muted-foreground)] mb-2"
+                                        level={3}
+                                    >
                                         Roles
-                                    </h3>
-                                    <div className="flex flex-wrap gap-2">
+                                    </Heading>
+                                    <Box className="flex flex-wrap gap-2">
                                         {[...roles]
                                             .sort(
                                                 (a, b) =>
                                                     b.position - a.position
                                             )
                                             .map((r) => (
-                                                <div
-                                                    key={r._id}
+                                                <Box
                                                     className="flex items-center gap-1.5 px-2 py-1 bg-[var(--color-bg-secondary)] rounded-md border border-[var(--color-border-subtle)]"
+                                                    key={r._id}
                                                 >
-                                                    <div
+                                                    <Box
                                                         className="w-3 h-3 rounded-full shrink-0"
                                                         style={{
                                                             backgroundColor:
@@ -280,17 +307,20 @@ export const ProfilePopup: React.FC<ProfilePopupProps> = ({
                                                                       : undefined,
                                                         }}
                                                     />
-                                                    <span className="text-xs font-medium text-[var(--color-foreground/90)]">
+                                                    <Text
+                                                        as="span"
+                                                        className="text-xs font-medium text-[var(--color-foreground/90)]"
+                                                    >
                                                         {r.name}
-                                                    </span>
-                                                </div>
+                                                    </Text>
+                                                </Box>
                                             ))}
-                                    </div>
-                                </div>
+                                    </Box>
+                                </Box>
                             )}
-                        </div>
+                        </Box>
                     </motion.div>
-                </div>
+                </Box>
             )}
         </AnimatePresence>,
         document.body

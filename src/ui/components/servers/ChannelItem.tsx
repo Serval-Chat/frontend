@@ -29,7 +29,6 @@ export const ChannelItem: React.FC<ChannelItemProps> = ({
 
     return (
         <button
-            onClick={onClick}
             className={cn(
                 'group flex items-center w-full px-2 py-1.5 rounded-md transition-all',
                 'hover:bg-white/5 cursor-pointer text-left',
@@ -37,6 +36,7 @@ export const ChannelItem: React.FC<ChannelItemProps> = ({
                     ? 'bg-white/10 text-foreground'
                     : 'text-foreground-muted'
             )}
+            onClick={onClick}
         >
             <Icon
                 className={cn(

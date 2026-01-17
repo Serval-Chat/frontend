@@ -12,8 +12,14 @@ import {
     wsMessages,
 } from '@/ws';
 
-import { useTypingIndicator } from './useTypingIndicator';
+import { type TypingUser, useTypingIndicator } from './useTypingIndicator';
 import { useWebSocket } from './useWebSocket';
+
+interface ChatWSResult {
+    sendMessage: (text: string, replyToId?: string) => void;
+    sendTyping: () => void;
+    typingUsers: TypingUser[];
+}
 
 /**
  * @description Hook for WebSockets stuff
@@ -22,7 +28,7 @@ export function useChatWS(
     selectedFriendId?: string,
     selectedServerId?: string,
     selectedChannelId?: string
-) {
+): ChatWSResult {
     const { data: user } = useMe();
     const queryClient = useQueryClient();
     const { typingUsers, addTypingUser, clearTypingUsers } =

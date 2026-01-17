@@ -3,7 +3,9 @@ import React from 'react';
 import type { Role } from '@/api/servers/servers.types';
 import type { User } from '@/api/users/users.types';
 import type { ProcessedChatMessage } from '@/types/chat.ui';
+import { Text } from '@/ui/components/common/Text';
 import { UserProfilePicture } from '@/ui/components/common/UserProfilePicture';
+import { Box } from '@/ui/components/layout/Box';
 import { ProfilePopup } from '@/ui/components/profile/ProfilePopup';
 import { cn } from '@/utils/cn';
 
@@ -34,42 +36,42 @@ export const Message: React.FC<MessageProps> = ({
     const avatarRef = React.useRef<HTMLDivElement>(null);
 
     return (
-        <div
-            id={`message-${message._id}`}
+        <Box
             className={cn(
                 'group relative px-4 py-0.5 hover:bg-white/[0.02] transition-colors flex flex-col',
                 isGroupStart ? 'mt-1' : 'mt-0',
                 isHighlighted && 'bg-blue-500/10 hover:bg-blue-500/15'
             )}
+            id={`message-${message._id}`}
         >
             {/* Reply Preview */}
             {isGroupStart && message.replyTo && (
                 <ReplyPreview
-                    user={message.replyTo.user}
+                    disableCustomFonts={disableCustomFonts}
+                    replyToId={message.replyTo._id}
                     role={message.replyTo.role}
                     text={message.replyTo.text}
-                    replyToId={message.replyTo._id}
+                    user={message.replyTo.user}
                     onClick={onReplyClick}
-                    disableCustomFonts={disableCustomFonts}
                 />
             )}
 
-            <div className="flex gap-1">
+            <Box className="flex gap-1">
                 {/* Avatar */}
-                <div
-                    ref={avatarRef}
+                <Box
                     className="w-12 flex-shrink-0 flex justify-center mt-1"
+                    ref={avatarRef}
                 >
                     {isGroupStart ? (
                         <UserProfilePicture
+                            noIndicator
+                            size="md"
                             src={user.profilePicture}
                             username={user.username}
-                            size="md"
-                            noIndicator={true}
                             onClick={() => setShowProfile(true)}
                         />
                     ) : (
-                        <span className="opacity-0 group-hover:opacity-40 text-[10px] text-white/50 font-medium select-none mt-1">
+                        <Text className="opacity-0 group-hover:opacity-40 text-[10px] text-white/50 font-medium select-none mt-1">
                             {
                                 new Date(message.createdAt)
                                     .toLocaleTimeString([], {
@@ -79,39 +81,39 @@ export const Message: React.FC<MessageProps> = ({
                                     })
                                     .split(' ')[0]
                             }
-                        </span>
+                        </Text>
                     )}
-                </div>
+                </Box>
 
                 {/* Content Area */}
-                <div className="flex-1 min-w-0">
+                <Box className="flex-1 min-w-0">
                     <MessageHeader
-                        user={user}
+                        disableCustomFonts={disableCustomFonts}
+                        isGroupStart={isGroupStart}
                         role={role}
                         timestamp={message.createdAt}
-                        isGroupStart={isGroupStart}
-                        disableCustomFonts={disableCustomFonts}
+                        user={user}
                         onClickName={() => setShowProfile(true)}
                     />
                     <MessageContent text={message.text} />
-                </div>
-            </div>
+                </Box>
+            </Box>
 
             {/* Hover Actions */}
-            <div className="absolute right-4 top-0 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all">
-                <div className="flex items-center bg-[#2b2d31] border border-white/5 rounded shadow-xl px-1 py-1 gap-1">
+            <Box className="absolute right-4 top-0 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all">
+                <Box className="flex items-center bg-[#2b2d31] border border-white/5 rounded shadow-xl px-1 py-1 gap-1">
                     {/* Actions will go here but none for now uwu */}
-                </div>
-            </div>
+                </Box>
+            </Box>
 
             <ProfilePopup
-                userId={user._id}
-                user={user}
-                role={role}
                 isOpen={showProfile}
-                onClose={() => setShowProfile(false)}
+                role={role}
                 triggerRef={avatarRef}
+                user={user}
+                userId={user._id}
+                onClose={() => setShowProfile(false)}
             />
-        </div>
+        </Box>
     );
 };

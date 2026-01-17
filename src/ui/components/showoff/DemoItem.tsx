@@ -11,13 +11,11 @@ interface DemoItemProps {
 /**
  * @description Container for demo elements
  */
-export const DemoItem: React.FC<DemoItemProps> = ({ id, title, children }) => {
-    return (
-        <div id={id} className="p-xs">
-            <Heading level={3} className="text-md font-medium mb-sm">
-                {title}
-            </Heading>
-            {children}
-        </div>
-    );
-};
+export const DemoItem: React.FC<DemoItemProps> = ({ id, title, children }) => (
+    <div className="p-xs" id={id}>
+        <Heading className="text-md font-medium mb-sm" level={3}>
+            {title}
+        </Heading>
+        {children}
+    </div>
+);

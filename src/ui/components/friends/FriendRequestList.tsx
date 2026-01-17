@@ -4,8 +4,10 @@ import { CheckCircle } from 'lucide-react';
 
 import { useIncomingRequests } from '@/api/friends/friends.queries';
 import { Heading } from '@/ui/components/common/Heading';
-import { LoadingSpinner } from '@/ui/components/common/LoadingSpinner';
 import { MutedText } from '@/ui/components/common/MutedText';
+import { Skeleton } from '@/ui/components/common/Skeleton';
+import { Text } from '@/ui/components/common/Text';
+import { Box } from '@/ui/components/layout/Box';
 
 import { FriendRequestItem } from './FriendRequestItem';
 
@@ -14,54 +16,94 @@ export const FriendRequestList: React.FC = () => {
 
     if (isLoading) {
         return (
-            <div className="flex flex-col items-center justify-center h-full p-8">
-                <LoadingSpinner size="lg" />
-            </div>
+            <Box className="flex flex-col h-full overflow-hidden">
+                <Box className="p-6 border-b border-[var(--color-bg-subtle)] space-y-2">
+                    <Skeleton height={28} width={180} />
+                    <Skeleton height={16} width={140} />
+                </Box>
+                <Box className="flex-1 p-4 space-y-4">
+                    {[...Array(3)].map((_, i) => (
+                        // eslint-disable-next-line react/no-array-index-key
+                        <Box
+                            className="flex items-center justify-between p-3"
+                            key={i}
+                        >
+                            <Box className="flex items-center gap-3">
+                                <Skeleton
+                                    height={40}
+                                    variant="circular"
+                                    width={40}
+                                />
+                                <Box className="space-y-1">
+                                    <Skeleton height={16} width={100} />
+                                    <Skeleton height={12} width={140} />
+                                </Box>
+                            </Box>
+                            <Box className="flex gap-2">
+                                <Skeleton
+                                    height={32}
+                                    variant="circular"
+                                    width={32}
+                                />
+                                <Skeleton
+                                    height={32}
+                                    variant="circular"
+                                    width={32}
+                                />
+                            </Box>
+                        </Box>
+                    ))}
+                </Box>
+            </Box>
         );
     }
 
     if (!requests || requests.length === 0) {
         return (
-            <div className="flex flex-col items-center justify-center h-full p-8 text-center animate-in fade-in zoom-in duration-300">
-                <div className="w-16 h-16 mb-4 rounded-full bg-[var(--color-bg-subtle)] flex items-center justify-center">
+            <Box className="flex flex-col items-center justify-center h-full p-8 text-center animate-in fade-in zoom-in duration-300">
+                <Box className="w-16 h-16 mb-4 rounded-full bg-[var(--color-bg-subtle)] flex items-center justify-center">
                     <CheckCircle className="w-8 h-8 text-foreground-muted opacity-20" />
-                </div>
-                <Heading level={3} className="mb-2">
+                </Box>
+                <Heading className="mb-2" level={3}>
                     No pending requests
                 </Heading>
                 <MutedText>
                     You're all caught up! When you receive friend requests,
                     they'll show up here.
                 </MutedText>
-            </div>
+            </Box>
         );
     }
 
     return (
-        <div className="flex flex-col h-full overflow-hidden">
-            <div className="p-6 border-b border-[var(--color-bg-subtle)]">
+        <Box className="flex flex-col h-full overflow-hidden">
+            <Box className="p-6 border-b border-[var(--color-bg-subtle)]">
                 <Heading
-                    level={2}
                     className="text-xl font-bold flex items-center gap-2"
+                    level={2}
                 >
                     Friend Requests
-                    <span className="bg-primary/20 text-primary text-xs px-2 py-0.5 rounded-full">
+                    <Text
+                        className="bg-primary/20 px-2 py-0.5 rounded-full"
+                        size="xs"
+                        variant="primary"
+                    >
                         {requests.length}
-                    </span>
+                    </Text>
                 </Heading>
                 <MutedText>Accept or decline friend requests.</MutedText>
-            </div>
+            </Box>
 
-            <div className="flex-1 overflow-y-auto p-4 space-y-2">
+            <Box className="flex-1 overflow-y-auto p-4 space-y-2">
                 {requests.map((request) => (
                     <FriendRequestItem
-                        key={request._id}
-                        requestId={request._id}
                         fromId={request.fromId || ''}
                         fromUsername={request.from || ''}
+                        key={request._id}
+                        requestId={request._id}
                     />
                 ))}
-            </div>
-        </div>
+            </Box>
+        </Box>
     );
 };

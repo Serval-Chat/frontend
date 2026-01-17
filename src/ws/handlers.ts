@@ -31,7 +31,7 @@ import {
 export const setupGlobalWsHandlers = (
     queryClient: QueryClient,
     dispatch: Dispatch
-) => {
+): void => {
     let currentUser: { id: string; username: string } | null = null;
 
     wsClient.on<IWsErrorEvent>(WsEvents.ERROR, (payload) => {
@@ -53,23 +53,31 @@ export const setupGlobalWsHandlers = (
 
     // Friendship events
     wsClient.on(WsEvents.FRIEND_ADDED, () => {
-        queryClient.invalidateQueries({ queryKey: FRIENDS_QUERY_KEY });
-        queryClient.invalidateQueries({ queryKey: FRIEND_REQUESTS_QUERY_KEY });
+        void queryClient.invalidateQueries({ queryKey: FRIENDS_QUERY_KEY });
+        void queryClient.invalidateQueries({
+            queryKey: FRIEND_REQUESTS_QUERY_KEY,
+        });
     });
 
     wsClient.on(WsEvents.FRIEND_REMOVED, () => {
-        queryClient.invalidateQueries({ queryKey: FRIENDS_QUERY_KEY });
-        queryClient.invalidateQueries({ queryKey: FRIEND_REQUESTS_QUERY_KEY });
+        void queryClient.invalidateQueries({ queryKey: FRIENDS_QUERY_KEY });
+        void queryClient.invalidateQueries({
+            queryKey: FRIEND_REQUESTS_QUERY_KEY,
+        });
     });
 
     wsClient.on(WsEvents.INCOMING_REQUEST_ADDED, () => {
-        queryClient.invalidateQueries({ queryKey: FRIENDS_QUERY_KEY });
-        queryClient.invalidateQueries({ queryKey: FRIEND_REQUESTS_QUERY_KEY });
+        void queryClient.invalidateQueries({ queryKey: FRIENDS_QUERY_KEY });
+        void queryClient.invalidateQueries({
+            queryKey: FRIEND_REQUESTS_QUERY_KEY,
+        });
     });
 
     wsClient.on(WsEvents.INCOMING_REQUEST_REMOVED, () => {
-        queryClient.invalidateQueries({ queryKey: FRIENDS_QUERY_KEY });
-        queryClient.invalidateQueries({ queryKey: FRIEND_REQUESTS_QUERY_KEY });
+        void queryClient.invalidateQueries({ queryKey: FRIENDS_QUERY_KEY });
+        void queryClient.invalidateQueries({
+            queryKey: FRIEND_REQUESTS_QUERY_KEY,
+        });
     });
 
     // Presence events
@@ -110,7 +118,7 @@ export const setupGlobalWsHandlers = (
         );
 
         if (currentUser && payload.username === currentUser.username) {
-            queryClient.invalidateQueries({ queryKey: ['me'] });
+            void queryClient.invalidateQueries({ queryKey: ['me'] });
         }
     });
 };
@@ -119,10 +127,8 @@ export const setupGlobalWsHandlers = (
  * @description WS handlers
  */
 export const wsHandlers = {
-    onMessageDm: (handler: (message: IMessageDm) => void) => {
-        return wsClient.on(WsEvents.MESSAGE_DM, handler);
-    },
-    onMessageServer: (handler: (message: IMessageServer) => void) => {
-        return wsClient.on(WsEvents.MESSAGE_SERVER, handler);
-    },
+    onMessageDm: (handler: (message: IMessageDm) => void) =>
+        wsClient.on(WsEvents.MESSAGE_DM, handler),
+    onMessageServer: (handler: (message: IMessageServer) => void) =>
+        wsClient.on(WsEvents.MESSAGE_SERVER, handler),
 };

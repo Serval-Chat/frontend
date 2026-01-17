@@ -1,5 +1,6 @@
 import React from 'react';
 
+import { Box } from '@/ui/components/layout/Box';
 import { cn } from '@/utils/cn';
 
 import { UserProfilePictureIcon } from './UserProfilePictureIcon';
@@ -26,20 +27,18 @@ export const UserProfilePicture: React.FC<UserProfilePictureProps> = ({
     noIndicator = false,
     className,
     onClick,
-}) => {
-    return (
-        <div
-            className={cn(
-                'relative inline-block',
-                onClick && 'cursor-pointer',
-                className
-            )}
-            onClick={onClick}
-        >
-            <UserProfilePictureIcon src={src} username={username} size={size} />
-            {!noIndicator && (
-                <UserProfileStatusIndicator status={status} size={size} />
-            )}
-        </div>
-    );
-};
+}) => (
+    <Box
+        className={cn(
+            'relative inline-block',
+            onClick && 'cursor-pointer',
+            className
+        )}
+        onClick={onClick}
+    >
+        <UserProfilePictureIcon size={size} src={src} username={username} />
+        {!noIndicator && (
+            <UserProfileStatusIndicator size={size} status={status} />
+        )}
+    </Box>
+);

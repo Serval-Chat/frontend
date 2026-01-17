@@ -1,26 +1,35 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+    type UseMutationResult,
+    type UseQueryResult,
+    useMutation,
+    useQuery,
+    useQueryClient,
+} from '@tanstack/react-query';
 
 import { usersApi } from './users.api';
+import type { User } from './users.types';
 
-export const useMe = () => {
-    return useQuery({
+export const useMe = (): UseQueryResult<User, Error> =>
+    useQuery({
         queryKey: ['me'],
         queryFn: usersApi.getMe,
     });
-};
 
 export const useUserById = (
     id: string,
     options: { enabled?: boolean } = {}
-) => {
-    return useQuery({
+): UseQueryResult<User, Error> =>
+    useQuery({
         queryKey: ['user', id],
         queryFn: () => usersApi.getById(id),
         enabled: (options.enabled ?? true) && !!id,
     });
-};
 
-export const useUpdateMe = () => {
+export const useUpdateMe = (): UseMutationResult<
+    User,
+    Error,
+    Partial<User>
+> => {
     const queryClient = useQueryClient();
 
     return useMutation({
@@ -31,7 +40,17 @@ export const useUpdateMe = () => {
     });
 };
 
-export const useUpdateStatus = () => {
+export const useUpdateStatus = (): UseMutationResult<
+    { customStatus: User['customStatus'] },
+    Error,
+    {
+        text?: string;
+        emoji?: string;
+        expiresAt?: string | null;
+        expiresInMinutes?: number;
+        clear?: boolean;
+    }
+> => {
     const queryClient = useQueryClient();
 
     return useMutation({

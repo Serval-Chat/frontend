@@ -1,3 +1,5 @@
+import type { ReactNode } from 'react';
+
 import { BouncingDots } from '@/ui/animations/BouncingDots';
 import { Stack } from '@/ui/components/layout/Stack';
 
@@ -5,7 +7,7 @@ import { DemoItem } from './DemoItem';
 import { DemoSection } from './DemoSection';
 import { SHOWOFF_SECTIONS } from './config';
 
-export function Animations() {
+export function Animations(): ReactNode {
     return (
         <DemoSection id={SHOWOFF_SECTIONS.animations} title="Animations">
             <Stack>

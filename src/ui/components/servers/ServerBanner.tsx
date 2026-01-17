@@ -1,7 +1,7 @@
 import React from 'react';
 
 import type { ServerBanner as ServerBannerData } from '@/api/servers/servers.types';
-import { NormalText } from '@/ui/components/common/NormalText';
+import { Text } from '@/ui/components/common/Text';
 import { resolveApiUrl } from '@/utils/apiUrl';
 import { cn } from '@/utils/cn';
 
@@ -28,9 +28,9 @@ export const ServerBanner: React.FC<ServerBannerProps> = ({
                 <div className="w-full h-[135px] relative overflow-hidden shrink-0">
                     {banner.type === 'image' || banner.type === 'gif' ? (
                         <img
-                            src={bannerUrl || ''}
                             alt={name}
                             className="w-full h-full object-cover transition-transform duration-500"
+                            src={bannerUrl || ''}
                         />
                     ) : (
                         <div
@@ -48,15 +48,15 @@ export const ServerBanner: React.FC<ServerBannerProps> = ({
                     banner && 'absolute bottom-0'
                 )}
             >
-                <NormalText
-                    weight="bold"
+                <Text
                     className={cn(
                         'truncate text-[15px] drop-shadow-lg',
                         loading ? 'text-foreground-muted' : 'text-foreground'
                     )}
+                    weight="bold"
                 >
                     {loading ? 'Loading...' : name}
-                </NormalText>
+                </Text>
             </div>
         </div>
     );

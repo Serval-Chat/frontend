@@ -1,3 +1,5 @@
+import type { ReactNode } from 'react';
+
 import { useFlashGroup } from '@/hooks/useFlashText';
 import { Button } from '@/ui/components/common/Button';
 import { Stack } from '@/ui/components/layout/Stack';
@@ -5,7 +7,7 @@ import { Stack } from '@/ui/components/layout/Stack';
 import { DemoSection } from './DemoSection';
 import { BUTTON_VARIANTS, SHOWOFF_SECTIONS } from './config';
 
-export function FlashButtons() {
+export function FlashButtons(): ReactNode {
     const flashButtons = useFlashGroup({
         normal: { initial: 'Normal Button', flash: 'Clicked!' },
         primary: { initial: 'Primary Button', flash: 'Clicked!' },
@@ -19,9 +21,9 @@ export function FlashButtons() {
             id={SHOWOFF_SECTIONS.flash}
             title="Flash buttons (change text after click)"
         >
-            <Stack direction="row" gap="xs" wrap>
+            <Stack wrap direction="row" gap="xs">
                 {BUTTON_VARIANTS.map(({ id, type }) => (
-                    <div key={id} id={`${id}-flash`} className="p-xs">
+                    <div className="p-xs" id={`${id}-flash`} key={id}>
                         <Button
                             variant={type}
                             onClick={

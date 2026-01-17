@@ -1,3 +1,5 @@
+import type { ReactNode } from 'react';
+
 import { useFlashGroup } from '@/hooks/useFlashText';
 import { Button } from '@/ui/components/common/Button';
 import { Stack } from '@/ui/components/layout/Stack';
@@ -5,7 +7,7 @@ import { Stack } from '@/ui/components/layout/Stack';
 import { DemoSection } from './DemoSection';
 import { BUTTON_VARIANTS, SHOWOFF_SECTIONS } from './config';
 
-export function ProcessingButtons() {
+export function ProcessingButtons(): ReactNode {
     const processingButtons = useFlashGroup({
         normal: { initial: 'Normal Processing', flash: 'Loading' },
         primary: { initial: 'Primary Processing', flash: 'Loading' },
@@ -19,20 +21,20 @@ export function ProcessingButtons() {
             id={SHOWOFF_SECTIONS.processing}
             title="Processing buttons (graying out)"
         >
-            <Stack direction="row" gap="xs" wrap>
+            <Stack wrap direction="row" gap="xs">
                 {BUTTON_VARIANTS.map(({ id, type }) => (
-                    <div key={id} id={`${id}-processing`} className="p-xs">
+                    <div className="p-xs" id={`${id}-processing`} key={id}>
                         <Button
+                            loading={
+                                processingButtons[
+                                    id as keyof typeof processingButtons
+                                ].isFlashing
+                            }
                             variant={type}
                             onClick={
                                 processingButtons[
                                     id as keyof typeof processingButtons
                                 ].trigger
-                            }
-                            loading={
-                                processingButtons[
-                                    id as keyof typeof processingButtons
-                                ].isFlashing
                             }
                         >
                             {

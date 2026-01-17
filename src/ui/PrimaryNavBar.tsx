@@ -6,6 +6,7 @@ import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { setNavMode, setSelectedFriendId } from '@/store/slices/navSlice';
 import { Divider } from '@/ui/components/common/Divider';
 import { IconButton } from '@/ui/components/common/IconButton';
+import { Box } from '@/ui/components/layout/Box';
 import { ServerList } from '@/ui/components/servers/ServerList';
 import { cn } from '@/utils/cn';
 
@@ -13,7 +14,7 @@ export const PrimaryNavBar: React.FC = () => {
     const dispatch = useAppDispatch();
     const navMode = useAppSelector((state) => state.nav.navMode);
 
-    const handleHomeClick = () => {
+    const handleHomeClick = (): void => {
         if (navMode === 'friends') {
             dispatch(setSelectedFriendId(null));
         } else {
@@ -22,20 +23,21 @@ export const PrimaryNavBar: React.FC = () => {
     };
 
     return (
-        <nav
+        <Box
+            as="nav"
             className={cn(
                 'h-full flex flex-col items-center py-3 gap-3',
                 'bg-[--color-background]',
                 'w-[72px] shrink-0'
             )}
         >
-            <div>
+            <Box>
                 <IconButton
                     icon={Home}
                     isActive={navMode === 'friends'}
                     onClick={handleHomeClick}
                 />
-            </div>
+            </Box>
 
             <Divider />
 
@@ -43,9 +45,9 @@ export const PrimaryNavBar: React.FC = () => {
 
             <Divider />
 
-            <div>
+            <Box>
                 <IconButton icon={Settings} />
-            </div>
-        </nav>
+            </Box>
+        </Box>
     );
 };

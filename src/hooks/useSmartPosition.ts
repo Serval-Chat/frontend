@@ -21,7 +21,7 @@ export const useSmartPosition = ({
     triggerRef,
     padding = 16,
     offset = 10,
-}: UseSmartPositionOptions) => {
+}: UseSmartPositionOptions): Position => {
     const [coords, setCoords] = useState<Position>(position || { x: 0, y: 0 });
 
     useLayoutEffect(() => {

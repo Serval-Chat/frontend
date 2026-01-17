@@ -4,10 +4,19 @@ import type { Role, ServerMember } from '@/api/servers/servers.types';
 import type { User } from '@/api/users/users.types';
 import { getHighestRoleForMember } from '@/ui/utils/chat';
 
+interface MemberMapsResult {
+    serverMemberMap: Map<string, User>;
+    roleMap: Map<string, Role>;
+    highestRoleMap: Map<string, Role>;
+}
+
 /**
  * @description Hook to compute lookup maps for server members and roles.
  */
-export const useMemberMaps = (members?: ServerMember[], roles?: Role[]) => {
+export const useMemberMaps = (
+    members?: ServerMember[],
+    roles?: Role[]
+): MemberMapsResult => {
     // Lookup for user objects by userId
     const serverMemberMap = React.useMemo(() => {
         const map = new Map<string, User>();

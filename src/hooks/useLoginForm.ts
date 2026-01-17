@@ -7,7 +7,17 @@ import { authApi } from '@/api/auth/auth.api';
 import type { StatusState } from '@/ui/types';
 import { setAuthToken } from '@/utils/authToken';
 
-export const useLoginForm = () => {
+interface LoginFormResult {
+    loginInput: string;
+    setLoginInput: React.Dispatch<React.SetStateAction<string>>;
+    password: string;
+    setPassword: React.Dispatch<React.SetStateAction<string>>;
+    status: StatusState;
+    setStatus: React.Dispatch<React.SetStateAction<StatusState>>;
+    handleSubmit: (e: React.FormEvent) => Promise<void>;
+}
+
+export const useLoginForm = (): LoginFormResult => {
     const [loginInput, setLoginInput] = useState('');
     const [password, setPassword] = useState('');
     const [status, setStatus] = useState<StatusState>({
@@ -16,7 +26,7 @@ export const useLoginForm = () => {
     });
     const navigate = useNavigate();
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent): Promise<void> => {
         e.preventDefault();
         setStatus({ message: '', type: '' });
 
@@ -28,7 +38,7 @@ export const useLoginForm = () => {
         try {
             const data = await authApi.login({ login: loginInput, password });
             setAuthToken(data.token);
-            navigate('/chat');
+            void navigate('/chat');
         } catch (error: unknown) {
             let errorMessage = 'Login failed';
             if (isAxiosError(error)) {

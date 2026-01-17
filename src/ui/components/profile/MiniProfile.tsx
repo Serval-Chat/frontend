@@ -6,8 +6,12 @@ import { Check, Settings, X } from 'lucide-react';
 import { useMe, useUpdateStatus } from '@/api/users/users.queries';
 import { useWebSocket } from '@/hooks/ws/useWebSocket';
 import { useAppSelector } from '@/store/hooks';
+import { Button } from '@/ui/components/common/Button';
 import { IconButton } from '@/ui/components/common/IconButton';
+import { Input } from '@/ui/components/common/Input';
+import { Text } from '@/ui/components/common/Text';
 import { UserProfilePicture } from '@/ui/components/common/UserProfilePicture';
+import { Box } from '@/ui/components/layout/Box';
 
 export const MiniProfile: React.FC = () => {
     const { data: user } = useMe();
@@ -48,7 +52,7 @@ export const MiniProfile: React.FC = () => {
                 usernameRef.current &&
                 payload.username === usernameRef.current
             ) {
-                queryClient.invalidateQueries({ queryKey: ['me'] });
+                void queryClient.invalidateQueries({ queryKey: ['me'] });
             }
         },
         [queryClient]
@@ -62,12 +66,12 @@ export const MiniProfile: React.FC = () => {
         }
     }, [isEditingStatus]);
 
-    const handleStatusClick = () => {
+    const handleStatusClick = (): void => {
         setStatusText(customStatus?.text || '');
         setIsEditingStatus(true);
     };
 
-    const handleSaveStatus = () => {
+    const handleSaveStatus = (): void => {
         if (statusText.trim()) {
             updateStatus(
                 {
@@ -92,12 +96,12 @@ export const MiniProfile: React.FC = () => {
         }
     };
 
-    const handleCancelStatus = () => {
+    const handleCancelStatus = (): void => {
         setIsEditingStatus(false);
         setStatusText('');
     };
 
-    const handleKeyDown = (e: React.KeyboardEvent) => {
+    const handleKeyDown = (e: React.KeyboardEvent): void => {
         if (e.key === 'Enter') {
             handleSaveStatus();
         } else if (e.key === 'Escape') {
@@ -108,75 +112,79 @@ export const MiniProfile: React.FC = () => {
     if (!user) return null;
 
     return (
-        <div className="flex items-center justify-between px-2 py-2 bg-[var(--tertiary-bg)] border-t border-[var(--color-border-subtle)] h-[60px] shrink-0">
-            <div className="flex items-center min-w-0 mr-2 flex-1">
-                <div className="relative shrink-0 mr-2">
+        <Box className="flex items-center justify-between px-2 py-2 bg-[var(--tertiary-bg)] border-t border-[var(--color-border-subtle)] h-[60px] shrink-0">
+            <Box className="flex items-center min-w-0 mr-2 flex-1">
+                <Box className="relative shrink-0 mr-2">
                     <UserProfilePicture
-                        src={user.profilePicture}
-                        username={user.username}
-                        status={presenceStatus}
-                        size="sm"
                         className="w-9 h-9"
+                        size="sm"
+                        src={user.profilePicture}
+                        status={presenceStatus}
+                        username={user.username}
                     />
-                </div>
-                <div className="min-w-0 flex flex-col flex-1">
-                    <div className="text-sm font-semibold text-[var(--color-header-primary)] truncate leading-tight">
+                </Box>
+                <Box className="min-w-0 flex flex-col flex-1">
+                    <Text className="text-sm font-semibold text-[var(--color-header-primary)] truncate leading-tight">
                         {user.displayName || user.username}
-                    </div>
+                    </Text>
                     {!isEditingStatus ? (
-                        <div
+                        <Box
                             className="text-xs text-[var(--color-header-secondary)] truncate leading-tight opacity-70 hover:opacity-100 transition-opacity cursor-pointer"
                             onClick={handleStatusClick}
                         >
                             {statusEmoji && (
-                                <span className="mr-1">{statusEmoji}</span>
+                                <Text as="span" className="mr-1">
+                                    {statusEmoji}
+                                </Text>
                             )}
                             {displayStatus}
-                        </div>
+                        </Box>
                     ) : (
-                        <div className="flex items-center gap-1 mt-0.5">
-                            <input
+                        <Box className="flex items-center gap-1 mt-0.5">
+                            <Input
+                                className="h-6 text-xs px-1.5 py-0.5"
+                                disabled={isPending}
+                                maxLength={120}
+                                placeholder="What's your status?"
                                 ref={inputRef}
                                 type="text"
                                 value={statusText}
                                 onChange={(e) => setStatusText(e.target.value)}
                                 onKeyDown={handleKeyDown}
-                                placeholder="What's your status?"
-                                disabled={isPending}
-                                className="text-xs bg-[var(--color-bg-secondary)] text-[var(--color-foreground)] px-1.5 py-0.5 rounded border border-[var(--color-border-subtle)] focus:outline-none focus:border-primary flex-1 min-w-0"
-                                maxLength={120}
                             />
-                            <button
-                                onClick={handleSaveStatus}
+                            <Button
+                                className="h-6 w-6 p-0 min-h-0"
                                 disabled={isPending}
-                                className="text-success hover:text-success-hover transition-colors p-0.5"
                                 title="Save"
+                                variant="success"
+                                onClick={handleSaveStatus}
                             >
                                 <Check size={14} />
-                            </button>
-                            <button
-                                onClick={handleCancelStatus}
+                            </Button>
+                            <Button
+                                className="h-6 w-6 p-0 min-h-0"
                                 disabled={isPending}
-                                className="text-danger hover:text-danger-hover transition-colors p-0.5"
                                 title="Cancel"
+                                variant="danger"
+                                onClick={handleCancelStatus}
                             >
                                 <X size={14} />
-                            </button>
-                        </div>
+                            </Button>
+                        </Box>
                     )}
-                </div>
-            </div>
+                </Box>
+            </Box>
 
-            <div className="flex items-center shrink-0">
+            <Box className="flex items-center shrink-0">
                 <IconButton
+                    className="w-8 h-8 p-0"
                     icon={Settings}
                     iconSize={18}
-                    className="w-8 h-8 p-0"
                     onClick={() => {
                         /* TODO: Open settings */
                     }}
                 />
-            </div>
-        </div>
+            </Box>
+        </Box>
     );
 };

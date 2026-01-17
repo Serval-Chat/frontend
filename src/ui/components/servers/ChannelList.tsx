@@ -34,7 +34,7 @@ export const ChannelList: React.FC<ChannelListProps> = ({
         new Set()
     );
 
-    const toggleCategory = (categoryId: string) => {
+    const toggleCategory = (categoryId: string): void => {
         setCollapsedCategories((prev) => {
             const next = new Set(prev);
             if (next.has(categoryId)) {
@@ -63,11 +63,11 @@ export const ChannelList: React.FC<ChannelListProps> = ({
             <div className="space-y-0.5">
                 {channelsByCategory['uncategorized']?.map((channel) => (
                     <ChannelItem
+                        icon={channel.icon}
+                        isActive={selectedChannelId === channel._id}
                         key={channel._id}
                         name={channel.name}
                         type={channel.type}
-                        icon={channel.icon}
-                        isActive={selectedChannelId === channel._id}
                         onClick={() => onChannelSelect(channel._id)}
                     />
                 ))}
@@ -77,10 +77,17 @@ export const ChannelList: React.FC<ChannelListProps> = ({
                 const isCollapsed = collapsedCategories.has(category._id);
 
                 return (
-                    <div key={category._id} className="space-y-1">
+                    <div className="space-y-1" key={category._id}>
                         <div
                             className="flex items-center px-1 group cursor-pointer"
+                            role="button"
+                            tabIndex={0}
                             onClick={() => toggleCategory(category._id)}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter' || e.key === ' ') {
+                                    toggleCategory(category._id);
+                                }
+                            }}
                         >
                             <ChevronDown
                                 className={`w-3 h-3 mr-0.5 text-foreground-muted transition-transform duration-200 ${
@@ -96,14 +103,14 @@ export const ChannelList: React.FC<ChannelListProps> = ({
                                 {channelsByCategory[category._id]?.map(
                                     (channel) => (
                                         <ChannelItem
-                                            key={channel._id}
-                                            name={channel.name}
-                                            type={channel.type}
                                             icon={channel.icon}
                                             isActive={
                                                 selectedChannelId ===
                                                 channel._id
                                             }
+                                            key={channel._id}
+                                            name={channel.name}
+                                            type={channel.type}
                                             onClick={() =>
                                                 onChannelSelect(channel._id)
                                             }

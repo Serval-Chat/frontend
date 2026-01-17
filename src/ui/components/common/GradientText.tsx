@@ -1,5 +1,6 @@
 import React from 'react';
 
+import { Box } from '@/ui/components/layout/Box';
 import { cn } from '@/utils/cn';
 
 interface GradientTextProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -27,7 +28,7 @@ export const GradientText: React.FC<GradientTextProps> = ({
     const background = `${gradientFunction}(${angle}deg, ${gradientString})`;
 
     return (
-        <div
+        <Box
             className={cn('font-bold text-xl w-fit', className)}
             style={{
                 background: background,
@@ -36,9 +37,10 @@ export const GradientText: React.FC<GradientTextProps> = ({
                 color: 'transparent',
                 ...style,
             }}
+            // eslint-disable-next-line react/jsx-props-no-spreading
             {...props}
         >
             {children}
-        </div>
+        </Box>
     );
 };

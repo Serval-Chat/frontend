@@ -37,7 +37,11 @@ export const ServerSidebarSection: React.FC<ServerSidebarSectionProps> = ({
 
         const groupsMap = new Map<string, MemberGroup>();
 
-        const getGroup = (id: string, name: string, position: number) => {
+        const getGroup = (
+            id: string,
+            name: string,
+            position: number
+        ): MemberGroup => {
             if (!groupsMap.has(id)) {
                 groupsMap.set(id, { id, name, members: [], position });
             }
@@ -108,7 +112,7 @@ export const ServerSidebarSection: React.FC<ServerSidebarSectionProps> = ({
             ) : (
                 <>
                     {groups.map((group) => (
-                        <div key={group.id} className="space-y-1">
+                        <div className="space-y-1" key={group.id}>
                             <div className="flex items-center justify-between px-3 mb-1">
                                 <div className="text-xs font-semibold text-foreground-muted uppercase tracking-wider">
                                     {group.name} — {group.members.length}
@@ -117,18 +121,18 @@ export const ServerSidebarSection: React.FC<ServerSidebarSectionProps> = ({
                             <div className="space-y-[2px]">
                                 {group.members.map((member) => (
                                     <UserItem
-                                        key={member._id}
-                                        userId={member.userId}
-                                        user={member.user}
-                                        role={memberRoleMap.get(member.userId)}
+                                        noFetch
                                         allRoles={roles?.filter((r) =>
                                             member.roles.includes(r._id)
                                         )}
-                                        joinedAt={member.joinedAt}
                                         disableCustomFonts={
                                             serverDetails?.disableCustomFonts
                                         }
-                                        noFetch
+                                        joinedAt={member.joinedAt}
+                                        key={member._id}
+                                        role={memberRoleMap.get(member.userId)}
+                                        user={member.user}
+                                        userId={member.userId}
                                     />
                                 ))}
                             </div>

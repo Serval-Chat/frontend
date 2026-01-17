@@ -20,8 +20,8 @@ export const DMSidebarSection: React.FC<DMSidebarSectionProps> = ({
             Direct Message
         </div>
         <div className="space-y-0">
-            <UserItem userId={friend._id} initialData={friend} noFetch />
-            <UserItem userId={me._id} initialData={me} noFetch />
+            <UserItem noFetch initialData={friend} userId={friend._id} />
+            <UserItem noFetch initialData={me} userId={me._id} />
         </div>
     </div>
 );

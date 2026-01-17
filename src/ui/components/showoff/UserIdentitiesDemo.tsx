@@ -59,10 +59,10 @@ export const UserIdentitiesDemo: React.FC = () => {
                 <div className="flex items-end gap-6">
                     <div className="flex flex-col items-center gap-2">
                         <UserProfilePicture
-                            username="Small"
                             size="sm"
-                            status="online"
                             src="https://catfla.re/images/servals/serval-1.jpg"
+                            status="online"
+                            username="Small"
                         />
                         <span className="text-xs text-foreground-muted">
                             sm (32px)
@@ -70,10 +70,10 @@ export const UserIdentitiesDemo: React.FC = () => {
                     </div>
                     <div className="flex flex-col items-center gap-2">
                         <UserProfilePicture
-                            username="Medium"
                             size="md"
-                            status="offline"
                             src="https://catfla.re/images/servals/serval-2.jpg"
+                            status="offline"
+                            username="Medium"
                         />
                         <span className="text-xs text-foreground-muted">
                             md (40px)
@@ -81,10 +81,10 @@ export const UserIdentitiesDemo: React.FC = () => {
                     </div>
                     <div className="flex flex-col items-center gap-2">
                         <UserProfilePicture
-                            username="Large"
                             size="lg"
-                            status="online"
                             src="https://catfla.re/images/servals/serval-3.jpg"
+                            status="online"
+                            username="Large"
                         />
                         <span className="text-xs text-foreground-muted">
                             lg (48px)
@@ -98,9 +98,9 @@ export const UserIdentitiesDemo: React.FC = () => {
                 title="Avatar Placeholders (Initials)"
             >
                 <div className="flex gap-4">
-                    <UserProfilePicture username="Antigravity" size="md" />
-                    <UserProfilePicture username="John Doe" size="md" />
-                    <UserProfilePicture username="System Admin" size="md" />
+                    <UserProfilePicture size="md" username="Antigravity" />
+                    <UserProfilePicture size="md" username="John Doe" />
+                    <UserProfilePicture size="md" username="System Admin" />
                 </div>
             </DemoItem>
 

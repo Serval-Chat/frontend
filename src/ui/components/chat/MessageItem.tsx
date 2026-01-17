@@ -30,13 +30,13 @@ export const MessageItem: React.FC<MessageItemProps> = ({
 
     return (
         <Message
-            message={message}
-            user={message.user}
-            role={role || message.role}
+            disableCustomFonts={disableCustomFonts}
             isGroupStart={isGroupStart}
             isHighlighted={isHighlighted}
+            message={message}
+            role={role || message.role}
+            user={message.user}
             onReplyClick={onReplyClick}
-            disableCustomFonts={disableCustomFonts}
         />
     );
 };

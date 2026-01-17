@@ -18,6 +18,7 @@ import { ChatLoadingState } from '@/ui/components/chat/ChatLoadingState';
 import { MessageInput } from '@/ui/components/chat/MessageInput';
 import { MessagesList } from '@/ui/components/chat/MessagesList';
 import { TypingIndicator } from '@/ui/components/chat/TypingIndicator';
+import { Box } from '@/ui/components/layout/Box';
 
 /**
  * @description Main chat area component that displays messages for the selected conversation.
@@ -80,41 +81,41 @@ export const MainChat: React.FC = () => {
 
     if (!selectedFriendId && !selectedChannelId) {
         return (
-            <div>
+            <Box>
                 <ChatHeader
-                    selectedFriendId={''}
                     friendUser={undefined}
                     selectedChannel={undefined}
+                    selectedFriendId=""
                 />
                 <ChatEmptyState />
-            </div>
+            </Box>
         );
     }
 
     return (
-        <div className="flex-1 flex flex-col min-h-0 relative overflow-hidden">
+        <Box className="flex-1 flex flex-col min-h-0 relative overflow-hidden">
             <ChatHeader
-                selectedFriendId={selectedFriendId}
                 friendUser={friendUser}
                 selectedChannel={selectedChannel}
+                selectedFriendId={selectedFriendId}
             />
 
-            <div className="flex-1 flex flex-col min-h-0">
+            <Box className="flex-1 flex flex-col min-h-0">
                 {isLoading ? (
                     <ChatLoadingState />
                 ) : (
                     <MessagesList
-                        messages={messages}
-                        onLoadMore={fetchNextPage}
+                        disableCustomFonts={serverDetails?.disableCustomFonts}
                         hasMore={hasNextPage}
                         isLoadingMore={isFetchingNextPage}
-                        disableCustomFonts={serverDetails?.disableCustomFonts}
+                        messages={messages}
+                        onLoadMore={() => void fetchNextPage()}
                     />
                 )}
-            </div>
+            </Box>
 
             <TypingIndicator typingUsers={typingUsers} />
             <MessageInput />
-        </div>
+        </Box>
     );
 };

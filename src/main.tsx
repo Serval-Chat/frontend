@@ -3,12 +3,12 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 
-import App from '@/pages/App';
-import Chat from '@/pages/Chat';
-import Login from '@/pages/Login';
-import NotFound from '@/pages/NotFound';
-import Register from '@/pages/Register';
-import Showoff from '@/pages/Showoff';
+import { App } from '@/pages/App';
+import { Chat } from '@/pages/Chat';
+import { Login } from '@/pages/Login';
+import { NotFound } from '@/pages/NotFound';
+import { Register } from '@/pages/Register';
+import { Showoff } from '@/pages/Showoff';
 import { QueryProvider } from '@/providers/QueryProvider';
 import { StoreProvider } from '@/providers/StoreProvider';
 import { WebSocketProvider } from '@/providers/WebSocketProvider';
@@ -21,12 +21,12 @@ createRoot(document.getElementById('root')!).render(
                 <WebSocketProvider>
                     <BrowserRouter>
                         <Routes>
-                            <Route path="/" element={<App />} />
-                            <Route path="/login" element={<Login />} />
-                            <Route path="/register" element={<Register />} />
-                            <Route path="/chat" element={<Chat />} />
-                            <Route path="/showoff" element={<Showoff />} />
-                            <Route path="*" element={<NotFound />} />
+                            <Route element={<App />} path="/" />
+                            <Route element={<Login />} path="/login" />
+                            <Route element={<Register />} path="/register" />
+                            <Route element={<Chat />} path="/chat" />
+                            <Route element={<Showoff />} path="/showoff" />
+                            <Route element={<NotFound />} path="*" />
                         </Routes>
                     </BrowserRouter>
                 </WebSocketProvider>

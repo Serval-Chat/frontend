@@ -71,4 +71,56 @@ describe('TextParser', () => {
             { type: 'link', url: 'https://link.com', text: 'https://link.com' },
         ]);
     });
+
+    it('should parse headings', () => {
+        const text = '# Heading 1\n## Heading 2\n### Heading 3';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            { type: 'h1', content: 'Heading 1' },
+            { type: 'text', content: '\n' },
+            { type: 'h2', content: 'Heading 2' },
+            { type: 'text', content: '\n' },
+            { type: 'h3', content: 'Heading 3' },
+        ]);
+    });
+
+    it('should parse subtext', () => {
+        const text = '-# This is subtext';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            { type: 'subtext', content: 'This is subtext' },
+        ]);
+    });
+
+    it('should parse spoilers', () => {
+        const text = 'This is a ||spoiler|| message';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            { type: 'text', content: 'This is a ' },
+            { type: 'spoiler', content: 'spoiler' },
+            { type: 'text', content: ' message' },
+        ]);
+    });
+
+    it('should parse inline code', () => {
+        const text = 'Use `npm install` to get started';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            { type: 'text', content: 'Use ' },
+            { type: 'inline_code', content: 'npm install' },
+            { type: 'text', content: ' to get started' },
+        ]);
+    });
+
+    it('should parse code blocks', () => {
+        const text = '```typescript\nconst x = 1;\n```';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            {
+                type: 'code_block',
+                content: 'const x = 1;',
+                language: 'typescript',
+            },
+        ]);
+    });
 });

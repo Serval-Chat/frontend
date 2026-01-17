@@ -13,10 +13,8 @@ interface PageWrapperProps {
 export const PageWrapper: React.FC<PageWrapperProps> = ({
     children,
     className,
-}) => {
-    return (
-        <div className={cn('relative z-10 text-center space-y-md', className)}>
-            {children}
-        </div>
-    );
-};
+}) => (
+    <div className={cn('relative z-10 text-center space-y-md', className)}>
+        {children}
+    </div>
+);

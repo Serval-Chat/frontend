@@ -23,9 +23,9 @@ export const ServerList: React.FC = () => {
             ) : (
                 servers?.map((server) => (
                     <ServerItem
+                        isActive={selectedServerId === server._id}
                         key={server._id}
                         server={server}
-                        isActive={selectedServerId === server._id}
                         onClick={() =>
                             dispatch(setSelectedServerId(server._id))
                         }

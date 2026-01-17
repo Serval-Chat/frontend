@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-interface TypingUser {
+export interface TypingUser {
     userId: string;
     username: string;
 }
@@ -8,7 +8,11 @@ interface TypingUser {
 /**
  * @description Hook for managing typing indicator state
  */
-export function useTypingIndicator() {
+export function useTypingIndicator(): {
+    typingUsers: TypingUser[];
+    addTypingUser: (userId: string, username: string) => void;
+    clearTypingUsers: () => void;
+} {
     const [typingUsers, setTypingUsers] = useState<TypingUser[]>([]);
     const timeoutsRef = useRef<Map<string, number>>(new Map());
 

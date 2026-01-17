@@ -63,22 +63,20 @@ export const Stack: React.FC<StackProps> = ({
     className,
     children,
     ...props
-}) => {
-    return (
-        <div
-            className={cn(
-                stackVariants({
-                    direction,
-                    gap,
-                    wrap,
-                    align,
-                    justify,
-                    className,
-                })
-            )}
-            {...props}
-        >
-            {children}
-        </div>
-    );
-};
+}) => (
+    <div
+        className={cn(
+            stackVariants({
+                direction,
+                gap,
+                wrap,
+                align,
+                justify,
+                className,
+            })
+        )}
+        {...props}
+    >
+        {children}
+    </div>
+);

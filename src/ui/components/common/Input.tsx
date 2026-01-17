@@ -36,7 +36,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
 
         const isNumber = type === 'number';
 
-        const handleIncrement = () => {
+        const handleIncrement = (): void => {
             if (internalRef.current) {
                 internalRef.current.stepUp();
                 const event = new Event('input', { bubbles: true });
@@ -44,7 +44,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             }
         };
 
-        const handleDecrement = () => {
+        const handleDecrement = (): void => {
             if (internalRef.current) {
                 internalRef.current.stepDown();
                 const event = new Event('input', { bubbles: true });
@@ -58,13 +58,13 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
                 style={{ minWidth, maxWidth, ...props.style }}
             >
                 <input
-                    type={type}
-                    disabled={disabled || undefined}
                     className={cn(
                         inputVariants({ disabled, className }),
                         isNumber && 'pr-9 [appearance:textfield]'
                     )}
+                    disabled={disabled || undefined}
                     ref={internalRef}
+                    type={type}
                     {...props}
                     style={{ minWidth: 'unset', maxWidth: 'unset' }}
                 />
@@ -72,16 +72,16 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
                 {isNumber && !disabled && (
                     <div className="absolute right-1 flex flex-col gap-[1px] opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity">
                         <button
+                            className="p-0.5 hover:bg-white/10 rounded-sm text-foreground-muted hover:text-foreground transition-colors"
                             type="button"
                             onClick={handleIncrement}
-                            className="p-0.5 hover:bg-white/10 rounded-sm text-foreground-muted hover:text-foreground transition-colors"
                         >
                             <ChevronUp size={14} />
                         </button>
                         <button
+                            className="p-0.5 hover:bg-white/10 rounded-sm text-foreground-muted hover:text-foreground transition-colors"
                             type="button"
                             onClick={handleDecrement}
-                            className="p-0.5 hover:bg-white/10 rounded-sm text-foreground-muted hover:text-foreground transition-colors"
                         >
                             <ChevronDown size={14} />
                         </button>

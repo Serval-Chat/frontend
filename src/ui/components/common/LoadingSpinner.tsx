@@ -1,5 +1,6 @@
 import React from 'react';
 
+import { Box } from '@/ui/components/layout/Box';
 import { cn } from '@/utils/cn';
 
 interface LoadingSpinnerProps {
@@ -21,7 +22,7 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
     };
 
     return (
-        <div
+        <Box
             className={cn(
                 'border-primary border-t-transparent rounded-full animate-spin',
                 sizeClasses[size],

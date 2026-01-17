@@ -10,6 +10,9 @@ const headingVariants = cva('font-bold', {
             page: 'text-3xl tracking-tight text-foreground',
             section: 'my-md text-xl font-sans',
             sub: 'text-lg font-semibold mb-md',
+            'chat-h1': 'text-2xl mt-1 mb-0.5',
+            'chat-h2': 'text-xl mt-0.5 mb-0',
+            'chat-h3': 'text-lg mt-0.5 mb-0',
         },
     },
     defaultVariants: {
@@ -37,6 +40,7 @@ export const Heading: React.FC<HeadingProps> = ({
     const Tag = `h${level}` as React.ElementType;
 
     return (
+        // eslint-disable-next-line react/jsx-props-no-spreading
         <Tag className={cn(headingVariants({ variant, className }))} {...props}>
             {children}
         </Tag>

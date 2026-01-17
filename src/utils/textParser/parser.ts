@@ -16,6 +16,13 @@ export const ParserPresets = {
             ParserFeature.BOLD_ITALIC,
             ParserFeature.EMOJI,
             ParserFeature.LINK,
+            ParserFeature.H1,
+            ParserFeature.H2,
+            ParserFeature.H3,
+            ParserFeature.SUBTEXT,
+            ParserFeature.SPOILER,
+            ParserFeature.INLINE_CODE,
+            ParserFeature.CODE_BLOCK,
         ],
     },
     BIO: {
@@ -25,6 +32,13 @@ export const ParserPresets = {
             ParserFeature.BOLD_ITALIC,
             ParserFeature.EMOJI,
             ParserFeature.LINK,
+            ParserFeature.H1,
+            ParserFeature.H2,
+            ParserFeature.H3,
+            ParserFeature.SUBTEXT,
+            ParserFeature.SPOILER,
+            ParserFeature.INLINE_CODE,
+            ParserFeature.CODE_BLOCK,
         ],
     },
 } as const;
@@ -94,6 +108,59 @@ export class TextParser {
                         currentText = '';
                     }
                     nodes.push(linkNode);
+                    continue;
+                }
+            }
+
+            // #, ##, ###, -#
+            if (
+                (char === '#' || (char === '-' && this.peek('-#'))) &&
+                (this.options.features.includes(ParserFeature.H1) ||
+                    this.options.features.includes(ParserFeature.H2) ||
+                    this.options.features.includes(ParserFeature.H3) ||
+                    this.options.features.includes(ParserFeature.SUBTEXT))
+            ) {
+                const headingNode = this.tryParseHeading();
+                if (headingNode) {
+                    if (currentText) {
+                        nodes.push({ type: 'text', content: currentText });
+                        currentText = '';
+                    }
+                    nodes.push(headingNode);
+                    continue;
+                }
+            }
+
+            // ||text||
+            if (
+                char === '|' &&
+                this.options.features.includes(ParserFeature.SPOILER) &&
+                this.peek('||')
+            ) {
+                const spoilerNode = this.tryParseSpoiler();
+                if (spoilerNode) {
+                    if (currentText) {
+                        nodes.push({ type: 'text', content: currentText });
+                        currentText = '';
+                    }
+                    nodes.push(spoilerNode);
+                    continue;
+                }
+            }
+
+            // `code` or ```code```
+            if (
+                char === '`' &&
+                (this.options.features.includes(ParserFeature.INLINE_CODE) ||
+                    this.options.features.includes(ParserFeature.CODE_BLOCK))
+            ) {
+                const codeNode = this.tryParseCode();
+                if (codeNode) {
+                    if (currentText) {
+                        nodes.push({ type: 'text', content: currentText });
+                        currentText = '';
+                    }
+                    nodes.push(codeNode);
                     continue;
                 }
             }
@@ -210,6 +277,165 @@ export class TextParser {
                       ? 'bold'
                       : 'italic';
             return { type, content } as ASTNode;
+        }
+
+        this.index = start;
+        return null;
+    }
+
+    private tryParseHeading(): ASTNode | null {
+        const start = this.index;
+
+        if (this.peek('### ')) {
+            this.index += 4;
+            let content = '';
+            while (
+                this.index < this.text.length &&
+                this.text[this.index] !== '\n'
+            ) {
+                content += this.text[this.index];
+                this.index++;
+            }
+            if (content.trim())
+                return { type: 'h3', content: content.trim() } as ASTNode;
+        } else if (this.peek('## ')) {
+            this.index += 3;
+            let content = '';
+            while (
+                this.index < this.text.length &&
+                this.text[this.index] !== '\n'
+            ) {
+                content += this.text[this.index];
+                this.index++;
+            }
+            if (content.trim())
+                return { type: 'h2', content: content.trim() } as ASTNode;
+        } else if (this.peek('# ')) {
+            this.index += 2;
+            let content = '';
+            while (
+                this.index < this.text.length &&
+                this.text[this.index] !== '\n'
+            ) {
+                content += this.text[this.index];
+                this.index++;
+            }
+            if (content.trim())
+                return { type: 'h1', content: content.trim() } as ASTNode;
+        } else if (this.peek('-# ')) {
+            this.index += 3;
+            let content = '';
+            while (
+                this.index < this.text.length &&
+                this.text[this.index] !== '\n'
+            ) {
+                content += this.text[this.index];
+                this.index++;
+            }
+            if (content.trim())
+                return { type: 'subtext', content: content.trim() } as ASTNode;
+        }
+
+        this.index = start;
+        return null;
+    }
+
+    private tryParseSpoiler(): ASTNode | null {
+        const start = this.index;
+        this.index += 2; // skip '||'
+
+        let content = '';
+        let foundClosing = false;
+
+        while (this.index < this.text.length) {
+            if (this.peek('||')) {
+                foundClosing = true;
+                break;
+            }
+            content += this.text[this.index];
+            this.index++;
+        }
+
+        if (foundClosing && content) {
+            this.index += 2; // skip '||'
+            return { type: 'spoiler', content } as ASTNode;
+        }
+
+        this.index = start;
+        return null;
+    }
+
+    private tryParseCode(): ASTNode | null {
+        const start = this.index;
+
+        // Try parse multiline code block first
+        if (this.peek('```')) {
+            this.index += 3;
+            let language = '';
+
+            // Optional language
+            while (
+                this.index < this.text.length &&
+                this.text[this.index] !== '\n' &&
+                this.text[this.index] !== ' '
+            ) {
+                language += this.text[this.index];
+                this.index++;
+            }
+
+            // Skip space/newline after language
+            if (
+                this.index < this.text.length &&
+                (this.text[this.index] === '\n' ||
+                    this.text[this.index] === ' ')
+            ) {
+                this.index++;
+            }
+
+            let content = '';
+            let foundClosing = false;
+
+            while (this.index < this.text.length) {
+                if (this.peek('```')) {
+                    foundClosing = true;
+                    break;
+                }
+                content += this.text[this.index];
+                this.index++;
+            }
+
+            if (foundClosing) {
+                this.index += 3;
+                return {
+                    type: 'code_block',
+                    content: content.trim(),
+                    language: language.trim() || undefined,
+                } as ASTNode;
+            }
+
+            this.index = start;
+            return null;
+        }
+
+        // Try parse inline code
+        if (this.peek('`')) {
+            this.index += 1;
+            let content = '';
+            let foundClosing = false;
+
+            while (this.index < this.text.length) {
+                if (this.text[this.index] === '`') {
+                    foundClosing = true;
+                    break;
+                }
+                content += this.text[this.index];
+                this.index++;
+            }
+
+            if (foundClosing && content) {
+                this.index += 1;
+                return { type: 'inline_code', content } as ASTNode;
+            }
         }
 
         this.index = start;

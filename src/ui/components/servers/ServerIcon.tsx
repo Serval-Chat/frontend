@@ -26,8 +26,6 @@ export const ServerIcon: React.FC<ServerIconProps> = ({
 
     return (
         <div
-            onClick={onClick}
-            title={server.name}
             className={cn(
                 'w-12 h-12 flex items-center justify-center transition-all duration-200 cursor-pointer overflow-hidden group relative',
                 'bg-[--color-bg-subtle] text-foreground-muted hover:bg-[--color-primary] hover:text-foreground-inverse',
@@ -35,12 +33,21 @@ export const ServerIcon: React.FC<ServerIconProps> = ({
                     ? 'rounded-[0.75rem] bg-[--color-primary] text-foreground-inverse'
                     : 'rounded-[1.2rem] hover:rounded-[0.75rem]'
             )}
+            role="button"
+            tabIndex={0}
+            title={server.name}
+            onClick={onClick}
+            onKeyDown={(e) => {
+                if (onClick && (e.key === 'Enter' || e.key === ' ')) {
+                    onClick();
+                }
+            }}
         >
             {iconUrl ? (
                 <img
-                    src={iconUrl}
                     alt={server.name}
                     className="w-full h-full object-cover"
+                    src={iconUrl}
                 />
             ) : (
                 <span className="text-sm font-bold">{initials}</span>

@@ -47,7 +47,7 @@ export const ServerSection: React.FC = () => {
         }
     }, [isLoadingChannels, channels, selectedChannelId, dispatch]);
 
-    const handleChannelSelect = (channelId: string) => {
+    const handleChannelSelect = (channelId: string): void => {
         dispatch(setSelectedChannelId(channelId));
     };
 
@@ -56,9 +56,9 @@ export const ServerSection: React.FC = () => {
     return (
         <div className="flex flex-col h-full w-full overflow-y-auto no-scrollbar custom-scrollbar">
             <ServerBanner
-                name={server?.name || ''}
                 banner={server?.banner}
                 loading={isLoadingServer}
+                name={server?.name || ''}
             />
 
             {isLoadingChannels || isLoadingCategories ? (
@@ -67,8 +67,8 @@ export const ServerSection: React.FC = () => {
                 </div>
             ) : (
                 <ChannelList
-                    channels={channels || []}
                     categories={categories || []}
+                    channels={channels || []}
                     selectedChannelId={selectedChannelId}
                     onChannelSelect={handleChannelSelect}
                 />

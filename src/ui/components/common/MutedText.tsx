@@ -1,5 +1,6 @@
 import React from 'react';
 
+import { Text } from '@/ui/components/common/Text';
 import { cn } from '@/utils/cn';
 
 interface MutedTextProps {
@@ -13,10 +14,8 @@ interface MutedTextProps {
 export const MutedText: React.FC<MutedTextProps> = ({
     children,
     className,
-}) => {
-    return (
-        <p className={cn('text-sm text-muted-foreground/80', className)}>
-            {children}
-        </p>
-    );
-};
+}) => (
+    <Text as="p" className={cn('text-sm text-muted-foreground/80', className)}>
+        {children}
+    </Text>
+);

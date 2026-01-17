@@ -1,5 +1,7 @@
 import React from 'react';
 
+import { Text } from '@/ui/components/common/Text';
+import { Box } from '@/ui/components/layout/Box';
 import { resolveApiUrl } from '@/utils/apiUrl';
 import { cn } from '@/utils/cn';
 
@@ -33,7 +35,7 @@ export const UserProfilePictureIcon: React.FC<UserProfilePictureIconProps> = ({
     };
 
     return (
-        <div
+        <Box
             className={cn(
                 'flex items-center justify-center rounded-full overflow-hidden bg-[--color-bg-subtle] text-foreground-muted font-bold shrink-0',
                 sizeClasses[size],
@@ -42,13 +44,13 @@ export const UserProfilePictureIcon: React.FC<UserProfilePictureIconProps> = ({
         >
             {iconUrl ? (
                 <img
-                    src={iconUrl}
                     alt={username}
                     className="w-full h-full object-cover"
+                    src={iconUrl}
                 />
             ) : (
-                <span>{initials}</span>
+                <Text as="span">{initials}</Text>
             )}
-        </div>
+        </Box>
     );
 };

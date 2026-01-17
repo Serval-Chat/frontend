@@ -3,7 +3,7 @@ import { useEffect, useRef } from 'react';
 import { animate } from 'framer-motion';
 import { useLocation } from 'react-router-dom';
 
-export const useAutoHighlight = (sectionIds: string[]) => {
+export const useAutoHighlight = (sectionIds: string[]): void => {
     const location = useLocation();
     const lastHighlightedHash = useRef<string | null>(null);
 

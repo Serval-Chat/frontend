@@ -1,3 +1,5 @@
+import type { ReactNode } from 'react';
+
 import { Input } from '@/ui/components/common/Input';
 import { Stack } from '@/ui/components/layout/Stack';
 
@@ -5,7 +7,7 @@ import { DemoItem } from './DemoItem';
 import { DemoSection } from './DemoSection';
 import { SHOWOFF_SECTIONS } from './config';
 
-export function InputsDemo() {
+export function InputsDemo(): ReactNode {
     return (
         <DemoSection id={SHOWOFF_SECTIONS.inputs} title="Input elements">
             <Stack className="max-w-sm">
@@ -16,18 +18,18 @@ export function InputsDemo() {
                     <Input disabled placeholder="Can't type here..." />
                 </DemoItem>
                 <DemoItem id="input-password" title="Password Input">
-                    <Input type="password" placeholder="Enter your secret..." />
+                    <Input placeholder="Enter your secret..." type="password" />
                 </DemoItem>
                 <DemoItem id="input-number" title="Number Input">
-                    <Input type="number" placeholder="Enter a number..." />
+                    <Input placeholder="Enter a number..." type="number" />
                 </DemoItem>
                 <DemoItem
                     id="input-width"
                     title="Width Constrained (min: 200px, max: 300px)"
                 >
                     <Input
-                        minWidth={200}
                         maxWidth={300}
+                        minWidth={200}
                         placeholder="I have width limits..."
                     />
                 </DemoItem>

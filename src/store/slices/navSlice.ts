@@ -72,4 +72,4 @@ export const {
     setSelectedFriendId,
     setSelectedChannelId,
 } = navSlice.actions;
-export default navSlice.reducer;
+export const navReducer = navSlice.reducer;

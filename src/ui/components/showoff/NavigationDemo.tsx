@@ -42,7 +42,7 @@ export const NavigationDemo: React.FC = () => {
                         </span>
                     </div>
                     <div className="flex flex-col items-center gap-1">
-                        <ServerIcon server={mockServer} isActive />
+                        <ServerIcon isActive server={mockServer} />
                         <span className="text-[10px] text-foreground-muted">
                             Active
                         </span>
@@ -67,29 +67,29 @@ export const NavigationDemo: React.FC = () => {
             >
                 <div className="flex flex-col gap-1 w-60 bg-[--color-bg-secondary] p-2 rounded-lg">
                     <UserItem
-                        userId={mockFriend._id}
-                        initialData={mockFriend}
                         noFetch
+                        initialData={mockFriend}
+                        userId={mockFriend._id}
                     />
                     <UserItem
-                        userId="2"
+                        isActive
+                        noFetch
                         initialData={{
                             ...mockFriend,
                             username: 'other',
                             displayName: 'Electrode',
                         }}
-                        isActive
-                        noFetch
+                        userId="2"
                     />
                     <UserItem
-                        userId="3"
+                        noFetch
                         initialData={{
                             ...mockFriend,
                             username: 'longname',
                             displayName:
                                 'A Very Long Username That Should Truncate Beautifully In The Sidebar',
                         }}
-                        noFetch
+                        userId="3"
                     />
                 </div>
             </DemoItem>

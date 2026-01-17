@@ -17,8 +17,8 @@ export const useProcessedMessages = (
     selectedServerId: string | null,
     serverMemberMap: Map<string, User>,
     highestRoleMap: Map<string, Role>
-): ProcessedChatMessage[] => {
-    return useMemo(() => {
+): ProcessedChatMessage[] =>
+    useMemo(() => {
         if (!rawMessagesData) return [];
 
         // Flatten all pages and sort chronologically
@@ -92,4 +92,3 @@ export const useProcessedMessages = (
         serverMemberMap,
         highestRoleMap,
     ]);
-};

@@ -8,6 +8,13 @@ export const ParserFeature = {
     BOLD_ITALIC: 'BOLD_ITALIC',
     EMOJI: 'EMOJI',
     LINK: 'LINK',
+    H1: 'H1',
+    H2: 'H2',
+    H3: 'H3',
+    SUBTEXT: 'SUBTEXT',
+    SPOILER: 'SPOILER',
+    INLINE_CODE: 'INLINE_CODE',
+    CODE_BLOCK: 'CODE_BLOCK',
 } as const;
 
 export type ParserFeature = (typeof ParserFeature)[keyof typeof ParserFeature];
@@ -18,7 +25,14 @@ export type ASTNodeType =
     | 'italic'
     | 'bold_italic'
     | 'emoji'
-    | 'link';
+    | 'link'
+    | 'h1'
+    | 'h2'
+    | 'h3'
+    | 'subtext'
+    | 'spoiler'
+    | 'inline_code'
+    | 'code_block';
 
 export interface TextNode {
     type: 'text';
@@ -51,10 +65,53 @@ export interface LinkNode {
     text?: string;
 }
 
+export interface H1Node {
+    type: 'h1';
+    content: string;
+}
+
+export interface H2Node {
+    type: 'h2';
+    content: string;
+}
+
+export interface H3Node {
+    type: 'h3';
+    content: string;
+}
+
+export interface SubtextNode {
+    type: 'subtext';
+    content: string;
+}
+
+export interface SpoilerNode {
+    type: 'spoiler';
+    content: string;
+}
+
+export interface InlineCodeNode {
+    type: 'inline_code';
+    content: string;
+}
+
+export interface CodeBlockNode {
+    type: 'code_block';
+    content: string;
+    language?: string;
+}
+
 export type ASTNode =
     | TextNode
     | BoldNode
     | ItalicNode
     | BoldItalicNode
     | EmojiNode
-    | LinkNode;
+    | LinkNode
+    | H1Node
+    | H2Node
+    | H3Node
+    | SubtextNode
+    | SpoilerNode
+    | InlineCodeNode
+    | CodeBlockNode;

@@ -75,21 +75,21 @@ export const UserProfilePopupDemo: React.FC = () => {
                         complete mock data.
                     </p>
                     <button
+                        className="w-fit px-4 py-2 bg-[var(--color-primary)] text-black font-semibold rounded-md hover:opacity-90 transition-opacity"
                         ref={triggerRef}
                         onClick={() => setIsPopupOpen(true)}
-                        className="w-fit px-4 py-2 bg-[var(--color-primary)] text-black font-semibold rounded-md hover:opacity-90 transition-opacity"
                     >
                         Show Mock Profile
                     </button>
 
                     <ProfilePopup
-                        userId={mockUser._id}
-                        user={mockUser}
+                        disableFetch
                         isOpen={isPopupOpen}
-                        onClose={() => setIsPopupOpen(false)}
-                        triggerRef={triggerRef}
                         joinedAt={new Date('2024-05-20').toISOString()}
-                        disableFetch={true}
+                        triggerRef={triggerRef}
+                        user={mockUser}
+                        userId={mockUser._id}
+                        onClose={() => setIsPopupOpen(false)}
                     />
                 </div>
             </DemoItem>
@@ -104,9 +104,7 @@ export const UserProfilePopupDemo: React.FC = () => {
                         option.
                     </p>
                     <UserItem
-                        userId={mockUser._id}
-                        user={mockUser}
-                        noFetch={true}
+                        noFetch
                         allRoles={[
                             {
                                 _id: 'role-1',
@@ -131,9 +129,11 @@ export const UserProfilePopupDemo: React.FC = () => {
                                 serverId: 's1',
                             },
                         ]}
+                        user={mockUser}
+                        userId={mockUser._id}
                     />
                     <UserItem
-                        userId="mock-2"
+                        noFetch
                         user={
                             {
                                 _id: 'mock-2',
@@ -142,7 +142,7 @@ export const UserProfilePopupDemo: React.FC = () => {
                                 customStatus: { text: 'Just chilling' },
                             } as User
                         }
-                        noFetch={true}
+                        userId="mock-2"
                     />
                 </div>
             </DemoItem>

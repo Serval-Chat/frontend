@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import type React from 'react';
+import { useEffect, useState } from 'react';
 
 import { useQueryClient } from '@tanstack/react-query';
 
@@ -26,13 +27,13 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
 
     useEffect(() => {
         // Listen for storage changes (login/logout)
-        const handleStorageChange = () => {
+        const handleStorageChange = (): void => {
             setIsAuthenticated(hasAuthToken());
         };
 
         window.addEventListener('storage', handleStorageChange);
 
-        const handleAuthChange = () => {
+        const handleAuthChange = (): void => {
             setIsAuthenticated(hasAuthToken());
         };
 
@@ -57,5 +58,5 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
         };
     }, [isAuthenticated]);
 
-    return <>{children}</>;
+    return children;
 };

@@ -1,4 +1,4 @@
-import React from 'react';
+import { Box } from '@/ui/components/layout/Box';
 
 interface VerticalSpacerProps {
     verticalSpace: number;
@@ -9,6 +9,4 @@ interface VerticalSpacerProps {
  */
 export const VerticalSpacer: React.FC<VerticalSpacerProps> = ({
     verticalSpace,
-}) => {
-    return <div style={{ height: `${verticalSpace}px` }} />;
-};
+}) => <Box className="shrink-0" style={{ height: `${verticalSpace}px` }} />;

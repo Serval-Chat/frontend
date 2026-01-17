@@ -8,9 +8,13 @@ interface DemoSectionProps {
     children: React.ReactNode;
 }
 
-export function DemoSection({ id, title, children }: DemoSectionProps) {
+export function DemoSection({
+    id,
+    title,
+    children,
+}: DemoSectionProps): React.ReactNode {
     return (
-        <section id={id} className="p-md font-sans">
+        <section className="p-md font-sans" id={id}>
             <Heading level={2} variant="sub">
                 {title}
             </Heading>

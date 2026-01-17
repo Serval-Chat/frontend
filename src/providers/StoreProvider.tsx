@@ -8,6 +8,6 @@ interface StoreProviderProps {
     children: ReactNode;
 }
 
-export function StoreProvider({ children }: StoreProviderProps) {
+export function StoreProvider({ children }: StoreProviderProps): ReactNode {
     return <Provider store={store}>{children}</Provider>;
 }

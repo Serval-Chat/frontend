@@ -1,8 +1,9 @@
 import type { Role } from '@/api/servers/servers.types';
 import type { User } from '@/api/users/users.types';
+import { Box } from '@/ui/components/layout/Box';
 import { cn } from '@/utils/cn';
 
-import { NormalText } from './NormalText';
+import { Text } from './Text';
 
 interface StyledUserNameProps {
     user?: User;
@@ -21,11 +22,9 @@ export const StyledUserName: React.FC<StyledUserNameProps> = ({
 }) => {
     if (!user && !role) {
         return (
-            <NormalText
-                className={cn('font-medium truncate text-sm', className)}
-            >
+            <Text className={cn('font-medium truncate text-sm', className)}>
                 {children}
-            </NormalText>
+            </Text>
         );
     }
 
@@ -118,17 +117,17 @@ export const StyledUserName: React.FC<StyledUserNameProps> = ({
     // If neither effect is active, render simply
     if (!hasGlow && !hasGradient) {
         return (
-            <NormalText
+            <Text
                 className={cn('font-medium truncate text-sm w-fit', className)}
                 style={containerStyle}
             >
                 {children}
-            </NormalText>
+            </Text>
         );
     }
 
     return (
-        <NormalText
+        <Text
             className={cn(
                 'font-medium truncate text-sm w-fit grid items-center',
                 className
@@ -136,20 +135,22 @@ export const StyledUserName: React.FC<StyledUserNameProps> = ({
             style={containerStyle}
         >
             {hasGlow && (
-                <span
+                <Box
+                    aria-hidden="true"
+                    as="span"
                     className="col-start-1 row-start-1 select-none pointer-events-none"
                     style={glowStyle}
-                    aria-hidden="true"
                 >
                     {children}
-                </span>
+                </Box>
             )}
-            <span
+            <Box
+                as="span"
                 className="col-start-1 row-start-1 relative"
                 style={gradientStyle}
             >
                 {children}
-            </span>
-        </NormalText>
+            </Box>
+        </Text>
     );
 };

@@ -18,6 +18,8 @@ import { useMe, useUserById } from '@/api/users/users.queries';
 import type { User } from '@/api/users/users.types';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { setSelectedFriendId } from '@/store/slices/navSlice';
+import { Text } from '@/ui/components/common/Text';
+import { Box } from '@/ui/components/layout/Box';
 import { ProfilePopup } from '@/ui/components/profile/ProfilePopup';
 import { cn } from '@/utils/cn';
 
@@ -129,7 +131,7 @@ export const UserItem: React.FC<UserItemProps> = ({
         label: 'Copy User ID',
         icon: Copy,
         onClick: () => {
-            navigator.clipboard.writeText(userId);
+            void navigator.clipboard.writeText(userId);
         },
     });
 
@@ -141,16 +143,8 @@ export const UserItem: React.FC<UserItemProps> = ({
 
     return (
         <>
-            <ContextMenu items={contextMenuItems} className="w-full">
-                <div
-                    ref={itemRef}
-                    onClick={() => {
-                        if (onClick) {
-                            onClick();
-                        } else {
-                            setShowProfile(true);
-                        }
-                    }}
+            <ContextMenu className="w-full" items={contextMenuItems}>
+                <Box
                     className={cn(
                         'flex items-center gap-3 px-3 py-1 rounded-md cursor-pointer transition-colors w-full min-w-0',
 
@@ -160,53 +154,69 @@ export const UserItem: React.FC<UserItemProps> = ({
                             : 'text-foreground-muted',
                         className
                     )}
+                    ref={itemRef}
+                    onClick={() => {
+                        if (onClick) {
+                            onClick();
+                        } else {
+                            setShowProfile(true);
+                        }
+                    }}
                 >
                     <UserProfilePicture
-                        src={profilePicture}
-                        username={displayName || username}
                         size="sm"
+                        src={profilePicture}
                         status={presenceStatus}
+                        username={displayName || username}
                         onClick={(e) => {
                             e.stopPropagation();
                             setShowProfile(true);
                         }}
                     />
 
-                    <div className="flex-1 min-w-0">
+                    <Box className="flex-1 min-w-0">
                         <StyledUserName
-                            user={userProfile}
-                            role={role}
                             disableCustomFonts={disableCustomFonts}
+                            role={role}
+                            user={userProfile}
                         >
                             {displayName || username}
                         </StyledUserName>
                         {(presenceCustomText || customStatus?.emoji) &&
                             presenceStatus !== 'offline' && (
-                                <div className="text-xs text-foreground-muted truncate flex items-center gap-1">
+                                <Box className="text-xs text-foreground-muted truncate flex items-center gap-1">
                                     {customStatus?.emoji && (
-                                        <span className="shrink-0">
+                                        <Text
+                                            as="span"
+                                            className="shrink-0"
+                                            size="xs"
+                                        >
                                             {customStatus.emoji}
-                                        </span>
+                                        </Text>
                                     )}
                                     {presenceCustomText && (
-                                        <span className="truncate">
+                                        <Text
+                                            as="span"
+                                            className="truncate"
+                                            size="xs"
+                                        >
                                             {presenceCustomText}
-                                        </span>
+                                        </Text>
                                     )}
-                                </div>
+                                </Box>
                             )}
-                    </div>
-                </div>
+                    </Box>
+                </Box>
             </ContextMenu>
             <ProfilePopup
-                userId={userId}
-                user={userProfile || undefined}
+                isOpen={showProfile}
+                joinedAt={joinedAt}
                 role={role}
                 roles={allRoles}
-                joinedAt={joinedAt}
-                isOpen={showProfile}
-                onClose={() => setShowProfile(false)}
                 triggerRef={itemRef}
+                user={userProfile || undefined}
+                userId={userId}
+                onClose={() => setShowProfile(false)}
             />
         </>
     );

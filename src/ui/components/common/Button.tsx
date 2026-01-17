@@ -29,6 +29,7 @@ const buttonVariants = cva(
                 success:
                     'bg-success text-foreground-inverse hover:bg-success-hover',
                 nav: 'bg-bg-secondary text-[#f4f4f4] w-12 h-12 p-0 rounded-[1.2rem] transition-all duration-200 hover:bg-primary hover:text-foreground-inverse hover:rounded-[0.75rem]',
+                ghost: 'bg-transparent text-foreground hover:bg-bg-subtle border-none shadow-none',
             },
         },
         compoundVariants: Object.entries(mutedClasses).map(
@@ -69,7 +70,7 @@ export const Button: React.FC<ButtonProps> = ({
     }>({ width: 'auto', height: 'auto' });
 
     useLayoutEffect(() => {
-        const updateDimensions = () => {
+        const updateDimensions = (): void => {
             if (!buttonRef.current) return;
             const { width, height } = buttonRef.current.getBoundingClientRect();
             setDimensions((prev) => {
@@ -100,15 +101,15 @@ export const Button: React.FC<ButtonProps> = ({
 
     return (
         <button
-            ref={buttonRef}
             aria-busy={loading || undefined}
-            style={dimensionStyles}
             className={cn(
                 'relative',
                 buttonVariants({ variant: variant }),
                 className
             )}
             disabled={loading || disabled}
+            ref={buttonRef}
+            style={dimensionStyles}
             {...props}
         >
             <span className={loading ? 'opacity-0' : undefined}>
@@ -116,7 +117,7 @@ export const Button: React.FC<ButtonProps> = ({
             </span>
             {loading && (
                 <div className="absolute inset-0 flex items-center justify-center">
-                    <BouncingDots size={4} color="bg-current" />
+                    <BouncingDots color="bg-current" size={4} />
                 </div>
             )}
         </button>

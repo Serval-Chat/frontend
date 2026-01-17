@@ -27,20 +27,20 @@ const TOCItem: React.FC<{ section: TOCSection }> = ({ section }) => {
             <div className="flex items-center space-x-2">
                 {hasChildren && (
                     <button
-                        onClick={() => setIsOpen(!isOpen)}
                         className={cn(
                             'w-4 h-4 flex items-center justify-center text-sm text-muted-foreground hover:text-muted-foreground-hover'
                         )}
+                        onClick={() => setIsOpen(!isOpen)}
                     >
                         {isOpen ? '▾' : '▸'}
                     </button>
                 )}
                 {!hasChildren && <span className="w-4 h-4 shrink-0" />}
                 <a
-                    href={`#${section.id}`}
                     className={cn(
                         'hover:text-primary hover:underline transition-colors duration-150 font-sans'
                     )}
+                    href={`#${section.id}`}
                 >
                     {section.title}
                 </a>
@@ -59,7 +59,7 @@ const TOCItem: React.FC<{ section: TOCSection }> = ({ section }) => {
 
 const collectAllIds = (sections: TOCSection[]): string[] => {
     const ids: string[] = [];
-    const traverse = (section: TOCSection) => {
+    const traverse = (section: TOCSection): void => {
         ids.push(section.id);
         if (section.children) {
             section.children.forEach(traverse);

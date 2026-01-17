@@ -1,5 +1,6 @@
 import React from 'react';
 
+import { Box } from '@/ui/components/layout/Box';
 import { cn } from '@/utils/cn';
 
 export type UserStatus = 'online' | 'offline';
@@ -21,7 +22,7 @@ export const UserProfileStatusIndicator: React.FC<
     };
 
     return (
-        <div
+        <Box
             className={cn(
                 'rounded-full border-background absolute -bottom-[1px] -right-[1px]',
                 sizeClasses[size],

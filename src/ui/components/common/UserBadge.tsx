@@ -3,6 +3,8 @@ import React from 'react';
 import { Shield } from 'lucide-react';
 
 import type { Badge } from '@/api/users/users.types';
+import { Text } from '@/ui/components/common/Text';
+import { Box } from '@/ui/components/layout/Box';
 import { ICON_MAP } from '@/ui/utils/iconMap';
 import { cn } from '@/utils/cn';
 
@@ -16,7 +18,7 @@ export const UserBadge: React.FC<UserBadgeProps> = ({ badge, className }) => {
     const color = badge.color || '#747F8D';
 
     return (
-        <div
+        <Box
             className={cn(
                 'inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-bold cursor-default transition-all border shrink-0',
                 className
@@ -29,7 +31,9 @@ export const UserBadge: React.FC<UserBadgeProps> = ({ badge, className }) => {
             title={badge.description || badge.name}
         >
             <IconComponent size={12} style={{ color: color }} />
-            <span>{badge.name}</span>
-        </div>
+            <Text as="span" className="text-[10px] leading-tight" size="xs">
+                {badge.name}
+            </Text>
+        </Box>
     );
 };

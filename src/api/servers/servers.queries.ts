@@ -1,60 +1,74 @@
-import { useQuery } from '@tanstack/react-query';
+import { type UseQueryResult, useQuery } from '@tanstack/react-query';
 
 import { serversApi } from './servers.api';
+import type {
+    Category,
+    Channel,
+    Role,
+    Server,
+    ServerMember,
+} from './servers.types';
 
 export const SERVERS_QUERY_KEYS = {
     list: ['servers', 'list'] as const,
-    details: (serverId: string) => ['servers', 'details', serverId] as const,
-    channels: (serverId: string) => ['servers', 'channels', serverId] as const,
-    categories: (serverId: string) =>
+    details: (serverId: string | null) =>
+        ['servers', 'details', serverId] as const,
+    channels: (serverId: string | null) =>
+        ['servers', 'channels', serverId] as const,
+    categories: (serverId: string | null) =>
         ['servers', 'categories', serverId] as const,
-    members: (serverId: string) => ['servers', 'members', serverId] as const,
-    roles: (serverId: string) => ['servers', 'roles', serverId] as const,
+    members: (serverId: string | null) =>
+        ['servers', 'members', serverId] as const,
+    roles: (serverId: string | null) => ['servers', 'roles', serverId] as const,
 };
 
-export const useServers = () => {
-    return useQuery({
+export const useServers = (): UseQueryResult<Server[], Error> =>
+    useQuery({
         queryKey: SERVERS_QUERY_KEYS.list,
         queryFn: () => serversApi.getServers(),
     });
-};
 
-export const useServerDetails = (serverId: string | null) => {
-    return useQuery({
-        queryKey: serverId ? SERVERS_QUERY_KEYS.details(serverId) : [],
+export const useServerDetails = (
+    serverId: string | null
+): UseQueryResult<Server, Error> =>
+    useQuery({
+        queryKey: SERVERS_QUERY_KEYS.details(serverId),
         queryFn: () => serversApi.getServerDetails(serverId!),
         enabled: !!serverId,
     });
-};
 
-export const useChannels = (serverId: string | null) => {
-    return useQuery({
-        queryKey: serverId ? SERVERS_QUERY_KEYS.channels(serverId) : [],
+export const useChannels = (
+    serverId: string | null
+): UseQueryResult<Channel[], Error> =>
+    useQuery({
+        queryKey: SERVERS_QUERY_KEYS.channels(serverId),
         queryFn: () => serversApi.getChannels(serverId!),
         enabled: !!serverId,
     });
-};
 
-export const useCategories = (serverId: string | null) => {
-    return useQuery({
-        queryKey: serverId ? SERVERS_QUERY_KEYS.categories(serverId) : [],
+export const useCategories = (
+    serverId: string | null
+): UseQueryResult<Category[], Error> =>
+    useQuery({
+        queryKey: SERVERS_QUERY_KEYS.categories(serverId),
         queryFn: () => serversApi.getCategories(serverId!),
         enabled: !!serverId,
     });
-};
 
-export const useMembers = (serverId: string | null) => {
-    return useQuery({
-        queryKey: serverId ? SERVERS_QUERY_KEYS.members(serverId) : [],
+export const useMembers = (
+    serverId: string | null
+): UseQueryResult<ServerMember[], Error> =>
+    useQuery({
+        queryKey: SERVERS_QUERY_KEYS.members(serverId),
         queryFn: () => serversApi.getMembers(serverId!),
         enabled: !!serverId,
     });
-};
 
-export const useRoles = (serverId: string | null) => {
-    return useQuery({
-        queryKey: serverId ? SERVERS_QUERY_KEYS.roles(serverId) : [],
+export const useRoles = (
+    serverId: string | null
+): UseQueryResult<Role[], Error> =>
+    useQuery({
+        queryKey: SERVERS_QUERY_KEYS.roles(serverId),
         queryFn: () => serversApi.getRoles(serverId!),
         enabled: !!serverId,
     });
-};

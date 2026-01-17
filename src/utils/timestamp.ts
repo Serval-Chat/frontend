@@ -57,7 +57,7 @@ export function shouldGroupMessages(
     prevMsg: Message,
     currentMsg: Message
 ): boolean {
-    const getSenderId = (msg: Message) =>
+    const getSenderId = (msg: Message): string | undefined =>
         msg.senderId || msg.user?._id || msg.user?.username;
 
     const id1 = getSenderId(prevMsg);

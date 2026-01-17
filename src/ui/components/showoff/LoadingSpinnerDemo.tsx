@@ -1,3 +1,5 @@
+import type { ReactNode } from 'react';
+
 import { LoadingSpinner } from '@/ui/components/common/LoadingSpinner';
 import { Stack } from '@/ui/components/layout/Stack';
 
@@ -5,7 +7,7 @@ import { DemoItem } from './DemoItem';
 import { DemoSection } from './DemoSection';
 import { SHOWOFF_SECTIONS } from './config';
 
-export function LoadingSpinnerDemo() {
+export function LoadingSpinnerDemo(): ReactNode {
     return (
         <DemoSection
             id={SHOWOFF_SECTIONS.loadingSpinner}

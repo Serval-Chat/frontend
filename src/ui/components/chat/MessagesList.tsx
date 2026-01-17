@@ -3,6 +3,7 @@ import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type { ProcessedChatMessage } from '@/types/chat.ui';
 import { MessageItem } from '@/ui/components/chat/MessageItem';
 import { LoadingSpinner } from '@/ui/components/common/LoadingSpinner';
+import { Box } from '@/ui/components/layout/Box';
 import { VerticalSpacer } from '@/ui/components/layout/VerticalSpacer';
 
 interface MessagesListProps {
@@ -34,7 +35,7 @@ export const MessagesList: React.FC<MessagesListProps> = ({
         activeHighlightId || null
     );
 
-    const handleReplyClick = (messageId: string) => {
+    const handleReplyClick = (messageId: string): void => {
         setInternalHighlightId(messageId);
         // Clear highlight after animation
         setTimeout(() => setInternalHighlightId(null), 2000);
@@ -42,7 +43,7 @@ export const MessagesList: React.FC<MessagesListProps> = ({
         onReplyClick?.(messageId);
     };
 
-    const handleScroll = () => {
+    const handleScroll = (): void => {
         const container = scrollContainerRef.current;
         if (!container) return;
 
@@ -105,38 +106,38 @@ export const MessagesList: React.FC<MessagesListProps> = ({
     }, [activeHighlightId]);
 
     return (
-        <div
+        <Box
+            className="flex-1 overflow-y-auto min-h-0 relative custom-scrollbar flex flex-col pt-4"
             ref={scrollContainerRef}
             onScroll={handleScroll}
-            className="flex-1 overflow-y-auto min-h-0 relative custom-scrollbar flex flex-col pt-4"
         >
             {hasMore && (
-                <div className="flex justify-center py-4">
+                <Box className="flex justify-center py-4">
                     {isLoadingMore ? (
                         <LoadingSpinner size="sm" />
                     ) : (
                         <button
-                            onClick={onLoadMore}
                             className="text-xs text-foreground-muted hover:text-foreground transition-colors"
+                            onClick={onLoadMore}
                         >
                             Load older messages
                         </button>
                     )}
-                </div>
+                </Box>
             )}
 
             {messages.map((msg, index) => (
                 <MessageItem
+                    disableCustomFonts={disableCustomFonts}
+                    isHighlighted={highlightId === msg._id}
                     key={msg._id}
                     message={msg}
-                    role={msg.role}
                     prevMessage={index > 0 ? messages[index - 1] : undefined}
-                    isHighlighted={highlightId === msg._id}
+                    role={msg.role}
                     onReplyClick={handleReplyClick}
-                    disableCustomFonts={disableCustomFonts}
                 />
             ))}
-            <VerticalSpacer verticalSpace={16} />
-        </div>
+            <VerticalSpacer verticalSpace={20} />
+        </Box>
     );
 };

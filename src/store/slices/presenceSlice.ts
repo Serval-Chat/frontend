@@ -110,4 +110,4 @@ export const {
     updateUserStatus,
     updateUserStatusByUsername,
 } = presenceSlice.actions;
-export default presenceSlice.reducer;
+export const presenceReducer = presenceSlice.reducer;

@@ -4,7 +4,7 @@ export function useFlashText(
     initialText: string,
     flashText: string,
     duration: number
-) {
+): readonly [string, () => void] {
     const [text, setText] = useState(initialText);
     const initialRef = useRef(initialText);
 
@@ -24,14 +24,16 @@ export function useFlashText(
         );
     }, [flashText, duration]);
 
-    useEffect(() => {
-        return () => clearTimeout(timeoutRef.current);
-    }, []);
+    useEffect(() => () => clearTimeout(timeoutRef.current), []);
 
     return [text, flash] as const;
 }
 
-export function useFlash(text: string, flash: string, duration: number = 2500) {
+export function useFlash(
+    text: string,
+    flash: string,
+    duration: number = 2500
+): { label: string; trigger: () => void; isFlashing: boolean } {
     const [label, trigger] = useFlashText(text, flash, duration);
     return { label, trigger, isFlashing: label === flash };
 }
@@ -44,7 +46,7 @@ type FlashConfig = {
 
 export function useFlashGroup<T extends string>(
     configs: Record<T, FlashConfig>
-) {
+): Record<T, { label: string; trigger: () => void; isFlashing: boolean }> {
     const [flashing, setFlashing] = useState<Partial<Record<T, boolean>>>({});
     const configsRef = useRef(configs);
 

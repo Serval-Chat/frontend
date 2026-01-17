@@ -6,14 +6,15 @@ import { Button } from '@/ui/components/common/Button';
 import { Heading } from '@/ui/components/common/Heading';
 import { Input } from '@/ui/components/common/Input';
 import { InputWrapper } from '@/ui/components/common/InputWrapper';
-import { NormalText } from '@/ui/components/common/NormalText';
 import { StatusMessage } from '@/ui/components/common/StatusMessage';
+import { Text } from '@/ui/components/common/Text';
+import { Box } from '@/ui/components/layout/Box';
 import { DefaultBackground } from '@/ui/components/layout/DefaultBackground';
 
 /**
  * @description Register page
  */
-const Register: React.FC = () => {
+export const Register: React.FC = () => {
     const {
         login,
         setLogin,
@@ -28,60 +29,63 @@ const Register: React.FC = () => {
     } = useRegisterForm();
 
     return (
-        <div className="min-h-screen w-full flex flex-col items-center justify-center bg-background relative overflow-hidden p-md">
+        <Box className="min-h-screen w-full flex flex-col items-center justify-center bg-background relative overflow-hidden p-md">
             <DefaultBackground />
 
             {/* Register Box */}
             <FormContent>
-                <div className="text-center space-y-sm">
+                <Box className="text-center space-y-sm">
                     <Heading variant="page">Create an account</Heading>
-                    <NormalText>
+                    <Text as="p">
                         Welcome! You'll need an invite token to join this chat
                         server.
-                    </NormalText>
-                </div>
+                    </Text>
+                </Box>
 
-                <form onSubmit={handleSubmit} className="space-y-md">
+                <form
+                    className="space-y-md"
+                    onSubmit={(e) => void handleSubmit(e)}
+                >
                     <InputWrapper>
                         <Input
-                            type="text"
+                            className="bg-background/50"
                             placeholder="Login"
+                            type="text"
                             value={login}
                             onChange={(e) => setLogin(e.target.value)}
-                            className="bg-background/50"
                         />
                     </InputWrapper>
                     <InputWrapper>
                         <Input
-                            type="text"
+                            className="bg-background/50"
                             placeholder="Username (display name)"
+                            type="text"
                             value={username}
                             onChange={(e) => setUsername(e.target.value)}
-                            className="bg-background/50"
                         />
                     </InputWrapper>
                     <InputWrapper>
                         <Input
-                            type="password"
+                            className="bg-background/50"
                             placeholder="Password"
+                            type="password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
-                            className="bg-background/50"
                         />
                     </InputWrapper>
                     <InputWrapper>
                         <Input
-                            type="text"
+                            className="bg-background/50"
                             placeholder="Invite Token"
+                            type="text"
                             value={inviteToken}
                             onChange={(e) => setInviteToken(e.target.value)}
-                            className="bg-background/50"
                         />
                     </InputWrapper>
                     <Button
+                        className="w-full py-sm text-lg font-semibold"
                         type="submit"
                         variant="normal"
-                        className="w-full py-sm text-lg font-semibold"
                     >
                         Register
                     </Button>
@@ -89,8 +93,6 @@ const Register: React.FC = () => {
 
                 <StatusMessage message={status.message} type={status.type} />
             </FormContent>
-        </div>
+        </Box>
     );
 };
-
-export default Register;

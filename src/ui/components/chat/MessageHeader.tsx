@@ -1,6 +1,8 @@
 import type { Role } from '@/api/servers/servers.types';
 import type { User } from '@/api/users/users.types';
 import { StyledUserName } from '@/ui/components/common/StyledUserName';
+import { Text } from '@/ui/components/common/Text';
+import { Box } from '@/ui/components/layout/Box';
 import { cn } from '@/utils/cn';
 import { formatDiscordTimestamp } from '@/utils/timestamp';
 
@@ -24,26 +26,26 @@ export const MessageHeader: React.FC<MessageHeaderProps> = ({
     if (!isGroupStart) return null;
 
     return (
-        <div className="flex items-baseline gap-2 mb-0.5">
-            <div
-                onClick={onClickName}
+        <Box className="flex items-baseline gap-2 mb-0.5">
+            <Box
                 className={cn(
                     onClickName &&
                         'cursor-pointer hover:underline underline-offset-2'
                 )}
+                onClick={onClickName}
             >
                 <StyledUserName
-                    user={user}
-                    role={role}
                     disableCustomFonts={disableCustomFonts}
+                    role={role}
+                    user={user}
                 >
                     {user.displayName || user.username}
                 </StyledUserName>
-            </div>
+            </Box>
 
-            <span className="text-[10px] text-white/40 font-medium uppercase tracking-wider">
+            <Text className="text-[10px] text-white/40 font-medium uppercase tracking-wider">
                 {formatDiscordTimestamp(timestamp)}
-            </span>
-        </div>
+            </Text>
+        </Box>
     );
 };

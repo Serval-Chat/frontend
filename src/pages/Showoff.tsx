@@ -1,3 +1,5 @@
+import { type ReactNode } from 'react';
+
 import { Heading } from '@/ui/components/common/Heading';
 import { Animations } from '@/ui/components/showoff/Animations';
 import { ChatDemo } from '@/ui/components/showoff/ChatDemo';
@@ -21,7 +23,7 @@ import { UserIdentitiesDemo } from '@/ui/components/showoff/UserIdentitiesDemo';
 import { UserProfilePopupDemo } from '@/ui/components/showoff/UserProfilePopupDemo';
 import { SHOWOFF_SECTIONS } from '@/ui/components/showoff/config';
 
-function Showoff() {
+export const Showoff = (): ReactNode => {
     const sections: TOCProps['sections'] = [
         {
             id: SHOWOFF_SECTIONS.typography,
@@ -144,6 +146,4 @@ function Showoff() {
             <ColorPalette />
         </>
     );
-}
-
-export default Showoff;
+};

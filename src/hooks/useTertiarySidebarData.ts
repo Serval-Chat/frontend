@@ -5,14 +5,27 @@ import {
     useRoles,
     useServerDetails,
 } from '@/api/servers/servers.queries';
-import type { Role } from '@/api/servers/servers.types';
+import type { Role, Server, ServerMember } from '@/api/servers/servers.types';
 import { useMe, useUserById } from '@/api/users/users.queries';
+import type { User } from '@/api/users/users.types';
 import { useAppSelector } from '@/store/hooks';
+
+interface TertiarySidebarDataResult {
+    selectedFriendId: null | string;
+    selectedServerId: null | string;
+    me: undefined | User;
+    friend: undefined | User;
+    serverDetails: Server | undefined;
+    members: ServerMember[] | undefined;
+    isLoadingMembers: boolean;
+    memberRoleMap: Map<string, Role>;
+    roles: Role[] | undefined;
+}
 
 /**
  * @description Hook to manage data fetching and role computation for the TertiarySidebar.
  */
-export const useTertiarySidebarData = () => {
+export const useTertiarySidebarData = (): TertiarySidebarDataResult => {
     const selectedFriendId = useAppSelector(
         (state) => state.nav.selectedFriendId
     );

@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 
 import { useChatWS } from '@/hooks/ws/useChatWS';
 import { useAppSelector } from '@/store/hooks';
-import { Input } from '@/ui/components/common/Input';
+import { TextArea } from '@/ui/components/common/TextArea';
+import { Box } from '@/ui/components/layout/Box';
 
 /**
  * @description Input component for sending messages in the chat.
@@ -26,7 +27,9 @@ export const MessageInput: React.FC = () => {
         selectedChannelId ?? undefined
     );
 
-    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    const handleKeyDown = (
+        e: React.KeyboardEvent<HTMLTextAreaElement>
+    ): void => {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
 
@@ -38,8 +41,9 @@ export const MessageInput: React.FC = () => {
     };
 
     return (
-        <div className="py-2 px-1 bg-background/50 border-t border-border-subtle">
-            <Input
+        <Box className="py-1 px-1">
+            <TextArea
+                className="w-full bg-[var(--bg-msg-input)]"
                 placeholder="Type a message..."
                 value={value}
                 onChange={(e) => {
@@ -47,8 +51,7 @@ export const MessageInput: React.FC = () => {
                     sendTyping();
                 }}
                 onKeyDown={handleKeyDown}
-                className="w-full bg-[var(--bg-msg-input)]"
             />
-        </div>
+        </Box>
     );
 };

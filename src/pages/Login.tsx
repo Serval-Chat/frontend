@@ -7,14 +7,15 @@ import { Heading } from '@/ui/components/common/Heading';
 import { Input } from '@/ui/components/common/Input';
 import { InputWrapper } from '@/ui/components/common/InputWrapper';
 import { MutedText } from '@/ui/components/common/MutedText';
-import { NormalText } from '@/ui/components/common/NormalText';
 import { StatusMessage } from '@/ui/components/common/StatusMessage';
+import { Text } from '@/ui/components/common/Text';
+import { Box } from '@/ui/components/layout/Box';
 import { DefaultBackground } from '@/ui/components/layout/DefaultBackground';
 
 /**
  * @description Login page
  */
-const Login: React.FC = () => {
+export const Login: React.FC = () => {
     const {
         loginInput,
         setLoginInput,
@@ -25,48 +26,50 @@ const Login: React.FC = () => {
     } = useLoginForm();
 
     return (
-        <div className="min-h-screen w-full flex flex-col items-center justify-center bg-background relative overflow-hidden p-md">
+        <Box className="min-h-screen w-full flex flex-col items-center justify-center bg-background relative overflow-hidden p-md">
             <DefaultBackground />
 
             {/* Login Box */}
             <FormContent>
-                <div className="text-center space-y-sm">
+                <Box className="text-center space-y-sm">
                     <Heading variant="page">HELLO!</Heading>
-                    <NormalText>
+                    <Text as="p">
                         If you see this, you need to log in to chat on this
                         server.
-                    </NormalText>
+                    </Text>
                     <MutedText>
-                        Not invited yet? Ask the owner (<b>catflare</b>).
+                        Not invited yet? Ask the owner (
+                        <Text weight="bold">catflare</Text>).
                     </MutedText>
-                    <NormalText>
-                        Got your login info? Enter it below!
-                    </NormalText>
-                </div>
+                    <Text as="p">Got your login info? Enter it below!</Text>
+                </Box>
 
-                <form onSubmit={handleSubmit} className="space-y-md">
+                <form
+                    className="space-y-md"
+                    onSubmit={(e) => void handleSubmit(e)}
+                >
                     <InputWrapper>
                         <Input
-                            type="text"
+                            className="bg-background/50"
                             placeholder="Login"
+                            type="text"
                             value={loginInput}
                             onChange={(e) => setLoginInput(e.target.value)}
-                            className="bg-background/50"
                         />
                     </InputWrapper>
                     <InputWrapper>
                         <Input
-                            type="password"
+                            className="bg-background/50"
                             placeholder="Password"
+                            type="password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
-                            className="bg-background/50"
                         />
                     </InputWrapper>
                     <Button
+                        className="w-full py-sm text-lg font-semibold"
                         type="submit"
                         variant="normal"
-                        className="w-full py-sm text-lg font-semibold"
                     >
                         There we go!
                     </Button>
@@ -74,8 +77,6 @@ const Login: React.FC = () => {
 
                 <StatusMessage message={status.message} type={status.type} />
             </FormContent>
-        </div>
+        </Box>
     );
 };
-
-export default Login;

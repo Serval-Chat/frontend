@@ -7,7 +7,21 @@ import { authApi } from '@/api/auth/auth.api';
 import type { StatusState } from '@/ui/types';
 import { setAuthToken } from '@/utils/authToken';
 
-export const useRegisterForm = () => {
+interface RegisterFormResult {
+    login: string;
+    setLogin: React.Dispatch<React.SetStateAction<string>>;
+    username: string;
+    setUsername: React.Dispatch<React.SetStateAction<string>>;
+    password: string;
+    setPassword: React.Dispatch<React.SetStateAction<string>>;
+    inviteToken: string;
+    setInviteToken: React.Dispatch<React.SetStateAction<string>>;
+    status: StatusState;
+    setStatus: React.Dispatch<React.SetStateAction<StatusState>>;
+    handleSubmit: (e: React.FormEvent) => Promise<void>;
+}
+
+export const useRegisterForm = (): RegisterFormResult => {
     const [login, setLogin] = useState('');
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
@@ -18,7 +32,7 @@ export const useRegisterForm = () => {
     });
     const navigate = useNavigate();
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent): Promise<void> => {
         e.preventDefault();
         setStatus({ message: '', type: '' });
 
@@ -35,7 +49,7 @@ export const useRegisterForm = () => {
                 invite: inviteToken,
             });
             setAuthToken(data.token);
-            navigate('/chat');
+            void navigate('/chat');
         } catch (error: unknown) {
             let errorMessage = 'Registration failed';
             if (isAxiosError(error)) {

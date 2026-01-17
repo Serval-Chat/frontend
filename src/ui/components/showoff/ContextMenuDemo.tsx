@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import React from 'react';
 
 import { Copy, Edit, Info, Star, Trash } from 'lucide-react';
@@ -8,7 +9,7 @@ import {
 } from '@/ui/components/common/ContextMenu';
 import { Heading } from '@/ui/components/common/Heading';
 import { MutedText } from '@/ui/components/common/MutedText';
-import { NormalText } from '@/ui/components/common/NormalText';
+import { Text } from '@/ui/components/common/Text';
 
 export const ContextMenuDemo: React.FC = () => {
     const exampleItems: ContextMenuItem[] = [
@@ -56,9 +57,9 @@ export const ContextMenuDemo: React.FC = () => {
                 <Heading variant="sub">Context Menu (Right Click)</Heading>
             </div>
 
-            <ContextMenu items={exampleItems} className="w-full">
+            <ContextMenu className="w-full" items={exampleItems}>
                 <div className="w-full h-32 flex flex-col items-center justify-center border-2 border-dashed border-[--color-border-subtle] rounded-xl bg-[--color-bg-subtle] hover:bg-[--color-bg-secondary] transition-colors cursor-context-menu group p-md">
-                    <NormalText>Right click me!</NormalText>
+                    <Text>Right click me!</Text>
                     <MutedText className="flex items-center justify-center mt-2">
                         <Info className="w-3.5 h-3.5 mr-1.5" />
                         Right click me (trust me)
