@@ -87,8 +87,16 @@ export const StyledUserName: React.FC<StyledUserNameProps> = ({
         }
     }
 
-    // Disable glow if in a server
-    const hasGlow = !role && usernameGlow?.enabled;
+    // Enable glow if user has it enabled
+    const hasGlow = usernameGlow?.enabled;
+
+    // Determine the color to use for the glow
+    const baseColor =
+        solidColor ||
+        role?.colors?.[0] ||
+        user?.usernameGradient?.colors?.[0] ||
+        role?.startColor ||
+        usernameGlow?.color;
 
     const containerStyle: React.CSSProperties = {
         fontFamily: usernameFont || undefined,
@@ -97,7 +105,7 @@ export const StyledUserName: React.FC<StyledUserNameProps> = ({
 
     const glowStyle: React.CSSProperties = hasGlow
         ? {
-              textShadow: `0 0 1px ${usernameGlow.color}, 0 0 2px ${usernameGlow.color}, 0 0 3px ${usernameGlow.color}`,
+              textShadow: `0 0 1px ${baseColor}, 0 0 2px ${baseColor}, 0 0 3px ${baseColor}`,
               color: 'transparent',
           }
         : { visibility: 'hidden' };
