@@ -26,7 +26,7 @@ export const TertiarySidebar: React.FC = () => {
         <Box
             as="aside"
             className={cn(
-                'h-full w-[240px] shrink-0 overflow-y-auto overflow-x-hidden custom-scrollbar bg-[var(--tertiary-bg)]'
+                'h-full w-[240px] shrink-0 overflow-y-auto overflow-x-hidden custom-scrollbar bg-[var(--tertiary-bg)]',
             )}
         >
             <Box className="p-3 flex flex-col gap-4">

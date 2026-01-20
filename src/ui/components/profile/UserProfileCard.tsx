@@ -43,7 +43,7 @@ export const UserProfileCard: React.FC<UserProfileCardProps> = ({
 }) => {
     const userId = user?._id;
     const presence = useAppSelector((state) =>
-        userId ? state.presence.users[userId] : undefined
+        userId ? state.presence.users[userId] : undefined,
     );
 
     const finalStatus = (propPresenceStatus ||
@@ -60,7 +60,7 @@ export const UserProfileCard: React.FC<UserProfileCardProps> = ({
     const userBio = user?.bio;
     const bioNodes = useMemo(
         () => (userBio ? parseText(userBio, ParserPresets.BIO) : []),
-        [userBio]
+        [userBio],
     );
 
     return (
@@ -185,7 +185,7 @@ export const UserProfileCard: React.FC<UserProfileCardProps> = ({
                                             day: 'numeric',
                                             month: 'short',
                                             year: 'numeric',
-                                        }
+                                        },
                                     )}
                             </Text>
                         </Box>
@@ -208,7 +208,7 @@ export const UserProfileCard: React.FC<UserProfileCardProps> = ({
                                             day: 'numeric',
                                             month: 'short',
                                             year: 'numeric',
-                                        }
+                                        },
                                     )}
                                 </Text>
                             </Box>

@@ -11,6 +11,7 @@ interface StyledUserNameProps {
     className?: string;
     disableCustomFonts?: boolean;
     glowIntensity?: number;
+    disableGlow?: boolean;
 }
 
 const glowIntensity = 0.7;
@@ -21,6 +22,7 @@ export const StyledUserName: React.FC<StyledUserNameProps> = ({
     children,
     className,
     disableCustomFonts,
+    disableGlow,
 }) => {
     if (!user && !role) {
         return (
@@ -89,8 +91,8 @@ export const StyledUserName: React.FC<StyledUserNameProps> = ({
         }
     }
 
-    // Enable glow if user has it enabled
-    const hasGlow = usernameGlow?.enabled;
+    // Enable glow if user has it enabled and glow is not disabled
+    const hasGlow = !disableGlow && usernameGlow?.enabled;
 
     const containerStyle: React.CSSProperties = {
         fontFamily: usernameFont || undefined,
@@ -143,7 +145,7 @@ export const StyledUserName: React.FC<StyledUserNameProps> = ({
                                     filter: `blur(${1 * glowIntensity}px) brightness(${1 + glowIntensity})`,
                                     opacity: Math.min(
                                         1,
-                                        0.8 + glowIntensity * 0.2
+                                        0.8 + glowIntensity * 0.2,
                                     ),
                                     zIndex: 'var(--z-effect-sm)',
                                     color: hasGradient
@@ -168,7 +170,7 @@ export const StyledUserName: React.FC<StyledUserNameProps> = ({
                                     filter: `blur(${2.5 * glowIntensity}px) brightness(${1 + glowIntensity * 0.8})`,
                                     opacity: Math.min(
                                         0.9,
-                                        0.6 + glowIntensity * 0.2
+                                        0.6 + glowIntensity * 0.2,
                                     ),
                                     zIndex: 'var(--z-effect-md)',
                                     color: hasGradient
@@ -193,7 +195,7 @@ export const StyledUserName: React.FC<StyledUserNameProps> = ({
                                     filter: `blur(${4 * glowIntensity}px) brightness(${1 + glowIntensity * 0.5})`,
                                     opacity: Math.min(
                                         0.8,
-                                        0.4 + glowIntensity * 0.2
+                                        0.4 + glowIntensity * 0.2,
                                     ),
                                     zIndex: 'var(--z-effect-lg)',
                                     color: hasGradient
@@ -224,7 +226,7 @@ export const StyledUserName: React.FC<StyledUserNameProps> = ({
         <Text
             className={cn(
                 'font-medium truncate text-sm w-fit inline-flex items-center',
-                className
+                className,
             )}
             style={containerStyle}
         >

@@ -10,7 +10,7 @@ import { cn } from '@/utils/cn';
  */
 export const MainContent: React.FC = () => {
     const { selectedFriendId, selectedChannelId } = useAppSelector(
-        (state) => state.nav
+        (state) => state.nav,
     );
 
     const isNothingSelected = !selectedFriendId && !selectedChannelId;
@@ -18,7 +18,7 @@ export const MainContent: React.FC = () => {
     return (
         <main
             className={cn(
-                'flex-1 flex flex-col relative z-content overflow-hidden'
+                'flex-1 flex flex-col relative z-content overflow-hidden',
             )}
         >
             {isNothingSelected ? <FriendRequestList /> : <MainChat />}

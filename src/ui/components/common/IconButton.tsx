@@ -20,7 +20,7 @@ export const IconButton: React.FC<IconButtonProps> = ({
         className={cn(
             'rounded-xl hover:rounded-lg transition-all duration-200',
             className,
-            isActive && 'bg-primary/20 text-primary'
+            isActive && 'bg-primary/20 text-primary',
         )}
         variant="nav"
         // eslint-disable-next-line react/jsx-props-no-spreading

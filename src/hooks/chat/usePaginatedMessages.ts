@@ -11,7 +11,7 @@ interface PaginatedMessagesResult {
     rawMessagesData: InfiniteData<ChatMessage[], unknown> | undefined;
     isLoading: boolean;
     fetchNextPage: (
-        options?: FetchNextPageOptions
+        options?: FetchNextPageOptions,
     ) => Promise<
         InfiniteQueryObserverResult<InfiniteData<ChatMessage[], unknown>, Error>
     >;
@@ -25,12 +25,12 @@ interface PaginatedMessagesResult {
 export const usePaginatedMessages = (
     selectedFriendId: string | null,
     selectedServerId: string | null,
-    selectedChannelId: string | null
+    selectedChannelId: string | null,
 ): PaginatedMessagesResult => {
     const userMessages = useUserMessages(selectedFriendId);
     const channelMessages = useChannelMessages(
         selectedServerId,
-        selectedChannelId
+        selectedChannelId,
     );
 
     if (selectedFriendId) {

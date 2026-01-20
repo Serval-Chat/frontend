@@ -47,7 +47,7 @@ export const useAutoHighlight = (sectionIds: string[]): void => {
                     'rgba(59, 130, 246, 0)',
                 ],
             },
-            { duration: 1.5, times: [0, 0.2, 1] }
+            { duration: 1.5, times: [0, 0.2, 1] },
         );
 
         // remove highlight after animation

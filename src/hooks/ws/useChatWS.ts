@@ -27,7 +27,7 @@ interface ChatWSResult {
 export function useChatWS(
     selectedFriendId?: string,
     selectedServerId?: string,
-    selectedChannelId?: string
+    selectedChannelId?: string,
 ): ChatWSResult {
     const { data: user } = useMe();
     const queryClient = useQueryClient();
@@ -45,7 +45,7 @@ export function useChatWS(
             replyToId: message.replyToId,
             isEdited: message.isEdited,
         }),
-        []
+        [],
     );
 
     const convertServerMessageToChatMessage = useCallback(
@@ -62,7 +62,7 @@ export function useChatWS(
             webhookUsername: message.webhookUsername,
             webhookAvatarUrl: message.webhookAvatarUrl,
         }),
-        []
+        [],
     );
 
     // Helper to add message to cache
@@ -88,10 +88,10 @@ export function useChatWS(
                             ...oldData.pages.slice(1),
                         ],
                     };
-                }
+                },
             );
         },
-        [queryClient]
+        [queryClient],
     );
 
     // Handle incoming DMs
@@ -106,12 +106,12 @@ export function useChatWS(
                 ) {
                     addMessageToCache(
                         CHAT_QUERY_KEYS.userMessages(selectedFriendId),
-                        convertDmToChatMessage(message)
+                        convertDmToChatMessage(message),
                     );
                 }
             },
-            [selectedFriendId, addMessageToCache, convertDmToChatMessage]
-        )
+            [selectedFriendId, addMessageToCache, convertDmToChatMessage],
+        ),
     );
 
     // Handle DM sent acknowledgment
@@ -126,12 +126,12 @@ export function useChatWS(
                 ) {
                     addMessageToCache(
                         CHAT_QUERY_KEYS.userMessages(selectedFriendId),
-                        convertDmToChatMessage(message)
+                        convertDmToChatMessage(message),
                     );
                 }
             },
-            [selectedFriendId, addMessageToCache, convertDmToChatMessage]
-        )
+            [selectedFriendId, addMessageToCache, convertDmToChatMessage],
+        ),
     );
 
     // Handle incoming server messages
@@ -147,9 +147,9 @@ export function useChatWS(
                     addMessageToCache(
                         CHAT_QUERY_KEYS.channelMessages(
                             selectedServerId,
-                            selectedChannelId
+                            selectedChannelId,
                         ),
-                        convertServerMessageToChatMessage(message)
+                        convertServerMessageToChatMessage(message),
                     );
                 }
             },
@@ -158,8 +158,8 @@ export function useChatWS(
                 selectedServerId,
                 addMessageToCache,
                 convertServerMessageToChatMessage,
-            ]
-        )
+            ],
+        ),
     );
 
     // Handle server message sent acknowledgment
@@ -175,9 +175,9 @@ export function useChatWS(
                     addMessageToCache(
                         CHAT_QUERY_KEYS.channelMessages(
                             selectedServerId,
-                            selectedChannelId
+                            selectedChannelId,
                         ),
-                        convertServerMessageToChatMessage(message)
+                        convertServerMessageToChatMessage(message),
                     );
                 }
             },
@@ -186,8 +186,8 @@ export function useChatWS(
                 selectedServerId,
                 addMessageToCache,
                 convertServerMessageToChatMessage,
-            ]
-        )
+            ],
+        ),
     );
 
     // Auto-join server when selectedServerId changes
@@ -217,8 +217,8 @@ export function useChatWS(
                     addTypingUser(payload.senderId, payload.senderUsername);
                 }
             },
-            [selectedFriendId, user?._id, addTypingUser]
-        )
+            [selectedFriendId, user?._id, addTypingUser],
+        ),
     );
 
     // Handle typing indicators for server messages
@@ -238,8 +238,8 @@ export function useChatWS(
                     addTypingUser(payload.senderId, payload.senderUsername);
                 }
             },
-            [selectedChannelId, user?._id, addTypingUser]
-        )
+            [selectedChannelId, user?._id, addTypingUser],
+        ),
     );
 
     // Clear typing users when conversation changes
@@ -256,11 +256,11 @@ export function useChatWS(
                     selectedServerId,
                     selectedChannelId,
                     text,
-                    replyToId
+                    replyToId,
                 );
             }
         },
-        [selectedFriendId, selectedServerId, selectedChannelId]
+        [selectedFriendId, selectedServerId, selectedChannelId],
     );
 
     const sendTyping = useCallback(() => {

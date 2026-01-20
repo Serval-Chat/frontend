@@ -40,7 +40,7 @@ export const ServerSidebarSection: React.FC<ServerSidebarSectionProps> = ({
         const getGroup = (
             id: string,
             name: string,
-            position: number
+            position: number,
         ): MemberGroup => {
             if (!groupsMap.has(id)) {
                 groupsMap.set(id, { id, name, members: [], position });
@@ -85,7 +85,7 @@ export const ServerSidebarSection: React.FC<ServerSidebarSectionProps> = ({
                 const group = getGroup(
                     highestSeparatedRole._id,
                     highestSeparatedRole.name,
-                    highestSeparatedRole.position
+                    highestSeparatedRole.position,
                 );
                 group.members.push(member);
             } else {
@@ -121,9 +121,10 @@ export const ServerSidebarSection: React.FC<ServerSidebarSectionProps> = ({
                             <div className="space-y-[2px]">
                                 {group.members.map((member) => (
                                     <UserItem
+                                        disableGlow
                                         noFetch
                                         allRoles={roles?.filter((r) =>
-                                            member.roles.includes(r._id)
+                                            member.roles.includes(r._id),
                                         )}
                                         disableCustomFonts={
                                             serverDetails?.disableCustomFonts

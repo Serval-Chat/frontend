@@ -3,7 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 export function useFlashText(
     initialText: string,
     flashText: string,
-    duration: number
+    duration: number,
 ): readonly [string, () => void] {
     const [text, setText] = useState(initialText);
     const initialRef = useRef(initialText);
@@ -12,7 +12,7 @@ export function useFlashText(
         initialRef.current = initialText;
     }, [initialText]);
     const timeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(
-        undefined
+        undefined,
     );
 
     const flash = useCallback(() => {
@@ -20,7 +20,7 @@ export function useFlashText(
         setText(flashText);
         timeoutRef.current = setTimeout(
             () => setText(initialRef.current),
-            duration
+            duration,
         );
     }, [flashText, duration]);
 
@@ -32,7 +32,7 @@ export function useFlashText(
 export function useFlash(
     text: string,
     flash: string,
-    duration: number = 2500
+    duration: number = 2500,
 ): { label: string; trigger: () => void; isFlashing: boolean } {
     const [label, trigger] = useFlashText(text, flash, duration);
     return { label, trigger, isFlashing: label === flash };
@@ -45,7 +45,7 @@ type FlashConfig = {
 };
 
 export function useFlashGroup<T extends string>(
-    configs: Record<T, FlashConfig>
+    configs: Record<T, FlashConfig>,
 ): Record<T, { label: string; trigger: () => void; isFlashing: boolean }> {
     const [flashing, setFlashing] = useState<Partial<Record<T, boolean>>>({});
     const configsRef = useRef(configs);
@@ -55,7 +55,7 @@ export function useFlashGroup<T extends string>(
     }, [configs]);
 
     const timeoutsRef = useRef<Record<string, ReturnType<typeof setTimeout>>>(
-        {}
+        {},
     );
 
     const trigger = useCallback((key: T) => {

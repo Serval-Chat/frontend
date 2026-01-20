@@ -30,7 +30,7 @@ export const MessageHeader: React.FC<MessageHeaderProps> = ({
             <Box
                 className={cn(
                     onClickName &&
-                        'cursor-pointer hover:underline underline-offset-2'
+                        'cursor-pointer hover:underline underline-offset-2',
                 )}
                 onClick={onClickName}
             >

@@ -17,7 +17,7 @@ export const useMe = (): UseQueryResult<User, Error> =>
 
 export const useUserById = (
     id: string,
-    options: { enabled?: boolean } = {}
+    options: { enabled?: boolean } = {},
 ): UseQueryResult<User, Error> =>
     useQuery({
         queryKey: ['user', id],
@@ -35,7 +35,7 @@ export const useUpdateBio = (): UseMutationResult<
         mutationFn: usersApi.updateBio,
         onSuccess: (data) => {
             queryClient.setQueryData<User>(['me'], (old) =>
-                old ? { ...old, bio: data.bio } : old
+                old ? { ...old, bio: data.bio } : old,
             );
         },
     });
@@ -51,7 +51,7 @@ export const useUpdatePronouns = (): UseMutationResult<
         mutationFn: usersApi.updatePronouns,
         onSuccess: (data) => {
             queryClient.setQueryData<User>(['me'], (old) =>
-                old ? { ...old, pronouns: data.pronouns } : old
+                old ? { ...old, pronouns: data.pronouns } : old,
             );
         },
     });
@@ -67,7 +67,7 @@ export const useUpdateDisplayName = (): UseMutationResult<
         mutationFn: usersApi.updateDisplayName,
         onSuccess: (data) => {
             queryClient.setQueryData<User>(['me'], (old) =>
-                old ? { ...old, displayName: data.displayName } : old
+                old ? { ...old, displayName: data.displayName } : old,
             );
         },
     });
@@ -83,7 +83,7 @@ export const useUpdateUsername = (): UseMutationResult<
         mutationFn: usersApi.updateUsername,
         onSuccess: (data) => {
             queryClient.setQueryData<User>(['me'], (old) =>
-                old ? { ...old, username: data.username } : old
+                old ? { ...old, username: data.username } : old,
             );
         },
     });
@@ -123,7 +123,7 @@ export const useUpdateStyle = (): UseMutationResult<
                               data.usernameGradient ?? old.usernameGradient,
                           usernameGlow: data.usernameGlow ?? old.usernameGlow,
                       }
-                    : old
+                    : old,
             );
         },
     });
@@ -139,7 +139,7 @@ export const useUpdateLanguage = (): UseMutationResult<
         mutationFn: usersApi.updateLanguage,
         onSuccess: (data) => {
             queryClient.setQueryData<User>(['me'], (old) =>
-                old ? { ...old, language: data.language } : old
+                old ? { ...old, language: data.language } : old,
             );
         },
     });

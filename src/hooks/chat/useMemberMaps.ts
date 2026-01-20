@@ -15,7 +15,7 @@ interface MemberMapsResult {
  */
 export const useMemberMaps = (
     members?: ServerMember[],
-    roles?: Role[]
+    roles?: Role[],
 ): MemberMapsResult => {
     // Lookup for user objects by userId
     const serverMemberMap = React.useMemo(() => {

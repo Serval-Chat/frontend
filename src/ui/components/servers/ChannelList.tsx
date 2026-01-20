@@ -24,14 +24,14 @@ export const ChannelList: React.FC<ChannelListProps> = ({
 }) => {
     // Sort items by position
     const sortedCategories = [...categories].sort(
-        (a, b) => a.position - b.position
+        (a, b) => a.position - b.position,
     );
     const sortedChannels = [...channels].sort(
-        (a, b) => a.position - b.position
+        (a, b) => a.position - b.position,
     );
 
     const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(
-        new Set()
+        new Set(),
     );
 
     const toggleCategory = (categoryId: string): void => {
@@ -54,7 +54,7 @@ export const ChannelList: React.FC<ChannelListProps> = ({
             acc[catId].push(channel);
             return acc;
         },
-        {} as Record<string, Channel[]>
+        {} as Record<string, Channel[]>,
     );
 
     return (
@@ -115,7 +115,7 @@ export const ChannelList: React.FC<ChannelListProps> = ({
                                                 onChannelSelect(channel._id)
                                             }
                                         />
-                                    )
+                                    ),
                                 )}
                             </div>
                         )}

@@ -31,7 +31,7 @@ export const ServerIcon: React.FC<ServerIconProps> = ({
                 'bg-[--color-bg-subtle] text-foreground-muted hover:bg-[--color-primary] hover:text-foreground-inverse',
                 isActive
                     ? 'rounded-[0.75rem] bg-[--color-primary] text-foreground-inverse'
-                    : 'rounded-[1.2rem] hover:rounded-[0.75rem]'
+                    : 'rounded-[1.2rem] hover:rounded-[0.75rem]',
             )}
             role="button"
             tabIndex={0}

@@ -5,8 +5,6 @@ import type { LucideIcon } from 'lucide-react';
 import { createPortal } from 'react-dom';
 
 import { useSmartPosition } from '@/hooks/useSmartPosition';
-import { Button } from '@/ui/components/common/Button';
-import { Text } from '@/ui/components/common/Text';
 import { Box } from '@/ui/components/layout/Box';
 import { cn } from '@/utils/cn';
 
@@ -93,7 +91,7 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
                     <AnimatePresence>
                         <motion.div
                             animate={{ opacity: 1, scale: 1, y: 0 }}
-                            className="min-w-[200px] bg-[var(--color-background)] border border-[var(--color-bg-secondary)] rounded-xl shadow-xl overflow-hidden backdrop-blur-md py-1.5"
+                            className="min-w-[220px] bg-[var(--color-background)] border border-[var(--color-border-subtle)] rounded-lg shadow-lg overflow-hidden backdrop-blur-md py-2"
                             exit={{ opacity: 0, scale: 0.95, y: -10 }}
                             initial={{ opacity: 0, scale: 0.95, y: -10 }}
                             ref={menuRef}
@@ -102,52 +100,73 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
                                 top: position.y,
                                 left: position.x,
                                 zIndex: 'var(--z-top)',
+                                boxShadow:
+                                    '0 10px 30px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 190, 0, 0.1)',
                             }}
-                            transition={{ duration: 0.1, ease: 'easeOut' }}
+                            transition={{ duration: 0.15, ease: 'easeOut' }}
                         >
                             {items.map((item, index) => {
                                 if (item.type === 'divider') {
                                     return (
                                         <Box
-                                            className="h-px bg-[var(--color-bg-secondary)] my-1"
+                                            className="h-px bg-[var(--color-divider)] my-1.5"
                                             key={`divider-${index}`} // eslint-disable-line react/no-array-index-key
                                         />
                                     );
                                 }
 
                                 const Icon = item.icon;
-                                const variant =
-                                    item.variant === 'normal'
-                                        ? 'ghost'
-                                        : item.variant || 'ghost';
+
+                                // Determine text color based on variant
+                                const getTextColorClass = (): string => {
+                                    switch (item.variant) {
+                                        case 'danger':
+                                            return 'text-[var(--color-danger)] hover:brightness-110';
+                                        case 'caution':
+                                            return 'text-[var(--color-caution)] hover:brightness-110';
+                                        case 'success':
+                                            return 'text-[var(--color-success)] hover:brightness-110';
+                                        case 'primary':
+                                            return 'text-[var(--color-primary)] hover:brightness-110';
+                                        default:
+                                            return 'text-[var(--color-foreground)] hover:brightness-110';
+                                    }
+                                };
 
                                 return (
-                                    <Button
-                                        className="w-full justify-start px-3 py-2 text-sm transition-colors group h-auto font-normal rounded-none"
+                                    <div
+                                        className={cn(
+                                            'w-full flex items-center px-3 py-2.5 text-sm transition-all duration-150 cursor-pointer select-none',
+                                            getTextColorClass(),
+                                        )}
                                         key={item.label}
-                                        variant={variant}
+                                        role="button"
+                                        tabIndex={0}
                                         onClick={() => {
                                             item.onClick();
                                             closeMenu();
                                         }}
+                                        onKeyDown={(e) => {
+                                            if (
+                                                e.key === 'Enter' ||
+                                                e.key === ' '
+                                            ) {
+                                                e.preventDefault();
+                                                item.onClick();
+                                                closeMenu();
+                                            }
+                                        }}
                                     >
-                                        <Icon
-                                            className={cn(
-                                                'w-4 h-4 mr-3 opacity-70 group-hover:opacity-100 transition-opacity',
-                                                item.variant &&
-                                                    item.variant !== 'normal' &&
-                                                    'opacity-100'
-                                            )}
-                                        />
-                                        <Text as="span" className="font-medium">
+                                        <Icon className="w-4 h-4 mr-3" />
+                                        <span className="font-medium">
                                             {item.label}
-                                        </Text>
-                                    </Button>
+                                        </span>
+                                    </div>
                                 );
                             })}
                         </motion.div>
                     </AnimatePresence>,
-                    document.body
+                    document.body,
                 )}
         </>
     );

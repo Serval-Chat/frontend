@@ -25,7 +25,7 @@ const presenceSlice = createSlice({
             state,
             action: PayloadAction<
                 Array<{ userId: string; username: string; status?: string }>
-            >
+            >,
         ) => {
             state.users = {};
             action.payload.forEach((user) => {
@@ -43,7 +43,7 @@ const presenceSlice = createSlice({
                 userId: string;
                 username: string;
                 status?: string;
-            }>
+            }>,
         ) => {
             state.users[action.payload.userId] = {
                 userId: action.payload.userId,
@@ -54,7 +54,7 @@ const presenceSlice = createSlice({
         },
         setUserOffline: (
             state,
-            action: PayloadAction<{ userId: string; username: string }>
+            action: PayloadAction<{ userId: string; username: string }>,
         ) => {
             if (state.users[action.payload.userId]) {
                 state.users[action.payload.userId].status = 'offline';
@@ -72,7 +72,7 @@ const presenceSlice = createSlice({
                 userId: string;
                 username: string;
                 status: string;
-            }>
+            }>,
         ) => {
             if (state.users[action.payload.userId]) {
                 state.users[action.payload.userId].customStatus =
@@ -90,7 +90,7 @@ const presenceSlice = createSlice({
             action: PayloadAction<{
                 username: string;
                 customStatus: string | undefined;
-            }>
+            }>,
         ) => {
             // Find users by username and update their custom status
             Object.values(state.users).forEach((user) => {

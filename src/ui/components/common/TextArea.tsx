@@ -17,7 +17,7 @@ const textAreaVariants = cva(
         defaultVariants: {
             disabled: false,
         },
-    }
+    },
 );
 
 export interface TextAreaProps
@@ -52,7 +52,7 @@ const TextArea = React.forwardRef<HTMLTextAreaElement, TextAreaProps>(
                 {...props}
             />
         );
-    }
+    },
 );
 TextArea.displayName = 'TextArea';
 

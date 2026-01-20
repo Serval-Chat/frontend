@@ -11,7 +11,7 @@ export const FriendList: React.FC = () => {
     const { data: friends, isLoading } = useFriends();
     const dispatch = useAppDispatch();
     const selectedFriendId = useAppSelector(
-        (state) => state.nav.selectedFriendId
+        (state) => state.nav.selectedFriendId,
     );
 
     const handleFriendClick = (friendId: string): void => {

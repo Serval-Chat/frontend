@@ -50,7 +50,6 @@ export default tseslint.config(
         { allowSameFolder: true, rootDir: 'src', prefix: '@' },
       ],
 
-      // 1. React-specific rules
       'react/jsx-uses-react': 'off',
       'react/react-in-jsx-scope': 'off',
       'react/jsx-boolean-value': ['warn', 'never'],
@@ -59,43 +58,25 @@ export default tseslint.config(
       'react/jsx-no-useless-fragment': 'warn',
       'react/jsx-props-no-spreading': ['warn', { html: 'ignore', custom: 'enforce' }],
       'react/no-array-index-key': 'warn',
-
-      // 2. TypeScript-specific rules
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
       '@typescript-eslint/no-explicit-any': 'warn',
       '@typescript-eslint/consistent-type-imports': ['error', { prefer: 'type-imports' }],
       '@typescript-eslint/explicit-function-return-type': ['warn', { allowExpressions: true }],
-
-      // Type-aware rules through tseslint
       '@typescript-eslint/no-floating-promises': 'warn',
       '@typescript-eslint/no-misused-promises': 'warn',
       '@typescript-eslint/await-thenable': 'warn',
 
-      // 3. Code style & consistency
-      'semi': ['error', 'always'],
-      'quotes': ['error', 'single', { avoidEscape: true }],
-      'comma-dangle': ['error', 'always-multiline'],
-      'object-curly-spacing': ['error', 'always'],
+      'semi': 'off',
+      'quotes': 'off',
+      'comma-dangle': 'off',
+      'object-curly-spacing': 'off',
       'arrow-body-style': ['warn', 'as-needed'],
       'prefer-const': 'error',
       'no-console': ['warn', { allow: ['warn', 'error'] }],
 
-      // 4. Import/order & module hygiene
-      'import/order': [
-        'error',
-        {
-          groups: ['builtin', 'external', 'internal', ['parent', 'sibling', 'index']],
-          pathGroups: [{ pattern: '@/**', group: 'internal' }],
-          alphabetize: { order: 'asc', caseInsensitive: true },
-          'newlines-between': 'always',
-        },
-      ],
+      'import/order': 'off',
       'import/no-default-export': 'warn',
-
-      // 5. React Hooks enhancements
       'react-hooks/exhaustive-deps': 'warn',
-
-      // 6. Optional: Performance / Best Practices
       '@typescript-eslint/ban-ts-comment': ['warn', { 'ts-ignore': 'allow-with-description' }],
     },
   },

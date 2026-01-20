@@ -32,7 +32,7 @@ export const MessagesList: React.FC<MessagesListProps> = ({
     const [isAtBottom, setIsAtBottom] = useState(true);
     const lastScrollHeightRef = useRef<number>(0);
     const [highlightId, setInternalHighlightId] = useState<string | null>(
-        activeHighlightId || null
+        activeHighlightId || null,
     );
 
     const handleReplyClick = (messageId: string): void => {

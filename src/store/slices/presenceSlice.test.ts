@@ -56,7 +56,7 @@ describe('presenceSlice', () => {
         };
         const state = presenceReducer(
             existingState,
-            setUserOffline({ userId: '1', username: 'alice' })
+            setUserOffline({ userId: '1', username: 'alice' }),
         );
         expect(state.users['1'].status).toBe('offline');
     });
@@ -64,7 +64,7 @@ describe('presenceSlice', () => {
     it('should handle setUserOffline for unknown user', () => {
         const state = presenceReducer(
             initialState,
-            setUserOffline({ userId: '2', username: 'bob' })
+            setUserOffline({ userId: '2', username: 'bob' }),
         );
         expect(state.users['2']).toEqual({
             userId: '2',
@@ -93,7 +93,7 @@ describe('presenceSlice', () => {
             updateUserStatusByUsername({
                 username: 'alice',
                 customStatus: 'Eating',
-            })
+            }),
         );
         expect(state.users['1'].customStatus).toBe('Eating');
         expect(state.users['2'].customStatus).toBeUndefined();

@@ -10,7 +10,7 @@ import { warningsApi } from './warnings.api';
 import type { Warning } from './warnings.types';
 
 export const useMyWarnings = (
-    acknowledged?: boolean
+    acknowledged?: boolean,
 ): UseQueryResult<Warning[], Error> =>
     useQuery({
         queryKey: ['warnings', { acknowledged }],

@@ -64,7 +64,7 @@ export const Text: React.FC<TextProps> = ({
 }) => (
     <Tag
         className={cn(
-            textVariants({ variant, size, weight, fontStyle, className })
+            textVariants({ variant, size, weight, fontStyle, className }),
         )}
         // eslint-disable-next-line react/jsx-props-no-spreading
         {...props}

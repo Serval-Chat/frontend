@@ -30,17 +30,17 @@ export const AccountSettings: React.FC = () => {
 
     const [displayName, setDisplayName] = useState(user?.displayName || '');
     const [originalDisplayName, setOriginalDisplayName] = useState(
-        user?.displayName || ''
+        user?.displayName || '',
     );
 
     const [username, setUsername] = useState(user?.username || '');
     const [originalUsername, setOriginalUsername] = useState(
-        user?.username || ''
+        user?.username || '',
     );
 
     const [pronouns, setPronouns] = useState(user?.pronouns || '');
     const [originalPronouns, setOriginalPronouns] = useState(
-        user?.pronouns || ''
+        user?.pronouns || '',
     );
 
     const [bio, setBio] = useState(user?.bio || '');

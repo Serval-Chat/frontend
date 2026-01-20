@@ -28,7 +28,7 @@ export const PrimaryNavBar: React.FC = () => {
             className={cn(
                 'h-full flex flex-col items-center py-3 gap-3',
                 'bg-[--color-background]',
-                'w-[72px] shrink-0'
+                'w-[72px] shrink-0',
             )}
         >
             <Box>

@@ -28,7 +28,7 @@ const TOCItem: React.FC<{ section: TOCSection }> = ({ section }) => {
                 {hasChildren && (
                     <button
                         className={cn(
-                            'w-4 h-4 flex items-center justify-center text-sm text-muted-foreground hover:text-muted-foreground-hover'
+                            'w-4 h-4 flex items-center justify-center text-sm text-muted-foreground hover:text-muted-foreground-hover',
                         )}
                         onClick={() => setIsOpen(!isOpen)}
                     >
@@ -38,7 +38,7 @@ const TOCItem: React.FC<{ section: TOCSection }> = ({ section }) => {
                 {!hasChildren && <span className="w-4 h-4 shrink-0" />}
                 <a
                     className={cn(
-                        'hover:text-primary hover:underline transition-colors duration-150 font-sans'
+                        'hover:text-primary hover:underline transition-colors duration-150 font-sans',
                     )}
                     href={`#${section.id}`}
                 >

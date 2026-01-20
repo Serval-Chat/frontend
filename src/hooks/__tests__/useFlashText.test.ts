@@ -14,7 +14,7 @@ describe('useFlashText', () => {
 
     it('should flash the text and reset after duration', () => {
         const { result } = renderHook(() =>
-            useFlashText('initial', 'flash', 1000)
+            useFlashText('initial', 'flash', 1000),
         );
 
         expect(result.current[0]).toBe('initial');
@@ -35,7 +35,7 @@ describe('useFlashText', () => {
     it('should use the latest initialText when resetting', () => {
         const { result, rerender } = renderHook(
             ({ initial }) => useFlashText(initial, 'flash', 1000),
-            { initialProps: { initial: 'initial1' } }
+            { initialProps: { initial: 'initial1' } },
         );
 
         act(() => {

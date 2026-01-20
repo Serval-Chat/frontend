@@ -124,6 +124,6 @@ export const ProfilePopup: React.FC<ProfilePopupProps> = ({
                 </Box>
             )}
         </AnimatePresence>,
-        document.body
+        document.body,
     );
 };

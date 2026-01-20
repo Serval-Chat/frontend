@@ -32,7 +32,7 @@ export const UserProfilePicture: React.FC<UserProfilePictureProps> = ({
         className={cn(
             'relative inline-block',
             onClick && 'cursor-pointer',
-            className
+            className,
         )}
         onClick={onClick}
     >

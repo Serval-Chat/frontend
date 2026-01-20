@@ -22,7 +22,7 @@ export const Spoiler: React.FC<SpoilerProps> = ({ children, className }) => {
                 isRevealed
                     ? 'bg-[var(--color-bg-secondary)]'
                     : 'bg-[var(--color-background)] hover:brightness-110 select-none',
-                className
+                className,
             )}
             onClick={() => setIsRevealed(true)}
         >
@@ -30,7 +30,7 @@ export const Spoiler: React.FC<SpoilerProps> = ({ children, className }) => {
                 as="span"
                 className={cn(
                     'transition-opacity duration-200',
-                    isRevealed ? 'opacity-100' : 'opacity-0'
+                    isRevealed ? 'opacity-100' : 'opacity-0',
                 )}
             >
                 {children}

@@ -93,7 +93,7 @@ export const StandingSettings: React.FC = () => {
                                                 Acknowledged on{' '}
                                                 {warning.acknowledgedAt
                                                     ? formatTimestamp(
-                                                          warning.acknowledgedAt
+                                                          warning.acknowledgedAt,
                                                       )
                                                     : 'unknown'}
                                             </Text>

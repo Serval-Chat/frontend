@@ -16,7 +16,7 @@ export const useProcessedMessages = (
     selectedFriendId: string | null,
     selectedServerId: string | null,
     serverMemberMap: Map<string, User>,
-    highestRoleMap: Map<string, Role>
+    highestRoleMap: Map<string, Role>,
 ): ProcessedChatMessage[] =>
     useMemo(() => {
         if (!rawMessagesData) return [];
@@ -27,7 +27,7 @@ export const useProcessedMessages = (
             .sort(
                 (a, b) =>
                     new Date(a.createdAt).getTime() -
-                    new Date(b.createdAt).getTime()
+                    new Date(b.createdAt).getTime(),
             );
 
         return allMessages.map((msg) => {
@@ -67,7 +67,7 @@ export const useProcessedMessages = (
                 selectedFriendId,
                 selectedServerId,
                 serverMemberMap,
-                highestRoleMap
+                highestRoleMap,
             );
 
             return {

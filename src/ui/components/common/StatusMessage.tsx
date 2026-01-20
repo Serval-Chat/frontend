@@ -30,7 +30,7 @@ export const StatusMessage: React.FC<StatusMessageProps> = ({
                     type === 'error'
                         ? 'bg-danger/10 text-danger border-danger/20'
                         : 'bg-success/10 text-success border-success/20',
-                    className
+                    className,
                 )}
                 exit={{ opacity: 0, y: -10 }}
                 initial={{ opacity: 0, y: -10 }}

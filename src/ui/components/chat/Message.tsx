@@ -40,7 +40,7 @@ export const Message: React.FC<MessageProps> = ({
             className={cn(
                 'group relative px-4 py-0.5 hover:bg-white/[0.02] transition-colors flex flex-col',
                 isGroupStart ? 'mt-1' : 'mt-0',
-                isHighlighted && 'bg-blue-500/10 hover:bg-blue-500/15'
+                isHighlighted && 'bg-blue-500/10 hover:bg-blue-500/15',
             )}
             id={`message-${message._id}`}
         >

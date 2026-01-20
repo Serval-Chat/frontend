@@ -27,10 +27,10 @@ interface TertiarySidebarDataResult {
  */
 export const useTertiarySidebarData = (): TertiarySidebarDataResult => {
     const selectedFriendId = useAppSelector(
-        (state) => state.nav.selectedFriendId
+        (state) => state.nav.selectedFriendId,
     );
     const selectedServerId = useAppSelector(
-        (state) => state.nav.selectedServerId
+        (state) => state.nav.selectedServerId,
     );
 
     const { data: me } = useMe();

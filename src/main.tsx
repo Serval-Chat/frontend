@@ -32,5 +32,5 @@ createRoot(document.getElementById('root')!).render(
                 </WebSocketProvider>
             </QueryProvider>
         </StoreProvider>
-    </StrictMode>
+    </StrictMode>,
 );

@@ -20,10 +20,10 @@ const AppearanceSettingsForm: React.FC<AppearanceSettingsFormProps> = ({
 
     // Local state
     const [glowEnabled, setGlowEnabled] = useState(
-        user.usernameGlow?.enabled ?? false
+        user.usernameGlow?.enabled ?? false,
     );
     const [gradientEnabled, setGradientEnabled] = useState(
-        user.usernameGradient?.enabled ?? false
+        user.usernameGradient?.enabled ?? false,
     );
     const [gradientColors, setGradientColors] = useState<
         { id: string; value: string }[]
@@ -31,10 +31,10 @@ const AppearanceSettingsForm: React.FC<AppearanceSettingsFormProps> = ({
         (user.usernameGradient?.colors || []).map((c) => ({
             id: Math.random().toString(36),
             value: c,
-        }))
+        })),
     );
     const [gradientAngle, setGradientAngle] = useState(
-        user.usernameGradient?.angle ?? 90
+        user.usernameGradient?.angle ?? 90,
     );
 
     // Track changes
@@ -67,7 +67,7 @@ const AppearanceSettingsForm: React.FC<AppearanceSettingsFormProps> = ({
             (user.usernameGradient?.colors || []).map((c) => ({
                 id: Math.random().toString(36),
                 value: c,
-            }))
+            })),
         );
         setGradientAngle(user.usernameGradient?.angle ?? 90);
     };
@@ -191,7 +191,7 @@ const AppearanceSettingsForm: React.FC<AppearanceSettingsFormProps> = ({
                                                                     : {
                                                                           type: 'gradient',
                                                                           index,
-                                                                      }
+                                                                      },
                                                             )
                                                         }
                                                     />
@@ -199,7 +199,7 @@ const AppearanceSettingsForm: React.FC<AppearanceSettingsFormProps> = ({
                                                         className="absolute -top-1 -right-1 bg-[var(--color-danger)] text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
                                                         onClick={() =>
                                                             removeGradientColor(
-                                                                index
+                                                                index,
                                                             )
                                                         }
                                                     >
@@ -220,18 +220,18 @@ const AppearanceSettingsForm: React.FC<AppearanceSettingsFormProps> = ({
                                                                     }
                                                                     onClick={() =>
                                                                         setActiveColorPicker(
-                                                                            null
+                                                                            null,
                                                                         )
                                                                     }
                                                                     onKeyDown={(
-                                                                        e
+                                                                        e,
                                                                     ) => {
                                                                         if (
                                                                             e.key ===
                                                                             'Escape'
                                                                         )
                                                                             setActiveColorPicker(
-                                                                                null
+                                                                                null,
                                                                             );
                                                                     }}
                                                                 />
@@ -241,11 +241,11 @@ const AppearanceSettingsForm: React.FC<AppearanceSettingsFormProps> = ({
                                                                             colorItem.value
                                                                         }
                                                                         onChange={(
-                                                                            c
+                                                                            c,
                                                                         ) =>
                                                                             updateGradientColor(
                                                                                 index,
-                                                                                c
+                                                                                c,
                                                                             )
                                                                         }
                                                                     />
@@ -253,7 +253,7 @@ const AppearanceSettingsForm: React.FC<AppearanceSettingsFormProps> = ({
                                                             </div>
                                                         )}
                                                 </div>
-                                            )
+                                            ),
                                         )}
                                         {gradientColors.length < 2 && (
                                             <button
@@ -280,7 +280,7 @@ const AppearanceSettingsForm: React.FC<AppearanceSettingsFormProps> = ({
                                                 value={gradientAngle}
                                                 onChange={(e) =>
                                                     setGradientAngle(
-                                                        Number(e.target.value)
+                                                        Number(e.target.value),
                                                     )
                                                 }
                                             />
@@ -321,10 +321,5 @@ const AppearanceSettingsForm: React.FC<AppearanceSettingsFormProps> = ({
 export const AppearanceSettings: React.FC = () => {
     const { data: user } = useMe();
     if (!user) return null;
-    return (
-        <AppearanceSettingsForm
-            key={user.updatedAt?.toString() || user._id}
-            user={user}
-        />
-    );
+    return <AppearanceSettingsForm key={user._id} user={user} />;
 };

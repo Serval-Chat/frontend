@@ -25,13 +25,13 @@ import { Box } from '@/ui/components/layout/Box';
  */
 export const MainChat: React.FC = () => {
     const selectedFriendId = useAppSelector(
-        (state) => state.nav.selectedFriendId
+        (state) => state.nav.selectedFriendId,
     );
     const selectedServerId = useAppSelector(
-        (state) => state.nav.selectedServerId
+        (state) => state.nav.selectedServerId,
     );
     const selectedChannelId = useAppSelector(
-        (state) => state.nav.selectedChannelId
+        (state) => state.nav.selectedChannelId,
     );
 
     // Data Fetching
@@ -46,7 +46,7 @@ export const MainChat: React.FC = () => {
 
     const selectedChannel = React.useMemo(
         () => channels?.find((c) => c._id === selectedChannelId),
-        [channels, selectedChannelId]
+        [channels, selectedChannelId],
     );
 
     const { serverMemberMap, highestRoleMap } = useMemberMaps(members, roles);
@@ -60,7 +60,7 @@ export const MainChat: React.FC = () => {
     } = usePaginatedMessages(
         selectedFriendId,
         selectedServerId,
-        selectedChannelId
+        selectedChannelId,
     );
 
     const messages = useProcessedMessages(
@@ -70,13 +70,13 @@ export const MainChat: React.FC = () => {
         selectedFriendId,
         selectedServerId,
         serverMemberMap,
-        highestRoleMap
+        highestRoleMap,
     );
 
     const { typingUsers } = useChatWS(
         selectedFriendId ?? undefined,
         selectedServerId ?? undefined,
-        selectedChannelId ?? undefined
+        selectedChannelId ?? undefined,
     );
 
     if (!selectedFriendId && !selectedChannelId) {

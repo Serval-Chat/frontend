@@ -23,7 +23,7 @@ export const wsMessages = {
         serverId: string,
         channelId: string,
         text: string,
-        replyToId?: string
+        replyToId?: string,
     ) => {
         wsClient.send(WsEvents.SEND_MESSAGE_SERVER, {
             serverId,

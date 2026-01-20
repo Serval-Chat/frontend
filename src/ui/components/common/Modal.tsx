@@ -45,7 +45,7 @@ export const Modal: React.FC<ModalProps> = ({
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         className={cn(
                             'relative w-full max-w-2xl bg-[var(--color-background)] rounded-xl shadow-2xl border border-[var(--color-border-subtle)] overflow-hidden flex flex-col max-h-[90vh]',
-                            className
+                            className,
                         )}
                         exit={{ opacity: 0, scale: 0.95, y: 20 }}
                         initial={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -75,7 +75,7 @@ export const Modal: React.FC<ModalProps> = ({
                         <div
                             className={cn(
                                 'flex-1 overflow-y-auto custom-scrollbar',
-                                !noPadding && 'p-6'
+                                !noPadding && 'p-6',
                             )}
                         >
                             {children}
@@ -84,6 +84,6 @@ export const Modal: React.FC<ModalProps> = ({
                 </div>
             )}
         </AnimatePresence>,
-        document.body
+        document.body,
     );
 };

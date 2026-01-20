@@ -45,13 +45,13 @@ export const ServerBanner: React.FC<ServerBannerProps> = ({
             <div
                 className={cn(
                     'flex items-center px-4 h-12 relative z-content',
-                    banner && 'absolute bottom-0'
+                    banner && 'absolute bottom-0',
                 )}
             >
                 <Text
                     className={cn(
                         'truncate text-[15px] drop-shadow-lg',
-                        loading ? 'text-foreground-muted' : 'text-foreground'
+                        loading ? 'text-foreground-muted' : 'text-foreground',
                     )}
                     weight="bold"
                 >

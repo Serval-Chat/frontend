@@ -9,13 +9,13 @@ export const chatApi = {
     getUserMessages: async (
         userId: string,
         limit: number = 50,
-        before?: string
+        before?: string,
     ): Promise<ChatMessage[]> => {
         const response = await apiClient.get<ChatMessage[]>(
             '/api/v1/messages',
             {
                 params: { userId, limit, before },
-            }
+            },
         );
         return response.data;
     },
@@ -27,13 +27,13 @@ export const chatApi = {
         serverId: string,
         channelId: string,
         limit: number = 50,
-        before?: string
+        before?: string,
     ): Promise<ChatMessage[]> => {
         const response = await apiClient.get<ChatMessage[]>(
             `/api/v1/servers/${serverId}/channels/${channelId}/messages`,
             {
                 params: { limit, before },
-            }
+            },
         );
         return response.data;
     },

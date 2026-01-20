@@ -12,23 +12,23 @@ export const MessageInput: React.FC = () => {
     const [value, setValue] = useState('');
 
     const selectedFriendId = useAppSelector(
-        (state) => state.nav.selectedFriendId
+        (state) => state.nav.selectedFriendId,
     );
     const selectedServerId = useAppSelector(
-        (state) => state.nav.selectedServerId
+        (state) => state.nav.selectedServerId,
     );
     const selectedChannelId = useAppSelector(
-        (state) => state.nav.selectedChannelId
+        (state) => state.nav.selectedChannelId,
     );
 
     const { sendMessage, sendTyping } = useChatWS(
         selectedFriendId ?? undefined,
         selectedServerId ?? undefined,
-        selectedChannelId ?? undefined
+        selectedChannelId ?? undefined,
     );
 
     const handleKeyDown = (
-        e: React.KeyboardEvent<HTMLTextAreaElement>
+        e: React.KeyboardEvent<HTMLTextAreaElement>,
     ): void => {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();

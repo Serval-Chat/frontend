@@ -10,7 +10,7 @@ export const friendsApi = {
 
     getIncomingRequests: async (): Promise<FriendRequest[]> => {
         const response = await apiClient.get<FriendRequest[]>(
-            '/api/v1/friends/incoming'
+            '/api/v1/friends/incoming',
         );
         return response.data;
     },

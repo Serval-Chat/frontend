@@ -30,7 +30,7 @@ import {
  */
 export const setupGlobalWsHandlers = (
     queryClient: QueryClient,
-    dispatch: Dispatch
+    dispatch: Dispatch,
 ): void => {
     let currentUser: { id: string; username: string } | null = null;
 
@@ -46,7 +46,7 @@ export const setupGlobalWsHandlers = (
                     userId: payload.user.id,
                     username: payload.user.username,
                     status: undefined,
-                })
+                }),
             );
         }
     });
@@ -114,7 +114,7 @@ export const setupGlobalWsHandlers = (
             updateUserStatusByUsername({
                 username: payload.username,
                 customStatus: statusText,
-            })
+            }),
         );
 
         if (currentUser && payload.username === currentUser.username) {

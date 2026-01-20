@@ -8,7 +8,7 @@ import type { ProcessedChatMessage } from '@/types/chat.ui';
  */
 export const getHighestRoleForMember = (
     roleIds: string[] | undefined,
-    roleMap: Map<string, Role>
+    roleMap: Map<string, Role>,
 ): Role | undefined => {
     if (!roleIds || roleIds.length === 0) return undefined;
 
@@ -34,7 +34,7 @@ export const resolveReplyTo = (
     selectedFriendId: string | null,
     selectedServerId: string | null,
     serverMemberMap: Map<string, User>,
-    highestRoleMap: Map<string, Role>
+    highestRoleMap: Map<string, Role>,
 ): ProcessedChatMessage['replyTo'] => {
     let replyTo: ProcessedChatMessage['replyTo'] = undefined;
 
@@ -43,7 +43,7 @@ export const resolveReplyTo = (
 
     if (repliedId) {
         const repliedMsg = allMessages.find(
-            (m) => m._id.toString() === repliedId
+            (m) => m._id.toString() === repliedId,
         );
 
         if (repliedMsg) {

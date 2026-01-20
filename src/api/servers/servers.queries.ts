@@ -29,7 +29,7 @@ export const useServers = (): UseQueryResult<Server[], Error> =>
     });
 
 export const useServerDetails = (
-    serverId: string | null
+    serverId: string | null,
 ): UseQueryResult<Server, Error> =>
     useQuery({
         queryKey: SERVERS_QUERY_KEYS.details(serverId),
@@ -38,7 +38,7 @@ export const useServerDetails = (
     });
 
 export const useChannels = (
-    serverId: string | null
+    serverId: string | null,
 ): UseQueryResult<Channel[], Error> =>
     useQuery({
         queryKey: SERVERS_QUERY_KEYS.channels(serverId),
@@ -47,7 +47,7 @@ export const useChannels = (
     });
 
 export const useCategories = (
-    serverId: string | null
+    serverId: string | null,
 ): UseQueryResult<Category[], Error> =>
     useQuery({
         queryKey: SERVERS_QUERY_KEYS.categories(serverId),
@@ -56,7 +56,7 @@ export const useCategories = (
     });
 
 export const useMembers = (
-    serverId: string | null
+    serverId: string | null,
 ): UseQueryResult<ServerMember[], Error> =>
     useQuery({
         queryKey: SERVERS_QUERY_KEYS.members(serverId),
@@ -65,7 +65,7 @@ export const useMembers = (
     });
 
 export const useRoles = (
-    serverId: string | null
+    serverId: string | null,
 ): UseQueryResult<Role[], Error> =>
     useQuery({
         queryKey: SERVERS_QUERY_KEYS.roles(serverId),

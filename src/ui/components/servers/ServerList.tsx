@@ -13,7 +13,7 @@ export const ServerList: React.FC = () => {
     const { data: servers, isLoading } = useServers();
     const dispatch = useAppDispatch();
     const selectedServerId = useAppSelector(
-        (state) => state.nav.selectedServerId
+        (state) => state.nav.selectedServerId,
     );
 
     return (

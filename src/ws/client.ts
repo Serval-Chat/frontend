@@ -9,7 +9,7 @@ import {
 
 type EventHandler<T = unknown> = (
     payload: T,
-    meta: IWsEnvelope['meta']
+    meta: IWsEnvelope['meta'],
 ) => void;
 
 /**
@@ -120,7 +120,7 @@ class WsClient {
             if (type === WsEvents.AUTHENTICATED) {
                 console.log(
                     '[WS] Authenticated as:',
-                    (payload as IWsAuthenticatedEvent).user.username
+                    (payload as IWsAuthenticatedEvent).user.username,
                 );
             }
 
@@ -144,10 +144,10 @@ class WsClient {
         if (this.reconnectAttempts < this.maxReconnectAttempts) {
             const delay = Math.min(
                 this.reconnectDelay * Math.pow(2, this.reconnectAttempts),
-                30000
+                30000,
             );
             console.log(
-                `[WS] Reconnecting in ${delay}ms... (Attempt ${this.reconnectAttempts + 1})`
+                `[WS] Reconnecting in ${delay}ms... (Attempt ${this.reconnectAttempts + 1})`,
             );
             setTimeout(() => {
                 this.reconnectAttempts++;

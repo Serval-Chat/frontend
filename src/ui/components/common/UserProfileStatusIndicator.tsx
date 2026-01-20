@@ -27,7 +27,7 @@ export const UserProfileStatusIndicator: React.FC<
                 'rounded-full border-background absolute -bottom-[1px] -right-[1px]',
                 sizeClasses[size],
                 status === 'online' ? 'bg-success' : 'bg-muted-foreground',
-                className
+                className,
             )}
             title={status}
         />

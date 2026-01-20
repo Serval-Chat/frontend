@@ -17,7 +17,7 @@ const inputVariants = cva(
         defaultVariants: {
             disabled: false,
         },
-    }
+    },
 );
 
 export interface InputProps
@@ -60,7 +60,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
                 <input
                     className={cn(
                         inputVariants({ disabled, className }),
-                        isNumber && 'pr-9 [appearance:textfield]'
+                        isNumber && 'pr-9 [appearance:textfield]',
                     )}
                     disabled={disabled || undefined}
                     ref={internalRef}
@@ -89,7 +89,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
                 )}
             </div>
         );
-    }
+    },
 );
 Input.displayName = 'Input';
 

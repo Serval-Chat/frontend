@@ -27,7 +27,7 @@ export const Skeleton: React.FC<SkeletonProps> = ({
                 'rounded-full': variant === 'circular',
                 'h-4 w-full': variant === 'text' && !height,
             },
-            className
+            className,
         )}
         style={{
             width,

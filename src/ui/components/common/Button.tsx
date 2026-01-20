@@ -42,13 +42,13 @@ const buttonVariants = cva(
                 variant: variant as keyof typeof mutedClasses,
                 loading: true,
                 class: className,
-            })
+            }),
         ),
         defaultVariants: {
             variant: 'normal',
             size: 'md',
         },
-    }
+    },
 );
 
 export interface ButtonProps
@@ -112,7 +112,7 @@ export const Button: React.FC<ButtonProps> = ({
             className={cn(
                 'relative',
                 buttonVariants({ variant, size }),
-                className
+                className,
             )}
             disabled={loading || disabled}
             ref={buttonRef}

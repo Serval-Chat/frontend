@@ -10,7 +10,7 @@ import { wsClient } from '@/ws/client';
  */
 export function useWebSocket<T = unknown>(
     event: string,
-    callback: (payload: T) => void
+    callback: (payload: T) => void,
 ): void {
     useEffect(() => {
         const unsubscribe = wsClient.on<T>(event, callback);

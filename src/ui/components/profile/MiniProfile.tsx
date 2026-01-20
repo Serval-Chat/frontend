@@ -30,7 +30,7 @@ export const MiniProfile: React.FC = () => {
     }, [user?.username]);
 
     const presence = useAppSelector(
-        (state) => state.presence.users[user?._id || '']
+        (state) => state.presence.users[user?._id || ''],
     );
     const presenceStatus = presence?.status || 'offline';
 
@@ -57,7 +57,7 @@ export const MiniProfile: React.FC = () => {
                 void queryClient.invalidateQueries({ queryKey: ['me'] });
             }
         },
-        [queryClient]
+        [queryClient],
     );
 
     useWebSocket('status_update', handleStatusUpdate);
@@ -84,7 +84,7 @@ export const MiniProfile: React.FC = () => {
                     onSuccess: () => {
                         setIsEditingStatus(false);
                     },
-                }
+                },
             );
         } else {
             updateStatus(
@@ -93,7 +93,7 @@ export const MiniProfile: React.FC = () => {
                     onSuccess: () => {
                         setIsEditingStatus(false);
                     },
-                }
+                },
             );
         }
     };

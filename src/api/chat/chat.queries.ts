@@ -20,7 +20,7 @@ const LIMIT = 50;
  * @description Hook to fetch messages for a specific user
  */
 export const useUserMessages = (
-    userId: string | null
+    userId: string | null,
 ): UseInfiniteQueryResult<InfiniteData<ChatMessage[]>, Error> =>
     useInfiniteQuery({
         queryKey: CHAT_QUERY_KEYS.userMessages(userId),
@@ -40,7 +40,7 @@ export const useUserMessages = (
  */
 export const useChannelMessages = (
     serverId: string | null,
-    channelId: string | null
+    channelId: string | null,
 ): UseInfiniteQueryResult<InfiniteData<ChatMessage[]>, Error> =>
     useInfiniteQuery({
         queryKey: CHAT_QUERY_KEYS.channelMessages(serverId, channelId),

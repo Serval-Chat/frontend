@@ -34,7 +34,7 @@ export const ChannelItem: React.FC<ChannelItemProps> = ({
                 'hover:bg-white/5 cursor-pointer text-left',
                 isActive
                     ? 'bg-white/10 text-foreground'
-                    : 'text-foreground-muted'
+                    : 'text-foreground-muted',
             )}
             onClick={onClick}
         >
@@ -43,13 +43,13 @@ export const ChannelItem: React.FC<ChannelItemProps> = ({
                     'w-[18px] h-[18px] mr-1.5 shrink-0 transition-colors',
                     isActive
                         ? 'text-foreground'
-                        : 'text-foreground-muted group-hover:text-foreground/80'
+                        : 'text-foreground-muted group-hover:text-foreground/80',
                 )}
             />
             <span
                 className={cn(
                     'text-[15px] font-medium truncate',
-                    isActive && 'text-foreground'
+                    isActive && 'text-foreground',
                 )}
             >
                 {name}

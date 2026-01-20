@@ -39,7 +39,7 @@ export const UserProfilePictureIcon: React.FC<UserProfilePictureIconProps> = ({
             className={cn(
                 'flex items-center justify-center rounded-full overflow-hidden bg-[--color-bg-subtle] text-foreground-muted font-bold shrink-0',
                 sizeClasses[size],
-                className
+                className,
             )}
         >
             {iconUrl ? (

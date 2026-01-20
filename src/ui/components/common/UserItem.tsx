@@ -45,6 +45,7 @@ interface UserItemProps {
     allRoles?: Role[];
     joinedAt?: string;
     disableCustomFonts?: boolean;
+    disableGlow?: boolean;
 }
 
 /**
@@ -63,6 +64,7 @@ export const UserItem: React.FC<UserItemProps> = ({
     allRoles,
     joinedAt,
     disableCustomFonts,
+    disableGlow,
 }) => {
     const dispatch = useAppDispatch();
     const { data: currentUser } = useMe();
@@ -152,7 +154,7 @@ export const UserItem: React.FC<UserItemProps> = ({
                         isActive
                             ? 'bg-[var(--color-bg-subtle)] text-foreground'
                             : 'text-foreground-muted',
-                        className
+                        className,
                     )}
                     ref={itemRef}
                     onClick={() => {
@@ -177,6 +179,7 @@ export const UserItem: React.FC<UserItemProps> = ({
                     <Box className="flex-1 min-w-0">
                         <StyledUserName
                             disableCustomFonts={disableCustomFonts}
+                            disableGlow={disableGlow}
                             role={role}
                             user={userProfile}
                         >

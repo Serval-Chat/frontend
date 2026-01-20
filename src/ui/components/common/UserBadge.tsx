@@ -21,7 +21,7 @@ export const UserBadge: React.FC<UserBadgeProps> = ({ badge, className }) => {
         <Box
             className={cn(
                 'inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-bold cursor-default transition-all border shrink-0',
-                className
+                className,
             )}
             style={{
                 backgroundColor: `${color}20`,

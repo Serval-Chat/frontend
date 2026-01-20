@@ -18,10 +18,10 @@ import { ServerBanner } from './ServerBanner';
 export const ServerSection: React.FC = () => {
     const dispatch = useAppDispatch();
     const selectedServerId = useAppSelector(
-        (state) => state.nav.selectedServerId
+        (state) => state.nav.selectedServerId,
     );
     const selectedChannelId = useAppSelector(
-        (state) => state.nav.selectedChannelId
+        (state) => state.nav.selectedChannelId,
     );
 
     const { data: server, isLoading: isLoadingServer } =
@@ -40,7 +40,7 @@ export const ServerSection: React.FC = () => {
         ) {
             // Default to first channel by position
             const sorted = [...channels].sort(
-                (a, b) => a.position - b.position
+                (a, b) => a.position - b.position,
             );
             const defaultChannel = sorted[0];
             dispatch(setSelectedChannelId(defaultChannel._id));

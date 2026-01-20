@@ -21,7 +21,7 @@ export const Toggle = React.forwardRef<HTMLInputElement, ToggleProps>(
             onChange,
             ...props
         },
-        ref
+        ref,
     ) => {
         const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
             onChange?.(e);
@@ -33,7 +33,7 @@ export const Toggle = React.forwardRef<HTMLInputElement, ToggleProps>(
                 className={cn(
                     'inline-flex items-center gap-2',
                     disabled ? 'cursor-not-allowed' : 'cursor-pointer',
-                    className
+                    className,
                 )}
             >
                 <span
@@ -41,7 +41,7 @@ export const Toggle = React.forwardRef<HTMLInputElement, ToggleProps>(
                         'relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
                         disabled && 'cursor-not-allowed opacity-50',
                         !disabled && 'cursor-pointer',
-                        checked ? 'bg-primary' : 'bg-bg-secondary'
+                        checked ? 'bg-primary' : 'bg-bg-secondary',
                     )}
                 >
                     <input
@@ -56,7 +56,7 @@ export const Toggle = React.forwardRef<HTMLInputElement, ToggleProps>(
                     <span
                         className={cn(
                             'inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition-transform',
-                            checked ? 'translate-x-5' : 'translate-x-0.5'
+                            checked ? 'translate-x-5' : 'translate-x-0.5',
                         )}
                     />
                 </span>
@@ -64,7 +64,7 @@ export const Toggle = React.forwardRef<HTMLInputElement, ToggleProps>(
                     <span
                         className={cn(
                             'text-sm text-foreground',
-                            disabled && 'opacity-50'
+                            disabled && 'opacity-50',
                         )}
                     >
                         {label}
@@ -72,7 +72,7 @@ export const Toggle = React.forwardRef<HTMLInputElement, ToggleProps>(
                 )}
             </label>
         );
-    }
+    },
 );
 
 Toggle.displayName = 'Toggle';

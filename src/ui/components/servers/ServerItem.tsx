@@ -24,7 +24,7 @@ export const ServerItem: React.FC<ServerItemProps> = ({
         <div
             className={cn(
                 'absolute left-0 top-1/2 -translate-y-1/2 w-1 bg-white rounded-r-full transition-all duration-200',
-                isActive ? 'h-10' : 'h-0 group-hover:h-5'
+                isActive ? 'h-10' : 'h-0 group-hover:h-5',
             )}
         />
         <ServerIcon isActive={isActive} server={server} onClick={onClick} />

@@ -10,7 +10,7 @@ export const emojiKeys = {
 
 export const useEmoji = (
     emojiId: string,
-    options: { enabled?: boolean } = {}
+    options: { enabled?: boolean } = {},
 ): UseQueryResult<Emoji, Error> =>
     useQuery({
         queryKey: emojiKeys.detail(emojiId),

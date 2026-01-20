@@ -73,7 +73,7 @@ export const Stack: React.FC<StackProps> = ({
                 align,
                 justify,
                 className,
-            })
+            }),
         )}
         {...props}
     >

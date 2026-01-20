@@ -55,7 +55,7 @@ interface Message {
  */
 export function shouldGroupMessages(
     prevMsg: Message,
-    currentMsg: Message
+    currentMsg: Message,
 ): boolean {
     const getSenderId = (msg: Message): string | undefined =>
         msg.senderId || msg.user?._id || msg.user?.username;
@@ -68,7 +68,7 @@ export function shouldGroupMessages(
     const date1 = new Date(prevMsg.createdAt);
     const date2 = new Date(currentMsg.createdAt);
     const diffMinutes = Math.abs(
-        (date2.getTime() - date1.getTime()) / (1000 * 60)
+        (date2.getTime() - date1.getTime()) / (1000 * 60),
     );
 
     return diffMinutes < 5;
