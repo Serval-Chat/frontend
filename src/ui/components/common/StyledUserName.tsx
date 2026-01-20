@@ -125,10 +125,11 @@ export const StyledUserName: React.FC<StyledUserNameProps> = ({
             };
 
             return (
-                /* eslint-disable-next-line react/no-array-index-key */
                 <span
                     className="relative inline-block"
-                    key={`char-${i}`}
+                    // index is the only stable unique identifier for character position in dynamic text
+                    // eslint-disable-next-line react/no-array-index-key
+                    key={i}
                     style={charStyle}
                 >
                     {hasGlow && (

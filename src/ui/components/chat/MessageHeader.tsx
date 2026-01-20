@@ -4,7 +4,7 @@ import { StyledUserName } from '@/ui/components/common/StyledUserName';
 import { Text } from '@/ui/components/common/Text';
 import { Box } from '@/ui/components/layout/Box';
 import { cn } from '@/utils/cn';
-import { formatDiscordTimestamp } from '@/utils/timestamp';
+import { formatTimestamp } from '@/utils/timestamp';
 
 interface MessageHeaderProps {
     user: User;
@@ -44,7 +44,7 @@ export const MessageHeader: React.FC<MessageHeaderProps> = ({
             </Box>
 
             <Text className="text-[10px] text-white/40 font-medium uppercase tracking-wider">
-                {formatDiscordTimestamp(timestamp)}
+                {formatTimestamp(timestamp)}
             </Text>
         </Box>
     );

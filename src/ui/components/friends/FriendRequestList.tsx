@@ -22,11 +22,10 @@ export const FriendRequestList: React.FC = () => {
                     <Skeleton height={16} width={140} />
                 </Box>
                 <Box className="flex-1 p-4 space-y-4">
-                    {[...Array(3)].map((_, i) => (
-                        // eslint-disable-next-line react/no-array-index-key
+                    {['skeleton-1', 'skeleton-2', 'skeleton-3'].map((key) => (
                         <Box
                             className="flex items-center justify-between p-3"
-                            key={i}
+                            key={key}
                         >
                             <Box className="flex items-center gap-3">
                                 <Skeleton
