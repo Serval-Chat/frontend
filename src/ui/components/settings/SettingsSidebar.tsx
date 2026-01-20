@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { ShieldAlert, User } from 'lucide-react';
+import { Palette, ShieldAlert, User } from 'lucide-react';
 
 import { Button } from '@/ui/components/common/Button';
 
@@ -13,9 +13,9 @@ export const SettingsSidebar: React.FC<SettingsSidebarProps> = ({
     activeSection,
     setActiveSection,
 }) => {
-    // Hardcoded translations for now as useTranslations is not available
     const sections = [
         { id: 'account', label: 'My Account', icon: User },
+        { id: 'appearance', label: 'Appearance', icon: Palette },
         { id: 'standing', label: 'Standing', icon: ShieldAlert },
     ];
 

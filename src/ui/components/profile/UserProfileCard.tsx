@@ -90,7 +90,7 @@ export const UserProfileCard: React.FC<UserProfileCardProps> = ({
                 )}
             </Box>
 
-            <Box className="relative z-10 -mt-[50px] px-4">
+            <Box className="relative z-content -mt-[50px] px-4">
                 <Box
                     className={`p-1.5 bg-[var(--color-background)] rounded-full inline-block relative ${onAvatarClick ? 'cursor-pointer group/avatar' : ''}`}
                     onClick={onAvatarClick}
