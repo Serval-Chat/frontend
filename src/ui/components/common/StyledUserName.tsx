@@ -1,6 +1,5 @@
 import type { Role } from '@/api/servers/servers.types';
 import type { User } from '@/api/users/users.types';
-import { Box } from '@/ui/components/layout/Box';
 import { cn } from '@/utils/cn';
 
 import { Text } from './Text';
@@ -11,7 +10,10 @@ interface StyledUserNameProps {
     children: React.ReactNode;
     className?: string;
     disableCustomFonts?: boolean;
+    glowIntensity?: number;
 }
+
+const glowIntensity = 0.7;
 
 export const StyledUserName: React.FC<StyledUserNameProps> = ({
     user,
@@ -90,75 +92,115 @@ export const StyledUserName: React.FC<StyledUserNameProps> = ({
     // Enable glow if user has it enabled
     const hasGlow = usernameGlow?.enabled;
 
-    // Determine the color to use for the glow
-    const baseColor =
-        solidColor ||
-        role?.colors?.[0] ||
-        user?.usernameGradient?.colors?.[0] ||
-        role?.startColor ||
-        usernameGlow?.color;
-
     const containerStyle: React.CSSProperties = {
         fontFamily: usernameFont || undefined,
-        color: solidColor || undefined,
     };
 
-    const glowStyle: React.CSSProperties = hasGlow
-        ? {
-              textShadow: `0 0 1px ${baseColor}, 0 0 2px ${baseColor}, 0 0 3px ${baseColor}`,
-              color: 'transparent',
-          }
-        : { visibility: 'hidden' };
+    // helper to render text with per-character effects
+    const renderStyledText = (text: string): React.ReactNode[] => {
+        const chars = text.split('');
+        const totalChars = chars.length;
 
-    const gradientStyle: React.CSSProperties = hasGradient
-        ? {
-              backgroundImage: `${gradientFunction}(${gradientArgs})`,
-              backgroundSize: '100%',
-              backgroundRepeat: 'no-repeat',
-              backgroundClip: 'text',
-              WebkitBackgroundClip: 'text',
-              color: 'transparent',
-              WebkitTextFillColor: 'transparent',
-          }
-        : {};
+        return chars.map((char, i) => {
+            const charStyle: React.CSSProperties = {
+                display: 'inline-block',
+                whiteSpace: 'pre',
+                padding: '0 0.125px',
+                ...(hasGradient
+                    ? {
+                          backgroundImage: `${gradientFunction}(${gradientArgs})`,
+                          backgroundSize: `${totalChars * 100}% 100%`,
+                          backgroundPosition:
+                              totalChars > 1
+                                  ? `${(i / (totalChars - 1)) * 100}% 0%`
+                                  : 'center',
+                          backgroundClip: 'text',
+                          WebkitBackgroundClip: 'text',
+                          color: 'transparent',
+                          WebkitTextFillColor: 'transparent',
+                      }
+                    : {
+                          color: solidColor || undefined,
+                      }),
+            };
 
-    // If neither effect is active, render simply
-    if (!hasGlow && !hasGradient) {
-        return (
-            <Text
-                className={cn('font-medium truncate text-sm w-fit', className)}
-                style={containerStyle}
-            >
-                {children}
-            </Text>
-        );
-    }
+            return (
+                /* eslint-disable-next-line react/no-array-index-key */
+                <span
+                    className="relative inline-block"
+                    key={`char-${i}`}
+                    style={charStyle}
+                >
+                    {hasGlow && (
+                        <>
+                            {/* Inner intense glow */}
+                            <span
+                                aria-hidden="true"
+                                className="absolute inset-0 select-none pointer-events-none"
+                                style={{
+                                    ...charStyle,
+                                    filter: `blur(${1 * glowIntensity}px) brightness(${1 + glowIntensity})`,
+                                    opacity: Math.min(
+                                        1,
+                                        0.8 + glowIntensity * 0.2
+                                    ),
+                                    zIndex: -1,
+                                }}
+                            >
+                                {char}
+                            </span>
+                            {/* Middle soft glow */}
+                            <span
+                                aria-hidden="true"
+                                className="absolute inset-0 select-none pointer-events-none"
+                                style={{
+                                    ...charStyle,
+                                    filter: `blur(${2.5 * glowIntensity}px) brightness(${1 + glowIntensity * 0.8})`,
+                                    opacity: Math.min(
+                                        0.9,
+                                        0.6 + glowIntensity * 0.2
+                                    ),
+                                    zIndex: -2,
+                                }}
+                            >
+                                {char}
+                            </span>
+                            {/* Outer broad glow */}
+                            <span
+                                aria-hidden="true"
+                                className="absolute inset-0 select-none pointer-events-none"
+                                style={{
+                                    ...charStyle,
+                                    filter: `blur(${4 * glowIntensity}px) brightness(${1 + glowIntensity * 0.5})`,
+                                    opacity: Math.min(
+                                        0.8,
+                                        0.4 + glowIntensity * 0.2
+                                    ),
+                                    zIndex: -3,
+                                }}
+                            >
+                                {char}
+                            </span>
+                        </>
+                    )}
+                    {char}
+                </span>
+            );
+        });
+    };
+
+    const content =
+        typeof children === 'string' ? renderStyledText(children) : children;
 
     return (
         <Text
             className={cn(
-                'font-medium truncate text-sm w-fit grid items-center',
+                'font-medium truncate text-sm w-fit inline-flex items-center',
                 className
             )}
             style={containerStyle}
         >
-            {hasGlow && (
-                <Box
-                    aria-hidden="true"
-                    as="span"
-                    className="col-start-1 row-start-1 select-none pointer-events-none"
-                    style={glowStyle}
-                >
-                    {children}
-                </Box>
-            )}
-            <Box
-                as="span"
-                className="col-start-1 row-start-1 relative"
-                style={gradientStyle}
-            >
-                {children}
-            </Box>
+            {content}
         </Text>
     );
 };

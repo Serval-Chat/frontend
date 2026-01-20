@@ -12,12 +12,14 @@ import { Input } from '@/ui/components/common/Input';
 import { Text } from '@/ui/components/common/Text';
 import { UserProfilePicture } from '@/ui/components/common/UserProfilePicture';
 import { Box } from '@/ui/components/layout/Box';
+import { SettingsModal } from '@/ui/components/settings/SettingsModal';
 
 export const MiniProfile: React.FC = () => {
     const { data: user } = useMe();
     const { mutate: updateStatus, isPending } = useUpdateStatus();
     const queryClient = useQueryClient();
     const [isEditingStatus, setIsEditingStatus] = useState(false);
+    const [showSettings, setShowSettings] = useState(false);
     const [statusText, setStatusText] = useState('');
     const inputRef = useRef<HTMLInputElement>(null);
     const usernameRef = useRef<string | undefined>(user?.username);
@@ -180,11 +182,14 @@ export const MiniProfile: React.FC = () => {
                     className="w-8 h-8 p-0"
                     icon={Settings}
                     iconSize={18}
-                    onClick={() => {
-                        /* TODO: Open settings */
-                    }}
+                    onClick={() => setShowSettings(true)}
                 />
             </Box>
+
+            <SettingsModal
+                isOpen={showSettings}
+                onClose={() => setShowSettings(false)}
+            />
         </Box>
     );
 };
