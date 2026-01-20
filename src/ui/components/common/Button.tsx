@@ -16,7 +16,7 @@ const mutedClasses = {
 };
 
 const buttonVariants = cva(
-    'bg-background px-xs py-xs inline-flex items-center justify-center rounded-md transition-colors duration-300 disabled:pointer-events-none disabled:opacity-50 font-sans whitespace-nowrap cursor-pointer',
+    'bg-background inline-flex items-center justify-center rounded-md transition-colors duration-300 disabled:pointer-events-none disabled:opacity-50 font-sans whitespace-nowrap cursor-pointer',
     {
         variants: {
             variant: {
@@ -31,6 +31,11 @@ const buttonVariants = cva(
                 nav: 'bg-bg-secondary text-[#f4f4f4] w-12 h-12 p-0 rounded-[1.2rem] transition-all duration-200 hover:bg-primary hover:text-foreground-inverse hover:rounded-[0.75rem]',
                 ghost: 'bg-transparent text-foreground hover:bg-bg-subtle border-none shadow-none',
             },
+            size: {
+                sm: 'px-2 py-1 text-xs',
+                md: 'px-xs py-xs text-sm',
+                lg: 'px-sm py-sm text-base',
+            },
         },
         compoundVariants: Object.entries(mutedClasses).map(
             ([variant, className]) => ({
@@ -41,6 +46,7 @@ const buttonVariants = cva(
         ),
         defaultVariants: {
             variant: 'normal',
+            size: 'md',
         },
     }
 );
@@ -58,6 +64,7 @@ export const Button: React.FC<ButtonProps> = ({
     children,
     className,
     variant,
+    size,
     loading,
     retainSize,
     disabled,
@@ -104,7 +111,7 @@ export const Button: React.FC<ButtonProps> = ({
             aria-busy={loading || undefined}
             className={cn(
                 'relative',
-                buttonVariants({ variant: variant }),
+                buttonVariants({ variant, size }),
                 className
             )}
             disabled={loading || disabled}
