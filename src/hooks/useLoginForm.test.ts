@@ -45,7 +45,10 @@ describe('useLoginForm', () => {
 
     it('should handle successful login', async () => {
         const { result } = renderHook(() => useLoginForm());
-        vi.mocked(authApi.login).mockResolvedValue({ token: 'fake-token' });
+        vi.mocked(authApi.login).mockResolvedValue({
+            token: 'fake-token',
+            username: 'testuser',
+        });
 
         await act(async () => {
             result.current.setLoginInput('testuser');
