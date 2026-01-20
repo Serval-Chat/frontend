@@ -101,7 +101,7 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
                                 position: 'fixed',
                                 top: position.y,
                                 left: position.x,
-                                zIndex: 9999,
+                                zIndex: 'var(--z-top)',
                             }}
                             transition={{ duration: 0.1, ease: 'easeOut' }}
                         >

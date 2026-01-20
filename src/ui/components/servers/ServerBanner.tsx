@@ -22,7 +22,7 @@ export const ServerBanner: React.FC<ServerBannerProps> = ({
     const bannerUrl = resolveApiUrl(banner?.value);
 
     return (
-        <div className="relative shrink-0 w-full shadow-[0_2px_10px_0_rgba(0,0,0,0.4)] z-10 bg-bg-secondary group overflow-hidden">
+        <div className="relative shrink-0 w-full shadow-[0_2px_10px_0_rgba(0,0,0,0.4)] z-content bg-bg-secondary group overflow-hidden">
             {/* Banner (Image or Color) */}
             {banner && !loading && (
                 <div className="w-full h-[135px] relative overflow-hidden shrink-0">
@@ -44,7 +44,7 @@ export const ServerBanner: React.FC<ServerBannerProps> = ({
 
             <div
                 className={cn(
-                    'flex items-center px-4 h-12 relative z-10',
+                    'flex items-center px-4 h-12 relative z-content',
                     banner && 'absolute bottom-0'
                 )}
             >

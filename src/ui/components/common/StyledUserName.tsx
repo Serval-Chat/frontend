@@ -126,7 +126,7 @@ export const StyledUserName: React.FC<StyledUserNameProps> = ({
 
             return (
                 <span
-                    className="relative inline-block"
+                    className="relative inline-block isolate"
                     // index is the only stable unique identifier for character position in dynamic text
                     // eslint-disable-next-line react/no-array-index-key
                     key={i}
@@ -145,7 +145,16 @@ export const StyledUserName: React.FC<StyledUserNameProps> = ({
                                         1,
                                         0.8 + glowIntensity * 0.2
                                     ),
-                                    zIndex: -1,
+                                    zIndex: 'var(--z-effect-sm)',
+                                    color: hasGradient
+                                        ? undefined
+                                        : solidColor || undefined,
+                                    backgroundImage: hasGradient
+                                        ? `${gradientFunction}(${gradientArgs})`
+                                        : undefined,
+                                    WebkitTextFillColor: hasGradient
+                                        ? 'transparent'
+                                        : undefined,
                                 }}
                             >
                                 {char}
@@ -161,7 +170,16 @@ export const StyledUserName: React.FC<StyledUserNameProps> = ({
                                         0.9,
                                         0.6 + glowIntensity * 0.2
                                     ),
-                                    zIndex: -2,
+                                    zIndex: 'var(--z-effect-md)',
+                                    color: hasGradient
+                                        ? undefined
+                                        : solidColor || undefined,
+                                    backgroundImage: hasGradient
+                                        ? `${gradientFunction}(${gradientArgs})`
+                                        : undefined,
+                                    WebkitTextFillColor: hasGradient
+                                        ? 'transparent'
+                                        : undefined,
                                 }}
                             >
                                 {char}
@@ -177,7 +195,16 @@ export const StyledUserName: React.FC<StyledUserNameProps> = ({
                                         0.8,
                                         0.4 + glowIntensity * 0.2
                                     ),
-                                    zIndex: -3,
+                                    zIndex: 'var(--z-effect-lg)',
+                                    color: hasGradient
+                                        ? undefined
+                                        : solidColor || undefined,
+                                    backgroundImage: hasGradient
+                                        ? `${gradientFunction}(${gradientArgs})`
+                                        : undefined,
+                                    WebkitTextFillColor: hasGradient
+                                        ? 'transparent'
+                                        : undefined,
                                 }}
                             >
                                 {char}

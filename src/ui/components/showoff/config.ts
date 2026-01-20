@@ -5,6 +5,7 @@ export const SHOWOFF_SECTIONS = {
     status: 'status-messages',
     retain: 'retain-size-buttons',
     inputs: 'input-elements',
+    toggles: 'toggle-switches',
     typography: 'typography',
     userIdentities: 'user-identities',
     navigation: 'navigation',

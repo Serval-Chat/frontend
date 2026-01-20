@@ -14,7 +14,7 @@ export const PageWrapper: React.FC<PageWrapperProps> = ({
     children,
     className,
 }) => (
-    <div className={cn('relative z-10 text-center space-y-md', className)}>
+    <div className={cn('relative z-content text-center space-y-md', className)}>
         {children}
     </div>
 );

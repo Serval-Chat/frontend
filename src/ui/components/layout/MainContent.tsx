@@ -17,7 +17,9 @@ export const MainContent: React.FC = () => {
 
     return (
         <main
-            className={cn('flex-1 flex flex-col relative z-10 overflow-hidden')}
+            className={cn(
+                'flex-1 flex flex-col relative z-content overflow-hidden'
+            )}
         >
             {isNothingSelected ? <FriendRequestList /> : <MainChat />}
         </main>

@@ -62,4 +62,20 @@
     --chat-bg: color-mix(in srgb, black 25%, var(--color-bg-secondary));
     --primary-bg: color-mix(in srgb, black 25%, var(--color-bg-secondary));
     --bg-msg-input: var(--color-background);
+
+    --z-negative: -1;
+    --z-base: 0;
+    --z-effect-sm: 5;
+    --z-effect-md: 6;
+    --z-effect-lg: 7;
+    --z-content: 10;
+    --z-dropdown: 1000;
+    --z-sticky: 1010;
+    --z-fixed: 1020;
+    --z-backdrop: 1030;
+    --z-modal: 1040;
+    --z-popover: 1050;
+    --z-toast: 1060;
+    --z-tooltip: 1070;
+    --z-top: 9999;
 }

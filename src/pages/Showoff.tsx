@@ -18,6 +18,7 @@ import {
     type TOCProps,
     TableOfContents,
 } from '@/ui/components/showoff/TableOfContents';
+import { TogglesDemo } from '@/ui/components/showoff/TogglesDemo';
 import { TypographyDemo } from '@/ui/components/showoff/TypographyDemo';
 import { UserIdentitiesDemo } from '@/ui/components/showoff/UserIdentitiesDemo';
 import { UserProfilePopupDemo } from '@/ui/components/showoff/UserProfilePopupDemo';
@@ -94,6 +95,15 @@ export const Showoff = (): ReactNode => {
             ],
         },
         {
+            id: SHOWOFF_SECTIONS.toggles,
+            title: 'Toggle Switches',
+            children: [
+                { id: 'toggle-normal', title: 'Normal Toggle' },
+                { id: 'toggle-label', title: 'Toggle with Label' },
+                { id: 'toggle-disabled', title: 'Disabled Toggle' },
+            ],
+        },
+        {
             id: SHOWOFF_SECTIONS.loadingSpinner,
             title: 'Loading Spinner',
             children: [
@@ -142,6 +152,7 @@ export const Showoff = (): ReactNode => {
             <UserProfilePopupDemo />
 
             <InputsDemo />
+            <TogglesDemo />
             <LoadingSpinnerDemo />
             <ColorPalette />
         </>

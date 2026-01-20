@@ -1,6 +1,12 @@
 import React, { useState } from 'react';
 
-import { useMe, useUpdateMe } from '@/api/users/users.queries';
+import {
+    useMe,
+    useUpdateBio,
+    useUpdateDisplayName,
+    useUpdatePronouns,
+    useUpdateUsername,
+} from '@/api/users/users.queries';
 import { Button } from '@/ui/components/common/Button';
 import { Input } from '@/ui/components/common/Input';
 import { TextArea } from '@/ui/components/common/TextArea';
@@ -8,7 +14,19 @@ import { UserProfileCard } from '@/ui/components/profile/UserProfileCard';
 
 export const AccountSettings: React.FC = () => {
     const { data: user } = useMe();
-    const { mutate: updateMe, isPending } = useUpdateMe();
+    const { mutate: updateBio, isPending: isUpdatingBio } = useUpdateBio();
+    const { mutate: updatePronouns, isPending: isUpdatingPronouns } =
+        useUpdatePronouns();
+    const { mutate: updateDisplayName, isPending: isUpdatingDisplayName } =
+        useUpdateDisplayName();
+    const { mutate: updateUsername, isPending: isUpdatingUsername } =
+        useUpdateUsername();
+
+    const isPending =
+        isUpdatingBio ||
+        isUpdatingPronouns ||
+        isUpdatingDisplayName ||
+        isUpdatingUsername;
 
     const [displayName, setDisplayName] = useState(user?.displayName || '');
     const [originalDisplayName, setOriginalDisplayName] = useState(
@@ -29,25 +47,26 @@ export const AccountSettings: React.FC = () => {
     const [originalBio, setOriginalBio] = useState(user?.bio || '');
 
     const handleSave = (): void => {
-        updateMe(
-            {
-                displayName:
-                    displayName !== originalDisplayName
-                        ? displayName
-                        : undefined,
-                username: username !== originalUsername ? username : undefined,
-                pronouns: pronouns !== originalPronouns ? pronouns : undefined,
-                bio: bio !== originalBio ? bio : undefined,
-            },
-            {
-                onSuccess: () => {
-                    setOriginalDisplayName(displayName);
-                    setOriginalUsername(username);
-                    setOriginalPronouns(pronouns);
-                    setOriginalBio(bio);
-                },
-            }
-        );
+        if (displayName !== originalDisplayName) {
+            updateDisplayName(displayName, {
+                onSuccess: () => setOriginalDisplayName(displayName),
+            });
+        }
+        if (pronouns !== originalPronouns) {
+            updatePronouns(pronouns, {
+                onSuccess: () => setOriginalPronouns(pronouns),
+            });
+        }
+        if (bio !== originalBio) {
+            updateBio(bio, {
+                onSuccess: () => setOriginalBio(bio),
+            });
+        }
+        if (username !== originalUsername) {
+            updateUsername(username, {
+                onSuccess: () => setOriginalUsername(username),
+            });
+        }
     };
 
     const hasChanges =
@@ -175,7 +194,7 @@ export const AccountSettings: React.FC = () => {
 
                     {/* Action Buttons */}
                     {hasChanges && (
-                        <div className="fixed bottom-0 left-0 right-0 p-4 bg-[var(--color-bg-secondary)] border-t border-[var(--color-border-subtle)] flex justify-end gap-3 items-center z-50 md:absolute md:rounded-b-lg">
+                        <div className="fixed bottom-0 left-0 right-0 p-4 bg-[var(--color-bg-secondary)] border-t border-[var(--color-border-subtle)] flex justify-end gap-3 items-center z-fixed md:absolute md:rounded-b-lg">
                             <span className="text-sm text-[var(--color-foreground)] mr-auto">
                                 Careful - you have unsaved changes!
                             </span>

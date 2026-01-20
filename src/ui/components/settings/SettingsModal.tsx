@@ -7,6 +7,7 @@ import { IconButton } from '@/ui/components/common/IconButton';
 import { Modal } from '@/ui/components/common/Modal';
 
 import { AccountSettings } from './AccountSettings';
+import { AppearanceSettings } from './AppearanceSettings';
 import { SettingsSidebar } from './SettingsSidebar';
 import { StandingSettings } from './StandingSettings';
 
@@ -59,6 +60,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
                     <div className="flex-1 overflow-y-auto p-6 scrollbar-thin scrollbar-thumb-[var(--color-bg-secondary)] scrollbar-track-transparent">
                         {activeSection === 'account' && <AccountSettings />}
+                        {activeSection === 'appearance' && (
+                            <AppearanceSettings />
+                        )}
                         {activeSection === 'standing' && <StandingSettings />}
                     </div>
                 </div>
