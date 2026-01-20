@@ -1,7 +1,6 @@
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 
 import { AnimatePresence, motion } from 'framer-motion';
-import { Calendar } from 'lucide-react';
 import { createPortal } from 'react-dom';
 
 import type { Role } from '@/api/servers/servers.types';
@@ -9,15 +8,9 @@ import { useUserById } from '@/api/users/users.queries';
 import type { User } from '@/api/users/users.types';
 import { useSmartPosition } from '@/hooks/useSmartPosition';
 import { useAppSelector } from '@/store/hooks';
-import { Heading } from '@/ui/components/common/Heading';
-import { ParsedText } from '@/ui/components/common/ParsedText';
-import { StyledUserName } from '@/ui/components/common/StyledUserName';
-import { Text } from '@/ui/components/common/Text';
-import { UserBadge } from '@/ui/components/common/UserBadge';
-import { UserProfilePicture } from '@/ui/components/common/UserProfilePicture';
 import { Box } from '@/ui/components/layout/Box';
-import { resolveApiUrl } from '@/utils/apiUrl';
-import { ParserPresets, parseText } from '@/utils/textParser/parser';
+
+import { UserProfileCard } from './UserProfileCard';
 
 // We'll treat the popup as a fixed overlay that can be positioned
 interface ProfilePopupProps {
@@ -58,11 +51,6 @@ export const ProfilePopup: React.FC<ProfilePopupProps> = ({
     const presenceCustomText =
         presence?.customStatus || user?.customStatus?.text;
     const presenceCustomEmoji = user?.customStatus?.emoji;
-    const userBio = user?.bio;
-    const bioNodes = useMemo(
-        () => (userBio ? parseText(userBio, ParserPresets.BIO) : []),
-        [userBio]
-    );
 
     const coords = useSmartPosition({
         isOpen,
@@ -103,14 +91,13 @@ export const ProfilePopup: React.FC<ProfilePopupProps> = ({
 
     if (!user && !userId) return null;
 
-    const bannerColor = user?.usernameGradient?.colors?.[0] || '#5865F2';
     return createPortal(
         <AnimatePresence>
             {isOpen && (
                 <Box className="fixed inset-0 z-50 pointer-events-none">
                     <motion.div
                         animate={{ opacity: 1, scale: 1, y: 0 }}
-                        className="pointer-events-auto w-[340px] max-h-[calc(100vh-32px)] bg-[var(--color-background)] rounded-2xl shadow-2xl flex flex-col overflow-y-auto overflow-x-hidden custom-scrollbar border border-[var(--color-border-subtle)]"
+                        className="pointer-events-auto"
                         exit={{ opacity: 0, scale: 0.95, y: 10 }}
                         initial={{ opacity: 0, scale: 0.95, y: 10 }}
                         ref={popupRef}
@@ -121,204 +108,18 @@ export const ProfilePopup: React.FC<ProfilePopupProps> = ({
                         }}
                         transition={{ duration: 0.15, ease: 'easeOut' }}
                     >
-                        <Box
-                            className="h-[120px] sticky top-0 z-0 w-full overflow-hidden shrink-0"
-                            style={{
-                                backgroundColor: bannerColor,
+                        <UserProfileCard
+                            className="max-h-[calc(100vh-32px)] overflow-y-auto overflow-x-hidden custom-scrollbar"
+                            customStatus={{
+                                text: presenceCustomText,
+                                emoji: presenceCustomEmoji,
                             }}
-                        >
-                            {user?.banner && user.banner.trim() !== '' && (
-                                <img
-                                    alt="User Banner"
-                                    className="w-full h-full object-cover"
-                                    src={resolveApiUrl(user.banner) || ''}
-                                />
-                            )}
-                        </Box>
-
-                        <Box className="relative z-10 -mt-[50px] px-4">
-                            <Box className="p-1.5 bg-[var(--color-background)] rounded-full inline-block">
-                                <UserProfilePicture
-                                    noIndicator={false}
-                                    size="xl"
-                                    src={user?.profilePicture}
-                                    status={presenceStatus}
-                                    username={user?.username || ''}
-                                />
-                            </Box>
-                        </Box>
-
-                        <Box className="p-4 pt-2">
-                            <Box className="mb-4">
-                                <StyledUserName
-                                    className="text-xl font-bold leading-tight w-full truncate"
-                                    role={role}
-                                    user={user}
-                                >
-                                    {user?.displayName || user?.username}
-                                </StyledUserName>
-
-                                <Box className="text-sm text-[var(--color-muted-foreground)] font-medium select-text">
-                                    @{user?.username}
-                                    {user?.pronouns && (
-                                        <Text
-                                            as="span"
-                                            className="ml-2 text-[var(--color-muted-foreground/60)]"
-                                        >
-                                            • {user.pronouns}
-                                        </Text>
-                                    )}
-                                </Box>
-
-                                {user?.badges && user.badges.length > 0 && (
-                                    <Box className="flex flex-wrap gap-1.5 mt-2">
-                                        {user.badges.map((badge) => (
-                                            <UserBadge
-                                                badge={badge}
-                                                key={badge._id}
-                                            />
-                                        ))}
-                                    </Box>
-                                )}
-                            </Box>
-
-                            {(presenceCustomText || presenceCustomEmoji) &&
-                                presenceStatus !== 'offline' && (
-                                    <Box className="mb-4 text-sm text-[var(--color-foreground/80)] flex items-center gap-2">
-                                        {presenceCustomEmoji && (
-                                            <Text as="span">
-                                                {presenceCustomEmoji}
-                                            </Text>
-                                        )}
-                                        <Text as="span">
-                                            {presenceCustomText}
-                                        </Text>
-                                    </Box>
-                                )}
-
-                            <Box className="h-px bg-[var(--color-divider)] w-full my-3" />
-
-                            {user?.bio && (
-                                <Box className="mb-4">
-                                    <Heading
-                                        className="uppercase text-xs font-bold text-[var(--color-muted-foreground)] mb-2"
-                                        level={3}
-                                    >
-                                        About Me
-                                    </Heading>
-                                    <Box className="text-sm text-[var(--color-foreground/90)] whitespace-pre-wrap leading-relaxed">
-                                        <ParsedText
-                                            nodes={bioNodes}
-                                            size="xs"
-                                        />
-                                    </Box>
-                                </Box>
-                            )}
-
-                            <Box className="flex gap-4 mb-4">
-                                <Box className="flex-1 min-w-0">
-                                    <Heading
-                                        className="uppercase text-xs font-bold text-[var(--color-muted-foreground)] mb-2"
-                                        level={3}
-                                    >
-                                        Member Since
-                                    </Heading>
-                                    <Box className="text-sm text-[var(--color-foreground/80)] flex items-center gap-2">
-                                        <Calendar
-                                            className="shrink-0"
-                                            size={14}
-                                        />
-                                        <Text as="span" className="truncate">
-                                            {user?.createdAt &&
-                                                new Date(
-                                                    user.createdAt
-                                                ).toLocaleDateString('en-GB', {
-                                                    day: 'numeric',
-                                                    month: 'short',
-                                                    year: 'numeric',
-                                                })}
-                                        </Text>
-                                    </Box>
-                                </Box>
-
-                                {joinedAt && (
-                                    <Box className="flex-1 min-w-0">
-                                        <Heading
-                                            className="uppercase text-xs font-bold text-[var(--color-muted-foreground)] mb-2 truncate"
-                                            level={3}
-                                        >
-                                            Joined Server
-                                        </Heading>
-                                        <Box className="text-sm text-[var(--color-foreground/80)] flex items-center gap-2">
-                                            <Calendar
-                                                className="shrink-0"
-                                                size={14}
-                                            />
-                                            <Text
-                                                as="span"
-                                                className="truncate"
-                                            >
-                                                {new Date(
-                                                    joinedAt
-                                                ).toLocaleDateString('en-GB', {
-                                                    day: 'numeric',
-                                                    month: 'short',
-                                                    year: 'numeric',
-                                                })}
-                                            </Text>
-                                        </Box>
-                                    </Box>
-                                )}
-                            </Box>
-
-                            {roles && roles.length > 0 && (
-                                <Box className="mb-4">
-                                    <Heading
-                                        className="uppercase text-xs font-bold text-[var(--color-muted-foreground)] mb-2"
-                                        level={3}
-                                    >
-                                        Roles
-                                    </Heading>
-                                    <Box className="flex flex-wrap gap-2">
-                                        {[...roles]
-                                            .sort(
-                                                (a, b) =>
-                                                    b.position - a.position
-                                            )
-                                            .map((r) => (
-                                                <Box
-                                                    className="flex items-center gap-1.5 px-2 py-1 bg-[var(--color-bg-secondary)] rounded-md border border-[var(--color-border-subtle)]"
-                                                    key={r._id}
-                                                >
-                                                    <Box
-                                                        className="w-3 h-3 rounded-full shrink-0"
-                                                        style={{
-                                                            backgroundColor:
-                                                                r.color ||
-                                                                '#B9BBBE',
-                                                            backgroundImage:
-                                                                r.colors &&
-                                                                r.colors
-                                                                    .length > 0
-                                                                    ? `linear-gradient(90deg, ${r.colors.join(', ')})`
-                                                                    : r.startColor &&
-                                                                        r.endColor
-                                                                      ? `linear-gradient(90deg, ${r.startColor}, ${r.endColor})`
-                                                                      : undefined,
-                                                        }}
-                                                    />
-                                                    <Text
-                                                        as="span"
-                                                        className="text-xs font-medium text-[var(--color-foreground/90)]"
-                                                    >
-                                                        {r.name}
-                                                    </Text>
-                                                </Box>
-                                            ))}
-                                    </Box>
-                                </Box>
-                            )}
-                        </Box>
+                            joinedAt={joinedAt}
+                            presenceStatus={presenceStatus}
+                            role={role}
+                            roles={roles}
+                            user={user}
+                        />
                     </motion.div>
                 </Box>
             )}
