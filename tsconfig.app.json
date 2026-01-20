@@ -10,7 +10,8 @@
     ],
     "module": "ESNext",
     "types": [
-      "vite/client"
+      "vite/client",
+      "vitest/globals"
     ],
     "skipLibCheck": true,
     /* Bundler mode */
@@ -54,6 +55,7 @@
     "noUncheckedSideEffectImports": true
   },
   "include": [
-    "src"
-, "src/main.tsx"  ]
+    "src",
+    "src/main.tsx"
+  ]
 }

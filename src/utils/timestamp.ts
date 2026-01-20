@@ -1,7 +1,7 @@
 /**
  * Format a message timestamp
  */
-export function formatDiscordTimestamp(isoString: string): string {
+export function formatTimestamp(isoString: string): string {
     const messageDate = new Date(isoString);
     const now = new Date();
 

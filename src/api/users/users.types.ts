@@ -19,7 +19,6 @@ export interface CustomStatus {
 
 export interface UserSettings {
     muteNotifications?: boolean;
-    useDiscordStyleMessages?: boolean;
     ownMessagesAlign?: 'left' | 'right';
     otherMessagesAlign?: 'left' | 'right';
     showYouLabel?: boolean;
