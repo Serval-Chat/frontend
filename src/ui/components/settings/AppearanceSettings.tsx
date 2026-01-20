@@ -82,8 +82,8 @@ const AppearanceSettingsForm: React.FC<AppearanceSettingsFormProps> = ({
         ...user,
         usernameGlow: {
             enabled: glowEnabled,
-            color: user.usernameGlow?.color, // Ensure compatibility with User type
-            intensity: user.usernameGlow?.intensity,
+            color: user.usernameGlow?.color,
+            intensity: user.usernameGlow?.intensity ?? 5,
         },
         usernameGradient: {
             enabled: gradientEnabled,

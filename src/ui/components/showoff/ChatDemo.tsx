@@ -23,6 +23,7 @@ const MOCK_USERS: Record<string, User> = {
         usernameGlow: {
             enabled: false,
             color: '#ff9a9e',
+            intensity: 5,
         },
     },
     hexagon: {
@@ -41,6 +42,7 @@ const MOCK_USERS: Record<string, User> = {
         usernameGlow: {
             enabled: false,
             color: '#4facfe',
+            intensity: 5,
         },
     },
     evalyn: {
@@ -58,6 +60,7 @@ const MOCK_USERS: Record<string, User> = {
         usernameGlow: {
             enabled: false,
             color: '#f093fb',
+            intensity: 5,
         },
     },
     mintsuki: {
@@ -75,6 +78,7 @@ const MOCK_USERS: Record<string, User> = {
         usernameGlow: {
             enabled: false,
             color: '',
+            intensity: 5,
         },
     },
 };

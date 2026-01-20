@@ -33,7 +33,7 @@ interface UserItemProps {
 
     initialData?: {
         username: string;
-        displayName?: string;
+        displayName?: string | null;
         profilePicture?: string | null;
         customStatus?: { text?: string; emoji?: string } | null;
     };
