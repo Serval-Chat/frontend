@@ -46,7 +46,7 @@ export const MessageHeader: React.FC<MessageHeaderProps> = ({
                 </StyledUserName>
             </Box>
 
-            <Text className="text-[10px] text-white/40 font-medium uppercase tracking-wider">
+            <Text className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">
                 {formatTimestamp(timestamp)}
             </Text>
         </Box>

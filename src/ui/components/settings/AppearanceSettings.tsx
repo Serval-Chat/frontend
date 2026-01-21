@@ -148,6 +148,8 @@ const AppearanceSettingsForm: React.FC<AppearanceSettingsFormProps> = ({
                             {[
                                 { id: 'serval', label: 'Serval' },
                                 { id: 'dark', label: 'Dark' },
+                                { id: 'light', label: 'Light' },
+                                { id: 'high-contrast', label: 'High Contrast' },
                             ].map((t) => (
                                 <button
                                     className={`group flex items-center gap-3 p-3 rounded-xl border-2 transition-all theme-${

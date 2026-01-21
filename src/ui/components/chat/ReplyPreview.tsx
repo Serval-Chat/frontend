@@ -35,10 +35,10 @@ export const ReplyPreview: React.FC<ReplyPreviewProps> = ({
             onClick={() => replyToId && onClick?.(replyToId)}
         >
             {/* Spine */}
-            <Box className="w-[36px] h-[18px] border-l-2 border-t-2 border-white/20 rounded-tl-lg mt-[11px] flex-shrink-0" />
+            <Box className="w-[36px] h-[18px] border-l-2 border-t-2 border-border-subtle rounded-tl-lg mt-[11px] flex-shrink-0" />
 
             <Box className="flex items-center gap-1.5 overflow-hidden min-w-0">
-                <Box className="w-4 h-4 rounded-full bg-white/10 overflow-hidden flex-shrink-0 ring-1 ring-white/5">
+                <Box className="w-4 h-4 rounded-full bg-bg-subtle overflow-hidden flex-shrink-0 ring-1 ring-border-subtle">
                     {resolveApiUrl(user.profilePicture) ? (
                         <img
                             alt=""
@@ -62,7 +62,7 @@ export const ReplyPreview: React.FC<ReplyPreviewProps> = ({
                 </StyledUserName>
                 <Text
                     as="span"
-                    className="text-xs text-white/50 truncate font-medium"
+                    className="text-xs text-muted-foreground truncate font-medium"
                 >
                     <ParsedText nodes={nodes} />
                 </Text>
