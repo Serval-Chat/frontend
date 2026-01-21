@@ -21,6 +21,7 @@ interface MessageProps {
     isHighlighted?: boolean;
     onReplyClick?: (messageId: string) => void;
     disableCustomFonts?: boolean;
+    disableGlow?: boolean;
 }
 
 export const Message: React.FC<MessageProps> = ({
@@ -31,6 +32,7 @@ export const Message: React.FC<MessageProps> = ({
     isHighlighted = false,
     onReplyClick,
     disableCustomFonts,
+    disableGlow,
 }) => {
     const [showProfile, setShowProfile] = React.useState(false);
     const avatarRef = React.useRef<HTMLDivElement>(null);
@@ -89,6 +91,7 @@ export const Message: React.FC<MessageProps> = ({
                 <Box className="flex-1 min-w-0">
                     <MessageHeader
                         disableCustomFonts={disableCustomFonts}
+                        disableGlow={disableGlow}
                         isGroupStart={isGroupStart}
                         role={role}
                         timestamp={message.createdAt}
@@ -107,6 +110,8 @@ export const Message: React.FC<MessageProps> = ({
             </Box>
 
             <ProfilePopup
+                disableCustomFonts={disableCustomFonts}
+                disableGlow={disableGlow}
                 isOpen={showProfile}
                 role={role}
                 triggerRef={avatarRef}

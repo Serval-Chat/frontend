@@ -75,7 +75,12 @@ export const StyledUserName: React.FC<StyledUserNameProps> = ({
     }
 
     // If user has custom gradient and no role gradient was set, use user's
-    if (!hasGradient && !solidColor && user?.usernameGradient?.enabled) {
+    if (
+        !hasGradient &&
+        !solidColor &&
+        user?.usernameGradient?.enabled &&
+        !disableCustomFonts
+    ) {
         const { colors, angle, repeating } = user.usernameGradient;
         if (colors.length > 0) {
             if (colors.length === 1) {
@@ -92,7 +97,8 @@ export const StyledUserName: React.FC<StyledUserNameProps> = ({
     }
 
     // Enable glow if user has it enabled and glow is not disabled
-    const hasGlow = !disableGlow && usernameGlow?.enabled;
+    const hasGlow =
+        !disableGlow && !disableCustomFonts && usernameGlow?.enabled;
 
     const containerStyle: React.CSSProperties = {
         fontFamily: usernameFont || undefined,

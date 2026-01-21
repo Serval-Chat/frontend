@@ -13,6 +13,7 @@ interface MessageItemProps {
     isHighlighted?: boolean;
     onReplyClick?: (messageId: string) => void;
     disableCustomFonts?: boolean;
+    disableGlow?: boolean;
 }
 
 export const MessageItem: React.FC<MessageItemProps> = ({
@@ -22,6 +23,7 @@ export const MessageItem: React.FC<MessageItemProps> = ({
     isHighlighted,
     onReplyClick,
     disableCustomFonts,
+    disableGlow,
 }) => {
     const isGroupStart =
         !prevMessage ||
@@ -31,6 +33,7 @@ export const MessageItem: React.FC<MessageItemProps> = ({
     return (
         <Message
             disableCustomFonts={disableCustomFonts}
+            disableGlow={disableGlow}
             isGroupStart={isGroupStart}
             isHighlighted={isHighlighted}
             message={message}

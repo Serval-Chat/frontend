@@ -212,6 +212,8 @@ export const UserItem: React.FC<UserItemProps> = ({
                 </Box>
             </ContextMenu>
             <ProfilePopup
+                disableCustomFonts={disableCustomFonts}
+                disableGlow={disableGlow}
                 isOpen={showProfile}
                 joinedAt={joinedAt}
                 role={role}

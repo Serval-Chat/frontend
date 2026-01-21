@@ -12,6 +12,7 @@ interface MessageHeaderProps {
     timestamp: string;
     isGroupStart?: boolean;
     disableCustomFonts?: boolean;
+    disableGlow?: boolean;
     onClickName?: () => void;
 }
 
@@ -21,6 +22,7 @@ export const MessageHeader: React.FC<MessageHeaderProps> = ({
     timestamp,
     isGroupStart = true,
     disableCustomFonts,
+    disableGlow,
     onClickName,
 }) => {
     if (!isGroupStart) return null;
@@ -36,6 +38,7 @@ export const MessageHeader: React.FC<MessageHeaderProps> = ({
             >
                 <StyledUserName
                     disableCustomFonts={disableCustomFonts}
+                    disableGlow={disableGlow}
                     role={role}
                     user={user}
                 >
