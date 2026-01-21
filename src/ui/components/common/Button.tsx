@@ -28,7 +28,7 @@ const buttonVariants = cva(
                     'bg-caution text-foreground-inverse hover:bg-caution-hover',
                 success:
                     'bg-success text-foreground-inverse hover:bg-success-hover',
-                nav: 'bg-bg-secondary text-[#f4f4f4] w-12 h-12 p-0 rounded-[1.2rem] transition-all duration-200 hover:bg-primary hover:text-foreground-inverse hover:rounded-[0.75rem]',
+                nav: 'bg-bg-secondary text-foreground w-12 h-12 p-0 rounded-[1.2rem] transition-all duration-200 hover:bg-primary hover:text-foreground-inverse hover:rounded-[0.75rem]',
                 ghost: 'bg-transparent text-foreground hover:bg-bg-subtle border-none shadow-none',
             },
             size: {

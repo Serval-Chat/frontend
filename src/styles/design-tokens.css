@@ -1,31 +1,5 @@
 @theme {
-    --color-primary: hsl(45 100% 50%);
-    --color-primary-hover: hsl(45 100% 40%);
-    --color-danger: hsl(15 90% 55%);
-    --color-danger-hover: hsl(15 90% 45%);
-    --color-caution: hsl(30 95% 60%);
-    --color-caution-hover: hsl(30 95% 50%);
-    --color-success: hsl(80 70% 40%);
-    --color-success-hover: hsl(80 70% 30%);
-    --color-primary-muted: hsl(45 100% 15%);
-    --color-primary-muted-text: hsl(45 100% 70%);
-    --color-danger-muted: hsl(15 90% 15%);
-    --color-danger-muted-text: hsl(15 90% 70%);
-    --color-caution-muted: hsl(30 95% 15%);
-    --color-caution-muted-text: hsl(30 95% 70%);
-    --color-success-muted: hsl(80 70% 15%);
-    --color-success-muted-text: hsl(80 70% 70%);
-    --color-background: #2e1d13;
-    --color-foreground: #fffbf0;
-    --color-foreground-inverse: #000000;
-    --color-muted-foreground: #bcaaa4;
-    --color-muted-foreground-hover: #e6dedb;
-    --color-border-subtle: rgb(255 190 0 / 0.2);
-    --color-bg-subtle: rgb(255 190 0 / 0.08);
-    --color-bg-secondary: rgb(255 190 0 / 0.12);
-    --color-placeholder: rgb(188 170 164 / 0.4);
-    --color-divider: rgb(255 190 0 / 0.15);
-
+    /* Theme-agnostic variables */
     --spacing: 0.25rem;
     --spacing-xs: calc(var(--spacing) * 1);
     --spacing-sm: calc(var(--spacing) * 2);
@@ -56,13 +30,6 @@
     --radius-md: 0.5rem;
     --radius-lg: 0.75rem;
 
-    --tertiary-bg: var(--color-background);
-    --secondary-bg: var(--color-background);
-    --bg-chat-header: var(--color-background);
-    --chat-bg: color-mix(in srgb, black 25%, var(--color-bg-secondary));
-    --primary-bg: color-mix(in srgb, black 25%, var(--color-bg-secondary));
-    --bg-msg-input: var(--color-background);
-
     --z-negative: -1;
     --z-base: 0;
     --z-effect-sm: 5;
@@ -78,4 +45,101 @@
     --z-toast: 1060;
     --z-tooltip: 1070;
     --z-top: 9999;
+
+    --color-primary: var(--primary);
+    --color-primary-hover: var(--primary-hover);
+    --color-danger: var(--danger);
+    --color-danger-hover: var(--danger-hover);
+    --color-caution: var(--caution);
+    --color-caution-hover: var(--caution-hover);
+    --color-success: var(--success);
+    --color-success-hover: var(--success-hover);
+    --color-primary-muted: var(--primary-muted);
+    --color-primary-muted-text: var(--primary-muted-text);
+    --color-danger-muted: var(--danger-muted);
+    --color-danger-muted-text: var(--danger-muted-text);
+    --color-caution-muted: var(--caution-muted);
+    --color-caution-muted-text: var(--caution-muted-text);
+    --color-success-muted: var(--success-muted);
+    --color-success-muted-text: var(--success-muted-text);
+    --color-background: var(--background);
+    --color-foreground: var(--foreground);
+    --color-foreground-inverse: var(--foreground-inverse);
+    --color-muted-foreground: var(--muted-foreground);
+    --color-muted-foreground-hover: var(--muted-foreground-hover);
+    --color-border-subtle: var(--border-subtle);
+    --color-bg-subtle: var(--bg-subtle);
+    --color-bg-secondary: var(--bg-secondary);
+    --color-placeholder: var(--placeholder);
+    --color-divider: var(--divider);
+
+    --tertiary-bg: var(--background);
+    --secondary-bg: var(--background);
+    --bg-chat-header: var(--background);
+    --chat-bg: color-mix(in srgb, black 25%, var(--bg-secondary));
+    --primary-bg: color-mix(in srgb, black 25%, var(--bg-secondary));
+    --bg-msg-input: var(--background);
+}
+
+:root,
+.theme-serval {
+    --primary: hsl(45 100% 50%);
+    --primary-hover: hsl(45 100% 40%);
+    --danger: hsl(15 90% 55%);
+    --danger-hover: hsl(15 90% 45%);
+    --caution: hsl(30 95% 60%);
+    --caution-hover: hsl(30 95% 50%);
+    --success: hsl(80 70% 40%);
+    --success-hover: hsl(80 70% 30%);
+    --primary-muted: hsl(45 100% 15%);
+    --primary-muted-text: hsl(45 100% 70%);
+    --danger-muted: hsl(15 90% 15%);
+    --danger-muted-text: hsl(15 90% 70%);
+    --caution-muted: hsl(30 95% 15%);
+    --caution-muted-text: hsl(30 95% 70%);
+    --success-muted: hsl(80 70% 15%);
+    --success-muted-text: hsl(80 70% 70%);
+    --background: #2e1d13;
+    --foreground: #fffbf0;
+    --foreground-inverse: #000000;
+    --muted-foreground: #bcaaa4;
+    --muted-foreground-hover: #e6dedb;
+    --border-subtle: rgb(255 190 0 / 0.2);
+    --bg-subtle: rgb(255 190 0 / 0.08);
+    --bg-secondary: rgb(255 190 0 / 0.12);
+    --placeholder: rgb(188 170 164 / 0.4);
+    --divider: rgb(255 190 0 / 0.15);
+}
+
+.theme-dark {
+    --primary: hsl(210 100% 60%);
+    --primary-hover: hsl(210 100% 50%);
+    --danger: hsl(0 85% 60%);
+    --danger-hover: hsl(0 85% 50%);
+    --caution: hsl(35 90% 60%);
+    --caution-hover: hsl(35 90% 50%);
+    --success: hsl(142 70% 55%);
+    --success-hover: hsl(142 70% 45%);
+    --primary-muted: hsl(210 100% 12%);
+    --primary-muted-text: hsl(210 100% 75%);
+    --danger-muted: hsl(0 85% 12%);
+    --danger-muted-text: hsl(0 85% 75%);
+    --caution-muted: hsl(35 90% 12%);
+    --caution-muted-text: hsl(35 90% 75%);
+    --success-muted: hsl(142 70% 12%);
+    --success-muted-text: hsl(142 70% 75%);
+    --background: #0f172a;
+    /* Slate 950 */
+    --foreground: #f8fafc;
+    /* Slate 50 */
+    --foreground-inverse: #ffffff;
+    --muted-foreground: #94a3b8;
+    /* Slate 400 */
+    --muted-foreground-hover: #cbd5e1;
+    /* Slate 300 */
+    --border-subtle: rgba(255, 255, 255, 0.1);
+    --bg-subtle: rgba(255, 255, 255, 0.05);
+    --bg-secondary: rgba(255, 255, 255, 0.08);
+    --placeholder: rgba(255, 255, 255, 0.2);
+    --divider: rgba(255, 255, 255, 0.1);
 }

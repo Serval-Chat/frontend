@@ -5,6 +5,7 @@ import { HexColorPicker } from 'react-colorful';
 
 import { useMe, useUpdateStyle } from '@/api/users/users.queries';
 import type { User } from '@/api/users/users.types';
+import { useTheme } from '@/providers/ThemeProvider';
 import { Button } from '@/ui/components/common/Button';
 import { StyledUserName } from '@/ui/components/common/StyledUserName';
 import { Toggle } from '@/ui/components/common/Toggle';
@@ -17,6 +18,7 @@ const AppearanceSettingsForm: React.FC<AppearanceSettingsFormProps> = ({
     user,
 }) => {
     const { mutate: updateStyle, isPending } = useUpdateStyle();
+    const { theme, setTheme } = useTheme();
 
     // Local state
     const [glowEnabled, setGlowEnabled] = useState(
@@ -137,6 +139,66 @@ const AppearanceSettingsForm: React.FC<AppearanceSettingsFormProps> = ({
                 </div>
 
                 <div className="flex flex-col gap-8">
+                    {/* Theme Settings */}
+                    <div className="space-y-4">
+                        <h4 className="text-lg font-semibold text-[var(--color-foreground)]">
+                            Theme
+                        </h4>
+                        <div className="flex flex-wrap gap-4">
+                            {[
+                                { id: 'serval', label: 'Serval' },
+                                { id: 'dark', label: 'Dark' },
+                            ].map((t) => (
+                                <button
+                                    className={`group flex items-center gap-3 p-3 rounded-xl border-2 transition-all theme-${
+                                        t.id
+                                    } ${
+                                        theme === t.id
+                                            ? 'border-[var(--color-primary)] bg-[var(--color-bg-secondary)]'
+                                            : 'border-[var(--color-border-subtle)] bg-[var(--color-bg-subtle)] hover:border-[var(--color-border)]'
+                                    }`}
+                                    key={t.id}
+                                    onClick={() => setTheme(t.id as any)}
+                                >
+                                    <div className="flex flex-col gap-1 w-12 h-10 rounded-lg p-1.5 border border-white/10 bg-[var(--background)] overflow-hidden">
+                                        <div className="w-full h-2 rounded-sm bg-[var(--primary)]" />
+                                        <div className="w-2/3 h-1.5 rounded-sm bg-[var(--foreground)] opacity-20" />
+                                        <div className="w-1/2 h-1.5 rounded-sm bg-[var(--foreground)] opacity-10" />
+                                    </div>
+                                    <div className="flex flex-col items-start pr-2">
+                                        <span
+                                            className={`text-sm font-bold ${
+                                                theme === t.id
+                                                    ? 'text-[var(--color-primary)]'
+                                                    : 'text-[var(--color-foreground)]'
+                                            }`}
+                                        >
+                                            {t.label}
+                                        </span>
+                                        <div className="flex gap-1 mt-1">
+                                            <div
+                                                className="w-2.5 h-2.5 rounded-full bg-[var(--primary)]"
+                                                title="Primary"
+                                            />
+                                            <div
+                                                className="w-2.5 h-2.5 rounded-full bg-[var(--primary-muted)]"
+                                                title="Primary Muted"
+                                            />
+                                            <div
+                                                className="w-2.5 h-2.5 rounded-full bg-[var(--success)]"
+                                                title="Success"
+                                            />
+                                            <div
+                                                className="w-2.5 h-2.5 rounded-full bg-[var(--danger)]"
+                                                title="Danger"
+                                            />
+                                        </div>
+                                    </div>
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
                     {/* Glow Settings */}
                     <div className="space-y-4">
                         <div className="flex items-center justify-between">

@@ -73,7 +73,7 @@ export const Message: React.FC<MessageProps> = ({
                             onClick={() => setShowProfile(true)}
                         />
                     ) : (
-                        <Text className="opacity-0 group-hover:opacity-40 text-[10px] text-white/50 font-medium select-none mt-1">
+                        <Text className="opacity-0 group-hover:opacity-40 text-[10px] text-muted-foreground font-medium select-none mt-1">
                             {
                                 new Date(message.createdAt)
                                     .toLocaleTimeString([], {
@@ -104,7 +104,7 @@ export const Message: React.FC<MessageProps> = ({
 
             {/* Hover Actions */}
             <Box className="absolute right-4 top-0 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all">
-                <Box className="flex items-center bg-[#2b2d31] border border-white/5 rounded shadow-xl px-1 py-1 gap-1">
+                <Box className="flex items-center bg-bg-secondary border border-white/5 rounded shadow-xl px-1 py-1 gap-1">
                     {/* Actions will go here but none for now uwu */}
                 </Box>
             </Box>
