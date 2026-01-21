@@ -24,6 +24,8 @@ interface ProfilePopupProps {
     roles?: Role[];
     joinedAt?: string;
     disableFetch?: boolean;
+    disableCustomFonts?: boolean;
+    disableGlow?: boolean;
 }
 
 export const ProfilePopup: React.FC<ProfilePopupProps> = ({
@@ -37,6 +39,8 @@ export const ProfilePopup: React.FC<ProfilePopupProps> = ({
     roles,
     joinedAt,
     disableFetch,
+    disableCustomFonts = false,
+    disableGlow = false,
 }) => {
     const popupRef = useRef<HTMLDivElement>(null);
 
@@ -114,6 +118,8 @@ export const ProfilePopup: React.FC<ProfilePopupProps> = ({
                                 text: presenceCustomText,
                                 emoji: presenceCustomEmoji,
                             }}
+                            disableCustomFonts={disableCustomFonts}
+                            disableGlow={disableGlow}
                             joinedAt={joinedAt}
                             presenceStatus={presenceStatus}
                             role={role}

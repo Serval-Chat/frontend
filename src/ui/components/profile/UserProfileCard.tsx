@@ -27,6 +27,8 @@ interface UserProfileCardProps {
     customStatus?: { text?: string; emoji?: string };
     onBannerClick?: () => void;
     onAvatarClick?: () => void;
+    disableCustomFonts?: boolean;
+    disableGlow?: boolean;
 }
 
 export const UserProfileCard: React.FC<UserProfileCardProps> = ({
@@ -40,6 +42,8 @@ export const UserProfileCard: React.FC<UserProfileCardProps> = ({
     customStatus,
     onBannerClick,
     onAvatarClick,
+    disableCustomFonts = false,
+    disableGlow = false,
 }) => {
     const userId = user?._id;
     const presence = useAppSelector((state) =>
@@ -54,8 +58,10 @@ export const UserProfileCard: React.FC<UserProfileCardProps> = ({
         presence?.customStatus ||
         user?.customStatus?.text;
     const finalCustomEmoji = customStatus?.emoji || user?.customStatus?.emoji;
-
-    const bannerColor = user?.usernameGradient?.colors?.[0] || '#5865F2';
+    const defaultColor = '#5865F2';
+    const bannerColor = disableCustomFonts
+        ? defaultColor
+        : user?.usernameGradient?.colors?.[0] || defaultColor;
 
     const userBio = user?.bio;
     const bioNodes = useMemo(
@@ -114,6 +120,8 @@ export const UserProfileCard: React.FC<UserProfileCardProps> = ({
                 <Box className="mb-4">
                     <StyledUserName
                         className="text-xl font-bold leading-tight w-full truncate"
+                        disableCustomFonts={disableCustomFonts}
+                        disableGlow={disableGlow}
                         role={role}
                         user={user as User}
                     >
