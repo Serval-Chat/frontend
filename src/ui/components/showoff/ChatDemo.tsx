@@ -142,14 +142,14 @@ export const ChatDemo: React.FC = () => (
     <DemoSection id="chat-messages" title="Chat Messages">
         <div className="space-y-6">
             <div>
-                <p className="text-white/60 text-sm mt-1">
+                <p className="text-muted-foreground text-sm mt-1">
                     Showoff for messages
                 </p>
             </div>
 
-            <div className="bg-background rounded-xl border border-white/5 overflow-hidden shadow-2xl flex flex-col h-[500px]">
-                <div className="p-4 border-b border-white/5 bg-white/5">
-                    <Text className="text-white/90" weight="semibold">
+            <div className="bg-background rounded-xl border border-border-subtle overflow-hidden shadow-2xl flex flex-col h-[500px]">
+                <div className="p-4 border-b border-border-subtle bg-bg-subtle">
+                    <Text className="text-foreground" weight="semibold">
                         # General (English)
                     </Text>
                 </div>

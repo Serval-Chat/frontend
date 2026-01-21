@@ -133,7 +133,7 @@ export const UserProfileCard: React.FC<UserProfileCardProps> = ({
                         {user?.pronouns && (
                             <Text
                                 as="span"
-                                className="ml-2 text-[var(--color-muted-foreground/60)]"
+                                className="ml-2 text-muted-foreground/60"
                             >
                                 • {user.pronouns}
                             </Text>
@@ -151,7 +151,7 @@ export const UserProfileCard: React.FC<UserProfileCardProps> = ({
 
                 {(finalCustomText || finalCustomEmoji) &&
                     finalStatus !== 'offline' && (
-                        <Box className="mb-4 text-sm text-[var(--color-foreground/80)] flex items-center gap-2">
+                        <Box className="mb-4 text-sm text-foreground/80 flex items-center gap-2">
                             {finalCustomEmoji && (
                                 <Text as="span">{finalCustomEmoji}</Text>
                             )}
@@ -169,7 +169,7 @@ export const UserProfileCard: React.FC<UserProfileCardProps> = ({
                         >
                             About Me
                         </Heading>
-                        <Box className="text-sm text-[var(--color-foreground/90)] whitespace-pre-wrap leading-relaxed">
+                        <Box className="text-sm text-foreground/90 whitespace-pre-wrap leading-relaxed">
                             <ParsedText nodes={bioNodes} size="xs" />
                         </Box>
                     </Box>
@@ -183,7 +183,7 @@ export const UserProfileCard: React.FC<UserProfileCardProps> = ({
                         >
                             Member Since
                         </Heading>
-                        <Box className="text-sm text-[var(--color-foreground/80)] flex items-center gap-2">
+                        <Box className="text-sm text-foreground/80 flex items-center gap-2">
                             <Calendar className="shrink-0" size={14} />
                             <Text as="span" className="truncate">
                                 {user?.createdAt &&
@@ -207,7 +207,7 @@ export const UserProfileCard: React.FC<UserProfileCardProps> = ({
                             >
                                 Joined Server
                             </Heading>
-                            <Box className="text-sm text-[var(--color-foreground/80)] flex items-center gap-2">
+                            <Box className="text-sm text-foreground/80 flex items-center gap-2">
                                 <Calendar className="shrink-0" size={14} />
                                 <Text as="span" className="truncate">
                                     {new Date(joinedAt).toLocaleDateString(
@@ -257,7 +257,7 @@ export const UserProfileCard: React.FC<UserProfileCardProps> = ({
                                         />
                                         <Text
                                             as="span"
-                                            className="text-xs font-medium text-[var(--color-foreground/90)]"
+                                            className="text-xs font-medium text-foreground/90"
                                         >
                                             {r.name}
                                         </Text>

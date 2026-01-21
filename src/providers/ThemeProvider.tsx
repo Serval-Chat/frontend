@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
-type Theme = 'serval' | 'dark';
+type Theme = 'serval' | 'dark' | 'light' | 'high-contrast';
 
 interface ThemeContextType {
     theme: Theme;
@@ -19,7 +19,12 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
 
     useEffect(() => {
         const root = document.documentElement;
-        root.classList.remove('theme-serval', 'theme-dark');
+        root.classList.remove(
+            'theme-serval',
+            'theme-dark',
+            'theme-light',
+            'theme-high-contrast',
+        );
         root.classList.add(`theme-${theme}`);
         localStorage.setItem('theme', theme);
     }, [theme]);

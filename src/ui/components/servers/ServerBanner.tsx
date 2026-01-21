@@ -50,8 +50,12 @@ export const ServerBanner: React.FC<ServerBannerProps> = ({
             >
                 <Text
                     className={cn(
-                        'truncate text-[15px] drop-shadow-lg',
-                        loading ? 'text-foreground-muted' : 'text-foreground',
+                        'truncate text-[15px] drop-shadow-lg transition-colors',
+                        loading
+                            ? 'text-muted-foreground'
+                            : banner
+                              ? 'text-white'
+                              : 'text-foreground',
                     )}
                     weight="bold"
                 >

@@ -76,12 +76,11 @@
     --tertiary-bg: var(--background);
     --secondary-bg: var(--background);
     --bg-chat-header: var(--background);
-    --chat-bg: color-mix(in srgb, black 25%, var(--bg-secondary));
-    --primary-bg: color-mix(in srgb, black 25%, var(--bg-secondary));
+    --chat-bg: var(--local-chat-bg);
+    --primary-bg: var(--local-primary-bg);
     --bg-msg-input: var(--background);
 }
 
-:root,
 .theme-serval {
     --primary: hsl(45 100% 50%);
     --primary-hover: hsl(45 100% 40%);
@@ -109,6 +108,10 @@
     --bg-secondary: rgb(255 190 0 / 0.12);
     --placeholder: rgb(188 170 164 / 0.4);
     --divider: rgb(255 190 0 / 0.15);
+
+    /* Local overrides for layout bits */
+    --local-chat-bg: color-mix(in srgb, black 25%, var(--bg-secondary));
+    --local-primary-bg: color-mix(in srgb, black 25%, var(--bg-secondary));
 }
 
 .theme-dark {
@@ -142,4 +145,71 @@
     --bg-secondary: rgba(255, 255, 255, 0.08);
     --placeholder: rgba(255, 255, 255, 0.2);
     --divider: rgba(255, 255, 255, 0.1);
+
+    --local-chat-bg: color-mix(in srgb, black 30%, var(--background));
+    --local-primary-bg: color-mix(in srgb, black 30%, var(--background));
+}
+
+.theme-light {
+    --primary: hsl(210 100% 45%);
+    --primary-hover: hsl(210 100% 35%);
+    --danger: hsl(0 85% 55%);
+    --danger-hover: hsl(0 85% 45%);
+    --caution: hsl(35 90% 55%);
+    --caution-hover: hsl(35 90% 45%);
+    --success: hsl(142 70% 40%);
+    --success-hover: hsl(142 70% 30%);
+    --primary-muted: hsl(210 100% 95%);
+    --primary-muted-text: hsl(210 100% 30%);
+    --danger-muted: hsl(0 85% 95%);
+    --danger-muted-text: hsl(0 85% 30%);
+    --caution-muted: hsl(35 90% 95%);
+    --caution-muted-text: hsl(35 90% 30%);
+    --success-muted: hsl(142 70% 95%);
+    --success-muted-text: hsl(142 70% 30%);
+    --background: #ffffff;
+    --foreground: #020617;
+    --foreground-inverse: #ffffff;
+    --muted-foreground: #64748b;
+    --muted-foreground-hover: #475569;
+    --border-subtle: rgba(0, 0, 0, 0.08);
+    --bg-subtle: #f8fafc;
+    --bg-secondary: #f1f5f9;
+    --placeholder: rgba(0, 0, 0, 0.4);
+    --divider: rgba(0, 0, 0, 0.05);
+
+    --local-chat-bg: #fdfdfd;
+    --local-primary-bg: #fdfdfd;
+}
+
+.theme-high-contrast {
+    --primary: #ffff00;
+    --primary-hover: #e6e600;
+    --danger: #ff0000;
+    --danger-hover: #cc0000;
+    --caution: #ffa500;
+    --caution-hover: #cc8400;
+    --success: #00ff00;
+    --success-hover: #00cc00;
+    --primary-muted: #1a1a00;
+    --primary-muted-text: #ffff00;
+    --danger-muted: #1a0000;
+    --danger-muted-text: #ff0000;
+    --caution-muted: #1a1100;
+    --caution-muted-text: #ffa500;
+    --success-muted: #001a00;
+    --success-muted-text: #00ff00;
+    --background: #000000;
+    --foreground: #ffffff;
+    --foreground-inverse: #000000;
+    --muted-foreground: #ffffff;
+    --muted-foreground-hover: #ffffff;
+    --border-subtle: #ffffff;
+    --bg-subtle: #1a1a1a;
+    --bg-secondary: #333333;
+    --placeholder: #ffffff;
+    --divider: #ffffff;
+
+    --local-chat-bg: #000000;
+    --local-primary-bg: #000000;
 }
