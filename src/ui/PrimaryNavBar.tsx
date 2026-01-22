@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 import { Home, Settings } from 'lucide-react';
 
@@ -8,11 +8,13 @@ import { Divider } from '@/ui/components/common/Divider';
 import { IconButton } from '@/ui/components/common/IconButton';
 import { Box } from '@/ui/components/layout/Box';
 import { ServerList } from '@/ui/components/servers/ServerList';
+import { SettingsModal } from '@/ui/components/settings/SettingsModal';
 import { cn } from '@/utils/cn';
 
 export const PrimaryNavBar: React.FC = () => {
     const dispatch = useAppDispatch();
     const navMode = useAppSelector((state) => state.nav.navMode);
+    const [showSettings, setShowSettings] = useState(false);
 
     const handleHomeClick = (): void => {
         if (navMode === 'friends') {
@@ -46,8 +48,16 @@ export const PrimaryNavBar: React.FC = () => {
             <Divider />
 
             <Box>
-                <IconButton icon={Settings} />
+                <IconButton
+                    icon={Settings}
+                    onClick={() => setShowSettings(true)}
+                />
             </Box>
+
+            <SettingsModal
+                isOpen={showSettings}
+                onClose={() => setShowSettings(false)}
+            />
         </Box>
     );
 };
