@@ -90,4 +90,26 @@ export const usersApi = {
                 customStatus: User['customStatus'];
             }>('/api/v1/profile/status', data)
             .then((r) => r.data),
+
+    updateProfilePicture: (file: File) => {
+        const formData = new FormData();
+        formData.append('profilePicture', file);
+        return apiClient
+            .post<{
+                message: string;
+                profilePicture: string;
+            }>('/api/v1/profile/picture', formData)
+            .then((r) => r.data);
+    },
+
+    updateBanner: (file: File) => {
+        const formData = new FormData();
+        formData.append('banner', file);
+        return apiClient
+            .post<{
+                message: string;
+                banner: string;
+            }>('/api/v1/profile/banner', formData)
+            .then((r) => r.data);
+    },
 };

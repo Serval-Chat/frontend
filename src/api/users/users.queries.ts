@@ -168,3 +168,37 @@ export const useUpdateStatus = (): UseMutationResult<
         },
     });
 };
+
+export const useUpdateProfilePicture = (): UseMutationResult<
+    { message: string; profilePicture: string },
+    Error,
+    File
+> => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: usersApi.updateProfilePicture,
+        onSuccess: (data) => {
+            queryClient.setQueryData<User>(['me'], (old) =>
+                old ? { ...old, profilePicture: data.profilePicture } : old,
+            );
+            void queryClient.invalidateQueries({ queryKey: ['me'] });
+        },
+    });
+};
+
+export const useUpdateBanner = (): UseMutationResult<
+    { message: string; banner: string },
+    Error,
+    File
+> => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: usersApi.updateBanner,
+        onSuccess: (data) => {
+            queryClient.setQueryData<User>(['me'], (old) =>
+                old ? { ...old, banner: data.banner } : old,
+            );
+            void queryClient.invalidateQueries({ queryKey: ['me'] });
+        },
+    });
+};

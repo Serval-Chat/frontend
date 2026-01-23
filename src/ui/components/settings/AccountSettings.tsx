@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 
 import {
     useMe,
+    useUpdateBanner,
     useUpdateBio,
     useUpdateDisplayName,
+    useUpdateProfilePicture,
     useUpdatePronouns,
     useUpdateUsername,
 } from '@/api/users/users.queries';
@@ -11,6 +13,8 @@ import { Button } from '@/ui/components/common/Button';
 import { Input } from '@/ui/components/common/Input';
 import { TextArea } from '@/ui/components/common/TextArea';
 import { UserProfileCard } from '@/ui/components/profile/UserProfileCard';
+
+import { ImageCropModal } from './ImageCropModal';
 
 export const AccountSettings: React.FC = () => {
     const { data: user } = useMe();
@@ -21,12 +25,25 @@ export const AccountSettings: React.FC = () => {
         useUpdateDisplayName();
     const { mutate: updateUsername, isPending: isUpdatingUsername } =
         useUpdateUsername();
+    const { mutate: updateProfilePicture, isPending: isUpdatingAvatar } =
+        useUpdateProfilePicture();
+    const { mutate: updateBanner, isPending: isUpdatingBanner } =
+        useUpdateBanner();
+
+    const avatarInputRef = useRef<HTMLInputElement>(null);
+    const bannerInputRef = useRef<HTMLInputElement>(null);
+
+    const [cropFile, setCropFile] = useState<File | null>(null);
+    const [cropType, setCropType] = useState<'avatar' | 'banner'>('avatar');
+    const [isCropModalOpen, setIsCropModalOpen] = useState(false);
 
     const isPending =
         isUpdatingBio ||
         isUpdatingPronouns ||
         isUpdatingDisplayName ||
-        isUpdatingUsername;
+        isUpdatingUsername ||
+        isUpdatingAvatar ||
+        isUpdatingBanner;
 
     const [displayName, setDisplayName] = useState(user?.displayName || '');
     const [originalDisplayName, setOriginalDisplayName] = useState(
@@ -69,6 +86,40 @@ export const AccountSettings: React.FC = () => {
         }
     };
 
+    const handleAvatarChange = (
+        e: React.ChangeEvent<HTMLInputElement>,
+    ): void => {
+        const file = e.target.files?.[0];
+        if (file) {
+            setCropFile(file);
+            setCropType('avatar');
+            setIsCropModalOpen(true);
+            // Reset input so the same file can be selected again
+            e.target.value = '';
+        }
+    };
+
+    const handleBannerChange = (
+        e: React.ChangeEvent<HTMLInputElement>,
+    ): void => {
+        const file = e.target.files?.[0];
+        if (file) {
+            setCropFile(file);
+            setCropType('banner');
+            setIsCropModalOpen(true);
+            // Reset input so the same file can be selected again
+            e.target.value = '';
+        }
+    };
+
+    const handleCropConfirm = (processedFile: File): void => {
+        if (cropType === 'avatar') {
+            updateProfilePicture(processedFile);
+        } else {
+            updateBanner(processedFile);
+        }
+    };
+
     const hasChanges =
         displayName !== originalDisplayName ||
         username !== originalUsername ||
@@ -87,6 +138,22 @@ export const AccountSettings: React.FC = () => {
 
     return (
         <div className="max-w-3xl">
+            {/* Hidden file inputs */}
+            <input
+                accept="image/webp,image/gif"
+                className="hidden"
+                ref={avatarInputRef}
+                type="file"
+                onChange={handleAvatarChange}
+            />
+            <input
+                accept="image/webp,image/gif"
+                className="hidden"
+                ref={bannerInputRef}
+                type="file"
+                onChange={handleBannerChange}
+            />
+
             <h3 className="text-xl font-bold text-[var(--color-foreground)] mb-6">
                 My Account
             </h3>
@@ -100,12 +167,8 @@ export const AccountSettings: React.FC = () => {
                     <UserProfileCard
                         presenceStatus="online"
                         user={previewUser}
-                        onAvatarClick={() => {
-                            /* TODO: Avatar Edit Modal */
-                        }}
-                        onBannerClick={() => {
-                            /* TODO: Banner Edit Modal */
-                        }}
+                        onAvatarClick={() => avatarInputRef.current?.click()}
+                        onBannerClick={() => bannerInputRef.current?.click()}
                     />
                 </div>
 
@@ -220,6 +283,14 @@ export const AccountSettings: React.FC = () => {
                     )}
                 </div>
             </div>
+
+            <ImageCropModal
+                imageFile={cropFile}
+                isOpen={isCropModalOpen}
+                type={cropType}
+                onClose={() => setIsCropModalOpen(false)}
+                onConfirm={handleCropConfirm}
+            />
         </div>
     );
 };
