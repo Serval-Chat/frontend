@@ -15,6 +15,8 @@ export const ParserFeature = {
     SPOILER: 'SPOILER',
     INLINE_CODE: 'INLINE_CODE',
     CODE_BLOCK: 'CODE_BLOCK',
+    INVITE: 'INVITE',
+    FILE: 'FILE',
 } as const;
 
 export type ParserFeature = (typeof ParserFeature)[keyof typeof ParserFeature];
@@ -32,7 +34,9 @@ export type ASTNodeType =
     | 'subtext'
     | 'spoiler'
     | 'inline_code'
-    | 'code_block';
+    | 'code_block'
+    | 'invite'
+    | 'file';
 
 export interface TextNode {
     type: 'text';
@@ -101,6 +105,17 @@ export interface CodeBlockNode {
     language?: string;
 }
 
+export interface InviteNode {
+    type: 'invite';
+    code: string;
+    url: string;
+}
+
+export interface FileNode {
+    type: 'file';
+    url: string;
+}
+
 export type ASTNode =
     | TextNode
     | BoldNode
@@ -114,4 +129,6 @@ export type ASTNode =
     | SubtextNode
     | SpoilerNode
     | InlineCodeNode
-    | CodeBlockNode;
+    | CodeBlockNode
+    | InviteNode
+    | FileNode;

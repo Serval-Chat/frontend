@@ -1,6 +1,8 @@
 /* eslint-disable react/no-array-index-key */
 import React from 'react';
 
+import { FileEmbed } from '@/ui/components/chat/FileEmbed';
+import { InviteLink } from '@/ui/components/chat/InviteLink';
 import type { ASTNode } from '@/utils/textParser/types';
 
 import { CodeBlock } from './CodeBlock';
@@ -14,6 +16,7 @@ interface ParsedTextProps {
     nodes: ASTNode[];
     className?: string;
     size?: 'xs' | 'sm' | 'base' | 'lg' | 'xl' | '2xl';
+    condenseFiles?: boolean;
 }
 
 /**
@@ -23,101 +26,134 @@ export const ParsedText: React.FC<ParsedTextProps> = ({
     nodes,
     className,
     size,
-}) => (
-    <span className={className}>
-        {nodes.map((node, idx) => {
-            switch (node.type) {
-                case 'text':
-                    return (
-                        <Text key={idx} size={size}>
-                            {node.content}
-                        </Text>
-                    );
+    condenseFiles,
+}) => {
+    const fileNodesCount = nodes.filter((n) => n.type === 'file').length;
+    const displayNodes = condenseFiles
+        ? nodes.filter((n) => n.type !== 'file')
+        : nodes;
 
-                case 'bold':
-                    return (
-                        <Text key={idx} size={size} weight="bold">
-                            {node.content}
-                        </Text>
-                    );
+    const hasVisibleContent = displayNodes.some(
+        (node) => node.type !== 'text' || node.content.trim().length > 0,
+    );
 
-                case 'italic':
-                    return (
-                        <Text fontStyle="italic" key={idx} size={size}>
-                            {node.content}
-                        </Text>
-                    );
+    return (
+        <span className={className}>
+            {displayNodes.map((node, idx) => {
+                switch (node.type) {
+                    case 'text':
+                        return (
+                            <Text key={idx} size={size}>
+                                {node.content}
+                            </Text>
+                        );
 
-                case 'bold_italic':
-                    return (
-                        <Text
-                            fontStyle="italic"
-                            key={idx}
-                            size={size}
-                            weight="bold"
-                        >
-                            {node.content}
-                        </Text>
-                    );
+                    case 'bold':
+                        return (
+                            <Text key={idx} size={size} weight="bold">
+                                {node.content}
+                            </Text>
+                        );
 
-                case 'emoji':
-                    return <ParsedEmoji emojiId={node.emojiId} key={idx} />;
+                    case 'italic':
+                        return (
+                            <Text fontStyle="italic" key={idx} size={size}>
+                                {node.content}
+                            </Text>
+                        );
 
-                case 'link':
-                    return (
-                        <Link href={node.url} key={idx}>
-                            {node.text || node.url}
-                        </Link>
-                    );
+                    case 'bold_italic':
+                        return (
+                            <Text
+                                fontStyle="italic"
+                                key={idx}
+                                size={size}
+                                weight="bold"
+                            >
+                                {node.content}
+                            </Text>
+                        );
 
-                case 'h1':
-                    return (
-                        <Heading key={idx} level={1} variant="chat-h1">
-                            {node.content}
-                        </Heading>
-                    );
+                    case 'emoji':
+                        return <ParsedEmoji emojiId={node.emojiId} key={idx} />;
 
-                case 'h2':
-                    return (
-                        <Heading key={idx} level={2} variant="chat-h2">
-                            {node.content}
-                        </Heading>
-                    );
+                    case 'link':
+                        return (
+                            <Link href={node.url} key={idx}>
+                                {node.text || node.url}
+                            </Link>
+                        );
 
-                case 'h3':
-                    return (
-                        <Heading key={idx} level={3} variant="chat-h3">
-                            {node.content}
-                        </Heading>
-                    );
+                    case 'h1':
+                        return (
+                            <Heading key={idx} level={1} variant="chat-h1">
+                                {node.content}
+                            </Heading>
+                        );
 
-                case 'subtext':
-                    return (
-                        <Text key={idx} size="xs" variant="muted">
-                            {node.content}
-                        </Text>
-                    );
+                    case 'h2':
+                        return (
+                            <Heading key={idx} level={2} variant="chat-h2">
+                                {node.content}
+                            </Heading>
+                        );
 
-                case 'spoiler':
-                    return <Spoiler key={idx}>{node.content}</Spoiler>;
+                    case 'h3':
+                        return (
+                            <Heading key={idx} level={3} variant="chat-h3">
+                                {node.content}
+                            </Heading>
+                        );
 
-                case 'inline_code':
-                    return (
-                        <CodeBlock inline content={node.content} key={idx} />
-                    );
+                    case 'subtext':
+                        return (
+                            <Text key={idx} size="xs" variant="muted">
+                                {node.content}
+                            </Text>
+                        );
 
-                case 'code_block':
-                    return (
-                        <CodeBlock
-                            content={node.content}
-                            key={idx}
-                            language={node.language}
-                        />
-                    );
+                    case 'spoiler':
+                        return <Spoiler key={idx}>{node.content}</Spoiler>;
 
-                default:
-                    return null;
-            }
-        })}
-    </span>
-);
+                    case 'inline_code':
+                        return (
+                            <CodeBlock
+                                inline
+                                content={node.content}
+                                key={idx}
+                            />
+                        );
+
+                    case 'code_block':
+                        return (
+                            <CodeBlock
+                                content={node.content}
+                                key={idx}
+                                language={node.language}
+                            />
+                        );
+
+                    case 'invite':
+                        return (
+                            <InviteLink
+                                code={node.code}
+                                key={idx}
+                                url={node.url}
+                            />
+                        );
+
+                    case 'file':
+                        return <FileEmbed key={idx} url={node.url} />;
+
+                    default:
+                        return null;
+                }
+            })}
+            {condenseFiles && fileNodesCount > 0 && !hasVisibleContent && (
+                <span className="ml-1 text-[11px] italic opacity-80">
+                    Attachments: {fileNodesCount}
+                </span>
+            )}
+        </span>
+    );
+};

@@ -123,4 +123,40 @@ describe('TextParser', () => {
             },
         ]);
     });
+
+    it('should parse invite links', () => {
+        const text = 'Join us: https://catfla.re/invite/serchat-dev';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            { type: 'text', content: 'Join us: ' },
+            {
+                type: 'invite',
+                code: 'serchat-dev',
+                url: 'https://catfla.re/invite/serchat-dev',
+            },
+        ]);
+    });
+
+    it('should parse rolling invite links', () => {
+        const text = 'https://rolling.catfla.re/invite/special';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            {
+                type: 'invite',
+                code: 'special',
+                url: 'https://rolling.catfla.re/invite/special',
+            },
+        ]);
+    });
+
+    it('should parse file embeds', () => {
+        const text = '[%file%](https://example.com/image.png)';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            {
+                type: 'file',
+                url: 'https://example.com/image.png',
+            },
+        ]);
+    });
 });

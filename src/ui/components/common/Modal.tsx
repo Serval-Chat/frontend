@@ -14,6 +14,7 @@ interface ModalProps {
     className?: string;
     showCloseButton?: boolean;
     noPadding?: boolean;
+    fullScreen?: boolean;
 }
 
 /**
@@ -27,6 +28,7 @@ export const Modal: React.FC<ModalProps> = ({
     className,
     showCloseButton = true,
     noPadding = false,
+    fullScreen = false,
 }) => {
     if (typeof document === 'undefined') return null;
 
@@ -44,7 +46,10 @@ export const Modal: React.FC<ModalProps> = ({
                     <motion.div
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         className={cn(
-                            'relative w-full max-w-2xl bg-[var(--color-background)] rounded-xl shadow-2xl border border-[var(--color-border-subtle)] overflow-hidden flex flex-col max-h-[90vh]',
+                            'relative w-full bg-[var(--color-background)] rounded-xl shadow-2xl border border-[var(--color-border-subtle)] overflow-hidden flex flex-col',
+                            fullScreen
+                                ? 'max-w-none w-screen h-[100dvh] max-h-none rounded-none border-none'
+                                : 'max-w-2xl max-h-[90vh]',
                             className,
                         )}
                         exit={{ opacity: 0, scale: 0.95, y: 20 }}

@@ -18,7 +18,7 @@ export const UserProfilePopupDemo: React.FC = () => {
         displayName: 'Catflare',
         login: 'nekoflare',
         profilePicture: 'https://catfla.re/images/servals/serval-1.jpg',
-        banner: 'https://catfla.re/images/servals/serval-banner.jpg',
+        banner: 'https://rolling.catfla.re/api/v1/profile/banner/19f0253d8960f45cc6e9193c3d34e2fb.gif',
         bio: 'I love servals! They are so cute and big. \n\nWorking on Serchat, the most beautiful chat app.',
         pronouns: 'she/her',
         badges: [

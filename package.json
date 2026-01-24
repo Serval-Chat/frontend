@@ -41,6 +41,8 @@
     "react-redux": "^9.2.0",
     "react-router-dom": "^7.11.0",
     "react-syntax-highlighter": "^16.1.0",
+    "react-window": "^1.8.10",
+    "refractor": "^5.0.0",
     "tailwind-merge": "^3.4.0",
     "uuid": "^13.0.0"
   },
@@ -55,6 +57,7 @@
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
     "@types/react-syntax-highlighter": "^15.5.13",
+    "@types/react-window": "^1.8.8",
     "@vitejs/plugin-react": "^5.1.2",
     "autoprefixer": "^10.4.23",
     "eslint": "^9.39.1",

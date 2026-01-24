@@ -5,7 +5,7 @@ import { HexColorPicker } from 'react-colorful';
 
 import { useMe, useUpdateStyle } from '@/api/users/users.queries';
 import type { User } from '@/api/users/users.types';
-import { useTheme } from '@/providers/ThemeProvider';
+import { type Theme, useTheme } from '@/providers/ThemeProvider';
 import { Button } from '@/ui/components/common/Button';
 import { StyledUserName } from '@/ui/components/common/StyledUserName';
 import { Toggle } from '@/ui/components/common/Toggle';
@@ -160,7 +160,7 @@ const AppearanceSettingsForm: React.FC<AppearanceSettingsFormProps> = ({
                                             : 'border-[var(--color-border-subtle)] bg-[var(--color-bg-subtle)] hover:border-[var(--color-border)]'
                                     }`}
                                     key={t.id}
-                                    onClick={() => setTheme(t.id as any)}
+                                    onClick={() => setTheme(t.id as Theme)}
                                 >
                                     <div className="flex flex-col gap-1 w-12 h-10 rounded-lg p-1.5 border border-white/10 bg-[var(--background)] overflow-hidden">
                                         <div className="w-full h-2 rounded-sm bg-[var(--primary)]" />

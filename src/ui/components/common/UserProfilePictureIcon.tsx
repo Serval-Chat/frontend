@@ -8,7 +8,7 @@ import { cn } from '@/utils/cn';
 interface UserProfilePictureIconProps {
     src?: string | null;
     username: string;
-    size?: 'sm' | 'md' | 'lg' | 'xl';
+    size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
     className?: string;
 }
 
@@ -28,6 +28,7 @@ export const UserProfilePictureIcon: React.FC<UserProfilePictureIconProps> = ({
         .toUpperCase();
 
     const sizeClasses = {
+        xs: 'w-5 h-5 text-[10px]',
         sm: 'w-8 h-8 text-xs',
         md: 'w-10 h-10 text-sm',
         lg: 'w-12 h-12 text-base',
@@ -49,7 +50,9 @@ export const UserProfilePictureIcon: React.FC<UserProfilePictureIconProps> = ({
                     src={iconUrl}
                 />
             ) : (
-                <Text as="span">{initials}</Text>
+                <Text as="span" size="xs">
+                    {initials}
+                </Text>
             )}
         </Box>
     );

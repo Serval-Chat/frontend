@@ -13,7 +13,7 @@ interface UserProfilePictureProps {
     src?: string | null;
     username: string;
     status?: UserStatus;
-    size?: 'sm' | 'md' | 'lg' | 'xl';
+    size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
     noIndicator?: boolean;
     className?: string;
     onClick?: (e: React.MouseEvent) => void;

@@ -18,6 +18,10 @@ export default defineConfig({
       '@/styles': path.resolve(__dirname, './src/styles'),
       '@/providers': path.resolve(__dirname, './src/providers'),
       '@/utils': path.resolve(__dirname, './src/utils'),
+      'decode-named-character-reference': path.resolve(
+        __dirname,
+        'node_modules/decode-named-character-reference/index.js',
+      ),
     },
   },
 });

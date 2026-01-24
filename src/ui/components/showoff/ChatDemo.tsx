@@ -136,6 +136,22 @@ const MOCK_MESSAGES: ProcessedChatMessage[] = [
         user: MOCK_USERS.catflare,
         senderId: MOCK_USERS.catflare._id,
     },
+    {
+        _id: '7',
+        text:
+            'Some code idk```c\n' +
+            '#include <stdio.h>\n' +
+            'int main() {\n' +
+            '    for(int i = 0; i < 30; i++) {\n' +
+            '        printf("Line %d\\n", i);\n' +
+            '    }\n' +
+            '    return 0;\n' +
+            '}\n' +
+            '```',
+        createdAt: new Date(Date.now() - 3250000).toISOString(),
+        user: MOCK_USERS.evalyn,
+        senderId: MOCK_USERS.evalyn._id,
+    },
 ];
 
 export const ChatDemo: React.FC = () => (

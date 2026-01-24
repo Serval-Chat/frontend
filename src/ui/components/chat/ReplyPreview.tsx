@@ -5,8 +5,8 @@ import type { User } from '@/api/users/users.types';
 import { ParsedText } from '@/ui/components/common/ParsedText';
 import { StyledUserName } from '@/ui/components/common/StyledUserName';
 import { Text } from '@/ui/components/common/Text';
+import { UserProfilePicture } from '@/ui/components/common/UserProfilePicture';
 import { Box } from '@/ui/components/layout/Box';
-import { resolveApiUrl } from '@/utils/apiUrl';
 import { ParserPresets, parseText } from '@/utils/textParser/parser';
 
 interface ReplyPreviewProps {
@@ -38,19 +38,12 @@ export const ReplyPreview: React.FC<ReplyPreviewProps> = ({
             <Box className="w-[36px] h-[18px] border-l-2 border-t-2 border-border-subtle rounded-tl-lg mt-[11px] flex-shrink-0" />
 
             <Box className="flex items-center gap-1.5 overflow-hidden min-w-0">
-                <Box className="w-4 h-4 rounded-full bg-bg-subtle overflow-hidden flex-shrink-0 ring-1 ring-border-subtle">
-                    {resolveApiUrl(user.profilePicture) ? (
-                        <img
-                            alt=""
-                            className="w-full h-full object-cover"
-                            src={resolveApiUrl(user.profilePicture)!}
-                        />
-                    ) : (
-                        <Box className="w-full h-full flex items-center justify-center bg-blue-500/20 text-[8px] font-bold text-blue-300">
-                            {user.username[0].toUpperCase()}
-                        </Box>
-                    )}
-                </Box>
+                <UserProfilePicture
+                    noIndicator
+                    size="xs"
+                    src={user.profilePicture}
+                    username={user.username}
+                />
                 <StyledUserName
                     className="text-xs font-bold whitespace-nowrap opacity-90"
                     disableCustomFonts={disableCustomFonts}
@@ -64,7 +57,7 @@ export const ReplyPreview: React.FC<ReplyPreviewProps> = ({
                     as="span"
                     className="text-xs text-muted-foreground truncate font-medium"
                 >
-                    <ParsedText nodes={nodes} />
+                    <ParsedText condenseFiles nodes={nodes} size="xs" />
                 </Text>
             </Box>
         </Box>

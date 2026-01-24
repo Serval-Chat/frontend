@@ -23,6 +23,8 @@ export const ParserPresets = {
             ParserFeature.SPOILER,
             ParserFeature.INLINE_CODE,
             ParserFeature.CODE_BLOCK,
+            ParserFeature.INVITE,
+            ParserFeature.FILE,
         ],
     },
     BIO: {
@@ -39,6 +41,8 @@ export const ParserPresets = {
             ParserFeature.SPOILER,
             ParserFeature.INLINE_CODE,
             ParserFeature.CODE_BLOCK,
+            ParserFeature.INVITE,
+            ParserFeature.FILE,
         ],
     },
 } as const;
@@ -59,6 +63,23 @@ export class TextParser {
 
         while (this.index < this.text.length) {
             const char = this.text[this.index];
+
+            // [%file%](url)
+            if (
+                char === '[' &&
+                this.options.features.includes(ParserFeature.FILE) &&
+                this.peek('[%file%]')
+            ) {
+                const fileNode = this.tryParseFile();
+                if (fileNode) {
+                    if (currentText) {
+                        nodes.push({ type: 'text', content: currentText });
+                        currentText = '';
+                    }
+                    nodes.push(fileNode);
+                    continue;
+                }
+            }
 
             // <emoji:id>
             if (
@@ -91,6 +112,23 @@ export class TextParser {
                         currentText = '';
                     }
                     nodes.push(formatNode);
+                    continue;
+                }
+            }
+
+            // Invite links: http(-s)://(rolling.)catfla.re/invite/(id)
+            if (
+                char === 'h' &&
+                this.options.features.includes(ParserFeature.INVITE) &&
+                (this.peek('http://') || this.peek('https://'))
+            ) {
+                const inviteNode = this.tryParseInvite();
+                if (inviteNode) {
+                    if (currentText) {
+                        nodes.push({ type: 'text', content: currentText });
+                        currentText = '';
+                    }
+                    nodes.push(inviteNode);
                     continue;
                 }
             }
@@ -436,6 +474,54 @@ export class TextParser {
                 this.index += 1;
                 return { type: 'inline_code', content } as ASTNode;
             }
+        }
+
+        this.index = start;
+        return null;
+    }
+
+    private tryParseFile(): ASTNode | null {
+        const start = this.index;
+        // Syntax: [%file%](url)
+        if (this.peek('[%file%](')) {
+            this.index += 9; // Skip [%file%](
+            let url = '';
+            let depth = 1;
+
+            while (this.index < this.text.length) {
+                const c = this.text[this.index];
+                if (c === '(') depth++;
+                if (c === ')') depth--;
+
+                if (depth === 0) {
+                    break;
+                }
+                url += c;
+                this.index++;
+            }
+
+            if (depth === 0 && url) {
+                this.index++; // Skip )
+                return { type: 'file', url } as ASTNode;
+            }
+        }
+
+        this.index = start;
+        return null;
+    }
+
+    private tryParseInvite(): ASTNode | null {
+        const start = this.index;
+        const inviteRegex =
+            /^https?:\/\/(?:rolling\.)?catfla\.re\/invite\/([a-zA-Z0-9_-]+)/;
+        const remainingText = this.text.slice(this.index);
+        const match = remainingText.match(inviteRegex);
+
+        if (match) {
+            const url = match[0];
+            const code = match[1];
+            this.index += url.length;
+            return { type: 'invite', code, url };
         }
 
         this.index = start;

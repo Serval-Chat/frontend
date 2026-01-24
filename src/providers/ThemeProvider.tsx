@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
-type Theme = 'serval' | 'dark' | 'light' | 'high-contrast';
+export type Theme = 'serval' | 'dark' | 'light' | 'high-contrast';
 
 interface ThemeContextType {
     theme: Theme;
@@ -36,7 +36,8 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
     );
 };
 
-export const useTheme = () => {
+// eslint-disable-next-line react-refresh/only-export-components
+export const useTheme = (): ThemeContextType => {
     const context = useContext(ThemeContext);
     if (!context) {
         throw new Error('useTheme must be used within a ThemeProvider');
