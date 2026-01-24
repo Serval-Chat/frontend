@@ -1,4 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
+
+import { Upload } from 'lucide-react';
 
 import {
     useChannels,
@@ -7,6 +9,7 @@ import {
     useServerDetails,
 } from '@/api/servers/servers.queries';
 import { useMe, useUserById } from '@/api/users/users.queries';
+import { useFileQueue } from '@/hooks/chat/useFileQueue';
 import { useMemberMaps } from '@/hooks/chat/useMemberMaps';
 import { usePaginatedMessages } from '@/hooks/chat/usePaginatedMessages';
 import { useProcessedMessages } from '@/hooks/chat/useProcessedMessages';
@@ -18,6 +21,7 @@ import { ChatLoadingState } from '@/ui/components/chat/ChatLoadingState';
 import { MessageInput } from '@/ui/components/chat/MessageInput';
 import { MessagesList } from '@/ui/components/chat/MessagesList';
 import { TypingIndicator } from '@/ui/components/chat/TypingIndicator';
+import { Text } from '@/ui/components/common/Text';
 import { Box } from '@/ui/components/layout/Box';
 
 /**
@@ -33,6 +37,10 @@ export const MainChat: React.FC = () => {
     const selectedChannelId = useAppSelector(
         (state) => state.nav.selectedChannelId,
     );
+
+    // File Upload State
+    const [isDragging, setIsDragging] = useState(false);
+    const fileQueueResult = useFileQueue();
 
     // Data Fetching
     const { data: currentUser } = useMe();
@@ -79,6 +87,28 @@ export const MainChat: React.FC = () => {
         selectedChannelId ?? undefined,
     );
 
+    const handleDragOver = (e: React.DragEvent): void => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsDragging(true);
+    };
+
+    const handleDragLeave = (e: React.DragEvent): void => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsDragging(false);
+    };
+
+    const handleDrop = (e: React.DragEvent): void => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsDragging(false);
+
+        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+            fileQueueResult.addFiles(e.dataTransfer.files);
+        }
+    };
+
     if (!selectedFriendId && !selectedChannelId) {
         return (
             <Box>
@@ -93,7 +123,12 @@ export const MainChat: React.FC = () => {
     }
 
     return (
-        <Box className="flex-1 flex flex-col min-h-0 relative overflow-hidden">
+        <Box
+            className="flex-1 flex flex-col min-h-0 relative overflow-hidden"
+            onDragLeave={handleDragLeave}
+            onDragOver={handleDragOver}
+            onDrop={handleDrop}
+        >
             <ChatHeader
                 friendUser={friendUser}
                 selectedChannel={selectedChannel}
@@ -115,7 +150,19 @@ export const MainChat: React.FC = () => {
             </Box>
 
             <TypingIndicator typingUsers={typingUsers} />
-            <MessageInput />
+            <MessageInput fileQueueResult={fileQueueResult} />
+
+            {/* Drag and Drop Overlay */}
+            {isDragging && (
+                <Box className="absolute inset-0 z-50 bg-bg-primary/80 backdrop-blur-sm flex flex-col items-center justify-center p-8 border-4 border-dashed border-primary/50 m-4 rounded-3xl pointer-events-none transition-all animate-in fade-in zoom-in duration-200">
+                    <div className="bg-primary/10 p-6 rounded-full mb-4">
+                        <Upload className="text-primary" size={48} />
+                    </div>
+                    <Text size="xl" weight="bold">
+                        Drop files to upload
+                    </Text>
+                </Box>
+            )}
         </Box>
     );
 };
