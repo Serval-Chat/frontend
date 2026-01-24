@@ -8,7 +8,9 @@ import type { ASTNode } from '@/utils/textParser/types';
 import { CodeBlock } from './CodeBlock';
 import { Heading } from './Heading';
 import { Link } from './Link';
+import { Mention } from './Mention';
 import { ParsedEmoji } from './ParsedEmoji';
+import { RoleMention } from './RoleMention';
 import { Spoiler } from './Spoiler';
 import { Text } from './Text';
 
@@ -144,6 +146,12 @@ export const ParsedText: React.FC<ParsedTextProps> = ({
 
                     case 'file':
                         return <FileEmbed key={idx} url={node.url} />;
+
+                    case 'mention':
+                        return <Mention key={idx} userId={node.userId} />;
+
+                    case 'role_mention':
+                        return <RoleMention key={idx} roleId={node.roleId} />;
 
                     default:
                         return null;

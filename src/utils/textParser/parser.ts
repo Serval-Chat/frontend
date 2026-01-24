@@ -25,6 +25,8 @@ export const ParserPresets = {
             ParserFeature.CODE_BLOCK,
             ParserFeature.INVITE,
             ParserFeature.FILE,
+            ParserFeature.MENTION,
+            ParserFeature.ROLE_MENTION,
         ],
     },
     BIO: {
@@ -43,6 +45,8 @@ export const ParserPresets = {
             ParserFeature.CODE_BLOCK,
             ParserFeature.INVITE,
             ParserFeature.FILE,
+            ParserFeature.MENTION,
+            ParserFeature.ROLE_MENTION,
         ],
     },
 } as const;
@@ -112,6 +116,40 @@ export class TextParser {
                         currentText = '';
                     }
                     nodes.push(formatNode);
+                    continue;
+                }
+            }
+
+            // <userid:'id'>
+            if (
+                char === '<' &&
+                this.options.features.includes(ParserFeature.MENTION) &&
+                this.peek("<userid:'")
+            ) {
+                const mentionNode = this.tryParseMention();
+                if (mentionNode) {
+                    if (currentText) {
+                        nodes.push({ type: 'text', content: currentText });
+                        currentText = '';
+                    }
+                    nodes.push(mentionNode);
+                    continue;
+                }
+            }
+
+            // <roleid:'id'>
+            if (
+                char === '<' &&
+                this.options.features.includes(ParserFeature.ROLE_MENTION) &&
+                this.peek("<roleid:'")
+            ) {
+                const roleMentionNode = this.tryParseRoleMention();
+                if (roleMentionNode) {
+                    if (currentText) {
+                        nodes.push({ type: 'text', content: currentText });
+                        currentText = '';
+                    }
+                    nodes.push(roleMentionNode);
                     continue;
                 }
             }
@@ -503,6 +541,66 @@ export class TextParser {
             if (depth === 0 && url) {
                 this.index++; // Skip )
                 return { type: 'file', url } as ASTNode;
+            }
+        }
+
+        this.index = start;
+        return null;
+    }
+
+    private tryParseMention(): ASTNode | null {
+        const start = this.index;
+        // Syntax: <userid:'ID'>
+        if (this.peek("<userid:'")) {
+            this.index += 9; // Skip <userid:'
+            let userId = '';
+
+            while (
+                this.index < this.text.length &&
+                this.text[this.index] !== "'"
+            ) {
+                userId += this.text[this.index];
+                this.index++;
+            }
+
+            if (
+                this.index + 2 <= this.text.length &&
+                this.text[this.index] === "'" &&
+                this.text[this.index + 1] === '>' &&
+                userId
+            ) {
+                this.index += 2; // Skip '>
+                return { type: 'mention', userId } as ASTNode;
+            }
+        }
+
+        this.index = start;
+        return null;
+    }
+
+    private tryParseRoleMention(): ASTNode | null {
+        const start = this.index;
+        // Syntax: <roleid:'ID'>
+        if (this.peek("<roleid:'")) {
+            this.index += 9; // Skip <roleid:'
+            let roleId = '';
+
+            while (
+                this.index < this.text.length &&
+                this.text[this.index] !== "'"
+            ) {
+                roleId += this.text[this.index];
+                this.index++;
+            }
+
+            if (
+                this.index + 2 <= this.text.length &&
+                this.text[this.index] === "'" &&
+                this.text[this.index + 1] === '>' &&
+                roleId
+            ) {
+                this.index += 2; // Skip '>
+                return { type: 'role_mention', roleId } as ASTNode;
             }
         }
 
