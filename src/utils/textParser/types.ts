@@ -17,6 +17,8 @@ export const ParserFeature = {
     CODE_BLOCK: 'CODE_BLOCK',
     INVITE: 'INVITE',
     FILE: 'FILE',
+    MENTION: 'MENTION',
+    ROLE_MENTION: 'ROLE_MENTION',
 } as const;
 
 export type ParserFeature = (typeof ParserFeature)[keyof typeof ParserFeature];
@@ -36,7 +38,9 @@ export type ASTNodeType =
     | 'inline_code'
     | 'code_block'
     | 'invite'
-    | 'file';
+    | 'file'
+    | 'mention'
+    | 'role_mention';
 
 export interface TextNode {
     type: 'text';
@@ -116,6 +120,16 @@ export interface FileNode {
     url: string;
 }
 
+export interface MentionNode {
+    type: 'mention';
+    userId: string;
+}
+
+export interface RoleMentionNode {
+    type: 'role_mention';
+    roleId: string;
+}
+
 export type ASTNode =
     | TextNode
     | BoldNode
@@ -131,4 +145,6 @@ export type ASTNode =
     | InlineCodeNode
     | CodeBlockNode
     | InviteNode
-    | FileNode;
+    | FileNode
+    | MentionNode
+    | RoleMentionNode;

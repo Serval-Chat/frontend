@@ -1,6 +1,7 @@
 import React from 'react';
 
 import type { Role } from '@/api/servers/servers.types';
+import { useMe } from '@/api/users/users.queries';
 import type { User } from '@/api/users/users.types';
 import type { ProcessedChatMessage } from '@/types/chat.ui';
 import { Text } from '@/ui/components/common/Text';
@@ -36,6 +37,13 @@ export const Message: React.FC<MessageProps> = ({
 }) => {
     const [showProfile, setShowProfile] = React.useState(false);
     const avatarRef = React.useRef<HTMLDivElement>(null);
+    const { data: me } = useMe();
+
+    const myId = me?._id;
+    const mentionsMe = React.useMemo(() => {
+        if (!myId) return false;
+        return message.text.includes(`<userid:'${myId}'>`);
+    }, [message.text, myId]);
 
     return (
         <Box
@@ -43,6 +51,7 @@ export const Message: React.FC<MessageProps> = ({
                 'group relative px-4 py-0.5 hover:bg-white/[0.02] transition-colors flex flex-col',
                 isGroupStart ? 'mt-1' : 'mt-0',
                 isHighlighted && 'bg-blue-500/10 hover:bg-blue-500/15',
+                mentionsMe && 'border-l-2 border-caution',
             )}
             id={`message-${message._id}`}
         >
