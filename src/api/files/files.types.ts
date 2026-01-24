@@ -12,3 +12,6 @@ export interface ProxyMetadata {
     headers: Record<string, string>;
     size?: number;
 }
+export interface FileUploadResponse {
+    url: string;
+}

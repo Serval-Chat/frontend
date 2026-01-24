@@ -1,6 +1,12 @@
 import React from 'react';
 
-import { Code, Download, File as FileIcon, Maximize2 } from 'lucide-react';
+import {
+    Code,
+    Download,
+    EyeOff,
+    File as FileIcon,
+    Maximize2,
+} from 'lucide-react';
 
 import {
     useFileContent,
@@ -35,6 +41,9 @@ export const FileEmbed: React.FC<FileEmbedProps> = ({ url }) => {
 
     const isLoading = loadingLocal || loadingRemote;
     const meta = isLocal ? localMeta : remoteMeta;
+
+    const isSpoiler = url.endsWith('#spoiler');
+    const [isRevealed, setIsRevealed] = React.useState(false);
 
     if (isLoading) {
         return (
@@ -75,13 +84,31 @@ export const FileEmbed: React.FC<FileEmbedProps> = ({ url }) => {
             : resolveApiUrl(
                   `/api/v1/file-proxy?url=${encodeURIComponent(url)}`,
               );
+
         return (
-            <Box className="my-2 max-w-[min(550px,100%)] max-h-[min(450px,70vh)] w-fit overflow-hidden rounded-lg bg-bg-secondary">
+            <Box
+                className="my-2 max-w-[min(550px,100%)] max-h-[min(450px,70vh)] w-fit overflow-hidden rounded-lg bg-bg-secondary relative cursor-pointer"
+                onClick={() => isSpoiler && !isRevealed && setIsRevealed(true)}
+            >
                 <img
                     alt={displayName || 'File content'}
-                    className="h-auto max-h-inherit w-auto max-w-full object-contain"
+                    className={`h-auto max-h-inherit w-auto max-w-full object-contain transition-all duration-300 ${isSpoiler && !isRevealed ? 'blur-2xl' : ''}`}
                     src={displayUrl!}
                 />
+                {isSpoiler && !isRevealed && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/20 backdrop-blur-sm">
+                        <div className="bg-black/60 px-3 py-1.5 rounded-full border border-white/20 flex items-center gap-2">
+                            <EyeOff size={16} />
+                            <Text
+                                className="text-white"
+                                size="xs"
+                                weight="bold"
+                            >
+                                SPOILER
+                            </Text>
+                        </div>
+                    </div>
+                )}
             </Box>
         );
     }
@@ -93,15 +120,34 @@ export const FileEmbed: React.FC<FileEmbedProps> = ({ url }) => {
             : resolveApiUrl(
                   `/api/v1/file-proxy?url=${encodeURIComponent(url)}`,
               );
+
         return (
-            <Box className="my-2 max-w-[min(550px,100%)] max-h-[min(450px,70vh)] w-fit overflow-hidden rounded-lg bg-bg-secondary">
-                <video
-                    controls
-                    className="h-auto max-h-inherit w-auto max-w-full"
-                    src={displayUrl!}
-                >
-                    <track kind="captions" />
-                </video>
+            <Box
+                className="my-2 max-w-[min(550px,100%)] max-h-[min(450px,70vh)] w-fit overflow-hidden rounded-lg bg-bg-secondary relative"
+                onClick={() => isSpoiler && !isRevealed && setIsRevealed(true)}
+            >
+                {isSpoiler && !isRevealed ? (
+                    <div className="w-80 h-48 flex items-center justify-center bg-bg-secondary relative cursor-pointer">
+                        <div className="bg-black/60 px-3 py-1.5 rounded-full border border-white/20 flex items-center gap-2">
+                            <EyeOff size={16} />
+                            <Text
+                                className="text-white"
+                                size="xs"
+                                weight="bold"
+                            >
+                                SPOILER (VIDEO)
+                            </Text>
+                        </div>
+                    </div>
+                ) : (
+                    <video
+                        controls
+                        className="h-auto max-h-inherit w-auto max-w-full"
+                        src={displayUrl!}
+                    >
+                        <track kind="captions" />
+                    </video>
+                )}
             </Box>
         );
     }
@@ -186,7 +232,7 @@ const CodeEmbed: React.FC<{
     const isLoading = isLocal ? loadingLocal : loadingRemote;
     const content = isLocal ? localContent : remoteContent;
 
-    // If it's too large, don't try to render it as code (e.g. > 1MB)
+    // If it's too large, don't try to render it as code
     if (isTooLarge) {
         return (
             <Box className="my-2 flex w-[300px] items-center gap-3 rounded-lg bg-bg-secondary p-3">
