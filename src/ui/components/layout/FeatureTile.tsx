@@ -18,7 +18,7 @@ export const FeatureTile: React.FC<FeatureTileProps> = ({
 }) => (
     <Box
         className={cn(
-            'group relative flex flex-col overflow-hidden rounded-2xl border border-border-subtle bg-bg-secondary transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-xl',
+            'group relative flex h-fit flex-col overflow-hidden rounded-2xl border border-border-subtle bg-bg-secondary transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-xl',
             className,
         )}
     >
@@ -29,7 +29,7 @@ export const FeatureTile: React.FC<FeatureTileProps> = ({
                 src={image}
             />
         </div>
-        <div className="flex flex-col gap-1 p-5">
+        <div className="flex flex-1 flex-col gap-1 p-5">
             <h3 className="text-lg font-bold text-foreground transition-colors group-hover:text-primary">
                 {title}
             </h3>
