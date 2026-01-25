@@ -1,4 +1,5 @@
 import { apiClient } from '@/api/client';
+import type { Emoji } from '@/api/emojis/emojis.types';
 
 import type {
     Category,
@@ -45,6 +46,13 @@ export const serversApi = {
     getMembers: async (serverId: string): Promise<ServerMember[]> => {
         const response = await apiClient.get<ServerMember[]>(
             `/api/v1/servers/${serverId}/members`,
+        );
+        return response.data;
+    },
+
+    getEmojis: async (serverId: string): Promise<Emoji[]> => {
+        const response = await apiClient.get<Emoji[]>(
+            `/api/v1/servers/${serverId}/emojis`,
         );
         return response.data;
     },

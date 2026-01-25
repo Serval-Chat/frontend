@@ -1,17 +1,23 @@
 import React from 'react';
 
+import { SmilePlus } from 'lucide-react';
+
+import { useAddReaction } from '@/api/reactions/reactions.queries';
 import type { Role } from '@/api/servers/servers.types';
 import { useMe } from '@/api/users/users.queries';
 import type { User } from '@/api/users/users.types';
+import { useCustomEmojis } from '@/hooks/useCustomEmojis';
 import type { ProcessedChatMessage } from '@/types/chat.ui';
 import { Text } from '@/ui/components/common/Text';
 import { UserProfilePicture } from '@/ui/components/common/UserProfilePicture';
+import { EmojiPicker } from '@/ui/components/emoji/EmojiPicker';
 import { Box } from '@/ui/components/layout/Box';
 import { ProfilePopup } from '@/ui/components/profile/ProfilePopup';
 import { cn } from '@/utils/cn';
 
 import { MessageContent } from './MessageContent';
 import { MessageHeader } from './MessageHeader';
+import { Reactions } from './Reactions';
 import { ReplyPreview } from './ReplyPreview';
 
 interface MessageProps {
@@ -36,14 +42,60 @@ export const Message: React.FC<MessageProps> = ({
     disableGlow,
 }) => {
     const [showProfile, setShowProfile] = React.useState(false);
+    const [showPicker, setShowPicker] = React.useState(false);
     const avatarRef = React.useRef<HTMLDivElement>(null);
+    const pickerRef = React.useRef<HTMLDivElement>(null);
     const { data: me } = useMe();
+    const addReaction = useAddReaction();
+    const { customCategories } = useCustomEmojis();
 
     const myId = me?._id;
     const mentionsMe = React.useMemo(() => {
         if (!myId) return false;
         return message.text.includes(`<userid:'${myId}'>`);
     }, [message.text, myId]);
+
+    const handleEmojiSelect = (emoji: string): void => {
+        addReaction.mutate({
+            messageId: message._id,
+            serverId: message.serverId,
+            channelId: message.channelId,
+            data: { emoji, emojiType: 'unicode' },
+        });
+        setShowPicker(false);
+    };
+
+    const handleCustomEmojiSelect = (emoji: {
+        id: string;
+        name: string;
+    }): void => {
+        addReaction.mutate({
+            messageId: message._id,
+            serverId: message.serverId,
+            channelId: message.channelId,
+            data: { emoji: emoji.name, emojiType: 'custom', emojiId: emoji.id },
+        });
+        setShowPicker(false);
+    };
+
+    // Close picker when clicking outside
+    React.useEffect(() => {
+        if (!showPicker) return;
+
+        const handleClickOutside = (event: MouseEvent): void => {
+            if (
+                pickerRef.current &&
+                !pickerRef.current.contains(event.target as Node)
+            ) {
+                setShowPicker(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [showPicker]);
 
     return (
         <Box
@@ -108,14 +160,44 @@ export const Message: React.FC<MessageProps> = ({
                         onClickName={() => setShowProfile(true)}
                     />
                     <MessageContent text={message.text} />
+                    <Reactions
+                        channelId={message.channelId}
+                        messageId={message._id}
+                        reactions={message.reactions || []}
+                        serverId={message.serverId}
+                        onAddClick={() => setShowPicker(true)}
+                    />
                 </Box>
             </Box>
 
             {/* Hover Actions */}
-            <Box className="absolute right-4 top-0 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all">
+            <Box className="absolute right-4 top-0 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all z-[var(--z-effect-md)]">
                 <Box className="flex items-center bg-bg-secondary border border-white/5 rounded shadow-xl px-1 py-1 gap-1">
-                    {/* Actions will go here but none for now uwu */}
+                    <button
+                        className={cn(
+                            'p-1.5 hover:bg-white/5 rounded transition-colors text-muted-foreground hover:text-foreground',
+                            showPicker && 'bg-white/10 text-foreground',
+                        )}
+                        title="Add Reaction"
+                        onClick={() => setShowPicker(!showPicker)}
+                    >
+                        <SmilePlus size={18} />
+                    </button>
+                    {/* Actions will go here but emojis for now uwu */}
                 </Box>
+
+                {showPicker && (
+                    <Box
+                        className="absolute bottom-full right-0 mb-2 z-[var(--z-popover)]"
+                        ref={pickerRef}
+                    >
+                        <EmojiPicker
+                            customCategories={customCategories}
+                            onCustomEmojiSelect={handleCustomEmojiSelect}
+                            onEmojiSelect={handleEmojiSelect}
+                        />
+                    </Box>
+                )}
             </Box>
 
             <ProfilePopup

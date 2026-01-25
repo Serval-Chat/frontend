@@ -1,5 +1,7 @@
 import { type UseQueryResult, useQuery } from '@tanstack/react-query';
 
+import type { Emoji } from '@/api/emojis/emojis.types';
+
 import { serversApi } from './servers.api';
 import type {
     Category,
@@ -20,6 +22,8 @@ export const SERVERS_QUERY_KEYS = {
     members: (serverId: string | null) =>
         ['servers', 'members', serverId] as const,
     roles: (serverId: string | null) => ['servers', 'roles', serverId] as const,
+    emojis: (serverId: string | null) =>
+        ['servers', 'emojis', serverId] as const,
 };
 
 export const useServers = (): UseQueryResult<Server[], Error> =>
@@ -70,5 +74,14 @@ export const useRoles = (
     useQuery({
         queryKey: SERVERS_QUERY_KEYS.roles(serverId),
         queryFn: () => serversApi.getRoles(serverId!),
+        enabled: !!serverId,
+    });
+
+export const useServerEmojis = (
+    serverId: string | null,
+): UseQueryResult<Emoji[], Error> =>
+    useQuery({
+        queryKey: ['servers', 'emojis', serverId],
+        queryFn: () => serversApi.getEmojis(serverId!),
         enabled: !!serverId,
     });
