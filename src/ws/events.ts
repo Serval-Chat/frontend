@@ -176,6 +176,20 @@ export const WsEvents = {
     FRIEND_REMOVED: 'friend_removed',
     INCOMING_REQUEST_ADDED: 'incoming_request_added',
     INCOMING_REQUEST_REMOVED: 'incoming_request_removed',
+
+    // Reactions
+    REACTION_ADDED: 'reaction_added',
+    REACTION_REMOVED: 'reaction_removed',
 } as const;
+
+export interface IReactionEventPayload {
+    messageId: string;
+    userId: string;
+    username: string;
+    emoji: string;
+    emojiType: 'unicode' | 'custom';
+    emojiId?: string;
+    messageType: 'dm' | 'server';
+}
 
 export type WsEventType = (typeof WsEvents)[keyof typeof WsEvents];

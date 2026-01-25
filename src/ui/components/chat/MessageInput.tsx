@@ -1,14 +1,17 @@
 import React, { useRef, useState } from 'react';
 
-import { Plus } from 'lucide-react';
+import { Plus, Smile } from 'lucide-react';
 
 import { filesApi } from '@/api/files/files.api';
+import { useServers } from '@/api/servers/servers.queries';
 import type { QueuedFile } from '@/hooks/chat/useFileQueue';
+import { useCustomEmojis } from '@/hooks/useCustomEmojis';
 import { useChatWS } from '@/hooks/ws/useChatWS';
 import { useAppSelector } from '@/store/hooks';
 import { Button } from '@/ui/components/common/Button';
 import { TextArea } from '@/ui/components/common/TextArea';
 import { useToast } from '@/ui/components/common/Toast';
+import { EmojiPicker } from '@/ui/components/emoji/EmojiPicker';
 import { Box } from '@/ui/components/layout/Box';
 
 import { FileQueue } from './FileQueue';
@@ -33,7 +36,9 @@ export const MessageInput: React.FC<MessageInputProps> = ({
 }) => {
     const [value, setValue] = useState('');
     const [isUploading, setIsUploading] = useState(false);
+    const [showEmojiPicker, setShowEmojiPicker] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const emojiPickerRef = useRef<HTMLDivElement>(null);
     const { showToast } = useToast();
 
     const {
@@ -61,6 +66,12 @@ export const MessageInput: React.FC<MessageInputProps> = ({
         selectedServerId ?? undefined,
         selectedChannelId ?? undefined,
     );
+
+    // servers is not used anymore as and is handled by useCustomEmojis
+    // but we keep useServers if we need it for other things, however lint says it's unused.
+    useServers();
+
+    const { customCategories } = useCustomEmojis();
 
     const handleUploadFiles = async (): Promise<string[]> => {
         if (files.length === 0) return [];
@@ -126,6 +137,14 @@ export const MessageInput: React.FC<MessageInputProps> = ({
         }
     };
 
+    const handleEmojiSelect = (emoji: string): void => {
+        setValue((prev) => prev + emoji);
+    };
+
+    const handleCustomEmojiSelect = (emoji: { id: string }): void => {
+        setValue((prev) => prev + `<emoji:${emoji.id}>`);
+    };
+
     const handleKeyDown = (
         e: React.KeyboardEvent<HTMLTextAreaElement>,
     ): void => {
@@ -146,7 +165,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
     };
 
     return (
-        <Box className="flex flex-col bg-[var(--bg-msg-input)] rounded-lg mx-4 mb-4 overflow-hidden border border-border-subtle focus-within:border-primary/50 transition-colors">
+        <Box className="flex flex-col bg-[var(--bg-msg-input)] rounded-lg mx-4 mb-4 overflow-visible border border-border-subtle focus-within:border-primary/50 transition-colors relative">
             <FileQueue
                 files={files}
                 onRemove={removeFile}
@@ -183,7 +202,29 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                     }}
                     onKeyDown={handleKeyDown}
                 />
+
+                <Button
+                    className="mb-1 h-8 w-8 p-0 shrink-0"
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                >
+                    <Smile size={20} />
+                </Button>
             </Box>
+
+            {showEmojiPicker && (
+                <div
+                    className="absolute bottom-full right-0 mb-2 z-[var(--z-popover)]"
+                    ref={emojiPickerRef}
+                >
+                    <EmojiPicker
+                        customCategories={customCategories}
+                        onCustomEmojiSelect={handleCustomEmojiSelect}
+                        onEmojiSelect={handleEmojiSelect}
+                    />
+                </div>
+            )}
         </Box>
     );
 };

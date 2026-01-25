@@ -105,7 +105,7 @@ export const CodeModal: React.FC<CodeModalProps> = memo(
                                 key={i}
                             >
                                 <div
-                                    className="w-16 flex-shrink-0 select-none text-right pr-4 text-muted-foreground/50 border-r border-border-subtle/20 bg-bg-secondary/30 sticky left-0 z-10"
+                                    className="w-16 flex-shrink-0 select-none text-right pr-4 text-muted-foreground/50 border-r border-border-subtle/20 bg-bg-secondary/30 sticky left-0 z-[var(--z-content)]"
                                     style={{ textAlign: 'right' }}
                                 >
                                     {i + 1}

@@ -10,6 +10,7 @@ import { Heading } from './Heading';
 import { Link } from './Link';
 import { Mention } from './Mention';
 import { ParsedEmoji } from './ParsedEmoji';
+import { ParsedUnicodeEmoji } from './ParsedUnicodeEmoji';
 import { RoleMention } from './RoleMention';
 import { Spoiler } from './Spoiler';
 import { Text } from './Text';
@@ -19,6 +20,7 @@ interface ParsedTextProps {
     className?: string;
     size?: 'xs' | 'sm' | 'base' | 'lg' | 'xl' | '2xl';
     condenseFiles?: boolean;
+    largeEmojis?: boolean;
 }
 
 /**
@@ -29,6 +31,7 @@ export const ParsedText: React.FC<ParsedTextProps> = ({
     className,
     size,
     condenseFiles,
+    largeEmojis,
 }) => {
     const fileNodesCount = nodes.filter((n) => n.type === 'file').length;
     const displayNodes = condenseFiles
@@ -77,7 +80,22 @@ export const ParsedText: React.FC<ParsedTextProps> = ({
                         );
 
                     case 'emoji':
-                        return <ParsedEmoji emojiId={node.emojiId} key={idx} />;
+                        return (
+                            <ParsedEmoji
+                                emojiId={node.emojiId}
+                                isLarge={largeEmojis}
+                                key={idx}
+                            />
+                        );
+
+                    case 'unicode_emoji':
+                        return (
+                            <ParsedUnicodeEmoji
+                                content={node.content}
+                                isLarge={largeEmojis}
+                                key={idx}
+                            />
+                        );
 
                     case 'link':
                         return (

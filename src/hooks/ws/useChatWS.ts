@@ -3,11 +3,12 @@ import { useCallback, useEffect, useRef } from 'react';
 import { type InfiniteData, useQueryClient } from '@tanstack/react-query';
 
 import { CHAT_QUERY_KEYS } from '@/api/chat/chat.queries';
-import { type ChatMessage } from '@/api/chat/chat.types';
+import { type ChatMessage, type MessageReaction } from '@/api/chat/chat.types';
 import { useMe } from '@/api/users/users.queries';
 import {
     type IMessageDm,
     type IMessageServer,
+    type IReactionEventPayload,
     WsEvents,
     wsMessages,
 } from '@/ws';
@@ -92,6 +93,42 @@ export function useChatWS(
             );
         },
         [queryClient],
+    );
+
+    // Helper to update reaction in cache
+    const updateReactionInCache = useCallback(
+        (payload: IReactionEventPayload, isRemoval: boolean) => {
+            const queryKey = getQueryKey(
+                payload,
+                selectedServerId,
+                selectedChannelId,
+                selectedFriendId,
+            );
+            if (!queryKey) return;
+
+            queryClient.setQueriesData<InfiniteData<ChatMessage[]>>(
+                { queryKey },
+                (oldData) => {
+                    if (!oldData) return oldData;
+
+                    return {
+                        ...oldData,
+                        pages: oldData.pages.map((page) =>
+                            page.map((msg) =>
+                                msg._id === payload.messageId
+                                    ? updateMessageReactions(
+                                          msg,
+                                          payload,
+                                          isRemoval,
+                                      )
+                                    : msg,
+                            ),
+                        ),
+                    };
+                },
+            );
+        },
+        [queryClient, selectedServerId, selectedChannelId, selectedFriendId],
     );
 
     // Handle incoming DMs
@@ -242,6 +279,28 @@ export function useChatWS(
         ),
     );
 
+    // Handle reaction added
+    useWebSocket(
+        WsEvents.REACTION_ADDED,
+        useCallback(
+            (payload: IReactionEventPayload) => {
+                updateReactionInCache(payload, false);
+            },
+            [updateReactionInCache],
+        ),
+    );
+
+    // Handle reaction removed
+    useWebSocket(
+        WsEvents.REACTION_REMOVED,
+        useCallback(
+            (payload: IReactionEventPayload) => {
+                updateReactionInCache(payload, true);
+            },
+            [updateReactionInCache],
+        ),
+    );
+
     // Clear typing users when conversation changes
     useEffect(() => {
         clearTypingUsers();
@@ -284,4 +343,89 @@ export function useChatWS(
         sendTyping,
         typingUsers,
     };
+}
+
+// Extract helper functions
+function getQueryKey(
+    payload: IReactionEventPayload,
+    serverId?: string,
+    channelId?: string,
+    friendId?: string,
+) {
+    if (payload.messageType === 'server' && serverId && channelId) {
+        return CHAT_QUERY_KEYS.channelMessages(serverId, channelId);
+    }
+    return friendId ? CHAT_QUERY_KEYS.userMessages(friendId) : null;
+}
+
+function updateMessageReactions(
+    msg: ChatMessage,
+    payload: IReactionEventPayload,
+    isRemoval: boolean,
+): ChatMessage {
+    const reactions = [...(msg.reactions || [])];
+    const existingIdx = reactions.findIndex(
+        (r) => r.emoji === payload.emoji && r.emojiType === payload.emojiType,
+    );
+
+    if (isRemoval) {
+        return removeReaction(msg, reactions, existingIdx, payload.userId);
+    } else {
+        return addReaction(msg, reactions, existingIdx, payload);
+    }
+}
+
+function removeReaction(
+    msg: ChatMessage,
+    reactions: MessageReaction[],
+    existingIdx: number,
+    userId: string,
+): ChatMessage {
+    if (existingIdx === -1) return msg;
+
+    const reaction = reactions[existingIdx];
+    const userIndex = reaction.users.indexOf(userId);
+    if (userIndex === -1) return msg;
+
+    const newUsers = reaction.users.filter((id) => id !== userId);
+
+    if (newUsers.length === 0) {
+        reactions.splice(existingIdx, 1);
+    } else {
+        reactions[existingIdx] = {
+            ...reaction,
+            users: newUsers,
+            count: newUsers.length,
+        };
+    }
+
+    return { ...msg, reactions };
+}
+
+function addReaction(
+    msg: ChatMessage,
+    reactions: MessageReaction[],
+    existingIdx: number,
+    payload: IReactionEventPayload,
+): ChatMessage {
+    if (existingIdx !== -1) {
+        const reaction = reactions[existingIdx];
+        if (reaction.users.includes(payload.userId)) return msg;
+
+        reactions[existingIdx] = {
+            ...reaction,
+            users: [...reaction.users, payload.userId],
+            count: reaction.count + 1,
+        };
+    } else {
+        reactions.push({
+            emoji: payload.emoji,
+            emojiType: payload.emojiType as 'unicode' | 'custom',
+            emojiId: payload.emojiId as string,
+            count: 1,
+            users: [payload.userId],
+        });
+    }
+
+    return { ...msg, reactions };
 }

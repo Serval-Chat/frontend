@@ -2,10 +2,12 @@ import React from 'react';
 
 import { useEmoji } from '@/api/emojis/emojis.queries';
 import { resolveApiUrl } from '@/utils/apiUrl';
+import { cn } from '@/utils/cn';
 
 interface ParsedEmojiProps {
     emojiId: string;
     className?: string;
+    isLarge?: boolean;
 }
 
 /**
@@ -14,6 +16,7 @@ interface ParsedEmojiProps {
 export const ParsedEmoji: React.FC<ParsedEmojiProps> = ({
     emojiId,
     className,
+    isLarge,
 }) => {
     const { data: emoji, isLoading } = useEmoji(emojiId);
 
@@ -22,7 +25,10 @@ export const ParsedEmoji: React.FC<ParsedEmojiProps> = ({
             <div
                 className={
                     className ||
-                    'inline-block w-5 h-5 bg-white/5 animate-pulse rounded'
+                    cn(
+                        'inline-block bg-white/5 animate-pulse rounded',
+                        isLarge ? 'w-10 h-10' : 'w-5 h-5',
+                    )
                 }
             />
         );
@@ -37,11 +43,13 @@ export const ParsedEmoji: React.FC<ParsedEmojiProps> = ({
     return (
         <img
             alt={emoji.name || 'emoji'}
-            className={className || 'inline-block w-5 h-5 align-text-bottom'}
+            className={cn(
+                className || 'inline-block align-text-bottom',
+                isLarge ? 'w-10 h-10' : 'w-5 h-5',
+            )}
             src={emojiUrl || ''}
             title={`:${emoji.name}:`}
             onError={(e) => {
-                // Fallback if emoji doesn't exist or fail to load
                 e.currentTarget.style.display = 'none';
             }}
         />

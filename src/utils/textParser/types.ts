@@ -19,6 +19,7 @@ export const ParserFeature = {
     FILE: 'FILE',
     MENTION: 'MENTION',
     ROLE_MENTION: 'ROLE_MENTION',
+    UNICODE_EMOJI: 'UNICODE_EMOJI',
 } as const;
 
 export type ParserFeature = (typeof ParserFeature)[keyof typeof ParserFeature];
@@ -29,6 +30,7 @@ export type ASTNodeType =
     | 'italic'
     | 'bold_italic'
     | 'emoji'
+    | 'unicode_emoji'
     | 'link'
     | 'h1'
     | 'h2'
@@ -65,6 +67,11 @@ export interface BoldItalicNode {
 export interface EmojiNode {
     type: 'emoji';
     emojiId: string;
+}
+
+export interface UnicodeEmojiNode {
+    type: 'unicode_emoji';
+    content: string; // The unicode character(s)
 }
 
 export interface LinkNode {
@@ -118,6 +125,7 @@ export interface InviteNode {
 export interface FileNode {
     type: 'file';
     url: string;
+    content?: string;
 }
 
 export interface MentionNode {
@@ -136,6 +144,7 @@ export type ASTNode =
     | ItalicNode
     | BoldItalicNode
     | EmojiNode
+    | UnicodeEmojiNode
     | LinkNode
     | H1Node
     | H2Node

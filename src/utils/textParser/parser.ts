@@ -1,3 +1,5 @@
+import { emojiRegex } from '@/utils/emoji';
+
 import {
     type ASTNode,
     ParserFeature,
@@ -15,6 +17,7 @@ export const ParserPresets = {
             ParserFeature.ITALIC,
             ParserFeature.BOLD_ITALIC,
             ParserFeature.EMOJI,
+            ParserFeature.UNICODE_EMOJI,
             ParserFeature.LINK,
             ParserFeature.H1,
             ParserFeature.H2,
@@ -35,6 +38,7 @@ export const ParserPresets = {
             ParserFeature.ITALIC,
             ParserFeature.BOLD_ITALIC,
             ParserFeature.EMOJI,
+            ParserFeature.UNICODE_EMOJI,
             ParserFeature.LINK,
             ParserFeature.H1,
             ParserFeature.H2,
@@ -55,10 +59,12 @@ export class TextParser {
     private text: string;
     private index: number = 0;
     private options: ParserOptions;
+    private startsWithEmojiRegex: RegExp;
 
     constructor(text: string, options: ParserOptions) {
         this.text = text;
         this.options = options;
+        this.startsWithEmojiRegex = new RegExp('^' + emojiRegex.source);
     }
 
     public parse(): ASTNode[] {
@@ -67,6 +73,24 @@ export class TextParser {
 
         while (this.index < this.text.length) {
             const char = this.text[this.index];
+            const charCode = char.charCodeAt(0);
+
+            // Unicode Emoji
+            // Optimization: All emojis have char codes > 127
+            if (
+                charCode > 127 &&
+                this.options.features.includes(ParserFeature.UNICODE_EMOJI)
+            ) {
+                const emojiNode = this.tryParseUnicodeEmoji();
+                if (emojiNode) {
+                    if (currentText) {
+                        nodes.push({ type: 'text', content: currentText });
+                        currentText = '';
+                    }
+                    nodes.push(emojiNode);
+                    continue;
+                }
+            }
 
             // [%file%](url)
             if (
@@ -254,6 +278,20 @@ export class TextParser {
 
     private peek(str: string): boolean {
         return this.text.startsWith(str, this.index);
+    }
+
+    private tryParseUnicodeEmoji(): ASTNode | null {
+        // Optimization: use slice to create a substring for matching
+        const remaining = this.text.slice(this.index);
+        const match = remaining.match(this.startsWithEmojiRegex);
+
+        if (match) {
+            const content = match[0];
+            this.index += content.length;
+            return { type: 'unicode_emoji', content };
+        }
+
+        return null;
     }
 
     private tryParseEmoji(): ASTNode | null {

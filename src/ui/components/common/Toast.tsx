@@ -47,7 +47,7 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({
     return (
         <ToastContext.Provider value={{ showToast }}>
             {children}
-            <Box className="fixed bottom-4 right-4 z-[100] flex flex-col gap-2 pointer-events-none">
+            <Box className="fixed bottom-4 right-4 z-[var(--z-toast)] flex flex-col gap-2 pointer-events-none">
                 <AnimatePresence>
                     {toasts.map((toast) => (
                         <ToastItem
