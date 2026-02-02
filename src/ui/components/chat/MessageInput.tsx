@@ -1,13 +1,17 @@
-import React, { useRef, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 
 import { Plus, Smile } from 'lucide-react';
 
 import { filesApi } from '@/api/files/files.api';
-import { useServers } from '@/api/servers/servers.queries';
+import { useFriends } from '@/api/friends/friends.queries';
+import { useMembers, useRoles } from '@/api/servers/servers.queries';
+import type { User } from '@/api/users/users.types';
 import type { QueuedFile } from '@/hooks/chat/useFileQueue';
 import { useCustomEmojis } from '@/hooks/useCustomEmojis';
+import { useMentionAutocomplete } from '@/hooks/useMentionAutocomplete';
 import { useChatWS } from '@/hooks/ws/useChatWS';
 import { useAppSelector } from '@/store/hooks';
+import { AutocompleteSuggestion } from '@/ui/components/common/AutocompleteSuggestion';
 import { Button } from '@/ui/components/common/Button';
 import { TextArea } from '@/ui/components/common/TextArea';
 import { useToast } from '@/ui/components/common/Toast';
@@ -35,9 +39,11 @@ export const MessageInput: React.FC<MessageInputProps> = ({
     fileQueueResult,
 }) => {
     const [value, setValue] = useState('');
+    const [cursorPosition, setCursorPosition] = useState(0);
     const [isUploading, setIsUploading] = useState(false);
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const textAreaRef = useRef<HTMLTextAreaElement>(null);
     const emojiPickerRef = useRef<HTMLDivElement>(null);
     const { showToast } = useToast();
 
@@ -67,11 +73,40 @@ export const MessageInput: React.FC<MessageInputProps> = ({
         selectedChannelId ?? undefined,
     );
 
-    // servers is not used anymore as and is handled by useCustomEmojis
-    // but we keep useServers if we need it for other things, however lint says it's unused.
-    useServers();
-
     const { customCategories } = useCustomEmojis();
+
+    const { data: friendsList = [] } = useFriends();
+    const { data: members = [] } = useMembers(selectedServerId);
+    const { data: roles = [] } = useRoles(selectedServerId);
+
+    const friendUsers = useMemo(
+        () => friendsList as unknown as User[],
+        [friendsList],
+    );
+
+    const allServerEmojis = useMemo(
+        () =>
+            customCategories.flatMap((cat) =>
+                cat.emojis.map((e) => ({
+                    _id: e.id,
+                    name: e.name,
+                    imageUrl: e.url,
+                    serverId: cat.id,
+                    createdBy: '',
+                    createdAt: '',
+                })),
+            ),
+        [customCategories],
+    );
+
+    const autocomplete = useMentionAutocomplete({
+        value,
+        cursorPosition,
+        members,
+        roles,
+        friends: friendUsers,
+        serverEmojis: allServerEmojis,
+    });
 
     const handleUploadFiles = async (): Promise<string[]> => {
         if (files.length === 0) return [];
@@ -148,6 +183,39 @@ export const MessageInput: React.FC<MessageInputProps> = ({
     const handleKeyDown = (
         e: React.KeyboardEvent<HTMLTextAreaElement>,
     ): void => {
+        if (autocomplete.hasSuggestions) {
+            if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                autocomplete.moveSelection('up');
+                return;
+            }
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                autocomplete.moveSelection('down');
+                return;
+            }
+            if (e.key === 'Tab' || (e.key === 'Enter' && !e.shiftKey)) {
+                e.preventDefault();
+                const newValue = autocomplete.selectCurrent();
+                if (newValue) {
+                    setValue(newValue);
+                    const newCursor = newValue.length;
+                    setCursorPosition(newCursor);
+                    setTimeout(() => {
+                        textAreaRef.current?.setSelectionRange(
+                            newCursor,
+                            newCursor,
+                        );
+                    }, 0);
+                }
+                return;
+            }
+            if (e.key === 'Escape') {
+                e.preventDefault();
+                return;
+            }
+        }
+
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
             if (!isUploading) {
@@ -194,13 +262,21 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                     placeholder={
                         isUploading ? 'Uploading...' : 'Type a message...'
                     }
+                    ref={textAreaRef}
                     rows={1}
                     value={value}
                     onChange={(e) => {
                         setValue(e.target.value);
+                        setCursorPosition(e.target.selectionStart);
                         sendTyping();
                     }}
+                    onClick={(e) => {
+                        setCursorPosition(e.currentTarget.selectionStart);
+                    }}
                     onKeyDown={handleKeyDown}
+                    onKeyUp={(e) => {
+                        setCursorPosition(e.currentTarget.selectionStart);
+                    }}
                 />
 
                 <Button
@@ -212,6 +288,27 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                     <Smile size={20} />
                 </Button>
             </Box>
+
+            {autocomplete.hasSuggestions && (
+                <AutocompleteSuggestion
+                    selectedIndex={autocomplete.selectedIndex}
+                    suggestions={autocomplete.suggestions}
+                    onSelect={(suggestion) => {
+                        const newValue =
+                            autocomplete.selectSuggestion(suggestion);
+                        setValue(newValue);
+                        const newCursor = newValue.length;
+                        setCursorPosition(newCursor);
+                        setTimeout(() => {
+                            textAreaRef.current?.focus();
+                            textAreaRef.current?.setSelectionRange(
+                                newCursor,
+                                newCursor,
+                            );
+                        }, 0);
+                    }}
+                />
+            )}
 
             {showEmojiPicker && (
                 <div
