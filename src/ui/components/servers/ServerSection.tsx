@@ -5,6 +5,7 @@ import {
     useChannels,
     useServerDetails,
 } from '@/api/servers/servers.queries';
+import { useServerWS } from '@/hooks/ws/useServerWS';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { setSelectedChannelId } from '@/store/slices/navSlice';
 import { LoadingSpinner } from '@/ui/components/common/LoadingSpinner';
@@ -30,6 +31,8 @@ export const ServerSection: React.FC = () => {
         useChannels(selectedServerId);
     const { data: categories, isLoading: isLoadingCategories } =
         useCategories(selectedServerId);
+
+    useServerWS(selectedServerId ?? undefined);
 
     useEffect(() => {
         if (

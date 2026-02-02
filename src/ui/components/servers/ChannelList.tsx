@@ -1,8 +1,14 @@
-import React, { useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
-import { ChevronDown } from 'lucide-react';
+import { Reorder } from 'framer-motion';
+import { ChevronDown, Copy, Folder } from 'lucide-react';
 
+import { serversApi } from '@/api/servers/servers.api';
 import type { Category, Channel } from '@/api/servers/servers.types';
+import { useAppSelector } from '@/store/hooks';
+import { ContextMenu } from '@/ui/components/common/ContextMenu';
+import type { ContextMenuItem } from '@/ui/components/common/ContextMenu';
+import { cn } from '@/utils/cn';
 
 import { ChannelItem } from './ChannelItem';
 
@@ -14,7 +20,7 @@ interface ChannelListProps {
 }
 
 /**
- * @description Renders a list of channels grouped by categories.
+ * @description Renders a list of channels grouped by categories with contexts for reordering said channels
  */
 export const ChannelList: React.FC<ChannelListProps> = ({
     channels,
@@ -22,16 +28,38 @@ export const ChannelList: React.FC<ChannelListProps> = ({
     selectedChannelId,
     onChannelSelect,
 }) => {
-    // Sort items by position
-    const sortedCategories = [...categories].sort(
-        (a, b) => a.position - b.position,
-    );
-    const sortedChannels = [...channels].sort(
-        (a, b) => a.position - b.position,
+    const selectedServerId = useAppSelector(
+        (state) => state.nav.selectedServerId,
     );
 
     const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(
         new Set(),
+    );
+
+    // initial sort
+    const initialSortedChannels = useMemo(
+        () => [...channels].sort((a, b) => a.position - b.position),
+        [channels],
+    );
+
+    // group channels by categoryId
+    const channelsByCategory = useMemo(
+        () =>
+            initialSortedChannels.reduce(
+                (acc, channel) => {
+                    const catId = channel.categoryId || 'uncategorized';
+                    if (!acc[catId]) acc[catId] = [];
+                    acc[catId].push(channel);
+                    return acc;
+                },
+                {} as Record<string, Channel[]>,
+            ),
+        [initialSortedChannels],
+    );
+
+    const sortedCategories = useMemo(
+        () => [...categories].sort((a, b) => a.position - b.position),
+        [categories],
     );
 
     const toggleCategory = (categoryId: string): void => {
@@ -46,35 +74,121 @@ export const ChannelList: React.FC<ChannelListProps> = ({
         });
     };
 
-    // Group channels by categoryId
-    const channelsByCategory = sortedChannels.reduce(
-        (acc, channel) => {
-            const catId = channel.categoryId || 'uncategorized';
-            if (!acc[catId]) acc[catId] = [];
-            acc[catId].push(channel);
-            return acc;
+    const handleReorder = useCallback(
+        async (reorderedChannels: Channel[]) => {
+            if (!selectedServerId) return;
+
+            const positions = reorderedChannels.map((ch, idx) => ({
+                channelId: ch._id,
+                position: idx,
+            }));
+
+            try {
+                await serversApi.reorderChannels(selectedServerId, positions);
+            } catch (error) {
+                console.error('Failed to reorder channels:', error);
+            }
         },
-        {} as Record<string, Channel[]>,
+        [selectedServerId],
+    );
+
+    const onReorder = (newOrder: Channel[]): void => {
+        void handleReorder(newOrder);
+    };
+
+    const handleMoveToCategory = async (
+        channelId: string,
+        categoryId: string | null,
+    ): Promise<void> => {
+        if (!selectedServerId) return;
+
+        try {
+            await serversApi.updateChannel(selectedServerId, channelId, {
+                categoryId,
+            });
+        } catch (error) {
+            console.error('Failed to move channel to category:', error);
+        }
+    };
+
+    const getChannelMenuItems = (channel: Channel): ContextMenuItem[] => {
+        const items: ContextMenuItem[] = [
+            {
+                label: 'Copy Channel ID',
+                icon: Copy,
+                onClick: () => {
+                    void navigator.clipboard.writeText(channel._id);
+                },
+            },
+        ];
+
+        // Move to Category options
+        const moveOptions: ContextMenuItem[] = [
+            {
+                label: 'Uncategorized',
+                icon: Folder,
+                onClick: () => void handleMoveToCategory(channel._id, null),
+            },
+            ...sortedCategories.map((cat) => ({
+                label: cat.name,
+                icon: Folder,
+                onClick: () => void handleMoveToCategory(channel._id, cat._id),
+            })),
+        ];
+
+        // Filter out current category
+        const currentCatId = channel.categoryId || null;
+        const availableOptions = moveOptions.filter((opt) => {
+            if (opt.type === 'divider') return false;
+            if (opt.label === 'Uncategorized') return currentCatId !== null;
+            const targetCat = sortedCategories.find(
+                (c) => c.name === opt.label,
+            );
+            return targetCat?._id !== currentCatId;
+        });
+
+        if (availableOptions.length > 0) {
+            if (items.length > 0) {
+                items.push({ type: 'divider' });
+            }
+            items.push({ label: 'Move to Category:', type: 'label' });
+            items.push(...availableOptions);
+        }
+
+        return items;
+    };
+
+    const renderChannel = (channel: Channel): React.ReactNode => (
+        <ContextMenu items={getChannelMenuItems(channel)} key={channel._id}>
+            <ChannelItem
+                icon={channel.icon}
+                isActive={selectedChannelId === channel._id}
+                name={channel.name}
+                type={channel.type}
+                onClick={() => onChannelSelect(channel._id)}
+            />
+        </ContextMenu>
     );
 
     return (
         <div className="flex flex-col px-2 space-y-4 py-4">
             {/* Uncategorized channels first */}
-            <div className="space-y-0.5">
+            <Reorder.Group
+                axis="y"
+                className="space-y-0.5"
+                values={channelsByCategory['uncategorized'] || []}
+                onReorder={(newOrder) => onReorder(newOrder)}
+            >
                 {channelsByCategory['uncategorized']?.map((channel) => (
-                    <ChannelItem
-                        icon={channel.icon}
-                        isActive={selectedChannelId === channel._id}
-                        key={channel._id}
-                        name={channel.name}
-                        type={channel.type}
-                        onClick={() => onChannelSelect(channel._id)}
-                    />
+                    <Reorder.Item key={channel._id} value={channel}>
+                        {renderChannel(channel)}
+                    </Reorder.Item>
                 ))}
-            </div>
+            </Reorder.Group>
 
             {sortedCategories.map((category) => {
                 const isCollapsed = collapsedCategories.has(category._id);
+                const categoryChannels = channelsByCategory[category._id] || [];
 
                 return (
                     <div className="space-y-1" key={category._id}>
@@ -90,34 +204,31 @@ export const ChannelList: React.FC<ChannelListProps> = ({
                             }}
                         >
                             <ChevronDown
-                                className={`w-3 h-3 mr-0.5 text-foreground-muted transition-transform duration-200 ${
-                                    isCollapsed ? '-rotate-90' : ''
-                                }`}
+                                className={cn(
+                                    'w-3 h-3 mr-0.5 text-foreground-muted transition-transform duration-200',
+                                    isCollapsed ? '-rotate-90' : '',
+                                )}
                             />
                             <span className="text-[12px] font-bold text-foreground-muted uppercase tracking-wider group-hover:text-foreground/80 transition-colors">
                                 {category.name}
                             </span>
                         </div>
                         {!isCollapsed && (
-                            <div className="space-y-0.5">
-                                {channelsByCategory[category._id]?.map(
-                                    (channel) => (
-                                        <ChannelItem
-                                            icon={channel.icon}
-                                            isActive={
-                                                selectedChannelId ===
-                                                channel._id
-                                            }
-                                            key={channel._id}
-                                            name={channel.name}
-                                            type={channel.type}
-                                            onClick={() =>
-                                                onChannelSelect(channel._id)
-                                            }
-                                        />
-                                    ),
-                                )}
-                            </div>
+                            <Reorder.Group
+                                axis="y"
+                                className="space-y-0.5"
+                                values={categoryChannels}
+                                onReorder={(newOrder) => onReorder(newOrder)}
+                            >
+                                {categoryChannels.map((channel) => (
+                                    <Reorder.Item
+                                        key={channel._id}
+                                        value={channel}
+                                    >
+                                        {renderChannel(channel)}
+                                    </Reorder.Item>
+                                ))}
+                            </Reorder.Group>
                         )}
                     </div>
                 );
