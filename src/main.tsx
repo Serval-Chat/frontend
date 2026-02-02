@@ -12,35 +12,35 @@ import { Showoff } from '@/pages/Showoff';
 import { QueryProvider } from '@/providers/QueryProvider';
 import { StoreProvider } from '@/providers/StoreProvider';
 import { ThemeProvider } from '@/providers/ThemeProvider';
-import { WebSocketProvider } from '@/providers/WebSocketProvider';
 import '@/styles/index.css';
 import { ToastProvider } from '@/ui/components/common/Toast';
+import { AuthenticatedLayout } from '@/ui/components/layout/AuthenticatedLayout';
 
 createRoot(document.getElementById('root')!).render(
     <StrictMode>
         <StoreProvider>
             <ThemeProvider>
                 <QueryProvider>
-                    <WebSocketProvider>
-                        <ToastProvider>
-                            <BrowserRouter>
-                                <Routes>
-                                    <Route element={<App />} path="/" />
-                                    <Route element={<Login />} path="/login" />
-                                    <Route
-                                        element={<Register />}
-                                        path="/register"
-                                    />
+                    <ToastProvider>
+                        <BrowserRouter>
+                            <Routes>
+                                <Route element={<App />} path="/" />
+                                <Route element={<Login />} path="/login" />
+                                <Route
+                                    element={<Register />}
+                                    path="/register"
+                                />
+                                <Route element={<AuthenticatedLayout />}>
                                     <Route element={<Chat />} path="/chat" />
                                     <Route
                                         element={<Showoff />}
                                         path="/showoff"
                                     />
-                                    <Route element={<NotFound />} path="*" />
-                                </Routes>
-                            </BrowserRouter>
-                        </ToastProvider>
-                    </WebSocketProvider>
+                                </Route>
+                                <Route element={<NotFound />} path="*" />
+                            </Routes>
+                        </BrowserRouter>
+                    </ToastProvider>
                 </QueryProvider>
             </ThemeProvider>
         </StoreProvider>
