@@ -9,7 +9,7 @@ export interface BoxProps extends React.HTMLAttributes<HTMLElement> {
 }
 
 /**
- * @description Generic wrapper in case I want to use react native in the future
+ * @description Generic wrapper in case I want to use react native in the future tho i reallly fucking spam classnames lol
  */
 export const Box = React.forwardRef<HTMLElement, BoxProps>(
     ({ children, className, as: Tag = 'div', ...props }, ref) => {

@@ -3,6 +3,7 @@ import React from 'react';
 
 import { FileEmbed } from '@/ui/components/chat/FileEmbed';
 import { InviteLink } from '@/ui/components/chat/InviteLink';
+import { Box } from '@/ui/components/layout/Box';
 import type { ASTNode } from '@/utils/textParser/types';
 
 import { CodeBlock } from './CodeBlock';
@@ -170,6 +171,23 @@ export const ParsedText: React.FC<ParsedTextProps> = ({
 
                     case 'role_mention':
                         return <RoleMention key={idx} roleId={node.roleId} />;
+
+                    case 'everyone':
+                        return (
+                            <Box
+                                as="span"
+                                className="inline-flex items-baseline px-1.5 py-[4px] rounded transition-opacity cursor-pointer select-none font-medium text-white shadow-sm hover:opacity-90 bg-primary"
+                                key={idx}
+                            >
+                                <Text
+                                    as="span"
+                                    className="leading-none drop-shadow-md"
+                                    size="sm"
+                                >
+                                    @everyone
+                                </Text>
+                            </Box>
+                        );
 
                     default:
                         return null;

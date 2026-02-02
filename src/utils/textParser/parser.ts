@@ -30,6 +30,7 @@ export const ParserPresets = {
             ParserFeature.FILE,
             ParserFeature.MENTION,
             ParserFeature.ROLE_MENTION,
+            ParserFeature.EVERYONE_MENTION,
         ],
     },
     BIO: {
@@ -51,6 +52,7 @@ export const ParserPresets = {
             ParserFeature.FILE,
             ParserFeature.MENTION,
             ParserFeature.ROLE_MENTION,
+            ParserFeature.EVERYONE_MENTION,
         ],
     },
 } as const;
@@ -174,6 +176,25 @@ export class TextParser {
                         currentText = '';
                     }
                     nodes.push(roleMentionNode);
+                    continue;
+                }
+            }
+
+            // <everyone>
+            if (
+                char === '<' &&
+                this.options.features.includes(
+                    ParserFeature.EVERYONE_MENTION,
+                ) &&
+                this.peek('<everyone>')
+            ) {
+                const everyoneNode = this.tryParseEveryoneMention();
+                if (everyoneNode) {
+                    if (currentText) {
+                        nodes.push({ type: 'text', content: currentText });
+                        currentText = '';
+                    }
+                    nodes.push(everyoneNode);
                     continue;
                 }
             }
@@ -683,6 +704,14 @@ export class TextParser {
         }
 
         this.index = start;
+        return null;
+    }
+
+    private tryParseEveryoneMention(): ASTNode | null {
+        if (this.peek('<everyone>')) {
+            this.index += 10;
+            return { type: 'everyone' };
+        }
         return null;
     }
 }

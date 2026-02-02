@@ -3,6 +3,7 @@ import React from 'react';
 import { SmilePlus } from 'lucide-react';
 
 import { useAddReaction } from '@/api/reactions/reactions.queries';
+import { useMembers } from '@/api/servers/servers.queries';
 import type { Role } from '@/api/servers/servers.types';
 import { useMe } from '@/api/users/users.queries';
 import type { User } from '@/api/users/users.types';
@@ -46,14 +47,33 @@ export const Message: React.FC<MessageProps> = ({
     const avatarRef = React.useRef<HTMLDivElement>(null);
     const pickerRef = React.useRef<HTMLDivElement>(null);
     const { data: me } = useMe();
+    const { data: members } = useMembers(message.serverId ?? null);
     const addReaction = useAddReaction();
     const { customCategories } = useCustomEmojis();
 
     const myId = me?._id;
     const mentionsMe = React.useMemo(() => {
         if (!myId) return false;
-        return message.text.includes(`<userid:'${myId}'>`);
-    }, [message.text, myId]);
+
+        // Direct mention
+        if (message.text.includes(`<userid:'${myId}'>`)) return true;
+
+        // Everyone mention
+        if (message.text.includes('<everyone>')) return true;
+
+        // Role mention
+        const myMember = members?.find((m) => m.userId === myId);
+        if (
+            myMember &&
+            myMember.roles.some((roleId) =>
+                message.text.includes(`<roleid:'${roleId}'>`),
+            )
+        ) {
+            return true;
+        }
+
+        return false;
+    }, [message.text, myId, members]);
 
     const handleEmojiSelect = (emoji: string): void => {
         addReaction.mutate({

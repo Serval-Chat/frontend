@@ -4,13 +4,14 @@ import { useRoles } from '@/api/servers/servers.queries';
 import { useAppSelector } from '@/store/hooks';
 import { Text } from '@/ui/components/common/Text';
 import { Box } from '@/ui/components/layout/Box';
+import { getRoleStyle } from '@/utils/roleColor';
 
 interface RoleMentionProps {
     roleId: string;
 }
 
 /**
- * @description Renders a role mention with its specific colors.
+ * @description Renders a role mention with colorrss
  */
 export const RoleMention: React.FC<RoleMentionProps> = ({ roleId }) => {
     const selectedServerId = useAppSelector(
@@ -22,31 +23,7 @@ export const RoleMention: React.FC<RoleMentionProps> = ({ roleId }) => {
 
     const roleName = role ? role.name : isLoading ? '...' : 'unknown-role';
 
-    const style: React.CSSProperties = {};
-    if (role) {
-        if (role.colors && role.colors.length >= 2) {
-            const repeat =
-                role.gradientRepeat && role.gradientRepeat > 1
-                    ? role.gradientRepeat
-                    : 1;
-            if (repeat > 1) {
-                const stop = (100 / repeat).toFixed(2);
-                style.background = `repeating-linear-gradient(90deg, ${role.colors.join(
-                    ', ',
-                )} ${stop}%)`;
-            } else {
-                style.background = `linear-gradient(90deg, ${role.colors.join(
-                    ', ',
-                )})`;
-            }
-        } else if (role.color) {
-            style.backgroundColor = role.color;
-        } else {
-            style.backgroundColor = 'var(--primary)';
-        }
-    } else {
-        style.backgroundColor = 'var(--divider)';
-    }
+    const style = getRoleStyle(role);
 
     return (
         <Box
@@ -55,7 +32,7 @@ export const RoleMention: React.FC<RoleMentionProps> = ({ roleId }) => {
             style={style}
         >
             <Text as="span" className="leading-none drop-shadow-md" size="sm">
-                @{roleName}
+                {roleName.startsWith('@') ? roleName : `@${roleName}`}
             </Text>
         </Box>
     );

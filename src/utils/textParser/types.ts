@@ -20,6 +20,7 @@ export const ParserFeature = {
     MENTION: 'MENTION',
     ROLE_MENTION: 'ROLE_MENTION',
     UNICODE_EMOJI: 'UNICODE_EMOJI',
+    EVERYONE_MENTION: 'EVERYONE_MENTION',
 } as const;
 
 export type ParserFeature = (typeof ParserFeature)[keyof typeof ParserFeature];
@@ -42,7 +43,8 @@ export type ASTNodeType =
     | 'invite'
     | 'file'
     | 'mention'
-    | 'role_mention';
+    | 'role_mention'
+    | 'everyone';
 
 export interface TextNode {
     type: 'text';
@@ -138,6 +140,10 @@ export interface RoleMentionNode {
     roleId: string;
 }
 
+export interface EveryoneNode {
+    type: 'everyone';
+}
+
 export type ASTNode =
     | TextNode
     | BoldNode
@@ -156,4 +162,5 @@ export type ASTNode =
     | InviteNode
     | FileNode
     | MentionNode
-    | RoleMentionNode;
+    | RoleMentionNode
+    | EveryoneNode;
