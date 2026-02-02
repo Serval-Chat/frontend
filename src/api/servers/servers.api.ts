@@ -56,4 +56,37 @@ export const serversApi = {
         );
         return response.data;
     },
+
+    reorderChannels: async (
+        serverId: string,
+        channelPositions: { channelId: string; position: number }[],
+    ): Promise<void> => {
+        await apiClient.patch(`/api/v1/servers/${serverId}/channels/reorder`, {
+            channelPositions,
+        });
+    },
+
+    reorderCategories: async (
+        serverId: string,
+        categoryPositions: { categoryId: string; position: number }[],
+    ): Promise<void> => {
+        await apiClient.patch(
+            `/api/v1/servers/${serverId}/categories/reorder`,
+            {
+                categoryPositions,
+            },
+        );
+    },
+
+    updateChannel: async (
+        serverId: string,
+        channelId: string,
+        updates: Partial<Channel>,
+    ): Promise<Channel> => {
+        const response = await apiClient.patch<Channel>(
+            `/api/v1/servers/${serverId}/channels/${channelId}`,
+            updates,
+        );
+        return response.data;
+    },
 };

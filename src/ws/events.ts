@@ -180,6 +180,18 @@ export const WsEvents = {
     // Reactions
     REACTION_ADDED: 'reaction_added',
     REACTION_REMOVED: 'reaction_removed',
+
+    // Server Management
+    SERVER_UPDATED: 'server_updated',
+    SERVER_DELETED: 'server_deleted',
+    CHANNEL_CREATED: 'channel_created',
+    CHANNEL_UPDATED: 'channel_updated',
+    CHANNEL_DELETED: 'channel_deleted',
+    CHANNELS_REORDERED: 'channels_reordered',
+    CATEGORY_CREATED: 'category_created',
+    CATEGORY_UPDATED: 'category_updated',
+    CATEGORY_DELETED: 'category_deleted',
+    CATEGORIES_REORDERED: 'categories_reordered',
 } as const;
 
 export interface IReactionEventPayload {

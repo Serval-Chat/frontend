@@ -22,7 +22,8 @@ export type ContextMenuItem =
               | 'success'
               | 'ghost';
       }
-    | { type: 'divider' };
+    | { type: 'divider' }
+    | { type: 'label'; label: string };
 
 interface ContextMenuProps {
     items: ContextMenuItem[];
@@ -112,6 +113,17 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
                                             className="h-px bg-[var(--color-divider)] my-1.5"
                                             key={`divider-${index}`} // eslint-disable-line react/no-array-index-key
                                         />
+                                    );
+                                }
+
+                                if (item.type === 'label') {
+                                    return (
+                                        <div
+                                            className="px-3 py-1.5 text-[10px] font-bold text-[var(--color-foreground-muted)] uppercase tracking-wider select-none"
+                                            key={`label-${index}-${item.label}`} // eslint-disable-line react/no-array-index-key
+                                        >
+                                            {item.label}
+                                        </div>
                                     );
                                 }
 
