@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Settings } from 'lucide-react';
+import { Settings, Zap } from 'lucide-react';
 
 import { Button } from '@/ui/components/common/Button';
 import { Text } from '@/ui/components/common/Text';
@@ -14,7 +14,10 @@ export const ServerSettingsSidebar: React.FC<ServerSettingsSidebarProps> = ({
     activeSection,
     setActiveSection,
 }) => {
-    const sections = [{ id: 'overview', label: 'Overview', icon: Settings }];
+    const sections = [
+        { id: 'overview', label: 'Overview', icon: Settings },
+        { id: 'behaviour', label: 'Behaviour', icon: Zap },
+    ];
 
     return (
         <div className="w-[240px] bg-[var(--secondary-bg)] border-r border-[var(--color-border-subtle)] p-4 overflow-y-auto shrink-0 flex flex-col gap-4">

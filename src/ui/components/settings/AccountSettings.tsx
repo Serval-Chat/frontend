@@ -9,8 +9,8 @@ import {
     useUpdatePronouns,
     useUpdateUsername,
 } from '@/api/users/users.queries';
-import { Button } from '@/ui/components/common/Button';
 import { Input } from '@/ui/components/common/Input';
+import { SettingsFloatingBar } from '@/ui/components/common/SettingsFloatingBar';
 import { TextArea } from '@/ui/components/common/TextArea';
 import { UserProfileCard } from '@/ui/components/profile/UserProfileCard';
 
@@ -255,32 +255,18 @@ export const AccountSettings: React.FC = () => {
                         </div>
                     </div>
 
-                    {/* Action Buttons */}
-                    {hasChanges && (
-                        <div className="fixed bottom-0 left-0 right-0 p-4 bg-[var(--color-bg-secondary)] border-t border-[var(--color-border-subtle)] flex justify-end gap-3 items-center z-fixed md:absolute md:rounded-b-lg">
-                            <span className="text-sm text-[var(--color-foreground)] mr-auto">
-                                Careful - you have unsaved changes!
-                            </span>
-                            <Button
-                                variant="ghost"
-                                onClick={() => {
-                                    setDisplayName(originalDisplayName);
-                                    setUsername(originalUsername);
-                                    setPronouns(originalPronouns);
-                                    setBio(originalBio);
-                                }}
-                            >
-                                Reset
-                            </Button>
-                            <Button
-                                loading={isPending}
-                                variant="success"
-                                onClick={handleSave}
-                            >
-                                Save Changes
-                            </Button>
-                        </div>
-                    )}
+                    <SettingsFloatingBar
+                        isFixed={false}
+                        isPending={isPending}
+                        isVisible={hasChanges}
+                        onReset={() => {
+                            setDisplayName(originalDisplayName);
+                            setUsername(originalUsername);
+                            setPronouns(originalPronouns);
+                            setBio(originalBio);
+                        }}
+                        onSave={handleSave}
+                    />
                 </div>
             </div>
 

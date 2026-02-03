@@ -6,7 +6,7 @@ import { HexColorPicker } from 'react-colorful';
 import { useMe, useUpdateStyle } from '@/api/users/users.queries';
 import type { User } from '@/api/users/users.types';
 import { type Theme, useTheme } from '@/providers/ThemeProvider';
-import { Button } from '@/ui/components/common/Button';
+import { SettingsFloatingBar } from '@/ui/components/common/SettingsFloatingBar';
 import { StyledUserName } from '@/ui/components/common/StyledUserName';
 import { Toggle } from '@/ui/components/common/Toggle';
 
@@ -360,24 +360,13 @@ const AppearanceSettingsForm: React.FC<AppearanceSettingsFormProps> = ({
                 </div>
             </div>
 
-            {/* Action Buttons */}
-            {hasChanges && (
-                <div className="fixed bottom-0 left-0 right-0 p-4 bg-[var(--color-bg-secondary)] border-t border-[var(--color-border-subtle)] flex justify-end gap-3 items-center z-fixed md:absolute md:rounded-b-lg">
-                    <span className="text-sm text-[var(--color-foreground)] mr-auto">
-                        Careful - you have unsaved changes!
-                    </span>
-                    <Button variant="ghost" onClick={handleReset}>
-                        Reset
-                    </Button>
-                    <Button
-                        loading={isPending}
-                        variant="success"
-                        onClick={handleSave}
-                    >
-                        Save Changes
-                    </Button>
-                </div>
-            )}
+            <SettingsFloatingBar
+                isFixed={false}
+                isPending={isPending}
+                isVisible={hasChanges}
+                onReset={handleReset}
+                onSave={handleSave}
+            />
         </div>
     );
 };

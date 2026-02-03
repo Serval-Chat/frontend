@@ -5,6 +5,7 @@ import { X } from 'lucide-react';
 import { IconButton } from '@/ui/components/common/IconButton';
 import { Modal } from '@/ui/components/common/Modal';
 
+import { ServerBehaviourSettings } from './ServerBehaviourSettings';
 import { ServerOverviewSettings } from './ServerOverviewSettings';
 import { ServerSettingsSidebar } from './ServerSettingsSidebar';
 
@@ -43,6 +44,9 @@ export const ServerSettingsModal: React.FC<ServerSettingsModalProps> = ({
                         <div className="max-w-4xl mx-auto">
                             {activeSection === 'overview' && (
                                 <ServerOverviewSettings serverId={serverId} />
+                            )}
+                            {activeSection === 'behaviour' && (
+                                <ServerBehaviourSettings serverId={serverId} />
                             )}
                         </div>
                     </div>

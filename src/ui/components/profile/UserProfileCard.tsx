@@ -7,6 +7,7 @@ import type { User } from '@/api/users/users.types';
 import { useAppSelector } from '@/store/hooks';
 import { Heading } from '@/ui/components/common/Heading';
 import { ParsedText } from '@/ui/components/common/ParsedText';
+import { RoleDot } from '@/ui/components/common/RoleDot';
 import { StyledUserName } from '@/ui/components/common/StyledUserName';
 import { Text } from '@/ui/components/common/Text';
 import { UserBadge } from '@/ui/components/common/UserBadge';
@@ -240,21 +241,7 @@ export const UserProfileCard: React.FC<UserProfileCardProps> = ({
                                         className="flex items-center gap-1.5 px-2 py-1 bg-[var(--color-bg-secondary)] rounded-md border border-[var(--color-border-subtle)]"
                                         key={r._id}
                                     >
-                                        <Box
-                                            className="w-3 h-3 rounded-full shrink-0"
-                                            style={{
-                                                backgroundColor:
-                                                    r.color || '#B9BBBE',
-                                                backgroundImage:
-                                                    r.colors &&
-                                                    r.colors.length > 0
-                                                        ? `linear-gradient(90deg, ${r.colors.join(', ')})`
-                                                        : r.startColor &&
-                                                            r.endColor
-                                                          ? `linear-gradient(90deg, ${r.startColor}, ${r.endColor})`
-                                                          : undefined,
-                                            }}
-                                        />
+                                        <RoleDot role={r} />
                                         <Text
                                             as="span"
                                             className="text-xs font-medium text-foreground/90"

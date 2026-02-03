@@ -43,10 +43,11 @@ const textVariants = cva('', {
 
 export interface TextProps
     extends
-        Omit<React.HTMLAttributes<HTMLSpanElement>, 'style'>,
+        Omit<React.HTMLAttributes<HTMLElement>, 'style'>,
         VariantProps<typeof textVariants> {
-    as?: 'span' | 'p' | 'div';
+    as?: 'span' | 'p' | 'div' | 'label';
     style?: React.CSSProperties;
+    htmlFor?: string;
 }
 
 /**

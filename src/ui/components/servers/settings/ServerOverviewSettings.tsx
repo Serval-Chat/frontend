@@ -17,6 +17,7 @@ import { Heading } from '@/ui/components/common/Heading';
 import { Input } from '@/ui/components/common/Input';
 import { LoadingSpinner } from '@/ui/components/common/LoadingSpinner';
 import { Modal } from '@/ui/components/common/Modal';
+import { SettingsFloatingBar } from '@/ui/components/common/SettingsFloatingBar';
 import { Text } from '@/ui/components/common/Text';
 import { Toggle } from '@/ui/components/common/Toggle';
 import { ImageCropModal } from '@/ui/components/settings/ImageCropModal';
@@ -378,36 +379,15 @@ export const ServerOverviewSettings: React.FC<ServerOverviewSettingsProps> = ({
                 </div>
             )}
 
-            {/* Floating Action Bar */}
-            {hasChanges && (
-                <div className="fixed bottom-8 left-[240px] right-0 flex justify-center pointer-events-none z-fixed">
-                    <div className="bg-[var(--color-bg-secondary)] border border-[var(--color-border-subtle)] rounded-lg p-4 flex items-center gap-6 shadow-2xl pointer-events-auto w-[calc(100%-48px)] max-w-2xl">
-                        <Text className="flex-1" size="sm">
-                            Careful — you have unsaved changes!
-                        </Text>
-                        <div className="flex gap-3">
-                            <Button
-                                className="min-w-[96px]"
-                                variant="ghost"
-                                onClick={() => {
-                                    setName(originalName);
-                                    setDisableCustomFonts(originalFonts);
-                                }}
-                            >
-                                Reset
-                            </Button>
-                            <Button
-                                className="min-w-[96px]"
-                                loading={isPending}
-                                variant="success"
-                                onClick={handleSave}
-                            >
-                                Save Changes
-                            </Button>
-                        </div>
-                    </div>
-                </div>
-            )}
+            <SettingsFloatingBar
+                isPending={isPending}
+                isVisible={hasChanges}
+                onReset={() => {
+                    setName(originalName);
+                    setDisableCustomFonts(originalFonts);
+                }}
+                onSave={handleSave}
+            />
 
             <ImageCropModal
                 imageFile={cropFile}
