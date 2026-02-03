@@ -100,7 +100,7 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
                                 position: 'fixed',
                                 top: position.y,
                                 left: position.x,
-                                zIndex: 'var(--z-top)',
+                                zIndex: 'var(--z-index-top)',
                                 boxShadow:
                                     '0 10px 30px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 190, 0, 0.1)',
                             }}

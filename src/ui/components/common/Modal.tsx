@@ -30,12 +30,35 @@ export const Modal: React.FC<ModalProps> = ({
     noPadding = false,
     fullScreen = false,
 }) => {
+    React.useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent): void => {
+            if (e.key === 'Escape' && isOpen) {
+                onClose();
+            }
+        };
+
+        if (isOpen) {
+            window.addEventListener('keydown', handleKeyDown);
+            document.body.style.overflow = 'hidden';
+        }
+
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown);
+            document.body.style.overflow = '';
+        };
+    }, [isOpen, onClose]);
+
     if (typeof document === 'undefined') return null;
 
     return createPortal(
         <AnimatePresence>
             {isOpen && (
-                <div className="fixed inset-0 z-modal flex items-center justify-center p-4">
+                <div
+                    className={cn(
+                        'fixed inset-0 z-modal flex items-center justify-center',
+                        !fullScreen && 'p-4',
+                    )}
+                >
                     <motion.div
                         animate={{ opacity: 1 }}
                         className="absolute inset-0 bg-black/60 backdrop-blur-sm"

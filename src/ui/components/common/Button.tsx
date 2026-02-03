@@ -23,7 +23,7 @@ const buttonVariants = cva(
                 normal: 'text-foreground border border-border-subtle hover:bg-bg-secondary hover:border-primary/40',
                 primary:
                     'bg-primary text-foreground-inverse hover:bg-primary-hover',
-                danger: 'bg-danger text-foreground-inverse hover:bg-danger-hover',
+                danger: 'bg-danger text-white hover:bg-danger-hover',
                 caution:
                     'bg-caution text-foreground-inverse hover:bg-caution-hover',
                 success:
@@ -119,7 +119,12 @@ export const Button: React.FC<ButtonProps> = ({
             style={dimensionStyles}
             {...props}
         >
-            <span className={loading ? 'opacity-0' : undefined}>
+            <span
+                className={cn(
+                    'flex items-center justify-center gap-inherit',
+                    loading ? 'opacity-0' : undefined,
+                )}
+            >
                 {children}
             </span>
             {loading && (

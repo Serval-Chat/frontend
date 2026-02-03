@@ -63,7 +63,7 @@ export const AutocompleteSuggestion: React.FC<AutocompleteSuggestionProps> = ({
     if (suggestions.length === 0) return null;
 
     return (
-        <Box className="absolute bottom-full left-0 right-0 mb-2 mx-4 bg-background border border-border-subtle rounded-lg shadow-lg overflow-hidden z-[var(--z-popover)]">
+        <Box className="absolute bottom-full left-0 right-0 mb-2 mx-4 bg-background border border-border-subtle rounded-lg shadow-lg overflow-hidden z-[var(--z-index-popover)]">
             <Box className="p-1 max-h-72 overflow-y-auto scrollbar-thin">
                 {suggestions.map((suggestion, index) => (
                     <Box

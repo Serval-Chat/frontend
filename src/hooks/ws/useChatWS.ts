@@ -68,7 +68,7 @@ export function useChatWS(
 
     // Helper to add message to cache
     const addMessageToCache = useCallback(
-        (queryKey: readonly unknown[], newMessage: ChatMessage) => {
+        (queryKey: readonly unknown[], newMessage: ChatMessage): void => {
             queryClient.setQueryData<InfiniteData<ChatMessage[]>>(
                 queryKey,
                 (oldData) => {
@@ -97,7 +97,7 @@ export function useChatWS(
 
     // Helper to update reaction in cache
     const updateReactionInCache = useCallback(
-        (payload: IReactionEventPayload, isRemoval: boolean) => {
+        (payload: IReactionEventPayload, isRemoval: boolean): void => {
             const queryKey = getQueryKey(
                 payload,
                 selectedServerId,
@@ -135,7 +135,7 @@ export function useChatWS(
     useWebSocket(
         WsEvents.MESSAGE_DM,
         useCallback(
-            (message: IMessageDm) => {
+            (message: IMessageDm): void => {
                 if (
                     selectedFriendId &&
                     (message.senderId === selectedFriendId ||
@@ -155,7 +155,7 @@ export function useChatWS(
     useWebSocket(
         WsEvents.MESSAGE_DM_SENT,
         useCallback(
-            (message: IMessageDm) => {
+            (message: IMessageDm): void => {
                 if (
                     selectedFriendId &&
                     (message.senderId === selectedFriendId ||
@@ -175,7 +175,7 @@ export function useChatWS(
     useWebSocket(
         WsEvents.MESSAGE_SERVER,
         useCallback(
-            (message: IMessageServer) => {
+            (message: IMessageServer): void => {
                 if (
                     selectedChannelId &&
                     selectedServerId &&
@@ -203,7 +203,7 @@ export function useChatWS(
     useWebSocket(
         WsEvents.MESSAGE_SERVER_SENT,
         useCallback(
-            (message: IMessageServer) => {
+            (message: IMessageServer): void => {
                 if (
                     selectedChannelId &&
                     selectedServerId &&
@@ -245,7 +245,7 @@ export function useChatWS(
     useWebSocket(
         WsEvents.TYPING_DM,
         useCallback(
-            (payload: { senderId: string; senderUsername: string }) => {
+            (payload: { senderId: string; senderUsername: string }): void => {
                 if (
                     selectedFriendId &&
                     payload.senderId === selectedFriendId &&
@@ -266,7 +266,7 @@ export function useChatWS(
                 channelId: string;
                 senderId: string;
                 senderUsername: string;
-            }) => {
+            }): void => {
                 if (
                     selectedChannelId &&
                     payload.channelId === selectedChannelId &&
@@ -283,7 +283,7 @@ export function useChatWS(
     useWebSocket(
         WsEvents.REACTION_ADDED,
         useCallback(
-            (payload: IReactionEventPayload) => {
+            (payload: IReactionEventPayload): void => {
                 updateReactionInCache(payload, false);
             },
             [updateReactionInCache],
@@ -294,7 +294,7 @@ export function useChatWS(
     useWebSocket(
         WsEvents.REACTION_REMOVED,
         useCallback(
-            (payload: IReactionEventPayload) => {
+            (payload: IReactionEventPayload): void => {
                 updateReactionInCache(payload, true);
             },
             [updateReactionInCache],
@@ -307,7 +307,7 @@ export function useChatWS(
     }, [selectedFriendId, selectedChannelId, clearTypingUsers]);
 
     const sendMessage = useCallback(
-        (text: string, replyToId?: string) => {
+        (text: string, replyToId?: string): void => {
             if (selectedFriendId) {
                 wsMessages.sendMessageDm(selectedFriendId, text, replyToId);
             } else if (selectedServerId && selectedChannelId) {
@@ -322,7 +322,7 @@ export function useChatWS(
         [selectedFriendId, selectedServerId, selectedChannelId],
     );
 
-    const sendTyping = useCallback(() => {
+    const sendTyping = useCallback((): void => {
         const now = Date.now();
         // Throttle to once every 2 seconds
         if (now - lastTypingSentRef.current < 2000) {
@@ -351,7 +351,7 @@ function getQueryKey(
     serverId?: string,
     channelId?: string,
     friendId?: string,
-) {
+): readonly unknown[] | null {
     if (payload.messageType === 'server' && serverId && channelId) {
         return CHAT_QUERY_KEYS.channelMessages(serverId, channelId);
     }

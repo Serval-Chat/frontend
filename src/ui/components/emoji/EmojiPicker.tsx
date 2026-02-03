@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { AutoSizer } from 'react-virtualized-auto-sizer';
 import { VariableSizeList as List } from 'react-window';
 
+import type { Server } from '@/api/servers/servers.types';
 import { Button } from '@/ui/components/common/Button';
 import { Text } from '@/ui/components/common/Text';
 import { Box } from '@/ui/components/layout/Box';
@@ -227,7 +228,7 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
             if (row.type === 'header') {
                 return (
                     <Box
-                        className="px-3 py-1 bg-background/95 backdrop-blur-sm z-[var(--z-effect-md)] border-b border-divider/50 flex items-center gap-2"
+                        className="px-3 py-1 bg-background/95 backdrop-blur-sm z-[var(--z-index-effect-md)] border-b border-divider/50 flex items-center gap-2"
                         style={style}
                     >
                         {row.isCustom ? (
@@ -237,7 +238,7 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
                                     {
                                         name: row.name,
                                         icon: row.icon,
-                                    } as any
+                                    } as Omit<Server, '_id' | 'ownerId'>
                                 }
                                 size="xs"
                             />
@@ -337,7 +338,7 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
                                         {
                                             name: cat.name,
                                             icon: cat.icon,
-                                        } as any
+                                        } as Omit<Server, '_id' | 'ownerId'>
                                     }
                                     size="xs"
                                     onClick={() => handleCategoryClick(cat.id)}
@@ -381,7 +382,7 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
 
             {/* Scrolling List */}
             <Box className="flex-1 min-w-0 flex flex-col bg-background">
-                <Box className="px-3 py-1.5 bg-background/80 backdrop-blur-md border-b border-divider/30 sticky top-0 z-[var(--z-content)] flex items-center justify-between h-[32px]">
+                <Box className="px-3 py-1.5 bg-background/80 backdrop-blur-md border-b border-divider/30 sticky top-0 z-[var(--z-index-content)] flex items-center justify-between h-[32px]">
                     <Text className="font-bold text-[9px] uppercase tracking-[0.2em] text-muted-foreground/70">
                         {(
                             flatRows.find(

@@ -153,7 +153,7 @@ export const StyledUserName: React.FC<StyledUserNameProps> = ({
                                         1,
                                         0.8 + glowIntensity * 0.2,
                                     ),
-                                    zIndex: 'var(--z-effect-sm)',
+                                    zIndex: 'var(--z-index-effect-sm)',
                                     color: hasGradient
                                         ? undefined
                                         : solidColor || undefined,
@@ -178,7 +178,7 @@ export const StyledUserName: React.FC<StyledUserNameProps> = ({
                                         0.9,
                                         0.6 + glowIntensity * 0.2,
                                     ),
-                                    zIndex: 'var(--z-effect-md)',
+                                    zIndex: 'var(--z-index-effect-md)',
                                     color: hasGradient
                                         ? undefined
                                         : solidColor || undefined,
@@ -203,7 +203,7 @@ export const StyledUserName: React.FC<StyledUserNameProps> = ({
                                         0.8,
                                         0.4 + glowIntensity * 0.2,
                                     ),
-                                    zIndex: 'var(--z-effect-lg)',
+                                    zIndex: 'var(--z-index-effect-lg)',
                                     color: hasGradient
                                         ? undefined
                                         : solidColor || undefined,

@@ -19,7 +19,6 @@ export interface Server {
     ownerId: string;
     icon?: string;
     banner?: ServerBanner;
-    description?: string;
     defaultRoleId?: string;
     memberCount?: number;
     allTimeHigh?: number;

@@ -89,4 +89,61 @@ export const serversApi = {
         );
         return response.data;
     },
+
+    updateServer: async (
+        serverId: string,
+        updates: Partial<Server>,
+    ): Promise<Server> => {
+        const response = await apiClient.patch<Server>(
+            `/api/v1/servers/${serverId}`,
+            updates,
+        );
+        return response.data;
+    },
+
+    uploadServerIcon: async (serverId: string, icon: File): Promise<string> => {
+        const formData = new FormData();
+        formData.append('icon', icon);
+        const response = await apiClient.post<{ icon: string }>(
+            `/api/v1/servers/${serverId}/icon`,
+            formData,
+            {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            },
+        );
+        return response.data.icon;
+    },
+
+    uploadServerBanner: async (
+        serverId: string,
+        banner: File,
+    ): Promise<string> => {
+        const formData = new FormData();
+        formData.append('banner', banner);
+        const response = await apiClient.post<{ banner: string }>(
+            `/api/v1/servers/${serverId}/banner`,
+            formData,
+            {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            },
+        );
+        return response.data.banner;
+    },
+
+    deleteServer: async (serverId: string): Promise<void> => {
+        await apiClient.delete(`/api/v1/servers/${serverId}`);
+    },
+
+    transferOwnership: async (
+        serverId: string,
+        newOwnerId: string,
+    ): Promise<void> => {
+        await apiClient.post(`/api/v1/servers/${serverId}/transfer-ownership`, {
+            newOwnerId,
+        });
+    },
 };

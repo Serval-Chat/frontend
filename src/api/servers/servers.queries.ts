@@ -1,4 +1,10 @@
-import { type UseQueryResult, useQuery } from '@tanstack/react-query';
+import {
+    type UseMutationResult,
+    type UseQueryResult,
+    useMutation,
+    useQuery,
+    useQueryClient,
+} from '@tanstack/react-query';
 
 import type { Emoji } from '@/api/emojis/emojis.types';
 
@@ -85,3 +91,83 @@ export const useServerEmojis = (
         queryFn: () => serversApi.getEmojis(serverId!),
         enabled: !!serverId,
     });
+
+export const useUpdateServer = (
+    serverId: string,
+): UseMutationResult<Server, Error, Partial<Server>> => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (updates: Partial<Server>) =>
+            serversApi.updateServer(serverId, updates),
+        onSuccess: () => {
+            void queryClient.invalidateQueries({
+                queryKey: SERVERS_QUERY_KEYS.details(serverId),
+            });
+            void queryClient.invalidateQueries({
+                queryKey: SERVERS_QUERY_KEYS.list,
+            });
+        },
+    });
+};
+
+export const useUpdateServerIcon = (
+    serverId: string,
+): UseMutationResult<string, Error, File> => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (icon: File) => serversApi.uploadServerIcon(serverId, icon),
+        onSuccess: () => {
+            void queryClient.invalidateQueries({
+                queryKey: SERVERS_QUERY_KEYS.details(serverId),
+            });
+            void queryClient.invalidateQueries({
+                queryKey: SERVERS_QUERY_KEYS.list,
+            });
+        },
+    });
+};
+
+export const useUpdateServerBanner = (
+    serverId: string,
+): UseMutationResult<string, Error, File> => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (banner: File) =>
+            serversApi.uploadServerBanner(serverId, banner),
+        onSuccess: () => {
+            void queryClient.invalidateQueries({
+                queryKey: SERVERS_QUERY_KEYS.details(serverId),
+            });
+            void queryClient.invalidateQueries({
+                queryKey: SERVERS_QUERY_KEYS.list,
+            });
+        },
+    });
+};
+
+export const useDeleteServer = (): UseMutationResult<void, Error, string> => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (serverId: string) => serversApi.deleteServer(serverId),
+        onSuccess: () => {
+            void queryClient.invalidateQueries({
+                queryKey: SERVERS_QUERY_KEYS.list,
+            });
+        },
+    });
+};
+
+export const useTransferOwnership = (
+    serverId: string,
+): UseMutationResult<void, Error, string> => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (newOwnerId: string) =>
+            serversApi.transferOwnership(serverId, newOwnerId),
+        onSuccess: () => {
+            void queryClient.invalidateQueries({
+                queryKey: SERVERS_QUERY_KEYS.details(serverId),
+            });
+        },
+    });
+};

@@ -13,7 +13,7 @@ interface ImageCropModalProps {
     isOpen: boolean;
     onClose: () => void;
     imageFile: File | null;
-    type: 'avatar' | 'banner';
+    type: 'avatar' | 'banner' | 'server-banner';
     onConfirm: (processedFile: File) => void;
 }
 
@@ -29,7 +29,8 @@ export const ImageCropModal: React.FC<ImageCropModalProps> = ({
 
     if (!imageFile) return null;
 
-    const aspectRatio = type === 'avatar' ? 1 : 1136 / 400;
+    const aspectRatio =
+        type === 'avatar' ? 1 : type === 'server-banner' ? 16 / 9 : 1136 / 400;
 
     const handleConfirm = async (): Promise<void> => {
         if (!crop) return;

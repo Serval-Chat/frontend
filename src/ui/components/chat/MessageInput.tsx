@@ -312,7 +312,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
 
             {showEmojiPicker && (
                 <div
-                    className="absolute bottom-full right-0 mb-2 z-[var(--z-popover)]"
+                    className="absolute bottom-full right-0 mb-2 z-[var(--z-index-popover)]"
                     ref={emojiPickerRef}
                 >
                     <EmojiPicker

@@ -191,7 +191,7 @@ export const Message: React.FC<MessageProps> = ({
             </Box>
 
             {/* Hover Actions */}
-            <Box className="absolute right-4 top-0 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all z-[var(--z-effect-md)]">
+            <Box className="absolute right-4 top-0 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all z-[var(--z-index-effect-md)]">
                 <Box className="flex items-center bg-bg-secondary border border-white/5 rounded shadow-xl px-1 py-1 gap-1">
                     <button
                         className={cn(
@@ -208,7 +208,7 @@ export const Message: React.FC<MessageProps> = ({
 
                 {showPicker && (
                     <Box
-                        className="absolute bottom-full right-0 mb-2 z-[var(--z-popover)]"
+                        className="absolute bottom-full right-0 mb-2 z-[var(--z-index-popover)]"
                         ref={pickerRef}
                     >
                         <EmojiPicker

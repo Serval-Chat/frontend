@@ -375,10 +375,13 @@ export async function processImage(
 
 export async function processProfileImage(
     file: File,
-    type: 'avatar' | 'banner',
+    type: 'avatar' | 'banner' | 'server-banner',
     crop?: CropSelection,
 ): Promise<File> {
-    const maxWidth = type === 'avatar' ? 256 : 1136;
-    const maxHeight = type === 'avatar' ? 256 : 400;
+    const isAvatar = type === 'avatar';
+    const isServerBanner = type === 'server-banner';
+
+    const maxWidth = isAvatar ? 256 : isServerBanner ? 960 : 1136;
+    const maxHeight = isAvatar ? 256 : isServerBanner ? 540 : 400;
     return processImage(file, maxWidth, maxHeight, crop);
 }

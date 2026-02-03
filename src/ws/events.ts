@@ -192,6 +192,9 @@ export const WsEvents = {
     CATEGORY_UPDATED: 'category_updated',
     CATEGORY_DELETED: 'category_deleted',
     CATEGORIES_REORDERED: 'categories_reordered',
+    SERVER_ICON_UPDATED: 'server_icon_updated',
+    SERVER_BANNER_UPDATED: 'server_banner_updated',
+    OWNERSHIP_TRANSFERRED: 'ownership_transferred',
 } as const;
 
 export interface IReactionEventPayload {
