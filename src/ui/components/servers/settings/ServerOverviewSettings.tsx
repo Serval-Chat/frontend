@@ -338,6 +338,7 @@ export const ServerOverviewSettings: React.FC<ServerOverviewSettingsProps> = ({
                                 </Text>
                             </div>
                             <Button
+                                className="min-w-[120px]"
                                 variant="danger"
                                 onClick={() => setIsTransferModalOpen(true)}
                             >
@@ -365,6 +366,7 @@ export const ServerOverviewSettings: React.FC<ServerOverviewSettingsProps> = ({
                                 </Text>
                             </div>
                             <Button
+                                className="min-w-[120px]"
                                 variant="danger"
                                 onClick={() => setIsDeleteModalOpen(true)}
                             >
@@ -385,6 +387,7 @@ export const ServerOverviewSettings: React.FC<ServerOverviewSettingsProps> = ({
                         </Text>
                         <div className="flex gap-3">
                             <Button
+                                className="min-w-[96px]"
                                 variant="ghost"
                                 onClick={() => {
                                     setName(originalName);
@@ -394,6 +397,7 @@ export const ServerOverviewSettings: React.FC<ServerOverviewSettingsProps> = ({
                                 Reset
                             </Button>
                             <Button
+                                className="min-w-[96px]"
                                 loading={isPending}
                                 variant="success"
                                 onClick={handleSave}
@@ -450,12 +454,14 @@ export const ServerOverviewSettings: React.FC<ServerOverviewSettingsProps> = ({
 
                     <div className="flex gap-3 justify-end pt-4 bg-[var(--color-bg-secondary)] -mx-6 -mb-6 p-6">
                         <Button
+                            className="min-w-[96px]"
                             variant="ghost"
                             onClick={() => setIsDeleteModalOpen(false)}
                         >
                             Cancel
                         </Button>
                         <Button
+                            className="min-w-[96px]"
                             disabled={confirmDeleteName !== server.name}
                             loading={isDeleting}
                             variant="danger"
