@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Plus, Repeat, Trash2 } from 'lucide-react';
 import { HexColorPicker } from 'react-colorful';
 
-import type { Role } from '@/api/servers/servers.types';
+import type { Role, RolePermissions } from '@/api/servers/servers.types';
 import { useMe } from '@/api/users/users.queries';
 import { Message } from '@/ui/components/chat/Message';
 import { Button } from '@/ui/components/common/Button';
@@ -16,7 +16,7 @@ import { cn } from '@/utils/cn';
 interface RoleEditorProps {
     role: Role;
     onSave: (
-        updates: Partial<Role> & { permissions?: Record<string, boolean> },
+        updates: Partial<Role> & { permissions?: RolePermissions },
     ) => void;
     onReset: () => void;
 }
@@ -42,16 +42,20 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
     const [solidColor, setSolidColor] = useState(role.color || '#99aab5');
     const [startColor, setStartColor] = useState(role.startColor || '#99aab5');
     const [endColor, setEndColor] = useState(role.endColor || '#2c2f33');
-    const [customColors, setCustomColors] = useState<string[]>(
-        role.colors || ['#99aab5', '#2c2f33'],
+    const [customColorItems, setCustomColorItems] = useState<
+        { id: string; color: string }[]
+    >(() =>
+        (role.colors || ['#99aab5', '#2c2f33']).map((c, i) => ({
+            id: `color-${role._id}-${i}`,
+            color: c,
+        })),
     );
     const [gradientRepeat, setGradientRepeat] = useState(
         role.gradientRepeat || 1,
     );
 
-    const [permissions, setPermissions] = useState<Record<string, boolean>>(
-        (role as Role & { permissions?: Record<string, boolean> })
-            .permissions || {},
+    const [permissions, setPermissions] = useState<Partial<RolePermissions>>(
+        role.permissions || {},
     );
     const [hasChanges, setHasChanges] = useState(false);
 
@@ -67,20 +71,25 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
         setSolidColor(role.color || '#99aab5');
         setStartColor(role.startColor || '#99aab5');
         setEndColor(role.endColor || '#2c2f33');
-        setCustomColors(role.colors || ['#99aab5', '#2c2f33']);
-        setGradientRepeat(role.gradientRepeat || 1);
-        setPermissions(
-            (role as Role & { permissions?: Record<string, boolean> })
-                .permissions || {},
+        setCustomColorItems(
+            (role.colors || ['#99aab5', '#2c2f33']).map((c, i) => ({
+                id: `color-${role._id}-${i}`,
+                color: c,
+            })),
         );
+        setGradientRepeat(role.gradientRepeat || 1);
+        setPermissions(role.permissions || {});
         setHasChanges(false);
     };
 
     const handleSave = (): void => {
         const updates: Partial<Role> & {
-            permissions?: Record<string, boolean>;
+            permissions?: RolePermissions;
             gradientRepeat?: number;
-        } = { name, permissions };
+        } = {
+            name,
+            permissions: permissions as RolePermissions,
+        };
 
         if (colorType === 'solid') {
             updates.color = solidColor;
@@ -96,7 +105,7 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
             updates.color = undefined;
             updates.startColor = undefined;
             updates.endColor = undefined;
-            updates.colors = customColors;
+            updates.colors = customColorItems.map((item) => item.color);
             updates.gradientRepeat = gradientRepeat;
         }
 
@@ -109,7 +118,10 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
         resetState();
     };
 
-    const updatePermission = (key: string, value: boolean): void => {
+    const updatePermission = (
+        key: keyof RolePermissions,
+        value: boolean,
+    ): void => {
         setPermissions((prev) => ({ ...prev, [key]: value }));
         setHasChanges(true);
     };
@@ -132,7 +144,7 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
             preview.color = null;
             preview.startColor = undefined;
             preview.endColor = undefined;
-            preview.colors = customColors;
+            preview.colors = customColorItems.map((item) => item.color);
             preview.gradientRepeat = gradientRepeat;
         }
         return preview;
@@ -277,44 +289,50 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
                                                 iconSize={14}
                                                 variant="ghost"
                                                 onClick={() => {
-                                                    setCustomColors([
-                                                        ...customColors,
-                                                        '#ffffff',
+                                                    setCustomColorItems([
+                                                        ...customColorItems,
+                                                        {
+                                                            id: `color-new-${Math.random()}`,
+                                                            color: '#ffffff',
+                                                        },
                                                     ]);
                                                     setHasChanges(true);
                                                 }}
                                             />
                                         </div>
                                         <div className="space-y-2 max-h-[300px] overflow-y-auto pr-2 scrollbar-thin">
-                                            {customColors.map((c, i) => (
-                                                // eslint-disable-next-line react/no-array-index-key
+                                            {customColorItems.map((item, i) => (
                                                 <div
                                                     className="flex gap-2 items-center"
-                                                    key={`custom-color-${i}`}
+                                                    key={item.id}
                                                 >
                                                     <div
                                                         className="w-8 h-8 rounded shrink-0 border border-[var(--color-border-subtle)]"
                                                         style={{
-                                                            backgroundColor: c,
+                                                            backgroundColor:
+                                                                item.color,
                                                         }}
                                                     />
                                                     <input
                                                         className="flex-1 bg-[var(--color-bg-secondary)] border border-[var(--color-border-subtle)] rounded px-2 py-1 text-xs text-[var(--color-foreground)]"
                                                         type="text"
-                                                        value={c}
+                                                        value={item.color}
                                                         onChange={(e) => {
-                                                            const newColors = [
-                                                                ...customColors,
+                                                            const newItems = [
+                                                                ...customColorItems,
                                                             ];
-                                                            newColors[i] =
-                                                                e.target.value;
-                                                            setCustomColors(
-                                                                newColors,
+                                                            newItems[i] = {
+                                                                ...item,
+                                                                color: e.target
+                                                                    .value,
+                                                            };
+                                                            setCustomColorItems(
+                                                                newItems,
                                                             );
                                                             setHasChanges(true);
                                                         }}
                                                     />
-                                                    {customColors.length >
+                                                    {customColorItems.length >
                                                         2 && (
                                                         <IconButton
                                                             className="w-6 h-6 p-0 text-[var(--color-danger)]"
@@ -322,8 +340,8 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
                                                             iconSize={14}
                                                             variant="ghost"
                                                             onClick={() => {
-                                                                setCustomColors(
-                                                                    customColors.filter(
+                                                                setCustomColorItems(
+                                                                    customColorItems.filter(
                                                                         (
                                                                             _,
                                                                             idx,

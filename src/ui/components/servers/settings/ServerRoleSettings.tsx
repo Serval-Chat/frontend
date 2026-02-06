@@ -9,7 +9,7 @@ import {
     useRoles,
     useUpdateRole,
 } from '@/api/servers/servers.queries';
-import type { Role } from '@/api/servers/servers.types';
+import type { Role, RolePermissions } from '@/api/servers/servers.types';
 import { LoadingSpinner } from '@/ui/components/common/LoadingSpinner';
 import { Text } from '@/ui/components/common/Text';
 
@@ -65,7 +65,7 @@ export const ServerRoleSettings: React.FC<ServerRoleSettingsProps> = ({
     };
 
     const handleSaveRole = (
-        updates: Partial<Role> & { permissions?: Record<string, boolean> },
+        updates: Partial<Role> & { permissions?: RolePermissions },
     ): void => {
         if (!effectiveSelectedId) return;
         updateRoleMutation.mutate(updates);

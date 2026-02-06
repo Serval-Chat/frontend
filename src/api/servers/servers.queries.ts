@@ -14,6 +14,7 @@ import type {
     Category,
     Channel,
     Role,
+    RolePermissions,
     Server,
     ServerMember,
 } from './servers.types';
@@ -178,7 +179,7 @@ export const useCreateRole = (
 ): UseMutationResult<
     Role,
     Error,
-    { name: string; color?: string; permissions?: Record<string, boolean> }
+    { name: string; color?: string; permissions?: RolePermissions }
 > => {
     const queryClient = useQueryClient();
     const { showToast } = useToast();
@@ -202,7 +203,7 @@ export const useUpdateRole = (
 ): UseMutationResult<
     Role,
     Error,
-    Partial<Role> & { permissions?: Record<string, boolean> }
+    Partial<Role> & { permissions?: RolePermissions }
 > => {
     const queryClient = useQueryClient();
     const { showToast } = useToast();

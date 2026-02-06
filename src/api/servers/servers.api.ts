@@ -5,6 +5,7 @@ import type {
     Category,
     Channel,
     Role,
+    RolePermissions,
     Server,
     ServerMember,
 } from './servers.types';
@@ -172,7 +173,7 @@ export const serversApi = {
         data: {
             name: string;
             color?: string;
-            permissions?: Record<string, boolean>;
+            permissions?: RolePermissions;
         },
     ): Promise<Role> => {
         const response = await apiClient.post<Role>(
@@ -185,7 +186,7 @@ export const serversApi = {
     updateRole: async (
         serverId: string,
         roleId: string,
-        updates: Partial<Role> & { permissions?: Record<string, boolean> },
+        updates: Partial<Role> & { permissions?: RolePermissions },
     ): Promise<Role> => {
         const response = await apiClient.patch<Role>(
             `/api/v1/servers/${serverId}/roles/${roleId}`,
