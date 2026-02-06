@@ -132,10 +132,10 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
                                     closeMenu={closeMenu}
                                     item={item}
                                     key={
-                                        item.id ||
+                                        item.id ??
                                         (item.type !== 'divider' &&
                                         typeof item.label === 'string'
-                                            ? item.label
+                                            ? `item-${item.label}`
                                             : `index-${index}`)
                                     }
                                 />
@@ -172,7 +172,7 @@ const ContextMenuItemRenderer: React.FC<ContextMenuItemProps> = ({
     const handleMouseLeave = (): void => {
         closeTimerRef.current = setTimeout(() => {
             setIsSubmenuOpen(false);
-        }, 100); // 100ms grace period
+        }, 300); // 300ms grace period
     };
 
     const handleSubMenuMouseEnter = (): void => {
@@ -212,10 +212,14 @@ const ContextMenuItemRenderer: React.FC<ContextMenuItemProps> = ({
                 onMouseLeave={handleMouseLeave}
             >
                 <div
+                    aria-expanded={isSubmenuOpen}
+                    aria-haspopup="true"
                     className={cn(
                         'w-full flex items-center justify-between px-3 py-2.5 text-sm transition-all duration-150 cursor-pointer select-none text-[var(--color-foreground)] hover:bg-[var(--color-bg-subtle)]',
                         isSubmenuOpen && 'bg-[var(--color-bg-subtle)]',
                     )}
+                    role="button"
+                    tabIndex={0}
                 >
                     <div className="flex items-center">
                         {item.icon && <item.icon className="w-4 h-4 mr-3" />}
@@ -327,14 +331,14 @@ const SubMenu: React.FC<SubMenuProps> = ({
     onMouseEnter,
     onMouseLeave,
 }) => {
-    const [position, setPosition] = useState({ x: 0, y: 0 });
-
-    useEffect(() => {
-        if (isOpen && parentRef.current) {
-            const rect = parentRef.current.getBoundingClientRect();
-            setPosition({ x: rect.left - 180, y: rect.top - 8 });
-        }
-    }, [isOpen, parentRef]);
+    const menuRef = useRef<HTMLDivElement>(null);
+    const position = useSmartPosition({
+        isOpen,
+        elementRef: menuRef,
+        triggerRef: parentRef,
+        offset: 0,
+        padding: 8,
+    });
 
     if (!isOpen) return null;
 
@@ -344,6 +348,7 @@ const SubMenu: React.FC<SubMenuProps> = ({
             className="min-w-[180px] bg-[var(--color-background)] border border-[var(--color-border-subtle)] rounded-lg shadow-lg overflow-hidden backdrop-blur-md py-2 fixed z-[var(--z-index-top)] context-menu-portal"
             exit={{ opacity: 0, scale: 0.95, x: -10 }}
             initial={{ opacity: 0, scale: 0.95, y: 10 }}
+            ref={menuRef}
             style={{
                 top: position.y,
                 left: position.x,
@@ -358,11 +363,11 @@ const SubMenu: React.FC<SubMenuProps> = ({
                     closeMenu={closeAll}
                     item={item}
                     key={
-                        item.id ||
+                        item.id ??
                         (item.type !== 'divider' &&
                         typeof item.label === 'string'
-                            ? item.label
-                            : `index-${index}`)
+                            ? `sub-item-${item.label}`
+                            : `sub-index-${index}`)
                     }
                 />
             ))}

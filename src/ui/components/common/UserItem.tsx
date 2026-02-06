@@ -17,7 +17,9 @@ import {
 } from '@/api/friends/friends.queries';
 import {
     useAddRoleToMember,
+    useMembers,
     useRemoveRoleFromMember,
+    useServerDetails,
 } from '@/api/servers/servers.queries';
 import type { Role } from '@/api/servers/servers.types';
 import { useMe, useUserById } from '@/api/users/users.queries';
@@ -79,16 +81,17 @@ export const UserItem: React.FC<UserItemProps> = ({
 }) => {
     const dispatch = useAppDispatch();
 
-    const serverId = providedServerId
-        ? String(providedServerId)
-        : role?.serverId
-          ? String(role.serverId)
-          : serverRoles?.[0]?.serverId
-            ? String(serverRoles[0].serverId)
-            : '';
+    const serverId =
+        providedServerId || role?.serverId || serverRoles?.[0]?.serverId || '';
+    const sid = serverId || null;
 
-    const { mutate: addRole } = useAddRoleToMember(serverId);
-    const { mutate: removeRole } = useRemoveRoleFromMember(serverId);
+    const { mutate: addRole, isPending: isAdding } =
+        useAddRoleToMember(serverId);
+    const { mutate: removeRole, isPending: isRemoving } =
+        useRemoveRoleFromMember(serverId);
+
+    const { data: serverDetails } = useServerDetails(sid);
+    const { data: members } = useMembers(sid);
 
     const { data: currentUser } = useMe();
     const { data: fetchedUser } = useUserById(userId, {
@@ -151,7 +154,21 @@ export const UserItem: React.FC<UserItemProps> = ({
     }
 
     // Group 3: Server Management (Roles)
-    if (serverRoles && serverId) {
+    const myMember = members?.find((m) => m.userId === currentUser?._id);
+    const myRoles = serverRoles?.filter(
+        (r) => myMember?.roles.includes(r._id) || r.name === '@everyone',
+    );
+    const isOwner = serverDetails?.ownerId === currentUser?._id;
+
+    const myHighestRole = myRoles?.sort((a, b) => b.position - a.position)[0];
+
+    const canManageRoles =
+        isOwner ||
+        myRoles?.some(
+            (r) => r.permissions?.administrator || r.permissions?.manageRoles,
+        );
+
+    if (serverRoles && sid && canManageRoles) {
         items.push({ type: 'divider' });
 
         // Sort roles by position (descending)
@@ -163,48 +180,53 @@ export const UserItem: React.FC<UserItemProps> = ({
         );
 
         items.push({
-            type: 'submenu',
-            label: 'Roles',
             icon: Shield,
             items: rolesToDisplay.map((r) => {
                 const hasRole = allRoles?.some(
                     (ur) => String(ur._id) === String(r._id),
                 );
-                const isEveryone = r.name === '@everyone';
+
+                // Hierarchy check: can only manage roles strictly below your highest role
+                // unless you are the owner
+                const canManageThisRole =
+                    isOwner ||
+                    (myHighestRole && myHighestRole.position > r.position);
 
                 return {
+                    indent: false,
                     label: (
                         <Box className="flex items-center gap-2">
                             <RoleDot role={r} size={8} />
-                            <span>{r.name}</span>
+                            <span className="truncate">{r.name}</span>
                         </Box>
                     ),
-                    rightIcon: hasRole ? Check : undefined,
-                    indent: false,
                     onClick: () => {
-                        if (isEveryone) {
-                            return;
-                        }
-
-                        if (!serverId) {
-                            return;
-                        }
+                        if (isAdding || isRemoving) return;
 
                         if (hasRole) {
                             removeRole({
-                                userId: String(userId),
-                                roleId: String(r._id),
+                                roleId: r._id,
+                                userId,
                             });
                         } else {
                             addRole({
-                                userId: String(userId),
-                                roleId: String(r._id),
+                                roleId: r._id,
+                                userId,
                             });
                         }
                     },
-                    variant: isEveryone ? 'ghost' : 'normal',
+                    preventClose: true,
+                    rightIcon: hasRole ? Check : undefined,
+                    type: 'action',
+                    variant: !canManageThisRole
+                        ? 'ghost'
+                        : isAdding || isRemoving
+                          ? 'ghost'
+                          : 'normal',
                 };
             }),
+            label: 'Roles',
+            type: 'submenu',
         });
     }
 

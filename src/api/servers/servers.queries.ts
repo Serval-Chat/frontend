@@ -7,6 +7,7 @@ import {
 } from '@tanstack/react-query';
 
 import type { Emoji } from '@/api/emojis/emojis.types';
+import { useToast } from '@/ui/components/common/Toast';
 
 import { serversApi } from './servers.api';
 import type {
@@ -180,12 +181,17 @@ export const useCreateRole = (
     { name: string; color?: string; permissions?: Record<string, boolean> }
 > => {
     const queryClient = useQueryClient();
+    const { showToast } = useToast();
     return useMutation({
         mutationFn: (data) => serversApi.createRole(serverId, data),
         onSuccess: () => {
             void queryClient.invalidateQueries({
                 queryKey: SERVERS_QUERY_KEYS.roles(serverId),
             });
+            showToast('Role created successfully', 'success');
+        },
+        onError: (error) => {
+            showToast(error.message || 'Failed to create role', 'error');
         },
     });
 };
@@ -199,6 +205,7 @@ export const useUpdateRole = (
     Partial<Role> & { permissions?: Record<string, boolean> }
 > => {
     const queryClient = useQueryClient();
+    const { showToast } = useToast();
     return useMutation({
         mutationFn: (updates) =>
             serversApi.updateRole(serverId, roleId, updates),
@@ -206,6 +213,10 @@ export const useUpdateRole = (
             void queryClient.invalidateQueries({
                 queryKey: SERVERS_QUERY_KEYS.roles(serverId),
             });
+            showToast('Role updated successfully', 'success');
+        },
+        onError: (error) => {
+            showToast(error.message || 'Failed to update role', 'error');
         },
     });
 };
@@ -214,12 +225,17 @@ export const useDeleteRole = (
     serverId: string,
 ): UseMutationResult<void, Error, string> => {
     const queryClient = useQueryClient();
+    const { showToast } = useToast();
     return useMutation({
         mutationFn: (roleId) => serversApi.deleteRole(serverId, roleId),
         onSuccess: () => {
             void queryClient.invalidateQueries({
                 queryKey: SERVERS_QUERY_KEYS.roles(serverId),
             });
+            showToast('Role deleted successfully', 'success');
+        },
+        onError: (error) => {
+            showToast(error.message || 'Failed to delete role', 'error');
         },
     });
 };
@@ -228,6 +244,7 @@ export const useReorderRoles = (
     serverId: string,
 ): UseMutationResult<Role[], Error, { roleId: string; position: number }[]> => {
     const queryClient = useQueryClient();
+    const { showToast } = useToast();
     return useMutation({
         mutationFn: (rolePositions) =>
             serversApi.reorderRoles(serverId, rolePositions),
@@ -236,6 +253,9 @@ export const useReorderRoles = (
                 queryKey: SERVERS_QUERY_KEYS.roles(serverId),
             });
         },
+        onError: (error) => {
+            showToast(error.message || 'Failed to reorder roles', 'error');
+        },
     });
 };
 
@@ -243,9 +263,32 @@ export const useAddRoleToMember = (
     serverId: string,
 ): UseMutationResult<void, Error, { userId: string; roleId: string }> => {
     const queryClient = useQueryClient();
+    const { showToast } = useToast();
     return useMutation({
         mutationFn: ({ userId, roleId }) =>
             serversApi.addRoleToMember(serverId, userId, roleId),
+        onMutate: async ({ userId, roleId }) => {
+            await queryClient.cancelQueries({
+                queryKey: SERVERS_QUERY_KEYS.members(serverId),
+            });
+
+            const previousMembers = queryClient.getQueryData<ServerMember[]>(
+                SERVERS_QUERY_KEYS.members(serverId),
+            );
+
+            if (previousMembers) {
+                queryClient.setQueryData<ServerMember[]>(
+                    SERVERS_QUERY_KEYS.members(serverId),
+                    previousMembers.map((member) =>
+                        member.userId === userId
+                            ? { ...member, roles: [...member.roles, roleId] }
+                            : member,
+                    ),
+                );
+            }
+
+            return { previousMembers };
+        },
         onSuccess: () => {
             void queryClient.invalidateQueries({
                 queryKey: SERVERS_QUERY_KEYS.members(serverId),
@@ -254,6 +297,15 @@ export const useAddRoleToMember = (
                 queryKey: ['tertiary-sidebar-data'],
             });
         },
+        onError: (error, _variables, context) => {
+            if (context?.previousMembers) {
+                queryClient.setQueryData(
+                    SERVERS_QUERY_KEYS.members(serverId),
+                    context.previousMembers,
+                );
+            }
+            showToast(error.message || 'Failed to add role', 'error');
+        },
     });
 };
 
@@ -261,9 +313,37 @@ export const useRemoveRoleFromMember = (
     serverId: string,
 ): UseMutationResult<void, Error, { userId: string; roleId: string }> => {
     const queryClient = useQueryClient();
+    const { showToast } = useToast();
     return useMutation({
         mutationFn: ({ userId, roleId }) =>
             serversApi.removeRoleFromMember(serverId, userId, roleId),
+        onMutate: async ({ userId, roleId }) => {
+            await queryClient.cancelQueries({
+                queryKey: SERVERS_QUERY_KEYS.members(serverId),
+            });
+
+            const previousMembers = queryClient.getQueryData<ServerMember[]>(
+                SERVERS_QUERY_KEYS.members(serverId),
+            );
+
+            if (previousMembers) {
+                queryClient.setQueryData<ServerMember[]>(
+                    SERVERS_QUERY_KEYS.members(serverId),
+                    previousMembers.map((member) =>
+                        member.userId === userId
+                            ? {
+                                  ...member,
+                                  roles: member.roles.filter(
+                                      (id) => id !== roleId,
+                                  ),
+                              }
+                            : member,
+                    ),
+                );
+            }
+
+            return { previousMembers };
+        },
         onSuccess: () => {
             void queryClient.invalidateQueries({
                 queryKey: SERVERS_QUERY_KEYS.members(serverId),
@@ -271,6 +351,15 @@ export const useRemoveRoleFromMember = (
             void queryClient.invalidateQueries({
                 queryKey: ['tertiary-sidebar-data'],
             });
+        },
+        onError: (error, _variables, context) => {
+            if (context?.previousMembers) {
+                queryClient.setQueryData(
+                    SERVERS_QUERY_KEYS.members(serverId),
+                    context.previousMembers,
+                );
+            }
+            showToast(error.message || 'Failed to remove role', 'error');
         },
     });
 };
