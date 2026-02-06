@@ -39,9 +39,27 @@ export const ServerSettingsModal: React.FC<ServerSettingsModalProps> = ({
                     activeSection={activeSection}
                     setActiveSection={setActiveSection}
                 />
-
                 {/* Content Area */}
-                <div className="flex-1 bg-[var(--color-background)] flex flex-col h-full overflow-hidden">
+                <div className="flex-1 bg-[var(--color-background)] flex flex-col h-full overflow-hidden relative">
+                    {/* Close Button Top Right */}
+                    <div
+                        className={cn(
+                            'absolute top-8 z-50 transition-all duration-300',
+                            activeSection === 'roles' ? 'right-80' : 'right-12',
+                        )}
+                    >
+                        <div className="flex flex-col items-center gap-2">
+                            <IconButton
+                                className="text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] hover:bg-[var(--color-bg-subtle)] border-2 border-[var(--color-border-subtle)] rounded-full p-2 transition-all duration-200"
+                                icon={X}
+                                iconSize={24}
+                                onClick={onClose}
+                            />
+                            <span className="text-[10px] font-bold text-[var(--color-muted-foreground)] uppercase">
+                                Esc
+                            </span>
+                        </div>
+                    </div>
                     <div
                         className={cn(
                             'flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-[var(--color-bg-secondary)] scrollbar-track-transparent',
@@ -66,21 +84,6 @@ export const ServerSettingsModal: React.FC<ServerSettingsModalProps> = ({
                                 <ServerBehaviourSettings serverId={serverId} />
                             )}
                         </div>
-                    </div>
-                </div>
-
-                {/* Close Button Top Right */}
-                <div className="absolute top-8 right-12 z-50">
-                    <div className="flex flex-col items-center gap-2">
-                        <IconButton
-                            className="text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] hover:bg-[var(--color-bg-subtle)] border-2 border-[var(--color-border-subtle)] rounded-full p-2 transition-all duration-200"
-                            icon={X}
-                            iconSize={24}
-                            onClick={onClose}
-                        />
-                        <span className="text-[10px] font-bold text-[var(--color-muted-foreground)] uppercase">
-                            Esc
-                        </span>
                     </div>
                 </div>
             </div>
