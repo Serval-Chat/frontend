@@ -38,10 +38,10 @@ export const FriendList: React.FC = () => {
                 friends?.map((friend) => (
                     <UserItem
                         initialData={friend}
-                        isActive={selectedFriendId === friend._id}
-                        key={friend._id}
-                        userId={friend._id}
-                        onClick={() => handleFriendClick(friend._id)}
+                        isActive={selectedFriendId === String(friend._id)}
+                        key={String(friend._id)}
+                        userId={String(friend._id)}
+                        onClick={() => handleFriendClick(String(friend._id))}
                     />
                 ))
             )}

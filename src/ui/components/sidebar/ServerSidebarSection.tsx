@@ -124,16 +124,22 @@ export const ServerSidebarSection: React.FC<ServerSidebarSectionProps> = ({
                                         disableGlow
                                         noFetch
                                         allRoles={roles?.filter((r) =>
-                                            member.roles.includes(r._id),
+                                            member.roles
+                                                .map(String)
+                                                .includes(String(r._id)),
                                         )}
                                         disableCustomFonts={
                                             serverDetails?.disableCustomFonts
                                         }
                                         joinedAt={member.joinedAt}
-                                        key={member._id}
+                                        key={String(member._id)}
                                         role={memberRoleMap.get(member.userId)}
+                                        serverId={String(
+                                            serverDetails?._id || '',
+                                        )}
+                                        serverRoles={roles}
                                         user={member.user}
-                                        userId={member.userId}
+                                        userId={String(member.userId)}
                                     />
                                 ))}
                             </div>

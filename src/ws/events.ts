@@ -122,6 +122,18 @@ export interface IStatusUpdatedEvent {
 }
 
 /**
+ * @description Member updated.
+ */
+export interface IMemberUpdatedEvent {
+    serverId: string;
+    userId: string;
+    member: {
+        userId: string;
+        roles: string[];
+    };
+}
+
+/**
  * @description Event names
  */
 export const WsEvents = {
@@ -195,6 +207,9 @@ export const WsEvents = {
     SERVER_ICON_UPDATED: 'server_icon_updated',
     SERVER_BANNER_UPDATED: 'server_banner_updated',
     OWNERSHIP_TRANSFERRED: 'ownership_transferred',
+    MEMBER_UPDATED: 'member_updated',
+    MEMBER_ADDED: 'member_added',
+    MEMBER_REMOVED: 'member_removed',
 } as const;
 
 export interface IReactionEventPayload {

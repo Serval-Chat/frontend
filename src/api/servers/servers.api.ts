@@ -43,6 +43,26 @@ export const serversApi = {
         return response.data;
     },
 
+    addRoleToMember: async (
+        serverId: string,
+        userId: string,
+        roleId: string,
+    ): Promise<void> => {
+        await apiClient.post(
+            `/api/v1/servers/${serverId}/members/${userId}/roles/${roleId}`,
+        );
+    },
+
+    removeRoleFromMember: async (
+        serverId: string,
+        userId: string,
+        roleId: string,
+    ): Promise<void> => {
+        await apiClient.delete(
+            `/api/v1/servers/${serverId}/members/${userId}/roles/${roleId}`,
+        );
+    },
+
     getMembers: async (serverId: string): Promise<ServerMember[]> => {
         const response = await apiClient.get<ServerMember[]>(
             `/api/v1/servers/${serverId}/members`,
@@ -145,5 +165,49 @@ export const serversApi = {
         await apiClient.post(`/api/v1/servers/${serverId}/transfer-ownership`, {
             newOwnerId,
         });
+    },
+
+    createRole: async (
+        serverId: string,
+        data: {
+            name: string;
+            color?: string;
+            permissions?: Record<string, boolean>;
+        },
+    ): Promise<Role> => {
+        const response = await apiClient.post<Role>(
+            `/api/v1/servers/${serverId}/roles`,
+            data,
+        );
+        return response.data;
+    },
+
+    updateRole: async (
+        serverId: string,
+        roleId: string,
+        updates: Partial<Role> & { permissions?: Record<string, boolean> },
+    ): Promise<Role> => {
+        const response = await apiClient.patch<Role>(
+            `/api/v1/servers/${serverId}/roles/${roleId}`,
+            updates,
+        );
+        return response.data;
+    },
+
+    deleteRole: async (serverId: string, roleId: string): Promise<void> => {
+        await apiClient.delete(`/api/v1/servers/${serverId}/roles/${roleId}`);
+    },
+
+    reorderRoles: async (
+        serverId: string,
+        rolePositions: { roleId: string; position: number }[],
+    ): Promise<Role[]> => {
+        const response = await apiClient.patch<Role[]>(
+            `/api/v1/servers/${serverId}/roles/reorder`,
+            {
+                rolePositions,
+            },
+        );
+        return response.data;
     },
 };

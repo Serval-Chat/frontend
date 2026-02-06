@@ -5,6 +5,7 @@ import {
     FRIENDS_QUERY_KEY,
     FRIEND_REQUESTS_QUERY_KEY,
 } from '@/api/friends/friends.queries';
+import { SERVERS_QUERY_KEYS } from '@/api/servers/servers.queries';
 import {
     setOnlineUsers,
     setUserOffline,
@@ -14,6 +15,7 @@ import {
 
 import { wsClient } from './client';
 import {
+    type IMemberUpdatedEvent,
     type IMessageDm,
     type IMessageServer,
     type IPresenceSyncEvent,
@@ -118,6 +120,16 @@ export const setupGlobalWsHandlers = (
         );
 
         if (currentUser && payload.username === currentUser.username) {
+            void queryClient.invalidateQueries({ queryKey: ['me'] });
+        }
+    });
+
+    wsClient.on<IMemberUpdatedEvent>(WsEvents.MEMBER_UPDATED, (payload) => {
+        void queryClient.invalidateQueries({
+            queryKey: SERVERS_QUERY_KEYS.members(payload.serverId),
+        });
+        if (currentUser && payload.userId === currentUser.id) {
+            // Invalidate 'me' if my own roles changed
             void queryClient.invalidateQueries({ queryKey: ['me'] });
         }
     });

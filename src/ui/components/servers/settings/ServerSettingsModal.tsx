@@ -4,9 +4,11 @@ import { X } from 'lucide-react';
 
 import { IconButton } from '@/ui/components/common/IconButton';
 import { Modal } from '@/ui/components/common/Modal';
+import { cn } from '@/utils/cn';
 
 import { ServerBehaviourSettings } from './ServerBehaviourSettings';
 import { ServerOverviewSettings } from './ServerOverviewSettings';
+import { ServerRoleSettings } from './ServerRoleSettings';
 import { ServerSettingsSidebar } from './ServerSettingsSidebar';
 
 interface ServerSettingsModalProps {
@@ -40,10 +42,25 @@ export const ServerSettingsModal: React.FC<ServerSettingsModalProps> = ({
 
                 {/* Content Area */}
                 <div className="flex-1 bg-[var(--color-background)] flex flex-col h-full overflow-hidden">
-                    <div className="flex-1 overflow-y-auto p-12 scrollbar-thin scrollbar-thumb-[var(--color-bg-secondary)] scrollbar-track-transparent">
-                        <div className="max-w-4xl mx-auto">
+                    <div
+                        className={cn(
+                            'flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-[var(--color-bg-secondary)] scrollbar-track-transparent',
+                            activeSection !== 'roles' && 'p-12',
+                        )}
+                    >
+                        <div
+                            className={cn(
+                                'mx-auto h-full',
+                                activeSection === 'roles'
+                                    ? 'max-w-none'
+                                    : 'max-w-4xl',
+                            )}
+                        >
                             {activeSection === 'overview' && (
                                 <ServerOverviewSettings serverId={serverId} />
+                            )}
+                            {activeSection === 'roles' && (
+                                <ServerRoleSettings serverId={serverId} />
                             )}
                             {activeSection === 'behaviour' && (
                                 <ServerBehaviourSettings serverId={serverId} />

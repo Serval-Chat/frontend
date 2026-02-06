@@ -205,4 +205,49 @@ export const useServerWS = (serverId?: string): void => {
             [serverId, invalidateCategories],
         ),
     );
+
+    // Handle member updates
+    useWebSocket(
+        WsEvents.MEMBER_UPDATED,
+        useCallback(
+            (payload: { serverId: string }): void => {
+                if (payload.serverId === serverId || !serverId) {
+                    void queryClient.invalidateQueries({
+                        queryKey: SERVERS_QUERY_KEYS.members(payload.serverId),
+                    });
+                }
+            },
+            [serverId, queryClient],
+        ),
+    );
+
+    useWebSocket(
+        WsEvents.MEMBER_REMOVED,
+        useCallback(
+            (payload: { serverId: string; userId: string }): void => {
+                if (payload.serverId === serverId || !serverId) {
+                    void queryClient.invalidateQueries({
+                        queryKey: SERVERS_QUERY_KEYS.members(payload.serverId),
+                    });
+                    // Also invalidate me if I was the one removed
+                    void queryClient.invalidateQueries({ queryKey: ['me'] });
+                }
+            },
+            [serverId, queryClient],
+        ),
+    );
+
+    useWebSocket(
+        WsEvents.MEMBER_ADDED,
+        useCallback(
+            (payload: { serverId: string; userId: string }): void => {
+                if (payload.serverId === serverId || !serverId) {
+                    void queryClient.invalidateQueries({
+                        queryKey: SERVERS_QUERY_KEYS.members(payload.serverId),
+                    });
+                }
+            },
+            [serverId, queryClient],
+        ),
+    );
 };

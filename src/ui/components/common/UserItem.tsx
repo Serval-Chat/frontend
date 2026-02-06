@@ -1,8 +1,10 @@
 import React from 'react';
 
 import {
+    Check,
     Copy,
     MessageSquare,
+    Shield,
     User as UserIcon,
     UserMinus,
     UserPlus,
@@ -13,6 +15,10 @@ import {
     useRemoveFriend,
     useSendFriendRequest,
 } from '@/api/friends/friends.queries';
+import {
+    useAddRoleToMember,
+    useRemoveRoleFromMember,
+} from '@/api/servers/servers.queries';
 import type { Role } from '@/api/servers/servers.types';
 import { useMe, useUserById } from '@/api/users/users.queries';
 import type { User } from '@/api/users/users.types';
@@ -24,11 +30,13 @@ import { ProfilePopup } from '@/ui/components/profile/ProfilePopup';
 import { cn } from '@/utils/cn';
 
 import { ContextMenu, type ContextMenuItem } from './ContextMenu';
+import { RoleDot } from './RoleDot';
 import { StyledUserName } from './StyledUserName';
 import { UserProfilePicture } from './UserProfilePicture';
 
 interface UserItemProps {
     userId: string;
+    serverId?: string;
     user?: User;
 
     initialData?: {
@@ -41,8 +49,9 @@ interface UserItemProps {
     onClick?: () => void;
     className?: string;
     noFetch?: boolean;
-    role?: Role;
-    allRoles?: Role[];
+    role?: Role; // Highest role for display
+    allRoles?: Role[]; // User's roles
+    serverRoles?: Role[]; // All available roles in server
     joinedAt?: string;
     disableCustomFonts?: boolean;
     disableGlow?: boolean;
@@ -53,6 +62,7 @@ interface UserItemProps {
  */
 export const UserItem: React.FC<UserItemProps> = ({
     userId,
+    serverId: providedServerId,
     user: providedUser,
     initialData,
 
@@ -62,11 +72,24 @@ export const UserItem: React.FC<UserItemProps> = ({
     noFetch,
     role,
     allRoles,
+    serverRoles,
     joinedAt,
     disableCustomFonts,
     disableGlow,
 }) => {
     const dispatch = useAppDispatch();
+
+    const serverId = providedServerId
+        ? String(providedServerId)
+        : role?.serverId
+          ? String(role.serverId)
+          : serverRoles?.[0]?.serverId
+            ? String(serverRoles[0].serverId)
+            : '';
+
+    const { mutate: addRole } = useAddRoleToMember(serverId);
+    const { mutate: removeRole } = useRemoveRoleFromMember(serverId);
+
     const { data: currentUser } = useMe();
     const { data: fetchedUser } = useUserById(userId, {
         enabled: !noFetch && !providedUser,
@@ -127,7 +150,64 @@ export const UserItem: React.FC<UserItemProps> = ({
         }
     }
 
-    // Group 3: Devtools of some sort (Copy ID)
+    // Group 3: Server Management (Roles)
+    if (serverRoles && serverId) {
+        items.push({ type: 'divider' });
+
+        // Sort roles by position (descending)
+        const sortedRoles = [...serverRoles].sort(
+            (a, b) => b.position - a.position,
+        );
+        const rolesToDisplay = sortedRoles.filter(
+            (r) => r.name !== '@everyone',
+        );
+
+        items.push({
+            type: 'submenu',
+            label: 'Roles',
+            icon: Shield,
+            items: rolesToDisplay.map((r) => {
+                const hasRole = allRoles?.some(
+                    (ur) => String(ur._id) === String(r._id),
+                );
+                const isEveryone = r.name === '@everyone';
+
+                return {
+                    label: (
+                        <Box className="flex items-center gap-2">
+                            <RoleDot role={r} size={8} />
+                            <span>{r.name}</span>
+                        </Box>
+                    ),
+                    rightIcon: hasRole ? Check : undefined,
+                    indent: false,
+                    onClick: () => {
+                        if (isEveryone) {
+                            return;
+                        }
+
+                        if (!serverId) {
+                            return;
+                        }
+
+                        if (hasRole) {
+                            removeRole({
+                                userId: String(userId),
+                                roleId: String(r._id),
+                            });
+                        } else {
+                            addRole({
+                                userId: String(userId),
+                                roleId: String(r._id),
+                            });
+                        }
+                    },
+                    variant: isEveryone ? 'ghost' : 'normal',
+                };
+            }),
+        });
+    }
+
     items.push({ type: 'divider' });
     items.push({
         label: 'Copy User ID',

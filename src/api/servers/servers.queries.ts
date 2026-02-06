@@ -171,3 +171,106 @@ export const useTransferOwnership = (
         },
     });
 };
+
+export const useCreateRole = (
+    serverId: string,
+): UseMutationResult<
+    Role,
+    Error,
+    { name: string; color?: string; permissions?: Record<string, boolean> }
+> => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (data) => serversApi.createRole(serverId, data),
+        onSuccess: () => {
+            void queryClient.invalidateQueries({
+                queryKey: SERVERS_QUERY_KEYS.roles(serverId),
+            });
+        },
+    });
+};
+
+export const useUpdateRole = (
+    serverId: string,
+    roleId: string,
+): UseMutationResult<
+    Role,
+    Error,
+    Partial<Role> & { permissions?: Record<string, boolean> }
+> => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (updates) =>
+            serversApi.updateRole(serverId, roleId, updates),
+        onSuccess: () => {
+            void queryClient.invalidateQueries({
+                queryKey: SERVERS_QUERY_KEYS.roles(serverId),
+            });
+        },
+    });
+};
+
+export const useDeleteRole = (
+    serverId: string,
+): UseMutationResult<void, Error, string> => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (roleId) => serversApi.deleteRole(serverId, roleId),
+        onSuccess: () => {
+            void queryClient.invalidateQueries({
+                queryKey: SERVERS_QUERY_KEYS.roles(serverId),
+            });
+        },
+    });
+};
+
+export const useReorderRoles = (
+    serverId: string,
+): UseMutationResult<Role[], Error, { roleId: string; position: number }[]> => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (rolePositions) =>
+            serversApi.reorderRoles(serverId, rolePositions),
+        onSuccess: () => {
+            void queryClient.invalidateQueries({
+                queryKey: SERVERS_QUERY_KEYS.roles(serverId),
+            });
+        },
+    });
+};
+
+export const useAddRoleToMember = (
+    serverId: string,
+): UseMutationResult<void, Error, { userId: string; roleId: string }> => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: ({ userId, roleId }) =>
+            serversApi.addRoleToMember(serverId, userId, roleId),
+        onSuccess: () => {
+            void queryClient.invalidateQueries({
+                queryKey: SERVERS_QUERY_KEYS.members(serverId),
+            });
+            void queryClient.invalidateQueries({
+                queryKey: ['tertiary-sidebar-data'],
+            });
+        },
+    });
+};
+
+export const useRemoveRoleFromMember = (
+    serverId: string,
+): UseMutationResult<void, Error, { userId: string; roleId: string }> => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: ({ userId, roleId }) =>
+            serversApi.removeRoleFromMember(serverId, userId, roleId),
+        onSuccess: () => {
+            void queryClient.invalidateQueries({
+                queryKey: SERVERS_QUERY_KEYS.members(serverId),
+            });
+            void queryClient.invalidateQueries({
+                queryKey: ['tertiary-sidebar-data'],
+            });
+        },
+    });
+};
