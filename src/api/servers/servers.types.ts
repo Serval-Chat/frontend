@@ -48,6 +48,22 @@ export interface Category {
     position: number;
 }
 
+export interface RolePermissions {
+    sendMessages: boolean;
+    manageMessages: boolean;
+    deleteMessagesOfOthers: boolean;
+    manageChannels: boolean;
+    manageRoles: boolean;
+    banMembers: boolean;
+    kickMembers: boolean;
+    manageInvites: boolean;
+    manageServer: boolean;
+    administrator: boolean;
+    pingRolesAndEveryone?: boolean;
+    manageReactions: boolean;
+    addReactions: boolean;
+}
+
 export interface Role {
     _id: string;
     serverId: string;
@@ -59,21 +75,7 @@ export interface Role {
     gradientRepeat?: number;
     position: number;
     separateFromOtherRoles?: boolean;
-    permissions?: {
-        sendMessages: boolean;
-        manageMessages: boolean;
-        deleteMessagesOfOthers: boolean;
-        manageChannels: boolean;
-        manageRoles: boolean;
-        banMembers: boolean;
-        kickMembers: boolean;
-        manageInvites: boolean;
-        manageServer: boolean;
-        administrator: boolean;
-        pingRolesAndEveryone?: boolean;
-        manageReactions: boolean;
-        addReactions: boolean;
-    };
+    permissions?: RolePermissions;
 }
 
 export interface ServerMember {
