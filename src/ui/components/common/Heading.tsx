@@ -13,6 +13,9 @@ const headingVariants = cva('font-bold', {
             'chat-h1': 'text-2xl mt-1 mb-0.5',
             'chat-h2': 'text-xl mt-0.5 mb-0',
             'chat-h3': 'text-lg mt-0.5 mb-0',
+            'admin-page': 'text-2xl font-black tracking-tight',
+            'admin-section': 'text-xl font-black tracking-tight uppercase',
+            'admin-sub': 'text-sm font-black uppercase tracking-wider',
         },
     },
     defaultVariants: {

@@ -9,6 +9,7 @@ import { useMe } from '@/api/users/users.queries';
 import type { User } from '@/api/users/users.types';
 import { useCustomEmojis } from '@/hooks/useCustomEmojis';
 import type { ProcessedChatMessage } from '@/types/chat.ui';
+import { Button } from '@/ui/components/common/Button';
 import { Text } from '@/ui/components/common/Text';
 import { UserProfilePicture } from '@/ui/components/common/UserProfilePicture';
 import { EmojiPicker } from '@/ui/components/emoji/EmojiPicker';
@@ -193,16 +194,18 @@ export const Message: React.FC<MessageProps> = ({
             {/* Hover Actions */}
             <Box className="absolute right-4 top-0 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all z-[var(--z-index-effect-md)]">
                 <Box className="flex items-center bg-bg-secondary border border-white/5 rounded shadow-xl px-1 py-1 gap-1">
-                    <button
+                    <Button
                         className={cn(
-                            'p-1.5 hover:bg-white/5 rounded transition-colors text-muted-foreground hover:text-foreground',
+                            'p-1.5 hover:bg-white/5 rounded transition-colors text-muted-foreground hover:text-foreground h-8 w-8',
                             showPicker && 'bg-white/10 text-foreground',
                         )}
+                        size="sm"
                         title="Add Reaction"
+                        variant="ghost"
                         onClick={() => setShowPicker(!showPicker)}
                     >
                         <SmilePlus size={18} />
-                    </button>
+                    </Button>
                     {/* Actions will go here but emojis for now uwu */}
                 </Box>
 

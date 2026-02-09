@@ -4,6 +4,7 @@
 import React, { useState } from 'react';
 
 import { useAutoHighlight } from '@/hooks/useAutoHighlight';
+import { Button } from '@/ui/components/common/Button';
 import { Heading } from '@/ui/components/common/Heading';
 import { cn } from '@/utils/cn';
 
@@ -26,14 +27,16 @@ const TOCItem: React.FC<{ section: TOCSection }> = ({ section }) => {
         <li>
             <div className="flex items-center space-x-2">
                 {hasChildren && (
-                    <button
+                    <Button
                         className={cn(
-                            'w-4 h-4 flex items-center justify-center text-sm text-muted-foreground hover:text-muted-foreground-hover',
+                            'w-4 h-4 min-w-0 p-0 flex items-center justify-center text-sm text-muted-foreground hover:text-muted-foreground-hover bg-transparent border-none shadow-none',
                         )}
+                        size="sm"
+                        variant="ghost"
                         onClick={() => setIsOpen(!isOpen)}
                     >
                         {isOpen ? '▾' : '▸'}
-                    </button>
+                    </Button>
                 )}
                 {!hasChildren && <span className="w-4 h-4 shrink-0" />}
                 <a

@@ -24,4 +24,31 @@ export default defineConfig({
       ),
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router-dom')) {
+              return 'vendor';
+            }
+            if (id.includes('lucide-react') || id.includes('framer-motion')) {
+              return 'ui-libs';
+            }
+            if (id.includes('redux') || id.includes('@tanstack/react-query')) {
+              return 'state-management';
+            }
+            if (id.includes('react-syntax-highlighter') || id.includes('refractor') || id.includes('highlight.js')) {
+              return 'syntax-highlighting';
+            }
+            if (id.includes('emoji-datasource')) {
+              return 'emoji-data';
+            }
+            return 'common-libs';
+          }
+        },
+      },
+    },
+    chunkSizeWarningLimit: 1000,
+  },
 });

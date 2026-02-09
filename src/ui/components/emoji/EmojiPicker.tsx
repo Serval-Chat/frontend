@@ -267,10 +267,11 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
                                 url: string;
                             };
                             return (
-                                <button
-                                    className="w-[12.5%] aspect-square p-1.5 hover:bg-white/5 rounded transition-transform active:scale-90 flex items-center justify-center group/emoji"
+                                <Button
+                                    className="w-[12.5%] aspect-square p-1.5 hover:bg-white/5 rounded transition-transform active:scale-90 flex items-center justify-center group/emoji border-none shadow-none"
                                     key={customEmoji.id}
                                     title={customEmoji.name}
+                                    variant="ghost"
                                     onClick={() =>
                                         onCustomEmojiSelect?.(customEmoji)
                                     }
@@ -282,15 +283,16 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
                                             resolveApiUrl(customEmoji.url) || ''
                                         }
                                     />
-                                </button>
+                                </Button>
                             );
                         } else {
                             const standardEmoji = emoji as EmojiData;
                             return (
-                                <button
-                                    className="w-[12.5%] aspect-square p-1.5 hover:bg-white/5 rounded transition-transform active:scale-90 flex items-center justify-center group/emoji"
+                                <Button
+                                    className="w-[12.5%] aspect-square p-1.5 hover:bg-white/5 rounded transition-transform active:scale-90 flex items-center justify-center group/emoji border-none shadow-none"
                                     key={standardEmoji.unified}
                                     title={standardEmoji.short_name}
+                                    variant="ghost"
                                     onClick={() =>
                                         onEmojiSelect(getUnicode(standardEmoji))
                                     }
@@ -300,7 +302,7 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
                                         className="scale-90 group-hover/emoji:scale-110 transition-transform duration-200"
                                         style={getSpriteStyle(standardEmoji)}
                                     />
-                                </button>
+                                </Button>
                             );
                         }
                     })}

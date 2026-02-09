@@ -1,8 +1,11 @@
 import React, { useRef, useState } from 'react';
 
 import type { User } from '@/api/users/users.types';
+import { Button } from '@/ui/components/common/Button';
+import { Text } from '@/ui/components/common/Text';
 import { UserItem } from '@/ui/components/common/UserItem';
 import { ProfilePopup } from '@/ui/components/profile/ProfilePopup';
+import { resolveApiUrl } from '@/utils/apiUrl';
 
 import { DemoItem } from './DemoItem';
 import { DemoSection } from './DemoSection';
@@ -10,7 +13,7 @@ import { SHOWOFF_SECTIONS } from './config';
 
 export const UserProfilePopupDemo: React.FC = () => {
     const [isPopupOpen, setIsPopupOpen] = useState(false);
-    const triggerRef = useRef<HTMLButtonElement>(null);
+    const triggerRef = useRef<HTMLDivElement>(null);
 
     const mockUser: User = {
         _id: 'mock-1',
@@ -18,7 +21,10 @@ export const UserProfilePopupDemo: React.FC = () => {
         displayName: 'Catflare',
         login: 'nekoflare',
         profilePicture: 'https://catfla.re/images/servals/serval-1.jpg',
-        banner: 'https://rolling.catfla.re/api/v1/profile/banner/19f0253d8960f45cc6e9193c3d34e2fb.gif',
+        banner:
+            resolveApiUrl(
+                '/api/v1/profile/banner/19f0253d8960f45cc6e9193c3d34e2fb.gif',
+            ) || '',
         bio: 'I love servals! They are so cute and big. \n\nWorking on Serchat, the most beautiful chat app.',
         pronouns: 'she/her',
         badges: [
@@ -70,17 +76,19 @@ export const UserProfilePopupDemo: React.FC = () => {
         >
             <DemoItem id="profile-popup-direct" title="Direct Popup Trigger">
                 <div className="flex flex-col gap-4">
-                    <p className="text-sm text-foreground-muted mb-2">
+                    <Text as="p" className="mb-2" size="sm" variant="muted">
                         Click the button below to see the profile popup with
                         complete mock data.
-                    </p>
-                    <button
-                        className="w-fit px-4 py-2 bg-[var(--color-primary)] text-black font-semibold rounded-md hover:opacity-90 transition-opacity"
-                        ref={triggerRef}
-                        onClick={() => setIsPopupOpen(true)}
-                    >
-                        Show Mock Profile
-                    </button>
+                    </Text>
+                    <div className="w-fit" ref={triggerRef}>
+                        <Button
+                            className="w-fit px-4 py-2 bg-[var(--color-primary)] text-black font-semibold rounded-md hover:opacity-90 transition-opacity"
+                            variant="primary"
+                            onClick={() => setIsPopupOpen(true)}
+                        >
+                            Show Mock Profile
+                        </Button>
+                    </div>
 
                     <ProfilePopup
                         disableFetch
@@ -99,10 +107,10 @@ export const UserProfilePopupDemo: React.FC = () => {
                 title="Context Menu Integration"
             >
                 <div className="flex flex-col gap-4 max-w-sm">
-                    <p className="text-sm text-foreground-muted mb-2">
+                    <Text as="p" className="mb-2" size="sm" variant="muted">
                         Right-click these user items to see the "Show Profile"
                         option.
-                    </p>
+                    </Text>
                     <UserItem
                         noFetch
                         allRoles={[

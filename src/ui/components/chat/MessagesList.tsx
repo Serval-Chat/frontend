@@ -2,6 +2,7 @@ import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 import type { ProcessedChatMessage } from '@/types/chat.ui';
 import { MessageItem } from '@/ui/components/chat/MessageItem';
+import { Button } from '@/ui/components/common/Button';
 import { LoadingSpinner } from '@/ui/components/common/LoadingSpinner';
 import { Box } from '@/ui/components/layout/Box';
 import { VerticalSpacer } from '@/ui/components/layout/VerticalSpacer';
@@ -116,12 +117,14 @@ export const MessagesList: React.FC<MessagesListProps> = ({
                     {isLoadingMore ? (
                         <LoadingSpinner size="sm" />
                     ) : (
-                        <button
-                            className="text-xs text-foreground-muted hover:text-foreground transition-colors"
+                        <Button
+                            className="bg-transparent border-none shadow-none text-xs text-foreground-muted hover:text-foreground hover:bg-bg-subtle transition-colors"
+                            size="sm"
+                            variant="ghost"
                             onClick={onLoadMore}
                         >
                             Load older messages
-                        </button>
+                        </Button>
                     )}
                 </Box>
             )}

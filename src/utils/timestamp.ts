@@ -41,6 +41,18 @@ export function formatTimestamp(isoString: string): string {
     });
 }
 
+/**
+ * Format a date to a simple readable string
+ */
+export function formatDate(date: string | Date): string {
+    const d = new Date(date);
+    return d.toLocaleDateString([], {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+    });
+}
+
 interface Message {
     senderId?: string;
     user?: {

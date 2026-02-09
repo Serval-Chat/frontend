@@ -5,10 +5,13 @@ import { HexColorPicker } from 'react-colorful';
 
 import { useMe, useUpdateStyle } from '@/api/users/users.queries';
 import type { User } from '@/api/users/users.types';
-import { type Theme, useTheme } from '@/providers/ThemeProvider';
+import { Button } from '@/ui/components/common/Button';
+import { Heading } from '@/ui/components/common/Heading';
 import { SettingsFloatingBar } from '@/ui/components/common/SettingsFloatingBar';
 import { StyledUserName } from '@/ui/components/common/StyledUserName';
 import { Toggle } from '@/ui/components/common/Toggle';
+
+import { ThemeSwitcher } from './ThemeSwitcher';
 
 interface AppearanceSettingsFormProps {
     user: User;
@@ -18,7 +21,6 @@ const AppearanceSettingsForm: React.FC<AppearanceSettingsFormProps> = ({
     user,
 }) => {
     const { mutate: updateStyle, isPending } = useUpdateStyle();
-    const { theme, setTheme } = useTheme();
 
     // Local state
     const [glowEnabled, setGlowEnabled] = useState(
@@ -117,16 +119,19 @@ const AppearanceSettingsForm: React.FC<AppearanceSettingsFormProps> = ({
 
     return (
         <div className="max-w-3xl pb-20">
-            <h3 className="text-xl font-bold text-[var(--color-foreground)] mb-6">
+            <Heading className="mb-6" level={3}>
                 Appearance
-            </h3>
+            </Heading>
 
             <div className="grid grid-cols-1 gap-8">
                 {/* Preview Section */}
                 <div className="bg-[var(--color-bg-subtle)] p-6 rounded-lg text-center">
-                    <h4 className="text-sm font-bold text-[var(--color-muted-foreground)] uppercase mb-4">
+                    <Heading
+                        className="mb-4 text-sm font-bold text-[var(--color-muted-foreground)] uppercase"
+                        level={4}
+                    >
                         Preview
-                    </h4>
+                    </Heading>
                     <div className="flex justify-center items-center py-4 bg-[var(--color-bg-secondary)] rounded border border-[var(--color-border-subtle)]">
                         <StyledUserName
                             className="text-3xl font-bold"
@@ -141,72 +146,14 @@ const AppearanceSettingsForm: React.FC<AppearanceSettingsFormProps> = ({
                 <div className="flex flex-col gap-8">
                     {/* Theme Settings */}
                     <div className="space-y-4">
-                        <h4 className="text-lg font-semibold text-[var(--color-foreground)]">
-                            Theme
-                        </h4>
-                        <div className="flex flex-wrap gap-4">
-                            {[
-                                { id: 'serval', label: 'Serval' },
-                                { id: 'dark', label: 'Dark' },
-                                { id: 'light', label: 'Light' },
-                                { id: 'high-contrast', label: 'High Contrast' },
-                            ].map((t) => (
-                                <button
-                                    className={`group flex items-center gap-3 p-3 rounded-xl border-2 transition-all theme-${
-                                        t.id
-                                    } ${
-                                        theme === t.id
-                                            ? 'border-[var(--color-primary)] bg-[var(--color-bg-secondary)]'
-                                            : 'border-[var(--color-border-subtle)] bg-[var(--color-bg-subtle)] hover:border-[var(--color-border)]'
-                                    }`}
-                                    key={t.id}
-                                    onClick={() => setTheme(t.id as Theme)}
-                                >
-                                    <div className="flex flex-col gap-1 w-12 h-10 rounded-lg p-1.5 border border-white/10 bg-[var(--background)] overflow-hidden">
-                                        <div className="w-full h-2 rounded-sm bg-[var(--primary)]" />
-                                        <div className="w-2/3 h-1.5 rounded-sm bg-[var(--foreground)] opacity-20" />
-                                        <div className="w-1/2 h-1.5 rounded-sm bg-[var(--foreground)] opacity-10" />
-                                    </div>
-                                    <div className="flex flex-col items-start pr-2">
-                                        <span
-                                            className={`text-sm font-bold ${
-                                                theme === t.id
-                                                    ? 'text-[var(--color-primary)]'
-                                                    : 'text-[var(--color-foreground)]'
-                                            }`}
-                                        >
-                                            {t.label}
-                                        </span>
-                                        <div className="flex gap-1 mt-1">
-                                            <div
-                                                className="w-2.5 h-2.5 rounded-full bg-[var(--primary)]"
-                                                title="Primary"
-                                            />
-                                            <div
-                                                className="w-2.5 h-2.5 rounded-full bg-[var(--primary-muted)]"
-                                                title="Primary Muted"
-                                            />
-                                            <div
-                                                className="w-2.5 h-2.5 rounded-full bg-[var(--success)]"
-                                                title="Success"
-                                            />
-                                            <div
-                                                className="w-2.5 h-2.5 rounded-full bg-[var(--danger)]"
-                                                title="Danger"
-                                            />
-                                        </div>
-                                    </div>
-                                </button>
-                            ))}
-                        </div>
+                        <Heading level={4}>Theme</Heading>
+                        <ThemeSwitcher />
                     </div>
 
                     {/* Glow Settings */}
                     <div className="space-y-4">
                         <div className="flex items-center justify-between">
-                            <h4 className="text-lg font-semibold text-[var(--color-foreground)]">
-                                Username Glow
-                            </h4>
+                            <Heading level={4}>Username Glow</Heading>
                             <Toggle
                                 checked={glowEnabled}
                                 onCheckedChange={setGlowEnabled}
@@ -217,9 +164,7 @@ const AppearanceSettingsForm: React.FC<AppearanceSettingsFormProps> = ({
                     {/* Gradient Settings */}
                     <div className="space-y-4">
                         <div className="flex items-center justify-between">
-                            <h4 className="text-lg font-semibold text-[var(--color-foreground)]">
-                                Username Gradient
-                            </h4>
+                            <Heading level={4}>Username Gradient</Heading>
                             <Toggle
                                 checked={gradientEnabled}
                                 onCheckedChange={setGradientEnabled}
@@ -239,12 +184,13 @@ const AppearanceSettingsForm: React.FC<AppearanceSettingsFormProps> = ({
                                                     className="relative group"
                                                     key={colorItem.id}
                                                 >
-                                                    <button
-                                                        className="w-10 h-10 rounded-full border-2 border-[var(--color-border)] shadow-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                                                    <Button
+                                                        className="w-10 h-10 rounded-full border-2 border-[var(--color-border)] shadow-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] p-0 min-w-0"
                                                         style={{
                                                             backgroundColor:
                                                                 colorItem.value,
                                                         }}
+                                                        variant="ghost"
                                                         onClick={() =>
                                                             setActiveColorPicker(
                                                                 activeColorPicker?.type ===
@@ -258,9 +204,16 @@ const AppearanceSettingsForm: React.FC<AppearanceSettingsFormProps> = ({
                                                                       },
                                                             )
                                                         }
-                                                    />
-                                                    <button
-                                                        className="absolute -top-1 -right-1 bg-[var(--color-danger)] text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                    >
+                                                        <span className="sr-only">
+                                                            Select color{' '}
+                                                            {colorItem.value}
+                                                        </span>
+                                                    </Button>
+                                                    <Button
+                                                        className="absolute -top-1 -right-1 bg-[var(--color-danger)] text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity w-4 h-4 min-w-0 border-none shadow-none"
+                                                        size="sm"
+                                                        variant="primary"
                                                         onClick={() =>
                                                             removeGradientColor(
                                                                 index,
@@ -268,7 +221,7 @@ const AppearanceSettingsForm: React.FC<AppearanceSettingsFormProps> = ({
                                                         }
                                                     >
                                                         <X size={10} />
-                                                    </button>
+                                                    </Button>
 
                                                     {activeColorPicker?.type ===
                                                         'gradient' &&
@@ -320,12 +273,13 @@ const AppearanceSettingsForm: React.FC<AppearanceSettingsFormProps> = ({
                                             ),
                                         )}
                                         {gradientColors.length < 2 && (
-                                            <button
-                                                className="w-10 h-10 rounded-full border-2 border-[var(--color-border)] border-dashed flex items-center justify-center text-[var(--color-muted-foreground)] hover:text-[var(--color-primary)] hover:border-[var(--color-primary)] transition-colors"
+                                            <Button
+                                                className="w-10 h-10 rounded-full border-2 border-[var(--color-border)] border-dashed flex items-center justify-center text-[var(--color-muted-foreground)] hover:text-[var(--color-primary)] hover:border-[var(--color-primary)] transition-colors p-0 min-w-0 shadow-none"
+                                                variant="ghost"
                                                 onClick={addGradientColor}
                                             >
                                                 <Plus size={16} />
-                                            </button>
+                                            </Button>
                                         )}
                                     </div>
                                 </div>

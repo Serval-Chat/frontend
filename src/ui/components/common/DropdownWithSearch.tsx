@@ -3,6 +3,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Check, ChevronDown, Search, X } from 'lucide-react';
 
+import { Button } from '@/ui/components/common/Button';
 import { Text } from '@/ui/components/common/Text';
 import { Box } from '@/ui/components/layout/Box';
 import { cn } from '@/utils/cn';
@@ -97,13 +98,15 @@ export const DropdownWithSearch: React.FC<DropdownWithSearchProps> = ({
                 </Text>
             )}
 
-            <button
+            <Button
                 className={cn(
-                    'flex items-center justify-between w-full px-4 py-2 bg-[var(--color-bg-secondary)] border border-[var(--color-border-subtle)] rounded-lg text-sm transition-all duration-200 hover:border-[var(--color-primary)]/50 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/20',
+                    'flex items-center justify-between w-full px-4 py-2 bg-[var(--color-bg-secondary)] border border-[var(--color-border-subtle)] rounded-lg text-sm transition-all duration-200 hover:border-[var(--color-primary)]/50 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/20 shadow-none',
                     isOpen &&
                         'border-[var(--color-primary)] ring-2 ring-[var(--color-primary)]/20',
                 )}
+                innerClassName="w-full justify-between"
                 type="button"
+                variant="ghost"
                 onClick={handleToggle}
             >
                 <div className="flex items-center gap-3 truncate">
@@ -126,13 +129,15 @@ export const DropdownWithSearch: React.FC<DropdownWithSearchProps> = ({
 
                 <div className="flex items-center gap-1 ml-2 flex-shrink-0">
                     {allowClear && value && (
-                        <button
-                            className="p-1 hover:bg-[var(--color-bg-subtle)] rounded-full text-[var(--color-muted-foreground)] transition-colors"
+                        <Button
+                            className="p-1 hover:bg-[var(--color-bg-subtle)] rounded-full text-[var(--color-muted-foreground)] transition-colors h-6 w-6 border-none shadow-none"
+                            size="sm"
                             type="button"
+                            variant="ghost"
                             onClick={handleClear}
                         >
                             <X size={14} />
-                        </button>
+                        </Button>
                     )}
                     <ChevronDown
                         className={cn(
@@ -142,7 +147,7 @@ export const DropdownWithSearch: React.FC<DropdownWithSearchProps> = ({
                         size={16}
                     />
                 </div>
-            </button>
+            </Button>
 
             <AnimatePresence>
                 {isOpen && (
@@ -174,14 +179,16 @@ export const DropdownWithSearch: React.FC<DropdownWithSearchProps> = ({
                         <div className="max-h-60 overflow-y-auto custom-scrollbar p-1">
                             {filteredOptions.length > 0 ? (
                                 filteredOptions.map((option) => (
-                                    <button
+                                    <Button
                                         className={cn(
-                                            'flex items-center justify-between w-full px-3 py-2 rounded-md transition-colors text-left group',
+                                            'flex items-center justify-between w-full px-3 py-2 rounded-md transition-colors text-left group border-none shadow-none justify-start',
                                             option.id === value
                                                 ? 'bg-[var(--color-primary)]/10 text-[var(--color-primary)]'
                                                 : 'hover:bg-[var(--color-bg-subtle)] text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]',
                                         )}
-                                        key={option.id}
+                                        innerClassName="w-full justify-start"
+                                        size="md"
+                                        variant="ghost"
                                         onClick={() => handleSelect(option.id)}
                                     >
                                         <div className="flex items-center gap-3 overflow-hidden">
@@ -207,7 +214,7 @@ export const DropdownWithSearch: React.FC<DropdownWithSearchProps> = ({
                                                 size={14}
                                             />
                                         )}
-                                    </button>
+                                    </Button>
                                 ))
                             ) : (
                                 <div className="p-4 text-center">

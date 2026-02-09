@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { Heading } from '@/ui/components/common/Heading';
+import { Text } from '@/ui/components/common/Text';
 import { SHOWOFF_SECTIONS } from '@/ui/components/showoff/config';
 
 interface ColorSwatchProps {
@@ -20,14 +21,21 @@ const ColorSwatch: React.FC<ColorSwatchProps> = ({
             style={{ backgroundColor: `var(${variable})` }}
         />
         <div className="flex flex-col">
-            <span className="text-sm font-bold text-foreground">{name}</span>
-            <span className="text-xs text-muted-foreground font-mono">
+            <Text as="span" size="sm" weight="bold">
+                {name}
+            </Text>
+            <Text as="span" className="font-mono" size="xs" variant="muted">
                 {variable}
-            </span>
+            </Text>
             {description && (
-                <span className="text-xs text-muted-foreground mt-1 italic">
+                <Text
+                    as="span"
+                    className="mt-1 italic"
+                    size="xs"
+                    variant="muted"
+                >
                     {description}
-                </span>
+                </Text>
             )}
         </div>
     </div>
@@ -86,11 +94,11 @@ export const ColorPalette: React.FC = () => (
         </div>
 
         <div className="mt-8 p-6 rounded-xl bg-bg-subtle border border-border-subtle">
-            <p className="text-muted-foreground leading-relaxed">
+            <Text as="p" className="leading-relaxed" variant="muted">
                 This pallete is very{' '}
                 <span className="text-primary font-bold italic">serval</span>.
                 Serval serval serval serval serval serval.
-            </p>
+            </Text>
         </div>
     </section>
 );

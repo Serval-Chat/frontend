@@ -3,6 +3,7 @@ import React from 'react';
 import { Hash, Volume2 } from 'lucide-react';
 
 import type { ChannelType } from '@/api/servers/servers.types';
+import { Button } from '@/ui/components/common/Button';
 import { ICON_MAP } from '@/ui/utils/iconMap';
 import { cn } from '@/utils/cn';
 
@@ -28,14 +29,15 @@ export const ChannelItem: React.FC<ChannelItemProps> = ({
     const Icon = CustomIcon || (type === 'text' ? Hash : Volume2);
 
     return (
-        <button
+        <Button
             className={cn(
-                'group flex items-center w-full px-2 py-1.5 rounded-md transition-all',
+                'group flex items-center w-full px-2 py-1.5 rounded-md transition-all border-none shadow-none justify-start',
                 'hover:bg-white/5 cursor-pointer text-left',
                 isActive
                     ? 'bg-white/10 text-foreground'
                     : 'text-foreground-muted',
             )}
+            variant="ghost"
             onClick={onClick}
         >
             <Icon
@@ -54,6 +56,6 @@ export const ChannelItem: React.FC<ChannelItemProps> = ({
             >
                 {name}
             </span>
-        </button>
+        </Button>
     );
 };
