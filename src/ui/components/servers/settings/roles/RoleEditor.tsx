@@ -10,6 +10,7 @@ import { Button } from '@/ui/components/common/Button';
 import { IconButton } from '@/ui/components/common/IconButton';
 import { Input } from '@/ui/components/common/Input';
 import { Text } from '@/ui/components/common/Text';
+import { Toggle } from '@/ui/components/common/Toggle';
 import { UserItem } from '@/ui/components/common/UserItem';
 import { cn } from '@/utils/cn';
 
@@ -193,21 +194,23 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
                             <div className="flex bg-[var(--color-bg-secondary)] rounded-md p-1 border border-[var(--color-border-subtle)]">
                                 {(['solid', 'linear', 'custom'] as const).map(
                                     (type) => (
-                                        <button
+                                        <Button
                                             className={cn(
-                                                'px-3 py-1 text-xs font-semibold rounded capitalize transition-all',
+                                                'px-3 py-1 text-xs font-semibold rounded capitalize transition-all border-none shadow-none',
                                                 colorType === type
-                                                    ? 'bg-[var(--color-primary)] text-[var(--color-foreground-inverse)]'
-                                                    : 'text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]',
+                                                    ? 'bg-[var(--color-primary)] text-[var(--color-foreground-inverse)] hover:bg-[var(--color-primary-hover)]'
+                                                    : 'text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] hover:bg-[var(--color-bg-secondary)]',
                                             )}
                                             key={type}
+                                            size="sm"
+                                            variant="ghost"
                                             onClick={() => {
                                                 setColorType(type);
                                                 setHasChanges(true);
                                             }}
                                         >
                                             {type}
-                                        </button>
+                                        </Button>
                                     ),
                                 )}
                             </div>
@@ -595,22 +598,6 @@ const PermissionToggle: React.FC<PermissionToggleProps> = ({
                 {description}
             </Text>
         </div>
-        <button
-            className={cn(
-                'w-12 h-6 rounded-full p-1 transition-colors relative flex items-center',
-                value
-                    ? 'bg-[var(--color-success)]'
-                    : 'bg-[var(--color-bg-secondary)] border border-[var(--color-border-subtle)]',
-            )}
-            type="button"
-            onClick={() => onChange(!value)}
-        >
-            <div
-                className={cn(
-                    'w-4 h-4 bg-white rounded-full shadow-sm transition-transform',
-                    value ? 'translate-x-6' : 'translate-x-0',
-                )}
-            />
-        </button>
+        <Toggle checked={value} onCheckedChange={onChange} />
     </div>
 );

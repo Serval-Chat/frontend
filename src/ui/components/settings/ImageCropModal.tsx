@@ -4,6 +4,7 @@ import { Check, X } from 'lucide-react';
 
 import { Button } from '@/ui/components/common/Button';
 import { Modal } from '@/ui/components/common/Modal';
+import { Text } from '@/ui/components/common/Text';
 import type { CropSelection } from '@/utils/imageProcessor';
 import { processProfileImage } from '@/utils/imageProcessor';
 
@@ -67,9 +68,9 @@ export const ImageCropModal: React.FC<ImageCropModalProps> = ({
                 />
 
                 <div className="flex justify-between items-center text-sm text-muted-foreground">
-                    <p>
+                    <Text as="p">
                         Drag corners to resize and center to move the crop area.
-                    </p>
+                    </Text>
                     <div className="flex gap-3">
                         <Button
                             disabled={isProcessing}

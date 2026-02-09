@@ -158,9 +158,9 @@ export const ChatDemo: React.FC = () => (
     <DemoSection id="chat-messages" title="Chat Messages">
         <div className="space-y-6">
             <div>
-                <p className="text-muted-foreground text-sm mt-1">
+                <Text as="p" className="mt-1" size="sm" variant="muted">
                     Showoff for messages
-                </p>
+                </Text>
             </div>
 
             <div className="bg-background rounded-xl border border-border-subtle overflow-hidden shadow-2xl flex flex-col h-[500px]">

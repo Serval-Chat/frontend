@@ -6,6 +6,8 @@ import { createPortal } from 'react-dom';
 
 import { cn } from '@/utils/cn';
 
+import { Button } from './Button';
+
 interface ModalProps {
     isOpen: boolean;
     onClose: () => void;
@@ -91,12 +93,14 @@ export const Modal: React.FC<ModalProps> = ({
                                     </h2>
                                 )}
                                 {showCloseButton && (
-                                    <button
-                                        className="p-1 rounded-md hover:bg-white/10 text-muted-foreground hover:text-foreground transition-colors"
+                                    <Button
+                                        className="p-1 min-w-0 h-8 w-8 rounded-md hover:bg-white/10 text-muted-foreground hover:text-foreground transition-colors border-none shadow-none"
+                                        size="sm"
+                                        variant="ghost"
                                         onClick={onClose}
                                     >
                                         <X size={20} />
-                                    </button>
+                                    </Button>
                                 )}
                             </div>
                         )}

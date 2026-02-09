@@ -3,33 +3,39 @@ import React from 'react';
 import { type VariantProps, cva } from 'class-variance-authority';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 
+import { Button } from '@/ui/components/common/Button';
 import { cn } from '@/utils/cn';
 
 const inputVariants = cva(
-    'h-10 w-full rounded-md border border-border-subtle bg-bg-subtle px-3 py-2 text-sm text-foreground placeholder:text-placeholder focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1 transition-all duration-200',
+    'w-full text-sm text-foreground placeholder:text-placeholder transition-all duration-200 outline-none disabled:cursor-not-allowed disabled:opacity-50',
     {
         variants: {
-            disabled: {
-                true: 'cursor-not-allowed opacity-50',
-                false: '',
+            variant: {
+                default:
+                    'h-10 rounded-md border border-border-subtle bg-bg-subtle px-3 py-2 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1',
+                admin: 'h-11 rounded-xl border border-border-subtle bg-background px-4 py-2.5 focus:border-primary/50 focus:ring-2 focus:ring-primary/10',
             },
         },
         defaultVariants: {
-            disabled: false,
+            variant: 'default',
         },
     },
 );
 
 export interface InputProps
     extends
-        Omit<React.InputHTMLAttributes<HTMLInputElement>, 'disabled'>,
+        React.InputHTMLAttributes<HTMLInputElement>,
         VariantProps<typeof inputVariants> {
     minWidth?: number | string;
     maxWidth?: number | string;
+    disabled?: boolean;
 }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-    ({ className, disabled, type, minWidth, maxWidth, ...props }, ref) => {
+    (
+        { className, variant, type, minWidth, maxWidth, disabled, ...props },
+        ref,
+    ) => {
         const internalRef = React.useRef<HTMLInputElement>(null);
 
         React.useImperativeHandle(ref, () => internalRef.current!);
@@ -59,7 +65,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             >
                 <input
                     className={cn(
-                        inputVariants({ disabled, className }),
+                        inputVariants({ variant, className }),
                         isNumber && 'pr-9 [appearance:textfield]',
                     )}
                     disabled={disabled || undefined}
@@ -71,20 +77,24 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
 
                 {isNumber && !disabled && (
                     <div className="absolute right-1 flex flex-col gap-[1px] opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity">
-                        <button
-                            className="p-0.5 hover:bg-white/10 rounded-sm text-foreground-muted hover:text-foreground transition-colors"
+                        <Button
+                            className="h-4 w-5 p-0 hover:bg-white/10 rounded-sm text-foreground-muted hover:text-foreground transition-colors border-none bg-transparent shadow-none"
+                            size="sm"
                             type="button"
+                            variant="ghost"
                             onClick={handleIncrement}
                         >
                             <ChevronUp size={14} />
-                        </button>
-                        <button
-                            className="p-0.5 hover:bg-white/10 rounded-sm text-foreground-muted hover:text-foreground transition-colors"
+                        </Button>
+                        <Button
+                            className="h-4 w-5 p-0 hover:bg-white/10 rounded-sm text-foreground-muted hover:text-foreground transition-colors border-none bg-transparent shadow-none"
+                            size="sm"
                             type="button"
+                            variant="ghost"
                             onClick={handleDecrement}
                         >
                             <ChevronDown size={14} />
-                        </button>
+                        </Button>
                     </div>
                 )}
             </div>

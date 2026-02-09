@@ -27,9 +27,9 @@ export const StandingSettings: React.FC = () => {
 
     return (
         <div className="max-w-3xl">
-            <h3 className="text-xl font-bold text-[var(--color-foreground)] mb-6">
+            <Heading className="mb-6" level={3}>
                 Account Standing
-            </h3>
+            </Heading>
 
             {!hasWarnings ? (
                 <div className="bg-success/10 border border-success/20 rounded-lg p-8 flex flex-col items-center text-center">

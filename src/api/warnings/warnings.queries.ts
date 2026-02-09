@@ -31,3 +31,12 @@ export const useAcknowledgeWarning = (): UseMutationResult<
         },
     });
 };
+
+export const useAdminUserWarnings = (
+    userId: string,
+): UseQueryResult<Warning[], Error> =>
+    useQuery({
+        queryKey: ['admin-user-warnings', userId],
+        queryFn: () => warningsApi.getUserWarnings(userId),
+        enabled: !!userId,
+    });

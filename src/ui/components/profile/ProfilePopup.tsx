@@ -6,6 +6,7 @@ import { createPortal } from 'react-dom';
 import type { Role } from '@/api/servers/servers.types';
 import { useUserById } from '@/api/users/users.queries';
 import type { User } from '@/api/users/users.types';
+import { useAdminUserDetail } from '@/hooks/admin/useAdminUsers';
 import { useSmartPosition } from '@/hooks/useSmartPosition';
 import { useAppSelector } from '@/store/hooks';
 import { Box } from '@/ui/components/layout/Box';
@@ -26,6 +27,7 @@ interface ProfilePopupProps {
     disableFetch?: boolean;
     disableCustomFonts?: boolean;
     disableGlow?: boolean;
+    adminView?: boolean;
 }
 
 export const ProfilePopup: React.FC<ProfilePopupProps> = ({
@@ -41,20 +43,27 @@ export const ProfilePopup: React.FC<ProfilePopupProps> = ({
     disableFetch,
     disableCustomFonts = false,
     disableGlow = false,
+    adminView = false,
 }) => {
     const popupRef = useRef<HTMLDivElement>(null);
 
     const { data: fetchedUser } = useUserById(userId, {
-        enabled: isOpen && !disableFetch,
+        enabled: isOpen && !disableFetch && !adminView,
     });
-    const user = fetchedUser || providedUser;
+    const { data: adminData } = useAdminUserDetail(
+        adminView && isOpen ? userId : null,
+    );
+
+    const user = adminData || fetchedUser || providedUser;
 
     // Presence data
     const presence = useAppSelector((state) => state.presence.users[userId]);
     const presenceStatus = presence?.status || 'offline';
     const presenceCustomText =
-        presence?.customStatus || user?.customStatus?.text;
-    const presenceCustomEmoji = user?.customStatus?.emoji;
+        presence?.customStatus ||
+        (user && 'customStatus' in user ? user.customStatus?.text : undefined);
+    const presenceCustomEmoji =
+        user && 'customStatus' in user ? user.customStatus?.emoji : undefined;
 
     const coords = useSmartPosition({
         isOpen,
@@ -113,6 +122,7 @@ export const ProfilePopup: React.FC<ProfilePopupProps> = ({
                         transition={{ duration: 0.15, ease: 'easeOut' }}
                     >
                         <UserProfileCard
+                            adminData={adminData}
                             className="max-h-[calc(100vh-32px)] overflow-y-auto overflow-x-hidden custom-scrollbar"
                             customStatus={{
                                 text: presenceCustomText,
@@ -124,7 +134,7 @@ export const ProfilePopup: React.FC<ProfilePopupProps> = ({
                             presenceStatus={presenceStatus}
                             role={role}
                             roles={roles}
-                            user={user}
+                            user={user as User}
                         />
                     </motion.div>
                 </Box>

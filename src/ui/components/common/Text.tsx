@@ -27,6 +27,7 @@ const textVariants = cva('', {
             medium: 'font-medium',
             semibold: 'font-semibold',
             bold: 'font-bold',
+            black: 'font-black',
         },
         fontStyle: {
             italic: 'italic',

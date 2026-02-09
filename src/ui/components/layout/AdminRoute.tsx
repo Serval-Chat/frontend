@@ -3,10 +3,9 @@ import { type ReactNode } from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
 
 import { useMe } from '@/api/users/users.queries';
-import { WebSocketProvider } from '@/providers/WebSocketProvider';
 import { LoadingSpinner } from '@/ui/components/common/LoadingSpinner';
 
-export const AuthenticatedLayout = (): ReactNode => {
+export const AdminRoute = (): ReactNode => {
     const { data: user, isLoading } = useMe();
 
     if (isLoading) {
@@ -21,9 +20,16 @@ export const AuthenticatedLayout = (): ReactNode => {
         return <Navigate replace to="/login" />;
     }
 
-    return (
-        <WebSocketProvider>
-            <Outlet />
-        </WebSocketProvider>
-    );
+    // Check if user has any administrative permissions
+    const permissions = user.permissions;
+    const hasAdminAccess =
+        permissions &&
+        (permissions.adminAccess === true ||
+            Object.values(permissions).some((val) => val === true));
+
+    if (!hasAdminAccess) {
+        return <Navigate replace to="/" />;
+    }
+
+    return <Outlet />;
 };

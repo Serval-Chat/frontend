@@ -9,6 +9,7 @@ import {
 } from '@/api/reactions/reactions.queries';
 import { useMe } from '@/api/users/users.queries';
 import { useCustomEmojis } from '@/hooks/useCustomEmojis';
+import { Button } from '@/ui/components/common/Button';
 import { ParsedUnicodeEmoji } from '@/ui/components/common/ParsedUnicodeEmoji';
 import { Text } from '@/ui/components/common/Text';
 import { EmojiPicker } from '@/ui/components/emoji/EmojiPicker';
@@ -154,15 +155,16 @@ export const Reactions: React.FC<ReactionsProps> = ({
                 );
             })}
 
-            <Box className="relative">
-                <button
-                    className="flex items-center justify-center px-1.5 py-0.5 rounded-md border border-white/5 bg-white/5 text-muted-foreground hover:bg-white/10 hover:border-white/10 cursor-pointer transition-all h-full"
+            <Box className="relative h-full">
+                <Button
+                    className="h-full min-h-[24px] px-1.5 py-0.5 border border-white/5 bg-white/5 text-muted-foreground hover:bg-white/10 hover:border-white/10"
+                    size="sm"
                     title="Add Reaction"
-                    type="button"
+                    variant="ghost"
                     onClick={() => setShowPicker(!showPicker)}
                 >
                     <SmilePlus size={16} />
-                </button>
+                </Button>
 
                 {showPicker && (
                     <div

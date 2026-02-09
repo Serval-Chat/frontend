@@ -17,6 +17,7 @@ import {
 import type { FileMetadata, ProxyMetadata } from '@/api/files/files.types';
 import { Button } from '@/ui/components/common/Button';
 import { CodeModal } from '@/ui/components/common/CodeModal';
+import { Link } from '@/ui/components/common/Link';
 import { LoadingSpinner } from '@/ui/components/common/LoadingSpinner';
 import { Text } from '@/ui/components/common/Text';
 import { Box } from '@/ui/components/layout/Box';
@@ -58,14 +59,9 @@ export const FileEmbed: React.FC<FileEmbedProps> = ({ url }) => {
 
     if (!meta) {
         return (
-            <a
-                className="text-primary hover:underline"
-                href={url}
-                rel="noopener noreferrer"
-                target="_blank"
-            >
+            <Link href={url} target="_blank">
                 {url}
-            </a>
+            </Link>
         );
     }
 
@@ -332,13 +328,15 @@ const CodeEmbed: React.FC<{
 
                 {isTruncated && (
                     <div className="px-3 py-2 bg-bg-primary/30 border-t border-border-subtle/30 flex justify-center">
-                        <button
-                            className="text-[11px] font-bold text-primary hover:text-primary-hover transition-colors flex items-center gap-1.5"
+                        <Button
+                            className="bg-transparent border-none shadow-none text-[11px] font-bold text-primary hover:text-primary-hover transition-colors flex items-center gap-1.5"
+                            size="sm"
+                            variant="ghost"
                             onClick={() => setShowFull(true)}
                         >
                             <Maximize2 size={12} />
                             Show whole
-                        </button>
+                        </Button>
                     </div>
                 )}
             </Box>

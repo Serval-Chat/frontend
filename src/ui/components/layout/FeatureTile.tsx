@@ -1,5 +1,7 @@
 import React from 'react';
 
+import { Heading } from '@/ui/components/common/Heading';
+import { Text } from '@/ui/components/common/Text';
 import { Box } from '@/ui/components/layout/Box';
 import { cn } from '@/utils/cn';
 
@@ -30,11 +32,16 @@ export const FeatureTile: React.FC<FeatureTileProps> = ({
             />
         </div>
         <div className="flex flex-1 flex-col gap-1 p-5">
-            <h3 className="text-lg font-bold text-foreground transition-colors group-hover:text-primary">
+            <Heading
+                className="text-lg transition-colors group-hover:text-primary"
+                level={3}
+            >
                 {title}
-            </h3>
+            </Heading>
             {description && (
-                <p className="text-sm text-muted-foreground">{description}</p>
+                <Text as="p" size="sm" variant="muted">
+                    {description}
+                </Text>
             )}
         </div>
     </Box>

@@ -150,6 +150,38 @@
     --local-primary-bg: color-mix(in srgb, black 30%, var(--background));
 }
 
+.theme-forest-green {
+    --primary: hsl(145 50% 45%);
+    --primary-hover: hsl(145 50% 35%);
+    --danger: hsl(0 85% 60%);
+    --danger-hover: hsl(0 85% 50%);
+    --caution: hsl(35 90% 60%);
+    --caution-hover: hsl(35 90% 50%);
+    --success: hsl(150 70% 55%);
+    --success-hover: hsl(150 70% 45%);
+    --primary-muted: hsl(145 50% 12%);
+    --primary-muted-text: hsl(145 50% 75%);
+    --danger-muted: hsl(0 85% 12%);
+    --danger-muted-text: hsl(0 85% 75%);
+    --caution-muted: hsl(35 90% 12%);
+    --caution-muted-text: hsl(35 90% 75%);
+    --success-muted: hsl(150 70% 12%);
+    --success-muted-text: hsl(150 70% 75%);
+    --background: #0a170f;
+    --foreground: #f0fdf4;
+    --foreground-inverse: #ffffff;
+    --muted-foreground: #4ade80;
+    --muted-foreground-hover: #86efac;
+    --border-subtle: rgb(74 222 128 / 0.15);
+    --bg-subtle: rgb(74 222 128 / 0.05);
+    --bg-secondary: rgb(74 222 128 / 0.1);
+    --placeholder: rgb(18, 110, 56 / 0.4);
+    --divider: rgb(74 222 128 / 0.1);
+
+    --local-chat-bg: color-mix(in srgb, black 30%, var(--background));
+    --local-primary-bg: color-mix(in srgb, black 30%, var(--background));
+}
+
 .theme-light {
     --primary: hsl(210 100% 45%);
     --primary-hover: hsl(210 100% 35%);
@@ -212,4 +244,36 @@
 
     --local-chat-bg: #000000;
     --local-primary-bg: #000000;
+}
+
+.theme-violet {
+    --primary: hsl(270 70% 64%);
+    --primary-hover: hsl(270 70% 54%);
+    --danger: hsl(350 85% 60%);
+    --danger-hover: hsl(350 85% 50%);
+    --caution: hsl(35 90% 60%);
+    --caution-hover: hsl(35 90% 50%);
+    --success: hsl(150 70% 55%);
+    --success-hover: hsl(150 70% 45%);
+    --primary-muted: hsl(270 70% 15%);
+    --primary-muted-text: hsl(270 70% 80%);
+    --danger-muted: hsl(350 85% 15%);
+    --danger-muted-text: hsl(350 85% 80%);
+    --caution-muted: hsl(35 90% 15%);
+    --caution-muted-text: hsl(35 90% 80%);
+    --success-muted: hsl(150 70% 15%);
+    --success-muted-text: hsl(150 70% 80%);
+    --background: #140d1f;
+    --foreground: #f5f3ff;
+    --foreground-inverse: #ffffff;
+    --muted-foreground: #a78bfa;
+    --muted-foreground-hover: #c4b5fd;
+    --border-subtle: rgb(167 139 250 / 0.2);
+    --bg-subtle: rgb(167 139 250 / 0.08);
+    --bg-secondary: rgb(167 139 250 / 0.12);
+    --placeholder: rgb(167 139 250 / 0.4);
+    --divider: rgb(167 139 250 / 0.15);
+
+    --local-chat-bg: color-mix(in srgb, black 30%, var(--background));
+    --local-primary-bg: color-mix(in srgb, black 30%, var(--background));
 }

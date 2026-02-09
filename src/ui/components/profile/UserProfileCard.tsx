@@ -1,10 +1,11 @@
 import React, { useMemo } from 'react';
 
-import { Calendar, Camera } from 'lucide-react';
+import { Calendar, Camera, Server } from 'lucide-react';
 
 import type { Role } from '@/api/servers/servers.types';
 import type { User } from '@/api/users/users.types';
 import { useAppSelector } from '@/store/hooks';
+import type { AdminExtendedUser } from '@/types/admin';
 import { Heading } from '@/ui/components/common/Heading';
 import { ParsedText } from '@/ui/components/common/ParsedText';
 import { RoleDot } from '@/ui/components/common/RoleDot';
@@ -15,6 +16,7 @@ import { UserProfilePicture } from '@/ui/components/common/UserProfilePicture';
 import { type UserStatus } from '@/ui/components/common/UserProfileStatusIndicator';
 import { Box } from '@/ui/components/layout/Box';
 import { resolveApiUrl } from '@/utils/apiUrl';
+import { cn } from '@/utils/cn';
 import { ParserPresets, parseText } from '@/utils/textParser/parser';
 
 interface UserProfileCardProps {
@@ -30,6 +32,7 @@ interface UserProfileCardProps {
     onAvatarClick?: () => void;
     disableCustomFonts?: boolean;
     disableGlow?: boolean;
+    adminData?: AdminExtendedUser;
 }
 
 export const UserProfileCard: React.FC<UserProfileCardProps> = ({
@@ -45,6 +48,7 @@ export const UserProfileCard: React.FC<UserProfileCardProps> = ({
     onAvatarClick,
     disableCustomFonts = false,
     disableGlow = false,
+    adminData,
 }) => {
     const userId = user?._id;
     const presence = useAppSelector((state) =>
@@ -250,6 +254,111 @@ export const UserProfileCard: React.FC<UserProfileCardProps> = ({
                                         </Text>
                                     </Box>
                                 ))}
+                        </Box>
+                    </Box>
+                )}
+
+                {adminData && (
+                    <Box className="mt-2 space-y-4 border-t border-[var(--color-divider)] pt-4">
+                        <Heading
+                            className="uppercase text-[10px] font-black text-danger tracking-[0.2em] mb-2"
+                            level={3}
+                        >
+                            Administrative View
+                        </Heading>
+
+                        {/* Admin Stats */}
+                        <div className="grid grid-cols-2 gap-2">
+                            <div className="p-2 rounded-lg bg-bg-secondary/50 border border-border-subtle">
+                                <span className="block text-[9px] font-bold text-muted-foreground uppercase tracking-tight">
+                                    Warnings
+                                </span>
+                                <span
+                                    className={cn(
+                                        'text-sm font-black',
+                                        adminData.warningCount > 0
+                                            ? 'text-caution'
+                                            : 'text-foreground',
+                                    )}
+                                >
+                                    {adminData.warningCount}
+                                </span>
+                            </div>
+                            <div className="p-2 rounded-lg bg-bg-secondary/50 border border-border-subtle">
+                                <span className="block text-[9px] font-bold text-muted-foreground uppercase tracking-tight">
+                                    Account Status
+                                </span>
+                                <span className="text-sm font-black text-success">
+                                    Active
+                                </span>
+                            </div>
+                        </div>
+
+                        {/* Banned Info */}
+                        {adminData.banExpiry && (
+                            <div className="p-3 rounded-lg bg-danger/10 border border-danger/20 text-xs text-danger">
+                                <span className="font-bold uppercase tracking-tight">
+                                    Banned Until:
+                                </span>
+                                <span className="block font-black mt-0.5">
+                                    {new Date(
+                                        adminData.banExpiry,
+                                    ).toLocaleString()}
+                                </span>
+                            </div>
+                        )}
+
+                        {/* Servers List */}
+                        <Box>
+                            <Heading
+                                className="uppercase text-[9px] font-bold text-muted-foreground tracking-widest mb-2 flex items-center gap-1.5"
+                                level={3}
+                            >
+                                <Server size={10} /> Joined Servers (
+                                {adminData.servers.length})
+                            </Heading>
+                            <Box className="space-y-1.5 max-h-[200px] overflow-y-auto pr-1 custom-scrollbar">
+                                {adminData.servers.map((server) => (
+                                    <div
+                                        className="flex items-center gap-2 p-1.5 rounded-lg bg-bg-secondary/30 border border-border-subtle/50 hover:bg-bg-secondary/50 transition-colors"
+                                        key={server._id}
+                                    >
+                                        <div className="w-6 h-6 rounded bg-bg-secondary flex-shrink-0 overflow-hidden">
+                                            {server.icon ? (
+                                                <img
+                                                    alt={server.name}
+                                                    className="w-full h-full object-cover"
+                                                    src={
+                                                        resolveApiUrl(
+                                                            server.icon,
+                                                        ) || ''
+                                                    }
+                                                />
+                                            ) : (
+                                                <div className="w-full h-full flex items-center justify-center text-[10px] font-black bg-primary/10 text-primary">
+                                                    {server.name.charAt(0)}
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <div className="text-[11px] font-bold truncate leading-tight">
+                                                {server.name}
+                                                {server.isOwner && (
+                                                    <span className="ml-1 text-[8px] text-caution font-black uppercase">
+                                                        Owner
+                                                    </span>
+                                                )}
+                                            </div>
+                                            <div className="text-[9px] text-muted-foreground uppercase font-medium">
+                                                Joined{' '}
+                                                {new Date(
+                                                    server.joinedAt,
+                                                ).toLocaleDateString()}
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </Box>
                         </Box>
                     </Box>
                 )}

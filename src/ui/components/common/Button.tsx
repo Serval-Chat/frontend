@@ -58,6 +58,7 @@ export interface ButtonProps
     children: React.ReactNode;
     loading?: boolean;
     retainSize?: boolean;
+    innerClassName?: string;
 }
 
 export const Button: React.FC<ButtonProps> = ({
@@ -67,6 +68,7 @@ export const Button: React.FC<ButtonProps> = ({
     size,
     loading,
     retainSize,
+    innerClassName,
     disabled,
     ...props
 }) => {
@@ -123,6 +125,7 @@ export const Button: React.FC<ButtonProps> = ({
                 className={cn(
                     'flex items-center justify-center gap-inherit',
                     loading ? 'opacity-0' : undefined,
+                    innerClassName,
                 )}
             >
                 {children}

@@ -12,15 +12,26 @@ interface UserProfilePictureIconProps {
     className?: string;
 }
 
+const isAbsoluteUrl = (url: string): boolean => {
+    try {
+        new URL(url);
+        return true;
+    } catch {
+        return false;
+    }
+};
+
 export const UserProfilePictureIcon: React.FC<UserProfilePictureIconProps> = ({
     src,
     username,
     size = 'md',
     className,
 }) => {
-    const iconUrl = resolveApiUrl(src || undefined);
+    const isFilename = src && !isAbsoluteUrl(src) && !src.includes('/');
+    const effectiveSrc = isFilename ? `/api/v1/profile/picture/${src}` : src;
+    const iconUrl = resolveApiUrl(effectiveSrc || undefined);
 
-    const initials = username
+    const initials = (username || '')
         .split(' ')
         .map((word) => word[0])
         .join('')

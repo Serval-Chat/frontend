@@ -9,8 +9,10 @@ import {
     useUpdatePronouns,
     useUpdateUsername,
 } from '@/api/users/users.queries';
+import { Heading } from '@/ui/components/common/Heading';
 import { Input } from '@/ui/components/common/Input';
 import { SettingsFloatingBar } from '@/ui/components/common/SettingsFloatingBar';
+import { Text } from '@/ui/components/common/Text';
 import { TextArea } from '@/ui/components/common/TextArea';
 import { UserProfileCard } from '@/ui/components/profile/UserProfileCard';
 
@@ -154,16 +156,19 @@ export const AccountSettings: React.FC = () => {
                 onChange={handleBannerChange}
             />
 
-            <h3 className="text-xl font-bold text-[var(--color-foreground)] mb-6">
+            <Heading className="mb-6" level={3}>
                 My Account
-            </h3>
+            </Heading>
 
             <div className="flex flex-col md:flex-row gap-8">
                 {/* Preview Section */}
                 <div className="flex-shrink-0">
-                    <h4 className="text-sm font-bold text-[var(--color-muted-foreground)] uppercase mb-3">
+                    <Heading
+                        className="mb-3 text-sm font-bold text-[var(--color-muted-foreground)] uppercase"
+                        level={4}
+                    >
                         Preview
-                    </h4>
+                    </Heading>
                     <UserProfileCard
                         presenceStatus="online"
                         user={previewUser}
@@ -204,9 +209,9 @@ export const AccountSettings: React.FC = () => {
                             value={username}
                             onChange={(e) => setUsername(e.target.value)}
                         />
-                        <p className="text-xs text-[var(--color-muted-foreground)]">
+                        <Text as="p" size="xs" variant="muted">
                             Changing your username might require a fresh login.
-                        </p>
+                        </Text>
                     </div>
 
                     <div className="space-y-2">
@@ -240,16 +245,21 @@ export const AccountSettings: React.FC = () => {
                             value={bio}
                             onChange={(e) => setBio(e.target.value)}
                         />
-                        <p className="text-xs text-[var(--color-muted-foreground)] text-right">
+                        <Text
+                            as="p"
+                            className="text-right"
+                            size="xs"
+                            variant="muted"
+                        >
                             {bio.length}/190
-                        </p>
+                        </Text>
                     </div>
 
                     {/* Password Section  */}
                     <div className="pt-6 border-t border-[var(--color-border-subtle)]">
-                        <h4 className="text-md font-bold text-[var(--color-foreground)] mb-4">
+                        <Heading className="mb-4" level={4}>
                             Password & Authentication
-                        </h4>
+                        </Heading>
                         <div className="bg-[var(--color-bg-subtle)] p-4 rounded text-center text-[var(--color-muted-foreground)]">
                             Password change functionality someday
                         </div>

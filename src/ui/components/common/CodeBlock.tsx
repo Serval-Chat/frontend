@@ -5,6 +5,7 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 
 import { customSyntaxTheme } from '@/styles/syntax-theme';
 
+import { Button } from './Button';
 import { CodeModal } from './CodeModal';
 
 interface CodeBlockProps {
@@ -56,8 +57,10 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({
                     <span className="text-[10px] uppercase font-black tracking-wider text-[var(--color-primary)]">
                         {language || 'text'}
                     </span>
-                    <button
-                        className="p-1.5 rounded-md hover:bg-[var(--color-primary/10)] text-[var(--color-muted-foreground)] hover:text-[var(--color-primary)] transition-all flex items-center gap-2"
+                    <Button
+                        className="p-1.5 rounded-md hover:bg-[var(--color-primary/10)] text-[var(--color-muted-foreground)] hover:text-[var(--color-primary)] transition-all flex items-center gap-2 border-none shadow-none"
+                        size="sm"
+                        variant="ghost"
                         onClick={handleCopy}
                     >
                         {isCopied ? (
@@ -71,7 +74,7 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({
                         <span className="text-[10px] font-bold">
                             {isCopied ? 'COPIED' : 'COPY CODE'}
                         </span>
-                    </button>
+                    </Button>
                 </div>
                 <div className="p-0 font-mono text-sm overflow-x-auto custom-scrollbar bg-black/10">
                     <SyntaxHighlighter

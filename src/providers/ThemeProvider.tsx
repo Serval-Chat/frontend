@@ -1,6 +1,12 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
-export type Theme = 'serval' | 'dark' | 'light' | 'high-contrast';
+export type Theme =
+    | 'serval'
+    | 'dark'
+    | 'light'
+    | 'high-contrast'
+    | 'violet'
+    | 'forest-green';
 
 interface ThemeContextType {
     theme: Theme;
@@ -24,6 +30,8 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
             'theme-dark',
             'theme-light',
             'theme-high-contrast',
+            'theme-violet',
+            'theme-forest-green',
         );
         root.classList.add(`theme-${theme}`);
         localStorage.setItem('theme', theme);
