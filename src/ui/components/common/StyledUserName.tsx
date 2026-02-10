@@ -1,5 +1,6 @@
 import type { Role } from '@/api/servers/servers.types';
 import type { User } from '@/api/users/users.types';
+import { resolveApiUrl } from '@/utils/apiUrl';
 import { cn } from '@/utils/cn';
 
 import { Text } from './Text';
@@ -12,6 +13,7 @@ interface StyledUserNameProps {
     disableCustomFonts?: boolean;
     glowIntensity?: number;
     disableGlow?: boolean;
+    showIcon?: boolean;
 }
 
 const glowIntensity = 0.7;
@@ -23,6 +25,7 @@ export const StyledUserName: React.FC<StyledUserNameProps> = ({
     className,
     disableCustomFonts,
     disableGlow,
+    showIcon = false,
 }) => {
     if (!user && !role) {
         return (
@@ -237,6 +240,17 @@ export const StyledUserName: React.FC<StyledUserNameProps> = ({
             style={containerStyle}
         >
             {content}
+            {showIcon && role?.icon && (
+                <img
+                    alt=""
+                    className="ml-1.5 w-4 h-4 object-contain"
+                    src={
+                        resolveApiUrl(
+                            `/api/v1/servers/${role.serverId}/roles/icon/${role.icon}`,
+                        ) || ''
+                    }
+                />
+            )}
         </Text>
     );
 };

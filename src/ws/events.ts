@@ -218,6 +218,10 @@ export const WsEvents = {
     MEMBER_UPDATED: 'member_updated',
     MEMBER_ADDED: 'member_added',
     MEMBER_REMOVED: 'member_removed',
+    ROLE_CREATED: 'role_created',
+    ROLE_UPDATED: 'role_updated',
+    ROLE_DELETED: 'role_deleted',
+    ROLES_REORDERED: 'roles_reordered',
     EMOJI_UPDATED: 'emoji_updated',
 } as const;
 

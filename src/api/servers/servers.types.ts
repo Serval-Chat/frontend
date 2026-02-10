@@ -75,6 +75,7 @@ export interface Role {
     gradientRepeat?: number;
     position: number;
     separateFromOtherRoles?: boolean;
+    icon?: string;
     permissions?: RolePermissions;
 }
 
