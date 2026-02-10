@@ -1,3 +1,5 @@
+import type React from 'react';
+
 import { act, renderHook } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -41,7 +43,7 @@ describe('useResizable', () => {
             result.current.handleMouseDown({
                 preventDefault: vi.fn(),
                 clientX: 100,
-            } as any);
+            } as unknown as React.MouseEvent);
         });
 
         act(() => {
@@ -64,7 +66,7 @@ describe('useResizable', () => {
             result.current.handleMouseDown({
                 preventDefault: vi.fn(),
                 clientX: 1000,
-            } as any);
+            } as unknown as React.MouseEvent);
         });
 
         act(() => {
@@ -84,7 +86,7 @@ describe('useResizable', () => {
             result.current.handleMouseDown({
                 preventDefault: vi.fn(),
                 clientX: 100,
-            } as any);
+            } as unknown as React.MouseEvent);
         });
 
         // Test minWidth (200)
@@ -110,7 +112,7 @@ describe('useResizable', () => {
             result.current.handleMouseDown({
                 preventDefault: vi.fn(),
                 clientX: 100,
-            } as any);
+            } as unknown as React.MouseEvent);
         });
 
         act(() => {

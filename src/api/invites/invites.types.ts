@@ -18,3 +18,21 @@ export interface InviteDetails {
     server: InviteServer;
     memberCount: number;
 }
+
+export interface ServerInvite {
+    _id: string;
+    serverId: string;
+    code: string;
+    customPath?: string;
+    createdByUserId: string;
+    maxUses?: number;
+    uses: number;
+    expiresAt?: string;
+    createdAt: string;
+}
+
+export interface CreateInviteData {
+    customPath?: string;
+    maxUses?: number;
+    expiresIn?: number; // In seconds
+}
