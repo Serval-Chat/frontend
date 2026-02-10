@@ -284,14 +284,29 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
                                                 variant="muted"
                                                 weight="bold"
                                             >
-                                                COLORS
+                                                COLORS (MAX 15)
                                             </Text>
                                             <IconButton
                                                 className="w-6 h-6 p-0"
+                                                disabled={
+                                                    customColorItems.length >=
+                                                    15
+                                                }
                                                 icon={Plus}
                                                 iconSize={14}
+                                                title={
+                                                    customColorItems.length >=
+                                                    15
+                                                        ? 'Maximum of 15 colors reached'
+                                                        : 'Add Color'
+                                                }
                                                 variant="ghost"
                                                 onClick={() => {
+                                                    if (
+                                                        customColorItems.length >=
+                                                        15
+                                                    )
+                                                        return;
                                                     setCustomColorItems([
                                                         ...customColorItems,
                                                         {
