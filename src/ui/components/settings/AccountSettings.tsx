@@ -9,6 +9,7 @@ import {
     useUpdatePronouns,
     useUpdateUsername,
 } from '@/api/users/users.queries';
+import { Button } from '@/ui/components/common/Button';
 import { Heading } from '@/ui/components/common/Heading';
 import { Input } from '@/ui/components/common/Input';
 import { SettingsFloatingBar } from '@/ui/components/common/SettingsFloatingBar';
@@ -16,6 +17,7 @@ import { Text } from '@/ui/components/common/Text';
 import { TextArea } from '@/ui/components/common/TextArea';
 import { UserProfileCard } from '@/ui/components/profile/UserProfileCard';
 
+import { ChangePasswordModal } from './ChangePasswordModal';
 import { ImageCropModal } from './ImageCropModal';
 
 export const AccountSettings: React.FC = () => {
@@ -38,6 +40,7 @@ export const AccountSettings: React.FC = () => {
     const [cropFile, setCropFile] = useState<File | null>(null);
     const [cropType, setCropType] = useState<'avatar' | 'banner'>('avatar');
     const [isCropModalOpen, setIsCropModalOpen] = useState(false);
+    const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
 
     const isPending =
         isUpdatingBio ||
@@ -255,13 +258,26 @@ export const AccountSettings: React.FC = () => {
                         </Text>
                     </div>
 
-                    {/* Password Section  */}
+                    {/* Password Section */}
                     <div className="pt-6 border-t border-[var(--color-border-subtle)]">
                         <Heading className="mb-4" level={4}>
                             Password & Authentication
                         </Heading>
-                        <div className="bg-[var(--color-bg-subtle)] p-4 rounded text-center text-[var(--color-muted-foreground)]">
-                            Password change functionality someday
+                        <div className="bg-[var(--color-bg-subtle)] p-6 rounded-lg border border-[var(--color-border-subtle)] flex items-center justify-between gap-4">
+                            <div className="flex flex-col gap-1">
+                                <Text weight="bold">Password</Text>
+                                <Text size="xs" variant="muted">
+                                    Please use a strong password (and I enforce
+                                    it)
+                                </Text>
+                            </div>
+                            <Button
+                                size="sm"
+                                variant="normal"
+                                onClick={() => setIsPasswordModalOpen(true)}
+                            >
+                                Change Password
+                            </Button>
                         </div>
                     </div>
 
@@ -279,6 +295,11 @@ export const AccountSettings: React.FC = () => {
                     />
                 </div>
             </div>
+
+            <ChangePasswordModal
+                isOpen={isPasswordModalOpen}
+                onClose={() => setIsPasswordModalOpen(false)}
+            />
 
             <ImageCropModal
                 imageFile={cropFile}
