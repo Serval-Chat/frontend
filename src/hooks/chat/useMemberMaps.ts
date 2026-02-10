@@ -2,12 +2,16 @@ import React from 'react';
 
 import type { Role, ServerMember } from '@/api/servers/servers.types';
 import type { User } from '@/api/users/users.types';
-import { getHighestRoleForMember } from '@/ui/utils/chat';
+import {
+    getHighestRoleForMember,
+    getHighestRoleWithIconForMember,
+} from '@/ui/utils/chat';
 
 interface MemberMapsResult {
     serverMemberMap: Map<string, User>;
     roleMap: Map<string, Role>;
     highestRoleMap: Map<string, Role>;
+    iconRoleMap: Map<string, Role>;
 }
 
 /**
@@ -45,5 +49,17 @@ export const useMemberMaps = (
         return map;
     }, [members, roles, roleMap]);
 
-    return { serverMemberMap, roleMap, highestRoleMap };
+    // Lookup for highest Role with icon by userId
+    const iconRoleMap = React.useMemo(() => {
+        const map = new Map<string, Role>();
+        if (!members || !roles) return map;
+
+        members.forEach((m) => {
+            const iconRole = getHighestRoleWithIconForMember(m.roles, roleMap);
+            if (iconRole) map.set(m.userId, iconRole);
+        });
+        return map;
+    }, [members, roles, roleMap]);
+
+    return { serverMemberMap, roleMap, highestRoleMap, iconRoleMap };
 };

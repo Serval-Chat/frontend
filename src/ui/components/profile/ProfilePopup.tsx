@@ -22,6 +22,7 @@ interface ProfilePopupProps {
     triggerRef?: React.RefObject<HTMLElement | null>;
     user?: User;
     role?: Role;
+    iconRole?: Role;
     roles?: Role[];
     joinedAt?: string;
     disableFetch?: boolean;
@@ -38,6 +39,7 @@ export const ProfilePopup: React.FC<ProfilePopupProps> = ({
     triggerRef,
     user: providedUser,
     role,
+    iconRole,
     roles,
     joinedAt,
     disableFetch,
@@ -130,6 +132,7 @@ export const ProfilePopup: React.FC<ProfilePopupProps> = ({
                             }}
                             disableCustomFonts={disableCustomFonts}
                             disableGlow={disableGlow}
+                            iconRole={iconRole}
                             joinedAt={joinedAt}
                             presenceStatus={presenceStatus}
                             role={role}

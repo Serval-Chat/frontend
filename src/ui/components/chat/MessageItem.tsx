@@ -9,6 +9,7 @@ import { Message } from './Message';
 interface MessageItemProps {
     message: ProcessedChatMessage;
     role?: Role;
+    iconRole?: Role;
     prevMessage?: ProcessedChatMessage;
     isHighlighted?: boolean;
     onReplyClick?: (messageId: string) => void;
@@ -19,6 +20,7 @@ interface MessageItemProps {
 export const MessageItem: React.FC<MessageItemProps> = ({
     message,
     role,
+    iconRole,
     prevMessage,
     isHighlighted,
     onReplyClick,
@@ -34,6 +36,7 @@ export const MessageItem: React.FC<MessageItemProps> = ({
         <Message
             disableCustomFonts={disableCustomFonts}
             disableGlow={disableGlow}
+            iconRole={iconRole || message.iconRole}
             isGroupStart={isGroupStart}
             isHighlighted={isHighlighted}
             message={message}

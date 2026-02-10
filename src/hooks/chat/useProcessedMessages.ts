@@ -17,6 +17,7 @@ export const useProcessedMessages = (
     selectedServerId: string | null,
     serverMemberMap: Map<string, User>,
     highestRoleMap: Map<string, Role>,
+    iconRoleMap: Map<string, Role>,
 ): ProcessedChatMessage[] =>
     useMemo(() => {
         if (!rawMessagesData) return [];
@@ -33,6 +34,7 @@ export const useProcessedMessages = (
         return allMessages.map((msg) => {
             let user: User | undefined = undefined;
             let role: Role | undefined = undefined;
+            let iconRole: Role | undefined = undefined;
 
             // Handle webhooks
             if (msg.isWebhook && msg.webhookUsername) {
@@ -55,6 +57,7 @@ export const useProcessedMessages = (
                 } else if (selectedServerId) {
                     user = serverMemberMap.get(msg.senderId as string) as User;
                     role = highestRoleMap.get(msg.senderId as string);
+                    iconRole = iconRoleMap.get(msg.senderId as string);
                 }
             }
 
@@ -68,6 +71,7 @@ export const useProcessedMessages = (
                 selectedServerId,
                 serverMemberMap,
                 highestRoleMap,
+                iconRoleMap,
             );
 
             return {
@@ -76,6 +80,7 @@ export const useProcessedMessages = (
                     user ||
                     ({ _id: msg.senderId, username: 'Unknown' } as User),
                 role: role,
+                iconRole: iconRole,
                 replyTo: resolvedReplyTo,
                 createdAt:
                     typeof msg.createdAt === 'string'
@@ -91,4 +96,5 @@ export const useProcessedMessages = (
         selectedServerId,
         serverMemberMap,
         highestRoleMap,
+        iconRoleMap,
     ]);

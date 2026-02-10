@@ -132,6 +132,7 @@ export const MessagesList: React.FC<MessagesListProps> = ({
             {messages.map((msg, index) => (
                 <MessageItem
                     disableCustomFonts={disableCustomFonts}
+                    iconRole={msg.iconRole}
                     isHighlighted={highlightId === msg._id}
                     key={msg._id}
                     message={msg}

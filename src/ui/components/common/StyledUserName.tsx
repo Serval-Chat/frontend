@@ -14,6 +14,7 @@ interface StyledUserNameProps {
     glowIntensity?: number;
     disableGlow?: boolean;
     showIcon?: boolean;
+    iconRole?: Role;
 }
 
 const glowIntensity = 0.7;
@@ -26,6 +27,7 @@ export const StyledUserName: React.FC<StyledUserNameProps> = ({
     disableCustomFonts,
     disableGlow,
     showIcon = false,
+    iconRole,
 }) => {
     if (!user && !role) {
         return (
@@ -240,13 +242,13 @@ export const StyledUserName: React.FC<StyledUserNameProps> = ({
             style={containerStyle}
         >
             {content}
-            {showIcon && role?.icon && (
+            {showIcon && (iconRole?.icon || role?.icon) && (
                 <img
                     alt=""
                     className="ml-1.5 w-4 h-4 object-contain"
                     src={
                         resolveApiUrl(
-                            `/api/v1/servers/${role.serverId}/roles/icon/${role.icon}`,
+                            `/api/v1/servers/${(iconRole || (role as Role)).serverId}/roles/icon/${iconRole?.icon || role?.icon}`,
                         ) || ''
                     }
                 />

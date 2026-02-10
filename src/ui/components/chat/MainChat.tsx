@@ -57,7 +57,10 @@ export const MainChat: React.FC = () => {
         [channels, selectedChannelId],
     );
 
-    const { serverMemberMap, highestRoleMap } = useMemberMaps(members, roles);
+    const { serverMemberMap, highestRoleMap, iconRoleMap } = useMemberMaps(
+        members,
+        roles,
+    );
 
     const {
         rawMessagesData,
@@ -79,6 +82,7 @@ export const MainChat: React.FC = () => {
         selectedServerId,
         serverMemberMap,
         highestRoleMap,
+        iconRoleMap,
     );
 
     const { typingUsers } = useChatWS(

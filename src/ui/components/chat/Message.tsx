@@ -30,6 +30,7 @@ interface MessageProps {
     message: ProcessedChatMessage;
     user: User;
     role?: Role;
+    iconRole?: Role;
     isGroupStart?: boolean;
     isHighlighted?: boolean;
     onReplyClick?: (messageId: string) => void;
@@ -41,6 +42,7 @@ export const Message: React.FC<MessageProps> = ({
     message,
     user,
     role,
+    iconRole,
     isGroupStart = true,
     isHighlighted = false,
     onReplyClick,
@@ -226,6 +228,7 @@ export const Message: React.FC<MessageProps> = ({
                         <MessageHeader
                             disableCustomFonts={disableCustomFonts}
                             disableGlow={disableGlow}
+                            iconRole={iconRole}
                             isGroupStart={isGroupStart}
                             role={role}
                             timestamp={message.createdAt}
