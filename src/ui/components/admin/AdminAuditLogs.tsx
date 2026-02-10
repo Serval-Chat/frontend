@@ -330,6 +330,7 @@ export const AdminAuditLogs = (): ReactNode => {
                     <Input
                         id="target-user-input"
                         placeholder="Paste User ID here..."
+                        size="admin"
                         type="text"
                         value={filters.targetUserId}
                         variant="admin"

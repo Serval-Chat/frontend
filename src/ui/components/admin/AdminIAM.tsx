@@ -329,6 +329,7 @@ export const AdminIAM = ({
                     <Input
                         className="pl-10"
                         placeholder="Search users by username or ID..."
+                        size="admin"
                         type="text"
                         value={searchTerm}
                         variant="admin"

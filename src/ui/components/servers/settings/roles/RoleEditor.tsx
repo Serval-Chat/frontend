@@ -173,12 +173,12 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
                         >
                             Role Name
                         </label>
-                        <input
-                            className="w-full bg-[var(--color-bg-secondary)] border border-[var(--color-border-subtle)] rounded-md px-4 py-2 text-[var(--color-foreground)] focus:outline-none focus:border-[var(--color-primary)] disabled:opacity-50"
+                        <Input
                             disabled={isEveryone}
                             id="roleName"
                             type="text"
                             value={name}
+                            variant="secondary"
                             onChange={(e) => {
                                 setName(e.target.value);
                                 setHasChanges(true);
@@ -227,10 +227,10 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
                                                 setHasChanges(true);
                                             }}
                                         />
-                                        <input
-                                            className="w-full bg-[var(--color-bg-secondary)] border border-[var(--color-border-subtle)] rounded-md px-4 py-2 text-sm text-[var(--color-foreground)] focus:outline-none focus:border-[var(--color-primary)]"
+                                        <Input
                                             type="text"
                                             value={solidColor}
+                                            variant="secondary"
                                             onChange={(e) => {
                                                 setSolidColor(e.target.value);
                                                 setHasChanges(true);
@@ -287,13 +287,13 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
                                                 COLORS (MAX 15)
                                             </Text>
                                             <IconButton
-                                                className="w-6 h-6 p-0"
+                                                className="w-8 h-8 p-0"
                                                 disabled={
                                                     customColorItems.length >=
                                                     15
                                                 }
                                                 icon={Plus}
-                                                iconSize={14}
+                                                iconSize={18}
                                                 title={
                                                     customColorItems.length >=
                                                     15
@@ -331,10 +331,11 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
                                                                 item.color,
                                                         }}
                                                     />
-                                                    <input
-                                                        className="flex-1 bg-[var(--color-bg-secondary)] border border-[var(--color-border-subtle)] rounded px-2 py-1 text-xs text-[var(--color-foreground)]"
+                                                    <Input
+                                                        size="sm"
                                                         type="text"
                                                         value={item.color}
+                                                        variant="secondary"
                                                         onChange={(e) => {
                                                             const newItems = [
                                                                 ...customColorItems,
@@ -353,9 +354,9 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
                                                     {customColorItems.length >
                                                         2 && (
                                                         <IconButton
-                                                            className="w-6 h-6 p-0 text-[var(--color-danger)]"
+                                                            className="w-8 h-8 p-0 text-[var(--color-danger)]"
                                                             icon={Trash2}
-                                                            iconSize={14}
+                                                            iconSize={18}
                                                             variant="ghost"
                                                             onClick={() => {
                                                                 setCustomColorItems(

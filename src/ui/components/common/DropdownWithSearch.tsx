@@ -8,6 +8,8 @@ import { Text } from '@/ui/components/common/Text';
 import { Box } from '@/ui/components/layout/Box';
 import { cn } from '@/utils/cn';
 
+import { Input } from './Input';
+
 interface DropdownOption {
     id: string;
     label: string;
@@ -165,9 +167,10 @@ export const DropdownWithSearch: React.FC<DropdownWithSearchProps> = ({
                                     className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-muted-foreground)]"
                                     size={14}
                                 />
-                                <input
-                                    className="w-full bg-[var(--color-background)] border border-[var(--color-border-subtle)] rounded-md pl-9 pr-4 py-1.5 text-sm focus:outline-none focus:border-[var(--color-primary)] transition-colors"
+                                <Input
+                                    className="pl-9"
                                     placeholder={searchPlaceholder}
+                                    size="sm"
                                     value={searchQuery}
                                     onChange={(e) =>
                                         setSearchQuery(e.target.value)

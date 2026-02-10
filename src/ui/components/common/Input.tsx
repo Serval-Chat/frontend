@@ -7,24 +7,33 @@ import { Button } from '@/ui/components/common/Button';
 import { cn } from '@/utils/cn';
 
 const inputVariants = cva(
-    'w-full text-sm text-foreground placeholder:text-placeholder transition-all duration-200 outline-none disabled:cursor-not-allowed disabled:opacity-50',
+    'w-full text-foreground placeholder:text-placeholder transition-all duration-200 outline-none disabled:cursor-not-allowed disabled:opacity-50',
     {
         variants: {
             variant: {
                 default:
-                    'h-10 rounded-md border border-border-subtle bg-bg-subtle px-3 py-2 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1',
-                admin: 'h-11 rounded-xl border border-border-subtle bg-background px-4 py-2.5 focus:border-primary/50 focus:ring-2 focus:ring-primary/10',
+                    'border border-border-subtle bg-bg-subtle focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1',
+                secondary:
+                    'border border-border-subtle bg-bg-secondary focus:border-primary',
+                admin: 'border border-border-subtle bg-background focus:border-primary/50 focus:ring-2 focus:ring-primary/10',
+            },
+            size: {
+                sm: 'h-8 rounded px-2 py-1 text-xs',
+                md: 'h-10 rounded-md px-3 py-2 text-sm',
+                lg: 'h-12 rounded-lg px-4 py-3 text-base',
+                admin: 'h-11 rounded-xl px-4 py-2.5 text-sm',
             },
         },
         defaultVariants: {
             variant: 'default',
+            size: 'md',
         },
     },
 );
 
 export interface InputProps
     extends
-        React.InputHTMLAttributes<HTMLInputElement>,
+        Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'>,
         VariantProps<typeof inputVariants> {
     minWidth?: number | string;
     maxWidth?: number | string;
@@ -33,7 +42,16 @@ export interface InputProps
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
     (
-        { className, variant, type, minWidth, maxWidth, disabled, ...props },
+        {
+            className,
+            variant,
+            size,
+            type,
+            minWidth,
+            maxWidth,
+            disabled,
+            ...props
+        },
         ref,
     ) => {
         const internalRef = React.useRef<HTMLInputElement>(null);
@@ -65,7 +83,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             >
                 <input
                     className={cn(
-                        inputVariants({ variant, className }),
+                        inputVariants({ variant, size, className }),
                         isNumber && 'pr-9 [appearance:textfield]',
                     )}
                     disabled={disabled || undefined}
