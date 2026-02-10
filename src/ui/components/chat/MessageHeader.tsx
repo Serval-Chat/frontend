@@ -37,6 +37,7 @@ export const MessageHeader: React.FC<MessageHeaderProps> = ({
                 onClick={onClickName}
             >
                 <StyledUserName
+                    showIcon
                     disableCustomFonts={disableCustomFonts}
                     disableGlow={disableGlow}
                     role={role}

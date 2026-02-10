@@ -45,6 +45,7 @@ export const ReplyPreview: React.FC<ReplyPreviewProps> = ({
                     username={user.username}
                 />
                 <StyledUserName
+                    showIcon
                     className="text-xs font-bold whitespace-nowrap opacity-90"
                     disableCustomFonts={disableCustomFonts}
                     disableGlow={disableGlow}

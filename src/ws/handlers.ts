@@ -145,6 +145,31 @@ export const setupGlobalWsHandlers = (
             queryKey: SERVERS_QUERY_KEYS.members(payload.serverId),
         });
     });
+
+    // Role events
+    wsClient.on<{ serverId: string }>(WsEvents.ROLE_CREATED, (payload) => {
+        void queryClient.invalidateQueries({
+            queryKey: SERVERS_QUERY_KEYS.roles(payload.serverId),
+        });
+    });
+
+    wsClient.on<{ serverId: string }>(WsEvents.ROLE_UPDATED, (payload) => {
+        void queryClient.invalidateQueries({
+            queryKey: SERVERS_QUERY_KEYS.roles(payload.serverId),
+        });
+    });
+
+    wsClient.on<{ serverId: string }>(WsEvents.ROLE_DELETED, (payload) => {
+        void queryClient.invalidateQueries({
+            queryKey: SERVERS_QUERY_KEYS.roles(payload.serverId),
+        });
+    });
+
+    wsClient.on<{ serverId: string }>(WsEvents.ROLES_REORDERED, (payload) => {
+        void queryClient.invalidateQueries({
+            queryKey: SERVERS_QUERY_KEYS.roles(payload.serverId),
+        });
+    });
 };
 
 /**

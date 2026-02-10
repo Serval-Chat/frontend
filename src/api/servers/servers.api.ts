@@ -243,6 +243,25 @@ export const serversApi = {
         return response.data;
     },
 
+    uploadRoleIcon: async (
+        serverId: string,
+        roleId: string,
+        icon: File,
+    ): Promise<Role> => {
+        const formData = new FormData();
+        formData.append('icon', icon);
+        const response = await apiClient.post<Role>(
+            `/api/v1/servers/${serverId}/roles/${roleId}/icon`,
+            formData,
+            {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            },
+        );
+        return response.data;
+    },
+
     deleteRole: async (serverId: string, roleId: string): Promise<void> => {
         await apiClient.delete(`/api/v1/servers/${serverId}/roles/${roleId}`);
     },

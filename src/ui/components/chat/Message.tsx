@@ -52,10 +52,14 @@ export const Message: React.FC<MessageProps> = ({
     const avatarRef = React.useRef<HTMLDivElement>(null);
     const pickerRef = React.useRef<HTMLDivElement>(null);
     const { data: me } = useMe();
-    const { data: members } = useMembers(message.serverId ?? null);
+    const { data: members } = useMembers(
+        message.serverId === 'preview' ? null : (message.serverId ?? null),
+    );
     const addReaction = useAddReaction();
     const deleteMessage = useDeleteMessage();
-    const { hasPermission, isOwner } = usePermissions(message.serverId ?? null);
+    const { hasPermission, isOwner } = usePermissions(
+        message.serverId === 'preview' ? null : (message.serverId ?? null),
+    );
     const { customCategories } = useCustomEmojis();
 
     const myId = me?._id;
