@@ -713,7 +713,7 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
             <ImageCropModal
                 imageFile={selectedIcon}
                 isOpen={isCropModalOpen}
-                type="avatar"
+                type="role-icon"
                 onClose={() => setIsCropModalOpen(false)}
                 onConfirm={(file) => {
                     void handleIconCrop(file);

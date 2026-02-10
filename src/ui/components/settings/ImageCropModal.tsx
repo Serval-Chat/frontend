@@ -14,7 +14,7 @@ interface ImageCropModalProps {
     isOpen: boolean;
     onClose: () => void;
     imageFile: File | null;
-    type: 'avatar' | 'banner' | 'server-banner' | 'emoji';
+    type: 'avatar' | 'banner' | 'server-banner' | 'emoji' | 'role-icon';
     onConfirm: (processedFile: File) => void;
 }
 
@@ -31,7 +31,7 @@ export const ImageCropModal: React.FC<ImageCropModalProps> = ({
     if (!imageFile) return null;
 
     const aspectRatio =
-        type === 'avatar' || type === 'emoji'
+        type === 'avatar' || type === 'emoji' || type === 'role-icon'
             ? 1
             : type === 'server-banner'
               ? 16 / 9
@@ -42,7 +42,8 @@ export const ImageCropModal: React.FC<ImageCropModalProps> = ({
 
         setIsProcessing(true);
         try {
-            const processingType = type === 'emoji' ? 'avatar' : type;
+            const processingType =
+                type === 'emoji' || type === 'role-icon' ? 'avatar' : type;
             const processed = await processProfileImage(
                 imageFile,
                 processingType,
@@ -67,6 +68,8 @@ export const ImageCropModal: React.FC<ImageCropModalProps> = ({
                 return 'Crop your profile picture';
             case 'emoji':
                 return 'Crop your emoji';
+            case 'role-icon':
+                return 'Crop your role icon';
             case 'server-banner':
             case 'banner':
                 return 'Crop your banner';

@@ -11,10 +11,12 @@ export interface ProcessedChatMessage extends Omit<
 > {
     user: User;
     role?: Role;
+    iconRole?: Role;
     replyTo?: {
         _id: string;
         user: User;
         role?: Role;
+        iconRole?: Role;
         text: string;
     };
     repliedToMessageId?: ChatMessage['repliedToMessageId'];

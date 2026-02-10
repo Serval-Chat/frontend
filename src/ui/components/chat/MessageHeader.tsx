@@ -9,6 +9,7 @@ import { formatTimestamp } from '@/utils/timestamp';
 interface MessageHeaderProps {
     user: User;
     role?: Role;
+    iconRole?: Role;
     timestamp: string;
     isGroupStart?: boolean;
     disableCustomFonts?: boolean;
@@ -19,6 +20,7 @@ interface MessageHeaderProps {
 export const MessageHeader: React.FC<MessageHeaderProps> = ({
     user,
     role,
+    iconRole,
     timestamp,
     isGroupStart = true,
     disableCustomFonts,
@@ -40,6 +42,7 @@ export const MessageHeader: React.FC<MessageHeaderProps> = ({
                     showIcon
                     disableCustomFonts={disableCustomFonts}
                     disableGlow={disableGlow}
+                    iconRole={iconRole}
                     role={role}
                     user={user}
                 >

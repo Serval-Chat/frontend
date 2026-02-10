@@ -24,6 +24,30 @@ export const getHighestRoleForMember = (
 };
 
 /**
+ * Finds the highest role for a member that has an icon.
+ */
+export const getHighestRoleWithIconForMember = (
+    roleIds: string[] | undefined,
+    roleMap: Map<string, Role>,
+): Role | undefined => {
+    if (!roleIds || roleIds.length === 0) return undefined;
+
+    let highestRole: Role | undefined = undefined;
+    roleIds.forEach((roleId) => {
+        const role = roleMap.get(roleId);
+        if (
+            role &&
+            role.icon &&
+            (!highestRole || role.position > highestRole.position)
+        ) {
+            highestRole = role;
+        }
+    });
+
+    return highestRole;
+};
+
+/**
  * Resolves the user and role information for a message reply.
  */
 export const resolveReplyTo = (
@@ -35,6 +59,7 @@ export const resolveReplyTo = (
     selectedServerId: string | null,
     serverMemberMap: Map<string, User>,
     highestRoleMap: Map<string, Role>,
+    iconRoleMap: Map<string, Role>,
 ): ProcessedChatMessage['replyTo'] => {
     let replyTo: ProcessedChatMessage['replyTo'] = undefined;
 
@@ -52,6 +77,7 @@ export const resolveReplyTo = (
                 text: repliedMsg.text,
                 user: { _id: repliedMsg.senderId, username: 'Unknown' } as User,
                 role: undefined,
+                iconRole: undefined,
             };
         }
     }
@@ -69,6 +95,7 @@ export const resolveReplyTo = (
                 replyTo.user =
                     serverMemberMap.get(replySenderId) || replyTo.user;
                 replyTo.role = highestRoleMap.get(replySenderId);
+                replyTo.iconRole = iconRoleMap.get(replySenderId);
             }
         }
     }

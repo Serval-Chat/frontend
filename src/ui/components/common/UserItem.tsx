@@ -58,6 +58,7 @@ interface UserItemProps {
     className?: string;
     noFetch?: boolean;
     role?: Role; // Highest role for display
+    iconRole?: Role; // Highest role with icon
     allRoles?: Role[]; // User's roles
     serverRoles?: Role[]; // All available roles in server
     joinedAt?: string;
@@ -79,6 +80,7 @@ export const UserItem: React.FC<UserItemProps> = ({
     className,
     noFetch,
     role,
+    iconRole,
     allRoles,
     serverRoles,
     joinedAt,
@@ -348,6 +350,7 @@ export const UserItem: React.FC<UserItemProps> = ({
                         <StyledUserName
                             disableCustomFonts={disableCustomFonts}
                             disableGlow={disableGlow}
+                            iconRole={iconRole}
                             role={role}
                             user={userProfile}
                         >
@@ -382,6 +385,7 @@ export const UserItem: React.FC<UserItemProps> = ({
             <ProfilePopup
                 disableCustomFonts={disableCustomFonts}
                 disableGlow={disableGlow}
+                iconRole={iconRole}
                 isOpen={showProfile}
                 joinedAt={joinedAt}
                 role={role}

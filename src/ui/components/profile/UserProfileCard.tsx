@@ -22,6 +22,7 @@ import { ParserPresets, parseText } from '@/utils/textParser/parser';
 interface UserProfileCardProps {
     user?: User | Partial<User>;
     role?: Role;
+    iconRole?: Role;
     roles?: Role[];
     joinedAt?: string;
     className?: string;
@@ -38,6 +39,7 @@ interface UserProfileCardProps {
 export const UserProfileCard: React.FC<UserProfileCardProps> = ({
     user,
     role,
+    iconRole,
     roles,
     joinedAt,
     className,
@@ -127,6 +129,7 @@ export const UserProfileCard: React.FC<UserProfileCardProps> = ({
                         className="text-xl font-bold leading-tight w-full truncate"
                         disableCustomFonts={disableCustomFonts}
                         disableGlow={disableGlow}
+                        iconRole={iconRole}
                         role={role}
                         user={user as User}
                     >
