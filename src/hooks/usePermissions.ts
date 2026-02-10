@@ -8,7 +8,16 @@ import {
 import type { RolePermissions } from '@/api/servers/servers.types';
 import { useMe } from '@/api/users/users.queries';
 
-export const usePermissions = (serverId: string | null) => {
+export interface UsePermissionsReturn {
+    permissions: Record<keyof RolePermissions, boolean>;
+    hasPermission: (permission: keyof RolePermissions) => boolean;
+    isOwner: boolean;
+    isLoading: boolean;
+}
+
+export const usePermissions = (
+    serverId: string | null,
+): UsePermissionsReturn => {
     const { data: currentUser } = useMe();
     const { data: members } = useMembers(serverId);
     const { data: roles } = useRoles(serverId);
@@ -91,7 +100,7 @@ export const usePermissions = (serverId: string | null) => {
         return perms;
     }, [serverId, currentUser, server, member, userRoles, roles]);
 
-    const hasPermission = (permission: keyof RolePermissions) =>
+    const hasPermission = (permission: keyof RolePermissions): boolean =>
         permissions[permission] || false;
 
     return {

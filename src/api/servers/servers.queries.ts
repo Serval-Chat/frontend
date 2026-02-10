@@ -17,6 +17,7 @@ import type {
     Role,
     RolePermissions,
     Server,
+    ServerBan,
     ServerMember,
 } from './servers.types';
 
@@ -33,6 +34,7 @@ export const SERVERS_QUERY_KEYS = {
     roles: (serverId: string | null) => ['servers', 'roles', serverId] as const,
     emojis: (serverId: string | null) =>
         ['servers', 'emojis', serverId] as const,
+    bans: (serverId: string | null) => ['servers', 'bans', serverId] as const,
 };
 
 export const useServers = (): UseQueryResult<Server[], Error> =>
@@ -469,6 +471,79 @@ export const useRemoveRoleFromMember = (
                 );
             }
             showToast(error.message || 'Failed to remove role', 'error');
+        },
+    });
+};
+
+export const useServerBans = (
+    serverId: string | null,
+): UseQueryResult<ServerBan[], Error> =>
+    useQuery({
+        queryKey: SERVERS_QUERY_KEYS.bans(serverId),
+        queryFn: () => serversApi.getBans(serverId!),
+        enabled: !!serverId,
+    });
+
+export const useKickMember = (
+    serverId: string,
+): UseMutationResult<void, Error, string> => {
+    const queryClient = useQueryClient();
+    const { showToast } = useToast();
+
+    return useMutation({
+        mutationFn: (userId: string) => serversApi.kickMember(serverId, userId),
+        onSuccess: () => {
+            void queryClient.invalidateQueries({
+                queryKey: SERVERS_QUERY_KEYS.members(serverId),
+            });
+            showToast('Member kicked successfully', 'success');
+        },
+        onError: (error) => {
+            showToast(error.message || 'Failed to kick member', 'error');
+        },
+    });
+};
+
+export const useBanMember = (
+    serverId: string,
+): UseMutationResult<void, Error, { userId: string; reason?: string }> => {
+    const queryClient = useQueryClient();
+    const { showToast } = useToast();
+
+    return useMutation({
+        mutationFn: ({ userId, reason }) =>
+            serversApi.banUser(serverId, userId, reason),
+        onSuccess: () => {
+            void queryClient.invalidateQueries({
+                queryKey: SERVERS_QUERY_KEYS.members(serverId),
+            });
+            void queryClient.invalidateQueries({
+                queryKey: SERVERS_QUERY_KEYS.bans(serverId),
+            });
+            showToast('User banned successfully', 'success');
+        },
+        onError: (error) => {
+            showToast(error.message || 'Failed to ban user', 'error');
+        },
+    });
+};
+
+export const useUnbanMember = (
+    serverId: string,
+): UseMutationResult<void, Error, string> => {
+    const queryClient = useQueryClient();
+    const { showToast } = useToast();
+
+    return useMutation({
+        mutationFn: (userId: string) => serversApi.unbanUser(serverId, userId),
+        onSuccess: () => {
+            void queryClient.invalidateQueries({
+                queryKey: SERVERS_QUERY_KEYS.bans(serverId),
+            });
+            showToast('User unbanned successfully', 'success');
+        },
+        onError: (error) => {
+            showToast(error.message || 'Failed to unban user', 'error');
         },
     });
 };

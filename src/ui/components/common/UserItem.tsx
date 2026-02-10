@@ -1,6 +1,7 @@
 import React from 'react';
 
 import {
+    Ban,
     Check,
     Copy,
     MessageSquare,
@@ -8,6 +9,7 @@ import {
     User as UserIcon,
     UserMinus,
     UserPlus,
+    UserX,
 } from 'lucide-react';
 
 import {
@@ -17,6 +19,8 @@ import {
 } from '@/api/friends/friends.queries';
 import {
     useAddRoleToMember,
+    useBanMember,
+    useKickMember,
     useMembers,
     useRemoveRoleFromMember,
     useServerDetails,
@@ -29,6 +33,8 @@ import { setSelectedFriendId } from '@/store/slices/navSlice';
 import { Text } from '@/ui/components/common/Text';
 import { Box } from '@/ui/components/layout/Box';
 import { ProfilePopup } from '@/ui/components/profile/ProfilePopup';
+import { BanUserModal } from '@/ui/components/servers/modals/BanUserModal';
+import { KickUserModal } from '@/ui/components/servers/modals/KickUserModal';
 import { cn } from '@/utils/cn';
 
 import { ContextMenu, type ContextMenuItem } from './ContextMenu';
@@ -90,10 +96,17 @@ export const UserItem: React.FC<UserItemProps> = ({
     const { mutate: removeRole, isPending: isRemoving } =
         useRemoveRoleFromMember(serverId);
 
+    const { mutate: kickMember } = useKickMember(serverId);
+    const { mutate: banMember } = useBanMember(serverId);
+
     const { data: serverDetails } = useServerDetails(sid);
     const { data: members } = useMembers(sid);
 
     const { data: currentUser } = useMe();
+
+    const [isKickModalOpen, setIsKickModalOpen] = React.useState(false);
+    const [isBanModalOpen, setIsBanModalOpen] = React.useState(false);
+
     const { data: fetchedUser } = useUserById(userId, {
         enabled: !noFetch && !providedUser,
     });
@@ -231,6 +244,59 @@ export const UserItem: React.FC<UserItemProps> = ({
     }
 
     items.push({ type: 'divider' });
+
+    // Group 4: Moderation
+    const canKick =
+        isOwner ||
+        myRoles?.some(
+            (r) => r.permissions?.administrator || r.permissions?.kickMembers,
+        );
+    const canBan =
+        isOwner ||
+        myRoles?.some(
+            (r) => r.permissions?.administrator || r.permissions?.banMembers,
+        );
+
+    const targetMember = members?.find((m) => m.userId === userId);
+    const targetRoles = serverRoles?.filter((r) =>
+        targetMember?.roles.includes(r._id),
+    );
+    const targetHighestRole = targetRoles?.sort(
+        (a, b) => b.position - a.position,
+    )[0];
+    const targetHighestPosition = targetHighestRole
+        ? targetHighestRole.position
+        : -1;
+    const myHighestPosition = myHighestRole ? myHighestRole.position : -1;
+
+    // Current user must have strictly higher role than target, OR be owner
+    const isHigherHierarchy =
+        isOwner || myHighestPosition > targetHighestPosition;
+
+    if (!isMe && sid && (canKick || canBan) && isHigherHierarchy) {
+        if (canKick) {
+            items.push({
+                label: 'Kick Member',
+                icon: UserX,
+                onClick: () => {
+                    setIsKickModalOpen(true);
+                },
+                variant: 'danger',
+            });
+        }
+        if (canBan) {
+            items.push({
+                label: 'Ban Member',
+                icon: Ban,
+                onClick: () => {
+                    setIsBanModalOpen(true);
+                },
+                variant: 'danger',
+            });
+        }
+        items.push({ type: 'divider' });
+    }
+
     items.push({
         label: 'Copy User ID',
         icon: Copy,
@@ -324,6 +390,22 @@ export const UserItem: React.FC<UserItemProps> = ({
                 user={userProfile || undefined}
                 userId={userId}
                 onClose={() => setShowProfile(false)}
+            />
+
+            <KickUserModal
+                isOpen={isKickModalOpen}
+                userAvatar={userProfile?.profilePicture}
+                username={username}
+                onClose={() => setIsKickModalOpen(false)}
+                onConfirm={() => kickMember(userId)}
+            />
+
+            <BanUserModal
+                isOpen={isBanModalOpen}
+                userAvatar={userProfile?.profilePicture}
+                username={username}
+                onClose={() => setIsBanModalOpen(false)}
+                onConfirm={(reason) => banMember({ userId, reason })}
             />
         </>
     );

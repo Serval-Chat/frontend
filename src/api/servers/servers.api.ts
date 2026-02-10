@@ -7,6 +7,7 @@ import type {
     Role,
     RolePermissions,
     Server,
+    ServerBan,
     ServerMember,
 } from './servers.types';
 
@@ -255,6 +256,32 @@ export const serversApi = {
             {
                 rolePositions,
             },
+        );
+        return response.data;
+    },
+
+    kickMember: async (serverId: string, userId: string): Promise<void> => {
+        await apiClient.delete(`/api/v1/servers/${serverId}/members/${userId}`);
+    },
+
+    banUser: async (
+        serverId: string,
+        userId: string,
+        reason?: string,
+    ): Promise<void> => {
+        await apiClient.post(`/api/v1/servers/${serverId}/bans`, {
+            userId,
+            reason,
+        });
+    },
+
+    unbanUser: async (serverId: string, userId: string): Promise<void> => {
+        await apiClient.delete(`/api/v1/servers/${serverId}/bans/${userId}`);
+    },
+
+    getBans: async (serverId: string): Promise<ServerBan[]> => {
+        const response = await apiClient.get<ServerBan[]>(
+            `/api/v1/servers/${serverId}/bans`,
         );
         return response.data;
     },

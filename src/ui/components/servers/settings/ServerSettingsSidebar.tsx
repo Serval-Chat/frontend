@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Handshake, Settings, Shield, Smile, Zap } from 'lucide-react';
+import { Ban, Handshake, Settings, Shield, Smile, Zap } from 'lucide-react';
 
 import type { RolePermissions } from '@/api/servers/servers.types';
 import { usePermissions } from '@/hooks/usePermissions';
@@ -55,6 +55,12 @@ export const ServerSettingsSidebar: React.FC<ServerSettingsSidebarProps> = ({
             label: 'Behaviour',
             icon: Zap,
             permission: 'manageServer',
+        },
+        {
+            id: 'bans',
+            label: 'Bans',
+            icon: Ban,
+            permission: 'banMembers',
         },
     ];
 

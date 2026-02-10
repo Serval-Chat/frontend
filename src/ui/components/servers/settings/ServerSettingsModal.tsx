@@ -6,6 +6,7 @@ import { IconButton } from '@/ui/components/common/IconButton';
 import { Modal } from '@/ui/components/common/Modal';
 import { cn } from '@/utils/cn';
 
+import { ServerBansSettings } from './ServerBansSettings';
 import { ServerBehaviourSettings } from './ServerBehaviourSettings';
 import { ServerEmojiSettings } from './ServerEmojiSettings';
 import { ServerInviteSettings } from './ServerInviteSettings';
@@ -91,6 +92,9 @@ export const ServerSettingsModal: React.FC<ServerSettingsModalProps> = ({
                             )}
                             {activeSection === 'behaviour' && (
                                 <ServerBehaviourSettings serverId={serverId} />
+                            )}
+                            {activeSection === 'bans' && (
+                                <ServerBansSettings serverId={serverId} />
                             )}
                         </div>
                     </div>
