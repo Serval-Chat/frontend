@@ -1,4 +1,5 @@
-import React from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { Loader2 } from 'lucide-react';
 
 import { useRegisterForm } from '@/hooks/useRegisterForm';
 import { FormContent } from '@/ui/components/auth/FormContent';
@@ -25,6 +26,8 @@ export const Register: React.FC = () => {
         inviteToken,
         setInviteToken,
         status,
+        errors,
+        isLoading,
         handleSubmit,
     } = useRegisterForm();
 
@@ -54,6 +57,18 @@ export const Register: React.FC = () => {
                             value={login}
                             onChange={(e) => setLogin(e.target.value)}
                         />
+                        <AnimatePresence>
+                            {errors.login && (
+                                <motion.small
+                                    animate={{ opacity: 1, height: 'auto' }}
+                                    className="text-red-400 text-xs mt-1 block h-0 overflow-hidden"
+                                    exit={{ opacity: 0, height: 0 }}
+                                    initial={{ opacity: 0, height: 0 }}
+                                >
+                                    {errors.login}
+                                </motion.small>
+                            )}
+                        </AnimatePresence>
                     </InputWrapper>
                     <InputWrapper>
                         <Input
@@ -63,6 +78,18 @@ export const Register: React.FC = () => {
                             value={username}
                             onChange={(e) => setUsername(e.target.value)}
                         />
+                        <AnimatePresence>
+                            {errors.username && (
+                                <motion.small
+                                    animate={{ opacity: 1, height: 'auto' }}
+                                    className="text-red-400 text-xs mt-1 block h-0 overflow-hidden"
+                                    exit={{ opacity: 0, height: 0 }}
+                                    initial={{ opacity: 0, height: 0 }}
+                                >
+                                    {errors.username}
+                                </motion.small>
+                            )}
+                        </AnimatePresence>
                     </InputWrapper>
                     <InputWrapper>
                         <Input
@@ -72,6 +99,18 @@ export const Register: React.FC = () => {
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                         />
+                        <AnimatePresence>
+                            {errors.password && (
+                                <motion.small
+                                    animate={{ opacity: 1, height: 'auto' }}
+                                    className="text-red-400 text-xs mt-1 block h-0 overflow-hidden"
+                                    exit={{ opacity: 0, height: 0 }}
+                                    initial={{ opacity: 0, height: 0 }}
+                                >
+                                    {errors.password}
+                                </motion.small>
+                            )}
+                        </AnimatePresence>
                     </InputWrapper>
                     <InputWrapper>
                         <Input
@@ -81,13 +120,30 @@ export const Register: React.FC = () => {
                             value={inviteToken}
                             onChange={(e) => setInviteToken(e.target.value)}
                         />
+                        <AnimatePresence>
+                            {errors.inviteToken && (
+                                <motion.small
+                                    animate={{ opacity: 1, height: 'auto' }}
+                                    className="text-red-400 text-xs mt-1 block h-0 overflow-hidden"
+                                    exit={{ opacity: 0, height: 0 }}
+                                    initial={{ opacity: 0, height: 0 }}
+                                >
+                                    {errors.inviteToken}
+                                </motion.small>
+                            )}
+                        </AnimatePresence>
                     </InputWrapper>
                     <Button
-                        className="w-full py-sm text-lg font-semibold"
+                        className="w-full py-sm text-lg font-semibold h-12 flex items-center justify-center gap-2"
+                        disabled={isLoading}
                         type="submit"
                         variant="normal"
                     >
-                        Register
+                        {isLoading ? (
+                            <Loader2 className="animate-spin" size={20} />
+                        ) : (
+                            'Register'
+                        )}
                     </Button>
                 </form>
 
