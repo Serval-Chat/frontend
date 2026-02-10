@@ -39,6 +39,7 @@ export const ServerSettingsModal: React.FC<ServerSettingsModalProps> = ({
                 {/* Navigation Sidebar */}
                 <ServerSettingsSidebar
                     activeSection={activeSection}
+                    serverId={serverId}
                     setActiveSection={setActiveSection}
                 />
                 {/* Content Area */}

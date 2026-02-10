@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Settings } from 'lucide-react';
 
 import type { Server } from '@/api/servers/servers.types';
+import { usePermissions } from '@/hooks/usePermissions';
 import { ContextMenu } from '@/ui/components/common/ContextMenu';
 import { cn } from '@/utils/cn';
 
@@ -24,14 +25,23 @@ export const ServerItem: React.FC<ServerItemProps> = ({
     onClick,
 }) => {
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+    const { hasPermission, isOwner } = usePermissions(server._id);
 
-    const contextMenuItems = [
-        {
+    const canManageServer =
+        isOwner ||
+        hasPermission('manageServer') ||
+        hasPermission('manageRoles') ||
+        hasPermission('manageInvites');
+
+    const contextMenuItems = [];
+
+    if (canManageServer) {
+        contextMenuItems.push({
             label: 'Server Settings',
             icon: Settings,
             onClick: () => setIsSettingsOpen(true),
-        },
-    ];
+        });
+    }
 
     return (
         <>
@@ -43,13 +53,21 @@ export const ServerItem: React.FC<ServerItemProps> = ({
                         isActive ? 'h-10' : 'h-0 group-hover:h-5',
                     )}
                 />
-                <ContextMenu items={contextMenuItems}>
+                {contextMenuItems.length > 0 ? (
+                    <ContextMenu items={contextMenuItems}>
+                        <ServerIcon
+                            isActive={isActive}
+                            server={server}
+                            onClick={onClick}
+                        />
+                    </ContextMenu>
+                ) : (
                     <ServerIcon
                         isActive={isActive}
                         server={server}
                         onClick={onClick}
                     />
-                </ContextMenu>
+                )}
             </div>
 
             <ServerSettingsModal

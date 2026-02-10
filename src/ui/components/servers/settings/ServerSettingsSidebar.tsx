@@ -2,25 +2,59 @@ import React from 'react';
 
 import { Handshake, Settings, Shield, Smile, Zap } from 'lucide-react';
 
+import { usePermissions } from '@/hooks/usePermissions';
 import { Button } from '@/ui/components/common/Button';
 import { Text } from '@/ui/components/common/Text';
 
 interface ServerSettingsSidebarProps {
     activeSection: string;
     setActiveSection: (section: string) => void;
+    serverId: string;
 }
 
 export const ServerSettingsSidebar: React.FC<ServerSettingsSidebarProps> = ({
     activeSection,
     setActiveSection,
+    serverId,
 }) => {
-    const sections = [
-        { id: 'overview', label: 'Overview', icon: Settings },
-        { id: 'roles', label: 'Roles', icon: Shield },
-        { id: 'emojis', label: 'Emojis', icon: Smile },
-        { id: 'invites', label: 'Invites', icon: Handshake },
-        { id: 'behaviour', label: 'Behaviour', icon: Zap },
+    const { hasPermission, isOwner } = usePermissions(serverId);
+
+    const allSections = [
+        {
+            id: 'overview',
+            label: 'Overview',
+            icon: Settings,
+            permission: 'manageServer',
+        },
+        {
+            id: 'roles',
+            label: 'Roles',
+            icon: Shield,
+            permission: 'manageRoles',
+        },
+        {
+            id: 'emojis',
+            label: 'Emojis',
+            icon: Smile,
+            permission: 'manageServer',
+        },
+        {
+            id: 'invites',
+            label: 'Invites',
+            icon: Handshake,
+            permission: 'manageInvites',
+        },
+        {
+            id: 'behaviour',
+            label: 'Behaviour',
+            icon: Zap,
+            permission: 'manageServer',
+        },
     ];
+
+    const sections = allSections.filter(
+        (section) => isOwner || hasPermission(section.permission as any),
+    );
 
     return (
         <div className="w-[240px] bg-[var(--secondary-bg)] border-r border-[var(--color-border-subtle)] p-4 overflow-y-auto shrink-0 flex flex-col gap-4">
