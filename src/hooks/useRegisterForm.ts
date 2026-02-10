@@ -6,6 +6,12 @@ import { useNavigate } from 'react-router-dom';
 import { authApi } from '@/api/auth/auth.api';
 import type { StatusState } from '@/ui/types';
 import { setAuthToken } from '@/utils/authToken';
+import {
+    validateInviteToken,
+    validateLogin,
+    validatePassword,
+    validateUsername,
+} from '@/utils/validation';
 
 interface ValidationErrors {
     login?: string;
@@ -48,37 +54,16 @@ export const useRegisterForm = (): RegisterFormResult => {
         let error = '';
         switch (name) {
             case 'login':
-                if (!value.trim()) error = 'Login is required';
-                else if (value.length < 3)
-                    error = 'Login must be at least 3 characters';
-                else if (value.length > 50)
-                    error = 'Login must be at most 50 characters';
+                error = validateLogin(value);
                 break;
             case 'username':
-                if (!value.trim()) error = 'Username is required';
-                else if (value.length < 3)
-                    error = 'Username must be at least 3 characters';
-                else if (value.length > 22)
-                    error = 'Username must be at most 22 characters';
-                else if (!/^[a-zA-Z0-9_]/.test(value))
-                    error =
-                        'Username must start with a letter, number, or underscore';
-                else if (!/^[a-zA-Z0-9_.-]+$/.test(value))
-                    error =
-                        'Username can only contain letters, numbers, underscores, hyphens, and dots';
-                else if (value.includes('..'))
-                    error = 'Username cannot contain consecutive dots';
+                error = validateUsername(value);
                 break;
             case 'password':
-                if (!value) error = 'Password is required';
-                else if (value.length < 6)
-                    error = 'Password must be at least 6 characters';
-                else if (value.length > 100)
-                    error = 'Password must be at most 100 characters';
+                error = validatePassword(value);
                 break;
             case 'inviteToken':
-                if (!value.trim()) error = 'Invite token is required';
-                else if (value.length > 100) error = 'Invite token is too long';
+                error = validateInviteToken(value);
                 break;
         }
         setErrors((prev) => ({ ...prev, [name]: error }));
@@ -110,11 +95,10 @@ export const useRegisterForm = (): RegisterFormResult => {
 
         // Final check before submission
         const currentErrors: ValidationErrors = {};
-        if (!login.trim()) currentErrors.login = 'Login is required';
-        if (!username.trim()) currentErrors.username = 'Username is required';
-        if (!password) currentErrors.password = 'Password is required';
-        if (!inviteToken.trim())
-            currentErrors.inviteToken = 'Invite token is required';
+        currentErrors.login = validateLogin(login);
+        currentErrors.username = validateUsername(username);
+        currentErrors.password = validatePassword(password);
+        currentErrors.inviteToken = validateInviteToken(inviteToken);
 
         if (
             Object.values(currentErrors).some((e) => e) ||
