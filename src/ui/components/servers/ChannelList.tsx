@@ -159,7 +159,11 @@ export const ChannelList: React.FC<ChannelListProps> = ({
     };
 
     const renderChannel = (channel: Channel): React.ReactNode => (
-        <ContextMenu items={getChannelMenuItems(channel)} key={channel._id}>
+        <ContextMenu
+            className="block w-full"
+            items={getChannelMenuItems(channel)}
+            key={channel._id}
+        >
             <ChannelItem
                 icon={channel.icon}
                 isActive={selectedChannelId === channel._id}
