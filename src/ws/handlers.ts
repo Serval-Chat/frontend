@@ -15,6 +15,7 @@ import {
 
 import { wsClient } from './client';
 import {
+    type IMemberAddedEvent,
     type IMemberUpdatedEvent,
     type IMessageDm,
     type IMessageServer,
@@ -132,6 +133,17 @@ export const setupGlobalWsHandlers = (
             // Invalidate 'me' if my own roles changed
             void queryClient.invalidateQueries({ queryKey: ['me'] });
         }
+    });
+
+    wsClient.on<IMemberAddedEvent>(WsEvents.MEMBER_ADDED, (payload) => {
+        if (currentUser && payload.userId === currentUser.id) {
+            void queryClient.invalidateQueries({
+                queryKey: SERVERS_QUERY_KEYS.list,
+            });
+        }
+        void queryClient.invalidateQueries({
+            queryKey: SERVERS_QUERY_KEYS.members(payload.serverId),
+        });
     });
 };
 
