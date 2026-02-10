@@ -44,7 +44,7 @@ export const useRegisterForm = (): RegisterFormResult => {
 
     const navigate = useNavigate();
 
-    const validateField = (name: string, value: string) => {
+    const validateField = (name: string, value: string): void => {
         let error = '';
         switch (name) {
             case 'login':
@@ -84,22 +84,22 @@ export const useRegisterForm = (): RegisterFormResult => {
         setErrors((prev) => ({ ...prev, [name]: error }));
     };
 
-    const handleSetLogin = (val: string) => {
+    const handleSetLogin = (val: string): void => {
         setLogin(val);
         validateField('login', val);
     };
 
-    const handleSetUsername = (val: string) => {
+    const handleSetUsername = (val: string): void => {
         setUsername(val);
         validateField('username', val);
     };
 
-    const handleSetPassword = (val: string) => {
+    const handleSetPassword = (val: string): void => {
         setPassword(val);
         validateField('password', val);
     };
 
-    const handleSetInviteToken = (val: string) => {
+    const handleSetInviteToken = (val: string): void => {
         setInviteToken(val);
         validateField('inviteToken', val);
     };

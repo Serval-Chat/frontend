@@ -86,3 +86,13 @@ export interface ServerMember {
     joinedAt: string;
     user: User;
 }
+
+export interface ServerBan {
+    _id: string;
+    serverId: string;
+    userId: string;
+    bannedBy: string;
+    reason?: string;
+    createdAt: string;
+    user: User | null;
+}
