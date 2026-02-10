@@ -104,9 +104,7 @@ export const ServerInviteSettings: React.FC<ServerInviteSettingsProps> = ({
 
             {/* Create Invite Form */}
             <div className="p-6 rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-bg-subtle)] space-y-6">
-                <Heading level={3} size="sm" weight="bold">
-                    Create New Invite
-                </Heading>
+                <Heading level={3}>Create New Invite</Heading>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div className="space-y-2">
@@ -195,9 +193,7 @@ export const ServerInviteSettings: React.FC<ServerInviteSettingsProps> = ({
 
             {/* Invites List */}
             <div className="space-y-4">
-                <Heading level={3} size="sm" weight="bold">
-                    Active Invites ({invites.length})
-                </Heading>
+                <Heading level={3}>Active Invites ({invites.length})</Heading>
 
                 {invites.length === 0 ? (
                     <div className="py-12 flex flex-col items-center justify-center text-center opacity-50">

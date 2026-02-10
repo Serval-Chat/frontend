@@ -351,7 +351,9 @@ export const AdminAuditLogs = (): ReactNode => {
                         <TableHead>Administrator</TableHead>
                         <TableHead>Action Performed</TableHead>
                         <TableHead>Target User</TableHead>
-                        <TableHead align="right"></TableHead>
+                        <TableHead align="right">
+                            <span className="sr-only">Actions</span>
+                        </TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
