@@ -7,6 +7,7 @@ import { Modal } from '@/ui/components/common/Modal';
 import { cn } from '@/utils/cn';
 
 import { ServerBehaviourSettings } from './ServerBehaviourSettings';
+import { ServerEmojiSettings } from './ServerEmojiSettings';
 import { ServerOverviewSettings } from './ServerOverviewSettings';
 import { ServerRoleSettings } from './ServerRoleSettings';
 import { ServerSettingsSidebar } from './ServerSettingsSidebar';
@@ -79,6 +80,9 @@ export const ServerSettingsModal: React.FC<ServerSettingsModalProps> = ({
                             )}
                             {activeSection === 'roles' && (
                                 <ServerRoleSettings serverId={serverId} />
+                            )}
+                            {activeSection === 'emojis' && (
+                                <ServerEmojiSettings serverId={serverId} />
                             )}
                             {activeSection === 'behaviour' && (
                                 <ServerBehaviourSettings serverId={serverId} />

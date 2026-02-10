@@ -14,7 +14,7 @@ interface ImageCropModalProps {
     isOpen: boolean;
     onClose: () => void;
     imageFile: File | null;
-    type: 'avatar' | 'banner' | 'server-banner';
+    type: 'avatar' | 'banner' | 'server-banner' | 'emoji';
     onConfirm: (processedFile: File) => void;
 }
 
@@ -31,14 +31,23 @@ export const ImageCropModal: React.FC<ImageCropModalProps> = ({
     if (!imageFile) return null;
 
     const aspectRatio =
-        type === 'avatar' ? 1 : type === 'server-banner' ? 16 / 9 : 1136 / 400;
+        type === 'avatar' || type === 'emoji'
+            ? 1
+            : type === 'server-banner'
+              ? 16 / 9
+              : 1136 / 400;
 
     const handleConfirm = async (): Promise<void> => {
         if (!crop) return;
 
         setIsProcessing(true);
         try {
-            const processed = await processProfileImage(imageFile, type, crop);
+            const processingType = type === 'emoji' ? 'avatar' : type;
+            const processed = await processProfileImage(
+                imageFile,
+                processingType,
+                crop,
+            );
             onConfirm(processed);
             onClose();
         } catch (error) {
@@ -52,11 +61,23 @@ export const ImageCropModal: React.FC<ImageCropModalProps> = ({
         void handleConfirm();
     };
 
+    const getTitle = (): string => {
+        switch (type) {
+            case 'avatar':
+                return 'Crop your profile picture';
+            case 'emoji':
+                return 'Crop your emoji';
+            case 'server-banner':
+            case 'banner':
+                return 'Crop your banner';
+        }
+    };
+
     return (
         <Modal
             className="w-[90vw] max-w-2xl"
             isOpen={isOpen}
-            title={`Crop your ${type === 'avatar' ? 'profile picture' : 'banner'}`}
+            title={getTitle()}
             onClose={onClose}
         >
             <div className="flex flex-col gap-6">

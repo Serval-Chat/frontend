@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Settings, Shield, Zap } from 'lucide-react';
+import { Settings, Shield, Smile, Zap } from 'lucide-react';
 
 import { Button } from '@/ui/components/common/Button';
 import { Text } from '@/ui/components/common/Text';
@@ -17,6 +17,7 @@ export const ServerSettingsSidebar: React.FC<ServerSettingsSidebarProps> = ({
     const sections = [
         { id: 'overview', label: 'Overview', icon: Settings },
         { id: 'roles', label: 'Roles', icon: Shield },
+        { id: 'emojis', label: 'Emojis', icon: Smile },
         { id: 'behaviour', label: 'Behaviour', icon: Zap },
     ];
 

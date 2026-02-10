@@ -148,10 +148,59 @@ export const useServerEmojis = (
     serverId: string | null,
 ): UseQueryResult<Emoji[], Error> =>
     useQuery({
-        queryKey: ['servers', 'emojis', serverId],
+        queryKey: SERVERS_QUERY_KEYS.emojis(serverId),
         queryFn: () => serversApi.getEmojis(serverId!),
         enabled: !!serverId,
     });
+
+export const useUploadEmoji = (
+    serverId: string,
+): UseMutationResult<Emoji, Error, { name: string; file: File }> => {
+    const queryClient = useQueryClient();
+    const { showToast } = useToast();
+
+    return useMutation({
+        mutationFn: ({ name, file }) =>
+            serversApi.uploadEmoji(serverId, name, file),
+        onSuccess: () => {
+            void queryClient.invalidateQueries({
+                queryKey: SERVERS_QUERY_KEYS.emojis(serverId),
+            });
+            showToast('Emoji uploaded successfully', 'success');
+        },
+        onError: (error) => {
+            let message = error.message || 'Failed to upload emoji';
+            if (error instanceof AxiosError && error.response?.data?.message) {
+                const apiMessage = error.response.data.message;
+                message = Array.isArray(apiMessage)
+                    ? apiMessage[0]
+                    : apiMessage;
+            }
+            showToast(message, 'error');
+        },
+    });
+};
+
+export const useDeleteEmoji = (
+    serverId: string,
+): UseMutationResult<void, Error, string> => {
+    const queryClient = useQueryClient();
+    const { showToast } = useToast();
+
+    return useMutation({
+        mutationFn: (emojiId: string) =>
+            serversApi.deleteEmoji(serverId, emojiId),
+        onSuccess: () => {
+            void queryClient.invalidateQueries({
+                queryKey: SERVERS_QUERY_KEYS.emojis(serverId),
+            });
+            showToast('Emoji deleted successfully', 'success');
+        },
+        onError: (error) => {
+            showToast(error.message || 'Failed to delete emoji', 'error');
+        },
+    });
+};
 
 export const useUpdateServer = (
     serverId: string,

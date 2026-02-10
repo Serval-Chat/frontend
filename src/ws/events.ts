@@ -218,6 +218,7 @@ export const WsEvents = {
     MEMBER_UPDATED: 'member_updated',
     MEMBER_ADDED: 'member_added',
     MEMBER_REMOVED: 'member_removed',
+    EMOJI_UPDATED: 'emoji_updated',
 } as const;
 
 export interface IReactionEventPayload {

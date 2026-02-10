@@ -101,6 +101,30 @@ export const serversApi = {
         return response.data;
     },
 
+    uploadEmoji: async (
+        serverId: string,
+        name: string,
+        file: File,
+    ): Promise<Emoji> => {
+        const formData = new FormData();
+        formData.append('emoji', file);
+        formData.append('name', name);
+        const response = await apiClient.post<Emoji>(
+            `/api/v1/servers/${serverId}/emojis`,
+            formData,
+            {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            },
+        );
+        return response.data;
+    },
+
+    deleteEmoji: async (serverId: string, emojiId: string): Promise<void> => {
+        await apiClient.delete(`/api/v1/servers/${serverId}/emojis/${emojiId}`);
+    },
+
     reorderChannels: async (
         serverId: string,
         channelPositions: { channelId: string; position: number }[],
