@@ -5,6 +5,7 @@ import {
     useQuery,
     useQueryClient,
 } from '@tanstack/react-query';
+import { AxiosError } from 'axios';
 
 import type { Emoji } from '@/api/emojis/emojis.types';
 import { useToast } from '@/ui/components/common/Toast';
@@ -39,6 +40,64 @@ export const useServers = (): UseQueryResult<Server[], Error> =>
         queryKey: SERVERS_QUERY_KEYS.list,
         queryFn: () => serversApi.getServers(),
     });
+
+export const useCreateServer = (): UseMutationResult<
+    { server: Server; channel: Channel },
+    Error,
+    { name: string; icon?: File }
+> => {
+    const queryClient = useQueryClient();
+    const { showToast } = useToast();
+
+    return useMutation({
+        mutationFn: ({ name, icon }) => serversApi.createServer(name, icon),
+        onSuccess: () => {
+            void queryClient.invalidateQueries({
+                queryKey: SERVERS_QUERY_KEYS.list,
+            });
+            showToast('Server created successfully', 'success');
+        },
+        onError: (error) => {
+            let message = error.message || 'Failed to create server';
+            if (error instanceof AxiosError && error.response?.data?.message) {
+                const apiMessage = error.response.data.message;
+                message = Array.isArray(apiMessage)
+                    ? apiMessage[0]
+                    : apiMessage;
+            }
+            showToast(message, 'error');
+        },
+    });
+};
+
+export const useJoinServer = (): UseMutationResult<
+    { serverId: string },
+    Error,
+    string
+> => {
+    const queryClient = useQueryClient();
+    const { showToast } = useToast();
+
+    return useMutation({
+        mutationFn: (inviteCode) => serversApi.joinServer(inviteCode),
+        onSuccess: () => {
+            void queryClient.invalidateQueries({
+                queryKey: SERVERS_QUERY_KEYS.list,
+            });
+            showToast('Joined server successfully', 'success');
+        },
+        onError: (error) => {
+            let message = error.message || 'Failed to join server';
+            if (error instanceof AxiosError && error.response?.data?.message) {
+                const apiMessage = error.response.data.message;
+                message = Array.isArray(apiMessage)
+                    ? apiMessage[0]
+                    : apiMessage;
+            }
+            showToast(message, 'error');
+        },
+    });
+};
 
 export const useServerDetails = (
     serverId: string | null,

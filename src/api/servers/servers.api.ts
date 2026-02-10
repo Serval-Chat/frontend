@@ -16,6 +16,29 @@ export const serversApi = {
         return response.data;
     },
 
+    createServer: async (
+        name: string,
+        icon?: File,
+    ): Promise<{ server: Server; channel: Channel }> => {
+        const response = await apiClient.post<{
+            server: Server;
+            channel: Channel;
+        }>('/api/v1/servers', { name });
+
+        if (icon) {
+            await serversApi.uploadServerIcon(response.data.server._id, icon);
+        }
+
+        return response.data;
+    },
+
+    joinServer: async (inviteCode: string): Promise<{ serverId: string }> => {
+        const response = await apiClient.post<{ serverId: string }>(
+            `/api/v1/invites/${inviteCode}/join`,
+        );
+        return response.data;
+    },
+
     getServerDetails: async (serverId: string): Promise<Server> => {
         const response = await apiClient.get<Server>(
             `/api/v1/servers/${serverId}`,

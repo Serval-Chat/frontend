@@ -134,6 +134,14 @@ export interface IMemberUpdatedEvent {
 }
 
 /**
+ * @description Member added.
+ */
+export interface IMemberAddedEvent {
+    serverId: string;
+    userId: string;
+}
+
+/**
  * @description Event names
  */
 export const WsEvents = {
