@@ -1,15 +1,19 @@
 import React from 'react';
 
-import { SmilePlus } from 'lucide-react';
+import { Copy, SmilePlus, Trash2 } from 'lucide-react';
 
+import { useDeleteMessage } from '@/api/chat/chat.queries';
 import { useAddReaction } from '@/api/reactions/reactions.queries';
 import { useMembers } from '@/api/servers/servers.queries';
 import type { Role } from '@/api/servers/servers.types';
 import { useMe } from '@/api/users/users.queries';
 import type { User } from '@/api/users/users.types';
 import { useCustomEmojis } from '@/hooks/useCustomEmojis';
+import { usePermissions } from '@/hooks/usePermissions';
 import type { ProcessedChatMessage } from '@/types/chat.ui';
 import { Button } from '@/ui/components/common/Button';
+import { ContextMenu } from '@/ui/components/common/ContextMenu';
+import type { ContextMenuItem } from '@/ui/components/common/ContextMenu';
 import { Text } from '@/ui/components/common/Text';
 import { UserProfilePicture } from '@/ui/components/common/UserProfilePicture';
 import { EmojiPicker } from '@/ui/components/emoji/EmojiPicker';
@@ -50,6 +54,8 @@ export const Message: React.FC<MessageProps> = ({
     const { data: me } = useMe();
     const { data: members } = useMembers(message.serverId ?? null);
     const addReaction = useAddReaction();
+    const deleteMessage = useDeleteMessage();
+    const { hasPermission, isOwner } = usePermissions(message.serverId ?? null);
     const { customCategories } = useCustomEmojis();
 
     const myId = me?._id;
@@ -118,6 +124,47 @@ export const Message: React.FC<MessageProps> = ({
         };
     }, [showPicker]);
 
+    const isMessageSender = me?._id === message.senderId;
+    const canDelete =
+        isMessageSender ||
+        isOwner ||
+        hasPermission('administrator') ||
+        hasPermission('manageMessages') ||
+        hasPermission('deleteMessagesOfOthers');
+
+    const handleDelete = React.useCallback((): void => {
+        if (!message.serverId || !message.channelId) return;
+        deleteMessage.mutate({
+            serverId: message.serverId,
+            channelId: message.channelId,
+            messageId: message._id,
+        });
+    }, [message.serverId, message.channelId, message._id, deleteMessage]);
+
+    const contextMenuItems = React.useMemo(() => {
+        const items: ContextMenuItem[] = [
+            {
+                label: 'Copy Message ID',
+                icon: Copy,
+                onClick: () => {
+                    void navigator.clipboard.writeText(message._id);
+                },
+            },
+        ];
+
+        if (canDelete) {
+            items.push({ type: 'divider' });
+            items.push({
+                label: 'Delete Message',
+                icon: Trash2,
+                variant: 'danger',
+                onClick: handleDelete,
+            });
+        }
+
+        return items;
+    }, [message._id, canDelete, handleDelete]);
+
     return (
         <Box
             className={cn(
@@ -128,111 +175,124 @@ export const Message: React.FC<MessageProps> = ({
             )}
             id={`message-${message._id}`}
         >
-            {/* Reply Preview */}
-            {isGroupStart && message.replyTo && (
-                <ReplyPreview
-                    disableCustomFonts={disableCustomFonts}
-                    replyToId={message.replyTo._id}
-                    role={message.replyTo.role}
-                    text={message.replyTo.text}
-                    user={message.replyTo.user}
-                    onClick={onReplyClick}
-                />
-            )}
+            <ContextMenu className="w-full h-full" items={contextMenuItems}>
+                {/* Reply Preview */}
+                {isGroupStart && message.replyTo && (
+                    <ReplyPreview
+                        disableCustomFonts={disableCustomFonts}
+                        replyToId={message.replyTo._id}
+                        role={message.replyTo.role}
+                        text={message.replyTo.text}
+                        user={message.replyTo.user}
+                        onClick={onReplyClick}
+                    />
+                )}
 
-            <Box className="flex gap-1">
-                {/* Avatar */}
-                <Box
-                    className="w-12 flex-shrink-0 flex justify-center mt-1"
-                    ref={avatarRef}
-                >
-                    {isGroupStart ? (
-                        <UserProfilePicture
-                            noIndicator
-                            size="md"
-                            src={user.profilePicture}
-                            username={user.username}
-                            onClick={() => setShowProfile(true)}
+                <Box className="flex gap-1">
+                    {/* Avatar */}
+                    <Box
+                        className="w-12 flex-shrink-0 flex justify-center mt-1"
+                        ref={avatarRef}
+                    >
+                        {isGroupStart ? (
+                            <UserProfilePicture
+                                noIndicator
+                                size="md"
+                                src={user.profilePicture}
+                                username={user.username}
+                                onClick={() => setShowProfile(true)}
+                            />
+                        ) : (
+                            <Text className="opacity-0 group-hover:opacity-40 text-[10px] text-muted-foreground font-medium select-none mt-1">
+                                {
+                                    new Date(message.createdAt)
+                                        .toLocaleTimeString([], {
+                                            hour: '2-digit',
+                                            minute: '2-digit',
+                                            hour12: false,
+                                        })
+                                        .split(' ')[0]
+                                }
+                            </Text>
+                        )}
+                    </Box>
+
+                    {/* Content Area */}
+                    <Box className="flex-1 min-w-0">
+                        <MessageHeader
+                            disableCustomFonts={disableCustomFonts}
+                            disableGlow={disableGlow}
+                            isGroupStart={isGroupStart}
+                            role={role}
+                            timestamp={message.createdAt}
+                            user={user}
+                            onClickName={() => setShowProfile(true)}
                         />
-                    ) : (
-                        <Text className="opacity-0 group-hover:opacity-40 text-[10px] text-muted-foreground font-medium select-none mt-1">
-                            {
-                                new Date(message.createdAt)
-                                    .toLocaleTimeString([], {
-                                        hour: '2-digit',
-                                        minute: '2-digit',
-                                        hour12: false,
-                                    })
-                                    .split(' ')[0]
-                            }
-                        </Text>
+                        <MessageContent text={message.text} />
+                        <Reactions
+                            channelId={message.channelId}
+                            messageId={message._id}
+                            reactions={message.reactions || []}
+                            serverId={message.serverId}
+                            onAddClick={() => setShowPicker(true)}
+                        />
+                    </Box>
+                </Box>
+
+                {/* Hover Actions */}
+                <Box className="absolute right-4 top-0 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all z-[var(--z-index-effect-md)]">
+                    <Box className="flex items-center bg-bg-secondary border border-white/5 rounded shadow-xl px-1 py-1 gap-1">
+                        <Button
+                            className={cn(
+                                'p-1.5 hover:bg-white/5 rounded transition-colors text-muted-foreground hover:text-foreground h-8 w-8',
+                                showPicker && 'bg-white/10 text-foreground',
+                            )}
+                            size="sm"
+                            title="Add Reaction"
+                            variant="ghost"
+                            onClick={() => setShowPicker(!showPicker)}
+                        >
+                            <SmilePlus size={18} />
+                        </Button>
+                        {/* Actions will go here but emojis for now uwu */}
+                        {canDelete && (
+                            <Button
+                                className="p-1.5 hover:bg-danger/20 rounded transition-colors text-muted-foreground hover:text-danger h-8 w-8"
+                                size="sm"
+                                title="Delete Message"
+                                variant="ghost"
+                                onClick={handleDelete}
+                            >
+                                <Trash2 size={18} />
+                            </Button>
+                        )}
+                    </Box>
+
+                    {showPicker && (
+                        <Box
+                            className="absolute bottom-full right-0 mb-2 z-[var(--z-index-popover)]"
+                            ref={pickerRef}
+                        >
+                            <EmojiPicker
+                                customCategories={customCategories}
+                                onCustomEmojiSelect={handleCustomEmojiSelect}
+                                onEmojiSelect={handleEmojiSelect}
+                            />
+                        </Box>
                     )}
                 </Box>
 
-                {/* Content Area */}
-                <Box className="flex-1 min-w-0">
-                    <MessageHeader
-                        disableCustomFonts={disableCustomFonts}
-                        disableGlow={disableGlow}
-                        isGroupStart={isGroupStart}
-                        role={role}
-                        timestamp={message.createdAt}
-                        user={user}
-                        onClickName={() => setShowProfile(true)}
-                    />
-                    <MessageContent text={message.text} />
-                    <Reactions
-                        channelId={message.channelId}
-                        messageId={message._id}
-                        reactions={message.reactions || []}
-                        serverId={message.serverId}
-                        onAddClick={() => setShowPicker(true)}
-                    />
-                </Box>
-            </Box>
-
-            {/* Hover Actions */}
-            <Box className="absolute right-4 top-0 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all z-[var(--z-index-effect-md)]">
-                <Box className="flex items-center bg-bg-secondary border border-white/5 rounded shadow-xl px-1 py-1 gap-1">
-                    <Button
-                        className={cn(
-                            'p-1.5 hover:bg-white/5 rounded transition-colors text-muted-foreground hover:text-foreground h-8 w-8',
-                            showPicker && 'bg-white/10 text-foreground',
-                        )}
-                        size="sm"
-                        title="Add Reaction"
-                        variant="ghost"
-                        onClick={() => setShowPicker(!showPicker)}
-                    >
-                        <SmilePlus size={18} />
-                    </Button>
-                    {/* Actions will go here but emojis for now uwu */}
-                </Box>
-
-                {showPicker && (
-                    <Box
-                        className="absolute bottom-full right-0 mb-2 z-[var(--z-index-popover)]"
-                        ref={pickerRef}
-                    >
-                        <EmojiPicker
-                            customCategories={customCategories}
-                            onCustomEmojiSelect={handleCustomEmojiSelect}
-                            onEmojiSelect={handleEmojiSelect}
-                        />
-                    </Box>
-                )}
-            </Box>
-
-            <ProfilePopup
-                disableCustomFonts={disableCustomFonts}
-                disableGlow={disableGlow}
-                isOpen={showProfile}
-                role={role}
-                triggerRef={avatarRef}
-                user={user}
-                userId={user._id}
-                onClose={() => setShowProfile(false)}
-            />
+                <ProfilePopup
+                    disableCustomFonts={disableCustomFonts}
+                    disableGlow={disableGlow}
+                    isOpen={showProfile}
+                    role={role}
+                    triggerRef={avatarRef}
+                    user={user}
+                    userId={user._id}
+                    onClose={() => setShowProfile(false)}
+                />
+            </ContextMenu>
         </Box>
     );
 };

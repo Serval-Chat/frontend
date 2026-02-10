@@ -37,4 +37,16 @@ export const chatApi = {
         );
         return response.data;
     },
+    /**
+     * @description Delete a message from a channel
+     */
+    deleteMessage: async (
+        serverId: string,
+        channelId: string,
+        messageId: string,
+    ): Promise<void> => {
+        await apiClient.delete(
+            `/api/v1/servers/${serverId}/channels/${channelId}/messages/${messageId}`,
+        );
+    },
 };

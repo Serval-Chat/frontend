@@ -2,6 +2,8 @@ import {
     type InfiniteData,
     type UseInfiniteQueryResult,
     useInfiniteQuery,
+    useMutation,
+    useQueryClient,
 } from '@tanstack/react-query';
 
 import { chatApi } from './chat.api';
@@ -54,3 +56,95 @@ export const useChannelMessages = (
         },
         enabled: !!serverId && !!channelId,
     });
+
+/**
+ * @description Hook to delete a message
+ */
+export const useDeleteMessage = (): {
+    mutate: (vars: {
+        serverId: string;
+        channelId: string;
+        messageId: string;
+    }) => void;
+    isPending: boolean;
+} => {
+    const queryClient = useQueryClient();
+
+    const mutation = useMutation({
+        mutationFn: ({
+            serverId,
+            channelId,
+            messageId,
+        }: {
+            serverId: string;
+            channelId: string;
+            messageId: string;
+        }) => chatApi.deleteMessage(serverId, channelId, messageId),
+        onMutate: async (variables) => {
+            // cancel any outgoing refetches (so they don't overwrite our optimistic update)
+            await queryClient.cancelQueries({
+                queryKey: CHAT_QUERY_KEYS.channelMessages(
+                    variables.serverId,
+                    variables.channelId,
+                ),
+            });
+
+            // snapshot the previous value
+            const previousMessages = queryClient.getQueryData<
+                InfiniteData<ChatMessage[]>
+            >(
+                CHAT_QUERY_KEYS.channelMessages(
+                    variables.serverId,
+                    variables.channelId,
+                ),
+            );
+
+            // optimistically update to the new value
+            if (previousMessages) {
+                queryClient.setQueryData<InfiniteData<ChatMessage[]>>(
+                    CHAT_QUERY_KEYS.channelMessages(
+                        variables.serverId,
+                        variables.channelId,
+                    ),
+                    {
+                        ...previousMessages,
+                        pages: previousMessages.pages.map((page) =>
+                            page.filter(
+                                (msg) => msg._id !== variables.messageId,
+                            ),
+                        ),
+                    },
+                );
+            }
+
+            // return a context object with the snapshotted value
+            return { previousMessages };
+        },
+        onError: (_err, variables, context) => {
+            // if the mutation fails, use the context returned from onMutate to roll back
+            if (context?.previousMessages) {
+                queryClient.setQueryData(
+                    CHAT_QUERY_KEYS.channelMessages(
+                        variables.serverId,
+                        variables.channelId,
+                    ),
+                    context.previousMessages,
+                );
+            }
+        },
+        onSettled: (_data, _error, variables) => {
+            // always refetch after error or success to keep things in sync
+            void queryClient.invalidateQueries({
+                queryKey: CHAT_QUERY_KEYS.channelMessages(
+                    variables.serverId,
+                    variables.channelId,
+                ),
+            });
+        },
+    });
+
+    return {
+        mutate: mutation.mutate,
+        isPending: mutation.isPending,
+    };
+};

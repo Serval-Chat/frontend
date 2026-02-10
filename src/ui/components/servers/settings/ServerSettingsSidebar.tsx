@@ -2,6 +2,7 @@ import React from 'react';
 
 import { Handshake, Settings, Shield, Smile, Zap } from 'lucide-react';
 
+import type { RolePermissions } from '@/api/servers/servers.types';
 import { usePermissions } from '@/hooks/usePermissions';
 import { Button } from '@/ui/components/common/Button';
 import { Text } from '@/ui/components/common/Text';
@@ -19,7 +20,12 @@ export const ServerSettingsSidebar: React.FC<ServerSettingsSidebarProps> = ({
 }) => {
     const { hasPermission, isOwner } = usePermissions(serverId);
 
-    const allSections = [
+    const allSections: {
+        id: string;
+        label: string;
+        icon: React.ComponentType<{ size?: number | string }>;
+        permission: keyof RolePermissions;
+    }[] = [
         {
             id: 'overview',
             label: 'Overview',
@@ -53,7 +59,7 @@ export const ServerSettingsSidebar: React.FC<ServerSettingsSidebarProps> = ({
     ];
 
     const sections = allSections.filter(
-        (section) => isOwner || hasPermission(section.permission as any),
+        (section) => isOwner || hasPermission(section.permission),
     );
 
     return (
