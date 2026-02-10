@@ -27,6 +27,14 @@ import { Input } from '@/ui/components/common/Input';
 import { LoadingOverlay } from '@/ui/components/common/LoadingOverlay';
 import { LoadingSpinner } from '@/ui/components/common/LoadingSpinner';
 import { Modal } from '@/ui/components/common/Modal';
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from '@/ui/components/common/Table';
 import { Text } from '@/ui/components/common/Text';
 import { Toggle } from '@/ui/components/common/Toggle';
 import { UserProfilePicture } from '@/ui/components/common/UserProfilePicture';
@@ -330,48 +338,53 @@ export const AdminIAM = ({
             </div>
 
             {/* Users List */}
-            <div className="overflow-hidden rounded-2xl border border-border-subtle bg-bg-subtle">
-                <div className="grid grid-cols-[1fr_120px_150px_100px] gap-4 items-center px-6 py-3 border-b border-border-subtle bg-bg-secondary/50 text-xs font-black uppercase tracking-widest text-muted-foreground">
-                    <div>User</div>
-                    <div>Access Level</div>
-                    <div>Joined</div>
-                    <div className="text-right">Actions</div>
-                </div>
-
-                <div className="divide-y divide-border-subtle">
+            <Table>
+                <TableHeader>
+                    <TableRow className="bg-bg-secondary/50 border-b border-border-subtle">
+                        <TableHead>User</TableHead>
+                        <TableHead>Access Level</TableHead>
+                        <TableHead>Joined</TableHead>
+                        <TableHead align="right">Actions</TableHead>
+                    </TableRow>
+                </TableHeader>
+                <TableBody>
                     {isLoading ? (
-                        <div className="p-12 flex justify-center">
-                            <LoadingSpinner size="lg" />
-                        </div>
+                        <TableRow>
+                            <TableCell align="center" colSpan={4}>
+                                <div className="py-12">
+                                    <LoadingSpinner size="lg" />
+                                </div>
+                            </TableCell>
+                        </TableRow>
                     ) : users && users.length > 0 ? (
                         users.map((user) => (
-                            <div
-                                className="grid grid-cols-[1fr_120px_150px_100px] gap-4 items-center px-6 py-4 hover:bg-bg-secondary/30 transition-colors group"
-                                key={user._id}
-                            >
-                                <div className="flex items-center gap-3 overflow-hidden">
-                                    <UserProfilePicture
-                                        className="w-10 h-10 rounded-full ring-2 ring-border-subtle"
-                                        src={user.profilePicture}
-                                        username={user.username}
-                                    />
-                                    <div className="flex flex-col truncate">
-                                        <span className="font-bold truncate text-foreground">
-                                            {user.displayName || user.username}
-                                        </span>
-                                        <span className="text-xs text-muted-foreground">
-                                            @{user.username}
-                                        </span>
-                                    </div>
-                                    {user.permissions.adminAccess && (
-                                        <ShieldAlert
-                                            className="text-danger shrink-0 ml-1"
-                                            size={14}
+                            <TableRow key={user._id}>
+                                <TableCell>
+                                    <div className="flex items-center gap-3 overflow-hidden">
+                                        <UserProfilePicture
+                                            className="w-10 h-10 rounded-full ring-2 ring-border-subtle"
+                                            src={user.profilePicture}
+                                            username={user.username}
                                         />
-                                    )}
-                                </div>
+                                        <div className="flex flex-col truncate">
+                                            <span className="font-bold truncate text-foreground">
+                                                {user.displayName ||
+                                                    user.username}
+                                            </span>
+                                            <span className="text-xs text-muted-foreground">
+                                                @{user.username}
+                                            </span>
+                                        </div>
+                                        {user.permissions.adminAccess && (
+                                            <ShieldAlert
+                                                className="text-danger shrink-0 ml-1"
+                                                size={14}
+                                            />
+                                        )}
+                                    </div>
+                                </TableCell>
 
-                                <div>
+                                <TableCell>
                                     <div
                                         className={cn(
                                             'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider',
@@ -392,53 +405,66 @@ export const AdminIAM = ({
                                               ? 'Staff'
                                               : 'User'}
                                     </div>
-                                </div>
+                                </TableCell>
 
-                                <div className="text-sm text-muted-foreground">
+                                <TableCell muted>
                                     {new Date(
                                         user.createdAt,
                                     ).toLocaleDateString()}
-                                </div>
+                                </TableCell>
 
-                                <div className="flex justify-end gap-1">
-                                    <Button
-                                        className="opacity-0 group-hover:opacity-100"
-                                        size="sm"
-                                        title="View Full Details"
-                                        variant="ghost"
-                                        onClick={() => onViewUser(user._id)}
-                                    >
-                                        <Eye size={16} />
-                                    </Button>
-                                    <Button
-                                        className="opacity-0 group-hover:opacity-100"
-                                        size="sm"
-                                        title="Edit Permissions"
-                                        variant="ghost"
-                                        onClick={() => setEditingUser(user)}
-                                    >
-                                        <Edit2 size={16} />
-                                    </Button>
-                                </div>
-                            </div>
+                                <TableCell align="right">
+                                    <div className="flex justify-end gap-1">
+                                        <Button
+                                            className="opacity-0 group-hover:opacity-100"
+                                            size="sm"
+                                            title="View Full Details"
+                                            variant="ghost"
+                                            onClick={() => onViewUser(user._id)}
+                                        >
+                                            <Eye size={16} />
+                                        </Button>
+                                        <Button
+                                            className="opacity-0 group-hover:opacity-100"
+                                            size="sm"
+                                            title="Edit Permissions"
+                                            variant="ghost"
+                                            onClick={() => setEditingUser(user)}
+                                        >
+                                            <Edit2 size={16} />
+                                        </Button>
+                                    </div>
+                                </TableCell>
+                            </TableRow>
                         ))
                     ) : (
-                        <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
-                            <UserIcon className="mb-4 opacity-20" size={48} />
-                            <Text as="p" weight="medium">
-                                No users found
-                            </Text>
-                            <Text as="p" className="opacity-60" size="sm">
-                                Try searching for a different username
-                            </Text>
-                        </div>
+                        <TableRow>
+                            <TableCell align="center" colSpan={4}>
+                                <div className="flex flex-col items-center justify-center py-16 text-muted-foreground text-center">
+                                    <UserIcon
+                                        className="mb-4 opacity-20"
+                                        size={48}
+                                    />
+                                    <Text as="p" weight="medium">
+                                        No users found
+                                    </Text>
+                                    <Text
+                                        as="p"
+                                        className="opacity-60"
+                                        size="sm"
+                                    >
+                                        Try searching for a different username
+                                    </Text>
+                                </div>
+                            </TableCell>
+                        </TableRow>
                     )}
-                </div>
-            </div>
+                </TableBody>
+            </Table>
 
             {/* Pagination Controls */}
             {!isLoading && users && (users.length > 0 || page > 0) && (
-                <div className="flex items-center justify-between px-6 py-4 border-t border-border-subtle bg-bg-subtle rounded-b-2xl">
+                <div className="flex items-center justify-between px-6 py-4 border border-border-subtle bg-bg-subtle rounded-2xl">
                     <Button
                         disabled={page === 0}
                         variant="ghost"

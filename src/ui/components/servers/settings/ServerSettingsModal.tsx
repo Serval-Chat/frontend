@@ -8,6 +8,7 @@ import { cn } from '@/utils/cn';
 
 import { ServerBehaviourSettings } from './ServerBehaviourSettings';
 import { ServerEmojiSettings } from './ServerEmojiSettings';
+import { ServerInviteSettings } from './ServerInviteSettings';
 import { ServerOverviewSettings } from './ServerOverviewSettings';
 import { ServerRoleSettings } from './ServerRoleSettings';
 import { ServerSettingsSidebar } from './ServerSettingsSidebar';
@@ -83,6 +84,9 @@ export const ServerSettingsModal: React.FC<ServerSettingsModalProps> = ({
                             )}
                             {activeSection === 'emojis' && (
                                 <ServerEmojiSettings serverId={serverId} />
+                            )}
+                            {activeSection === 'invites' && (
+                                <ServerInviteSettings serverId={serverId} />
                             )}
                             {activeSection === 'behaviour' && (
                                 <ServerBehaviourSettings serverId={serverId} />
