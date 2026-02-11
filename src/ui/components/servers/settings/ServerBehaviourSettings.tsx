@@ -12,6 +12,7 @@ import { LoadingSpinner } from '@/ui/components/common/LoadingSpinner';
 import { RoleDot } from '@/ui/components/common/RoleDot';
 import { SettingsFloatingBar } from '@/ui/components/common/SettingsFloatingBar';
 import { Text } from '@/ui/components/common/Text';
+import { Toggle } from '@/ui/components/common/Toggle';
 
 interface ServerBehaviourSettingsProps {
     serverId: string;
@@ -35,16 +36,28 @@ const ServerBehaviourSettingsForm: React.FC<
     const [originalRoleId, setOriginalRoleId] = useState<string | null>(
         server.defaultRoleId || null,
     );
+    const [disableCustomFonts, setDisableCustomFonts] = useState(
+        server.disableCustomFonts || false,
+    );
+    const [originalFonts, setOriginalFonts] = useState(
+        server.disableCustomFonts || false,
+    );
 
-    const hasChanges = selectedRoleId !== originalRoleId;
+    const hasChanges =
+        selectedRoleId !== originalRoleId ||
+        disableCustomFonts !== originalFonts;
 
     const handleSave = (): void => {
         if (!hasChanges) return;
         updateServer(
-            { defaultRoleId: selectedRoleId ?? undefined },
+            {
+                defaultRoleId: selectedRoleId ?? undefined,
+                disableCustomFonts,
+            },
             {
                 onSuccess: () => {
                     setOriginalRoleId(selectedRoleId);
+                    setOriginalFonts(disableCustomFonts);
                 },
             },
         );
@@ -52,6 +65,7 @@ const ServerBehaviourSettingsForm: React.FC<
 
     const handleReset = (): void => {
         setSelectedRoleId(originalRoleId);
+        setDisableCustomFonts(originalFonts);
     };
 
     // Filter out @everyone
@@ -121,6 +135,28 @@ const ServerBehaviourSettingsForm: React.FC<
                                     : selectedRoleId
                             }
                             onChange={handleDropdownChange}
+                        />
+                    </div>
+                </div>
+
+                <div className="pt-6 border-t border-[var(--color-border-subtle)]">
+                    <div className="flex items-center justify-between">
+                        <div className="space-y-1">
+                            <Text as="p" weight="semibold">
+                                Disable Custom Fonts
+                            </Text>
+                            <Text
+                                as="p"
+                                className="text-[var(--color-muted-foreground)]"
+                                size="xs"
+                            >
+                                Force all members to use system fonts in this
+                                server.
+                            </Text>
+                        </div>
+                        <Toggle
+                            checked={disableCustomFonts}
+                            onCheckedChange={setDisableCustomFonts}
                         />
                     </div>
                 </div>
