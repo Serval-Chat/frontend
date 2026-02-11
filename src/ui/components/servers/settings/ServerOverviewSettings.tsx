@@ -19,7 +19,6 @@ import { LoadingSpinner } from '@/ui/components/common/LoadingSpinner';
 import { Modal } from '@/ui/components/common/Modal';
 import { SettingsFloatingBar } from '@/ui/components/common/SettingsFloatingBar';
 import { Text } from '@/ui/components/common/Text';
-import { Toggle } from '@/ui/components/common/Toggle';
 import { ImageCropModal } from '@/ui/components/settings/ImageCropModal';
 import { resolveApiUrl } from '@/utils/apiUrl';
 
@@ -43,12 +42,6 @@ export const ServerOverviewSettings: React.FC<ServerOverviewSettingsProps> = ({
 
     const [name, setName] = useState(server?.name || '');
     const [originalName, setOriginalName] = useState(server?.name || '');
-    const [disableCustomFonts, setDisableCustomFonts] = useState(
-        server?.disableCustomFonts || false,
-    );
-    const [originalFonts, setOriginalFonts] = useState(
-        server?.disableCustomFonts || false,
-    );
 
     const [cropFile, setCropFile] = useState<File | null>(null);
     const [cropType, setCropType] = useState<
@@ -56,28 +49,23 @@ export const ServerOverviewSettings: React.FC<ServerOverviewSettingsProps> = ({
     >('avatar');
     const [isCropModalOpen, setIsCropModalOpen] = useState(false);
 
-    // Initial sync
     React.useEffect(() => {
         if (server) {
             setName(server.name);
             setOriginalName(server.name);
-            setDisableCustomFonts(!!server.disableCustomFonts);
-            setOriginalFonts(!!server.disableCustomFonts);
         }
     }, [server]);
 
-    const hasChanges =
-        name !== originalName || disableCustomFonts !== originalFonts;
+    const hasChanges = name !== originalName;
     const isPending = isUpdatingServer || isUpdatingIcon || isUpdatingBanner;
 
     const handleSave = (): void => {
         if (!hasChanges) return;
         updateServer(
-            { name, disableCustomFonts },
+            { name },
             {
                 onSuccess: () => {
                     setOriginalName(name);
-                    setOriginalFonts(disableCustomFonts);
                 },
             },
         );
@@ -285,28 +273,6 @@ export const ServerOverviewSettings: React.FC<ServerOverviewSettingsProps> = ({
                             onChange={(e) => setName(e.target.value)}
                         />
                     </div>
-
-                    <div className="pt-4 border-t border-[var(--color-border-subtle)]">
-                        <div className="flex items-center justify-between">
-                            <div className="space-y-1">
-                                <Text as="p" weight="semibold">
-                                    Disable Custom Fonts
-                                </Text>
-                                <Text
-                                    as="p"
-                                    className="text-[var(--color-muted-foreground)]"
-                                    size="xs"
-                                >
-                                    Force all members to use system fonts in
-                                    this server.
-                                </Text>
-                            </div>
-                            <Toggle
-                                checked={disableCustomFonts}
-                                onCheckedChange={setDisableCustomFonts}
-                            />
-                        </div>
-                    </div>
                 </div>
             </div>
 
@@ -384,7 +350,6 @@ export const ServerOverviewSettings: React.FC<ServerOverviewSettingsProps> = ({
                 isVisible={hasChanges}
                 onReset={() => {
                     setName(originalName);
-                    setDisableCustomFonts(originalFonts);
                 }}
                 onSave={handleSave}
             />
