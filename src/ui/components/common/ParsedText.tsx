@@ -14,7 +14,7 @@ import { ParsedEmoji } from './ParsedEmoji';
 import { ParsedUnicodeEmoji } from './ParsedUnicodeEmoji';
 import { RoleMention } from './RoleMention';
 import { Spoiler } from './Spoiler';
-import { Text } from './Text';
+import { Text, type TextProps } from './Text';
 
 interface ParsedTextProps {
     nodes: ASTNode[];
@@ -22,6 +22,7 @@ interface ParsedTextProps {
     size?: 'xs' | 'sm' | 'base' | 'lg' | 'xl' | '2xl';
     condenseFiles?: boolean;
     largeEmojis?: boolean;
+    wrap?: TextProps['wrap'];
 }
 
 /**
@@ -33,6 +34,7 @@ export const ParsedText: React.FC<ParsedTextProps> = ({
     size,
     condenseFiles,
     largeEmojis,
+    wrap,
 }) => {
     const fileNodesCount = nodes.filter((n) => n.type === 'file').length;
     const displayNodes = condenseFiles
@@ -49,21 +51,31 @@ export const ParsedText: React.FC<ParsedTextProps> = ({
                 switch (node.type) {
                     case 'text':
                         return (
-                            <Text key={idx} size={size}>
+                            <Text key={idx} size={size} wrap={wrap}>
                                 {node.content}
                             </Text>
                         );
 
                     case 'bold':
                         return (
-                            <Text key={idx} size={size} weight="bold">
+                            <Text
+                                key={idx}
+                                size={size}
+                                weight="bold"
+                                wrap={wrap}
+                            >
                                 {node.content}
                             </Text>
                         );
 
                     case 'italic':
                         return (
-                            <Text fontStyle="italic" key={idx} size={size}>
+                            <Text
+                                fontStyle="italic"
+                                key={idx}
+                                size={size}
+                                wrap={wrap}
+                            >
                                 {node.content}
                             </Text>
                         );
@@ -75,6 +87,7 @@ export const ParsedText: React.FC<ParsedTextProps> = ({
                                 key={idx}
                                 size={size}
                                 weight="bold"
+                                wrap={wrap}
                             >
                                 {node.content}
                             </Text>
@@ -128,7 +141,12 @@ export const ParsedText: React.FC<ParsedTextProps> = ({
 
                     case 'subtext':
                         return (
-                            <Text key={idx} size="xs" variant="muted">
+                            <Text
+                                key={idx}
+                                size="xs"
+                                variant="muted"
+                                wrap={wrap}
+                            >
                                 {node.content}
                             </Text>
                         );

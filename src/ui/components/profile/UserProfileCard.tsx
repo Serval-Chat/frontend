@@ -178,7 +178,11 @@ export const UserProfileCard: React.FC<UserProfileCardProps> = ({
                             About Me
                         </Heading>
                         <Box className="text-sm text-foreground/90 whitespace-pre-wrap leading-relaxed">
-                            <ParsedText nodes={bioNodes} size="xs" />
+                            <ParsedText
+                                nodes={bioNodes}
+                                size="xs"
+                                wrap="preWrap"
+                            />
                         </Box>
                     </Box>
                 )}

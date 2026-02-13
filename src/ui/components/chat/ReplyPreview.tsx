@@ -58,7 +58,12 @@ export const ReplyPreview: React.FC<ReplyPreviewProps> = ({
                     as="span"
                     className="text-xs text-muted-foreground truncate font-medium"
                 >
-                    <ParsedText condenseFiles nodes={nodes} size="xs" />
+                    <ParsedText
+                        condenseFiles
+                        nodes={nodes}
+                        size="xs"
+                        wrap="nowrap"
+                    />
                 </Text>
             </Box>
         </Box>
