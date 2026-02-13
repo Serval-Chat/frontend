@@ -17,6 +17,7 @@ import { Text } from '@/ui/components/common/Text';
 import { TextArea } from '@/ui/components/common/TextArea';
 import { UserProfileCard } from '@/ui/components/profile/UserProfileCard';
 
+import { ChangeLoginModal } from './ChangeLoginModal';
 import { ChangePasswordModal } from './ChangePasswordModal';
 import { ImageCropModal } from './ImageCropModal';
 
@@ -41,6 +42,7 @@ export const AccountSettings: React.FC = () => {
     const [cropType, setCropType] = useState<'avatar' | 'banner'>('avatar');
     const [isCropModalOpen, setIsCropModalOpen] = useState(false);
     const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+    const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
     const isPending =
         isUpdatingBio ||
@@ -263,21 +265,38 @@ export const AccountSettings: React.FC = () => {
                         <Heading className="mb-4" level={4}>
                             Password & Authentication
                         </Heading>
-                        <div className="bg-[var(--color-bg-subtle)] p-6 rounded-lg border border-[var(--color-border-subtle)] flex items-center justify-between gap-4">
-                            <div className="flex flex-col gap-1">
-                                <Text weight="bold">Password</Text>
-                                <Text size="xs" variant="muted">
-                                    Please use a strong password (and I enforce
-                                    it)
-                                </Text>
+                        <div className="space-y-4">
+                            <div className="bg-[var(--color-bg-subtle)] p-6 rounded-lg border border-[var(--color-border-subtle)] flex items-center justify-between gap-4">
+                                <div className="flex flex-col gap-1">
+                                    <Text weight="bold">Login</Text>
+                                    <Text size="xs" variant="muted">
+                                        Change your login email address
+                                    </Text>
+                                </div>
+                                <Button
+                                    size="sm"
+                                    variant="normal"
+                                    onClick={() => setIsLoginModalOpen(true)}
+                                >
+                                    Change Login
+                                </Button>
                             </div>
-                            <Button
-                                size="sm"
-                                variant="normal"
-                                onClick={() => setIsPasswordModalOpen(true)}
-                            >
-                                Change Password
-                            </Button>
+                            <div className="bg-[var(--color-bg-subtle)] p-6 rounded-lg border border-[var(--color-border-subtle)] flex items-center justify-between gap-4">
+                                <div className="flex flex-col gap-1">
+                                    <Text weight="bold">Password</Text>
+                                    <Text size="xs" variant="muted">
+                                        Please use a strong password (and I
+                                        enforce it)
+                                    </Text>
+                                </div>
+                                <Button
+                                    size="sm"
+                                    variant="normal"
+                                    onClick={() => setIsPasswordModalOpen(true)}
+                                >
+                                    Change Password
+                                </Button>
+                            </div>
                         </div>
                     </div>
 
@@ -295,6 +314,11 @@ export const AccountSettings: React.FC = () => {
                     />
                 </div>
             </div>
+
+            <ChangeLoginModal
+                isOpen={isLoginModalOpen}
+                onClose={() => setIsLoginModalOpen(false)}
+            />
 
             <ChangePasswordModal
                 isOpen={isPasswordModalOpen}

@@ -39,3 +39,22 @@ export interface ChangeLoginResponse {
     login: string;
     token: string;
 }
+
+export interface RequestPasswordResetRequest {
+    email: string;
+}
+
+export interface RequestPasswordResetResponse {
+    message: string;
+    requestId: string;
+}
+
+export interface ConfirmPasswordResetRequest {
+    token: string;
+    newPassword: string;
+}
+
+export interface ConfirmPasswordResetResponse {
+    message: string;
+    requestId: string;
+}

@@ -1,5 +1,7 @@
 import React from 'react';
 
+import { Link } from 'react-router-dom';
+
 import { useLoginForm } from '@/hooks/useLoginForm';
 import { FormContent } from '@/ui/components/auth/FormContent';
 import { Button } from '@/ui/components/common/Button';
@@ -66,6 +68,14 @@ export const Login: React.FC = () => {
                             onChange={(e) => setPassword(e.target.value)}
                         />
                     </InputWrapper>
+                    <div className="text-right">
+                        <Link
+                            className="text-sm text-primary hover:underline"
+                            to="/forgot-password"
+                        >
+                            Forgot Password?
+                        </Link>
+                    </div>
                     <Button
                         className="w-full py-sm text-lg font-semibold"
                         type="submit"

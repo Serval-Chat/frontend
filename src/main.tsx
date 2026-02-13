@@ -6,9 +6,11 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { Admin } from '@/pages/Admin';
 import { App } from '@/pages/App';
 import { Chat } from '@/pages/Chat';
+import { ForgotPassword } from '@/pages/ForgotPassword';
 import { Login } from '@/pages/Login';
 import { NotFound } from '@/pages/NotFound';
 import { Register } from '@/pages/Register';
+import { ResetPassword } from '@/pages/ResetPassword';
 import { Showoff } from '@/pages/Showoff';
 import { QueryProvider } from '@/providers/QueryProvider';
 import { StoreProvider } from '@/providers/StoreProvider';
@@ -28,6 +30,14 @@ createRoot(document.getElementById('root')!).render(
                             <Routes>
                                 <Route element={<App />} path="/" />
                                 <Route element={<Login />} path="/login" />
+                                <Route
+                                    element={<ForgotPassword />}
+                                    path="/forgot-password"
+                                />
+                                <Route
+                                    element={<ResetPassword />}
+                                    path="/reset-password"
+                                />
                                 <Route
                                     element={<Register />}
                                     path="/register"
