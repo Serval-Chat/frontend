@@ -99,7 +99,7 @@ export const ServerEmojiSettings: React.FC<ServerEmojiSettingsProps> = ({
                 <Heading className="mb-1" level={2} variant="section">
                     Server Emojis
                 </Heading>
-                <Text className="text-[var(--color-muted-foreground)]">
+                <Text variant="muted">
                     Upload custom emojis for your server members to use.
                 </Text>
             </div>
@@ -119,10 +119,7 @@ export const ServerEmojiSettings: React.FC<ServerEmojiSettingsProps> = ({
                         value={emojiName}
                         onChange={(e) => setEmojiName(e.target.value)}
                     />
-                    <Text
-                        className="text-[var(--color-muted-foreground)]"
-                        size="xs"
-                    >
+                    <Text size="xs" variant="muted">
                         Only alphanumeric characters, underscores, and dashes.
                     </Text>
                 </div>
@@ -154,8 +151,10 @@ export const ServerEmojiSettings: React.FC<ServerEmojiSettingsProps> = ({
                                 <>
                                     <Plus className="w-6 h-6 text-[var(--color-muted-foreground)]" />
                                     <Text
-                                        className="text-[var(--color-muted-foreground)] text-center leading-tight"
+                                        align="center"
+                                        leading="tight"
                                         size="xs"
+                                        variant="muted"
                                     >
                                         Upload
                                     </Text>
@@ -185,9 +184,12 @@ export const ServerEmojiSettings: React.FC<ServerEmojiSettingsProps> = ({
                                 {hoveredEmojiId === emoji._id && (
                                     <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center gap-1 p-2">
                                         <Text
-                                            className="text-white text-center leading-tight break-all"
+                                            align="center"
+                                            leading="tight"
                                             size="xs"
+                                            variant="inverse"
                                             weight="medium"
+                                            wrap="breakAll"
                                         >
                                             :{emoji.name}:
                                         </Text>

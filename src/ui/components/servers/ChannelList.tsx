@@ -1,16 +1,20 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { Reorder } from 'framer-motion';
-import { ChevronDown, Copy, Folder } from 'lucide-react';
+import { ChevronDown, Copy, Folder, Plus, Settings } from 'lucide-react';
 
 import { serversApi } from '@/api/servers/servers.api';
 import type { Category, Channel } from '@/api/servers/servers.types';
+import { usePermissions } from '@/hooks/usePermissions';
 import { useAppSelector } from '@/store/hooks';
 import { ContextMenu } from '@/ui/components/common/ContextMenu';
 import type { ContextMenuItem } from '@/ui/components/common/ContextMenu';
+import { IconButton } from '@/ui/components/common/IconButton';
 import { cn } from '@/utils/cn';
 
 import { ChannelItem } from './ChannelItem';
+import { ChannelSettingsModal } from './modals/ChannelSettingsModal';
+import { CreateChannelModal } from './modals/CreateChannelModal';
 
 interface ChannelListProps {
     channels: Channel[];
@@ -19,8 +23,12 @@ interface ChannelListProps {
     onChannelSelect: (channelId: string) => void;
 }
 
+type ListItem =
+    | { type: 'category'; id: string; data: Category }
+    | { type: 'channel'; id: string; data: Channel };
+
 /**
- * @description Renders a list of channels grouped by categories with contexts for reordering said channels
+ * @description Renders the list of channels grouped by categories.
  */
 export const ChannelList: React.FC<ChannelListProps> = ({
     channels,
@@ -32,68 +40,187 @@ export const ChannelList: React.FC<ChannelListProps> = ({
         (state) => state.nav.selectedServerId,
     );
 
-    const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(
-        new Set(),
+    const [collapsedCategories, setCollapsedCategories] = useState<
+        Record<string, boolean>
+    >({});
+
+    const [settingsChannel, setSettingsChannel] = useState<Channel | null>(
+        null,
     );
 
-    // initial sort
-    const initialSortedChannels = useMemo(
-        () => [...channels].sort((a, b) => a.position - b.position),
-        [channels],
+    const { hasPermission } = usePermissions(selectedServerId);
+    const canManageChannels = hasPermission('manageChannels');
+
+    const [createModalOpen, setCreateModalOpen] = useState(false);
+    const [createCategoryId, setCreateCategoryId] = useState<string | null>(
+        null,
     );
 
-    // group channels by categoryId
-    const channelsByCategory = useMemo(
-        () =>
-            initialSortedChannels.reduce(
-                (acc, channel) => {
-                    const catId = channel.categoryId || 'uncategorized';
-                    if (!acc[catId]) acc[catId] = [];
-                    acc[catId].push(channel);
-                    return acc;
-                },
-                {} as Record<string, Channel[]>,
-            ),
-        [initialSortedChannels],
-    );
+    const [items, setItems] = useState<ListItem[]>([]);
+    const [isReordering, setIsReordering] = useState(false);
+    const [syncLock, setSyncLock] = useState(false);
 
-    const sortedCategories = useMemo(
-        () => [...categories].sort((a, b) => a.position - b.position),
-        [categories],
-    );
+    // Sync items when props change (only when not reordering and not locked)
+    useEffect(() => {
+        if (isReordering || syncLock) return;
+
+        const sortedCategories = [...categories].sort(
+            (a, b) => a.position - b.position,
+        );
+        const sortedChannels = [...channels].sort(
+            (a, b) => a.position - b.position,
+        );
+
+        const newList: ListItem[] = [];
+
+        // Add uncategorized channels
+        const uncategorized = sortedChannels.filter((c) => !c.categoryId);
+        uncategorized.forEach((c) =>
+            newList.push({ type: 'channel', id: c._id, data: c }),
+        );
+
+        // Add categories and their channels
+        sortedCategories.forEach((cat) => {
+            newList.push({ type: 'category', id: cat._id, data: cat });
+            const catChannels = sortedChannels.filter(
+                (c) => c.categoryId === cat._id,
+            );
+            catChannels.forEach((c) =>
+                newList.push({ type: 'channel', id: c._id, data: c }),
+            );
+        });
+
+        setItems(newList);
+    }, [categories, channels, isReordering, syncLock]);
 
     const toggleCategory = (categoryId: string): void => {
-        setCollapsedCategories((prev) => {
-            const next = new Set(prev);
-            if (next.has(categoryId)) {
-                next.delete(categoryId);
-            } else {
-                next.add(categoryId);
-            }
-            return next;
-        });
+        setCollapsedCategories((prev) => ({
+            ...prev,
+            [categoryId]: !prev[categoryId],
+        }));
     };
 
-    const handleReorder = useCallback(
-        async (reorderedChannels: Channel[]) => {
-            if (!selectedServerId) return;
+    const [activeItemId, setActiveItemId] = useState<string | null>(null);
 
-            const positions = reorderedChannels.map((ch, idx) => ({
-                channelId: ch._id,
-                position: idx,
-            }));
+    const handleReorder = (newItems: ListItem[]): void => {
+        setIsReordering(true);
 
-            try {
-                await serversApi.reorderChannels(selectedServerId, positions);
-            } catch (error) {
-                console.error('Failed to reorder channels:', error);
+        // If a category is being dragged, move its children with it
+        const activeItem = items.find((i) => i.id === activeItemId);
+        if (activeItem?.type === 'category') {
+            const categoryId = activeItem.id;
+
+            const childrenItems = items.filter(
+                (i) => i.type === 'channel' && i.data.categoryId === categoryId,
+            );
+
+            if (childrenItems.length > 0) {
+                const childrenIds = new Set(childrenItems.map((i) => i.id));
+                const newCategoryIndex = newItems.findIndex(
+                    (i) => i.id === categoryId,
+                );
+
+                const updatedItems = newItems.filter(
+                    (i) => !childrenIds.has(i.id),
+                );
+                updatedItems.splice(newCategoryIndex + 1, 0, ...childrenItems);
+
+                setItems(updatedItems);
+                return;
             }
-        },
-        [selectedServerId],
-    );
+        }
 
-    const onReorder = (newOrder: Channel[]): void => {
-        void handleReorder(newOrder);
+        setItems(newItems);
+    };
+
+    const handleDragEnd = async (): Promise<void> => {
+        if (!selectedServerId || !canManageChannels) {
+            setIsReordering(false);
+            return;
+        }
+
+        try {
+            const channelUpdates: {
+                id: string;
+                updates: Partial<Channel>;
+            }[] = [];
+            const categoryPositions: {
+                categoryId: string;
+                position: number;
+            }[] = [];
+            const channelPositions: { channelId: string; position: number }[] =
+                [];
+
+            let currentCategoryId: string | null = null;
+            let channelPos = 0;
+            let categoryPos = 0;
+
+            items.forEach((item) => {
+                if (item.type === 'category') {
+                    currentCategoryId = item.id;
+                    categoryPositions.push({
+                        categoryId: item.id,
+                        position: categoryPos++,
+                    });
+                } else {
+                    const channel = item.data;
+                    if (channel.categoryId !== currentCategoryId) {
+                        channelUpdates.push({
+                            id: channel._id,
+                            updates: { categoryId: currentCategoryId },
+                        });
+                    }
+                    channelPositions.push({
+                        channelId: channel._id,
+                        position: channelPos++,
+                    });
+                }
+            });
+
+            // Parallel updates
+            const promises: Promise<unknown>[] = [];
+
+            // Update category IDs if changed
+            channelUpdates.forEach((update) => {
+                promises.push(
+                    serversApi.updateChannel(
+                        selectedServerId,
+                        update.id,
+                        update.updates,
+                    ),
+                );
+            });
+
+            // Reorder channels
+            if (channelPositions.length > 0) {
+                promises.push(
+                    serversApi.reorderChannels(
+                        selectedServerId,
+                        channelPositions,
+                    ),
+                );
+            }
+
+            // Reorder categories
+            if (categoryPositions.length > 0) {
+                promises.push(
+                    serversApi.reorderCategories(
+                        selectedServerId,
+                        categoryPositions,
+                    ),
+                );
+            }
+
+            await Promise.all(promises);
+        } catch (error) {
+            console.error('Failed to reorder:', error);
+            setIsReordering(false);
+        } finally {
+            setIsReordering(false);
+            setActiveItemId(null);
+            setSyncLock(true);
+            setTimeout(() => setSyncLock(false), 500);
+        }
     };
 
     const handleMoveToCategory = async (
@@ -120,6 +247,13 @@ export const ChannelList: React.FC<ChannelListProps> = ({
                     void navigator.clipboard.writeText(channel._id);
                 },
             },
+            {
+                label: 'Edit Channel',
+                icon: Settings,
+                onClick: () => {
+                    setSettingsChannel(channel);
+                },
+            },
         ];
 
         // Move to Category options
@@ -129,11 +263,14 @@ export const ChannelList: React.FC<ChannelListProps> = ({
                 icon: Folder,
                 onClick: () => void handleMoveToCategory(channel._id, null),
             },
-            ...sortedCategories.map((cat) => ({
-                label: cat.name,
-                icon: Folder,
-                onClick: () => void handleMoveToCategory(channel._id, cat._id),
-            })),
+            ...[...categories]
+                .sort((a, b) => a.position - b.position)
+                .map((cat) => ({
+                    label: cat.name,
+                    icon: Folder,
+                    onClick: () =>
+                        void handleMoveToCategory(channel._id, cat._id),
+                })),
         ];
 
         // Filter out current category
@@ -141,9 +278,7 @@ export const ChannelList: React.FC<ChannelListProps> = ({
         const availableOptions = moveOptions.filter((opt) => {
             if (opt.type === 'divider') return false;
             if (opt.label === 'Uncategorized') return currentCatId !== null;
-            const targetCat = sortedCategories.find(
-                (c) => c.name === opt.label,
-            );
+            const targetCat = categories.find((c) => c.name === opt.label);
             return targetCat?._id !== currentCatId;
         });
 
@@ -175,68 +310,131 @@ export const ChannelList: React.FC<ChannelListProps> = ({
     );
 
     return (
-        <div className="flex flex-col px-2 space-y-4 py-4">
-            {/* Uncategorized channels first */}
-            <Reorder.Group
-                axis="y"
-                className="space-y-0.5"
-                values={channelsByCategory['uncategorized'] || []}
-                onReorder={(newOrder) => onReorder(newOrder)}
-            >
-                {channelsByCategory['uncategorized']?.map((channel) => (
-                    <Reorder.Item key={channel._id} value={channel}>
-                        {renderChannel(channel)}
-                    </Reorder.Item>
-                ))}
-            </Reorder.Group>
+        <ContextMenu
+            className="flex-1"
+            items={
+                canManageChannels
+                    ? [
+                          {
+                              label: 'Create Channel',
+                              icon: Plus,
+                              onClick: () => {
+                                  setCreateCategoryId(null);
+                                  setCreateModalOpen(true);
+                              },
+                          },
+                      ]
+                    : []
+            }
+        >
+            <div className="flex flex-col px-2 space-y-0.5 py-4 min-h-full">
+                <Reorder.Group
+                    axis="y"
+                    className="space-y-0.5"
+                    values={items}
+                    onReorder={handleReorder}
+                >
+                    {items.map((item) => {
+                        if (item.type === 'category') {
+                            const category = item.data;
+                            const isCollapsed =
+                                collapsedCategories[category._id];
 
-            {sortedCategories.map((category) => {
-                const isCollapsed = collapsedCategories.has(category._id);
-                const categoryChannels = channelsByCategory[category._id] || [];
-
-                return (
-                    <div className="space-y-1" key={category._id}>
-                        <div
-                            className="flex items-center px-1 group cursor-pointer"
-                            role="button"
-                            tabIndex={0}
-                            onClick={() => toggleCategory(category._id)}
-                            onKeyDown={(e) => {
-                                if (e.key === 'Enter' || e.key === ' ') {
-                                    toggleCategory(category._id);
-                                }
-                            }}
-                        >
-                            <ChevronDown
-                                className={cn(
-                                    'w-3 h-3 mr-0.5 text-foreground-muted transition-transform duration-200',
-                                    isCollapsed ? '-rotate-90' : '',
-                                )}
-                            />
-                            <span className="text-[12px] font-bold text-foreground-muted uppercase tracking-wider group-hover:text-foreground/80 transition-colors">
-                                {category.name}
-                            </span>
-                        </div>
-                        {!isCollapsed && (
-                            <Reorder.Group
-                                axis="y"
-                                className="space-y-0.5"
-                                values={categoryChannels}
-                                onReorder={(newOrder) => onReorder(newOrder)}
-                            >
-                                {categoryChannels.map((channel) => (
-                                    <Reorder.Item
-                                        key={channel._id}
-                                        value={channel}
+                            return (
+                                <Reorder.Item
+                                    className="pt-4 first:pt-0"
+                                    key={item.id}
+                                    value={item}
+                                    onDragEnd={() => void handleDragEnd()}
+                                    onDragStart={() => setActiveItemId(item.id)}
+                                >
+                                    <div
+                                        className="flex items-center px-1 group cursor-pointer"
+                                        role="button"
+                                        tabIndex={0}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            toggleCategory(category._id);
+                                        }}
+                                        onKeyDown={(e) => {
+                                            if (
+                                                e.key === 'Enter' ||
+                                                e.key === ' '
+                                            ) {
+                                                toggleCategory(category._id);
+                                            }
+                                        }}
                                     >
-                                        {renderChannel(channel)}
-                                    </Reorder.Item>
-                                ))}
-                            </Reorder.Group>
-                        )}
-                    </div>
-                );
-            })}
-        </div>
+                                        <ChevronDown
+                                            className={cn(
+                                                'w-3 h-3 mr-0.5 text-foreground-muted transition-transform duration-200',
+                                                isCollapsed ? '-rotate-90' : '',
+                                            )}
+                                        />
+                                        <span className="text-[12px] font-bold text-foreground-muted uppercase tracking-wider group-hover:text-foreground/80 transition-colors flex-1">
+                                            {category.name}
+                                        </span>
+                                        {canManageChannels && (
+                                            <IconButton
+                                                className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5"
+                                                icon={Plus}
+                                                iconSize={14}
+                                                title="Create Channel"
+                                                variant="ghost"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setCreateCategoryId(
+                                                        category._id,
+                                                    );
+                                                    setCreateModalOpen(true);
+                                                }}
+                                            />
+                                        )}
+                                    </div>
+                                </Reorder.Item>
+                            );
+                        } else {
+                            const channel = item.data;
+                            const isCollapsed = channel.categoryId
+                                ? collapsedCategories[channel.categoryId]
+                                : false;
+
+                            if (isCollapsed) return null;
+
+                            return (
+                                <Reorder.Item
+                                    key={item.id}
+                                    value={item}
+                                    onDragEnd={() => void handleDragEnd()}
+                                    onDragStart={() => setActiveItemId(item.id)}
+                                >
+                                    {renderChannel(channel)}
+                                </Reorder.Item>
+                            );
+                        }
+                    })}
+                </Reorder.Group>
+
+                {settingsChannel && (
+                    <ChannelSettingsModal
+                        channel={settingsChannel}
+                        isOpen={!!settingsChannel}
+                        onClose={() => setSettingsChannel(null)}
+                    />
+                )}
+
+                {selectedServerId && (
+                    <CreateChannelModal
+                        categoryId={createCategoryId}
+                        isOpen={createModalOpen}
+                        serverId={selectedServerId}
+                        onClose={() => {
+                            setCreateModalOpen(false);
+                            setCreateCategoryId(null);
+                        }}
+                    />
+                )}
+            </div>
+        </ContextMenu>
     );
 };

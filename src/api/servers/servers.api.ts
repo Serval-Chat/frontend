@@ -168,6 +168,22 @@ export const serversApi = {
         return response.data;
     },
 
+    createChannel: async (
+        serverId: string,
+        data: {
+            name: string;
+            type?: 'text' | 'voice';
+            categoryId?: string | null;
+            position?: number;
+        },
+    ): Promise<Channel> => {
+        const response = await apiClient.post<Channel>(
+            `/api/v1/servers/${serverId}/channels`,
+            data,
+        );
+        return response.data;
+    },
+
     updateServer: async (
         serverId: string,
         updates: Partial<Server>,

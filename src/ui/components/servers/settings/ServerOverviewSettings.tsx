@@ -166,7 +166,7 @@ export const ServerOverviewSettings: React.FC<ServerOverviewSettingsProps> = ({
                 <Heading className="mb-1" level={2} variant="section">
                     Server Overview
                 </Heading>
-                <Text className="text-[var(--color-muted-foreground)]">
+                <Text variant="muted">
                     Update your server's identity and appearance.
                 </Text>
             </div>
@@ -206,7 +206,12 @@ export const ServerOverviewSettings: React.FC<ServerOverviewSettingsProps> = ({
                             )}
                             <div className="absolute inset-0 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/40">
                                 <Upload className="w-6 h-6 text-white mb-1" />
-                                <Text className="text-[10px] text-white font-bold uppercase">
+                                <Text
+                                    size="2xs"
+                                    transform="uppercase"
+                                    variant="inverse"
+                                    weight="bold"
+                                >
                                     Change Icon
                                 </Text>
                             </div>
@@ -242,14 +247,19 @@ export const ServerOverviewSettings: React.FC<ServerOverviewSettingsProps> = ({
                                 />
                             ) : (
                                 <div className="p-4 text-center">
-                                    <Text className="text-[var(--color-muted-foreground)] text-xs">
+                                    <Text size="xs" variant="muted">
                                         No Banner Set
                                     </Text>
                                 </div>
                             )}
                             <div className="absolute inset-0 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/40">
                                 <Upload className="w-6 h-6 text-white mb-1" />
-                                <Text className="text-[10px] text-white font-bold uppercase">
+                                <Text
+                                    size="2xs"
+                                    transform="uppercase"
+                                    variant="inverse"
+                                    weight="bold"
+                                >
                                     Change Banner
                                 </Text>
                             </div>
@@ -295,11 +305,7 @@ export const ServerOverviewSettings: React.FC<ServerOverviewSettingsProps> = ({
                                 <Text as="p" weight="bold">
                                     Transfer Ownership
                                 </Text>
-                                <Text
-                                    as="p"
-                                    className="text-[var(--color-muted-foreground)]"
-                                    size="xs"
-                                >
+                                <Text as="p" size="xs" variant="muted">
                                     Give this server to another member. This
                                     action cannot be undone.
                                 </Text>
@@ -316,18 +322,10 @@ export const ServerOverviewSettings: React.FC<ServerOverviewSettingsProps> = ({
 
                         <div className="p-4 flex items-center justify-between gap-4">
                             <div className="space-y-1">
-                                <Text
-                                    as="p"
-                                    className="text-[var(--color-status-error)]"
-                                    weight="bold"
-                                >
+                                <Text as="p" variant="danger" weight="bold">
                                     Delete Server
                                 </Text>
-                                <Text
-                                    as="p"
-                                    className="text-[var(--color-muted-foreground)]"
-                                    size="xs"
-                                >
+                                <Text as="p" size="xs" variant="muted">
                                     Permanently delete this server and all its
                                     data. This action is IRREVERSIBLE.
                                 </Text>
@@ -426,10 +424,7 @@ export const ServerOverviewSettings: React.FC<ServerOverviewSettingsProps> = ({
                 onClose={() => setIsTransferModalOpen(false)}
             >
                 <div className="space-y-6">
-                    <Text
-                        className="text-[var(--color-muted-foreground)]"
-                        size="sm"
-                    >
+                    <Text size="sm" variant="muted">
                         Transferring ownership will make another member the
                         owner of this server. You will no longer have full
                         control over the server.
@@ -469,10 +464,7 @@ export const ServerOverviewSettings: React.FC<ServerOverviewSettingsProps> = ({
                                                 {member.user.displayName ||
                                                     member.user.username}
                                             </Text>
-                                            <Text
-                                                className="text-[var(--color-muted-foreground)]"
-                                                size="xs"
-                                            >
+                                            <Text size="xs" variant="muted">
                                                 @{member.user.username}
                                             </Text>
                                         </div>

@@ -101,7 +101,7 @@ const ServerBehaviourSettingsForm: React.FC<
                 <Heading className="mb-1" level={2} variant="section">
                     Server Behaviour
                 </Heading>
-                <Text className="text-[var(--color-muted-foreground)]">
+                <Text variant="muted">
                     Configure how users interact with your server and automated
                     actions (one day).
                 </Text>
@@ -113,11 +113,7 @@ const ServerBehaviourSettingsForm: React.FC<
                         <Text as="p" weight="semibold">
                             Default Join Role
                         </Text>
-                        <Text
-                            as="p"
-                            className="text-[var(--color-muted-foreground)]"
-                            size="xs"
-                        >
+                        <Text as="p" size="xs" variant="muted">
                             Automatically assign this role to new members when
                             they join the server.
                         </Text>
@@ -145,11 +141,7 @@ const ServerBehaviourSettingsForm: React.FC<
                             <Text as="p" weight="semibold">
                                 Disable Custom Fonts
                             </Text>
-                            <Text
-                                as="p"
-                                className="text-[var(--color-muted-foreground)]"
-                                size="xs"
-                            >
+                            <Text as="p" size="xs" variant="muted">
                                 Force all members to use system fonts in this
                                 server.
                             </Text>

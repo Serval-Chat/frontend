@@ -97,7 +97,7 @@ export const ServerInviteSettings: React.FC<ServerInviteSettingsProps> = ({
                 <Heading className="mb-1" level={2} variant="section">
                     Server Invites
                 </Heading>
-                <Text className="text-[var(--color-muted-foreground)]">
+                <Text variant="muted">
                     Create and manage invitations for your server.
                 </Text>
             </div>
@@ -120,10 +120,7 @@ export const ServerInviteSettings: React.FC<ServerInviteSettingsProps> = ({
                             value={customPath}
                             onChange={(e) => setCustomPath(e.target.value)}
                         />
-                        <Text
-                            className="text-[var(--color-muted-foreground)]"
-                            size="xs"
-                        >
+                        <Text size="xs" variant="muted">
                             Optional. Leave empty for random code.
                         </Text>
                     </div>
@@ -144,10 +141,7 @@ export const ServerInviteSettings: React.FC<ServerInviteSettingsProps> = ({
                                 setMaxUses(parseInt(e.target.value) || 0)
                             }
                         />
-                        <Text
-                            className="text-[var(--color-muted-foreground)]"
-                            size="xs"
-                        >
+                        <Text size="xs" variant="muted">
                             0 for unlimited uses.
                         </Text>
                     </div>

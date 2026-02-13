@@ -8,6 +8,7 @@ import type { Role, RolePermissions } from '@/api/servers/servers.types';
 import { useMe } from '@/api/users/users.queries';
 import { Message } from '@/ui/components/chat/Message';
 import { Button } from '@/ui/components/common/Button';
+import { Heading } from '@/ui/components/common/Heading';
 import { IconButton } from '@/ui/components/common/IconButton';
 import { Input } from '@/ui/components/common/Input';
 import { Text } from '@/ui/components/common/Text';
@@ -201,13 +202,13 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
                 <div className="flex-1 overflow-y-auto p-8 max-w-3xl mx-auto w-full space-y-8 pb-24">
                     {/* General Settings */}
                     <section className="space-y-4">
-                        <Text
+                        <Heading
                             className="border-b border-[var(--color-border-subtle)] pb-2"
-                            size="lg"
-                            weight="bold"
+                            level={3}
+                            variant="section"
                         >
                             General Settings
-                        </Text>
+                        </Heading>
 
                         <div className="space-y-2">
                             <label
@@ -553,8 +554,9 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
                                     </div>
                                     <div className="space-y-1">
                                         <Text
-                                            className="uppercase tracking-wider"
                                             size="xs"
+                                            tracking="wider"
+                                            transform="uppercase"
                                             variant="muted"
                                             weight="bold"
                                         >
@@ -588,9 +590,7 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
 
                     {/* Permissions Settings */}
                     <section className="space-y-4 pt-4 border-t border-[var(--color-border-subtle)]">
-                        <Text size="lg" weight="bold">
-                            Permissions
-                        </Text>
+                        <Heading level={2}>Permissions</Heading>
                         <div className="space-y-4">
                             <PermissionToggle
                                 danger
@@ -741,15 +741,13 @@ const PermissionToggle: React.FC<PermissionToggleProps> = ({
     <div className="flex items-center justify-between py-2">
         <div className="flex-1 pr-4">
             <Text
-                className={cn(
-                    'block mb-1',
-                    danger && 'text-[var(--color-danger)]',
-                )}
+                as="p"
+                variant={danger ? 'danger' : 'default'}
                 weight="semibold"
             >
                 {label}
             </Text>
-            <Text className="block leading-snug" size="xs" variant="muted">
+            <Text as="p" leading="snug" size="xs" variant="muted">
                 {description}
             </Text>
         </div>

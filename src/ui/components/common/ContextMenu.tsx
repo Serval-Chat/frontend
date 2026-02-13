@@ -56,6 +56,7 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
 
     const handleContextMenu = (e: React.MouseEvent): void => {
         e.preventDefault();
+        e.stopPropagation();
         setClickPosition({ x: e.clientX, y: e.clientY });
         setIsOpen(true);
     };
@@ -102,7 +103,7 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
     return (
         <>
             <Box
-                className={cn('inline-block', className)}
+                className={cn('block', className)}
                 onContextMenu={handleContextMenu}
             >
                 {children}

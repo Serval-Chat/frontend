@@ -14,8 +14,10 @@ const textVariants = cva('', {
             success: 'text-[var(--color-success)]',
             danger: 'text-[var(--color-danger)]',
             caution: 'text-[var(--color-caution)]',
+            inverse: 'text-[var(--color-foreground-inverse)]',
         },
         size: {
+            '2xs': 'text-[10px]',
             xs: 'text-xs',
             sm: 'text-sm',
             base: 'text-base',
@@ -53,6 +55,23 @@ const textVariants = cva('', {
             pre: 'whitespace-pre',
             preLine: 'whitespace-pre-line',
             preWrap: 'whitespace-pre-wrap',
+            breakAll: 'break-all',
+        },
+        leading: {
+            none: 'leading-none',
+            tight: 'leading-tight',
+            snug: 'leading-snug',
+            normal: 'leading-normal',
+            relaxed: 'leading-relaxed',
+            loose: 'leading-loose',
+        },
+        tracking: {
+            tighter: 'tracking-tighter',
+            tight: 'tracking-tight',
+            normal: 'tracking-normal',
+            wide: 'tracking-wide',
+            wider: 'tracking-wider',
+            widest: 'tracking-widest',
         },
     },
     defaultVariants: {
@@ -63,6 +82,8 @@ const textVariants = cva('', {
         transform: 'normal',
         align: 'left',
         wrap: 'wrap',
+        leading: 'normal',
+        tracking: 'normal',
     },
 });
 
@@ -87,6 +108,8 @@ export const Text: React.FC<TextProps> = ({
     transform,
     align,
     wrap,
+    leading,
+    tracking,
     as: Tag = 'span',
     children,
     ...props
@@ -101,6 +124,8 @@ export const Text: React.FC<TextProps> = ({
                 transform,
                 align,
                 wrap,
+                leading,
+                tracking,
                 className,
             }),
         )}

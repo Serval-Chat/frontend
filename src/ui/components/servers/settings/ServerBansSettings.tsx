@@ -64,7 +64,7 @@ export const ServerBansSettings: React.FC<ServerBansSettingsProps> = ({
                 <Heading className="mb-1" level={2} variant="section">
                     Server Bans
                 </Heading>
-                <Text className="text-[var(--color-muted-foreground)]">
+                <Text variant="muted">
                     Manage users who have been banned from this server. Banned
                     users cannot join or see the server.
                 </Text>
@@ -116,10 +116,7 @@ export const ServerBansSettings: React.FC<ServerBansSettingsProps> = ({
                                                         ban.user?.username ||
                                                         'Unknown User'}
                                                 </Text>
-                                                <Text
-                                                    className="text-[var(--color-muted-foreground)]"
-                                                    size="xs"
-                                                >
+                                                <Text size="xs" variant="muted">
                                                     @
                                                     {ban.user?.username ||
                                                         'unknown'}
