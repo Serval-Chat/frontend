@@ -5,10 +5,14 @@ import type {
     ChangeLoginResponse,
     ChangePasswordRequest,
     ChangePasswordResponse,
+    ConfirmPasswordResetRequest,
+    ConfirmPasswordResetResponse,
     LoginRequest,
     LoginResponse,
     RegisterRequest,
     RegisterResponse,
+    RequestPasswordResetRequest,
+    RequestPasswordResetResponse,
 } from './auth.types';
 
 export const authApi = {
@@ -30,5 +34,21 @@ export const authApi = {
     changeLogin: (data: ChangeLoginRequest) =>
         apiClient
             .patch<ChangeLoginResponse>('/api/v1/auth/login', data)
+            .then((r) => r.data),
+
+    requestPasswordReset: (data: RequestPasswordResetRequest) =>
+        apiClient
+            .post<RequestPasswordResetResponse>(
+                '/api/v1/auth/password/reset',
+                data,
+            )
+            .then((r) => r.data),
+
+    confirmPasswordReset: (data: ConfirmPasswordResetRequest) =>
+        apiClient
+            .post<ConfirmPasswordResetResponse>(
+                '/api/v1/auth/password/reset/confirm',
+                data,
+            )
             .then((r) => r.data),
 };

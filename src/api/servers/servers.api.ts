@@ -126,6 +126,15 @@ export const serversApi = {
         await apiClient.delete(`/api/v1/servers/${serverId}/emojis/${emojiId}`);
     },
 
+    deleteChannel: async (
+        serverId: string,
+        channelId: string,
+    ): Promise<void> => {
+        await apiClient.delete(
+            `/api/v1/servers/${serverId}/channels/${channelId}`,
+        );
+    },
+
     reorderChannels: async (
         serverId: string,
         channelPositions: { channelId: string; position: number }[],

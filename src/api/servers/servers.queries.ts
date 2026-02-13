@@ -257,6 +257,42 @@ export const useUpdateServerBanner = (
     });
 };
 
+export const useUpdateChannel = (
+    serverId: string,
+    channelId: string,
+): UseMutationResult<Channel, Error, Partial<Channel>> => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (updates: Partial<Channel>) =>
+            serversApi.updateChannel(serverId, channelId, updates),
+        onSuccess: () => {
+            void queryClient.invalidateQueries({
+                queryKey: SERVERS_QUERY_KEYS.channels(serverId),
+            });
+        },
+    });
+};
+
+export const useDeleteChannel = (
+    serverId: string,
+): UseMutationResult<void, Error, string> => {
+    const queryClient = useQueryClient();
+    const { showToast } = useToast();
+    return useMutation({
+        mutationFn: (channelId: string) =>
+            serversApi.deleteChannel(serverId, channelId),
+        onSuccess: () => {
+            void queryClient.invalidateQueries({
+                queryKey: SERVERS_QUERY_KEYS.channels(serverId),
+            });
+            showToast('Channel deleted successfully', 'success');
+        },
+        onError: (error) => {
+            showToast(error.message || 'Failed to delete channel', 'error');
+        },
+    });
+};
+
 export const useDeleteServer = (): UseMutationResult<void, Error, string> => {
     const queryClient = useQueryClient();
     return useMutation({
