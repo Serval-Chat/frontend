@@ -35,6 +35,7 @@ export function useChatWS(
     const { typingUsers, addTypingUser, clearTypingUsers } =
         useTypingIndicator();
     const lastTypingSentRef = useRef<number>(0);
+    const prevChannelRef = useRef<string | null>(null);
 
     const convertDmToChatMessage = useCallback(
         (message: IMessageDm): ChatMessage => ({
@@ -241,6 +242,23 @@ export function useChatWS(
         }
     }, [selectedServerId, selectedChannelId]);
 
+    // Refetch channel messages when switching to a channel so we always see fresh data
+    useEffect(() => {
+        if (!selectedServerId || !selectedChannelId) {
+            prevChannelRef.current = null;
+            return;
+        }
+        if (prevChannelRef.current !== selectedChannelId) {
+            prevChannelRef.current = selectedChannelId;
+            void queryClient.invalidateQueries({
+                queryKey: CHAT_QUERY_KEYS.channelMessages(
+                    selectedServerId,
+                    selectedChannelId,
+                ),
+            });
+        }
+    }, [queryClient, selectedServerId, selectedChannelId]);
+
     // Handle typing indicators for DMs
     useWebSocket(
         WsEvents.TYPING_DM,
@@ -279,6 +297,77 @@ export function useChatWS(
         ),
     );
 
+    // Handle server message deleted – update cache for that channel regardless of selection
+    useWebSocket(
+        WsEvents.MESSAGE_SERVER_DELETED,
+        useCallback(
+            (payload: { messageId: string; channelId: string }): void => {
+                queryClient.setQueriesData<InfiniteData<ChatMessage[]>>(
+                    {
+                        predicate: (query) =>
+                            query.queryKey[0] === 'chat' &&
+                            query.queryKey[1] === 'messages' &&
+                            query.queryKey[2] === 'channel' &&
+                            query.queryKey[4] === payload.channelId,
+                    },
+                    (oldData) => {
+                        if (!oldData) return oldData;
+                        return {
+                            ...oldData,
+                            pages: oldData.pages.map((page) =>
+                                page.filter(
+                                    (msg) => msg._id !== payload.messageId,
+                                ),
+                            ),
+                        };
+                    },
+                );
+            },
+            [queryClient],
+        ),
+    );
+
+    // Handle server message edited – update cache for that channel regardless of selection
+    useWebSocket(
+        WsEvents.MESSAGE_SERVER_EDITED,
+        useCallback(
+            (payload: {
+                messageId: string;
+                serverId: string;
+                channelId: string;
+                text: string;
+                editedAt: string;
+                isEdited: true;
+            }): void => {
+                const queryKey = CHAT_QUERY_KEYS.channelMessages(
+                    payload.serverId,
+                    payload.channelId,
+                );
+                queryClient.setQueryData<InfiniteData<ChatMessage[]>>(
+                    queryKey,
+                    (oldData) => {
+                        if (!oldData) return oldData;
+                        return {
+                            ...oldData,
+                            pages: oldData.pages.map((page) =>
+                                page.map((msg) =>
+                                    msg._id === payload.messageId
+                                        ? {
+                                              ...msg,
+                                              text: payload.text,
+                                              isEdited: payload.isEdited,
+                                          }
+                                        : msg,
+                                ),
+                            ),
+                        };
+                    },
+                );
+            },
+            [queryClient],
+        ),
+    );
+
     // Handle reaction added
     useWebSocket(
         WsEvents.REACTION_ADDED,
@@ -299,6 +388,14 @@ export function useChatWS(
             },
             [updateReactionInCache],
         ),
+    );
+
+    // Handle DM unread updates
+    useWebSocket(
+        WsEvents.DM_UNREAD_UPDATED,
+        useCallback((): void => {
+            void queryClient.invalidateQueries({ queryKey: ['friends'] });
+        }, [queryClient]),
     );
 
     // Clear typing users when conversation changes

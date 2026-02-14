@@ -9,6 +9,7 @@ export const SHOWOFF_SECTIONS = {
     typography: 'typography',
     userIdentities: 'user-identities',
     navigation: 'navigation',
+    serverItems: 'server-items',
     chatMessages: 'chat-messages',
     loadingSpinner: 'loading-spinner',
     colorPalette: 'color-palette',

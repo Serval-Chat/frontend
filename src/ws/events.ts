@@ -174,6 +174,7 @@ export const WsEvents = {
     MESSAGE_SERVER_DELETED: 'message_server_deleted',
     MARK_CHANNEL_READ: 'mark_channel_read',
     CHANNEL_UNREAD_UPDATED: 'channel_unread_updated',
+    SERVER_UNREAD_UPDATED: 'server_unread_updated',
     TYPING_SERVER: 'typing_server',
 
     // Management

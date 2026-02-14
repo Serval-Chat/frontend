@@ -4,6 +4,7 @@ import type { Friend } from '@/api/friends/friends.types';
 import type { Server } from '@/api/servers/servers.types';
 import { UserItem } from '@/ui/components/common/UserItem';
 import { ServerIcon } from '@/ui/components/servers/ServerIcon';
+import { ServerItem } from '@/ui/components/servers/ServerItem';
 
 import { DemoItem } from './DemoItem';
 import { DemoSection } from './DemoSection';
@@ -56,6 +57,50 @@ export const NavigationDemo: React.FC = () => {
                         />
                         <span className="text-[10px] text-foreground-muted">
                             With Icon
+                        </span>
+                    </div>
+                </div>
+            </DemoItem>
+
+            <DemoItem
+                id={SHOWOFF_SECTIONS.serverItems}
+                title="Server Items (read & unread)"
+            >
+                <div className="flex flex-col items-center gap-3 w-20 bg-[--color-bg-secondary] p-3 rounded-xl">
+                    <div className="flex flex-col items-center gap-1">
+                        <ServerItem
+                            isActive={false}
+                            isUnread={false}
+                            server={mockServer}
+                        />
+                        <span className="text-[10px] text-foreground-muted">
+                            Read
+                        </span>
+                    </div>
+                    <div className="flex flex-col items-center gap-1">
+                        <ServerItem
+                            isActive
+                            isUnread={false}
+                            server={mockServer}
+                        />
+                        <span className="text-[10px] text-foreground-muted">
+                            Read (active)
+                        </span>
+                    </div>
+                    <div className="flex flex-col items-center gap-1">
+                        <ServerItem
+                            isUnread
+                            isActive={false}
+                            server={mockServer}
+                        />
+                        <span className="text-[10px] text-foreground-muted">
+                            Unread
+                        </span>
+                    </div>
+                    <div className="flex flex-col items-center gap-1">
+                        <ServerItem isActive isUnread server={mockServer} />
+                        <span className="text-[10px] text-foreground-muted">
+                            Unread (active)
                         </span>
                     </div>
                 </div>

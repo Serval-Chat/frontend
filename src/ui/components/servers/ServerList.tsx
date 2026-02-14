@@ -15,6 +15,7 @@ export const ServerList: React.FC = () => {
     const selectedServerId = useAppSelector(
         (state) => state.nav.selectedServerId,
     );
+    const unreadServers = useAppSelector((state) => state.unread.unreadServers);
 
     return (
         <div className="flex-1 w-full flex flex-col items-center gap-3 overflow-y-auto no-scrollbar">
@@ -24,6 +25,7 @@ export const ServerList: React.FC = () => {
                 servers?.map((server) => (
                     <ServerItem
                         isActive={selectedServerId === server._id}
+                        isUnread={!!unreadServers[server._id]}
                         key={server._id}
                         server={server}
                         onClick={() =>

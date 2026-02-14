@@ -11,6 +11,7 @@ import { ContextMenu } from '@/ui/components/common/ContextMenu';
 import type { ContextMenuItem } from '@/ui/components/common/ContextMenu';
 import { IconButton } from '@/ui/components/common/IconButton';
 import { cn } from '@/utils/cn';
+import { wsMessages } from '@/ws/messages';
 
 import { ChannelItem } from './ChannelItem';
 import { ChannelSettingsModal } from './modals/ChannelSettingsModal';
@@ -92,6 +93,23 @@ export const ChannelList: React.FC<ChannelListProps> = ({
 
         setItems(newList);
     }, [categories, channels, isReordering, syncLock]);
+
+    // Mark channel as read when opened
+    useEffect(() => {
+        if (!selectedChannelId || !selectedServerId) return;
+
+        const channel = channels.find((c) => c._id === selectedChannelId);
+        if (!channel) return;
+
+        const isUnread =
+            channel.lastMessageAt &&
+            (!channel.lastReadAt ||
+                new Date(channel.lastMessageAt) > new Date(channel.lastReadAt));
+
+        if (isUnread) {
+            wsMessages.markChannelRead(selectedServerId, selectedChannelId);
+        }
+    }, [selectedChannelId, selectedServerId, channels]);
 
     const toggleCategory = (categoryId: string): void => {
         setCollapsedCategories((prev) => ({
@@ -293,21 +311,29 @@ export const ChannelList: React.FC<ChannelListProps> = ({
         return items;
     };
 
-    const renderChannel = (channel: Channel): React.ReactNode => (
-        <ContextMenu
-            className="block w-full"
-            items={getChannelMenuItems(channel)}
-            key={channel._id}
-        >
-            <ChannelItem
-                icon={channel.icon}
-                isActive={selectedChannelId === channel._id}
-                name={channel.name}
-                type={channel.type}
-                onClick={() => onChannelSelect(channel._id)}
-            />
-        </ContextMenu>
-    );
+    const renderChannel = (channel: Channel): React.ReactNode => {
+        const isUnread =
+            channel.lastMessageAt &&
+            (!channel.lastReadAt ||
+                new Date(channel.lastMessageAt) > new Date(channel.lastReadAt));
+
+        return (
+            <ContextMenu
+                className="block w-full"
+                items={getChannelMenuItems(channel)}
+                key={channel._id}
+            >
+                <ChannelItem
+                    icon={channel.icon}
+                    isActive={selectedChannelId === channel._id}
+                    isUnread={!!isUnread}
+                    name={channel.name}
+                    type={channel.type}
+                    onClick={() => onChannelSelect(channel._id)}
+                />
+            </ContextMenu>
+        );
+    };
 
     return (
         <ContextMenu
@@ -367,11 +393,11 @@ export const ChannelList: React.FC<ChannelListProps> = ({
                                     >
                                         <ChevronDown
                                             className={cn(
-                                                'w-3 h-3 mr-0.5 text-foreground-muted transition-transform duration-200',
+                                                'w-3 h-3 mr-0.5 text-muted-foreground transition-transform duration-200',
                                                 isCollapsed ? '-rotate-90' : '',
                                             )}
                                         />
-                                        <span className="text-[12px] font-bold text-foreground-muted uppercase tracking-wider group-hover:text-foreground/80 transition-colors flex-1">
+                                        <span className="text-[12px] font-bold text-muted-foreground uppercase tracking-wider group-hover:text-foreground/80 transition-colors flex-1">
                                             {category.name}
                                         </span>
                                         {canManageChannels && (

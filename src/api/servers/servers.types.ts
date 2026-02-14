@@ -39,6 +39,7 @@ export interface Channel {
     categoryId?: string | null;
     description?: string;
     lastMessageAt?: string | null;
+    lastReadAt?: string | null;
 }
 
 export interface Category {
