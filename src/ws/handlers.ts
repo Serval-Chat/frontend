@@ -5,6 +5,7 @@ import {
     FRIENDS_QUERY_KEY,
     FRIEND_REQUESTS_QUERY_KEY,
 } from '@/api/friends/friends.queries';
+import { serversApi } from '@/api/servers/servers.api';
 import { SERVERS_QUERY_KEYS } from '@/api/servers/servers.queries';
 import {
     setOnlineUsers,
@@ -12,6 +13,11 @@ import {
     setUserOnline,
     updateUserStatusByUsername,
 } from '@/store/slices/presenceSlice';
+import {
+    setDmUnread,
+    setServerUnread,
+    setUnreadServers,
+} from '@/store/slices/unreadSlice';
 
 import { wsClient } from './client';
 import {
@@ -51,8 +57,41 @@ export const setupGlobalWsHandlers = (
                     status: undefined,
                 }),
             );
+            // Fetch initial unread status for servers
+            serversApi
+                .getUnreadStatus()
+                .then((unreadMap) => {
+                    dispatch(setUnreadServers(unreadMap));
+                })
+                .catch(() => {});
         }
     });
+
+    // Server unread (from WebSocket)
+    wsClient.on<{ serverId: string; hasUnread: boolean }>(
+        WsEvents.SERVER_UNREAD_UPDATED,
+        (payload) => {
+            dispatch(
+                setServerUnread({
+                    serverId: payload.serverId,
+                    unread: payload.hasUnread,
+                }),
+            );
+        },
+    );
+
+    // DM unread (from WebSocket) – sync Redux with backend
+    wsClient.on<{ peerId: string; count: number }>(
+        WsEvents.DM_UNREAD_UPDATED,
+        (payload) => {
+            dispatch(
+                setDmUnread({
+                    userId: payload.peerId,
+                    unread: payload.count > 0,
+                }),
+            );
+        },
+    );
 
     // Friendship events
     wsClient.on(WsEvents.FRIEND_ADDED, () => {

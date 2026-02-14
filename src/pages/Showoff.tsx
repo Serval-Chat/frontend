@@ -37,6 +37,14 @@ export const Showoff = (): ReactNode => {
         {
             id: SHOWOFF_SECTIONS.navigation,
             title: 'Navigation Components',
+            children: [
+                { id: 'server-icons', title: 'Server Icons' },
+                {
+                    id: SHOWOFF_SECTIONS.serverItems,
+                    title: 'Server Items (read & unread)',
+                },
+                { id: 'friend-items', title: 'Friend List Items' },
+            ],
         },
         {
             id: SHOWOFF_SECTIONS.chatMessages,

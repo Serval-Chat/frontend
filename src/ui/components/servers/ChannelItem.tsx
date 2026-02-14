@@ -12,6 +12,7 @@ interface ChannelItemProps {
     type: ChannelType;
     icon?: string;
     isActive?: boolean;
+    isUnread?: boolean;
     onClick?: () => void;
 }
 
@@ -23,35 +24,36 @@ export const ChannelItem: React.FC<ChannelItemProps> = ({
     type,
     icon,
     isActive,
+    isUnread,
     onClick,
 }) => {
     const CustomIcon = icon ? ICON_MAP[icon] : null;
     const Icon = CustomIcon || (type === 'text' ? Hash : Volume2);
 
+    const channelClasses = cn(
+        'group flex items-center w-full px-2 py-1.5 rounded-md transition-all border-none shadow-none justify-start',
+        'hover:bg-white/5 cursor-pointer text-left',
+        isActive
+            ? 'bg-white/10 text-foreground'
+            : isUnread
+              ? 'text-foreground'
+              : 'text-muted-foreground',
+    );
+
     return (
-        <Button
-            className={cn(
-                'group flex items-center w-full px-2 py-1.5 rounded-md transition-all border-none shadow-none justify-start',
-                'hover:bg-white/5 cursor-pointer text-left',
-                isActive
-                    ? 'bg-white/10 text-foreground'
-                    : 'text-foreground-muted',
-            )}
-            variant="ghost"
-            onClick={onClick}
-        >
+        <Button className={channelClasses} variant="ghost" onClick={onClick}>
             <Icon
                 className={cn(
                     'w-[18px] h-[18px] mr-1.5 shrink-0 transition-colors',
-                    isActive
+                    isActive || isUnread
                         ? 'text-foreground'
-                        : 'text-foreground-muted group-hover:text-foreground/80',
+                        : 'text-muted-foreground group-hover:text-foreground/80',
                 )}
             />
             <span
                 className={cn(
                     'text-[15px] font-medium truncate',
-                    isActive && 'text-foreground',
+                    (isActive || isUnread) && 'text-foreground',
                 )}
             >
                 {name}

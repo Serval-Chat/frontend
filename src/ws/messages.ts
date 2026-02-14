@@ -67,4 +67,18 @@ export const wsMessages = {
     sendTypingServer: (serverId: string, channelId: string) => {
         wsClient.send(WsEvents.TYPING_SERVER, { serverId, channelId });
     },
+
+    /**
+     * Mark a channel as read.
+     */
+    markChannelRead: (serverId: string, channelId: string) => {
+        wsClient.send(WsEvents.MARK_CHANNEL_READ, { serverId, channelId });
+    },
+
+    /**
+     * Mark a DM as read.
+     */
+    markDmRead: (peerId: string) => {
+        wsClient.send(WsEvents.MARK_DM_READ, { userId: peerId });
+    },
 };

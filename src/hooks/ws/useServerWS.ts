@@ -250,4 +250,17 @@ export const useServerWS = (serverId?: string): void => {
             [serverId, queryClient],
         ),
     );
+
+    // Handle unread updates
+    useWebSocket(
+        WsEvents.CHANNEL_UNREAD_UPDATED,
+        useCallback(
+            (payload: { serverId: string; channelId: string }): void => {
+                if (payload.serverId === serverId || !serverId) {
+                    invalidateChannels();
+                }
+            },
+            [serverId, invalidateChannels],
+        ),
+    );
 };

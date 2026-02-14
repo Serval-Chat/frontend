@@ -17,6 +17,13 @@ export const serversApi = {
         return response.data;
     },
 
+    getUnreadStatus: async (): Promise<Record<string, boolean>> => {
+        const response = await apiClient.get<Record<string, boolean>>(
+            '/api/v1/servers/unread',
+        );
+        return response.data;
+    },
+
     createServer: async (
         name: string,
         icon?: File,
