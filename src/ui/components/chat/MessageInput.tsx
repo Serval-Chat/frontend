@@ -2,9 +2,12 @@ import React, { useMemo, useRef, useState } from 'react';
 
 import { Plus, Smile } from 'lucide-react';
 
+import { useChannelMessages, useUserMessages } from '@/api/chat/chat.queries';
+import type { ChatMessage } from '@/api/chat/chat.types';
 import { filesApi } from '@/api/files/files.api';
 import { useFriends } from '@/api/friends/friends.queries';
 import { useMembers, useRoles } from '@/api/servers/servers.queries';
+import { useMe } from '@/api/users/users.queries';
 import type { User } from '@/api/users/users.types';
 import type { QueuedFile } from '@/hooks/chat/useFileQueue';
 import { useCustomEmojis } from '@/hooks/useCustomEmojis';
@@ -75,9 +78,17 @@ export const MessageInput: React.FC<MessageInputProps> = ({
 
     const { customCategories } = useCustomEmojis();
 
+    const { data: me } = useMe();
     const { data: friendsList = [] } = useFriends();
     const { data: members = [] } = useMembers(selectedServerId);
     const { data: roles = [] } = useRoles(selectedServerId);
+
+    // Get messages for the current chat
+    const { data: channelMessages } = useChannelMessages(
+        selectedServerId,
+        selectedChannelId,
+    );
+    const { data: userMessages } = useUserMessages(selectedFriendId);
 
     const friendUsers = useMemo(
         () => friendsList as unknown as User[],
@@ -98,6 +109,35 @@ export const MessageInput: React.FC<MessageInputProps> = ({
             ),
         [customCategories],
     );
+
+    // Find the last message from the current user
+    const findLastMyMessage = useMemo(() => {
+        if (!me?._id) return null;
+
+        let messages: ChatMessage[] = [];
+
+        // Get messages based on current chat type
+        if (selectedServerId && selectedChannelId && channelMessages?.pages) {
+            messages = channelMessages.pages.flat();
+        } else if (selectedFriendId && userMessages?.pages) {
+            messages = userMessages.pages.flat();
+        }
+
+        // Find the last message from current user, excluding empty messages
+        const myMessages = messages.filter(
+            (msg) =>
+                msg.senderId === me._id && msg.text && msg.text.trim() !== '',
+        );
+
+        return myMessages.length > 0 ? myMessages[myMessages.length - 1] : null;
+    }, [
+        me?._id,
+        selectedServerId,
+        selectedChannelId,
+        selectedFriendId,
+        channelMessages,
+        userMessages,
+    ]);
 
     const autocomplete = useMentionAutocomplete({
         value,
@@ -216,12 +256,47 @@ export const MessageInput: React.FC<MessageInputProps> = ({
             }
         }
 
+        // Handle ArrowUp to edit last message when input is empty and no autocomplete
+        if (
+            e.key === 'ArrowUp' &&
+            !value.trim() &&
+            !autocomplete.hasSuggestions
+        ) {
+            const lastMessage = findLastMyMessage;
+            if (lastMessage) {
+                e.preventDefault();
+
+                // Dispatch custom event to trigger inline editing
+                const editEvent = new CustomEvent('editLastMessage', {
+                    detail: {
+                        messageId: lastMessage._id,
+                        serverId: lastMessage.serverId,
+                        channelId: lastMessage.channelId,
+                        receiverId: lastMessage.receiverId,
+                    },
+                });
+                window.dispatchEvent(editEvent);
+            }
+            return;
+        }
+
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
             if (!isUploading) {
                 void handleSendMessage(value);
             }
         }
+    };
+
+    const getPlaceholder = (): string => {
+        if (isUploading) return 'Uploading...';
+
+        const hasLastMessage = findLastMyMessage !== null;
+        if (hasLastMessage && !value.trim()) {
+            return 'Type a message... (ArrowUp to edit last message)';
+        }
+
+        return 'Type a message...';
     };
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
@@ -259,9 +334,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
 
                 <TextArea
                     className="flex-1 bg-transparent border-none focus:ring-0 min-h-[40px] py-2 resize-none scrollbar-none"
-                    placeholder={
-                        isUploading ? 'Uploading...' : 'Type a message...'
-                    }
+                    placeholder={getPlaceholder()}
                     ref={textAreaRef}
                     rows={1}
                     value={value}

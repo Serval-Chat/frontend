@@ -1,6 +1,9 @@
 import { type Dispatch } from '@reduxjs/toolkit';
 import { type QueryClient } from '@tanstack/react-query';
+import type { InfiniteData } from '@tanstack/react-query';
 
+import { CHAT_QUERY_KEYS } from '@/api/chat/chat.queries';
+import type { ChatMessage } from '@/api/chat/chat.types';
 import {
     FRIENDS_QUERY_KEY,
     FRIEND_REQUESTS_QUERY_KEY,
@@ -207,6 +210,79 @@ export const setupGlobalWsHandlers = (
     wsClient.on<{ serverId: string }>(WsEvents.ROLES_REORDERED, (payload) => {
         void queryClient.invalidateQueries({
             queryKey: SERVERS_QUERY_KEYS.roles(payload.serverId),
+        });
+    });
+
+    // Message editing events
+    wsClient.on<{
+        messageId: string;
+        serverId: string;
+        channelId: string;
+        text: string;
+        editedAt: string;
+        isEdited: boolean;
+    }>(WsEvents.MESSAGE_SERVER_EDITED, (payload) => {
+        // Update the message in the cache
+        const queryKey = CHAT_QUERY_KEYS.channelMessages(
+            payload.serverId,
+            payload.channelId,
+        );
+        const currentData = queryClient.getQueryData(queryKey) as
+            | InfiniteData<ChatMessage[]>
+            | undefined;
+
+        if (currentData?.pages) {
+            queryClient.setQueryData(queryKey, {
+                ...currentData,
+                pages: currentData.pages.map((page: ChatMessage[]) =>
+                    page.map((msg) =>
+                        msg._id === payload.messageId
+                            ? {
+                                  ...msg,
+                                  text: payload.text,
+                                  isEdited: payload.isEdited,
+                                  editedAt: payload.editedAt,
+                              }
+                            : msg,
+                    ),
+                ),
+            });
+        }
+    });
+
+    wsClient.on<{
+        messageId: string;
+        senderId: string;
+        receiverId: string;
+        text: string;
+        editedAt: string;
+        isEdited: boolean;
+    }>(WsEvents.MESSAGE_DM_EDITED, (payload) => {
+        // Update DM message in cache for both users
+        const queryKey1 = CHAT_QUERY_KEYS.userMessages(payload.senderId);
+        const queryKey2 = CHAT_QUERY_KEYS.userMessages(payload.receiverId);
+
+        [queryKey1, queryKey2].forEach((queryKey) => {
+            const currentData = queryClient.getQueryData(queryKey) as
+                | InfiniteData<ChatMessage[]>
+                | undefined;
+            if (currentData?.pages) {
+                queryClient.setQueryData(queryKey, {
+                    ...currentData,
+                    pages: currentData.pages.map((page: ChatMessage[]) =>
+                        page.map((msg) =>
+                            msg._id === payload.messageId
+                                ? {
+                                      ...msg,
+                                      text: payload.text,
+                                      isEdited: payload.isEdited,
+                                      editedAt: payload.editedAt,
+                                  }
+                                : msg,
+                        ),
+                    ),
+                });
+            }
         });
     });
 };

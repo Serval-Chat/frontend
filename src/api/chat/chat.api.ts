@@ -49,4 +49,34 @@ export const chatApi = {
             `/api/v1/servers/${serverId}/channels/${channelId}/messages/${messageId}`,
         );
     },
+
+    /**
+     * @description Edit a message in a channel
+     */
+    editChannelMessage: async (
+        serverId: string,
+        channelId: string,
+        messageId: string,
+        content: string,
+    ): Promise<ChatMessage> => {
+        const response = await apiClient.patch<ChatMessage>(
+            `/api/v1/servers/${serverId}/channels/${channelId}/messages/${messageId}`,
+            { content },
+        );
+        return response.data;
+    },
+
+    /**
+     * @description Edit a direct message
+     */
+    editUserMessage: async (
+        messageId: string,
+        content: string,
+    ): Promise<ChatMessage> => {
+        const response = await apiClient.patch<ChatMessage>(
+            `/api/v1/messages/${messageId}`,
+            { content },
+        );
+        return response.data;
+    },
 };

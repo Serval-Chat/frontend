@@ -15,6 +15,8 @@ interface MessageHeaderProps {
     disableCustomFonts?: boolean;
     disableGlow?: boolean;
     onClickName?: () => void;
+    isEdited?: boolean;
+    editedAt?: string;
 }
 
 export const MessageHeader: React.FC<MessageHeaderProps> = ({
@@ -26,6 +28,8 @@ export const MessageHeader: React.FC<MessageHeaderProps> = ({
     disableCustomFonts,
     disableGlow,
     onClickName,
+    isEdited,
+    editedAt,
 }) => {
     if (!isGroupStart) return null;
 
@@ -53,6 +57,12 @@ export const MessageHeader: React.FC<MessageHeaderProps> = ({
             <Text className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">
                 {formatTimestamp(timestamp)}
             </Text>
+
+            {isEdited && (
+                <Text className="text-[10px] text-muted-foreground font-medium italic">
+                    (edited{editedAt ? ` ${formatTimestamp(editedAt)}` : ''})
+                </Text>
+            )}
         </Box>
     );
 };

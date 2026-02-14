@@ -9,6 +9,12 @@ import {
 import { chatApi } from './chat.api';
 import type { ChatMessage } from './chat.types';
 
+interface EditUserMessageVariables {
+    messageId: string;
+    content: string;
+    userId?: string;
+}
+
 export const CHAT_QUERY_KEYS = {
     userMessages: (userId: string | null) =>
         ['chat', 'messages', 'user', userId] as const,
@@ -140,6 +146,149 @@ export const useDeleteMessage = (): {
                     variables.channelId,
                 ),
             });
+        },
+    });
+
+    return {
+        mutate: mutation.mutate,
+        isPending: mutation.isPending,
+    };
+};
+
+/**
+ * @description Hook to edit a channel message
+ */
+export const useEditChannelMessage = (): {
+    mutate: (vars: {
+        serverId: string;
+        channelId: string;
+        messageId: string;
+        content: string;
+    }) => void;
+    isPending: boolean;
+} => {
+    const queryClient = useQueryClient();
+
+    const mutation = useMutation({
+        mutationFn: ({
+            serverId,
+            channelId,
+            messageId,
+            content,
+        }: {
+            serverId: string;
+            channelId: string;
+            messageId: string;
+            content: string;
+        }) =>
+            chatApi.editChannelMessage(serverId, channelId, messageId, content),
+        onMutate: async (variables) => {
+            // cancel any outgoing refetches
+            await queryClient.cancelQueries({
+                queryKey: CHAT_QUERY_KEYS.channelMessages(
+                    variables.serverId,
+                    variables.channelId,
+                ),
+            });
+
+            // snapshot the previous value
+            const previousMessages = queryClient.getQueryData<
+                InfiniteData<ChatMessage[]>
+            >(
+                CHAT_QUERY_KEYS.channelMessages(
+                    variables.serverId,
+                    variables.channelId,
+                ),
+            );
+
+            // optimistically update the message
+            if (previousMessages) {
+                queryClient.setQueryData<InfiniteData<ChatMessage[]>>(
+                    CHAT_QUERY_KEYS.channelMessages(
+                        variables.serverId,
+                        variables.channelId,
+                    ),
+                    {
+                        ...previousMessages,
+                        pages: previousMessages.pages.map((page) =>
+                            page.map((msg) =>
+                                msg._id === variables.messageId
+                                    ? {
+                                          ...msg,
+                                          text: variables.content,
+                                          isEdited: true,
+                                          editedAt: new Date().toISOString(),
+                                      }
+                                    : msg,
+                            ),
+                        ),
+                    },
+                );
+            }
+
+            return { previousMessages };
+        },
+        onError: (_err, variables, context) => {
+            if (context?.previousMessages) {
+                queryClient.setQueryData(
+                    CHAT_QUERY_KEYS.channelMessages(
+                        variables.serverId,
+                        variables.channelId,
+                    ),
+                    context.previousMessages,
+                );
+            }
+        },
+        onSettled: (_data, _error, variables) => {
+            void queryClient.invalidateQueries({
+                queryKey: CHAT_QUERY_KEYS.channelMessages(
+                    variables.serverId,
+                    variables.channelId,
+                ),
+            });
+        },
+    });
+
+    return {
+        mutate: mutation.mutate,
+        isPending: mutation.isPending,
+    };
+};
+
+/**
+ * @description Hook to edit a direct message
+ */
+export const useEditUserMessage = (): {
+    mutate: (vars: {
+        messageId: string;
+        content: string;
+        userId?: string;
+    }) => void;
+    isPending: boolean;
+} => {
+    const queryClient = useQueryClient();
+
+    const mutation = useMutation({
+        mutationFn: ({ messageId, content }: EditUserMessageVariables) =>
+            chatApi.editUserMessage(messageId, content),
+        onMutate: async (variables) => {
+            // For DMs, we need to invalidate both user's message queries
+            const userId = variables.userId;
+            if (userId) {
+                await queryClient.cancelQueries({
+                    queryKey: CHAT_QUERY_KEYS.userMessages(userId),
+                });
+            }
+
+            return { userId };
+        },
+        onSettled: (_data, _error, variables) => {
+            const userId = variables.userId;
+            if (userId) {
+                void queryClient.invalidateQueries({
+                    queryKey: CHAT_QUERY_KEYS.userMessages(userId),
+                });
+            }
         },
     });
 

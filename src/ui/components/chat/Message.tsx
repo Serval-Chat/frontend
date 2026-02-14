@@ -1,6 +1,7 @@
 import React from 'react';
 
-import { Copy, SmilePlus, Trash2 } from 'lucide-react';
+import { Copy, Edit, SmilePlus, Trash2 } from 'lucide-react';
+import { useClickAway, useEvent } from 'react-use';
 
 import { useDeleteMessage } from '@/api/chat/chat.queries';
 import { useAddReaction } from '@/api/reactions/reactions.queries';
@@ -22,6 +23,7 @@ import { ProfilePopup } from '@/ui/components/profile/ProfilePopup';
 import { cn } from '@/utils/cn';
 
 import { MessageContent } from './MessageContent';
+import { MessageEdit } from './MessageEdit';
 import { MessageHeader } from './MessageHeader';
 import { Reactions } from './Reactions';
 import { ReplyPreview } from './ReplyPreview';
@@ -51,6 +53,7 @@ export const Message: React.FC<MessageProps> = ({
 }) => {
     const [showProfile, setShowProfile] = React.useState(false);
     const [showPicker, setShowPicker] = React.useState(false);
+    const [isEditing, setIsEditing] = React.useState(false);
     const avatarRef = React.useRef<HTMLDivElement>(null);
     const pickerRef = React.useRef<HTMLDivElement>(null);
     const { data: me } = useMe();
@@ -112,25 +115,21 @@ export const Message: React.FC<MessageProps> = ({
     };
 
     // Close picker when clicking outside
-    React.useEffect(() => {
-        if (!showPicker) return;
-
-        const handleClickOutside = (event: MouseEvent): void => {
-            if (
-                pickerRef.current &&
-                !pickerRef.current.contains(event.target as Node)
-            ) {
-                setShowPicker(false);
-            }
-        };
-
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
-        };
-    }, [showPicker]);
+    useClickAway(pickerRef, () => {
+        setShowPicker(false);
+    });
 
     const isMessageSender = me?._id === message.senderId;
+    const canEdit = isMessageSender;
+
+    // Listen for editLastMessage event from MessageInput
+    useEvent('editLastMessage', (event: CustomEvent) => {
+        const { messageId } = event.detail;
+        if (messageId === message._id && canEdit) {
+            setIsEditing(true);
+        }
+    });
+
     const canDelete =
         isMessageSender ||
         isOwner ||
@@ -147,6 +146,10 @@ export const Message: React.FC<MessageProps> = ({
         });
     }, [message.serverId, message.channelId, message._id, deleteMessage]);
 
+    const handleEdit = React.useCallback((): void => {
+        setIsEditing(true);
+    }, []);
+
     const contextMenuItems = React.useMemo(() => {
         const items: ContextMenuItem[] = [
             {
@@ -157,6 +160,14 @@ export const Message: React.FC<MessageProps> = ({
                 },
             },
         ];
+
+        if (canEdit) {
+            items.push({
+                label: 'Edit Message',
+                icon: Edit,
+                onClick: handleEdit,
+            });
+        }
 
         if (canDelete) {
             items.push({ type: 'divider' });
@@ -169,7 +180,7 @@ export const Message: React.FC<MessageProps> = ({
         }
 
         return items;
-    }, [message._id, canDelete, handleDelete]);
+    }, [message._id, canEdit, canDelete, handleEdit, handleDelete]);
 
     return (
         <Box
@@ -228,14 +239,27 @@ export const Message: React.FC<MessageProps> = ({
                         <MessageHeader
                             disableCustomFonts={disableCustomFonts}
                             disableGlow={disableGlow}
+                            editedAt={message.editedAt}
                             iconRole={iconRole}
+                            isEdited={message.isEdited}
                             isGroupStart={isGroupStart}
                             role={role}
                             timestamp={message.createdAt}
                             user={user}
                             onClickName={() => setShowProfile(true)}
                         />
-                        <MessageContent text={message.text} />
+                        {isEditing ? (
+                            <MessageEdit
+                                channelId={message.channelId}
+                                initialText={message.text}
+                                messageId={message._id}
+                                receiverId={message.receiverId}
+                                serverId={message.serverId}
+                                onCancel={() => setIsEditing(false)}
+                            />
+                        ) : (
+                            <MessageContent text={message.text} />
+                        )}
                         <Reactions
                             channelId={message.channelId}
                             messageId={message._id}
@@ -261,7 +285,19 @@ export const Message: React.FC<MessageProps> = ({
                         >
                             <SmilePlus size={18} />
                         </Button>
-                        {/* Actions will go here but emojis for now uwu */}
+
+                        {canEdit && (
+                            <Button
+                                className="p-1.5 hover:bg-white/5 rounded transition-colors text-muted-foreground hover:text-foreground h-8 w-8"
+                                size="sm"
+                                title="Edit Message"
+                                variant="ghost"
+                                onClick={handleEdit}
+                            >
+                                <Edit size={18} />
+                            </Button>
+                        )}
+
                         {canDelete && (
                             <Button
                                 className="p-1.5 hover:bg-danger/20 rounded transition-colors text-muted-foreground hover:text-danger h-8 w-8"

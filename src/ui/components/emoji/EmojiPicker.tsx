@@ -15,7 +15,6 @@ import {
     type EmojiData,
     categories,
     categoryIconMap,
-    getSpriteStyle,
     getUnicode,
     groupedEmojis,
 } from '@/utils/emoji';
@@ -244,10 +243,11 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
                             />
                         ) : (
                             <div className="w-4 h-4 flex items-center justify-center overflow-hidden">
-                                <span
-                                    className="scale-75 flex-shrink-0"
-                                    style={getSpriteStyle(row.standardIcon)}
-                                />
+                                <span className="text-sm flex-shrink-0">
+                                    {row.standardIcon
+                                        ? getUnicode(row.standardIcon)
+                                        : ''}
+                                </span>
                             </div>
                         )}
                         <Text className="font-bold text-[10px] uppercase tracking-widest text-muted-foreground truncate">
@@ -299,9 +299,10 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
                                 >
                                     <span
                                         aria-label={standardEmoji.short_name}
-                                        className="scale-90 group-hover/emoji:scale-110 transition-transform duration-200"
-                                        style={getSpriteStyle(standardEmoji)}
-                                    />
+                                        className="text-lg group-hover/emoji:scale-110 transition-transform duration-200"
+                                    >
+                                        {getUnicode(standardEmoji)}
+                                    </span>
                                 </Button>
                             );
                         }
@@ -368,11 +369,12 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
                             <div className="w-8 h-8 p-1 flex items-center justify-center overflow-hidden">
                                 <span
                                     aria-label={cat.name}
-                                    className="flex-shrink-0 scale-90"
-                                    style={getSpriteStyle(
-                                        categoryIconMap[cat.id],
-                                    )}
-                                />
+                                    className="flex-shrink-0 text-lg"
+                                >
+                                    {categoryIconMap[cat.id]
+                                        ? getUnicode(categoryIconMap[cat.id]!)
+                                        : ''}
+                                </span>
                             </div>
                             {isActive && (
                                 <div className="absolute -left-3.5 top-1/2 -translate-y-1/2 w-1.5 h-6 bg-primary rounded-full shadow-[0_0_8px_rgba(var(--primary),0.5)]" />
