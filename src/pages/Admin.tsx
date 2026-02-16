@@ -1,6 +1,7 @@
 import { type ReactNode, useState } from 'react';
 
 import { AdminAuditLogs } from '@/ui/components/admin/AdminAuditLogs';
+import { AdminBadges } from '@/ui/components/admin/AdminBadges';
 import { AdminIAM } from '@/ui/components/admin/AdminIAM';
 import { AdminLayout } from '@/ui/components/admin/AdminLayout';
 import { AdminOverview } from '@/ui/components/admin/AdminOverview';
@@ -33,6 +34,8 @@ export const Admin = (): ReactNode => {
                 );
             case 'logs':
                 return <AdminAuditLogs />;
+            case 'badges':
+                return <AdminBadges />;
             case 'settings':
                 return <AdminSettings />;
             default:
@@ -57,6 +60,7 @@ export const Admin = (): ReactNode => {
             servers: 'Server Moderation',
             bans: 'Bans & Mutes',
             logs: 'Audit Logs',
+            badges: 'Badges',
             settings: 'Admin Settings',
         };
         if (activeSection === 'users' && viewingUserId) {

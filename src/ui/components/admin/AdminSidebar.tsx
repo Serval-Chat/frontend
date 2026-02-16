@@ -1,6 +1,7 @@
 import { type ReactNode } from 'react';
 
 import {
+    Badge,
     BarChart3,
     FileText,
     Server,
@@ -95,6 +96,12 @@ export const AdminSidebar = ({
                 icon={<FileText size={18} />}
                 label="Audit Logs"
                 onClick={() => onSectionChange('logs')}
+            />
+            <SidebarItem
+                active={activeSection === 'badges'}
+                icon={<Badge size={18} />}
+                label="Badges"
+                onClick={() => onSectionChange('badges')}
             />
         </nav>
 

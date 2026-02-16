@@ -87,6 +87,7 @@ export interface ServerMember {
     roles: string[];
     joinedAt: string;
     user: User;
+    online?: boolean;
 }
 
 export interface ServerBan {

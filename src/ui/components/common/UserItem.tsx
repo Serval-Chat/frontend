@@ -41,6 +41,7 @@ import { ContextMenu, type ContextMenuItem } from './ContextMenu';
 import { RoleDot } from './RoleDot';
 import { StyledUserName } from './StyledUserName';
 import { UserProfilePicture } from './UserProfilePicture';
+import type { UserStatus } from './UserProfileStatusIndicator';
 
 interface UserItemProps {
     userId: string;
@@ -64,6 +65,7 @@ interface UserItemProps {
     joinedAt?: string;
     disableCustomFonts?: boolean;
     disableGlow?: boolean;
+    initialPresenceStatus?: UserStatus;
 }
 
 /**
@@ -86,6 +88,7 @@ export const UserItem: React.FC<UserItemProps> = ({
     joinedAt,
     disableCustomFonts,
     disableGlow,
+    initialPresenceStatus,
 }) => {
     const dispatch = useAppDispatch();
 
@@ -310,7 +313,8 @@ export const UserItem: React.FC<UserItemProps> = ({
     const contextMenuItems = items;
 
     const presence = useAppSelector((state) => state.presence.users[userId]);
-    const presenceStatus = presence?.status || 'offline';
+    const presenceStatus =
+        presence?.status ?? initialPresenceStatus ?? 'offline';
     const presenceCustomText = presence?.customStatus || customStatus?.text;
 
     return (

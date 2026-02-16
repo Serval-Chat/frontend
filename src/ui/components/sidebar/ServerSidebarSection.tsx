@@ -58,7 +58,7 @@ export const ServerSidebarSection: React.FC<ServerSidebarSectionProps> = ({
 
         members.forEach((member) => {
             const presence = presenceMap[member.userId];
-            const isOnline = presence?.status === 'online';
+            const isOnline = member.online ?? presence?.status === 'online';
 
             if (!isOnline) {
                 offlineGroup.members.push(member);
@@ -130,6 +130,11 @@ export const ServerSidebarSection: React.FC<ServerSidebarSectionProps> = ({
                                         )}
                                         disableCustomFonts={
                                             serverDetails?.disableCustomFonts
+                                        }
+                                        initialPresenceStatus={
+                                            group.id === 'offline'
+                                                ? 'offline'
+                                                : 'online'
                                         }
                                         joinedAt={member.joinedAt}
                                         key={String(member._id)}
