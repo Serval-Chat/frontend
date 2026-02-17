@@ -81,6 +81,19 @@ export interface IMessageServer {
 }
 
 /**
+ * @description Server message sent acknowledgment.
+ */
+export interface IMessageServerSent {
+    messageId: string;
+    serverId: string;
+    channelId: string;
+    senderId: string;
+    text: string;
+    createdAt: string;
+    replyToId?: string;
+}
+
+/**
  * @description Presence sync.
  */
 export interface IPresenceSyncEvent {

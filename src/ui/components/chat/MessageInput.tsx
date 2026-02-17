@@ -1,6 +1,6 @@
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 
-import { Plus, Smile } from 'lucide-react';
+import { Plus, Smile, X } from 'lucide-react';
 
 import { useChannelMessages, useUserMessages } from '@/api/chat/chat.queries';
 import type { ChatMessage } from '@/api/chat/chat.types';
@@ -14,8 +14,11 @@ import { useCustomEmojis } from '@/hooks/useCustomEmojis';
 import { useMentionAutocomplete } from '@/hooks/useMentionAutocomplete';
 import { useChatWS } from '@/hooks/ws/useChatWS';
 import { useAppSelector } from '@/store/hooks';
+import type { ProcessedChatMessage } from '@/types/chat.ui';
 import { AutocompleteSuggestion } from '@/ui/components/common/AutocompleteSuggestion';
 import { Button } from '@/ui/components/common/Button';
+import { StyledUserName } from '@/ui/components/common/StyledUserName';
+import { Text } from '@/ui/components/common/Text';
 import { TextArea } from '@/ui/components/common/TextArea';
 import { useToast } from '@/ui/components/common/Toast';
 import { EmojiPicker } from '@/ui/components/emoji/EmojiPicker';
@@ -33,6 +36,8 @@ interface MessageInputProps {
         updateFileStatus: (id: string, status: QueuedFile['status']) => void;
         clearQueue: () => void;
     };
+    replyingTo?: ProcessedChatMessage | null;
+    onCancelReply?: () => void;
 }
 
 /**
@@ -40,6 +45,8 @@ interface MessageInputProps {
  */
 export const MessageInput: React.FC<MessageInputProps> = ({
     fileQueueResult,
+    replyingTo,
+    onCancelReply,
 }) => {
     const [value, setValue] = useState('');
     const [cursorPosition, setCursorPosition] = useState(0);
@@ -49,6 +56,12 @@ export const MessageInput: React.FC<MessageInputProps> = ({
     const textAreaRef = useRef<HTMLTextAreaElement>(null);
     const emojiPickerRef = useRef<HTMLDivElement>(null);
     const { showToast } = useToast();
+
+    useEffect(() => {
+        if (replyingTo) {
+            textAreaRef.current?.focus();
+        }
+    }, [replyingTo]);
 
     const {
         files,
@@ -206,9 +219,10 @@ export const MessageInput: React.FC<MessageInputProps> = ({
             .join('\n');
 
         if (finalMessage) {
-            sendMessage(finalMessage);
+            sendMessage(finalMessage, replyingTo?._id);
             setValue('');
             clearQueue();
+            onCancelReply?.();
         }
     };
 
@@ -314,6 +328,38 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                 onRemove={removeFile}
                 onToggleSpoiler={toggleSpoiler}
             />
+
+            {replyingTo && (
+                <Box className="flex items-center justify-between gap-3 px-3 py-2 border-b border-border-subtle bg-bg-subtle/30">
+                    <Box className="flex items-center gap-2 min-w-0">
+                        <Text className="text-xs text-muted-foreground whitespace-nowrap">
+                            Replying to
+                        </Text>
+                        <StyledUserName
+                            className="text-xs font-bold whitespace-nowrap"
+                            role={replyingTo.role}
+                            user={replyingTo.user}
+                        >
+                            {replyingTo.user.displayName ||
+                                replyingTo.user.username}
+                        </StyledUserName>
+                        <Text className="text-xs text-muted-foreground truncate">
+                            {(replyingTo.text || '')
+                                .replaceAll('\n', ' ')
+                                .trim() || '(no text)'}
+                        </Text>
+                    </Box>
+                    <Button
+                        className="h-7 w-7 p-0 shrink-0"
+                        size="sm"
+                        title="Cancel reply"
+                        variant="ghost"
+                        onClick={onCancelReply}
+                    >
+                        <X size={16} />
+                    </Button>
+                </Box>
+            )}
 
             <Box className="flex items-end p-2 gap-2">
                 <input

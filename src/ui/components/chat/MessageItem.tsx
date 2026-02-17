@@ -13,6 +13,7 @@ interface MessageItemProps {
     prevMessage?: ProcessedChatMessage;
     isHighlighted?: boolean;
     onReplyClick?: (messageId: string) => void;
+    onReplyToMessage?: (message: ProcessedChatMessage) => void;
     disableCustomFonts?: boolean;
     disableGlow?: boolean;
 }
@@ -24,12 +25,15 @@ export const MessageItem: React.FC<MessageItemProps> = ({
     prevMessage,
     isHighlighted,
     onReplyClick,
+    onReplyToMessage,
     disableCustomFonts,
     disableGlow,
 }) => {
     const isGroupStart =
         !prevMessage ||
         !!message.replyTo ||
+        !!message.replyToId ||
+        !!message.repliedToMessageId ||
         !shouldGroupMessages(prevMessage, message);
 
     return (
@@ -43,6 +47,7 @@ export const MessageItem: React.FC<MessageItemProps> = ({
             role={role || message.role}
             user={message.user}
             onReplyClick={onReplyClick}
+            onReplyToMessage={onReplyToMessage}
         />
     );
 };

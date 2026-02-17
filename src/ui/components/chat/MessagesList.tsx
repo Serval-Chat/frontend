@@ -13,6 +13,7 @@ interface MessagesListProps {
     hasMore?: boolean;
     isLoadingMore?: boolean;
     onReplyClick?: (messageId: string) => void;
+    onReplyToMessage?: (message: ProcessedChatMessage) => void;
     activeHighlightId?: string | null;
     disableCustomFonts?: boolean;
 }
@@ -26,6 +27,7 @@ export const MessagesList: React.FC<MessagesListProps> = ({
     hasMore,
     isLoadingMore,
     onReplyClick,
+    onReplyToMessage,
     activeHighlightId,
     disableCustomFonts,
 }) => {
@@ -38,6 +40,10 @@ export const MessagesList: React.FC<MessagesListProps> = ({
 
     const handleReplyClick = (messageId: string): void => {
         setInternalHighlightId(messageId);
+        const el = document.getElementById(`message-${messageId}`);
+        if (el) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
         // Clear highlight after animation
         setTimeout(() => setInternalHighlightId(null), 2000);
 
@@ -139,6 +145,7 @@ export const MessagesList: React.FC<MessagesListProps> = ({
                     prevMessage={index > 0 ? messages[index - 1] : undefined}
                     role={msg.role}
                     onReplyClick={handleReplyClick}
+                    onReplyToMessage={onReplyToMessage}
                 />
             ))}
             <VerticalSpacer verticalSpace={20} />

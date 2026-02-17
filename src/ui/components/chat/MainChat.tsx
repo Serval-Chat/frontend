@@ -15,6 +15,7 @@ import { usePaginatedMessages } from '@/hooks/chat/usePaginatedMessages';
 import { useProcessedMessages } from '@/hooks/chat/useProcessedMessages';
 import { useChatWS } from '@/hooks/ws/useChatWS';
 import { useAppSelector } from '@/store/hooks';
+import type { ProcessedChatMessage } from '@/types/chat.ui';
 import { ChatEmptyState } from '@/ui/components/chat/ChatEmptyState';
 import { ChatHeader } from '@/ui/components/chat/ChatHeader';
 import { ChatLoadingState } from '@/ui/components/chat/ChatLoadingState';
@@ -41,6 +42,9 @@ export const MainChat: React.FC = () => {
     // File Upload State
     const [isDragging, setIsDragging] = useState(false);
     const fileQueueResult = useFileQueue();
+    const [replyingTo, setReplyingTo] = useState<ProcessedChatMessage | null>(
+        null,
+    );
 
     // Data Fetching
     const { data: currentUser } = useMe();
@@ -149,12 +153,17 @@ export const MainChat: React.FC = () => {
                         isLoadingMore={isFetchingNextPage}
                         messages={messages}
                         onLoadMore={() => void fetchNextPage()}
+                        onReplyToMessage={(msg) => setReplyingTo(msg)}
                     />
                 )}
             </Box>
 
             <TypingIndicator typingUsers={typingUsers} />
-            <MessageInput fileQueueResult={fileQueueResult} />
+            <MessageInput
+                fileQueueResult={fileQueueResult}
+                replyingTo={replyingTo}
+                onCancelReply={() => setReplyingTo(null)}
+            />
 
             {/* Drag and Drop Overlay */}
             {isDragging && (

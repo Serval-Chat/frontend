@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Copy, Edit, SmilePlus, Trash2 } from 'lucide-react';
+import { Copy, CornerUpLeft, Edit, SmilePlus, Trash2 } from 'lucide-react';
 import { useClickAway, useEvent } from 'react-use';
 
 import { useDeleteMessage } from '@/api/chat/chat.queries';
@@ -36,6 +36,7 @@ interface MessageProps {
     isGroupStart?: boolean;
     isHighlighted?: boolean;
     onReplyClick?: (messageId: string) => void;
+    onReplyToMessage?: (message: ProcessedChatMessage) => void;
     disableCustomFonts?: boolean;
     disableGlow?: boolean;
 }
@@ -48,6 +49,7 @@ export const Message: React.FC<MessageProps> = ({
     isGroupStart = true,
     isHighlighted = false,
     onReplyClick,
+    onReplyToMessage,
     disableCustomFonts,
     disableGlow,
 }) => {
@@ -161,6 +163,14 @@ export const Message: React.FC<MessageProps> = ({
             },
         ];
 
+        if (onReplyToMessage) {
+            items.unshift({
+                label: 'Reply',
+                icon: CornerUpLeft,
+                onClick: () => onReplyToMessage(message),
+            });
+        }
+
         if (canEdit) {
             items.push({
                 label: 'Edit Message',
@@ -180,7 +190,14 @@ export const Message: React.FC<MessageProps> = ({
         }
 
         return items;
-    }, [message._id, canEdit, canDelete, handleEdit, handleDelete]);
+    }, [
+        message,
+        canEdit,
+        canDelete,
+        handleEdit,
+        handleDelete,
+        onReplyToMessage,
+    ]);
 
     return (
         <Box
@@ -273,6 +290,17 @@ export const Message: React.FC<MessageProps> = ({
                 {/* Hover Actions */}
                 <Box className="absolute right-4 top-0 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all z-[var(--z-index-effect-md)]">
                     <Box className="flex items-center bg-bg-secondary border border-white/5 rounded shadow-xl px-1 py-1 gap-1">
+                        {onReplyToMessage && (
+                            <Button
+                                className="p-1.5 hover:bg-white/5 rounded transition-colors text-muted-foreground hover:text-foreground h-8 w-8"
+                                size="sm"
+                                title="Reply"
+                                variant="ghost"
+                                onClick={() => onReplyToMessage(message)}
+                            >
+                                <CornerUpLeft size={18} />
+                            </Button>
+                        )}
                         <Button
                             className={cn(
                                 'p-1.5 hover:bg-white/5 rounded transition-colors text-muted-foreground hover:text-foreground h-8 w-8',

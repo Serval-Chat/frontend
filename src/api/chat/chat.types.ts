@@ -27,6 +27,12 @@ export interface ChatMessage {
     receiverId?: string; // For DMs
     replyToId?: string;
     repliedToMessageId?: string;
+    repliedTo?: {
+        messageId: string;
+        senderId: string;
+        senderUsername?: string;
+        text: string;
+    };
     isEdited?: boolean;
     editedAt?: string;
     isWebhook?: boolean;

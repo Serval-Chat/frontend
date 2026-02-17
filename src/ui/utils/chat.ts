@@ -82,6 +82,19 @@ export const resolveReplyTo = (
         }
     }
 
+    if (!replyTo && msg.repliedTo) {
+        replyTo = {
+            _id: msg.repliedTo.messageId,
+            text: msg.repliedTo.text,
+            user: {
+                _id: msg.repliedTo.senderId,
+                username: msg.repliedTo.senderUsername || 'Unknown',
+            } as User,
+            role: undefined,
+            iconRole: undefined,
+        };
+    }
+
     // Attempt to resolve missing user/role in replyTo
     if (replyTo) {
         const replySenderId = replyTo.user?._id?.toString();

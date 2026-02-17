@@ -8,6 +8,7 @@ import { useMe } from '@/api/users/users.queries';
 import {
     type IMessageDm,
     type IMessageServer,
+    type IMessageServerSent,
     type IReactionEventPayload,
     WsEvents,
     wsMessages,
@@ -45,13 +46,14 @@ export function useChatWS(
             senderId: message.senderId,
             receiverId: message.receiverId,
             replyToId: message.replyToId,
+            repliedTo: message.repliedTo,
             isEdited: message.isEdited,
         }),
         [],
     );
 
     const convertServerMessageToChatMessage = useCallback(
-        (message: IMessageServer): ChatMessage => ({
+        (message: IMessageServer | IMessageServerSent): ChatMessage => ({
             _id: message.messageId,
             text: message.text,
             createdAt: message.createdAt,
@@ -59,10 +61,16 @@ export function useChatWS(
             serverId: message.serverId,
             channelId: message.channelId,
             replyToId: message.replyToId,
-            isEdited: message.isEdited,
-            isWebhook: message.isWebhook,
-            webhookUsername: message.webhookUsername,
-            webhookAvatarUrl: message.webhookAvatarUrl,
+            isEdited: 'isEdited' in message ? message.isEdited : false,
+            isWebhook: 'isWebhook' in message ? message.isWebhook : false,
+            webhookUsername:
+                'webhookUsername' in message
+                    ? message.webhookUsername
+                    : undefined,
+            webhookAvatarUrl:
+                'webhookAvatarUrl' in message
+                    ? message.webhookAvatarUrl
+                    : undefined,
         }),
         [],
     );
@@ -204,7 +212,7 @@ export function useChatWS(
     useWebSocket(
         WsEvents.MESSAGE_SERVER_SENT,
         useCallback(
-            (message: IMessageServer): void => {
+            (message: IMessageServerSent): void => {
                 if (
                     selectedChannelId &&
                     selectedServerId &&
