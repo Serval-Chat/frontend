@@ -44,10 +44,19 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
                     })()
                 )}
             </Box>
-            <Box className="text-[15px] font-semibold text-foreground truncate">
-                {selectedFriendId
-                    ? friendUser?.displayName || friendUser?.username || '...'
-                    : selectedChannel?.name || 'No Channel'}
+            <Box className="flex flex-col gap-0.5 min-w-0">
+                <Box className="text-[15px] font-semibold text-foreground truncate">
+                    {selectedFriendId
+                        ? friendUser?.displayName ||
+                          friendUser?.username ||
+                          '...'
+                        : selectedChannel?.name || 'No Channel'}
+                </Box>
+                {!selectedFriendId && selectedChannel?.description && (
+                    <Text className="text-xs text-foreground-muted truncate">
+                        {selectedChannel.description}
+                    </Text>
+                )}
             </Box>
         </Box>
     </Box>

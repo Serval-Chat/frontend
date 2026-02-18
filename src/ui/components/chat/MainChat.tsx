@@ -149,6 +149,7 @@ export const MainChat: React.FC = () => {
                 ) : (
                     <MessagesList
                         disableCustomFonts={serverDetails?.disableCustomFonts}
+                        disableGlow={serverDetails?.disableCustomFonts}
                         hasMore={hasNextPage}
                         isLoadingMore={isFetchingNextPage}
                         messages={messages}
@@ -160,6 +161,8 @@ export const MainChat: React.FC = () => {
 
             <TypingIndicator typingUsers={typingUsers} />
             <MessageInput
+                disableCustomFonts={serverDetails?.disableCustomFonts}
+                disableGlow={serverDetails?.disableCustomFonts}
                 fileQueueResult={fileQueueResult}
                 replyingTo={replyingTo}
                 onCancelReply={() => setReplyingTo(null)}

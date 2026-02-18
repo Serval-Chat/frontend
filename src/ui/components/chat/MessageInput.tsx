@@ -38,6 +38,8 @@ interface MessageInputProps {
     };
     replyingTo?: ProcessedChatMessage | null;
     onCancelReply?: () => void;
+    disableCustomFonts?: boolean;
+    disableGlow?: boolean;
 }
 
 /**
@@ -47,6 +49,8 @@ export const MessageInput: React.FC<MessageInputProps> = ({
     fileQueueResult,
     replyingTo,
     onCancelReply,
+    disableCustomFonts,
+    disableGlow,
 }) => {
     const [value, setValue] = useState('');
     const [cursorPosition, setCursorPosition] = useState(0);
@@ -62,6 +66,32 @@ export const MessageInput: React.FC<MessageInputProps> = ({
             textAreaRef.current?.focus();
         }
     }, [replyingTo]);
+
+    // Auto-focus on global keydown when no other element is focused
+    useEffect(() => {
+        const handleGlobalKeyDown = (e: KeyboardEvent) => {
+            const target = e.target as HTMLElement;
+            // Only autofocus if:
+            // 1. Key is a printable character
+            // 2. No input, textarea, or contenteditable element is focused
+            // 3. No modifier keys are pressed (except shift)
+            const isInputElement =
+                target.tagName === 'INPUT' ||
+                target.tagName === 'TEXTAREA' ||
+                target.contentEditable === 'true';
+            const hasModifier = e.ctrlKey || e.metaKey || e.altKey;
+            const isPrintable = e.key.length === 1 && !hasModifier;
+
+            if (isPrintable && !isInputElement && textAreaRef.current) {
+                // Focus the textarea without consuming the key
+                textAreaRef.current.focus();
+                // The key will be handled by the textarea's onChange after focus
+            }
+        };
+
+        window.addEventListener('keydown', handleGlobalKeyDown);
+        return () => window.removeEventListener('keydown', handleGlobalKeyDown);
+    }, []);
 
     const {
         files,
@@ -337,6 +367,8 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                         </Text>
                         <StyledUserName
                             className="text-xs font-bold whitespace-nowrap"
+                            disableCustomFonts={disableCustomFonts}
+                            disableGlow={disableGlow}
                             role={replyingTo.role}
                             user={replyingTo.user}
                         >

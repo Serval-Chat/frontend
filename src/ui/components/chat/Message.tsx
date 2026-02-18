@@ -208,6 +208,7 @@ export const Message: React.FC<MessageProps> = ({
                 mentionsMe && 'border-l-2 border-caution',
             )}
             id={`message-${message._id}`}
+            onMouseLeave={() => setShowPicker(false)}
         >
             <ContextMenu className="w-full h-full" items={contextMenuItems}>
                 {/* Reply Preview */}
