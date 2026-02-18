@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React from 'react';
 
 import { X } from 'lucide-react';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 import { Heading } from '@/ui/components/common/Heading';
 import { IconButton } from '@/ui/components/common/IconButton';
@@ -16,20 +17,32 @@ interface SettingsModalProps {
     onClose: () => void;
 }
 
+const SECTION_URL_MAP: Record<string, string> = {
+    'my-account': 'account',
+    appearance: 'appearance',
+    standing: 'standing',
+};
+
+const SECTION_ID_TO_URL: Record<string, string> = {
+    account: 'my-account',
+    appearance: 'appearance',
+    standing: 'standing',
+};
+
 export const SettingsModal: React.FC<SettingsModalProps> = ({
     isOpen,
     onClose,
 }) => {
-    const [activeSection, setActiveSection] = useState<string>('account');
+    const location = useLocation();
+    const navigate = useNavigate();
 
-    // Reset section when modal opens (adjusting state during render)
-    const [prevIsOpen, setPrevIsOpen] = useState(isOpen);
-    if (isOpen !== prevIsOpen) {
-        setPrevIsOpen(isOpen);
-        if (isOpen) {
-            setActiveSection('account');
-        }
-    }
+    const urlSegment = location.pathname.split('/').pop() ?? '';
+    const activeSection = SECTION_URL_MAP[urlSegment] ?? 'account';
+
+    const handleSetSection = (sectionId: string): void => {
+        const urlPath = SECTION_ID_TO_URL[sectionId] ?? 'my-account';
+        void navigate(`/chat/@setting/${urlPath}`);
+    };
 
     return (
         <Modal
@@ -42,7 +55,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             <div className="flex h-full w-full">
                 <SettingsSidebar
                     activeSection={activeSection}
-                    setActiveSection={setActiveSection}
+                    setActiveSection={handleSetSection}
                 />
 
                 <div className="flex-1 bg-[var(--color-background)] flex flex-col h-full overflow-hidden relative">

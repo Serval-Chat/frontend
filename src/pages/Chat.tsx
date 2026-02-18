@@ -6,6 +6,7 @@ import { SecondaryNavBar } from '@/ui/SecondaryNavBar';
 import { TertiarySidebar } from '@/ui/TertiarySidebar';
 import { Box } from '@/ui/components/layout/Box';
 import { MainContent } from '@/ui/components/layout/MainContent';
+import { NavigationSync } from '@/ui/components/layout/NavigationSync';
 
 /**
  * @description Chat page
@@ -24,6 +25,7 @@ export const Chat: React.FC = () => {
 
     return (
         <Box className="h-screen w-full flex bg-[var(--chat-bg)] overflow-hidden">
+            <NavigationSync />
             <PrimaryNavBar />
             <SecondaryNavBar />
             <MainContent />

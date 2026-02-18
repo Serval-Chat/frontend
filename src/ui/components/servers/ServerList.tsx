@@ -1,5 +1,7 @@
 import React from 'react';
 
+import { useNavigate } from 'react-router-dom';
+
 import { useServers } from '@/api/servers/servers.queries';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { setSelectedServerId } from '@/store/slices/navSlice';
@@ -16,6 +18,19 @@ export const ServerList: React.FC = () => {
         (state) => state.nav.selectedServerId,
     );
     const unreadServers = useAppSelector((state) => state.unread.unreadServers);
+    const navigate = useNavigate();
+    const lastOpenedChannelByServer = useAppSelector(
+        (state) => state.nav.lastOpenedChannelByServer,
+    );
+
+    const handleServerClick = (serverId: string): void => {
+        const lastChannelId = lastOpenedChannelByServer[serverId];
+        if (lastChannelId) {
+            void navigate(`/chat/@server/${serverId}/channel/${lastChannelId}`);
+        } else {
+            dispatch(setSelectedServerId(serverId));
+        }
+    };
 
     return (
         <div className="flex-1 w-full flex flex-col items-center gap-3 overflow-y-auto no-scrollbar">
@@ -28,9 +43,7 @@ export const ServerList: React.FC = () => {
                         isUnread={!!unreadServers[server._id]}
                         key={server._id}
                         server={server}
-                        onClick={() =>
-                            dispatch(setSelectedServerId(server._id))
-                        }
+                        onClick={() => handleServerClick(server._id)}
                     />
                 ))
             )}

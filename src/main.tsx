@@ -43,7 +43,35 @@ createRoot(document.getElementById('root')!).render(
                                     path="/register"
                                 />
                                 <Route element={<AuthenticatedLayout />}>
-                                    <Route element={<Chat />} path="/chat" />
+                                    <Route path="/chat">
+                                        <Route index element={<Chat />} />
+                                        <Route element={<Chat />} path="@me" />
+                                        <Route
+                                            element={<Chat />}
+                                            path="@server/:serverId/channel/:channelId"
+                                        />
+                                        <Route
+                                            element={<Chat />}
+                                            path="@user/:userId"
+                                        />
+                                        <Route
+                                            element={<Chat />}
+                                            path="@setting"
+                                        >
+                                            <Route
+                                                element={<Chat />}
+                                                path="my-account"
+                                            />
+                                            <Route
+                                                element={<Chat />}
+                                                path="appearance"
+                                            />
+                                            <Route
+                                                element={<Chat />}
+                                                path="standing"
+                                            />
+                                        </Route>
+                                    </Route>
                                     <Route
                                         element={<Showoff />}
                                         path="/showoff"

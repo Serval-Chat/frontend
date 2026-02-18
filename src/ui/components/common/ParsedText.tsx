@@ -64,7 +64,15 @@ export const ParsedText: React.FC<ParsedTextProps> = ({
                                 weight="bold"
                                 wrap={wrap}
                             >
-                                {node.content}
+                                {typeof node.content === 'string' ? (
+                                    node.content
+                                ) : (
+                                    <ParsedText
+                                        nodes={node.content}
+                                        size={size}
+                                        wrap={wrap}
+                                    />
+                                )}
                             </Text>
                         );
 
@@ -76,7 +84,15 @@ export const ParsedText: React.FC<ParsedTextProps> = ({
                                 size={size}
                                 wrap={wrap}
                             >
-                                {node.content}
+                                {typeof node.content === 'string' ? (
+                                    node.content
+                                ) : (
+                                    <ParsedText
+                                        nodes={node.content}
+                                        size={size}
+                                        wrap={wrap}
+                                    />
+                                )}
                             </Text>
                         );
 
@@ -89,7 +105,15 @@ export const ParsedText: React.FC<ParsedTextProps> = ({
                                 weight="bold"
                                 wrap={wrap}
                             >
-                                {node.content}
+                                {typeof node.content === 'string' ? (
+                                    node.content
+                                ) : (
+                                    <ParsedText
+                                        nodes={node.content}
+                                        size={size}
+                                        wrap={wrap}
+                                    />
+                                )}
                             </Text>
                         );
 
@@ -114,28 +138,62 @@ export const ParsedText: React.FC<ParsedTextProps> = ({
                     case 'link':
                         return (
                             <Link href={node.url} key={idx}>
-                                {node.text || node.url}
+                                {typeof node.text === 'string' ? (
+                                    node.text || node.url
+                                ) : node.text ? (
+                                    <ParsedText
+                                        nodes={node.text}
+                                        size={size}
+                                        wrap={wrap}
+                                    />
+                                ) : (
+                                    node.url
+                                )}
                             </Link>
                         );
 
                     case 'h1':
                         return (
                             <Heading key={idx} level={1} variant="chat-h1">
-                                {node.content}
+                                {typeof node.content === 'string' ? (
+                                    node.content
+                                ) : (
+                                    <ParsedText
+                                        nodes={node.content}
+                                        size={size}
+                                        wrap={wrap}
+                                    />
+                                )}
                             </Heading>
                         );
 
                     case 'h2':
                         return (
                             <Heading key={idx} level={2} variant="chat-h2">
-                                {node.content}
+                                {typeof node.content === 'string' ? (
+                                    node.content
+                                ) : (
+                                    <ParsedText
+                                        nodes={node.content}
+                                        size={size}
+                                        wrap={wrap}
+                                    />
+                                )}
                             </Heading>
                         );
 
                     case 'h3':
                         return (
                             <Heading key={idx} level={3} variant="chat-h3">
-                                {node.content}
+                                {typeof node.content === 'string' ? (
+                                    node.content
+                                ) : (
+                                    <ParsedText
+                                        nodes={node.content}
+                                        size={size}
+                                        wrap={wrap}
+                                    />
+                                )}
                             </Heading>
                         );
 
@@ -147,12 +205,32 @@ export const ParsedText: React.FC<ParsedTextProps> = ({
                                 variant="muted"
                                 wrap={wrap}
                             >
-                                {node.content}
+                                {typeof node.content === 'string' ? (
+                                    node.content
+                                ) : (
+                                    <ParsedText
+                                        nodes={node.content}
+                                        size={size}
+                                        wrap={wrap}
+                                    />
+                                )}
                             </Text>
                         );
 
                     case 'spoiler':
-                        return <Spoiler key={idx}>{node.content}</Spoiler>;
+                        return (
+                            <Spoiler key={idx}>
+                                {typeof node.content === 'string' ? (
+                                    node.content
+                                ) : (
+                                    <ParsedText
+                                        nodes={node.content}
+                                        size={size}
+                                        wrap={wrap}
+                                    />
+                                )}
+                            </Spoiler>
+                        );
 
                     case 'inline_code':
                         return (

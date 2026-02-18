@@ -53,17 +53,17 @@ export interface TextNode {
 
 export interface BoldNode {
     type: 'bold';
-    content: string;
+    content: string | ASTNode[];
 }
 
 export interface ItalicNode {
     type: 'italic';
-    content: string;
+    content: string | ASTNode[];
 }
 
 export interface BoldItalicNode {
     type: 'bold_italic';
-    content: string;
+    content: string | ASTNode[];
 }
 
 export interface EmojiNode {
@@ -84,27 +84,27 @@ export interface LinkNode {
 
 export interface H1Node {
     type: 'h1';
-    content: string;
+    content: string | ASTNode[];
 }
 
 export interface H2Node {
     type: 'h2';
-    content: string;
+    content: string | ASTNode[];
 }
 
 export interface H3Node {
     type: 'h3';
-    content: string;
+    content: string | ASTNode[];
 }
 
 export interface SubtextNode {
     type: 'subtext';
-    content: string;
+    content: string | ASTNode[];
 }
 
 export interface SpoilerNode {
     type: 'spoiler';
-    content: string;
+    content: string | ASTNode[];
 }
 
 export interface InlineCodeNode {

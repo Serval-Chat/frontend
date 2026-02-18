@@ -1,21 +1,23 @@
 import React from 'react';
 
+import { useNavigate } from 'react-router-dom';
+
 import { useFriends } from '@/api/friends/friends.queries';
-import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { setSelectedFriendId } from '@/store/slices/navSlice';
+import { useAppSelector } from '@/store/hooks';
 import { Skeleton } from '@/ui/components/common/Skeleton';
 import { UserItem } from '@/ui/components/common/UserItem';
 import { Box } from '@/ui/components/layout/Box';
 
 export const FriendList: React.FC = () => {
     const { data: friends, isLoading } = useFriends();
-    const dispatch = useAppDispatch();
     const selectedFriendId = useAppSelector(
         (state) => state.nav.selectedFriendId,
     );
 
+    const navigate = useNavigate();
+
     const handleFriendClick = (friendId: string): void => {
-        dispatch(setSelectedFriendId(friendId));
+        void navigate(`/chat/@user/${friendId}`);
     };
 
     return (

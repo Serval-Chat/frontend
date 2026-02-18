@@ -1,13 +1,14 @@
 import React, { useEffect } from 'react';
 
+import { useNavigate } from 'react-router-dom';
+
 import {
     useCategories,
     useChannels,
     useServerDetails,
 } from '@/api/servers/servers.queries';
 import { useServerWS } from '@/hooks/ws/useServerWS';
-import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { setSelectedChannelId } from '@/store/slices/navSlice';
+import { useAppSelector } from '@/store/hooks';
 import { LoadingSpinner } from '@/ui/components/common/LoadingSpinner';
 
 import { ChannelList } from './ChannelList';
@@ -17,7 +18,7 @@ import { ServerBanner } from './ServerBanner';
  * @description Orchestrates server-specific navigation (banner, channels, categories).
  */
 export const ServerSection: React.FC = () => {
-    const dispatch = useAppDispatch();
+    const navigate = useNavigate();
     const selectedServerId = useAppSelector(
         (state) => state.nav.selectedServerId,
     );
@@ -34,25 +35,30 @@ export const ServerSection: React.FC = () => {
 
     useServerWS(selectedServerId ?? undefined);
 
+    // When a server is selected but no channel is active, navigate to the first channel.
     useEffect(() => {
         if (
             !isLoadingChannels &&
             channels &&
             channels.length > 0 &&
-            !selectedChannelId
+            !selectedChannelId &&
+            selectedServerId
         ) {
-            // Default to first channel by position
             const sorted = [...channels].sort(
                 (a, b) => a.position - b.position,
             );
-            const defaultChannel = sorted[0];
-            dispatch(setSelectedChannelId(defaultChannel._id));
+            void navigate(
+                `/chat/@server/${selectedServerId}/channel/${sorted[0]._id}`,
+                { replace: true },
+            );
         }
-    }, [isLoadingChannels, channels, selectedChannelId, dispatch]);
-
-    const handleChannelSelect = (channelId: string): void => {
-        dispatch(setSelectedChannelId(channelId));
-    };
+    }, [
+        isLoadingChannels,
+        channels,
+        selectedChannelId,
+        selectedServerId,
+        navigate,
+    ]);
 
     if (!selectedServerId) return null;
 
@@ -73,7 +79,6 @@ export const ServerSection: React.FC = () => {
                     categories={categories || []}
                     channels={channels || []}
                     selectedChannelId={selectedChannelId}
-                    onChannelSelect={handleChannelSelect}
                 />
             )}
         </div>

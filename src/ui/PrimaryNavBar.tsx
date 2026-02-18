@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 
 import { Compass, Home, Plus, Settings } from 'lucide-react';
+import { useLocation, useNavigate } from 'react-router-dom';
 
-import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { setNavMode, setSelectedFriendId } from '@/store/slices/navSlice';
+import { useAppSelector } from '@/store/hooks';
 import { Divider } from '@/ui/components/common/Divider';
 import { IconButton } from '@/ui/components/common/IconButton';
 import { Box } from '@/ui/components/layout/Box';
@@ -14,18 +14,33 @@ import { SettingsModal } from '@/ui/components/settings/SettingsModal';
 import { cn } from '@/utils/cn';
 
 export const PrimaryNavBar: React.FC = () => {
-    const dispatch = useAppDispatch();
     const navMode = useAppSelector((state) => state.nav.navMode);
+    const navigate = useNavigate();
+    const location = useLocation();
     const [showSettings, setShowSettings] = useState(false);
     const [showCreateServer, setShowCreateServer] = useState(false);
     const [showJoinServer, setShowJoinServer] = useState(false);
 
-    const handleHomeClick = (): void => {
-        if (navMode === 'friends') {
-            dispatch(setSelectedFriendId(null));
+    // Sync settings modal with URL
+    React.useEffect(() => {
+        if (location.pathname.startsWith('/chat/@setting')) {
+            setShowSettings(true);
         } else {
-            dispatch(setNavMode('friends'));
+            setShowSettings(false);
         }
+    }, [location.pathname]);
+
+    const handleHomeClick = (): void => {
+        void navigate('/chat/@me');
+    };
+
+    const handleSettingsClick = (): void => {
+        void navigate('/chat/@setting/my-account');
+    };
+
+    const handleCloseSettings = (): void => {
+        // Navigate back to the previous state or @me
+        void navigate(-1);
     };
 
     return (
@@ -68,15 +83,12 @@ export const PrimaryNavBar: React.FC = () => {
             <Divider />
 
             <Box>
-                <IconButton
-                    icon={Settings}
-                    onClick={() => setShowSettings(true)}
-                />
+                <IconButton icon={Settings} onClick={handleSettingsClick} />
             </Box>
 
             <SettingsModal
                 isOpen={showSettings}
-                onClose={() => setShowSettings(false)}
+                onClose={handleCloseSettings}
             />
             <CreateServerModal
                 isOpen={showCreateServer}

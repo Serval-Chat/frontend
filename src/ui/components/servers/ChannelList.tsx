@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 
 import { Reorder } from 'framer-motion';
 import { ChevronDown, Copy, Folder, Plus, Settings } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 import { serversApi } from '@/api/servers/servers.api';
 import type { Category, Channel } from '@/api/servers/servers.types';
@@ -21,7 +22,6 @@ interface ChannelListProps {
     channels: Channel[];
     categories: Category[];
     selectedChannelId: string | null;
-    onChannelSelect: (channelId: string) => void;
 }
 
 type ListItem =
@@ -35,7 +35,6 @@ export const ChannelList: React.FC<ChannelListProps> = ({
     channels,
     categories,
     selectedChannelId,
-    onChannelSelect,
 }) => {
     const selectedServerId = useAppSelector(
         (state) => state.nav.selectedServerId,
@@ -311,6 +310,16 @@ export const ChannelList: React.FC<ChannelListProps> = ({
         return items;
     };
 
+    const navigate = useNavigate();
+
+    const handleChannelClick = (channelId: string): void => {
+        if (selectedServerId) {
+            void navigate(
+                `/chat/@server/${selectedServerId}/channel/${channelId}`,
+            );
+        }
+    };
+
     const renderChannel = (channel: Channel): React.ReactNode => {
         const isUnread =
             channel.lastMessageAt &&
@@ -329,7 +338,7 @@ export const ChannelList: React.FC<ChannelListProps> = ({
                     isUnread={!!isUnread}
                     name={channel.name}
                     type={channel.type}
-                    onClick={() => onChannelSelect(channel._id)}
+                    onClick={() => handleChannelClick(channel._id)}
                 />
             </ContextMenu>
         );

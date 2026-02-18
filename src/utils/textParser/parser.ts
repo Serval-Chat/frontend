@@ -94,19 +94,34 @@ export class TextParser {
                 }
             }
 
-            // [%file%](url)
+            // [%file%](url) or [label](url)
             if (
                 char === '[' &&
-                this.options.features.includes(ParserFeature.FILE) &&
-                this.peek('[%file%]')
+                this.options.features.includes(ParserFeature.LINK)
             ) {
-                const fileNode = this.tryParseFile();
-                if (fileNode) {
+                if (
+                    this.options.features.includes(ParserFeature.FILE) &&
+                    this.peek('[%file%]')
+                ) {
+                    const fileNode = this.tryParseFile();
+                    if (fileNode) {
+                        if (currentText) {
+                            nodes.push({ type: 'text', content: currentText });
+                            currentText = '';
+                        }
+                        nodes.push(fileNode);
+                        continue;
+                    }
+                }
+
+                // Try named link
+                const linkNode = this.tryParseNamedLink();
+                if (linkNode) {
                     if (currentText) {
                         nodes.push({ type: 'text', content: currentText });
                         currentText = '';
                     }
-                    nodes.push(fileNode);
+                    nodes.push(linkNode);
                     continue;
                 }
             }
@@ -390,12 +405,25 @@ export class TextParser {
             return null;
         }
 
-        const closingStars = '*'.repeat(starCount);
+        const closingSequence = '*'.repeat(starCount);
         let content = '';
         let foundClosing = false;
 
         while (this.index < this.text.length) {
-            if (this.peek(closingStars)) {
+            if (this.peek(closingSequence)) {
+                if (
+                    starCount < 3 &&
+                    this.text[this.index + starCount] === '*'
+                ) {
+                    while (
+                        this.index < this.text.length &&
+                        this.text[this.index] === '*'
+                    ) {
+                        content += this.text[this.index];
+                        this.index++;
+                    }
+                    continue;
+                }
                 foundClosing = true;
                 break;
             }
@@ -411,7 +439,7 @@ export class TextParser {
                     : starCount === 2
                       ? 'bold'
                       : 'italic';
-            return { type, content } as ASTNode;
+            return { type, content: this.parseContent(content) } as ASTNode;
         }
 
         this.index = start;
@@ -432,7 +460,10 @@ export class TextParser {
                 this.index++;
             }
             if (content.trim())
-                return { type: 'h3', content: content.trim() } as ASTNode;
+                return {
+                    type: 'h3',
+                    content: this.parseContent(content.trim()),
+                } as ASTNode;
         } else if (this.peek('## ')) {
             this.index += 3;
             let content = '';
@@ -444,7 +475,10 @@ export class TextParser {
                 this.index++;
             }
             if (content.trim())
-                return { type: 'h2', content: content.trim() } as ASTNode;
+                return {
+                    type: 'h2',
+                    content: this.parseContent(content.trim()),
+                } as ASTNode;
         } else if (this.peek('# ')) {
             this.index += 2;
             let content = '';
@@ -456,7 +490,10 @@ export class TextParser {
                 this.index++;
             }
             if (content.trim())
-                return { type: 'h1', content: content.trim() } as ASTNode;
+                return {
+                    type: 'h1',
+                    content: this.parseContent(content.trim()),
+                } as ASTNode;
         } else if (this.peek('-# ')) {
             this.index += 3;
             let content = '';
@@ -468,7 +505,10 @@ export class TextParser {
                 this.index++;
             }
             if (content.trim())
-                return { type: 'subtext', content: content.trim() } as ASTNode;
+                return {
+                    type: 'subtext',
+                    content: this.parseContent(content.trim()),
+                } as ASTNode;
         }
 
         this.index = start;
@@ -493,7 +533,10 @@ export class TextParser {
 
         if (foundClosing && content) {
             this.index += 2; // skip '||'
-            return { type: 'spoiler', content } as ASTNode;
+            return {
+                type: 'spoiler',
+                content: this.parseContent(content),
+            } as ASTNode;
         }
 
         this.index = start;
@@ -705,6 +748,56 @@ export class TextParser {
 
         this.index = start;
         return null;
+    }
+
+    private tryParseNamedLink(): ASTNode | null {
+        const start = this.index;
+        if (this.text[this.index] === '[') {
+            this.index++;
+            let label = '';
+            let depth = 1;
+            while (this.index < this.text.length) {
+                const c = this.text[this.index];
+                if (c === '[') depth++;
+                if (c === ']') depth--;
+                if (depth === 0) break;
+                label += c;
+                this.index++;
+            }
+
+            if (depth === 0 && label && this.peek('](')) {
+                this.index += 2; // Skip ](
+                let url = '';
+                let urlDepth = 1;
+                while (this.index < this.text.length) {
+                    const c = this.text[this.index];
+                    if (c === '(') urlDepth++;
+                    if (c === ')') urlDepth--;
+                    if (urlDepth === 0) break;
+                    url += c;
+                    this.index++;
+                }
+
+                if (urlDepth === 0 && url) {
+                    this.index++; // Skip )
+                    return {
+                        type: 'link',
+                        url,
+                        text: this.parseContent(label),
+                    } as ASTNode;
+                }
+            }
+        }
+        this.index = start;
+        return null;
+    }
+
+    private parseContent(content: string): string | ASTNode[] {
+        const nodes = parseText(content, this.options);
+        if (nodes.length === 1 && nodes[0].type === 'text') {
+            return nodes[0].content;
+        }
+        return nodes;
     }
 
     private tryParseEveryoneMention(): ASTNode | null {

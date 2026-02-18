@@ -44,14 +44,14 @@ describe('TextParser', () => {
     });
 
     it('should parse links', () => {
-        const text = 'Check out https://google.com for more';
+        const text = 'Check out https://rolling.catfla.re for more';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
             { type: 'text', content: 'Check out ' },
             {
                 type: 'link',
-                url: 'https://google.com',
-                text: 'https://google.com',
+                url: 'https://rolling.catfla.re',
+                text: 'https://rolling.catfla.re',
             },
             { type: 'text', content: ' for more' },
         ]);
@@ -156,6 +156,73 @@ describe('TextParser', () => {
             {
                 type: 'file',
                 url: 'https://example.com/image.png',
+            },
+        ]);
+    });
+
+    it('should parse named links', () => {
+        const text = 'Check [Serchat](https://rolling.catfla.re) now';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            { type: 'text', content: 'Check ' },
+            {
+                type: 'link',
+                url: 'https://rolling.catfla.re',
+                text: 'Serchat',
+            },
+            { type: 'text', content: ' now' },
+        ]);
+    });
+
+    it('should parse named links within another element', () => {
+        const text = '# Check [Serchat](https://rolling.catfla.re) now';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            {
+                type: 'h1',
+                content: [
+                    { type: 'text', content: 'Check ' },
+                    {
+                        type: 'link',
+                        url: 'https://rolling.catfla.re',
+                        text: 'Serchat',
+                    },
+                    { type: 'text', content: ' now' },
+                ],
+            },
+        ]);
+    });
+
+    it('should parse bold within italic', () => {
+        const text = 'This is *italic and **bold** text*';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            { type: 'text', content: 'This is ' },
+            {
+                type: 'italic',
+                content: [
+                    { type: 'text', content: 'italic and ' },
+                    { type: 'bold', content: 'bold' },
+                    { type: 'text', content: ' text' },
+                ],
+            },
+        ]);
+    });
+
+    it('should parse links within spoilers', () => {
+        const text = 'Secret: ||[Serchat](https://rolling.catfla.re)||';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            { type: 'text', content: 'Secret: ' },
+            {
+                type: 'spoiler',
+                content: [
+                    {
+                        type: 'link',
+                        url: 'https://rolling.catfla.re',
+                        text: 'Serchat',
+                    },
+                ],
             },
         ]);
     });
