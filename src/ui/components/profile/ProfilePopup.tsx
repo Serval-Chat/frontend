@@ -62,10 +62,11 @@ export const ProfilePopup: React.FC<ProfilePopupProps> = ({
     const presence = useAppSelector((state) => state.presence.users[userId]);
     const presenceStatus = presence?.status || 'offline';
     const presenceCustomText =
-        presence?.customStatus ||
+        presence?.customStatus?.text ??
         (user && 'customStatus' in user ? user.customStatus?.text : undefined);
     const presenceCustomEmoji =
-        user && 'customStatus' in user ? user.customStatus?.emoji : undefined;
+        presence?.customStatus?.emoji ??
+        (user && 'customStatus' in user ? user.customStatus?.emoji : undefined);
 
     const coords = useSmartPosition({
         isOpen,

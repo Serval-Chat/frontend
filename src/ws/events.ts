@@ -100,7 +100,7 @@ export interface IPresenceSyncEvent {
     online: Array<{
         userId: string;
         username: string;
-        status?: string;
+        status?: { text: string; emoji?: string | null } | null;
     }>;
 }
 
@@ -110,7 +110,7 @@ export interface IPresenceSyncEvent {
 export interface IUserOnlineEvent {
     userId: string;
     username: string;
-    status?: string;
+    status?: { text: string; emoji?: string | null } | null;
 }
 
 /**

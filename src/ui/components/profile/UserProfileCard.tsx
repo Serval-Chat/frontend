@@ -7,7 +7,9 @@ import type { User } from '@/api/users/users.types';
 import { useAppSelector } from '@/store/hooks';
 import type { AdminExtendedUser } from '@/types/admin';
 import { Heading } from '@/ui/components/common/Heading';
+import { ParsedEmoji } from '@/ui/components/common/ParsedEmoji';
 import { ParsedText } from '@/ui/components/common/ParsedText';
+import { ParsedUnicodeEmoji } from '@/ui/components/common/ParsedUnicodeEmoji';
 import { RoleDot } from '@/ui/components/common/RoleDot';
 import { StyledUserName } from '@/ui/components/common/StyledUserName';
 import { Text } from '@/ui/components/common/Text';
@@ -61,10 +63,13 @@ export const UserProfileCard: React.FC<UserProfileCardProps> = ({
         presence?.status ||
         'offline') as UserStatus;
     const finalCustomText =
-        customStatus?.text ||
-        presence?.customStatus ||
+        customStatus?.text ??
+        presence?.customStatus?.text ??
         user?.customStatus?.text;
-    const finalCustomEmoji = customStatus?.emoji || user?.customStatus?.emoji;
+    const finalCustomEmoji =
+        customStatus?.emoji ??
+        presence?.customStatus?.emoji ??
+        user?.customStatus?.emoji;
     const defaultColor = '#5865F2';
     const bannerColor = disableCustomFonts
         ? defaultColor
@@ -157,15 +162,26 @@ export const UserProfileCard: React.FC<UserProfileCardProps> = ({
                     )}
                 </Box>
 
-                {(finalCustomText || finalCustomEmoji) &&
-                    finalStatus !== 'offline' && (
-                        <Box className="mb-4 text-sm text-foreground/80 flex items-center gap-2">
-                            {finalCustomEmoji && (
-                                <Text as="span">{finalCustomEmoji}</Text>
-                            )}
-                            <Text as="span">{finalCustomText}</Text>
-                        </Box>
-                    )}
+                {(finalCustomText || finalCustomEmoji) && (
+                    <Box className="mb-4 text-sm text-foreground/80 flex items-center gap-2">
+                        {finalCustomEmoji && (
+                            <Box className="shrink-0 flex items-center">
+                                {/^[0-9a-fA-F]{24}$/.test(finalCustomEmoji) ? (
+                                    <ParsedEmoji
+                                        className="w-5 h-5"
+                                        emojiId={finalCustomEmoji}
+                                    />
+                                ) : (
+                                    <ParsedUnicodeEmoji
+                                        className="text-xl"
+                                        content={finalCustomEmoji}
+                                    />
+                                )}
+                            </Box>
+                        )}
+                        <Text as="span">{finalCustomText}</Text>
+                    </Box>
+                )}
 
                 <Box className="h-px bg-[var(--color-divider)] w-full my-3" />
 

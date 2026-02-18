@@ -6,7 +6,10 @@ interface UserPresence {
     userId: string;
     username?: string;
     status: UserPresenceStatus;
-    customStatus?: string;
+    customStatus?: {
+        text: string;
+        emoji?: string | null;
+    } | null;
 }
 
 interface PresenceState {
@@ -24,7 +27,11 @@ const presenceSlice = createSlice({
         setOnlineUsers: (
             state,
             action: PayloadAction<
-                Array<{ userId: string; username: string; status?: string }>
+                Array<{
+                    userId: string;
+                    username: string;
+                    status?: { text: string; emoji?: string | null } | null;
+                }>
             >,
         ) => {
             state.users = {};
@@ -33,7 +40,7 @@ const presenceSlice = createSlice({
                     userId: user.userId,
                     username: user.username,
                     status: 'online',
-                    customStatus: user.status,
+                    customStatus: user.status || null,
                 };
             });
         },
@@ -42,14 +49,14 @@ const presenceSlice = createSlice({
             action: PayloadAction<{
                 userId: string;
                 username: string;
-                status?: string;
+                status?: { text: string; emoji?: string | null } | null;
             }>,
         ) => {
             state.users[action.payload.userId] = {
                 userId: action.payload.userId,
                 username: action.payload.username,
                 status: 'online',
-                customStatus: action.payload.status,
+                customStatus: action.payload.status || null,
             };
         },
         setUserOffline: (
@@ -63,6 +70,7 @@ const presenceSlice = createSlice({
                     userId: action.payload.userId,
                     username: action.payload.username,
                     status: 'offline',
+                    customStatus: null,
                 };
             }
         },
@@ -71,7 +79,7 @@ const presenceSlice = createSlice({
             action: PayloadAction<{
                 userId: string;
                 username: string;
-                status: string;
+                status: { text: string; emoji?: string | null } | null;
             }>,
         ) => {
             if (state.users[action.payload.userId]) {
@@ -89,7 +97,7 @@ const presenceSlice = createSlice({
             state,
             action: PayloadAction<{
                 username: string;
-                customStatus: string | undefined;
+                customStatus: { text: string; emoji?: string | null } | null;
             }>,
         ) => {
             // Find users by username and update their custom status

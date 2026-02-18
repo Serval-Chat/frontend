@@ -103,7 +103,7 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
     return (
         <>
             <Box
-                className={cn('block', className)}
+                className={cn('block min-w-0', className)}
                 onContextMenu={handleContextMenu}
             >
                 {children}

@@ -15,7 +15,7 @@ describe('presenceSlice', () => {
 
     it('should handle setOnlineUsers', () => {
         const users = [
-            { userId: '1', username: 'alice', status: 'Available' },
+            { userId: '1', username: 'alice', status: { text: 'Available' } },
             { userId: '2', username: 'bob' },
         ];
         const state = presenceReducer(initialState, setOnlineUsers(users));
@@ -23,24 +23,28 @@ describe('presenceSlice', () => {
             userId: '1',
             username: 'alice',
             status: 'online',
-            customStatus: 'Available',
+            customStatus: { text: 'Available' },
         });
         expect(state.users['2']).toEqual({
             userId: '2',
             username: 'bob',
             status: 'online',
-            customStatus: undefined,
+            customStatus: null,
         });
     });
 
     it('should handle setUserOnline', () => {
-        const user = { userId: '1', username: 'alice', status: 'Coding' };
+        const user = {
+            userId: '1',
+            username: 'alice',
+            status: { text: 'Coding' },
+        };
         const state = presenceReducer(initialState, setUserOnline(user));
         expect(state.users['1']).toEqual({
             userId: '1',
             username: 'alice',
             status: 'online',
-            customStatus: 'Coding',
+            customStatus: { text: 'Coding' },
         });
     });
 
@@ -51,6 +55,7 @@ describe('presenceSlice', () => {
                     userId: '1',
                     username: 'alice',
                     status: 'online' as const,
+                    customStatus: { text: 'Coding' },
                 },
             },
         };
@@ -59,6 +64,7 @@ describe('presenceSlice', () => {
             setUserOffline({ userId: '1', username: 'alice' }),
         );
         expect(state.users['1'].status).toBe('offline');
+        expect(state.users['1'].customStatus).toBeNull();
     });
 
     it('should handle setUserOffline for unknown user', () => {
@@ -70,6 +76,7 @@ describe('presenceSlice', () => {
             userId: '2',
             username: 'bob',
             status: 'offline',
+            customStatus: null,
         });
     });
 
@@ -80,11 +87,13 @@ describe('presenceSlice', () => {
                     userId: '1',
                     username: 'alice',
                     status: 'online' as const,
+                    customStatus: null,
                 },
                 '2': {
                     userId: '2',
                     username: 'bob',
                     status: 'online' as const,
+                    customStatus: null,
                 },
             },
         };
@@ -92,10 +101,10 @@ describe('presenceSlice', () => {
             existingState,
             updateUserStatusByUsername({
                 username: 'alice',
-                customStatus: 'Eating',
+                customStatus: { text: 'Eating' },
             }),
         );
-        expect(state.users['1'].customStatus).toBe('Eating');
-        expect(state.users['2'].customStatus).toBeUndefined();
+        expect(state.users['1'].customStatus).toEqual({ text: 'Eating' });
+        expect(state.users['2'].customStatus).toBeNull();
     });
 });

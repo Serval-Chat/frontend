@@ -151,13 +151,11 @@ export const setupGlobalWsHandlers = (
     });
 
     wsClient.on<IStatusUpdatedEvent>(WsEvents.STATUS_UPDATED, (payload) => {
-        const statusText = payload.status?.text || undefined;
-
         // Update presence state by username
         dispatch(
             updateUserStatusByUsername({
                 username: payload.username,
-                customStatus: statusText,
+                customStatus: payload.status,
             }),
         );
 

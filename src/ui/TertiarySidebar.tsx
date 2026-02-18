@@ -45,7 +45,7 @@ export const TertiarySidebar: React.FC = () => {
                 side="left"
                 onMouseDown={handleMouseDown}
             />
-            <Box className="p-3 flex flex-col gap-4">
+            <Box className="p-3 flex flex-col gap-4 min-w-0">
                 {/* DM Context */}
                 {selectedFriendId && friend && me && (
                     <DMSidebarSection friend={friend} me={me} />

@@ -1,30 +1,18 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useState } from 'react';
 
-import { useQueryClient } from '@tanstack/react-query';
-import { Check, X } from 'lucide-react';
-
-import { useMe, useUpdateStatus } from '@/api/users/users.queries';
-import { useWebSocket } from '@/hooks/ws/useWebSocket';
+import { useMe } from '@/api/users/users.queries';
 import { useAppSelector } from '@/store/hooks';
-import { Button } from '@/ui/components/common/Button';
-import { Input } from '@/ui/components/common/Input';
+import { ParsedEmoji } from '@/ui/components/common/ParsedEmoji';
+import { ParsedUnicodeEmoji } from '@/ui/components/common/ParsedUnicodeEmoji';
 import { Text } from '@/ui/components/common/Text';
 import { UserProfilePicture } from '@/ui/components/common/UserProfilePicture';
 import { Box } from '@/ui/components/layout/Box';
 
+import { StatusModal } from './StatusModal';
+
 export const MiniProfile: React.FC = () => {
     const { data: user } = useMe();
-    const { mutate: updateStatus, isPending } = useUpdateStatus();
-    const queryClient = useQueryClient();
-    const [isEditingStatus, setIsEditingStatus] = useState(false);
-    const [statusText, setStatusText] = useState('');
-    const inputRef = useRef<HTMLInputElement>(null);
-    const usernameRef = useRef<string | undefined>(user?.username);
-
-    // Keep username ref in sync
-    useEffect(() => {
-        usernameRef.current = user?.username;
-    }, [user?.username]);
+    const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
 
     const presence = useAppSelector(
         (state) => state.presence.users[user?._id || ''],
@@ -32,80 +20,24 @@ export const MiniProfile: React.FC = () => {
     const presenceStatus = presence?.status || 'offline';
 
     const customStatus = user?.customStatus;
-    const displayStatus = customStatus?.text || 'Set specific status';
-    const statusEmoji = customStatus?.emoji;
-
-    // Listen for status updates
-    const handleStatusUpdate = useCallback(
-        (payload: {
-            username: string;
-            status: {
-                text: string;
-                emoji?: string;
-                expiresAt: string | null;
-                updatedAt: string;
-            } | null;
-        }) => {
-            // Only update if it's the current user's status
-            if (
-                usernameRef.current &&
-                payload.username === usernameRef.current
-            ) {
-                void queryClient.invalidateQueries({ queryKey: ['me'] });
-            }
-        },
-        [queryClient],
-    );
-
-    useWebSocket('status_update', handleStatusUpdate);
-
-    useEffect(() => {
-        if (isEditingStatus && inputRef.current) {
-            inputRef.current.focus();
-        }
-    }, [isEditingStatus]);
+    const statusText = customStatus?.text || '';
+    const statusEmoji = customStatus?.emoji || '';
 
     const handleStatusClick = (): void => {
-        setStatusText(customStatus?.text || '');
-        setIsEditingStatus(true);
+        setIsStatusModalOpen(true);
     };
 
-    const handleSaveStatus = (): void => {
-        if (statusText.trim()) {
-            updateStatus(
-                {
-                    text: statusText.trim(),
-                    emoji: statusEmoji,
-                },
-                {
-                    onSuccess: () => {
-                        setIsEditingStatus(false);
-                    },
-                },
-            );
-        } else {
-            updateStatus(
-                { clear: true },
-                {
-                    onSuccess: () => {
-                        setIsEditingStatus(false);
-                    },
-                },
+    const renderStatusEmoji = (): React.ReactNode => {
+        if (!statusEmoji) return null;
+
+        const isCustomEmoji = /^[0-9a-fA-F]{24}$/.test(statusEmoji);
+        if (isCustomEmoji) {
+            return (
+                <ParsedEmoji className="mr-1 w-4 h-4" emojiId={statusEmoji} />
             );
         }
-    };
 
-    const handleCancelStatus = (): void => {
-        setIsEditingStatus(false);
-        setStatusText('');
-    };
-
-    const handleKeyDown = (e: React.KeyboardEvent): void => {
-        if (e.key === 'Enter') {
-            handleSaveStatus();
-        } else if (e.key === 'Escape') {
-            handleCancelStatus();
-        }
+        return <ParsedUnicodeEmoji className="mr-1" content={statusEmoji} />;
     };
 
     if (!user) return null;
@@ -126,53 +58,28 @@ export const MiniProfile: React.FC = () => {
                     <Text className="text-sm font-semibold text-[var(--color-header-primary)] truncate leading-tight">
                         {user.displayName || user.username}
                     </Text>
-                    {!isEditingStatus ? (
-                        <Box
-                            className="text-xs text-[var(--color-header-secondary)] truncate leading-tight opacity-70 hover:opacity-100 transition-opacity cursor-pointer"
-                            onClick={handleStatusClick}
-                        >
-                            {statusEmoji && (
-                                <Text as="span" className="mr-1">
-                                    {statusEmoji}
-                                </Text>
-                            )}
-                            {displayStatus}
-                        </Box>
-                    ) : (
-                        <Box className="flex items-center gap-1 mt-0.5">
-                            <Input
-                                className="h-6 text-xs px-1.5 py-0.5"
-                                disabled={isPending}
-                                maxLength={120}
-                                placeholder="What's your status?"
-                                ref={inputRef}
-                                type="text"
-                                value={statusText}
-                                onChange={(e) => setStatusText(e.target.value)}
-                                onKeyDown={handleKeyDown}
-                            />
-                            <Button
-                                className="h-6 w-6 p-0 min-h-0"
-                                disabled={isPending}
-                                title="Save"
-                                variant="success"
-                                onClick={handleSaveStatus}
-                            >
-                                <Check size={14} />
-                            </Button>
-                            <Button
-                                className="h-6 w-6 p-0 min-h-0"
-                                disabled={isPending}
-                                title="Cancel"
-                                variant="danger"
-                                onClick={handleCancelStatus}
-                            >
-                                <X size={14} />
-                            </Button>
-                        </Box>
-                    )}
+                    <Box
+                        className="text-xs text-[var(--color-header-secondary)] truncate leading-tight opacity-70 hover:opacity-100 transition-opacity cursor-pointer flex items-center"
+                        onClick={handleStatusClick}
+                    >
+                        {statusEmoji || statusText ? (
+                            <>
+                                {renderStatusEmoji()}
+                                <span className="truncate">{statusText}</span>
+                            </>
+                        ) : (
+                            'Set specific status'
+                        )}
+                    </Box>
                 </Box>
             </Box>
+
+            <StatusModal
+                initialEmoji={statusEmoji}
+                initialText={statusText}
+                isOpen={isStatusModalOpen}
+                onClose={() => setIsStatusModalOpen(false)}
+            />
         </Box>
     );
 };

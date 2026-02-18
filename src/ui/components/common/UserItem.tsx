@@ -38,6 +38,8 @@ import { KickUserModal } from '@/ui/components/servers/modals/KickUserModal';
 import { cn } from '@/utils/cn';
 
 import { ContextMenu, type ContextMenuItem } from './ContextMenu';
+import { ParsedEmoji } from './ParsedEmoji';
+import { ParsedUnicodeEmoji } from './ParsedUnicodeEmoji';
 import { RoleDot } from './RoleDot';
 import { StyledUserName } from './StyledUserName';
 import { UserProfilePicture } from './UserProfilePicture';
@@ -315,7 +317,10 @@ export const UserItem: React.FC<UserItemProps> = ({
     const presence = useAppSelector((state) => state.presence.users[userId]);
     const presenceStatus =
         presence?.status ?? initialPresenceStatus ?? 'offline';
-    const presenceCustomText = presence?.customStatus || customStatus?.text;
+    const presenceCustomText =
+        presence?.customStatus?.text ?? customStatus?.text;
+    const presenceCustomEmoji =
+        presence?.customStatus?.emoji ?? customStatus?.emoji;
 
     return (
         <>
@@ -350,7 +355,7 @@ export const UserItem: React.FC<UserItemProps> = ({
                         }}
                     />
 
-                    <Box className="flex-1 min-w-0">
+                    <Box className="flex flex-col flex-1 min-w-0 overflow-hidden">
                         <StyledUserName
                             disableCustomFonts={disableCustomFonts}
                             disableGlow={disableGlow}
@@ -360,29 +365,36 @@ export const UserItem: React.FC<UserItemProps> = ({
                         >
                             {displayName || username}
                         </StyledUserName>
-                        {(presenceCustomText || customStatus?.emoji) &&
-                            presenceStatus !== 'offline' && (
-                                <Box className="text-xs text-foreground-muted truncate flex items-center gap-1">
-                                    {customStatus?.emoji && (
-                                        <Text
-                                            as="span"
-                                            className="shrink-0"
-                                            size="xs"
-                                        >
-                                            {customStatus.emoji}
-                                        </Text>
-                                    )}
-                                    {presenceCustomText && (
-                                        <Text
-                                            as="span"
-                                            className="truncate"
-                                            size="xs"
-                                        >
-                                            {presenceCustomText}
-                                        </Text>
-                                    )}
-                                </Box>
-                            )}
+                        {(presenceCustomText || presenceCustomEmoji) && (
+                            <Box className="text-xs text-foreground-muted flex items-center gap-1 min-w-0">
+                                {presenceCustomEmoji && (
+                                    <Box className="shrink-0 flex items-center">
+                                        {/^[0-9a-fA-F]{24}$/.test(
+                                            presenceCustomEmoji,
+                                        ) ? (
+                                            <ParsedEmoji
+                                                className="w-3.5 h-3.5"
+                                                emojiId={presenceCustomEmoji}
+                                            />
+                                        ) : (
+                                            <ParsedUnicodeEmoji
+                                                className="text-xs"
+                                                content={presenceCustomEmoji}
+                                            />
+                                        )}
+                                    </Box>
+                                )}
+                                {presenceCustomText && (
+                                    <Text
+                                        as="div"
+                                        className="truncate min-w-0"
+                                        size="xs"
+                                    >
+                                        {presenceCustomText}
+                                    </Text>
+                                )}
+                            </Box>
+                        )}
                     </Box>
                 </Box>
             </ContextMenu>

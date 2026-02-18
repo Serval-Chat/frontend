@@ -116,13 +116,13 @@ export const ServerSidebarSection: React.FC<ServerSidebarSectionProps> = ({
             ) : (
                 <>
                     {groups.map((group) => (
-                        <div className="space-y-1" key={group.id}>
-                            <div className="flex items-center justify-between px-3 mb-1">
-                                <div className="text-xs font-semibold text-foreground-muted uppercase tracking-wider">
+                        <div className="space-y-1 min-w-0" key={group.id}>
+                            <div className="flex items-center justify-between px-3 mb-1 min-w-0">
+                                <div className="text-xs font-semibold text-foreground-muted uppercase tracking-wider truncate">
                                     {group.name} — {group.members.length}
                                 </div>
                             </div>
-                            <div className="space-y-[2px]">
+                            <div className="space-y-[2px] min-w-0">
                                 {group.members.map((member) => (
                                     <UserItem
                                         disableGlow

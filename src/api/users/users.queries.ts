@@ -165,6 +165,7 @@ export const useUpdateStatus = (): UseMutationResult<
                 if (!old) return old;
                 return { ...old, customStatus: data.customStatus };
             });
+            void queryClient.invalidateQueries({ queryKey: ['me'] });
         },
     });
 };
