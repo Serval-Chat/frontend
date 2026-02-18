@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 
 import type { Role, Server, ServerMember } from '@/api/servers/servers.types';
+import { useMe } from '@/api/users/users.queries';
 import { useAppSelector } from '@/store/hooks';
 import { LoadingSpinner } from '@/ui/components/common/LoadingSpinner';
 import { UserItem } from '@/ui/components/common/UserItem';
@@ -31,6 +32,7 @@ export const ServerSidebarSection: React.FC<ServerSidebarSectionProps> = ({
     roles,
 }) => {
     const presenceMap = useAppSelector((state) => state.presence.users);
+    const { data: me } = useMe();
 
     const groups = useMemo(() => {
         if (!members) return [];
@@ -58,7 +60,9 @@ export const ServerSidebarSection: React.FC<ServerSidebarSectionProps> = ({
 
         members.forEach((member) => {
             const presence = presenceMap[member.userId];
-            const isOnline = member.online ?? presence?.status === 'online';
+            const isMe = me && member.userId === me._id;
+            const isOnline =
+                (member.online ?? presence?.status === 'online') || isMe;
 
             if (!isOnline) {
                 offlineGroup.members.push(member);
@@ -101,7 +105,7 @@ export const ServerSidebarSection: React.FC<ServerSidebarSectionProps> = ({
         result.sort((a, b) => b.position - a.position);
 
         return result;
-    }, [members, roles, presenceMap]);
+    }, [members, roles, presenceMap, me]);
 
     return (
         <div className="space-y-4 pb-4">

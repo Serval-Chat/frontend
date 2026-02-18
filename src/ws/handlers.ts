@@ -10,6 +10,7 @@ import {
 } from '@/api/friends/friends.queries';
 import { serversApi } from '@/api/servers/servers.api';
 import { SERVERS_QUERY_KEYS } from '@/api/servers/servers.queries';
+import type { User } from '@/api/users/users.types';
 import {
     setOnlineUsers,
     setUserOffline,
@@ -128,14 +129,12 @@ export const setupGlobalWsHandlers = (
     // Presence events
     wsClient.on<IPresenceSyncEvent>(WsEvents.PRESENCE_SYNC, (payload) => {
         const onlineUsers = [...payload.online];
+        const me = queryClient.getQueryData<{ id: string }>(['me']);
 
-        if (
-            currentUser &&
-            !onlineUsers.some((u) => u.userId === currentUser!.id)
-        ) {
+        if (me && !onlineUsers.some((u) => u.userId === me.id)) {
             onlineUsers.push({
-                userId: currentUser.id,
-                username: currentUser.username,
+                userId: me.id,
+                username: (me as unknown as User).username || '',
                 status: undefined,
             });
         }
