@@ -275,7 +275,7 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
                                     </Text>
 
                                     <input
-                                        accept=".png,.jpg,.jpeg,.webp"
+                                        accept=".png,.jpg,.jpeg,.webp,.gif"
                                         className="hidden"
                                         id="role-icon-upload"
                                         type="file"

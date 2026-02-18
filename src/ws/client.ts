@@ -124,12 +124,20 @@ class WsClient {
                 );
             }
 
-            const typeHandlers = this.handlers.get(type);
-            if (typeHandlers) {
-                typeHandlers.forEach((handler) => handler(payload, meta));
-            }
+            this.emit(type, payload, meta);
         } catch (error) {
             console.error('[WS] Failed to parse message:', error);
+        }
+    }
+
+    private emit<T = unknown>(
+        type: string,
+        payload: T,
+        meta: IWsEnvelope['meta'] = { ts: Date.now() },
+    ): void {
+        const typeHandlers = this.handlers.get(type);
+        if (typeHandlers) {
+            typeHandlers.forEach((handler) => handler(payload, meta));
         }
     }
 
@@ -138,8 +146,13 @@ class WsClient {
     }
 
     private handleClose(event: CloseEvent): void {
+        console.warn('Connection lost, reconnecting... for WS');
         console.log('[WS] Connection closed:', event.reason);
         this.stopPing();
+        this.emit(WsEvents.DISCONNECTED, {
+            code: event.code,
+            reason: event.reason,
+        });
 
         if (this.reconnectAttempts < this.maxReconnectAttempts) {
             const delay = Math.min(

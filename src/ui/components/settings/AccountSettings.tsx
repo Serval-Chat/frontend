@@ -147,14 +147,14 @@ export const AccountSettings: React.FC = () => {
         <div className="max-w-3xl">
             {/* Hidden file inputs */}
             <input
-                accept="image/webp,image/gif"
+                accept="image/webp,image/gif,image/png,image/jpeg"
                 className="hidden"
                 ref={avatarInputRef}
                 type="file"
                 onChange={handleAvatarChange}
             />
             <input
-                accept="image/webp,image/gif"
+                accept="image/webp,image/gif,image/png,image/jpeg"
                 className="hidden"
                 ref={bannerInputRef}
                 type="file"

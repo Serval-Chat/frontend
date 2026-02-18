@@ -163,6 +163,7 @@ export const WsEvents = {
     PONG: 'pong',
     AUTHENTICATE: 'authenticate',
     AUTHENTICATED: 'authenticated',
+    DISCONNECTED: 'disconnected',
     ERROR: 'error',
 
     // DMs

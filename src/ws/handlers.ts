@@ -282,6 +282,10 @@ export const setupGlobalWsHandlers = (
             }
         });
     });
+
+    wsClient.on(WsEvents.DISCONNECTED, () => {
+        void queryClient.invalidateQueries();
+    });
 };
 
 /**
