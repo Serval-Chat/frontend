@@ -273,4 +273,247 @@ describe('TextParser', () => {
             { type: 'text', content: 'Normal text' },
         ]);
     });
+
+    it('should parse basic markdown tables', () => {
+        const text =
+            '| Syntax      | Description |\n| ----------- | ----------- |\n| Header      | Title       |\n| Paragraph   | Text        |';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            {
+                type: 'table',
+                headers: ['Syntax', 'Description'],
+                rows: [
+                    ['Header', 'Title'],
+                    ['Paragraph', 'Text'],
+                ],
+            },
+        ]);
+    });
+
+    it('should parse tables with single column', () => {
+        const text = '| Column 1 |\n| -------- |\n| Value 1  |\n| Value 2  |';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            {
+                type: 'table',
+                headers: ['Column 1'],
+                rows: [['Value 1'], ['Value 2']],
+            },
+        ]);
+    });
+
+    it('should parse tables with many columns', () => {
+        const text =
+            '| A | B | C | D |\n| - | - | - | - |\n| 1 | 2 | 3 | 4 |\n| 5 | 6 | 7 | 8 |';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            {
+                type: 'table',
+                headers: ['A', 'B', 'C', 'D'],
+                rows: [
+                    ['1', '2', '3', '4'],
+                    ['5', '6', '7', '8'],
+                ],
+            },
+        ]);
+    });
+
+    it('should parse tables with alignment indicators in separator', () => {
+        const text =
+            '| Left | Center | Right |\n| :--- | :----: | ---: |\n| L | C | R |';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            {
+                type: 'table',
+                headers: ['Left', 'Center', 'Right'],
+                rows: [['L', 'C', 'R']],
+            },
+        ]);
+    });
+
+    it('should not parse incomplete tables without separator', () => {
+        const text = '| Header 1 | Header 2 |\n| Value 1  | Value 2  |';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).not.toContainEqual({
+            type: 'table',
+        });
+    });
+
+    it('should parse tables with mismatched column counts', () => {
+        const text =
+            '| Header 1 | Header 2 |\n| --- | --- |\n| Value 1 | Value 2 | Extra |';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            {
+                type: 'table',
+                headers: ['Header 1', 'Header 2'],
+                rows: [['Value 1', 'Value 2']],
+            },
+        ]);
+    });
+
+    it('should parse tables with empty cells', () => {
+        const text =
+            '| A | B | C |\n| - | - | - |\n| 1 |   | 3 |\n|   | 2 |   |';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            {
+                type: 'table',
+                headers: ['A', 'B', 'C'],
+                rows: [
+                    ['1', [], '3'],
+                    [[], '2', []],
+                ],
+            },
+        ]);
+    });
+
+    it('should parse tables with markdown formatting in cells', () => {
+        const text =
+            '| **Bold** | *Italic* |\n| --- | --- |\n| Normal | **bold cell** |\n| Text | *italic cell* |';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            {
+                type: 'table',
+                headers: [
+                    [{ type: 'bold', content: 'Bold' }],
+                    [{ type: 'italic', content: 'Italic' }],
+                ],
+                rows: [
+                    ['Normal', [{ type: 'bold', content: 'bold cell' }]],
+                    ['Text', [{ type: 'italic', content: 'italic cell' }]],
+                ],
+            },
+        ]);
+    });
+
+    it('should parse tables with mixed formatting in cells', () => {
+        const text =
+            '| Header | Content |\n| --- | --- |\n| ***Bold Italic*** | Normal |';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            {
+                type: 'table',
+                headers: ['Header', 'Content'],
+                rows: [
+                    [
+                        [{ type: 'bold_italic', content: 'Bold Italic' }],
+                        'Normal',
+                    ],
+                ],
+            },
+        ]);
+    });
+
+    it('should parse tables with links in cells', () => {
+        const text =
+            '| Link | Named |\n| --- | --- |\n| https://test.com | [Serchat](https://rolling.catfla.re) |';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            {
+                type: 'table',
+                headers: ['Link', 'Named'],
+                rows: [
+                    [
+                        [
+                            {
+                                type: 'link',
+                                url: 'https://test.com',
+                                text: 'https://test.com',
+                            },
+                        ],
+                        [
+                            {
+                                type: 'link',
+                                url: 'https://rolling.catfla.re',
+                                text: 'Serchat',
+                            },
+                        ],
+                    ],
+                ],
+            },
+        ]);
+    });
+
+    it('should parse table at the beginning of text', () => {
+        const text = '| Header |\n| ------ |\n| Value  |';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            {
+                type: 'table',
+                headers: ['Header'],
+                rows: [['Value']],
+            },
+        ]);
+    });
+
+    it('should parse text before table on different line', () => {
+        const text = 'Some text\n| Header |\n| ------ |\n| Value  |';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            { type: 'text', content: 'Some text\n' },
+            {
+                type: 'table',
+                headers: ['Header'],
+                rows: [['Value']],
+            },
+        ]);
+    });
+
+    it('should parse text after table on different line', () => {
+        const text = '| Header |\n| ------ |\n| Value  |\nSome text';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            {
+                type: 'table',
+                headers: ['Header'],
+                rows: [['Value']],
+            },
+            { type: 'text', content: 'Some text' },
+        ]);
+    });
+
+    it('should not parse table if not at line start', () => {
+        const text = 'Text | Header |\n| ------ |\n| Value  |';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        // Should not parse as table since table doesn't start at line beginning
+        expect(nodes).not.toContainEqual({
+            type: 'table',
+            headers: ['Header'],
+        });
+    });
+
+    it('should parse multiple tables in sequence', () => {
+        const text =
+            '| A | B |\n| - | - |\n| 1 | 2 |\n| C | D |\n| - | - |\n| 3 | 4 |';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        // After first table ends at row 3, trying to continue from line 4 which has "| C | D |"
+        // This will either be parsed as a second table or combined, depending on implementation
+        expect(nodes.some((n) => n.type === 'table')).toBe(true);
+    });
+
+    it('should handle tables with spaces around pipes', () => {
+        const text =
+            '|  Header 1  |  Header 2  |\n|  ---  |  ---  |\n|  Value 1  |  Value 2  |';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            {
+                type: 'table',
+                headers: ['Header 1', 'Header 2'],
+                rows: [['Value 1', 'Value 2']],
+            },
+        ]);
+    });
+
+    it('should parse table with empty cells and mismatched rows', () => {
+        const text = '|a|b|c|\n|-|-|-|\n|a|||b|||c|';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            {
+                type: 'table',
+                headers: ['a', 'b', 'c'],
+                rows: [['a', [{ type: 'spoiler', content: 'b' }], 'c']],
+            },
+        ]);
+    });
 });

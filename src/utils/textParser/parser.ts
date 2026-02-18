@@ -32,6 +32,7 @@ export const ParserPresets = {
             ParserFeature.ROLE_MENTION,
             ParserFeature.EVERYONE_MENTION,
             ParserFeature.ORDERED_LIST,
+            ParserFeature.TABLE,
         ],
     },
     BIO: {
@@ -55,6 +56,7 @@ export const ParserPresets = {
             ParserFeature.ROLE_MENTION,
             ParserFeature.EVERYONE_MENTION,
             ParserFeature.ORDERED_LIST,
+            ParserFeature.TABLE,
         ],
     },
 } as const;
@@ -286,6 +288,23 @@ export class TextParser {
                     if (this.peek('\n')) {
                         this.index++;
                     }
+                    continue;
+                }
+            }
+
+            // ||text||
+            if (
+                char === '|' &&
+                this.options.features.includes(ParserFeature.TABLE) &&
+                (this.index === 0 || this.text[this.index - 1] === '\n')
+            ) {
+                const tableNode = this.tryParseTable();
+                if (tableNode) {
+                    if (currentText) {
+                        nodes.push({ type: 'text', content: currentText });
+                        currentText = '';
+                    }
+                    nodes.push(tableNode);
                     continue;
                 }
             }
@@ -802,6 +821,187 @@ export class TextParser {
                 type: 'ordered_list',
                 number,
                 content: this.parseContent(content.trim()),
+            } as ASTNode;
+        }
+
+        this.index = start;
+        return null;
+    }
+
+    private tryParseTable(): ASTNode | null {
+        const start = this.index;
+
+        // Must be at start of line
+        if (this.index > 0 && this.text[this.index - 1] !== '\n') {
+            return null;
+        }
+
+        // Try to parse the header row
+        if (this.text[this.index] !== '|') {
+            return null;
+        }
+
+        // Parse header row
+        let headerLine = '';
+        let tempIndex = this.index;
+        while (tempIndex < this.text.length && this.text[tempIndex] !== '\n') {
+            headerLine += this.text[tempIndex];
+            tempIndex++;
+        }
+
+        if (!headerLine.startsWith('|') || !headerLine.endsWith('|')) {
+            this.index = start;
+            return null;
+        }
+
+        // Parse separator row
+        if (tempIndex >= this.text.length) {
+            this.index = start;
+            return null;
+        }
+
+        tempIndex++; // Skip newline
+        let separatorLine = '';
+        const separatorStart = tempIndex;
+        while (tempIndex < this.text.length && this.text[tempIndex] !== '\n') {
+            separatorLine += this.text[tempIndex];
+            tempIndex++;
+        }
+
+        // Check if separator line is valid
+        if (!separatorLine.startsWith('|') || !separatorLine.endsWith('|')) {
+            this.index = start;
+            return null;
+        }
+
+        const separatorCells = separatorLine
+            .split('|')
+            .slice(1, -1) // Remove empty first and last elements
+            .map((cell) => cell.trim());
+
+        // Check if all separator cells are dashes (with optional colons for alignment)
+        const isValidSeparator = separatorCells.every((cell) =>
+            /^:?-+:?$/.test(cell),
+        );
+
+        if (!isValidSeparator) {
+            this.index = start;
+            return null;
+        }
+
+        // Parse headers
+        const headers = headerLine
+            .split('|')
+            .slice(1, -1) // Remove empty first and last elements
+            .map((header) => this.parseContent(header.trim()));
+
+        // If header count doesn't match separator count, it's not a valid table
+        if (headers.length !== separatorCells.length) {
+            this.index = start;
+            return null;
+        }
+
+        // Now we know it's a valid table, move past header and separator
+        this.index = separatorStart + separatorLine.length;
+        if (this.index < this.text.length && this.text[this.index] === '\n') {
+            this.index++;
+        }
+
+        // Parse body rows
+        const rows: (string | ASTNode[])[][] = [];
+        while (this.index < this.text.length) {
+            const lineStart = this.index;
+            if (this.text[this.index] !== '|') {
+                break;
+            }
+
+            let rowLine = '';
+            while (
+                this.index < this.text.length &&
+                this.text[this.index] !== '\n'
+            ) {
+                rowLine += this.text[this.index];
+                this.index++;
+            }
+
+            if (!rowLine.startsWith('|') || !rowLine.endsWith('|')) {
+                this.index = lineStart;
+                break;
+            }
+
+            // Split by pipe but respect spoilers
+            const cells: string[] = [];
+            let currentCell = '';
+            let inSpoiler = false;
+
+            // Skip first and last pipe as checked above
+            for (let i = 1; i < rowLine.length - 1; i++) {
+                const char = rowLine[i];
+
+                if (char === '|') {
+                    if (inSpoiler) {
+                        // Check if this closes the spoiler
+                        if (rowLine[i + 1] === '|') {
+                            currentCell += '||';
+                            inSpoiler = false;
+                            i++; // Skip next char
+                        } else {
+                            currentCell += char;
+                        }
+                    } else {
+                        // If we are at the start of a cell (empty content), check for spoiler start
+                        if (
+                            currentCell.length === 0 &&
+                            rowLine[i + 1] === '|'
+                        ) {
+                            // Check if there is a closing || later
+                            const remaining = rowLine.slice(i + 2);
+                            if (remaining.includes('||')) {
+                                currentCell += '||';
+                                inSpoiler = true;
+                                i++; // Skip next char
+                                continue;
+                            }
+                        }
+
+                        // Otherwise it is a separator
+                        cells.push(currentCell.trim());
+                        currentCell = '';
+                    }
+                } else {
+                    currentCell += char;
+                }
+            }
+            // Add the last cell
+            cells.push(currentCell.trim());
+
+            const parsedCells = cells.map((cell) => this.parseContent(cell));
+
+            if (parsedCells.length > headers.length) {
+                rows.push(parsedCells.slice(0, headers.length));
+            } else {
+                while (parsedCells.length < headers.length) {
+                    parsedCells.push([]);
+                }
+                rows.push(parsedCells);
+            }
+
+            if (
+                this.index < this.text.length &&
+                this.text[this.index] === '\n'
+            ) {
+                this.index++;
+            } else {
+                break;
+            }
+        }
+
+        // Return table if we have at least the headers
+        if (headers.length > 0) {
+            return {
+                type: 'table',
+                headers,
+                rows,
             } as ASTNode;
         }
 

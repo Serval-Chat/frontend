@@ -4,15 +4,29 @@ import { cn } from '@/utils/cn';
 
 interface TableProps extends React.TableHTMLAttributes<HTMLTableElement> {
     children: React.ReactNode;
+    fullWidth?: boolean;
 }
 
 export const Table: React.FC<TableProps> = ({
     children,
     className,
+    fullWidth = true,
     ...props
 }) => (
-    <div className="rounded-lg border border-[var(--color-border-subtle)] overflow-hidden">
-        <table className={cn('w-full text-sm text-left', className)} {...props}>
+    <div
+        className={cn(
+            'rounded-lg border border-[var(--color-border-subtle)] overflow-hidden',
+            !fullWidth && 'w-fit max-w-full',
+        )}
+    >
+        <table
+            className={cn(
+                'text-sm text-left',
+                fullWidth ? 'w-full' : 'w-full',
+                className,
+            )}
+            {...props}
+        >
             {children}
         </table>
     </div>
@@ -91,7 +105,7 @@ export const TableHead: React.FC<TableHeadProps> = ({
 }) => (
     <th
         className={cn(
-            'px-4 py-3 font-bold uppercase tracking-wider text-[10px]',
+            'px-4 py-3 font-bold uppercase tracking-wider text-[10px] border-r border-[var(--color-border-subtle)] last:border-0',
             align === 'center' && 'text-center',
             align === 'right' && 'text-right',
             className,
@@ -119,7 +133,7 @@ export const TableCell: React.FC<TableCellProps> = ({
 }) => (
     <td
         className={cn(
-            'px-4 py-4',
+            'px-4 py-4 border-r border-[var(--color-border-subtle)] last:border-0',
             align === 'center' && 'text-center',
             align === 'right' && 'text-right',
             monospace && 'font-mono',

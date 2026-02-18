@@ -65,6 +65,7 @@ const presenceSlice = createSlice({
         ) => {
             if (state.users[action.payload.userId]) {
                 state.users[action.payload.userId].status = 'offline';
+                state.users[action.payload.userId].customStatus = null;
             } else {
                 state.users[action.payload.userId] = {
                     userId: action.payload.userId,

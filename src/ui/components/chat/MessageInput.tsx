@@ -69,7 +69,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
 
     // Auto-focus on global keydown when no other element is focused
     useEffect(() => {
-        const handleGlobalKeyDown = (e: KeyboardEvent) => {
+        const handleGlobalKeyDown = (e: KeyboardEvent): void => {
             const target = e.target as HTMLElement;
             // Only autofocus if:
             // 1. Key is a printable character

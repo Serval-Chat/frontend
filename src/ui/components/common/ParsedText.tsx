@@ -14,6 +14,14 @@ import { ParsedEmoji } from './ParsedEmoji';
 import { ParsedUnicodeEmoji } from './ParsedUnicodeEmoji';
 import { RoleMention } from './RoleMention';
 import { Spoiler } from './Spoiler';
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from './Table';
 import { Text, type TextProps } from './Text';
 
 interface ParsedTextProps {
@@ -308,6 +316,52 @@ export const ParsedText: React.FC<ParsedTextProps> = ({
                                     )}
                                 </Box>
                             </Box>
+                        );
+
+                    case 'table':
+                        return (
+                            <Table fullWidth={false} key={idx}>
+                                <TableHeader>
+                                    <TableRow className="bg-bg-secondary/50 border-b border-border-subtle">
+                                        {node.headers.map(
+                                            (header, headerIdx) => (
+                                                <TableHead key={headerIdx}>
+                                                    {typeof header ===
+                                                    'string' ? (
+                                                        header
+                                                    ) : (
+                                                        <ParsedText
+                                                            nodes={header}
+                                                            size={size}
+                                                            wrap={wrap}
+                                                        />
+                                                    )}
+                                                </TableHead>
+                                            ),
+                                        )}
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {node.rows.map((row, rowIdx) => (
+                                        <TableRow key={rowIdx}>
+                                            {row.map((cell, cellIdx) => (
+                                                <TableCell key={cellIdx}>
+                                                    {typeof cell ===
+                                                    'string' ? (
+                                                        cell
+                                                    ) : (
+                                                        <ParsedText
+                                                            nodes={cell}
+                                                            size={size}
+                                                            wrap={wrap}
+                                                        />
+                                                    )}
+                                                </TableCell>
+                                            ))}
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
                         );
 
                     default:
