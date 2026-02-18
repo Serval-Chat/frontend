@@ -31,6 +31,7 @@ export const ParserPresets = {
             ParserFeature.MENTION,
             ParserFeature.ROLE_MENTION,
             ParserFeature.EVERYONE_MENTION,
+            ParserFeature.ORDERED_LIST,
         ],
     },
     BIO: {
@@ -53,6 +54,7 @@ export const ParserPresets = {
             ParserFeature.MENTION,
             ParserFeature.ROLE_MENTION,
             ParserFeature.EVERYONE_MENTION,
+            ParserFeature.ORDERED_LIST,
         ],
     },
 } as const;
@@ -263,6 +265,27 @@ export class TextParser {
                         currentText = '';
                     }
                     nodes.push(headingNode);
+                    continue;
+                }
+            }
+
+            // 1. item
+            if (
+                char >= '0' &&
+                char <= '9' &&
+                this.options.features.includes(ParserFeature.ORDERED_LIST)
+            ) {
+                const listNode = this.tryParseOrderedList();
+                if (listNode) {
+                    if (currentText) {
+                        nodes.push({ type: 'text', content: currentText });
+                        currentText = '';
+                    }
+                    nodes.push(listNode);
+
+                    if (this.peek('\n')) {
+                        this.index++;
+                    }
                     continue;
                 }
             }
@@ -744,6 +767,42 @@ export class TextParser {
 
         if (url) {
             return { type: 'link', url, text: url };
+        }
+
+        this.index = start;
+        return null;
+    }
+
+    private tryParseOrderedList(): ASTNode | null {
+        const start = this.index;
+
+        // Must be at start of line
+        if (this.index > 0 && this.text[this.index - 1] !== '\n') {
+            return null;
+        }
+
+        const remaining = this.text.slice(this.index);
+        const match = remaining.match(/^(\d+)\. /);
+        if (!match) return null;
+
+        const number = match[1];
+        this.index += match[0].length;
+
+        let content = '';
+        while (
+            this.index < this.text.length &&
+            this.text[this.index] !== '\n'
+        ) {
+            content += this.text[this.index];
+            this.index++;
+        }
+
+        if (content.trim()) {
+            return {
+                type: 'ordered_list',
+                number,
+                content: this.parseContent(content.trim()),
+            } as ASTNode;
         }
 
         this.index = start;

@@ -226,4 +226,51 @@ describe('TextParser', () => {
             },
         ]);
     });
+
+    it('should parse ordered list items', () => {
+        const text = '1. First item\n2. Second item';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            { type: 'ordered_list', number: '1', content: 'First item' },
+            { type: 'ordered_list', number: '2', content: 'Second item' },
+        ]);
+    });
+
+    it('should parse ordered list items with nested formatting', () => {
+        const text = '1. Item with **bold** and [link](https://test.com)';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            {
+                type: 'ordered_list',
+                number: '1',
+                content: [
+                    { type: 'text', content: 'Item with ' },
+                    { type: 'bold', content: 'bold' },
+                    { type: 'text', content: ' and ' },
+                    {
+                        type: 'link',
+                        url: 'https://test.com',
+                        text: 'link',
+                    },
+                ],
+            },
+        ]);
+    });
+
+    it('should not parse digits in the middle of a line as ordered list', () => {
+        const text = 'There is 1. something here';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            { type: 'text', content: 'There is 1. something here' },
+        ]);
+    });
+
+    it('should skip newline after list item even if followed by normal text', () => {
+        const text = '1. Item\nNormal text';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            { type: 'ordered_list', number: '1', content: 'Item' },
+            { type: 'text', content: 'Normal text' },
+        ]);
+    });
 });

@@ -21,6 +21,7 @@ export const ParserFeature = {
     ROLE_MENTION: 'ROLE_MENTION',
     UNICODE_EMOJI: 'UNICODE_EMOJI',
     EVERYONE_MENTION: 'EVERYONE_MENTION',
+    ORDERED_LIST: 'ORDERED_LIST',
 } as const;
 
 export type ParserFeature = (typeof ParserFeature)[keyof typeof ParserFeature];
@@ -44,7 +45,8 @@ export type ASTNodeType =
     | 'file'
     | 'mention'
     | 'role_mention'
-    | 'everyone';
+    | 'everyone'
+    | 'ordered_list';
 
 export interface TextNode {
     type: 'text';
@@ -144,6 +146,12 @@ export interface EveryoneNode {
     type: 'everyone';
 }
 
+export interface OrderedListNode {
+    type: 'ordered_list';
+    number: string;
+    content: string | ASTNode[];
+}
+
 export type ASTNode =
     | TextNode
     | BoldNode
@@ -163,4 +171,5 @@ export type ASTNode =
     | FileNode
     | MentionNode
     | RoleMentionNode
-    | EveryoneNode;
+    | EveryoneNode
+    | OrderedListNode;

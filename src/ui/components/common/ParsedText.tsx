@@ -285,6 +285,31 @@ export const ParsedText: React.FC<ParsedTextProps> = ({
                             </Box>
                         );
 
+                    case 'ordered_list':
+                        return (
+                            <Box
+                                className="pl-2 flex gap-1.5 items-baseline"
+                                key={idx}
+                            >
+                                <Text size={size} variant="muted" wrap={wrap}>
+                                    {node.number}.
+                                </Text>
+                                <Box className="flex-1">
+                                    {typeof node.content === 'string' ? (
+                                        <Text key={idx} size={size} wrap={wrap}>
+                                            {node.content}
+                                        </Text>
+                                    ) : (
+                                        <ParsedText
+                                            nodes={node.content}
+                                            size={size}
+                                            wrap={wrap}
+                                        />
+                                    )}
+                                </Box>
+                            </Box>
+                        );
+
                     default:
                         return null;
                 }
