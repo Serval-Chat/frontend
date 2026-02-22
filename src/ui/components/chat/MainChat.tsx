@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 
-import { Upload } from 'lucide-react';
+import { Upload, X } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 import {
     useChannels,
@@ -14,7 +15,8 @@ import { useMemberMaps } from '@/hooks/chat/useMemberMaps';
 import { usePaginatedMessages } from '@/hooks/chat/usePaginatedMessages';
 import { useProcessedMessages } from '@/hooks/chat/useProcessedMessages';
 import { useChatWS } from '@/hooks/ws/useChatWS';
-import { useAppSelector } from '@/store/hooks';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { setTargetMessageId } from '@/store/slices/navSlice';
 import type { ProcessedChatMessage } from '@/types/chat.ui';
 import { ChatEmptyState } from '@/ui/components/chat/ChatEmptyState';
 import { ChatHeader } from '@/ui/components/chat/ChatHeader';
@@ -29,6 +31,8 @@ import { Box } from '@/ui/components/layout/Box';
  * @description Main chat area component that displays messages for the selected conversation.
  */
 export const MainChat: React.FC = () => {
+    const dispatch = useAppDispatch();
+    const navigate = useNavigate();
     const selectedFriendId = useAppSelector(
         (state) => state.nav.selectedFriendId,
     );
@@ -37,6 +41,9 @@ export const MainChat: React.FC = () => {
     );
     const selectedChannelId = useAppSelector(
         (state) => state.nav.selectedChannelId,
+    );
+    const targetMessageId = useAppSelector(
+        (state) => state.nav.targetMessageId,
     );
 
     // File Upload State
@@ -72,10 +79,12 @@ export const MainChat: React.FC = () => {
         fetchNextPage,
         hasNextPage,
         isFetchingNextPage,
+        isViewingOlderMessages,
     } = usePaginatedMessages(
         selectedFriendId,
         selectedServerId,
         selectedChannelId,
+        targetMessageId,
     );
 
     const messages = useProcessedMessages(
@@ -117,6 +126,29 @@ export const MainChat: React.FC = () => {
         }
     };
 
+    const handleJumpToLatest = (): void => {
+        dispatch(setTargetMessageId(null));
+        if (selectedServerId && selectedChannelId) {
+            void navigate(
+                `/chat/@server/${selectedServerId}/channel/${selectedChannelId}`,
+            );
+        } else if (selectedFriendId) {
+            void navigate(`/chat/@user/${selectedFriendId}`);
+        }
+    };
+
+    const handleReplyClick = (messageId: string): void => {
+        if (selectedServerId && selectedChannelId) {
+            void navigate(
+                `/chat/@server/${selectedServerId}/channel/${selectedChannelId}/message/${messageId}`,
+            );
+        } else if (selectedFriendId) {
+            void navigate(
+                `/chat/@user/${selectedFriendId}/message/${messageId}`,
+            );
+        }
+    };
+
     if (!selectedFriendId && !selectedChannelId) {
         return (
             <Box>
@@ -143,17 +175,36 @@ export const MainChat: React.FC = () => {
                 selectedFriendId={selectedFriendId}
             />
 
+            {isViewingOlderMessages && (
+                <Box className="bg-warning/10 border-b border-warning/30 px-6 py-3 flex items-center justify-between">
+                    <Text className="text-warning" size="sm">
+                        You are viewing older messages
+                    </Text>
+                    <button
+                        className="flex items-center gap-2 text-warning hover:text-warning/80 transition-colors"
+                        onClick={handleJumpToLatest}
+                    >
+                        <X size={16} />
+                        <span className="text-sm">Jump to latest</span>
+                    </button>
+                </Box>
+            )}
+
             <Box className="flex-1 flex flex-col min-h-0">
                 {isLoading ? (
                     <ChatLoadingState />
                 ) : (
                     <MessagesList
+                        activeHighlightId={targetMessageId}
                         disableCustomFonts={serverDetails?.disableCustomFonts}
                         disableGlow={serverDetails?.disableCustomFonts}
                         hasMore={hasNextPage}
+                        hasMoreNewer={isViewingOlderMessages}
                         isLoadingMore={isFetchingNextPage}
                         messages={messages}
                         onLoadMore={() => void fetchNextPage()}
+                        onLoadMoreNewer={handleJumpToLatest}
+                        onReplyClick={handleReplyClick}
                         onReplyToMessage={(msg) => setReplyingTo(msg)}
                     />
                 )}

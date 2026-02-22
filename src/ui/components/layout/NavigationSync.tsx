@@ -8,6 +8,7 @@ import {
     setSelectedChannelId,
     setSelectedFriendId,
     setSelectedServerId,
+    setTargetMessageId,
 } from '@/store/slices/navSlice';
 
 /**
@@ -33,19 +34,48 @@ export const NavigationSync: React.FC = () => {
 
         if (path === '/chat/@me') {
             dispatch(setSelectedFriendId(null));
+            dispatch(setTargetMessageId(null));
         } else if (params.serverId && params.channelId) {
+            let contextChanged = false;
             if (selectedServerId !== params.serverId) {
                 dispatch(setSelectedServerId(params.serverId));
+                contextChanged = true;
             }
             if (selectedChannelId !== params.channelId) {
                 dispatch(setSelectedChannelId(params.channelId));
+                contextChanged = true;
+            }
+
+            if (params.messageId) {
+                dispatch(setTargetMessageId(params.messageId));
+                void navigate(
+                    `/chat/@server/${params.serverId}/channel/${params.channelId}`,
+                    { replace: true },
+                );
+            } else if (contextChanged) {
+                // Clear if we changed channels and no new message was specified
+                dispatch(setTargetMessageId(null));
             }
         } else if (params.userId) {
-            dispatch(setSelectedFriendId(params.userId));
+            if (params.messageId) {
+                dispatch(setTargetMessageId(params.messageId));
+                void navigate(`/chat/@user/${params.userId}`, {
+                    replace: true,
+                });
+            } else {
+                dispatch(setSelectedFriendId(params.userId));
+                dispatch(setTargetMessageId(null));
+            }
         }
         // @setting routes are handled by the SettingsModal via PrimaryNavBar
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [location.pathname, params.serverId, params.channelId, params.userId]);
+    }, [
+        location.pathname,
+        params.serverId,
+        params.channelId,
+        params.userId,
+        params.messageId,
+    ]);
 
     return null;
 };

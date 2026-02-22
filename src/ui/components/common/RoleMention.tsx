@@ -1,5 +1,7 @@
 import React from 'react';
 
+import { AtSign } from 'lucide-react';
+
 import { useRoles } from '@/api/servers/servers.queries';
 import { useAppSelector } from '@/store/hooks';
 import { Text } from '@/ui/components/common/Text';
@@ -28,11 +30,12 @@ export const RoleMention: React.FC<RoleMentionProps> = ({ roleId }) => {
     return (
         <Box
             as="span"
-            className="inline-flex items-baseline px-1.5 py-[4px] rounded transition-opacity cursor-pointer select-none font-medium text-white shadow-sm hover:opacity-90"
+            className="inline-flex items-center gap-0.5 whitespace-nowrap px-1 py-px rounded transition-opacity cursor-pointer select-none font-medium text-white shadow-sm hover:opacity-90"
             style={style}
         >
-            <Text as="span" className="leading-none drop-shadow-md" size="sm">
-                {roleName.startsWith('@') ? roleName : `@${roleName}`}
+            <AtSign className="shrink-0" size={14} />
+            <Text as="span" className="flex items-center" size="sm">
+                {roleName}
             </Text>
         </Box>
     );

@@ -21,6 +21,7 @@ export const ParserFeature = {
     ROLE_MENTION: 'ROLE_MENTION',
     UNICODE_EMOJI: 'UNICODE_EMOJI',
     EVERYONE_MENTION: 'EVERYONE_MENTION',
+    CHANNEL_LINK: 'CHANNEL_LINK',
     ORDERED_LIST: 'ORDERED_LIST',
     TABLE: 'TABLE',
 } as const;
@@ -47,6 +48,7 @@ export type ASTNodeType =
     | 'mention'
     | 'role_mention'
     | 'everyone'
+    | 'channel_link'
     | 'ordered_list'
     | 'table';
 
@@ -148,6 +150,14 @@ export interface EveryoneNode {
     type: 'everyone';
 }
 
+export interface ChannelLinkNode {
+    type: 'channel_link';
+    serverId: string;
+    channelId: string;
+    url: string;
+    messageId?: string;
+}
+
 export interface OrderedListNode {
     type: 'ordered_list';
     number: string;
@@ -180,5 +190,6 @@ export type ASTNode =
     | MentionNode
     | RoleMentionNode
     | EveryoneNode
+    | ChannelLinkNode
     | OrderedListNode
     | TableNode;

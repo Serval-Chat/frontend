@@ -153,15 +153,29 @@ export const Message: React.FC<MessageProps> = ({
     }, []);
 
     const contextMenuItems = React.useMemo(() => {
-        const items: ContextMenuItem[] = [
-            {
-                label: 'Copy Message ID',
+        const items: ContextMenuItem[] = [];
+
+        if (message.serverId && message.channelId) {
+            items.push({
+                label: 'Copy Message Link',
                 icon: Copy,
                 onClick: () => {
-                    void navigator.clipboard.writeText(message._id);
+                    const link = `/chat/@server/${message.serverId}/channel/${message.channelId}/message/${message._id}`;
+                    void navigator.clipboard.writeText(
+                        `${window.location.origin}${link}`,
+                    );
                 },
+            });
+            items.push({ type: 'divider' });
+        }
+
+        items.push({
+            label: 'Copy Message ID',
+            icon: Copy,
+            onClick: () => {
+                void navigator.clipboard.writeText(message._id);
             },
-        ];
+        });
 
         if (onReplyToMessage) {
             items.unshift({

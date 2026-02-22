@@ -18,8 +18,19 @@ interface EditUserMessageVariables {
 export const CHAT_QUERY_KEYS = {
     userMessages: (userId: string | null) =>
         ['chat', 'messages', 'user', userId] as const,
-    channelMessages: (serverId: string | null, channelId: string | null) =>
-        ['chat', 'messages', 'channel', serverId, channelId] as const,
+    channelMessages: (
+        serverId: string | null,
+        channelId: string | null,
+        targetMessageId: string | null = null,
+    ) =>
+        [
+            'chat',
+            'messages',
+            'channel',
+            serverId,
+            channelId,
+            targetMessageId,
+        ] as const,
 };
 
 const LIMIT = 50;
@@ -37,7 +48,6 @@ export const useUserMessages = (
         initialPageParam: undefined as string | undefined,
         getNextPageParam: (lastPage) => {
             if (lastPage.length < LIMIT) return undefined;
-            // The first message in the array is the oldest (since backend returns ASC)
             return lastPage[0]._id;
         },
         enabled: !!userId,
@@ -49,15 +59,34 @@ export const useUserMessages = (
 export const useChannelMessages = (
     serverId: string | null,
     channelId: string | null,
+    around?: string | null,
 ): UseInfiniteQueryResult<InfiniteData<ChatMessage[]>, Error> =>
     useInfiniteQuery({
-        queryKey: CHAT_QUERY_KEYS.channelMessages(serverId, channelId),
-        queryFn: ({ pageParam }) =>
-            chatApi.getChannelMessages(serverId!, channelId!, LIMIT, pageParam),
+        queryKey: CHAT_QUERY_KEYS.channelMessages(
+            serverId,
+            channelId,
+            around || null,
+        ),
+        queryFn: ({ pageParam }) => {
+            if (around && !pageParam) {
+                return chatApi.getChannelMessages(
+                    serverId!,
+                    channelId!,
+                    LIMIT * 2,
+                    undefined,
+                    around,
+                );
+            }
+            return chatApi.getChannelMessages(
+                serverId!,
+                channelId!,
+                LIMIT,
+                pageParam as string | undefined,
+            );
+        },
         initialPageParam: undefined as string | undefined,
         getNextPageParam: (lastPage) => {
             if (lastPage.length < LIMIT) return undefined;
-            // The first message in the array is the oldest (since backend returns ASC)
             return lastPage[0]._id;
         },
         enabled: !!serverId && !!channelId,
@@ -89,62 +118,58 @@ export const useDeleteMessage = (): {
         onMutate: async (variables) => {
             // cancel any outgoing refetches (so they don't overwrite our optimistic update)
             await queryClient.cancelQueries({
-                queryKey: CHAT_QUERY_KEYS.channelMessages(
-                    variables.serverId,
-                    variables.channelId,
-                ),
+                predicate: (query) =>
+                    query.queryKey[0] === 'chat' &&
+                    query.queryKey[1] === 'messages' &&
+                    query.queryKey[2] === 'channel' &&
+                    query.queryKey[3] === variables.serverId &&
+                    query.queryKey[4] === variables.channelId,
             });
 
-            // snapshot the previous value
-            const previousMessages = queryClient.getQueryData<
-                InfiniteData<ChatMessage[]>
-            >(
-                CHAT_QUERY_KEYS.channelMessages(
-                    variables.serverId,
-                    variables.channelId,
-                ),
-            );
-
-            // optimistically update to the new value
-            if (previousMessages) {
-                queryClient.setQueryData<InfiniteData<ChatMessage[]>>(
-                    CHAT_QUERY_KEYS.channelMessages(
-                        variables.serverId,
-                        variables.channelId,
-                    ),
-                    {
-                        ...previousMessages,
-                        pages: previousMessages.pages.map((page) =>
+            // optimistically update to the new value using setQueriesData
+            queryClient.setQueriesData<InfiniteData<ChatMessage[]>>(
+                {
+                    predicate: (query) =>
+                        query.queryKey[0] === 'chat' &&
+                        query.queryKey[1] === 'messages' &&
+                        query.queryKey[2] === 'channel' &&
+                        query.queryKey[3] === variables.serverId &&
+                        query.queryKey[4] === variables.channelId,
+                },
+                (oldData) => {
+                    if (!oldData) return oldData;
+                    return {
+                        ...oldData,
+                        pages: oldData.pages.map((page) =>
                             page.filter(
                                 (msg) => msg._id !== variables.messageId,
                             ),
                         ),
-                    },
-                );
-            }
+                    };
+                },
+            );
 
-            // return a context object with the snapshotted value
-            return { previousMessages };
+            return {};
         },
-        onError: (_err, variables, context) => {
-            // if the mutation fails, use the context returned from onMutate to roll back
-            if (context?.previousMessages) {
-                queryClient.setQueryData(
-                    CHAT_QUERY_KEYS.channelMessages(
-                        variables.serverId,
-                        variables.channelId,
-                    ),
-                    context.previousMessages,
-                );
-            }
+        onError: (_err, variables, _context) => {
+            void queryClient.invalidateQueries({
+                predicate: (query) =>
+                    query.queryKey[0] === 'chat' &&
+                    query.queryKey[1] === 'messages' &&
+                    query.queryKey[2] === 'channel' &&
+                    query.queryKey[3] === variables.serverId &&
+                    query.queryKey[4] === variables.channelId,
+            });
         },
         onSettled: (_data, _error, variables) => {
-            // always refetch after error or success to keep things in sync
+            // always refetch after error or success
             void queryClient.invalidateQueries({
-                queryKey: CHAT_QUERY_KEYS.channelMessages(
-                    variables.serverId,
-                    variables.channelId,
-                ),
+                predicate: (query) =>
+                    query.queryKey[0] === 'chat' &&
+                    query.queryKey[1] === 'messages' &&
+                    query.queryKey[2] === 'channel' &&
+                    query.queryKey[3] === variables.serverId &&
+                    query.queryKey[4] === variables.channelId,
             });
         },
     });
@@ -185,32 +210,29 @@ export const useEditChannelMessage = (): {
         onMutate: async (variables) => {
             // cancel any outgoing refetches
             await queryClient.cancelQueries({
-                queryKey: CHAT_QUERY_KEYS.channelMessages(
-                    variables.serverId,
-                    variables.channelId,
-                ),
+                predicate: (query) =>
+                    query.queryKey[0] === 'chat' &&
+                    query.queryKey[1] === 'messages' &&
+                    query.queryKey[2] === 'channel' &&
+                    query.queryKey[3] === variables.serverId &&
+                    query.queryKey[4] === variables.channelId,
             });
 
-            // snapshot the previous value
-            const previousMessages = queryClient.getQueryData<
-                InfiniteData<ChatMessage[]>
-            >(
-                CHAT_QUERY_KEYS.channelMessages(
-                    variables.serverId,
-                    variables.channelId,
-                ),
-            );
-
             // optimistically update the message
-            if (previousMessages) {
-                queryClient.setQueryData<InfiniteData<ChatMessage[]>>(
-                    CHAT_QUERY_KEYS.channelMessages(
-                        variables.serverId,
-                        variables.channelId,
-                    ),
-                    {
-                        ...previousMessages,
-                        pages: previousMessages.pages.map((page) =>
+            queryClient.setQueriesData<InfiniteData<ChatMessage[]>>(
+                {
+                    predicate: (query) =>
+                        query.queryKey[0] === 'chat' &&
+                        query.queryKey[1] === 'messages' &&
+                        query.queryKey[2] === 'channel' &&
+                        query.queryKey[3] === variables.serverId &&
+                        query.queryKey[4] === variables.channelId,
+                },
+                (oldData) => {
+                    if (!oldData) return oldData;
+                    return {
+                        ...oldData,
+                        pages: oldData.pages.map((page) =>
                             page.map((msg) =>
                                 msg._id === variables.messageId
                                     ? {
@@ -222,29 +244,30 @@ export const useEditChannelMessage = (): {
                                     : msg,
                             ),
                         ),
-                    },
-                );
-            }
+                    };
+                },
+            );
 
-            return { previousMessages };
+            return {};
         },
-        onError: (_err, variables, context) => {
-            if (context?.previousMessages) {
-                queryClient.setQueryData(
-                    CHAT_QUERY_KEYS.channelMessages(
-                        variables.serverId,
-                        variables.channelId,
-                    ),
-                    context.previousMessages,
-                );
-            }
+        onError: (_err, variables, _context) => {
+            void queryClient.invalidateQueries({
+                predicate: (query) =>
+                    query.queryKey[0] === 'chat' &&
+                    query.queryKey[1] === 'messages' &&
+                    query.queryKey[2] === 'channel' &&
+                    query.queryKey[3] === variables.serverId &&
+                    query.queryKey[4] === variables.channelId,
+            });
         },
         onSettled: (_data, _error, variables) => {
             void queryClient.invalidateQueries({
-                queryKey: CHAT_QUERY_KEYS.channelMessages(
-                    variables.serverId,
-                    variables.channelId,
-                ),
+                predicate: (query) =>
+                    query.queryKey[0] === 'chat' &&
+                    query.queryKey[1] === 'messages' &&
+                    query.queryKey[2] === 'channel' &&
+                    query.queryKey[3] === variables.serverId &&
+                    query.queryKey[4] === variables.channelId,
             });
         },
     });

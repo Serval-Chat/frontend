@@ -194,6 +194,7 @@ export function useChatWS(
                         CHAT_QUERY_KEYS.channelMessages(
                             selectedServerId,
                             selectedChannelId,
+                            null, // explicit targetMessageId === null for live view
                         ),
                         convertServerMessageToChatMessage(message),
                     );
@@ -222,6 +223,7 @@ export function useChatWS(
                         CHAT_QUERY_KEYS.channelMessages(
                             selectedServerId,
                             selectedChannelId,
+                            null, // explicit targetMessageId === null for live view
                         ),
                         convertServerMessageToChatMessage(message),
                     );
@@ -309,7 +311,11 @@ export function useChatWS(
     useWebSocket(
         WsEvents.MESSAGE_SERVER_DELETED,
         useCallback(
-            (payload: { messageId: string; channelId: string }): void => {
+            (payload: {
+                messageId: string;
+                channelId: string;
+                serverId?: string;
+            }): void => {
                 queryClient.setQueriesData<InfiniteData<ChatMessage[]>>(
                     {
                         predicate: (query) =>
@@ -347,12 +353,15 @@ export function useChatWS(
                 editedAt: string;
                 isEdited: true;
             }): void => {
-                const queryKey = CHAT_QUERY_KEYS.channelMessages(
-                    payload.serverId,
-                    payload.channelId,
-                );
-                queryClient.setQueryData<InfiniteData<ChatMessage[]>>(
-                    queryKey,
+                queryClient.setQueriesData<InfiniteData<ChatMessage[]>>(
+                    {
+                        predicate: (query) =>
+                            query.queryKey[0] === 'chat' &&
+                            query.queryKey[1] === 'messages' &&
+                            query.queryKey[2] === 'channel' &&
+                            query.queryKey[3] === payload.serverId &&
+                            query.queryKey[4] === payload.channelId,
+                    },
                     (oldData) => {
                         if (!oldData) return oldData;
                         return {

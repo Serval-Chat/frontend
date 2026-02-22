@@ -63,22 +63,56 @@ export const resolveReplyTo = (
 ): ProcessedChatMessage['replyTo'] => {
     let replyTo: ProcessedChatMessage['replyTo'] = undefined;
 
-    // If replyTo is missing, try to resolve from IDs
-    const repliedId = (msg.repliedToMessageId || msg.replyToId)?.toString();
+    if (msg.referenced_message) {
+        replyTo = {
+            _id: msg.referenced_message._id,
+            text: msg.referenced_message.text,
+            user: {
+                _id: msg.referenced_message.senderId,
+                username: 'Unknown',
+            } as User,
+            role: undefined,
+            iconRole: undefined,
+        };
+    }
 
-    if (repliedId) {
-        const repliedMsg = allMessages.find(
-            (m) => m._id.toString() === repliedId,
-        );
+    if (
+        !replyTo &&
+        msg.repliedToMessageId &&
+        typeof msg.repliedToMessageId === 'object'
+    ) {
+        replyTo = {
+            _id: msg.repliedToMessageId._id,
+            text: msg.repliedToMessageId.text,
+            user: {
+                _id: msg.repliedToMessageId.senderId,
+                username: 'Unknown',
+            } as User,
+            role: undefined,
+            iconRole: undefined,
+        };
+    }
 
-        if (repliedMsg) {
-            replyTo = {
-                _id: repliedMsg._id,
-                text: repliedMsg.text,
-                user: { _id: repliedMsg.senderId, username: 'Unknown' } as User,
-                role: undefined,
-                iconRole: undefined,
-            };
+    if (!replyTo) {
+        const repliedId = (msg.repliedToMessageId || msg.replyToId)?.toString();
+
+        if (repliedId) {
+            const repliedMsg = allMessages.find(
+                (m) => m._id.toString() === repliedId,
+            );
+
+            if (repliedMsg) {
+                replyTo = {
+                    _id: repliedMsg._id,
+                    text: repliedMsg.text,
+                    user: {
+                        _id: repliedMsg.senderId,
+                        username: 'Unknown',
+                    } as User,
+                    role: undefined,
+                    iconRole: undefined,
+                };
+            }
         }
     }
 
@@ -95,7 +129,6 @@ export const resolveReplyTo = (
         };
     }
 
-    // Attempt to resolve missing user/role in replyTo
     if (replyTo) {
         const replySenderId = replyTo.user?._id?.toString();
         if (replySenderId) {

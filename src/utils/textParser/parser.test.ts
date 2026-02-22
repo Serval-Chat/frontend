@@ -148,7 +148,77 @@ describe('TextParser', () => {
             },
         ]);
     });
+    it('should parse channel links from rolling.catfla.re', () => {
+        const text =
+            'Check this channel: https://rolling.catfla.re/chat/@server/6911caf7eefdd0a9fe8160e5/channel/692c89c811f314d2aea864d1';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            { type: 'text', content: 'Check this channel: ' },
+            {
+                type: 'channel_link',
+                serverId: '6911caf7eefdd0a9fe8160e5',
+                channelId: '692c89c811f314d2aea864d1',
+                url: 'https://rolling.catfla.re/chat/@server/6911caf7eefdd0a9fe8160e5/channel/692c89c811f314d2aea864d1',
+            },
+        ]);
+    });
 
+    it('should parse channel links from catfla.re', () => {
+        const text =
+            'https://catfla.re/chat/@server/serverId123/channel/channelId456';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            {
+                type: 'channel_link',
+                serverId: 'serverId123',
+                channelId: 'channelId456',
+                url: 'https://catfla.re/chat/@server/serverId123/channel/channelId456',
+            },
+        ]);
+    });
+
+    it('should parse channel links from localhost', () => {
+        const text =
+            'http://localhost:5173/chat/@server/serverId/channel/channelId';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            {
+                type: 'channel_link',
+                serverId: 'serverId',
+                channelId: 'channelId',
+                url: 'http://localhost:5173/chat/@server/serverId/channel/channelId',
+            },
+        ]);
+    });
+
+    it('should parse channel links from localhost:8001', () => {
+        const text =
+            'http://localhost:8001/chat/@server/serverId/channel/channelId';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            {
+                type: 'channel_link',
+                serverId: 'serverId',
+                channelId: 'channelId',
+                url: 'http://localhost:8001/chat/@server/serverId/channel/channelId',
+            },
+        ]);
+    });
+
+    it('should parse message links with messageId from localhost:5173', () => {
+        const text =
+            'http://localhost:5173/chat/@server/6911caf7eefdd0a9fe8160e5/channel/695a948fc14c479df60a50a0/message/695b916b70e8c8265d45a4b9';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            {
+                type: 'channel_link',
+                serverId: '6911caf7eefdd0a9fe8160e5',
+                channelId: '695a948fc14c479df60a50a0',
+                url: 'http://localhost:5173/chat/@server/6911caf7eefdd0a9fe8160e5/channel/695a948fc14c479df60a50a0/message/695b916b70e8c8265d45a4b9',
+                messageId: '695b916b70e8c8265d45a4b9',
+            },
+        ]);
+    });
     it('should parse file embeds', () => {
         const text = '[%file%](https://example.com/image.png)';
         const nodes = parseText(text, ParserPresets.MESSAGE);

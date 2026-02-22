@@ -1,6 +1,7 @@
 /* eslint-disable react/no-array-index-key */
 import React from 'react';
 
+import { ChannelLink } from '@/ui/components/chat/ChannelLink';
 import { FileEmbed } from '@/ui/components/chat/FileEmbed';
 import { InviteLink } from '@/ui/components/chat/InviteLink';
 import { Box } from '@/ui/components/layout/Box';
@@ -275,6 +276,16 @@ export const ParsedText: React.FC<ParsedTextProps> = ({
 
                     case 'role_mention':
                         return <RoleMention key={idx} roleId={node.roleId} />;
+
+                    case 'channel_link':
+                        return (
+                            <ChannelLink
+                                channelId={node.channelId}
+                                key={idx}
+                                messageId={node.messageId}
+                                serverId={node.serverId}
+                            />
+                        );
 
                     case 'everyone':
                         return (

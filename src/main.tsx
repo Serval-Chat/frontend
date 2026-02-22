@@ -52,6 +52,10 @@ createRoot(document.getElementById('root')!).render(
                                         />
                                         <Route
                                             element={<Chat />}
+                                            path="@server/:serverId/channel/:channelId/message/:messageId"
+                                        />
+                                        <Route
+                                            element={<Chat />}
                                             path="@user/:userId"
                                         />
                                         <Route

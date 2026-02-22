@@ -10,11 +10,12 @@ export const chatApi = {
         userId: string,
         limit: number = 50,
         before?: string,
+        after?: string,
     ): Promise<ChatMessage[]> => {
         const response = await apiClient.get<ChatMessage[]>(
             '/api/v1/messages',
             {
-                params: { userId, limit, before },
+                params: { userId, limit, before, after },
             },
         );
         return response.data;
@@ -28,11 +29,13 @@ export const chatApi = {
         channelId: string,
         limit: number = 50,
         before?: string,
+        around?: string,
+        after?: string,
     ): Promise<ChatMessage[]> => {
         const response = await apiClient.get<ChatMessage[]>(
             `/api/v1/servers/${serverId}/channels/${channelId}/messages`,
             {
-                params: { limit, before },
+                params: { limit, before, around, after },
             },
         );
         return response.data;

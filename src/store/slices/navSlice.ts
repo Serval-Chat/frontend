@@ -8,6 +8,7 @@ interface NavState {
     selectedServerId: string | null;
     selectedFriendId: string | null;
     selectedChannelId: string | null;
+    targetMessageId: string | null;
     lastOpenedChannelByServer: Record<string, string>;
     lastSelectedFriendId: string | null;
 }
@@ -17,6 +18,7 @@ const initialState: NavState = {
     selectedServerId: null,
     selectedFriendId: null,
     selectedChannelId: null,
+    targetMessageId: null,
     lastOpenedChannelByServer: {},
     lastSelectedFriendId: null,
 };
@@ -63,6 +65,9 @@ const navSlice = createSlice({
                     action.payload;
             }
         },
+        setTargetMessageId: (state, action: PayloadAction<string | null>) => {
+            state.targetMessageId = action.payload;
+        },
     },
 });
 
@@ -71,5 +76,6 @@ export const {
     setSelectedServerId,
     setSelectedFriendId,
     setSelectedChannelId,
+    setTargetMessageId,
 } = navSlice.actions;
 export const navReducer = navSlice.reducer;

@@ -12,6 +12,9 @@ interface MessagesListProps {
     onLoadMore?: () => void;
     hasMore?: boolean;
     isLoadingMore?: boolean;
+    onLoadMoreNewer?: () => void;
+    hasMoreNewer?: boolean;
+    isLoadingMoreNewer?: boolean;
     onReplyClick?: (messageId: string) => void;
     onReplyToMessage?: (message: ProcessedChatMessage) => void;
     activeHighlightId?: string | null;
@@ -27,6 +30,9 @@ export const MessagesList: React.FC<MessagesListProps> = ({
     onLoadMore,
     hasMore,
     isLoadingMore,
+    onLoadMoreNewer,
+    hasMoreNewer,
+    isLoadingMoreNewer,
     onReplyClick,
     onReplyToMessage,
     activeHighlightId,
@@ -39,6 +45,7 @@ export const MessagesList: React.FC<MessagesListProps> = ({
     const [highlightId, setInternalHighlightId] = useState<string | null>(
         activeHighlightId || null,
     );
+    const highlightTimerRef = useRef<NodeJS.Timeout | null>(null);
 
     const handleReplyClick = (messageId: string): void => {
         setInternalHighlightId(messageId);
@@ -46,8 +53,13 @@ export const MessagesList: React.FC<MessagesListProps> = ({
         if (el) {
             el.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
+
         // Clear highlight after animation
-        setTimeout(() => setInternalHighlightId(null), 2000);
+        if (highlightTimerRef.current) clearTimeout(highlightTimerRef.current);
+        highlightTimerRef.current = setTimeout(() => {
+            setInternalHighlightId(null);
+            highlightTimerRef.current = null;
+        }, 2000);
 
         onReplyClick?.(messageId);
     };
@@ -91,28 +103,43 @@ export const MessagesList: React.FC<MessagesListProps> = ({
         lastScrollHeightRef.current = newScrollHeight;
     }, [messages, activeHighlightId, isAtBottom]);
 
+    const lastScrolledIdRef = useRef<string | null>(null);
+
     // Handle explicit scroll requests
     useEffect(() => {
-        if (!activeHighlightId) return;
+        if (!activeHighlightId) {
+            lastScrolledIdRef.current = null;
+            return;
+        }
+
+        if (lastScrolledIdRef.current === activeHighlightId) {
+            return;
+        }
 
         const el = document.getElementById(`message-${activeHighlightId}`);
         if (el) {
-            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            requestAnimationFrame(() => {
+                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                setInternalHighlightId(activeHighlightId);
+            });
+            lastScrolledIdRef.current = activeHighlightId;
+
+            if (highlightTimerRef.current)
+                clearTimeout(highlightTimerRef.current);
+            highlightTimerRef.current = setTimeout(() => {
+                setInternalHighlightId(null);
+                highlightTimerRef.current = null;
+            }, 2000);
         }
+    }, [activeHighlightId, messages]);
 
-        const highlightTimeout = setTimeout(() => {
-            setInternalHighlightId(activeHighlightId);
-        }, 0);
-
-        const clearHighlightTimeout = setTimeout(() => {
-            setInternalHighlightId(null);
-        }, 2000);
-
-        return () => {
-            clearTimeout(highlightTimeout);
-            clearTimeout(clearHighlightTimeout);
-        };
-    }, [activeHighlightId]);
+    useEffect(
+        () => () => {
+            if (highlightTimerRef.current)
+                clearTimeout(highlightTimerRef.current);
+        },
+        [],
+    );
 
     return (
         <Box
@@ -151,6 +178,24 @@ export const MessagesList: React.FC<MessagesListProps> = ({
                     onReplyToMessage={onReplyToMessage}
                 />
             ))}
+
+            {hasMoreNewer && (
+                <Box className="flex justify-center py-4">
+                    {isLoadingMoreNewer ? (
+                        <LoadingSpinner size="sm" />
+                    ) : (
+                        <Button
+                            className="bg-transparent border-none shadow-none text-xs text-foreground-muted hover:text-foreground hover:bg-bg-subtle transition-colors"
+                            size="sm"
+                            variant="ghost"
+                            onClick={onLoadMoreNewer}
+                        >
+                            Load newer messages
+                        </Button>
+                    )}
+                </Box>
+            )}
+
             <VerticalSpacer verticalSpace={20} />
         </Box>
     );

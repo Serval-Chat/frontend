@@ -31,6 +31,7 @@ export const ParserPresets = {
             ParserFeature.MENTION,
             ParserFeature.ROLE_MENTION,
             ParserFeature.EVERYONE_MENTION,
+            ParserFeature.CHANNEL_LINK,
             ParserFeature.ORDERED_LIST,
             ParserFeature.TABLE,
         ],
@@ -55,6 +56,7 @@ export const ParserPresets = {
             ParserFeature.MENTION,
             ParserFeature.ROLE_MENTION,
             ParserFeature.EVERYONE_MENTION,
+            ParserFeature.CHANNEL_LINK,
             ParserFeature.ORDERED_LIST,
             ParserFeature.TABLE,
         ],
@@ -214,6 +216,24 @@ export class TextParser {
                         currentText = '';
                     }
                     nodes.push(everyoneNode);
+                    continue;
+                }
+            }
+
+            // Channel links: http(-s)://localhost:xxxx/chat/@server/{serverId}/channel/{channelId}
+            // or http(-s)://(rolling.)catfla.re/chat/@server/{serverId}/channel/{channelId}
+            if (
+                char === 'h' &&
+                this.options.features.includes(ParserFeature.CHANNEL_LINK) &&
+                (this.peek('http://') || this.peek('https://'))
+            ) {
+                const channelLinkNode = this.tryParseChannelLink();
+                if (channelLinkNode) {
+                    if (currentText) {
+                        nodes.push({ type: 'text', content: currentText });
+                        currentText = '';
+                    }
+                    nodes.push(channelLinkNode);
                     continue;
                 }
             }
@@ -1064,6 +1084,35 @@ export class TextParser {
             this.index += 10;
             return { type: 'everyone' };
         }
+        return null;
+    }
+
+    private tryParseChannelLink(): ASTNode | null {
+        const start = this.index;
+        // Pattern: http(s)://localhost:5173/chat/@server/{serverId}/channel/{channelId}(/message/{messageId})?
+        // or http(s)://localhost:8001/chat/@server/{serverId}/channel/{channelId}(/message/{messageId})?
+        // or http(s)://(rolling.)catfla.re/chat/@server/{serverId}/channel/{channelId}(/message/{messageId})?
+        const channelLinkRegex =
+            /^https?:\/\/(?:localhost:(?:5173|8001)|(?:rolling\.)?catfla\.re)\/chat\/@server\/([a-zA-Z0-9]+)\/channel\/([a-zA-Z0-9]+)(?:\/message\/([a-zA-Z0-9]+))?/;
+        const remainingText = this.text.slice(this.index);
+        const match = remainingText.match(channelLinkRegex);
+
+        if (match) {
+            const url = match[0];
+            const serverId = match[1];
+            const channelId = match[2];
+            const messageId = match[3];
+            this.index += url.length;
+            return {
+                type: 'channel_link',
+                serverId,
+                channelId,
+                url,
+                messageId,
+            } as ASTNode;
+        }
+
+        this.index = start;
         return null;
     }
 }
