@@ -109,6 +109,14 @@ const MOCK_MESSAGES: ProcessedChatMessage[] = [
         createdAt: new Date(Date.now() - 3500000).toISOString(),
         user: MOCK_USERS.evalyn,
         senderId: MOCK_USERS.evalyn._id,
+        reactions: [
+            {
+                emoji: '😃',
+                emojiType: 'unicode',
+                count: 1,
+                users: [MOCK_USERS.mintsuki._id],
+            },
+        ],
     },
     {
         _id: '3',

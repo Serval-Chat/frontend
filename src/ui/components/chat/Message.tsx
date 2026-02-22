@@ -342,7 +342,7 @@ export const Message: React.FC<MessageProps> = ({
 
                     {showPicker && (
                         <Box
-                            className="absolute bottom-full right-0 mb-2 z-[var(--z-index-popover)]"
+                            className="absolute bottom-full right-0 pb-2 z-[var(--z-index-popover)]"
                             ref={pickerRef}
                         >
                             <EmojiPicker
