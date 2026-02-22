@@ -168,7 +168,7 @@ export const Reactions: React.FC<ReactionsProps> = ({
 
                 {showPicker && (
                     <div
-                        className="absolute bottom-full left-0 mb-2 z-[var(--z-index-popover)]"
+                        className="absolute bottom-full left-0 pb-2 z-[var(--z-index-popover)]"
                         ref={pickerRef}
                     >
                         <EmojiPicker
