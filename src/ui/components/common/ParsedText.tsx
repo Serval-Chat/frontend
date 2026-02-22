@@ -147,7 +147,7 @@ export const ParsedText: React.FC<ParsedTextProps> = ({
 
                     case 'link':
                         return (
-                            <Link href={node.url} key={idx}>
+                            <Link href={node.url} key={idx} size={size}>
                                 {typeof node.text === 'string' ? (
                                     node.text || node.url
                                 ) : node.text ? (

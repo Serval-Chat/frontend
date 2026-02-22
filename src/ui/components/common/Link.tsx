@@ -6,11 +6,24 @@ import { cn } from '@/utils/cn';
 
 import { ConfirmLinkModal } from './ConfirmLinkModal';
 
+export type LinkSize = '2xs' | 'xs' | 'sm' | 'base' | 'lg' | 'xl' | '2xl';
+
+const sizeClasses: Record<LinkSize, string> = {
+    '2xs': 'text-[10px] leading-normal',
+    xs: 'text-xs leading-normal',
+    sm: 'text-sm leading-normal',
+    base: 'text-base leading-normal',
+    lg: 'text-lg leading-normal',
+    xl: 'text-xl leading-normal',
+    '2xl': 'text-2xl leading-normal',
+};
+
 export interface LinkProps extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
     href?: string;
     to?: string;
     children: React.ReactNode;
     external?: boolean;
+    size?: LinkSize;
 }
 
 /**
@@ -22,23 +35,28 @@ export const Link: React.FC<LinkProps> = ({
     children,
     className,
     external,
+    size,
     onClick,
     ...props
 }) => {
+    const sizeClass = size ? sizeClasses[size] : undefined;
     const [isModalOpen, setIsModalOpen] = useState(false);
     const targetUrl = to || href || '#';
     const isInternal = to !== undefined && !external;
 
-    const baseClass = 'text-primary hover:underline transition-all';
+    const baseClass = 'text-primary hover:underline transition-all text-base';
 
     if (isInternal) {
         return (
             <RouterLink
-                className={cn(baseClass, className)}
+                className={cn(baseClass, sizeClass, className)}
                 to={to!}
                 onClick={onClick}
                 // eslint-disable-next-line react/jsx-props-no-spreading
-                {...(props as Omit<LinkProps, 'to' | 'href' | 'external'>)}
+                {...(props as Omit<
+                    LinkProps,
+                    'to' | 'href' | 'external' | 'size'
+                >)}
             >
                 {children}
             </RouterLink>
@@ -64,7 +82,7 @@ export const Link: React.FC<LinkProps> = ({
     return (
         <>
             <a
-                className={cn(baseClass, className)}
+                className={cn(baseClass, sizeClass, className)}
                 href={targetUrl}
                 rel={isExternal ? 'noopener noreferrer' : undefined}
                 target={isExternal ? '_blank' : undefined}
