@@ -27,7 +27,7 @@ export interface Server {
     updatedAt?: string;
 }
 
-export type ChannelType = 'text' | 'voice';
+export type ChannelType = 'text' | 'voice' | 'link';
 
 export interface Channel {
     _id: string;
@@ -40,6 +40,7 @@ export interface Channel {
     description?: string;
     lastMessageAt?: string | null;
     lastReadAt?: string | null;
+    link?: string;
 }
 
 export interface Category {

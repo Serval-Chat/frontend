@@ -69,7 +69,24 @@ export const Link: React.FC<LinkProps> = ({
     const handleClick = (e: React.MouseEvent<HTMLAnchorElement>): void => {
         if (isExternal) {
             e.preventDefault();
-            setIsModalOpen(true);
+            let isSafe = false;
+            try {
+                const parsed = new URL(targetUrl);
+                if (
+                    parsed.hostname === 'catfla.re' ||
+                    parsed.hostname.endsWith('.catfla.re')
+                ) {
+                    isSafe = true;
+                }
+            } catch {
+                // ignore
+            }
+
+            if (isSafe) {
+                window.open(targetUrl, '_blank', 'noopener,noreferrer');
+            } else {
+                setIsModalOpen(true);
+            }
         }
         onClick?.(e);
     };

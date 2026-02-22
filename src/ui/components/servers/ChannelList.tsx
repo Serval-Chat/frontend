@@ -8,6 +8,7 @@ import { serversApi } from '@/api/servers/servers.api';
 import type { Category, Channel } from '@/api/servers/servers.types';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useAppSelector } from '@/store/hooks';
+import { ConfirmLinkModal } from '@/ui/components/common/ConfirmLinkModal';
 import { ContextMenu } from '@/ui/components/common/ContextMenu';
 import type { ContextMenuItem } from '@/ui/components/common/ContextMenu';
 import { IconButton } from '@/ui/components/common/IconButton';
@@ -47,6 +48,8 @@ export const ChannelList: React.FC<ChannelListProps> = ({
     const [settingsChannel, setSettingsChannel] = useState<Channel | null>(
         null,
     );
+    const [selectedLinkChannel, setSelectedLinkChannel] =
+        useState<Channel | null>(null);
 
     const { hasPermission } = usePermissions(selectedServerId);
     const canManageChannels = hasPermission('manageChannels');
@@ -312,16 +315,37 @@ export const ChannelList: React.FC<ChannelListProps> = ({
 
     const navigate = useNavigate();
 
-    const handleChannelClick = (channelId: string): void => {
+    const handleChannelClick = (channel: Channel): void => {
+        if (activeItemId || isReordering || syncLock) return;
+
+        if (channel.type === 'link') {
+            const url = channel.link || '#';
+            try {
+                const parsed = new URL(url);
+                if (
+                    parsed.hostname === 'catfla.re' ||
+                    parsed.hostname.endsWith('.catfla.re')
+                ) {
+                    window.open(url, '_blank', 'noopener,noreferrer');
+                    return;
+                }
+            } catch {
+                // Ignore
+            }
+            setSelectedLinkChannel(channel);
+            return;
+        }
+
         if (selectedServerId) {
             void navigate(
-                `/chat/@server/${selectedServerId}/channel/${channelId}`,
+                `/chat/@server/${selectedServerId}/channel/${channel._id}`,
             );
         }
     };
 
     const renderChannel = (channel: Channel): React.ReactNode => {
         const isUnread =
+            channel.type !== 'link' &&
             channel.lastMessageAt &&
             (!channel.lastReadAt ||
                 new Date(channel.lastMessageAt) > new Date(channel.lastReadAt));
@@ -338,7 +362,7 @@ export const ChannelList: React.FC<ChannelListProps> = ({
                     isUnread={!!isUnread}
                     name={channel.name}
                     type={channel.type}
-                    onClick={() => handleChannelClick(channel._id)}
+                    onClick={() => handleChannelClick(channel)}
                 />
             </ContextMenu>
         );
@@ -466,6 +490,22 @@ export const ChannelList: React.FC<ChannelListProps> = ({
                         onClose={() => {
                             setCreateModalOpen(false);
                             setCreateCategoryId(null);
+                        }}
+                    />
+                )}
+
+                {selectedLinkChannel && (
+                    <ConfirmLinkModal
+                        isOpen={!!selectedLinkChannel}
+                        url={selectedLinkChannel.link || '#'}
+                        onClose={() => setSelectedLinkChannel(null)}
+                        onConfirm={() => {
+                            window.open(
+                                selectedLinkChannel.link || '#',
+                                '_blank',
+                                'noopener,noreferrer',
+                            );
+                            setSelectedLinkChannel(null);
                         }}
                     />
                 )}

@@ -179,9 +179,10 @@ export const serversApi = {
         serverId: string,
         data: {
             name: string;
-            type?: 'text' | 'voice';
+            type?: 'text' | 'voice' | 'link';
             categoryId?: string | null;
             position?: number;
+            link?: string;
         },
     ): Promise<Channel> => {
         const response = await apiClient.post<Channel>(

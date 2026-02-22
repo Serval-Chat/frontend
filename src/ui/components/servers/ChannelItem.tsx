@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Hash, Volume2 } from 'lucide-react';
+import { Hash, Link, Volume2 } from 'lucide-react';
 
 import type { ChannelType } from '@/api/servers/servers.types';
 import { Button } from '@/ui/components/common/Button';
@@ -27,8 +27,11 @@ export const ChannelItem: React.FC<ChannelItemProps> = ({
     isUnread,
     onClick,
 }) => {
-    const CustomIcon = icon ? ICON_MAP[icon] : null;
-    const Icon = CustomIcon || (type === 'text' ? Hash : Volume2);
+    // custom icons don't apply to pseudochannels
+    const CustomIcon = type !== 'link' && icon ? ICON_MAP[icon] : null;
+    const Icon =
+        CustomIcon ||
+        (type === 'text' ? Hash : type === 'link' ? Link : Volume2);
 
     const channelClasses = cn(
         'group flex items-center w-full px-2 py-1.5 rounded-md transition-all border-none shadow-none justify-start',

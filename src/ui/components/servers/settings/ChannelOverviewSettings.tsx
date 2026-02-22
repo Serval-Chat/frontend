@@ -32,6 +32,9 @@ export const ChannelOverviewSettings: React.FC<
     );
     const [selectedIcon, setSelectedIcon] = useState(channel.icon || '');
     const [originalIcon, setOriginalIcon] = useState(channel.icon || '');
+    const [linkUrl, setLinkUrl] = useState(channel.link || '');
+    const [originalLinkUrl, setOriginalLinkUrl] = useState(channel.link || '');
+    const [error, setError] = useState<string | null>(null);
 
     const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
 
@@ -52,25 +55,51 @@ export const ChannelOverviewSettings: React.FC<
         setOriginalDescription(channel.description || '');
         setSelectedIcon(channel.icon || '');
         setOriginalIcon(channel.icon || '');
+        setLinkUrl(channel.link || '');
+        setOriginalLinkUrl(channel.link || '');
     }
 
     const hasChanges =
         name !== originalName ||
         description !== originalDescription ||
-        selectedIcon !== originalIcon;
+        selectedIcon !== originalIcon ||
+        linkUrl !== originalLinkUrl;
 
     const handleSave = (): void => {
+        setError(null);
+
+        if (channel.type === 'link') {
+            if (!linkUrl.trim()) {
+                setError('URL is required for Link channels.');
+                return;
+            }
+            try {
+                new URL(linkUrl.trim());
+            } catch {
+                setError(
+                    'Please enter a valid URL (e.g., https://example.com).',
+                );
+                return;
+            }
+        }
+
         updateChannel(
             {
                 name,
                 description,
                 icon: selectedIcon || undefined,
+                ...(channel.type === 'link'
+                    ? { link: linkUrl || undefined }
+                    : {}),
             },
             {
                 onSuccess: () => {
                     setOriginalName(name);
                     setOriginalDescription(description);
                     setOriginalIcon(selectedIcon);
+                    if (channel.type === 'link') {
+                        setOriginalLinkUrl(linkUrl);
+                    }
                 },
             },
         );
@@ -80,6 +109,8 @@ export const ChannelOverviewSettings: React.FC<
         setName(originalName);
         setDescription(originalDescription);
         setSelectedIcon(originalIcon);
+        setLinkUrl(originalLinkUrl);
+        setError(null);
     };
 
     const handleDelete = (): void => {
@@ -131,6 +162,28 @@ export const ChannelOverviewSettings: React.FC<
                         onChange={(e) => setDescription(e.target.value)}
                     />
                 </div>
+
+                {channel.type === 'link' && (
+                    <div className="space-y-2">
+                        <label
+                            className="text-xs font-bold text-[var(--color-muted-foreground)] uppercase tracking-wider"
+                            htmlFor="channel-link"
+                        >
+                            Channel URL
+                        </label>
+                        <Input
+                            id="channel-link"
+                            placeholder="https://example.com"
+                            value={linkUrl}
+                            onChange={(e) => setLinkUrl(e.target.value)}
+                        />
+                        {error && (
+                            <Text size="xs" variant="danger">
+                                {error}
+                            </Text>
+                        )}
+                    </div>
+                )}
 
                 <div className="space-y-2">
                     <label
