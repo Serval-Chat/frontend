@@ -45,7 +45,9 @@ export const MessagesList: React.FC<MessagesListProps> = ({
     const [highlightId, setInternalHighlightId] = useState<string | null>(
         activeHighlightId || null,
     );
-    const highlightTimerRef = useRef<NodeJS.Timeout | null>(null);
+    const highlightTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
+        null,
+    );
 
     const handleReplyClick = (messageId: string): void => {
         setInternalHighlightId(messageId);

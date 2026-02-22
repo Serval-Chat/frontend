@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { render } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -31,10 +29,12 @@ describe('MessagesList Scroll Behavior', () => {
 
     beforeEach(() => {
         scrollIntoViewMock = vi.fn();
-        window.HTMLElement.prototype.scrollIntoView = scrollIntoViewMock;
+        window.HTMLElement.prototype.scrollIntoView =
+            scrollIntoViewMock as unknown as typeof window.HTMLElement.prototype.scrollIntoView;
 
         requestAnimationFrameMock = vi.fn((cb) => cb());
-        window.requestAnimationFrame = requestAnimationFrameMock;
+        window.requestAnimationFrame =
+            requestAnimationFrameMock as unknown as typeof window.requestAnimationFrame;
     });
 
     const mockMessages: ProcessedChatMessage[] = [
