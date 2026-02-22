@@ -5,7 +5,7 @@ import { useClickAway, useEvent } from 'react-use';
 
 import { useDeleteMessage } from '@/api/chat/chat.queries';
 import { useAddReaction } from '@/api/reactions/reactions.queries';
-import { useMembers } from '@/api/servers/servers.queries';
+import { useMembers, useRoles } from '@/api/servers/servers.queries';
 import type { Role } from '@/api/servers/servers.types';
 import { useMe } from '@/api/users/users.queries';
 import type { User } from '@/api/users/users.types';
@@ -62,6 +62,18 @@ export const Message: React.FC<MessageProps> = ({
     const { data: members } = useMembers(
         message.serverId === 'preview' ? null : (message.serverId ?? null),
     );
+    const { data: serverRoles } = useRoles(
+        message.serverId === 'preview' ? null : (message.serverId ?? null),
+    );
+
+    const senderMember = React.useMemo(
+        () => members?.find((m) => m.userId === message.senderId),
+        [members, message.senderId],
+    );
+    const senderRoles = React.useMemo(() => {
+        if (!senderMember || !serverRoles) return undefined;
+        return serverRoles.filter((r) => senderMember.roles.includes(r._id));
+    }, [senderMember, serverRoles]);
     const addReaction = useAddReaction();
     const deleteMessage = useDeleteMessage();
     const { hasPermission, isOwner } = usePermissions(
@@ -371,8 +383,11 @@ export const Message: React.FC<MessageProps> = ({
                 <ProfilePopup
                     disableCustomFonts={disableCustomFonts}
                     disableGlow={disableGlow}
+                    iconRole={iconRole}
                     isOpen={showProfile}
+                    joinedAt={senderMember?.joinedAt}
                     role={role}
+                    roles={senderRoles}
                     triggerRef={avatarRef}
                     user={user}
                     userId={user._id}
