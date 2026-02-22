@@ -586,4 +586,54 @@ describe('TextParser', () => {
             },
         ]);
     });
+
+    it('should parse inline LaTeX with $$...$$', () => {
+        const text = 'The formula $$E = mc^2$$ is famous';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            { type: 'text', content: 'The formula ' },
+            { type: 'inline_latex', content: 'E = mc^2' },
+            { type: 'text', content: ' is famous' },
+        ]);
+    });
+
+    it('should parse display LaTeX with $\\n...\\n$', () => {
+        const text = '$\nE = mc^2\n$';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([{ type: 'latex', content: 'E = mc^2' }]);
+    });
+
+    it('should parse multiline display LaTeX', () => {
+        const text = '$\n\\frac{a}{b}\n+ c\n$';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            { type: 'latex', content: '\\frac{a}{b}\n+ c' },
+        ]);
+    });
+
+    it('should not parse $$ as display LaTeX when content has no newline after opening', () => {
+        const text = '$$x$$';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([{ type: 'inline_latex', content: 'x' }]);
+    });
+
+    it('should not parse unclosed inline LaTeX as latex node', () => {
+        const text = '$$unclosed';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([{ type: 'text', content: '$$unclosed' }]);
+    });
+
+    it('should not parse $ without newline as display LaTeX', () => {
+        const text = '$E = mc^2$';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        // Single $ not followed by newline should not parse as latex
+        expect(nodes).not.toContainEqual({
+            type: 'latex',
+            content: 'E = mc^2',
+        });
+        expect(nodes).not.toContainEqual({
+            type: 'inline_latex',
+            content: 'E = mc^2',
+        });
+    });
 });

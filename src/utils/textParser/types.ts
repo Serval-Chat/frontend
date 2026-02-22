@@ -24,6 +24,8 @@ export const ParserFeature = {
     CHANNEL_LINK: 'CHANNEL_LINK',
     ORDERED_LIST: 'ORDERED_LIST',
     TABLE: 'TABLE',
+    LATEX: 'LATEX',
+    INLINE_LATEX: 'INLINE_LATEX',
 } as const;
 
 export type ParserFeature = (typeof ParserFeature)[keyof typeof ParserFeature];
@@ -50,7 +52,9 @@ export type ASTNodeType =
     | 'everyone'
     | 'channel_link'
     | 'ordered_list'
-    | 'table';
+    | 'table'
+    | 'latex'
+    | 'inline_latex';
 
 export interface TextNode {
     type: 'text';
@@ -170,6 +174,16 @@ export interface TableNode {
     rows: (string | ASTNode[])[][];
 }
 
+export interface LatexNode {
+    type: 'latex';
+    content: string;
+}
+
+export interface InlineLatexNode {
+    type: 'inline_latex';
+    content: string;
+}
+
 export type ASTNode =
     | TextNode
     | BoldNode
@@ -192,4 +206,6 @@ export type ASTNode =
     | EveryoneNode
     | ChannelLinkNode
     | OrderedListNode
-    | TableNode;
+    | TableNode
+    | LatexNode
+    | InlineLatexNode;

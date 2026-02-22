@@ -9,6 +9,7 @@ import type { ASTNode } from '@/utils/textParser/types';
 
 import { CodeBlock } from './CodeBlock';
 import { Heading } from './Heading';
+import { LatexRenderer } from './LatexRenderer';
 import { Link } from './Link';
 import { Mention } from './Mention';
 import { ParsedEmoji } from './ParsedEmoji';
@@ -373,6 +374,20 @@ export const ParsedText: React.FC<ParsedTextProps> = ({
                                     ))}
                                 </TableBody>
                             </Table>
+                        );
+
+                    case 'latex':
+                        return (
+                            <LatexRenderer
+                                displayMode
+                                content={node.content}
+                                key={idx}
+                            />
+                        );
+
+                    case 'inline_latex':
+                        return (
+                            <LatexRenderer content={node.content} key={idx} />
                         );
 
                     default:

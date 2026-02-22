@@ -34,6 +34,8 @@ export const ParserPresets = {
             ParserFeature.CHANNEL_LINK,
             ParserFeature.ORDERED_LIST,
             ParserFeature.TABLE,
+            ParserFeature.LATEX,
+            ParserFeature.INLINE_LATEX,
         ],
     },
     BIO: {
@@ -59,6 +61,8 @@ export const ParserPresets = {
             ParserFeature.CHANNEL_LINK,
             ParserFeature.ORDERED_LIST,
             ParserFeature.TABLE,
+            ParserFeature.LATEX,
+            ParserFeature.INLINE_LATEX,
         ],
     },
 } as const;
@@ -359,6 +363,23 @@ export class TextParser {
                         currentText = '';
                     }
                     nodes.push(codeNode);
+                    continue;
+                }
+            }
+
+            // $$text$$ (inline) or $\ntext\n$
+            if (
+                char === '$' &&
+                (this.options.features.includes(ParserFeature.INLINE_LATEX) ||
+                    this.options.features.includes(ParserFeature.LATEX))
+            ) {
+                const latexNode = this.tryParseLatex();
+                if (latexNode) {
+                    if (currentText) {
+                        nodes.push({ type: 'text', content: currentText });
+                        currentText = '';
+                    }
+                    nodes.push(latexNode);
                     continue;
                 }
             }
@@ -1113,6 +1134,71 @@ export class TextParser {
         }
 
         this.index = start;
+        return null;
+    }
+
+    private tryParseLatex(): ASTNode | null {
+        const start = this.index;
+
+        // Display LaTeX: $ at end of line or start, content on separate lines, closing $ on its own line
+        // Syntax: $\ncontent\n$
+        if (
+            this.options.features.includes(ParserFeature.LATEX) &&
+            this.peek('$\n')
+        ) {
+            this.index += 2; // skip '$\n'
+            let content = '';
+            let foundClosing = false;
+
+            while (this.index < this.text.length) {
+                if (this.peek('\n$')) {
+                    const afterClose = this.index + 2;
+                    if (
+                        afterClose >= this.text.length ||
+                        this.text[afterClose] === '\n'
+                    ) {
+                        foundClosing = true;
+                        break;
+                    }
+                }
+                content += this.text[this.index];
+                this.index++;
+            }
+
+            if (foundClosing && content.trim()) {
+                this.index += 2; // skip '\n$'
+                return { type: 'latex', content: content.trim() };
+            }
+
+            this.index = start;
+        }
+
+        // Inline LaTeX: $$content$$
+        if (
+            this.options.features.includes(ParserFeature.INLINE_LATEX) &&
+            this.peek('$$')
+        ) {
+            this.index += 2; // skip '$$'
+            let content = '';
+            let foundClosing = false;
+
+            while (this.index < this.text.length) {
+                if (this.peek('$$')) {
+                    foundClosing = true;
+                    break;
+                }
+                content += this.text[this.index];
+                this.index++;
+            }
+
+            if (foundClosing && content) {
+                this.index += 2; // skip '$$'
+                return { type: 'inline_latex', content };
+            }
+
+            this.index = start;
+        }
+
         return null;
     }
 }
