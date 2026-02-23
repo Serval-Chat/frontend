@@ -14,6 +14,7 @@ import { useFileQueue } from '@/hooks/chat/useFileQueue';
 import { useMemberMaps } from '@/hooks/chat/useMemberMaps';
 import { usePaginatedMessages } from '@/hooks/chat/usePaginatedMessages';
 import { useProcessedMessages } from '@/hooks/chat/useProcessedMessages';
+import { usePermissions } from '@/hooks/usePermissions';
 import { useChatWS } from '@/hooks/ws/useChatWS';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { setTargetMessageId } from '@/store/slices/navSlice';
@@ -65,6 +66,13 @@ export const MainChat: React.FC = () => {
     const { data: channels } = useChannels(selectedServerId);
     const { data: members } = useMembers(selectedServerId);
     const { data: roles } = useRoles(selectedServerId);
+    const { hasPermission } = usePermissions(
+        selectedServerId,
+        selectedChannelId,
+    );
+
+    // dms have no permissions therefore always allow.
+    const canSendMessages = !selectedServerId || hasPermission('sendMessages');
 
     const selectedChannel = React.useMemo(
         () => channels?.find((c) => c._id === selectedChannelId),
@@ -110,7 +118,7 @@ export const MainChat: React.FC = () => {
     const handleDragOver = (e: React.DragEvent): void => {
         e.preventDefault();
         e.stopPropagation();
-        setIsDragging(true);
+        if (canSendMessages) setIsDragging(true);
     };
 
     const handleDragLeave = (e: React.DragEvent): void => {
@@ -124,7 +132,11 @@ export const MainChat: React.FC = () => {
         e.stopPropagation();
         setIsDragging(false);
 
-        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+        if (
+            canSendMessages &&
+            e.dataTransfer.files &&
+            e.dataTransfer.files.length > 0
+        ) {
             fileQueueResult.addFiles(e.dataTransfer.files);
         }
     };
@@ -220,13 +232,21 @@ export const MainChat: React.FC = () => {
             </Box>
 
             <TypingIndicator typingUsers={typingUsers} />
-            <MessageInput
-                disableCustomFonts={serverDetails?.disableCustomFonts}
-                disableGlow={serverDetails?.disableCustomFonts}
-                fileQueueResult={fileQueueResult}
-                replyingTo={replyingTo}
-                onCancelReply={() => setReplyingTo(null)}
-            />
+            {canSendMessages ? (
+                <MessageInput
+                    disableCustomFonts={serverDetails?.disableCustomFonts}
+                    disableGlow={serverDetails?.disableCustomFonts}
+                    fileQueueResult={fileQueueResult}
+                    replyingTo={replyingTo}
+                    onCancelReply={() => setReplyingTo(null)}
+                />
+            ) : (
+                <Box className="mx-4 mb-4 px-4 h-[56px] flex items-center rounded-lg bg-[var(--bg-msg-input)] border border-border-subtle">
+                    <Text className="text-muted-foreground" size="sm">
+                        You can&apos;t type in this channel.
+                    </Text>
+                </Box>
+            )}
 
             {/* Drag and Drop Overlay */}
             {isDragging && (

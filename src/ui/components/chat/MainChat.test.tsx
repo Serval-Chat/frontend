@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import * as UserQueries from '@/api/users/users.queries';
+import * as Permissions from '@/hooks/usePermissions';
 import { useAppSelector } from '@/store/hooks';
 
 import { MainChat } from './MainChat';
@@ -51,6 +52,15 @@ vi.mock('@/api/users/users.queries', () => ({
     useUserById: vi.fn(),
 }));
 
+vi.mock('@/hooks/usePermissions', () => ({
+    usePermissions: vi.fn().mockReturnValue({
+        hasPermission: () => true,
+        permissions: {},
+        isOwner: false,
+        isLoading: false,
+    }),
+}));
+
 vi.mock('@/ui/components/chat/ChatHeader', () => ({
     ChatHeader: () => <div data-testid="chat-header" />,
 }));
@@ -71,6 +81,53 @@ vi.mock('@/ui/components/common/Text', () => ({
 vi.mock('@/ui/components/layout/Box', () => ({
     Box: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }));
+
+describe('channel send permission gating', () => {
+    const mockNavigate = vi.fn();
+
+    beforeEach(() => {
+        vi.clearAllMocks();
+        vi.mocked(useNavigate).mockReturnValue(mockNavigate);
+        vi.mocked(useAppSelector).mockImplementation((selector) => {
+            const state = {
+                nav: { selectedServerId: 'server1', selectedChannelId: 'ch1' },
+            };
+            return selector(state as never);
+        });
+        vi.mocked(UserQueries.useUserById).mockReturnValue({
+            data: undefined,
+            isError: false,
+        } as never);
+    });
+
+    it('shows the disabled notice and hides input when sendMessages is false', () => {
+        vi.mocked(Permissions.usePermissions).mockReturnValue({
+            hasPermission: () => false,
+            permissions: {} as never,
+            isOwner: false,
+            isLoading: false,
+        });
+
+        const { getByText, queryByTestId } = render(<MainChat />);
+
+        expect(getByText("You can't type in this channel.")).toBeDefined();
+        expect(queryByTestId('message-input')).toBeNull();
+    });
+
+    it('shows the message input when sendMessages is true', () => {
+        vi.mocked(Permissions.usePermissions).mockReturnValue({
+            hasPermission: () => true,
+            permissions: {} as never,
+            isOwner: false,
+            isLoading: false,
+        });
+
+        const { getByTestId, queryByText } = render(<MainChat />);
+
+        expect(getByTestId('message-input')).toBeDefined();
+        expect(queryByText("You can't type in this channel.")).toBeNull();
+    });
+});
 
 describe('MainChat fallback logic', () => {
     const mockNavigate = vi.fn();

@@ -41,6 +41,7 @@ export interface Channel {
     lastMessageAt?: string | null;
     lastReadAt?: string | null;
     link?: string;
+    permissions?: Record<string, Record<string, boolean>>;
 }
 
 export interface Category {
@@ -48,6 +49,7 @@ export interface Category {
     name: string;
     serverId: string;
     position: number;
+    permissions?: Record<string, Record<string, boolean>>;
 }
 
 export interface RolePermissions {
