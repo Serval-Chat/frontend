@@ -41,7 +41,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
     const handleSetSection = (sectionId: string): void => {
         const urlPath = SECTION_ID_TO_URL[sectionId] ?? 'my-account';
-        void navigate(`/chat/@setting/${urlPath}`);
+        void navigate(`/chat/@setting/${urlPath}`, { replace: true });
     };
 
     return (
