@@ -57,6 +57,9 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
     const handleContextMenu = (e: React.MouseEvent): void => {
         e.preventDefault();
         e.stopPropagation();
+
+        if (items.length === 0) return;
+
         setClickPosition({ x: e.clientX, y: e.clientY });
         setIsOpen(true);
     };

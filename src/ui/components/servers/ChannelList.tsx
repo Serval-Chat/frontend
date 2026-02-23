@@ -313,6 +313,48 @@ export const ChannelList: React.FC<ChannelListProps> = ({
         return items;
     };
 
+    const getCategoryMenuItems = (category: Category): ContextMenuItem[] => {
+        const items: ContextMenuItem[] = [
+            {
+                label: 'Copy Category ID',
+                icon: Copy,
+                onClick: () => {
+                    void navigator.clipboard.writeText(category._id);
+                },
+            },
+        ];
+
+        return items;
+    };
+
+    const getGlobalMenuItems = (): ContextMenuItem[] => {
+        const items: ContextMenuItem[] = [];
+
+        if (canManageChannels) {
+            items.push({
+                label: 'Create Channel',
+                icon: Plus,
+                onClick: () => {
+                    setCreateCategoryId(null);
+                    setCreateModalOpen(true);
+                },
+            });
+        }
+
+        if (selectedServerId) {
+            if (items.length > 0) items.push({ type: 'divider' });
+            items.push({
+                label: 'Copy Server ID',
+                icon: Copy,
+                onClick: () => {
+                    void navigator.clipboard.writeText(selectedServerId);
+                },
+            });
+        }
+
+        return items;
+    };
+
     const navigate = useNavigate();
 
     const handleChannelClick = (channel: Channel): void => {
@@ -369,23 +411,7 @@ export const ChannelList: React.FC<ChannelListProps> = ({
     };
 
     return (
-        <ContextMenu
-            className="flex-1"
-            items={
-                canManageChannels
-                    ? [
-                          {
-                              label: 'Create Channel',
-                              icon: Plus,
-                              onClick: () => {
-                                  setCreateCategoryId(null);
-                                  setCreateModalOpen(true);
-                              },
-                          },
-                      ]
-                    : []
-            }
-        >
+        <ContextMenu className="flex-1" items={getGlobalMenuItems()}>
             <div className="flex flex-col px-2 space-y-0.5 py-4 min-h-full">
                 <Reorder.Group
                     axis="y"
@@ -407,49 +433,60 @@ export const ChannelList: React.FC<ChannelListProps> = ({
                                     onDragEnd={() => void handleDragEnd()}
                                     onDragStart={() => setActiveItemId(item.id)}
                                 >
-                                    <div
-                                        className="flex items-center px-1 group cursor-pointer"
-                                        role="button"
-                                        tabIndex={0}
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            toggleCategory(category._id);
-                                        }}
-                                        onKeyDown={(e) => {
-                                            if (
-                                                e.key === 'Enter' ||
-                                                e.key === ' '
-                                            ) {
-                                                toggleCategory(category._id);
-                                            }
-                                        }}
+                                    <ContextMenu
+                                        className="pt-4 first:pt-0"
+                                        items={getCategoryMenuItems(category)}
                                     >
-                                        <ChevronDown
-                                            className={cn(
-                                                'w-3 h-3 mr-0.5 text-muted-foreground transition-transform duration-200',
-                                                isCollapsed ? '-rotate-90' : '',
-                                            )}
-                                        />
-                                        <span className="text-[12px] font-bold text-muted-foreground uppercase tracking-wider group-hover:text-foreground/80 transition-colors flex-1">
-                                            {category.name}
-                                        </span>
-                                        {canManageChannels && (
-                                            <IconButton
-                                                className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5"
-                                                icon={Plus}
-                                                iconSize={14}
-                                                title="Create Channel"
-                                                variant="ghost"
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    setCreateCategoryId(
+                                        <div
+                                            className="flex items-center px-1 group cursor-pointer"
+                                            role="button"
+                                            tabIndex={0}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                toggleCategory(category._id);
+                                            }}
+                                            onKeyDown={(e) => {
+                                                if (
+                                                    e.key === 'Enter' ||
+                                                    e.key === ' '
+                                                ) {
+                                                    toggleCategory(
                                                         category._id,
                                                     );
-                                                    setCreateModalOpen(true);
-                                                }}
+                                                }
+                                            }}
+                                        >
+                                            <ChevronDown
+                                                className={cn(
+                                                    'w-3 h-3 mr-0.5 text-muted-foreground transition-transform duration-200',
+                                                    isCollapsed
+                                                        ? '-rotate-90'
+                                                        : '',
+                                                )}
                                             />
-                                        )}
-                                    </div>
+                                            <span className="text-[12px] font-bold text-muted-foreground uppercase tracking-wider group-hover:text-foreground/80 transition-colors flex-1">
+                                                {category.name}
+                                            </span>
+                                            {canManageChannels && (
+                                                <IconButton
+                                                    className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5"
+                                                    icon={Plus}
+                                                    iconSize={14}
+                                                    title="Create Channel"
+                                                    variant="ghost"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setCreateCategoryId(
+                                                            category._id,
+                                                        );
+                                                        setCreateModalOpen(
+                                                            true,
+                                                        );
+                                                    }}
+                                                />
+                                            )}
+                                        </div>
+                                    </ContextMenu>
                                 </Reorder.Item>
                             );
                         } else {
