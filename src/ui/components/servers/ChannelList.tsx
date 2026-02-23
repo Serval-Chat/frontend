@@ -267,47 +267,48 @@ export const ChannelList: React.FC<ChannelListProps> = ({
                     void navigator.clipboard.writeText(channel._id);
                 },
             },
-            {
+        ];
+
+        if (canManageChannels) {
+            items.push({
                 label: 'Edit Channel',
                 icon: Settings,
                 onClick: () => {
                     setSettingsChannel(channel);
                 },
-            },
-        ];
+            });
 
-        // Move to Category options
-        const moveOptions: ContextMenuItem[] = [
-            {
-                label: 'Uncategorized',
-                icon: Folder,
-                onClick: () => void handleMoveToCategory(channel._id, null),
-            },
-            ...[...categories]
-                .sort((a, b) => a.position - b.position)
-                .map((cat) => ({
-                    label: cat.name,
+            // Move to Category options
+            const moveOptions: ContextMenuItem[] = [
+                {
+                    label: 'Uncategorized',
                     icon: Folder,
-                    onClick: () =>
-                        void handleMoveToCategory(channel._id, cat._id),
-                })),
-        ];
+                    onClick: () => void handleMoveToCategory(channel._id, null),
+                },
+                ...[...categories]
+                    .sort((a, b) => a.position - b.position)
+                    .map((cat) => ({
+                        label: cat.name,
+                        icon: Folder,
+                        onClick: () =>
+                            void handleMoveToCategory(channel._id, cat._id),
+                    })),
+            ];
 
-        // Filter out current category
-        const currentCatId = channel.categoryId || null;
-        const availableOptions = moveOptions.filter((opt) => {
-            if (opt.type === 'divider') return false;
-            if (opt.label === 'Uncategorized') return currentCatId !== null;
-            const targetCat = categories.find((c) => c.name === opt.label);
-            return targetCat?._id !== currentCatId;
-        });
+            // Filter out current category
+            const currentCatId = channel.categoryId || null;
+            const availableOptions = moveOptions.filter((opt) => {
+                if (opt.type === 'divider') return false;
+                if (opt.label === 'Uncategorized') return currentCatId !== null;
+                const targetCat = categories.find((c) => c.name === opt.label);
+                return targetCat?._id !== currentCatId;
+            });
 
-        if (availableOptions.length > 0) {
-            if (items.length > 0) {
+            if (availableOptions.length > 0) {
                 items.push({ type: 'divider' });
+                items.push({ label: 'Move to Category:', type: 'label' });
+                items.push(...availableOptions);
             }
-            items.push({ label: 'Move to Category:', type: 'label' });
-            items.push(...availableOptions);
         }
 
         return items;
@@ -428,6 +429,7 @@ export const ChannelList: React.FC<ChannelListProps> = ({
                             return (
                                 <Reorder.Item
                                     className="pt-4 first:pt-0"
+                                    dragListener={canManageChannels}
                                     key={item.id}
                                     value={item}
                                     onDragEnd={() => void handleDragEnd()}
@@ -499,6 +501,7 @@ export const ChannelList: React.FC<ChannelListProps> = ({
 
                             return (
                                 <Reorder.Item
+                                    dragListener={canManageChannels}
                                     key={item.id}
                                     value={item}
                                     onDragEnd={() => void handleDragEnd()}
