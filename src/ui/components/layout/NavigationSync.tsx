@@ -10,6 +10,7 @@ import {
     setSelectedServerId,
     setTargetMessageId,
 } from '@/store/slices/navSlice';
+import { isValidObjectId } from '@/utils/validation';
 
 /**
  * @description Syncs Redux navigation state from the current URL.
@@ -35,29 +36,66 @@ export const NavigationSync: React.FC = () => {
         if (path === '/chat/@me') {
             dispatch(setSelectedFriendId(null));
             dispatch(setTargetMessageId(null));
-        } else if (params.serverId && params.channelId) {
+        } else if (params.serverId) {
+            if (!isValidObjectId(params.serverId)) {
+                void navigate('/chat/@me', { replace: true });
+                return;
+            }
+
             let contextChanged = false;
             if (selectedServerId !== params.serverId) {
                 dispatch(setSelectedServerId(params.serverId));
                 contextChanged = true;
             }
-            if (selectedChannelId !== params.channelId) {
-                dispatch(setSelectedChannelId(params.channelId));
-                contextChanged = true;
-            }
 
-            if (params.messageId) {
-                dispatch(setTargetMessageId(params.messageId));
-                void navigate(
-                    `/chat/@server/${params.serverId}/channel/${params.channelId}`,
-                    { replace: true },
-                );
+            if (params.channelId) {
+                if (!isValidObjectId(params.channelId)) {
+                    void navigate(`/chat/@server/${params.serverId}`, {
+                        replace: true,
+                    });
+                    return;
+                }
+
+                if (selectedChannelId !== params.channelId) {
+                    dispatch(setSelectedChannelId(params.channelId));
+                    contextChanged = true;
+                }
+
+                if (params.messageId) {
+                    if (!isValidObjectId(params.messageId)) {
+                        void navigate(
+                            `/chat/@server/${params.serverId}/channel/${params.channelId}`,
+                            { replace: true },
+                        );
+                        return;
+                    }
+
+                    dispatch(setTargetMessageId(params.messageId));
+                    void navigate(
+                        `/chat/@server/${params.serverId}/channel/${params.channelId}`,
+                        { replace: true },
+                    );
+                } else if (contextChanged) {
+                    // Clear if we changed channels and no new message was specified
+                    dispatch(setTargetMessageId(null));
+                }
             } else if (contextChanged) {
-                // Clear if we changed channels and no new message was specified
                 dispatch(setTargetMessageId(null));
             }
         } else if (params.userId) {
+            if (!isValidObjectId(params.userId)) {
+                void navigate('/chat/@me', { replace: true });
+                return;
+            }
+
             if (params.messageId) {
+                if (!isValidObjectId(params.messageId)) {
+                    void navigate(`/chat/@user/${params.userId}`, {
+                        replace: true,
+                    });
+                    return;
+                }
+
                 dispatch(setTargetMessageId(params.messageId));
                 void navigate(`/chat/@user/${params.userId}`, {
                     replace: true,

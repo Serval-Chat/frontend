@@ -8,7 +8,11 @@ import {
     useServerDetails,
 } from '@/api/servers/servers.queries';
 import { useServerWS } from '@/hooks/ws/useServerWS';
-import { useAppSelector } from '@/store/hooks';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import {
+    setSelectedChannelId,
+    setTargetMessageId,
+} from '@/store/slices/navSlice';
 import { LoadingSpinner } from '@/ui/components/common/LoadingSpinner';
 
 import { ChannelList } from './ChannelList';
@@ -18,6 +22,7 @@ import { ServerBanner } from './ServerBanner';
  * @description Orchestrates server-specific navigation (banner, channels, categories).
  */
 export const ServerSection: React.FC = () => {
+    const dispatch = useAppDispatch();
     const navigate = useNavigate();
     const selectedServerId = useAppSelector(
         (state) => state.nav.selectedServerId,
@@ -26,14 +31,51 @@ export const ServerSection: React.FC = () => {
         (state) => state.nav.selectedChannelId,
     );
 
-    const { data: server, isLoading: isLoadingServer } =
-        useServerDetails(selectedServerId);
-    const { data: channels, isLoading: isLoadingChannels } =
-        useChannels(selectedServerId);
+    const {
+        data: server,
+        isLoading: isLoadingServer,
+        isError: isServerError,
+    } = useServerDetails(selectedServerId);
+    const {
+        data: channels,
+        isLoading: isLoadingChannels,
+        isError: isChannelsError,
+    } = useChannels(selectedServerId);
     const { data: categories, isLoading: isLoadingCategories } =
         useCategories(selectedServerId);
 
     useServerWS(selectedServerId ?? undefined);
+
+    useEffect(() => {
+        if (!selectedServerId) return;
+
+        if (isServerError || isChannelsError) {
+            void navigate('/chat/@me', { replace: true });
+            return;
+        }
+
+        if (!isLoadingChannels && channels && selectedChannelId) {
+            const channelExists = channels.some(
+                (c) => c._id === selectedChannelId,
+            );
+            if (!channelExists) {
+                dispatch(setSelectedChannelId(null));
+                dispatch(setTargetMessageId(null));
+                void navigate(`/chat/@server/${selectedServerId}`, {
+                    replace: true,
+                });
+            }
+        }
+    }, [
+        isServerError,
+        isChannelsError,
+        isLoadingChannels,
+        channels,
+        selectedChannelId,
+        selectedServerId,
+        dispatch,
+        navigate,
+    ]);
 
     // When a server is selected but no channel is active, navigate to the first channel.
     useEffect(() => {

@@ -33,3 +33,8 @@ export const validateInviteToken = (value: string): string => {
     if (value.length > 100) return 'Invite token is too long';
     return '';
 };
+
+export const isValidObjectId = (id: string | undefined): boolean => {
+    if (!id) return false;
+    return /^[a-fA-F0-9]{24}$/.test(id);
+};

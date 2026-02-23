@@ -55,9 +55,12 @@ export const MainChat: React.FC = () => {
 
     // Data Fetching
     const { data: currentUser } = useMe();
-    const { data: friendUser } = useUserById(selectedFriendId ?? '', {
-        enabled: !!selectedFriendId,
-    });
+    const { data: friendUser, isError: isFriendError } = useUserById(
+        selectedFriendId ?? '',
+        {
+            enabled: !!selectedFriendId,
+        },
+    );
     const { data: serverDetails } = useServerDetails(selectedServerId);
     const { data: channels } = useChannels(selectedServerId);
     const { data: members } = useMembers(selectedServerId);
@@ -136,6 +139,12 @@ export const MainChat: React.FC = () => {
             void navigate(`/chat/@user/${selectedFriendId}`);
         }
     };
+
+    React.useEffect(() => {
+        if (isFriendError && selectedFriendId) {
+            void navigate('/chat/@me', { replace: true });
+        }
+    }, [isFriendError, selectedFriendId, navigate]);
 
     const handleReplyClick = (messageId: string): void => {
         if (selectedServerId && selectedChannelId) {

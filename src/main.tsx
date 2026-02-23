@@ -49,6 +49,10 @@ createRoot(document.getElementById('root')!).render(
                                         <Route element={<Chat />} path="@me" />
                                         <Route
                                             element={<Chat />}
+                                            path="@server/:serverId" // note to myself: use this as some sort of onboarding idk. selectable roles? ill find something cool :3 it would come in together with "<HomeIcon> Home" button on top to open this path too.
+                                        />
+                                        <Route
+                                            element={<Chat />}
                                             path="@server/:serverId/channel/:channelId"
                                         />
                                         <Route
