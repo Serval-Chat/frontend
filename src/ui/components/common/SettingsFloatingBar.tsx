@@ -54,7 +54,7 @@ export const SettingsFloatingBar: React.FC<SettingsFloatingBarProps> = ({
             >
                 <div
                     className={cn(
-                        'bg-[var(--color-bg-secondary)] border border-[var(--color-border-subtle)] rounded-lg p-4 flex items-center gap-6 shadow-2xl pointer-events-auto w-full max-w-2xl',
+                        'bg-[var(--color-background)] backdrop-blur-md border border-[var(--color-border-subtle)] rounded-lg p-4 flex items-center gap-6 shadow-2xl pointer-events-auto w-full max-w-2xl',
                         containerClassName,
                     )}
                 >

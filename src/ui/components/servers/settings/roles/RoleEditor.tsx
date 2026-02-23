@@ -11,6 +11,7 @@ import { Button } from '@/ui/components/common/Button';
 import { Heading } from '@/ui/components/common/Heading';
 import { IconButton } from '@/ui/components/common/IconButton';
 import { Input } from '@/ui/components/common/Input';
+import { SettingsFloatingBar } from '@/ui/components/common/SettingsFloatingBar';
 import { Text } from '@/ui/components/common/Text';
 import { Toggle } from '@/ui/components/common/Toggle';
 import { UserItem } from '@/ui/components/common/UserItem';
@@ -685,30 +686,12 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
                 </div>
 
                 {/* Floating Save Bar */}
-                {hasChanges && (
-                    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-[calc(100%-48px)] max-w-3xl bg-[var(--color-bg-secondary)] border border-[var(--color-border-subtle)] rounded-lg p-3 flex items-center justify-between shadow-2xl animate-in fade-in slide-in-from-bottom-4">
-                        <Text size="sm" weight="semibold">
-                            Careful — you have unsaved changes!
-                        </Text>
-                        <div className="flex gap-2">
-                            <Button
-                                size="sm"
-                                variant="ghost"
-                                onClick={handleReset}
-                            >
-                                Reset
-                            </Button>
-                            <Button
-                                className="bg-[var(--color-success)] hover:bg-[var(--color-success-hover)] text-white"
-                                size="sm"
-                                variant="normal"
-                                onClick={handleSave}
-                            >
-                                Save Changes
-                            </Button>
-                        </div>
-                    </div>
-                )}
+                <SettingsFloatingBar
+                    isFixed={false}
+                    isVisible={hasChanges}
+                    onReset={handleReset}
+                    onSave={handleSave}
+                />
             </div>
             <ImageCropModal
                 imageFile={selectedIcon}
