@@ -7,6 +7,7 @@ import {
     useDeleteRole,
     useReorderRoles,
     useRoles,
+    useServerDetails,
     useUpdateRole,
 } from '@/api/servers/servers.queries';
 import type { Role, RolePermissions } from '@/api/servers/servers.types';
@@ -23,6 +24,7 @@ interface ServerRoleSettingsProps {
 export const ServerRoleSettings: React.FC<ServerRoleSettingsProps> = ({
     serverId,
 }) => {
+    const { data: server } = useServerDetails(serverId);
     const { data: roles, isLoading } = useRoles(serverId);
     const [selectedRoleId, setSelectedRoleId] = useState<string | null>(null);
 
@@ -110,6 +112,8 @@ export const ServerRoleSettings: React.FC<ServerRoleSettingsProps> = ({
             <div className="flex-1 overflow-hidden relative">
                 {selectedRole ? (
                     <RoleEditor
+                        disableCustomFonts={server?.disableCustomFonts}
+                        disableGlow={server?.disableCustomFonts}
                         key={selectedRole._id}
                         role={selectedRole}
                         onReset={() => {}}

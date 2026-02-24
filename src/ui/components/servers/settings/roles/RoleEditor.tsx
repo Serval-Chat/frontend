@@ -25,6 +25,8 @@ interface RoleEditorProps {
         updates: Partial<Role> & { permissions?: RolePermissions },
     ) => void;
     onReset: () => void;
+    disableCustomFonts?: boolean;
+    disableGlow?: boolean;
 }
 
 type ColorType = 'solid' | 'linear' | 'custom';
@@ -33,6 +35,8 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
     role,
     onSave,
     onReset,
+    disableCustomFonts,
+    disableGlow,
 }) => {
     const { data: me } = useMe();
     const [name, setName] = useState(role.name);
@@ -547,6 +551,10 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
                                         {me && (
                                             <UserItem
                                                 noFetch
+                                                disableCustomFonts={
+                                                    disableCustomFonts
+                                                }
+                                                disableGlow={disableGlow}
                                                 role={previewRole}
                                                 user={me}
                                                 userId={me._id}
@@ -567,6 +575,10 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
                                             {me && (
                                                 <Message
                                                     isGroupStart
+                                                    disableCustomFonts={
+                                                        disableCustomFonts
+                                                    }
+                                                    disableGlow={disableGlow}
                                                     message={{
                                                         _id: 'preview',
                                                         text: 'Hello! This is how your role colors will look in the chat.',
