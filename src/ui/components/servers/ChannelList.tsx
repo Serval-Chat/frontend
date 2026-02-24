@@ -1,7 +1,14 @@
 import React, { useEffect, useState } from 'react';
 
 import { Reorder } from 'framer-motion';
-import { ChevronDown, Copy, Folder, Plus, Settings } from 'lucide-react';
+import {
+    ChevronDown,
+    Copy,
+    Folder,
+    Link as LinkIcon,
+    Plus,
+    Settings,
+} from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 import { serversApi } from '@/api/servers/servers.api';
@@ -260,6 +267,14 @@ export const ChannelList: React.FC<ChannelListProps> = ({
 
     const getChannelMenuItems = (channel: Channel): ContextMenuItem[] => {
         const items: ContextMenuItem[] = [
+            {
+                label: 'Copy Channel Link',
+                icon: LinkIcon,
+                onClick: () => {
+                    const url = `${window.location.origin}/chat/@server/${channel.serverId}/channel/${channel._id}`;
+                    void navigator.clipboard.writeText(url);
+                },
+            },
             {
                 label: 'Copy Channel ID',
                 icon: Copy,

@@ -6,7 +6,11 @@ import { useChannelMessages, useUserMessages } from '@/api/chat/chat.queries';
 import type { ChatMessage } from '@/api/chat/chat.types';
 import { filesApi } from '@/api/files/files.api';
 import { useFriends } from '@/api/friends/friends.queries';
-import { useMembers, useRoles } from '@/api/servers/servers.queries';
+import {
+    useChannels,
+    useMembers,
+    useRoles,
+} from '@/api/servers/servers.queries';
 import { useMe } from '@/api/users/users.queries';
 import type { User } from '@/api/users/users.types';
 import type { QueuedFile } from '@/hooks/chat/useFileQueue';
@@ -125,6 +129,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
     const { data: friendsList = [] } = useFriends();
     const { data: members = [] } = useMembers(selectedServerId);
     const { data: roles = [] } = useRoles(selectedServerId);
+    const { data: channels = [] } = useChannels(selectedServerId);
 
     // Get messages for the current chat
     const { data: channelMessages } = useChannelMessages(
@@ -189,6 +194,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
         roles,
         friends: friendUsers,
         serverEmojis: allServerEmojis,
+        channels,
     });
 
     const handleUploadFiles = async (): Promise<string[]> => {

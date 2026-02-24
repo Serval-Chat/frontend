@@ -1,4 +1,4 @@
-import { useLayoutEffect, useState } from 'react';
+import { useCallback, useLayoutEffect, useState } from 'react';
 
 interface Position {
     x: number;
@@ -24,52 +24,66 @@ export const useSmartPosition = ({
 }: UseSmartPositionOptions): Position => {
     const [coords, setCoords] = useState<Position>(position || { x: 0, y: 0 });
 
-    useLayoutEffect(() => {
-        if (isOpen && elementRef.current) {
-            const elementRect = elementRef.current.getBoundingClientRect();
-            const { innerWidth, innerHeight } = window;
+    const updatePosition = useCallback(() => {
+        if (!isOpen || !elementRef.current) return;
 
-            let x = 0;
-            let y = 0;
+        const elementRect = elementRef.current.getBoundingClientRect();
+        const { innerWidth, innerHeight } = window;
 
-            if (position) {
-                x = position.x;
-                y = position.y;
-            } else if (triggerRef?.current) {
-                const triggerRect = triggerRef.current.getBoundingClientRect();
-                x = triggerRect.right + offset;
-                y = triggerRect.top;
+        let x = 0;
+        let y = 0;
 
-                // Flip if overflow right
-                if (x + elementRect.width > innerWidth) {
-                    x = triggerRect.left - elementRect.width - offset;
-                }
-            } else {
-                // Center fallback
-                x = innerWidth / 2 - elementRect.width / 2;
-                y = innerHeight / 2 - elementRect.height / 2;
-            }
+        if (position) {
+            x = position.x;
+            y = position.y;
+        } else if (triggerRef?.current) {
+            const triggerRect = triggerRef.current.getBoundingClientRect();
+            x = triggerRect.right + offset;
+            y = triggerRect.top;
 
-            // Boundary checks
-            // Right edge
+            // Flip if overflow right
             if (x + elementRect.width > innerWidth) {
-                x = innerWidth - elementRect.width - padding;
+                x = triggerRect.left - elementRect.width - offset;
             }
-            // Bottom edge
-            if (y + elementRect.height > innerHeight) {
-                y = innerHeight - elementRect.height - padding;
-            }
-            // Left edge
-            if (x < padding) x = padding;
-            // Top edge
-            if (y < padding) y = padding;
-
-            setCoords((prev) => {
-                if (prev.x === x && prev.y === y) return prev;
-                return { x, y };
-            });
+        } else {
+            // Center fallback
+            x = innerWidth / 2 - elementRect.width / 2;
+            y = innerHeight / 2 - elementRect.height / 2;
         }
+
+        // Boundary checks
+        // Right edge
+        if (x + elementRect.width > innerWidth - padding) {
+            x = innerWidth - elementRect.width - padding;
+        }
+        // Bottom edge
+        if (y + elementRect.height > innerHeight - padding) {
+            y = innerHeight - elementRect.height - padding;
+        }
+        // Left edge
+        if (x < padding) x = padding;
+        // Top edge
+        if (y < padding) y = padding;
+
+        setCoords((prev) => {
+            if (prev.x === x && prev.y === y) return prev;
+            return { x, y };
+        });
     }, [isOpen, position, triggerRef, elementRef, padding, offset]);
+
+    useLayoutEffect(() => {
+        if (isOpen) {
+            updatePosition();
+            window.addEventListener('resize', updatePosition);
+            window.addEventListener('scroll', updatePosition, true);
+
+            return () => {
+                window.removeEventListener('resize', updatePosition);
+                window.removeEventListener('scroll', updatePosition, true);
+            };
+        }
+        return undefined;
+    }, [isOpen, updatePosition]);
 
     return coords;
 };

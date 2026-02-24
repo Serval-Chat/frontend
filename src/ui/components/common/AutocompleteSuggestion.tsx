@@ -1,10 +1,13 @@
 import React from 'react';
 
+import { Hash, Volume2 } from 'lucide-react';
+
 import type { Emoji } from '@/api/emojis/emojis.types';
-import type { Role } from '@/api/servers/servers.types';
+import type { Channel, Role } from '@/api/servers/servers.types';
 import type { User } from '@/api/users/users.types';
 import { UserProfilePicture } from '@/ui/components/common/UserProfilePicture';
 import { Box } from '@/ui/components/layout/Box';
+import { ICON_MAP } from '@/ui/utils/iconMap';
 import { resolveApiUrl } from '@/utils/apiUrl';
 import { cn } from '@/utils/cn';
 import { getSpriteStyle } from '@/utils/emoji';
@@ -16,7 +19,8 @@ export type SuggestionType =
     | 'role'
     | 'emoji'
     | 'server-emoji'
-    | 'everyone';
+    | 'everyone'
+    | 'channel';
 
 export interface UserSuggestion {
     type: 'user';
@@ -42,12 +46,18 @@ export interface EveryoneSuggestion {
     type: 'everyone';
 }
 
+export interface ChannelSuggestion {
+    type: 'channel';
+    channel: Channel;
+}
+
 export type Suggestion =
     | UserSuggestion
     | RoleSuggestion
     | EmojiSuggestion
     | ServerEmojiSuggestion
-    | EveryoneSuggestion;
+    | EveryoneSuggestion
+    | ChannelSuggestion;
 
 interface AutocompleteSuggestionProps {
     suggestions: Suggestion[];
@@ -169,6 +179,34 @@ export const AutocompleteSuggestion: React.FC<AutocompleteSuggestionProps> = ({
                                 </span>
                             </>
                         )}
+                        {suggestion.type === 'channel' && (
+                            <>
+                                <Box className="w-5 h-5 shrink-0 flex items-center justify-center text-muted-foreground">
+                                    {(() => {
+                                        const CustomIcon = suggestion.channel
+                                            .icon
+                                            ? ICON_MAP[suggestion.channel.icon]
+                                            : null;
+                                        const Icon =
+                                            CustomIcon ||
+                                            (suggestion.channel.type === 'voice'
+                                                ? Volume2
+                                                : Hash);
+                                        return <Icon size={16} />;
+                                    })()}
+                                </Box>
+                                <span
+                                    className={cn(
+                                        'font-bold truncate text-sm',
+                                        index === selectedIndex
+                                            ? 'text-primary'
+                                            : 'text-foreground',
+                                    )}
+                                >
+                                    {suggestion.channel.name}
+                                </span>
+                            </>
+                        )}
                         {suggestion.type === 'everyone' && (
                             <>
                                 <Box className="w-4 h-4 rounded-full shrink-0 flex items-center justify-center bg-primary">
@@ -207,5 +245,7 @@ const getSuggestionKey = (suggestion: Suggestion): string => {
             return `server-emoji-${suggestion.emoji._id}`;
         case 'everyone':
             return 'everyone';
+        case 'channel':
+            return `channel-${suggestion.channel._id}`;
     }
 };

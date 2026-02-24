@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 
 import type { Emoji } from '@/api/emojis/emojis.types';
-import type { Role, ServerMember } from '@/api/servers/servers.types';
+import type { Channel, Role, ServerMember } from '@/api/servers/servers.types';
 import type { User } from '@/api/users/users.types';
 import type { Suggestion } from '@/ui/components/common/AutocompleteSuggestion';
 import { getUnicode, groupedEmojis } from '@/utils/emoji';
@@ -14,6 +14,7 @@ interface UseMentionAutocompleteProps {
     roles?: Role[];
     friends?: User[];
     serverEmojis?: Emoji[];
+    channels?: Channel[];
 }
 
 interface UseMentionAutocompleteReturn {
@@ -32,6 +33,7 @@ export const useMentionAutocomplete = ({
     roles = [],
     friends = [],
     serverEmojis = [],
+    channels = [],
 }: UseMentionAutocompleteProps): UseMentionAutocompleteReturn => {
     const allEmojis = useMemo(() => {
         const emojis: EmojiData[] = [];
@@ -145,6 +147,25 @@ export const useMentionAutocomplete = ({
             };
         }
 
+        // Check for #channel
+        const channelMatch = textBeforeCursor.match(/#([^#\n]*)$/);
+        if (channelMatch) {
+            const query = channelMatch[1].toLowerCase();
+            const replaceStart = cursorPosition - channelMatch[0].length;
+
+            const channelSuggestions: Suggestion[] = channels
+                .filter((channel) => channel.name.toLowerCase().includes(query))
+                .map((channel) => ({ type: 'channel' as const, channel }));
+
+            return {
+                suggestions: channelSuggestions.slice(0, 10),
+                triggerText: query,
+                triggerType: 'channel' as const,
+                replaceStart,
+                replaceEnd: cursorPosition,
+            };
+        }
+
         return {
             suggestions: [] as Suggestion[],
             triggerText: '',
@@ -160,6 +181,7 @@ export const useMentionAutocomplete = ({
         friends,
         allEmojis,
         serverEmojis,
+        channels,
     ]);
 
     // derive current index based on whether we are still in same query
@@ -180,6 +202,9 @@ export const useMentionAutocomplete = ({
             replacement = `<emoji:${suggestion.emoji._id}> `;
         } else if (suggestion.type === 'everyone') {
             replacement = '<everyone> ';
+        } else if (suggestion.type === 'channel') {
+            const channel = suggestion.channel;
+            replacement = `${window.location.origin}/chat/@server/${channel.serverId}/channel/${channel._id} `;
         }
 
         const before = value.slice(0, autocompleteData.replaceStart);
