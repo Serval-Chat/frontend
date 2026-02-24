@@ -155,13 +155,13 @@ export const DropdownWithSearch: React.FC<DropdownWithSearchProps> = ({
                 {isOpen && (
                     <motion.div
                         animate={{ opacity: 1, y: 0, scale: 1 }}
-                        className="absolute z-[var(--z-index-popover)] w-full mt-2 bg-[var(--color-bg-secondary)] border border-[var(--color-border-subtle)] rounded-xl shadow-2xl overflow-hidden"
+                        className="absolute z-[var(--z-index-popover)] w-full mt-2 bg-[var(--color-background)] backdrop-blur-md border border-[var(--color-border-subtle)] rounded-xl shadow-2xl overflow-hidden"
                         exit={{ opacity: 0, y: 4, scale: 0.98 }}
                         initial={{ opacity: 0, y: 4, scale: 0.98 }}
                         ref={dropdownRef}
                         transition={{ duration: 0.15, ease: 'easeOut' }}
                     >
-                        <div className="p-2 border-b border-[var(--color-border-subtle)] bg-[var(--color-bg-subtle)]/50">
+                        <div className="p-2 border-b border-[var(--color-border-subtle)] bg-[var(--color-background)]/50 backdrop-blur-sm">
                             <div className="relative">
                                 <Search
                                     className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-muted-foreground)]"
