@@ -4,7 +4,7 @@ import { useMe } from '@/api/users/users.queries';
 import { useAppSelector } from '@/store/hooks';
 import { ParsedEmoji } from '@/ui/components/common/ParsedEmoji';
 import { ParsedUnicodeEmoji } from '@/ui/components/common/ParsedUnicodeEmoji';
-import { Text } from '@/ui/components/common/Text';
+import { StyledUserName } from '@/ui/components/common/StyledUserName';
 import { UserProfilePicture } from '@/ui/components/common/UserProfilePicture';
 import { Box } from '@/ui/components/layout/Box';
 
@@ -55,9 +55,12 @@ export const MiniProfile: React.FC = () => {
                     />
                 </Box>
                 <Box className="min-w-0 flex flex-col flex-1">
-                    <Text className="text-sm font-semibold text-[var(--color-header-primary)] truncate leading-tight">
+                    <StyledUserName
+                        className="text-sm font-semibold !text-[var(--color-header-primary)] leading-tight"
+                        user={user}
+                    >
                         {user.displayName || user.username}
-                    </Text>
+                    </StyledUserName>
                     <Box
                         className="text-xs text-[var(--color-header-secondary)] truncate leading-tight opacity-70 hover:opacity-100 transition-opacity cursor-pointer flex items-center"
                         onClick={handleStatusClick}

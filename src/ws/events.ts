@@ -1,3 +1,11 @@
+import type {
+    Badge,
+    UserSettings,
+    UsernameFont,
+    UsernameGlow,
+    UsernameGradient,
+} from '@/api/users/users.types';
+
 /**
  * @description WebSocket envelope structure for all messages.
  */
@@ -166,6 +174,11 @@ export const WsEvents = {
     DISCONNECTED: 'disconnected',
     ERROR: 'error',
 
+    // User Profile
+    USER_UPDATED: 'user_updated',
+    USER_BANNER_UPDATED: 'user_banner_updated',
+    DISPLAY_NAME_UPDATED: 'display_name_updated',
+
     // DMs
     SEND_MESSAGE_DM: 'send_message_dm',
     MESSAGE_DM_SENT: 'message_dm_sent',
@@ -248,6 +261,34 @@ export interface IReactionEventPayload {
     emojiType: 'unicode' | 'custom';
     emojiId?: string;
     messageType: 'dm' | 'server';
+}
+
+export interface IUserUpdatedEvent {
+    userId: string;
+    username?: string;
+    displayName?: string | null;
+    profilePicture?: string;
+    bio?: string;
+    pronouns?: string;
+    usernameFont?: UsernameFont;
+    usernameGradient?: UsernameGradient;
+    usernameGlow?: UsernameGlow;
+    language?: string;
+    settings?: UserSettings;
+    banner?: string;
+    badges?: Badge[] | string[];
+    oldUsername?: string;
+    newUsername?: string;
+}
+
+export interface IUserBannerUpdatedEvent {
+    username: string;
+    banner: string;
+}
+
+export interface IDisplayNameUpdatedEvent {
+    username: string;
+    displayName: string | null;
 }
 
 export type WsEventType = (typeof WsEvents)[keyof typeof WsEvents];

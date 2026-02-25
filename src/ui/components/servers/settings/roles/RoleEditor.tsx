@@ -26,7 +26,7 @@ interface RoleEditorProps {
     ) => void;
     onReset: () => void;
     disableCustomFonts?: boolean;
-    disableGlow?: boolean;
+    disableGlowAndColors?: boolean;
 }
 
 type ColorType = 'solid' | 'linear' | 'custom';
@@ -36,7 +36,7 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
     onSave,
     onReset,
     disableCustomFonts,
-    disableGlow,
+    disableGlowAndColors,
 }) => {
     const { data: me } = useMe();
     const [name, setName] = useState(role.name);
@@ -554,7 +554,9 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
                                                 disableCustomFonts={
                                                     disableCustomFonts
                                                 }
-                                                disableGlow={disableGlow}
+                                                disableGlowAndColors={
+                                                    disableGlowAndColors
+                                                }
                                                 role={previewRole}
                                                 user={me}
                                                 userId={me._id}
@@ -578,7 +580,9 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
                                                     disableCustomFonts={
                                                         disableCustomFonts
                                                     }
-                                                    disableGlow={disableGlow}
+                                                    disableGlowAndColors={
+                                                        disableGlowAndColors
+                                                    }
                                                     message={{
                                                         _id: 'preview',
                                                         text: 'Hello! This is how your role colors will look in the chat.',

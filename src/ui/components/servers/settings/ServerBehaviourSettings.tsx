@@ -42,10 +42,18 @@ const ServerBehaviourSettingsForm: React.FC<
     const [originalFonts, setOriginalFonts] = useState(
         server.disableCustomFonts || false,
     );
+    const [
+        disableUsernameGlowAndCustomColor,
+        setDisableUsernameGlowAndCustomColor,
+    ] = useState(server.disableUsernameGlowAndCustomColor || false);
+    const [originalGlow, setOriginalGlow] = useState(
+        server.disableUsernameGlowAndCustomColor || false,
+    );
 
     const hasChanges =
         selectedRoleId !== originalRoleId ||
-        disableCustomFonts !== originalFonts;
+        disableCustomFonts !== originalFonts ||
+        disableUsernameGlowAndCustomColor !== originalGlow;
 
     const handleSave = (): void => {
         if (!hasChanges) return;
@@ -53,11 +61,13 @@ const ServerBehaviourSettingsForm: React.FC<
             {
                 defaultRoleId: selectedRoleId ?? undefined,
                 disableCustomFonts,
+                disableUsernameGlowAndCustomColor,
             },
             {
                 onSuccess: () => {
                     setOriginalRoleId(selectedRoleId);
                     setOriginalFonts(disableCustomFonts);
+                    setOriginalGlow(disableUsernameGlowAndCustomColor);
                 },
             },
         );
@@ -66,6 +76,7 @@ const ServerBehaviourSettingsForm: React.FC<
     const handleReset = (): void => {
         setSelectedRoleId(originalRoleId);
         setDisableCustomFonts(originalFonts);
+        setDisableUsernameGlowAndCustomColor(originalGlow);
     };
 
     // Filter out @everyone
@@ -149,6 +160,26 @@ const ServerBehaviourSettingsForm: React.FC<
                         <Toggle
                             checked={disableCustomFonts}
                             onCheckedChange={setDisableCustomFonts}
+                        />
+                    </div>
+                </div>
+
+                <div className="pt-6 border-t border-[var(--color-border-subtle)]">
+                    <div className="flex items-center justify-between">
+                        <div className="space-y-1">
+                            <Text as="p" weight="semibold">
+                                Disable Username Glow and Custom Color
+                            </Text>
+                            <Text as="p" size="xs" variant="muted">
+                                Force all members to use standard colors without
+                                glow.
+                            </Text>
+                        </div>
+                        <Toggle
+                            checked={disableUsernameGlowAndCustomColor}
+                            onCheckedChange={
+                                setDisableUsernameGlowAndCustomColor
+                            }
                         />
                     </div>
                 </div>

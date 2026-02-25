@@ -8,8 +8,10 @@ import {
     FRIENDS_QUERY_KEY,
     FRIEND_REQUESTS_QUERY_KEY,
 } from '@/api/friends/friends.queries';
+import type { Friend } from '@/api/friends/friends.types';
 import { serversApi } from '@/api/servers/servers.api';
 import { SERVERS_QUERY_KEYS } from '@/api/servers/servers.queries';
+import type { ServerMember } from '@/api/servers/servers.types';
 import type { User } from '@/api/users/users.types';
 import {
     setOnlineUsers,
@@ -25,14 +27,17 @@ import {
 
 import { wsClient } from './client';
 import {
+    type IDisplayNameUpdatedEvent,
     type IMemberAddedEvent,
     type IMemberUpdatedEvent,
     type IMessageDm,
     type IMessageServer,
     type IPresenceSyncEvent,
     type IStatusUpdatedEvent,
+    type IUserBannerUpdatedEvent,
     type IUserOfflineEvent,
     type IUserOnlineEvent,
+    type IUserUpdatedEvent,
     type IWsAuthenticatedEvent,
     type IWsErrorEvent,
     WsEvents,
@@ -163,6 +168,107 @@ export const setupGlobalWsHandlers = (
             void queryClient.invalidateQueries({ queryKey: ['me'] });
         }
     });
+
+    wsClient.on<IUserUpdatedEvent>(WsEvents.USER_UPDATED, (payload) => {
+        void queryClient.invalidateQueries({
+            queryKey: ['user', payload.userId],
+        });
+        if (currentUser && payload.userId === currentUser.id) {
+            void queryClient.invalidateQueries({ queryKey: ['me'] });
+        }
+
+        queryClient.setQueriesData<ServerMember[]>(
+            { queryKey: ['servers', 'members'] },
+            (old) => {
+                if (!old) return old;
+                return old.map((member) =>
+                    member.userId === payload.userId
+                        ? { ...member, user: { ...member.user, ...payload } }
+                        : member,
+                );
+            },
+        );
+
+        queryClient.setQueriesData<Friend[]>(
+            { queryKey: FRIENDS_QUERY_KEY },
+            (old) => {
+                if (!old) return old;
+                return old.map((friend) =>
+                    friend._id === payload.userId
+                        ? { ...friend, ...payload }
+                        : friend,
+                );
+            },
+        );
+    });
+
+    wsClient.on<IUserBannerUpdatedEvent>(
+        WsEvents.USER_BANNER_UPDATED,
+        (payload) => {
+            void queryClient.invalidateQueries({ queryKey: ['user'] });
+            if (currentUser && payload.username === currentUser.username) {
+                void queryClient.invalidateQueries({ queryKey: ['me'] });
+            }
+
+            queryClient.setQueriesData<ServerMember[]>(
+                { queryKey: ['servers', 'members'] },
+                (old) => {
+                    if (!old) return old;
+                    return old.map((member) =>
+                        member.user.username === payload.username
+                            ? {
+                                  ...member,
+                                  user: {
+                                      ...member.user,
+                                      banner: payload.banner,
+                                  },
+                              }
+                            : member,
+                    );
+                },
+            );
+        },
+    );
+
+    wsClient.on<IDisplayNameUpdatedEvent>(
+        WsEvents.DISPLAY_NAME_UPDATED,
+        (payload) => {
+            void queryClient.invalidateQueries({ queryKey: ['user'] });
+            if (currentUser && payload.username === currentUser.username) {
+                void queryClient.invalidateQueries({ queryKey: ['me'] });
+            }
+
+            queryClient.setQueriesData<ServerMember[]>(
+                { queryKey: ['servers', 'members'] },
+                (old) => {
+                    if (!old) return old;
+                    return old.map((member) =>
+                        member.user.username === payload.username
+                            ? {
+                                  ...member,
+                                  user: {
+                                      ...member.user,
+                                      displayName: payload.displayName,
+                                  },
+                              }
+                            : member,
+                    );
+                },
+            );
+
+            queryClient.setQueriesData<Friend[]>(
+                { queryKey: FRIENDS_QUERY_KEY },
+                (old) => {
+                    if (!old) return old;
+                    return old.map((friend) =>
+                        friend.username === payload.username
+                            ? { ...friend, displayName: payload.displayName }
+                            : friend,
+                    );
+                },
+            );
+        },
+    );
 
     wsClient.on<IMemberUpdatedEvent>(WsEvents.MEMBER_UPDATED, (payload) => {
         void queryClient.invalidateQueries({

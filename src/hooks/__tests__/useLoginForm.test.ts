@@ -2,8 +2,7 @@ import { act, renderHook } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
 import { authApi } from '@/api/auth/auth.api';
-
-import { useLoginForm } from './useLoginForm';
+import { useLoginForm } from '@/hooks/useLoginForm';
 
 // Mock dependencies
 vi.mock('react-router-dom', () => ({

@@ -12,7 +12,7 @@ interface StyledUserNameProps {
     className?: string;
     disableCustomFonts?: boolean;
     glowIntensity?: number;
-    disableGlow?: boolean;
+    disableGlowAndColors?: boolean;
     showIcon?: boolean;
     iconRole?: Role;
 }
@@ -25,7 +25,7 @@ export const StyledUserName: React.FC<StyledUserNameProps> = ({
     children,
     className,
     disableCustomFonts,
-    disableGlow,
+    disableGlowAndColors,
     showIcon = false,
     iconRole,
 }) => {
@@ -45,14 +45,23 @@ export const StyledUserName: React.FC<StyledUserNameProps> = ({
     let gradientFunction = 'linear-gradient';
     let gradientArgs = '90deg, transparent, transparent';
     let hasGradient = false;
+    let fallbackColor = '';
     let solidColor = '';
 
     // If role is provided and has colors, use it
     if (role) {
+        const isDefaultColor = (c: string): boolean =>
+            c.toLowerCase() === '#99aab5';
+
         if (role.colors && role.colors.length > 0) {
             const uniqueColors = new Set(role.colors);
             if (uniqueColors.size === 1) {
-                solidColor = role.colors[0];
+                const color = role.colors[0];
+                if (!isDefaultColor(color)) {
+                    solidColor = color;
+                } else {
+                    fallbackColor = color;
+                }
             } else {
                 hasGradient = true;
                 const repeat =
@@ -69,13 +78,21 @@ export const StyledUserName: React.FC<StyledUserNameProps> = ({
             }
         } else if (role.startColor && role.endColor) {
             if (role.startColor === role.endColor) {
-                solidColor = role.startColor;
+                if (!isDefaultColor(role.startColor)) {
+                    solidColor = role.startColor;
+                } else {
+                    fallbackColor = role.startColor;
+                }
             } else {
                 hasGradient = true;
                 gradientArgs = `90deg, ${role.startColor}, ${role.endColor}`;
             }
         } else if (role.color) {
-            solidColor = role.color;
+            if (!isDefaultColor(role.color)) {
+                solidColor = role.color;
+            } else {
+                fallbackColor = role.color;
+            }
         }
     }
 
@@ -84,7 +101,8 @@ export const StyledUserName: React.FC<StyledUserNameProps> = ({
         !hasGradient &&
         !solidColor &&
         user?.usernameGradient?.enabled &&
-        !disableCustomFonts
+        !disableCustomFonts &&
+        !disableGlowAndColors
     ) {
         const { colors, angle, repeating } = user.usernameGradient;
         if (colors.length > 0) {
@@ -101,12 +119,18 @@ export const StyledUserName: React.FC<StyledUserNameProps> = ({
         }
     }
 
+    if (!hasGradient && !solidColor && fallbackColor) {
+        solidColor = fallbackColor;
+    }
+
     // Enable glow if user has it enabled and glow is not disabled
-    const hasGlow =
-        !disableGlow && !disableCustomFonts && usernameGlow?.enabled;
+    const hasGlow = !disableGlowAndColors && usernameGlow?.enabled;
 
     const containerStyle: React.CSSProperties = {
-        fontFamily: usernameFont || undefined,
+        fontFamily:
+            usernameFont && usernameFont !== 'default'
+                ? usernameFont
+                : undefined,
     };
 
     // helper to render text with per-character effects

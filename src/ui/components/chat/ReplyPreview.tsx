@@ -16,7 +16,7 @@ interface ReplyPreviewProps {
     replyToId?: string;
     onClick?: (messageId: string) => void;
     disableCustomFonts?: boolean;
-    disableGlow?: boolean;
+    disableGlowAndColors?: boolean;
 }
 
 export const ReplyPreview: React.FC<ReplyPreviewProps> = ({
@@ -26,7 +26,7 @@ export const ReplyPreview: React.FC<ReplyPreviewProps> = ({
     replyToId,
     onClick,
     disableCustomFonts,
-    disableGlow,
+    disableGlowAndColors,
 }) => {
     const nodes = useMemo(() => parseText(text, ParserPresets.MESSAGE), [text]);
     return (
@@ -48,7 +48,7 @@ export const ReplyPreview: React.FC<ReplyPreviewProps> = ({
                     showIcon
                     className="text-xs font-bold whitespace-nowrap opacity-90"
                     disableCustomFonts={disableCustomFonts}
-                    disableGlow={disableGlow}
+                    disableGlowAndColors={disableGlowAndColors}
                     role={role}
                     user={user}
                 >

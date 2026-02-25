@@ -1,12 +1,26 @@
 import React from 'react';
 
-import type { User } from '@/api/users/users.types';
+import type { User, UsernameFont } from '@/api/users/users.types';
 import { StyledUserName } from '@/ui/components/common/StyledUserName';
 import { UserProfilePicture } from '@/ui/components/common/UserProfilePicture';
 
 import { DemoItem } from './DemoItem';
 import { DemoSection } from './DemoSection';
 import { SHOWOFF_SECTIONS } from './config';
+
+const ALL_FONTS: UsernameFont[] = [
+    'default',
+    'Audiowide',
+    'Bebas Neue',
+    'Betania Patmos',
+    'Google Sans Code',
+    'Noto Sans',
+    'Pacifico',
+    'Playpen Sans Deva',
+    'Rampart One',
+    'Roboto',
+    'Workbench',
+];
 
 export const UserIdentitiesDemo: React.FC = () => {
     // Mock users
@@ -39,7 +53,7 @@ export const UserIdentitiesDemo: React.FC = () => {
             _id: '4',
             username: 'Average british person',
             login: 'fancy',
-            usernameFont: 'cursive',
+            usernameFont: 'Pacifico' as User['usernameFont'],
             usernameGradient: {
                 enabled: true,
                 colors: ['#ff00ff', '#00ffff'],
@@ -138,6 +152,35 @@ export const UserIdentitiesDemo: React.FC = () => {
                             {mockUsers.fancy.username}
                         </StyledUserName>
                     </div>
+                </div>
+            </DemoItem>
+
+            <DemoItem id="all-fonts" title="All Username Fonts">
+                <div className="flex flex-col gap-4">
+                    {ALL_FONTS.map((font) => (
+                        <div className="flex items-center gap-2" key={font}>
+                            <span className="text-sm text-foreground-muted w-32">
+                                {font}:
+                            </span>
+                            <StyledUserName
+                                user={
+                                    {
+                                        _id: `font-${font}`,
+                                        username:
+                                            font === 'default'
+                                                ? 'Default font (Inter)'
+                                                : font,
+                                        login: `font-${font}`,
+                                        usernameFont: font,
+                                    } as User
+                                }
+                            >
+                                {font === 'default'
+                                    ? 'Default font (Inter)'
+                                    : font}
+                            </StyledUserName>
+                        </div>
+                    ))}
                 </div>
             </DemoItem>
         </DemoSection>

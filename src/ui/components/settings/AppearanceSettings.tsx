@@ -4,14 +4,53 @@ import { Plus, X } from 'lucide-react';
 import { HexColorPicker } from 'react-colorful';
 
 import { useMe, useUpdateStyle } from '@/api/users/users.queries';
-import type { User } from '@/api/users/users.types';
+import type { User, UsernameFont } from '@/api/users/users.types';
 import { Button } from '@/ui/components/common/Button';
+import { DropdownWithSearch } from '@/ui/components/common/DropdownWithSearch';
 import { Heading } from '@/ui/components/common/Heading';
 import { SettingsFloatingBar } from '@/ui/components/common/SettingsFloatingBar';
 import { StyledUserName } from '@/ui/components/common/StyledUserName';
 import { Toggle } from '@/ui/components/common/Toggle';
 
 import { ThemeSwitcher } from './ThemeSwitcher';
+
+const FONT_OPTIONS = [
+    {
+        id: 'default',
+        label: 'Default (Noto Sans)',
+        style: { fontFamily: 'default' },
+    },
+    { id: 'Audiowide', label: 'Audiowide', style: { fontFamily: 'Audiowide' } },
+    {
+        id: 'Bebas Neue',
+        label: 'Bebas Neue',
+        style: { fontFamily: 'Bebas Neue' },
+    },
+    {
+        id: 'Betania Patmos',
+        label: 'Betania Patmos',
+        style: { fontFamily: 'Betania Patmos' },
+    },
+    {
+        id: 'Google Sans Code',
+        label: 'Google Sans Code',
+        style: { fontFamily: 'Google Sans Code' },
+    },
+    { id: 'Noto Sans', label: 'Noto Sans', style: { fontFamily: 'Noto Sans' } },
+    { id: 'Pacifico', label: 'Pacifico', style: { fontFamily: 'Pacifico' } },
+    {
+        id: 'Playpen Sans Deva',
+        label: 'Playpen Sans Deva',
+        style: { fontFamily: 'Playpen Sans Deva' },
+    },
+    {
+        id: 'Rampart One',
+        label: 'Rampart One',
+        style: { fontFamily: 'Rampart One' },
+    },
+    { id: 'Roboto', label: 'Roboto', style: { fontFamily: 'Roboto' } },
+    { id: 'Workbench', label: 'Workbench', style: { fontFamily: 'Workbench' } },
+];
 
 interface AppearanceSettingsFormProps {
     user: User;
@@ -23,6 +62,9 @@ const AppearanceSettingsForm: React.FC<AppearanceSettingsFormProps> = ({
     const { mutate: updateStyle, isPending } = useUpdateStyle();
 
     // Local state
+    const [usernameFont, setUsernameFont] = useState<UsernameFont>(
+        user.usernameFont ?? 'default',
+    );
     const [glowEnabled, setGlowEnabled] = useState(
         user.usernameGlow?.enabled ?? false,
     );
@@ -43,6 +85,7 @@ const AppearanceSettingsForm: React.FC<AppearanceSettingsFormProps> = ({
 
     // Track changes
     const hasChanges =
+        usernameFont !== (user.usernameFont ?? 'default') ||
         glowEnabled !== (user.usernameGlow?.enabled ?? false) ||
         gradientEnabled !== (user.usernameGradient?.enabled ?? false) ||
         JSON.stringify(gradientColors.map((c) => c.value)) !==
@@ -51,6 +94,7 @@ const AppearanceSettingsForm: React.FC<AppearanceSettingsFormProps> = ({
 
     const handleSave = (): void => {
         updateStyle({
+            usernameFont: usernameFont,
             usernameGlow: {
                 enabled: glowEnabled,
                 color: user.usernameGlow?.color || '#ffffff', // Required by DTO but ignored by our logic
@@ -65,6 +109,7 @@ const AppearanceSettingsForm: React.FC<AppearanceSettingsFormProps> = ({
     };
 
     const handleReset = (): void => {
+        setUsernameFont(user.usernameFont ?? 'default');
         setGlowEnabled(user.usernameGlow?.enabled ?? false);
         setGradientEnabled(user.usernameGradient?.enabled ?? false);
         setGradientColors(
@@ -82,8 +127,17 @@ const AppearanceSettingsForm: React.FC<AppearanceSettingsFormProps> = ({
         index?: number;
     } | null>(null);
 
+    const handleResetToDefaults = (): void => {
+        setUsernameFont('default');
+        setGlowEnabled(false);
+        setGradientEnabled(false);
+        setGradientColors([]);
+        setGradientAngle(90);
+    };
+
     const previewUser = {
         ...user,
+        usernameFont: usernameFont !== 'default' ? usernameFont : undefined,
         usernameGlow: {
             enabled: glowEnabled,
             color: user.usernameGlow?.color,
@@ -119,9 +173,16 @@ const AppearanceSettingsForm: React.FC<AppearanceSettingsFormProps> = ({
 
     return (
         <div className="max-w-3xl pb-20">
-            <Heading className="mb-6" level={3}>
-                Appearance
-            </Heading>
+            <div className="flex items-center justify-between mb-6">
+                <Heading level={3}>Appearance</Heading>
+                <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={handleResetToDefaults}
+                >
+                    Reset all username styles
+                </Button>
+            </div>
 
             <div className="grid grid-cols-1 gap-8">
                 {/* Preview Section */}
@@ -150,7 +211,42 @@ const AppearanceSettingsForm: React.FC<AppearanceSettingsFormProps> = ({
                         <ThemeSwitcher />
                     </div>
 
-                    {/* Glow Settings */}
+                    {/* Font Settings */}
+                    <div className="space-y-4">
+                        <div className="flex flex-col gap-2">
+                            <Heading level={4}>Username Font</Heading>
+                            <span className="text-sm text-[var(--color-muted-foreground)]">
+                                Select a custom font for your username alias
+                                globally.
+                            </span>
+                            <div className="max-w-xs z-[var(--z-index-dropdown)] relative">
+                                <DropdownWithSearch
+                                    allowClear={false}
+                                    options={FONT_OPTIONS.map((f) => ({
+                                        ...f,
+                                        label: f.label,
+                                        displayLabel: (
+                                            <span style={f.style}>
+                                                {f.label}
+                                            </span>
+                                        ),
+                                    }))}
+                                    placeholder="Select Font"
+                                    searchPlaceholder="Search fonts..."
+                                    value={
+                                        usernameFont === 'default'
+                                            ? null
+                                            : usernameFont
+                                    }
+                                    onChange={(val) => {
+                                        setUsernameFont(
+                                            (val as UsernameFont) || 'default',
+                                        );
+                                    }}
+                                />
+                            </div>
+                        </div>
+                    </div>
                     <div className="space-y-4">
                         <div className="flex items-center justify-between">
                             <Heading level={4}>Username Glow</Heading>

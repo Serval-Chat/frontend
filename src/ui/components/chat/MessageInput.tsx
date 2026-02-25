@@ -43,7 +43,7 @@ interface MessageInputProps {
     replyingTo?: ProcessedChatMessage | null;
     onCancelReply?: () => void;
     disableCustomFonts?: boolean;
-    disableGlow?: boolean;
+    disableGlowAndColors?: boolean;
 }
 
 /**
@@ -54,7 +54,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
     replyingTo,
     onCancelReply,
     disableCustomFonts,
-    disableGlow,
+    disableGlowAndColors,
 }) => {
     const [value, setValue] = useState('');
     const [cursorPosition, setCursorPosition] = useState(0);
@@ -374,7 +374,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                         <StyledUserName
                             className="text-xs font-bold whitespace-nowrap"
                             disableCustomFonts={disableCustomFonts}
-                            disableGlow={disableGlow}
+                            disableGlowAndColors={disableGlowAndColors}
                             role={replyingTo.role}
                             user={replyingTo.user}
                         >

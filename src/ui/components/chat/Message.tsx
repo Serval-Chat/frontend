@@ -38,7 +38,7 @@ interface MessageProps {
     onReplyClick?: (messageId: string) => void;
     onReplyToMessage?: (message: ProcessedChatMessage) => void;
     disableCustomFonts?: boolean;
-    disableGlow?: boolean;
+    disableGlowAndColors?: boolean;
 }
 
 export const Message: React.FC<MessageProps> = ({
@@ -51,7 +51,7 @@ export const Message: React.FC<MessageProps> = ({
     onReplyClick,
     onReplyToMessage,
     disableCustomFonts,
-    disableGlow,
+    disableGlowAndColors,
 }) => {
     const [showProfile, setShowProfile] = React.useState(false);
     const [showPicker, setShowPicker] = React.useState(false);
@@ -282,7 +282,7 @@ export const Message: React.FC<MessageProps> = ({
                     <Box className="flex-1 min-w-0">
                         <MessageHeader
                             disableCustomFonts={disableCustomFonts}
-                            disableGlow={disableGlow}
+                            disableGlowAndColors={disableGlowAndColors}
                             editedAt={message.editedAt}
                             iconRole={iconRole}
                             isEdited={message.isEdited}
@@ -382,7 +382,7 @@ export const Message: React.FC<MessageProps> = ({
 
                 <ProfilePopup
                     disableCustomFonts={disableCustomFonts}
-                    disableGlow={disableGlow}
+                    disableGlowAndColors={disableGlowAndColors}
                     iconRole={iconRole}
                     isOpen={showProfile}
                     joinedAt={senderMember?.joinedAt}

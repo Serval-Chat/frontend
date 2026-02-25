@@ -1,3 +1,16 @@
+export type UsernameFont =
+    | 'default'
+    | 'Audiowide'
+    | 'Bebas Neue'
+    | 'Betania Patmos'
+    | 'Google Sans Code'
+    | 'Noto Sans'
+    | 'Pacifico'
+    | 'Playpen Sans Deva'
+    | 'Rampart One'
+    | 'Roboto'
+    | 'Workbench';
+
 export interface UsernameGradient {
     enabled: boolean;
     colors: string[];
@@ -56,7 +69,7 @@ export interface User {
     username: string;
     displayName?: string | null;
     profilePicture?: string;
-    usernameFont?: string;
+    usernameFont?: UsernameFont;
     usernameGradient?: UsernameGradient;
     usernameGlow?: UsernameGlow;
     language?: string;

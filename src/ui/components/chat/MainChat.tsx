@@ -218,7 +218,9 @@ export const MainChat: React.FC = () => {
                     <MessagesList
                         activeHighlightId={targetMessageId}
                         disableCustomFonts={serverDetails?.disableCustomFonts}
-                        disableGlow={serverDetails?.disableCustomFonts}
+                        disableGlowAndColors={
+                            serverDetails?.disableUsernameGlowAndCustomColor
+                        }
                         hasMore={hasNextPage}
                         hasMoreNewer={isViewingOlderMessages}
                         isLoadingMore={isFetchingNextPage}
@@ -235,7 +237,9 @@ export const MainChat: React.FC = () => {
             {canSendMessages ? (
                 <MessageInput
                     disableCustomFonts={serverDetails?.disableCustomFonts}
-                    disableGlow={serverDetails?.disableCustomFonts}
+                    disableGlowAndColors={
+                        serverDetails?.disableUsernameGlowAndCustomColor
+                    }
                     fileQueueResult={fileQueueResult}
                     replyingTo={replyingTo}
                     onCancelReply={() => setReplyingTo(null)}

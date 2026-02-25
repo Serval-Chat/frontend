@@ -13,6 +13,7 @@ import { Input } from './Input';
 interface DropdownOption {
     id: string;
     label: string;
+    displayLabel?: React.ReactNode;
     icon?: React.ReactNode;
     description?: string;
 }
@@ -125,7 +126,10 @@ export const DropdownWithSearch: React.FC<DropdownWithSearchProps> = ({
                                 : 'text-[var(--color-foreground)]',
                         )}
                     >
-                        {selectedOption ? selectedOption.label : placeholder}
+                        {selectedOption
+                            ? selectedOption.displayLabel ||
+                              selectedOption.label
+                            : placeholder}
                     </span>
                 </div>
 
@@ -202,7 +206,8 @@ export const DropdownWithSearch: React.FC<DropdownWithSearchProps> = ({
                                             )}
                                             <div className="flex flex-col min-w-0">
                                                 <span className="text-sm font-medium truncate">
-                                                    {option.label}
+                                                    {option.displayLabel ||
+                                                        option.label}
                                                 </span>
                                                 {option.description && (
                                                     <span className="text-[10px] opacity-70 truncate">

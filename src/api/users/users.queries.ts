@@ -7,7 +7,12 @@ import {
 } from '@tanstack/react-query';
 
 import { usersApi } from './users.api';
-import type { User } from './users.types';
+import type {
+    User,
+    UsernameFont,
+    UsernameGlow,
+    UsernameGradient,
+} from './users.types';
 
 export const useMe = (): UseQueryResult<User, Error> =>
     useQuery({
@@ -37,6 +42,7 @@ export const useUpdateBio = (): UseMutationResult<
             queryClient.setQueryData<User>(['me'], (old) =>
                 old ? { ...old, bio: data.bio } : old,
             );
+            void queryClient.invalidateQueries({ queryKey: ['me'] });
         },
     });
 };
@@ -53,6 +59,7 @@ export const useUpdatePronouns = (): UseMutationResult<
             queryClient.setQueryData<User>(['me'], (old) =>
                 old ? { ...old, pronouns: data.pronouns } : old,
             );
+            void queryClient.invalidateQueries({ queryKey: ['me'] });
         },
     });
 };
@@ -69,6 +76,7 @@ export const useUpdateDisplayName = (): UseMutationResult<
             queryClient.setQueryData<User>(['me'], (old) =>
                 old ? { ...old, displayName: data.displayName } : old,
             );
+            void queryClient.invalidateQueries({ queryKey: ['me'] });
         },
     });
 };
@@ -85,29 +93,23 @@ export const useUpdateUsername = (): UseMutationResult<
             queryClient.setQueryData<User>(['me'], (old) =>
                 old ? { ...old, username: data.username } : old,
             );
+            void queryClient.invalidateQueries({ queryKey: ['me'] });
         },
     });
 };
 
 export const useUpdateStyle = (): UseMutationResult<
     {
-        usernameFont?: string;
-        usernameGradient?: {
-            enabled: boolean;
-            colors: string[];
-            angle: number;
-        };
-        usernameGlow?: { enabled: boolean; color: string; intensity: number };
+        message: string;
+        usernameFont?: UsernameFont;
+        usernameGradient?: UsernameGradient;
+        usernameGlow?: UsernameGlow;
     },
     Error,
     {
-        usernameFont?: string;
-        usernameGradient?: {
-            enabled: boolean;
-            colors: string[];
-            angle: number;
-        };
-        usernameGlow?: { enabled: boolean; color?: string; intensity: number };
+        usernameFont?: UsernameFont;
+        usernameGradient?: UsernameGradient;
+        usernameGlow?: UsernameGlow;
     }
 > => {
     const queryClient = useQueryClient();
@@ -125,6 +127,7 @@ export const useUpdateStyle = (): UseMutationResult<
                       }
                     : old,
             );
+            void queryClient.invalidateQueries({ queryKey: ['me'] });
         },
     });
 };
@@ -141,6 +144,7 @@ export const useUpdateLanguage = (): UseMutationResult<
             queryClient.setQueryData<User>(['me'], (old) =>
                 old ? { ...old, language: data.language } : old,
             );
+            void queryClient.invalidateQueries({ queryKey: ['me'] });
         },
     });
 };

@@ -125,7 +125,6 @@ export const ServerSidebarSection: React.FC<ServerSidebarSectionProps> = ({
                             <div className="space-y-[2px] min-w-0">
                                 {group.members.map((member) => (
                                     <UserItem
-                                        disableGlow
                                         noFetch
                                         allRoles={roles?.filter((r) =>
                                             member.roles
@@ -134,6 +133,9 @@ export const ServerSidebarSection: React.FC<ServerSidebarSectionProps> = ({
                                         )}
                                         disableCustomFonts={
                                             serverDetails?.disableCustomFonts
+                                        }
+                                        disableGlowAndColors={
+                                            serverDetails?.disableUsernameGlowAndCustomColor
                                         }
                                         initialPresenceStatus={
                                             group.id === 'offline'

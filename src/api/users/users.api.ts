@@ -1,6 +1,11 @@
 import { apiClient } from '@/api/client';
 
-import type { User } from './users.types';
+import type {
+    User,
+    UsernameFont,
+    UsernameGlow,
+    UsernameGradient,
+} from './users.types';
 
 export const usersApi = {
     getMe: () => apiClient.get<User>('/api/v1/profile/me').then((r) => r.data),
@@ -41,32 +46,16 @@ export const usersApi = {
             .then((r) => r.data),
 
     updateStyle: (data: {
-        usernameFont?: string;
-        usernameGradient?: {
-            enabled: boolean;
-            colors: string[];
-            angle: number;
-        };
-        usernameGlow?: {
-            enabled: boolean;
-            color?: string;
-            intensity: number;
-        };
+        usernameFont?: UsernameFont;
+        usernameGradient?: UsernameGradient;
+        usernameGlow?: UsernameGlow;
     }) =>
         apiClient
             .patch<{
                 message: string;
-                usernameFont?: string;
-                usernameGradient?: {
-                    enabled: boolean;
-                    colors: string[];
-                    angle: number;
-                };
-                usernameGlow?: {
-                    enabled: boolean;
-                    color: string;
-                    intensity: number;
-                };
+                usernameFont?: UsernameFont;
+                usernameGradient?: UsernameGradient;
+                usernameGlow?: UsernameGlow;
             }>('/api/v1/profile/style', data)
             .then((r) => r.data),
 

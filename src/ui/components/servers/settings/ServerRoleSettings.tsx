@@ -113,7 +113,9 @@ export const ServerRoleSettings: React.FC<ServerRoleSettingsProps> = ({
                 {selectedRole ? (
                     <RoleEditor
                         disableCustomFonts={server?.disableCustomFonts}
-                        disableGlow={server?.disableCustomFonts}
+                        disableGlowAndColors={
+                            server?.disableUsernameGlowAndCustomColor
+                        }
                         key={selectedRole._id}
                         role={selectedRole}
                         onReset={() => {}}

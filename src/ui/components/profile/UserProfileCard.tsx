@@ -34,7 +34,7 @@ interface UserProfileCardProps {
     onBannerClick?: () => void;
     onAvatarClick?: () => void;
     disableCustomFonts?: boolean;
-    disableGlow?: boolean;
+    disableGlowAndColors?: boolean;
     adminData?: AdminExtendedUser;
 }
 
@@ -50,8 +50,8 @@ export const UserProfileCard: React.FC<UserProfileCardProps> = ({
     customStatus,
     onBannerClick,
     onAvatarClick,
-    disableCustomFonts = false,
-    disableGlow = false,
+    disableCustomFonts,
+    disableGlowAndColors,
     adminData,
 }) => {
     const userId = user?._id;
@@ -133,7 +133,7 @@ export const UserProfileCard: React.FC<UserProfileCardProps> = ({
                     <StyledUserName
                         className="text-xl font-bold leading-tight w-full truncate"
                         disableCustomFonts={disableCustomFonts}
-                        disableGlow={disableGlow}
+                        disableGlowAndColors={disableGlowAndColors}
                         iconRole={iconRole}
                         role={role}
                         user={user as User}

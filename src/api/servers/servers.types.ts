@@ -23,6 +23,7 @@ export interface Server {
     memberCount?: number;
     allTimeHigh?: number;
     disableCustomFonts?: boolean;
+    disableUsernameGlowAndCustomColor?: boolean;
     createdAt?: string;
     updatedAt?: string;
 }

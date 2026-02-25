@@ -66,7 +66,7 @@ interface UserItemProps {
     serverRoles?: Role[]; // All available roles in server
     joinedAt?: string;
     disableCustomFonts?: boolean;
-    disableGlow?: boolean;
+    disableGlowAndColors?: boolean;
     initialPresenceStatus?: UserStatus;
 }
 
@@ -89,7 +89,7 @@ export const UserItem: React.FC<UserItemProps> = ({
     serverRoles,
     joinedAt,
     disableCustomFonts,
-    disableGlow,
+    disableGlowAndColors,
     initialPresenceStatus,
 }) => {
     const dispatch = useAppDispatch();
@@ -358,7 +358,7 @@ export const UserItem: React.FC<UserItemProps> = ({
                     <Box className="flex flex-col flex-1 min-w-0 overflow-hidden">
                         <StyledUserName
                             disableCustomFonts={disableCustomFonts}
-                            disableGlow={disableGlow}
+                            disableGlowAndColors={disableGlowAndColors}
                             iconRole={iconRole}
                             role={role}
                             user={userProfile}
@@ -400,7 +400,7 @@ export const UserItem: React.FC<UserItemProps> = ({
             </ContextMenu>
             <ProfilePopup
                 disableCustomFonts={disableCustomFonts}
-                disableGlow={disableGlow}
+                disableGlowAndColors={disableGlowAndColors}
                 iconRole={iconRole}
                 isOpen={showProfile}
                 joinedAt={joinedAt}
