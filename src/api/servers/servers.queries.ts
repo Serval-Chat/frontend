@@ -293,6 +293,42 @@ export const useDeleteChannel = (
     });
 };
 
+export const useUpdateCategory = (
+    serverId: string,
+    categoryId: string,
+): UseMutationResult<Category, Error, Partial<Category>> => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (updates: Partial<Category>) =>
+            serversApi.updateCategory(serverId, categoryId, updates),
+        onSuccess: () => {
+            void queryClient.invalidateQueries({
+                queryKey: SERVERS_QUERY_KEYS.categories(serverId),
+            });
+        },
+    });
+};
+
+export const useDeleteCategory = (
+    serverId: string,
+): UseMutationResult<void, Error, string> => {
+    const queryClient = useQueryClient();
+    const { showToast } = useToast();
+    return useMutation({
+        mutationFn: (categoryId: string) =>
+            serversApi.deleteCategory(serverId, categoryId),
+        onSuccess: () => {
+            void queryClient.invalidateQueries({
+                queryKey: SERVERS_QUERY_KEYS.categories(serverId),
+            });
+            showToast('Category deleted successfully', 'success');
+        },
+        onError: (error) => {
+            showToast(error.message || 'Failed to delete category', 'error');
+        },
+    });
+};
+
 export const useDeleteServer = (): UseMutationResult<void, Error, string> => {
     const queryClient = useQueryClient();
     return useMutation({

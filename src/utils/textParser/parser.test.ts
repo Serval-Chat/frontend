@@ -666,4 +666,39 @@ describe('TextParser', () => {
             { type: 'text', content: '\\' },
         ]);
     });
+
+    it('should parse thematic breaks', () => {
+        const text = 'Above\n---\nBelow';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            { type: 'text', content: 'Above\n' },
+            { type: 'thematic_break' },
+            { type: 'text', content: 'Below' },
+        ]);
+    });
+
+    it('should parse thematic breaks with trailing spaces', () => {
+        const text = '---   \nNext line';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            { type: 'thematic_break' },
+            { type: 'text', content: 'Next line' },
+        ]);
+    });
+
+    it('should not parse thematic breaks with more or fewer than 3 dashes', () => {
+        const text1 = '----\nLine';
+        const nodes1 = parseText(text1, ParserPresets.MESSAGE);
+        expect(nodes1.some((n) => n.type === 'thematic_break')).toBe(false);
+
+        const text2 = '--\nLine';
+        const nodes2 = parseText(text2, ParserPresets.MESSAGE);
+        expect(nodes2.some((n) => n.type === 'thematic_break')).toBe(false);
+    });
+
+    it('should not parse thematic breaks not at the start of a line', () => {
+        const text = 'Text ---';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([{ type: 'text', content: 'Text ---' }]);
+    });
 });

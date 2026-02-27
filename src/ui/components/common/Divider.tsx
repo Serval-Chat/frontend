@@ -5,12 +5,14 @@ import { cn } from '@/utils/cn';
 
 interface DividerProps {
     className?: string;
+    fullWidth?: boolean;
 }
 
-export const Divider: React.FC<DividerProps> = ({ className }) => (
+export const Divider: React.FC<DividerProps> = ({ className, fullWidth }) => (
     <Box
         className={cn(
-            'w-full px-[12px] py-[2px] flex items-center justify-center',
+            'w-full py-[2px] flex items-center justify-center',
+            !fullWidth && 'px-[12px]',
             className,
         )}
     >

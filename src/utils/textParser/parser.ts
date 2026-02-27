@@ -36,6 +36,7 @@ export const ParserPresets = {
             ParserFeature.TABLE,
             ParserFeature.LATEX,
             ParserFeature.INLINE_LATEX,
+            ParserFeature.THEMATIC_BREAK,
         ],
     },
     BIO: {
@@ -63,6 +64,7 @@ export const ParserPresets = {
             ParserFeature.TABLE,
             ParserFeature.LATEX,
             ParserFeature.INLINE_LATEX,
+            ParserFeature.THEMATIC_BREAK,
         ],
     },
 } as const;
@@ -285,6 +287,22 @@ export class TextParser {
                         currentText = '';
                     }
                     nodes.push(linkNode);
+                    continue;
+                }
+            }
+
+            // --- (Thematic Break)
+            if (
+                char === '-' &&
+                this.options.features.includes(ParserFeature.THEMATIC_BREAK)
+            ) {
+                const breakNode = this.tryParseThematicBreak();
+                if (breakNode) {
+                    if (currentText) {
+                        nodes.push({ type: 'text', content: currentText });
+                        currentText = '';
+                    }
+                    nodes.push(breakNode);
                     continue;
                 }
             }
@@ -555,11 +573,18 @@ export class TextParser {
                 content += this.text[this.index];
                 this.index++;
             }
-            if (content.trim())
+            if (content.trim()) {
+                if (
+                    this.index < this.text.length &&
+                    this.text[this.index] === '\n'
+                ) {
+                    this.index++;
+                }
                 return {
                     type: 'h3',
                     content: this.parseContent(content.trim()),
                 } as ASTNode;
+            }
         } else if (this.peek('## ')) {
             this.index += 3;
             let content = '';
@@ -570,11 +595,18 @@ export class TextParser {
                 content += this.text[this.index];
                 this.index++;
             }
-            if (content.trim())
+            if (content.trim()) {
+                if (
+                    this.index < this.text.length &&
+                    this.text[this.index] === '\n'
+                ) {
+                    this.index++;
+                }
                 return {
                     type: 'h2',
                     content: this.parseContent(content.trim()),
                 } as ASTNode;
+            }
         } else if (this.peek('# ')) {
             this.index += 2;
             let content = '';
@@ -585,11 +617,18 @@ export class TextParser {
                 content += this.text[this.index];
                 this.index++;
             }
-            if (content.trim())
+            if (content.trim()) {
+                if (
+                    this.index < this.text.length &&
+                    this.text[this.index] === '\n'
+                ) {
+                    this.index++;
+                }
                 return {
                     type: 'h1',
                     content: this.parseContent(content.trim()),
                 } as ASTNode;
+            }
         } else if (this.peek('-# ')) {
             this.index += 3;
             let content = '';
@@ -600,11 +639,18 @@ export class TextParser {
                 content += this.text[this.index];
                 this.index++;
             }
-            if (content.trim())
+            if (content.trim()) {
+                if (
+                    this.index < this.text.length &&
+                    this.text[this.index] === '\n'
+                ) {
+                    this.index++;
+                }
                 return {
                     type: 'subtext',
                     content: this.parseContent(content.trim()),
                 } as ASTNode;
+            }
         }
 
         this.index = start;
@@ -1212,6 +1258,47 @@ export class TextParser {
             this.index = start;
         }
 
+        return null;
+    }
+
+    private tryParseThematicBreak(): ASTNode | null {
+        const start = this.index;
+
+        // Must be at start of line
+        if (this.index > 0 && this.text[this.index - 1] !== '\n') {
+            return null;
+        }
+
+        let dashCount = 0;
+        let tempIndex = this.index;
+
+        // Count dashes and trailing spaces
+        while (tempIndex < this.text.length) {
+            const c = this.text[tempIndex];
+            if (c === '-') {
+                dashCount++;
+            } else if (c !== ' ' && c !== '\t' && c !== '\r') {
+                break;
+            }
+            tempIndex++;
+        }
+
+        // Must be 3 dashes, and the line must ends after
+        if (
+            dashCount === 3 &&
+            (tempIndex >= this.text.length || this.text[tempIndex] === '\n')
+        ) {
+            this.index = tempIndex;
+            if (
+                this.index < this.text.length &&
+                this.text[this.index] === '\n'
+            ) {
+                this.index++;
+            }
+            return { type: 'thematic_break' };
+        }
+
+        this.index = start;
         return null;
     }
 }

@@ -8,6 +8,7 @@ import { Box } from '@/ui/components/layout/Box';
 import type { ASTNode } from '@/utils/textParser/types';
 
 import { CodeBlock } from './CodeBlock';
+import { Divider } from './Divider';
 import { Heading } from './Heading';
 import { LatexRenderer } from './LatexRenderer';
 import { Link } from './Link';
@@ -61,7 +62,12 @@ export const ParsedText: React.FC<ParsedTextProps> = ({
                 switch (node.type) {
                     case 'text':
                         return (
-                            <Text key={idx} size={size} wrap={wrap}>
+                            <Text
+                                data-source={JSON.stringify(node.content)}
+                                key={idx}
+                                size={size}
+                                wrap={wrap}
+                            >
                                 {node.content}
                             </Text>
                         );
@@ -389,6 +395,9 @@ export const ParsedText: React.FC<ParsedTextProps> = ({
                         return (
                             <LatexRenderer content={node.content} key={idx} />
                         );
+
+                    case 'thematic_break':
+                        return <Divider fullWidth className="my-2" key={idx} />;
 
                     default:
                         return null;

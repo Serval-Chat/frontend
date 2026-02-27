@@ -24,6 +24,7 @@ import { cn } from '@/utils/cn';
 import { wsMessages } from '@/ws/messages';
 
 import { ChannelItem } from './ChannelItem';
+import { CategorySettingsModal } from './modals/CategorySettingsModal';
 import { ChannelSettingsModal } from './modals/ChannelSettingsModal';
 import { CreateCategoryModal } from './modals/CreateCategoryModal';
 import { CreateChannelModal } from './modals/CreateChannelModal';
@@ -54,6 +55,9 @@ export const ChannelList: React.FC<ChannelListProps> = ({
         Record<string, boolean>
     >({});
 
+    const [settingsCategory, setSettingsCategory] = useState<Category | null>(
+        null,
+    );
     const [settingsChannel, setSettingsChannel] = useState<Channel | null>(
         null,
     );
@@ -344,6 +348,16 @@ export const ChannelList: React.FC<ChannelListProps> = ({
             },
         ];
 
+        if (canManageChannels) {
+            items.unshift({
+                label: 'Edit Category',
+                icon: Settings,
+                onClick: () => {
+                    setSettingsCategory(category);
+                },
+            });
+        }
+
         return items;
     };
 
@@ -436,6 +450,14 @@ export const ChannelList: React.FC<ChannelListProps> = ({
                     name={channel.name}
                     type={channel.type}
                     onClick={() => handleChannelClick(channel)}
+                    onSettingsClick={
+                        canManageChannels
+                            ? (e) => {
+                                  e.stopPropagation();
+                                  setSettingsChannel(channel);
+                              }
+                            : undefined
+                    }
                 />
             </ContextMenu>
         );
@@ -500,22 +522,37 @@ export const ChannelList: React.FC<ChannelListProps> = ({
                                                 {category.name}
                                             </span>
                                             {canManageChannels && (
-                                                <IconButton
-                                                    className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5"
-                                                    icon={Plus}
-                                                    iconSize={14}
-                                                    title="Create Channel"
-                                                    variant="ghost"
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        setCreateCategoryId(
-                                                            category._id,
-                                                        );
-                                                        setCreateModalOpen(
-                                                            true,
-                                                        );
-                                                    }}
-                                                />
+                                                <div className="flex opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <IconButton
+                                                        className="p-0.5"
+                                                        icon={Settings}
+                                                        iconSize={14}
+                                                        title="Edit Category"
+                                                        variant="ghost"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            setSettingsCategory(
+                                                                category,
+                                                            );
+                                                        }}
+                                                    />
+                                                    <IconButton
+                                                        className="p-0.5"
+                                                        icon={Plus}
+                                                        iconSize={14}
+                                                        title="Create Channel"
+                                                        variant="ghost"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            setCreateCategoryId(
+                                                                category._id,
+                                                            );
+                                                            setCreateModalOpen(
+                                                                true,
+                                                            );
+                                                        }}
+                                                    />
+                                                </div>
                                             )}
                                         </div>
                                     </ContextMenu>
@@ -543,6 +580,14 @@ export const ChannelList: React.FC<ChannelListProps> = ({
                         }
                     })}
                 </Reorder.Group>
+
+                {settingsCategory && (
+                    <CategorySettingsModal
+                        category={settingsCategory}
+                        isOpen={!!settingsCategory}
+                        onClose={() => setSettingsCategory(null)}
+                    />
+                )}
 
                 {settingsChannel && (
                     <ChannelSettingsModal

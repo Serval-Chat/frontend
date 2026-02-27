@@ -206,6 +206,27 @@ export const serversApi = {
         return response.data;
     },
 
+    updateCategory: async (
+        serverId: string,
+        categoryId: string,
+        updates: Partial<Category>,
+    ): Promise<Category> => {
+        const response = await apiClient.patch<Category>(
+            `/api/v1/servers/${serverId}/categories/${categoryId}`,
+            updates,
+        );
+        return response.data;
+    },
+
+    deleteCategory: async (
+        serverId: string,
+        categoryId: string,
+    ): Promise<void> => {
+        await apiClient.delete(
+            `/api/v1/servers/${serverId}/categories/${categoryId}`,
+        );
+    },
+
     updateServer: async (
         serverId: string,
         updates: Partial<Server>,

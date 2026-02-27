@@ -26,6 +26,7 @@ export const ParserFeature = {
     TABLE: 'TABLE',
     LATEX: 'LATEX',
     INLINE_LATEX: 'INLINE_LATEX',
+    THEMATIC_BREAK: 'THEMATIC_BREAK',
 } as const;
 
 export type ParserFeature = (typeof ParserFeature)[keyof typeof ParserFeature];
@@ -54,7 +55,8 @@ export type ASTNodeType =
     | 'ordered_list'
     | 'table'
     | 'latex'
-    | 'inline_latex';
+    | 'inline_latex'
+    | 'thematic_break';
 
 export interface TextNode {
     type: 'text';
@@ -184,6 +186,10 @@ export interface InlineLatexNode {
     content: string;
 }
 
+export interface ThematicBreakNode {
+    type: 'thematic_break';
+}
+
 export type ASTNode =
     | TextNode
     | BoldNode
@@ -208,4 +214,5 @@ export type ASTNode =
     | OrderedListNode
     | TableNode
     | LatexNode
-    | InlineLatexNode;
+    | InlineLatexNode
+    | ThematicBreakNode;
