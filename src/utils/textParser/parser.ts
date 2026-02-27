@@ -87,8 +87,21 @@ export class TextParser {
             const char = this.text[this.index];
             const charCode = char.charCodeAt(0);
 
+            if (char === '\\' && this.index + 1 < this.text.length) {
+                if (currentText) {
+                    nodes.push({ type: 'text', content: currentText });
+                    currentText = '';
+                }
+
+                const escapedChar = this.text[this.index + 1];
+
+                nodes.push({ type: 'text', content: escapedChar });
+
+                this.index += 2;
+                continue;
+            }
+
             // Unicode Emoji
-            // Optimization: All emojis have char codes > 127
             if (
                 charCode > 127 &&
                 this.options.features.includes(ParserFeature.UNICODE_EMOJI)

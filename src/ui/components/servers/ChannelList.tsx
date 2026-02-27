@@ -395,6 +395,10 @@ export const ChannelList: React.FC<ChannelListProps> = ({
                     parsed.hostname === 'catfla.re' ||
                     parsed.hostname.endsWith('.catfla.re')
                 ) {
+                    if (parsed.pathname.startsWith('/chat/@setting')) {
+                        void navigate(parsed.pathname);
+                        return;
+                    }
                     window.open(url, '_blank', 'noopener,noreferrer');
                     return;
                 }

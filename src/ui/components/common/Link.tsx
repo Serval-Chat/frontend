@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-import { Link as RouterLink } from 'react-router-dom';
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
 
 import { cn } from '@/utils/cn';
 
@@ -43,6 +43,7 @@ export const Link: React.FC<LinkProps> = ({
     const [isModalOpen, setIsModalOpen] = useState(false);
     const targetUrl = to || href || '#';
     const isInternal = to !== undefined && !external;
+    const navigate = useNavigate();
 
     const baseClass = 'text-primary hover:underline transition-all text-base';
 
@@ -70,19 +71,29 @@ export const Link: React.FC<LinkProps> = ({
         if (isExternal) {
             e.preventDefault();
             let isSafe = false;
+            let isInternalSetting = false;
+            let internalPath = '';
+
             try {
                 const parsed = new URL(targetUrl);
                 if (
                     parsed.hostname === 'catfla.re' ||
                     parsed.hostname.endsWith('.catfla.re')
                 ) {
-                    isSafe = true;
+                    if (parsed.pathname.startsWith('/chat/@setting')) {
+                        isInternalSetting = true;
+                        internalPath = parsed.pathname;
+                    } else {
+                        isSafe = true;
+                    }
                 }
             } catch {
                 // ignore
             }
 
-            if (isSafe) {
+            if (isInternalSetting) {
+                void navigate(internalPath);
+            } else if (isSafe) {
                 window.open(targetUrl, '_blank', 'noopener,noreferrer');
             } else {
                 setIsModalOpen(true);

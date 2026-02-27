@@ -636,4 +636,34 @@ describe('TextParser', () => {
             content: 'E = mc^2',
         });
     });
+
+    it('should handle escaped markdown characters like \\* and \\|', () => {
+        const text = 'Hello \\*not bold\\* and \\|\\|not spoiler\\|\\|';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            { type: 'text', content: 'Hello ' },
+            { type: 'text', content: '*' },
+            { type: 'text', content: 'not bold' },
+            { type: 'text', content: '*' },
+            { type: 'text', content: ' and ' },
+            { type: 'text', content: '|' },
+            { type: 'text', content: '|' },
+            { type: 'text', content: 'not spoiler' },
+            { type: 'text', content: '|' },
+            { type: 'text', content: '|' },
+        ]);
+    });
+
+    it('should handle escaped markdown characters like \\` and \\\\', () => {
+        const text = 'Escaped \\`code\\` and backslash \\\\';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            { type: 'text', content: 'Escaped ' },
+            { type: 'text', content: '`' },
+            { type: 'text', content: 'code' },
+            { type: 'text', content: '`' },
+            { type: 'text', content: ' and backslash ' },
+            { type: 'text', content: '\\' },
+        ]);
+    });
 });
