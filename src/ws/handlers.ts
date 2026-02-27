@@ -183,7 +183,10 @@ export const setupGlobalWsHandlers = (
                 if (!old) return old;
                 return old.map((member) =>
                     member.userId === payload.userId
-                        ? { ...member, user: { ...member.user, ...payload } }
+                        ? {
+                              ...member,
+                              user: { ...member.user, ...payload } as User,
+                          }
                         : member,
                 );
             },

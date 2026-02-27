@@ -1,7 +1,7 @@
 export interface Friend {
     _id: string;
     username: string;
-    displayName?: string;
+    displayName?: string | null;
     createdAt: string;
     profilePicture: string | null;
     customStatus: {
