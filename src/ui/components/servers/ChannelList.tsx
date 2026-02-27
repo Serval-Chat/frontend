@@ -5,6 +5,7 @@ import {
     ChevronDown,
     Copy,
     Folder,
+    FolderPlus,
     Link as LinkIcon,
     Plus,
     Settings,
@@ -24,6 +25,7 @@ import { wsMessages } from '@/ws/messages';
 
 import { ChannelItem } from './ChannelItem';
 import { ChannelSettingsModal } from './modals/ChannelSettingsModal';
+import { CreateCategoryModal } from './modals/CreateCategoryModal';
 import { CreateChannelModal } from './modals/CreateChannelModal';
 
 interface ChannelListProps {
@@ -62,6 +64,8 @@ export const ChannelList: React.FC<ChannelListProps> = ({
     const canManageChannels = hasPermission('manageChannels');
 
     const [createModalOpen, setCreateModalOpen] = useState(false);
+    const [createCategoryModalOpen, setCreateCategoryModalOpen] =
+        useState(false);
     const [createCategoryId, setCreateCategoryId] = useState<string | null>(
         null,
     );
@@ -355,6 +359,13 @@ export const ChannelList: React.FC<ChannelListProps> = ({
                     setCreateModalOpen(true);
                 },
             });
+            items.push({
+                label: 'Create Category',
+                icon: FolderPlus,
+                onClick: () => {
+                    setCreateCategoryModalOpen(true);
+                },
+            });
         }
 
         if (selectedServerId) {
@@ -546,6 +557,14 @@ export const ChannelList: React.FC<ChannelListProps> = ({
                             setCreateModalOpen(false);
                             setCreateCategoryId(null);
                         }}
+                    />
+                )}
+
+                {selectedServerId && (
+                    <CreateCategoryModal
+                        isOpen={createCategoryModalOpen}
+                        serverId={selectedServerId}
+                        onClose={() => setCreateCategoryModalOpen(false)}
                     />
                 )}
 

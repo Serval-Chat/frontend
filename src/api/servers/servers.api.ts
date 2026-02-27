@@ -192,6 +192,20 @@ export const serversApi = {
         return response.data;
     },
 
+    createCategory: async (
+        serverId: string,
+        data: {
+            name: string;
+            position?: number;
+        },
+    ): Promise<Category> => {
+        const response = await apiClient.post<Category>(
+            `/api/v1/servers/${serverId}/categories`,
+            data,
+        );
+        return response.data;
+    },
+
     updateServer: async (
         serverId: string,
         updates: Partial<Server>,
