@@ -77,31 +77,6 @@ export const ServerSection: React.FC = () => {
         navigate,
     ]);
 
-    // When a server is selected but no channel is active, navigate to the first channel.
-    useEffect(() => {
-        if (
-            !isLoadingChannels &&
-            channels &&
-            channels.length > 0 &&
-            !selectedChannelId &&
-            selectedServerId
-        ) {
-            const sorted = [...channels].sort(
-                (a, b) => a.position - b.position,
-            );
-            void navigate(
-                `/chat/@server/${selectedServerId}/channel/${sorted[0]._id}`,
-                { replace: true },
-            );
-        }
-    }, [
-        isLoadingChannels,
-        channels,
-        selectedChannelId,
-        selectedServerId,
-        navigate,
-    ]);
-
     if (!selectedServerId) return null;
 
     return (

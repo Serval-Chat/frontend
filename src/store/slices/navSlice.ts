@@ -11,6 +11,8 @@ interface NavState {
     targetMessageId: string | null;
     lastOpenedChannelByServer: Record<string, string>;
     lastSelectedFriendId: string | null;
+    mobileHomeTab: 'friends' | 'requests';
+    showMobileMemberList: boolean;
 }
 
 const initialState: NavState = {
@@ -21,6 +23,8 @@ const initialState: NavState = {
     targetMessageId: null,
     lastOpenedChannelByServer: {},
     lastSelectedFriendId: null,
+    mobileHomeTab: 'friends',
+    showMobileMemberList: false,
 };
 
 const navSlice = createSlice({
@@ -29,6 +33,8 @@ const navSlice = createSlice({
     reducers: {
         setNavMode: (state, action: PayloadAction<NavMode>) => {
             state.navMode = action.payload;
+            state.mobileHomeTab = 'friends';
+            state.showMobileMemberList = false;
             if (action.payload === 'friends') {
                 state.selectedServerId = null;
                 state.selectedChannelId = null;
@@ -59,6 +65,7 @@ const navSlice = createSlice({
             state.navMode = 'servers';
             state.selectedChannelId = action.payload;
             state.selectedFriendId = null;
+            state.showMobileMemberList = false;
 
             if (state.selectedServerId && action.payload) {
                 state.lastOpenedChannelByServer[state.selectedServerId] =
@@ -67,6 +74,13 @@ const navSlice = createSlice({
         },
         setTargetMessageId: (state, action: PayloadAction<string | null>) => {
             state.targetMessageId = action.payload;
+        },
+        toggleMobileHomeTab: (state) => {
+            state.mobileHomeTab =
+                state.mobileHomeTab === 'friends' ? 'requests' : 'friends';
+        },
+        toggleMobileMemberList: (state) => {
+            state.showMobileMemberList = !state.showMobileMemberList;
         },
     },
 });
@@ -77,5 +91,7 @@ export const {
     setSelectedFriendId,
     setSelectedChannelId,
     setTargetMessageId,
+    toggleMobileHomeTab,
+    toggleMobileMemberList,
 } = navSlice.actions;
 export const navReducer = navSlice.reducer;

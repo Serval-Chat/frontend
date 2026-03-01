@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 
 import { Reorder } from 'framer-motion';
 import {
+    ArrowDown,
+    ArrowUp,
     ChevronDown,
     Copy,
     Folder,
@@ -77,6 +79,13 @@ export const ChannelList: React.FC<ChannelListProps> = ({
     const [items, setItems] = useState<ListItem[]>([]);
     const [isReordering, setIsReordering] = useState(false);
     const [syncLock, setSyncLock] = useState(false);
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+    useEffect(() => {
+        const handleResize = (): void => setIsMobile(window.innerWidth < 768);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     // Sync items when props change (only when not reordering and not locked)
     useEffect(() => {
@@ -273,6 +282,108 @@ export const ChannelList: React.FC<ChannelListProps> = ({
         }
     };
 
+    const handleMoveItemMobile = async (
+        itemToMove: ListItem,
+        direction: 'up' | 'down',
+    ): Promise<void> => {
+        if (!selectedServerId || !canManageChannels) return;
+
+        // Find items of the same type and scope to determine who to swap with
+        let siblings: ListItem[] = [];
+        if (itemToMove.type === 'category') {
+            siblings = items.filter((i) => i.type === 'category');
+        } else {
+            const channel = itemToMove.data as Channel;
+            siblings = items.filter(
+                (i) =>
+                    i.type === 'channel' &&
+                    i.data.categoryId === channel.categoryId,
+            );
+        }
+
+        const currentIndex = siblings.findIndex((i) => i.id === itemToMove.id);
+        const targetIndex =
+            direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+
+        if (targetIndex < 0 || targetIndex >= siblings.length) return;
+
+        const targetItem = siblings[targetIndex];
+
+        // Optimistic UI update
+        const newItems = [...items];
+        if (itemToMove.type === 'category') {
+            const idxA = newItems.findIndex((i) => i.id === itemToMove.id);
+            const idxB = newItems.findIndex((i) => i.id === targetItem.id);
+            const blockA = [
+                newItems[idxA],
+                ...newItems.filter(
+                    (i) =>
+                        i.type === 'channel' &&
+                        i.data.categoryId === itemToMove.id,
+                ),
+            ];
+            const blockB = [
+                newItems[idxB],
+                ...newItems.filter(
+                    (i) =>
+                        i.type === 'channel' &&
+                        i.data.categoryId === targetItem.id,
+                ),
+            ];
+            const minIdx = Math.min(idxA, idxB);
+
+            const filtered = newItems.filter(
+                (i) =>
+                    !(
+                        i.id === itemToMove.id ||
+                        i.id === targetItem.id ||
+                        (i.type === 'channel' &&
+                            (i.data.categoryId === itemToMove.id ||
+                                i.data.categoryId === targetItem.id))
+                    ),
+            );
+
+            if (direction === 'up') {
+                filtered.splice(minIdx, 0, ...blockA, ...blockB);
+            } else {
+                filtered.splice(minIdx, 0, ...blockB, ...blockA);
+            }
+            setItems(filtered);
+        } else {
+            const idxA = newItems.findIndex((i) => i.id === itemToMove.id);
+            const idxB = newItems.findIndex((i) => i.id === targetItem.id);
+
+            newItems[idxA] = items[idxB];
+            newItems[idxB] = items[idxA];
+            setItems(newItems);
+        }
+
+        try {
+            setSyncLock(true);
+
+            if (itemToMove.type === 'category') {
+                const item1 = itemToMove.data as Category;
+                const item2 = targetItem.data as Category;
+
+                await serversApi.reorderCategories(selectedServerId, [
+                    { categoryId: item1._id, position: item2.position },
+                    { categoryId: item2._id, position: item1.position },
+                ]);
+            } else {
+                const item1 = itemToMove.data as Channel;
+                const item2 = targetItem.data as Channel;
+                await serversApi.reorderChannels(selectedServerId, [
+                    { channelId: item1._id, position: item2.position },
+                    { channelId: item2._id, position: item1.position },
+                ]);
+            }
+        } catch (error) {
+            console.error('Failed to reorder items:', error);
+        } finally {
+            setTimeout(() => setSyncLock(false), 500);
+        }
+    };
+
     const getChannelMenuItems = (channel: Channel): ContextMenuItem[] => {
         const items: ContextMenuItem[] = [
             {
@@ -300,6 +411,47 @@ export const ChannelList: React.FC<ChannelListProps> = ({
                     setSettingsChannel(channel);
                 },
             });
+
+            if (isMobile) {
+                // Check if it can move up/down
+                const siblings = channels
+                    .filter((c) => c.categoryId === channel.categoryId)
+                    .sort((a, b) => a.position - b.position);
+                const index = siblings.findIndex((c) => c._id === channel._id);
+
+                items.push({ type: 'divider' });
+
+                if (index > 0) {
+                    items.push({
+                        label: 'Move Up',
+                        icon: ArrowUp,
+                        onClick: () =>
+                            void handleMoveItemMobile(
+                                {
+                                    type: 'channel',
+                                    id: channel._id,
+                                    data: channel,
+                                },
+                                'up',
+                            ),
+                    });
+                }
+                if (index < siblings.length - 1) {
+                    items.push({
+                        label: 'Move Down',
+                        icon: ArrowDown,
+                        onClick: () =>
+                            void handleMoveItemMobile(
+                                {
+                                    type: 'channel',
+                                    id: channel._id,
+                                    data: channel,
+                                },
+                                'down',
+                            ),
+                    });
+                }
+            }
 
             // Move to Category options
             const moveOptions: ContextMenuItem[] = [
@@ -356,6 +508,49 @@ export const ChannelList: React.FC<ChannelListProps> = ({
                     setSettingsCategory(category);
                 },
             });
+
+            if (isMobile) {
+                const siblings = [...categories].sort(
+                    (a, b) => a.position - b.position,
+                );
+                const index = siblings.findIndex((c) => c._id === category._id);
+
+                const moveItems: ContextMenuItem[] = [];
+                if (index > 0) {
+                    moveItems.push({
+                        label: 'Move Up',
+                        icon: ArrowUp,
+                        onClick: () =>
+                            void handleMoveItemMobile(
+                                {
+                                    type: 'category',
+                                    id: category._id,
+                                    data: category,
+                                },
+                                'up',
+                            ),
+                    });
+                }
+                if (index < siblings.length - 1) {
+                    moveItems.push({
+                        label: 'Move Down',
+                        icon: ArrowDown,
+                        onClick: () =>
+                            void handleMoveItemMobile(
+                                {
+                                    type: 'category',
+                                    id: category._id,
+                                    data: category,
+                                },
+                                'down',
+                            ),
+                    });
+                }
+
+                if (moveItems.length > 0) {
+                    items.splice(1, 0, { type: 'divider' }, ...moveItems);
+                }
+            }
         }
 
         return items;
@@ -481,7 +676,9 @@ export const ChannelList: React.FC<ChannelListProps> = ({
                             return (
                                 <Reorder.Item
                                     className="pt-4 first:pt-0"
-                                    dragListener={canManageChannels}
+                                    dragListener={
+                                        canManageChannels && !isMobile
+                                    }
                                     key={item.id}
                                     value={item}
                                     onDragEnd={() => void handleDragEnd()}
@@ -568,7 +765,9 @@ export const ChannelList: React.FC<ChannelListProps> = ({
 
                             return (
                                 <Reorder.Item
-                                    dragListener={canManageChannels}
+                                    dragListener={
+                                        canManageChannels && !isMobile
+                                    }
                                     key={item.id}
                                     value={item}
                                     onDragEnd={() => void handleDragEnd()}

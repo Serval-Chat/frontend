@@ -13,7 +13,8 @@ import { cn } from '@/utils/cn';
  * @description Secondary navigation bar
  */
 export const SecondaryNavBar: React.FC = () => {
-    const navMode = useAppSelector((state) => state.nav.navMode);
+    const { navMode, mobileHomeTab, selectedFriendId, selectedChannelId } =
+        useAppSelector((state) => state.nav);
     const { width, isResizing, handleMouseDown } = useResizable({
         initialWidth: 240,
         minWidth: 200,
@@ -22,11 +23,25 @@ export const SecondaryNavBar: React.FC = () => {
         side: 'left',
     });
 
+    const isNothingSelected = !selectedFriendId && !selectedChannelId;
+
     return (
         <Box
             as="aside"
             className={cn(
                 'h-full shrink-0 flex flex-col no-scrollbar bg-[var(--secondary-bg)] relative',
+                navMode === 'friends' &&
+                    isNothingSelected &&
+                    mobileHomeTab === 'friends' &&
+                    'max-md:!w-auto max-md:!flex-1 max-md:shrink',
+                navMode === 'servers' &&
+                    isNothingSelected &&
+                    'max-md:!w-auto max-md:!flex-1 max-md:shrink',
+                navMode === 'friends' &&
+                    isNothingSelected &&
+                    mobileHomeTab === 'requests' &&
+                    'max-md:hidden',
+                !isNothingSelected && 'max-md:hidden',
             )}
             style={{ width: `${width}px` }}
         >

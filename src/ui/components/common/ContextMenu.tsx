@@ -224,13 +224,26 @@ const ContextMenuItemRenderer: React.FC<ContextMenuItemProps> = ({
                     )}
                     role="button"
                     tabIndex={0}
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        setIsSubmenuOpen((prev) => !prev);
+                    }}
+                    onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            setIsSubmenuOpen((prev) => !prev);
+                        }
+                    }}
                 >
                     <div className="flex items-center">
                         {item.icon && <item.icon className="w-4 h-4 mr-3" />}
                         <span className="font-medium">{item.label}</span>
                     </div>
                     <svg
-                        className="w-4 h-4 text-[var(--color-muted-foreground)]"
+                        className={cn(
+                            'w-4 h-4 text-[var(--color-muted-foreground)] transition-transform duration-150',
+                            isSubmenuOpen ? 'rotate-90' : '',
+                        )}
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"

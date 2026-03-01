@@ -3,7 +3,8 @@ import React, { useState } from 'react';
 import { Compass, Home, Plus, Settings } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
-import { useAppSelector } from '@/store/hooks';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { toggleMobileHomeTab } from '@/store/slices/navSlice';
 import { Divider } from '@/ui/components/common/Divider';
 import { IconButton } from '@/ui/components/common/IconButton';
 import { Box } from '@/ui/components/layout/Box';
@@ -14,12 +15,17 @@ import { SettingsModal } from '@/ui/components/settings/SettingsModal';
 import { cn } from '@/utils/cn';
 
 export const PrimaryNavBar: React.FC = () => {
-    const navMode = useAppSelector((state) => state.nav.navMode);
+    const { navMode, selectedFriendId, selectedChannelId } = useAppSelector(
+        (state) => state.nav,
+    );
+    const dispatch = useAppDispatch();
     const navigate = useNavigate();
     const location = useLocation();
     const [showSettings, setShowSettings] = useState(false);
     const [showCreateServer, setShowCreateServer] = useState(false);
     const [showJoinServer, setShowJoinServer] = useState(false);
+
+    const isChatActive = !!selectedFriendId || !!selectedChannelId;
 
     // Sync settings modal with URL
     React.useEffect(() => {
@@ -31,7 +37,11 @@ export const PrimaryNavBar: React.FC = () => {
     }, [location.pathname]);
 
     const handleHomeClick = (): void => {
-        void navigate('/chat/@me');
+        if (navMode === 'friends' && location.pathname === '/chat/@me') {
+            dispatch(toggleMobileHomeTab());
+        } else {
+            void navigate('/chat/@me');
+        }
     };
 
     const handleSettingsClick = (): void => {
@@ -50,6 +60,7 @@ export const PrimaryNavBar: React.FC = () => {
                 'h-full flex flex-col items-center py-3 gap-3',
                 'bg-[--color-background]',
                 'w-[72px] shrink-0',
+                isChatActive && 'max-md:hidden',
             )}
         >
             <Box>

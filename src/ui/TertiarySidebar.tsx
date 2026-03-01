@@ -1,7 +1,9 @@
-import React from 'react';
+import { X } from 'lucide-react';
 
 import { useResizable } from '@/hooks/useResizable';
 import { useTertiarySidebarData } from '@/hooks/useTertiarySidebarData';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { toggleMobileMemberList } from '@/store/slices/navSlice';
 import { Resizer } from '@/ui/components/common/Resizer';
 import { Box } from '@/ui/components/layout/Box';
 import { DMSidebarSection } from '@/ui/components/sidebar/DMSidebarSection';
@@ -24,6 +26,11 @@ export const TertiarySidebar: React.FC = () => {
         roles,
     } = useTertiarySidebarData();
 
+    const dispatch = useAppDispatch();
+    const showMobileMemberList = useAppSelector(
+        (state) => state.nav.showMobileMemberList,
+    );
+
     const { width, isResizing, handleMouseDown } = useResizable({
         initialWidth: 240,
         minWidth: 200,
@@ -37,6 +44,9 @@ export const TertiarySidebar: React.FC = () => {
             as="aside"
             className={cn(
                 'h-full shrink-0 overflow-y-auto overflow-x-hidden custom-scrollbar bg-[var(--tertiary-bg)] relative',
+                showMobileMemberList
+                    ? 'max-md:fixed max-md:inset-y-0 max-md:right-0 max-md:z-50 max-md:w-64 max-md:shadow-2xl'
+                    : 'max-md:hidden',
             )}
             style={{ width: `${width}px` }}
         >
@@ -45,6 +55,21 @@ export const TertiarySidebar: React.FC = () => {
                 side="left"
                 onMouseDown={handleMouseDown}
             />
+            {/* Mobile close button row */}
+            {showMobileMemberList && (
+                <div className="md:hidden flex items-center justify-between px-3 pt-3 pb-1">
+                    <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                        Members
+                    </span>
+                    <button
+                        aria-label="Close member list"
+                        className="p-1 text-muted-foreground hover:text-foreground transition-colors"
+                        onClick={() => dispatch(toggleMobileMemberList())}
+                    >
+                        <X className="w-4 h-4" />
+                    </button>
+                </div>
+            )}
             <Box className="p-3 flex flex-col gap-4 min-w-0">
                 {/* DM Context */}
                 {selectedFriendId && friend && me && (

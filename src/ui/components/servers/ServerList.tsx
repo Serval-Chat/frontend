@@ -18,14 +18,16 @@ export const ServerList: React.FC = () => {
         (state) => state.nav.selectedServerId,
     );
     const unreadServers = useAppSelector((state) => state.unread.unreadServers);
-    const navigate = useNavigate();
     const lastOpenedChannelByServer = useAppSelector(
         (state) => state.nav.lastOpenedChannelByServer,
     );
+    const navigate = useNavigate();
 
     const handleServerClick = (serverId: string): void => {
         const lastChannelId = lastOpenedChannelByServer[serverId];
-        if (lastChannelId) {
+        const isMobile = window.innerWidth < 768; // md breakpoint
+
+        if (lastChannelId && !isMobile) {
             void navigate(`/chat/@server/${serverId}/channel/${lastChannelId}`);
         } else {
             dispatch(setSelectedServerId(serverId));

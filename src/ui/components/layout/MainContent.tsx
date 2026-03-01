@@ -9,8 +9,13 @@ import { cn } from '@/utils/cn';
  * @description Main chat area content component.
  */
 export const MainContent: React.FC = () => {
-    const { selectedFriendId, selectedServerId, selectedChannelId } =
-        useAppSelector((state) => state.nav);
+    const {
+        selectedFriendId,
+        selectedServerId,
+        selectedChannelId,
+        navMode,
+        mobileHomeTab,
+    } = useAppSelector((state) => state.nav);
 
     const isNothingSelected = !selectedFriendId && !selectedChannelId;
 
@@ -24,6 +29,11 @@ export const MainContent: React.FC = () => {
         <main
             className={cn(
                 'flex-1 flex flex-col relative z-content overflow-hidden',
+                navMode === 'friends' &&
+                    isNothingSelected &&
+                    mobileHomeTab === 'friends' &&
+                    'max-md:hidden',
+                navMode === 'servers' && isNothingSelected && 'max-md:hidden',
             )}
         >
             {isNothingSelected ? (
