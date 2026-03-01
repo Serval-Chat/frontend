@@ -10,6 +10,7 @@ interface UserProfilePictureIconProps {
     username: string;
     size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
     className?: string;
+    onClick?: (e: React.MouseEvent) => void;
 }
 
 const isAbsoluteUrl = (url: string): boolean => {
@@ -26,6 +27,7 @@ export const UserProfilePictureIcon: React.FC<UserProfilePictureIconProps> = ({
     username,
     size = 'md',
     className,
+    onClick,
 }) => {
     const isFilename = src && !isAbsoluteUrl(src) && !src.includes('/');
     const effectiveSrc = isFilename ? `/api/v1/profile/picture/${src}` : src;
@@ -53,6 +55,7 @@ export const UserProfilePictureIcon: React.FC<UserProfilePictureIconProps> = ({
                 sizeClasses[size],
                 className,
             )}
+            onClick={onClick}
         >
             {iconUrl ? (
                 <img

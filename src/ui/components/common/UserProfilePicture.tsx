@@ -34,9 +34,13 @@ export const UserProfilePicture: React.FC<UserProfilePictureProps> = ({
             onClick && 'cursor-pointer',
             className,
         )}
-        onClick={onClick}
     >
-        <UserProfilePictureIcon size={size} src={src} username={username} />
+        <UserProfilePictureIcon
+            size={size}
+            src={src}
+            username={username}
+            onClick={onClick}
+        />
         {!noIndicator && (
             <UserProfileStatusIndicator size={size} status={status} />
         )}
