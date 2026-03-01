@@ -24,7 +24,7 @@ export const Chat: React.FC = () => {
     }, [user, error]);
 
     return (
-        <Box className="h-screen w-full flex bg-[var(--chat-bg)] overflow-hidden">
+        <Box className="h-[100dvh] w-full flex bg-[var(--chat-bg)] overflow-hidden">
             <NavigationSync />
             <PrimaryNavBar />
             <SecondaryNavBar />
