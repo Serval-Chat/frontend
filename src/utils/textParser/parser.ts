@@ -37,6 +37,8 @@ export const ParserPresets = {
             ParserFeature.LATEX,
             ParserFeature.INLINE_LATEX,
             ParserFeature.THEMATIC_BREAK,
+            ParserFeature.UNDERLINE,
+            ParserFeature.STRIKETHROUGH,
         ],
     },
     BIO: {
@@ -65,6 +67,8 @@ export const ParserPresets = {
             ParserFeature.LATEX,
             ParserFeature.INLINE_LATEX,
             ParserFeature.THEMATIC_BREAK,
+            ParserFeature.UNDERLINE,
+            ParserFeature.STRIKETHROUGH,
         ],
     },
 } as const;
@@ -182,6 +186,40 @@ export class TextParser {
                         currentText = '';
                     }
                     nodes.push(formatNode);
+                    continue;
+                }
+            }
+
+            // __underline__
+            if (
+                char === '_' &&
+                this.options.features.includes(ParserFeature.UNDERLINE) &&
+                this.peek('__')
+            ) {
+                const underlineNode = this.tryParseUnderline();
+                if (underlineNode) {
+                    if (currentText) {
+                        nodes.push({ type: 'text', content: currentText });
+                        currentText = '';
+                    }
+                    nodes.push(underlineNode);
+                    continue;
+                }
+            }
+
+            // ~~strikethrough~~
+            if (
+                char === '~' &&
+                this.options.features.includes(ParserFeature.STRIKETHROUGH) &&
+                this.peek('~~')
+            ) {
+                const strikethroughNode = this.tryParseStrikethrough();
+                if (strikethroughNode) {
+                    if (currentText) {
+                        nodes.push({ type: 'text', content: currentText });
+                        currentText = '';
+                    }
+                    nodes.push(strikethroughNode);
                     continue;
                 }
             }
@@ -1296,6 +1334,62 @@ export class TextParser {
                 this.index++;
             }
             return { type: 'thematic_break' };
+        }
+
+        this.index = start;
+        return null;
+    }
+
+    private tryParseUnderline(): ASTNode | null {
+        const start = this.index;
+        this.index += 2; // skip '__'
+
+        let content = '';
+        let foundClosing = false;
+
+        while (this.index < this.text.length) {
+            if (this.peek('__')) {
+                foundClosing = true;
+                break;
+            }
+            content += this.text[this.index];
+            this.index++;
+        }
+
+        if (foundClosing && content) {
+            this.index += 2; // skip '__'
+            return {
+                type: 'underline',
+                content: this.parseContent(content),
+            } as ASTNode;
+        }
+
+        this.index = start;
+        return null;
+    }
+
+    private tryParseStrikethrough(): ASTNode | null {
+        const start = this.index;
+        this.index += 2; // skip '~~'
+
+        let content = '';
+        let foundClosing = false;
+
+        while (this.index < this.text.length) {
+            if (this.peek('~~')) {
+                foundClosing = true;
+                break;
+            }
+            content += this.text[this.index];
+            this.index++;
+        }
+
+        if (foundClosing && content) {
+            this.index += 2; // skip '~~'
+            return {
+                type: 'strikethrough',
+                content: this.parseContent(content),
+            } as ASTNode;
         }
 
         this.index = start;

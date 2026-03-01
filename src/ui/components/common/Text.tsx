@@ -73,6 +73,11 @@ const textVariants = cva('', {
             wider: 'tracking-wider',
             widest: 'tracking-widest',
         },
+        decoration: {
+            none: 'no-underline',
+            underline: 'underline',
+            strike: 'line-through',
+        },
     },
     defaultVariants: {
         variant: 'default',
@@ -81,6 +86,7 @@ const textVariants = cva('', {
         fontStyle: 'normal',
         transform: 'normal',
         align: 'left',
+        decoration: 'none',
         wrap: 'wrap',
         leading: 'normal',
         tracking: 'normal',
@@ -110,6 +116,7 @@ export const Text: React.FC<TextProps> = ({
     wrap,
     leading,
     tracking,
+    decoration,
     as: Tag = 'span',
     children,
     ...props
@@ -126,6 +133,7 @@ export const Text: React.FC<TextProps> = ({
                 wrap,
                 leading,
                 tracking,
+                decoration,
                 className,
             }),
         )}

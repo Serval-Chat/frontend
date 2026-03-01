@@ -27,6 +27,8 @@ export const ParserFeature = {
     LATEX: 'LATEX',
     INLINE_LATEX: 'INLINE_LATEX',
     THEMATIC_BREAK: 'THEMATIC_BREAK',
+    UNDERLINE: 'UNDERLINE',
+    STRIKETHROUGH: 'STRIKETHROUGH',
 } as const;
 
 export type ParserFeature = (typeof ParserFeature)[keyof typeof ParserFeature];
@@ -56,7 +58,9 @@ export type ASTNodeType =
     | 'table'
     | 'latex'
     | 'inline_latex'
-    | 'thematic_break';
+    | 'thematic_break'
+    | 'underline'
+    | 'strikethrough';
 
 export interface TextNode {
     type: 'text';
@@ -75,6 +79,16 @@ export interface ItalicNode {
 
 export interface BoldItalicNode {
     type: 'bold_italic';
+    content: string | ASTNode[];
+}
+
+export interface UnderlineNode {
+    type: 'underline';
+    content: string | ASTNode[];
+}
+
+export interface StrikethroughNode {
+    type: 'strikethrough';
     content: string | ASTNode[];
 }
 
@@ -215,4 +229,6 @@ export type ASTNode =
     | TableNode
     | LatexNode
     | InlineLatexNode
-    | ThematicBreakNode;
+    | ThematicBreakNode
+    | UnderlineNode
+    | StrikethroughNode;

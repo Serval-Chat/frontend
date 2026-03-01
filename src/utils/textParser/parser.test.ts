@@ -77,9 +77,7 @@ describe('TextParser', () => {
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
             { type: 'h1', content: 'Heading 1' },
-            { type: 'text', content: '\n' },
             { type: 'h2', content: 'Heading 2' },
-            { type: 'text', content: '\n' },
             { type: 'h3', content: 'Heading 3' },
         ]);
     });
@@ -700,5 +698,47 @@ describe('TextParser', () => {
         const text = 'Text ---';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([{ type: 'text', content: 'Text ---' }]);
+    });
+
+    it('should parse underline text', () => {
+        const text = 'Hello __underline__ world';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            { type: 'text', content: 'Hello ' },
+            { type: 'underline', content: 'underline' },
+            { type: 'text', content: ' world' },
+        ]);
+    });
+
+    it('should parse strikethrough text', () => {
+        const text = 'Hello ~~strikethrough~~ world';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            { type: 'text', content: 'Hello ' },
+            { type: 'strikethrough', content: 'strikethrough' },
+            { type: 'text', content: ' world' },
+        ]);
+    });
+
+    it('should parse complex nested formatting with underline and strikethrough', () => {
+        const text =
+            'This is **bold and ~~strikethrough and __underlined__~~**';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            { type: 'text', content: 'This is ' },
+            {
+                type: 'bold',
+                content: [
+                    { type: 'text', content: 'bold and ' },
+                    {
+                        type: 'strikethrough',
+                        content: [
+                            { type: 'text', content: 'strikethrough and ' },
+                            { type: 'underline', content: 'underlined' },
+                        ],
+                    },
+                ],
+            },
+        ]);
     });
 });

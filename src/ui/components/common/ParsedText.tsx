@@ -133,6 +133,46 @@ export const ParsedText: React.FC<ParsedTextProps> = ({
                             </Text>
                         );
 
+                    case 'underline':
+                        return (
+                            <Text
+                                decoration="underline"
+                                key={idx}
+                                size={size}
+                                wrap={wrap}
+                            >
+                                {typeof node.content === 'string' ? (
+                                    node.content
+                                ) : (
+                                    <ParsedText
+                                        nodes={node.content}
+                                        size={size}
+                                        wrap={wrap}
+                                    />
+                                )}
+                            </Text>
+                        );
+
+                    case 'strikethrough':
+                        return (
+                            <Text
+                                decoration="strike"
+                                key={idx}
+                                size={size}
+                                wrap={wrap}
+                            >
+                                {typeof node.content === 'string' ? (
+                                    node.content
+                                ) : (
+                                    <ParsedText
+                                        nodes={node.content}
+                                        size={size}
+                                        wrap={wrap}
+                                    />
+                                )}
+                            </Text>
+                        );
+
                     case 'emoji':
                         return (
                             <ParsedEmoji
