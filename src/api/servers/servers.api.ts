@@ -175,6 +175,29 @@ export const serversApi = {
         return response.data;
     },
 
+    getChannelPermissions: async (
+        serverId: string,
+        channelId: string,
+    ): Promise<{ permissions: Record<string, Record<string, boolean>> }> => {
+        const response = await apiClient.get<{
+            permissions: Record<string, Record<string, boolean>>;
+        }>(`/api/v1/servers/${serverId}/channels/${channelId}/permissions`);
+        return response.data;
+    },
+
+    updateChannelPermissions: async (
+        serverId: string,
+        channelId: string,
+        permissions: Record<string, Record<string, boolean>>,
+    ): Promise<{ permissions: Record<string, Record<string, boolean>> }> => {
+        const response = await apiClient.patch<{
+            permissions: Record<string, Record<string, boolean>>;
+        }>(`/api/v1/servers/${serverId}/channels/${channelId}/permissions`, {
+            permissions,
+        });
+        return response.data;
+    },
+
     createChannel: async (
         serverId: string,
         data: {
@@ -225,6 +248,29 @@ export const serversApi = {
         await apiClient.delete(
             `/api/v1/servers/${serverId}/categories/${categoryId}`,
         );
+    },
+
+    getCategoryPermissions: async (
+        serverId: string,
+        categoryId: string,
+    ): Promise<{ permissions: Record<string, Record<string, boolean>> }> => {
+        const response = await apiClient.get<{
+            permissions: Record<string, Record<string, boolean>>;
+        }>(`/api/v1/servers/${serverId}/categories/${categoryId}/permissions`);
+        return response.data;
+    },
+
+    updateCategoryPermissions: async (
+        serverId: string,
+        categoryId: string,
+        permissions: Record<string, Record<string, boolean>>,
+    ): Promise<{ permissions: Record<string, Record<string, boolean>> }> => {
+        const response = await apiClient.patch<{
+            permissions: Record<string, Record<string, boolean>>;
+        }>(`/api/v1/servers/${serverId}/categories/${categoryId}/permissions`, {
+            permissions,
+        });
+        return response.data;
     },
 
     updateServer: async (

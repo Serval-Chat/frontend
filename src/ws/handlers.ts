@@ -27,12 +27,28 @@ import {
 
 import { wsClient } from './client';
 import {
+    type ICategoriesReorderedEvent,
+    type ICategoryDeletedEvent,
+    type ICategoryEvent,
+    type IChannelDeletedEvent,
+    type IChannelEvent,
+    type IChannelsReorderedEvent,
     type IDisplayNameUpdatedEvent,
+    type IEmojiUpdatedEvent,
     type IMemberAddedEvent,
+    type IMemberRemovedEvent,
     type IMemberUpdatedEvent,
     type IMessageDm,
     type IMessageServer,
+    type IOwnershipTransferredEvent,
+    type IPermissionsUpdatedEvent,
     type IPresenceSyncEvent,
+    type IRoleDeletedEvent,
+    type IRoleEvent,
+    type IRolesReorderedEvent,
+    type IServerBannerUpdatedEvent,
+    type IServerIconUpdatedEvent,
+    type IServerUpdatedEvent,
     type IStatusUpdatedEvent,
     type IUserBannerUpdatedEvent,
     type IUserOfflineEvent,
@@ -170,6 +186,10 @@ export const setupGlobalWsHandlers = (
     });
 
     wsClient.on<IUserUpdatedEvent>(WsEvents.USER_UPDATED, (payload) => {
+        if (payload.senderId === currentUser?.id) {
+            void queryClient.invalidateQueries({ queryKey: ['me'] });
+            return;
+        }
         void queryClient.invalidateQueries({
             queryKey: ['user', payload.userId],
         });
@@ -295,27 +315,204 @@ export const setupGlobalWsHandlers = (
     });
 
     // Role events
-    wsClient.on<{ serverId: string }>(WsEvents.ROLE_CREATED, (payload) => {
+    wsClient.on<IRoleEvent>(WsEvents.ROLE_CREATED, (payload) => {
+        if (payload.senderId === currentUser?.id) return;
         void queryClient.invalidateQueries({
             queryKey: SERVERS_QUERY_KEYS.roles(payload.serverId),
         });
     });
 
-    wsClient.on<{ serverId: string }>(WsEvents.ROLE_UPDATED, (payload) => {
+    wsClient.on<IRoleEvent>(WsEvents.ROLE_UPDATED, (payload) => {
+        if (payload.senderId === currentUser?.id) return;
         void queryClient.invalidateQueries({
             queryKey: SERVERS_QUERY_KEYS.roles(payload.serverId),
         });
     });
 
-    wsClient.on<{ serverId: string }>(WsEvents.ROLE_DELETED, (payload) => {
+    wsClient.on<IRoleDeletedEvent>(WsEvents.ROLE_DELETED, (payload) => {
+        if (payload.senderId === currentUser?.id) return;
         void queryClient.invalidateQueries({
             queryKey: SERVERS_QUERY_KEYS.roles(payload.serverId),
         });
     });
 
-    wsClient.on<{ serverId: string }>(WsEvents.ROLES_REORDERED, (payload) => {
+    wsClient.on<IRolesReorderedEvent>(WsEvents.ROLES_REORDERED, (payload) => {
+        if (payload.senderId === currentUser?.id) return;
         void queryClient.invalidateQueries({
             queryKey: SERVERS_QUERY_KEYS.roles(payload.serverId),
+        });
+    });
+
+    // Channel events
+    wsClient.on<IChannelEvent>(WsEvents.CHANNEL_CREATED, (payload) => {
+        if (payload.senderId === currentUser?.id) return;
+        void queryClient.invalidateQueries({
+            queryKey: SERVERS_QUERY_KEYS.channels(payload.serverId),
+        });
+    });
+
+    wsClient.on<IChannelEvent>(WsEvents.CHANNEL_UPDATED, (payload) => {
+        if (payload.senderId === currentUser?.id) return;
+        void queryClient.invalidateQueries({
+            queryKey: SERVERS_QUERY_KEYS.channels(payload.serverId),
+        });
+    });
+
+    wsClient.on<IChannelDeletedEvent>(WsEvents.CHANNEL_DELETED, (payload) => {
+        if (payload.senderId === currentUser?.id) return;
+        void queryClient.invalidateQueries({
+            queryKey: SERVERS_QUERY_KEYS.channels(payload.serverId),
+        });
+    });
+
+    wsClient.on<IChannelsReorderedEvent>(
+        WsEvents.CHANNELS_REORDERED,
+        (payload) => {
+            if (payload.senderId === currentUser?.id) return;
+            void queryClient.invalidateQueries({
+                queryKey: SERVERS_QUERY_KEYS.channels(payload.serverId),
+            });
+        },
+    );
+
+    // Category events
+    wsClient.on<ICategoryEvent>(WsEvents.CATEGORY_CREATED, (payload) => {
+        if (payload.senderId === currentUser?.id) return;
+        void queryClient.invalidateQueries({
+            queryKey: SERVERS_QUERY_KEYS.categories(payload.serverId),
+        });
+    });
+
+    wsClient.on<ICategoryEvent>(WsEvents.CATEGORY_UPDATED, (payload) => {
+        if (payload.senderId === currentUser?.id) return;
+        void queryClient.invalidateQueries({
+            queryKey: SERVERS_QUERY_KEYS.categories(payload.serverId),
+        });
+    });
+
+    wsClient.on<ICategoryDeletedEvent>(WsEvents.CATEGORY_DELETED, (payload) => {
+        if (payload.senderId === currentUser?.id) return;
+        void queryClient.invalidateQueries({
+            queryKey: SERVERS_QUERY_KEYS.categories(payload.serverId),
+        });
+        void queryClient.invalidateQueries({
+            queryKey: SERVERS_QUERY_KEYS.channels(payload.serverId),
+        });
+    });
+
+    wsClient.on<ICategoriesReorderedEvent>(
+        WsEvents.CATEGORIES_REORDERED,
+        (payload) => {
+            if (payload.senderId === currentUser?.id) return;
+            void queryClient.invalidateQueries({
+                queryKey: SERVERS_QUERY_KEYS.categories(payload.serverId),
+            });
+        },
+    );
+
+    // Permission events
+    wsClient.on<IPermissionsUpdatedEvent>(
+        WsEvents.CHANNEL_PERMISSIONS_UPDATED,
+        (payload) => {
+            if (payload.senderId === currentUser?.id) return;
+            void queryClient.invalidateQueries({
+                queryKey: [
+                    'servers',
+                    'channel_permissions',
+                    payload.serverId,
+                    payload.channelId,
+                ],
+            });
+            void queryClient.invalidateQueries({
+                queryKey: SERVERS_QUERY_KEYS.channels(payload.serverId),
+            });
+        },
+    );
+
+    wsClient.on<IPermissionsUpdatedEvent>(
+        WsEvents.CATEGORY_PERMISSIONS_UPDATED,
+        (payload) => {
+            if (payload.senderId === currentUser?.id) return;
+            void queryClient.invalidateQueries({
+                queryKey: [
+                    'servers',
+                    'category_permissions',
+                    payload.serverId,
+                    payload.categoryId,
+                ],
+            });
+        },
+    );
+
+    // Server events
+    wsClient.on<IServerUpdatedEvent>(WsEvents.SERVER_UPDATED, (payload) => {
+        if (payload.senderId === currentUser?.id) return;
+        void queryClient.invalidateQueries({
+            queryKey: SERVERS_QUERY_KEYS.details(payload.serverId),
+        });
+        void queryClient.invalidateQueries({
+            queryKey: SERVERS_QUERY_KEYS.list,
+        });
+    });
+
+    wsClient.on<{ serverId: string; senderId?: string }>(
+        WsEvents.SERVER_DELETED,
+        (payload) => {
+            if (payload.senderId === currentUser?.id) return;
+            void queryClient.invalidateQueries({
+                queryKey: SERVERS_QUERY_KEYS.list,
+            });
+        },
+    );
+
+    wsClient.on<IServerIconUpdatedEvent>(
+        WsEvents.SERVER_ICON_UPDATED,
+        (payload) => {
+            if (payload.senderId === currentUser?.id) return;
+            void queryClient.invalidateQueries({
+                queryKey: SERVERS_QUERY_KEYS.details(payload.serverId),
+            });
+            void queryClient.invalidateQueries({
+                queryKey: SERVERS_QUERY_KEYS.list,
+            });
+        },
+    );
+
+    wsClient.on<IServerBannerUpdatedEvent>(
+        WsEvents.SERVER_BANNER_UPDATED,
+        (payload) => {
+            if (payload.senderId === currentUser?.id) return;
+            void queryClient.invalidateQueries({
+                queryKey: SERVERS_QUERY_KEYS.details(payload.serverId),
+            });
+        },
+    );
+
+    wsClient.on<IOwnershipTransferredEvent>(
+        WsEvents.OWNERSHIP_TRANSFERRED,
+        (payload) => {
+            void queryClient.invalidateQueries({
+                queryKey: SERVERS_QUERY_KEYS.details(payload.serverId),
+            });
+        },
+    );
+
+    wsClient.on<IMemberRemovedEvent>(WsEvents.MEMBER_REMOVED, (payload) => {
+        void queryClient.invalidateQueries({
+            queryKey: SERVERS_QUERY_KEYS.members(payload.serverId),
+        });
+        if (currentUser && payload.userId === currentUser.id) {
+            void queryClient.invalidateQueries({
+                queryKey: SERVERS_QUERY_KEYS.list,
+            });
+        }
+    });
+
+    // Emoji events
+    wsClient.on<IEmojiUpdatedEvent>(WsEvents.EMOJI_UPDATED, (payload) => {
+        if (payload.senderId === currentUser?.id) return;
+        void queryClient.invalidateQueries({
+            queryKey: SERVERS_QUERY_KEYS.emojis(payload.serverId),
         });
     });
 

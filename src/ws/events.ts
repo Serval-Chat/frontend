@@ -1,10 +1,19 @@
 import type {
+    Category,
+    Channel,
+    Role,
+    Server,
+    ServerBanner,
+} from '@/api/servers/servers.types';
+import type {
     Badge,
     UserSettings,
     UsernameFont,
     UsernameGlow,
     UsernameGradient,
 } from '@/api/users/users.types';
+
+export type { Category, Channel, Server, ServerBanner };
 
 /**
  * @description WebSocket envelope structure for all messages.
@@ -152,6 +161,7 @@ export interface IMemberUpdatedEvent {
         userId: string;
         roles: string[];
     };
+    senderId?: string;
 }
 
 /**
@@ -160,6 +170,153 @@ export interface IMemberUpdatedEvent {
 export interface IMemberAddedEvent {
     serverId: string;
     userId: string;
+    senderId?: string;
+}
+
+/**
+ * @description Member removed.
+ */
+export interface IMemberRemovedEvent {
+    serverId: string;
+    userId: string;
+    senderId?: string;
+}
+
+/**
+ * @description Ownership transferred.
+ */
+export interface IOwnershipTransferredEvent {
+    serverId: string;
+    oldOwnerId: string;
+    newOwnerId: string;
+    senderId?: string;
+}
+
+/**
+ * @description Server updated.
+ */
+export interface IServerUpdatedEvent {
+    serverId: string;
+    server: Server;
+    senderId?: string;
+}
+
+/**
+ * @description Channel created/updated.
+ */
+export interface IChannelEvent {
+    serverId: string;
+    channel: Channel;
+    senderId?: string;
+}
+
+/**
+ * @description Channels reordered.
+ */
+export interface IChannelsReorderedEvent {
+    serverId: string;
+    channelPositions: { channelId: string; position: number }[];
+    senderId?: string;
+}
+
+/**
+ * @description Channel deleted.
+ */
+export interface IChannelDeletedEvent {
+    serverId: string;
+    channelId: string;
+    senderId?: string;
+}
+
+/**
+ * @description Category created/updated.
+ */
+export interface ICategoryEvent {
+    serverId: string;
+    category: Category;
+    senderId?: string;
+}
+
+/**
+ * @description Categories reordered.
+ */
+export interface ICategoriesReorderedEvent {
+    serverId: string;
+    categoryPositions: { categoryId: string; position: number }[];
+    senderId?: string;
+}
+
+/**
+ * @description Category deleted.
+ */
+export interface ICategoryDeletedEvent {
+    serverId: string;
+    categoryId: string;
+    senderId?: string;
+}
+
+/**
+ * @description Permissions updated.
+ */
+export interface IPermissionsUpdatedEvent {
+    serverId: string;
+    channelId?: string;
+    categoryId?: string;
+    permissions: Record<string, Record<string, boolean>>;
+    senderId?: string;
+}
+
+/**
+ * @description Role created/updated.
+ */
+export interface IRoleEvent {
+    serverId: string;
+    role: Role;
+    senderId?: string;
+}
+
+/**
+ * @description Role deleted.
+ */
+export interface IRoleDeletedEvent {
+    serverId: string;
+    roleId: string;
+    senderId?: string;
+}
+
+/**
+ * @description Roles reordered.
+ */
+export interface IRolesReorderedEvent {
+    serverId: string;
+    rolePositions: { roleId: string; position: number }[];
+    senderId?: string;
+}
+
+/**
+ * @description Emoji updated.
+ */
+export interface IEmojiUpdatedEvent {
+    serverId: string;
+    senderId?: string;
+}
+
+/**
+ * @description Server icon updated.
+ */
+export interface IServerIconUpdatedEvent {
+    serverId: string;
+    icon: string;
+    senderId?: string;
+}
+
+/**
+ * @description Server banner updated.
+ */
+export interface IServerBannerUpdatedEvent {
+    serverId: string;
+    banner: ServerBanner;
+    senderId?: string;
 }
 
 /**
@@ -250,6 +407,8 @@ export const WsEvents = {
     ROLE_UPDATED: 'role_updated',
     ROLE_DELETED: 'role_deleted',
     ROLES_REORDERED: 'roles_reordered',
+    CHANNEL_PERMISSIONS_UPDATED: 'channel_permissions_updated',
+    CATEGORY_PERMISSIONS_UPDATED: 'category_permissions_updated',
     EMOJI_UPDATED: 'emoji_updated',
 } as const;
 
@@ -279,6 +438,7 @@ export interface IUserUpdatedEvent {
     badges?: Badge[] | string[];
     oldUsername?: string;
     newUsername?: string;
+    senderId?: string;
 }
 
 export interface IUserBannerUpdatedEvent {

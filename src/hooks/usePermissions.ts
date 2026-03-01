@@ -60,6 +60,7 @@ export const usePermissions = (
             pingRolesAndEveryone: false,
             manageReactions: false,
             addReactions: false,
+            viewChannels: false,
         };
 
         if (!serverId || !currentUser) return perms;
@@ -131,10 +132,11 @@ export const usePermissions = (
                     // Channel Overrides, higher position wins
                     let overrideValue: boolean | undefined;
                     sortedRolesAsc.forEach((role) => {
+                        const overrides = channel.permissions || {};
                         const roleOverrides =
-                            channel.permissions?.[role._id] ||
+                            overrides[role._id] ||
                             (role._id === everyoneRole?._id
-                                ? channel.permissions?.['everyone']
+                                ? overrides['everyone']
                                 : undefined);
 
                         if (
@@ -154,10 +156,11 @@ export const usePermissions = (
                     if (category) {
                         let catOverrideValue: boolean | undefined;
                         sortedRolesAsc.forEach((role) => {
+                            const overrides = category.permissions || {};
                             const roleOverrides =
-                                category.permissions?.[role._id] ||
+                                overrides[role._id] ||
                                 (role._id === everyoneRole?._id
-                                    ? category.permissions?.['everyone']
+                                    ? overrides['everyone']
                                     : undefined);
 
                             if (

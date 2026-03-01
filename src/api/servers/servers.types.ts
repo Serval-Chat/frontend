@@ -67,6 +67,7 @@ export interface RolePermissions {
     pingRolesAndEveryone?: boolean;
     manageReactions: boolean;
     addReactions: boolean;
+    viewChannels: boolean;
 }
 
 export interface Role {

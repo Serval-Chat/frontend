@@ -257,6 +257,113 @@ export const useUpdateServerBanner = (
     });
 };
 
+export const useServerRoles = (
+    serverId: string,
+): UseQueryResult<Role[], Error> =>
+    useQuery({
+        queryKey: SERVERS_QUERY_KEYS.roles(serverId),
+        queryFn: () => serversApi.getRoles(serverId),
+        enabled: !!serverId,
+    });
+
+export const useChannelPermissions = (
+    serverId: string,
+    channelId: string,
+    options?: { enabled?: boolean },
+): UseQueryResult<Record<string, Record<string, boolean>>, Error> =>
+    useQuery({
+        queryKey: ['servers', 'channel_permissions', serverId, channelId],
+        queryFn: () => serversApi.getChannelPermissions(serverId, channelId),
+        enabled: !!serverId && !!channelId && (options?.enabled ?? true),
+        select: (data) => data.permissions,
+    });
+
+export const useUpdateChannelPermissions = (
+    serverId: string,
+    channelId: string,
+): UseMutationResult<
+    { permissions: Record<string, Record<string, boolean>> },
+    Error,
+    Record<string, Record<string, boolean>>
+> => {
+    const queryClient = useQueryClient();
+    const { showToast } = useToast();
+    return useMutation({
+        mutationFn: (permissions: Record<string, Record<string, boolean>>) =>
+            serversApi.updateChannelPermissions(
+                serverId,
+                channelId,
+                permissions,
+            ),
+        onSuccess: () => {
+            void queryClient.invalidateQueries({
+                queryKey: [
+                    'servers',
+                    'channel_permissions',
+                    serverId,
+                    channelId,
+                ],
+            });
+            showToast('Channel permissions updated', 'success');
+        },
+        onError: (error) => {
+            showToast(
+                error.message || 'Failed to update channel permissions',
+                'error',
+            );
+        },
+    });
+};
+
+export const useCategoryPermissions = (
+    serverId: string,
+    categoryId: string,
+    options?: { enabled?: boolean },
+): UseQueryResult<Record<string, Record<string, boolean>>, Error> =>
+    useQuery({
+        queryKey: ['servers', 'category_permissions', serverId, categoryId],
+        queryFn: () => serversApi.getCategoryPermissions(serverId, categoryId),
+        enabled: !!serverId && !!categoryId && (options?.enabled ?? true),
+        select: (data) => data.permissions,
+    });
+
+export const useUpdateCategoryPermissions = (
+    serverId: string,
+    categoryId: string,
+): UseMutationResult<
+    { permissions: Record<string, Record<string, boolean>> },
+    Error,
+    Record<string, Record<string, boolean>>
+> => {
+    const queryClient = useQueryClient();
+    const { showToast } = useToast();
+    return useMutation({
+        mutationFn: (permissions: Record<string, Record<string, boolean>>) =>
+            serversApi.updateCategoryPermissions(
+                serverId,
+                categoryId,
+                permissions,
+            ),
+        onSuccess: () => {
+            void queryClient.invalidateQueries({
+                queryKey: [
+                    'servers',
+                    'category_permissions',
+                    serverId,
+                    categoryId,
+                ],
+            });
+            showToast('Category permissions updated', 'success');
+        },
+        onError: (error) => {
+            showToast(
+                error.message || 'Failed to update category permissions',
+                'error',
+            );
+        },
+    });
+};
+
 export const useUpdateChannel = (
     serverId: string,
     channelId: string,
@@ -381,16 +488,18 @@ export const useCreateRole = (
 
 export const useUpdateRole = (
     serverId: string,
-    roleId: string,
 ): UseMutationResult<
     Role,
     Error,
-    Partial<Role> & { permissions?: RolePermissions }
+    {
+        roleId: string;
+        updates: Partial<Role> & { permissions?: RolePermissions };
+    }
 > => {
     const queryClient = useQueryClient();
     const { showToast } = useToast();
     return useMutation({
-        mutationFn: (updates) =>
+        mutationFn: ({ roleId, updates }) =>
             serversApi.updateRole(serverId, roleId, updates),
         onSuccess: () => {
             void queryClient.invalidateQueries({

@@ -661,6 +661,14 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
                                 }
                             />
                             <PermissionToggle
+                                description="Allows member to view channels."
+                                label="View Channels"
+                                value={permissions.viewChannels !== false}
+                                onChange={(val) =>
+                                    updatePermission('viewChannels', val)
+                                }
+                            />
+                            <PermissionToggle
                                 description="Allows member to send messages in text channels."
                                 label="Send Messages"
                                 value={permissions.sendMessages !== false}

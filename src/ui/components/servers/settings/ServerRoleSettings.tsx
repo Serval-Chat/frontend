@@ -29,7 +29,7 @@ export const ServerRoleSettings: React.FC<ServerRoleSettingsProps> = ({
     const [selectedRoleId, setSelectedRoleId] = useState<string | null>(null);
 
     const createRoleMutation = useCreateRole(serverId);
-    const updateRoleMutation = useUpdateRole(serverId, selectedRoleId || '');
+    const updateRoleMutation = useUpdateRole(serverId);
     const deleteRoleMutation = useDeleteRole(serverId);
     const reorderRolesMutation = useReorderRoles(serverId);
 
@@ -70,7 +70,7 @@ export const ServerRoleSettings: React.FC<ServerRoleSettingsProps> = ({
         updates: Partial<Role> & { permissions?: RolePermissions },
     ): void => {
         if (!effectiveSelectedId) return;
-        updateRoleMutation.mutate(updates);
+        updateRoleMutation.mutate({ roleId: effectiveSelectedId, updates });
     };
 
     const handleReorderRoles = (newRoles: Role[]): void => {

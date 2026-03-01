@@ -69,7 +69,7 @@ export const ServerSettingsSidebar: React.FC<ServerSettingsSidebarProps> = ({
     );
 
     return (
-        <div className="w-[240px] bg-[var(--secondary-bg)] border-r border-[var(--color-border-subtle)] p-4 overflow-y-auto shrink-0 flex flex-col gap-4">
+        <div className="w-[240px] bg-[var(--color-bg-secondary)] border-r border-[var(--color-border-subtle)] p-4 overflow-y-auto shrink-0 flex flex-col gap-4">
             <div>
                 <Text
                     className="px-3 mb-2 text-[var(--color-muted-foreground)] uppercase tracking-wider"
