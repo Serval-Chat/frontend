@@ -73,12 +73,22 @@ export const Modal: React.FC<ModalProps> = ({
                         className={cn(
                             'relative w-full bg-[var(--color-background)] rounded-xl shadow-2xl border border-[var(--color-border-subtle)] overflow-hidden flex flex-col',
                             fullScreen
-                                ? 'max-w-none w-screen h-[100dvh] max-h-none rounded-none border-none'
+                                ? 'max-w-none w-screen max-h-none rounded-none border-none'
                                 : 'max-w-2xl max-h-[90vh]',
                             className,
                         )}
                         exit={{ opacity: 0, scale: 0.95, y: 20 }}
                         initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                        style={
+                            fullScreen
+                                ? {
+                                      height: 'calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom))',
+                                      marginTop: 'env(safe-area-inset-top)',
+                                      marginBottom:
+                                          'env(safe-area-inset-bottom)',
+                                  }
+                                : undefined
+                        }
                         transition={{
                             type: 'spring',
                             damping: 25,

@@ -30,6 +30,7 @@ export const SecondaryNavBar: React.FC = () => {
             as="aside"
             className={cn(
                 'h-full shrink-0 flex flex-col no-scrollbar bg-[var(--secondary-bg)] relative',
+                'pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]',
                 navMode === 'friends' &&
                     isNothingSelected &&
                     mobileHomeTab === 'friends' &&

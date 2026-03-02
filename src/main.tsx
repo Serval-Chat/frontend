@@ -2,7 +2,7 @@ import { StrictMode } from 'react';
 
 import 'katex/dist/katex.min.css';
 import { createRoot } from 'react-dom/client';
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 
 import { Admin } from '@/pages/Admin';
 import { App } from '@/pages/App';
@@ -13,6 +13,7 @@ import { NotFound } from '@/pages/NotFound';
 import { Register } from '@/pages/Register';
 import { ResetPassword } from '@/pages/ResetPassword';
 import { Showoff } from '@/pages/Showoff';
+import { TauriGateway } from '@/pages/TauriGateway';
 import { QueryProvider } from '@/providers/QueryProvider';
 import { StoreProvider } from '@/providers/StoreProvider';
 import { ThemeProvider } from '@/providers/ThemeProvider';
@@ -20,6 +21,13 @@ import '@/styles/index.css';
 import { ToastProvider } from '@/ui/components/common/Toast';
 import { AdminRoute } from '@/ui/components/layout/AdminRoute';
 import { AuthenticatedLayout } from '@/ui/components/layout/AuthenticatedLayout';
+
+const isTauri = () => '__TAURI__' in window;
+
+const WebOnly = ({ children }: { children: React.ReactNode }) => {
+    if (isTauri()) return <Navigate replace to="/chat/@me" />;
+    return <>{children}</>;
+};
 
 createRoot(document.getElementById('root')!).render(
     <StrictMode>
@@ -29,18 +37,41 @@ createRoot(document.getElementById('root')!).render(
                     <ToastProvider>
                         <BrowserRouter>
                             <Routes>
-                                <Route element={<App />} path="/" />
+                                <Route
+                                    element={
+                                        <WebOnly>
+                                            <App />
+                                        </WebOnly>
+                                    }
+                                    path="/"
+                                />
                                 <Route element={<Login />} path="/login" />
                                 <Route
-                                    element={<ForgotPassword />}
+                                    element={<TauriGateway />}
+                                    path="/gateway"
+                                />
+                                <Route
+                                    element={
+                                        <WebOnly>
+                                            <ForgotPassword />
+                                        </WebOnly>
+                                    }
                                     path="/forgot-password"
                                 />
                                 <Route
-                                    element={<ResetPassword />}
+                                    element={
+                                        <WebOnly>
+                                            <ResetPassword />
+                                        </WebOnly>
+                                    }
                                     path="/reset-password"
                                 />
                                 <Route
-                                    element={<Register />}
+                                    element={
+                                        <WebOnly>
+                                            <Register />
+                                        </WebOnly>
+                                    }
                                     path="/register"
                                 />
                                 <Route element={<AuthenticatedLayout />}>
@@ -49,7 +80,7 @@ createRoot(document.getElementById('root')!).render(
                                         <Route element={<Chat />} path="@me" />
                                         <Route
                                             element={<Chat />}
-                                            path="@server/:serverId" // note to myself: use this as some sort of onboarding idk. selectable roles? ill find something cool :3 it would come in together with "<HomeIcon> Home" button on top to open this path too.
+                                            path="@server/:serverId"
                                         />
                                         <Route
                                             element={<Chat />}
@@ -82,12 +113,23 @@ createRoot(document.getElementById('root')!).render(
                                         </Route>
                                     </Route>
                                     <Route
-                                        element={<Showoff />}
+                                        element={
+                                            <WebOnly>
+                                                <Showoff />
+                                            </WebOnly>
+                                        }
                                         path="/showoff"
                                     />
                                 </Route>
                                 <Route element={<AdminRoute />}>
-                                    <Route element={<Admin />} path="/admin" />
+                                    <Route
+                                        element={
+                                            <WebOnly>
+                                                <Admin />
+                                            </WebOnly>
+                                        }
+                                        path="/admin"
+                                    />
                                 </Route>
                                 <Route element={<NotFound />} path="*" />
                             </Routes>

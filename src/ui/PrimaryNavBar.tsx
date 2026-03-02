@@ -57,7 +57,8 @@ export const PrimaryNavBar: React.FC = () => {
         <Box
             as="nav"
             className={cn(
-                'h-full flex flex-col items-center py-3 gap-3',
+                'h-full flex flex-col items-center gap-3',
+                'pt-[calc(0.75rem+env(safe-area-inset-top))] pb-[calc(0.75rem+env(safe-area-inset-bottom))]',
                 'bg-[--color-background]',
                 'w-[72px] shrink-0',
                 isChatActive && 'max-md:hidden',

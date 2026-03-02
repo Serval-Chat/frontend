@@ -44,6 +44,7 @@ export const TertiarySidebar: React.FC = () => {
             as="aside"
             className={cn(
                 'h-full shrink-0 overflow-y-auto overflow-x-hidden custom-scrollbar bg-[var(--tertiary-bg)] relative',
+                'pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]',
                 showMobileMemberList
                     ? 'max-md:fixed max-md:inset-y-0 max-md:right-0 max-md:z-50 max-md:w-64 max-md:shadow-2xl'
                     : 'max-md:hidden',

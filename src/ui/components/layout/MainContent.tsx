@@ -29,6 +29,7 @@ export const MainContent: React.FC = () => {
         <main
             className={cn(
                 'flex-1 flex flex-col relative z-content overflow-hidden',
+                'pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]',
                 navMode === 'friends' &&
                     isNothingSelected &&
                     mobileHomeTab === 'friends' &&
