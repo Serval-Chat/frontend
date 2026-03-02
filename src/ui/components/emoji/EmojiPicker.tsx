@@ -1,6 +1,7 @@
 import React, { useCallback } from 'react';
 
 import { motion } from 'framer-motion';
+import { useMeasure } from 'react-use';
 import { AutoSizer } from 'react-virtualized-auto-sizer';
 import { VariableSizeList as List } from 'react-window';
 
@@ -37,7 +38,6 @@ interface EmojiPickerProps {
     className?: string;
 }
 
-const COLUMN_COUNT = 8;
 const HEADER_HEIGHT = 32;
 const ROW_HEIGHT = 40;
 
@@ -64,8 +64,16 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
     className,
 }) => {
     const listRef = React.useRef<List>(null);
+    const [listContainerRef, { width: listWidth }] =
+        useMeasure<HTMLDivElement>();
     const [activeCategoryId, setActiveCategoryId] = React.useState<string>('');
     const [isScrollingTo, setIsScrollingTo] = React.useState(false);
+
+    // Compute dynamic column count based on width. Min 8 columns, scale up if wider.
+    const columnCount = React.useMemo(() => {
+        if (!listWidth) return 8; // Default to 8 until measured
+        return Math.max(1, Math.floor((listWidth - 8) / 40));
+    }, [listWidth]);
 
     const displayCategories = React.useMemo(
         () => [
@@ -97,10 +105,10 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
                 isCustom: true,
             });
             const emojiCount = cat.emojis.length;
-            for (let i = 0; i < emojiCount; i += COLUMN_COUNT) {
+            for (let i = 0; i < emojiCount; i += columnCount) {
                 rows.push({
                     type: 'row',
-                    emojis: cat.emojis.slice(i, i + COLUMN_COUNT),
+                    emojis: cat.emojis.slice(i, i + columnCount),
                     isCustom: true,
                     id: cat.id,
                 });
@@ -118,10 +126,10 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
             });
             const emojis = groupedEmojis[catId] || [];
             const emojiCount = emojis.length;
-            for (let i = 0; i < emojiCount; i += COLUMN_COUNT) {
+            for (let i = 0; i < emojiCount; i += columnCount) {
                 rows.push({
                     type: 'row',
-                    emojis: emojis.slice(i, i + COLUMN_COUNT),
+                    emojis: emojis.slice(i, i + columnCount),
                     isCustom: false,
                     id: catId,
                 });
@@ -129,7 +137,7 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
         });
 
         return rows;
-    }, [customCategories]);
+    }, [customCategories, columnCount]);
 
     // Initial active category
     React.useEffect(() => {
@@ -268,7 +276,7 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
                             };
                             return (
                                 <Button
-                                    className="w-[12.5%] aspect-square p-1.5 hover:bg-white/5 rounded transition-transform active:scale-90 flex items-center justify-center group/emoji border-none shadow-none"
+                                    className="w-10 h-10 p-1.5 hover:bg-white/5 rounded transition-transform active:scale-90 flex items-center justify-center group/emoji border-none shadow-none"
                                     key={customEmoji.id}
                                     title={customEmoji.name}
                                     variant="ghost"
@@ -289,7 +297,7 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
                             const standardEmoji = emoji as EmojiData;
                             return (
                                 <Button
-                                    className="w-[12.5%] aspect-square p-1.5 hover:bg-white/5 rounded transition-transform active:scale-90 flex items-center justify-center group/emoji border-none shadow-none"
+                                    className="w-10 h-10 p-1.5 hover:bg-white/5 rounded transition-transform active:scale-90 flex items-center justify-center group/emoji border-none shadow-none"
                                     key={standardEmoji.unified}
                                     title={standardEmoji.short_name}
                                     variant="ghost"
@@ -397,7 +405,10 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
                         )?.name || 'Emojis'}
                     </Text>
                 </Box>
-                <div className="flex-1 w-full h-full relative">
+                <div
+                    className="flex-1 w-full h-full relative"
+                    ref={listContainerRef}
+                >
                     <AutoSizer
                         renderProp={({ height, width }) => {
                             if (!height || !width) return null;

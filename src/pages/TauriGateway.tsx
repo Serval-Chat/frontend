@@ -1,9 +1,11 @@
+import type React from 'react';
+
 import { Navigate } from 'react-router-dom';
 
 import { useMe } from '@/api/users/users.queries';
 import { LoadingSpinner } from '@/ui/components/common/LoadingSpinner';
 
-export const TauriGateway = () => {
+export const TauriGateway = (): React.ReactElement => {
     const { data: user, isLoading } = useMe();
 
     if (isLoading) {

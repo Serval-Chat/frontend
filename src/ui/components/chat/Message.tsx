@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { Copy, CornerUpLeft, Edit, SmilePlus, Trash2 } from 'lucide-react';
+import { createPortal } from 'react-dom';
 import { useClickAway, useEvent } from 'react-use';
 
 import { useDeleteMessage } from '@/api/chat/chat.queries';
@@ -11,10 +12,12 @@ import { useMe } from '@/api/users/users.queries';
 import type { User } from '@/api/users/users.types';
 import { useCustomEmojis } from '@/hooks/useCustomEmojis';
 import { usePermissions } from '@/hooks/usePermissions';
+import { useSmartPosition } from '@/hooks/useSmartPosition';
 import type { ProcessedChatMessage } from '@/types/chat.ui';
 import { Button } from '@/ui/components/common/Button';
 import { ContextMenu } from '@/ui/components/common/ContextMenu';
 import type { ContextMenuItem } from '@/ui/components/common/ContextMenu';
+import { Modal } from '@/ui/components/common/Modal';
 import { Text } from '@/ui/components/common/Text';
 import { UserProfilePicture } from '@/ui/components/common/UserProfilePicture';
 import { EmojiPicker } from '@/ui/components/emoji/EmojiPicker';
@@ -58,6 +61,7 @@ export const Message: React.FC<MessageProps> = ({
     const [isEditing, setIsEditing] = React.useState(false);
     const avatarRef = React.useRef<HTMLDivElement>(null);
     const pickerRef = React.useRef<HTMLDivElement>(null);
+    const reactRef = React.useRef<HTMLButtonElement>(null);
     const { data: me } = useMe();
     const { data: members } = useMembers(
         message.serverId === 'preview' ? null : (message.serverId ?? null),
@@ -197,6 +201,12 @@ export const Message: React.FC<MessageProps> = ({
             });
         }
 
+        items.splice(onReplyToMessage ? 1 : 0, 0, {
+            label: 'Add Reaction',
+            icon: SmilePlus,
+            onClick: () => setShowPicker(true),
+        });
+
         if (canEdit) {
             items.push({
                 label: 'Edit Message',
@@ -220,10 +230,22 @@ export const Message: React.FC<MessageProps> = ({
         message,
         canEdit,
         canDelete,
+        onReplyToMessage,
         handleEdit,
         handleDelete,
-        onReplyToMessage,
     ]);
+
+    const isMobile =
+        typeof window !== 'undefined' &&
+        window.matchMedia('(pointer: coarse)').matches;
+
+    const pickerCoords = useSmartPosition({
+        isOpen: showPicker && !isMobile,
+        elementRef: pickerRef,
+        triggerRef: reactRef,
+        padding: 16,
+        offset: 8,
+    });
 
     return (
         <Box
@@ -315,8 +337,13 @@ export const Message: React.FC<MessageProps> = ({
                 </Box>
 
                 {/* Hover Actions */}
-                <Box className="absolute right-4 top-0 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all z-[var(--z-index-effect-md)]">
-                    <Box className="flex items-center bg-bg-secondary border border-white/5 rounded shadow-xl px-1 py-1 gap-1">
+                <Box
+                    className={cn(
+                        'absolute right-4 top-0 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all z-[var(--z-index-effect-md)]',
+                        showPicker && 'opacity-100',
+                    )}
+                >
+                    <Box className="flex items-center bg-bg-secondary border border-white/5 rounded shadow-xl px-1 py-1 gap-1 max-md:hidden">
                         {onReplyToMessage && (
                             <Button
                                 className="p-1.5 hover:bg-white/5 rounded transition-colors text-muted-foreground hover:text-foreground h-8 w-8"
@@ -333,6 +360,7 @@ export const Message: React.FC<MessageProps> = ({
                                 'p-1.5 hover:bg-white/5 rounded transition-colors text-muted-foreground hover:text-foreground h-8 w-8',
                                 showPicker && 'bg-white/10 text-foreground',
                             )}
+                            ref={reactRef}
                             size="sm"
                             title="Add Reaction"
                             variant="ghost"
@@ -366,18 +394,46 @@ export const Message: React.FC<MessageProps> = ({
                         )}
                     </Box>
 
-                    {showPicker && (
-                        <Box
-                            className="absolute bottom-full right-0 pb-2 z-[var(--z-index-popover)]"
-                            ref={pickerRef}
-                        >
-                            <EmojiPicker
-                                customCategories={customCategories}
-                                onCustomEmojiSelect={handleCustomEmojiSelect}
-                                onEmojiSelect={handleEmojiSelect}
-                            />
-                        </Box>
-                    )}
+                    {showPicker &&
+                        (isMobile ? (
+                            <Modal
+                                fullScreen
+                                noPadding
+                                isOpen={showPicker}
+                                title="Add Reaction"
+                                onClose={() => setShowPicker(false)}
+                            >
+                                <EmojiPicker
+                                    className="w-full h-full border-none shadow-none rounded-none !max-w-none !max-h-none"
+                                    customCategories={customCategories}
+                                    onCustomEmojiSelect={
+                                        handleCustomEmojiSelect
+                                    }
+                                    onEmojiSelect={handleEmojiSelect}
+                                />
+                            </Modal>
+                        ) : (
+                            createPortal(
+                                <Box
+                                    className="z-[var(--z-index-popover)]"
+                                    ref={pickerRef}
+                                    style={{
+                                        position: 'fixed',
+                                        left: pickerCoords.x,
+                                        top: pickerCoords.y,
+                                    }}
+                                >
+                                    <EmojiPicker
+                                        customCategories={customCategories}
+                                        onCustomEmojiSelect={
+                                            handleCustomEmojiSelect
+                                        }
+                                        onEmojiSelect={handleEmojiSelect}
+                                    />
+                                </Box>,
+                                document.body,
+                            )
+                        ))}
                 </Box>
 
                 <ProfilePopup

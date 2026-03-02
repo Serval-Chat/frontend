@@ -22,11 +22,15 @@ import { ToastProvider } from '@/ui/components/common/Toast';
 import { AdminRoute } from '@/ui/components/layout/AdminRoute';
 import { AuthenticatedLayout } from '@/ui/components/layout/AuthenticatedLayout';
 
-const isTauri = () => '__TAURI__' in window;
+const isTauri = (): boolean => '__TAURI__' in window;
 
-const WebOnly = ({ children }: { children: React.ReactNode }) => {
+export const WebOnly = ({
+    children,
+}: {
+    children: React.ReactNode;
+}): React.ReactNode => {
     if (isTauri()) return <Navigate replace to="/chat/@me" />;
-    return <>{children}</>;
+    return children;
 };
 
 createRoot(document.getElementById('root')!).render(

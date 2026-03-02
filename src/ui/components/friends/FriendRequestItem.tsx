@@ -45,7 +45,7 @@ export const FriendRequestItem: React.FC<FriendRequestItemProps> = ({
                     </MutedText>
                 </Box>
             </Box>
-            <Box className="flex items-center gap-2 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
+            <Box className="flex items-center gap-2 transition-opacity">
                 <Button
                     className="h-8 w-8 p-0 rounded-full text-green-500 hover:text-green-600 hover:bg-green-500/10 border-transparent hover:border-green-500/50"
                     disabled={isRejecting}

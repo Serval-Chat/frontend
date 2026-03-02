@@ -10,11 +10,10 @@ import jsxA11y from 'eslint-plugin-jsx-a11y';
 import query from '@tanstack/eslint-plugin-query';
 
 export default tseslint.config(
-  { ignores: ['dist'] },
+  { ignores: ['dist', 'src-tauri/**/*', 'vitest.config.ts', 'vite.config.ts'] },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
     files: ['**/*.{ts,tsx}'],
-    ignores: ['vite.config.ts', 'vitest.config.ts'],
     languageOptions: {
       ecmaVersion: 2020,
       globals: globals.browser,
