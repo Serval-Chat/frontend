@@ -5,6 +5,7 @@ import {
     useQuery,
     useQueryClient,
 } from '@tanstack/react-query';
+import type { AxiosError } from 'axios';
 
 import { invitesApi } from './invites.api';
 import type {
@@ -73,7 +74,7 @@ export const useDeleteInvite = (
 
 export const useJoinServer = (): UseMutationResult<
     { serverId: string },
-    Error,
+    AxiosError,
     string
 > => {
     const queryClient = useQueryClient();

@@ -8,6 +8,7 @@ import { Admin } from '@/pages/Admin';
 import { App } from '@/pages/App';
 import { Chat } from '@/pages/Chat';
 import { ForgotPassword } from '@/pages/ForgotPassword';
+import { Invite } from '@/pages/Invite';
 import { Login } from '@/pages/Login';
 import { NotFound } from '@/pages/NotFound';
 import { Register } from '@/pages/Register';
@@ -50,6 +51,10 @@ createRoot(document.getElementById('root')!).render(
                                     path="/"
                                 />
                                 <Route element={<Login />} path="/login" />
+                                <Route
+                                    element={<Invite />}
+                                    path="/invite/:inviteId"
+                                />
                                 <Route
                                     element={<TauriGateway />}
                                     path="/gateway"
