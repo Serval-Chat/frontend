@@ -17,7 +17,12 @@ export const TopNavBar: React.FC = () => (
                 </span>
             </Link>
 
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 md:gap-4">
+                <Link className="hover:no-underline" to="/downloads">
+                    <Button size="sm" variant="ghost">
+                        Download
+                    </Button>
+                </Link>
                 <Link className="hover:no-underline" to="/login">
                     <Button size="sm" variant="ghost">
                         Login

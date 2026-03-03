@@ -56,6 +56,9 @@ export const App = (): ReactNode => (
                                 No account? Click me to register.
                             </Button>
                         </Link>
+                        <Link to="/downloads">
+                            <Button variant="normal">Download App</Button>
+                        </Link>
                     </div>
                 </div>
             </section>
