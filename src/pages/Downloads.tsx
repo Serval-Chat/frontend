@@ -30,7 +30,7 @@ export const Downloads = (): ReactNode => (
                     size="lg"
                     variant="muted"
                 >
-                    Experience seamless communication on any device.
+                    Experience the SERVALLLL
                 </Text>
             </section>
 
