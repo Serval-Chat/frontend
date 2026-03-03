@@ -19,19 +19,13 @@ export const TopNavBar: React.FC = () => (
 
             <div className="flex items-center gap-2 md:gap-4">
                 <Link className="hover:no-underline" to="/downloads">
-                    <Button size="sm" variant="ghost">
-                        Download
-                    </Button>
+                    <Button variant="ghost">Download</Button>
                 </Link>
                 <Link className="hover:no-underline" to="/login">
-                    <Button size="sm" variant="ghost">
-                        Login
-                    </Button>
+                    <Button variant="ghost">Login</Button>
                 </Link>
                 <Link className="hover:no-underline" to="/register">
-                    <Button size="sm" variant="primary">
-                        Register
-                    </Button>
+                    <Button variant="primary">Register</Button>
                 </Link>
             </div>
         </div>
