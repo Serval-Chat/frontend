@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-import { X } from 'lucide-react';
+import { ChevronLeft, X } from 'lucide-react';
 
 import { IconButton } from '@/ui/components/common/IconButton';
 import { Modal } from '@/ui/components/common/Modal';
@@ -26,6 +26,12 @@ export const ServerSettingsModal: React.FC<ServerSettingsModalProps> = ({
     serverId,
 }) => {
     const [activeSection, setActiveSection] = useState<string>('overview');
+    const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(true);
+
+    const handleSetSection = (sectionId: string): void => {
+        setIsMobileSidebarOpen(false);
+        setActiveSection(sectionId);
+    };
 
     return (
         <Modal
@@ -38,18 +44,47 @@ export const ServerSettingsModal: React.FC<ServerSettingsModalProps> = ({
         >
             <div className="flex h-full w-full relative">
                 {/* Navigation Sidebar */}
-                <ServerSettingsSidebar
-                    activeSection={activeSection}
-                    serverId={serverId}
-                    setActiveSection={setActiveSection}
-                />
+                <div
+                    className={cn(
+                        'h-full shrink-0',
+                        isMobileSidebarOpen
+                            ? 'w-full md:w-auto'
+                            : 'hidden md:block',
+                    )}
+                >
+                    <ServerSettingsSidebar
+                        activeSection={activeSection}
+                        serverId={serverId}
+                        setActiveSection={handleSetSection}
+                    />
+                </div>
                 {/* Content Area */}
-                <div className="flex-1 bg-[var(--color-background)] flex flex-col h-full overflow-hidden relative">
+                <div
+                    className={cn(
+                        'flex-1 bg-[var(--color-background)] flex flex-col h-full overflow-hidden relative',
+                        isMobileSidebarOpen ? 'hidden md:flex' : 'flex',
+                    )}
+                >
+                    {/* Mobile Back Header */}
+                    {!isMobileSidebarOpen && (
+                        <div className="md:hidden flex items-center sticky top-0 z-40 bg-[var(--color-background)] border-b border-[var(--color-border-subtle)] px-4 py-3 shrink-0">
+                            <button
+                                className="flex items-center gap-1 text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] font-medium transition-colors"
+                                onClick={() => setIsMobileSidebarOpen(true)}
+                            >
+                                <ChevronLeft size={20} />
+                                Back
+                            </button>
+                        </div>
+                    )}
+
                     {/* Close Button Top Right */}
                     <div
                         className={cn(
-                            'absolute top-8 z-50 transition-all duration-300',
-                            activeSection === 'roles' ? 'right-80' : 'right-12',
+                            'absolute top-6 md:top-8 z-50 transition-all duration-300',
+                            activeSection === 'roles'
+                                ? 'right-6 md:right-80'
+                                : 'right-6 md:right-12',
                         )}
                     >
                         <div className="flex flex-col items-center gap-2">

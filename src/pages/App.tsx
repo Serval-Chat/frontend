@@ -89,7 +89,7 @@ export const App = (): ReactNode => (
             </section>
         </main>
 
-        <footer className="border-t border-border-subtle py-8 text-center text-sm text-muted-foreground">
+        <footer className="border-t border-border-subtle mx-8 py-8 text-center text-sm text-muted-foreground">
             <Text as="p">
                 &copy; {new Date().getFullYear()} Serchat. Made with love for
                 everyone.

@@ -46,7 +46,7 @@ export const RoleNavbar: React.FC<RoleNavbarProps> = ({
     };
 
     return (
-        <div className="w-64 bg-[var(--color-bg-subtle)] border-l border-[var(--color-border-subtle)] flex flex-col h-full overflow-hidden shrink-0">
+        <div className="w-full md:w-64 bg-[var(--color-bg-subtle)] border-l border-[var(--color-border-subtle)] flex flex-col h-full overflow-hidden shrink-0">
             <div className="p-3 border-b border-[var(--color-border-subtle)] flex items-center justify-between">
                 <Text size="sm" weight="bold">
                     Roles

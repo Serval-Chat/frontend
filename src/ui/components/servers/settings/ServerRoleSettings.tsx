@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-import { Shield } from 'lucide-react';
+import { ChevronLeft, Shield } from 'lucide-react';
 
 import {
     useCreateRole,
@@ -13,6 +13,7 @@ import {
 import type { Role, RolePermissions } from '@/api/servers/servers.types';
 import { LoadingSpinner } from '@/ui/components/common/LoadingSpinner';
 import { Text } from '@/ui/components/common/Text';
+import { cn } from '@/utils/cn';
 
 import { RoleEditor } from './roles/RoleEditor';
 import { RoleNavbar } from './roles/RoleNavbar';
@@ -27,6 +28,7 @@ export const ServerRoleSettings: React.FC<ServerRoleSettingsProps> = ({
     const { data: server } = useServerDetails(serverId);
     const { data: roles, isLoading } = useRoles(serverId);
     const [selectedRoleId, setSelectedRoleId] = useState<string | null>(null);
+    const [isMobileListOpen, setIsMobileListOpen] = useState(true);
 
     const createRoleMutation = useCreateRole(serverId);
     const updateRoleMutation = useUpdateRole(serverId);
@@ -50,6 +52,7 @@ export const ServerRoleSettings: React.FC<ServerRoleSettingsProps> = ({
             {
                 onSuccess: (newRole) => {
                     setSelectedRoleId(newRole._id);
+                    setIsMobileListOpen(false);
                 },
             },
         );
@@ -107,9 +110,46 @@ export const ServerRoleSettings: React.FC<ServerRoleSettingsProps> = ({
     }
 
     return (
-        <div className="h-full flex overflow-hidden">
+        <div className="h-full flex flex-col md:flex-row overflow-hidden">
+            {/* Right Sidebar (Role List) - on mobile it should show when list is open */}
+            <div
+                className={cn(
+                    'h-full shrink-0 order-first md:order-last',
+                    isMobileListOpen ? 'w-full md:w-auto' : 'hidden md:block',
+                )}
+            >
+                <RoleNavbar
+                    roles={roles}
+                    selectedRoleId={effectiveSelectedId}
+                    onAddRole={handleAddRole}
+                    onDeleteRole={handleDeleteRole}
+                    onReorderRoles={handleReorderRoles}
+                    onSelectRole={(id) => {
+                        setSelectedRoleId(id);
+                        setIsMobileListOpen(false);
+                    }}
+                />
+            </div>
+
             {/* Main Content (Editor) */}
-            <div className="flex-1 overflow-hidden relative">
+            <div
+                className={cn(
+                    'flex-1 overflow-hidden relative',
+                    isMobileListOpen ? 'hidden md:block' : 'block',
+                )}
+            >
+                {/* Mobile Back Header */}
+                {!isMobileListOpen && (
+                    <div className="md:hidden items-center flex sticky top-0 z-20 bg-[var(--color-background)] border-b border-[var(--color-border-subtle)] px-4 py-3 shrink-0 w-full mb-4">
+                        <button
+                            className="flex items-center gap-1 text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] font-medium transition-colors"
+                            onClick={() => setIsMobileListOpen(true)}
+                        >
+                            <ChevronLeft size={20} />
+                            Back
+                        </button>
+                    </div>
+                )}
                 {selectedRole ? (
                     <RoleEditor
                         disableCustomFonts={server?.disableCustomFonts}
@@ -127,16 +167,6 @@ export const ServerRoleSettings: React.FC<ServerRoleSettingsProps> = ({
                     </div>
                 )}
             </div>
-
-            {/* Right Sidebar (Role List) */}
-            <RoleNavbar
-                roles={roles}
-                selectedRoleId={effectiveSelectedId}
-                onAddRole={handleAddRole}
-                onDeleteRole={handleDeleteRole}
-                onReorderRoles={handleReorderRoles}
-                onSelectRole={setSelectedRoleId}
-            />
         </div>
     );
 };

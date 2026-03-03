@@ -19,21 +19,29 @@ export const ChannelSettingsModal: React.FC<ChannelSettingsModalProps> = ({
     channel,
 }) => {
     const [activeSection, setActiveSection] = useState<string>('overview');
+    const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(true);
+
+    const handleSetSection = (sectionId: string): void => {
+        setIsMobileSidebarOpen(false);
+        setActiveSection(sectionId);
+    };
 
     return (
         <SettingsModalLayout
             closeButtonOffsetClass={
                 activeSection === 'permissions' ? 'right-[304px]' : 'right-12'
             }
+            isMobileSidebarOpen={isMobileSidebarOpen}
             isOpen={isOpen}
             sidebar={
                 <ChannelSettingsSidebar
                     activeSection={activeSection}
                     channelName={channel.name}
-                    setActiveSection={setActiveSection}
+                    setActiveSection={handleSetSection}
                 />
             }
             onClose={onClose}
+            onMobileBackClick={() => setIsMobileSidebarOpen(true)}
         >
             {activeSection === 'overview' ? (
                 <SettingsContentPane>

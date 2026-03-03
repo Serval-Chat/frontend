@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 
+import { ChevronLeft } from 'lucide-react';
+
 import {
     useCategoryPermissions,
     useChannelPermissions,
@@ -116,6 +118,7 @@ export const PermissionsEditorTab: React.FC<PermissionsEditorTabProps> = ({
     const [selectedRoleId, setSelectedRoleId] = useState<string | null>(null);
     const [localOverrides, setLocalOverrides] = useState<Overrides>({});
     const [hasChanges, setHasChanges] = useState(false);
+    const [isMobileListOpen, setIsMobileListOpen] = useState(true);
 
     const [prevInitialPermissions, setPrevInitialPermissions] =
         useState(initialPermissions);
@@ -169,6 +172,7 @@ export const PermissionsEditorTab: React.FC<PermissionsEditorTabProps> = ({
 
     const handleAddRole = (role: Role): void => {
         setSelectedRoleId(role._id);
+        setIsMobileListOpen(false);
         setLocalOverrides((prev) =>
             role._id in prev ? prev : { ...prev, [role._id]: {} },
         );
@@ -203,7 +207,19 @@ export const PermissionsEditorTab: React.FC<PermissionsEditorTabProps> = ({
 
     return (
         <EditorLayout>
-            <EditorPanel>
+            <EditorPanel isMobileListOpen={isMobileListOpen}>
+                {/* Mobile Back Header */}
+                {!isMobileListOpen && (
+                    <div className="md:hidden items-center flex sticky top-0 z-20 bg-[var(--color-background)] border-b border-[var(--color-border-subtle)] px-4 py-4 shrink-0 w-full mb-4 mx-[-2rem] px-[2rem]">
+                        <button
+                            className="flex items-center gap-1 text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] font-medium transition-colors"
+                            onClick={() => setIsMobileListOpen(true)}
+                        >
+                            <ChevronLeft size={20} />
+                            Back
+                        </button>
+                    </div>
+                )}
                 {selectedRole ? (
                     <>
                         <div>
@@ -267,7 +283,7 @@ export const PermissionsEditorTab: React.FC<PermissionsEditorTabProps> = ({
                 />
             </EditorPanel>
 
-            <RolesSidebar>
+            <RolesSidebar isMobileListOpen={isMobileListOpen}>
                 <div className="flex items-center justify-between">
                     <SectionLabel>Roles/Members</SectionLabel>
                     <AddRoleDropdown
@@ -281,7 +297,10 @@ export const PermissionsEditorTab: React.FC<PermissionsEditorTabProps> = ({
                             isActive={effectiveSelectedRoleId === role._id}
                             key={role._id}
                             role={role}
-                            onClick={() => setSelectedRoleId(role._id)}
+                            onClick={() => {
+                                setSelectedRoleId(role._id);
+                                setIsMobileListOpen(false);
+                            }}
                         />
                     ))}
                 </div>

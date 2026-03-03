@@ -20,7 +20,7 @@ export const SettingsSidebar: React.FC<SettingsSidebarProps> = ({
     ];
 
     return (
-        <div className="w-[200px] bg-[var(--secondary-bg)] border-r border-[var(--color-border-subtle)] p-3 overflow-y-auto shrink-0 flex flex-col gap-1">
+        <div className="w-full md:w-[200px] bg-[var(--secondary-bg)] border-r border-[var(--color-border-subtle)] p-3 overflow-y-auto shrink-0 flex flex-col gap-1">
             {sections.map((section) => {
                 const Icon = section.icon;
                 const isActive = activeSection === section.id;
