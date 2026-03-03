@@ -17,6 +17,7 @@ import {
 import type { FileMetadata, ProxyMetadata } from '@/api/files/files.types';
 import { Button } from '@/ui/components/common/Button';
 import { CodeModal } from '@/ui/components/common/CodeModal';
+import { ImageLightbox } from '@/ui/components/common/ImageLightbox';
 import { Link } from '@/ui/components/common/Link';
 import { LoadingSpinner } from '@/ui/components/common/LoadingSpinner';
 import { Text } from '@/ui/components/common/Text';
@@ -45,6 +46,7 @@ export const FileEmbed: React.FC<FileEmbedProps> = ({ url }) => {
 
     const isSpoiler = url.endsWith('#spoiler');
     const [isRevealed, setIsRevealed] = React.useState(false);
+    const [isLightboxOpen, setIsLightboxOpen] = React.useState(false);
 
     if (isLoading) {
         return (
@@ -82,30 +84,44 @@ export const FileEmbed: React.FC<FileEmbedProps> = ({ url }) => {
               );
 
         return (
-            <Box
-                className="my-2 max-w-[min(550px,100%)] max-h-[min(450px,70vh)] w-fit overflow-hidden rounded-lg bg-bg-secondary relative cursor-pointer"
-                onClick={() => isSpoiler && !isRevealed && setIsRevealed(true)}
-            >
-                <img
-                    alt={displayName || 'File content'}
-                    className={`h-auto max-h-inherit w-auto max-w-full object-contain transition-all duration-300 ${isSpoiler && !isRevealed ? 'blur-2xl' : ''}`}
-                    src={displayUrl!}
-                />
-                {isSpoiler && !isRevealed && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/20 backdrop-blur-sm">
-                        <div className="bg-black/60 px-3 py-1.5 rounded-full border border-white/20 flex items-center gap-2">
-                            <EyeOff size={16} />
-                            <Text
-                                className="text-white"
-                                size="xs"
-                                weight="bold"
-                            >
-                                SPOILER
-                            </Text>
+            <>
+                <Box
+                    className="my-2 max-w-[min(550px,100%)] max-h-[min(450px,70vh)] w-fit overflow-hidden rounded-lg bg-bg-secondary relative cursor-pointer"
+                    onClick={() => {
+                        if (isSpoiler && !isRevealed) {
+                            setIsRevealed(true);
+                        } else {
+                            setIsLightboxOpen(true);
+                        }
+                    }}
+                >
+                    <img
+                        alt={displayName || 'File content'}
+                        className={`h-auto max-h-inherit w-auto max-w-full object-contain transition-all duration-300 ${isSpoiler && !isRevealed ? 'blur-2xl' : ''}`}
+                        src={displayUrl!}
+                    />
+                    {isSpoiler && !isRevealed && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/20 backdrop-blur-sm">
+                            <div className="bg-black/60 px-3 py-1.5 rounded-full border border-white/20 flex items-center gap-2">
+                                <EyeOff size={16} />
+                                <Text
+                                    className="text-white"
+                                    size="xs"
+                                    weight="bold"
+                                >
+                                    SPOILER
+                                </Text>
+                            </div>
                         </div>
-                    </div>
-                )}
-            </Box>
+                    )}
+                </Box>
+                <ImageLightbox
+                    alt={displayName || 'Image'}
+                    isOpen={isLightboxOpen}
+                    src={displayUrl!}
+                    onClose={() => setIsLightboxOpen(false)}
+                />
+            </>
         );
     }
 

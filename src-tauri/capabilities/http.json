@@ -1,0 +1,13 @@
+{
+  "identifier": "http-scope",
+  "description": "http scope",
+  "windows": ["main"],
+  "permissions": [
+    {
+      "identifier": "http:allow-fetch",
+      "allow": [
+        { "url": "https://rolling.catfla.re/**" }
+      ]
+    }
+  ]
+}

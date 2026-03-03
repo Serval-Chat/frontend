@@ -1,0 +1,15 @@
+{
+  "identifier": "allow-downloads",
+  "description": "allow writing to downloads",
+  "windows": ["main"],
+  "permissions": [
+    {
+      "identifier": "fs:allow-write-file",
+      "allow": [
+        { "path": "/storage/emulated/0/Download/**" }
+      ]
+    },
+    "fs:allow-download-write",
+    "fs:allow-download-write-recursive"
+  ]
+}
