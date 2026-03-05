@@ -86,7 +86,7 @@ export const FileEmbed: React.FC<FileEmbedProps> = ({ url }) => {
         return (
             <>
                 <Box
-                    className="my-2 max-w-[min(550px,100%)] max-h-[min(450px,70vh)] w-fit overflow-hidden rounded-lg bg-bg-secondary relative cursor-pointer"
+                    className="my-2 w-fit rounded-lg bg-bg-secondary relative cursor-pointer"
                     onClick={() => {
                         if (isSpoiler && !isRevealed) {
                             setIsRevealed(true);
@@ -97,7 +97,7 @@ export const FileEmbed: React.FC<FileEmbedProps> = ({ url }) => {
                 >
                     <img
                         alt={displayName || 'File content'}
-                        className={`h-auto max-h-inherit w-auto max-w-full object-contain transition-all duration-300 ${isSpoiler && !isRevealed ? 'blur-2xl' : ''}`}
+                        className={`block max-w-[min(550px,100%)] max-h-[min(450px,70vh)] w-auto h-auto object-contain rounded-lg transition-all duration-300 ${isSpoiler && !isRevealed ? 'blur-2xl' : ''}`}
                         src={displayUrl!}
                     />
                     {isSpoiler && !isRevealed && (
