@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 
+import { motion } from 'framer-motion';
 import { Hash, Users, Volume2, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -35,6 +36,10 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
     const { selectedServerId, selectedChannelId, showMobileMemberList } =
         useAppSelector((state) => state.nav);
 
+    const [descExpanded, setDescExpanded] = useState(false);
+
+    const hasDescription = !selectedFriendId && !!selectedChannel?.description;
+
     const handleBackClick = (): void => {
         if (selectedFriendId) {
             dispatch(setSelectedFriendId(null));
@@ -48,10 +53,11 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
     return (
         <Box
             as="header"
-            className="h-12 flex items-center px-4 border-b border-white/5 bg-[var(--bg-chat-header)] backdrop-blur-sm shrink-0"
+            className="flex items-start px-4 border-b border-white/5 bg-[var(--bg-chat-header)] backdrop-blur-sm shrink-0"
         >
-            <Box className="flex items-center gap-2 overflow-hidden">
-                <Box className="text-foreground-muted shrink-0">
+            {/* Left: icon + name + description */}
+            <Box className="flex items-start gap-2 flex-1 min-w-0 overflow-hidden py-3">
+                <Box className="text-foreground-muted shrink-0 mt-0.5">
                     {selectedFriendId ? (
                         <Text className="text-xl">@</Text>
                     ) : (
@@ -68,25 +74,52 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
                         })()
                     )}
                 </Box>
-                <Box className="flex flex-col gap-0.5 min-w-0">
-                    <Box className="text-[15px] font-semibold text-foreground truncate">
+                <Box className="flex flex-col gap-0.5 min-w-0 flex-1">
+                    <Box className="text-[15px] font-semibold text-foreground truncate leading-5">
                         {selectedFriendId
                             ? friendUser?.displayName ||
                               friendUser?.username ||
                               '...'
                             : selectedChannel?.name || 'No Channel'}
                     </Box>
-                    {!selectedFriendId && selectedChannel?.description && (
-                        <Text className="text-xs text-foreground-muted truncate">
-                            {selectedChannel.description}
-                        </Text>
+                    {hasDescription && (
+                        <motion.button
+                            className="text-left w-full focus:outline-none"
+                            type="button"
+                            onClick={() => setDescExpanded((v) => !v)}
+                        >
+                            <motion.div
+                                animate={
+                                    descExpanded ? 'expanded' : 'collapsed'
+                                }
+                                className="overflow-hidden"
+                                initial={false}
+                                transition={{
+                                    duration: 0.2,
+                                    ease: 'easeInOut',
+                                }}
+                                variants={{
+                                    collapsed: { height: '1.25rem' },
+                                    expanded: { height: 'auto' },
+                                }}
+                            >
+                                <span
+                                    className={`text-xs text-foreground-muted block break-words ${
+                                        descExpanded
+                                            ? 'whitespace-pre-wrap pb-0.5'
+                                            : 'truncate'
+                                    }`}
+                                >
+                                    {selectedChannel!.description}
+                                </span>
+                            </motion.div>
+                        </motion.button>
                     )}
                 </Box>
             </Box>
 
             {/* Mobile back button + member list toggle */}
-            <Box className="ml-auto md:hidden flex items-center gap-1">
-                {/* Only show member list icon for server channels, not DMs */}
+            <Box className="ml-2 md:hidden flex items-center gap-1 pt-2 shrink-0">
                 {selectedChannelId && !selectedFriendId && (
                     <button
                         aria-label="Toggle member list"
