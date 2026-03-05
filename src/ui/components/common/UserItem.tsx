@@ -201,50 +201,61 @@ export const UserItem: React.FC<UserItemProps> = ({
 
         items.push({
             icon: Shield,
-            items: rolesToDisplay.map((r) => {
-                const hasRole = allRoles?.some(
-                    (ur) => String(ur._id) === String(r._id),
-                );
+            items:
+                rolesToDisplay.length > 0
+                    ? rolesToDisplay.map((r) => {
+                          const hasRole = allRoles?.some(
+                              (ur) => String(ur._id) === String(r._id),
+                          );
 
-                // Hierarchy check: can only manage roles strictly below your highest role
-                // unless you are the owner
-                const canManageThisRole =
-                    isOwner ||
-                    (myHighestRole && myHighestRole.position > r.position);
+                          // Hierarchy check: can only manage roles strictly below your highest role
+                          // unless you are the owner
+                          const canManageThisRole =
+                              isOwner ||
+                              (myHighestRole &&
+                                  myHighestRole.position > r.position);
 
-                return {
-                    indent: false,
-                    label: (
-                        <Box className="flex items-center gap-2">
-                            <RoleDot role={r} size={8} />
-                            <span className="truncate">{r.name}</span>
-                        </Box>
-                    ),
-                    onClick: () => {
-                        if (isAdding || isRemoving) return;
+                          return {
+                              indent: false,
+                              label: (
+                                  <Box className="flex items-center gap-2">
+                                      <RoleDot role={r} size={8} />
+                                      <span className="truncate">{r.name}</span>
+                                  </Box>
+                              ),
+                              onClick: () => {
+                                  if (isAdding || isRemoving) return;
 
-                        if (hasRole) {
-                            removeRole({
-                                roleId: r._id,
-                                userId,
-                            });
-                        } else {
-                            addRole({
-                                roleId: r._id,
-                                userId,
-                            });
-                        }
-                    },
-                    preventClose: true,
-                    rightIcon: hasRole ? Check : undefined,
-                    type: 'action',
-                    variant: !canManageThisRole
-                        ? 'ghost'
-                        : isAdding || isRemoving
-                          ? 'ghost'
-                          : 'normal',
-                };
-            }),
+                                  if (hasRole) {
+                                      removeRole({
+                                          roleId: r._id,
+                                          userId,
+                                      });
+                                  } else {
+                                      addRole({
+                                          roleId: r._id,
+                                          userId,
+                                      });
+                                  }
+                              },
+                              preventClose: true,
+                              rightIcon: hasRole ? Check : undefined,
+                              type: 'action',
+                              variant: !canManageThisRole
+                                  ? 'ghost'
+                                  : isAdding || isRemoving
+                                    ? 'ghost'
+                                    : 'normal',
+                          };
+                      })
+                    : [
+                          {
+                              label: 'No roles',
+                              onClick: () => {},
+                              type: 'action',
+                              variant: 'ghost',
+                          },
+                      ],
             label: 'Roles',
             type: 'submenu',
         });

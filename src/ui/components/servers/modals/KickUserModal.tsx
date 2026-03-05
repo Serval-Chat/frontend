@@ -47,7 +47,7 @@ export const KickUserModal: React.FC<KickUserModalProps> = ({
                     Cancel
                 </Button>
                 <Button
-                    className="bg-[var(--color-status-error)] hover:bg-[var(--color-status-error-hover)] text-white border-none"
+                    variant="danger"
                     onClick={() => {
                         onConfirm();
                         onClose();
