@@ -1,6 +1,26 @@
 import { createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
 
+const LAST_CHANNELS_KEY = 'serchat-last-channels';
+
+const loadLastChannels = (): Record<string, string> => {
+    try {
+        const raw = localStorage.getItem(LAST_CHANNELS_KEY);
+        if (raw) return JSON.parse(raw) as Record<string, string>;
+    } catch {
+        console.error('Failed to load last channels (how!?)');
+    }
+    return {};
+};
+
+export const saveLastChannels = (data: Record<string, string>): void => {
+    try {
+        localStorage.setItem(LAST_CHANNELS_KEY, JSON.stringify(data));
+    } catch {
+        console.error('Failed to save last channels (how!?)');
+    }
+};
+
 export type NavMode = 'friends' | 'servers';
 
 interface NavState {
@@ -21,7 +41,7 @@ const initialState: NavState = {
     selectedFriendId: null,
     selectedChannelId: null,
     targetMessageId: null,
-    lastOpenedChannelByServer: {},
+    lastOpenedChannelByServer: loadLastChannels(),
     lastSelectedFriendId: null,
     mobileHomeTab: 'friends',
     showMobileMemberList: false,

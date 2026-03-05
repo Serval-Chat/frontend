@@ -35,6 +35,7 @@ export const MessageEdit: React.FC<MessageEditProps> = ({
 }) => {
     const [text, setText] = useState(initialText);
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+    const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
     const textAreaRef = useRef<HTMLTextAreaElement>(null);
     const emojiPickerRef = useRef<HTMLDivElement>(null);
 
@@ -48,6 +49,12 @@ export const MessageEdit: React.FC<MessageEditProps> = ({
             textAreaRef.current.focus();
             textAreaRef.current.select();
         }
+    }, []);
+
+    React.useEffect(() => {
+        const handleResize = (): void => setIsMobile(window.innerWidth <= 768);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
     }, []);
 
     // Close emoji picker when clicking outside
@@ -108,6 +115,10 @@ export const MessageEdit: React.FC<MessageEditProps> = ({
         e: React.KeyboardEvent<HTMLTextAreaElement>,
     ): void => {
         if (e.key === 'Enter' && !e.shiftKey) {
+            if (isMobile) {
+                // On mobile, let default behavior insert a new line
+                return;
+            }
             e.preventDefault();
             handleSubmit();
         }

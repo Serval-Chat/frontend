@@ -54,16 +54,31 @@ export const ServerSection: React.FC = () => {
             return;
         }
 
-        if (!isLoadingChannels && channels && selectedChannelId) {
-            const channelExists = channels.some(
-                (c) => c._id === selectedChannelId,
-            );
-            if (!channelExists) {
-                dispatch(setSelectedChannelId(null));
-                dispatch(setTargetMessageId(null));
-                void navigate(`/chat/@server/${selectedServerId}`, {
-                    replace: true,
-                });
+        if (!isLoadingChannels && channels) {
+            if (selectedChannelId) {
+                const channelExists = channels.some(
+                    (c) => c._id === selectedChannelId,
+                );
+                if (!channelExists) {
+                    dispatch(setSelectedChannelId(null));
+                    dispatch(setTargetMessageId(null));
+                    void navigate(`/chat/@server/${selectedServerId}`, {
+                        replace: true,
+                    });
+                }
+            } else {
+                const sortedChannels = [...channels].sort(
+                    (a, b) => a.position - b.position,
+                );
+                const firstChannel = sortedChannels.find(
+                    (c) => c.type !== 'link',
+                );
+                if (firstChannel) {
+                    void navigate(
+                        `/chat/@server/${selectedServerId}/channel/${firstChannel._id}`,
+                        { replace: true },
+                    );
+                }
             }
         }
     }, [

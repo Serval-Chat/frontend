@@ -1,6 +1,6 @@
 import { configureStore } from '@reduxjs/toolkit';
 
-import { navReducer } from './slices/navSlice';
+import { navReducer, saveLastChannels } from './slices/navSlice';
 import { presenceReducer } from './slices/presenceSlice';
 import { unreadReducer } from './slices/unreadSlice';
 
@@ -10,6 +10,15 @@ export const store = configureStore({
         presence: presenceReducer,
         unread: unreadReducer,
     },
+});
+
+let prevLastChannels = store.getState().nav.lastOpenedChannelByServer;
+store.subscribe(() => {
+    const next = store.getState().nav.lastOpenedChannelByServer;
+    if (next !== prevLastChannels) {
+        prevLastChannels = next;
+        saveLastChannels(next);
+    }
 });
 
 export type RootState = ReturnType<typeof store.getState>;

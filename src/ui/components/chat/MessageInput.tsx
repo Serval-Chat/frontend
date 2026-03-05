@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 
-import { Plus, Smile, X } from 'lucide-react';
+import { Plus, Send, Smile, X } from 'lucide-react';
 
 import { useChannelMessages, useUserMessages } from '@/api/chat/chat.queries';
 import type { ChatMessage } from '@/api/chat/chat.types';
@@ -60,6 +60,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
     const [cursorPosition, setCursorPosition] = useState(0);
     const [isUploading, setIsUploading] = useState(false);
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+    const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const textAreaRef = useRef<HTMLTextAreaElement>(null);
     const emojiPickerRef = useRef<HTMLDivElement>(null);
@@ -95,6 +96,12 @@ export const MessageInput: React.FC<MessageInputProps> = ({
 
         window.addEventListener('keydown', handleGlobalKeyDown);
         return () => window.removeEventListener('keydown', handleGlobalKeyDown);
+    }, []);
+
+    useEffect(() => {
+        const handleResize = (): void => setIsMobile(window.innerWidth <= 768);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
     }, []);
 
     const {
@@ -331,6 +338,10 @@ export const MessageInput: React.FC<MessageInputProps> = ({
         }
 
         if (e.key === 'Enter' && !e.shiftKey) {
+            if (isMobile) {
+                // On mobile, just insert a new line by Default
+                return;
+            }
             e.preventDefault();
             if (!isUploading) {
                 void handleSendMessage(value);
@@ -444,6 +455,18 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                 >
                     <Smile size={20} />
                 </Button>
+
+                {(value.trim() || files.length > 0) && isMobile && (
+                    <Button
+                        className="mb-1 h-8 w-8 p-0 shrink-0 text-primary"
+                        disabled={isUploading}
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => void handleSendMessage(value)}
+                    >
+                        <Send size={20} />
+                    </Button>
+                )}
             </Box>
 
             {autocomplete.hasSuggestions && (
