@@ -1,9 +1,21 @@
 import React, { useState } from 'react';
 
-import { ChevronLeft, X } from 'lucide-react';
+import {
+    Ban,
+    ChevronLeft,
+    Handshake,
+    Settings,
+    Shield,
+    Smile,
+    X,
+    Zap,
+} from 'lucide-react';
 
+import type { RolePermissions } from '@/api/servers/servers.types';
+import { usePermissions } from '@/hooks/usePermissions';
 import { IconButton } from '@/ui/components/common/IconButton';
 import { Modal } from '@/ui/components/common/Modal';
+import { SettingsSidebarLayout } from '@/ui/components/common/settings/SettingsSidebarLayout';
 import { cn } from '@/utils/cn';
 
 import { ServerBansSettings } from './ServerBansSettings';
@@ -12,13 +24,41 @@ import { ServerEmojiSettings } from './ServerEmojiSettings';
 import { ServerInviteSettings } from './ServerInviteSettings';
 import { ServerOverviewSettings } from './ServerOverviewSettings';
 import { ServerRoleSettings } from './ServerRoleSettings';
-import { ServerSettingsSidebar } from './ServerSettingsSidebar';
 
 interface ServerSettingsModalProps {
     isOpen: boolean;
     onClose: () => void;
     serverId: string;
 }
+
+const ALL_SECTIONS: {
+    id: string;
+    label: string;
+    icon: React.ComponentType<{ size?: number | string }>;
+    permission: keyof RolePermissions;
+}[] = [
+    {
+        id: 'overview',
+        label: 'Overview',
+        icon: Settings,
+        permission: 'manageServer',
+    },
+    { id: 'roles', label: 'Roles', icon: Shield, permission: 'manageRoles' },
+    { id: 'emojis', label: 'Emojis', icon: Smile, permission: 'manageServer' },
+    {
+        id: 'invites',
+        label: 'Invites',
+        icon: Handshake,
+        permission: 'manageInvites',
+    },
+    {
+        id: 'behaviour',
+        label: 'Behaviour',
+        icon: Zap,
+        permission: 'manageServer',
+    },
+    { id: 'bans', label: 'Bans', icon: Ban, permission: 'banMembers' },
+];
 
 export const ServerSettingsModal: React.FC<ServerSettingsModalProps> = ({
     isOpen,
@@ -27,6 +67,12 @@ export const ServerSettingsModal: React.FC<ServerSettingsModalProps> = ({
 }) => {
     const [activeSection, setActiveSection] = useState<string>('overview');
     const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(true);
+    const { hasPermission, isOwner } = usePermissions(serverId);
+
+    const sections = ALL_SECTIONS.map((s) => ({
+        ...s,
+        hidden: !isOwner && !hasPermission(s.permission),
+    }));
 
     const handleSetSection = (sectionId: string): void => {
         setIsMobileSidebarOpen(false);
@@ -52,9 +98,10 @@ export const ServerSettingsModal: React.FC<ServerSettingsModalProps> = ({
                             : 'hidden md:block',
                     )}
                 >
-                    <ServerSettingsSidebar
+                    <SettingsSidebarLayout
                         activeSection={activeSection}
-                        serverId={serverId}
+                        headerText="Server Settings"
+                        sections={sections}
                         setActiveSection={handleSetSection}
                     />
                 </div>
