@@ -79,8 +79,13 @@ export const NavigationSync: React.FC = () => {
                     // Clear if we changed channels and no new message was specified
                     dispatch(setTargetMessageId(null));
                 }
-            } else if (contextChanged) {
-                dispatch(setTargetMessageId(null));
+            } else {
+                if (selectedChannelId !== null) {
+                    dispatch(setSelectedChannelId(null));
+                }
+                if (contextChanged) {
+                    dispatch(setTargetMessageId(null));
+                }
             }
         } else if (params.userId) {
             if (!isValidObjectId(params.userId)) {

@@ -38,7 +38,9 @@ export const MainContent: React.FC = () => {
             )}
         >
             {isNothingSelected ? (
-                <FriendRequestList />
+                navMode === 'friends' ? (
+                    <FriendRequestList />
+                ) : null
             ) : (
                 <MainChat key={conversationKey} />
             )}

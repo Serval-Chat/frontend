@@ -3,8 +3,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { useServers } from '@/api/servers/servers.queries';
-import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { setSelectedServerId } from '@/store/slices/navSlice';
+import { useAppSelector } from '@/store/hooks';
 
 import { ServerItem } from './ServerItem';
 
@@ -13,7 +12,6 @@ import { ServerItem } from './ServerItem';
  */
 export const ServerList: React.FC = () => {
     const { data: servers, isLoading } = useServers();
-    const dispatch = useAppDispatch();
     const selectedServerId = useAppSelector(
         (state) => state.nav.selectedServerId,
     );
@@ -27,10 +25,10 @@ export const ServerList: React.FC = () => {
         const lastChannelId = lastOpenedChannelByServer[serverId];
         const isMobile = window.innerWidth < 768; // md breakpoint
 
-        if (lastChannelId && !isMobile) {
+        if (!isMobile && lastChannelId) {
             void navigate(`/chat/@server/${serverId}/channel/${lastChannelId}`);
         } else {
-            dispatch(setSelectedServerId(serverId));
+            void navigate(`/chat/@server/${serverId}`);
         }
     };
 

@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 import {
     useCategories,
@@ -24,11 +24,15 @@ import { ServerBanner } from './ServerBanner';
 export const ServerSection: React.FC = () => {
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
+    const { channelId } = useParams();
     const selectedServerId = useAppSelector(
         (state) => state.nav.selectedServerId,
     );
     const selectedChannelId = useAppSelector(
         (state) => state.nav.selectedChannelId,
+    );
+    const lastOpenedChannelByServer = useAppSelector(
+        (state) => state.nav.lastOpenedChannelByServer,
     );
 
     const {
@@ -67,15 +71,26 @@ export const ServerSection: React.FC = () => {
                     });
                 }
             } else {
+                if (channelId) return;
+
+                // On mobile, if we are at the server root, don't auto-navigate
+                const isMobile = window.innerWidth < 768;
+                if (isMobile) return;
+
+                const lastChannelId =
+                    lastOpenedChannelByServer[selectedServerId];
                 const sortedChannels = [...channels].sort(
                     (a, b) => a.position - b.position,
                 );
                 const firstChannel = sortedChannels.find(
                     (c) => c.type !== 'link',
                 );
-                if (firstChannel) {
+
+                const targetChannelId = lastChannelId || firstChannel?._id;
+
+                if (targetChannelId) {
                     void navigate(
-                        `/chat/@server/${selectedServerId}/channel/${firstChannel._id}`,
+                        `/chat/@server/${selectedServerId}/channel/${targetChannelId}`,
                         { replace: true },
                     );
                 }
@@ -88,8 +103,10 @@ export const ServerSection: React.FC = () => {
         channels,
         selectedChannelId,
         selectedServerId,
+        lastOpenedChannelByServer,
         dispatch,
         navigate,
+        channelId,
     ]);
 
     if (!selectedServerId) return null;
