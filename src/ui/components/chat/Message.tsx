@@ -263,6 +263,7 @@ export const Message: React.FC<MessageProps> = ({
                 {isGroupStart && message.replyTo && (
                     <ReplyPreview
                         disableCustomFonts={disableCustomFonts}
+                        disableGlowAndColors={disableGlowAndColors}
                         replyToId={message.replyTo._id}
                         role={message.replyTo.role}
                         text={message.replyTo.text}
