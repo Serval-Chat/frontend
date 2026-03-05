@@ -8,6 +8,20 @@ import { Text } from '@/ui/components/common/Text';
 import { Box } from '@/ui/components/layout/Box';
 import { TopNavBar } from '@/ui/components/layout/TopNavBar';
 
+const WindowsIcon = ({ size = 24 }: { size?: number }) => (
+    <svg
+        height={size}
+        viewBox="0 0 88 88"
+        width={size}
+        xmlns="http://www.w3.org/2000/svg"
+    >
+        <path
+            d="M0 12.402l35.687-4.86.016 34.423-35.67.033L0 12.402zM35.67 46.528l.033 34.505-35.703-4.91V46.561l35.67-.033zM39.67 6.997L88 0v41.528l-48.33.05V6.997zM88 46.594l-.016 41.406-48.33-6.947V46.528l48.346.066z"
+            fill="currentColor"
+        />
+    </svg>
+);
+
 export const Downloads = (): ReactNode => (
     <Box className="flex min-h-screen flex-col bg-background selection:bg-primary/30">
         <TopNavBar />
@@ -34,8 +48,41 @@ export const Downloads = (): ReactNode => (
                 </Text>
             </section>
 
-            <section className="mt-8 w-full max-w-4xl">
-                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+            <section className="mt-8 w-full max-w-6xl">
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+                    {/* Windows */}
+                    <div className="flex flex-col items-center rounded-2xl border border-border-subtle bg-bg-secondary p-8 text-center transition-colors hover:border-blue-500/50">
+                        <div className="mb-6 rounded-2xl bg-blue-500/10 p-4 text-blue-500">
+                            <WindowsIcon size={48} />
+                        </div>
+                        <Heading
+                            className="mb-4 text-2xl font-bold text-foreground"
+                            level={2}
+                        >
+                            Microslop™ Windows
+                        </Heading>
+                        <Text className="mb-8" variant="muted">
+                            Serchat for your Microslop™ Windows PC.
+                        </Text>
+
+                        <div className="mt-auto flex w-full flex-col gap-4">
+                            <a
+                                download
+                                className="w-full"
+                                href="/releases/windows_x64/Serchat_v0.7.9.exe"
+                            >
+                                <Button
+                                    className="w-full h-14 text-lg"
+                                    variant="primary"
+                                >
+                                    <Download className="mr-2" size={20} />
+                                    Download .exe
+                                </Button>
+                            </a>
+                        </div>
+                    </div>
+
+                    {/* Linux */}
                     <div className="flex flex-col items-center rounded-2xl border border-border-subtle bg-bg-secondary p-8 text-center transition-colors hover:border-primary/50">
                         <div className="mb-6 rounded-2xl bg-primary-muted p-4 text-primary">
                             <Monitor size={48} />
@@ -44,7 +91,7 @@ export const Downloads = (): ReactNode => (
                             className="mb-4 text-2xl font-bold text-foreground"
                             level={2}
                         >
-                            Desktop
+                            Linux
                         </Heading>
                         <Text className="mb-8" variant="muted">
                             Serchat for your lovely Linux.
@@ -54,7 +101,7 @@ export const Downloads = (): ReactNode => (
                             <a
                                 download
                                 className="w-full"
-                                href="/releases/linux_x64/Serchat_latest.AppImage"
+                                href="/releases/linux_x64/Serchat_v0.7.9.AppImage"
                             >
                                 <Button
                                     className="w-full h-14 text-lg"
@@ -68,7 +115,7 @@ export const Downloads = (): ReactNode => (
                                 <a
                                     download
                                     className="w-full flex-1"
-                                    href="/releases/ubuntu/Serchat_latest.deb"
+                                    href="/releases/ubuntu/Serchat_v0.7.9.deb"
                                 >
                                     <Button className="w-full" variant="normal">
                                         .deb
@@ -77,7 +124,7 @@ export const Downloads = (): ReactNode => (
                                 <a
                                     download
                                     className="w-full flex-1"
-                                    href="/releases/rhel/Serchat_latest.rpm"
+                                    href="/releases/rhel/Serchat_v0.7.9.rpm"
                                 >
                                     <Button className="w-full" variant="normal">
                                         .rpm
@@ -87,6 +134,7 @@ export const Downloads = (): ReactNode => (
                         </div>
                     </div>
 
+                    {/* Android */}
                     <div className="flex flex-col items-center rounded-2xl border border-border-subtle bg-bg-secondary p-8 text-center transition-colors hover:border-success/50">
                         <div className="mb-6 rounded-2xl bg-success-muted p-4 text-success">
                             <Smartphone size={48} />
@@ -105,7 +153,7 @@ export const Downloads = (): ReactNode => (
                             <a
                                 download
                                 className="w-full"
-                                href="/releases/android/Serchat_latest.apk"
+                                href="/releases/android/Serchat_v0.7.9.apk"
                             >
                                 <Button
                                     className="w-full h-14 text-lg"
