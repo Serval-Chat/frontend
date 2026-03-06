@@ -2,6 +2,7 @@ import React from 'react';
 
 import { useResizable } from '@/hooks/useResizable';
 import { useAppSelector } from '@/store/hooks';
+import { useMobileSwipeContext } from '@/ui/MobileSwipeContext';
 import { Resizer } from '@/ui/components/common/Resizer';
 import { FriendsSection } from '@/ui/components/friends/FriendsSection';
 import { Box } from '@/ui/components/layout/Box';
@@ -22,6 +23,7 @@ export const SecondaryNavBar: React.FC = () => {
         storageKey: 'secondary-navbar-width',
         side: 'left',
     });
+    const inSwipePanel = useMobileSwipeContext();
 
     const isNothingSelected = !selectedFriendId && !selectedChannelId;
 
@@ -31,20 +33,23 @@ export const SecondaryNavBar: React.FC = () => {
             className={cn(
                 'h-full shrink-0 flex flex-col no-scrollbar bg-[var(--secondary-bg)] relative',
                 'pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]',
-                navMode === 'friends' &&
+                !inSwipePanel &&
+                    navMode === 'friends' &&
                     isNothingSelected &&
                     mobileHomeTab === 'friends' &&
                     'max-md:!w-auto max-md:!flex-1 max-md:shrink',
-                navMode === 'servers' &&
+                !inSwipePanel &&
+                    navMode === 'servers' &&
                     isNothingSelected &&
                     'max-md:!w-auto max-md:!flex-1 max-md:shrink',
-                navMode === 'friends' &&
+                !inSwipePanel &&
+                    navMode === 'friends' &&
                     isNothingSelected &&
                     mobileHomeTab === 'requests' &&
                     'max-md:hidden',
-                !isNothingSelected && 'max-md:hidden',
+                !inSwipePanel && !isNothingSelected && 'max-md:hidden',
             )}
-            style={{ width: `${width}px` }}
+            style={{ width: inSwipePanel ? undefined : `${width}px` }}
         >
             <Box className="flex-1 flex flex-col min-h-0 relative">
                 {navMode === 'friends' && <FriendsSection />}

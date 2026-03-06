@@ -45,9 +45,12 @@ export const TertiarySidebar: React.FC = () => {
             className={cn(
                 'h-full shrink-0 overflow-y-auto overflow-x-hidden custom-scrollbar bg-[var(--tertiary-bg)] relative',
                 'pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]',
+                'md:block',
+                'max-md:fixed max-md:inset-y-0 max-md:right-0 max-md:z-50 max-md:w-64 max-md:shadow-2xl',
+                'max-md:transition-transform max-md:duration-300 max-md:[transition-timing-function:cubic-bezier(0.25,0.46,0.45,0.94)]',
                 showMobileMemberList
-                    ? 'max-md:fixed max-md:inset-y-0 max-md:right-0 max-md:z-50 max-md:w-64 max-md:shadow-2xl'
-                    : 'max-md:hidden',
+                    ? 'max-md:translate-x-0'
+                    : 'max-md:translate-x-full',
             )}
             style={{ width: `${width}px` }}
         >

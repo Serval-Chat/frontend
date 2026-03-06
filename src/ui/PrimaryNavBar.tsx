@@ -5,6 +5,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { toggleMobileHomeTab } from '@/store/slices/navSlice';
+import { useMobileSwipeContext } from '@/ui/MobileSwipeContext';
 import { Divider } from '@/ui/components/common/Divider';
 import { IconButton } from '@/ui/components/common/IconButton';
 import { Box } from '@/ui/components/layout/Box';
@@ -24,6 +25,7 @@ export const PrimaryNavBar: React.FC = () => {
     const [showSettings, setShowSettings] = useState(false);
     const [showCreateServer, setShowCreateServer] = useState(false);
     const [showJoinServer, setShowJoinServer] = useState(false);
+    const inSwipePanel = useMobileSwipeContext();
 
     const isChatActive = !!selectedFriendId || !!selectedChannelId;
 
@@ -61,7 +63,7 @@ export const PrimaryNavBar: React.FC = () => {
                 'pt-[calc(0.75rem+env(safe-area-inset-top))] pb-[calc(0.75rem+env(safe-area-inset-bottom))]',
                 'bg-[--color-background]',
                 'w-[72px] shrink-0',
-                isChatActive && 'max-md:hidden',
+                !inSwipePanel && isChatActive && 'max-md:hidden',
             )}
         >
             <Box>

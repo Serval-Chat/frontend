@@ -23,6 +23,7 @@ import '@/styles/index.css';
 import { ToastProvider } from '@/ui/components/common/Toast';
 import { AdminRoute } from '@/ui/components/layout/AdminRoute';
 import { AuthenticatedLayout } from '@/ui/components/layout/AuthenticatedLayout';
+import { NavigationSync } from '@/ui/components/layout/NavigationSync';
 
 const isTauri = (): boolean => '__TAURI__' in window;
 
@@ -89,39 +90,45 @@ createRoot(document.getElementById('root')!).render(
                                     path="/downloads"
                                 />
                                 <Route element={<AuthenticatedLayout />}>
-                                    <Route path="/chat">
-                                        <Route index element={<Chat />} />
-                                        <Route element={<Chat />} path="@me" />
+                                    <Route element={<Chat />} path="/chat">
                                         <Route
-                                            element={<Chat />}
+                                            index
+                                            element={<NavigationSync />}
+                                        />
+                                        <Route
+                                            element={<NavigationSync />}
+                                            path="@me"
+                                        />
+                                        <Route
+                                            element={<NavigationSync />}
                                             path="@server/:serverId"
                                         />
                                         <Route
-                                            element={<Chat />}
+                                            element={<NavigationSync />}
                                             path="@server/:serverId/channel/:channelId"
                                         />
                                         <Route
-                                            element={<Chat />}
+                                            element={<NavigationSync />}
                                             path="@server/:serverId/channel/:channelId/message/:messageId"
                                         />
                                         <Route
-                                            element={<Chat />}
+                                            element={<NavigationSync />}
                                             path="@user/:userId"
                                         />
                                         <Route
-                                            element={<Chat />}
+                                            element={<NavigationSync />}
                                             path="@setting"
                                         >
                                             <Route
-                                                element={<Chat />}
+                                                element={<NavigationSync />}
                                                 path="my-account"
                                             />
                                             <Route
-                                                element={<Chat />}
+                                                element={<NavigationSync />}
                                                 path="appearance"
                                             />
                                             <Route
-                                                element={<Chat />}
+                                                element={<NavigationSync />}
                                                 path="standing"
                                             />
                                         </Route>

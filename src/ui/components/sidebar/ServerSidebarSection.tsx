@@ -119,7 +119,7 @@ export const ServerSidebarSection: React.FC<ServerSidebarSectionProps> = ({
                         <div className="space-y-1 min-w-0" key={group.id}>
                             <div className="flex items-center justify-between px-3 mb-1 min-w-0">
                                 <div className="text-xs font-semibold text-foreground-muted uppercase tracking-wider truncate">
-                                    {group.name} — {group.members.length}
+                                    {group.name} - {group.members.length}
                                 </div>
                             </div>
                             <div className="space-y-[2px] min-w-0">
