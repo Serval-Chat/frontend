@@ -13,7 +13,6 @@ import { Box } from '@/ui/components/layout/Box';
 
 import { UserProfileCard } from './UserProfileCard';
 
-// We'll treat the popup as a fixed overlay that can be positioned
 interface ProfilePopupProps {
     userId: string;
     isOpen: boolean;
