@@ -2,6 +2,29 @@
 @import 'tailwindcss';
 @import './design-tokens.css';
 
+* {
+    scrollbar-width: thin;
+    scrollbar-color: var(--bg-subtle) transparent;
+}
+
+*::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+*::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+    background-color: var(--bg-subtle);
+    border-radius: 999px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+    background-color: var(--bg-muted);
+}
+
 @layer base {
     body {
         @apply bg-background text-foreground antialiased font-sans;
