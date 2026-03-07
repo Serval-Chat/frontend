@@ -1,5 +1,13 @@
 import React, { useRef, useState } from 'react';
 
+import { ClearEditorPlugin } from '@lexical/react/LexicalClearEditorPlugin';
+import { LexicalComposer } from '@lexical/react/LexicalComposer';
+import { ContentEditable } from '@lexical/react/LexicalContentEditable';
+import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary';
+import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
+import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin';
+import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
+import { $getSelection, $isRangeSelection, type LexicalEditor } from 'lexical';
 import { Check, Smile, X } from 'lucide-react';
 import { useClickAway } from 'react-use';
 
@@ -7,12 +15,24 @@ import {
     useEditChannelMessage,
     useEditUserMessage,
 } from '@/api/chat/chat.queries';
+import { useFriends } from '@/api/friends/friends.queries';
+import {
+    useChannels,
+    useMembers,
+    useRoles,
+} from '@/api/servers/servers.queries';
+import type { User } from '@/api/users/users.types';
 import { useCustomEmojis } from '@/hooks/useCustomEmojis';
 import { Button } from '@/ui/components/common/Button';
-import { TextArea } from '@/ui/components/common/TextArea';
 import { EmojiPicker } from '@/ui/components/emoji/EmojiPicker';
 import { Box } from '@/ui/components/layout/Box';
 import { cn } from '@/utils/cn';
+
+import { $createChipNode, ChipNode } from './lexical/ChipNode';
+import { LexicalAutocompletePlugin } from './lexical/LexicalAutocompletePlugin';
+import { LexicalInitPlugin } from './lexical/LexicalInitPlugin';
+import { LexicalSubmitPlugin } from './lexical/LexicalSubmitPlugin';
+import { $getRawMessageText } from './lexical/lexicalUtils';
 
 interface MessageEditProps {
     messageId: string;
@@ -36,20 +56,41 @@ export const MessageEdit: React.FC<MessageEditProps> = ({
     const [text, setText] = useState(initialText);
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
     const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
-    const textAreaRef = useRef<HTMLTextAreaElement>(null);
     const emojiPickerRef = useRef<HTMLDivElement>(null);
 
     const editChannelMessage = useEditChannelMessage();
     const editUserMessage = useEditUserMessage();
     const { customCategories } = useCustomEmojis();
 
-    // Focus textarea on mount
-    React.useEffect(() => {
-        if (textAreaRef.current) {
-            textAreaRef.current.focus();
-            textAreaRef.current.select();
-        }
-    }, []);
+    const { data: friends } = useFriends();
+    const { data: channels } = useChannels(serverId || '');
+    const { data: members } = useMembers(serverId || '');
+    const { data: roles } = useRoles(serverId || '');
+
+    const friendUsers = React.useMemo(() => {
+        if (!friends) return [];
+        return friends as unknown as User[];
+    }, [friends]);
+
+    const allServerEmojis = React.useMemo(
+        () =>
+            customCategories.flatMap((cat) =>
+                cat.emojis.map((e) => ({
+                    _id: e.id,
+                    name: e.name,
+                    imageUrl: e.url,
+                    serverId: cat.id,
+                    createdBy: '',
+                    createdAt: '',
+                })),
+            ),
+        [customCategories],
+    );
+
+    const isAutocompleteOpenRef = useRef<boolean>(false);
+    const [editorInstance, setEditorInstance] = useState<LexicalEditor | null>(
+        null,
+    );
 
     React.useEffect(() => {
         const handleResize = (): void => setIsMobile(window.innerWidth <= 768);
@@ -63,28 +104,44 @@ export const MessageEdit: React.FC<MessageEditProps> = ({
     });
 
     const handleEmojiSelect = (emoji: string): void => {
-        setText((prev) => prev + emoji);
+        if (editorInstance) {
+            editorInstance.update(() => {
+                const selection = editorInstance
+                    .getEditorState()
+                    .read(() => $getSelection());
+                if ($isRangeSelection(selection)) {
+                    selection.insertText(emoji);
+                }
+            });
+        }
         setShowEmojiPicker(false);
-        // Focus back to textarea after emoji selection
-        setTimeout(() => {
-            textAreaRef.current?.focus();
-        }, 0);
     };
 
     const handleCustomEmojiSelect = (emoji: {
         id: string;
         name: string;
     }): void => {
-        setText((prev) => prev + `<emoji:${emoji.id}>`);
+        if (editorInstance) {
+            editorInstance.update(() => {
+                const selection = editorInstance
+                    .getEditorState()
+                    .read(() => $getSelection());
+                if ($isRangeSelection(selection)) {
+                    selection.insertNodes([
+                        $createChipNode('emoji', {
+                            id: emoji.id,
+                            label: emoji.name,
+                        }),
+                    ]);
+                    selection.insertText(' ');
+                }
+            });
+        }
         setShowEmojiPicker(false);
-        // Focus back to textarea after emoji selection
-        setTimeout(() => {
-            textAreaRef.current?.focus();
-        }, 0);
     };
 
-    const handleSubmit = (): void => {
-        const trimmedText = text.trim();
+    const handleSubmit = (overrideText?: string): void => {
+        const trimmedText = (overrideText ?? text).trim();
         if (!trimmedText || trimmedText === initialText.trim()) {
             onCancel();
             return;
@@ -111,36 +168,83 @@ export const MessageEdit: React.FC<MessageEditProps> = ({
         onCancel();
     };
 
-    const handleKeyDown = (
-        e: React.KeyboardEvent<HTMLTextAreaElement>,
-    ): void => {
-        if (e.key === 'Enter' && !e.shiftKey) {
-            if (isMobile) {
-                // On mobile, let default behavior insert a new line
-                return;
-            }
-            e.preventDefault();
-            handleSubmit();
-        }
-        if (e.key === 'Escape') {
-            e.preventDefault();
-            onCancel();
-        }
-    };
-
     const isPending = editChannelMessage.isPending || editUserMessage.isPending;
     const hasChanged = text.trim() !== initialText.trim();
 
+    const initialConfig = {
+        namespace: 'MessageEdit',
+        nodes: [ChipNode],
+        onError: (error: Error) => console.error(error),
+        theme: {
+            paragraph: 'mb-0',
+            text: {
+                bold: 'font-bold',
+                italic: 'italic',
+                underline: 'underline',
+                strikethrough: 'line-through',
+            },
+        },
+    };
+
     return (
         <Box className="relative w-full">
-            <TextArea
-                className="w-full bg-bg-secondary border border-border-subtle rounded-md px-3 py-2 text-sm resize-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 min-h-[60px]"
-                disabled={isPending}
-                ref={textAreaRef}
-                value={text}
-                onChange={(e) => setText(e.target.value)}
-                onKeyDown={handleKeyDown}
-            />
+            <div className="flex-1 relative cursor-text min-h-[60px] flex items-start bg-bg-secondary rounded-md border border-border-subtle focus-within:outline-none focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary/30 transition-all duration-200">
+                <LexicalComposer initialConfig={initialConfig}>
+                    <LexicalInitPlugin initialText={initialText} />
+                    <RichTextPlugin
+                        ErrorBoundary={LexicalErrorBoundary}
+                        contentEditable={
+                            <ContentEditable
+                                className="w-full h-full px-3 py-2 pb-8 text-sm text-foreground outline-none resize-none overflow-y-auto custom-scrollbar min-h-[60px] max-h-[200px]"
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Escape') {
+                                        e.preventDefault();
+                                        onCancel();
+                                    }
+                                    if (e.key === 'Enter' && !e.shiftKey) {
+                                        if (isMobile) return;
+                                        if (!isAutocompleteOpenRef.current) {
+                                            e.preventDefault();
+                                            e.stopPropagation();
+                                        }
+                                    }
+                                }}
+                            />
+                        }
+                        placeholder={
+                            <div className="absolute top-[9px] left-3 pointer-events-none text-placeholder text-sm select-none">
+                                Editing message...
+                            </div>
+                        }
+                    />
+                    <HistoryPlugin />
+                    <ClearEditorPlugin />
+                    <LexicalSubmitPlugin
+                        isAutocompleteOpenRef={isAutocompleteOpenRef}
+                        onSendMessage={(msg) => {
+                            if (!isMobile) handleSubmit(msg);
+                        }}
+                    />
+                    <LexicalAutocompletePlugin
+                        channels={channels}
+                        friends={friendUsers}
+                        members={members}
+                        roles={roles}
+                        serverEmojis={allServerEmojis}
+                        onOpenChange={(isOpen) => {
+                            isAutocompleteOpenRef.current = isOpen;
+                        }}
+                    />
+                    <OnChangePlugin
+                        onChange={(editorState, editor) => {
+                            if (!editorInstance) setEditorInstance(editor);
+                            editorState.read(() => {
+                                setText($getRawMessageText());
+                            });
+                        }}
+                    />
+                </LexicalComposer>
+            </div>
 
             <Box className="absolute right-2 bottom-2 flex gap-1">
                 <Button
@@ -183,7 +287,7 @@ export const MessageEdit: React.FC<MessageEditProps> = ({
                     size="sm"
                     title="Save (Enter)"
                     variant="ghost"
-                    onClick={handleSubmit}
+                    onClick={() => handleSubmit()}
                 >
                     <Check size={14} />
                 </Button>

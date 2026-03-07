@@ -8,6 +8,7 @@ interface ParsedEmojiProps {
     emojiId: string;
     className?: string;
     isLarge?: boolean;
+    style?: React.CSSProperties;
 }
 
 /**
@@ -17,6 +18,7 @@ export const ParsedEmoji: React.FC<ParsedEmojiProps> = ({
     emojiId,
     className,
     isLarge,
+    style,
 }) => {
     const { data: emoji, isLoading } = useEmoji(emojiId);
 
@@ -30,6 +32,7 @@ export const ParsedEmoji: React.FC<ParsedEmojiProps> = ({
                         isLarge ? 'w-10 h-10' : 'w-5 h-5',
                     )
                 }
+                style={style}
             />
         );
     }
@@ -44,10 +47,12 @@ export const ParsedEmoji: React.FC<ParsedEmojiProps> = ({
         <img
             alt={emoji.name || 'emoji'}
             className={cn(
-                className || 'inline-block align-text-bottom',
+                'inline-block align-text-bottom',
                 isLarge ? 'w-10 h-10' : 'w-5 h-5',
+                className,
             )}
             src={emojiUrl || ''}
+            style={style}
             title={`:${emoji.name}:`}
             onError={(e) => {
                 e.currentTarget.style.display = 'none';

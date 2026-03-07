@@ -8,7 +8,7 @@ import { Text } from '@/ui/components/common/Text';
 import { Box } from '@/ui/components/layout/Box';
 import { TopNavBar } from '@/ui/components/layout/TopNavBar';
 
-const WindowsIcon = ({ size = 24 }: { size?: number }) => (
+const WindowsIcon = ({ size = 24 }: { size?: number }): React.ReactNode => (
     <svg
         height={size}
         viewBox="0 0 88 88"

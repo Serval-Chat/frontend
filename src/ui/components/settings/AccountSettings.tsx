@@ -1,5 +1,14 @@
-import React, { useRef, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 
+import { ClearEditorPlugin } from '@lexical/react/LexicalClearEditorPlugin';
+import { LexicalComposer } from '@lexical/react/LexicalComposer';
+import { ContentEditable } from '@lexical/react/LexicalContentEditable';
+import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary';
+import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
+import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin';
+import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
+
+import { useFriends } from '@/api/friends/friends.queries';
 import {
     useMe,
     useUpdateBanner,
@@ -9,12 +18,17 @@ import {
     useUpdatePronouns,
     useUpdateUsername,
 } from '@/api/users/users.queries';
+import type { User } from '@/api/users/users.types';
+import { useCustomEmojis } from '@/hooks/useCustomEmojis';
+import { ChipNode } from '@/ui/components/chat/lexical/ChipNode';
+import { LexicalAutocompletePlugin } from '@/ui/components/chat/lexical/LexicalAutocompletePlugin';
+import { LexicalInitPlugin } from '@/ui/components/chat/lexical/LexicalInitPlugin';
+import { $getRawMessageText } from '@/ui/components/chat/lexical/lexicalUtils';
 import { Button } from '@/ui/components/common/Button';
 import { Heading } from '@/ui/components/common/Heading';
 import { Input } from '@/ui/components/common/Input';
 import { SettingsFloatingBar } from '@/ui/components/common/SettingsFloatingBar';
 import { Text } from '@/ui/components/common/Text';
-import { TextArea } from '@/ui/components/common/TextArea';
 import { UserProfileCard } from '@/ui/components/profile/UserProfileCard';
 
 import { ChangeLoginModal } from './ChangeLoginModal';
@@ -37,12 +51,36 @@ export const AccountSettings: React.FC = () => {
 
     const avatarInputRef = useRef<HTMLInputElement>(null);
     const bannerInputRef = useRef<HTMLInputElement>(null);
+    const isAutocompleteOpenRef = useRef<boolean>(false);
 
     const [cropFile, setCropFile] = useState<File | null>(null);
     const [cropType, setCropType] = useState<'avatar' | 'banner'>('avatar');
     const [isCropModalOpen, setIsCropModalOpen] = useState(false);
     const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
     const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+
+    const { data: friendsList = [] } = useFriends();
+    const { customCategories } = useCustomEmojis();
+
+    const friendUsers = useMemo(
+        () => friendsList as unknown as User[],
+        [friendsList],
+    );
+
+    const allServerEmojis = useMemo(
+        () =>
+            customCategories.flatMap((cat) =>
+                cat.emojis.map((e) => ({
+                    _id: e.id,
+                    name: e.name,
+                    imageUrl: e.url,
+                    serverId: cat.id,
+                    createdBy: '',
+                    createdAt: '',
+                })),
+            ),
+        [customCategories],
+    );
 
     const isPending =
         isUpdatingBio ||
@@ -242,14 +280,59 @@ export const AccountSettings: React.FC = () => {
                         >
                             About Me
                         </label>
-                        <TextArea
-                            className="min-h-[100px] resize-y"
-                            id="bio"
-                            maxLength={190}
-                            placeholder="Tell us about yourself..."
-                            value={bio}
-                            onChange={(e) => setBio(e.target.value)}
-                        />
+                        <div className="relative min-h-[100px] flex items-start bg-[var(--color-bg-secondary)] rounded-md border border-[var(--color-border-subtle)] focus-within:outline-none focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary/30 transition-all duration-200">
+                            <LexicalComposer
+                                initialConfig={{
+                                    namespace: 'BioEditor',
+                                    nodes: [ChipNode],
+                                    onError: (error) => console.error(error),
+                                    theme: {
+                                        paragraph: 'mb-0',
+                                        text: {
+                                            bold: 'font-bold',
+                                            italic: 'italic',
+                                            underline: 'underline',
+                                            strikethrough: 'line-through',
+                                        },
+                                    },
+                                }}
+                            >
+                                <LexicalInitPlugin
+                                    initialText={user.bio || ''}
+                                />
+                                <RichTextPlugin
+                                    ErrorBoundary={LexicalErrorBoundary}
+                                    contentEditable={
+                                        <ContentEditable className="w-full h-full px-3 py-2 text-sm text-foreground outline-none resize-none overflow-y-auto custom-scrollbar min-h-[100px] max-h-[300px]" />
+                                    }
+                                    placeholder={
+                                        <div className="absolute top-[9px] left-3 pointer-events-none text-placeholder text-sm select-none">
+                                            Tell us about yourself...
+                                        </div>
+                                    }
+                                />
+                                <HistoryPlugin />
+                                <ClearEditorPlugin />
+                                <LexicalAutocompletePlugin
+                                    friends={friendUsers}
+                                    serverEmojis={allServerEmojis}
+                                    onOpenChange={(isOpen) => {
+                                        isAutocompleteOpenRef.current = isOpen;
+                                    }}
+                                />
+                                <OnChangePlugin
+                                    onChange={(editorState) => {
+                                        editorState.read(() => {
+                                            const rawText =
+                                                $getRawMessageText();
+                                            if (rawText.length <= 190) {
+                                                setBio(rawText);
+                                            }
+                                        });
+                                    }}
+                                />
+                            </LexicalComposer>
+                        </div>
                         <Text
                             as="p"
                             className="text-right"

@@ -1,5 +1,25 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, {
+    useCallback,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from 'react';
 
+import { ClearEditorPlugin } from '@lexical/react/LexicalClearEditorPlugin';
+import { LexicalComposer } from '@lexical/react/LexicalComposer';
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
+import { ContentEditable } from '@lexical/react/LexicalContentEditable';
+import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary';
+import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
+import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin';
+import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
+import {
+    $getSelection,
+    $isRangeSelection,
+    CLEAR_EDITOR_COMMAND,
+    type LexicalEditor,
+} from 'lexical';
 import { Plus, Send, Smile, X } from 'lucide-react';
 
 import { useChannelMessages, useUserMessages } from '@/api/chat/chat.queries';
@@ -15,20 +35,35 @@ import { useMe } from '@/api/users/users.queries';
 import type { User } from '@/api/users/users.types';
 import type { QueuedFile } from '@/hooks/chat/useFileQueue';
 import { useCustomEmojis } from '@/hooks/useCustomEmojis';
-import { useMentionAutocomplete } from '@/hooks/useMentionAutocomplete';
 import { useChatWS } from '@/hooks/ws/useChatWS';
 import { useAppSelector } from '@/store/hooks';
 import type { ProcessedChatMessage } from '@/types/chat.ui';
-import { AutocompleteSuggestion } from '@/ui/components/common/AutocompleteSuggestion';
 import { Button } from '@/ui/components/common/Button';
+import { ParsedText } from '@/ui/components/common/ParsedText';
 import { StyledUserName } from '@/ui/components/common/StyledUserName';
 import { Text } from '@/ui/components/common/Text';
-import { TextArea } from '@/ui/components/common/TextArea';
 import { useToast } from '@/ui/components/common/Toast';
 import { EmojiPicker } from '@/ui/components/emoji/EmojiPicker';
 import { Box } from '@/ui/components/layout/Box';
+import { ParserPresets, parseText } from '@/utils/textParser/parser';
 
 import { FileQueue } from './FileQueue';
+import { $createChipNode, ChipNode } from './lexical/ChipNode';
+import { LexicalAutocompletePlugin } from './lexical/LexicalAutocompletePlugin';
+import { LexicalSubmitPlugin } from './lexical/LexicalSubmitPlugin';
+import { $getRawMessageText } from './lexical/lexicalUtils';
+
+const EditorBridge = ({
+    onReady,
+}: {
+    onReady: (e: LexicalEditor) => void;
+}): React.ReactNode => {
+    const [editor] = useLexicalComposerContext();
+    useEffect(() => {
+        onReady(editor);
+    }, [editor, onReady]);
+    return null;
+};
 
 interface MessageInputProps {
     fileQueueResult: {
@@ -46,9 +81,16 @@ interface MessageInputProps {
     disableGlowAndColors?: boolean;
 }
 
-/**
- * @description Input component for sending messages in the chat.
- */
+const theme = {
+    paragraph: 'mb-0',
+    text: {
+        bold: 'font-bold',
+        italic: 'italic',
+        underline: 'underline',
+        strikethrough: 'line-through',
+    },
+};
+
 export const MessageInput: React.FC<MessageInputProps> = ({
     fileQueueResult,
     replyingTo,
@@ -56,47 +98,16 @@ export const MessageInput: React.FC<MessageInputProps> = ({
     disableCustomFonts,
     disableGlowAndColors,
 }) => {
-    const [value, setValue] = useState('');
-    const [cursorPosition, setCursorPosition] = useState(0);
     const [isUploading, setIsUploading] = useState(false);
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
     const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+    const [hasText, setHasText] = useState(false);
+    const [editor, setEditor] = useState<LexicalEditor | null>(null);
+
+    const isAutocompleteOpenRef = useRef<boolean>(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
-    const textAreaRef = useRef<HTMLTextAreaElement>(null);
     const emojiPickerRef = useRef<HTMLDivElement>(null);
     const { showToast } = useToast();
-
-    useEffect(() => {
-        if (replyingTo) {
-            textAreaRef.current?.focus();
-        }
-    }, [replyingTo]);
-
-    // Auto-focus on global keydown when no other element is focused
-    useEffect(() => {
-        const handleGlobalKeyDown = (e: KeyboardEvent): void => {
-            const target = e.target as HTMLElement;
-            // Only autofocus if:
-            // 1. Key is a printable character
-            // 2. No input, textarea, or contenteditable element is focused
-            // 3. No modifier keys are pressed (except shift)
-            const isInputElement =
-                target.tagName === 'INPUT' ||
-                target.tagName === 'TEXTAREA' ||
-                target.contentEditable === 'true';
-            const hasModifier = e.ctrlKey || e.metaKey || e.altKey;
-            const isPrintable = e.key.length === 1 && !hasModifier;
-
-            if (isPrintable && !isInputElement && textAreaRef.current) {
-                // Focus the textarea without consuming the key
-                textAreaRef.current.focus();
-                // The key will be handled by the textarea's onChange after focus
-            }
-        };
-
-        window.addEventListener('keydown', handleGlobalKeyDown);
-        return () => window.removeEventListener('keydown', handleGlobalKeyDown);
-    }, []);
 
     useEffect(() => {
         const handleResize = (): void => setIsMobile(window.innerWidth <= 768);
@@ -138,7 +149,6 @@ export const MessageInput: React.FC<MessageInputProps> = ({
     const { data: roles = [] } = useRoles(selectedServerId);
     const { data: channels = [] } = useChannels(selectedServerId);
 
-    // Get messages for the current chat
     const { data: channelMessages } = useChannelMessages(
         selectedServerId,
         selectedChannelId,
@@ -165,20 +175,17 @@ export const MessageInput: React.FC<MessageInputProps> = ({
         [customCategories],
     );
 
-    // Find the last message from the current user
     const findLastMyMessage = useMemo(() => {
         if (!me?._id) return null;
 
         let messages: ChatMessage[] = [];
 
-        // Get messages based on current chat type
         if (selectedServerId && selectedChannelId && channelMessages?.pages) {
             messages = channelMessages.pages.flat();
         } else if (selectedFriendId && userMessages?.pages) {
             messages = userMessages.pages.flat();
         }
 
-        // Find the last message from current user, excluding empty messages
         const myMessages = messages.filter(
             (msg) =>
                 msg.senderId === me._id && msg.text && msg.text.trim() !== '',
@@ -194,17 +201,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
         userMessages,
     ]);
 
-    const autocomplete = useMentionAutocomplete({
-        value,
-        cursorPosition,
-        members,
-        roles,
-        friends: friendUsers,
-        serverEmojis: allServerEmojis,
-        channels,
-    });
-
-    const handleUploadFiles = async (): Promise<string[]> => {
+    const handleUploadFiles = useCallback(async (): Promise<string[]> => {
         if (files.length === 0) return [];
 
         setIsUploading(true);
@@ -243,129 +240,61 @@ export const MessageInput: React.FC<MessageInputProps> = ({
         } finally {
             setIsUploading(false);
         }
-    };
+    }, [files, updateFileStatus, updateFileProgress, showToast]);
 
-    const handleSendMessage = async (text: string): Promise<void> => {
-        const trimmedText = text.trim();
-        if (!trimmedText && files.length === 0) return;
+    const handleSendMessage = useCallback(
+        async (text: string): Promise<void> => {
+            const trimmedText = text.trim();
+            if (!trimmedText && files.length === 0) return;
 
-        const uploadedUrls = await handleUploadFiles();
+            const uploadedUrls = await handleUploadFiles();
 
-        // If upload failed and we only had files, don't send anything
-        if (uploadedUrls.length === 0 && !trimmedText && files.length > 0) {
-            return;
-        }
-
-        const formattedUrls = uploadedUrls.map((url) => `[%file%](${url})`);
-        const finalMessage = [trimmedText, ...formattedUrls]
-            .filter(Boolean)
-            .join('\n');
-
-        if (finalMessage) {
-            sendMessage(finalMessage, replyingTo?._id);
-            setValue('');
-            clearQueue();
-            onCancelReply?.();
-        }
-    };
-
-    const handleEmojiSelect = (emoji: string): void => {
-        setValue((prev) => prev + emoji);
-    };
-
-    const handleCustomEmojiSelect = (emoji: { id: string }): void => {
-        setValue((prev) => prev + `<emoji:${emoji.id}>`);
-    };
-
-    const handleKeyDown = (
-        e: React.KeyboardEvent<HTMLTextAreaElement>,
-    ): void => {
-        if (autocomplete.hasSuggestions) {
-            if (e.key === 'ArrowUp') {
-                e.preventDefault();
-                autocomplete.moveSelection('up');
+            if (uploadedUrls.length === 0 && !trimmedText && files.length > 0) {
                 return;
             }
-            if (e.key === 'ArrowDown') {
-                e.preventDefault();
-                autocomplete.moveSelection('down');
-                return;
-            }
-            if (e.key === 'Tab' || (e.key === 'Enter' && !e.shiftKey)) {
-                e.preventDefault();
-                const newValue = autocomplete.selectCurrent();
-                if (newValue) {
-                    setValue(newValue);
-                    const newCursor = newValue.length;
-                    setCursorPosition(newCursor);
-                    setTimeout(() => {
-                        textAreaRef.current?.setSelectionRange(
-                            newCursor,
-                            newCursor,
-                        );
-                    }, 0);
-                }
-                return;
-            }
-            if (e.key === 'Escape') {
-                e.preventDefault();
-                return;
-            }
-        }
 
-        // Handle ArrowUp to edit last message when input is empty and no autocomplete
-        if (
-            e.key === 'ArrowUp' &&
-            !value.trim() &&
-            !autocomplete.hasSuggestions
-        ) {
-            const lastMessage = findLastMyMessage;
-            if (lastMessage) {
-                e.preventDefault();
+            const formattedUrls = uploadedUrls.map((url) => `[%file%](${url})`);
+            const finalMessage = [trimmedText, ...formattedUrls]
+                .filter(Boolean)
+                .join('\n');
 
-                // Dispatch custom event to trigger inline editing
-                const editEvent = new CustomEvent('editLastMessage', {
-                    detail: {
-                        messageId: lastMessage._id,
-                        serverId: lastMessage.serverId,
-                        channelId: lastMessage.channelId,
-                        receiverId: lastMessage.receiverId,
-                    },
-                });
-                window.dispatchEvent(editEvent);
+            if (finalMessage) {
+                sendMessage(finalMessage, replyingTo?._id);
+                clearQueue();
+                onCancelReply?.();
             }
-            return;
-        }
-
-        if (e.key === 'Enter' && !e.shiftKey) {
-            if (isMobile) {
-                // On mobile, just insert a new line by Default
-                return;
-            }
-            e.preventDefault();
-            if (!isUploading) {
-                void handleSendMessage(value);
-            }
-        }
-    };
-
-    const getPlaceholder = (): string => {
-        if (isUploading) return 'Uploading...';
-
-        const hasLastMessage = findLastMyMessage !== null;
-        if (hasLastMessage && !value.trim()) {
-            return 'Type a message... (ArrowUp to edit last message)';
-        }
-
-        return 'Type a message...';
-    };
+        },
+        [
+            files,
+            handleUploadFiles,
+            clearQueue,
+            sendMessage,
+            replyingTo,
+            onCancelReply,
+        ],
+    );
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
         if (e.target.files) {
             addFiles(e.target.files);
-            // Reset input so the same file can be selected again if removed
             e.target.value = '';
         }
+    };
+
+    const initialConfig = {
+        namespace: 'MessageInput',
+        nodes: [ChipNode],
+        onError: (error: Error) => console.error(error),
+        theme,
+    };
+
+    const getPlaceholder = (): string => {
+        if (isUploading) return 'Uploading...';
+        const hasLastMessage = findLastMyMessage !== null;
+        if (hasLastMessage && !hasText) {
+            return 'Type a message... (ArrowUp to edit last message)';
+        }
+        return 'Type a message...';
     };
 
     return (
@@ -392,11 +321,16 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                             {replyingTo.user.displayName ||
                                 replyingTo.user.username}
                         </StyledUserName>
-                        <Text className="text-xs text-muted-foreground truncate">
-                            {(replyingTo.text || '')
-                                .replaceAll('\n', ' ')
-                                .trim() || '(no text)'}
-                        </Text>
+                        <Box className="text-xs text-muted-foreground truncate opacity-80 flex gap-1 overflow-hidden whitespace-nowrap items-center">
+                            <ParsedText
+                                nodes={parseText(
+                                    replyingTo.text || '',
+                                    ParserPresets.MESSAGE,
+                                )}
+                                size="xs"
+                                wrap="nowrap"
+                            />
+                        </Box>
                     </Box>
                     <Button
                         className="h-7 w-7 p-0 shrink-0"
@@ -410,7 +344,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                 </Box>
             )}
 
-            <Box className="flex items-end p-2 gap-2">
+            <Box className="flex items-end p-2 gap-2 relative">
                 <input
                     multiple
                     ref={fileInputRef}
@@ -427,25 +361,77 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                     <Plus size={20} />
                 </Button>
 
-                <TextArea
-                    className="flex-1 bg-transparent border-none focus:ring-0 min-h-[40px] py-2 resize-none scrollbar-none"
-                    placeholder={getPlaceholder()}
-                    ref={textAreaRef}
-                    rows={1}
-                    value={value}
-                    onChange={(e) => {
-                        setValue(e.target.value);
-                        setCursorPosition(e.target.selectionStart);
-                        sendTyping();
-                    }}
-                    onClick={(e) => {
-                        setCursorPosition(e.currentTarget.selectionStart);
-                    }}
-                    onKeyDown={handleKeyDown}
-                    onKeyUp={(e) => {
-                        setCursorPosition(e.currentTarget.selectionStart);
-                    }}
-                />
+                <div className="flex-1 relative cursor-text min-h-[40px] flex items-center bg-bg-subtle rounded-md border border-border-subtle focus-within:outline-none focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-1 transition-all duration-200">
+                    <LexicalComposer initialConfig={initialConfig}>
+                        <EditorBridge onReady={setEditor} />
+                        <RichTextPlugin
+                            ErrorBoundary={LexicalErrorBoundary}
+                            contentEditable={
+                                <ContentEditable
+                                    className="w-full h-full px-3 py-2 text-sm text-foreground outline-none resize-none overflow-y-auto custom-scrollbar max-h-[200px]"
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'ArrowUp' && !hasText) {
+                                            const lastMessage =
+                                                findLastMyMessage;
+                                            if (lastMessage) {
+                                                e.preventDefault();
+                                                const editEvent =
+                                                    new CustomEvent(
+                                                        'editLastMessage',
+                                                        {
+                                                            detail: {
+                                                                messageId:
+                                                                    lastMessage._id,
+                                                                serverId:
+                                                                    lastMessage.serverId,
+                                                                channelId:
+                                                                    lastMessage.channelId,
+                                                                receiverId:
+                                                                    lastMessage.receiverId,
+                                                            },
+                                                        },
+                                                    );
+                                                window.dispatchEvent(editEvent);
+                                            }
+                                        }
+                                    }}
+                                />
+                            }
+                            placeholder={
+                                <div className="absolute top-[9px] left-3 pointer-events-none text-placeholder text-sm select-none">
+                                    {getPlaceholder()}
+                                </div>
+                            }
+                        />
+                        <HistoryPlugin />
+                        <ClearEditorPlugin />
+                        <LexicalSubmitPlugin
+                            isAutocompleteOpenRef={isAutocompleteOpenRef}
+                            onSendMessage={handleSendMessage}
+                        />
+                        <LexicalAutocompletePlugin
+                            channels={channels}
+                            friends={friendUsers}
+                            members={members}
+                            roles={roles}
+                            serverEmojis={allServerEmojis}
+                            onOpenChange={(isOpen) => {
+                                isAutocompleteOpenRef.current = isOpen;
+                            }}
+                        />
+                        <OnChangePlugin
+                            onChange={(editorState) => {
+                                editorState.read(() => {
+                                    const text = $getRawMessageText();
+                                    setHasText(text.trim().length > 0);
+                                    if (text.trim().length > 0) {
+                                        sendTyping();
+                                    }
+                                });
+                            }}
+                        />
+                    </LexicalComposer>
+                </div>
 
                 <Button
                     className="mb-1 h-8 w-8 p-0 shrink-0"
@@ -456,39 +442,29 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                     <Smile size={20} />
                 </Button>
 
-                {(value.trim() || files.length > 0) && isMobile && (
+                {(hasText || files.length > 0) && isMobile && (
                     <Button
                         className="mb-1 h-8 w-8 p-0 shrink-0 text-primary"
                         disabled={isUploading}
                         size="sm"
                         variant="ghost"
-                        onClick={() => void handleSendMessage(value)}
+                        onClick={() => {
+                            if (editor) {
+                                editor.getEditorState().read(() => {
+                                    const text = $getRawMessageText();
+                                    void handleSendMessage(text);
+                                });
+                                editor.dispatchCommand(
+                                    CLEAR_EDITOR_COMMAND,
+                                    undefined,
+                                );
+                            }
+                        }}
                     >
                         <Send size={20} />
                     </Button>
                 )}
             </Box>
-
-            {autocomplete.hasSuggestions && (
-                <AutocompleteSuggestion
-                    selectedIndex={autocomplete.selectedIndex}
-                    suggestions={autocomplete.suggestions}
-                    onSelect={(suggestion) => {
-                        const newValue =
-                            autocomplete.selectSuggestion(suggestion);
-                        setValue(newValue);
-                        const newCursor = newValue.length;
-                        setCursorPosition(newCursor);
-                        setTimeout(() => {
-                            textAreaRef.current?.focus();
-                            textAreaRef.current?.setSelectionRange(
-                                newCursor,
-                                newCursor,
-                            );
-                        }, 0);
-                    }}
-                />
-            )}
 
             {showEmojiPicker && (
                 <div
@@ -497,8 +473,27 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                 >
                     <EmojiPicker
                         customCategories={customCategories}
-                        onCustomEmojiSelect={handleCustomEmojiSelect}
-                        onEmojiSelect={handleEmojiSelect}
+                        onCustomEmojiSelect={(emoji) => {
+                            editor?.update(() => {
+                                const selection = $getSelection();
+                                if ($isRangeSelection(selection)) {
+                                    const chip = $createChipNode('emoji', {
+                                        id: emoji.id,
+                                        label: emoji.name,
+                                        imageUrl: emoji.url,
+                                    });
+                                    selection.insertNodes([chip]);
+                                }
+                            });
+                        }}
+                        onEmojiSelect={(emoji) => {
+                            editor?.update(() => {
+                                const selection = $getSelection();
+                                if ($isRangeSelection(selection)) {
+                                    selection.insertText(emoji);
+                                }
+                            });
+                        }}
                     />
                 </div>
             )}
