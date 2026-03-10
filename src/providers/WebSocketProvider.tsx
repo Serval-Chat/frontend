@@ -1,10 +1,12 @@
 import type React from 'react';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 
 import { useQueryClient } from '@tanstack/react-query';
 
+import { useAuth } from '@/hooks/useAuth';
+import { initTauriNotifications } from '@/lib/tauriNotifications';
 import { useAppDispatch } from '@/store/hooks';
-import { getAuthToken, hasAuthToken } from '@/utils/authToken';
+import { getAuthToken } from '@/utils/authToken';
 import { setupGlobalWsHandlers, wsClient } from '@/ws';
 
 interface WebSocketProviderProps {
@@ -17,33 +19,14 @@ interface WebSocketProviderProps {
 export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
     children,
 }) => {
-    const [isAuthenticated, setIsAuthenticated] = useState(hasAuthToken());
+    const { isAuthenticated } = useAuth();
     const queryClient = useQueryClient();
     const dispatch = useAppDispatch();
 
     useEffect(() => {
-        setupGlobalWsHandlers(queryClient, dispatch);
+        initTauriNotifications(queryClient).catch(console.error);
+        return setupGlobalWsHandlers(queryClient, dispatch);
     }, [queryClient, dispatch]);
-
-    useEffect(() => {
-        // Listen for storage changes (login/logout)
-        const handleStorageChange = (): void => {
-            setIsAuthenticated(hasAuthToken());
-        };
-
-        window.addEventListener('storage', handleStorageChange);
-
-        const handleAuthChange = (): void => {
-            setIsAuthenticated(hasAuthToken());
-        };
-
-        window.addEventListener('auth-change', handleAuthChange);
-
-        return () => {
-            window.removeEventListener('storage', handleStorageChange);
-            window.removeEventListener('auth-change', handleAuthChange);
-        };
-    }, []);
 
     useEffect(() => {
         if (isAuthenticated) {

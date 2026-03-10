@@ -14,6 +14,7 @@ interface ServerItemProps {
     server: Server;
     isActive?: boolean;
     isUnread?: boolean;
+    pingCount?: number;
     onClick?: () => void;
 }
 
@@ -24,6 +25,7 @@ export const ServerItem: React.FC<ServerItemProps> = ({
     server,
     isActive,
     isUnread,
+    pingCount,
     onClick,
 }) => {
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -62,6 +64,7 @@ export const ServerItem: React.FC<ServerItemProps> = ({
                 {contextMenuItems.length > 0 ? (
                     <ContextMenu items={contextMenuItems}>
                         <ServerIcon
+                            badgeCount={pingCount}
                             isActive={isActive}
                             server={server}
                             onClick={onClick}

@@ -19,6 +19,11 @@ export const PrimaryNavBar: React.FC = () => {
     const { navMode, selectedFriendId, selectedChannelId } = useAppSelector(
         (state) => state.nav,
     );
+    const unreadDms = useAppSelector((state) => state.unread.unreadDms);
+    const totalUnreadDms = Object.values(unreadDms).reduce(
+        (acc, count) => acc + (typeof count === 'number' ? count : 0),
+        0,
+    );
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
     const location = useLocation();
@@ -68,6 +73,7 @@ export const PrimaryNavBar: React.FC = () => {
         >
             <Box>
                 <IconButton
+                    badgeCount={totalUnreadDms}
                     icon={Home}
                     isActive={navMode === 'friends'}
                     onClick={handleHomeClick}

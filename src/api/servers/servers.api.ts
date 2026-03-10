@@ -17,10 +17,12 @@ export const serversApi = {
         return response.data;
     },
 
-    getUnreadStatus: async (): Promise<Record<string, boolean>> => {
-        const response = await apiClient.get<Record<string, boolean>>(
-            '/api/v1/servers/unread',
-        );
+    getUnreadStatus: async (): Promise<
+        Record<string, { hasUnread: boolean; pingCount: number }>
+    > => {
+        const response = await apiClient.get<
+            Record<string, { hasUnread: boolean; pingCount: number }>
+        >('/api/v1/servers/unread');
         return response.data;
     },
 

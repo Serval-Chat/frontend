@@ -15,6 +15,7 @@ export const SHOWOFF_SECTIONS = {
     colorPalette: 'color-palette',
     contextMenu: 'context-menu',
     userProfilePopup: 'user-profile-popup',
+    pushPrompt: 'push-prompt',
 } as const;
 
 export const BUTTON_VARIANTS = [

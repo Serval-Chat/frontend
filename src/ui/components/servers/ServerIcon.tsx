@@ -1,6 +1,5 @@
-import React from 'react';
-
 import type { Server } from '@/api/servers/servers.types';
+import { Badge } from '@/ui/components/common/Badge';
 import { resolveApiUrl } from '@/utils/apiUrl';
 import { cn } from '@/utils/cn';
 
@@ -10,6 +9,7 @@ interface ServerIconProps {
     onClick?: () => void;
     className?: string;
     size?: 'xxs' | 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+    badgeCount?: number;
 }
 
 export const ServerIcon: React.FC<ServerIconProps> = ({
@@ -18,6 +18,7 @@ export const ServerIcon: React.FC<ServerIconProps> = ({
     onClick,
     className,
     size = 'md',
+    badgeCount,
 }) => {
     const iconUrl = resolveApiUrl(server.icon);
 
@@ -58,11 +59,10 @@ export const ServerIcon: React.FC<ServerIconProps> = ({
     return (
         <div
             className={cn(
-                'flex items-center justify-center transition-all duration-200 cursor-pointer overflow-hidden group relative',
-                'bg-[--color-bg-subtle] text-foreground-muted hover:bg-[--color-primary] hover:text-foreground-inverse',
+                'flex items-center justify-center transition-all duration-200 cursor-pointer group relative',
                 isActive
-                    ? `${activeRoundedClasses[size]} bg-[--color-primary] text-foreground-inverse`
-                    : `${roundedClasses[size]} hover:${activeRoundedClasses[size]}`,
+                    ? `bg-[--color-primary] text-foreground-inverse`
+                    : `bg-[--color-bg-subtle] text-foreground-muted hover:bg-[--color-primary] hover:text-foreground-inverse`,
                 sizeClasses[size],
                 className,
             )}
@@ -76,14 +76,26 @@ export const ServerIcon: React.FC<ServerIconProps> = ({
                 }
             }}
         >
-            {iconUrl ? (
-                <img
-                    alt={server.name}
-                    className="w-full h-full object-cover"
-                    src={iconUrl}
-                />
-            ) : (
-                <span className="font-bold">{initials}</span>
+            <div
+                className={cn(
+                    'w-full h-full flex items-center justify-center overflow-hidden transition-all duration-200',
+                    isActive
+                        ? activeRoundedClasses[size]
+                        : `${roundedClasses[size]} group-hover:${activeRoundedClasses[size]}`,
+                )}
+            >
+                {iconUrl ? (
+                    <img
+                        alt={server.name}
+                        className="w-full h-full object-cover"
+                        src={iconUrl}
+                    />
+                ) : (
+                    <span className="font-bold">{initials}</span>
+                )}
+            </div>
+            {badgeCount !== undefined && badgeCount > 0 && (
+                <Badge count={badgeCount} />
             )}
         </div>
     );

@@ -165,6 +165,18 @@ export interface IMemberUpdatedEvent {
 }
 
 /**
+ * @description New notification alert (mention or reaction).
+ */
+export interface IMentionEvent {
+    type: 'mention' | 'reaction';
+    senderId: string;
+    sender: string;
+    serverId?: string;
+    channelId?: string;
+    message: IMessageServer | IMessageDm;
+}
+
+/**
  * @description Member added.
  */
 export interface IMemberAddedEvent {
@@ -410,6 +422,7 @@ export const WsEvents = {
     CHANNEL_PERMISSIONS_UPDATED: 'channel_permissions_updated',
     CATEGORY_PERMISSIONS_UPDATED: 'category_permissions_updated',
     EMOJI_UPDATED: 'emoji_updated',
+    MENTION: 'mention',
 } as const;
 
 export interface IReactionEventPayload {

@@ -19,6 +19,12 @@ vi.mock('@/utils/authToken', () => ({
     setAuthToken: vi.fn(),
 }));
 
+vi.mock('@tanstack/react-query', () => ({
+    useQueryClient: () => ({
+        invalidateQueries: vi.fn(),
+    }),
+}));
+
 describe('useLoginForm', () => {
     it('should initialize with empty values', () => {
         const { result } = renderHook(() => useLoginForm());

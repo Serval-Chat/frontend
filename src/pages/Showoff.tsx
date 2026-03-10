@@ -11,6 +11,7 @@ import { InputsDemo } from '@/ui/components/showoff/InputsDemo';
 import { LoadingSpinnerDemo } from '@/ui/components/showoff/LoadingSpinnerDemo';
 import { NavigationDemo } from '@/ui/components/showoff/NavigationDemo';
 import { ProcessingButtons } from '@/ui/components/showoff/ProcessingButtons';
+import { PushPromptDemo } from '@/ui/components/showoff/PushPromptDemo';
 import { RetainSizeButtons } from '@/ui/components/showoff/RetainSizeButtons';
 import { SpecializedButtons } from '@/ui/components/showoff/SpecializedButtons';
 import { StatusMessages } from '@/ui/components/showoff/StatusMessages';
@@ -130,6 +131,10 @@ export const Showoff = (): ReactNode => {
         },
 
         {
+            id: SHOWOFF_SECTIONS.pushPrompt,
+            title: 'Push Notifications Prompt',
+        },
+        {
             id: SHOWOFF_SECTIONS.colorPalette,
             title: 'Leptailurus Serval Color Palette',
         },
@@ -158,6 +163,7 @@ export const Showoff = (): ReactNode => {
 
             <ContextMenuDemo />
             <UserProfilePopupDemo />
+            <PushPromptDemo />
 
             <InputsDemo />
             <TogglesDemo />

@@ -1,7 +1,8 @@
 import React from 'react';
 
-import { Link } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 
+import { useAuth } from '@/hooks/useAuth';
 import { useLoginForm } from '@/hooks/useLoginForm';
 import { FormContent } from '@/ui/components/auth/FormContent';
 import { Button } from '@/ui/components/common/Button';
@@ -18,6 +19,7 @@ import { DefaultBackground } from '@/ui/components/layout/DefaultBackground';
  * @description Login page
  */
 export const Login: React.FC = () => {
+    const { isAuthenticated } = useAuth();
     const {
         loginInput,
         setLoginInput,
@@ -26,6 +28,8 @@ export const Login: React.FC = () => {
         status,
         handleSubmit,
     } = useLoginForm();
+
+    if (isAuthenticated) return <Navigate replace to="/chat" />;
 
     return (
         <Box className="min-h-screen w-full flex flex-col items-center justify-center bg-background relative overflow-hidden p-md">

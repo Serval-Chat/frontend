@@ -6,6 +6,8 @@ import {
     useQueryClient,
 } from '@tanstack/react-query';
 
+import { hasAuthToken } from '@/utils/authToken';
+
 import { usersApi } from './users.api';
 import type {
     User,
@@ -18,6 +20,7 @@ export const useMe = (): UseQueryResult<User, Error> =>
     useQuery({
         queryKey: ['me'],
         queryFn: usersApi.getMe,
+        enabled: hasAuthToken(),
     });
 
 export const useUserById = (

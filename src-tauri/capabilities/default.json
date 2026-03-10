@@ -8,6 +8,7 @@
   "permissions": [
     "core:default",
     "http:default",
-    "http:allow-fetch"
+    "http:allow-fetch",
+    "notification:default"
   ]
 }

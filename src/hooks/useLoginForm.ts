@@ -1,9 +1,15 @@
 import { useState } from 'react';
 
+import { useQueryClient } from '@tanstack/react-query';
 import { isAxiosError } from 'axios';
 import { useNavigate } from 'react-router-dom';
 
 import { authApi } from '@/api/auth/auth.api';
+import {
+    checkAndMigrateVapid,
+    listenForSwNavigation,
+    setupWebPush,
+} from '@/lib/pushClient';
 import type { StatusState } from '@/ui/types';
 import { setAuthToken } from '@/utils/authToken';
 
@@ -25,6 +31,7 @@ export const useLoginForm = (): LoginFormResult => {
         type: '',
     });
     const navigate = useNavigate();
+    const queryClient = useQueryClient();
 
     const handleSubmit = async (e: React.FormEvent): Promise<void> => {
         e.preventDefault();
@@ -37,7 +44,15 @@ export const useLoginForm = (): LoginFormResult => {
 
         try {
             const data = await authApi.login({ login: loginInput, password });
-            setAuthToken(data.token);
+            await setAuthToken(data.token);
+            await queryClient.invalidateQueries({ queryKey: ['me'] });
+
+            await setupWebPush();
+            await checkAndMigrateVapid();
+            listenForSwNavigation((url) => {
+                void navigate(url);
+            });
+
             void navigate('/chat');
         } catch (error: unknown) {
             let errorMessage = 'Login failed';

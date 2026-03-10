@@ -4,6 +4,11 @@ import { isAxiosError } from 'axios';
 import { useNavigate } from 'react-router-dom';
 
 import { authApi } from '@/api/auth/auth.api';
+import {
+    checkAndMigrateVapid,
+    listenForSwNavigation,
+    setupWebPush,
+} from '@/lib/pushClient';
 import type { StatusState } from '@/ui/types';
 import { setAuthToken } from '@/utils/authToken';
 import {
@@ -120,7 +125,14 @@ export const useRegisterForm = (): RegisterFormResult => {
                 password,
                 invite: inviteToken,
             });
-            setAuthToken(data.token);
+            await setAuthToken(data.token);
+
+            await setupWebPush();
+            await checkAndMigrateVapid();
+            listenForSwNavigation((url) => {
+                void navigate(url);
+            });
+
             void navigate('/chat');
         } catch (error: unknown) {
             let errorMessage = 'Registration failed';

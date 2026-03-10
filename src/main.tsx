@@ -4,6 +4,7 @@ import 'katex/dist/katex.min.css';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 
+import { teardownWebPush } from '@/lib/pushClient';
 import { Admin } from '@/pages/Admin';
 import { App } from '@/pages/App';
 import { Chat } from '@/pages/Chat';
@@ -24,8 +25,14 @@ import { ToastProvider } from '@/ui/components/common/Toast';
 import { AdminRoute } from '@/ui/components/layout/AdminRoute';
 import { AuthenticatedLayout } from '@/ui/components/layout/AuthenticatedLayout';
 import { NavigationSync } from '@/ui/components/layout/NavigationSync';
+import { hasAuthToken } from '@/utils/authToken';
 
 const isTauri = (): boolean => '__TAURI__' in window;
+window.addEventListener('auth-change', () => {
+    if (!hasAuthToken()) {
+        teardownWebPush().catch(console.error);
+    }
+});
 
 export const WebOnly = ({
     children,

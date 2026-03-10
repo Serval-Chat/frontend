@@ -1,13 +1,27 @@
-import { type ReactNode } from 'react';
+import React, { type ReactNode } from 'react';
 
 import { Navigate, Outlet } from 'react-router-dom';
 
 import { useMe } from '@/api/users/users.queries';
+import { useAuth } from '@/hooks/useAuth';
+import { syncWebPush } from '@/lib/pushClient';
 import { WebSocketProvider } from '@/providers/WebSocketProvider';
 import { LoadingSpinner } from '@/ui/components/common/LoadingSpinner';
+import { PushPrompt } from '@/ui/components/common/PushPrompt';
 
 export const AuthenticatedLayout = (): ReactNode => {
+    const { isAuthenticated } = useAuth();
     const { data: user, isLoading } = useMe();
+
+    React.useEffect(() => {
+        if (isAuthenticated && user) {
+            void syncWebPush();
+        }
+    }, [isAuthenticated, user]);
+
+    if (!isAuthenticated) {
+        return <Navigate replace to="/login" />;
+    }
 
     if (isLoading) {
         return (
@@ -18,11 +32,12 @@ export const AuthenticatedLayout = (): ReactNode => {
     }
 
     if (!user) {
-        return <Navigate replace to="/login" />;
+        return null;
     }
 
     return (
         <WebSocketProvider>
+            <PushPrompt />
             <Outlet />
         </WebSocketProvider>
     );

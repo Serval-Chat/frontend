@@ -37,15 +37,19 @@ export const ServerList: React.FC = () => {
             {isLoading ? (
                 <div className="w-12 h-12 rounded-[1.2rem] bg-white/5 animate-pulse" />
             ) : (
-                servers?.map((server) => (
-                    <ServerItem
-                        isActive={selectedServerId === server._id}
-                        isUnread={!!unreadServers[server._id]}
-                        key={server._id}
-                        server={server}
-                        onClick={() => handleServerClick(server._id)}
-                    />
-                ))
+                servers?.map((server) => {
+                    const unreadStatus = unreadServers[server._id];
+                    return (
+                        <ServerItem
+                            isActive={selectedServerId === server._id}
+                            isUnread={unreadStatus?.hasUnread}
+                            key={server._id}
+                            pingCount={unreadStatus?.pingCount}
+                            server={server}
+                            onClick={() => handleServerClick(server._id)}
+                        />
+                    );
+                })
             )}
         </div>
     );

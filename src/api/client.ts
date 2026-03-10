@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-import { getAuthToken } from '@/utils/authToken';
+import { getAuthToken, removeAuthToken } from '@/utils/authToken';
 
 export const apiClient = axios.create({
     baseURL: import.meta.env.VITE_API_BASE_URL,
@@ -18,9 +18,9 @@ apiClient.interceptors.request.use((config) => {
 
 apiClient.interceptors.response.use(
     (response) => response,
-    (error) => {
+    async (error) => {
         if (error.response?.status === 401) {
-            window.location.href = '/login';
+            await removeAuthToken();
         }
         return Promise.reject(error);
     },
