@@ -2,7 +2,12 @@ import { render } from '@testing-library/react';
 import { useNavigate } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import * as UserQueries from '@/api/users/users.queries';
+import {
+    useClearChannelPings,
+    useDeletePing,
+    usePings,
+} from '@/api/pings/pings.queries';
+import { useMe, useUserById } from '@/api/users/users.queries';
 import * as Permissions from '@/hooks/usePermissions';
 import { useAppSelector } from '@/store/hooks';
 
@@ -45,6 +50,12 @@ vi.mock('@/api/servers/servers.queries', () => ({
     useMembers: vi.fn().mockReturnValue({ data: [] }),
     useRoles: vi.fn().mockReturnValue({ data: [] }),
     useServerDetails: vi.fn().mockReturnValue({ data: undefined }),
+}));
+
+vi.mock('@/api/pings/pings.queries', () => ({
+    usePings: vi.fn().mockReturnValue({ data: { pings: [] } }),
+    useClearChannelPings: vi.fn().mockReturnValue({ mutate: vi.fn() }),
+    useDeletePing: vi.fn().mockReturnValue({ mutate: vi.fn() }),
 }));
 
 vi.mock('@/api/users/users.queries', () => ({
@@ -94,9 +105,19 @@ describe('channel send permission gating', () => {
             };
             return selector(state as never);
         });
-        vi.mocked(UserQueries.useUserById).mockReturnValue({
+        vi.mocked(useMe).mockReturnValue({ data: undefined } as never);
+        vi.mocked(useUserById).mockReturnValue({
             data: undefined,
             isError: false,
+        } as never);
+        vi.mocked(usePings).mockReturnValue({
+            data: { pings: [] },
+        } as never);
+        vi.mocked(useClearChannelPings).mockReturnValue({
+            mutate: vi.fn(),
+        } as never);
+        vi.mocked(useDeletePing).mockReturnValue({
+            mutate: vi.fn(),
         } as never);
     });
 
@@ -145,7 +166,7 @@ describe('MainChat fallback logic', () => {
             return selector(state as never);
         });
 
-        vi.mocked(UserQueries.useUserById).mockReturnValue({
+        vi.mocked(useUserById).mockReturnValue({
             data: undefined,
             isError: true,
         } as never);
@@ -165,7 +186,7 @@ describe('MainChat fallback logic', () => {
             return selector(state as never);
         });
 
-        vi.mocked(UserQueries.useUserById).mockReturnValue({
+        vi.mocked(useUserById).mockReturnValue({
             data: { _id: 'validUserId123', username: 'RealFriend' },
             isError: false,
         } as never);

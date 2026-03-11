@@ -741,4 +741,107 @@ describe('TextParser', () => {
             },
         ]);
     });
+
+    it('should parse single-line blockquote', () => {
+        const text = '> This is a quote';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            {
+                type: 'blockquote',
+                content: 'This is a quote',
+                multiline: false,
+            },
+        ]);
+    });
+
+    it('should parse single-line blockquote with nested formatting', () => {
+        const text = '> Quote with **bold**';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            {
+                type: 'blockquote',
+                content: [
+                    { type: 'text', content: 'Quote with ' },
+                    { type: 'bold', content: 'bold' },
+                ],
+                multiline: false,
+            },
+        ]);
+    });
+
+    it('should parse multi-line blockquote', () => {
+        const text = '>>> This is a\nmulti-line\nquote';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            {
+                type: 'blockquote',
+                content: 'This is a\nmulti-line\nquote',
+                multiline: true,
+            },
+        ]);
+    });
+
+    it('should not parse blockquote if not at start of line', () => {
+        const text = 'Not a > quote';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([{ type: 'text', content: 'Not a > quote' }]);
+    });
+
+    it('should handle escaped blockquote', () => {
+        const text = '\\> Not a quote';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            { type: 'text', content: '>' },
+            { type: 'text', content: ' Not a quote' },
+        ]);
+    });
+
+    it('should group consecutive blockquote lines', () => {
+        const text = '> Line 1\n> Line 2';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            {
+                type: 'blockquote',
+                content: 'Line 1\nLine 2',
+                multiline: false,
+            },
+        ]);
+    });
+
+    it('should parse nested blockquotes', () => {
+        const text = '> level 1\n> > level 2';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            {
+                type: 'blockquote',
+                content: [
+                    { type: 'text', content: 'level 1\n' },
+                    {
+                        type: 'blockquote',
+                        content: 'level 2',
+                        multiline: false,
+                    },
+                ],
+                multiline: false,
+            },
+        ]);
+    });
+
+    it('should handle mixed nesting with no spaces', () => {
+        const text = '>>level 2';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            {
+                type: 'blockquote',
+                content: [
+                    {
+                        type: 'blockquote',
+                        content: 'level 2',
+                        multiline: false,
+                    },
+                ],
+                multiline: false,
+            },
+        ]);
+    });
 });

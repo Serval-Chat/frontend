@@ -39,6 +39,7 @@ export const ParserPresets = {
             ParserFeature.THEMATIC_BREAK,
             ParserFeature.UNDERLINE,
             ParserFeature.STRIKETHROUGH,
+            ParserFeature.BLOCKQUOTE,
         ],
     },
     BIO: {
@@ -69,6 +70,7 @@ export const ParserPresets = {
             ParserFeature.THEMATIC_BREAK,
             ParserFeature.UNDERLINE,
             ParserFeature.STRIKETHROUGH,
+            ParserFeature.BLOCKQUOTE,
         ],
     },
 } as const;
@@ -449,6 +451,23 @@ export class TextParser {
                         currentText = '';
                     }
                     nodes.push(latexNode);
+                    continue;
+                }
+            }
+
+            // quote lbocks
+            if (
+                char === '>' &&
+                this.options.features.includes(ParserFeature.BLOCKQUOTE) &&
+                (this.index === 0 || this.text[this.index - 1] === '\n')
+            ) {
+                const blockquoteNode = this.tryParseBlockquote();
+                if (blockquoteNode) {
+                    if (currentText) {
+                        nodes.push({ type: 'text', content: currentText });
+                        currentText = '';
+                    }
+                    nodes.push(blockquoteNode);
                     continue;
                 }
             }
@@ -1390,6 +1409,71 @@ export class TextParser {
                 type: 'strikethrough',
                 content: this.parseContent(content),
             } as ASTNode;
+        }
+
+        this.index = start;
+        return null;
+    }
+
+    private tryParseBlockquote(): ASTNode | null {
+        const start = this.index;
+
+        if (this.peek('>>> ')) {
+            this.index += 4;
+            const content = this.text.slice(this.index);
+            this.index = this.text.length;
+            return {
+                type: 'blockquote',
+                content: this.parseContent(content),
+                multiline: true,
+            } as ASTNode;
+        }
+
+        if (this.peek('>')) {
+            const lines: string[] = [];
+            let tempIndex = this.index;
+
+            while (tempIndex < this.text.length) {
+                if (
+                    tempIndex > this.index &&
+                    this.text[tempIndex - 1] !== '\n'
+                ) {
+                    break;
+                }
+
+                if (this.text.startsWith('>', tempIndex)) {
+                    tempIndex++; // Skip >
+                    // Optional space
+                    if (this.text[tempIndex] === ' ') {
+                        tempIndex++;
+                    }
+
+                    let lineContent = '';
+                    while (
+                        tempIndex < this.text.length &&
+                        this.text[tempIndex] !== '\n'
+                    ) {
+                        lineContent += this.text[tempIndex];
+                        tempIndex++;
+                    }
+                    lines.push(lineContent);
+
+                    if (this.text[tempIndex] === '\n') {
+                        tempIndex++;
+                    }
+                } else {
+                    break;
+                }
+            }
+
+            if (lines.length > 0) {
+                this.index = tempIndex;
+                return {
+                    type: 'blockquote',
+                    content: this.parseContent(lines.join('\n')),
+                    multiline: false,
+                } as ASTNode;
+            }
         }
 
         this.index = start;

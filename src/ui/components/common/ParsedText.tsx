@@ -1,10 +1,10 @@
-/* eslint-disable react/no-array-index-key */
 import React from 'react';
 
 import { ChannelLink } from '@/ui/components/chat/ChannelLink';
 import { FileEmbed } from '@/ui/components/chat/FileEmbed';
 import { InviteLink } from '@/ui/components/chat/InviteLink';
 import { Box } from '@/ui/components/layout/Box';
+import { cn } from '@/utils/cn';
 import type { ASTNode } from '@/utils/textParser/types';
 
 import { CodeBlock } from './CodeBlock';
@@ -34,6 +34,7 @@ interface ParsedTextProps {
     condenseFiles?: boolean;
     largeEmojis?: boolean;
     wrap?: TextProps['wrap'];
+    isNested?: boolean;
 }
 
 /**
@@ -46,6 +47,7 @@ export const ParsedText: React.FC<ParsedTextProps> = ({
     condenseFiles,
     largeEmojis,
     wrap,
+    isNested,
 }) => {
     const fileNodesCount = nodes.filter((n) => n.type === 'file').length;
     const displayNodes = condenseFiles
@@ -104,6 +106,7 @@ export const ParsedText: React.FC<ParsedTextProps> = ({
                                     node.content
                                 ) : (
                                     <ParsedText
+                                        isNested
                                         nodes={node.content}
                                         size={size}
                                         wrap={wrap}
@@ -125,6 +128,7 @@ export const ParsedText: React.FC<ParsedTextProps> = ({
                                     node.content
                                 ) : (
                                     <ParsedText
+                                        isNested
                                         nodes={node.content}
                                         size={size}
                                         wrap={wrap}
@@ -145,6 +149,7 @@ export const ParsedText: React.FC<ParsedTextProps> = ({
                                     node.content
                                 ) : (
                                     <ParsedText
+                                        isNested
                                         nodes={node.content}
                                         size={size}
                                         wrap={wrap}
@@ -438,6 +443,30 @@ export const ParsedText: React.FC<ParsedTextProps> = ({
 
                     case 'thematic_break':
                         return <Divider fullWidth className="my-2" key={idx} />;
+
+                    case 'blockquote':
+                        return (
+                            <Box
+                                className={cn(
+                                    'pl-4 border-l-4 border-border-subtle italic',
+                                    !isNested && 'my-2',
+                                )}
+                                key={idx}
+                            >
+                                {typeof node.content === 'string' ? (
+                                    <Text size={size} wrap={wrap}>
+                                        {node.content}
+                                    </Text>
+                                ) : (
+                                    <ParsedText
+                                        isNested
+                                        nodes={node.content}
+                                        size={size}
+                                        wrap={wrap}
+                                    />
+                                )}
+                            </Box>
+                        );
 
                     default:
                         return null;

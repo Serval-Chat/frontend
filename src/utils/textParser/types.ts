@@ -29,6 +29,7 @@ export const ParserFeature = {
     THEMATIC_BREAK: 'THEMATIC_BREAK',
     UNDERLINE: 'UNDERLINE',
     STRIKETHROUGH: 'STRIKETHROUGH',
+    BLOCKQUOTE: 'BLOCKQUOTE',
 } as const;
 
 export type ParserFeature = (typeof ParserFeature)[keyof typeof ParserFeature];
@@ -60,7 +61,8 @@ export type ASTNodeType =
     | 'inline_latex'
     | 'thematic_break'
     | 'underline'
-    | 'strikethrough';
+    | 'strikethrough'
+    | 'blockquote';
 
 export interface TextNode {
     type: 'text';
@@ -204,6 +206,12 @@ export interface ThematicBreakNode {
     type: 'thematic_break';
 }
 
+export interface BlockquoteNode {
+    type: 'blockquote';
+    content: string | ASTNode[];
+    multiline?: boolean;
+}
+
 export type ASTNode =
     | TextNode
     | BoldNode
@@ -231,4 +239,5 @@ export type ASTNode =
     | InlineLatexNode
     | ThematicBreakNode
     | UnderlineNode
-    | StrikethroughNode;
+    | StrikethroughNode
+    | BlockquoteNode;

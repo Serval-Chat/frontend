@@ -13,6 +13,7 @@ import { ServerSection } from './ServerSection';
 
 vi.mock('react-router-dom', () => ({
     useNavigate: vi.fn(),
+    useParams: vi.fn().mockReturnValue({}),
 }));
 
 vi.mock('@/store/hooks', () => ({
