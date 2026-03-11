@@ -4,6 +4,11 @@ import { Upload, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 import {
+    useClearChannelPings,
+    useDeletePing,
+    usePings,
+} from '@/api/pings/pings.queries';
+import {
     useChannels,
     useMembers,
     useRoles,
@@ -27,6 +32,7 @@ import { MessagesList } from '@/ui/components/chat/MessagesList';
 import { TypingIndicator } from '@/ui/components/chat/TypingIndicator';
 import { Text } from '@/ui/components/common/Text';
 import { Box } from '@/ui/components/layout/Box';
+import { wsMessages } from '@/ws';
 
 /**
  * @description Main chat area component that displays messages for the selected conversation.
@@ -70,6 +76,9 @@ export const MainChat: React.FC = () => {
         selectedServerId,
         selectedChannelId,
     );
+    const { data: pings } = usePings();
+    const { mutate: clearChannelPings } = useClearChannelPings();
+    const { mutate: deletePing } = useDeletePing();
 
     // dms have no permissions therefore always allow.
     const canSendMessages = !selectedServerId || hasPermission('sendMessages');
@@ -157,6 +166,40 @@ export const MainChat: React.FC = () => {
             void navigate('/chat/@me', { replace: true });
         }
     }, [isFriendError, selectedFriendId, navigate]);
+
+    // Auto-clear pings when seen in chat
+    React.useEffect(() => {
+        if (selectedServerId && selectedChannelId) {
+            wsMessages.markChannelRead(selectedServerId, selectedChannelId);
+
+            if (pings?.pings) {
+                const hasPingsInActiveChannel = pings.pings.some(
+                    (p) => p.channelId === selectedChannelId,
+                );
+                if (hasPingsInActiveChannel) {
+                    clearChannelPings(selectedChannelId);
+                }
+            }
+        } else if (selectedFriendId) {
+            wsMessages.markDmRead(selectedFriendId);
+            if (pings?.pings) {
+                const friendPings = pings.pings.filter(
+                    (p) => p.senderId === selectedFriendId && !p.serverId,
+                );
+                if (friendPings.length > 0) {
+                    friendPings.forEach((p) => deletePing(p.id));
+                }
+            }
+        }
+    }, [
+        selectedChannelId,
+        selectedServerId,
+        selectedFriendId,
+        pings?.pings,
+        messages?.length,
+        clearChannelPings,
+        deletePing,
+    ]);
 
     const handleReplyClick = (messageId: string): void => {
         if (selectedServerId && selectedChannelId) {

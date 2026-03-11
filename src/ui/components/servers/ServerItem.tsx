@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 
-import { Settings } from 'lucide-react';
+import { Check, Settings } from 'lucide-react';
 
+import { useMarkServerRead } from '@/api/servers/servers.queries';
 import type { Server } from '@/api/servers/servers.types';
 import { usePermissions } from '@/hooks/usePermissions';
 import { ContextMenu } from '@/ui/components/common/ContextMenu';
@@ -30,6 +31,7 @@ export const ServerItem: React.FC<ServerItemProps> = ({
 }) => {
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
     const { hasPermission, isOwner } = usePermissions(server._id);
+    const { mutate: markAsRead } = useMarkServerRead();
 
     const canManageServer =
         isOwner ||
@@ -38,6 +40,14 @@ export const ServerItem: React.FC<ServerItemProps> = ({
         hasPermission('manageInvites');
 
     const contextMenuItems = [];
+
+    if (isUnread || (pingCount && pingCount > 0)) {
+        contextMenuItems.push({
+            label: 'Mark as Read',
+            icon: Check,
+            onClick: () => markAsRead(server._id),
+        });
+    }
 
     if (canManageServer) {
         contextMenuItems.push({

@@ -1,3 +1,5 @@
+import { useEffect } from 'react';
+
 import {
     type UseMutationResult,
     type UseQueryResult,
@@ -6,8 +8,10 @@ import {
     useQueryClient,
 } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
+import { useDispatch } from 'react-redux';
 
 import type { Emoji } from '@/api/emojis/emojis.types';
+import { setUnreadServers } from '@/store/slices/unreadSlice';
 import { useToast } from '@/ui/components/common/Toast';
 
 import { serversApi } from './servers.api';
@@ -23,6 +27,7 @@ import type {
 
 export const SERVERS_QUERY_KEYS = {
     list: ['servers', 'list'] as const,
+    unread: () => ['servers', 'unread'] as const,
     details: (serverId: string | null) =>
         ['servers', 'details', serverId] as const,
     channels: (serverId: string | null) =>
@@ -42,6 +47,25 @@ export const useServers = (): UseQueryResult<Server[], Error> =>
         queryKey: SERVERS_QUERY_KEYS.list,
         queryFn: () => serversApi.getServers(),
     });
+
+export const useUnreadStatus = (): UseQueryResult<
+    Record<string, { hasUnread: boolean; pingCount: number }>,
+    Error
+> => {
+    const dispatch = useDispatch();
+    const query = useQuery({
+        queryKey: SERVERS_QUERY_KEYS.unread(),
+        queryFn: () => serversApi.getUnreadStatus(),
+    });
+
+    useEffect(() => {
+        if (query.data) {
+            dispatch(setUnreadServers(query.data));
+        }
+    }, [query.data, dispatch]);
+
+    return query;
+};
 
 export const useCreateServer = (): UseMutationResult<
     { server: Server; channel: Channel },
@@ -725,6 +749,110 @@ export const useUnbanMember = (
         },
         onError: (error) => {
             showToast(error.message || 'Failed to unban user', 'error');
+        },
+    });
+};
+
+export const useMarkServerRead = (): UseMutationResult<void, Error, string> => {
+    const queryClient = useQueryClient();
+    const dispatch = useDispatch();
+
+    return useMutation({
+        mutationFn: (serverId: string) => serversApi.markServerRead(serverId),
+        onMutate: async (serverId) => {
+            await queryClient.cancelQueries({
+                queryKey: SERVERS_QUERY_KEYS.unread(),
+            });
+            await queryClient.cancelQueries({ queryKey: ['pings'] });
+            await queryClient.cancelQueries({
+                queryKey: SERVERS_QUERY_KEYS.channels(serverId),
+            });
+
+            // Snapshot the previous values
+            const previousUnread = queryClient.getQueryData(
+                SERVERS_QUERY_KEYS.unread(),
+            );
+            const previousPings = queryClient.getQueryData<{
+                pings: { serverId?: string }[];
+            }>(['pings']);
+            const previousChannels = queryClient.getQueryData<Channel[]>(
+                SERVERS_QUERY_KEYS.channels(serverId),
+            );
+
+            // Optimistically update
+            if (previousUnread) {
+                const newUnread = {
+                    ...(previousUnread as Record<
+                        string,
+                        { hasUnread: boolean; pingCount: number }
+                    >),
+                    [serverId]: { hasUnread: false, pingCount: 0 },
+                };
+                queryClient.setQueryData(
+                    SERVERS_QUERY_KEYS.unread(),
+                    newUnread,
+                );
+                // Sync to redux immediately
+                dispatch(setUnreadServers(newUnread));
+            }
+
+            if (previousPings) {
+                queryClient.setQueryData(['pings'], {
+                    ...previousPings,
+                    pings: previousPings.pings.filter(
+                        (p) => p.serverId !== serverId,
+                    ),
+                });
+            }
+
+            if (previousChannels) {
+                const now = new Date().toISOString();
+                queryClient.setQueryData(
+                    SERVERS_QUERY_KEYS.channels(serverId),
+                    previousChannels.map((c) => ({ ...c, lastReadAt: now })),
+                );
+            }
+
+            return { previousUnread, previousPings, previousChannels };
+        },
+        onError: (_err, serverId, context) => {
+            if (context?.previousUnread) {
+                queryClient.setQueryData(
+                    SERVERS_QUERY_KEYS.unread(),
+                    context.previousUnread,
+                );
+                dispatch(
+                    setUnreadServers(
+                        context.previousUnread as Record<
+                            string,
+                            { hasUnread: boolean; pingCount: number }
+                        >,
+                    ),
+                );
+            }
+            if (context?.previousPings) {
+                queryClient.setQueryData(['pings'], context.previousPings);
+            }
+            if (context?.previousChannels) {
+                queryClient.setQueryData(
+                    SERVERS_QUERY_KEYS.channels(serverId),
+                    context.previousChannels,
+                );
+            }
+        },
+        onSuccess: (_data, serverId) => {
+            void queryClient.invalidateQueries({
+                queryKey: SERVERS_QUERY_KEYS.unread(),
+            });
+            void queryClient.invalidateQueries({
+                queryKey: ['pings'],
+            });
+            void queryClient.invalidateQueries({
+                queryKey: SERVERS_QUERY_KEYS.channels(serverId),
+            });
+            void queryClient.invalidateQueries({
+                queryKey: SERVERS_QUERY_KEYS.details(serverId),
+            });
         },
     });
 };

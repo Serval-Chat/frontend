@@ -17,15 +17,16 @@ export const IconButton: React.FC<IconButtonProps> = ({
     isActive,
     badgeCount,
     className,
+    variant,
     ...props
 }) => (
     <Button
         className={cn(
-            'rounded-xl hover:rounded-lg transition-all duration-200 relative',
+            'transition-all duration-200 relative',
             className,
             isActive && 'bg-primary/20 text-primary',
         )}
-        variant="nav"
+        variant={variant || 'nav'}
         // eslint-disable-next-line react/jsx-props-no-spreading
         {...props}
     >

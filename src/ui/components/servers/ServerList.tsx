@@ -2,7 +2,7 @@ import React from 'react';
 
 import { useNavigate } from 'react-router-dom';
 
-import { useServers } from '@/api/servers/servers.queries';
+import { useServers, useUnreadStatus } from '@/api/servers/servers.queries';
 import { useAppSelector } from '@/store/hooks';
 
 import { ServerItem } from './ServerItem';
@@ -12,6 +12,7 @@ import { ServerItem } from './ServerItem';
  */
 export const ServerList: React.FC = () => {
     const { data: servers, isLoading } = useServers();
+    useUnreadStatus();
     const selectedServerId = useAppSelector(
         (state) => state.nav.selectedServerId,
     );

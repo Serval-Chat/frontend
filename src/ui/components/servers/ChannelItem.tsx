@@ -14,6 +14,7 @@ interface ChannelItemProps {
     icon?: string;
     isActive?: boolean;
     isUnread?: boolean;
+    pingCount?: number;
     onClick?: () => void;
     onSettingsClick?: (e: React.MouseEvent) => void;
 }
@@ -27,6 +28,7 @@ export const ChannelItem: React.FC<ChannelItemProps> = ({
     icon,
     isActive,
     isUnread,
+    pingCount,
     onClick,
     onSettingsClick,
 }) => {
@@ -81,6 +83,13 @@ export const ChannelItem: React.FC<ChannelItemProps> = ({
                     >
                         {name}
                     </span>
+                    {pingCount
+                        ? pingCount > 0 && (
+                              <div className="ml-1.5 px-1.5 h-4 min-w-[16px] flex items-center justify-center bg-[var(--color-danger)] text-white text-[10px] font-bold rounded-full leading-none">
+                                  {pingCount > 99 ? '99+' : pingCount}
+                              </div>
+                          )
+                        : null}
                 </div>
                 {onSettingsClick && (
                     <IconButton

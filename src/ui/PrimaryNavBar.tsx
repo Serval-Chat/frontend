@@ -1,14 +1,17 @@
 import React, { useState } from 'react';
 
-import { Compass, Home, Plus, Settings } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { Bell, Compass, Home, Plus, Settings } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
+import { usePings } from '@/api/pings';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { toggleMobileHomeTab } from '@/store/slices/navSlice';
 import { useMobileSwipeContext } from '@/ui/MobileSwipeContext';
 import { Divider } from '@/ui/components/common/Divider';
 import { IconButton } from '@/ui/components/common/IconButton';
 import { Box } from '@/ui/components/layout/Box';
+import { PingInbox } from '@/ui/components/pings/PingInbox';
 import { CreateServerModal } from '@/ui/components/servers/CreateServerModal';
 import { JoinServerModal } from '@/ui/components/servers/JoinServerModal';
 import { ServerList } from '@/ui/components/servers/ServerList';
@@ -20,28 +23,24 @@ export const PrimaryNavBar: React.FC = () => {
         (state) => state.nav,
     );
     const unreadDms = useAppSelector((state) => state.unread.unreadDms);
+    const { data: pingsData } = usePings();
     const totalUnreadDms = Object.values(unreadDms).reduce(
         (acc, count) => acc + (typeof count === 'number' ? count : 0),
         0,
     );
+    const pingCount = pingsData?.pings?.length || 0;
+
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
     const location = useLocation();
-    const [showSettings, setShowSettings] = useState(false);
     const [showCreateServer, setShowCreateServer] = useState(false);
     const [showJoinServer, setShowJoinServer] = useState(false);
+    const [showInbox, setShowInbox] = useState(false);
+
+    const showSettings = location.pathname.startsWith('/chat/@setting');
     const inSwipePanel = useMobileSwipeContext();
 
     const isChatActive = !!selectedFriendId || !!selectedChannelId;
-
-    // Sync settings modal with URL
-    React.useEffect(() => {
-        if (location.pathname.startsWith('/chat/@setting')) {
-            setShowSettings(true);
-        } else {
-            setShowSettings(false);
-        }
-    }, [location.pathname]);
 
     const handleHomeClick = (): void => {
         if (navMode === 'friends' && location.pathname === '/chat/@me') {
@@ -64,7 +63,7 @@ export const PrimaryNavBar: React.FC = () => {
         <Box
             as="nav"
             className={cn(
-                'h-full flex flex-col items-center gap-3',
+                'h-full flex flex-col items-center gap-3 relative z-50',
                 'pt-[calc(0.75rem+env(safe-area-inset-top))] pb-[calc(0.75rem+env(safe-area-inset-bottom))]',
                 'bg-[--color-background]',
                 'w-[72px] shrink-0',
@@ -101,6 +100,29 @@ export const PrimaryNavBar: React.FC = () => {
             </Box>
 
             <Divider />
+
+            <Box className="relative">
+                <IconButton
+                    badgeCount={pingCount}
+                    icon={Bell}
+                    isActive={showInbox}
+                    onClick={() => setShowInbox(!showInbox)}
+                />
+
+                <AnimatePresence>
+                    {showInbox && (
+                        <motion.div
+                            animate={{ opacity: 1, x: 0, scale: 1 }}
+                            className="absolute left-[calc(100%+12px)] bottom-0 z-50 origin-bottom-left"
+                            exit={{ opacity: 0, x: -10, scale: 0.95 }}
+                            initial={{ opacity: 0, x: -10, scale: 0.95 }}
+                            transition={{ duration: 0.15, ease: 'easeOut' }}
+                        >
+                            <PingInbox onClose={() => setShowInbox(false)} />
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+            </Box>
 
             <Box>
                 <IconButton icon={Settings} onClick={handleSettingsClick} />

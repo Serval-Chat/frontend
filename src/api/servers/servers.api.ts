@@ -420,4 +420,8 @@ export const serversApi = {
         );
         return response.data;
     },
+
+    markServerRead: async (serverId: string): Promise<void> => {
+        await apiClient.post(`/api/v1/servers/${serverId}/ack`);
+    },
 };

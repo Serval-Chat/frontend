@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
+import { usePings } from '@/api/pings/pings.queries';
 import { serversApi } from '@/api/servers/servers.api';
 import type { Category, Channel } from '@/api/servers/servers.types';
 import { usePermissions } from '@/hooks/usePermissions';
@@ -52,6 +53,17 @@ export const ChannelList: React.FC<ChannelListProps> = ({
     const selectedServerId = useAppSelector(
         (state) => state.nav.selectedServerId,
     );
+    const { data: pingsData } = usePings();
+
+    const channelPings = React.useMemo(() => {
+        const counts: Record<string, number> = {};
+        pingsData?.pings.forEach((p) => {
+            if (p.channelId) {
+                counts[p.channelId] = (counts[p.channelId] || 0) + 1;
+            }
+        });
+        return counts;
+    }, [pingsData]);
 
     const [collapsedCategories, setCollapsedCategories] = useState<
         Record<string, boolean>
@@ -643,6 +655,7 @@ export const ChannelList: React.FC<ChannelListProps> = ({
                     isActive={selectedChannelId === channel._id}
                     isUnread={!!isUnread}
                     name={channel.name}
+                    pingCount={channelPings[channel._id]}
                     type={channel.type}
                     onClick={() => handleChannelClick(channel)}
                     onSettingsClick={

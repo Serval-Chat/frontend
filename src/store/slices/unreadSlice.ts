@@ -66,6 +66,15 @@ export const unreadSlice = createSlice({
                 state.unreadServers[action.payload.serverId].pingCount += 1;
             }
         },
+        decrementServerPing: (
+            state,
+            action: PayloadAction<{ serverId: string }>,
+        ) => {
+            const status = state.unreadServers[action.payload.serverId];
+            if (status && status.pingCount > 0) {
+                status.pingCount -= 1;
+            }
+        },
         setUnreadDms: (
             state,
             action: PayloadAction<Record<string, number>>,
@@ -86,6 +95,7 @@ export const {
     setServerUnread,
     setServerPingCount,
     incrementServerPing,
+    decrementServerPing,
     setUnreadDms,
     setDmUnread,
 } = unreadSlice.actions;
