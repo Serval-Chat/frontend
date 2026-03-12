@@ -31,6 +31,8 @@ export const ParserFeature = {
     STRIKETHROUGH: 'STRIKETHROUGH',
     BLOCKQUOTE: 'BLOCKQUOTE',
     ADMONITION: 'ADMONITION',
+    MERMAID: 'MERMAID',
+    UNORDERED_LIST: 'UNORDERED_LIST',
 } as const;
 
 export type ParserFeature = (typeof ParserFeature)[keyof typeof ParserFeature];
@@ -64,7 +66,9 @@ export type ASTNodeType =
     | 'underline'
     | 'strikethrough'
     | 'blockquote'
-    | 'admonition';
+    | 'admonition'
+    | 'mermaid'
+    | 'unordered_list';
 
 export interface TextNode {
     type: 'text';
@@ -148,6 +152,11 @@ export interface CodeBlockNode {
     language?: string;
 }
 
+export interface MermaidNode {
+    type: 'mermaid';
+    content: string;
+}
+
 export interface InviteNode {
     type: 'invite';
     code: string;
@@ -186,6 +195,13 @@ export interface OrderedListNode {
     type: 'ordered_list';
     number: string;
     content: string | ASTNode[];
+    depth?: number;
+}
+
+export interface UnorderedListNode {
+    type: 'unordered_list';
+    content: string | ASTNode[];
+    depth?: number;
 }
 
 export interface TableNode {
@@ -259,4 +275,6 @@ export type ASTNode =
     | UnderlineNode
     | StrikethroughNode
     | BlockquoteNode
-    | AdmonitionNode;
+    | AdmonitionNode
+    | MermaidNode
+    | UnorderedListNode;

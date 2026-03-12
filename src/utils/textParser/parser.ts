@@ -41,6 +41,8 @@ export const ParserPresets = {
             ParserFeature.STRIKETHROUGH,
             ParserFeature.BLOCKQUOTE,
             ParserFeature.ADMONITION,
+            ParserFeature.MERMAID,
+            ParserFeature.UNORDERED_LIST,
         ],
     },
     BIO: {
@@ -73,6 +75,8 @@ export const ParserPresets = {
             ParserFeature.STRIKETHROUGH,
             ParserFeature.BLOCKQUOTE,
             ParserFeature.ADMONITION,
+            ParserFeature.MERMAID,
+            ParserFeature.UNORDERED_LIST,
         ],
     },
 } as const;
@@ -172,6 +176,29 @@ export class TextParser {
                         currentText = '';
                     }
                     nodes.push(emojiNode);
+                    continue;
+                }
+            }
+
+            // - item, * item, + item
+            if (
+                (char === '-' ||
+                    char === '*' ||
+                    char === '+' ||
+                    char === ' ') &&
+                this.options.features.includes(ParserFeature.UNORDERED_LIST)
+            ) {
+                const listNode = this.tryParseUnorderedList();
+                if (listNode) {
+                    if (currentText) {
+                        nodes.push({ type: 'text', content: currentText });
+                        currentText = '';
+                    }
+                    nodes.push(listNode);
+
+                    if (this.peek('\n')) {
+                        this.index++;
+                    }
                     continue;
                 }
             }
@@ -370,8 +397,7 @@ export class TextParser {
 
             // 1. item
             if (
-                char >= '0' &&
-                char <= '9' &&
+                ((char >= '0' && char <= '9') || char === ' ') &&
                 this.options.features.includes(ParserFeature.ORDERED_LIST)
             ) {
                 const listNode = this.tryParseOrderedList();
@@ -427,7 +453,8 @@ export class TextParser {
             if (
                 char === '`' &&
                 (this.options.features.includes(ParserFeature.INLINE_CODE) ||
-                    this.options.features.includes(ParserFeature.CODE_BLOCK))
+                    this.options.features.includes(ParserFeature.CODE_BLOCK) ||
+                    this.options.features.includes(ParserFeature.MERMAID))
             ) {
                 const codeNode = this.tryParseCode();
                 if (codeNode) {
@@ -808,10 +835,22 @@ export class TextParser {
 
             if (foundClosing) {
                 this.index += 3;
+                const lang = language.trim();
+
+                if (
+                    lang === 'mermaid' &&
+                    this.options.features.includes(ParserFeature.MERMAID)
+                ) {
+                    return {
+                        type: 'mermaid',
+                        content: content.trim(),
+                    } as ASTNode;
+                }
+
                 return {
                     type: 'code_block',
                     content: content.trim(),
-                    language: language.trim() || undefined,
+                    language: lang || undefined,
                 } as ASTNode;
             }
 
@@ -983,10 +1022,11 @@ export class TextParser {
         }
 
         const remaining = this.text.slice(this.index);
-        const match = remaining.match(/^(\d+)\. /);
+        const match = remaining.match(/^( *)(-?\d+)\. /);
         if (!match) return null;
 
-        const number = match[1];
+        const indentation = match[1].length;
+        const number = match[2];
         this.index += match[0].length;
 
         let content = '';
@@ -1003,6 +1043,42 @@ export class TextParser {
                 type: 'ordered_list',
                 number,
                 content: this.parseContent(content.trim()),
+                depth: Math.floor(indentation / 2),
+            } as ASTNode;
+        }
+
+        this.index = start;
+        return null;
+    }
+
+    private tryParseUnorderedList(): ASTNode | null {
+        const start = this.index;
+
+        if (this.index > 0 && this.text[this.index - 1] !== '\n') {
+            return null;
+        }
+
+        const remaining = this.text.slice(this.index);
+        const match = remaining.match(/^( *)([*\-+]) /);
+        if (!match) return null;
+
+        const indentation = match[1].length;
+        this.index += match[0].length;
+
+        let content = '';
+        while (
+            this.index < this.text.length &&
+            this.text[this.index] !== '\n'
+        ) {
+            content += this.text[this.index];
+            this.index++;
+        }
+
+        if (content.trim()) {
+            return {
+                type: 'unordered_list',
+                content: this.parseContent(content.trim()),
+                depth: Math.floor(indentation / 2),
             } as ASTNode;
         }
 

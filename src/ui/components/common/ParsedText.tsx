@@ -15,6 +15,7 @@ import { Heading } from './Heading';
 import { LatexRenderer } from './LatexRenderer';
 import { Link } from './Link';
 import { Mention } from './Mention';
+import { MermaidChart } from './MermaidChart';
 import { ParsedEmoji } from './ParsedEmoji';
 import { ParsedUnicodeEmoji } from './ParsedUnicodeEmoji';
 import { RoleMention } from './RoleMention';
@@ -313,6 +314,11 @@ export const ParsedText: React.FC<ParsedTextProps> = ({
                             />
                         );
 
+                    case 'mermaid':
+                        return (
+                            <MermaidChart content={node.content} key={idx} />
+                        );
+
                     case 'invite':
                         return (
                             <InviteLink
@@ -357,12 +363,42 @@ export const ParsedText: React.FC<ParsedTextProps> = ({
                                 </Text>
                             </Box>
                         );
+                    case 'unordered_list':
+                        return (
+                            <Box
+                                className="flex gap-2 items-baseline"
+                                key={idx}
+                                style={{
+                                    paddingLeft: `${(node.depth ?? 0) * 1.5}rem`,
+                                }}
+                            >
+                                <Text size={size} variant="muted" wrap={wrap}>
+                                    •
+                                </Text>
+                                <Box className="flex-1 min-w-0">
+                                    {typeof node.content === 'string' ? (
+                                        <Text key={idx} size={size} wrap={wrap}>
+                                            {node.content}
+                                        </Text>
+                                    ) : (
+                                        <ParsedText
+                                            nodes={node.content}
+                                            size={size}
+                                            wrap={wrap}
+                                        />
+                                    )}
+                                </Box>
+                            </Box>
+                        );
 
                     case 'ordered_list':
                         return (
                             <Box
-                                className="pl-2 flex gap-1.5 items-baseline"
+                                className="flex gap-1.5 items-baseline"
                                 key={idx}
+                                style={{
+                                    paddingLeft: `${(node.depth ?? 0) * 1.5}rem`,
+                                }}
                             >
                                 <Text size={size} variant="muted" wrap={wrap}>
                                     {node.number}.

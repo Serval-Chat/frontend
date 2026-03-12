@@ -123,6 +123,17 @@ describe('TextParser', () => {
         ]);
     });
 
+    it('should parse mermaid code blocks as mermaid nodes', () => {
+        const text = '```mermaid\ngraph TD;\nA-->B;\n```';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            {
+                type: 'mermaid',
+                content: 'graph TD;\nA-->B;',
+            },
+        ]);
+    });
+
     it('should parse invite links', () => {
         const text = 'Join us: https://catfla.re/invite/serchat-dev';
         const nodes = parseText(text, ParserPresets.MESSAGE);
@@ -300,8 +311,33 @@ describe('TextParser', () => {
         const text = '1. First item\n2. Second item';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
-            { type: 'ordered_list', number: '1', content: 'First item' },
-            { type: 'ordered_list', number: '2', content: 'Second item' },
+            {
+                type: 'ordered_list',
+                number: '1',
+                content: 'First item',
+                depth: 0,
+            },
+            {
+                type: 'ordered_list',
+                number: '2',
+                content: 'Second item',
+                depth: 0,
+            },
+        ]);
+    });
+
+    it('should parse indented ordered list items', () => {
+        const text = '1. Parent\n  2. Child\n    3. Grandchild';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            { type: 'ordered_list', number: '1', content: 'Parent', depth: 0 },
+            { type: 'ordered_list', number: '2', content: 'Child', depth: 1 },
+            {
+                type: 'ordered_list',
+                number: '3',
+                content: 'Grandchild',
+                depth: 2,
+            },
         ]);
     });
 
@@ -322,6 +358,7 @@ describe('TextParser', () => {
                         text: 'link',
                     },
                 ],
+                depth: 0,
             },
         ]);
     });
@@ -338,8 +375,66 @@ describe('TextParser', () => {
         const text = '1. Item\nNormal text';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
-            { type: 'ordered_list', number: '1', content: 'Item' },
+            { type: 'ordered_list', number: '1', content: 'Item', depth: 0 },
             { type: 'text', content: 'Normal text' },
+        ]);
+    });
+
+    it('should parse unordered list items (-)', () => {
+        const text = '- First item\n- Second item';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            { type: 'unordered_list', content: 'First item', depth: 0 },
+            { type: 'unordered_list', content: 'Second item', depth: 0 },
+        ]);
+    });
+
+    it('should parse nested unordered list items', () => {
+        const text = '- Parent\n  - Child\n    - Grandchild';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            { type: 'unordered_list', content: 'Parent', depth: 0 },
+            { type: 'unordered_list', content: 'Child', depth: 1 },
+            { type: 'unordered_list', content: 'Grandchild', depth: 2 },
+        ]);
+    });
+
+    it('should parse unordered list items (*)', () => {
+        const text = '* First item\n* Second item';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            { type: 'unordered_list', content: 'First item', depth: 0 },
+            { type: 'unordered_list', content: 'Second item', depth: 0 },
+        ]);
+    });
+
+    it('should parse unordered list items (+)', () => {
+        const text = '+ First item\n+ Second item';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            { type: 'unordered_list', content: 'First item', depth: 0 },
+            { type: 'unordered_list', content: 'Second item', depth: 0 },
+        ]);
+    });
+
+    it('should parse unordered list items with nested formatting', () => {
+        const text = '- Item with **bold** and [link](https://test.com)';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            {
+                type: 'unordered_list',
+                content: [
+                    { type: 'text', content: 'Item with ' },
+                    { type: 'bold', content: 'bold' },
+                    { type: 'text', content: ' and ' },
+                    {
+                        type: 'link',
+                        url: 'https://test.com',
+                        text: 'link',
+                    },
+                ],
+                depth: 0,
+            },
         ]);
     });
 
@@ -963,9 +1058,10 @@ describe('TextParser', () => {
         for (const t of ['note', 'tip', 'important', 'warning', 'caution']) {
             const text = `> [!${t.toUpperCase()}]\n> Body`;
             const nodes = parseText(text, ParserPresets.MESSAGE);
-            expect(nodes[0].type).toBe('admonition');
-            expect(nodes[0].style).toBe('github');
-            expect((nodes[0] as AdmonitionNode).admonitionType).toBe(t);
+            const admonition = nodes[0] as AdmonitionNode;
+            expect(admonition.type).toBe('admonition');
+            expect(admonition.style).toBe('github');
+            expect(admonition.admonitionType).toBe(t);
         }
     });
 
@@ -1009,7 +1105,7 @@ describe('TextParser', () => {
             style: 'github',
             admonitionType: 'note',
         });
-        const content = nodes[0].content as unknown[];
+        const content = (nodes[0] as AdmonitionNode).content as unknown[];
         expect(content).toContainEqual({ type: 'italic', content: 'italic' });
     });
 
@@ -1021,7 +1117,7 @@ describe('TextParser', () => {
             style: 'github',
             admonitionType: 'tip',
         });
-        const content = nodes[0].content as unknown[];
+        const content = (nodes[0] as AdmonitionNode).content as unknown[];
         expect(content).toContainEqual({
             type: 'inline_code',
             content: 'code',
@@ -1409,7 +1505,7 @@ describe('TextParser', () => {
             style: 'myst',
             admonitionType: 'warning',
         });
-        const content = nodes[0].content as string;
+        const content = (nodes[0] as AdmonitionNode).content as string;
         expect(content).toContain('Line 1');
         expect(content).toContain('Line 2');
         expect(content).toContain('Line 3');
