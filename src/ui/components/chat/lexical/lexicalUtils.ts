@@ -1,6 +1,7 @@
 import {
     $getRoot,
     $isLineBreakNode,
+    $isParagraphNode,
     $isTextNode,
     type LexicalNode,
 } from 'lexical';
@@ -42,6 +43,12 @@ export function $getRawMessageText(): string {
             const children = node.getChildren();
             for (const child of children) {
                 traverse(child);
+            }
+            if ($isParagraphNode(node)) {
+                const parent = node.getParent();
+                if (parent && node !== parent.getLastChild()) {
+                    rawText += '\n';
+                }
             }
         }
     };

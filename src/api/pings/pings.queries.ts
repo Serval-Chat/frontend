@@ -14,7 +14,7 @@ import {
     setUnreadServers,
 } from '@/store/slices/unreadSlice';
 
-import { pingsService } from './pings.service';
+import { pingsApi } from './pings.api';
 import type {
     ClearChannelPingsResponse,
     DeletePingResponse,
@@ -31,7 +31,7 @@ export function usePings(): UseQueryResult<
 > {
     return useQuery({
         queryKey: PINGS_KEYS.all,
-        queryFn: pingsService.getPings,
+        queryFn: pingsApi.getPings,
         staleTime: 1000 * 60, // 1 minute
     });
 }
@@ -45,7 +45,7 @@ export function useDeletePing(): UseMutationResult<
     const dispatch = useDispatch();
 
     return useMutation({
-        mutationFn: pingsService.deletePing,
+        mutationFn: pingsApi.deletePing,
         onSuccess: (_, deletedId) => {
             const oldData = queryClient.getQueryData<{
                 pings: PingNotification[];
@@ -87,7 +87,7 @@ export function useClearChannelPings(): UseMutationResult<
     const dispatch = useDispatch();
 
     return useMutation({
-        mutationFn: pingsService.clearChannelPings,
+        mutationFn: pingsApi.clearChannelPings,
         onSuccess: (_, channelId) => {
             const oldData = queryClient.getQueryData<{
                 pings: PingNotification[];
@@ -124,7 +124,7 @@ export function useClearChannelPings(): UseMutationResult<
                 );
             }
 
-            queryClient.invalidateQueries({
+            void queryClient.invalidateQueries({
                 queryKey: SERVERS_QUERY_KEYS.unread(),
             });
         },
@@ -140,11 +140,11 @@ export function useClearAllPings(): UseMutationResult<
     const dispatch = useDispatch();
 
     return useMutation({
-        mutationFn: pingsService.clearAllPings,
+        mutationFn: pingsApi.clearAllPings,
         onSuccess: () => {
             queryClient.setQueryData(PINGS_KEYS.all, { pings: [] });
             dispatch(setUnreadServers({})); // Clear all unread/pings in Redux too
-            queryClient.invalidateQueries({
+            void queryClient.invalidateQueries({
                 queryKey: SERVERS_QUERY_KEYS.unread(),
             });
         },

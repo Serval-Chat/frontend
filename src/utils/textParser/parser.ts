@@ -40,6 +40,7 @@ export const ParserPresets = {
             ParserFeature.UNDERLINE,
             ParserFeature.STRIKETHROUGH,
             ParserFeature.BLOCKQUOTE,
+            ParserFeature.ADMONITION,
         ],
     },
     BIO: {
@@ -71,6 +72,7 @@ export const ParserPresets = {
             ParserFeature.UNDERLINE,
             ParserFeature.STRIKETHROUGH,
             ParserFeature.BLOCKQUOTE,
+            ParserFeature.ADMONITION,
         ],
     },
 } as const;
@@ -455,10 +457,33 @@ export class TextParser {
                 }
             }
 
-            // quote lbocks
+            // MyST admonitions: :::type
+            if (
+                char === ':' &&
+                this.options.features.includes(ParserFeature.ADMONITION) &&
+                this.peek(':::') &&
+                (this.index === 0 || this.text[this.index - 1] === '\n')
+            ) {
+                const mystNode = this.tryParseMystAdmonition();
+                if (mystNode) {
+                    if (currentText) {
+                        // Trim trailing newline that separates preceding text from the ::: block
+                        const trimmed = currentText.endsWith('\n')
+                            ? currentText.slice(0, -1)
+                            : currentText;
+                        nodes.push({ type: 'text', content: trimmed });
+                        currentText = '';
+                    }
+                    nodes.push(mystNode);
+                    continue;
+                }
+            }
+
+            // Blockquotes (and GitHub/Obsidian admonitions)
             if (
                 char === '>' &&
-                this.options.features.includes(ParserFeature.BLOCKQUOTE) &&
+                (this.options.features.includes(ParserFeature.BLOCKQUOTE) ||
+                    this.options.features.includes(ParserFeature.ADMONITION)) &&
                 (this.index === 0 || this.text[this.index - 1] === '\n')
             ) {
                 const blockquoteNode = this.tryParseBlockquote();
@@ -1467,17 +1492,255 @@ export class TextParser {
             }
 
             if (lines.length > 0) {
-                this.index = tempIndex;
-                return {
-                    type: 'blockquote',
-                    content: this.parseContent(lines.join('\n')),
-                    multiline: false,
-                } as ASTNode;
+                // Check for GitHub/Obsidian admonition
+                if (this.options.features.includes(ParserFeature.ADMONITION)) {
+                    const firstLine = lines[0];
+                    let parsedType = '';
+                    let parsedFoldModifier = '';
+                    let parsedTitle = '';
+                    let isValidAdmonition = false;
+
+                    if (firstLine.startsWith('[!')) {
+                        let i = 2; // skip '[!'
+
+                        // Parse characters for type [a-zA-Z]
+                        while (i < firstLine.length) {
+                            const c = firstLine[i];
+                            if (
+                                (c >= 'a' && c <= 'z') ||
+                                (c >= 'A' && c <= 'Z')
+                            ) {
+                                parsedType += c;
+                                i++;
+                            } else {
+                                break;
+                            }
+                        }
+
+                        // Expect closing bracket ']'
+                        if (
+                            parsedType.length > 0 &&
+                            i < firstLine.length &&
+                            firstLine[i] === ']'
+                        ) {
+                            i++; // skip ']'
+                            isValidAdmonition = true;
+
+                            // Parse optional fold modifier '+' or '-'
+                            if (
+                                i < firstLine.length &&
+                                (firstLine[i] === '+' || firstLine[i] === '-')
+                            ) {
+                                parsedFoldModifier = firstLine[i];
+                                i++;
+                            }
+
+                            // Parse optional title
+                            if (i < firstLine.length) {
+                                parsedTitle = firstLine.substring(i).trim();
+                            }
+                        }
+                    }
+
+                    if (isValidAdmonition) {
+                        const rawType = parsedType.toLowerCase();
+                        const foldModifier = parsedFoldModifier;
+                        const titleRemainder = parsedTitle;
+
+                        const hasObsidianFeatures =
+                            foldModifier !== '' || titleRemainder !== '';
+
+                        // Define supported types
+                        const githubTypes = new Set([
+                            'note',
+                            'tip',
+                            'important',
+                            'warning',
+                            'caution',
+                        ]);
+                        const obsidianTypes = new Set([
+                            'note',
+                            'abstract',
+                            'summary',
+                            'tldr',
+                            'info',
+                            'todo',
+                            'tip',
+                            'hint',
+                            'important',
+                            'success',
+                            'check',
+                            'done',
+                            'question',
+                            'help',
+                            'faq',
+                            'warning',
+                            'caution',
+                            'attention',
+                            'failure',
+                            'fail',
+                            'missing',
+                            'danger',
+                            'error',
+                            'bug',
+                            'example',
+                            'quote',
+                            'cite',
+                            'seealso',
+                        ]);
+
+                        let style: 'github' | 'obsidian' | null = null;
+
+                        if (hasObsidianFeatures) {
+                            style = 'obsidian';
+                        } else if (githubTypes.has(rawType)) {
+                            style = 'github';
+                        } else if (obsidianTypes.has(rawType)) {
+                            style = 'obsidian';
+                        } else {
+                            style = null;
+                        }
+
+                        let fallbackToBlockquote = false;
+                        if (!style) {
+                            fallbackToBlockquote = true;
+                        } else if (style === 'github' && lines.length < 2) {
+                            fallbackToBlockquote = true;
+                        }
+
+                        if (!fallbackToBlockquote) {
+                            this.index = tempIndex;
+                            const bodyLines = lines.slice(1);
+                            const bodyText = bodyLines.join('\n');
+
+                            const node: ASTNode = {
+                                type: 'admonition',
+                                style: style as 'github' | 'obsidian',
+                                admonitionType: rawType,
+                                title:
+                                    titleRemainder !== ''
+                                        ? titleRemainder
+                                        : undefined,
+                                collapsible:
+                                    style === 'obsidian' && foldModifier !== ''
+                                        ? true
+                                        : undefined,
+                                defaultOpen:
+                                    style === 'obsidian' && foldModifier !== ''
+                                        ? foldModifier === '+'
+                                        : undefined,
+                                content:
+                                    bodyText === ''
+                                        ? ''
+                                        : this.parseContent(bodyText),
+                            };
+                            return node;
+                        }
+                    }
+                }
+
+                if (this.options.features.includes(ParserFeature.BLOCKQUOTE)) {
+                    this.index = tempIndex;
+                    return {
+                        type: 'blockquote',
+                        content: this.parseContent(lines.join('\n')),
+                        multiline: false,
+                    } as ASTNode;
+                }
             }
         }
 
         this.index = start;
         return null;
+    }
+
+    private tryParseMystAdmonition(): ASTNode | null {
+        const start = this.index;
+
+        if (!this.peek(':::')) {
+            return null;
+        }
+
+        this.index += 3; // skip ':::'
+
+        let rawType = '';
+        while (
+            this.index < this.text.length &&
+            this.text[this.index] !== ' ' &&
+            this.text[this.index] !== '\n'
+        ) {
+            rawType += this.text[this.index];
+            this.index++;
+        }
+
+        if (rawType.startsWith('{') && rawType.endsWith('}')) {
+            rawType = rawType.slice(1, -1);
+        }
+
+        if (!rawType) {
+            this.index = start;
+            return null;
+        }
+
+        let title: string | undefined;
+        if (this.index < this.text.length && this.text[this.index] === ' ') {
+            this.index++; // skip space
+            let titleText = '';
+            while (
+                this.index < this.text.length &&
+                this.text[this.index] !== '\n'
+            ) {
+                titleText += this.text[this.index];
+                this.index++;
+            }
+            title = titleText.trim() || undefined;
+        }
+
+        if (this.index < this.text.length && this.text[this.index] === '\n') {
+            this.index++;
+        }
+
+        let bodyText = '';
+        let foundClosing = false;
+
+        while (this.index < this.text.length) {
+            // Check for closing ::: on its own line
+            if (
+                this.peek(':::') &&
+                (this.index === 0 || this.text[this.index - 1] === '\n')
+            ) {
+                const afterClose = this.index + 3;
+                if (
+                    afterClose >= this.text.length ||
+                    this.text[afterClose] === '\n'
+                ) {
+                    foundClosing = true;
+                    break;
+                }
+            }
+            bodyText += this.text[this.index];
+            this.index++;
+        }
+
+        if (!foundClosing) {
+            this.index = start;
+            return null;
+        }
+
+        this.index += 3; // skip closing ':::'
+        if (this.index < this.text.length && this.text[this.index] === '\n') {
+            this.index++;
+        }
+
+        const trimmedBody = bodyText.trim();
+        const node: ASTNode = {
+            type: 'admonition',
+            style: 'myst',
+            admonitionType: rawType.toLowerCase(),
+            title,
+            content: trimmedBody === '' ? '' : this.parseContent(trimmedBody),
+        };
+        return node;
     }
 }
 

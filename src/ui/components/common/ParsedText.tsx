@@ -1,3 +1,4 @@
+/* eslint-disable react/no-array-index-key */
 import React from 'react';
 
 import { ChannelLink } from '@/ui/components/chat/ChannelLink';
@@ -7,6 +8,7 @@ import { Box } from '@/ui/components/layout/Box';
 import { cn } from '@/utils/cn';
 import type { ASTNode } from '@/utils/textParser/types';
 
+import { Admonition } from './Admonition';
 import { CodeBlock } from './CodeBlock';
 import { Divider } from './Divider';
 import { Heading } from './Heading';
@@ -446,7 +448,7 @@ export const ParsedText: React.FC<ParsedTextProps> = ({
 
                     case 'blockquote':
                         return (
-                            <Box
+                            <div
                                 className={cn(
                                     'pl-4 border-l-4 border-border-subtle italic',
                                     !isNested && 'my-2',
@@ -465,7 +467,29 @@ export const ParsedText: React.FC<ParsedTextProps> = ({
                                         wrap={wrap}
                                     />
                                 )}
-                            </Box>
+                            </div>
+                        );
+
+                    case 'admonition':
+                        return (
+                            <Admonition
+                                isNested={isNested}
+                                key={idx}
+                                node={node}
+                            >
+                                {typeof node.content === 'string' ? (
+                                    <Text size={size} wrap={wrap}>
+                                        {node.content}
+                                    </Text>
+                                ) : node.content.length > 0 ? (
+                                    <ParsedText
+                                        isNested
+                                        nodes={node.content}
+                                        size={size}
+                                        wrap={wrap}
+                                    />
+                                ) : null}
+                            </Admonition>
                         );
 
                     default:

@@ -6,7 +6,7 @@ import type {
     GetPingsResponse,
 } from './pings.types';
 
-export const pingsService = {
+export const pingsApi = {
     /**
      * Get all pings for the current user
      */

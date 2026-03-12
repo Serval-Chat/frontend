@@ -30,6 +30,7 @@ export const ParserFeature = {
     UNDERLINE: 'UNDERLINE',
     STRIKETHROUGH: 'STRIKETHROUGH',
     BLOCKQUOTE: 'BLOCKQUOTE',
+    ADMONITION: 'ADMONITION',
 } as const;
 
 export type ParserFeature = (typeof ParserFeature)[keyof typeof ParserFeature];
@@ -62,7 +63,8 @@ export type ASTNodeType =
     | 'thematic_break'
     | 'underline'
     | 'strikethrough'
-    | 'blockquote';
+    | 'blockquote'
+    | 'admonition';
 
 export interface TextNode {
     type: 'text';
@@ -212,6 +214,22 @@ export interface BlockquoteNode {
     multiline?: boolean;
 }
 
+export type AdmonitionStyle = 'github' | 'obsidian' | 'myst';
+
+export interface AdmonitionNode {
+    type: 'admonition';
+    style: AdmonitionStyle;
+    /** Normalized lowercase type, e.g. 'note', 'warning' */
+    admonitionType: string;
+    /** Custom title (Obsidian/MyST). When undefined, the renderer uses admonitionType. */
+    title?: string;
+    /** Obsidian only: whether the callout has a fold toggle */
+    collapsible?: boolean;
+    /** Obsidian only: true = expanded by default (+), false = collapsed (-) */
+    defaultOpen?: boolean;
+    content: string | ASTNode[];
+}
+
 export type ASTNode =
     | TextNode
     | BoldNode
@@ -240,4 +258,5 @@ export type ASTNode =
     | ThematicBreakNode
     | UnderlineNode
     | StrikethroughNode
-    | BlockquoteNode;
+    | BlockquoteNode
+    | AdmonitionNode;

@@ -3,8 +3,8 @@ import React, { useMemo, useState } from 'react';
 import { CheckCheck, Inbox, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-import type { PingNotification } from '@/api/pings';
-import { useClearAllPings, usePings } from '@/api/pings';
+import { useClearAllPings, usePings } from '@/api/pings/pings.queries';
+import type { PingNotification } from '@/api/pings/pings.types';
 import { IconButton } from '@/ui/components/common/IconButton';
 import { Input } from '@/ui/components/common/Input';
 import { Text } from '@/ui/components/common/Text';

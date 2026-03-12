@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { ParserPresets, parseText } from './parser';
+import type { AdmonitionNode } from './types';
 
 describe('TextParser', () => {
     it('should parse bold text', () => {
@@ -843,5 +844,652 @@ describe('TextParser', () => {
                 multiline: false,
             },
         ]);
+    });
+    // ─── GitHub Admonitions ───────────────────────────────────────────────────────
+
+    it('should parse GitHub-style NOTE admonition', () => {
+        const text = '> [!NOTE]\n> This is a note.';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            {
+                type: 'admonition',
+                style: 'github',
+                admonitionType: 'note',
+                title: undefined,
+                collapsible: undefined,
+                defaultOpen: undefined,
+                content: 'This is a note.',
+            },
+        ]);
+    });
+
+    it('should parse GitHub-style TIP admonition', () => {
+        const text = '> [!TIP]\n> This is a tip.';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            {
+                type: 'admonition',
+                style: 'github',
+                admonitionType: 'tip',
+                title: undefined,
+                collapsible: undefined,
+                defaultOpen: undefined,
+                content: 'This is a tip.',
+            },
+        ]);
+    });
+
+    it('should parse GitHub-style IMPORTANT admonition', () => {
+        const text = '> [!IMPORTANT]\n> This is important.';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            {
+                type: 'admonition',
+                style: 'github',
+                admonitionType: 'important',
+                title: undefined,
+                collapsible: undefined,
+                defaultOpen: undefined,
+                content: 'This is important.',
+            },
+        ]);
+    });
+
+    it('should parse GitHub-style WARNING admonition', () => {
+        const text = '> [!WARNING]\n> This is a warning.';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            {
+                type: 'admonition',
+                style: 'github',
+                admonitionType: 'warning',
+                title: undefined,
+                collapsible: undefined,
+                defaultOpen: undefined,
+                content: 'This is a warning.',
+            },
+        ]);
+    });
+
+    it('should parse GitHub-style CAUTION admonition', () => {
+        const text = '> [!CAUTION]\n> This is a caution.';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            {
+                type: 'admonition',
+                style: 'github',
+                admonitionType: 'caution',
+                title: undefined,
+                collapsible: undefined,
+                defaultOpen: undefined,
+                content: 'This is a caution.',
+            },
+        ]);
+    });
+
+    it('should parse GitHub-style admonition case-insensitively', () => {
+        const text = '> [!warning]\n> Be careful.';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            {
+                type: 'admonition',
+                style: 'github',
+                admonitionType: 'warning',
+                title: undefined,
+                collapsible: undefined,
+                defaultOpen: undefined,
+                content: 'Be careful.',
+            },
+        ]);
+    });
+
+    it('should parse GitHub-style admonition with multi-line body', () => {
+        const text = '> [!CAUTION]\n> Line 1\n> Line 2';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            {
+                type: 'admonition',
+                style: 'github',
+                admonitionType: 'caution',
+                title: undefined,
+                collapsible: undefined,
+                defaultOpen: undefined,
+                content: 'Line 1\nLine 2',
+            },
+        ]);
+    });
+
+    it('should parse all GitHub admonition types', () => {
+        for (const t of ['note', 'tip', 'important', 'warning', 'caution']) {
+            const text = `> [!${t.toUpperCase()}]\n> Body`;
+            const nodes = parseText(text, ParserPresets.MESSAGE);
+            expect(nodes[0].type).toBe('admonition');
+            expect(nodes[0].style).toBe('github');
+            expect((nodes[0] as AdmonitionNode).admonitionType).toBe(t);
+        }
+    });
+
+    it('should fall back to blockquote for unknown GitHub-style type', () => {
+        const text = '> [!CUSTOMTYPE]\n> Content';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            {
+                type: 'blockquote',
+                content: '[!CUSTOMTYPE]\nContent',
+                multiline: false,
+            },
+        ]);
+    });
+
+    it('should parse GitHub admonition body with inline bold formatting', () => {
+        const text = '> [!WARNING]\n> This is **bold** text.';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            {
+                type: 'admonition',
+                style: 'github',
+                admonitionType: 'warning',
+                title: undefined,
+                collapsible: undefined,
+                defaultOpen: undefined,
+                content: [
+                    { type: 'text', content: 'This is ' },
+                    { type: 'bold', content: 'bold' },
+                    { type: 'text', content: ' text.' },
+                ],
+            },
+        ]);
+    });
+
+    it('should parse GitHub admonition body with inline italic formatting', () => {
+        const text = '> [!NOTE]\n> This is *italic* text.';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes[0]).toMatchObject({
+            type: 'admonition',
+            style: 'github',
+            admonitionType: 'note',
+        });
+        const content = nodes[0].content as unknown[];
+        expect(content).toContainEqual({ type: 'italic', content: 'italic' });
+    });
+
+    it('should parse GitHub admonition body with inline code', () => {
+        const text = '> [!TIP]\n> Use `code` here.';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes[0]).toMatchObject({
+            type: 'admonition',
+            style: 'github',
+            admonitionType: 'tip',
+        });
+        const content = nodes[0].content as unknown[];
+        expect(content).toContainEqual({
+            type: 'inline_code',
+            content: 'code',
+        });
+    });
+
+    it('should not parse GitHub admonition without leading blockquote marker', () => {
+        const text = '[!NOTE]\nThis is a note.';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes.some((n) => n.type === 'admonition')).toBe(false);
+    });
+
+    it('should not parse GitHub admonition with missing body line marker', () => {
+        const text = '> [!NOTE]\nThis is a note without the > prefix.';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes.some((n) => n.type === 'admonition')).toBe(false);
+    });
+
+    it('should parse GitHub admonition with empty body', () => {
+        const text = '> [!NOTE]\n> ';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes[0]).toMatchObject({
+            type: 'admonition',
+            style: 'github',
+            admonitionType: 'note',
+            content: '',
+        });
+    });
+
+    // ─── Obsidian Admonitions ─────────────────────────────────────────────────────
+
+    it('should parse Obsidian-style NOTE admonition with no title', () => {
+        const text = '> [!note]\n> This is a note.';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            {
+                type: 'admonition',
+                style: 'github',
+                admonitionType: 'note',
+                title: undefined,
+                collapsible: undefined,
+                defaultOpen: undefined,
+                content: 'This is a note.',
+            },
+        ]);
+    });
+
+    it('should parse Obsidian-style admonition with custom title', () => {
+        const text = '> [!warning] Watch Out\n> Content here.';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            {
+                type: 'admonition',
+                style: 'obsidian',
+                admonitionType: 'warning',
+                title: 'Watch Out',
+                collapsible: undefined,
+                defaultOpen: undefined,
+                content: 'Content here.',
+            },
+        ]);
+    });
+
+    it('should parse Obsidian collapsible admonition expanded (+)', () => {
+        const text = '> [!tip]+ Helpful Tip\n> Body text.';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            {
+                type: 'admonition',
+                style: 'obsidian',
+                admonitionType: 'tip',
+                title: 'Helpful Tip',
+                collapsible: true,
+                defaultOpen: true,
+                content: 'Body text.',
+            },
+        ]);
+    });
+
+    it('should parse Obsidian collapsible admonition collapsed (-)', () => {
+        const text = '> [!danger]-\n> Hidden content.';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            {
+                type: 'admonition',
+                style: 'obsidian',
+                admonitionType: 'danger',
+                title: undefined,
+                collapsible: true,
+                defaultOpen: false,
+                content: 'Hidden content.',
+            },
+        ]);
+    });
+
+    it('should parse Obsidian collapsible admonition collapsed (-) with title', () => {
+        const text = '> [!warning]- Collapsible Warning\n> Hidden content.';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            {
+                type: 'admonition',
+                style: 'obsidian',
+                admonitionType: 'warning',
+                title: 'Collapsible Warning',
+                collapsible: true,
+                defaultOpen: false,
+                content: 'Hidden content.',
+            },
+        ]);
+    });
+
+    it('should parse Obsidian collapsible admonition expanded (+) with no title', () => {
+        const text = '> [!note]+\n> Visible by default.';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            {
+                type: 'admonition',
+                style: 'obsidian',
+                admonitionType: 'note',
+                title: undefined,
+                collapsible: true,
+                defaultOpen: true,
+                content: 'Visible by default.',
+            },
+        ]);
+    });
+
+    it('should parse known Obsidian type without fold or title as Obsidian admonition', () => {
+        const text = '> [!info]\n> Just info.';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes[0]).toMatchObject({
+            type: 'admonition',
+            style: 'obsidian',
+            admonitionType: 'info',
+            content: 'Just info.',
+        });
+    });
+
+    it('should parse bug type as Obsidian admonition', () => {
+        const text = '> [!bug]\n> a';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes[0]).toMatchObject({
+            type: 'admonition',
+            style: 'obsidian',
+            admonitionType: 'bug',
+            content: 'a',
+        });
+    });
+
+    it('should render unknown Obsidian type as generic admonition when fold modifier present', () => {
+        const text = '> [!custom]+ Expanded\n> Content.';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            {
+                type: 'admonition',
+                style: 'obsidian',
+                admonitionType: 'custom',
+                title: 'Expanded',
+                collapsible: true,
+                defaultOpen: true,
+                content: 'Content.',
+            },
+        ]);
+    });
+
+    it('should parse Obsidian admonition with multi-line body', () => {
+        const text = '> [!warning]\n> Line 1\n> Line 2';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes[0]).toMatchObject({
+            type: 'admonition',
+            style: 'github',
+            admonitionType: 'warning',
+            content: 'Line 1\nLine 2',
+        });
+    });
+
+    it('should parse Obsidian admonition case-insensitively', () => {
+        const text = '> [!WARNING]\n> A warning.';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes[0]).toMatchObject({
+            type: 'admonition',
+            admonitionType: 'warning',
+        });
+    });
+
+    it('should parse all Obsidian admonition types', () => {
+        for (const t of [
+            'note',
+            'tip',
+            'important',
+            'warning',
+            'caution',
+            'danger',
+            'error',
+            'hint',
+        ]) {
+            const text = `> [!${t}]+\n> Body`;
+            const nodes = parseText(text, ParserPresets.MESSAGE);
+            expect(nodes[0]).toMatchObject({
+                type: 'admonition',
+                style: 'obsidian',
+                admonitionType: t,
+            });
+        }
+    });
+
+    it('should parse Obsidian admonition with empty body', () => {
+        const text = '> [!note]\n> ';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes[0]).toMatchObject({
+            type: 'admonition',
+            style: 'github',
+            admonitionType: 'note',
+            content: '',
+        });
+    });
+
+    it('should parse MyST-style NOTE admonition', () => {
+        const text = ':::{note}\nA simple note.\n:::';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            {
+                type: 'admonition',
+                style: 'myst',
+                admonitionType: 'note',
+                title: undefined,
+                content: 'A simple note.',
+            },
+        ]);
+    });
+
+    it('should parse MyST-style TIP admonition', () => {
+        const text = ':::{tip}\nA helpful tip.\n:::';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            {
+                type: 'admonition',
+                style: 'myst',
+                admonitionType: 'tip',
+                title: undefined,
+                content: 'A helpful tip.',
+            },
+        ]);
+    });
+
+    it('should parse MyST-style IMPORTANT admonition', () => {
+        const text = ':::{important}\nThis is important.\n:::';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            {
+                type: 'admonition',
+                style: 'myst',
+                admonitionType: 'important',
+                title: undefined,
+                content: 'This is important.',
+            },
+        ]);
+    });
+
+    it('should parse MyST-style WARNING admonition', () => {
+        const text = ':::{warning}\nThis is a warning.\n:::';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            {
+                type: 'admonition',
+                style: 'myst',
+                admonitionType: 'warning',
+                title: undefined,
+                content: 'This is a warning.',
+            },
+        ]);
+    });
+
+    it('should parse MyST-style CAUTION admonition', () => {
+        const text = ':::{caution}\nThis is a caution.\n:::';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            {
+                type: 'admonition',
+                style: 'myst',
+                admonitionType: 'caution',
+                title: undefined,
+                content: 'This is a caution.',
+            },
+        ]);
+    });
+
+    it('should parse MyST-style DANGER admonition', () => {
+        const text = ':::{danger}\nThis is danger.\n:::';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            {
+                type: 'admonition',
+                style: 'myst',
+                admonitionType: 'danger',
+                title: undefined,
+                content: 'This is danger.',
+            },
+        ]);
+    });
+
+    it('should parse MyST-style ERROR admonition', () => {
+        const text = ':::{error}\nThis is an error.\n:::';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            {
+                type: 'admonition',
+                style: 'myst',
+                admonitionType: 'error',
+                title: undefined,
+                content: 'This is an error.',
+            },
+        ]);
+    });
+
+    it('should parse MyST-style HINT admonition', () => {
+        const text = ':::{hint}\nThis is a hint.\n:::';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            {
+                type: 'admonition',
+                style: 'myst',
+                admonitionType: 'hint',
+                title: undefined,
+                content: 'This is a hint.',
+            },
+        ]);
+    });
+
+    it('should parse MyST-style SEEALSO admonition', () => {
+        const text = ':::{seealso}\nSee also this.\n:::';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            {
+                type: 'admonition',
+                style: 'myst',
+                admonitionType: 'seealso',
+                title: undefined,
+                content: 'See also this.',
+            },
+        ]);
+    });
+
+    it('should parse MyST admonition with custom title', () => {
+        const text = ':::{warning} Watch Out\nDanger ahead.\n:::';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            {
+                type: 'admonition',
+                style: 'myst',
+                admonitionType: 'warning',
+                title: 'Watch Out',
+                content: 'Danger ahead.',
+            },
+        ]);
+    });
+
+    it('should parse MyST admonition with case-insensitive type', () => {
+        const text = ':::{WARNING}\nA warning.\n:::';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes[0]).toMatchObject({
+            type: 'admonition',
+            style: 'myst',
+            admonitionType: 'warning',
+        });
+    });
+
+    it('should parse MyST admonition with multi-paragraph body', () => {
+        const text = ':::{danger}\nFirst paragraph.\n\nSecond paragraph.\n:::';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes[0]).toMatchObject({
+            type: 'admonition',
+            style: 'myst',
+            admonitionType: 'danger',
+        });
+        const content = (nodes[0] as { content: unknown }).content;
+        expect(content).toBeDefined();
+    });
+
+    it('should parse MyST admonition with multi-line body', () => {
+        const text = ':::{warning}\nLine 1\nLine 2\nLine 3\n:::';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes[0]).toMatchObject({
+            type: 'admonition',
+            style: 'myst',
+            admonitionType: 'warning',
+        });
+        const content = nodes[0].content as string;
+        expect(content).toContain('Line 1');
+        expect(content).toContain('Line 2');
+        expect(content).toContain('Line 3');
+    });
+
+    it('should parse MyST admonition followed by normal text', () => {
+        const text = ':::{note}\nNote body.\n:::\nAfter text';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes[0]).toMatchObject({ type: 'admonition', style: 'myst' });
+        expect(nodes[1]).toMatchObject({
+            type: 'text',
+            content: 'After text',
+        });
+    });
+
+    it('should parse MyST admonition preceded by normal text', () => {
+        const text = 'Before text\n:::{note}\nNote body.\n:::';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes[0]).toMatchObject({
+            type: 'text',
+            content: 'Before text',
+        });
+        expect(nodes[1]).toMatchObject({ type: 'admonition', style: 'myst' });
+    });
+
+    it('should not parse MyST admonition if not at start of line', () => {
+        const text = 'Some text :::{note}\nBody\n:::';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes.some((n) => n.type === 'admonition')).toBe(false);
+    });
+
+    it('should not parse unclosed MyST admonition', () => {
+        const text = ':::{note}\nBody without closing fence';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes.some((n) => n.type === 'admonition')).toBe(false);
+    });
+
+    it('should parse unknown MyST type as generic admonition', () => {
+        const text = ':::{customtype}\nContent.\n:::';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            {
+                type: 'admonition',
+                style: 'myst',
+                admonitionType: 'customtype',
+                title: undefined,
+                content: 'Content.',
+            },
+        ]);
+    });
+
+    it('should parse MyST admonition with empty body', () => {
+        const text = ':::{note}\n\n:::';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes[0]).toMatchObject({
+            type: 'admonition',
+            style: 'myst',
+            admonitionType: 'note',
+        });
+    });
+
+    it('should parse all MyST admonition types', () => {
+        for (const t of [
+            'note',
+            'tip',
+            'important',
+            'warning',
+            'caution',
+            'danger',
+            'error',
+            'hint',
+            'seealso',
+        ]) {
+            const text = `:::{${t}}\nBody\n:::`;
+            const nodes = parseText(text, ParserPresets.MESSAGE);
+            expect(nodes[0]).toMatchObject({
+                type: 'admonition',
+                style: 'myst',
+                admonitionType: t,
+            });
+        }
     });
 });

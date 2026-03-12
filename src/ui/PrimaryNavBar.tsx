@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { Bell, Compass, Home, Plus, Settings } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
-import { usePings } from '@/api/pings';
+import { usePings } from '@/api/pings/pings.queries';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { toggleMobileHomeTab } from '@/store/slices/navSlice';
 import { useMobileSwipeContext } from '@/ui/MobileSwipeContext';

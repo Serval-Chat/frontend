@@ -2,8 +2,8 @@ import React from 'react';
 
 import { X } from 'lucide-react';
 
-import type { PingNotification } from '@/api/pings';
-import { useDeletePing } from '@/api/pings';
+import { useDeletePing } from '@/api/pings/pings.queries';
+import type { PingNotification } from '@/api/pings/pings.types';
 import { useChannels, useServers } from '@/api/servers/servers.queries';
 import type { Channel } from '@/api/servers/servers.types';
 import { MessageContent } from '@/ui/components/chat/MessageContent';
