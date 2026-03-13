@@ -6,6 +6,13 @@ interface MermaidChartProps {
     content: string;
 }
 
+mermaid.initialize({
+    startOnLoad: false,
+    theme: 'dark',
+    securityLevel: 'loose',
+    fontFamily: 'Inter, sans-serif',
+});
+
 /**
  * @description Renders a mermaid chart
  */
@@ -18,25 +25,16 @@ export const MermaidChart: React.FC<MermaidChartProps> = ({ content }) => {
         const renderChart = async (): Promise<void> => {
             try {
                 const id = `mermaid-${Math.random().toString(36).substring(2, 9)}`;
-
-                mermaid.initialize({
-                    startOnLoad: false,
-                    theme: 'dark',
-                    securityLevel: 'sandbox',
-                    fontFamily: 'Inter, sans-serif',
-                });
-
                 const { svg } = await mermaid.render(id, content);
-
                 setSvgContent(svg);
                 setError(null);
             } catch (err: unknown) {
                 console.error('Mermaid render error:', err);
-                if (err instanceof Error) {
-                    setError(err.message);
-                } else {
-                    setError('Failed to render chart');
-                }
+                setError(
+                    err instanceof Error
+                        ? err.message
+                        : 'Failed to render chart',
+                );
             }
         };
 
