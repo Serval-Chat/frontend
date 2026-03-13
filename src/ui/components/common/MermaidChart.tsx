@@ -22,7 +22,7 @@ export const MermaidChart: React.FC<MermaidChartProps> = ({ content }) => {
                 mermaid.initialize({
                     startOnLoad: false,
                     theme: 'dark',
-                    securityLevel: 'strict',
+                    securityLevel: 'sandbox',
                     fontFamily: 'Inter, sans-serif',
                 });
 
