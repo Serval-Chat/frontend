@@ -20,8 +20,8 @@ const AdminErrorFallback = ({
     error: Error;
     resetErrorBoundary: () => void;
 }): ReactNode => (
-    <div className="flex flex-col items-center justify-center p-12 text-center rounded-2xl border border-danger/20 bg-danger/5">
-        <div className="flex items-center justify-center w-12 h-12 mb-4 rounded-full bg-danger/10 text-danger">
+    <div className="flex flex-col items-center justify-center rounded-2xl border border-danger/20 bg-danger/5 p-12 text-center">
+        <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-danger/10 text-danger">
             <AlertTriangle size={24} />
         </div>
         <Heading className="mb-2" level={3}>

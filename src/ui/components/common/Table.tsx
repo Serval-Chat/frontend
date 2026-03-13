@@ -15,13 +15,13 @@ export const Table: React.FC<TableProps> = ({
 }) => (
     <div
         className={cn(
-            'rounded-lg border border-[var(--color-border-subtle)] overflow-hidden',
+            'overflow-hidden rounded-lg border border-border-subtle',
             !fullWidth && 'w-fit max-w-full',
         )}
     >
         <table
             className={cn(
-                'text-sm text-left',
+                'text-left text-sm',
                 fullWidth ? 'w-full' : 'w-full',
                 className,
             )}
@@ -43,7 +43,7 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
 }) => (
     <thead
         className={cn(
-            'bg-[var(--color-bg-secondary)] text-[var(--color-muted-foreground)] border-b border-[var(--color-border-subtle)]',
+            'border-b border-border-subtle bg-bg-secondary text-muted-foreground',
             className,
         )}
         {...props}
@@ -62,10 +62,7 @@ export const TableBody: React.FC<TableBodyProps> = ({
     ...props
 }) => (
     <tbody
-        className={cn(
-            'divide-y divide-[var(--color-border-subtle)]',
-            className,
-        )}
+        className={cn('divide-y divide-border-subtle', className)}
         {...props}
     >
         {children}
@@ -82,10 +79,7 @@ export const TableRow: React.FC<TableRowProps> = ({
     ...props
 }) => (
     <tr
-        className={cn(
-            'hover:bg-[var(--color-bg-subtle)] transition-colors group',
-            className,
-        )}
+        className={cn('group transition-colors hover:bg-bg-subtle', className)}
         {...props}
     >
         {children}
@@ -105,7 +99,7 @@ export const TableHead: React.FC<TableHeadProps> = ({
 }) => (
     <th
         className={cn(
-            'px-4 py-3 font-bold uppercase tracking-wider text-[10px] border-r border-[var(--color-border-subtle)] last:border-0',
+            'border-r border-border-subtle px-4 py-3 text-[10px] font-bold tracking-wider uppercase last:border-0',
             align === 'center' && 'text-center',
             align === 'right' && 'text-right',
             className,
@@ -133,11 +127,11 @@ export const TableCell: React.FC<TableCellProps> = ({
 }) => (
     <td
         className={cn(
-            'px-4 py-4 border-r border-[var(--color-border-subtle)] last:border-0',
+            'border-r border-border-subtle px-4 py-4 last:border-0',
             align === 'center' && 'text-center',
             align === 'right' && 'text-right',
             monospace && 'font-mono',
-            muted && 'text-[var(--color-muted-foreground)]',
+            muted && 'text-muted-foreground',
             className,
         )}
         {...props}

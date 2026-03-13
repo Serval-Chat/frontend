@@ -26,10 +26,10 @@ export const StatusMessage: React.FC<StatusMessageProps> = ({
                 animate={{ opacity: 1, y: 0 }}
                 as={motion.div}
                 className={cn(
-                    'w-full min-h-10 flex items-center justify-center px-4 py-2 rounded-md text-sm font-medium text-center border',
+                    'flex min-h-10 w-full items-center justify-center rounded-md border px-4 py-2 text-center text-sm font-medium',
                     type === 'error'
-                        ? 'bg-danger/10 text-danger border-danger/20'
-                        : 'bg-success/10 text-success border-success/20',
+                        ? 'border-danger/20 bg-danger/10 text-danger'
+                        : 'border-success/20 bg-success/10 text-success',
                     className,
                 )}
                 exit={{ opacity: 0, y: -10 }}

@@ -188,14 +188,14 @@ export const MessageEdit: React.FC<MessageEditProps> = ({
 
     return (
         <Box className="relative w-full">
-            <div className="flex-1 relative cursor-text min-h-[60px] flex items-start bg-bg-secondary rounded-md border border-border-subtle focus-within:outline-none focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary/30 transition-all duration-200">
+            <div className="relative flex min-h-[60px] flex-1 cursor-text items-start rounded-md border border-border-subtle bg-bg-secondary transition-all duration-200 focus-within:border-primary/30 focus-within:ring-2 focus-within:ring-primary/20 focus-within:outline-none">
                 <LexicalComposer initialConfig={initialConfig}>
                     <LexicalInitPlugin initialText={initialText} />
                     <RichTextPlugin
                         ErrorBoundary={LexicalErrorBoundary}
                         contentEditable={
                             <ContentEditable
-                                className="w-full h-full px-3 py-2 pb-8 text-sm text-foreground outline-none resize-none overflow-y-auto custom-scrollbar min-h-[60px] max-h-[200px]"
+                                className="custom-scrollbar h-full max-h-[200px] min-h-[60px] w-full resize-none overflow-y-auto px-3 py-2 pb-8 text-sm text-foreground outline-none"
                                 onKeyDown={(e) => {
                                     if (e.key === 'Escape') {
                                         e.preventDefault();
@@ -212,7 +212,7 @@ export const MessageEdit: React.FC<MessageEditProps> = ({
                             />
                         }
                         placeholder={
-                            <div className="absolute top-[9px] left-3 pointer-events-none text-placeholder text-sm select-none">
+                            <div className="pointer-events-none absolute top-[9px] left-3 text-sm text-placeholder select-none">
                                 Editing message...
                             </div>
                         }
@@ -249,8 +249,8 @@ export const MessageEdit: React.FC<MessageEditProps> = ({
             <Box className="absolute right-2 bottom-2 flex gap-1">
                 <Button
                     className={cn(
-                        'h-6 w-6 p-0 rounded transition-colors',
-                        'hover:bg-white/5 text-muted-foreground hover:text-foreground',
+                        'h-6 w-6 rounded p-0 transition-colors',
+                        'text-muted-foreground hover:bg-white/5 hover:text-foreground',
                         showEmojiPicker && 'bg-white/10 text-foreground',
                     )}
                     disabled={isPending}
@@ -264,8 +264,8 @@ export const MessageEdit: React.FC<MessageEditProps> = ({
 
                 <Button
                     className={cn(
-                        'h-6 w-6 p-0 rounded transition-colors',
-                        'hover:bg-danger/20 text-muted-foreground hover:text-danger',
+                        'h-6 w-6 rounded p-0 transition-colors',
+                        'text-muted-foreground hover:bg-danger/20 hover:text-danger',
                     )}
                     disabled={isPending}
                     size="sm"
@@ -278,10 +278,10 @@ export const MessageEdit: React.FC<MessageEditProps> = ({
 
                 <Button
                     className={cn(
-                        'h-6 w-6 p-0 rounded transition-colors',
+                        'h-6 w-6 rounded p-0 transition-colors',
                         hasChanged
-                            ? 'hover:bg-success/20 text-muted-foreground hover:text-success'
-                            : 'opacity-50 cursor-not-allowed',
+                            ? 'text-muted-foreground hover:bg-success/20 hover:text-success'
+                            : 'cursor-not-allowed opacity-50',
                     )}
                     disabled={isPending || !hasChanged}
                     size="sm"
@@ -295,7 +295,7 @@ export const MessageEdit: React.FC<MessageEditProps> = ({
 
             {showEmojiPicker && (
                 <Box
-                    className="absolute bottom-full right-0 mb-2 z-[var(--z-index-popover)]"
+                    className="absolute right-0 bottom-full z-[var(--z-index-popover)] mb-2"
                     ref={emojiPickerRef}
                 >
                     <EmojiPicker

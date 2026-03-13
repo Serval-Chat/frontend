@@ -203,11 +203,11 @@ export const AccountSettings: React.FC = () => {
                 My Account
             </Heading>
 
-            <div className="flex flex-col md:flex-row gap-8">
+            <div className="flex flex-col gap-8 md:flex-row">
                 {/* Preview Section */}
                 <div className="flex-shrink-0">
                     <Heading
-                        className="mb-3 text-sm font-bold text-[var(--color-muted-foreground)] uppercase"
+                        className="mb-3 text-sm font-bold text-muted-foreground uppercase"
                         level={4}
                     >
                         Preview
@@ -224,7 +224,7 @@ export const AccountSettings: React.FC = () => {
                 <div className="flex-1 space-y-6">
                     <div className="space-y-2">
                         <label
-                            className="text-sm font-bold text-[var(--color-muted-foreground)] uppercase"
+                            className="text-sm font-bold text-muted-foreground uppercase"
                             htmlFor="displayName"
                         >
                             Display Name
@@ -240,7 +240,7 @@ export const AccountSettings: React.FC = () => {
 
                     <div className="space-y-2">
                         <label
-                            className="text-sm font-bold text-[var(--color-muted-foreground)] uppercase"
+                            className="text-sm font-bold text-muted-foreground uppercase"
                             htmlFor="username"
                         >
                             Username
@@ -259,7 +259,7 @@ export const AccountSettings: React.FC = () => {
 
                     <div className="space-y-2">
                         <label
-                            className="text-sm font-bold text-[var(--color-muted-foreground)] uppercase"
+                            className="text-sm font-bold text-muted-foreground uppercase"
                             htmlFor="pronouns"
                         >
                             Pronouns
@@ -275,12 +275,12 @@ export const AccountSettings: React.FC = () => {
 
                     <div className="space-y-2">
                         <label
-                            className="text-sm font-bold text-[var(--color-muted-foreground)] uppercase"
+                            className="text-sm font-bold text-muted-foreground uppercase"
                             htmlFor="bio"
                         >
                             About Me
                         </label>
-                        <div className="relative min-h-[100px] flex items-start bg-[var(--color-bg-secondary)] rounded-md border border-[var(--color-border-subtle)] focus-within:outline-none focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary/30 transition-all duration-200">
+                        <div className="relative flex min-h-[100px] items-start rounded-md border border-border-subtle bg-bg-secondary transition-all duration-200 focus-within:border-primary/30 focus-within:ring-2 focus-within:ring-primary/20 focus-within:outline-none">
                             <LexicalComposer
                                 initialConfig={{
                                     namespace: 'BioEditor',
@@ -303,10 +303,10 @@ export const AccountSettings: React.FC = () => {
                                 <RichTextPlugin
                                     ErrorBoundary={LexicalErrorBoundary}
                                     contentEditable={
-                                        <ContentEditable className="w-full h-full px-3 py-2 text-sm text-foreground outline-none resize-none overflow-y-auto custom-scrollbar min-h-[100px] max-h-[300px]" />
+                                        <ContentEditable className="custom-scrollbar h-full max-h-[300px] min-h-[100px] w-full resize-none overflow-y-auto px-3 py-2 text-sm text-foreground outline-none" />
                                     }
                                     placeholder={
-                                        <div className="absolute top-[9px] left-3 pointer-events-none text-placeholder text-sm select-none">
+                                        <div className="pointer-events-none absolute top-[9px] left-3 text-sm text-placeholder select-none">
                                             Tell us about yourself...
                                         </div>
                                     }
@@ -344,12 +344,12 @@ export const AccountSettings: React.FC = () => {
                     </div>
 
                     {/* Password Section */}
-                    <div className="pt-6 border-t border-[var(--color-border-subtle)]">
+                    <div className="border-t border-border-subtle pt-6">
                         <Heading className="mb-4" level={4}>
                             Password & Authentication
                         </Heading>
                         <div className="space-y-4">
-                            <div className="bg-[var(--color-bg-subtle)] p-6 rounded-lg border border-[var(--color-border-subtle)] flex items-center justify-between gap-4">
+                            <div className="flex items-center justify-between gap-4 rounded-lg border border-border-subtle bg-bg-subtle p-6">
                                 <div className="flex flex-col gap-1">
                                     <Text weight="bold">Login</Text>
                                     <Text size="xs" variant="muted">
@@ -364,7 +364,7 @@ export const AccountSettings: React.FC = () => {
                                     Change Login
                                 </Button>
                             </div>
-                            <div className="bg-[var(--color-bg-subtle)] p-6 rounded-lg border border-[var(--color-border-subtle)] flex items-center justify-between gap-4">
+                            <div className="flex items-center justify-between gap-4 rounded-lg border border-border-subtle bg-bg-subtle p-6">
                                 <div className="flex flex-col gap-1">
                                     <Text weight="bold">Password</Text>
                                     <Text size="xs" variant="muted">

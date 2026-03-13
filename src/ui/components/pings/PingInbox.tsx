@@ -52,22 +52,19 @@ export const PingInbox: React.FC<PingInboxProps> = ({ onClose }) => {
     return (
         <Box
             className={cn(
-                'flex flex-col w-[380px] max-w-[95vw] h-[500px] max-h-[80vh]',
-                'bg-[var(--color-background)] border border-[var(--color-border-subtle)] rounded-md overflow-hidden',
+                'flex h-[500px] max-h-[80vh] w-[380px] max-w-[95vw] flex-col',
+                'overflow-hidden rounded-md border border-border-subtle bg-background',
             )}
         >
             {/* Header */}
-            <div className="flex items-center justify-between px-3 h-10 border-b border-[var(--color-border-subtle)] bg-[var(--color-bg-subtle)]">
+            <div className="flex h-10 items-center justify-between border-b border-border-subtle bg-bg-subtle px-3">
                 <div className="flex items-center gap-2">
-                    <Inbox
-                        className="text-[var(--color-muted-foreground)]"
-                        size={16}
-                    />
+                    <Inbox className="text-muted-foreground" size={16} />
                     <Text leading="none" size="sm" weight="bold">
                         Inbox
                     </Text>
                     {pings.length > 0 && (
-                        <div className="bg-[var(--color-primary)] text-[var(--color-foreground-inverse)] text-[10px] font-bold px-1.5 h-4 flex items-center justify-center rounded-full">
+                        <div className="flex h-4 items-center justify-center rounded-full bg-primary px-1.5 text-[10px] font-bold text-foreground-inverse">
                             {pings.length}
                         </div>
                     )}
@@ -75,7 +72,7 @@ export const PingInbox: React.FC<PingInboxProps> = ({ onClose }) => {
                 <div className="flex items-center gap-0.5">
                     {pings.length > 0 && (
                         <IconButton
-                            className="w-8 h-8 p-0"
+                            className="h-8 w-8 p-0"
                             icon={CheckCheck}
                             iconSize={16}
                             size="sm"
@@ -85,7 +82,7 @@ export const PingInbox: React.FC<PingInboxProps> = ({ onClose }) => {
                         />
                     )}
                     <IconButton
-                        className="w-8 h-8 p-0"
+                        className="h-8 w-8 p-0"
                         icon={X}
                         iconSize={16}
                         size="sm"
@@ -96,7 +93,7 @@ export const PingInbox: React.FC<PingInboxProps> = ({ onClose }) => {
             </div>
 
             {/* Search */}
-            <div className="p-2 border-b border-[var(--color-border-subtle)]">
+            <div className="border-b border-border-subtle p-2">
                 <Input
                     placeholder="Search..."
                     size="sm"
@@ -107,12 +104,12 @@ export const PingInbox: React.FC<PingInboxProps> = ({ onClose }) => {
             </div>
 
             {/* List */}
-            <div className="flex-1 overflow-y-auto flex flex-col bg-[var(--color-background)] scrollbar-none">
+            <div className="scrollbar-none flex flex-1 flex-col overflow-y-auto bg-background">
                 {isLoading ? (
-                    <div className="flex flex-col p-2 gap-1">
+                    <div className="flex flex-col gap-1 p-2">
                         {[1, 2, 3].map((i) => (
                             <div
-                                className="h-16 bg-[var(--color-bg-subtle)] animate-pulse"
+                                className="h-16 animate-pulse bg-bg-subtle"
                                 key={i}
                             />
                         ))}
@@ -126,7 +123,7 @@ export const PingInbox: React.FC<PingInboxProps> = ({ onClose }) => {
                         />
                     ))
                 ) : (
-                    <div className="flex flex-col items-center justify-center grow text-[var(--color-muted-foreground)] p-10">
+                    <div className="flex grow flex-col items-center justify-center p-10 text-muted-foreground">
                         <Inbox
                             className="mb-2 opacity-20"
                             size={32}
@@ -139,7 +136,7 @@ export const PingInbox: React.FC<PingInboxProps> = ({ onClose }) => {
                 )}
             </div>
 
-            <div className="flex items-center justify-center h-10 border-t border-[var(--color-border-subtle)] bg-[var(--color-bg-subtle)] px-3">
+            <div className="flex h-10 items-center justify-center border-t border-border-subtle bg-bg-subtle px-3">
                 <Text
                     size="2xs"
                     tracking="wider"

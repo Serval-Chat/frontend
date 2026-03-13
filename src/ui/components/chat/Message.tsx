@@ -250,7 +250,7 @@ export const Message: React.FC<MessageProps> = ({
     return (
         <Box
             className={cn(
-                'group relative px-4 py-0.5 hover:bg-white/2 transition-colors flex flex-col',
+                'group relative flex flex-col px-4 py-0.5 transition-colors hover:bg-white/2',
                 isGroupStart ? 'mt-1' : 'mt-0',
                 isHighlighted && 'bg-blue-500/10 hover:bg-blue-500/15',
                 mentionsMe && 'border-l-2 border-caution',
@@ -258,7 +258,7 @@ export const Message: React.FC<MessageProps> = ({
             id={`message-${message._id}`}
             onMouseLeave={() => setShowPicker(false)}
         >
-            <ContextMenu className="w-full h-full" items={contextMenuItems}>
+            <ContextMenu className="h-full w-full" items={contextMenuItems}>
                 {/* Reply Preview */}
                 {isGroupStart && message.replyTo && (
                     <ReplyPreview
@@ -275,7 +275,7 @@ export const Message: React.FC<MessageProps> = ({
                 <Box className="flex gap-1">
                     {/* Avatar */}
                     <Box
-                        className="w-12 flex-shrink-0 flex justify-center mt-1"
+                        className="mt-1 flex w-12 flex-shrink-0 justify-center"
                         ref={avatarRef}
                     >
                         {isGroupStart ? (
@@ -287,7 +287,7 @@ export const Message: React.FC<MessageProps> = ({
                                 onClick={() => setShowProfile(true)}
                             />
                         ) : (
-                            <Text className="opacity-0 group-hover:opacity-40 text-[10px] text-muted-foreground font-medium select-none mt-1">
+                            <Text className="mt-1 text-[10px] font-medium text-muted-foreground opacity-0 select-none group-hover:opacity-40">
                                 {
                                     new Date(message.createdAt)
                                         .toLocaleTimeString([], {
@@ -302,7 +302,7 @@ export const Message: React.FC<MessageProps> = ({
                     </Box>
 
                     {/* Content Area */}
-                    <Box className="flex-1 min-w-0">
+                    <Box className="min-w-0 flex-1">
                         <MessageHeader
                             disableCustomFonts={disableCustomFonts}
                             disableGlowAndColors={disableGlowAndColors}
@@ -340,14 +340,14 @@ export const Message: React.FC<MessageProps> = ({
                 {/* Hover Actions */}
                 <Box
                     className={cn(
-                        'absolute right-4 top-0 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all z-[var(--z-index-effect-md)]',
+                        'absolute top-0 right-4 z-[var(--z-index-effect-md)] -translate-y-1/2 opacity-0 transition-all group-hover:opacity-100',
                         showPicker && 'opacity-100',
                     )}
                 >
-                    <Box className="flex items-center bg-bg-secondary border border-white/5 rounded shadow-xl px-1 py-1 gap-1 max-md:hidden">
+                    <Box className="flex items-center gap-1 rounded border border-white/5 bg-bg-secondary px-1 py-1 shadow-xl max-md:hidden">
                         {onReplyToMessage && (
                             <Button
-                                className="p-1.5 hover:bg-white/5 rounded transition-colors text-muted-foreground hover:text-foreground h-8 w-8"
+                                className="h-8 w-8 rounded p-1.5 text-muted-foreground transition-colors hover:bg-white/5 hover:text-foreground"
                                 size="sm"
                                 title="Reply"
                                 variant="ghost"
@@ -358,7 +358,7 @@ export const Message: React.FC<MessageProps> = ({
                         )}
                         <Button
                             className={cn(
-                                'p-1.5 hover:bg-white/5 rounded transition-colors text-muted-foreground hover:text-foreground h-8 w-8',
+                                'h-8 w-8 rounded p-1.5 text-muted-foreground transition-colors hover:bg-white/5 hover:text-foreground',
                                 showPicker && 'bg-white/10 text-foreground',
                             )}
                             ref={reactRef}
@@ -372,7 +372,7 @@ export const Message: React.FC<MessageProps> = ({
 
                         {canEdit && (
                             <Button
-                                className="p-1.5 hover:bg-white/5 rounded transition-colors text-muted-foreground hover:text-foreground h-8 w-8"
+                                className="h-8 w-8 rounded p-1.5 text-muted-foreground transition-colors hover:bg-white/5 hover:text-foreground"
                                 size="sm"
                                 title="Edit Message"
                                 variant="ghost"
@@ -384,7 +384,7 @@ export const Message: React.FC<MessageProps> = ({
 
                         {canDelete && (
                             <Button
-                                className="p-1.5 hover:bg-danger/20 rounded transition-colors text-muted-foreground hover:text-danger h-8 w-8"
+                                className="h-8 w-8 rounded p-1.5 text-muted-foreground transition-colors hover:bg-danger/20 hover:text-danger"
                                 size="sm"
                                 title="Delete Message"
                                 variant="ghost"
@@ -405,7 +405,7 @@ export const Message: React.FC<MessageProps> = ({
                                 onClose={() => setShowPicker(false)}
                             >
                                 <EmojiPicker
-                                    className="w-full h-full border-none shadow-none rounded-none !max-w-none !max-h-none"
+                                    className="h-full !max-h-none w-full !max-w-none rounded-none border-none shadow-none"
                                     customCategories={customCategories}
                                     onCustomEmojiSelect={
                                         handleCustomEmojiSelect

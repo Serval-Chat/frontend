@@ -34,7 +34,7 @@ export const KickUserModal: React.FC<KickUserModalProps> = ({
                 />
                 <Box>
                     <Heading level={3}>Kick {username}?</Heading>
-                    <Text className="text-[var(--color-muted-foreground)] mt-1">
+                    <Text className="mt-1 text-muted-foreground">
                         Are you sure you want to kick{' '}
                         <strong>{username}</strong> from the server? They will
                         be able to rejoin with a new invite.
@@ -42,7 +42,7 @@ export const KickUserModal: React.FC<KickUserModalProps> = ({
                 </Box>
             </Box>
 
-            <Box className="flex justify-end gap-3 pt-4 border-t border-[var(--color-border-subtle)] bg-[var(--color-bg-subtle)] -mx-6 -mb-6 p-6">
+            <Box className="-mx-6 -mb-6 flex justify-end gap-3 border-t border-border-subtle bg-bg-subtle p-6 pt-4">
                 <Button variant="ghost" onClick={onClose}>
                     Cancel
                 </Button>
@@ -53,7 +53,7 @@ export const KickUserModal: React.FC<KickUserModalProps> = ({
                         onClose();
                     }}
                 >
-                    <UserX className="w-4 h-4 mr-2" />
+                    <UserX className="mr-2 h-4 w-4" />
                     Kick Member
                 </Button>
             </Box>

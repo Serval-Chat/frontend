@@ -101,7 +101,7 @@ export const StatusModal: React.FC<StatusModalProps> = ({
         if (!statusEmoji) return <Smile size={20} />;
 
         if (isCustomEmoji(statusEmoji)) {
-            return <ParsedEmoji className="w-5 h-5" emojiId={statusEmoji} />;
+            return <ParsedEmoji className="h-5 w-5" emojiId={statusEmoji} />;
         }
 
         return <ParsedUnicodeEmoji className="text-xl" content={statusEmoji} />;
@@ -115,10 +115,10 @@ export const StatusModal: React.FC<StatusModalProps> = ({
             onClose={onClose}
         >
             <Box className="flex flex-col gap-4">
-                <Box className="flex items-center gap-2 p-2 bg-[var(--color-bg-subtle)] rounded-lg border border-[var(--color-border-subtle)] focus-within:border-primary transition-colors">
+                <Box className="flex items-center gap-2 rounded-lg border border-border-subtle bg-bg-subtle p-2 transition-colors focus-within:border-primary">
                     <Box className="shrink-0">
                         <Button
-                            className="p-1 h-8 w-8 min-w-0"
+                            className="h-8 w-8 min-w-0 p-1"
                             ref={triggerRef}
                             variant="ghost"
                             onClick={() => setShowEmojiPicker(!showEmojiPicker)}
@@ -148,7 +148,7 @@ export const StatusModal: React.FC<StatusModalProps> = ({
                             )}
                     </Box>
                     <Input
-                        className="border-none bg-transparent focus:ring-0 flex-1 h-9"
+                        className="h-9 flex-1 border-none bg-transparent focus:ring-0"
                         maxLength={120}
                         placeholder="What's happening?"
                         value={statusText}
@@ -161,7 +161,7 @@ export const StatusModal: React.FC<StatusModalProps> = ({
                     />
                     {(statusText || statusEmoji) && (
                         <Button
-                            className="p-1 h-8 w-8 min-w-0 text-muted-foreground hover:text-foreground"
+                            className="h-8 w-8 min-w-0 p-1 text-muted-foreground hover:text-foreground"
                             variant="ghost"
                             onClick={() => {
                                 setStatusText('');
@@ -173,7 +173,7 @@ export const StatusModal: React.FC<StatusModalProps> = ({
                     )}
                 </Box>
 
-                <Box className="flex justify-between items-center gap-3">
+                <Box className="flex items-center justify-between gap-3">
                     <Button
                         className="text-muted-foreground hover:text-danger"
                         variant="ghost"

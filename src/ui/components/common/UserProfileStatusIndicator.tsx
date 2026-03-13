@@ -25,7 +25,7 @@ export const UserProfileStatusIndicator: React.FC<
     return (
         <Box
             className={cn(
-                'rounded-full border-background absolute -bottom-[1px] -right-[1px]',
+                'absolute -right-[1px] -bottom-[1px] rounded-full border-background',
                 sizeClasses[size],
                 status === 'online' ? 'bg-success' : 'bg-muted-foreground',
                 className,

@@ -673,7 +673,7 @@ export const ChannelList: React.FC<ChannelListProps> = ({
 
     return (
         <ContextMenu className="flex-1" items={getGlobalMenuItems()}>
-            <div className="flex flex-col px-2 space-y-0.5 py-4 min-h-full">
+            <div className="flex min-h-full flex-col space-y-0.5 px-2 py-4">
                 <Reorder.Group
                     axis="y"
                     className="space-y-0.5"
@@ -702,7 +702,7 @@ export const ChannelList: React.FC<ChannelListProps> = ({
                                         items={getCategoryMenuItems(category)}
                                     >
                                         <div
-                                            className="flex items-center px-1 group cursor-pointer"
+                                            className="group flex cursor-pointer items-center px-1"
                                             role="button"
                                             tabIndex={0}
                                             onClick={(e) => {
@@ -722,17 +722,17 @@ export const ChannelList: React.FC<ChannelListProps> = ({
                                         >
                                             <ChevronDown
                                                 className={cn(
-                                                    'w-3 h-3 mr-0.5 text-muted-foreground transition-transform duration-200',
+                                                    'mr-0.5 h-3 w-3 text-muted-foreground transition-transform duration-200',
                                                     isCollapsed
                                                         ? '-rotate-90'
                                                         : '',
                                                 )}
                                             />
-                                            <span className="text-[12px] font-bold text-muted-foreground uppercase tracking-wider group-hover:text-foreground/80 transition-colors flex-1">
+                                            <span className="flex-1 text-[12px] font-bold tracking-wider text-muted-foreground uppercase transition-colors group-hover:text-foreground/80">
                                                 {category.name}
                                             </span>
                                             {canManageChannels && (
-                                                <div className="flex opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <div className="flex opacity-0 transition-opacity group-hover:opacity-100">
                                                     <IconButton
                                                         className="p-0.5"
                                                         icon={Settings}

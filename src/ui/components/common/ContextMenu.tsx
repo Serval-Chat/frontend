@@ -117,7 +117,7 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
                     <AnimatePresence>
                         <motion.div
                             animate={{ opacity: 1, scale: 1, y: 0 }}
-                            className="min-w-[220px] bg-[var(--color-background)] border border-[var(--color-border-subtle)] rounded-lg shadow-lg overflow-hidden backdrop-blur-md py-2 context-menu-portal"
+                            className="context-menu-portal min-w-[220px] overflow-hidden rounded-lg border border-border-subtle bg-background py-2 shadow-lg backdrop-blur-md"
                             exit={{ opacity: 0, scale: 0.95, y: -10 }}
                             initial={{ opacity: 0, scale: 0.95, y: -10 }}
                             ref={menuRef}
@@ -196,12 +196,12 @@ const ContextMenuItemRenderer: React.FC<ContextMenuItemProps> = ({
     );
 
     if (item.type === 'divider') {
-        return <Box className="h-px bg-[var(--color-divider)] my-1.5" />;
+        return <Box className="my-1.5 h-px bg-divider" />;
     }
 
     if (item.type === 'label') {
         return (
-            <div className="px-3 py-1.5 text-[10px] font-bold text-[var(--color-foreground-muted)] uppercase tracking-wider select-none">
+            <div className="text-foreground-muted px-3 py-1.5 text-[10px] font-bold tracking-wider uppercase select-none">
                 {item.label}
             </div>
         );
@@ -219,8 +219,8 @@ const ContextMenuItemRenderer: React.FC<ContextMenuItemProps> = ({
                     aria-expanded={isSubmenuOpen}
                     aria-haspopup="true"
                     className={cn(
-                        'w-full flex items-center justify-between px-3 py-2.5 text-sm transition-all duration-150 cursor-pointer select-none text-[var(--color-foreground)] hover:bg-[var(--color-bg-subtle)]',
-                        isSubmenuOpen && 'bg-[var(--color-bg-subtle)]',
+                        'flex w-full cursor-pointer items-center justify-between px-3 py-2.5 text-sm text-foreground transition-all duration-150 select-none hover:bg-bg-subtle',
+                        isSubmenuOpen && 'bg-bg-subtle',
                     )}
                     role="button"
                     tabIndex={0}
@@ -236,12 +236,12 @@ const ContextMenuItemRenderer: React.FC<ContextMenuItemProps> = ({
                     }}
                 >
                     <div className="flex items-center">
-                        {item.icon && <item.icon className="w-4 h-4 mr-3" />}
+                        {item.icon && <item.icon className="mr-3 h-4 w-4" />}
                         <span className="font-medium">{item.label}</span>
                     </div>
                     <svg
                         className={cn(
-                            'w-4 h-4 text-[var(--color-muted-foreground)] transition-transform duration-150',
+                            'h-4 w-4 text-muted-foreground transition-transform duration-150',
                             isSubmenuOpen ? 'rotate-90' : '',
                         )}
                         fill="none"
@@ -280,24 +280,26 @@ const ContextMenuItemRenderer: React.FC<ContextMenuItemProps> = ({
     const getTextColorClass = (): string => {
         switch (item.variant) {
             case 'danger':
-                return 'text-[var(--color-danger)] hover:brightness-110';
+                return 'text-danger hover:brightness-110';
             case 'caution':
-                return 'text-[var(--color-caution)] hover:brightness-110';
+                return 'text-caution hover:brightness-110';
             case 'success':
-                return 'text-[var(--color-success)] hover:brightness-110';
+                return 'text-success hover:brightness-110';
             case 'primary':
-                return 'text-[var(--color-primary)] hover:brightness-110';
+                return 'text-primary hover:brightness-110';
             case 'ghost':
                 return 'opacity-50 cursor-not-allowed';
+            case 'normal':
+            case undefined:
             default:
-                return 'text-[var(--color-foreground)] hover:brightness-110';
+                return 'text-foreground hover:brightness-110';
         }
     };
 
     return (
         <div
             className={cn(
-                'w-full flex items-center px-3 py-2.5 text-sm transition-all duration-150 cursor-pointer select-none hover:bg-[var(--color-bg-subtle)]',
+                'flex w-full cursor-pointer items-center px-3 py-2.5 text-sm transition-all duration-150 select-none hover:bg-bg-subtle',
                 getTextColorClass(),
             )}
             role="button"
@@ -323,10 +325,10 @@ const ContextMenuItemRenderer: React.FC<ContextMenuItemProps> = ({
                 }
             }}
         >
-            {Icon && <Icon className="w-4 h-4 mr-3" />}
-            {!Icon && item.indent !== false && <div className="w-4 h-4 mr-3" />}
-            <span className="font-medium flex-1">{item.label}</span>
-            {item.rightIcon && <item.rightIcon className="w-4 h-4 ml-2" />}
+            {Icon && <Icon className="mr-3 h-4 w-4" />}
+            {!Icon && item.indent !== false && <div className="mr-3 h-4 w-4" />}
+            <span className="flex-1 font-medium">{item.label}</span>
+            {item.rightIcon && <item.rightIcon className="ml-2 h-4 w-4" />}
         </div>
     );
 };
@@ -362,7 +364,7 @@ const SubMenu: React.FC<SubMenuProps> = ({
     return createPortal(
         <motion.div
             animate={{ opacity: 1, scale: 1, x: 0 }}
-            className="min-w-[180px] bg-[var(--color-background)] border border-[var(--color-border-subtle)] rounded-lg shadow-lg overflow-hidden backdrop-blur-md py-2 fixed z-[var(--z-index-top)] context-menu-portal"
+            className="context-menu-portal fixed z-[var(--z-index-top)] min-w-[180px] overflow-hidden rounded-lg border border-border-subtle bg-background py-2 shadow-lg backdrop-blur-md"
             exit={{ opacity: 0, scale: 0.95, x: -10 }}
             initial={{ opacity: 0, scale: 0.95, y: 10 }}
             ref={menuRef}

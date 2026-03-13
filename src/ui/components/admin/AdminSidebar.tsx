@@ -29,7 +29,7 @@ const SidebarItem = ({
 }: SidebarItemProps): ReactNode => (
     <Button
         className={cn(
-            'flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 border-none justify-start shadow-none',
+            'flex w-full items-center justify-start gap-3 rounded-lg border-none px-3 py-2 text-sm font-medium shadow-none transition-all duration-200',
             active
                 ? 'bg-primary/20 text-primary shadow-sm hover:bg-primary/30'
                 : 'text-muted-foreground hover:bg-bg-secondary hover:text-foreground',
@@ -59,7 +59,7 @@ export const AdminSidebar = ({
     activeSection,
     onSectionChange,
 }: AdminSidebarProps): ReactNode => (
-    <aside className="fixed left-0 top-0 flex h-full w-64 flex-col border-r border-border-subtle bg-background/50 backdrop-blur-xl">
+    <aside className="fixed top-0 left-0 flex h-full w-64 flex-col border-r border-border-subtle bg-background/50 backdrop-blur-xl">
         <div className="flex h-16 items-center border-b border-border-subtle px-6">
             <Heading level={2} variant="admin-section">
                 SER<span className="text-primary">ADMIN</span>

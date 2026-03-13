@@ -85,7 +85,7 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
                 <Box className="space-y-4">
                     <Box className="space-y-2">
                         <label
-                            className="text-xs font-bold text-[var(--color-muted-foreground)] uppercase tracking-wider"
+                            className="text-xs font-bold tracking-wider text-muted-foreground uppercase"
                             htmlFor="current-password"
                         >
                             Current Password
@@ -97,10 +97,7 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
                             onChange={(e) => setCurrentPassword(e.target.value)}
                         />
                         {errors.current && (
-                            <Text
-                                className="text-[var(--color-status-error)]"
-                                size="xs"
-                            >
+                            <Text className="text-status-error" size="xs">
                                 {errors.current}
                             </Text>
                         )}
@@ -108,7 +105,7 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
 
                     <Box className="space-y-2">
                         <label
-                            className="text-xs font-bold text-[var(--color-muted-foreground)] uppercase tracking-wider"
+                            className="text-xs font-bold tracking-wider text-muted-foreground uppercase"
                             htmlFor="new-password"
                         >
                             New Password
@@ -120,10 +117,7 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
                             onChange={(e) => setNewPassword(e.target.value)}
                         />
                         {errors.new && (
-                            <Text
-                                className="text-[var(--color-status-error)]"
-                                size="xs"
-                            >
+                            <Text className="text-status-error" size="xs">
                                 {errors.new}
                             </Text>
                         )}
@@ -131,7 +125,7 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
 
                     <Box className="space-y-2">
                         <label
-                            className="text-xs font-bold text-[var(--color-muted-foreground)] uppercase tracking-wider"
+                            className="text-xs font-bold tracking-wider text-muted-foreground uppercase"
                             htmlFor="confirm-password"
                         >
                             Confirm New Password
@@ -143,22 +137,19 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
                             onChange={(e) => setConfirmPassword(e.target.value)}
                         />
                         {errors.confirm && (
-                            <Text
-                                className="text-[var(--color-status-error)]"
-                                size="xs"
-                            >
+                            <Text className="text-status-error" size="xs">
                                 {errors.confirm}
                             </Text>
                         )}
                     </Box>
                 </Box>
 
-                <Box className="flex justify-end gap-3 pt-4 border-t border-[var(--color-border-subtle)] bg-[var(--color-bg-subtle)] -mx-6 -mb-6 p-6">
+                <Box className="-mx-6 -mb-6 flex justify-end gap-3 border-t border-border-subtle bg-bg-subtle p-6 pt-4">
                     <Button type="button" variant="ghost" onClick={handleClose}>
                         Cancel
                     </Button>
                     <Button
-                        className="bg-primary hover:bg-primary-hover text-white border-none"
+                        className="border-none bg-primary text-white hover:bg-primary-hover"
                         loading={isPending}
                         type="submit"
                     >

@@ -58,10 +58,10 @@ export const ContextMenuDemo: React.FC = () => {
             </div>
 
             <ContextMenu className="w-full" items={exampleItems}>
-                <div className="w-full h-32 flex flex-col items-center justify-center border-2 border-dashed border-[--color-border-subtle] rounded-xl bg-[--color-bg-subtle] hover:bg-[--color-bg-secondary] transition-colors cursor-context-menu group p-md">
+                <div className="group flex h-32 w-full cursor-context-menu flex-col items-center justify-center rounded-xl border-2 border-dashed border-[--color-border-subtle] bg-[--color-bg-subtle] p-md transition-colors hover:bg-[--color-bg-secondary]">
                     <Text>Right click me!</Text>
-                    <MutedText className="flex items-center justify-center mt-2">
-                        <Info className="w-3.5 h-3.5 mr-1.5" />
+                    <MutedText className="mt-2 flex items-center justify-center">
+                        <Info className="mr-1.5 h-3.5 w-3.5" />
                         Right click me (trust me)
                     </MutedText>
                 </div>

@@ -81,7 +81,7 @@ export const CategoryOverviewSettings: React.FC<
             <div className="space-y-8">
                 <div className="space-y-2">
                     <label
-                        className="text-xs font-bold text-[var(--color-muted-foreground)] uppercase tracking-wider"
+                        className="text-xs font-bold tracking-wider text-muted-foreground uppercase"
                         htmlFor="category-name"
                     >
                         Category Name
@@ -96,19 +96,15 @@ export const CategoryOverviewSettings: React.FC<
             </div>
 
             {/* Danger Zone */}
-            <div className="pt-10 space-y-6">
-                <div className="pb-4 border-b border-[var(--color-border-subtle)]">
-                    <Heading
-                        className="text-[var(--color-error)]"
-                        level={2}
-                        variant="section"
-                    >
+            <div className="space-y-6 pt-10">
+                <div className="border-b border-border-subtle pb-4">
+                    <Heading className="text-error" level={2} variant="section">
                         Danger Zone
                     </Heading>
                 </div>
 
-                <div className="rounded-lg border border-[var(--color-bg-secondary)] divide-y divide-[var(--color-border-subtle)]">
-                    <div className="p-4 flex items-center justify-between gap-4">
+                <div className="divide-y divide-border-subtle rounded-lg border border-bg-secondary">
+                    <div className="flex items-center justify-between gap-4 p-4">
                         <div className="space-y-1">
                             <Text as="p" variant="danger" weight="bold">
                                 Delete Category
@@ -124,7 +120,7 @@ export const CategoryOverviewSettings: React.FC<
                             variant="danger"
                             onClick={() => setIsDeleteConfirmOpen(true)}
                         >
-                            <Trash2 className="w-4 h-4 mr-2" />
+                            <Trash2 className="mr-2 h-4 w-4" />
                             Delete Category
                         </Button>
                     </div>
@@ -146,13 +142,13 @@ export const CategoryOverviewSettings: React.FC<
                 onClose={() => setIsDeleteConfirmOpen(false)}
             >
                 <div className="space-y-6">
-                    <div className="p-4 bg-[var(--color-status-error-bg)] border border-[var(--color-status-error)] rounded-md text-[var(--color-status-error)] text-sm">
+                    <div className="border-status-error bg-status-error-bg text-status-error rounded-md border p-4 text-sm">
                         Are you sure you want to delete{' '}
                         <span className="font-bold">{category.name}</span>?
                         Channels within this category will not be deleted, but
                         will become uncategorized. This action cannot be undone.
                     </div>
-                    <div className="flex justify-end gap-3 pt-4 bg-[var(--color-bg-secondary)] -mx-6 -mb-6 p-6">
+                    <div className="-mx-6 -mb-6 flex justify-end gap-3 bg-bg-secondary p-6 pt-4">
                         <Button
                             variant="ghost"
                             onClick={() => setIsDeleteConfirmOpen(false)}

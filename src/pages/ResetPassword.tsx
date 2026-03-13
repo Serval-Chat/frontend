@@ -89,10 +89,10 @@ export const ResetPassword: React.FC = () => {
 
     if (!token) {
         return (
-            <Box className="min-h-screen w-full flex flex-col items-center justify-center bg-background relative overflow-hidden p-md">
+            <Box className="relative flex min-h-screen w-full flex-col items-center justify-center overflow-hidden bg-background p-md">
                 <DefaultBackground />
                 <FormContent>
-                    <Box className="text-center space-y-sm">
+                    <Box className="space-y-sm text-center">
                         <Heading variant="page">Invalid Link</Heading>
                         <Text as="p" className="text-red-500">
                             No reset token found in the URL. Please use the link
@@ -105,11 +105,11 @@ export const ResetPassword: React.FC = () => {
     }
 
     return (
-        <Box className="min-h-screen w-full flex flex-col items-center justify-center bg-background relative overflow-hidden p-md">
+        <Box className="relative flex min-h-screen w-full flex-col items-center justify-center overflow-hidden bg-background p-md">
             <DefaultBackground />
 
             <FormContent>
-                <Box className="text-center space-y-sm">
+                <Box className="space-y-sm text-center">
                     <Heading variant="page">Reset Password</Heading>
                     <Text as="p">Enter your new password below.</Text>
                 </Box>

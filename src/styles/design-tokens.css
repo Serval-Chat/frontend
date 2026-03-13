@@ -72,6 +72,9 @@
     --color-bg-secondary: var(--bg-secondary);
     --color-placeholder: var(--placeholder);
     --color-divider: var(--divider);
+    --color-text-subtle: var(--text-subtle);
+    --color-text-normal: var(--text-normal);
+    --color-bg-subtle-hover: var(--bg-subtle-hover);
 
     --tertiary-bg: var(--background);
     --secondary-bg: var(--background);
@@ -108,6 +111,9 @@
     --bg-secondary: rgb(255 190 0 / 0.12);
     --placeholder: rgb(188 170 164 / 0.4);
     --divider: rgb(255 190 0 / 0.15);
+    --text-subtle: #bcaaa4;
+    --text-normal: #fffbf0;
+    --bg-subtle-hover: rgb(255 190 0 / 0.15);
 
     /* Local overrides for layout bits */
     --local-chat-bg: color-mix(in srgb, black 25%, var(--bg-secondary));

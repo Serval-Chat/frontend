@@ -112,7 +112,7 @@ export const ServerSection: React.FC = () => {
     if (!selectedServerId) return null;
 
     return (
-        <div className="flex flex-col h-full w-full overflow-y-auto no-scrollbar custom-scrollbar">
+        <div className="no-scrollbar custom-scrollbar flex h-full w-full flex-col overflow-y-auto">
             <ServerBanner
                 banner={server?.banner}
                 loading={isLoadingServer}
@@ -120,7 +120,7 @@ export const ServerSection: React.FC = () => {
             />
 
             {isLoadingChannels || isLoadingCategories ? (
-                <div className="flex-1 flex items-center justify-center">
+                <div className="flex flex-1 items-center justify-center">
                     <LoadingSpinner />
                 </div>
             ) : (

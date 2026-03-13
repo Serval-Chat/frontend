@@ -73,13 +73,13 @@ export const AutocompleteSuggestion: React.FC<AutocompleteSuggestionProps> = ({
     if (suggestions.length === 0) return null;
 
     return (
-        <Box className="absolute bottom-full left-0 right-0 mb-2 mx-4 bg-[var(--color-background)] backdrop-blur-md border border-[var(--color-border-subtle)] rounded-lg shadow-lg overflow-hidden z-[var(--z-index-popover)]">
-            <Box className="p-1 max-h-72 overflow-y-auto scrollbar-thin">
+        <Box className="absolute right-0 bottom-full left-0 z-[var(--z-index-popover)] mx-4 mb-2 overflow-hidden rounded-lg border border-border-subtle bg-background shadow-lg backdrop-blur-md">
+            <Box className="scrollbar-thin max-h-72 overflow-y-auto p-1">
                 {suggestions.map((suggestion, index) => (
                     <Box
                         className={`
-                            flex items-center gap-3 px-3 py-1.5 rounded-md cursor-pointer transition-colors
-                            ${index === selectedIndex ? 'bg-primary/15 text-primary-foreground' : 'hover:bg-white/5'}
+                            flex cursor-pointer items-center gap-3 rounded-md px-3 py-1.5 transition-colors
+                            ${index === selectedIndex ? 'text-primary-foreground bg-primary/15' : 'hover:bg-white/5'}
                         `}
                         key={getSuggestionKey(suggestion)}
                         onClick={() => onSelect(suggestion)}
@@ -91,10 +91,10 @@ export const AutocompleteSuggestion: React.FC<AutocompleteSuggestionProps> = ({
                                     src={suggestion.user.profilePicture}
                                     username={suggestion.user.username}
                                 />
-                                <Box className="flex flex-col min-w-0">
+                                <Box className="flex min-w-0 flex-col">
                                     <span
                                         className={cn(
-                                            'font-bold truncate text-sm',
+                                            'truncate text-sm font-bold',
                                             index === selectedIndex
                                                 ? 'text-primary'
                                                 : 'text-foreground',
@@ -104,7 +104,7 @@ export const AutocompleteSuggestion: React.FC<AutocompleteSuggestionProps> = ({
                                             suggestion.user.username}
                                     </span>
                                     {suggestion.user.displayName && (
-                                        <span className="text-muted-foreground text-xs truncate">
+                                        <span className="truncate text-xs text-muted-foreground">
                                             {suggestion.user.username.startsWith(
                                                 '@',
                                             )
@@ -118,12 +118,12 @@ export const AutocompleteSuggestion: React.FC<AutocompleteSuggestionProps> = ({
                         {suggestion.type === 'role' && (
                             <>
                                 <Box
-                                    className="w-4 h-4 rounded-full shrink-0 border border-white/10"
+                                    className="h-4 w-4 shrink-0 rounded-full border border-white/10"
                                     style={getRoleStyle(suggestion.role)}
                                 />
                                 <span
                                     className={cn(
-                                        'font-bold truncate text-sm',
+                                        'truncate text-sm font-bold',
                                         index === selectedIndex
                                             ? 'text-primary'
                                             : 'text-foreground',
@@ -137,14 +137,14 @@ export const AutocompleteSuggestion: React.FC<AutocompleteSuggestionProps> = ({
                         )}
                         {suggestion.type === 'emoji' && (
                             <>
-                                <Box className="w-6 h-6 shrink-0">
+                                <Box className="h-6 w-6 shrink-0">
                                     <div
                                         style={getSpriteStyle(suggestion.emoji)}
                                     />
                                 </Box>
                                 <span
                                     className={cn(
-                                        'font-bold truncate text-sm',
+                                        'truncate text-sm font-bold',
                                         index === selectedIndex
                                             ? 'text-primary'
                                             : 'text-foreground',
@@ -156,10 +156,10 @@ export const AutocompleteSuggestion: React.FC<AutocompleteSuggestionProps> = ({
                         )}
                         {suggestion.type === 'server-emoji' && (
                             <>
-                                <Box className="w-6 h-6 shrink-0">
+                                <Box className="h-6 w-6 shrink-0">
                                     <img
                                         alt={suggestion.emoji.name}
-                                        className="w-full h-full object-contain"
+                                        className="h-full w-full object-contain"
                                         src={
                                             resolveApiUrl(
                                                 suggestion.emoji.imageUrl,
@@ -169,7 +169,7 @@ export const AutocompleteSuggestion: React.FC<AutocompleteSuggestionProps> = ({
                                 </Box>
                                 <span
                                     className={cn(
-                                        'font-bold truncate text-sm',
+                                        'truncate text-sm font-bold',
                                         index === selectedIndex
                                             ? 'text-primary'
                                             : 'text-foreground',
@@ -181,7 +181,7 @@ export const AutocompleteSuggestion: React.FC<AutocompleteSuggestionProps> = ({
                         )}
                         {suggestion.type === 'channel' && (
                             <>
-                                <Box className="w-5 h-5 shrink-0 flex items-center justify-center text-muted-foreground">
+                                <Box className="flex h-5 w-5 shrink-0 items-center justify-center text-muted-foreground">
                                     {(() => {
                                         const CustomIcon = suggestion.channel
                                             .icon
@@ -197,7 +197,7 @@ export const AutocompleteSuggestion: React.FC<AutocompleteSuggestionProps> = ({
                                 </Box>
                                 <span
                                     className={cn(
-                                        'font-bold truncate text-sm',
+                                        'truncate text-sm font-bold',
                                         index === selectedIndex
                                             ? 'text-primary'
                                             : 'text-foreground',
@@ -209,14 +209,14 @@ export const AutocompleteSuggestion: React.FC<AutocompleteSuggestionProps> = ({
                         )}
                         {suggestion.type === 'everyone' && (
                             <>
-                                <Box className="w-4 h-4 rounded-full shrink-0 flex items-center justify-center bg-primary">
-                                    <span className="text-[10px] text-white font-bold">
+                                <Box className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-primary">
+                                    <span className="text-[10px] font-bold text-white">
                                         @
                                     </span>
                                 </Box>
                                 <span
                                     className={cn(
-                                        'font-bold truncate text-sm',
+                                        'truncate text-sm font-bold',
                                         index === selectedIndex
                                             ? 'text-primary'
                                             : 'text-foreground',

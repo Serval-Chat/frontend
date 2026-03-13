@@ -171,8 +171,8 @@ export const ChatDemo: React.FC = () => (
                 </Text>
             </div>
 
-            <div className="bg-background rounded-xl border border-border-subtle overflow-hidden shadow-2xl flex flex-col h-[500px]">
-                <div className="p-4 border-b border-border-subtle bg-bg-subtle">
+            <div className="flex h-[500px] flex-col overflow-hidden rounded-xl border border-border-subtle bg-background shadow-2xl">
+                <div className="border-b border-border-subtle bg-bg-subtle p-4">
                     <Text className="text-foreground" weight="semibold">
                         # General (English)
                     </Text>

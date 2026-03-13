@@ -46,13 +46,13 @@ export const RoleNavbar: React.FC<RoleNavbarProps> = ({
     };
 
     return (
-        <div className="w-full md:w-64 bg-[var(--color-bg-subtle)] border-l border-[var(--color-border-subtle)] flex flex-col h-full overflow-hidden shrink-0">
-            <div className="p-3 border-b border-[var(--color-border-subtle)] flex items-center justify-between">
+        <div className="flex h-full w-full shrink-0 flex-col overflow-hidden border-l border-border-subtle bg-bg-subtle md:w-64">
+            <div className="flex items-center justify-between border-b border-border-subtle p-3">
                 <Text size="sm" weight="bold">
                     Roles
                 </Text>
                 <IconButton
-                    className="w-7 h-7 p-0 text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]"
+                    className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground"
                     icon={Plus}
                     iconSize={16}
                     title="Add Role"
@@ -104,8 +104,8 @@ const RoleItem: React.FC<RoleItemProps> = ({
 
     return (
         <Reorder.Item
-            className={`group flex items-center gap-1.5 p-1 rounded transition-colors cursor-pointer
-                ${isActive ? 'bg-[var(--color-bg-secondary)] text-[var(--color-foreground)]' : 'hover:bg-[var(--color-bg-subtle)] text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]'}
+            className={`group flex cursor-pointer items-center gap-1.5 rounded p-1 transition-colors
+                ${isActive ? 'bg-bg-secondary text-foreground' : 'text-muted-foreground hover:bg-bg-subtle hover:text-foreground'}
             `}
             dragControls={controls}
             dragListener={false}
@@ -114,7 +114,7 @@ const RoleItem: React.FC<RoleItemProps> = ({
             onDragEnd={onDragEnd}
         >
             <div
-                className="cursor-grab active:cursor-grabbing p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                className="cursor-grab p-0.5 opacity-0 transition-opacity group-hover:opacity-100 active:cursor-grabbing"
                 onPointerDown={(e) => controls.start(e)}
             >
                 <GripVertical size={12} />
@@ -136,7 +136,7 @@ const RoleItem: React.FC<RoleItemProps> = ({
 
             {!isEveryone && (
                 <IconButton
-                    className="w-6 h-6 p-0 opacity-0 group-hover:opacity-100 text-[var(--color-danger)] hover:bg-[var(--color-danger-muted)] transition-opacity"
+                    className="h-6 w-6 p-0 text-danger opacity-0 transition-opacity group-hover:opacity-100 hover:bg-danger-muted"
                     icon={Trash2}
                     iconSize={12}
                     variant="ghost"

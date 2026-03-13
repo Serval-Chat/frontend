@@ -31,7 +31,7 @@ export const SecondaryNavBar: React.FC = () => {
         <Box
             as="aside"
             className={cn(
-                'h-full shrink-0 flex flex-col no-scrollbar bg-[var(--secondary-bg)] relative',
+                'no-scrollbar relative flex h-full shrink-0 flex-col bg-[var(--secondary-bg)]',
                 'pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]',
                 !inSwipePanel &&
                     navMode === 'friends' &&
@@ -51,7 +51,7 @@ export const SecondaryNavBar: React.FC = () => {
             )}
             style={{ width: inSwipePanel ? undefined : `${width}px` }}
         >
-            <Box className="flex-1 flex flex-col min-h-0 relative">
+            <Box className="relative flex min-h-0 flex-1 flex-col">
                 {navMode === 'friends' && <FriendsSection />}
                 {navMode === 'servers' && <ServerSection />}
             </Box>

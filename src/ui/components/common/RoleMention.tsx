@@ -30,7 +30,7 @@ export const RoleMention: React.FC<RoleMentionProps> = ({ roleId }) => {
     return (
         <Box
             as="span"
-            className="inline-flex items-center gap-0.5 whitespace-nowrap px-1 py-px rounded transition-opacity cursor-pointer select-none font-medium text-white shadow-sm hover:opacity-90"
+            className="inline-flex cursor-pointer items-center gap-0.5 rounded px-1 py-px font-medium whitespace-nowrap text-white shadow-sm transition-opacity select-none hover:opacity-90"
             style={style}
         >
             <AtSign className="shrink-0" size={14} />

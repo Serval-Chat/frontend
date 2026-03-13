@@ -8,14 +8,14 @@ const headingVariants = cva('font-bold', {
     variants: {
         variant: {
             page: 'text-3xl tracking-tight text-foreground',
-            section: 'my-md text-xl font-sans',
-            sub: 'text-lg font-semibold mb-md',
-            'chat-h1': 'text-2xl mt-1 mb-0.5',
-            'chat-h2': 'text-xl mt-0.5 mb-0',
-            'chat-h3': 'text-lg mt-0.5 mb-0',
+            section: 'my-md font-sans text-xl',
+            sub: 'mb-md text-lg font-semibold',
+            'chat-h1': 'mt-1 mb-0.5 text-2xl',
+            'chat-h2': 'mt-0.5 mb-0 text-xl',
+            'chat-h3': 'mt-0.5 mb-0 text-lg',
             'admin-page': 'text-2xl font-black tracking-tight',
             'admin-section': 'text-xl font-black tracking-tight uppercase',
-            'admin-sub': 'text-sm font-black uppercase tracking-wider',
+            'admin-sub': 'text-sm font-black tracking-wider uppercase',
         },
     },
     defaultVariants: {

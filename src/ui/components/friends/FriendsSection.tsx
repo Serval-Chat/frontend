@@ -6,18 +6,18 @@ import { AddFriendForm } from './AddFriendForm';
 import { FriendList } from './FriendList';
 
 const FriendsHeader = (): React.ReactNode => (
-    <Box className="text-xs font-semibold text-foreground-muted uppercase tracking-wider mb-3 px-1">
+    <Box className="text-foreground-muted mb-3 px-1 text-xs font-semibold tracking-wider uppercase">
         Friends
     </Box>
 );
 
 export const FriendsSection: React.FC = () => (
-    <Box className="flex flex-col h-full overflow-hidden">
-        <Box className="px-3 pt-4 pb-2 shrink-0">
+    <Box className="flex h-full flex-col overflow-hidden">
+        <Box className="shrink-0 px-3 pt-4 pb-2">
             <FriendsHeader />
             <AddFriendForm />
         </Box>
-        <Box className="flex-1 overflow-y-auto custom-scrollbar">
+        <Box className="custom-scrollbar flex-1 overflow-y-auto">
             <FriendList />
         </Box>
     </Box>

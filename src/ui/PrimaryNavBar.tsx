@@ -63,7 +63,7 @@ export const PrimaryNavBar: React.FC = () => {
         <Box
             as="nav"
             className={cn(
-                'h-full flex flex-col items-center gap-3 relative z-50',
+                'relative z-50 flex h-full flex-col items-center gap-3',
                 'pt-[calc(0.75rem+env(safe-area-inset-top))] pb-[calc(0.75rem+env(safe-area-inset-bottom))]',
                 'bg-[--color-background]',
                 'w-[72px] shrink-0',
@@ -85,7 +85,7 @@ export const PrimaryNavBar: React.FC = () => {
 
             <Box>
                 <IconButton
-                    className="text-green-500 hover:text-green-400 bg-[var(--color-bg-subtle)] hover:bg-[var(--color-bg-subtle-hover)]"
+                    className="bg-bg-subtle text-green-500 hover:bg-bg-subtle-hover hover:text-green-400"
                     icon={Plus}
                     onClick={() => setShowCreateServer(true)}
                 />
@@ -93,7 +93,7 @@ export const PrimaryNavBar: React.FC = () => {
 
             <Box>
                 <IconButton
-                    className="text-[var(--color-text-subtle)] hover:text-[var(--color-text-normal)] bg-[var(--color-bg-subtle)] hover:bg-[var(--color-bg-subtle-hover)]"
+                    className="bg-bg-subtle text-text-subtle hover:bg-bg-subtle-hover hover:text-text-normal"
                     icon={Compass}
                     onClick={() => setShowJoinServer(true)}
                 />
@@ -113,7 +113,7 @@ export const PrimaryNavBar: React.FC = () => {
                     {showInbox && (
                         <motion.div
                             animate={{ opacity: 1, x: 0, scale: 1 }}
-                            className="absolute left-[calc(100%+12px)] bottom-0 z-50 origin-bottom-left"
+                            className="absolute bottom-0 left-[calc(100%+12px)] z-50 origin-bottom-left"
                             exit={{ opacity: 0, x: -10, scale: 0.95 }}
                             initial={{ opacity: 0, x: -10, scale: 0.95 }}
                             transition={{ duration: 0.15, ease: 'easeOut' }}

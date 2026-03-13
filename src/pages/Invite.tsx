@@ -42,7 +42,7 @@ const InviteBannerHeader: React.FC<InviteBannerHeaderProps> = ({
             {/* Banner area */}
             <div
                 className={cn(
-                    'w-full h-[140px] flex-shrink-0 relative overflow-hidden rounded-t-lg',
+                    'relative h-[140px] w-full flex-shrink-0 overflow-hidden rounded-t-lg',
                     !hasBanner && 'bg-bg-secondary',
                 )}
             >
@@ -51,12 +51,12 @@ const InviteBannerHeader: React.FC<InviteBannerHeaderProps> = ({
                         {banner.type === 'image' || banner.type === 'gif' ? (
                             <img
                                 alt={name}
-                                className="w-full h-full object-cover"
+                                className="h-full w-full object-cover"
                                 src={bannerUrl ?? ''}
                             />
                         ) : (
                             <div
-                                className="w-full h-full"
+                                className="h-full w-full"
                                 style={
                                     banner.type === 'gradient'
                                         ? { background: banner.value }
@@ -69,18 +69,18 @@ const InviteBannerHeader: React.FC<InviteBannerHeaderProps> = ({
                     </>
                 )}
 
-                {loading && <Skeleton className="w-full h-full rounded-none" />}
+                {loading && <Skeleton className="h-full w-full rounded-none" />}
             </div>
 
             {/* Server icon */}
-            <div className="absolute left-1/2 -translate-x-1/2 bottom-0 translate-y-1/2 z-content">
+            <div className="absolute bottom-0 left-1/2 z-content -translate-x-1/2 translate-y-1/2">
                 {loading ? (
                     <Skeleton
-                        className="w-20 h-20 rounded-[1.8rem] ring-4 ring-bg-subtle"
+                        className="h-20 w-20 rounded-[1.8rem] ring-4 ring-bg-subtle"
                         variant="rectangular"
                     />
                 ) : (
-                    <div className="ring-4 ring-[var(--color-bg-subtle)] rounded-[1.8rem]">
+                    <div className="rounded-[1.8rem] ring-4 ring-bg-subtle">
                         <ServerIcon server={{ name, icon }} size="xl" />
                     </div>
                 )}
@@ -90,7 +90,7 @@ const InviteBannerHeader: React.FC<InviteBannerHeaderProps> = ({
 };
 
 const InvalidInvite: React.FC = () => (
-    <div className="relative z-content text-center space-y-md">
+    <div className="relative z-content space-y-md text-center">
         <div className="flex justify-center text-muted-foreground/50">
             <CircleOff size={64} strokeWidth={1.5} />
         </div>
@@ -99,7 +99,7 @@ const InvalidInvite: React.FC = () => (
             This invite link is invalid, has expired, or has reached its maximum
             number of uses.
         </Text>
-        <Link className="inline-block mt-sm text-sm font-medium" to="/">
+        <Link className="mt-sm inline-block text-sm font-medium" to="/">
             Go back home
         </Link>
     </div>
@@ -131,14 +131,14 @@ export const Invite: React.FC = () => {
     const showError = isError && !isLoading;
 
     return (
-        <Box className="min-h-screen w-full flex flex-col items-center justify-center bg-background relative overflow-hidden p-md">
+        <Box className="relative flex min-h-screen w-full flex-col items-center justify-center overflow-hidden bg-background p-md">
             <DefaultBackground />
 
             {showError ? (
                 <InvalidInvite />
             ) : (
                 /* Invite card */
-                <div className="relative z-content w-full max-w-sm bg-bg-subtle/50 backdrop-blur-xl border border-border-subtle rounded-lg shadow-lg overflow-visible flex flex-col">
+                <div className="relative z-content flex w-full max-w-sm flex-col overflow-visible rounded-lg border border-border-subtle bg-bg-subtle/50 shadow-lg backdrop-blur-xl">
                     {/* Banner + icon header */}
                     <InviteBannerHeader
                         banner={data?.server.banner}
@@ -148,7 +148,7 @@ export const Invite: React.FC = () => {
                     />
 
                     {/* Card body */}
-                    <div className="flex flex-col items-center text-center gap-sm px-lg pb-lg pt-14">
+                    <div className="flex flex-col items-center gap-sm px-lg pt-14 pb-lg text-center">
                         {/* Server name */}
                         {showSkeleton ? (
                             <Skeleton className="h-7 w-40" variant="text" />
@@ -225,7 +225,7 @@ export const Invite: React.FC = () => {
                             <Skeleton className="h-10 w-full rounded-md" />
                         ) : (
                             <Button
-                                className="w-full mt-sm py-sm text-base font-semibold"
+                                className="mt-sm w-full py-sm text-base font-semibold"
                                 loading={isJoining}
                                 variant="primary"
                                 onClick={handleJoin}

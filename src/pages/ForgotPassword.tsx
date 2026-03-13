@@ -51,11 +51,11 @@ export const ForgotPassword: React.FC = () => {
     };
 
     return (
-        <Box className="min-h-screen w-full flex flex-col items-center justify-center bg-background relative overflow-hidden p-md">
+        <Box className="relative flex min-h-screen w-full flex-col items-center justify-center overflow-hidden bg-background p-md">
             <DefaultBackground />
 
             <FormContent>
-                <Box className="text-center space-y-sm">
+                <Box className="space-y-sm text-center">
                     <Heading variant="page">Forgot Password?</Heading>
                     <Text as="p">
                         No worries! Enter your email and we'll send you a reset
@@ -96,7 +96,7 @@ export const ForgotPassword: React.FC = () => {
                     />
                 )}
 
-                <Box className="text-center mt-md">
+                <Box className="mt-md text-center">
                     <Link to="/login">Back to Login</Link>
                 </Box>
             </FormContent>

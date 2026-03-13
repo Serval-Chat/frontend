@@ -51,7 +51,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     return (
         <Modal
             noPadding
-            className="w-[96%] max-w-[1200px] h-[92vh] max-h-[900px] bg-[var(--color-background)] p-0 flex flex-row overflow-hidden"
+            className="flex h-[92vh] max-h-[900px] w-[96%] max-w-[1200px] flex-row overflow-hidden bg-background p-0"
             isOpen={isOpen}
             showCloseButton={false}
             onClose={onClose}
@@ -73,15 +73,15 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
                 <div
                     className={cn(
-                        'flex-1 bg-[var(--color-background)] flex flex-col h-full overflow-hidden relative',
+                        'relative flex h-full flex-1 flex-col overflow-hidden bg-background',
                         isMobileSidebarOpen ? 'hidden md:flex' : 'flex',
                     )}
                 >
-                    <div className="flex items-center justify-between px-6 py-5 border-b border-[var(--color-border-subtle)] shrink-0">
+                    <div className="flex shrink-0 items-center justify-between border-b border-border-subtle px-6 py-5">
                         <div className="flex items-center gap-2">
                             <div className="md:hidden">
                                 <IconButton
-                                    className="text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] hover:bg-[var(--color-bg-subtle)]"
+                                    className="text-muted-foreground hover:bg-bg-subtle hover:text-foreground"
                                     icon={ChevronLeft}
                                     iconSize={24}
                                     onClick={() => setIsMobileSidebarOpen(true)}
@@ -96,14 +96,14 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                             </Heading>
                         </div>
                         <IconButton
-                            className="text-[var(--color-muted-foreground)] hover:text-[var(--color-danger)] hover:bg-[var(--color-danger-muted)] border border-[var(--color-border-subtle)]"
+                            className="border border-border-subtle text-muted-foreground hover:bg-danger-muted hover:text-danger"
                             icon={X}
                             iconSize={20}
                             onClick={onClose}
                         />
                     </div>
 
-                    <div className="flex-1 overflow-y-auto p-6 scrollbar-thin scrollbar-thumb-[var(--color-bg-secondary)] scrollbar-track-transparent">
+                    <div className="scrollbar-thin scrollbar-thumb-bg-secondary scrollbar-track-transparent flex-1 overflow-y-auto p-6">
                         {activeSection === 'account' && <AccountSettings />}
                         {activeSection === 'appearance' && (
                             <AppearanceSettings />

@@ -31,13 +31,13 @@ export const ReplyPreview: React.FC<ReplyPreviewProps> = ({
     const nodes = useMemo(() => parseText(text, ParserPresets.MESSAGE), [text]);
     return (
         <Box
-            className="flex items-center gap-2 opacity-60 hover:opacity-100 transition-opacity cursor-pointer group/reply select-none ml-[24px]"
+            className="group/reply ml-[24px] flex cursor-pointer items-center gap-2 opacity-60 transition-opacity select-none hover:opacity-100"
             onClick={() => replyToId && onClick?.(replyToId)}
         >
             {/* Spine */}
-            <Box className="w-[36px] h-[18px] border-l-2 border-t-2 border-border-subtle rounded-tl-lg mt-[11px] flex-shrink-0" />
+            <Box className="mt-[11px] h-[18px] w-[36px] flex-shrink-0 rounded-tl-lg border-t-2 border-l-2 border-border-subtle" />
 
-            <Box className="flex items-center gap-1.5 overflow-hidden min-w-0">
+            <Box className="flex min-w-0 items-center gap-1.5 overflow-hidden">
                 <UserProfilePicture
                     noIndicator
                     size="xs"
@@ -56,7 +56,7 @@ export const ReplyPreview: React.FC<ReplyPreviewProps> = ({
                 </StyledUserName>
                 <Text
                     as="span"
-                    className="text-xs text-muted-foreground truncate font-medium"
+                    className="truncate text-xs font-medium text-muted-foreground"
                 >
                     <ParsedText
                         condenseFiles

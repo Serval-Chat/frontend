@@ -91,7 +91,7 @@ export const ImageCropModal: React.FC<ImageCropModalProps> = ({
                     onCropChange={setCrop}
                 />
 
-                <div className="flex justify-between items-center text-sm text-muted-foreground">
+                <div className="flex items-center justify-between text-sm text-muted-foreground">
                     <Text as="p">
                         Drag corners to resize and center to move the crop area.
                     </Text>
@@ -101,7 +101,7 @@ export const ImageCropModal: React.FC<ImageCropModalProps> = ({
                             variant="normal"
                             onClick={onClose}
                         >
-                            <X className="w-4 h-4 mr-2" />
+                            <X className="mr-2 h-4 w-4" />
                             Cancel
                         </Button>
                         <Button
@@ -110,7 +110,7 @@ export const ImageCropModal: React.FC<ImageCropModalProps> = ({
                             onClick={handleConfirmClick}
                         >
                             {!isProcessing && (
-                                <Check className="w-4 h-4 mr-2" />
+                                <Check className="mr-2 h-4 w-4" />
                             )}
                             Apply Crop
                         </Button>

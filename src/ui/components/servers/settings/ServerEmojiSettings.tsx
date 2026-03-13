@@ -107,7 +107,7 @@ export const ServerEmojiSettings: React.FC<ServerEmojiSettingsProps> = ({
             <div className="space-y-4">
                 <div className="space-y-2">
                     <label
-                        className="text-xs font-bold text-[var(--color-muted-foreground)] uppercase tracking-wider"
+                        className="text-xs font-bold tracking-wider text-muted-foreground uppercase"
                         htmlFor="emoji-name"
                     >
                         Emoji Name
@@ -134,22 +134,22 @@ export const ServerEmojiSettings: React.FC<ServerEmojiSettingsProps> = ({
 
                 {isLoading ? (
                     <div className="flex justify-center p-12">
-                        <Loader2 className="animate-spin w-8 h-8 text-[var(--color-muted-foreground)]" />
+                        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
                     </div>
                 ) : (
-                    <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-3">
+                    <div className="grid grid-cols-4 gap-3 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10">
                         {/* Upload Box */}
                         <button
-                            className="aspect-square border-2 border-dashed border-[var(--color-border-subtle)] rounded-lg hover:border-[var(--color-primary)] hover:bg-[var(--color-bg-subtle)] transition-all flex flex-col items-center justify-center gap-2 p-3 disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="flex aspect-square flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border-subtle p-3 transition-all hover:border-primary hover:bg-bg-subtle disabled:cursor-not-allowed disabled:opacity-50"
                             disabled={isUploading || !emojiName}
                             type="button"
                             onClick={handleUploadClick}
                         >
                             {isUploading ? (
-                                <Loader2 className="w-6 h-6 animate-spin text-[var(--color-muted-foreground)]" />
+                                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
                             ) : (
                                 <>
-                                    <Plus className="w-6 h-6 text-[var(--color-muted-foreground)]" />
+                                    <Plus className="h-6 w-6 text-muted-foreground" />
                                     <Text
                                         align="center"
                                         leading="tight"
@@ -165,24 +165,24 @@ export const ServerEmojiSettings: React.FC<ServerEmojiSettingsProps> = ({
                         {/* Emoji Grid */}
                         {emojis.map((emoji) => (
                             <div
-                                className="relative aspect-square border border-[var(--color-border-subtle)] rounded-lg hover:border-[var(--color-primary)] transition-all overflow-hidden group bg-[var(--color-bg-subtle)]"
+                                className="group relative aspect-square overflow-hidden rounded-lg border border-border-subtle bg-bg-subtle transition-all hover:border-primary"
                                 key={emoji._id}
                                 onMouseEnter={() =>
                                     setHoveredEmojiId(emoji._id)
                                 }
                                 onMouseLeave={() => setHoveredEmojiId(null)}
                             >
-                                <div className="w-full h-full flex items-center justify-center p-2">
+                                <div className="flex h-full w-full items-center justify-center p-2">
                                     <img
                                         alt={emoji.name}
-                                        className="max-w-full max-h-full object-contain"
+                                        className="max-h-full max-w-full object-contain"
                                         src={
                                             resolveApiUrl(emoji.imageUrl) || ''
                                         }
                                     />
                                 </div>
                                 {hoveredEmojiId === emoji._id && (
-                                    <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center gap-1 p-2">
+                                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-black/60 p-2">
                                         <Text
                                             align="center"
                                             leading="tight"
@@ -201,7 +201,7 @@ export const ServerEmojiSettings: React.FC<ServerEmojiSettingsProps> = ({
                                                 deleteEmoji(emoji._id)
                                             }
                                         >
-                                            <Trash2 className="w-3 h-3" />
+                                            <Trash2 className="h-3 w-3" />
                                         </Button>
                                     </div>
                                 )}

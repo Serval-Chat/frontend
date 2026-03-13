@@ -29,7 +29,7 @@ export const FriendRequestItem: React.FC<FriendRequestItemProps> = ({
     const { mutate: reject, isPending: isRejecting } = useRejectFriendRequest();
 
     return (
-        <Box className="flex items-center justify-between p-3 rounded-lg bg-[var(--color-bg-subtle)] hover:bg-[var(--color-bg-tertiary)] transition-colors group">
+        <Box className="group hover:bg-bg-tertiary flex items-center justify-between rounded-lg bg-bg-subtle p-3 transition-colors">
             <Box className="flex items-center gap-3">
                 <UserProfilePicture
                     size="md"
@@ -47,7 +47,7 @@ export const FriendRequestItem: React.FC<FriendRequestItemProps> = ({
             </Box>
             <Box className="flex items-center gap-2 transition-opacity">
                 <Button
-                    className="h-8 w-8 p-0 rounded-full text-green-500 hover:text-green-600 hover:bg-green-500/10 border-transparent hover:border-green-500/50"
+                    className="h-8 w-8 rounded-full border-transparent p-0 text-green-500 hover:border-green-500/50 hover:bg-green-500/10 hover:text-green-600"
                     disabled={isRejecting}
                     loading={isAccepting}
                     variant="normal"
@@ -56,7 +56,7 @@ export const FriendRequestItem: React.FC<FriendRequestItemProps> = ({
                     <Check className="h-4 w-4" />
                 </Button>
                 <Button
-                    className="h-8 w-8 p-0 rounded-full text-red-500 hover:text-red-600 hover:bg-red-500/10 border-transparent hover:border-red-500/50"
+                    className="h-8 w-8 rounded-full border-transparent p-0 text-red-500 hover:border-red-500/50 hover:bg-red-500/10 hover:text-red-600"
                     disabled={isAccepting}
                     loading={isRejecting}
                     variant="normal"

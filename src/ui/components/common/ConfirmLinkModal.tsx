@@ -29,8 +29,8 @@ export const ConfirmLinkModal: React.FC<ConfirmLinkModalProps> = ({
         onClose={onClose}
     >
         <div className="space-y-6">
-            <div className="flex items-start gap-4 p-4 rounded-xl bg-[var(--color-bg-subtle)] border border-[var(--color-border-subtle)]">
-                <div className="p-2 rounded-lg bg-yellow-500/10 text-yellow-500 shrink-0">
+            <div className="flex items-start gap-4 rounded-xl border border-border-subtle bg-bg-subtle p-4">
+                <div className="shrink-0 rounded-lg bg-yellow-500/10 p-2 text-yellow-500">
                     <ShieldAlert size={24} />
                 </div>
                 <div className="space-y-1">
@@ -54,14 +54,14 @@ export const ConfirmLinkModal: React.FC<ConfirmLinkModalProps> = ({
                 >
                     Destination
                 </Text>
-                <div className="p-3 rounded-lg bg-[var(--color-background)] border border-[var(--color-border-subtle)] break-all font-mono text-xs text-primary">
+                <div className="rounded-lg border border-border-subtle bg-background p-3 font-mono text-xs break-all text-primary">
                     {url}
                 </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-3 pt-2">
+            <div className="flex flex-col gap-3 pt-2 sm:flex-row">
                 <Button
-                    className="flex-1 sm:order-2 gap-2"
+                    className="flex-1 gap-2 sm:order-2"
                     variant="success"
                     onClick={onConfirm}
                 >

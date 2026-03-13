@@ -110,7 +110,7 @@ export const MainContent: React.FC = () => {
     return (
         <main
             className={cn(
-                'flex-1 flex flex-col relative z-content overflow-hidden',
+                'relative z-content flex flex-1 flex-col overflow-hidden',
                 'pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]',
                 !inSwipePanel &&
                     navMode === 'friends' &&

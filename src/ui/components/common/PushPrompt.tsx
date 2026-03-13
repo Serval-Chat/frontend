@@ -49,10 +49,10 @@ export const PushPrompt: React.FC = () => {
     if (!isVisible) return null;
 
     return (
-        <div className="fixed bottom-4 left-4 right-4 md:right-auto z-[9999] md:w-80 p-4 bg-background border border-sidebar-border shadow-2xl rounded-lg flex flex-col gap-3 animate-in slide-in-from-bottom-5">
+        <div className="border-sidebar-border animate-in slide-in-from-bottom-5 fixed right-4 bottom-4 left-4 z-[9999] flex flex-col gap-3 rounded-lg border bg-background p-4 shadow-2xl md:right-auto md:w-80">
             <Button
                 aria-label="Dismiss banner"
-                className="absolute top-2 right-2 p-1 text-primary-500 hover:text-primary-300"
+                className="text-primary-500 hover:text-primary-300 absolute top-2 right-2 p-1"
                 size="sm"
                 variant="ghost"
                 onClick={handleDismiss}
@@ -61,7 +61,7 @@ export const PushPrompt: React.FC = () => {
             </Button>
 
             <Heading
-                className="pr-5 text-primary-100"
+                className="text-primary-100 pr-5"
                 level={3}
                 variant="chat-h3"
             >

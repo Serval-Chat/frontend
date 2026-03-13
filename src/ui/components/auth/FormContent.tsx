@@ -16,7 +16,7 @@ export const FormContent: React.FC<FormContentProps> = ({
 }) => (
     <div
         className={cn(
-            'relative z-content w-full max-w-110 p-lg bg-bg-subtle/50 backdrop-blur-xl border border-border-subtle rounded-lg shadow-lg space-y-xl flex-shrink-0',
+            'relative z-content w-full max-w-110 flex-shrink-0 space-y-xl rounded-lg border border-border-subtle bg-bg-subtle/50 p-lg shadow-lg backdrop-blur-xl',
             className,
         )}
     >

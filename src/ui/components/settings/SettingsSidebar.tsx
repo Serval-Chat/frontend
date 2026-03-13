@@ -20,18 +20,18 @@ export const SettingsSidebar: React.FC<SettingsSidebarProps> = ({
     ];
 
     return (
-        <div className="w-full md:w-[200px] bg-[var(--secondary-bg)] border-r border-[var(--color-border-subtle)] p-3 overflow-y-auto shrink-0 flex flex-col gap-1">
+        <div className="flex w-full shrink-0 flex-col gap-1 overflow-y-auto border-r border-border-subtle bg-[var(--secondary-bg)] p-3 md:w-[200px]">
             {sections.map((section) => {
                 const Icon = section.icon;
                 const isActive = activeSection === section.id;
 
                 return (
                     <Button
-                        className={`justify-start w-full px-3 py-2.5 text-sm transition-all duration-200
+                        className={`w-full justify-start px-3 py-2.5 text-sm transition-all duration-200
                             ${
                                 isActive
-                                    ? 'bg-[var(--color-bg-subtle)] text-[var(--color-foreground)] font-semibold border-transparent'
-                                    : 'text-[var(--color-muted-foreground)] hover:bg-[var(--color-bg-subtle)] hover:text-[var(--color-foreground)]'
+                                    ? 'border-transparent bg-bg-subtle font-semibold text-foreground'
+                                    : 'text-muted-foreground hover:bg-bg-subtle hover:text-foreground'
                             }`}
                         key={section.id}
                         variant={isActive ? 'normal' : 'ghost'}

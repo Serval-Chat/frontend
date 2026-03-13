@@ -12,7 +12,7 @@ import { VerticalSpacer } from '@/ui/components/layout/VerticalSpacer';
  * @description 404 Not Found page
  */
 export const NotFound: React.FC = () => (
-    <Box className="min-h-screen w-full flex flex-col items-center justify-center bg-background relative overflow-hidden p-md">
+    <Box className="relative flex min-h-screen w-full flex-col items-center justify-center overflow-hidden bg-background p-md">
         <DefaultBackground />
 
         <PageWrapper>
@@ -23,7 +23,7 @@ export const NotFound: React.FC = () => (
             <Text as="p" className="font-medium">
                 Page not found
             </Text>
-            <Link className="inline-block mt-xl text-sm font-medium" to="/">
+            <Link className="mt-xl inline-block text-sm font-medium" to="/">
                 Go back home
             </Link>
         </PageWrapper>

@@ -67,7 +67,7 @@ export const ChannelLink: React.FC<ChannelLinkProps> = ({
     return (
         <Box
             as="span"
-            className="inline-flex items-center px-1.5 py-[4px] rounded bg-primary/10 hover:bg-primary/20 text-primary font-medium transition-colors cursor-pointer select-none"
+            className="inline-flex cursor-pointer items-center rounded bg-primary/10 px-1.5 py-[4px] font-medium text-primary transition-colors select-none hover:bg-primary/20"
             onClick={handleClick}
         >
             <Icon className="mr-1" size="14" />

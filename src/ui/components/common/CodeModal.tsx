@@ -57,6 +57,7 @@ const AstRenderer: React.FC<{ nodes: AstNode[] }> = memo(({ nodes }) => (
         })}
     </>
 ));
+AstRenderer.displayName = 'AstRenderer';
 
 export const CodeModal: React.FC<CodeModalProps> = memo(
     ({ isOpen, onClose, content, language = 'text' }) => {
@@ -96,23 +97,23 @@ export const CodeModal: React.FC<CodeModalProps> = memo(
                 title={language.toUpperCase()}
                 onClose={onClose}
             >
-                <div className="bg-background h-full flex flex-col overflow-auto custom-scrollbar">
-                    <div className="flex-1 font-mono text-sm leading-6 py-4">
+                <div className="custom-scrollbar flex h-full flex-col overflow-auto bg-background">
+                    <div className="flex-1 py-4 font-mono text-sm leading-6">
                         {codeLines.map((lineNodes, i) => (
                             <div
-                                className="group flex hover:bg-white/5 transition-colors"
+                                className="group flex transition-colors hover:bg-white/5"
                                 // eslint-disable-next-line react/no-array-index-key
                                 key={i}
                             >
                                 <div
-                                    className="w-16 flex-shrink-0 select-none text-right pr-4 text-muted-foreground/50 border-r border-border-subtle/20 bg-bg-secondary/30 sticky left-0 z-[var(--z-index-content)]"
+                                    className="sticky left-0 z-[var(--z-index-content)] w-16 flex-shrink-0 border-r border-border-subtle/20 bg-bg-secondary/30 pr-4 text-right text-muted-foreground/50 select-none"
                                     style={{ textAlign: 'right' }}
                                 >
                                     {i + 1}
                                 </div>
 
                                 <div
-                                    className="flex-1 px-4 whitespace-pre-wrap break-all min-w-0"
+                                    className="min-w-0 flex-1 px-4 break-all whitespace-pre-wrap"
                                     style={{
                                         ...customSyntaxTheme[
                                             'code[class*="language-"]'
@@ -131,3 +132,4 @@ export const CodeModal: React.FC<CodeModalProps> = memo(
         );
     },
 );
+CodeModal.displayName = 'CodeModal';

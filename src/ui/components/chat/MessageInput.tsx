@@ -298,7 +298,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
     };
 
     return (
-        <Box className="flex flex-col bg-[var(--bg-msg-input)] rounded-lg mx-4 mb-4 overflow-visible border border-border-subtle focus-within:border-primary/50 transition-colors relative">
+        <Box className="relative mx-4 mb-4 flex flex-col overflow-visible rounded-lg border border-border-subtle bg-[var(--bg-msg-input)] transition-colors focus-within:border-primary/50">
             <FileQueue
                 files={files}
                 onRemove={removeFile}
@@ -306,9 +306,9 @@ export const MessageInput: React.FC<MessageInputProps> = ({
             />
 
             {replyingTo && (
-                <Box className="flex items-center justify-between gap-3 px-3 py-2 border-b border-border-subtle bg-bg-subtle/30">
-                    <Box className="flex items-center gap-2 min-w-0">
-                        <Text className="text-xs text-muted-foreground whitespace-nowrap">
+                <Box className="flex items-center justify-between gap-3 border-b border-border-subtle bg-bg-subtle/30 px-3 py-2">
+                    <Box className="flex min-w-0 items-center gap-2">
+                        <Text className="text-xs whitespace-nowrap text-muted-foreground">
                             Replying to
                         </Text>
                         <StyledUserName
@@ -321,7 +321,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                             {replyingTo.user.displayName ||
                                 replyingTo.user.username}
                         </StyledUserName>
-                        <Box className="text-xs text-muted-foreground truncate opacity-80 flex gap-1 overflow-hidden whitespace-nowrap items-center">
+                        <Box className="flex items-center gap-1 truncate overflow-hidden text-xs whitespace-nowrap text-muted-foreground opacity-80">
                             <ParsedText
                                 nodes={parseText(
                                     replyingTo.text || '',
@@ -333,7 +333,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                         </Box>
                     </Box>
                     <Button
-                        className="h-7 w-7 p-0 shrink-0"
+                        className="h-7 w-7 shrink-0 p-0"
                         size="sm"
                         title="Cancel reply"
                         variant="ghost"
@@ -344,7 +344,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                 </Box>
             )}
 
-            <Box className="flex items-end p-2 gap-2 relative">
+            <Box className="relative flex items-end gap-2 p-2">
                 <input
                     multiple
                     ref={fileInputRef}
@@ -353,7 +353,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                     onChange={handleFileChange}
                 />
                 <Button
-                    className="mb-1 h-8 w-8 p-0 shrink-0"
+                    className="mb-1 h-8 w-8 shrink-0 p-0"
                     size="sm"
                     variant="ghost"
                     onClick={() => fileInputRef.current?.click()}
@@ -361,14 +361,14 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                     <Plus size={20} />
                 </Button>
 
-                <div className="flex-1 relative cursor-text min-h-[40px] flex items-center bg-bg-subtle rounded-md border border-border-subtle focus-within:outline-none focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-1 transition-all duration-200">
+                <div className="relative flex min-h-[40px] flex-1 cursor-text items-center rounded-md border border-border-subtle bg-bg-subtle transition-all duration-200 focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-1 focus-within:outline-none">
                     <LexicalComposer initialConfig={initialConfig}>
                         <EditorBridge onReady={setEditor} />
                         <RichTextPlugin
                             ErrorBoundary={LexicalErrorBoundary}
                             contentEditable={
                                 <ContentEditable
-                                    className="w-full h-full px-3 py-2 text-sm text-foreground outline-none resize-none overflow-y-auto custom-scrollbar max-h-[200px]"
+                                    className="custom-scrollbar h-full max-h-[200px] w-full resize-none overflow-y-auto px-3 py-2 text-sm text-foreground outline-none"
                                     onKeyDown={(e) => {
                                         if (e.key === 'ArrowUp' && !hasText) {
                                             const lastMessage =
@@ -398,7 +398,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                                 />
                             }
                             placeholder={
-                                <div className="absolute top-[9px] left-3 pointer-events-none text-placeholder text-sm select-none">
+                                <div className="pointer-events-none absolute top-[9px] left-3 text-sm text-placeholder select-none">
                                     {getPlaceholder()}
                                 </div>
                             }
@@ -434,7 +434,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                 </div>
 
                 <Button
-                    className="mb-1 h-8 w-8 p-0 shrink-0"
+                    className="mb-1 h-8 w-8 shrink-0 p-0"
                     size="sm"
                     variant="ghost"
                     onClick={() => setShowEmojiPicker(!showEmojiPicker)}
@@ -444,7 +444,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
 
                 {(hasText || files.length > 0) && isMobile && (
                     <Button
-                        className="mb-1 h-8 w-8 p-0 shrink-0 text-primary"
+                        className="mb-1 h-8 w-8 shrink-0 p-0 text-primary"
                         disabled={isUploading}
                         size="sm"
                         variant="ghost"
@@ -468,7 +468,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
 
             {showEmojiPicker && (
                 <div
-                    className="absolute bottom-full right-0 mb-2 z-[var(--z-index-popover)]"
+                    className="absolute right-0 bottom-full z-[var(--z-index-popover)] mb-2"
                     ref={emojiPickerRef}
                 >
                     <EmojiPicker

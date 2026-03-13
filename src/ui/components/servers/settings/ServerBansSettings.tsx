@@ -74,8 +74,8 @@ export const ServerBansSettings: React.FC<ServerBansSettingsProps> = ({
                 <Heading level={3}>Banned Users ({bans.length})</Heading>
 
                 {bans.length === 0 ? (
-                    <div className="py-12 flex flex-col items-center justify-center text-center border border-dashed border-[var(--color-border-subtle)] rounded-lg opacity-50 bg-[var(--color-bg-subtle)]">
-                        <ShieldAlert className="w-12 h-12 mb-3 text-[var(--color-muted-foreground)]" />
+                    <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-border-subtle bg-bg-subtle py-12 text-center opacity-50">
+                        <ShieldAlert className="mb-3 h-12 w-12 text-muted-foreground" />
                         <Text className="mb-1" size="lg" weight="medium">
                             No active bans
                         </Text>
@@ -107,7 +107,7 @@ export const ServerBansSettings: React.FC<ServerBansSettingsProps> = ({
                                                     'Unknown User'
                                                 }
                                             />
-                                            <Box className="flex flex-col min-w-0">
+                                            <Box className="flex min-w-0 flex-col">
                                                 <Text
                                                     className="truncate"
                                                     weight="bold"
@@ -151,8 +151,8 @@ export const ServerBansSettings: React.FC<ServerBansSettingsProps> = ({
                                                 )
                                             }
                                         >
-                                            <Trash2 className="w-4 h-4 text-[var(--color-status-error)]" />
-                                            <span className="ml-2 text-[var(--color-status-error)]">
+                                            <Trash2 className="text-status-error h-4 w-4" />
+                                            <span className="text-status-error ml-2">
                                                 Unban
                                             </span>
                                         </Button>

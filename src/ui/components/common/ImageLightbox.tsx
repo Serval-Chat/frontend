@@ -81,32 +81,32 @@ export const ImageLightbox: React.FC<ImageLightboxProps> = ({
                     />
 
                     {/* Toolbar */}
-                    <div className="relative z-10 flex items-center justify-between px-4 pt-[max(0.75rem,env(safe-area-inset-top))] pb-3 shrink-0 bg-black/40 backdrop-blur-md border-b border-white/5">
-                        <span className="text-white/60 text-sm truncate max-w-[50%] font-medium">
+                    <div className="relative z-10 flex shrink-0 items-center justify-between border-b border-white/5 bg-black/40 px-4 pt-[max(0.75rem,env(safe-area-inset-top))] pb-3 backdrop-blur-md">
+                        <span className="max-w-[50%] truncate text-sm font-medium text-white/60">
                             {alt}
                         </span>
                         <div className="flex items-center gap-1 md:gap-2">
                             <button
                                 aria-label="Zoom out"
-                                className="text-white/70 hover:text-white transition-colors p-2 rounded-md hover:bg-white/10 active:bg-white/20"
+                                className="rounded-md p-2 text-white/70 transition-colors hover:bg-white/10 hover:text-white active:bg-white/20"
                                 onClick={zoomOut}
                             >
                                 <ZoomOut size={20} />
                             </button>
-                            <span className="text-white/50 text-xs w-12 text-center tabular-nums">
+                            <span className="w-12 text-center text-xs text-white/50 tabular-nums">
                                 {Math.round(scale * 100)}%
                             </span>
                             <button
                                 aria-label="Zoom in"
-                                className="text-white/70 hover:text-white transition-colors p-2 rounded-md hover:bg-white/10 active:bg-white/20"
+                                className="rounded-md p-2 text-white/70 transition-colors hover:bg-white/10 hover:text-white active:bg-white/20"
                                 onClick={zoomIn}
                             >
                                 <ZoomIn size={20} />
                             </button>
-                            <div className="w-px h-4 bg-white/10 mx-1" />
+                            <div className="mx-1 h-4 w-px bg-white/10" />
                             <button
                                 aria-label="Download"
-                                className="text-white/70 hover:text-white transition-colors p-2 rounded-md hover:bg-white/10 active:bg-white/20"
+                                className="rounded-md p-2 text-white/70 transition-colors hover:bg-white/10 hover:text-white active:bg-white/20"
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     void handleDownload();
@@ -116,7 +116,7 @@ export const ImageLightbox: React.FC<ImageLightboxProps> = ({
                             </button>
                             <button
                                 aria-label="Close"
-                                className="text-white/70 hover:text-white transition-colors p-2 rounded-md hover:bg-white/10 active:bg-white/20 ml-1"
+                                className="ml-1 rounded-md p-2 text-white/70 transition-colors hover:bg-white/10 hover:text-white active:bg-white/20"
                                 onClick={onClose}
                             >
                                 <X size={20} />
@@ -126,7 +126,7 @@ export const ImageLightbox: React.FC<ImageLightboxProps> = ({
 
                     {/* Image area */}
                     <div
-                        className="relative flex-1 flex items-center justify-center overflow-auto focus:outline-none"
+                        className="relative flex flex-1 items-center justify-center overflow-auto focus:outline-none"
                         role="button"
                         tabIndex={0}
                         onClick={onClose}

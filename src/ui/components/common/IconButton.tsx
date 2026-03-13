@@ -22,7 +22,7 @@ export const IconButton: React.FC<IconButtonProps> = ({
 }) => (
     <Button
         className={cn(
-            'transition-all duration-200 relative',
+            'relative transition-all duration-200',
             className,
             isActive && 'bg-primary/20 text-primary',
         )}

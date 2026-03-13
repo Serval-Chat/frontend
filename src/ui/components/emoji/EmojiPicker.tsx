@@ -235,12 +235,12 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
             if (row.type === 'header') {
                 return (
                     <Box
-                        className="px-3 py-1 bg-background/95 backdrop-blur-sm z-[var(--z-index-effect-md)] border-b border-divider/50 flex items-center gap-2"
+                        className="z-[var(--z-index-effect-md)] flex items-center gap-2 border-b border-divider/50 bg-background/95 px-3 py-1 backdrop-blur-sm"
                         style={style}
                     >
                         {row.isCustom ? (
                             <ServerIcon
-                                className="!rounded-sm !cursor-default"
+                                className="!cursor-default !rounded-sm"
                                 server={
                                     {
                                         name: row.name,
@@ -250,15 +250,15 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
                                 size="xs"
                             />
                         ) : (
-                            <div className="w-4 h-4 flex items-center justify-center overflow-hidden">
-                                <span className="text-sm flex-shrink-0">
+                            <div className="flex h-4 w-4 items-center justify-center overflow-hidden">
+                                <span className="flex-shrink-0 text-sm">
                                     {row.standardIcon
                                         ? getUnicode(row.standardIcon)
                                         : ''}
                                 </span>
                             </div>
                         )}
-                        <Text className="font-bold text-[10px] uppercase tracking-widest text-muted-foreground truncate">
+                        <Text className="truncate text-[10px] font-bold tracking-widest text-muted-foreground uppercase">
                             {row.name}
                         </Text>
                     </Box>
@@ -266,7 +266,7 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
             }
 
             return (
-                <div className="flex px-1 items-center" style={style}>
+                <div className="flex items-center px-1" style={style}>
                     {row.emojis.map((emoji) => {
                         if (row.isCustom) {
                             const customEmoji = emoji as {
@@ -276,7 +276,7 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
                             };
                             return (
                                 <Button
-                                    className="w-10 h-10 p-1.5 hover:bg-white/5 rounded transition-transform active:scale-90 flex items-center justify-center group/emoji border-none shadow-none"
+                                    className="group/emoji flex h-10 w-10 items-center justify-center rounded border-none p-1.5 shadow-none transition-transform hover:bg-white/5 active:scale-90"
                                     key={customEmoji.id}
                                     title={customEmoji.name}
                                     variant="ghost"
@@ -286,7 +286,7 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
                                 >
                                     <img
                                         alt={customEmoji.name}
-                                        className="w-full h-full object-contain group-hover/emoji:scale-110 transition-transform duration-200"
+                                        className="h-full w-full object-contain transition-transform duration-200 group-hover/emoji:scale-110"
                                         src={
                                             resolveApiUrl(customEmoji.url) || ''
                                         }
@@ -297,7 +297,7 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
                             const standardEmoji = emoji as EmojiData;
                             return (
                                 <Button
-                                    className="w-10 h-10 p-1.5 hover:bg-white/5 rounded transition-transform active:scale-90 flex items-center justify-center group/emoji border-none shadow-none"
+                                    className="group/emoji flex h-10 w-10 items-center justify-center rounded border-none p-1.5 shadow-none transition-transform hover:bg-white/5 active:scale-90"
                                     key={standardEmoji.unified}
                                     title={standardEmoji.short_name}
                                     variant="ghost"
@@ -307,7 +307,7 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
                                 >
                                     <span
                                         aria-label={standardEmoji.short_name}
-                                        className="text-lg group-hover/emoji:scale-110 transition-transform duration-200"
+                                        className="text-lg transition-transform duration-200 group-hover/emoji:scale-110"
                                     >
                                         {getUnicode(standardEmoji)}
                                     </span>
@@ -325,14 +325,14 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
         <motion.div
             animate={{ opacity: 1, scale: 1, y: 0 }}
             className={cn(
-                'flex h-[380px] w-[350px] bg-background border border-divider rounded-xl shadow-2xl overflow-hidden',
+                'flex h-[380px] w-[350px] overflow-hidden rounded-xl border border-divider bg-background shadow-2xl',
                 className,
             )}
             initial={{ opacity: 0, scale: 0.95, y: 10 }}
             transition={{ duration: 0.2, ease: 'easeOut' }}
         >
             {/* Sidebar */}
-            <Box className="w-[44px] flex-shrink-0 flex flex-col items-center bg-bg-subtle/50 overflow-y-auto py-3 gap-2 border-r border-divider/50 scrollbar-hide shadow-inner">
+            <Box className="scrollbar-hide flex w-[44px] flex-shrink-0 flex-col items-center gap-2 overflow-y-auto border-r border-divider/50 bg-bg-subtle/50 py-3 shadow-inner">
                 {displayCategories.map((cat) => {
                     const isActive = activeCategoryId === cat.id;
 
@@ -355,7 +355,7 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
                                     onClick={() => handleCategoryClick(cat.id)}
                                 />
                                 {isActive && (
-                                    <div className="absolute -left-3.5 top-1/2 -translate-y-1/2 w-1.5 h-6 bg-primary rounded-full shadow-[0_0_8px_rgba(var(--primary),0.5)]" />
+                                    <div className="absolute top-1/2 -left-3.5 h-6 w-1.5 -translate-y-1/2 rounded-full bg-primary shadow-[0_0_8px_rgba(var(--primary),0.5)]" />
                                 )}
                             </Box>
                         );
@@ -364,17 +364,17 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
                     return (
                         <Button
                             className={cn(
-                                'w-9 h-9 flex-shrink-0 relative group !bg-transparent',
+                                'group relative h-9 w-9 flex-shrink-0 !bg-transparent',
                                 isActive
-                                    ? 'text-primary scale-110 !rounded-lg'
-                                    : 'text-muted-foreground hover:text-foreground hover:scale-105',
+                                    ? 'scale-110 !rounded-lg text-primary'
+                                    : 'text-muted-foreground hover:scale-105 hover:text-foreground',
                             )}
                             key={cat.id}
                             title={cat.name}
                             variant="nav"
                             onClick={() => handleCategoryClick(cat.id)}
                         >
-                            <div className="w-8 h-8 p-1 flex items-center justify-center overflow-hidden">
+                            <div className="flex h-8 w-8 items-center justify-center overflow-hidden p-1">
                                 <span
                                     aria-label={cat.name}
                                     className="flex-shrink-0 text-lg"
@@ -385,7 +385,7 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
                                 </span>
                             </div>
                             {isActive && (
-                                <div className="absolute -left-3.5 top-1/2 -translate-y-1/2 w-1.5 h-6 bg-primary rounded-full shadow-[0_0_8px_rgba(var(--primary),0.5)]" />
+                                <div className="absolute top-1/2 -left-3.5 h-6 w-1.5 -translate-y-1/2 rounded-full bg-primary shadow-[0_0_8px_rgba(var(--primary),0.5)]" />
                             )}
                         </Button>
                     );
@@ -393,9 +393,9 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
             </Box>
 
             {/* Scrolling List */}
-            <Box className="flex-1 min-w-0 flex flex-col bg-background">
-                <Box className="px-3 py-1.5 bg-background/80 backdrop-blur-md border-b border-divider/30 sticky top-0 z-[var(--z-index-content)] flex items-center justify-between h-[32px]">
-                    <Text className="font-bold text-[9px] uppercase tracking-[0.2em] text-muted-foreground/70">
+            <Box className="flex min-w-0 flex-1 flex-col bg-background">
+                <Box className="sticky top-0 z-[var(--z-index-content)] flex h-[32px] items-center justify-between border-b border-divider/30 bg-background/80 px-3 py-1.5 backdrop-blur-md">
+                    <Text className="text-[9px] font-bold tracking-[0.2em] text-muted-foreground/70 uppercase">
                         {(
                             flatRows.find(
                                 (r) =>
@@ -406,7 +406,7 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
                     </Text>
                 </Box>
                 <div
-                    className="flex-1 w-full h-full relative"
+                    className="relative h-full w-full flex-1"
                     ref={listContainerRef}
                 >
                     <AutoSizer

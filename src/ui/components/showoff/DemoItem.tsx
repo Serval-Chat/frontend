@@ -13,7 +13,7 @@ interface DemoItemProps {
  */
 export const DemoItem: React.FC<DemoItemProps> = ({ id, title, children }) => (
     <div className="p-xs" id={id}>
-        <Heading className="text-md font-medium mb-sm" level={3}>
+        <Heading className="text-md mb-sm font-medium" level={3}>
             {title}
         </Heading>
         {children}

@@ -7,7 +7,7 @@ import { Box } from '@/ui/components/layout/Box';
  * @description Loading state for the main chat area.
  */
 export const ChatLoadingState: React.FC = () => (
-    <Box className="flex-1 flex items-center justify-center">
+    <Box className="flex flex-1 items-center justify-center">
         <LoadingSpinner size="lg" />
     </Box>
 );

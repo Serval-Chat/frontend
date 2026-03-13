@@ -47,7 +47,7 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({
     return (
         <ToastContext.Provider value={{ showToast }}>
             {children}
-            <Box className="fixed bottom-4 right-4 z-[var(--z-index-toast)] flex flex-col gap-2 pointer-events-none">
+            <Box className="pointer-events-none fixed right-4 bottom-4 z-[var(--z-index-toast)] flex flex-col gap-2">
                 <AnimatePresence>
                     {toasts.map((toast) => (
                         <ToastItem
@@ -91,7 +91,7 @@ const ToastItem: React.FC<{ toast: Toast; onClose: () => void }> = ({
         <motion.div
             layout
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            className={`pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-lg border backdrop-blur-md shadow-lg min-w-[300px] max-w-md ${bgColors[toast.type]}`}
+            className={`pointer-events-auto flex max-w-md min-w-[300px] items-center gap-3 rounded-lg border px-4 py-3 shadow-lg backdrop-blur-md ${bgColors[toast.type]}`}
             exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.2 } }}
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
         >
@@ -104,7 +104,7 @@ const ToastItem: React.FC<{ toast: Toast; onClose: () => void }> = ({
                 {toast.message}
             </Text>
             <Button
-                className="shrink-0 h-6 w-6 p-0 hover:bg-white/5 border-none"
+                className="h-6 w-6 shrink-0 border-none p-0 hover:bg-white/5"
                 size="sm"
                 variant="ghost"
                 onClick={onClose}

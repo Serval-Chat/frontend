@@ -20,7 +20,7 @@ export const UserBadge: React.FC<UserBadgeProps> = ({ badge, className }) => {
     return (
         <Box
             className={cn(
-                'inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-bold cursor-default transition-all border shrink-0',
+                'inline-flex shrink-0 cursor-default items-center gap-1 rounded-md border px-1.5 py-0.5 text-[10px] font-bold transition-all',
                 className,
             )}
             style={{

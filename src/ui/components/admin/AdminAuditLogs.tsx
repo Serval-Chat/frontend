@@ -108,7 +108,7 @@ const LogEntry = ({ log }: LogEntryProps): ReactNode => {
                     <div className="flex items-center gap-2 overflow-hidden">
                         <div
                             className={cn(
-                                'rounded-full px-2.5 py-0.5 text-xs font-bold uppercase tracking-wider whitespace-nowrap',
+                                'rounded-full px-2.5 py-0.5 text-xs font-bold tracking-wider whitespace-nowrap uppercase',
                                 log.actionType.toLowerCase().includes('delete')
                                     ? 'bg-danger/10 text-danger'
                                     : log.actionType
@@ -129,12 +129,12 @@ const LogEntry = ({ log }: LogEntryProps): ReactNode => {
 
                 {/* Target */}
                 <TableCell>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground overflow-hidden">
+                    <div className="flex items-center gap-2 overflow-hidden text-sm text-muted-foreground">
                         {log.targetUserId ? (
                             <>
                                 <Text
                                     as="span"
-                                    className="text-[10px] uppercase opacity-50 shrink-0"
+                                    className="shrink-0 text-[10px] uppercase opacity-50"
                                     weight="bold"
                                 >
                                     Target:
@@ -187,14 +187,14 @@ const LogEntry = ({ log }: LogEntryProps): ReactNode => {
                                     <Terminal size={12} />
                                     <Text
                                         as="span"
-                                        className="uppercase tracking-widest"
+                                        className="tracking-widest uppercase"
                                         size="xs"
                                         weight="bold"
                                     >
                                         Metadata
                                     </Text>
                                 </div>
-                                <pre className="overflow-x-auto whitespace-pre-wrap text-muted-foreground break-all">
+                                <pre className="overflow-x-auto break-all whitespace-pre-wrap text-muted-foreground">
                                     {JSON.stringify(
                                         log.additionalData,
                                         null,
@@ -232,7 +232,7 @@ export const AdminAuditLogs = (): ReactNode => {
 
     if (error || !logs) {
         return (
-            <div className="flex items-center justify-center min-h-[400px]">
+            <div className="flex min-h-[400px] items-center justify-center">
                 <AdminErrorDisplay
                     error={error}
                     title="Audit Logs Unavailable"
@@ -242,13 +242,13 @@ export const AdminAuditLogs = (): ReactNode => {
     }
 
     return (
-        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+        <div className="animate-in fade-in slide-in-from-bottom-4 space-y-6 duration-700">
             {/* Toolbar */}
             <div className="grid grid-cols-1 gap-4 rounded-2xl border border-border-subtle bg-bg-subtle p-5 lg:grid-cols-3">
                 {/* Admin Select */}
                 <div className="space-y-2">
                     <label
-                        className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground"
+                        className="flex items-center gap-2 text-[10px] font-black tracking-widest text-muted-foreground uppercase"
                         htmlFor="admin-select"
                     >
                         <User size={12} />
@@ -256,7 +256,7 @@ export const AdminAuditLogs = (): ReactNode => {
                     </label>
                     <div className="relative">
                         <select
-                            className="w-full appearance-none rounded-xl border border-border-subtle bg-background py-2.5 pl-4 pr-10 text-sm outline-none transition-focus focus:border-primary/50 focus:ring-2 focus:ring-primary/10 cursor-pointer"
+                            className="transition-focus w-full cursor-pointer appearance-none rounded-xl border border-border-subtle bg-background py-2.5 pr-10 pl-4 text-sm outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10"
                             id="admin-select"
                             value={filters.adminId}
                             onChange={(e) =>
@@ -274,7 +274,7 @@ export const AdminAuditLogs = (): ReactNode => {
                             ))}
                         </select>
                         <ChevronDown
-                            className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground"
+                            className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-muted-foreground"
                             size={14}
                         />
                     </div>
@@ -283,7 +283,7 @@ export const AdminAuditLogs = (): ReactNode => {
                 {/* Action Select */}
                 <div className="space-y-2">
                     <label
-                        className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground"
+                        className="flex items-center gap-2 text-[10px] font-black tracking-widest text-muted-foreground uppercase"
                         htmlFor="action-select"
                     >
                         <Filter size={12} />
@@ -291,7 +291,7 @@ export const AdminAuditLogs = (): ReactNode => {
                     </label>
                     <div className="relative">
                         <select
-                            className="w-full appearance-none rounded-xl border border-border-subtle bg-background py-2.5 pl-4 pr-10 text-sm outline-none transition-focus focus:border-primary/50 focus:ring-2 focus:ring-primary/10 cursor-pointer"
+                            className="transition-focus w-full cursor-pointer appearance-none rounded-xl border border-border-subtle bg-background py-2.5 pr-10 pl-4 text-sm outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10"
                             id="action-select"
                             value={filters.actionType}
                             onChange={(e) =>
@@ -312,7 +312,7 @@ export const AdminAuditLogs = (): ReactNode => {
                             <option value="delete_server">Delete Server</option>
                         </select>
                         <ChevronDown
-                            className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground"
+                            className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-muted-foreground"
                             size={14}
                         />
                     </div>
@@ -321,7 +321,7 @@ export const AdminAuditLogs = (): ReactNode => {
                 {/* Target ID Input */}
                 <div className="space-y-2">
                     <label
-                        className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground"
+                        className="flex items-center gap-2 text-[10px] font-black tracking-widest text-muted-foreground uppercase"
                         htmlFor="target-user-input"
                     >
                         <Search size={12} />
@@ -347,7 +347,7 @@ export const AdminAuditLogs = (): ReactNode => {
             {/* Logs Table */}
             <Table>
                 <TableHeader>
-                    <TableRow className="bg-bg-secondary/50 border-b border-border-subtle">
+                    <TableRow className="border-b border-border-subtle bg-bg-secondary/50">
                         <TableHead>Timestamp</TableHead>
                         <TableHead>Administrator</TableHead>
                         <TableHead>Action Performed</TableHead>
@@ -363,7 +363,7 @@ export const AdminAuditLogs = (): ReactNode => {
                     ) : (
                         <TableRow>
                             <TableCell align="center" colSpan={5}>
-                                <div className="flex h-64 flex-col items-center justify-center text-muted-foreground text-center">
+                                <div className="flex h-64 flex-col items-center justify-center text-center text-muted-foreground">
                                     <Activity
                                         className="mb-4 opacity-20"
                                         size={48}

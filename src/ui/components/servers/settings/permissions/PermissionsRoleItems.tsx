@@ -11,7 +11,7 @@ export const RoleColorDot: React.FC<{ color?: string | null }> = ({
     color,
 }) => (
     <div
-        className="w-3 h-3 rounded-full shrink-0"
+        className="h-3 w-3 shrink-0 rounded-full"
         style={{ backgroundColor: color || '#99aab5' }}
     />
 );
@@ -30,10 +30,10 @@ export const RoleListItem: React.FC<RoleListItemProps> = ({
     <Button
         aria-current={isActive ? 'true' : undefined}
         className={cn(
-            'justify-start w-full px-3 py-2 text-sm transition-all duration-200 shadow-none border-none',
+            'w-full justify-start border-none px-3 py-2 text-sm shadow-none transition-all duration-200',
             isActive
-                ? 'bg-[var(--color-bg-subtle)] text-[var(--color-foreground)] font-semibold'
-                : 'bg-transparent text-[var(--color-muted-foreground)] hover:bg-[var(--color-bg-subtle)] hover:text-[var(--color-foreground)] focus:outline-none',
+                ? 'bg-bg-subtle font-semibold text-foreground'
+                : 'bg-transparent text-muted-foreground hover:bg-bg-subtle hover:text-foreground focus:outline-none',
         )}
         variant="ghost"
         onClick={onClick}
@@ -78,11 +78,11 @@ export const AddRoleDropdown: React.FC<AddRoleDropdownProps> = ({
                                 setIsOpen(false);
                         }}
                     />
-                    <div className="absolute right-0 top-full mt-1 w-48 bg-[var(--color-bg-tertiary)] border border-[var(--color-border-subtle)] rounded shadow-lg z-50 max-h-60 overflow-y-auto">
+                    <div className="bg-bg-tertiary absolute top-full right-0 z-50 mt-1 max-h-60 w-48 overflow-y-auto rounded border border-border-subtle shadow-lg">
                         {availableRoles.length > 0 ? (
                             availableRoles.map((role) => (
                                 <button
-                                    className="w-full text-left px-3 py-2 text-sm hover:bg-[var(--color-bg-subtle)] text-[var(--color-foreground)] flex items-center gap-2"
+                                    className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-foreground hover:bg-bg-subtle"
                                     key={role._id}
                                     onClick={() => {
                                         onAdd(role);
@@ -96,7 +96,7 @@ export const AddRoleDropdown: React.FC<AddRoleDropdownProps> = ({
                                 </button>
                             ))
                         ) : (
-                            <p className="px-3 py-2 text-sm text-[var(--color-muted-foreground)]">
+                            <p className="px-3 py-2 text-sm text-muted-foreground">
                                 No roles left to add
                             </p>
                         )}

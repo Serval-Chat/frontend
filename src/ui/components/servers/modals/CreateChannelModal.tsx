@@ -112,7 +112,7 @@ export const CreateChannelModal: React.FC<CreateChannelModalProps> = ({
                             ({ type, label, description, Icon }) => (
                                 <button
                                     className={cn(
-                                        'w-full flex items-center gap-3 px-3 py-3 rounded-md border transition-all text-left',
+                                        'flex w-full items-center gap-3 rounded-md border px-3 py-3 text-left transition-all',
                                         channelType === type
                                             ? 'border-primary bg-primary/10'
                                             : 'border-white/10 bg-white/5 hover:bg-white/10',
@@ -123,13 +123,13 @@ export const CreateChannelModal: React.FC<CreateChannelModalProps> = ({
                                 >
                                     <Icon
                                         className={cn(
-                                            'w-5 h-5 shrink-0',
+                                            'h-5 w-5 shrink-0',
                                             channelType === type
                                                 ? 'text-primary'
                                                 : 'text-muted-foreground',
                                         )}
                                     />
-                                    <div className="flex-1 min-w-0 flex flex-col gap-0.5">
+                                    <div className="flex min-w-0 flex-1 flex-col gap-0.5">
                                         <Text size="sm" weight="medium">
                                             {label}
                                         </Text>
@@ -139,7 +139,7 @@ export const CreateChannelModal: React.FC<CreateChannelModalProps> = ({
                                     </div>
                                     <div
                                         className={cn(
-                                            'w-4 h-4 rounded-full border-2 shrink-0',
+                                            'h-4 w-4 shrink-0 rounded-full border-2',
                                             channelType === type
                                                 ? 'border-primary bg-primary'
                                                 : 'border-muted-foreground',
@@ -205,7 +205,7 @@ export const CreateChannelModal: React.FC<CreateChannelModalProps> = ({
                     </Text>
                 )}
 
-                <div className="flex gap-3 justify-end pt-2">
+                <div className="flex justify-end gap-3 pt-2">
                     <Button
                         disabled={isLoading}
                         variant="ghost"

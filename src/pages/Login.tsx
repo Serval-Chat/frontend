@@ -32,12 +32,12 @@ export const Login: React.FC = () => {
     if (isAuthenticated) return <Navigate replace to="/chat" />;
 
     return (
-        <Box className="min-h-screen w-full flex flex-col items-center justify-center bg-background relative overflow-hidden p-md">
+        <Box className="relative flex min-h-screen w-full flex-col items-center justify-center overflow-hidden bg-background p-md">
             <DefaultBackground />
 
             {/* Login Box */}
             <FormContent>
-                <Box className="text-center space-y-sm">
+                <Box className="space-y-sm text-center">
                     <Heading variant="page">HELLO!</Heading>
                     <Text as="p">
                         If you see this, you need to log in to chat on this

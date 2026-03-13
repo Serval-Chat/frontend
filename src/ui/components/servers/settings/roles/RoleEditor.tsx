@@ -203,12 +203,12 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
 
     return (
         <>
-            <div className="flex-1 flex flex-col h-full overflow-hidden bg-[var(--color-background)]">
-                <div className="flex-1 overflow-y-auto p-8 max-w-3xl mx-auto w-full space-y-8 pb-24">
+            <div className="flex h-full flex-1 flex-col overflow-hidden bg-background">
+                <div className="mx-auto w-full max-w-3xl flex-1 space-y-8 overflow-y-auto p-8 pb-24">
                     {/* General Settings */}
                     <section className="space-y-4">
                         <Heading
-                            className="border-b border-[var(--color-border-subtle)] pb-2"
+                            className="border-b border-border-subtle pb-2"
                             level={3}
                             variant="section"
                         >
@@ -217,7 +217,7 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
 
                         <div className="space-y-2">
                             <label
-                                className="text-xs font-bold text-[var(--color-muted-foreground)] uppercase"
+                                className="text-xs font-bold text-muted-foreground uppercase"
                                 htmlFor="roleName"
                             >
                                 Role Name
@@ -237,27 +237,27 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
 
                         <div className="space-y-2">
                             <label
-                                className="text-xs font-bold text-[var(--color-muted-foreground)] uppercase"
+                                className="text-xs font-bold text-muted-foreground uppercase"
                                 htmlFor="roleIcon"
                             >
                                 Role Icon
                             </label>
                             <div className="flex items-center gap-4">
-                                <div className="w-16 h-16 rounded bg-[var(--color-bg-secondary)] border border-[var(--color-border-subtle)] flex items-center justify-center overflow-hidden relative group">
+                                <div className="group relative flex h-16 w-16 items-center justify-center overflow-hidden rounded border border-border-subtle bg-bg-secondary">
                                     {previewIcon ? (
                                         <img
                                             alt="Role Icon"
-                                            className="w-full h-full object-cover"
+                                            className="h-full w-full object-cover"
                                             src={previewIcon}
                                         />
                                     ) : (
                                         <ImageIcon
-                                            className="text-[var(--color-muted-foreground)]"
+                                            className="text-muted-foreground"
                                             size={24}
                                         />
                                     )}
                                     <button
-                                        className="absolute inset-0 w-full h-full bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer border-none p-0"
+                                        className="absolute inset-0 flex h-full w-full cursor-pointer items-center justify-center border-none bg-black/50 p-0 opacity-0 transition-opacity group-hover:opacity-100"
                                         type="button"
                                         onClick={() =>
                                             document
@@ -292,19 +292,19 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
 
                         <div className="space-y-4 pt-4">
                             <div className="flex items-center justify-between">
-                                <span className="text-xs font-bold text-[var(--color-muted-foreground)] uppercase">
+                                <span className="text-xs font-bold text-muted-foreground uppercase">
                                     Role Color
                                 </span>
-                                <div className="flex bg-[var(--color-bg-secondary)] rounded-md p-1 border border-[var(--color-border-subtle)]">
+                                <div className="flex rounded-md border border-border-subtle bg-bg-secondary p-1">
                                     {(
                                         ['solid', 'linear', 'custom'] as const
                                     ).map((type) => (
                                         <Button
                                             className={cn(
-                                                'px-3 py-1 text-xs font-semibold rounded capitalize transition-all border-none shadow-none',
+                                                'rounded border-none px-3 py-1 text-xs font-semibold capitalize shadow-none transition-all',
                                                 colorType === type
-                                                    ? 'bg-[var(--color-primary)] text-[var(--color-foreground-inverse)] hover:bg-[var(--color-primary-hover)]'
-                                                    : 'text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] hover:bg-[var(--color-bg-secondary)]',
+                                                    ? 'bg-primary text-foreground-inverse hover:bg-primary-hover'
+                                                    : 'text-muted-foreground hover:bg-bg-secondary hover:text-foreground',
                                             )}
                                             key={type}
                                             size="sm"
@@ -320,8 +320,8 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
                                 </div>
                             </div>
 
-                            <div className="flex gap-8 items-start">
-                                <div className="space-y-4 min-w-[200px]">
+                            <div className="flex items-start gap-8">
+                                <div className="min-w-[200px] space-y-4">
                                     {colorType === 'solid' && (
                                         <div className="space-y-4">
                                             <HexColorPicker
@@ -393,7 +393,7 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
                                                     COLORS (MAX 15)
                                                 </Text>
                                                 <IconButton
-                                                    className="w-8 h-8 p-0"
+                                                    className="h-8 w-8 p-0"
                                                     disabled={
                                                         customColorItems.length >=
                                                         15
@@ -424,15 +424,15 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
                                                     }}
                                                 />
                                             </div>
-                                            <div className="space-y-2 max-h-[300px] overflow-y-auto pr-2 scrollbar-thin">
+                                            <div className="scrollbar-thin max-h-[300px] space-y-2 overflow-y-auto pr-2">
                                                 {customColorItems.map(
                                                     (item, i) => (
                                                         <div
-                                                            className="flex gap-2 items-center"
+                                                            className="flex items-center gap-2"
                                                             key={item.id}
                                                         >
                                                             <div
-                                                                className="w-8 h-8 rounded shrink-0 border border-[var(--color-border-subtle)]"
+                                                                className="h-8 w-8 shrink-0 rounded border border-border-subtle"
                                                                 style={{
                                                                     backgroundColor:
                                                                         item.color,
@@ -471,7 +471,7 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
                                                             {customColorItems.length >
                                                                 2 && (
                                                                 <IconButton
-                                                                    className="w-8 h-8 p-0 text-[var(--color-danger)]"
+                                                                    className="h-8 w-8 p-0 text-danger"
                                                                     icon={
                                                                         Trash2
                                                                     }
@@ -500,7 +500,7 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
                                                     ),
                                                 )}
                                             </div>
-                                            <div className="pt-2 flex items-center gap-4">
+                                            <div className="flex items-center gap-4 pt-2">
                                                 <div className="flex-1 space-y-1">
                                                     <Text
                                                         size="xs"
@@ -511,7 +511,7 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
                                                     </Text>
                                                     <div className="flex items-center gap-2">
                                                         <Repeat
-                                                            className="text-[var(--color-muted-foreground)]"
+                                                            className="text-muted-foreground"
                                                             size={14}
                                                         />
                                                         <Input
@@ -547,7 +547,7 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
                                         name displayed in this style in the
                                         member list and in messages.
                                     </Text>
-                                    <div className="p-4 rounded-md border border-[var(--color-border-subtle)] bg-[var(--tertiary-bg)] w-64">
+                                    <div className="w-64 rounded-md border border-border-subtle bg-[var(--tertiary-bg)] p-4">
                                         {me && (
                                             <UserItem
                                                 noFetch
@@ -573,7 +573,7 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
                                         >
                                             Preview Text
                                         </Text>
-                                        <div className="bg-[var(--color-bg-secondary)] rounded-md border border-[var(--color-border-subtle)] overflow-hidden">
+                                        <div className="overflow-hidden rounded-md border border-border-subtle bg-bg-secondary">
                                             {me && (
                                                 <Message
                                                     isGroupStart
@@ -606,7 +606,7 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
                     </section>
 
                     {/* Permissions Settings */}
-                    <section className="space-y-4 pt-4 border-t border-[var(--color-border-subtle)]">
+                    <section className="space-y-4 border-t border-border-subtle pt-4">
                         <Heading level={2}>Permissions</Heading>
                         <div className="space-y-4">
                             <PermissionToggle

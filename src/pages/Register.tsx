@@ -32,12 +32,12 @@ export const Register: React.FC = () => {
     } = useRegisterForm();
 
     return (
-        <Box className="min-h-screen w-full flex flex-col items-center justify-center bg-background relative overflow-hidden p-md">
+        <Box className="relative flex min-h-screen w-full flex-col items-center justify-center overflow-hidden bg-background p-md">
             <DefaultBackground />
 
             {/* Register Box */}
             <FormContent>
-                <Box className="text-center space-y-sm">
+                <Box className="space-y-sm text-center">
                     <Heading variant="page">Create an account</Heading>
                     <Text as="p">
                         Welcome! You'll need an invite token to join this chat
@@ -61,7 +61,7 @@ export const Register: React.FC = () => {
                             {errors.login && (
                                 <motion.small
                                     animate={{ opacity: 1, height: 'auto' }}
-                                    className="text-red-400 text-xs mt-1 block h-0 overflow-hidden"
+                                    className="mt-1 block h-0 overflow-hidden text-xs text-red-400"
                                     exit={{ opacity: 0, height: 0 }}
                                     initial={{ opacity: 0, height: 0 }}
                                 >
@@ -82,7 +82,7 @@ export const Register: React.FC = () => {
                             {errors.username && (
                                 <motion.small
                                     animate={{ opacity: 1, height: 'auto' }}
-                                    className="text-red-400 text-xs mt-1 block h-0 overflow-hidden"
+                                    className="mt-1 block h-0 overflow-hidden text-xs text-red-400"
                                     exit={{ opacity: 0, height: 0 }}
                                     initial={{ opacity: 0, height: 0 }}
                                 >
@@ -103,7 +103,7 @@ export const Register: React.FC = () => {
                             {errors.password && (
                                 <motion.small
                                     animate={{ opacity: 1, height: 'auto' }}
-                                    className="text-red-400 text-xs mt-1 block h-0 overflow-hidden"
+                                    className="mt-1 block h-0 overflow-hidden text-xs text-red-400"
                                     exit={{ opacity: 0, height: 0 }}
                                     initial={{ opacity: 0, height: 0 }}
                                 >
@@ -124,7 +124,7 @@ export const Register: React.FC = () => {
                             {errors.inviteToken && (
                                 <motion.small
                                     animate={{ opacity: 1, height: 'auto' }}
-                                    className="text-red-400 text-xs mt-1 block h-0 overflow-hidden"
+                                    className="mt-1 block h-0 overflow-hidden text-xs text-red-400"
                                     exit={{ opacity: 0, height: 0 }}
                                     initial={{ opacity: 0, height: 0 }}
                                 >
@@ -134,7 +134,7 @@ export const Register: React.FC = () => {
                         </AnimatePresence>
                     </InputWrapper>
                     <Button
-                        className="w-full py-sm text-lg font-semibold h-12 flex items-center justify-center gap-2"
+                        className="flex h-12 w-full items-center justify-center gap-2 py-sm text-lg font-semibold"
                         disabled={isLoading}
                         type="submit"
                         variant="normal"

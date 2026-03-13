@@ -26,7 +26,7 @@ export const MessageContent: React.FC<MessageContentProps> = ({ text }) => {
     }, [nodes]);
 
     return (
-        <Box className="text-sm text-foreground leading-relaxed break-words whitespace-pre-wrap">
+        <Box className="text-sm leading-relaxed break-words whitespace-pre-wrap text-foreground">
             <ParsedText
                 largeEmojis={isEmojiOnly}
                 nodes={nodes}

@@ -33,7 +33,7 @@ export const MiniProfile: React.FC = () => {
         const isCustomEmoji = /^[0-9a-fA-F]{24}$/.test(statusEmoji);
         if (isCustomEmoji) {
             return (
-                <ParsedEmoji className="mr-1 w-4 h-4" emojiId={statusEmoji} />
+                <ParsedEmoji className="mr-1 h-4 w-4" emojiId={statusEmoji} />
             );
         }
 
@@ -43,26 +43,26 @@ export const MiniProfile: React.FC = () => {
     if (!user) return null;
 
     return (
-        <Box className="flex items-center justify-between px-2 py-2 bg-[var(--tertiary-bg)] border-t border-[var(--color-border-subtle)] h-[60px] shrink-0">
-            <Box className="flex items-center min-w-0 mr-2 flex-1">
-                <Box className="relative shrink-0 mr-2">
+        <Box className="flex h-[60px] shrink-0 items-center justify-between border-t border-border-subtle bg-[var(--tertiary-bg)] px-2 py-2">
+            <Box className="mr-2 flex min-w-0 flex-1 items-center">
+                <Box className="relative mr-2 shrink-0">
                     <UserProfilePicture
-                        className="w-9 h-9"
+                        className="h-9 w-9"
                         size="sm"
                         src={user.profilePicture}
                         status={presenceStatus}
                         username={user.username}
                     />
                 </Box>
-                <Box className="min-w-0 flex flex-col flex-1">
+                <Box className="flex min-w-0 flex-1 flex-col">
                     <StyledUserName
-                        className="text-sm font-semibold !text-[var(--color-header-primary)] leading-tight"
+                        className="!text-header-primary text-sm leading-tight font-semibold"
                         user={user}
                     >
                         {user.displayName || user.username}
                     </StyledUserName>
                     <Box
-                        className="text-xs text-[var(--color-header-secondary)] truncate leading-tight opacity-70 hover:opacity-100 transition-opacity cursor-pointer flex items-center"
+                        className="text-header-secondary flex cursor-pointer items-center truncate text-xs leading-tight opacity-70 transition-opacity hover:opacity-100"
                         onClick={handleStatusClick}
                     >
                         {statusEmoji || statusText ? (

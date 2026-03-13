@@ -109,7 +109,7 @@ export const ProfilePopup: React.FC<ProfilePopupProps> = ({
     return createPortal(
         <AnimatePresence>
             {isOpen && (
-                <Box className="fixed inset-0 z-backdrop pointer-events-none">
+                <Box className="pointer-events-none fixed inset-0 z-backdrop">
                     <motion.div
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         className="pointer-events-auto"
@@ -125,7 +125,7 @@ export const ProfilePopup: React.FC<ProfilePopupProps> = ({
                     >
                         <UserProfileCard
                             adminData={adminData}
-                            className="max-h-[calc(100vh-32px)] overflow-y-auto overflow-x-hidden custom-scrollbar"
+                            className="custom-scrollbar max-h-[calc(100vh-32px)] overflow-x-hidden overflow-y-auto"
                             customStatus={{
                                 text: presenceCustomText,
                                 emoji: presenceCustomEmoji,

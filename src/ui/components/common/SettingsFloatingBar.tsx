@@ -42,7 +42,7 @@ export const SettingsFloatingBar: React.FC<SettingsFloatingBarProps> = ({
                 animate={{ y: 0, opacity: 1 }}
                 className={cn(
                     isFixed ? 'fixed' : 'absolute',
-                    'bottom-8 right-0 flex justify-center pointer-events-none z-fixed px-4',
+                    'pointer-events-none right-0 bottom-8 z-fixed flex justify-center px-4',
                     isFixed && `left-[${offset}]`,
                     !isFixed && 'left-0',
                     className,
@@ -54,7 +54,7 @@ export const SettingsFloatingBar: React.FC<SettingsFloatingBarProps> = ({
             >
                 <div
                     className={cn(
-                        'bg-[var(--color-background)] backdrop-blur-md border border-[var(--color-border-subtle)] rounded-lg p-4 flex items-center gap-6 shadow-2xl pointer-events-auto w-full max-w-2xl',
+                        'pointer-events-auto flex w-full max-w-2xl items-center gap-6 rounded-lg border border-border-subtle bg-background p-4 shadow-2xl backdrop-blur-md',
                         containerClassName,
                     )}
                 >

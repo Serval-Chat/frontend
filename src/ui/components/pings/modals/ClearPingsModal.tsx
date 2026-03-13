@@ -29,7 +29,7 @@ export const ClearPingsModal: React.FC<ClearPingsModalProps> = ({
                 action cannot be undone.
             </Text>
         </div>
-        <Box className="flex justify-end gap-3 px-6 py-4 border-t border-[var(--color-border-subtle)] bg-[var(--color-bg-subtle)]">
+        <Box className="flex justify-end gap-3 border-t border-border-subtle bg-bg-subtle px-6 py-4">
             <Button variant="ghost" onClick={onClose}>
                 Cancel
             </Button>

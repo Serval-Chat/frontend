@@ -116,13 +116,13 @@ export const ServerSidebarSection: React.FC<ServerSidebarSectionProps> = ({
             ) : (
                 <>
                     {groups.map((group) => (
-                        <div className="space-y-1 min-w-0" key={group.id}>
-                            <div className="flex items-center justify-between px-3 mb-1 min-w-0">
-                                <div className="text-xs font-semibold text-foreground-muted uppercase tracking-wider truncate">
+                        <div className="min-w-0 space-y-1" key={group.id}>
+                            <div className="mb-1 flex min-w-0 items-center justify-between px-3">
+                                <div className="text-foreground-muted truncate text-xs font-semibold tracking-wider uppercase">
                                     {group.name} - {group.members.length}
                                 </div>
                             </div>
-                            <div className="space-y-[2px] min-w-0">
+                            <div className="min-w-0 space-y-[2px]">
                                 {group.members.map((member) => (
                                     <UserItem
                                         noFetch

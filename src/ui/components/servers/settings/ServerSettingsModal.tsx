@@ -83,12 +83,12 @@ export const ServerSettingsModal: React.FC<ServerSettingsModalProps> = ({
         <Modal
             fullScreen
             noPadding
-            className="bg-[var(--color-background)]"
+            className="bg-background"
             isOpen={isOpen}
             showCloseButton={false}
             onClose={onClose}
         >
-            <div className="flex h-full w-full relative">
+            <div className="relative flex h-full w-full">
                 {/* Navigation Sidebar */}
                 <div
                     className={cn(
@@ -108,15 +108,15 @@ export const ServerSettingsModal: React.FC<ServerSettingsModalProps> = ({
                 {/* Content Area */}
                 <div
                     className={cn(
-                        'flex-1 bg-[var(--color-background)] flex flex-col h-full overflow-hidden relative',
+                        'relative flex h-full flex-1 flex-col overflow-hidden bg-background',
                         isMobileSidebarOpen ? 'hidden md:flex' : 'flex',
                     )}
                 >
                     {/* Mobile Back Header */}
                     {!isMobileSidebarOpen && (
-                        <div className="md:hidden flex items-center sticky top-0 z-40 bg-[var(--color-background)] border-b border-[var(--color-border-subtle)] px-4 py-3 shrink-0">
+                        <div className="sticky top-0 z-40 flex shrink-0 items-center border-b border-border-subtle bg-background px-4 py-3 md:hidden">
                             <button
-                                className="flex items-center gap-1 text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] font-medium transition-colors"
+                                className="flex items-center gap-1 font-medium text-muted-foreground transition-colors hover:text-foreground"
                                 onClick={() => setIsMobileSidebarOpen(true)}
                             >
                                 <ChevronLeft size={20} />
@@ -128,7 +128,7 @@ export const ServerSettingsModal: React.FC<ServerSettingsModalProps> = ({
                     {/* Close Button Top Right */}
                     <div
                         className={cn(
-                            'absolute top-6 md:top-8 z-50 transition-all duration-300',
+                            'absolute top-6 z-50 transition-all duration-300 md:top-8',
                             activeSection === 'roles'
                                 ? 'right-6 md:right-80'
                                 : 'right-6 md:right-12',
@@ -136,19 +136,19 @@ export const ServerSettingsModal: React.FC<ServerSettingsModalProps> = ({
                     >
                         <div className="flex flex-col items-center gap-2">
                             <IconButton
-                                className="text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] hover:bg-[var(--color-bg-subtle)] border-2 border-[var(--color-border-subtle)] rounded-full p-2 transition-all duration-200"
+                                className="rounded-full border-2 border-border-subtle p-2 text-muted-foreground transition-all duration-200 hover:bg-bg-subtle hover:text-foreground"
                                 icon={X}
                                 iconSize={24}
                                 onClick={onClose}
                             />
-                            <span className="text-[10px] font-bold text-[var(--color-muted-foreground)] uppercase">
+                            <span className="text-[10px] font-bold text-muted-foreground uppercase">
                                 Esc
                             </span>
                         </div>
                     </div>
                     <div
                         className={cn(
-                            'flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-[var(--color-bg-secondary)] scrollbar-track-transparent',
+                            'scrollbar-thin scrollbar-thumb-bg-secondary scrollbar-track-transparent flex-1 overflow-y-auto',
                             activeSection !== 'roles' && 'p-12',
                         )}
                     >

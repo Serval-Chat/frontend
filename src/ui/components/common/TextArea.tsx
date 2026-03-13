@@ -6,7 +6,7 @@ import { Box } from '@/ui/components/layout/Box';
 import { cn } from '@/utils/cn';
 
 const textAreaVariants = cva(
-    'w-full rounded-md border border-border-subtle bg-bg-subtle px-3 py-2 text-sm text-foreground placeholder:text-placeholder focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1 transition-all duration-200 resize-none min-h-[40px] max-h-[200px] custom-scrollbar',
+    'custom-scrollbar max-h-[200px] min-h-[40px] w-full resize-none rounded-md border border-border-subtle bg-bg-subtle px-3 py-2 text-sm text-foreground transition-all duration-200 placeholder:text-placeholder focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1 focus-visible:outline-none',
     {
         variants: {
             disabled: {

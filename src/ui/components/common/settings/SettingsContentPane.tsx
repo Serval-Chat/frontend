@@ -11,7 +11,7 @@ export const SettingsContentPane: React.FC<SettingsContentPaneProps> = ({
     children,
     maxWidthClass = 'max-w-4xl',
 }) => (
-    <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-[var(--color-bg-secondary)] scrollbar-track-transparent p-12">
+    <div className="scrollbar-thin scrollbar-thumb-bg-secondary scrollbar-track-transparent flex-1 overflow-y-auto p-12">
         <div className={cn('mx-auto h-full', maxWidthClass)}>{children}</div>
     </div>
 );

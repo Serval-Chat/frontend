@@ -133,7 +133,7 @@ export const ServerOverviewSettings: React.FC<ServerOverviewSettingsProps> = ({
 
     if (isLoading) {
         return (
-            <div className="flex items-center justify-center h-full">
+            <div className="flex h-full items-center justify-center">
                 <LoadingSpinner />
             </div>
         );
@@ -171,18 +171,18 @@ export const ServerOverviewSettings: React.FC<ServerOverviewSettingsProps> = ({
                 </Text>
             </div>
 
-            <div className="flex flex-col md:flex-row gap-12">
+            <div className="flex flex-col gap-12 md:flex-row">
                 {/* Visuals Section */}
-                <div className="space-y-8 flex-shrink-0">
+                <div className="flex-shrink-0 space-y-8">
                     <div className="space-y-3">
                         <label
-                            className="text-xs font-bold text-[var(--color-muted-foreground)] uppercase tracking-wider"
+                            className="text-xs font-bold tracking-wider text-muted-foreground uppercase"
                             htmlFor="server-icon-upload"
                         >
                             Server Icon
                         </label>
                         <div
-                            className="group relative w-32 h-32 rounded-3xl bg-[var(--color-bg-subtle)] flex items-center justify-center border border-[var(--color-border-subtle)] overflow-hidden cursor-pointer hover:border-[var(--color-primary)] transition-all"
+                            className="group relative flex h-32 w-32 cursor-pointer items-center justify-center overflow-hidden rounded-3xl border border-border-subtle bg-bg-subtle transition-all hover:border-primary"
                             role="button"
                             tabIndex={0}
                             onClick={() => iconInputRef.current?.click()}
@@ -196,7 +196,7 @@ export const ServerOverviewSettings: React.FC<ServerOverviewSettingsProps> = ({
                             {iconUrl ? (
                                 <img
                                     alt={server.name}
-                                    className="w-full h-full object-cover group-hover:opacity-40 transition-opacity"
+                                    className="h-full w-full object-cover transition-opacity group-hover:opacity-40"
                                     src={iconUrl}
                                 />
                             ) : (
@@ -204,8 +204,8 @@ export const ServerOverviewSettings: React.FC<ServerOverviewSettingsProps> = ({
                                     {server.name.charAt(0).toUpperCase()}
                                 </Text>
                             )}
-                            <div className="absolute inset-0 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/40">
-                                <Upload className="w-6 h-6 text-white mb-1" />
+                            <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
+                                <Upload className="mb-1 h-6 w-6 text-white" />
                                 <Text
                                     size="2xs"
                                     transform="uppercase"
@@ -220,13 +220,13 @@ export const ServerOverviewSettings: React.FC<ServerOverviewSettingsProps> = ({
 
                     <div className="space-y-3">
                         <label
-                            className="text-xs font-bold text-[var(--color-muted-foreground)] uppercase tracking-wider"
+                            className="text-xs font-bold tracking-wider text-muted-foreground uppercase"
                             htmlFor="server-banner-upload"
                         >
                             Server Banner
                         </label>
                         <div
-                            className="group relative w-full aspect-[16/9] md:w-64 rounded-xl bg-[var(--color-bg-subtle)] flex items-center justify-center border border-[var(--color-border-subtle)] overflow-hidden cursor-pointer hover:border-[var(--color-primary)] transition-all"
+                            className="group relative flex aspect-[16/9] w-full cursor-pointer items-center justify-center overflow-hidden rounded-xl border border-border-subtle bg-bg-subtle transition-all hover:border-primary md:w-64"
                             role="button"
                             tabIndex={0}
                             onClick={() => bannerInputRef.current?.click()}
@@ -240,7 +240,7 @@ export const ServerOverviewSettings: React.FC<ServerOverviewSettingsProps> = ({
                             {server.banner?.value ? (
                                 <img
                                     alt="Banner"
-                                    className="w-full h-full object-cover group-hover:opacity-40 transition-opacity"
+                                    className="h-full w-full object-cover transition-opacity group-hover:opacity-40"
                                     src={
                                         resolveApiUrl(server.banner.value) || ''
                                     }
@@ -252,8 +252,8 @@ export const ServerOverviewSettings: React.FC<ServerOverviewSettingsProps> = ({
                                     </Text>
                                 </div>
                             )}
-                            <div className="absolute inset-0 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/40">
-                                <Upload className="w-6 h-6 text-white mb-1" />
+                            <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
+                                <Upload className="mb-1 h-6 w-6 text-white" />
                                 <Text
                                     size="2xs"
                                     transform="uppercase"
@@ -271,7 +271,7 @@ export const ServerOverviewSettings: React.FC<ServerOverviewSettingsProps> = ({
                 <div className="flex-1 space-y-8">
                     <div className="space-y-2">
                         <label
-                            className="text-xs font-bold text-[var(--color-muted-foreground)] uppercase tracking-wider"
+                            className="text-xs font-bold tracking-wider text-muted-foreground uppercase"
                             htmlFor="serverName"
                         >
                             Server Name
@@ -288,10 +288,10 @@ export const ServerOverviewSettings: React.FC<ServerOverviewSettingsProps> = ({
 
             {/* Danger Zone */}
             {isOwner && (
-                <div className="pt-10 space-y-6">
-                    <div className="pb-4 border-b border-[var(--color-border-subtle)]">
+                <div className="space-y-6 pt-10">
+                    <div className="border-b border-border-subtle pb-4">
                         <Heading
-                            className="text-[var(--color-error)]"
+                            className="text-error"
                             level={2}
                             variant="section"
                         >
@@ -299,8 +299,8 @@ export const ServerOverviewSettings: React.FC<ServerOverviewSettingsProps> = ({
                         </Heading>
                     </div>
 
-                    <div className="rounded-lg border border-[var(--color-bg-secondary)] divide-y divide-[var(--color-border-subtle)]">
-                        <div className="p-4 flex items-center justify-between gap-4">
+                    <div className="divide-y divide-border-subtle rounded-lg border border-bg-secondary">
+                        <div className="flex items-center justify-between gap-4 p-4">
                             <div className="space-y-1">
                                 <Text as="p" weight="bold">
                                     Transfer Ownership
@@ -315,12 +315,12 @@ export const ServerOverviewSettings: React.FC<ServerOverviewSettingsProps> = ({
                                 variant="danger"
                                 onClick={() => setIsTransferModalOpen(true)}
                             >
-                                <UserPlus className="w-4 h-4 mr-2" />
+                                <UserPlus className="mr-2 h-4 w-4" />
                                 Transfer
                             </Button>
                         </div>
 
-                        <div className="p-4 flex items-center justify-between gap-4">
+                        <div className="flex items-center justify-between gap-4 p-4">
                             <div className="space-y-1">
                                 <Text as="p" variant="danger" weight="bold">
                                     Delete Server
@@ -335,7 +335,7 @@ export const ServerOverviewSettings: React.FC<ServerOverviewSettingsProps> = ({
                                 variant="danger"
                                 onClick={() => setIsDeleteModalOpen(true)}
                             >
-                                <Trash2 className="w-4 h-4 mr-2" />
+                                <Trash2 className="mr-2 h-4 w-4" />
                                 Delete Server
                             </Button>
                         </div>
@@ -371,7 +371,7 @@ export const ServerOverviewSettings: React.FC<ServerOverviewSettingsProps> = ({
                 }}
             >
                 <div className="space-y-6">
-                    <div className="p-4 bg-[var(--color-status-error-bg)] border border-[var(--color-status-error)] rounded-md text-[var(--color-status-error)] text-sm">
+                    <div className="border-status-error bg-status-error-bg text-status-error rounded-md border p-4 text-sm">
                         Are you sure you want to delete{' '}
                         <strong>{server.name}</strong>? This action cannot be
                         undone. All messages, channels, and roles will be
@@ -380,7 +380,7 @@ export const ServerOverviewSettings: React.FC<ServerOverviewSettingsProps> = ({
 
                     <div className="space-y-2">
                         <label
-                            className="text-xs font-bold text-[var(--color-muted-foreground)] uppercase"
+                            className="text-xs font-bold text-muted-foreground uppercase"
                             htmlFor="confirm-delete-name"
                         >
                             Enter Server Name
@@ -395,7 +395,7 @@ export const ServerOverviewSettings: React.FC<ServerOverviewSettingsProps> = ({
                         />
                     </div>
 
-                    <div className="flex gap-3 justify-end pt-4 bg-[var(--color-bg-secondary)] -mx-6 -mb-6 p-6">
+                    <div className="-mx-6 -mb-6 flex justify-end gap-3 bg-bg-secondary p-6 pt-4">
                         <Button
                             className="min-w-[96px]"
                             variant="ghost"
@@ -430,20 +430,20 @@ export const ServerOverviewSettings: React.FC<ServerOverviewSettingsProps> = ({
                         control over the server.
                     </Text>
 
-                    <div className="max-h-[300px] overflow-y-auto custom-scrollbar space-y-2">
+                    <div className="custom-scrollbar max-h-[300px] space-y-2 overflow-y-auto">
                         {members
                             ?.filter((m) => m.userId !== me?._id)
                             .map((member) => (
                                 <div
-                                    className="flex items-center justify-between p-2 rounded-md hover:bg-[var(--color-bg-subtle)] transition-colors group"
+                                    className="group flex items-center justify-between rounded-md p-2 transition-colors hover:bg-bg-subtle"
                                     key={member.userId}
                                 >
                                     <div className="flex items-center gap-3">
-                                        <div className="w-8 h-8 rounded-full bg-[var(--color-bg-secondary)] overflow-hidden">
+                                        <div className="h-8 w-8 overflow-hidden rounded-full bg-bg-secondary">
                                             {member.user.profilePicture ? (
                                                 <img
                                                     alt={member.user.username}
-                                                    className="w-full h-full object-cover"
+                                                    className="h-full w-full object-cover"
                                                     src={
                                                         resolveApiUrl(
                                                             member.user
@@ -452,7 +452,7 @@ export const ServerOverviewSettings: React.FC<ServerOverviewSettingsProps> = ({
                                                     }
                                                 />
                                             ) : (
-                                                <div className="w-full h-full flex items-center justify-center text-xs font-bold">
+                                                <div className="flex h-full w-full items-center justify-center text-xs font-bold">
                                                     {member.user.username
                                                         .charAt(0)
                                                         .toUpperCase()}
@@ -470,7 +470,7 @@ export const ServerOverviewSettings: React.FC<ServerOverviewSettingsProps> = ({
                                         </div>
                                     </div>
                                     <Button
-                                        className="opacity-0 group-hover:opacity-100 transition-opacity"
+                                        className="opacity-0 transition-opacity group-hover:opacity-100"
                                         loading={isTransferring}
                                         size="sm"
                                         variant="primary"
@@ -486,7 +486,7 @@ export const ServerOverviewSettings: React.FC<ServerOverviewSettingsProps> = ({
                             ))}
                     </div>
 
-                    <div className="flex justify-end pt-4 -mx-6 -mb-6 p-6">
+                    <div className="-mx-6 -mb-6 flex justify-end p-6 pt-4">
                         <Button
                             variant="ghost"
                             onClick={() => setIsTransferModalOpen(false)}

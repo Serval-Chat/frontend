@@ -117,16 +117,16 @@ export const Reactions: React.FC<ReactionsProps> = ({
     };
 
     return (
-        <Box className="flex flex-wrap gap-1 mt-1 mb-1">
+        <Box className="mt-1 mb-1 flex flex-wrap gap-1">
             {reactions.map((reaction) => {
                 const hasReacted = reaction.users.includes(me?._id || '');
                 return (
                     <Box
                         className={cn(
-                            'flex items-center gap-1.5 px-1.5 py-0.5 rounded-md border transition-all cursor-pointer select-none',
+                            'flex cursor-pointer items-center gap-1.5 rounded-md border px-1.5 py-0.5 transition-all select-none',
                             hasReacted
-                                ? 'bg-primary/10 border-primary/30 text-primary'
-                                : 'bg-white/5 border-white/5 text-muted-foreground hover:bg-white/10 hover:border-white/10',
+                                ? 'border-primary/30 bg-primary/10 text-primary'
+                                : 'border-white/5 bg-white/5 text-muted-foreground hover:border-white/10 hover:bg-white/10',
                         )}
                         key={`${reaction.emoji}-${reaction.users.join(',')}`}
                         title={
@@ -141,7 +141,7 @@ export const Reactions: React.FC<ReactionsProps> = ({
                             reaction.emojiUrl ? (
                                 <img
                                     alt={reaction.emoji}
-                                    className="w-4 h-4 object-contain"
+                                    className="h-4 w-4 object-contain"
                                     src={resolveApiUrl(reaction.emojiUrl) || ''}
                                 />
                             ) : (
@@ -157,7 +157,7 @@ export const Reactions: React.FC<ReactionsProps> = ({
 
             <Box className="relative h-full">
                 <Button
-                    className="h-full min-h-[24px] px-1.5 py-0.5 border border-white/5 bg-white/5 text-muted-foreground hover:bg-white/10 hover:border-white/10"
+                    className="h-full min-h-[24px] border border-white/5 bg-white/5 px-1.5 py-0.5 text-muted-foreground hover:border-white/10 hover:bg-white/10"
                     size="sm"
                     title="Add Reaction"
                     variant="ghost"
@@ -168,7 +168,7 @@ export const Reactions: React.FC<ReactionsProps> = ({
 
                 {showPicker && (
                     <div
-                        className="absolute bottom-full left-0 pb-2 z-[var(--z-index-popover)]"
+                        className="absolute bottom-full left-0 z-[var(--z-index-popover)] pb-2"
                         ref={pickerRef}
                     >
                         <EmojiPicker

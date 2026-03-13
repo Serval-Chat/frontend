@@ -338,11 +338,11 @@ export const UserItem: React.FC<UserItemProps> = ({
             <ContextMenu className="w-full" items={contextMenuItems}>
                 <Box
                     className={cn(
-                        'flex items-center gap-3 px-3 py-1 rounded-md cursor-pointer transition-colors w-full min-w-0',
+                        'flex w-full min-w-0 cursor-pointer items-center gap-3 rounded-md px-3 py-1 transition-colors',
 
-                        'hover:bg-[var(--color-bg-subtle)]',
+                        'hover:bg-bg-subtle',
                         isActive
-                            ? 'bg-[var(--color-bg-subtle)] text-foreground'
+                            ? 'bg-bg-subtle text-foreground'
                             : 'text-foreground-muted',
                         className,
                     )}
@@ -366,7 +366,7 @@ export const UserItem: React.FC<UserItemProps> = ({
                         }}
                     />
 
-                    <Box className="flex flex-col flex-1 min-w-0 overflow-hidden">
+                    <Box className="flex min-w-0 flex-1 flex-col overflow-hidden">
                         <StyledUserName
                             disableCustomFonts={disableCustomFonts}
                             disableGlowAndColors={disableGlowAndColors}
@@ -377,14 +377,14 @@ export const UserItem: React.FC<UserItemProps> = ({
                             {displayName || username}
                         </StyledUserName>
                         {(presenceCustomText || presenceCustomEmoji) && (
-                            <Box className="text-xs text-foreground-muted flex items-center gap-1 min-w-0">
+                            <Box className="text-foreground-muted flex min-w-0 items-center gap-1 text-xs">
                                 {presenceCustomEmoji && (
-                                    <Box className="shrink-0 flex items-center">
+                                    <Box className="flex shrink-0 items-center">
                                         {/^[0-9a-fA-F]{24}$/.test(
                                             presenceCustomEmoji,
                                         ) ? (
                                             <ParsedEmoji
-                                                className="w-3.5 h-3.5"
+                                                className="h-3.5 w-3.5"
                                                 emojiId={presenceCustomEmoji}
                                             />
                                         ) : (
@@ -398,7 +398,7 @@ export const UserItem: React.FC<UserItemProps> = ({
                                 {presenceCustomText && (
                                     <Text
                                         as="div"
-                                        className="truncate min-w-0"
+                                        className="min-w-0 truncate"
                                         size="xs"
                                     >
                                         {presenceCustomText}

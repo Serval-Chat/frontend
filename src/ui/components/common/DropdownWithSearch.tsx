@@ -95,7 +95,7 @@ export const DropdownWithSearch: React.FC<DropdownWithSearchProps> = ({
             {label && (
                 <Text
                     as="label"
-                    className="block mb-2 text-xs font-bold uppercase text-[var(--color-muted-foreground)] tracking-wider"
+                    className="mb-2 block text-xs font-bold tracking-wider text-muted-foreground uppercase"
                 >
                     {label}
                 </Text>
@@ -103,9 +103,8 @@ export const DropdownWithSearch: React.FC<DropdownWithSearchProps> = ({
 
             <Button
                 className={cn(
-                    'flex items-center justify-between w-full px-4 py-2 bg-[var(--color-bg-secondary)] border border-[var(--color-border-subtle)] rounded-lg text-sm transition-all duration-200 hover:border-[var(--color-primary)]/50 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/20 shadow-none',
-                    isOpen &&
-                        'border-[var(--color-primary)] ring-2 ring-[var(--color-primary)]/20',
+                    'flex w-full items-center justify-between rounded-lg border border-border-subtle bg-bg-secondary px-4 py-2 text-sm shadow-none transition-all duration-200 hover:border-primary/50 focus:ring-2 focus:ring-primary/20 focus:outline-none',
+                    isOpen && 'border-primary ring-2 ring-primary/20',
                 )}
                 innerClassName="w-full justify-between"
                 type="button"
@@ -122,8 +121,8 @@ export const DropdownWithSearch: React.FC<DropdownWithSearchProps> = ({
                         className={cn(
                             'truncate',
                             !selectedOption
-                                ? 'text-[var(--color-muted-foreground)]'
-                                : 'text-[var(--color-foreground)]',
+                                ? 'text-muted-foreground'
+                                : 'text-foreground',
                         )}
                     >
                         {selectedOption
@@ -133,10 +132,10 @@ export const DropdownWithSearch: React.FC<DropdownWithSearchProps> = ({
                     </span>
                 </div>
 
-                <div className="flex items-center gap-1 ml-2 flex-shrink-0">
+                <div className="ml-2 flex flex-shrink-0 items-center gap-1">
                     {allowClear && value && (
                         <Button
-                            className="p-1 hover:bg-[var(--color-bg-subtle)] rounded-full text-[var(--color-muted-foreground)] transition-colors h-6 w-6 border-none shadow-none"
+                            className="h-6 w-6 rounded-full border-none p-1 text-muted-foreground shadow-none transition-colors hover:bg-bg-subtle"
                             size="sm"
                             type="button"
                             variant="ghost"
@@ -147,7 +146,7 @@ export const DropdownWithSearch: React.FC<DropdownWithSearchProps> = ({
                     )}
                     <ChevronDown
                         className={cn(
-                            'text-[var(--color-muted-foreground)] transition-transform duration-200',
+                            'text-muted-foreground transition-transform duration-200',
                             isOpen && 'rotate-180',
                         )}
                         size={16}
@@ -159,16 +158,16 @@ export const DropdownWithSearch: React.FC<DropdownWithSearchProps> = ({
                 {isOpen && (
                     <motion.div
                         animate={{ opacity: 1, y: 0, scale: 1 }}
-                        className="absolute z-[var(--z-index-popover)] w-full mt-2 bg-[var(--color-background)] backdrop-blur-md border border-[var(--color-border-subtle)] rounded-xl shadow-2xl overflow-hidden"
+                        className="absolute z-[var(--z-index-popover)] mt-2 w-full overflow-hidden rounded-xl border border-border-subtle bg-background shadow-2xl backdrop-blur-md"
                         exit={{ opacity: 0, y: 4, scale: 0.98 }}
                         initial={{ opacity: 0, y: 4, scale: 0.98 }}
                         ref={dropdownRef}
                         transition={{ duration: 0.15, ease: 'easeOut' }}
                     >
-                        <div className="p-2 border-b border-[var(--color-border-subtle)] bg-[var(--color-background)]/50 backdrop-blur-sm">
+                        <div className="border-b border-border-subtle bg-background/50 p-2 backdrop-blur-sm">
                             <div className="relative">
                                 <Search
-                                    className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-muted-foreground)]"
+                                    className="absolute top-1/2 left-3 -translate-y-1/2 text-muted-foreground"
                                     size={14}
                                 />
                                 <Input
@@ -183,15 +182,15 @@ export const DropdownWithSearch: React.FC<DropdownWithSearchProps> = ({
                             </div>
                         </div>
 
-                        <div className="max-h-60 overflow-y-auto custom-scrollbar p-1">
+                        <div className="custom-scrollbar max-h-60 overflow-y-auto p-1">
                             {filteredOptions.length > 0 ? (
                                 filteredOptions.map((option) => (
                                     <Button
                                         className={cn(
-                                            'flex items-center justify-between w-full px-3 py-2 rounded-md transition-colors text-left group border-none shadow-none justify-start',
+                                            'group flex w-full items-center justify-between rounded-md border-none px-3 py-2 text-left shadow-none transition-colors',
                                             option.id === value
-                                                ? 'bg-[var(--color-primary)]/10 text-[var(--color-primary)]'
-                                                : 'hover:bg-[var(--color-bg-subtle)] text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]',
+                                                ? 'bg-primary/10 text-primary'
+                                                : 'text-muted-foreground hover:bg-bg-subtle hover:text-foreground',
                                         )}
                                         innerClassName="w-full justify-start"
                                         size="md"
@@ -204,13 +203,13 @@ export const DropdownWithSearch: React.FC<DropdownWithSearchProps> = ({
                                                     {option.icon}
                                                 </div>
                                             )}
-                                            <div className="flex flex-col min-w-0">
-                                                <span className="text-sm font-medium truncate">
+                                            <div className="flex min-w-0 flex-col">
+                                                <span className="truncate text-sm font-medium">
                                                     {option.displayLabel ||
                                                         option.label}
                                                 </span>
                                                 {option.description && (
-                                                    <span className="text-[10px] opacity-70 truncate">
+                                                    <span className="truncate text-[10px] opacity-70">
                                                         {option.description}
                                                     </span>
                                                 )}
@@ -218,7 +217,7 @@ export const DropdownWithSearch: React.FC<DropdownWithSearchProps> = ({
                                         </div>
                                         {option.id === value && (
                                             <Check
-                                                className="flex-shrink-0 ml-2"
+                                                className="ml-2 flex-shrink-0"
                                                 size={14}
                                             />
                                         )}
@@ -227,7 +226,7 @@ export const DropdownWithSearch: React.FC<DropdownWithSearchProps> = ({
                             ) : (
                                 <div className="p-4 text-center">
                                     <Text
-                                        className="text-[var(--color-muted-foreground)]"
+                                        className="text-muted-foreground"
                                         size="xs"
                                     >
                                         {noOptionsMessage}

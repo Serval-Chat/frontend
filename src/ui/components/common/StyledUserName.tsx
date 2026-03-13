@@ -31,7 +31,7 @@ export const StyledUserName: React.FC<StyledUserNameProps> = ({
 }) => {
     if (!user && !role) {
         return (
-            <Text className={cn('font-medium truncate text-sm', className)}>
+            <Text className={cn('truncate text-sm font-medium', className)}>
                 {children}
             </Text>
         );
@@ -163,7 +163,7 @@ export const StyledUserName: React.FC<StyledUserNameProps> = ({
 
             return (
                 <span
-                    className="relative inline-block isolate"
+                    className="relative isolate inline-block"
                     // index is the only stable unique identifier for character position in dynamic text
                     // eslint-disable-next-line react/no-array-index-key
                     key={i}
@@ -174,7 +174,7 @@ export const StyledUserName: React.FC<StyledUserNameProps> = ({
                             {/* Inner intense glow */}
                             <span
                                 aria-hidden="true"
-                                className="absolute inset-0 select-none pointer-events-none"
+                                className="pointer-events-none absolute inset-0 select-none"
                                 style={{
                                     ...charStyle,
                                     filter: `blur(${1 * glowIntensity}px) brightness(${1 + glowIntensity})`,
@@ -199,7 +199,7 @@ export const StyledUserName: React.FC<StyledUserNameProps> = ({
                             {/* Middle soft glow */}
                             <span
                                 aria-hidden="true"
-                                className="absolute inset-0 select-none pointer-events-none"
+                                className="pointer-events-none absolute inset-0 select-none"
                                 style={{
                                     ...charStyle,
                                     filter: `blur(${2.5 * glowIntensity}px) brightness(${1 + glowIntensity * 0.8})`,
@@ -224,7 +224,7 @@ export const StyledUserName: React.FC<StyledUserNameProps> = ({
                             {/* Outer broad glow */}
                             <span
                                 aria-hidden="true"
-                                className="absolute inset-0 select-none pointer-events-none"
+                                className="pointer-events-none absolute inset-0 select-none"
                                 style={{
                                     ...charStyle,
                                     filter: `blur(${4 * glowIntensity}px) brightness(${1 + glowIntensity * 0.5})`,
@@ -260,7 +260,7 @@ export const StyledUserName: React.FC<StyledUserNameProps> = ({
     return (
         <Text
             className={cn(
-                'font-medium truncate text-sm w-fit inline-flex items-center',
+                'inline-flex w-fit items-center truncate text-sm font-medium',
                 className,
             )}
             style={containerStyle}
@@ -269,7 +269,7 @@ export const StyledUserName: React.FC<StyledUserNameProps> = ({
             {showIcon && (iconRole?.icon || role?.icon) && (
                 <img
                     alt=""
-                    className="ml-1.5 w-4 h-4 object-contain"
+                    className="ml-1.5 h-4 w-4 object-contain"
                     src={
                         resolveApiUrl(
                             `/api/v1/servers/${(iconRole || (role as Role)).serverId}/roles/icon/${iconRole?.icon || role?.icon}`,

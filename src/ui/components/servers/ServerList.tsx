@@ -34,9 +34,9 @@ export const ServerList: React.FC = () => {
     };
 
     return (
-        <div className="flex-1 w-full flex flex-col items-center gap-3 overflow-y-auto no-scrollbar">
+        <div className="no-scrollbar flex w-full flex-1 flex-col items-center gap-3 overflow-y-auto">
             {isLoading ? (
-                <div className="w-12 h-12 rounded-[1.2rem] bg-white/5 animate-pulse" />
+                <div className="h-12 w-12 animate-pulse rounded-[1.2rem] bg-white/5" />
             ) : (
                 servers?.map((server) => {
                     const unreadStatus = unreadServers[server._id];

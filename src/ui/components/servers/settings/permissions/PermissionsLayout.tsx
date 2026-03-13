@@ -19,7 +19,7 @@ export const SectionLabel: React.FC<{ children: React.ReactNode }> = ({
 );
 
 export const EmptyState: React.FC<{ message: string }> = ({ message }) => (
-    <div className="flex items-center justify-center h-full text-[var(--color-muted-foreground)]">
+    <div className="flex h-full items-center justify-center text-muted-foreground">
         {message}
     </div>
 );
@@ -27,7 +27,7 @@ export const EmptyState: React.FC<{ message: string }> = ({ message }) => (
 export const EditorLayout: React.FC<{ children: React.ReactNode }> = ({
     children,
 }) => (
-    <div className="flex-1 flex flex-col md:flex-row h-full overflow-hidden bg-[var(--color-background)]">
+    <div className="flex h-full flex-1 flex-col overflow-hidden bg-background md:flex-row">
         {children}
     </div>
 );
@@ -38,11 +38,11 @@ export const EditorPanel: React.FC<{
 }> = ({ children, isMobileListOpen = false }) => (
     <div
         className={cn(
-            'flex-1 overflow-y-auto p-8 relative',
+            'relative flex-1 overflow-y-auto p-8',
             isMobileListOpen ? 'hidden md:block' : 'block',
         )}
     >
-        <div className="max-w-2xl mx-auto space-y-8 pb-24">{children}</div>
+        <div className="mx-auto max-w-2xl space-y-8 pb-24">{children}</div>
     </div>
 );
 
@@ -52,10 +52,10 @@ export const RolesSidebar: React.FC<{
 }> = ({ children, isMobileListOpen = true }) => (
     <aside
         className={cn(
-            'border-l border-[var(--color-border-subtle)] bg-[var(--color-bg-secondary)] overflow-y-auto flex-shrink-0 order-first md:order-last',
+            'order-first flex-shrink-0 overflow-y-auto border-l border-border-subtle bg-bg-secondary md:order-last',
             isMobileListOpen ? 'w-full md:w-64' : 'hidden md:block md:w-64',
         )}
     >
-        <div className="p-4 space-y-4">{children}</div>
+        <div className="space-y-4 p-4">{children}</div>
     </aside>
 );

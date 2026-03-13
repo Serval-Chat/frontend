@@ -208,7 +208,7 @@ export const Chat: React.FC = () => {
 
     if (!isMobile) {
         return (
-            <Box className="h-[100dvh] w-full flex bg-[var(--chat-bg)] overflow-hidden">
+            <Box className="flex h-[100dvh] w-full overflow-hidden bg-[var(--chat-bg)]">
                 <Outlet />
                 <PrimaryNavBar />
                 <SecondaryNavBar />
@@ -220,13 +220,13 @@ export const Chat: React.FC = () => {
 
     return (
         <Box
-            className="h-[100dvh] w-full bg-[var(--chat-bg)] overflow-hidden relative"
+            className="relative h-[100dvh] w-full overflow-hidden bg-[var(--chat-bg)]"
             ref={swipeRef}
         >
             <Outlet />
             <MobileSwipeContext.Provider value>
                 <motion.div
-                    className="h-full flex"
+                    className="flex h-full"
                     style={{
                         x,
                         width: '200vw',
@@ -234,15 +234,15 @@ export const Chat: React.FC = () => {
                     }}
                 >
                     {/* Panel 0: List (PrimaryNavBar + SecondaryNavBar) */}
-                    <div className="w-screen h-full shrink-0 flex overflow-hidden">
+                    <div className="flex h-full w-screen shrink-0 overflow-hidden">
                         <PrimaryNavBar />
-                        <div className="flex-1 min-w-0 h-full">
+                        <div className="h-full min-w-0 flex-1">
                             <SecondaryNavBar />
                         </div>
                     </div>
 
                     {/* Panel 1: Chat (MainContent) */}
-                    <div className="w-screen h-full shrink-0 flex flex-col overflow-hidden">
+                    <div className="flex h-full w-screen shrink-0 flex-col overflow-hidden">
                         <MainContent />
                     </div>
                 </motion.div>

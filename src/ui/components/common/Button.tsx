@@ -17,11 +17,11 @@ const mutedClasses = {
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const buttonVariants = cva(
-    'bg-background inline-flex items-center justify-center rounded-md transition-colors duration-300 disabled:pointer-events-none disabled:opacity-50 font-sans whitespace-nowrap cursor-pointer',
+    'inline-flex cursor-pointer items-center justify-center rounded-md bg-background font-sans whitespace-nowrap transition-colors duration-300 disabled:pointer-events-none disabled:opacity-50',
     {
         variants: {
             variant: {
-                normal: 'text-foreground border border-border-subtle hover:bg-bg-secondary hover:border-primary/40',
+                normal: 'border border-border-subtle text-foreground hover:border-primary/40 hover:bg-bg-secondary',
                 primary:
                     'bg-primary text-foreground-inverse hover:bg-primary-hover',
                 danger: 'bg-danger text-white hover:bg-danger-hover',
@@ -29,8 +29,8 @@ export const buttonVariants = cva(
                     'bg-caution text-foreground-inverse hover:bg-caution-hover',
                 success:
                     'bg-success text-foreground-inverse hover:bg-success-hover',
-                nav: 'bg-bg-secondary text-foreground w-12 h-12 p-0 rounded-[1.2rem] transition-all duration-200 hover:bg-primary hover:text-foreground-inverse hover:rounded-[0.75rem]',
-                ghost: 'bg-transparent text-foreground hover:bg-bg-subtle border-none shadow-none',
+                nav: 'h-12 w-12 rounded-[1.2rem] bg-bg-secondary p-0 text-foreground transition-all duration-200 hover:rounded-[0.75rem] hover:bg-primary hover:text-foreground-inverse',
+                ghost: 'border-none bg-transparent text-foreground shadow-none hover:bg-bg-subtle',
             },
             size: {
                 sm: 'px-2 py-1 text-xs',
@@ -130,7 +130,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
             >
                 <span
                     className={cn(
-                        'flex items-center justify-center gap-inherit',
+                        'gap-inherit flex items-center justify-center',
                         loading ? 'opacity-0' : undefined,
                         innerClassName,
                     )}

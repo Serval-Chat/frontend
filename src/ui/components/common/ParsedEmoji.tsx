@@ -28,8 +28,8 @@ export const ParsedEmoji: React.FC<ParsedEmojiProps> = ({
                 className={
                     className ||
                     cn(
-                        'inline-block bg-white/5 animate-pulse rounded',
-                        isLarge ? 'w-10 h-10' : 'w-5 h-5',
+                        'inline-block animate-pulse rounded bg-white/5',
+                        isLarge ? 'h-10 w-10' : 'h-5 w-5',
                     )
                 }
                 style={style}
@@ -48,7 +48,7 @@ export const ParsedEmoji: React.FC<ParsedEmojiProps> = ({
             alt={emoji.name || 'emoji'}
             className={cn(
                 'inline-block align-text-bottom',
-                isLarge ? 'w-10 h-10' : 'w-5 h-5',
+                isLarge ? 'h-10 w-10' : 'h-5 w-5',
                 className,
             )}
             src={emojiUrl || ''}

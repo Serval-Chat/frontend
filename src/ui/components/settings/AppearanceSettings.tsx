@@ -173,7 +173,7 @@ const AppearanceSettingsForm: React.FC<AppearanceSettingsFormProps> = ({
 
     return (
         <div className="max-w-3xl pb-20">
-            <div className="flex items-center justify-between mb-6">
+            <div className="mb-6 flex items-center justify-between">
                 <Heading level={3}>Appearance</Heading>
                 <Button
                     size="sm"
@@ -186,14 +186,14 @@ const AppearanceSettingsForm: React.FC<AppearanceSettingsFormProps> = ({
 
             <div className="grid grid-cols-1 gap-8">
                 {/* Preview Section */}
-                <div className="bg-[var(--color-bg-subtle)] p-6 rounded-lg text-center">
+                <div className="rounded-lg bg-bg-subtle p-6 text-center">
                     <Heading
-                        className="mb-4 text-sm font-bold text-[var(--color-muted-foreground)] uppercase"
+                        className="mb-4 text-sm font-bold text-muted-foreground uppercase"
                         level={4}
                     >
                         Preview
                     </Heading>
-                    <div className="flex justify-center items-center py-4 bg-[var(--color-bg-secondary)] rounded border border-[var(--color-border-subtle)]">
+                    <div className="flex items-center justify-center rounded border border-border-subtle bg-bg-secondary py-4">
                         <StyledUserName
                             className="text-3xl font-bold"
                             disableCustomFonts={false}
@@ -215,11 +215,11 @@ const AppearanceSettingsForm: React.FC<AppearanceSettingsFormProps> = ({
                     <div className="space-y-4">
                         <div className="flex flex-col gap-2">
                             <Heading level={4}>Username Font</Heading>
-                            <span className="text-sm text-[var(--color-muted-foreground)]">
+                            <span className="text-sm text-muted-foreground">
                                 Select a custom font for your username alias
                                 globally.
                             </span>
-                            <div className="max-w-xs z-[var(--z-index-dropdown)] relative">
+                            <div className="relative z-[var(--z-index-dropdown)] max-w-xs">
                                 <DropdownWithSearch
                                     allowClear={false}
                                     options={FONT_OPTIONS.map((f) => ({
@@ -268,20 +268,20 @@ const AppearanceSettingsForm: React.FC<AppearanceSettingsFormProps> = ({
                         </div>
 
                         {gradientEnabled && (
-                            <div className="p-4 border border-[var(--color-border-subtle)] rounded-lg bg-[var(--color-bg-subtle)] space-y-4">
+                            <div className="space-y-4 rounded-lg border border-border-subtle bg-bg-subtle p-4">
                                 <div>
-                                    <span className="block text-sm font-medium text-[var(--color-muted-foreground)] mb-2">
+                                    <span className="mb-2 block text-sm font-medium text-muted-foreground">
                                         Colors (Max 2)
                                     </span>
-                                    <div className="flex flex-wrap gap-2 mb-2">
+                                    <div className="mb-2 flex flex-wrap gap-2">
                                         {gradientColors.map(
                                             (colorItem, index) => (
                                                 <div
-                                                    className="relative group"
+                                                    className="group relative"
                                                     key={colorItem.id}
                                                 >
                                                     <Button
-                                                        className="w-10 h-10 rounded-full border-2 border-[var(--color-border)] shadow-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] p-0 min-w-0"
+                                                        className="border-border h-10 w-10 min-w-0 rounded-full border-2 p-0 shadow-sm focus:ring-2 focus:ring-primary focus:outline-none"
                                                         style={{
                                                             backgroundColor:
                                                                 colorItem.value,
@@ -307,7 +307,7 @@ const AppearanceSettingsForm: React.FC<AppearanceSettingsFormProps> = ({
                                                         </span>
                                                     </Button>
                                                     <Button
-                                                        className="absolute -top-1 -right-1 bg-[var(--color-danger)] text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity w-4 h-4 min-w-0 border-none shadow-none"
+                                                        className="absolute -top-1 -right-1 h-4 w-4 min-w-0 rounded-full border-none bg-danger p-0.5 text-white opacity-0 shadow-none transition-opacity group-hover:opacity-100"
                                                         size="sm"
                                                         variant="primary"
                                                         onClick={() =>
@@ -348,7 +348,7 @@ const AppearanceSettingsForm: React.FC<AppearanceSettingsFormProps> = ({
                                                                             );
                                                                     }}
                                                                 />
-                                                                <div className="relative shadow-xl rounded-lg overflow-hidden">
+                                                                <div className="relative overflow-hidden rounded-lg shadow-xl">
                                                                     <HexColorPicker
                                                                         color={
                                                                             colorItem.value
@@ -370,7 +370,7 @@ const AppearanceSettingsForm: React.FC<AppearanceSettingsFormProps> = ({
                                         )}
                                         {gradientColors.length < 2 && (
                                             <Button
-                                                className="w-10 h-10 rounded-full border-2 border-[var(--color-border)] border-dashed flex items-center justify-center text-[var(--color-muted-foreground)] hover:text-[var(--color-primary)] hover:border-[var(--color-primary)] transition-colors p-0 min-w-0 shadow-none"
+                                                className="border-border flex h-10 w-10 min-w-0 items-center justify-center rounded-full border-2 border-dashed p-0 text-muted-foreground shadow-none transition-colors hover:border-primary hover:text-primary"
                                                 variant="ghost"
                                                 onClick={addGradientColor}
                                             >
@@ -382,12 +382,12 @@ const AppearanceSettingsForm: React.FC<AppearanceSettingsFormProps> = ({
 
                                 <div className="grid grid-cols-1 gap-4">
                                     <div>
-                                        <span className="block text-sm font-medium text-[var(--color-muted-foreground)] mb-2">
+                                        <span className="mb-2 block text-sm font-medium text-muted-foreground">
                                             Angle (Deg)
                                         </span>
                                         <div className="flex items-center gap-4">
                                             <input
-                                                className="flex-1 accent-[var(--color-primary)] h-1.5 bg-[var(--color-bg-secondary)] rounded-lg appearance-none cursor-pointer"
+                                                className="h-1.5 flex-1 cursor-pointer appearance-none rounded-lg bg-bg-secondary accent-primary"
                                                 max={360}
                                                 min={0}
                                                 type="range"
@@ -398,7 +398,7 @@ const AppearanceSettingsForm: React.FC<AppearanceSettingsFormProps> = ({
                                                     )
                                                 }
                                             />
-                                            <span className="text-sm font-medium text-[var(--color-foreground)] min-w-[3ch]">
+                                            <span className="min-w-[3ch] text-sm font-medium text-foreground">
                                                 {gradientAngle}°
                                             </span>
                                         </div>

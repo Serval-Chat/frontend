@@ -68,7 +68,7 @@ export const AdminErrorDisplay = ({
     return (
         <div
             className={cn(
-                'flex flex-col items-center justify-center p-8 text-center animate-in fade-in zoom-in-95 duration-500',
+                'animate-in fade-in zoom-in-95 flex flex-col items-center justify-center p-8 text-center duration-500',
                 className,
             )}
         >
@@ -92,8 +92,8 @@ export const AdminErrorDisplay = ({
                     {action}
                 </Text>
 
-                <div className="mt-6 inline-block rounded-lg bg-bg-secondary/50 px-4 py-2 border border-border-subtle">
-                    <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mr-2">
+                <div className="mt-6 inline-block rounded-lg border border-border-subtle bg-bg-secondary/50 px-4 py-2">
+                    <span className="mr-2 text-[10px] font-black tracking-widest text-muted-foreground uppercase">
                         Error Details:
                     </span>
                     <span className="font-mono text-xs text-danger">
@@ -105,7 +105,7 @@ export const AdminErrorDisplay = ({
 
             {reset && (
                 <Button
-                    className="mt-8 px-6 py-2.5 rounded-xl transition-all hover:scale-105 active:scale-95"
+                    className="mt-8 rounded-xl px-6 py-2.5 transition-all hover:scale-105 active:scale-95"
                     variant="primary"
                     onClick={reset}
                 >

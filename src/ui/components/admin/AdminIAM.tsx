@@ -121,9 +121,9 @@ const PermissionEditor = ({
         >
             <div className="space-y-6">
                 {/* Quick Roles */}
-                <div className="flex gap-2 p-1 bg-bg-secondary rounded-lg">
+                <div className="flex gap-2 rounded-lg bg-bg-secondary p-1">
                     <Button
-                        className="flex-1 py-1 text-xs font-bold rounded-md transition-colors"
+                        className="flex-1 rounded-md py-1 text-xs font-bold transition-colors"
                         disabled={!canEdit}
                         variant="ghost"
                         onClick={() => setRole('user')}
@@ -131,7 +131,7 @@ const PermissionEditor = ({
                         User
                     </Button>
                     <Button
-                        className="flex-1 py-1 text-xs font-bold rounded-md transition-colors text-caution"
+                        className="flex-1 rounded-md py-1 text-xs font-bold text-caution transition-colors"
                         disabled={!canEdit}
                         variant="ghost"
                         onClick={() => setRole('moderator')}
@@ -139,7 +139,7 @@ const PermissionEditor = ({
                         Moderator
                     </Button>
                     <Button
-                        className="flex-1 py-1 text-xs font-bold rounded-md transition-colors text-danger"
+                        className="flex-1 rounded-md py-1 text-xs font-bold text-danger transition-colors"
                         disabled={!canEdit}
                         variant="ghost"
                         onClick={() => setRole('admin')}
@@ -148,11 +148,11 @@ const PermissionEditor = ({
                     </Button>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-[60vh] overflow-y-auto pr-2">
+                <div className="grid max-h-[60vh] grid-cols-1 gap-3 overflow-y-auto pr-2 md:grid-cols-2">
                     {PERMISSION_KEYS.map((key) => (
                         <div
                             className={cn(
-                                'flex items-center justify-between p-3 rounded-xl border transition-all',
+                                'flex items-center justify-between rounded-xl border p-3 transition-all',
                                 permissions[key]
                                     ? 'border-primary/50 bg-primary/5'
                                     : 'border-border-subtle bg-bg-secondary/30',
@@ -179,12 +179,12 @@ const PermissionEditor = ({
                     ))}
                 </div>
 
-                <div className="flex justify-end gap-3 pt-4 border-t border-border-subtle">
+                <div className="flex justify-end gap-3 border-t border-border-subtle pt-4">
                     <Button variant="ghost" onClick={onClose}>
                         Cancel
                     </Button>
                     {!canEdit && (
-                        <span className="text-xs text-danger self-center mr-2">
+                        <span className="mr-2 self-center text-xs text-danger">
                             You do not have permission to edit users.
                         </span>
                     )}
@@ -202,9 +202,9 @@ const PermissionEditor = ({
 
             {/* Confirmation Modal */}
             {showConfirm && (
-                <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
-                    <div className="w-full max-w-md bg-background border border-border-subtle rounded-2xl p-6 shadow-2xl scale-100 animate-in zoom-in-95 duration-200">
-                        <div className="flex items-center gap-3 mb-4 text-warning">
+                <div className="animate-in fade-in fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm duration-200">
+                    <div className="animate-in zoom-in-95 w-full max-w-md scale-100 rounded-2xl border border-border-subtle bg-background p-6 shadow-2xl duration-200">
+                        <div className="text-warning mb-4 flex items-center gap-3">
                             <AlertTriangle size={24} />
                             <Heading level={3}>Confirm Changes</Heading>
                         </div>
@@ -216,7 +216,7 @@ const PermissionEditor = ({
                             ?
                             {permissions.adminAccess &&
                                 !user.permissions.adminAccess && (
-                                    <span className="block mt-2 text-danger font-bold">
+                                    <span className="mt-2 block font-bold text-danger">
                                         Warning: You are granting Super Admin
                                         access!
                                     </span>
@@ -303,7 +303,7 @@ export const AdminIAM = ({
     );
 
     return (
-        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+        <div className="animate-in fade-in slide-in-from-bottom-4 space-y-6 duration-700">
             {/* Header */}
             <div className="flex flex-col gap-1">
                 <Heading
@@ -323,7 +323,7 @@ export const AdminIAM = ({
             <div className="flex items-center gap-4 rounded-2xl border border-border-subtle bg-bg-subtle p-4">
                 <div className="relative flex-1">
                     <Search
-                        className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                        className="absolute top-1/2 left-3 -translate-y-1/2 text-muted-foreground"
                         size={16}
                     />
                     <Input
@@ -341,7 +341,7 @@ export const AdminIAM = ({
             {/* Users List */}
             <Table>
                 <TableHeader>
-                    <TableRow className="bg-bg-secondary/50 border-b border-border-subtle">
+                    <TableRow className="border-b border-border-subtle bg-bg-secondary/50">
                         <TableHead>User</TableHead>
                         <TableHead>Access Level</TableHead>
                         <TableHead>Joined</TableHead>
@@ -363,12 +363,12 @@ export const AdminIAM = ({
                                 <TableCell>
                                     <div className="flex items-center gap-3 overflow-hidden">
                                         <UserProfilePicture
-                                            className="w-10 h-10 rounded-full ring-2 ring-border-subtle"
+                                            className="h-10 w-10 rounded-full ring-2 ring-border-subtle"
                                             src={user.profilePicture}
                                             username={user.username}
                                         />
                                         <div className="flex flex-col truncate">
-                                            <span className="font-bold truncate text-foreground">
+                                            <span className="truncate font-bold text-foreground">
                                                 {user.displayName ||
                                                     user.username}
                                             </span>
@@ -378,7 +378,7 @@ export const AdminIAM = ({
                                         </div>
                                         {user.permissions.adminAccess && (
                                             <ShieldAlert
-                                                className="text-danger shrink-0 ml-1"
+                                                className="ml-1 shrink-0 text-danger"
                                                 size={14}
                                             />
                                         )}
@@ -388,7 +388,7 @@ export const AdminIAM = ({
                                 <TableCell>
                                     <div
                                         className={cn(
-                                            'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider',
+                                            'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-bold tracking-wider uppercase',
                                             user.permissions.adminAccess
                                                 ? 'bg-danger/10 text-danger'
                                                 : Object.values(
@@ -441,7 +441,7 @@ export const AdminIAM = ({
                     ) : (
                         <TableRow>
                             <TableCell align="center" colSpan={4}>
-                                <div className="flex flex-col items-center justify-center py-16 text-muted-foreground text-center">
+                                <div className="flex flex-col items-center justify-center py-16 text-center text-muted-foreground">
                                     <UserIcon
                                         className="mb-4 opacity-20"
                                         size={48}
@@ -465,7 +465,7 @@ export const AdminIAM = ({
 
             {/* Pagination Controls */}
             {!isLoading && users && (users.length > 0 || page > 0) && (
-                <div className="flex items-center justify-between px-6 py-4 border border-border-subtle bg-bg-subtle rounded-2xl">
+                <div className="flex items-center justify-between rounded-2xl border border-border-subtle bg-bg-subtle px-6 py-4">
                     <Button
                         disabled={page === 0}
                         variant="ghost"

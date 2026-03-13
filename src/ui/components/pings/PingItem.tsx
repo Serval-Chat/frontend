@@ -41,8 +41,8 @@ export const PingItem: React.FC<PingItemProps> = ({ ping, onClick }) => {
     return (
         <div
             className={cn(
-                'group flex flex-col gap-0.5 p-3 cursor-pointer select-none border-b border-[var(--color-border-subtle)] last:border-0',
-                'bg-[var(--color-background)] hover:bg-[var(--color-bg-subtle)]',
+                'group flex cursor-pointer flex-col gap-0.5 border-b border-border-subtle p-3 select-none last:border-0',
+                'bg-background hover:bg-bg-subtle',
             )}
             role="button"
             tabIndex={0}
@@ -55,11 +55,11 @@ export const PingItem: React.FC<PingItemProps> = ({ ping, onClick }) => {
             }}
         >
             <div className="flex items-center justify-between gap-2">
-                <div className="flex items-center gap-1.5 min-w-0">
+                <div className="flex min-w-0 items-center gap-1.5">
                     <Text className="truncate" size="sm" weight="bold">
                         {ping.sender}
                     </Text>
-                    <span className="text-[10px] text-[var(--color-muted-foreground)] uppercase font-bold px-1 rounded bg-[var(--color-bg-secondary)]">
+                    <span className="rounded bg-bg-secondary px-1 text-[10px] font-bold text-muted-foreground uppercase">
                         {ping.type}
                     </span>
                     <Text className="ml-1 shrink-0" size="2xs" variant="muted">
@@ -68,7 +68,7 @@ export const PingItem: React.FC<PingItemProps> = ({ ping, onClick }) => {
                 </div>
 
                 <IconButton
-                    className="opacity-0 group-hover:opacity-100 transition-opacity shrink-0 w-6 h-6 p-1 text-[var(--color-muted-foreground)] hover:text-[var(--color-danger)] hover:bg-[var(--color-danger-muted)]"
+                    className="h-6 w-6 shrink-0 p-1 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 hover:bg-danger-muted hover:text-danger"
                     icon={X}
                     iconSize={14}
                     title="Dismiss"
@@ -76,13 +76,13 @@ export const PingItem: React.FC<PingItemProps> = ({ ping, onClick }) => {
                 />
             </div>
 
-            <div className="flex items-center gap-1 text-[10px] text-[var(--color-primary)] font-medium truncate mb-1">
+            <div className="mb-1 flex items-center gap-1 truncate text-[10px] font-medium text-primary">
                 {serverName && <span>{serverName}</span>}
                 {serverName && channelName && <span>/</span>}
                 {channelName && <span>#{channelName}</span>}
             </div>
 
-            <div className="text-sm text-[var(--color-foreground)] line-clamp-3 overflow-hidden opacity-90">
+            <div className="line-clamp-3 overflow-hidden text-sm text-foreground opacity-90">
                 <MessageContent text={snippet} />
             </div>
         </div>

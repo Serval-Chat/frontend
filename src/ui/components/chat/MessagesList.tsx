@@ -145,7 +145,7 @@ export const MessagesList: React.FC<MessagesListProps> = ({
 
     return (
         <Box
-            className="flex-1 overflow-y-auto min-h-0 relative custom-scrollbar flex flex-col pt-4"
+            className="custom-scrollbar relative flex min-h-0 flex-1 flex-col overflow-y-auto pt-4"
             ref={scrollContainerRef}
             onScroll={handleScroll}
         >
@@ -155,7 +155,7 @@ export const MessagesList: React.FC<MessagesListProps> = ({
                         <LoadingSpinner size="sm" />
                     ) : (
                         <Button
-                            className="bg-transparent border-none shadow-none text-xs text-foreground-muted hover:text-foreground hover:bg-bg-subtle transition-colors"
+                            className="text-foreground-muted border-none bg-transparent text-xs shadow-none transition-colors hover:bg-bg-subtle hover:text-foreground"
                             size="sm"
                             variant="ghost"
                             onClick={onLoadMore}
@@ -187,7 +187,7 @@ export const MessagesList: React.FC<MessagesListProps> = ({
                         <LoadingSpinner size="sm" />
                     ) : (
                         <Button
-                            className="bg-transparent border-none shadow-none text-xs text-foreground-muted hover:text-foreground hover:bg-bg-subtle transition-colors"
+                            className="text-foreground-muted border-none bg-transparent text-xs shadow-none transition-colors hover:bg-bg-subtle hover:text-foreground"
                             size="sm"
                             variant="ghost"
                             onClick={onLoadMoreNewer}

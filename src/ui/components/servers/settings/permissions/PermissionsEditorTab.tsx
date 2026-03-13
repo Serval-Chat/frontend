@@ -210,9 +210,9 @@ export const PermissionsEditorTab: React.FC<PermissionsEditorTabProps> = ({
             <EditorPanel isMobileListOpen={isMobileListOpen}>
                 {/* Mobile Back Header */}
                 {!isMobileListOpen && (
-                    <div className="md:hidden items-center flex sticky top-0 z-20 bg-[var(--color-background)] border-b border-[var(--color-border-subtle)] px-4 py-4 shrink-0 w-full mb-4 mx-[-2rem] px-[2rem]">
+                    <div className="sticky top-0 z-20 mx-[-2rem] mb-4 flex w-full shrink-0 items-center border-b border-border-subtle bg-background px-4 px-[2rem] py-4 md:hidden">
                         <button
-                            className="flex items-center gap-1 text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] font-medium transition-colors"
+                            className="flex items-center gap-1 font-medium text-muted-foreground transition-colors hover:text-foreground"
                             onClick={() => setIsMobileListOpen(true)}
                         >
                             <ChevronLeft size={20} />
@@ -243,7 +243,7 @@ export const PermissionsEditorTab: React.FC<PermissionsEditorTabProps> = ({
                             {PERMISSION_GROUPS.map((group) => (
                                 <section key={group.label}>
                                     <SectionLabel>{group.label}</SectionLabel>
-                                    <div className="bg-[var(--color-bg-secondary)] rounded-md border border-[var(--color-border-subtle)] overflow-hidden px-4">
+                                    <div className="overflow-hidden rounded-md border border-border-subtle bg-bg-secondary px-4">
                                         {group.permissions.map((perm) => (
                                             <PermissionOverrideSwitch
                                                 description={perm.description}

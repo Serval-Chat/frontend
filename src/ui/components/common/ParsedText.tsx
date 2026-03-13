@@ -351,7 +351,7 @@ export const ParsedText: React.FC<ParsedTextProps> = ({
                         return (
                             <Box
                                 as="span"
-                                className="inline-flex items-baseline px-1.5 py-[4px] rounded transition-opacity cursor-pointer select-none font-medium text-white shadow-sm hover:opacity-90 bg-primary"
+                                className="inline-flex cursor-pointer items-baseline rounded bg-primary px-1.5 py-[4px] font-medium text-white shadow-sm transition-opacity select-none hover:opacity-90"
                                 key={idx}
                             >
                                 <Text
@@ -366,7 +366,7 @@ export const ParsedText: React.FC<ParsedTextProps> = ({
                     case 'unordered_list':
                         return (
                             <Box
-                                className="flex gap-2 items-baseline"
+                                className="flex items-baseline gap-2"
                                 key={idx}
                                 style={{
                                     paddingLeft: `${(node.depth ?? 0) * 1.5}rem`,
@@ -375,7 +375,7 @@ export const ParsedText: React.FC<ParsedTextProps> = ({
                                 <Text size={size} variant="muted" wrap={wrap}>
                                     •
                                 </Text>
-                                <Box className="flex-1 min-w-0">
+                                <Box className="min-w-0 flex-1">
                                     {typeof node.content === 'string' ? (
                                         <Text key={idx} size={size} wrap={wrap}>
                                             {node.content}
@@ -394,7 +394,7 @@ export const ParsedText: React.FC<ParsedTextProps> = ({
                     case 'ordered_list':
                         return (
                             <Box
-                                className="flex gap-1.5 items-baseline"
+                                className="flex items-baseline gap-1.5"
                                 key={idx}
                                 style={{
                                     paddingLeft: `${(node.depth ?? 0) * 1.5}rem`,
@@ -423,7 +423,7 @@ export const ParsedText: React.FC<ParsedTextProps> = ({
                         return (
                             <Table fullWidth={false} key={idx}>
                                 <TableHeader>
-                                    <TableRow className="bg-bg-secondary/50 border-b border-border-subtle">
+                                    <TableRow className="border-b border-border-subtle bg-bg-secondary/50">
                                         {node.headers.map(
                                             (header, headerIdx) => (
                                                 <TableHead key={headerIdx}>
@@ -486,7 +486,7 @@ export const ParsedText: React.FC<ParsedTextProps> = ({
                         return (
                             <div
                                 className={cn(
-                                    'pl-4 border-l-4 border-border-subtle italic',
+                                    'border-l-4 border-border-subtle pl-4 italic',
                                     !isNested && 'my-2',
                                 )}
                                 key={idx}

@@ -92,7 +92,7 @@ export const RichInputPreview: React.FC<RichInputPreviewProps> = ({
     return (
         <div
             aria-hidden
-            className="absolute inset-0 pointer-events-none overflow-hidden"
+            className="pointer-events-none absolute inset-0 overflow-hidden"
             style={{
                 fontFamily: 'inherit',
                 fontSize: '0.875rem',
@@ -160,7 +160,7 @@ function renderNode(
                 : `${node.userId}`;
             return (
                 <span
-                    className="inline-flex items-baseline px-1.5 rounded bg-primary/15 text-primary font-medium"
+                    className="inline-flex items-baseline rounded bg-primary/15 px-1.5 font-medium text-primary"
                     key={idx}
                     style={{ verticalAlign: 'baseline' }}
                 >
@@ -175,7 +175,7 @@ function renderNode(
             const style = getRoleStyle(role);
             return (
                 <span
-                    className="inline-flex items-center gap-0.5 whitespace-nowrap px-1 rounded font-medium text-white shadow-sm"
+                    className="inline-flex items-center gap-0.5 rounded px-1 font-medium whitespace-nowrap text-white shadow-sm"
                     key={idx}
                     style={{ ...style, verticalAlign: 'baseline' }}
                 >
@@ -191,7 +191,7 @@ function renderNode(
         case 'everyone':
             return (
                 <span
-                    className="inline-flex items-baseline px-1.5 rounded bg-primary font-medium text-white shadow-sm"
+                    className="inline-flex items-baseline rounded bg-primary px-1.5 font-medium text-white shadow-sm"
                     key={idx}
                     style={{ verticalAlign: 'baseline' }}
                 >
@@ -229,7 +229,7 @@ function renderNode(
             const name = channel ? channel.name : node.channelId;
             return (
                 <span
-                    className="inline-flex items-center gap-0.5 whitespace-nowrap px-1 rounded bg-primary/15 text-primary font-medium"
+                    className="inline-flex items-center gap-0.5 rounded bg-primary/15 px-1 font-medium whitespace-nowrap text-primary"
                     key={idx}
                     style={{ verticalAlign: 'baseline' }}
                 >
@@ -242,19 +242,31 @@ function renderNode(
             );
         }
 
+        case 'link':
+        case 'file':
+        case 'bold':
+        case 'blockquote':
+        case 'table':
+        case 'h1':
+        case 'h2':
+        case 'h3':
+        case 'mermaid':
+        case 'italic':
+        case 'underline':
+        case 'bold_italic':
+        case 'subtext':
+        case 'spoiler':
+        case 'inline_code':
+        case 'code_block':
+        case 'invite':
+        case 'ordered_list':
+        case 'latex':
+        case 'inline_latex':
+        case 'thematic_break':
+        case 'strikethrough':
+        case 'admonition':
+        case 'unordered_list':
         default:
-            // For any unrecognized node types (shouldn't happen with our feature set),
-            // fall back to rendering the raw content if available
-            if ('content' in node && typeof node.content === 'string') {
-                return (
-                    <span
-                        key={idx}
-                        style={{ color: 'var(--color-foreground)' }}
-                    >
-                        {node.content}
-                    </span>
-                );
-            }
             return null;
     }
 }

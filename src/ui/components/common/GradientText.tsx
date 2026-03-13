@@ -29,7 +29,7 @@ export const GradientText: React.FC<GradientTextProps> = ({
 
     return (
         <Box
-            className={cn('font-bold text-xl w-fit', className)}
+            className={cn('w-fit text-xl font-bold', className)}
             style={{
                 background: background,
                 backgroundClip: 'text',

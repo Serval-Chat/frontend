@@ -50,7 +50,7 @@ export const FileEmbed: React.FC<FileEmbedProps> = ({ url }) => {
 
     if (isLoading) {
         return (
-            <Box className="w-fit min-w-[200px] my-2 flex items-center gap-2 rounded-lg bg-bg-secondary p-4">
+            <Box className="my-2 flex w-fit min-w-[200px] items-center gap-2 rounded-lg bg-bg-secondary p-4">
                 <LoadingSpinner size="sm" />
                 <Text size="sm" variant="muted">
                     Fetching file info...
@@ -86,7 +86,7 @@ export const FileEmbed: React.FC<FileEmbedProps> = ({ url }) => {
         return (
             <>
                 <Box
-                    className="my-2 w-fit rounded-lg bg-bg-secondary relative cursor-pointer"
+                    className="relative my-2 w-fit cursor-pointer rounded-lg bg-bg-secondary"
                     onClick={() => {
                         if (isSpoiler && !isRevealed) {
                             setIsRevealed(true);
@@ -97,12 +97,12 @@ export const FileEmbed: React.FC<FileEmbedProps> = ({ url }) => {
                 >
                     <img
                         alt={displayName || 'File content'}
-                        className={`block max-w-[min(550px,100%)] max-h-[min(450px,70vh)] w-auto h-auto object-contain rounded-lg transition-all duration-300 ${isSpoiler && !isRevealed ? 'blur-2xl' : ''}`}
+                        className={`block h-auto max-h-[min(450px,70vh)] w-auto max-w-[min(550px,100%)] rounded-lg object-contain transition-all duration-300 ${isSpoiler && !isRevealed ? 'blur-2xl' : ''}`}
                         src={displayUrl!}
                     />
                     {isSpoiler && !isRevealed && (
                         <div className="absolute inset-0 flex items-center justify-center bg-black/20 backdrop-blur-sm">
-                            <div className="bg-black/60 px-3 py-1.5 rounded-full border border-white/20 flex items-center gap-2">
+                            <div className="flex items-center gap-2 rounded-full border border-white/20 bg-black/60 px-3 py-1.5">
                                 <EyeOff size={16} />
                                 <Text
                                     className="text-white"
@@ -135,12 +135,12 @@ export const FileEmbed: React.FC<FileEmbedProps> = ({ url }) => {
 
         return (
             <Box
-                className="my-2 max-w-[min(550px,100%)] max-h-[min(450px,70vh)] w-fit overflow-hidden rounded-lg bg-bg-secondary relative"
+                className="relative my-2 max-h-[min(450px,70vh)] w-fit max-w-[min(550px,100%)] overflow-hidden rounded-lg bg-bg-secondary"
                 onClick={() => isSpoiler && !isRevealed && setIsRevealed(true)}
             >
                 {isSpoiler && !isRevealed ? (
-                    <div className="w-80 h-48 flex items-center justify-center bg-bg-secondary relative cursor-pointer">
-                        <div className="bg-black/60 px-3 py-1.5 rounded-full border border-white/20 flex items-center gap-2">
+                    <div className="relative flex h-48 w-80 cursor-pointer items-center justify-center bg-bg-secondary">
+                        <div className="flex items-center gap-2 rounded-full border border-white/20 bg-black/60 px-3 py-1.5">
                             <EyeOff size={16} />
                             <Text
                                 className="text-white"
@@ -154,7 +154,7 @@ export const FileEmbed: React.FC<FileEmbedProps> = ({ url }) => {
                 ) : (
                     <video
                         controls
-                        className="h-auto max-h-inherit w-auto max-w-full"
+                        className="max-h-inherit h-auto w-auto max-w-full"
                         src={displayUrl!}
                     >
                         <track kind="captions" />
@@ -202,10 +202,10 @@ export const FileEmbed: React.FC<FileEmbedProps> = ({ url }) => {
     // Generic file rendering
     return (
         <Box className="my-2 flex w-[300px] items-center gap-3 rounded-lg bg-bg-secondary p-3 transition-all">
-            <div className="bg-primary/10 text-primary flex h-10 w-10 items-center justify-center rounded-lg">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
                 <FileIcon size={20} />
             </div>
-            <div className="flex flex-1 flex-col min-w-0">
+            <div className="flex min-w-0 flex-1 flex-col">
                 <Text className="truncate" size="sm" weight="bold">
                     {displayName}
                 </Text>
@@ -248,10 +248,10 @@ const CodeEmbed: React.FC<{
     if (isTooLarge) {
         return (
             <Box className="my-2 flex w-[300px] items-center gap-3 rounded-lg bg-bg-secondary p-3">
-                <div className="bg-primary/10 text-primary flex h-10 w-10 items-center justify-center rounded-lg">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
                     <Code size={20} />
                 </div>
-                <div className="flex flex-1 flex-col min-w-0">
+                <div className="flex min-w-0 flex-1 flex-col">
                     <Text className="truncate" size="sm" weight="bold">
                         {filename}
                     </Text>
@@ -273,7 +273,7 @@ const CodeEmbed: React.FC<{
 
     if (isLoading) {
         return (
-            <Box className="w-fit min-w-[200px] my-2 flex items-center gap-2 rounded-lg bg-bg-secondary p-4">
+            <Box className="my-2 flex w-fit min-w-[200px] items-center gap-2 rounded-lg bg-bg-secondary p-4">
                 <LoadingSpinner size="sm" />
                 <Text size="sm" variant="muted">
                     Loading content...
@@ -292,9 +292,9 @@ const CodeEmbed: React.FC<{
 
     return (
         <>
-            <Box className="my-2 max-w-[600px] overflow-hidden rounded-lg bg-bg-secondary border border-border-subtle/50">
-                <div className="flex items-center justify-between px-3 py-2 bg-bg-primary/50 border-b border-border-subtle/50">
-                    <div className="flex items-center gap-2 min-w-0">
+            <Box className="my-2 max-w-[600px] overflow-hidden rounded-lg border border-border-subtle/50 bg-bg-secondary">
+                <div className="bg-bg-primary/50 flex items-center justify-between border-b border-border-subtle/50 px-3 py-2">
+                    <div className="flex min-w-0 items-center gap-2">
                         <Code className="text-muted-foreground" size={14} />
                         <Text
                             className="truncate text-foreground/80"
@@ -331,21 +331,21 @@ const CodeEmbed: React.FC<{
                 </div>
 
                 <div className="relative">
-                    <pre className="p-4 overflow-x-auto text-xs font-mono bg-bg-secondary/30 scrollbar-none">
+                    <pre className="scrollbar-none overflow-x-auto bg-bg-secondary/30 p-4 font-mono text-xs">
                         <code className="text-foreground/90">
                             {previewContent || 'No content'}
                         </code>
                     </pre>
 
                     {isTruncated && (
-                        <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-bg-secondary to-transparent pointer-events-none" />
+                        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-bg-secondary to-transparent" />
                     )}
                 </div>
 
                 {isTruncated && (
-                    <div className="px-3 py-2 bg-bg-primary/30 border-t border-border-subtle/30 flex justify-center">
+                    <div className="bg-bg-primary/30 flex justify-center border-t border-border-subtle/30 px-3 py-2">
                         <Button
-                            className="bg-transparent border-none shadow-none text-[11px] font-bold text-primary hover:text-primary-hover transition-colors flex items-center gap-1.5"
+                            className="flex items-center gap-1.5 border-none bg-transparent text-[11px] font-bold text-primary shadow-none transition-colors hover:text-primary-hover"
                             size="sm"
                             variant="ghost"
                             onClick={() => setShowFull(true)}

@@ -77,7 +77,7 @@ export const CreateCategoryModal: React.FC<CreateCategoryModalProps> = ({
                     </Text>
                 )}
 
-                <div className="flex gap-3 justify-end pt-2">
+                <div className="flex justify-end gap-3 pt-2">
                     <Button
                         disabled={isLoading}
                         variant="ghost"

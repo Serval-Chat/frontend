@@ -28,10 +28,10 @@ export const SettingsSidebarLayout: React.FC<SettingsSidebarLayoutProps> = ({
     const visibleSections = sections.filter((s) => !s.hidden);
 
     return (
-        <div className="h-full w-full md:w-[240px] bg-[var(--color-bg-secondary)] border-r border-[var(--color-border-subtle)] p-4 overflow-y-auto shrink-0 flex flex-col gap-4">
+        <div className="flex h-full w-full shrink-0 flex-col gap-4 overflow-y-auto border-r border-border-subtle bg-bg-secondary p-4 md:w-[240px]">
             <div>
                 <Text
-                    className="px-3 mb-2 text-[var(--color-muted-foreground)] uppercase tracking-wider"
+                    className="mb-2 px-3 tracking-wider text-muted-foreground uppercase"
                     size="xs"
                     weight="bold"
                 >
@@ -45,12 +45,12 @@ export const SettingsSidebarLayout: React.FC<SettingsSidebarLayoutProps> = ({
                         return (
                             <Button
                                 className={cn(
-                                    'justify-start w-full px-3 py-2 text-sm transition-all duration-200',
+                                    'w-full justify-start px-3 py-2 text-sm transition-all duration-200',
                                     isActive
-                                        ? 'bg-[var(--color-bg-subtle)] text-[var(--color-foreground)] font-semibold border-transparent'
-                                        : 'text-[var(--color-muted-foreground)] hover:bg-[var(--color-bg-subtle)] hover:text-[var(--color-foreground)]',
+                                        ? 'border-transparent bg-bg-subtle font-semibold text-foreground'
+                                        : 'text-muted-foreground hover:bg-bg-subtle hover:text-foreground',
                                     section.disabled &&
-                                        'opacity-50 cursor-not-allowed',
+                                        'cursor-not-allowed opacity-50',
                                 )}
                                 disabled={section.disabled}
                                 key={section.id}

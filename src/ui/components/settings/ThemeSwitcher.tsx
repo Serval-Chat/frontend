@@ -29,13 +29,13 @@ export const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({
             {THEMES.map((t) => (
                 <Button
                     className={cn(
-                        'group flex items-center gap-4 p-6 rounded-2xl border-2 transition-all shadow-none justify-start',
+                        'group flex items-center justify-start gap-4 rounded-2xl border-2 p-6 shadow-none transition-all',
                         `theme-${t.id}`,
                         theme === t.id
-                            ? 'border-[var(--color-primary)] bg-[var(--color-bg-secondary)]'
-                            : 'border-[var(--color-border-subtle)] bg-[var(--color-bg-subtle)] hover:border-[var(--color-border)]',
+                            ? 'border-primary bg-bg-secondary'
+                            : 'hover:border-border border-border-subtle bg-bg-subtle',
                         variant === 'admin' &&
-                            'flex-col items-center justify-center p-6 min-w-[140px]',
+                            'min-w-[140px] flex-col items-center justify-center p-6',
                     )}
                     key={t.id}
                     variant="ghost"
@@ -43,13 +43,13 @@ export const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({
                 >
                     <div
                         className={cn(
-                            'flex flex-col gap-1 rounded-lg p-1.5 border border-white/10 bg-[var(--background)] overflow-hidden shadow-sm',
-                            variant === 'admin' ? 'w-20 h-14' : 'w-12 h-10',
+                            'flex flex-col gap-1 overflow-hidden rounded-lg border border-white/10 bg-[var(--background)] p-1.5 shadow-sm',
+                            variant === 'admin' ? 'h-14 w-20' : 'h-10 w-12',
                         )}
                     >
-                        <div className="w-full h-2 rounded-sm bg-[var(--primary)]" />
-                        <div className="w-2/3 h-1.5 rounded-sm bg-[var(--foreground)] opacity-20" />
-                        <div className="w-1/2 h-1.5 rounded-sm bg-[var(--foreground)] opacity-10" />
+                        <div className="h-2 w-full rounded-sm bg-[var(--primary)]" />
+                        <div className="h-1.5 w-2/3 rounded-sm bg-[var(--foreground)] opacity-20" />
+                        <div className="h-1.5 w-1/2 rounded-sm bg-[var(--foreground)] opacity-10" />
                     </div>
                     <div
                         className={cn(
@@ -62,27 +62,27 @@ export const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({
                             className={cn(
                                 'text-sm font-bold',
                                 theme === t.id
-                                    ? 'text-[var(--color-primary)]'
-                                    : 'text-[var(--color-foreground)]',
+                                    ? 'text-primary'
+                                    : 'text-foreground',
                             )}
                         >
                             {t.label}
                         </span>
-                        <div className="flex gap-1 mt-1">
+                        <div className="mt-1 flex gap-1">
                             <div
-                                className="w-2.5 h-2.5 rounded-full bg-[var(--primary)]"
+                                className="h-2.5 w-2.5 rounded-full bg-[var(--primary)]"
                                 title="Primary"
                             />
                             <div
-                                className="w-2.5 h-2.5 rounded-full bg-[var(--primary-muted)]"
+                                className="h-2.5 w-2.5 rounded-full bg-[var(--primary-muted)]"
                                 title="Primary Muted"
                             />
                             <div
-                                className="w-2.5 h-2.5 rounded-full bg-[var(--success)]"
+                                className="h-2.5 w-2.5 rounded-full bg-[var(--success)]"
                                 title="Success"
                             />
                             <div
-                                className="w-2.5 h-2.5 rounded-full bg-[var(--danger)]"
+                                className="h-2.5 w-2.5 rounded-full bg-[var(--danger)]"
                                 title="Danger"
                             />
                         </div>

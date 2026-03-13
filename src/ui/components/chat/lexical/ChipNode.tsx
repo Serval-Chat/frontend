@@ -117,7 +117,7 @@ export class ChipNode extends DecoratorNode<React.ReactNode> {
             case 'everyone':
                 return (
                     <span
-                        className="inline-flex items-baseline px-1.5 rounded bg-primary text-[0.9em] font-medium text-white shadow-sm mx-0.5"
+                        className="mx-0.5 inline-flex items-baseline rounded bg-primary px-1.5 text-[0.9em] font-medium text-white shadow-sm"
                         style={{ verticalAlign: 'baseline' }}
                     >
                         @everyone
@@ -135,7 +135,7 @@ export class ChipNode extends DecoratorNode<React.ReactNode> {
             case 'emoji':
                 return (
                     <ParsedEmoji
-                        className="align-middle mx-px"
+                        className="mx-px align-middle"
                         emojiId={this.__payload.id}
                         style={{
                             width: '1.2em',

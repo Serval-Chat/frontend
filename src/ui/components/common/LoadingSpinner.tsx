@@ -24,7 +24,7 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
     return (
         <Box
             className={cn(
-                'border-primary border-t-transparent rounded-full animate-spin',
+                'animate-spin rounded-full border-primary border-t-transparent',
                 sizeClasses[size],
                 className,
             )}

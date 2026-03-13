@@ -35,16 +35,16 @@ export const NavigationDemo: React.FC = () => {
             title="Navigation Components"
         >
             <DemoItem id="server-icons" title="Server Icons & Primary Nav">
-                <div className="flex gap-4 items-center bg-[--color-bg-secondary] p-4 rounded-xl w-fit">
+                <div className="flex w-fit items-center gap-4 rounded-xl bg-[--color-bg-secondary] p-4">
                     <div className="flex flex-col items-center gap-1">
                         <ServerIcon server={mockServer} />
-                        <span className="text-[10px] text-foreground-muted">
+                        <span className="text-foreground-muted text-[10px]">
                             Default
                         </span>
                     </div>
                     <div className="flex flex-col items-center gap-1">
                         <ServerIcon isActive server={mockServer} />
-                        <span className="text-[10px] text-foreground-muted">
+                        <span className="text-foreground-muted text-[10px]">
                             Active
                         </span>
                     </div>
@@ -55,7 +55,7 @@ export const NavigationDemo: React.FC = () => {
                                 icon: 'https://catfla.re/images/servals/serval-1.jpg',
                             }}
                         />
-                        <span className="text-[10px] text-foreground-muted">
+                        <span className="text-foreground-muted text-[10px]">
                             With Icon
                         </span>
                     </div>
@@ -66,14 +66,14 @@ export const NavigationDemo: React.FC = () => {
                 id={SHOWOFF_SECTIONS.serverItems}
                 title="Server Items (read & unread)"
             >
-                <div className="flex flex-col items-center gap-3 w-20 bg-[--color-bg-secondary] p-3 rounded-xl">
+                <div className="flex w-20 flex-col items-center gap-3 rounded-xl bg-[--color-bg-secondary] p-3">
                     <div className="flex flex-col items-center gap-1">
                         <ServerItem
                             isActive={false}
                             isUnread={false}
                             server={mockServer}
                         />
-                        <span className="text-[10px] text-foreground-muted">
+                        <span className="text-foreground-muted text-[10px]">
                             Read
                         </span>
                     </div>
@@ -83,7 +83,7 @@ export const NavigationDemo: React.FC = () => {
                             isUnread={false}
                             server={mockServer}
                         />
-                        <span className="text-[10px] text-foreground-muted">
+                        <span className="text-foreground-muted text-[10px]">
                             Read (active)
                         </span>
                     </div>
@@ -93,13 +93,13 @@ export const NavigationDemo: React.FC = () => {
                             isActive={false}
                             server={mockServer}
                         />
-                        <span className="text-[10px] text-foreground-muted">
+                        <span className="text-foreground-muted text-[10px]">
                             Unread
                         </span>
                     </div>
                     <div className="flex flex-col items-center gap-1">
                         <ServerItem isActive isUnread server={mockServer} />
-                        <span className="text-[10px] text-foreground-muted">
+                        <span className="text-foreground-muted text-[10px]">
                             Unread (active)
                         </span>
                     </div>
@@ -110,7 +110,7 @@ export const NavigationDemo: React.FC = () => {
                 id="friend-items"
                 title="Friend List Items (Secondary Nav)"
             >
-                <div className="flex flex-col gap-1 w-60 bg-[--color-bg-secondary] p-2 rounded-lg">
+                <div className="flex w-60 flex-col gap-1 rounded-lg bg-[--color-bg-secondary] p-2">
                     <UserItem
                         noFetch
                         initialData={mockFriend}

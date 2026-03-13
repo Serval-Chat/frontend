@@ -53,11 +53,11 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
     return (
         <Box
             as="header"
-            className="flex items-start px-4 border-b border-white/5 bg-[var(--bg-chat-header)] backdrop-blur-sm shrink-0"
+            className="flex shrink-0 items-start border-b border-white/5 bg-[var(--bg-chat-header)] px-4 backdrop-blur-sm"
         >
             {/* Left: icon + name + description */}
-            <Box className="flex items-start gap-2 flex-1 min-w-0 overflow-hidden py-3">
-                <Box className="text-foreground-muted shrink-0 mt-0.5">
+            <Box className="flex min-w-0 flex-1 items-start gap-2 overflow-hidden py-3">
+                <Box className="text-foreground-muted mt-0.5 shrink-0">
                     {selectedFriendId ? (
                         <Text className="text-xl">@</Text>
                     ) : (
@@ -70,12 +70,12 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
                                 (selectedChannel?.type === 'voice'
                                     ? Volume2
                                     : Hash);
-                            return <Icon className="w-5 h-5" />;
+                            return <Icon className="h-5 w-5" />;
                         })()
                     )}
                 </Box>
-                <Box className="flex flex-col gap-0.5 min-w-0 flex-1">
-                    <Box className="text-[15px] font-semibold text-foreground truncate leading-5">
+                <Box className="flex min-w-0 flex-1 flex-col gap-0.5">
+                    <Box className="truncate text-[15px] leading-5 font-semibold text-foreground">
                         {selectedFriendId
                             ? friendUser?.displayName ||
                               friendUser?.username ||
@@ -84,7 +84,7 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
                     </Box>
                     {hasDescription && (
                         <motion.button
-                            className="text-left w-full focus:outline-none"
+                            className="w-full text-left focus:outline-none"
                             type="button"
                             onClick={() => setDescExpanded((v) => !v)}
                         >
@@ -104,9 +104,9 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
                                 }}
                             >
                                 <span
-                                    className={`text-xs text-foreground-muted block break-words ${
+                                    className={`text-foreground-muted block text-xs break-words ${
                                         descExpanded
-                                            ? 'whitespace-pre-wrap pb-0.5'
+                                            ? 'pb-0.5 whitespace-pre-wrap'
                                             : 'truncate'
                                     }`}
                                 >
@@ -119,7 +119,7 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
             </Box>
 
             {/* Mobile back button + member list toggle */}
-            <Box className="ml-2 md:hidden flex items-center gap-1 pt-2 shrink-0">
+            <Box className="ml-2 flex shrink-0 items-center gap-1 pt-2 md:hidden">
                 {selectedChannelId && !selectedFriendId && (
                     <button
                         aria-label="Toggle member list"
@@ -130,15 +130,15 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
                         }`}
                         onClick={() => dispatch(toggleMobileMemberList())}
                     >
-                        <Users className="w-5 h-5" />
+                        <Users className="h-5 w-5" />
                     </button>
                 )}
                 <button
                     aria-label="Back to contacts"
-                    className="p-2 -mr-2 text-foreground-muted hover:text-foreground transition-colors"
+                    className="text-foreground-muted -mr-2 p-2 transition-colors hover:text-foreground"
                     onClick={handleBackClick}
                 >
-                    <X className="w-6 h-6" />
+                    <X className="h-6 w-6" />
                 </button>
             </Box>
         </Box>

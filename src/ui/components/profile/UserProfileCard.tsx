@@ -83,11 +83,11 @@ export const UserProfileCard: React.FC<UserProfileCardProps> = ({
 
     return (
         <div
-            className={`w-[340px] bg-[var(--color-background)] rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-[var(--color-border-subtle)] ${className || ''}`}
+            className={`flex w-[340px] flex-col overflow-hidden rounded-2xl border border-border-subtle bg-background shadow-2xl ${className || ''}`}
             style={style}
         >
             <Box
-                className={`h-[120px] relative w-full overflow-hidden shrink-0 ${onBannerClick ? 'cursor-pointer group/banner' : ''}`}
+                className={`relative h-[120px] w-full shrink-0 overflow-hidden ${onBannerClick ? 'group/banner cursor-pointer' : ''}`}
                 style={{
                     backgroundColor: bannerColor,
                 }}
@@ -96,12 +96,12 @@ export const UserProfileCard: React.FC<UserProfileCardProps> = ({
                 {user?.banner && user.banner.trim() !== '' && (
                     <img
                         alt="User Banner"
-                        className="w-full h-full object-cover"
+                        className="h-full w-full object-cover"
                         src={resolveApiUrl(user.banner) || ''}
                     />
                 )}
                 {onBannerClick && (
-                    <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center gap-2 opacity-0 group-hover/banner:opacity-100 transition-opacity duration-200 text-white text-xs font-bold uppercase">
+                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/50 text-xs font-bold text-white uppercase opacity-0 transition-opacity duration-200 group-hover/banner:opacity-100">
                         <Camera size={24} />
                         <span>Change Banner</span>
                     </div>
@@ -110,7 +110,7 @@ export const UserProfileCard: React.FC<UserProfileCardProps> = ({
 
             <Box className="relative z-content -mt-[50px] px-4">
                 <Box
-                    className={`p-1.5 bg-[var(--color-background)] rounded-full inline-block relative ${onAvatarClick ? 'cursor-pointer group/avatar' : ''}`}
+                    className={`relative inline-block rounded-full bg-background p-1.5 ${onAvatarClick ? 'group/avatar cursor-pointer' : ''}`}
                     onClick={onAvatarClick}
                 >
                     <UserProfilePicture
@@ -121,7 +121,7 @@ export const UserProfileCard: React.FC<UserProfileCardProps> = ({
                         username={user?.username || ''}
                     />
                     {onAvatarClick && (
-                        <div className="absolute inset-1.5 rounded-full bg-black/50 flex items-center justify-center opacity-0 group-hover/avatar:opacity-100 transition-opacity duration-200 text-white">
+                        <div className="absolute inset-1.5 flex items-center justify-center rounded-full bg-black/50 text-white opacity-0 transition-opacity duration-200 group-hover/avatar:opacity-100">
                             <Camera size={20} />
                         </div>
                     )}
@@ -131,7 +131,7 @@ export const UserProfileCard: React.FC<UserProfileCardProps> = ({
             <Box className="p-4 pt-2">
                 <Box className="mb-4">
                     <StyledUserName
-                        className="text-xl font-bold leading-tight w-full truncate"
+                        className="w-full truncate text-xl leading-tight font-bold"
                         disableCustomFonts={disableCustomFonts}
                         disableGlowAndColors={disableGlowAndColors}
                         iconRole={iconRole}
@@ -141,7 +141,7 @@ export const UserProfileCard: React.FC<UserProfileCardProps> = ({
                         {user?.displayName || user?.username}
                     </StyledUserName>
 
-                    <Box className="text-sm text-[var(--color-muted-foreground)] font-medium select-text">
+                    <Box className="text-sm font-medium text-muted-foreground select-text">
                         @{user?.username}
                         {user?.pronouns && (
                             <Text
@@ -154,7 +154,7 @@ export const UserProfileCard: React.FC<UserProfileCardProps> = ({
                     </Box>
 
                     {user?.badges && user?.badges.length > 0 && (
-                        <Box className="flex flex-wrap gap-1.5 mt-2">
+                        <Box className="mt-2 flex flex-wrap gap-1.5">
                             {user.badges.map((badge) => (
                                 <UserBadge badge={badge} key={badge._id} />
                             ))}
@@ -163,12 +163,12 @@ export const UserProfileCard: React.FC<UserProfileCardProps> = ({
                 </Box>
 
                 {(finalCustomText || finalCustomEmoji) && (
-                    <Box className="mb-4 text-sm text-foreground/80 flex items-center gap-2">
+                    <Box className="mb-4 flex items-center gap-2 text-sm text-foreground/80">
                         {finalCustomEmoji && (
-                            <Box className="shrink-0 flex items-center">
+                            <Box className="flex shrink-0 items-center">
                                 {/^[0-9a-fA-F]{24}$/.test(finalCustomEmoji) ? (
                                     <ParsedEmoji
-                                        className="w-5 h-5"
+                                        className="h-5 w-5"
                                         emojiId={finalCustomEmoji}
                                     />
                                 ) : (
@@ -183,17 +183,17 @@ export const UserProfileCard: React.FC<UserProfileCardProps> = ({
                     </Box>
                 )}
 
-                <Box className="h-px bg-[var(--color-divider)] w-full my-3" />
+                <Box className="my-3 h-px w-full bg-divider" />
 
                 {user?.bio && (
                     <Box className="mb-4">
                         <Heading
-                            className="uppercase text-xs font-bold text-[var(--color-muted-foreground)] mb-2"
+                            className="mb-2 text-xs font-bold text-muted-foreground uppercase"
                             level={3}
                         >
                             About Me
                         </Heading>
-                        <Box className="text-sm text-foreground/90 whitespace-pre-wrap leading-relaxed">
+                        <Box className="text-sm leading-relaxed whitespace-pre-wrap text-foreground/90">
                             <ParsedText
                                 nodes={bioNodes}
                                 size="xs"
@@ -203,15 +203,15 @@ export const UserProfileCard: React.FC<UserProfileCardProps> = ({
                     </Box>
                 )}
 
-                <Box className="flex gap-4 mb-4">
-                    <Box className="flex-1 min-w-0">
+                <Box className="mb-4 flex gap-4">
+                    <Box className="min-w-0 flex-1">
                         <Heading
-                            className="uppercase text-xs font-bold text-[var(--color-muted-foreground)] mb-2"
+                            className="mb-2 text-xs font-bold text-muted-foreground uppercase"
                             level={3}
                         >
                             Member Since
                         </Heading>
-                        <Box className="text-sm text-foreground/80 flex items-center gap-2">
+                        <Box className="flex items-center gap-2 text-sm text-foreground/80">
                             <Calendar className="shrink-0" size={14} />
                             <Text as="span" className="truncate">
                                 {user?.createdAt &&
@@ -228,14 +228,14 @@ export const UserProfileCard: React.FC<UserProfileCardProps> = ({
                     </Box>
 
                     {joinedAt && (
-                        <Box className="flex-1 min-w-0">
+                        <Box className="min-w-0 flex-1">
                             <Heading
-                                className="uppercase text-xs font-bold text-[var(--color-muted-foreground)] mb-2 truncate"
+                                className="mb-2 truncate text-xs font-bold text-muted-foreground uppercase"
                                 level={3}
                             >
                                 Joined Server
                             </Heading>
-                            <Box className="text-sm text-foreground/80 flex items-center gap-2">
+                            <Box className="flex items-center gap-2 text-sm text-foreground/80">
                                 <Calendar className="shrink-0" size={14} />
                                 <Text as="span" className="truncate">
                                     {new Date(joinedAt).toLocaleDateString(
@@ -255,7 +255,7 @@ export const UserProfileCard: React.FC<UserProfileCardProps> = ({
                 {roles && roles.length > 0 && (
                     <Box className="mb-4">
                         <Heading
-                            className="uppercase text-xs font-bold text-[var(--color-muted-foreground)] mb-2"
+                            className="mb-2 text-xs font-bold text-muted-foreground uppercase"
                             level={3}
                         >
                             Roles
@@ -265,7 +265,7 @@ export const UserProfileCard: React.FC<UserProfileCardProps> = ({
                                 .sort((a, b) => b.position - a.position)
                                 .map((r) => (
                                     <Box
-                                        className="flex items-center gap-1.5 px-2 py-1 bg-[var(--color-bg-secondary)] rounded-md border border-[var(--color-border-subtle)]"
+                                        className="flex items-center gap-1.5 rounded-md border border-border-subtle bg-bg-secondary px-2 py-1"
                                         key={r._id}
                                     >
                                         <RoleDot role={r} />
@@ -282,9 +282,9 @@ export const UserProfileCard: React.FC<UserProfileCardProps> = ({
                 )}
 
                 {adminData && (
-                    <Box className="mt-2 space-y-4 border-t border-[var(--color-divider)] pt-4">
+                    <Box className="mt-2 space-y-4 border-t border-divider pt-4">
                         <Heading
-                            className="uppercase text-[10px] font-black text-danger tracking-[0.2em] mb-2"
+                            className="mb-2 text-[10px] font-black tracking-[0.2em] text-danger uppercase"
                             level={3}
                         >
                             Administrative View
@@ -292,8 +292,8 @@ export const UserProfileCard: React.FC<UserProfileCardProps> = ({
 
                         {/* Admin Stats */}
                         <div className="grid grid-cols-2 gap-2">
-                            <div className="p-2 rounded-lg bg-bg-secondary/50 border border-border-subtle">
-                                <span className="block text-[9px] font-bold text-muted-foreground uppercase tracking-tight">
+                            <div className="rounded-lg border border-border-subtle bg-bg-secondary/50 p-2">
+                                <span className="block text-[9px] font-bold tracking-tight text-muted-foreground uppercase">
                                     Warnings
                                 </span>
                                 <span
@@ -307,8 +307,8 @@ export const UserProfileCard: React.FC<UserProfileCardProps> = ({
                                     {adminData.warningCount}
                                 </span>
                             </div>
-                            <div className="p-2 rounded-lg bg-bg-secondary/50 border border-border-subtle">
-                                <span className="block text-[9px] font-bold text-muted-foreground uppercase tracking-tight">
+                            <div className="rounded-lg border border-border-subtle bg-bg-secondary/50 p-2">
+                                <span className="block text-[9px] font-bold tracking-tight text-muted-foreground uppercase">
                                     Account Status
                                 </span>
                                 <span className="text-sm font-black text-success">
@@ -319,11 +319,11 @@ export const UserProfileCard: React.FC<UserProfileCardProps> = ({
 
                         {/* Banned Info */}
                         {adminData.banExpiry && (
-                            <div className="p-3 rounded-lg bg-danger/10 border border-danger/20 text-xs text-danger">
-                                <span className="font-bold uppercase tracking-tight">
+                            <div className="rounded-lg border border-danger/20 bg-danger/10 p-3 text-xs text-danger">
+                                <span className="font-bold tracking-tight uppercase">
                                     Banned Until:
                                 </span>
-                                <span className="block font-black mt-0.5">
+                                <span className="mt-0.5 block font-black">
                                     {new Date(
                                         adminData.banExpiry,
                                     ).toLocaleString()}
@@ -334,23 +334,23 @@ export const UserProfileCard: React.FC<UserProfileCardProps> = ({
                         {/* Servers List */}
                         <Box>
                             <Heading
-                                className="uppercase text-[9px] font-bold text-muted-foreground tracking-widest mb-2 flex items-center gap-1.5"
+                                className="mb-2 flex items-center gap-1.5 text-[9px] font-bold tracking-widest text-muted-foreground uppercase"
                                 level={3}
                             >
                                 <Server size={10} /> Joined Servers (
                                 {adminData.servers.length})
                             </Heading>
-                            <Box className="space-y-1.5 max-h-[200px] overflow-y-auto pr-1 custom-scrollbar">
+                            <Box className="custom-scrollbar max-h-[200px] space-y-1.5 overflow-y-auto pr-1">
                                 {adminData.servers.map((server) => (
                                     <div
-                                        className="flex items-center gap-2 p-1.5 rounded-lg bg-bg-secondary/30 border border-border-subtle/50 hover:bg-bg-secondary/50 transition-colors"
+                                        className="flex items-center gap-2 rounded-lg border border-border-subtle/50 bg-bg-secondary/30 p-1.5 transition-colors hover:bg-bg-secondary/50"
                                         key={server._id}
                                     >
-                                        <div className="w-6 h-6 rounded bg-bg-secondary flex-shrink-0 overflow-hidden">
+                                        <div className="h-6 w-6 flex-shrink-0 overflow-hidden rounded bg-bg-secondary">
                                             {server.icon ? (
                                                 <img
                                                     alt={server.name}
-                                                    className="w-full h-full object-cover"
+                                                    className="h-full w-full object-cover"
                                                     src={
                                                         resolveApiUrl(
                                                             server.icon,
@@ -358,21 +358,21 @@ export const UserProfileCard: React.FC<UserProfileCardProps> = ({
                                                     }
                                                 />
                                             ) : (
-                                                <div className="w-full h-full flex items-center justify-center text-[10px] font-black bg-primary/10 text-primary">
+                                                <div className="flex h-full w-full items-center justify-center bg-primary/10 text-[10px] font-black text-primary">
                                                     {server.name.charAt(0)}
                                                 </div>
                                             )}
                                         </div>
-                                        <div className="flex-1 min-w-0">
-                                            <div className="text-[11px] font-bold truncate leading-tight">
+                                        <div className="min-w-0 flex-1">
+                                            <div className="truncate text-[11px] leading-tight font-bold">
                                                 {server.name}
                                                 {server.isOwner && (
-                                                    <span className="ml-1 text-[8px] text-caution font-black uppercase">
+                                                    <span className="ml-1 text-[8px] font-black text-caution uppercase">
                                                         Owner
                                                     </span>
                                                 )}
                                             </div>
-                                            <div className="text-[9px] text-muted-foreground uppercase font-medium">
+                                            <div className="text-[9px] font-medium text-muted-foreground uppercase">
                                                 Joined{' '}
                                                 {new Date(
                                                     server.joinedAt,

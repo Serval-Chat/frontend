@@ -71,10 +71,10 @@ export const Modal: React.FC<ModalProps> = ({
                     <motion.div
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         className={cn(
-                            'relative w-full bg-[var(--color-background)] rounded-xl shadow-2xl border border-[var(--color-border-subtle)] overflow-hidden flex flex-col',
+                            'relative flex w-full flex-col overflow-hidden rounded-xl border border-border-subtle bg-background shadow-2xl',
                             fullScreen
-                                ? 'max-w-none w-screen max-h-none rounded-none border-none'
-                                : 'max-w-2xl max-h-[90vh]',
+                                ? 'max-h-none w-screen max-w-none rounded-none border-none'
+                                : 'max-h-[90vh] max-w-2xl',
                             className,
                         )}
                         exit={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -96,7 +96,7 @@ export const Modal: React.FC<ModalProps> = ({
                         }}
                     >
                         {(title || showCloseButton) && (
-                            <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--color-border-subtle)] shrink-0 bg-[var(--color-bg-subtle)]">
+                            <div className="flex shrink-0 items-center justify-between border-b border-border-subtle bg-bg-subtle px-6 py-4">
                                 {title && (
                                     <h2 className="text-lg font-bold text-foreground">
                                         {title}
@@ -104,7 +104,7 @@ export const Modal: React.FC<ModalProps> = ({
                                 )}
                                 {showCloseButton && (
                                     <Button
-                                        className="p-1 min-w-0 h-8 w-8 rounded-md hover:bg-white/10 text-muted-foreground hover:text-foreground transition-colors border-none shadow-none"
+                                        className="h-8 w-8 min-w-0 rounded-md border-none p-1 text-muted-foreground shadow-none transition-colors hover:bg-white/10 hover:text-foreground"
                                         size="sm"
                                         variant="ghost"
                                         onClick={onClose}
@@ -116,7 +116,7 @@ export const Modal: React.FC<ModalProps> = ({
                         )}
                         <div
                             className={cn(
-                                'flex-1 overflow-y-auto custom-scrollbar',
+                                'custom-scrollbar flex-1 overflow-y-auto',
                                 !noPadding && 'p-6',
                             )}
                         >

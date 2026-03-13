@@ -23,10 +23,10 @@ export const FriendList: React.FC = () => {
     return (
         <Box className="flex flex-col gap-1 p-2">
             {isLoading ? (
-                <Box className="p-4 flex flex-col gap-3">
+                <Box className="flex flex-col gap-3 p-4">
                     {[...Array(5)].map((_, i) => (
                         // eslint-disable-next-line react/no-array-index-key
-                        <Box className="flex gap-3 items-center" key={i}>
+                        <Box className="flex items-center gap-3" key={i}>
                             <Skeleton
                                 height={32}
                                 variant="circular"

@@ -28,7 +28,7 @@ export const LoadingOverlay: React.FC<LoadingOverlayProps> = ({
                 <motion.div
                     animate={{ opacity: 1 }}
                     className={cn(
-                        'flex flex-col items-center justify-center p-6 text-center z-[9999]',
+                        'z-[9999] flex flex-col items-center justify-center p-6 text-center',
                         containerRef ? 'absolute inset-0' : 'fixed inset-0',
                         !transparent && 'bg-black/60',
                         blur && 'backdrop-blur-sm',
@@ -50,7 +50,7 @@ export const LoadingOverlay: React.FC<LoadingOverlayProps> = ({
                             <div className="absolute inset-0 animate-ping rounded-full border border-primary/20" />
                         </div>
                         {message && (
-                            <span className="text-sm font-black uppercase tracking-[0.2em] text-white drop-shadow-md">
+                            <span className="text-sm font-black tracking-[0.2em] text-white uppercase drop-shadow-md">
                                 {message}
                             </span>
                         )}

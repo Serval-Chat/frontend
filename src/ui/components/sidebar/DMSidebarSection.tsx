@@ -15,11 +15,11 @@ export const DMSidebarSection: React.FC<DMSidebarSectionProps> = ({
     friend,
     me,
 }) => (
-    <div className="space-y-4 min-w-0">
-        <div className="text-xs font-semibold text-foreground-muted uppercase tracking-wider px-1 truncate">
+    <div className="min-w-0 space-y-4">
+        <div className="text-foreground-muted truncate px-1 text-xs font-semibold tracking-wider uppercase">
             Direct Message
         </div>
-        <div className="space-y-0 min-w-0">
+        <div className="min-w-0 space-y-0">
             <UserItem noFetch initialData={friend} userId={friend._id} />
             <UserItem noFetch initialData={me} userId={me._id} />
         </div>

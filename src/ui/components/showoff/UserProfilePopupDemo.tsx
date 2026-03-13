@@ -82,7 +82,7 @@ export const UserProfilePopupDemo: React.FC = () => {
                     </Text>
                     <div className="w-fit" ref={triggerRef}>
                         <Button
-                            className="w-fit px-4 py-2 bg-[var(--color-primary)] text-black font-semibold rounded-md hover:opacity-90 transition-opacity"
+                            className="w-fit rounded-md bg-primary px-4 py-2 font-semibold text-black transition-opacity hover:opacity-90"
                             variant="primary"
                             onClick={() => setIsPopupOpen(true)}
                         >
@@ -106,7 +106,7 @@ export const UserProfilePopupDemo: React.FC = () => {
                 id="profile-popup-context"
                 title="Context Menu Integration"
             >
-                <div className="flex flex-col gap-4 max-w-sm">
+                <div className="flex max-w-sm flex-col gap-4">
                     <Text as="p" className="mb-2" size="sm" variant="muted">
                         Right-click these user items to see the "Show Profile"
                         option.

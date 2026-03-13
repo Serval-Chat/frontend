@@ -27,7 +27,7 @@ export const Mention: React.FC<MentionProps> = ({ userId }) => {
         <>
             <Box
                 as="span"
-                className="inline-flex items-baseline px-1.5 py-[4px] rounded bg-primary/10 hover:bg-primary/20 text-primary font-medium transition-colors cursor-pointer select-none"
+                className="inline-flex cursor-pointer items-baseline rounded bg-primary/10 px-1.5 py-[4px] font-medium text-primary transition-colors select-none hover:bg-primary/20"
                 ref={triggerRef}
                 onClick={() => setIsPopupOpen(true)}
             >

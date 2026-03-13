@@ -86,7 +86,7 @@ export const ServerRoleSettings: React.FC<ServerRoleSettingsProps> = ({
 
     if (isLoading) {
         return (
-            <div className="h-full flex items-center justify-center">
+            <div className="flex h-full items-center justify-center">
                 <LoadingSpinner size="lg" />
             </div>
         );
@@ -94,11 +94,8 @@ export const ServerRoleSettings: React.FC<ServerRoleSettingsProps> = ({
 
     if (!roles || roles.length === 0) {
         return (
-            <div className="h-full flex flex-col items-center justify-center text-center p-8">
-                <Shield
-                    className="text-[var(--color-muted-foreground)] mb-4"
-                    size={48}
-                />
+            <div className="flex h-full flex-col items-center justify-center p-8 text-center">
+                <Shield className="mb-4 text-muted-foreground" size={48} />
                 <Text className="mb-2" size="lg" weight="bold">
                     Something went wrong
                 </Text>
@@ -110,11 +107,11 @@ export const ServerRoleSettings: React.FC<ServerRoleSettingsProps> = ({
     }
 
     return (
-        <div className="h-full flex flex-col md:flex-row overflow-hidden">
+        <div className="flex h-full flex-col overflow-hidden md:flex-row">
             {/* Right Sidebar (Role List) - on mobile it should show when list is open */}
             <div
                 className={cn(
-                    'h-full shrink-0 order-first md:order-last',
+                    'order-first h-full shrink-0 md:order-last',
                     isMobileListOpen ? 'w-full md:w-auto' : 'hidden md:block',
                 )}
             >
@@ -134,15 +131,15 @@ export const ServerRoleSettings: React.FC<ServerRoleSettingsProps> = ({
             {/* Main Content (Editor) */}
             <div
                 className={cn(
-                    'flex-1 overflow-hidden relative',
+                    'relative flex-1 overflow-hidden',
                     isMobileListOpen ? 'hidden md:block' : 'block',
                 )}
             >
                 {/* Mobile Back Header */}
                 {!isMobileListOpen && (
-                    <div className="md:hidden items-center flex sticky top-0 z-20 bg-[var(--color-background)] border-b border-[var(--color-border-subtle)] px-4 py-3 shrink-0 w-full mb-4">
+                    <div className="sticky top-0 z-20 mb-4 flex w-full shrink-0 items-center border-b border-border-subtle bg-background px-4 py-3 md:hidden">
                         <button
-                            className="flex items-center gap-1 text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] font-medium transition-colors"
+                            className="flex items-center gap-1 font-medium text-muted-foreground transition-colors hover:text-foreground"
                             onClick={() => setIsMobileListOpen(true)}
                         >
                             <ChevronLeft size={20} />
@@ -162,7 +159,7 @@ export const ServerRoleSettings: React.FC<ServerRoleSettingsProps> = ({
                         onSave={handleSaveRole}
                     />
                 ) : (
-                    <div className="h-full flex items-center justify-center text-[var(--color-muted-foreground)]">
+                    <div className="flex h-full items-center justify-center text-muted-foreground">
                         Select a role to edit
                     </div>
                 )}

@@ -7,7 +7,7 @@ export const PushPromptDemo = (): React.ReactNode => (
         id={SHOWOFF_SECTIONS.pushPrompt}
         title="Push Notifications Prompt"
     >
-        <div className="relative border border-dashed border-sidebar-border rounded-lg p-8 p-12 bg-sidebar flex items-center justify-center min-h-[200px] overflow-hidden">
+        <div className="border-sidebar-border bg-sidebar relative flex min-h-[200px] items-center justify-center overflow-hidden rounded-lg border border-dashed p-8 p-12">
             <PushPrompt />
         </div>
     </DemoSection>

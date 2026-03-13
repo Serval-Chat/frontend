@@ -78,7 +78,7 @@ export const UserIdentitiesDemo: React.FC = () => {
                             status="online"
                             username="Small"
                         />
-                        <span className="text-xs text-foreground-muted">
+                        <span className="text-foreground-muted text-xs">
                             sm (32px)
                         </span>
                     </div>
@@ -89,7 +89,7 @@ export const UserIdentitiesDemo: React.FC = () => {
                             status="offline"
                             username="Medium"
                         />
-                        <span className="text-xs text-foreground-muted">
+                        <span className="text-foreground-muted text-xs">
                             md (40px)
                         </span>
                     </div>
@@ -100,7 +100,7 @@ export const UserIdentitiesDemo: React.FC = () => {
                             status="online"
                             username="Large"
                         />
-                        <span className="text-xs text-foreground-muted">
+                        <span className="text-foreground-muted text-xs">
                             lg (48px)
                         </span>
                     </div>
@@ -121,7 +121,7 @@ export const UserIdentitiesDemo: React.FC = () => {
             <DemoItem id="styled-usernames" title="Styled Usernames">
                 <div className="flex flex-col gap-4">
                     <div className="flex items-center gap-2">
-                        <span className="text-sm text-foreground-muted w-24">
+                        <span className="text-foreground-muted w-24 text-sm">
                             Default:
                         </span>
                         <StyledUserName user={mockUsers.normal}>
@@ -129,7 +129,7 @@ export const UserIdentitiesDemo: React.FC = () => {
                         </StyledUserName>
                     </div>
                     <div className="flex items-center gap-2">
-                        <span className="text-sm text-foreground-muted w-24">
+                        <span className="text-foreground-muted w-24 text-sm">
                             Glow:
                         </span>
                         <StyledUserName user={mockUsers.glowing}>
@@ -137,7 +137,7 @@ export const UserIdentitiesDemo: React.FC = () => {
                         </StyledUserName>
                     </div>
                     <div className="flex items-center gap-2">
-                        <span className="text-sm text-foreground-muted w-24">
+                        <span className="text-foreground-muted w-24 text-sm">
                             Gradient:
                         </span>
                         <StyledUserName user={mockUsers.gradient}>
@@ -145,7 +145,7 @@ export const UserIdentitiesDemo: React.FC = () => {
                         </StyledUserName>
                     </div>
                     <div className="flex items-center gap-2">
-                        <span className="text-sm text-foreground-muted w-24">
+                        <span className="text-foreground-muted w-24 text-sm">
                             The Full Lux:
                         </span>
                         <StyledUserName user={mockUsers.fancy}>
@@ -159,7 +159,7 @@ export const UserIdentitiesDemo: React.FC = () => {
                 <div className="flex flex-col gap-4">
                     {ALL_FONTS.map((font) => (
                         <div className="flex items-center gap-2" key={font}>
-                            <span className="text-sm text-foreground-muted w-32">
+                            <span className="text-foreground-muted w-32 text-sm">
                                 {font}:
                             </span>
                             <StyledUserName

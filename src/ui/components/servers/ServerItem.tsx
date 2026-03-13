@@ -59,11 +59,11 @@ export const ServerItem: React.FC<ServerItemProps> = ({
 
     return (
         <>
-            <div className="relative group w-full flex items-center justify-center">
+            <div className="group relative flex w-full items-center justify-center">
                 {/* Active / Unread indicator */}
                 <div
                     className={cn(
-                        'absolute left-0 top-1/2 -translate-y-1/2 w-1 bg-white rounded-r-full transition-all duration-200',
+                        'absolute top-1/2 left-0 w-1 -translate-y-1/2 rounded-r-full bg-white transition-all duration-200',
                         isActive
                             ? 'h-10'
                             : isUnread

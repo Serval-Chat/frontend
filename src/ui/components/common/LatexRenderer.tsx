@@ -29,7 +29,7 @@ export const LatexRenderer: React.FC<LatexRendererProps> = ({
     }, [content, displayMode]);
 
     if (displayMode) {
-        return <span className="block my-1 overflow-x-auto" ref={ref} />;
+        return <span className="my-1 block overflow-x-auto" ref={ref} />;
     }
 
     return <span ref={ref} />;

@@ -59,7 +59,7 @@ export const CreateServerModal: React.FC<CreateServerModalProps> = ({
                     </Text>
                 </div>
 
-                <div className="flex justify-end gap-2 mt-4">
+                <div className="mt-4 flex justify-end gap-2">
                     <Button type="button" variant="ghost" onClick={onClose}>
                         Back
                     </Button>

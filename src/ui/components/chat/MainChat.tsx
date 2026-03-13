@@ -228,7 +228,7 @@ export const MainChat: React.FC = () => {
 
     return (
         <Box
-            className="flex-1 flex flex-col min-h-0 relative overflow-hidden"
+            className="relative flex min-h-0 flex-1 flex-col overflow-hidden"
             onDragLeave={handleDragLeave}
             onDragOver={handleDragOver}
             onDrop={handleDrop}
@@ -240,12 +240,12 @@ export const MainChat: React.FC = () => {
             />
 
             {isViewingOlderMessages && (
-                <Box className="bg-warning/10 border-b border-warning/30 px-6 py-3 flex items-center justify-between">
+                <Box className="bg-warning/10 border-warning/30 flex items-center justify-between border-b px-6 py-3">
                     <Text className="text-warning" size="sm">
                         You are viewing older messages
                     </Text>
                     <button
-                        className="flex items-center gap-2 text-warning hover:text-warning/80 transition-colors"
+                        className="text-warning hover:text-warning/80 flex items-center gap-2 transition-colors"
                         onClick={handleJumpToLatest}
                     >
                         <X size={16} />
@@ -254,7 +254,7 @@ export const MainChat: React.FC = () => {
                 </Box>
             )}
 
-            <Box className="flex-1 flex flex-col min-h-0">
+            <Box className="flex min-h-0 flex-1 flex-col">
                 {isLoading ? (
                     <ChatLoadingState />
                 ) : (
@@ -288,7 +288,7 @@ export const MainChat: React.FC = () => {
                     onCancelReply={() => setReplyingTo(null)}
                 />
             ) : (
-                <Box className="mx-4 mb-4 px-4 h-[56px] flex items-center rounded-lg bg-[var(--bg-msg-input)] border border-border-subtle">
+                <Box className="mx-4 mb-4 flex h-[56px] items-center rounded-lg border border-border-subtle bg-[var(--bg-msg-input)] px-4">
                     <Text className="text-muted-foreground" size="sm">
                         You can&apos;t type in this channel.
                     </Text>
@@ -297,8 +297,8 @@ export const MainChat: React.FC = () => {
 
             {/* Drag and Drop Overlay */}
             {isDragging && (
-                <Box className="absolute inset-0 z-[var(--z-index-backdrop)] bg-bg-primary/80 backdrop-blur-sm flex flex-col items-center justify-center p-8 border-4 border-dashed border-primary/50 m-4 rounded-3xl pointer-events-none transition-all animate-in fade-in zoom-in duration-200">
-                    <div className="bg-primary/10 p-6 rounded-full mb-4">
+                <Box className="bg-bg-primary/80 animate-in fade-in zoom-in pointer-events-none absolute inset-0 z-[var(--z-index-backdrop)] m-4 flex flex-col items-center justify-center rounded-3xl border-4 border-dashed border-primary/50 p-8 backdrop-blur-sm transition-all duration-200">
+                    <div className="mb-4 rounded-full bg-primary/10 p-6">
                         <Upload className="text-primary" size={48} />
                     </div>
                     <Text size="xl" weight="bold">

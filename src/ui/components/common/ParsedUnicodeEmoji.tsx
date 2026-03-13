@@ -26,10 +26,10 @@ export const ParsedUnicodeEmoji: React.FC<ParsedUnicodeEmojiProps> = ({
             className={
                 className ||
                 cn(
-                    'inline-block align-middle relative',
+                    'relative inline-block align-middle',
                     isLarge
-                        ? 'w-[2.5em] h-[2.5em]'
-                        : 'w-[1.2em] h-[1.2em] -top-[0.1em]',
+                        ? 'h-[2.5em] w-[2.5em]'
+                        : '-top-[0.1em] h-[1.2em] w-[1.2em]',
                 )
             }
             title={emojiData.short_name}

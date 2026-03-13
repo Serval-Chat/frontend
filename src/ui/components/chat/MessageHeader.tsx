@@ -34,11 +34,11 @@ export const MessageHeader: React.FC<MessageHeaderProps> = ({
     if (!isGroupStart) return null;
 
     return (
-        <Box className="flex items-baseline gap-2 mb-0.5">
+        <Box className="mb-0.5 flex items-baseline gap-2">
             <Box
                 className={cn(
                     onClickName &&
-                        'cursor-pointer hover:underline underline-offset-2',
+                        'cursor-pointer underline-offset-2 hover:underline',
                 )}
                 onClick={onClickName}
             >
@@ -54,12 +54,12 @@ export const MessageHeader: React.FC<MessageHeaderProps> = ({
                 </StyledUserName>
             </Box>
 
-            <Text className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">
+            <Text className="text-[10px] font-medium tracking-wider text-muted-foreground uppercase">
                 {formatTimestamp(timestamp)}
             </Text>
 
             {isEdited && (
-                <Text className="text-[10px] text-muted-foreground font-medium italic">
+                <Text className="text-[10px] font-medium text-muted-foreground italic">
                     (edited{editedAt ? ` ${formatTimestamp(editedAt)}` : ''})
                 </Text>
             )}

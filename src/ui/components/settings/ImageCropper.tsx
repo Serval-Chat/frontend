@@ -351,7 +351,7 @@ export const ImageCropper: React.FC<ImageCropperProps> = ({
     return (
         <div
             className={cn(
-                'relative flex items-center justify-center bg-black/10 rounded-lg overflow-hidden',
+                'relative flex items-center justify-center overflow-hidden rounded-lg bg-black/10',
                 className,
             )}
             ref={containerRef}

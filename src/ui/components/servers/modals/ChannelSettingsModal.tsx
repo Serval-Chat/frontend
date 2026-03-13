@@ -51,7 +51,7 @@ export const ChannelSettingsModal: React.FC<ChannelSettingsModalProps> = ({
                     />
                 </SettingsContentPane>
             ) : (
-                <div className="flex-1 flex flex-col h-full overflow-hidden">
+                <div className="flex h-full flex-1 flex-col overflow-hidden">
                     <PermissionsEditorTab
                         serverId={channel.serverId}
                         targetId={channel._id}

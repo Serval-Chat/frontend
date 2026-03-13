@@ -59,10 +59,10 @@ export const ServerIcon: React.FC<ServerIconProps> = ({
     return (
         <div
             className={cn(
-                'flex items-center justify-center transition-all duration-200 cursor-pointer group relative',
+                'group relative flex cursor-pointer items-center justify-center transition-all duration-200',
                 isActive
                     ? `bg-[--color-primary] text-foreground-inverse`
-                    : `bg-[--color-bg-subtle] text-foreground-muted hover:bg-[--color-primary] hover:text-foreground-inverse`,
+                    : `text-foreground-muted bg-[--color-bg-subtle] hover:bg-[--color-primary] hover:text-foreground-inverse`,
                 sizeClasses[size],
                 className,
             )}
@@ -78,7 +78,7 @@ export const ServerIcon: React.FC<ServerIconProps> = ({
         >
             <div
                 className={cn(
-                    'w-full h-full flex items-center justify-center overflow-hidden transition-all duration-200',
+                    'flex h-full w-full items-center justify-center overflow-hidden transition-all duration-200',
                     isActive
                         ? activeRoundedClasses[size]
                         : `${roundedClasses[size]} group-hover:${activeRoundedClasses[size]}`,
@@ -87,7 +87,7 @@ export const ServerIcon: React.FC<ServerIconProps> = ({
                 {iconUrl ? (
                     <img
                         alt={server.name}
-                        className="w-full h-full object-cover"
+                        className="h-full w-full object-cover"
                         src={iconUrl}
                     />
                 ) : (

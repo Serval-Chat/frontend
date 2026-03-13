@@ -51,7 +51,7 @@ export const CategorySettingsModal: React.FC<CategorySettingsModalProps> = ({
                     />
                 </SettingsContentPane>
             ) : (
-                <div className="flex-1 flex flex-col h-full overflow-hidden">
+                <div className="flex h-full flex-1 flex-col overflow-hidden">
                     <PermissionsEditorTab
                         serverId={category.serverId}
                         targetId={category._id}

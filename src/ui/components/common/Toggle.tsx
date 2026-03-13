@@ -38,7 +38,7 @@ export const Toggle = React.forwardRef<HTMLInputElement, ToggleProps>(
             >
                 <span
                     className={cn(
-                        'relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
+                        'relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:outline-none',
                         disabled && 'cursor-not-allowed opacity-50',
                         !disabled && 'cursor-pointer',
                         checked ? 'bg-primary' : 'bg-bg-secondary',
@@ -46,7 +46,7 @@ export const Toggle = React.forwardRef<HTMLInputElement, ToggleProps>(
                 >
                     <input
                         checked={checked}
-                        className="sr-only peer"
+                        className="peer sr-only"
                         disabled={disabled}
                         ref={ref}
                         type="checkbox"

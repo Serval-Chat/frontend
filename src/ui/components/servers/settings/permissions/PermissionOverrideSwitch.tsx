@@ -17,7 +17,7 @@ interface PermissionOverrideSwitchProps {
 export const PermissionOverrideSwitch: React.FC<
     PermissionOverrideSwitchProps
 > = ({ label, description, value, onChange, danger }) => (
-    <div className="flex items-center justify-between py-3 border-b border-[var(--color-border-subtle)] last:border-b-0">
+    <div className="flex items-center justify-between border-b border-border-subtle py-3 last:border-b-0">
         <div className="flex-1 pr-4">
             <Text
                 as="p"
@@ -30,13 +30,13 @@ export const PermissionOverrideSwitch: React.FC<
                 {description}
             </Text>
         </div>
-        <div className="flex bg-[var(--color-bg-secondary)] rounded-md p-1 border border-[var(--color-border-subtle)] overflow-hidden shrink-0">
+        <div className="flex shrink-0 overflow-hidden rounded-md border border-border-subtle bg-bg-secondary p-1">
             <Button
                 className={cn(
-                    'w-10 h-8 p-0 rounded-l transition-all border-none shadow-none text-[var(--color-muted-foreground)]',
+                    'h-8 w-10 rounded-l border-none p-0 text-muted-foreground shadow-none transition-all',
                     value === false
-                        ? 'bg-[var(--color-danger)] text-white hover:bg-[var(--color-danger-hover)]'
-                        : 'hover:bg-[var(--color-danger)] hover:text-white',
+                        ? 'bg-danger text-white hover:bg-danger-hover'
+                        : 'hover:bg-danger hover:text-white',
                 )}
                 title="Deny"
                 variant="ghost"
@@ -46,10 +46,10 @@ export const PermissionOverrideSwitch: React.FC<
             </Button>
             <Button
                 className={cn(
-                    'w-10 h-8 p-0 rounded-none transition-all border-x border-[var(--color-border-subtle)] shadow-none text-[var(--color-muted-foreground)]',
+                    'h-8 w-10 rounded-none border-x border-border-subtle p-0 text-muted-foreground shadow-none transition-all',
                     value === undefined
-                        ? 'bg-[var(--color-bg-subtle)] text-[var(--color-foreground)]'
-                        : 'hover:bg-[var(--color-bg-subtle)] hover:text-[var(--color-foreground)]',
+                        ? 'bg-bg-subtle text-foreground'
+                        : 'hover:bg-bg-subtle hover:text-foreground',
                 )}
                 title="Inherit"
                 variant="ghost"
@@ -59,10 +59,10 @@ export const PermissionOverrideSwitch: React.FC<
             </Button>
             <Button
                 className={cn(
-                    'w-10 h-8 p-0 rounded-r transition-all border-none shadow-none text-[var(--color-muted-foreground)]',
+                    'h-8 w-10 rounded-r border-none p-0 text-muted-foreground shadow-none transition-all',
                     value === true
-                        ? 'bg-[var(--color-success)] text-white hover:bg-[var(--color-success-hover)]'
-                        : 'hover:bg-[var(--color-success)] hover:text-white',
+                        ? 'bg-success text-white hover:bg-success-hover'
+                        : 'hover:bg-success hover:text-white',
                 )}
                 title="Allow"
                 variant="ghost"

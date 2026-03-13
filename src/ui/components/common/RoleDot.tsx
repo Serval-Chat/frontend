@@ -23,7 +23,7 @@ export const RoleDot: React.FC<RoleDotProps> = ({
 
     return (
         <Box
-            className={cn('rounded-full shrink-0', className)}
+            className={cn('shrink-0 rounded-full', className)}
             style={{
                 ...style,
                 width: size,

@@ -33,9 +33,9 @@ export const AddFriendForm: React.FC = () => {
 
     return (
         <>
-            <Box className="flex gap-2 mb-2">
+            <Box className="mb-2 flex gap-2">
                 <Input
-                    className="bg-bg-tertiary border-none h-8"
+                    className="bg-bg-tertiary h-8 border-none"
                     placeholder="Username"
                     value={username}
                     onChange={(e) => {
@@ -45,7 +45,7 @@ export const AddFriendForm: React.FC = () => {
                     onKeyDown={(e) => e.key === 'Enter' && submit()}
                 />
                 <IconButton
-                    className="shrink-0 h-8 w-8 p-0 bg-bg-secondary border-none hover:bg-primary hover:text-foreground-inverse transition-all duration-200"
+                    className="h-8 w-8 shrink-0 border-none bg-bg-secondary p-0 transition-all duration-200 hover:bg-primary hover:text-foreground-inverse"
                     disabled={isPending || !username}
                     icon={Plus}
                     iconSize={16}
@@ -55,7 +55,7 @@ export const AddFriendForm: React.FC = () => {
             </Box>
 
             <StatusMessage
-                className="text-xs min-h-0 py-1.5"
+                className="min-h-0 py-1.5 text-xs"
                 message={status?.message || ''}
                 type={status?.type || 'error'}
             />

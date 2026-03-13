@@ -163,16 +163,16 @@ export const Admonition: React.FC<AdmonitionProps> = ({
     const header = (
         <div
             className={cn(
-                'flex items-center gap-1.5 font-semibold text-sm select-none',
+                'flex items-center gap-1.5 text-sm font-semibold select-none',
                 theme.titleColor,
             )}
         >
-            <span aria-hidden className="leading-none mt-[1px]">
+            <span aria-hidden className="mt-[1px] leading-none">
                 <theme.icon size={16} />
             </span>
             <span>{displayTitle}</span>
             {node.collapsible && (
-                <span className="ml-auto text-xs opacity-60 leading-none">
+                <span className="ml-auto text-xs leading-none opacity-60">
                     ▾
                 </span>
             )}
@@ -180,7 +180,7 @@ export const Admonition: React.FC<AdmonitionProps> = ({
     );
 
     const containerClass = cn(
-        'rounded-md border-l-4 pl-3 pr-3 pt-2 pb-2 text-sm',
+        'rounded-md border-l-4 pt-2 pr-3 pb-2 pl-3 text-sm',
         theme.border,
         theme.bg,
         !isNested && 'my-2',
@@ -192,7 +192,7 @@ export const Admonition: React.FC<AdmonitionProps> = ({
                 className={containerClass}
                 open={node.defaultOpen !== false}
             >
-                <summary className="list-none cursor-pointer">{header}</summary>
+                <summary className="cursor-pointer list-none">{header}</summary>
                 {children && <div className="mt-1.5">{children}</div>}
             </details>
         );

@@ -72,7 +72,7 @@ export const Downloads = (): ReactNode => (
                                 href="/releases/windows_x64/Serchat_v0.7.9.exe"
                             >
                                 <Button
-                                    className="w-full h-14 text-lg"
+                                    className="h-14 w-full text-lg"
                                     variant="primary"
                                 >
                                     <Download className="mr-2" size={20} />
@@ -104,7 +104,7 @@ export const Downloads = (): ReactNode => (
                                 href="/releases/linux_x64/Serchat_v0.7.9.AppImage"
                             >
                                 <Button
-                                    className="w-full h-14 text-lg"
+                                    className="h-14 w-full text-lg"
                                     variant="primary"
                                 >
                                     <Download className="mr-2" size={20} />
@@ -156,7 +156,7 @@ export const Downloads = (): ReactNode => (
                                 href="/releases/android/Serchat_v0.7.9.apk"
                             >
                                 <Button
-                                    className="w-full h-14 text-lg"
+                                    className="h-14 w-full text-lg"
                                     variant="success"
                                 >
                                     <Download className="mr-2" size={20} />
@@ -169,7 +169,7 @@ export const Downloads = (): ReactNode => (
             </section>
         </main>
 
-        <footer className="border-t border-border-subtle mx-8 py-8 text-center text-sm text-muted-foreground">
+        <footer className="mx-8 border-t border-border-subtle py-8 text-center text-sm text-muted-foreground">
             <Text as="p">
                 &copy; {new Date().getFullYear()} Serchat. Made with love for
                 everyone.

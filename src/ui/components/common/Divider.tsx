@@ -11,11 +11,11 @@ interface DividerProps {
 export const Divider: React.FC<DividerProps> = ({ className, fullWidth }) => (
     <Box
         className={cn(
-            'w-full py-[2px] flex items-center justify-center',
+            'flex w-full items-center justify-center py-[2px]',
             !fullWidth && 'px-[12px]',
             className,
         )}
     >
-        <Box className="w-full h-[3px] rounded-full bg-divider" />
+        <Box className="h-[3px] w-full rounded-full bg-divider" />
     </Box>
 );

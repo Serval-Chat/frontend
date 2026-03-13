@@ -25,7 +25,7 @@ export const StatCard = ({
     return (
         <div className="group relative flex aspect-square flex-col justify-between overflow-hidden rounded-3xl border border-border-subtle bg-bg-subtle p-8 transition-all duration-300 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/5">
             {/* Background Accent */}
-            <div className="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-primary/5 blur-3xl transition-all duration-500 group-hover:bg-primary/10" />
+            <div className="absolute -top-4 -right-4 h-24 w-24 rounded-full bg-primary/5 blur-3xl transition-all duration-500 group-hover:bg-primary/10" />
 
             <div className="flex items-start justify-between gap-4">
                 <div className="space-y-2">

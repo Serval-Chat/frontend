@@ -83,7 +83,7 @@ export const ChangeLoginModal: React.FC<ChangeLoginModalProps> = ({
                 <Box className="space-y-4">
                     <Box className="space-y-2">
                         <label
-                            className="text-xs font-bold text-[var(--color-muted-foreground)] uppercase tracking-wider"
+                            className="text-xs font-bold tracking-wider text-muted-foreground uppercase"
                             htmlFor="current-login"
                         >
                             Current Login
@@ -98,7 +98,7 @@ export const ChangeLoginModal: React.FC<ChangeLoginModalProps> = ({
 
                     <Box className="space-y-2">
                         <label
-                            className="text-xs font-bold text-[var(--color-muted-foreground)] uppercase tracking-wider"
+                            className="text-xs font-bold tracking-wider text-muted-foreground uppercase"
                             htmlFor="new-login"
                         >
                             New Login
@@ -110,10 +110,7 @@ export const ChangeLoginModal: React.FC<ChangeLoginModalProps> = ({
                             onChange={(e) => setNewLogin(e.target.value)}
                         />
                         {errors.newLogin && (
-                            <Text
-                                className="text-[var(--color-status-error)]"
-                                size="xs"
-                            >
+                            <Text className="text-status-error" size="xs">
                                 {errors.newLogin}
                             </Text>
                         )}
@@ -121,7 +118,7 @@ export const ChangeLoginModal: React.FC<ChangeLoginModalProps> = ({
 
                     <Box className="space-y-2">
                         <label
-                            className="text-xs font-bold text-[var(--color-muted-foreground)] uppercase tracking-wider"
+                            className="text-xs font-bold tracking-wider text-muted-foreground uppercase"
                             htmlFor="password"
                         >
                             Confirm Password
@@ -133,10 +130,7 @@ export const ChangeLoginModal: React.FC<ChangeLoginModalProps> = ({
                             onChange={(e) => setPassword(e.target.value)}
                         />
                         {errors.password && (
-                            <Text
-                                className="text-[var(--color-status-error)]"
-                                size="xs"
-                            >
+                            <Text className="text-status-error" size="xs">
                                 {errors.password}
                             </Text>
                         )}
@@ -146,12 +140,12 @@ export const ChangeLoginModal: React.FC<ChangeLoginModalProps> = ({
                     </Box>
                 </Box>
 
-                <Box className="flex justify-end gap-3 pt-4 border-t border-[var(--color-border-subtle)] bg-[var(--color-bg-subtle)] -mx-6 -mb-6 p-6">
+                <Box className="-mx-6 -mb-6 flex justify-end gap-3 border-t border-border-subtle bg-bg-subtle p-6 pt-4">
                     <Button type="button" variant="ghost" onClick={handleClose}>
                         Cancel
                     </Button>
                     <Button
-                        className="bg-primary hover:bg-primary-hover text-white border-none"
+                        className="border-none bg-primary text-white hover:bg-primary-hover"
                         loading={isPending}
                         type="submit"
                     >

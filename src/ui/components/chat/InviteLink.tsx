@@ -35,7 +35,7 @@ export const InviteLink: React.FC<InviteLinkProps> = ({ code, url }) => {
 
     if (isLoading) {
         return (
-            <Box className="w-fit min-w-75 my-2 flex items-center gap-2 rounded-lg border border-border-subtle bg-bg-secondary p-4">
+            <Box className="my-2 flex w-fit min-w-75 items-center gap-2 rounded-lg border border-border-subtle bg-bg-secondary p-4">
                 <LoadingSpinner size="sm" />
                 <Text size="sm" variant="muted">
                     Fetching invite details...
@@ -70,11 +70,11 @@ export const InviteLink: React.FC<InviteLinkProps> = ({ code, url }) => {
             : null;
 
     return (
-        <Box className="w-80 my-2 flex flex-col overflow-hidden rounded-lg bg-bg-secondary transition-all">
+        <Box className="my-2 flex w-80 flex-col overflow-hidden rounded-lg bg-bg-secondary transition-all">
             {/* Copy server link button */}
             <div className="relative">
                 <button
-                    className="absolute right-2 top-2 z-10 rounded-md p-1.5 text-muted-foreground opacity-40 transition-all hover:opacity-100 hover:bg-bg-tertiary"
+                    className="hover:bg-bg-tertiary absolute top-2 right-2 z-10 rounded-md p-1.5 text-muted-foreground opacity-40 transition-all hover:opacity-100"
                     type="button"
                     onClick={handleCopy}
                 >
@@ -84,7 +84,7 @@ export const InviteLink: React.FC<InviteLinkProps> = ({ code, url }) => {
 
             {/* Banner */}
             {bannerUrl && (
-                <div className="bg-primary/10 h-20 w-full overflow-hidden">
+                <div className="h-20 w-full overflow-hidden bg-primary/10">
                     <img
                         alt=""
                         className="h-full w-full object-cover"
@@ -95,7 +95,7 @@ export const InviteLink: React.FC<InviteLinkProps> = ({ code, url }) => {
 
             <div className="flex flex-col gap-4 p-4">
                 <Text
-                    className="uppercase tracking-wider"
+                    className="tracking-wider uppercase"
                     size="xs"
                     variant="muted"
                     weight="bold"
@@ -107,11 +107,11 @@ export const InviteLink: React.FC<InviteLinkProps> = ({ code, url }) => {
                     {iconUrl ? (
                         <img
                             alt={invite.server.name}
-                            className="bg-background h-12 w-12 rounded-xl object-cover shadow-sm"
+                            className="h-12 w-12 rounded-xl bg-background object-cover shadow-sm"
                             src={iconUrl}
                         />
                     ) : (
-                        <div className="bg-primary/20 text-primary flex h-12 w-12 items-center justify-center rounded-xl text-xl font-bold">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/20 text-xl font-bold text-primary">
                             {invite.server.name.charAt(0).toUpperCase()}
                         </div>
                     )}
@@ -121,7 +121,7 @@ export const InviteLink: React.FC<InviteLinkProps> = ({ code, url }) => {
                             {invite.server.name}
                         </Text>
                         <div className="flex items-center gap-2">
-                            <div className="bg-success h-2 w-2 animate-pulse rounded-full" />
+                            <div className="h-2 w-2 animate-pulse rounded-full bg-success" />
                             <Text size="xs" variant="muted">
                                 {invite.memberCount}{' '}
                                 {invite.memberCount === 1

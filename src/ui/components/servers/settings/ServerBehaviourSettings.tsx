@@ -146,7 +146,7 @@ const ServerBehaviourSettingsForm: React.FC<
                     </div>
                 </div>
 
-                <div className="pt-6 border-t border-[var(--color-border-subtle)]">
+                <div className="border-t border-border-subtle pt-6">
                     <div className="flex items-center justify-between">
                         <div className="space-y-1">
                             <Text as="p" weight="semibold">
@@ -164,7 +164,7 @@ const ServerBehaviourSettingsForm: React.FC<
                     </div>
                 </div>
 
-                <div className="pt-6 border-t border-[var(--color-border-subtle)]">
+                <div className="border-t border-border-subtle pt-6">
                     <div className="flex items-center justify-between">
                         <div className="space-y-1">
                             <Text as="p" weight="semibold">
@@ -204,7 +204,7 @@ export const ServerBehaviourSettings: React.FC<
 
     if (isServerLoading || isRolesLoading) {
         return (
-            <div className="flex items-center justify-center h-full">
+            <div className="flex h-full items-center justify-center">
                 <LoadingSpinner />
             </div>
         );

@@ -17,7 +17,7 @@ export const StandingSettings: React.FC = () => {
 
     if (isLoading) {
         return (
-            <div className="flex items-center justify-center h-full">
+            <div className="flex h-full items-center justify-center">
                 <Text variant="muted">Loading standing information...</Text>
             </div>
         );
@@ -32,8 +32,8 @@ export const StandingSettings: React.FC = () => {
             </Heading>
 
             {!hasWarnings ? (
-                <div className="bg-success/10 border border-success/20 rounded-lg p-8 flex flex-col items-center text-center">
-                    <div className="w-16 h-16 bg-success/20 rounded-full flex items-center justify-center mb-4">
+                <div className="flex flex-col items-center rounded-lg border border-success/20 bg-success/10 p-8 text-center">
+                    <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-success/20">
                         <CheckCircle className="text-success" size={32} />
                     </div>
                     <Heading level={4} variant="sub">
@@ -46,9 +46,9 @@ export const StandingSettings: React.FC = () => {
                 </div>
             ) : (
                 <div className="space-y-6">
-                    <div className="bg-caution/10 border border-caution/20 rounded-lg p-4 flex gap-4 items-start">
+                    <div className="flex items-start gap-4 rounded-lg border border-caution/20 bg-caution/10 p-4">
                         <ShieldAlert
-                            className="text-caution shrink-0"
+                            className="shrink-0 text-caution"
                             size={24}
                         />
                         <div>
@@ -64,10 +64,10 @@ export const StandingSettings: React.FC = () => {
                     <div className="space-y-4">
                         {warnings?.map((warning) => (
                             <div
-                                className="bg-[var(--color-bg-subtle)] border border-[var(--color-border-subtle)] rounded-lg p-4"
+                                className="rounded-lg border border-border-subtle bg-bg-subtle p-4"
                                 key={warning._id}
                             >
-                                <div className="flex justify-between items-start mb-2">
+                                <div className="mb-2 flex items-start justify-between">
                                     <div className="flex items-center gap-2">
                                         <AlertTriangle
                                             className="text-danger"
@@ -82,10 +82,10 @@ export const StandingSettings: React.FC = () => {
                                         {formatTimestamp(warning.timestamp)}
                                     </Text>
                                 </div>
-                                <div className="bg-[var(--color-background)] p-3 rounded border border-[var(--color-border-subtle)] mb-4">
+                                <div className="mb-4 rounded border border-border-subtle bg-background p-3">
                                     <Text size="sm">{warning.message}</Text>
                                 </div>
-                                <div className="flex justify-between items-center">
+                                <div className="flex items-center justify-between">
                                     {warning.acknowledged ? (
                                         <div className="flex items-center gap-1.5 text-success">
                                             <CheckCircle size={14} />
@@ -126,7 +126,7 @@ export const StandingSettings: React.FC = () => {
                 </div>
             )}
 
-            <div className="mt-12 pt-6 border-t border-[var(--color-border-subtle)]">
+            <div className="mt-12 border-t border-border-subtle pt-6">
                 <Heading level={4} variant="sub">
                     Why do I see this?
                 </Heading>

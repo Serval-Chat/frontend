@@ -21,7 +21,7 @@ export const FileQueue: React.FC<FileQueueProps> = ({
     if (files.length === 0) return null;
 
     return (
-        <Box className="flex flex-wrap gap-2 p-2 bg-bg-secondary/50 border-t border-border-subtle">
+        <Box className="flex flex-wrap gap-2 border-t border-border-subtle bg-bg-secondary/50 p-2">
             {files.map((file) => (
                 <FileQueueItem
                     file={file}
@@ -53,22 +53,22 @@ const FileQueueItem: React.FC<{
     );
 
     return (
-        <Box className="relative group w-24 h-24 rounded-lg overflow-hidden border border-border-subtle bg-bg-primary">
+        <Box className="group bg-bg-primary relative h-24 w-24 overflow-hidden rounded-lg border border-border-subtle">
             {isImage && previewUrl ? (
                 <img
                     alt={file.file.name}
-                    className={`w-full h-full object-cover transition-all duration-300 ${
+                    className={`h-full w-full object-cover transition-all duration-300 ${
                         file.isSpoiler ? 'blur-md' : ''
                     } ${file.status === 'uploading' ? 'opacity-50' : ''}`}
                     src={previewUrl}
                 />
             ) : (
                 <div
-                    className={`w-full h-full flex flex-col items-center justify-center p-1 text-center ${
+                    className={`flex h-full w-full flex-col items-center justify-center p-1 text-center ${
                         file.status === 'uploading' ? 'opacity-50' : ''
                     }`}
                 >
-                    <Text className="truncate w-full text-[10px]" size="xs">
+                    <Text className="w-full truncate text-[10px]" size="xs">
                         {file.file.name}
                     </Text>
                     <Text size="xs" variant="muted">
@@ -78,10 +78,10 @@ const FileQueueItem: React.FC<{
             )}
 
             {file.status === 'idle' && (
-                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1">
+                <div className="absolute inset-0 flex items-center justify-center gap-1 bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
                     {isImage && (
                         <Button
-                            className="h-8 w-8 p-0 bg-black/60 hover:bg-black/80 border-none"
+                            className="h-8 w-8 border-none bg-black/60 p-0 hover:bg-black/80"
                             size="sm"
                             variant="ghost"
                             onClick={(e) => {
@@ -97,7 +97,7 @@ const FileQueueItem: React.FC<{
                         </Button>
                     )}
                     <Button
-                        className="h-8 w-8 p-0 bg-black/60 hover:bg-black/80 border-none text-red-400 hover:text-red-300"
+                        className="h-8 w-8 border-none bg-black/60 p-0 text-red-400 hover:bg-black/80 hover:text-red-300"
                         size="sm"
                         variant="ghost"
                         onClick={(e) => {
@@ -112,7 +112,7 @@ const FileQueueItem: React.FC<{
 
             {/* Uploading indicator */}
             {file.status === 'uploading' && (
-                <div className="absolute inset-x-2 bottom-2 h-1 bg-white/20 rounded-full overflow-hidden">
+                <div className="absolute inset-x-2 bottom-2 h-1 overflow-hidden rounded-full bg-white/20">
                     <div
                         className="h-full bg-primary transition-all duration-300"
                         style={{ width: `${file.progress}%` }}
@@ -122,21 +122,21 @@ const FileQueueItem: React.FC<{
 
             {/* Completed indicator */}
             {file.status === 'completed' && (
-                <div className="absolute top-1 right-1 bg-green-500 rounded-full p-0.5">
+                <div className="absolute top-1 right-1 rounded-full bg-green-500 p-0.5">
                     <Check className="text-white" size={10} />
                 </div>
             )}
 
             {/* Error indicator */}
             {file.status === 'error' && (
-                <div className="absolute inset-0 bg-red-500/20 flex items-center justify-center">
+                <div className="absolute inset-0 flex items-center justify-center bg-red-500/20">
                     <X className="text-red-500" size={20} />
                 </div>
             )}
 
             {/* Spoiler indicator tag */}
             {file.isSpoiler && (
-                <div className="absolute top-1 left-1 bg-black/60 px-1 rounded text-[10px] font-bold text-white uppercase tracking-wider backdrop-blur-sm pointer-events-none">
+                <div className="pointer-events-none absolute top-1 left-1 rounded bg-black/60 px-1 text-[10px] font-bold tracking-wider text-white uppercase backdrop-blur-sm">
                     Spoiler
                 </div>
             )}

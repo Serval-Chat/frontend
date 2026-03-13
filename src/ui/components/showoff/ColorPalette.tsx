@@ -17,7 +17,7 @@ const ColorSwatch: React.FC<ColorSwatchProps> = ({
 }) => (
     <div className="flex flex-col gap-2">
         <div
-            className="h-24 w-full rounded-lg shadow-md border border-border-subtle"
+            className="h-24 w-full rounded-lg border border-border-subtle shadow-md"
             style={{ backgroundColor: `var(${variable})` }}
         />
         <div className="flex flex-col">
@@ -47,7 +47,7 @@ export const ColorPalette: React.FC = () => (
             Leptailurus Serval Color Palette
         </Heading>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+        <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
             {/* Main Colors */}
             <ColorSwatch
                 description="Serval serval serval serval."
@@ -93,10 +93,10 @@ export const ColorPalette: React.FC = () => (
             />
         </div>
 
-        <div className="mt-8 p-6 rounded-xl bg-bg-subtle border border-border-subtle">
+        <div className="mt-8 rounded-xl border border-border-subtle bg-bg-subtle p-6">
             <Text as="p" className="leading-relaxed" variant="muted">
                 This pallete is very{' '}
-                <span className="text-primary font-bold italic">serval</span>.
+                <span className="font-bold text-primary italic">serval</span>.
                 Serval serval serval serval serval serval.
             </Text>
         </div>

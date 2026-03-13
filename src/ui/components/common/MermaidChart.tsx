@@ -15,7 +15,7 @@ export const MermaidChart: React.FC<MermaidChartProps> = ({ content }) => {
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        const renderChart = async () => {
+        const renderChart = async (): Promise<void> => {
             try {
                 const id = `mermaid-${Math.random().toString(36).substring(2, 9)}`;
 
@@ -45,8 +45,8 @@ export const MermaidChart: React.FC<MermaidChartProps> = ({ content }) => {
 
     if (error) {
         return (
-            <div className="my-2 p-4 rounded-lg bg-[var(--color-bg-secondary)] border border-[var(--color-danger/50)] border-l-4 border-l-[var(--color-danger)] font-mono text-sm overflow-x-auto text-[var(--color-danger)] shadow-sm">
-                <div className="font-bold mb-2">Mermaid Syntax Error:</div>
+            <div className="my-2 overflow-x-auto rounded-lg border border-l-4 border-danger/50 border-l-danger bg-bg-secondary p-4 font-mono text-sm text-danger shadow-sm">
+                <div className="mb-2 font-bold">Mermaid Syntax Error:</div>
                 <pre className="whitespace-pre-wrap">{error}</pre>
             </div>
         );
@@ -54,8 +54,8 @@ export const MermaidChart: React.FC<MermaidChartProps> = ({ content }) => {
 
     if (!svgContent) {
         return (
-            <div className="my-2 p-4 rounded-lg bg-[var(--color-bg-secondary)] border border-[var(--color-border-subtle)] flex items-center justify-center min-h-[100px] animate-pulse">
-                <span className="text-[var(--color-muted-foreground)] text-sm font-medium">
+            <div className="my-2 flex min-h-[100px] animate-pulse items-center justify-center rounded-lg border border-border-subtle bg-bg-secondary p-4">
+                <span className="text-sm font-medium text-muted-foreground">
                     Rendering chart...
                 </span>
             </div>
@@ -64,7 +64,7 @@ export const MermaidChart: React.FC<MermaidChartProps> = ({ content }) => {
 
     return (
         <div
-            className="my-2 p-4 rounded-lg bg-[var(--color-background)] border border-[var(--color-border-subtle)] overflow-x-auto overflow-y-hidden shadow-sm flex items-center justify-center [&>svg]:max-w-full [&>svg]:h-auto transition-colors hover:border-[var(--color-primary/40)]"
+            className="my-2 flex items-center justify-center overflow-x-auto overflow-y-hidden rounded-lg border border-border-subtle bg-background p-4 shadow-sm transition-colors hover:border-primary/40 [&>svg]:h-auto [&>svg]:max-w-full"
             dangerouslySetInnerHTML={{ __html: svgContent }}
             ref={containerRef}
         />

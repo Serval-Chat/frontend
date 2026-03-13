@@ -7,14 +7,14 @@ import { cn } from '@/utils/cn';
 const textVariants = cva('', {
     variants: {
         variant: {
-            default: 'text-[var(--color-foreground)]',
-            muted: 'text-[var(--color-muted-foreground)]',
-            subtle: 'text-[var(--color-muted-foreground)] opacity-80',
-            primary: 'text-[var(--color-primary)]',
-            success: 'text-[var(--color-success)]',
-            danger: 'text-[var(--color-danger)]',
-            caution: 'text-[var(--color-caution)]',
-            inverse: 'text-[var(--color-foreground-inverse)]',
+            default: 'text-foreground',
+            muted: 'text-muted-foreground',
+            subtle: 'text-muted-foreground opacity-80',
+            primary: 'text-primary',
+            success: 'text-success',
+            danger: 'text-danger',
+            caution: 'text-caution',
+            inverse: 'text-foreground-inverse',
         },
         size: {
             '2xs': 'text-[10px]',

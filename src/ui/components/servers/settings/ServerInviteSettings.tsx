@@ -103,13 +103,13 @@ export const ServerInviteSettings: React.FC<ServerInviteSettingsProps> = ({
             </div>
 
             {/* Create Invite Form */}
-            <div className="p-6 rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-bg-subtle)] space-y-6">
+            <div className="space-y-6 rounded-lg border border-border-subtle bg-bg-subtle p-6">
                 <Heading level={3}>Create New Invite</Heading>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
                     <div className="space-y-2">
                         <label
-                            className="text-xs font-bold text-[var(--color-muted-foreground)] uppercase tracking-wider"
+                            className="text-xs font-bold tracking-wider text-muted-foreground uppercase"
                             htmlFor="custom-path"
                         >
                             Custom Path (Vanity)
@@ -127,7 +127,7 @@ export const ServerInviteSettings: React.FC<ServerInviteSettingsProps> = ({
 
                     <div className="space-y-2">
                         <label
-                            className="text-xs font-bold text-[var(--color-muted-foreground)] uppercase tracking-wider"
+                            className="text-xs font-bold tracking-wider text-muted-foreground uppercase"
                             htmlFor="max-uses"
                         >
                             Max Uses
@@ -148,13 +148,13 @@ export const ServerInviteSettings: React.FC<ServerInviteSettingsProps> = ({
 
                     <div className="space-y-2">
                         <label
-                            className="text-xs font-bold text-[var(--color-muted-foreground)] uppercase tracking-wider"
+                            className="text-xs font-bold tracking-wider text-muted-foreground uppercase"
                             htmlFor="expires-in"
                         >
                             Expire After
                         </label>
                         <select
-                            className="w-full h-10 px-3 rounded-md bg-[var(--color-input-bg)] border border-[var(--color-input-border)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] transition-all"
+                            className="border-input-border bg-input-bg h-10 w-full rounded-md border px-3 text-sm transition-all focus:ring-2 focus:ring-primary focus:outline-none"
                             id="expires-in"
                             value={expiresIn}
                             onChange={(e) =>
@@ -179,7 +179,7 @@ export const ServerInviteSettings: React.FC<ServerInviteSettingsProps> = ({
                         variant="primary"
                         onClick={handleCreateInvite}
                     >
-                        <Plus className="w-4 h-4 mr-2" />
+                        <Plus className="mr-2 h-4 w-4" />
                         Generate Invite
                     </Button>
                 </div>
@@ -190,7 +190,7 @@ export const ServerInviteSettings: React.FC<ServerInviteSettingsProps> = ({
                 <Heading level={3}>Active Invites ({invites.length})</Heading>
 
                 {invites.length === 0 ? (
-                    <div className="py-12 flex flex-col items-center justify-center text-center opacity-50">
+                    <div className="flex flex-col items-center justify-center py-12 text-center opacity-50">
                         <Text className="mb-1" size="lg" weight="medium">
                             No active invites
                         </Text>
@@ -236,7 +236,7 @@ export const ServerInviteSettings: React.FC<ServerInviteSettingsProps> = ({
                                                     )
                                                 }
                                             >
-                                                <Copy className="w-4 h-4" />
+                                                <Copy className="h-4 w-4" />
                                             </Button>
                                             <Button
                                                 size="sm"
@@ -246,7 +246,7 @@ export const ServerInviteSettings: React.FC<ServerInviteSettingsProps> = ({
                                                     handleDelete(invite._id)
                                                 }
                                             >
-                                                <Trash2 className="w-4 h-4 text-[var(--color-status-error)]" />
+                                                <Trash2 className="text-status-error h-4 w-4" />
                                             </Button>
                                         </div>
                                     </TableCell>

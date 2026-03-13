@@ -7,7 +7,7 @@ import { Button } from '@/ui/components/common/Button';
 import { cn } from '@/utils/cn';
 
 const inputVariants = cva(
-    'w-full text-foreground placeholder:text-placeholder transition-all duration-200 outline-none disabled:cursor-not-allowed disabled:opacity-50',
+    'w-full text-foreground transition-all duration-200 outline-none placeholder:text-placeholder disabled:cursor-not-allowed disabled:opacity-50',
     {
         variants: {
             variant: {
@@ -78,13 +78,13 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
 
         return (
             <div
-                className="group relative flex items-center w-full"
+                className="group relative flex w-full items-center"
                 style={{ minWidth, maxWidth, ...props.style }}
             >
                 <input
                     className={cn(
                         inputVariants({ variant, size, className }),
-                        isNumber && 'pr-9 [appearance:textfield]',
+                        isNumber && '[appearance:textfield] pr-9',
                     )}
                     disabled={disabled || undefined}
                     ref={internalRef}
@@ -94,9 +94,9 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
                 />
 
                 {isNumber && !disabled && (
-                    <div className="absolute right-1 flex flex-col gap-[1px] opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity">
+                    <div className="absolute right-1 flex flex-col gap-[1px] opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100">
                         <Button
-                            className="h-4 w-5 p-0 hover:bg-white/10 rounded-sm text-foreground-muted hover:text-foreground transition-colors border-none bg-transparent shadow-none"
+                            className="text-foreground-muted h-4 w-5 rounded-sm border-none bg-transparent p-0 shadow-none transition-colors hover:bg-white/10 hover:text-foreground"
                             size="sm"
                             type="button"
                             variant="ghost"
@@ -105,7 +105,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
                             <ChevronUp size={14} />
                         </Button>
                         <Button
-                            className="h-4 w-5 p-0 hover:bg-white/10 rounded-sm text-foreground-muted hover:text-foreground transition-colors border-none bg-transparent shadow-none"
+                            className="text-foreground-muted h-4 w-5 rounded-sm border-none bg-transparent p-0 shadow-none transition-colors hover:bg-white/10 hover:text-foreground"
                             size="sm"
                             type="button"
                             variant="ghost"

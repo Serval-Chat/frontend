@@ -27,7 +27,7 @@ export const AdminOverview = (): ReactNode => {
 
     if (error || !stats) {
         return (
-            <div className="flex items-center justify-center min-h-[400px]">
+            <div className="flex min-h-[400px] items-center justify-center">
                 <AdminErrorDisplay
                     error={error}
                     title="Statistics Unavailable"
@@ -37,7 +37,7 @@ export const AdminOverview = (): ReactNode => {
     }
 
     return (
-        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+        <div className="animate-in fade-in slide-in-from-bottom-4 space-y-8 duration-700">
             <div className="grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-6">
                 <StatCard
                     icon={<Users size={20} />}

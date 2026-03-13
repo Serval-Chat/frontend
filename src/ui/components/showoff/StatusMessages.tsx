@@ -10,7 +10,7 @@ import { SHOWOFF_SECTIONS } from './config';
 export function StatusMessages(): ReactNode {
     return (
         <DemoSection id={SHOWOFF_SECTIONS.status} title="Status Messages">
-            <Stack className="max-w-sm w-full">
+            <Stack className="w-full max-w-sm">
                 <DemoItem id="status-error" title="Error Message">
                     <StatusMessage
                         message="Something went wrong. Please try again."

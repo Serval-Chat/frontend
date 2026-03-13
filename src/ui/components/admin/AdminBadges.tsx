@@ -161,11 +161,11 @@ const BadgeEditor = ({
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     <div className="space-y-2">
                         <Text
                             as="label"
-                            className="block text-xs font-bold uppercase text-muted-foreground tracking-wider"
+                            className="block text-xs font-bold tracking-wider text-muted-foreground uppercase"
                         >
                             ID
                         </Text>
@@ -182,7 +182,7 @@ const BadgeEditor = ({
                     <div className="space-y-2">
                         <Text
                             as="label"
-                            className="block text-xs font-bold uppercase text-muted-foreground tracking-wider"
+                            className="block text-xs font-bold tracking-wider text-muted-foreground uppercase"
                         >
                             Name
                         </Text>
@@ -196,11 +196,11 @@ const BadgeEditor = ({
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     <div className="space-y-2">
                         <Text
                             as="label"
-                            className="block text-xs font-bold uppercase text-muted-foreground tracking-wider"
+                            className="block text-xs font-bold tracking-wider text-muted-foreground uppercase"
                         >
                             Icon
                         </Text>
@@ -216,7 +216,7 @@ const BadgeEditor = ({
                     <div className="space-y-2">
                         <Text
                             as="label"
-                            className="block text-xs font-bold uppercase text-muted-foreground tracking-wider"
+                            className="block text-xs font-bold tracking-wider text-muted-foreground uppercase"
                         >
                             Color
                         </Text>
@@ -233,7 +233,7 @@ const BadgeEditor = ({
                 <div className="space-y-2">
                     <Text
                         as="label"
-                        className="block text-xs font-bold uppercase text-muted-foreground tracking-wider"
+                        className="block text-xs font-bold tracking-wider text-muted-foreground uppercase"
                     >
                         Description
                     </Text>
@@ -244,7 +244,7 @@ const BadgeEditor = ({
                     />
                 </div>
 
-                <div className="flex justify-end gap-3 pt-4 border-t border-border-subtle">
+                <div className="flex justify-end gap-3 border-t border-border-subtle pt-4">
                     <Button variant="ghost" onClick={onClose}>
                         Cancel
                     </Button>
@@ -272,7 +272,7 @@ export const AdminBadges = (): ReactNode => {
     const [editingBadge, setEditingBadge] = useState<Badge | null>(null);
 
     return (
-        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+        <div className="animate-in fade-in slide-in-from-bottom-4 space-y-6 duration-700">
             <div className="flex items-start justify-between gap-4">
                 <div>
                     <Heading level={2} variant="admin-page">
@@ -295,7 +295,7 @@ export const AdminBadges = (): ReactNode => {
 
             <Table>
                 <TableHeader>
-                    <TableRow className="bg-bg-secondary/50 border-b border-border-subtle">
+                    <TableRow className="border-b border-border-subtle bg-bg-secondary/50">
                         <TableHead>Badge</TableHead>
                         <TableHead>ID</TableHead>
                         <TableHead>Description</TableHead>

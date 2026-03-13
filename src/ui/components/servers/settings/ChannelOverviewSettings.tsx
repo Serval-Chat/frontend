@@ -135,7 +135,7 @@ export const ChannelOverviewSettings: React.FC<
             <div className="space-y-8">
                 <div className="space-y-2">
                     <label
-                        className="text-xs font-bold text-[var(--color-muted-foreground)] uppercase tracking-wider"
+                        className="text-xs font-bold tracking-wider text-muted-foreground uppercase"
                         htmlFor="channel-name"
                     >
                         Channel Name
@@ -150,7 +150,7 @@ export const ChannelOverviewSettings: React.FC<
 
                 <div className="space-y-2">
                     <label
-                        className="text-xs font-bold text-[var(--color-muted-foreground)] uppercase tracking-wider"
+                        className="text-xs font-bold tracking-wider text-muted-foreground uppercase"
                         htmlFor="channel-description"
                     >
                         Description
@@ -166,7 +166,7 @@ export const ChannelOverviewSettings: React.FC<
                 {channel.type === 'link' && (
                     <div className="space-y-2">
                         <label
-                            className="text-xs font-bold text-[var(--color-muted-foreground)] uppercase tracking-wider"
+                            className="text-xs font-bold tracking-wider text-muted-foreground uppercase"
                             htmlFor="channel-link"
                         >
                             Channel URL
@@ -187,22 +187,22 @@ export const ChannelOverviewSettings: React.FC<
 
                 <div className="space-y-2">
                     <label
-                        className="text-xs font-bold text-[var(--color-muted-foreground)] uppercase tracking-wider"
+                        className="text-xs font-bold tracking-wider text-muted-foreground uppercase"
                         htmlFor="channel-icons"
                     >
                         Channel Icon
                     </label>
                     <div
-                        className="grid grid-cols-6 md:grid-cols-10 gap-2 max-h-48 overflow-y-auto p-3 border border-[var(--color-border-subtle)] rounded-md custom-scrollbar bg-[var(--color-bg-secondary)]"
+                        className="custom-scrollbar grid max-h-48 grid-cols-6 gap-2 overflow-y-auto rounded-md border border-border-subtle bg-bg-secondary p-3 md:grid-cols-10"
                         id="channel-icons"
                     >
                         {Object.entries(ICON_MAP).map(
                             ([key, IconComponent]) => (
                                 <Button
                                     className={cn(
-                                        'p-2 h-auto text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] border transition-all',
+                                        'h-auto border p-2 text-muted-foreground transition-all hover:text-foreground',
                                         selectedIcon === key
-                                            ? 'bg-[var(--color-primary-transparent)] border-[var(--color-primary)] text-[var(--color-primary)] shadow-[0_0_8px_var(--color-primary-transparent)]'
+                                            ? 'border-primary bg-primary/20 text-primary shadow-[0_0_8px_var(--color-primary)]'
                                             : 'border-transparent',
                                     )}
                                     key={key}
@@ -219,19 +219,15 @@ export const ChannelOverviewSettings: React.FC<
             </div>
 
             {/* Danger Zone */}
-            <div className="pt-10 space-y-6">
-                <div className="pb-4 border-b border-[var(--color-border-subtle)]">
-                    <Heading
-                        className="text-[var(--color-error)]"
-                        level={2}
-                        variant="section"
-                    >
+            <div className="space-y-6 pt-10">
+                <div className="border-b border-border-subtle pb-4">
+                    <Heading className="text-error" level={2} variant="section">
                         Danger Zone
                     </Heading>
                 </div>
 
-                <div className="rounded-lg border border-[var(--color-bg-secondary)] divide-y divide-[var(--color-border-subtle)]">
-                    <div className="p-4 flex items-center justify-between gap-4">
+                <div className="divide-y divide-border-subtle rounded-lg border border-bg-secondary">
+                    <div className="flex items-center justify-between gap-4 p-4">
                         <div className="space-y-1">
                             <Text as="p" variant="danger" weight="bold">
                                 Delete Channel
@@ -246,7 +242,7 @@ export const ChannelOverviewSettings: React.FC<
                             variant="danger"
                             onClick={() => setIsDeleteConfirmOpen(true)}
                         >
-                            <Trash2 className="w-4 h-4 mr-2" />
+                            <Trash2 className="mr-2 h-4 w-4" />
                             Delete Channel
                         </Button>
                     </div>
@@ -268,12 +264,12 @@ export const ChannelOverviewSettings: React.FC<
                 onClose={() => setIsDeleteConfirmOpen(false)}
             >
                 <div className="space-y-6">
-                    <div className="p-4 bg-[var(--color-status-error-bg)] border border-[var(--color-status-error)] rounded-md text-[var(--color-status-error)] text-sm">
+                    <div className="border-status-error bg-status-error-bg text-status-error rounded-md border p-4 text-sm">
                         Are you sure you want to delete{' '}
                         <span className="font-bold">#{channel.name}</span>? This
                         action cannot be undone.
                     </div>
-                    <div className="flex justify-end gap-3 pt-4 bg-[var(--color-bg-secondary)] -mx-6 -mb-6 p-6">
+                    <div className="-mx-6 -mb-6 flex justify-end gap-3 bg-bg-secondary p-6 pt-4">
                         <Button
                             variant="ghost"
                             onClick={() => setIsDeleteConfirmOpen(false)}

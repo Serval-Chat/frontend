@@ -29,7 +29,7 @@ const TOCItem: React.FC<{ section: TOCSection }> = ({ section }) => {
                 {hasChildren && (
                     <Button
                         className={cn(
-                            'w-4 h-4 min-w-0 p-0 flex items-center justify-center text-sm text-muted-foreground hover:text-muted-foreground-hover bg-transparent border-none shadow-none',
+                            'flex h-4 w-4 min-w-0 items-center justify-center border-none bg-transparent p-0 text-sm text-muted-foreground shadow-none hover:text-muted-foreground-hover',
                         )}
                         size="sm"
                         variant="ghost"
@@ -38,10 +38,10 @@ const TOCItem: React.FC<{ section: TOCSection }> = ({ section }) => {
                         {isOpen ? '▾' : '▸'}
                     </Button>
                 )}
-                {!hasChildren && <span className="w-4 h-4 shrink-0" />}
+                {!hasChildren && <span className="h-4 w-4 shrink-0" />}
                 <a
                     className={cn(
-                        'hover:text-primary hover:underline transition-colors duration-150 font-sans',
+                        'font-sans transition-colors duration-150 hover:text-primary hover:underline',
                     )}
                     href={`#${section.id}`}
                 >
@@ -50,7 +50,7 @@ const TOCItem: React.FC<{ section: TOCSection }> = ({ section }) => {
             </div>
 
             {hasChildren && isOpen && (
-                <ul className="ml-lg mt-xs space-y-xs">
+                <ul className="mt-xs ml-lg space-y-xs">
                     {section.children!.map((child) => (
                         <TOCItem key={child.id} section={child} />
                     ))}

@@ -18,10 +18,10 @@ export const Spoiler: React.FC<SpoilerProps> = ({ children, className }) => {
         <Box
             as="span"
             className={cn(
-                'inline-block rounded px-1 transition-colors cursor-pointer',
+                'inline-block cursor-pointer rounded px-1 transition-colors',
                 isRevealed
-                    ? 'bg-[var(--color-bg-secondary)]'
-                    : 'bg-[var(--color-background)] hover:brightness-110 select-none',
+                    ? 'bg-bg-secondary'
+                    : 'bg-background select-none hover:brightness-110',
                 className,
             )}
             onClick={() => setIsRevealed(true)}
