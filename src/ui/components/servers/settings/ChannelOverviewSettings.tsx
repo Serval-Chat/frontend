@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-import { Clock, Download, Loader2, ShieldCheck, Trash2 } from 'lucide-react';
+import { Clock, Download, Loader2, Trash2 } from 'lucide-react';
 
 import {
     useDeleteChannel,
@@ -246,8 +246,10 @@ export const ChannelOverviewSettings: React.FC<
                         <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
                             <div className="space-y-2">
                                 <div className="flex items-center gap-2">
-                                    <ShieldCheck className="h-4 w-4 text-primary" />
-                                    <Text weight="bold">Secure Export</Text>
+                                    <Download className="h-4 w-4 text-primary" />
+                                    <Text weight="bold">
+                                        Export channel messages
+                                    </Text>
                                 </div>
                                 <Text size="xs" variant="muted">
                                     Only people with export permissions can
