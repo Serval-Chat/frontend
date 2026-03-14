@@ -1,12 +1,15 @@
 import React, { useState } from 'react';
 
-import { Trash2 } from 'lucide-react';
+import { Clock, Download, Loader2, ShieldCheck, Trash2 } from 'lucide-react';
 
 import {
     useDeleteChannel,
+    useExportChannelState,
+    useRequestExportChannel,
     useUpdateChannel,
 } from '@/api/servers/servers.queries';
 import { type Channel } from '@/api/servers/servers.types';
+import { usePermissions } from '@/hooks/usePermissions';
 import { Button } from '@/ui/components/common/Button';
 import { Heading } from '@/ui/components/common/Heading';
 import { Input } from '@/ui/components/common/Input';
@@ -45,6 +48,14 @@ export const ChannelOverviewSettings: React.FC<
     const { mutate: deleteChannel, isPending: isDeleting } = useDeleteChannel(
         channel.serverId,
     );
+
+    const { hasPermission } = usePermissions(channel.serverId, channel._id);
+    const canExport = hasPermission('export_channel_messages');
+
+    const { data: exportState, isLoading: isLoadingExportState } =
+        useExportChannelState(channel.serverId, channel._id);
+    const { mutate: requestExport, isPending: isRequestingExport } =
+        useRequestExportChannel(channel.serverId, channel._id);
 
     const [prevChannelId, setPrevChannelId] = useState(channel._id);
     if (channel._id !== prevChannelId) {
@@ -217,6 +228,90 @@ export const ChannelOverviewSettings: React.FC<
                     </div>
                 </div>
             </div>
+
+            {/* Export Messages Section */}
+            {canExport && channel.type === 'text' && (
+                <div className="space-y-6 pt-10">
+                    <div className="border-b border-border-subtle pb-4">
+                        <Heading level={2} variant="section">
+                            Channel Export
+                        </Heading>
+                        <Text variant="muted">
+                            Export all messages from this channel to a JSON
+                            file.
+                        </Text>
+                    </div>
+
+                    <div className="rounded-lg border border-border-subtle bg-bg-secondary p-6">
+                        <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+                            <div className="space-y-2">
+                                <div className="flex items-center gap-2">
+                                    <ShieldCheck className="h-4 w-4 text-primary" />
+                                    <Text weight="bold">Secure Export</Text>
+                                </div>
+                                <Text size="xs" variant="muted">
+                                    Only people with export permissions can
+                                    trigger this. Exports are limited to one per
+                                    channel every 7 days.
+                                </Text>
+
+                                {exportState?.state === 'cooling_down' &&
+                                    exportState.nextExportAt && (
+                                        <div className="bg-warning/10 text-warning mt-2 flex items-center gap-2 rounded-md p-2">
+                                            <Clock className="h-3.5 w-3.5" />
+                                            <Text size="xs" weight="medium">
+                                                Export cooling down. Next
+                                                available:{' '}
+                                                {new Date(
+                                                    exportState.nextExportAt,
+                                                ).toLocaleDateString()}
+                                            </Text>
+                                        </div>
+                                    )}
+
+                                {exportState?.state === 'in_progress' && (
+                                    <div className="mt-2 flex items-center gap-2 rounded-md bg-primary/10 p-2 text-primary">
+                                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                        <Text size="xs" weight="medium">
+                                            An export is currently in
+                                            progress...
+                                        </Text>
+                                    </div>
+                                )}
+                            </div>
+
+                            <Button
+                                className="min-w-[160px]"
+                                disabled={
+                                    exportState?.state !== 'available' ||
+                                    isRequestingExport
+                                }
+                                loading={
+                                    isRequestingExport || isLoadingExportState
+                                }
+                                onClick={() => requestExport()}
+                            >
+                                {exportState?.state === 'in_progress' ? (
+                                    <>
+                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                        Exporting...
+                                    </>
+                                ) : exportState?.state === 'cooling_down' ? (
+                                    <>
+                                        <Clock className="mr-2 h-4 w-4" />
+                                        Rate Limited
+                                    </>
+                                ) : (
+                                    <>
+                                        <Download className="mr-2 h-4 w-4" />
+                                        Export Messages
+                                    </>
+                                )}
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Danger Zone */}
             <div className="space-y-6 pt-10">

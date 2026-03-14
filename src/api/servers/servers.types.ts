@@ -68,6 +68,7 @@ export interface RolePermissions {
     manageReactions: boolean;
     addReactions: boolean;
     viewChannels: boolean;
+    export_channel_messages: boolean;
 }
 
 export interface Role {

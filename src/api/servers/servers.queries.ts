@@ -67,6 +67,46 @@ export const useUnreadStatus = (): UseQueryResult<
     return query;
 };
 
+export const useExportChannelState = (
+    serverId: string,
+    channelId: string,
+): UseQueryResult<
+    {
+        state: 'available' | 'in_progress' | 'cooling_down';
+        lastExportAt?: string;
+        nextExportAt?: string;
+    },
+    Error
+> =>
+    useQuery({
+        queryKey: ['servers', 'export_state', serverId, channelId],
+        queryFn: () => serversApi.getExportState(serverId, channelId),
+        enabled: !!serverId && !!channelId,
+        refetchInterval: (query) =>
+            query.state.data?.state === 'in_progress' ? 5000 : false,
+    });
+
+export const useRequestExportChannel = (
+    serverId: string,
+    channelId: string,
+): UseMutationResult<{ message: string; jobId: string }, Error, void> => {
+    const queryClient = useQueryClient();
+    const { showToast } = useToast();
+
+    return useMutation({
+        mutationFn: () => serversApi.requestExport(serverId, channelId),
+        onSuccess: () => {
+            void queryClient.invalidateQueries({
+                queryKey: ['servers', 'export_state', serverId, channelId],
+            });
+            showToast('Export requested successfully', 'success');
+        },
+        onError: (error) => {
+            showToast(error.message || 'Failed to request export', 'error');
+        },
+    });
+};
+
 export const useCreateServer = (): UseMutationResult<
     { server: Server; channel: Channel },
     Error,

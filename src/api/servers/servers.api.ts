@@ -424,4 +424,31 @@ export const serversApi = {
     markServerRead: async (serverId: string): Promise<void> => {
         await apiClient.post(`/api/v1/servers/${serverId}/ack`);
     },
+
+    getExportState: async (
+        serverId: string,
+        channelId: string,
+    ): Promise<{
+        state: 'available' | 'in_progress' | 'cooling_down';
+        lastExportAt?: string;
+        nextExportAt?: string;
+    }> => {
+        const response = await apiClient.get<{
+            state: 'available' | 'in_progress' | 'cooling_down';
+            lastExportAt?: string;
+            nextExportAt?: string;
+        }>(`/api/v1/servers/${serverId}/channels/${channelId}/export-state`);
+        return response.data;
+    },
+
+    requestExport: async (
+        serverId: string,
+        channelId: string,
+    ): Promise<{ message: string; jobId: string }> => {
+        const response = await apiClient.post<{
+            message: string;
+            jobId: string;
+        }>(`/api/v1/servers/${serverId}/channels/${channelId}/export`);
+        return response.data;
+    },
 };
