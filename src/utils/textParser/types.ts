@@ -33,6 +33,7 @@ export const ParserFeature = {
     ADMONITION: 'ADMONITION',
     MERMAID: 'MERMAID',
     UNORDERED_LIST: 'UNORDERED_LIST',
+    KLIPY: 'KLIPY',
 } as const;
 
 export type ParserFeature = (typeof ParserFeature)[keyof typeof ParserFeature];
@@ -68,7 +69,8 @@ export type ASTNodeType =
     | 'blockquote'
     | 'admonition'
     | 'mermaid'
-    | 'unordered_list';
+    | 'unordered_list'
+    | 'klipy';
 
 export interface TextNode {
     type: 'text';
@@ -114,6 +116,11 @@ export interface LinkNode {
     type: 'link';
     url: string;
     text?: string;
+}
+export interface KlipyNode {
+    type: 'klipy';
+    klipyId: string;
+    url: string;
 }
 
 export interface H1Node {
@@ -277,4 +284,5 @@ export type ASTNode =
     | BlockquoteNode
     | AdmonitionNode
     | MermaidNode
-    | UnorderedListNode;
+    | UnorderedListNode
+    | KlipyNode;

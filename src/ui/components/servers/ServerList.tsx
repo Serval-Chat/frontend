@@ -146,7 +146,14 @@ const ServerFolderWrapper: React.FC<{
             dragListener={false}
             value={props.folder}
         >
-            <ServerFolder {...props} dragControls={dragControls} />
+            <ServerFolder
+                activeServerId={props.activeServerId}
+                dragControls={dragControls}
+                folder={props.folder}
+                servers={props.servers}
+                unreadServers={props.unreadServers}
+                onServerClick={props.onServerClick}
+            />
         </Reorder.Item>
     );
 };
@@ -171,7 +178,13 @@ const ServerItemWrapper: React.FC<{
                 className="w-full"
                 onPointerDown={(e) => dragControls.start(e)}
             >
-                <ServerItem {...props} />
+                <ServerItem
+                    isActive={props.isActive}
+                    isUnread={props.isUnread}
+                    pingCount={props.pingCount}
+                    server={props.server}
+                    onClick={props.onClick}
+                />
             </div>
         </Reorder.Item>
     );

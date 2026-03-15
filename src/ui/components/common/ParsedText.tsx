@@ -3,6 +3,7 @@ import React from 'react';
 
 import { ChannelLink } from '@/ui/components/chat/ChannelLink';
 import { FileEmbed } from '@/ui/components/chat/FileEmbed';
+import { GifPlayer } from '@/ui/components/chat/GifPlayer';
 import { InviteLink } from '@/ui/components/chat/InviteLink';
 import { Box } from '@/ui/components/layout/Box';
 import { cn } from '@/utils/cn';
@@ -526,6 +527,15 @@ export const ParsedText: React.FC<ParsedTextProps> = ({
                                     />
                                 ) : null}
                             </Admonition>
+                        );
+
+                    case 'klipy':
+                        return (
+                            <GifPlayer
+                                key={idx}
+                                klipyId={node.klipyId}
+                                url={node.url}
+                            />
                         );
 
                     default:

@@ -266,6 +266,7 @@ function renderNode(
         case 'strikethrough':
         case 'admonition':
         case 'unordered_list':
+        case 'klipy':
         default:
             return null;
     }

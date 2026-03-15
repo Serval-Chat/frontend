@@ -43,6 +43,7 @@ export const ParserPresets = {
             ParserFeature.ADMONITION,
             ParserFeature.MERMAID,
             ParserFeature.UNORDERED_LIST,
+            ParserFeature.KLIPY,
         ],
     },
     BIO: {
@@ -1006,6 +1007,17 @@ export class TextParser {
         }
 
         if (url) {
+            const klipyRegex =
+                /^https?:\/\/(?:www\.)?klipy\.com\/g\/([a-zA-Z0-9_-]+)/;
+            const klipyMatch = url.match(klipyRegex);
+
+            if (
+                klipyMatch &&
+                this.options.features.includes(ParserFeature.KLIPY)
+            ) {
+                return { type: 'klipy', klipyId: klipyMatch[1], url };
+            }
+
             return { type: 'link', url, text: url };
         }
 

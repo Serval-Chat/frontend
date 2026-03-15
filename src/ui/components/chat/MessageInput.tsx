@@ -20,7 +20,7 @@ import {
     CLEAR_EDITOR_COMMAND,
     type LexicalEditor,
 } from 'lexical';
-import { Plus, Send, Smile, X } from 'lucide-react';
+import { FileImage, Plus, Send, Smile, X } from 'lucide-react';
 
 import { useChannelMessages, useUserMessages } from '@/api/chat/chat.queries';
 import type { ChatMessage } from '@/api/chat/chat.types';
@@ -45,9 +45,11 @@ import { Text } from '@/ui/components/common/Text';
 import { useToast } from '@/ui/components/common/Toast';
 import { EmojiPicker } from '@/ui/components/emoji/EmojiPicker';
 import { Box } from '@/ui/components/layout/Box';
+import { cn } from '@/utils/cn';
 import { ParserPresets, parseText } from '@/utils/textParser/parser';
 
 import { FileQueue } from './FileQueue';
+import { GifPicker } from './GifPicker';
 import { $createChipNode, ChipNode } from './lexical/ChipNode';
 import { LexicalAutocompletePlugin } from './lexical/LexicalAutocompletePlugin';
 import { LexicalSubmitPlugin } from './lexical/LexicalSubmitPlugin';
@@ -100,6 +102,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
 }) => {
     const [isUploading, setIsUploading] = useState(false);
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+    const [showGifPicker, setShowGifPicker] = useState(false);
     const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
     const [hasText, setHasText] = useState(false);
     const [editor, setEditor] = useState<LexicalEditor | null>(null);
@@ -434,13 +437,49 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                 </div>
 
                 <Button
-                    className="mb-1 h-8 w-8 shrink-0 p-0"
+                    className={cn(
+                        'mb-1 h-8 w-8 shrink-0 p-0',
+                        showEmojiPicker && 'text-primary',
+                    )}
                     size="sm"
                     variant="ghost"
-                    onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                    onClick={() => {
+                        setShowEmojiPicker(!showEmojiPicker);
+                        setShowGifPicker(false);
+                    }}
                 >
                     <Smile size={20} />
                 </Button>
+
+                <Box className="relative">
+                    <Button
+                        className={cn(
+                            'mb-1 h-8 w-8 shrink-0 p-0',
+                            showGifPicker && 'text-primary',
+                        )}
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => {
+                            setShowGifPicker(!showGifPicker);
+                            setShowEmojiPicker(false);
+                        }}
+                    >
+                        <FileImage size={20} />
+                    </Button>
+                    {showGifPicker && (
+                        <Box className="absolute right-0 bottom-full z-50 mb-2">
+                            <GifPicker
+                                onClose={() => setShowGifPicker(false)}
+                                onSelect={(url) => {
+                                    if (editor) {
+                                        void handleSendMessage(url);
+                                    }
+                                    setShowGifPicker(false);
+                                }}
+                            />
+                        </Box>
+                    )}
+                </Box>
 
                 {(hasText || files.length > 0) && isMobile && (
                     <Button
