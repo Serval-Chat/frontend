@@ -33,6 +33,7 @@ interface NavState {
     lastSelectedFriendId: string | null;
     mobileHomeTab: 'friends' | 'requests';
     showMobileMemberList: boolean;
+    openedFolders: string[];
 }
 
 const initialState: NavState = {
@@ -45,6 +46,7 @@ const initialState: NavState = {
     lastSelectedFriendId: null,
     mobileHomeTab: 'friends',
     showMobileMemberList: false,
+    openedFolders: [],
 };
 
 const navSlice = createSlice({
@@ -102,6 +104,14 @@ const navSlice = createSlice({
         toggleMobileMemberList: (state) => {
             state.showMobileMemberList = !state.showMobileMemberList;
         },
+        toggleFolder: (state, action: PayloadAction<string>) => {
+            const index = state.openedFolders.indexOf(action.payload);
+            if (index !== -1) {
+                state.openedFolders.splice(index, 1);
+            } else {
+                state.openedFolders.push(action.payload);
+            }
+        },
     },
 });
 
@@ -113,5 +123,6 @@ export const {
     setTargetMessageId,
     toggleMobileHomeTab,
     toggleMobileMemberList,
+    toggleFolder,
 } = navSlice.actions;
 export const navReducer = navSlice.reducer;

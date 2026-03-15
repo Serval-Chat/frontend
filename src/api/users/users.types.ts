@@ -40,6 +40,17 @@ export interface UserSettings {
     otherMessageColor?: string;
 }
 
+export interface ServerFolder {
+    id: string;
+    name: string;
+    color: string;
+    serverIds: string[];
+}
+
+export interface ServerSettings {
+    order: (string | ServerFolder)[];
+}
+
 export interface AdminPermissions {
     adminAccess?: boolean;
     viewUsers?: boolean;
@@ -86,4 +97,5 @@ export interface User {
 
     settings?: UserSettings;
     banner?: string;
+    serverSettings?: ServerSettings;
 }

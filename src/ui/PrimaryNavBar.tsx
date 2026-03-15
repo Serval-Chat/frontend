@@ -10,6 +10,7 @@ import { toggleMobileHomeTab } from '@/store/slices/navSlice';
 import { useMobileSwipeContext } from '@/ui/MobileSwipeContext';
 import { Divider } from '@/ui/components/common/Divider';
 import { IconButton } from '@/ui/components/common/IconButton';
+import { Tooltip } from '@/ui/components/common/Tooltip';
 import { Box } from '@/ui/components/layout/Box';
 import { PingInbox } from '@/ui/components/pings/PingInbox';
 import { CreateServerModal } from '@/ui/components/servers/CreateServerModal';
@@ -71,12 +72,14 @@ export const PrimaryNavBar: React.FC = () => {
             )}
         >
             <Box>
-                <IconButton
-                    badgeCount={totalUnreadDms}
-                    icon={Home}
-                    isActive={navMode === 'friends'}
-                    onClick={handleHomeClick}
-                />
+                <Tooltip content="Direct Messages">
+                    <IconButton
+                        badgeCount={totalUnreadDms}
+                        icon={Home}
+                        isActive={navMode === 'friends'}
+                        onClick={handleHomeClick}
+                    />
+                </Tooltip>
             </Box>
 
             <Divider />
@@ -84,30 +87,36 @@ export const PrimaryNavBar: React.FC = () => {
             <ServerList />
 
             <Box>
-                <IconButton
-                    className="bg-bg-subtle text-green-500 hover:bg-bg-subtle-hover hover:text-green-400"
-                    icon={Plus}
-                    onClick={() => setShowCreateServer(true)}
-                />
+                <Tooltip content="Add a Server">
+                    <IconButton
+                        className="bg-bg-subtle text-green-500 hover:bg-bg-subtle-hover hover:text-green-400"
+                        icon={Plus}
+                        onClick={() => setShowCreateServer(true)}
+                    />
+                </Tooltip>
             </Box>
 
             <Box>
-                <IconButton
-                    className="bg-bg-subtle text-text-subtle hover:bg-bg-subtle-hover hover:text-text-normal"
-                    icon={Compass}
-                    onClick={() => setShowJoinServer(true)}
-                />
+                <Tooltip content="Explore Servers">
+                    <IconButton
+                        className="bg-bg-subtle text-text-subtle hover:bg-bg-subtle-hover hover:text-text-normal"
+                        icon={Compass}
+                        onClick={() => setShowJoinServer(true)}
+                    />
+                </Tooltip>
             </Box>
 
             <Divider />
 
             <Box className="relative">
-                <IconButton
-                    badgeCount={pingCount}
-                    icon={Bell}
-                    isActive={showInbox}
-                    onClick={() => setShowInbox(!showInbox)}
-                />
+                <Tooltip content="Inbox">
+                    <IconButton
+                        badgeCount={pingCount}
+                        icon={Bell}
+                        isActive={showInbox}
+                        onClick={() => setShowInbox(!showInbox)}
+                    />
+                </Tooltip>
 
                 <AnimatePresence>
                     {showInbox && (
@@ -125,7 +134,9 @@ export const PrimaryNavBar: React.FC = () => {
             </Box>
 
             <Box>
-                <IconButton icon={Settings} onClick={handleSettingsClick} />
+                <Tooltip content="User Settings">
+                    <IconButton icon={Settings} onClick={handleSettingsClick} />
+                </Tooltip>
             </Box>
 
             <SettingsModal

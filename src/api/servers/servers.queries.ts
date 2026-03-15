@@ -11,6 +11,7 @@ import { AxiosError } from 'axios';
 import { useDispatch } from 'react-redux';
 
 import type { Emoji } from '@/api/emojis/emojis.types';
+import type { ServerSettings, User } from '@/api/users/users.types';
 import { setUnreadServers } from '@/store/slices/unreadSlice';
 import { useToast } from '@/ui/components/common/Toast';
 
@@ -893,6 +894,24 @@ export const useMarkServerRead = (): UseMutationResult<void, Error, string> => {
             void queryClient.invalidateQueries({
                 queryKey: SERVERS_QUERY_KEYS.details(serverId),
             });
+        },
+    });
+};
+
+export const useUpdateServerSettings = (): UseMutationResult<
+    { message: string; serverSettings: ServerSettings },
+    Error,
+    ServerSettings
+> => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (settings: ServerSettings) =>
+            serversApi.updateServerSettings(settings),
+        onSuccess: (data) => {
+            queryClient.setQueryData<User>(['me'], (old) =>
+                old ? { ...old, serverSettings: data.serverSettings } : old,
+            );
+            void queryClient.invalidateQueries({ queryKey: ['me'] });
         },
     });
 };

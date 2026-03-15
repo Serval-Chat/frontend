@@ -9,6 +9,7 @@ import {
     FRIEND_REQUESTS_QUERY_KEY,
 } from '@/api/friends/friends.queries';
 import type { Friend } from '@/api/friends/friends.types';
+import type { PingNotification } from '@/api/pings/pings.types';
 import { serversApi } from '@/api/servers/servers.api';
 import { SERVERS_QUERY_KEYS } from '@/api/servers/servers.queries';
 import type { ServerMember } from '@/api/servers/servers.types';
@@ -145,6 +146,36 @@ export const setupGlobalWsHandlers = (
             if (payload.serverId) {
                 dispatch(incrementServerPing({ serverId: payload.serverId }));
             }
+
+            queryClient.setQueryData<{ pings: PingNotification[] }>(
+                ['pings'],
+                (old) => {
+                    const newPing: PingNotification = {
+                        id: payload.message.messageId,
+                        type: (payload.type === 'reaction'
+                            ? 'system'
+                            : 'mention') as PingNotification['type'],
+                        sender: payload.sender,
+                        senderId: payload.senderId,
+                        serverId: payload.serverId,
+                        channelId: payload.channelId,
+                        message: payload.message as unknown as Record<
+                            string,
+                            unknown
+                        >,
+                        timestamp: Date.now(),
+                    };
+
+                    if (!old) return { pings: [newPing] };
+
+                    if (old.pings.some((p) => p.id === newPing.id)) return old;
+
+                    return {
+                        ...old,
+                        pings: [newPing, ...old.pings],
+                    };
+                },
+            );
         }),
     );
 
