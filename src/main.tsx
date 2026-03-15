@@ -9,6 +9,7 @@ import { Admin } from '@/pages/Admin';
 import { App } from '@/pages/App';
 import { Chat } from '@/pages/Chat';
 import { Downloads } from '@/pages/Downloads';
+import { EmbedBuilder } from '@/pages/EmbedBuilder';
 import { ForgotPassword } from '@/pages/ForgotPassword';
 import { Invite } from '@/pages/Invite';
 import { Login } from '@/pages/Login';
@@ -147,6 +148,10 @@ createRoot(document.getElementById('root')!).render(
                                             </WebOnly>
                                         }
                                         path="/showoff"
+                                    />
+                                    <Route
+                                        element={<EmbedBuilder />}
+                                        path="/embed-builder"
                                     />
                                 </Route>
                                 <Route element={<AdminRoute />}>

@@ -80,6 +80,39 @@ export const ParserPresets = {
             ParserFeature.UNORDERED_LIST,
         ],
     },
+    EMBED: {
+        features: [
+            ParserFeature.BOLD,
+            ParserFeature.ITALIC,
+            ParserFeature.BOLD_ITALIC,
+            ParserFeature.UNDERLINE,
+            ParserFeature.STRIKETHROUGH,
+            ParserFeature.INLINE_CODE,
+            ParserFeature.CODE_BLOCK,
+            ParserFeature.LINK,
+            ParserFeature.BLOCKQUOTE,
+            ParserFeature.ORDERED_LIST,
+            ParserFeature.UNORDERED_LIST,
+            ParserFeature.SPOILER,
+            ParserFeature.H1,
+            ParserFeature.H2,
+            ParserFeature.H3,
+            ParserFeature.SUBTEXT,
+            ParserFeature.THEMATIC_BREAK,
+        ],
+    },
+    EMBED_INLINE: {
+        features: [
+            ParserFeature.BOLD,
+            ParserFeature.ITALIC,
+            ParserFeature.BOLD_ITALIC,
+            ParserFeature.UNDERLINE,
+            ParserFeature.STRIKETHROUGH,
+            ParserFeature.INLINE_CODE,
+            ParserFeature.LINK,
+            ParserFeature.SPOILER,
+        ],
+    },
 } as const;
 
 export class TextParser {
