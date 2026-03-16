@@ -524,6 +524,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                                     selection.insertNodes([chip]);
                                 }
                             });
+                            editor?.focus();
                         }}
                         onEmojiSelect={(emoji) => {
                             editor?.update(() => {
@@ -532,6 +533,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                                     selection.insertText(emoji);
                                 }
                             });
+                            editor?.focus();
                         }}
                     />
                 </div>

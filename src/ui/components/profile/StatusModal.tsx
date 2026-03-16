@@ -36,6 +36,7 @@ export const StatusModal: React.FC<StatusModalProps> = ({
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
     const emojiPickerRef = useRef<HTMLDivElement>(null);
     const triggerRef = useRef<HTMLButtonElement>(null);
+    const inputRef = useRef<HTMLInputElement>(null);
     const { customCategories } = useCustomEmojis();
     const { mutate: updateStatus, isPending } = useUpdateStatus();
 
@@ -90,11 +91,13 @@ export const StatusModal: React.FC<StatusModalProps> = ({
     const handleEmojiSelect = (emoji: string): void => {
         setStatusEmoji(emoji);
         setShowEmojiPicker(false);
+        inputRef.current?.focus();
     };
 
     const handleCustomEmojiSelect = (emoji: { id: string }): void => {
         setStatusEmoji(emoji.id);
         setShowEmojiPicker(false);
+        inputRef.current?.focus();
     };
 
     const renderEmojiPreview = (): React.ReactNode => {
@@ -151,6 +154,7 @@ export const StatusModal: React.FC<StatusModalProps> = ({
                         className="h-9 flex-1 border-none bg-transparent focus:ring-0"
                         maxLength={120}
                         placeholder="What's happening?"
+                        ref={inputRef}
                         value={statusText}
                         onChange={(e) => setStatusText(e.target.value)}
                         onKeyDown={(e) => {

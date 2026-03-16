@@ -113,6 +113,7 @@ export const MessageEdit: React.FC<MessageEditProps> = ({
                     selection.insertText(emoji);
                 }
             });
+            editorInstance.focus();
         }
         setShowEmojiPicker(false);
     };
@@ -136,6 +137,7 @@ export const MessageEdit: React.FC<MessageEditProps> = ({
                     selection.insertText(' ');
                 }
             });
+            editorInstance.focus();
         }
         setShowEmojiPicker(false);
     };
