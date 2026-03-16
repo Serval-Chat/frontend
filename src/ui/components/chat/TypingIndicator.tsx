@@ -29,21 +29,13 @@ export const TypingIndicator: React.FC<TypingIndicatorProps> = ({
     return (
         <Box
             className={cn(
-                'min-h-[36px] px-4 py-2 transition-all duration-300 ease-in-out',
-                isTyping
-                    ? 'bg-gradient-to-r from-primary/10 to-transparent opacity-100'
-                    : 'bg-transparent opacity-0',
+                'pointer-events-none absolute right-0 bottom-0 left-0 z-10',
+                'px-4 pt-6 pb-2 transition-opacity duration-300 ease-in-out',
+                'bg-gradient-to-t from-[var(--chat-bg)] via-[var(--chat-bg)]/80 to-transparent',
+                isTyping ? 'opacity-100' : 'opacity-0',
             )}
         >
-            <Text
-                className={cn(
-                    'transition-opacity duration-300',
-                    isTyping ? 'opacity-100' : 'opacity-0',
-                )}
-                color="muted"
-                fontStyle="italic"
-                size="sm"
-            >
+            <Text color="muted" fontStyle="italic" size="sm">
                 {getTypingText()}
             </Text>
         </Box>

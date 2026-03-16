@@ -254,7 +254,7 @@ export const MainChat: React.FC = () => {
                 </Box>
             )}
 
-            <Box className="flex min-h-0 flex-1 flex-col">
+            <Box className="relative flex min-h-0 flex-1 flex-col">
                 {isLoading ? (
                     <ChatLoadingState />
                 ) : (
@@ -274,9 +274,8 @@ export const MainChat: React.FC = () => {
                         onReplyToMessage={(msg) => setReplyingTo(msg)}
                     />
                 )}
+                <TypingIndicator typingUsers={typingUsers} />
             </Box>
-
-            <TypingIndicator typingUsers={typingUsers} />
             {canSendMessages ? (
                 <MessageInput
                     disableCustomFonts={serverDetails?.disableCustomFonts}
