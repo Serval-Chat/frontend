@@ -115,8 +115,35 @@ export const MessageInput: React.FC<MessageInputProps> = ({
     useEffect(() => {
         const handleResize = (): void => setIsMobile(window.innerWidth <= 768);
         window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
-    }, []);
+
+        const handleGlobalKeyDown = (e: KeyboardEvent): void => {
+            // don't refocus when already in input
+            if (
+                e.target instanceof HTMLInputElement ||
+                e.target instanceof HTMLTextAreaElement ||
+                (e.target as HTMLElement).isContentEditable
+            ) {
+                return;
+            }
+
+            // check if printable
+            if (e.key.length === 1 && !e.ctrlKey && !e.altKey && !e.metaKey) {
+                // focus editor
+                editor?.focus();
+
+                // close pickers if they are open
+                setShowEmojiPicker(false);
+                setShowGifPicker(false);
+            }
+        };
+
+        window.addEventListener('keydown', handleGlobalKeyDown);
+
+        return () => {
+            window.removeEventListener('resize', handleResize);
+            window.removeEventListener('keydown', handleGlobalKeyDown);
+        };
+    }, [editor]);
 
     const {
         files,
