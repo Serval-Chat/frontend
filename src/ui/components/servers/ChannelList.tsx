@@ -693,6 +693,7 @@ export const ChannelList: React.FC<ChannelListProps> = ({
                                         canManageChannels && !isMobile
                                     }
                                     key={item.id}
+                                    layout="position"
                                     value={item}
                                     onDragEnd={() => void handleDragEnd()}
                                     onDragStart={() => setActiveItemId(item.id)}
@@ -782,6 +783,7 @@ export const ChannelList: React.FC<ChannelListProps> = ({
                                         canManageChannels && !isMobile
                                     }
                                     key={item.id}
+                                    layout="position"
                                     value={item}
                                     onDragEnd={() => void handleDragEnd()}
                                     onDragStart={() => setActiveItemId(item.id)}

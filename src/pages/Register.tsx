@@ -52,7 +52,7 @@ export const Register: React.FC = () => {
                     <InputWrapper>
                         <Input
                             className="bg-background/50"
-                            placeholder="Login"
+                            placeholder="E-mail"
                             type="text"
                             value={login}
                             onChange={(e) => setLogin(e.target.value)}

@@ -57,7 +57,7 @@ export const Login: React.FC = () => {
                     <InputWrapper>
                         <Input
                             className="bg-background/50"
-                            placeholder="Login"
+                            placeholder="E-mail"
                             type="text"
                             value={loginInput}
                             onChange={(e) => setLoginInput(e.target.value)}
