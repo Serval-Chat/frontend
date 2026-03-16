@@ -1,20 +1,24 @@
 import { type ReactNode } from 'react';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
-import { Edit2, Plus, Trash2 } from 'lucide-react';
+import { Check, Edit2, Plus, Search, Trash2, UserPlus } from 'lucide-react';
 
-import type { Badge } from '@/api/users/users.types';
+import type { Badge, User } from '@/api/users/users.types';
+import { ADMIN_CONSTANTS } from '@/constants/admin';
 import {
     useAdminBadges,
+    useAssignBadgeToUser,
     useCreateAdminBadge,
     useDeleteAdminBadge,
     useUpdateAdminBadge,
 } from '@/hooks/admin/useAdminBadges';
+import { useAdminUsers } from '@/hooks/admin/useAdminUsers';
 import { Button } from '@/ui/components/common/Button';
 import { DropdownWithSearch } from '@/ui/components/common/DropdownWithSearch';
 import { Heading } from '@/ui/components/common/Heading';
 import { Input } from '@/ui/components/common/Input';
 import { Modal } from '@/ui/components/common/Modal';
+import { StyledUserName } from '@/ui/components/common/StyledUserName';
 import {
     Table,
     TableBody,
@@ -27,7 +31,174 @@ import { Text } from '@/ui/components/common/Text';
 import { TextArea } from '@/ui/components/common/TextArea';
 import { useToast } from '@/ui/components/common/Toast';
 import { UserBadge } from '@/ui/components/common/UserBadge';
+import { UserProfilePicture } from '@/ui/components/common/UserProfilePicture';
+import { Box } from '@/ui/components/layout/Box';
+import { Stack } from '@/ui/components/layout/Stack';
 import { ICON_MAP } from '@/ui/utils/iconMap';
+
+const AssignBadgeModal = ({
+    badge,
+    onClose,
+}: {
+    badge: Badge;
+    onClose: () => void;
+}): ReactNode => {
+    const { showToast } = useToast();
+    const [searchTerm, setSearchTerm] = useState('');
+    const [debouncedSearch, setDebouncedSearch] = useState('');
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setDebouncedSearch(searchTerm);
+        }, ADMIN_CONSTANTS.SEARCH_DEBOUNCE_MS);
+        return () => clearTimeout(timer);
+    }, [searchTerm]);
+
+    const { data: users, isLoading } = useAdminUsers(debouncedSearch, 0, 10);
+    const { mutate: assignBadge, isPending } = useAssignBadgeToUser();
+
+    const handleAssign = (userId: string): void => {
+        assignBadge(
+            { userId, badgeId: badge.id },
+            {
+                onSuccess: () => {
+                    showToast('Badge assigned successfully', 'success');
+                },
+                onError: (e) => {
+                    showToast(e.message || 'Failed to assign badge', 'error');
+                },
+            },
+        );
+    };
+
+    return (
+        <Modal isOpen title={`Assign Badge: ${badge.name}`} onClose={onClose}>
+            <Stack gap="lg">
+                <Box className="flex items-center gap-4 rounded-2xl border border-border-subtle bg-bg-subtle p-5">
+                    <UserBadge badge={badge} />
+                    <Stack gap="xs">
+                        <Text as="span" size="lg" weight="black">
+                            {badge.name}
+                        </Text>
+                        <Text
+                            as="span"
+                            className="font-mono text-[10px] uppercase opacity-50"
+                        >
+                            {badge.id}
+                        </Text>
+                    </Stack>
+                </Box>
+
+                <Box className="relative">
+                    <Search
+                        className="absolute top-1/2 left-4 -translate-y-1/2 text-muted-foreground/50"
+                        size={18}
+                    />
+                    <Input
+                        className="pl-12"
+                        placeholder="Search for a user..."
+                        size="admin"
+                        value={searchTerm}
+                        variant="admin"
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                </Box>
+
+                <Box className="custom-scrollbar max-h-[400px] min-h-[160px] overflow-y-auto pr-1">
+                    <Stack gap="sm">
+                        {isLoading ? (
+                            <Box className="flex h-40 flex-col items-center justify-center gap-3 text-muted-foreground">
+                                <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary/20 border-t-primary" />
+                                <Text size="xs">Scanning user database...</Text>
+                            </Box>
+                        ) : users && users.length > 0 ? (
+                            users.map((user) => (
+                                <Box
+                                    className="flex items-center justify-between rounded-xl border border-border-subtle bg-bg-secondary/20 p-4 transition-all hover:bg-bg-secondary/40"
+                                    key={user._id}
+                                >
+                                    <Box className="flex items-center gap-4 overflow-hidden">
+                                        <UserProfilePicture
+                                            size="sm"
+                                            src={user.profilePicture}
+                                            username={user.username}
+                                        />
+                                        <Stack
+                                            className="overflow-hidden"
+                                            gap="none"
+                                        >
+                                            <StyledUserName
+                                                className="text-sm font-bold"
+                                                user={
+                                                    {
+                                                        ...user,
+                                                        profilePicture:
+                                                            user.profilePicture ||
+                                                            undefined,
+                                                    } as unknown as User
+                                                }
+                                            >
+                                                {user.displayName ||
+                                                    user.username}
+                                            </StyledUserName>
+                                            <Text
+                                                as="span"
+                                                className="opacity-50"
+                                                size="xs"
+                                            >
+                                                @{user.username}
+                                            </Text>
+                                        </Stack>
+                                    </Box>
+                                    <Button
+                                        disabled={
+                                            isPending ||
+                                            (user.badges &&
+                                                user.badges.includes(badge.id))
+                                        }
+                                        size="sm"
+                                        variant={
+                                            user.badges &&
+                                            user.badges.includes(badge.id)
+                                                ? 'ghost'
+                                                : 'primary'
+                                        }
+                                        onClick={() => handleAssign(user._id)}
+                                    >
+                                        {user.badges &&
+                                        user.badges.includes(badge.id) ? (
+                                            <>
+                                                <Check size={14} /> Assigned
+                                            </>
+                                        ) : (
+                                            <>
+                                                <UserPlus size={14} /> Assign
+                                            </>
+                                        )}
+                                    </Button>
+                                </Box>
+                            ))
+                        ) : (
+                            <Box className="flex h-40 flex-col items-center justify-center gap-2 text-muted-foreground">
+                                <Text size="xs">
+                                    {searchTerm
+                                        ? 'No matching users identified'
+                                        : 'Awaiting search query...'}
+                                </Text>
+                            </Box>
+                        )}
+                    </Stack>
+                </Box>
+
+                <Box className="flex justify-end border-t border-border-subtle pt-4">
+                    <Button variant="ghost" onClick={onClose}>
+                        Return
+                    </Button>
+                </Box>
+            </Stack>
+        </Modal>
+    );
+};
 
 const BadgeEditor = ({
     badge,
@@ -270,6 +441,7 @@ export const AdminBadges = (): ReactNode => {
 
     const [editorOpen, setEditorOpen] = useState(false);
     const [editingBadge, setEditingBadge] = useState<Badge | null>(null);
+    const [assigningBadge, setAssigningBadge] = useState<Badge | null>(null);
 
     return (
         <div className="animate-in fade-in slide-in-from-bottom-4 space-y-6 duration-700">
@@ -337,6 +509,16 @@ export const AdminBadges = (): ReactNode => {
                                     <div className="flex justify-end gap-1">
                                         <Button
                                             size="sm"
+                                            title="Assign badge to user"
+                                            variant="ghost"
+                                            onClick={() => {
+                                                setAssigningBadge(badgeItem);
+                                            }}
+                                        >
+                                            <UserPlus size={16} />
+                                        </Button>
+                                        <Button
+                                            size="sm"
                                             title="Edit badge"
                                             variant="ghost"
                                             onClick={() => {
@@ -398,6 +580,13 @@ export const AdminBadges = (): ReactNode => {
                 <BadgeEditor
                     badge={editingBadge}
                     onClose={() => setEditorOpen(false)}
+                />
+            )}
+
+            {assigningBadge && (
+                <AssignBadgeModal
+                    badge={assigningBadge}
+                    onClose={() => setAssigningBadge(null)}
                 />
             )}
         </div>

@@ -125,7 +125,7 @@ export const setupGlobalWsHandlers = (
         ),
     );
 
-    // DM unread (from WebSocket) – sync Redux with backend
+    // DM unread (from WebSocket) - sync Redux with backend
     cleanups.push(
         wsClient.on<{ peerId: string; count: number }>(
             WsEvents.DM_UNREAD_UPDATED,

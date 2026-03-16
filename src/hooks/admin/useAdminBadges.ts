@@ -61,3 +61,47 @@ export const useDeleteAdminBadge = (): UseMutationResult<
         },
     });
 };
+
+export const useAssignBadgeToUser = (): UseMutationResult<
+    { message: string },
+    Error,
+    { userId: string; badgeId: string },
+    unknown
+> => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: ({ userId, badgeId }) =>
+            adminBadgesApi.assignBadgeToUser(userId, badgeId),
+        onSuccess: (_, { userId }) => {
+            void queryClient.invalidateQueries({
+                queryKey: ['admin-user-detail', userId],
+            });
+            void queryClient.invalidateQueries({
+                queryKey: ['admin-users'],
+            });
+        },
+    });
+};
+
+export const useRemoveBadgeFromUser = (): UseMutationResult<
+    { message: string },
+    Error,
+    { userId: string; badgeId: string },
+    unknown
+> => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: ({ userId, badgeId }) =>
+            adminBadgesApi.removeBadgeFromUser(userId, badgeId),
+        onSuccess: (_, { userId }) => {
+            void queryClient.invalidateQueries({
+                queryKey: ['admin-user-detail', userId],
+            });
+            void queryClient.invalidateQueries({
+                queryKey: ['admin-users'],
+            });
+        },
+    });
+};

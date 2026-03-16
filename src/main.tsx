@@ -40,7 +40,12 @@ export const WebOnly = ({
 }: {
     children: React.ReactNode;
 }): React.ReactNode => {
-    if (isTauri()) return <Navigate replace to="/chat/@me" />;
+    if (isTauri()) {
+        console.warn(
+            'WebOnly: Redirecting to /chat/@me because this is a desktop (Tauri) environment',
+        );
+        return <Navigate replace to="/chat/@me" />;
+    }
     return children;
 };
 

@@ -8,7 +8,7 @@ import type { AuditLog } from '@/types/admin';
 export interface AuditLogFilters {
     limit?: number;
     offset?: number;
-    adminId?: string;
+    actorId?: string;
     actionType?: string;
     targetUserId?: string;
     startDate?: string;
@@ -24,10 +24,14 @@ export const useAdminAuditLogs = (
     useQuery<AuditLog[]>({
         queryKey: ['admin-audit-logs', filters],
         queryFn: async () => {
+            const params = Object.fromEntries(
+                Object.entries(filters).filter(([_, value]) => value !== ''),
+            );
+
             const { data } = await apiClient.get<AuditLog[]>(
                 '/api/v1/admin/logs',
                 {
-                    params: filters,
+                    params,
                 },
             );
             return data;

@@ -1,3 +1,5 @@
+import type { Badge } from '@/api/users/users.types';
+
 export interface AdminStats {
     users: number;
     usersTrend: number;
@@ -13,7 +15,7 @@ export interface AdminStats {
 
 export interface AuditLog {
     _id: string;
-    adminId: string | { _id: string; username: string };
+    actorId: string | { _id: string; username: string };
     actionType: string;
     targetUserId?: string | { _id: string; username: string };
     additionalData?: Record<string, unknown>;
@@ -43,7 +45,7 @@ export interface AdminUser {
     createdAt: string | Date;
     banExpiry?: string | Date;
     warningCount: number;
-    badges: string[];
+    badges: (string | Badge)[];
 }
 
 export interface AdminUserServer {

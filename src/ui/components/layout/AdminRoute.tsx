@@ -17,6 +17,7 @@ export const AdminRoute = (): ReactNode => {
     }
 
     if (!user) {
+        console.warn('AdminRoute: No user found, redirecting to /login');
         return <Navigate replace to="/login" />;
     }
 
@@ -28,6 +29,12 @@ export const AdminRoute = (): ReactNode => {
             Object.values(permissions).some((val) => val === true));
 
     if (!hasAdminAccess) {
+        console.warn(
+            'AdminRoute: User does not have admin access, redirecting to /',
+            {
+                permissions,
+            },
+        );
         return <Navigate replace to="/" />;
     }
 

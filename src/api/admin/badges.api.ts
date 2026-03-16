@@ -24,4 +24,18 @@ export const adminBadgesApi = {
         apiClient
             .delete<{ message: string }>(`/api/v1/admin/badges/${badgeId}`)
             .then((r) => r.data),
+
+    assignBadgeToUser: (userId: string, badgeId: string) =>
+        apiClient
+            .post<{ message: string }>(`/api/v1/admin/users/${userId}/badges`, {
+                badgeId,
+            })
+            .then((r) => r.data),
+
+    removeBadgeFromUser: (userId: string, badgeId: string) =>
+        apiClient
+            .delete<{
+                message: string;
+            }>(`/api/v1/admin/users/${userId}/badges/${badgeId}`)
+            .then((r) => r.data),
 };

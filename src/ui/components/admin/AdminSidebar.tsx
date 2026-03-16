@@ -7,6 +7,7 @@ import {
     Server,
     Settings,
     ShieldAlert,
+    Ticket,
     Users,
 } from 'lucide-react';
 
@@ -102,6 +103,12 @@ export const AdminSidebar = ({
                 icon={<Badge size={18} />}
                 label="Badges"
                 onClick={() => onSectionChange('badges')}
+            />
+            <SidebarItem
+                active={activeSection === 'invites'}
+                icon={<Ticket size={18} />}
+                label="Invites"
+                onClick={() => onSectionChange('invites')}
             />
         </nav>
 

@@ -48,7 +48,7 @@ const LogEntry = ({ log }: LogEntryProps): ReactNode => {
             .join(' ');
 
     const renderUser = (
-        user: AuditLog['adminId'] | AuditLog['targetUserId'],
+        user: AuditLog['actorId'] | AuditLog['targetUserId'],
     ): string => {
         if (!user) return 'Unknown';
         if (typeof user === 'string') return user;
@@ -92,13 +92,13 @@ const LogEntry = ({ log }: LogEntryProps): ReactNode => {
                             className="truncate"
                             size="sm"
                             title={
-                                typeof log.adminId === 'object'
-                                    ? log.adminId._id
-                                    : log.adminId
+                                typeof log.actorId === 'object'
+                                    ? log.actorId._id
+                                    : log.actorId
                             }
                             weight="medium"
                         >
-                            {renderUser(log.adminId)}
+                            {renderUser(log.actorId)}
                         </Text>
                     </div>
                 </TableCell>
@@ -214,7 +214,7 @@ export const AdminAuditLogs = (): ReactNode => {
     const [filters, setFilters] = useState({
         limit: ADMIN_CONSTANTS.MAX_AUDIT_LOGS_PAGE_SIZE,
         offset: 0,
-        adminId: '',
+        actorId: '',
         targetUserId: '',
         actionType: '',
     });
@@ -258,11 +258,11 @@ export const AdminAuditLogs = (): ReactNode => {
                         <select
                             className="transition-focus w-full cursor-pointer appearance-none rounded-xl border border-border-subtle bg-background py-2.5 pr-10 pl-4 text-sm outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10"
                             id="admin-select"
-                            value={filters.adminId}
+                            value={filters.actorId}
                             onChange={(e) =>
                                 setFilters((prev) => ({
                                     ...prev,
-                                    adminId: e.target.value,
+                                    actorId: e.target.value,
                                 }))
                             }
                         >

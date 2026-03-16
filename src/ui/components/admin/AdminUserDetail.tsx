@@ -1,4 +1,4 @@
-import { type ReactNode } from 'react';
+import { type ReactNode, useMemo, useState } from 'react';
 
 import {
     AlertTriangle,
@@ -6,19 +6,32 @@ import {
     Calendar,
     CheckCircle,
     Clock,
-    Server,
+    Plus,
+    Server as ServerIconLucide,
     Shield,
     Users,
     XCircle,
 } from 'lucide-react';
 
-import type { User } from '@/api/users/users.types';
+import type { Server } from '@/api/servers/servers.types';
+import type { Badge, User } from '@/api/users/users.types';
 import { useAdminUserWarnings } from '@/api/warnings/warnings.queries';
+import {
+    useAdminBadges,
+    useAssignBadgeToUser,
+    useRemoveBadgeFromUser,
+} from '@/hooks/admin/useAdminBadges';
 import { useAdminUserDetail } from '@/hooks/admin/useAdminUsers';
 import { Button } from '@/ui/components/common/Button';
+import { DropdownWithSearch } from '@/ui/components/common/DropdownWithSearch';
 import { Heading } from '@/ui/components/common/Heading';
+import { StyledUserName } from '@/ui/components/common/StyledUserName';
 import { Text } from '@/ui/components/common/Text';
+import { useToast } from '@/ui/components/common/Toast';
+import { UserBadge } from '@/ui/components/common/UserBadge';
+import { UserProfilePicture } from '@/ui/components/common/UserProfilePicture';
 import { UserProfileCard } from '@/ui/components/profile/UserProfileCard';
+import { ServerIcon } from '@/ui/components/servers/ServerIcon';
 import { resolveApiUrl } from '@/utils/apiUrl';
 import { cn } from '@/utils/cn';
 
@@ -35,6 +48,36 @@ export const AdminUserDetail = ({
 }: AdminUserDetailProps): ReactNode => {
     const { data: adminData, isLoading, error } = useAdminUserDetail(userId);
     const { data: warnings } = useAdminUserWarnings(userId);
+    const { data: allBadges } = useAdminBadges();
+    const { mutate: assignBadge, isPending: isAssigning } =
+        useAssignBadgeToUser();
+    const { mutate: removeBadge, isPending: isRemoving } =
+        useRemoveBadgeFromUser();
+    const { showToast } = useToast();
+
+    const [isAddingBadge, setIsAddingBadge] = useState(false);
+
+    const availableBadges = useMemo(() => {
+        if (!allBadges || !adminData) return [];
+        return allBadges.filter(
+            (b) =>
+                !adminData.badges.some((ub: Badge | string) => {
+                    if (typeof ub === 'string') return ub === b.id;
+                    return ub.id === b.id;
+                }),
+        );
+    }, [allBadges, adminData]);
+
+    const badgeOptions = useMemo(
+        () =>
+            availableBadges.map((b) => ({
+                id: b.id,
+                label: b.name,
+                description: b.description,
+                icon: <UserBadge badge={b} />,
+            })),
+        [availableBadges],
+    );
 
     if (isLoading) {
         return (
@@ -71,6 +114,38 @@ export const AdminUserDetail = ({
         );
     }
 
+    const handleAssignBadge = (badgeId: string | null): void => {
+        if (!badgeId) return;
+        assignBadge(
+            { userId, badgeId },
+            {
+                onSuccess: () => {
+                    showToast('Badge assigned', 'success');
+                    setIsAddingBadge(false);
+                },
+                onError: (e) => {
+                    showToast(e.message || 'Failed to assign badge', 'error');
+                },
+            },
+        );
+    };
+
+    const handleRemoveBadge = (badgeId: string): void => {
+        if (!window.confirm(`Remove badge ${badgeId} from user?`)) return;
+
+        removeBadge(
+            { userId, badgeId },
+            {
+                onSuccess: () => {
+                    showToast('Badge removed', 'success');
+                },
+                onError: (e) => {
+                    showToast(e.message || 'Failed to remove badge', 'error');
+                },
+            },
+        );
+    };
+
     return (
         <div className="animate-in fade-in slide-in-from-bottom-4 flex h-full flex-col duration-700">
             {/* Back Button */}
@@ -93,7 +168,14 @@ export const AdminUserDetail = ({
                     <div className="custom-scrollbar flex-1 overflow-y-auto pr-2">
                         <UserProfileCard
                             presenceStatus="offline"
-                            user={adminData as unknown as User}
+                            user={
+                                {
+                                    ...adminData,
+                                    profilePicture:
+                                        adminData.profilePicture || undefined,
+                                    banner: adminData.banner || undefined,
+                                } as unknown as User
+                            }
                         />
                     </div>
                 </div>
@@ -105,6 +187,59 @@ export const AdminUserDetail = ({
                         Administrative View
                     </div>
                     <div className="custom-scrollbar flex-1 space-y-4 overflow-y-auto pr-2">
+                        {/* Summary Header */}
+                        <div className="overflow-hidden rounded-2xl border border-border-subtle bg-bg-subtle">
+                            <div className="relative h-24 w-full overflow-hidden">
+                                <div
+                                    className="h-full w-full bg-cover bg-center"
+                                    style={{
+                                        backgroundImage: adminData.banner
+                                            ? `url(${resolveApiUrl(adminData.banner)})`
+                                            : 'none',
+                                        backgroundColor: !adminData.banner
+                                            ? 'var(--color-bg-secondary)'
+                                            : 'transparent',
+                                    }}
+                                />
+                            </div>
+                            <div className="px-6 pb-6">
+                                <div className="relative -mt-12 mb-4">
+                                    <UserProfilePicture
+                                        size="xl"
+                                        src={
+                                            resolveApiUrl(
+                                                adminData.profilePicture ||
+                                                    undefined,
+                                            ) || undefined
+                                        }
+                                        username={adminData.username}
+                                    />
+                                </div>
+                                <div className="flex flex-col">
+                                    <StyledUserName
+                                        className="text-2xl"
+                                        user={
+                                            {
+                                                ...adminData,
+                                                profilePicture:
+                                                    adminData.profilePicture ||
+                                                    undefined,
+                                                banner:
+                                                    adminData.banner ||
+                                                    undefined,
+                                            } as unknown as User
+                                        }
+                                    >
+                                        {adminData.displayName ||
+                                            adminData.username}
+                                    </StyledUserName>
+                                    <Text variant="muted">
+                                        @{adminData.username}
+                                    </Text>
+                                </div>
+                            </div>
+                        </div>
+
                         {/* Account Status */}
                         <div className="rounded-2xl border border-border-subtle bg-bg-subtle p-6">
                             <Heading
@@ -181,6 +316,104 @@ export const AdminUserDetail = ({
                                     </Text>
                                 </div>
                             )}
+                        </div>
+
+                        {/* Badges Management */}
+                        <div className="rounded-2xl border border-border-subtle bg-bg-subtle p-6">
+                            <div className="mb-4 flex items-center justify-between">
+                                <Heading level={3} variant="admin-sub">
+                                    Badges Management
+                                </Heading>
+                                <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    onClick={() =>
+                                        setIsAddingBadge(!isAddingBadge)
+                                    }
+                                >
+                                    <Plus size={16} />
+                                </Button>
+                            </div>
+
+                            {isAddingBadge && (
+                                <div className="animate-in slide-in-from-top-2 mb-4 space-y-2 rounded-xl border border-border-subtle bg-bg-secondary/50 p-4">
+                                    <DropdownWithSearch
+                                        label="Select badge to assign"
+                                        options={badgeOptions}
+                                        placeholder={
+                                            isAssigning
+                                                ? 'Assigning...'
+                                                : 'Choose a badge...'
+                                        }
+                                        searchPlaceholder="Search available badges..."
+                                        value={null}
+                                        onChange={handleAssignBadge}
+                                    />
+                                    <div className="mt-2 flex justify-end">
+                                        <Button
+                                            size="sm"
+                                            variant="ghost"
+                                            onClick={() =>
+                                                setIsAddingBadge(false)
+                                            }
+                                        >
+                                            Cancel
+                                        </Button>
+                                    </div>
+                                </div>
+                            )}
+
+                            <div className="flex flex-wrap gap-3">
+                                {adminData.badges &&
+                                adminData.badges.length > 0 ? (
+                                    (
+                                        adminData.badges as unknown as Badge[]
+                                    ).map((badge: Badge) => (
+                                        <div
+                                            className="group relative inline-flex items-center gap-2 rounded-xl border border-border-subtle bg-bg-secondary/50 px-3 py-2 transition-all hover:border-danger/30 hover:bg-danger/5"
+                                            key={badge.id}
+                                        >
+                                            <UserBadge badge={badge} />
+                                            <div className="flex flex-col">
+                                                <Text
+                                                    as="span"
+                                                    size="xs"
+                                                    weight="bold"
+                                                >
+                                                    {badge.name}
+                                                </Text>
+                                                <Text
+                                                    as="span"
+                                                    className="text-[9px]"
+                                                    variant="muted"
+                                                >
+                                                    {badge.id}
+                                                </Text>
+                                            </div>
+                                            <button
+                                                className="absolute -top-1.5 -right-1.5 hidden h-5 w-5 items-center justify-center rounded-full bg-danger text-white shadow-sm transition-transform group-hover:flex hover:scale-110"
+                                                disabled={isRemoving}
+                                                title="Remove badge"
+                                                type="button"
+                                                onClick={() =>
+                                                    handleRemoveBadge(badge.id)
+                                                }
+                                            >
+                                                <XCircle size={12} />
+                                            </button>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <Text
+                                        as="p"
+                                        className="w-full text-center"
+                                        size="xs"
+                                        variant="muted"
+                                    >
+                                        No badges assigned
+                                    </Text>
+                                )}
+                            </div>
                         </div>
 
                         {/* Account Information */}
@@ -369,68 +602,45 @@ export const AdminUserDetail = ({
             {/* Server Memberships Section */}
             <div className="mt-6 rounded-2xl border border-border-subtle bg-bg-subtle p-6">
                 <div className="mb-4 flex items-center gap-2">
-                    <Server className="text-primary" size={16} />
+                    <ServerIconLucide className="text-primary" size={16} />
                     <Heading level={3} variant="admin-sub">
                         Server Memberships ({adminData.servers.length})
                     </Heading>
                 </div>
                 <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                    {adminData.servers.map((server) => (
+                    {(adminData.servers || []).map((server) => (
                         <div
-                            className="group flex items-center gap-3 rounded-xl border border-border-subtle/50 bg-bg-secondary/30 p-3 transition-all hover:border-primary/20 hover:bg-bg-secondary"
+                            className="hover:border-border-hover flex items-center justify-between rounded-xl border border-border-subtle bg-bg-secondary/30 p-4 transition-all hover:bg-bg-secondary/50"
                             key={server._id}
                         >
-                            <div className="h-12 w-12 flex-shrink-0 overflow-hidden rounded-lg bg-bg-secondary ring-2 ring-border-subtle transition-all group-hover:ring-primary/30">
-                                {server.icon ? (
-                                    <img
-                                        alt={server.name}
-                                        className="h-full w-full object-cover"
-                                        src={resolveApiUrl(server.icon) || ''}
-                                    />
-                                ) : (
-                                    <div className="flex h-full w-full items-center justify-center bg-primary/10 text-lg font-black text-primary">
-                                        {server.name.charAt(0)}
-                                    </div>
-                                )}
-                            </div>
-                            <div className="min-w-0 flex-1">
-                                <div className="flex items-center gap-2">
-                                    <Text
-                                        as="span"
-                                        className="truncate"
-                                        size="sm"
-                                        weight="bold"
-                                    >
-                                        {server.name}
-                                    </Text>
-                                    {server.isOwner && (
-                                        <Text
-                                            as="span"
-                                            className="rounded bg-caution/10 px-1.5 py-0.5 text-[9px] text-caution uppercase"
-                                            weight="black"
-                                        >
-                                            Owner
+                            <div className="flex items-center gap-4">
+                                <ServerIcon
+                                    server={
+                                        {
+                                            ...server,
+                                            icon: server.icon || undefined,
+                                        } as unknown as Server
+                                    }
+                                    size="sm"
+                                />
+                                <div className="flex flex-col">
+                                    <Text weight="bold">{server.name}</Text>
+                                    <div className="flex items-center gap-2">
+                                        <Text size="xs" variant="muted">
+                                            {server.memberCount} members
                                         </Text>
-                                    )}
-                                </div>
-                                <div className="mt-1 flex items-center gap-3 text-[10px] text-muted-foreground">
-                                    <Text
-                                        as="span"
-                                        className="flex items-center gap-1"
-                                    >
-                                        <Users size={10} />
-                                        {server.memberCount} members
-                                    </Text>
-                                    <Text
-                                        as="span"
-                                        className="flex items-center gap-1"
-                                    >
-                                        <Clock size={10} />
-                                        Joined{' '}
-                                        {new Date(
-                                            server.joinedAt,
-                                        ).toLocaleDateString()}
-                                    </Text>
+                                        <Text className="opacity-30" size="xs">
+                                            •
+                                        </Text>
+                                        <Text size="xs" variant="muted">
+                                            Joined{' '}
+                                            {server.joinedAt
+                                                ? new Date(
+                                                      server.joinedAt,
+                                                  ).toLocaleDateString()
+                                                : 'Unknown'}
+                                        </Text>
+                                    </div>
                                 </div>
                             </div>
                         </div>

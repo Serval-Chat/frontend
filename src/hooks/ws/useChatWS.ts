@@ -307,7 +307,7 @@ export function useChatWS(
         ),
     );
 
-    // Handle server message deleted – update cache for that channel regardless of selection
+    // Handle server message deleted - update cache for that channel regardless of selection
     useWebSocket(
         WsEvents.MESSAGE_SERVER_DELETED,
         useCallback(
@@ -341,7 +341,7 @@ export function useChatWS(
         ),
     );
 
-    // Handle server message edited – update cache for that channel regardless of selection
+    // Handle server message edited - update cache for that channel regardless of selection
     useWebSocket(
         WsEvents.MESSAGE_SERVER_EDITED,
         useCallback(

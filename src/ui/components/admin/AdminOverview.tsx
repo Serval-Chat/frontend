@@ -10,6 +10,8 @@ import {
 
 import { useAdminStats } from '@/hooks/admin/useAdminStats';
 import { LoadingSpinner } from '@/ui/components/common/LoadingSpinner';
+import { Box } from '@/ui/components/layout/Box';
+import { Stack } from '@/ui/components/layout/Stack';
 
 import { AdminErrorDisplay } from './AdminErrorDisplay';
 import { StatCard } from './StatCard';
@@ -19,26 +21,29 @@ export const AdminOverview = (): ReactNode => {
 
     if (isLoading) {
         return (
-            <div className="flex h-64 items-center justify-center">
+            <Box className="flex h-64 items-center justify-center">
                 <LoadingSpinner size="lg" />
-            </div>
+            </Box>
         );
     }
 
     if (error || !stats) {
         return (
-            <div className="flex min-h-[400px] items-center justify-center">
+            <Box className="flex min-h-[400px] items-center justify-center">
                 <AdminErrorDisplay
                     error={error}
                     title="Statistics Unavailable"
                 />
-            </div>
+            </Box>
         );
     }
 
     return (
-        <div className="animate-in fade-in slide-in-from-bottom-4 space-y-8 duration-700">
-            <div className="grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-6">
+        <Stack
+            className="animate-in fade-in slide-in-from-bottom-4 duration-700"
+            gap="xl"
+        >
+            <Box className="grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-6">
                 <StatCard
                     icon={<Users size={20} />}
                     title="Total Users"
@@ -69,7 +74,7 @@ export const AdminOverview = (): ReactNode => {
                     trend={stats.messagesTrend}
                     value={stats.messages.toLocaleString()}
                 />
-            </div>
-        </div>
+            </Box>
+        </Stack>
     );
 };

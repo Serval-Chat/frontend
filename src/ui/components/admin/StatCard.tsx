@@ -4,6 +4,8 @@ import { TrendingDown, TrendingUp } from 'lucide-react';
 
 import { Heading } from '@/ui/components/common/Heading';
 import { Text } from '@/ui/components/common/Text';
+import { Box } from '@/ui/components/layout/Box';
+import { Stack } from '@/ui/components/layout/Stack';
 import { cn } from '@/utils/cn';
 
 interface StatCardProps {
@@ -23,16 +25,16 @@ export const StatCard = ({
     const isNegative = trend !== undefined && trend < 0;
 
     return (
-        <div className="group relative flex aspect-square flex-col justify-between overflow-hidden rounded-3xl border border-border-subtle bg-bg-subtle p-8 transition-all duration-300 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/5">
+        <Box className="group relative flex aspect-square flex-col justify-between overflow-hidden rounded-3xl border border-border-subtle bg-bg-subtle p-8 transition-all duration-300 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/5">
             {/* Background Accent */}
-            <div className="absolute -top-4 -right-4 h-24 w-24 rounded-full bg-primary/5 blur-3xl transition-all duration-500 group-hover:bg-primary/10" />
+            <Box className="absolute -top-4 -right-4 h-24 w-24 rounded-full bg-primary/5 blur-3xl transition-all duration-500 group-hover:bg-primary/10" />
 
-            <div className="flex items-start justify-between gap-4">
-                <div className="space-y-2">
+            <Box className="flex items-start justify-between gap-4">
+                <Stack gap="xs">
                     <Text as="p" size="sm" variant="muted" weight="medium">
                         {title}
                     </Text>
-                    <div className="flex flex-wrap items-baseline gap-2">
+                    <Box className="flex flex-wrap items-baseline gap-2">
                         <Heading
                             className="text-3xl font-black tracking-tight"
                             level={3}
@@ -63,16 +65,16 @@ export const StatCard = ({
                                 {Math.abs(trend)}%
                             </Text>
                         )}
-                    </div>
-                </div>
+                    </Box>
+                </Stack>
 
-                <div className="shrink-0 rounded-xl bg-primary/10 p-3 text-primary transition-colors duration-300 group-hover:bg-primary group-hover:text-foreground-inverse">
+                <Box className="shrink-0 rounded-xl bg-primary/10 p-3 text-primary transition-colors duration-300 group-hover:bg-primary group-hover:text-foreground-inverse">
                     {icon}
-                </div>
-            </div>
+                </Box>
+            </Box>
 
             {/* Bottom Border */}
-            <div className="absolute bottom-0 left-0 h-0.5 w-0 bg-primary transition-all duration-500 group-hover:w-full" />
-        </div>
+            <Box className="absolute bottom-0 left-0 h-0.5 w-0 bg-primary transition-all duration-500 group-hover:w-full" />
+        </Box>
     );
 };
