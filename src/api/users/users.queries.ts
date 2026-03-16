@@ -11,6 +11,7 @@ import { hasAuthToken } from '@/utils/authToken';
 import { usersApi } from './users.api';
 import type {
     User,
+    UserSettings,
     UsernameFont,
     UsernameGlow,
     UsernameGradient,
@@ -127,6 +128,31 @@ export const useUpdateStyle = (): UseMutationResult<
                           usernameGradient:
                               data.usernameGradient ?? old.usernameGradient,
                           usernameGlow: data.usernameGlow ?? old.usernameGlow,
+                      }
+                    : old,
+            );
+            void queryClient.invalidateQueries({ queryKey: ['me'] });
+        },
+    });
+};
+
+export const useUpdateSettings = (): UseMutationResult<
+    { message: string; settings: UserSettings },
+    Error,
+    Partial<UserSettings>
+> => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: usersApi.updateSettings,
+        onSuccess: (data) => {
+            queryClient.setQueryData<User>(['me'], (old) =>
+                old
+                    ? {
+                          ...old,
+                          settings: {
+                              ...old.settings,
+                              ...data.settings,
+                          },
                       }
                     : old,
             );

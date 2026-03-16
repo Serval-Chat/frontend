@@ -101,7 +101,6 @@ export const StyledUserName: React.FC<StyledUserNameProps> = ({
         !hasGradient &&
         !solidColor &&
         user?.usernameGradient?.enabled &&
-        !disableCustomFonts &&
         !disableGlowAndColors
     ) {
         const { colors, angle, repeating } = user.usernameGradient;

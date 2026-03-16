@@ -8,6 +8,7 @@ import { IconButton } from '@/ui/components/common/IconButton';
 import { Modal } from '@/ui/components/common/Modal';
 import { cn } from '@/utils/cn';
 
+import { AccessibilitySettings } from './AccessibilitySettings';
 import { AccountSettings } from './AccountSettings';
 import { AppearanceSettings } from './AppearanceSettings';
 import { SettingsSidebar } from './SettingsSidebar';
@@ -21,12 +22,14 @@ interface SettingsModalProps {
 const SECTION_URL_MAP: Record<string, string> = {
     'my-account': 'account',
     appearance: 'appearance',
+    accessibility: 'accessibility',
     standing: 'standing',
 };
 
 const SECTION_ID_TO_URL: Record<string, string> = {
     account: 'my-account',
     appearance: 'appearance',
+    accessibility: 'accessibility',
     standing: 'standing',
 };
 
@@ -107,6 +110,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                         {activeSection === 'account' && <AccountSettings />}
                         {activeSection === 'appearance' && (
                             <AppearanceSettings />
+                        )}
+                        {activeSection === 'accessibility' && (
+                            <AccessibilitySettings />
                         )}
                         {activeSection === 'standing' && <StandingSettings />}
                     </div>

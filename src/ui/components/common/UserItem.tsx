@@ -368,7 +368,11 @@ export const UserItem: React.FC<UserItemProps> = ({
 
                     <Box className="flex min-w-0 flex-1 flex-col overflow-hidden">
                         <StyledUserName
-                            disableCustomFonts={disableCustomFonts}
+                            disableCustomFonts={
+                                disableCustomFonts ||
+                                currentUser?.settings
+                                    ?.disableCustomUsernameFonts
+                            }
                             disableGlowAndColors={disableGlowAndColors}
                             iconRole={iconRole}
                             role={role}
@@ -410,7 +414,10 @@ export const UserItem: React.FC<UserItemProps> = ({
                 </Box>
             </ContextMenu>
             <ProfilePopup
-                disableCustomFonts={disableCustomFonts}
+                disableCustomFonts={
+                    disableCustomFonts ||
+                    currentUser?.settings?.disableCustomUsernameFonts
+                }
                 disableGlowAndColors={disableGlowAndColors}
                 iconRole={iconRole}
                 isOpen={showProfile}

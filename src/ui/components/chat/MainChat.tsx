@@ -260,7 +260,10 @@ export const MainChat: React.FC = () => {
                 ) : (
                     <MessagesList
                         activeHighlightId={targetMessageId}
-                        disableCustomFonts={serverDetails?.disableCustomFonts}
+                        disableCustomFonts={
+                            serverDetails?.disableCustomFonts ||
+                            currentUser?.settings?.disableCustomUsernameFonts
+                        }
                         disableGlowAndColors={
                             serverDetails?.disableUsernameGlowAndCustomColor
                         }
@@ -278,7 +281,10 @@ export const MainChat: React.FC = () => {
             </Box>
             {canSendMessages ? (
                 <MessageInput
-                    disableCustomFonts={serverDetails?.disableCustomFonts}
+                    disableCustomFonts={
+                        serverDetails?.disableCustomFonts ||
+                        currentUser?.settings?.disableCustomUsernameFonts
+                    }
                     disableGlowAndColors={
                         serverDetails?.disableUsernameGlowAndCustomColor
                     }

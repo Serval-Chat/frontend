@@ -142,6 +142,10 @@ createRoot(document.getElementById('root')!).render(
                                             />
                                             <Route
                                                 element={<NavigationSync />}
+                                                path="accessibility"
+                                            />
+                                            <Route
+                                                element={<NavigationSync />}
                                                 path="standing"
                                             />
                                         </Route>

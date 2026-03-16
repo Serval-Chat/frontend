@@ -3,6 +3,7 @@ import React, { useMemo } from 'react';
 import { Calendar, Camera, Server } from 'lucide-react';
 
 import type { Role } from '@/api/servers/servers.types';
+import { useMe } from '@/api/users/users.queries';
 import type { User } from '@/api/users/users.types';
 import { useAppSelector } from '@/store/hooks';
 import type { AdminExtendedUser } from '@/types/admin';
@@ -54,6 +55,7 @@ export const UserProfileCard: React.FC<UserProfileCardProps> = ({
     disableGlowAndColors,
     adminData,
 }) => {
+    const { data: currentUser } = useMe();
     const userId = user?._id;
     const presence = useAppSelector((state) =>
         userId ? state.presence.users[userId] : undefined,
@@ -71,9 +73,7 @@ export const UserProfileCard: React.FC<UserProfileCardProps> = ({
         presence?.customStatus?.emoji ??
         user?.customStatus?.emoji;
     const defaultColor = '#5865F2';
-    const bannerColor = disableCustomFonts
-        ? defaultColor
-        : user?.usernameGradient?.colors?.[0] || defaultColor;
+    const bannerColor = user?.usernameGradient?.colors?.[0] || defaultColor;
 
     const userBio = user?.bio;
     const bioNodes = useMemo(
@@ -132,7 +132,10 @@ export const UserProfileCard: React.FC<UserProfileCardProps> = ({
                 <Box className="mb-4">
                     <StyledUserName
                         className="w-full truncate text-xl leading-tight font-bold"
-                        disableCustomFonts={disableCustomFonts}
+                        disableCustomFonts={
+                            disableCustomFonts ||
+                            currentUser?.settings?.disableCustomUsernameFonts
+                        }
                         disableGlowAndColors={disableGlowAndColors}
                         iconRole={iconRole}
                         role={role}

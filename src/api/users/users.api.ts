@@ -2,6 +2,7 @@ import { apiClient } from '@/api/client';
 
 import type {
     User,
+    UserSettings,
     UsernameFont,
     UsernameGlow,
     UsernameGradient,
@@ -57,6 +58,14 @@ export const usersApi = {
                 usernameGradient?: UsernameGradient;
                 usernameGlow?: UsernameGlow;
             }>('/api/v1/profile/style', data)
+            .then((r) => r.data),
+
+    updateSettings: (data: Partial<UserSettings>) =>
+        apiClient
+            .post<{
+                message: string;
+                settings: UserSettings;
+            }>('/api/v1/settings', data)
             .then((r) => r.data),
 
     updateLanguage: (language: string) =>
