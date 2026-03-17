@@ -63,6 +63,7 @@
     --color-success-muted: var(--success-muted);
     --color-success-muted-text: var(--success-muted-text);
     --color-background: var(--background);
+    --color-bg-primary: var(--background);
     --color-foreground: var(--foreground);
     --color-foreground-inverse: var(--foreground-inverse);
     --color-muted-foreground: var(--muted-foreground);
