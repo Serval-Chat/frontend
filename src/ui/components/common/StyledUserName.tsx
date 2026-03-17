@@ -12,7 +12,9 @@ interface StyledUserNameProps {
     className?: string;
     disableCustomFonts?: boolean;
     glowIntensity?: number;
-    disableGlowAndColors?: boolean;
+    disableGlowAndColors?: boolean; // legacy
+    disableColors?: boolean;
+    disableGlow?: boolean;
     showIcon?: boolean;
     iconRole?: Role;
 }
@@ -26,9 +28,13 @@ export const StyledUserName: React.FC<StyledUserNameProps> = ({
     className,
     disableCustomFonts,
     disableGlowAndColors,
+    disableColors,
+    disableGlow,
     showIcon = false,
     iconRole,
 }) => {
+    const effectiveDisableColors = disableGlowAndColors || disableColors;
+    const effectiveDisableGlow = disableGlowAndColors || disableGlow;
     if (!user && !role) {
         return (
             <Text className={cn('truncate text-sm font-medium', className)}>
@@ -101,7 +107,7 @@ export const StyledUserName: React.FC<StyledUserNameProps> = ({
         !hasGradient &&
         !solidColor &&
         user?.usernameGradient?.enabled &&
-        !disableGlowAndColors
+        !effectiveDisableColors
     ) {
         const { colors, angle, repeating } = user.usernameGradient;
         if (colors.length > 0) {
@@ -123,7 +129,7 @@ export const StyledUserName: React.FC<StyledUserNameProps> = ({
     }
 
     // Enable glow if user has it enabled and glow is not disabled
-    const hasGlow = !disableGlowAndColors && usernameGlow?.enabled;
+    const hasGlow = !effectiveDisableGlow && usernameGlow?.enabled;
 
     const containerStyle: React.CSSProperties = {
         fontFamily:

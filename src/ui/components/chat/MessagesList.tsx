@@ -20,6 +20,8 @@ interface MessagesListProps {
     activeHighlightId?: string | null;
     disableCustomFonts?: boolean;
     disableGlowAndColors?: boolean;
+    disableColors?: boolean;
+    disableGlow?: boolean;
 }
 
 /**
@@ -38,6 +40,8 @@ export const MessagesList: React.FC<MessagesListProps> = ({
     activeHighlightId,
     disableCustomFonts,
     disableGlowAndColors,
+    disableColors,
+    disableGlow,
 }) => {
     const scrollContainerRef = useRef<HTMLDivElement>(null);
     const [isAtBottom, setIsAtBottom] = useState(true);
@@ -168,7 +172,9 @@ export const MessagesList: React.FC<MessagesListProps> = ({
 
             {messages.map((msg, index) => (
                 <MessageItem
+                    disableColors={disableColors}
                     disableCustomFonts={disableCustomFonts}
+                    disableGlow={disableGlow}
                     disableGlowAndColors={disableGlowAndColors}
                     iconRole={msg.iconRole}
                     isHighlighted={highlightId === msg._id}

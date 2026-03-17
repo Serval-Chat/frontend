@@ -67,6 +67,8 @@ interface UserItemProps {
     joinedAt?: string;
     disableCustomFonts?: boolean;
     disableGlowAndColors?: boolean;
+    disableColors?: boolean;
+    disableGlow?: boolean;
     initialPresenceStatus?: UserStatus;
 }
 
@@ -90,6 +92,8 @@ export const UserItem: React.FC<UserItemProps> = ({
     joinedAt,
     disableCustomFonts,
     disableGlowAndColors,
+    disableColors,
+    disableGlow,
     initialPresenceStatus,
 }) => {
     const dispatch = useAppDispatch();
@@ -368,10 +372,19 @@ export const UserItem: React.FC<UserItemProps> = ({
 
                     <Box className="flex min-w-0 flex-1 flex-col overflow-hidden">
                         <StyledUserName
+                            disableColors={
+                                disableColors ||
+                                currentUser?.settings
+                                    ?.disableCustomUsernameColors
+                            }
                             disableCustomFonts={
                                 disableCustomFonts ||
                                 currentUser?.settings
                                     ?.disableCustomUsernameFonts
+                            }
+                            disableGlow={
+                                disableGlow ||
+                                currentUser?.settings?.disableCustomUsernameGlow
                             }
                             disableGlowAndColors={disableGlowAndColors}
                             iconRole={iconRole}
@@ -414,9 +427,17 @@ export const UserItem: React.FC<UserItemProps> = ({
                 </Box>
             </ContextMenu>
             <ProfilePopup
+                disableColors={
+                    disableColors ||
+                    currentUser?.settings?.disableCustomUsernameColors
+                }
                 disableCustomFonts={
                     disableCustomFonts ||
                     currentUser?.settings?.disableCustomUsernameFonts
+                }
+                disableGlow={
+                    disableGlow ||
+                    currentUser?.settings?.disableCustomUsernameGlow
                 }
                 disableGlowAndColors={disableGlowAndColors}
                 iconRole={iconRole}

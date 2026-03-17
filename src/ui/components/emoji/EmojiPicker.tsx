@@ -7,6 +7,7 @@ import { VariableSizeList as List } from 'react-window';
 
 import type { Server } from '@/api/servers/servers.types';
 import { Button } from '@/ui/components/common/Button';
+import { ParsedUnicodeEmoji } from '@/ui/components/common/ParsedUnicodeEmoji';
 import { Text } from '@/ui/components/common/Text';
 import { Box } from '@/ui/components/layout/Box';
 import { ServerIcon } from '@/ui/components/servers/ServerIcon';
@@ -251,11 +252,12 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
                             />
                         ) : (
                             <div className="flex h-4 w-4 items-center justify-center overflow-hidden">
-                                <span className="flex-shrink-0 text-sm">
-                                    {row.standardIcon
-                                        ? getUnicode(row.standardIcon)
-                                        : ''}
-                                </span>
+                                {row.standardIcon ? (
+                                    <ParsedUnicodeEmoji
+                                        className="inline-block h-[14px] w-[14px] flex-shrink-0"
+                                        content={getUnicode(row.standardIcon)}
+                                    />
+                                ) : null}
                             </div>
                         )}
                         <Text className="truncate text-[10px] font-bold tracking-widest text-muted-foreground uppercase">
@@ -305,12 +307,10 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
                                         onEmojiSelect(getUnicode(standardEmoji))
                                     }
                                 >
-                                    <span
-                                        aria-label={standardEmoji.short_name}
-                                        className="text-lg transition-transform duration-200 group-hover/emoji:scale-110"
-                                    >
-                                        {getUnicode(standardEmoji)}
-                                    </span>
+                                    <ParsedUnicodeEmoji
+                                        className="inline-block h-[26px] w-[26px] transition-transform duration-200 group-hover/emoji:scale-110"
+                                        content={getUnicode(standardEmoji)}
+                                    />
                                 </Button>
                             );
                         }
@@ -375,14 +375,14 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
                             onClick={() => handleCategoryClick(cat.id)}
                         >
                             <div className="flex h-8 w-8 items-center justify-center overflow-hidden p-1">
-                                <span
-                                    aria-label={cat.name}
-                                    className="flex-shrink-0 text-lg"
-                                >
-                                    {categoryIconMap[cat.id]
-                                        ? getUnicode(categoryIconMap[cat.id]!)
-                                        : ''}
-                                </span>
+                                {categoryIconMap[cat.id] ? (
+                                    <ParsedUnicodeEmoji
+                                        className="inline-block h-[24px] w-[24px] flex-shrink-0"
+                                        content={getUnicode(
+                                            categoryIconMap[cat.id]!,
+                                        )}
+                                    />
+                                ) : null}
                             </div>
                             {isActive && (
                                 <div className="absolute top-1/2 -left-3.5 h-6 w-1.5 -translate-y-1/2 rounded-full bg-primary shadow-[0_0_8px_rgba(var(--primary),0.5)]" />

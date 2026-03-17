@@ -81,6 +81,8 @@ interface MessageInputProps {
     onCancelReply?: () => void;
     disableCustomFonts?: boolean;
     disableGlowAndColors?: boolean;
+    disableColors?: boolean;
+    disableGlow?: boolean;
 }
 
 const theme = {
@@ -99,6 +101,8 @@ export const MessageInput: React.FC<MessageInputProps> = ({
     onCancelReply,
     disableCustomFonts,
     disableGlowAndColors,
+    disableColors,
+    disableGlow,
 }) => {
     const [isUploading, setIsUploading] = useState(false);
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
@@ -343,7 +347,9 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                         </Text>
                         <StyledUserName
                             className="text-xs font-bold whitespace-nowrap"
+                            disableColors={disableColors}
                             disableCustomFonts={disableCustomFonts}
+                            disableGlow={disableGlow}
                             disableGlowAndColors={disableGlowAndColors}
                             role={replyingTo.role}
                             user={replyingTo.user}

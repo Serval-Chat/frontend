@@ -15,25 +15,51 @@ export const AccessibilitySettings: React.FC = () => {
     const [localDisableFonts, setLocalDisableFonts] = useState<boolean | null>(
         null,
     );
+    const [localDisableColors, setLocalDisableColors] = useState<
+        boolean | null
+    >(null);
+    const [localDisableGlow, setLocalDisableGlow] = useState<boolean | null>(
+        null,
+    );
 
     const disableCustomFonts =
         localDisableFonts !== null
             ? localDisableFonts
             : user?.settings?.disableCustomUsernameFonts || false;
 
+    const disableCustomColors =
+        localDisableColors !== null
+            ? localDisableColors
+            : user?.settings?.disableCustomUsernameColors || false;
+
+    const disableCustomGlow =
+        localDisableGlow !== null
+            ? localDisableGlow
+            : user?.settings?.disableCustomUsernameGlow || false;
+
     const hasChanges =
-        localDisableFonts !== null &&
-        localDisableFonts !==
-            (user?.settings?.disableCustomUsernameFonts || false);
+        (localDisableFonts !== null &&
+            localDisableFonts !==
+                (user?.settings?.disableCustomUsernameFonts || false)) ||
+        (localDisableColors !== null &&
+            localDisableColors !==
+                (user?.settings?.disableCustomUsernameColors || false)) ||
+        (localDisableGlow !== null &&
+            localDisableGlow !==
+                (user?.settings?.disableCustomUsernameGlow || false));
 
     const handleSave = (): void => {
         updateSettings(
             {
                 disableCustomUsernameFonts: disableCustomFonts,
+                disableCustomUsernameColors: disableCustomColors,
+                disableCustomUsernameGlow: disableCustomGlow,
             },
             {
                 onSuccess: () => {
                     setLocalDisableFonts(null);
+                    setLocalDisableColors(null);
+                    setLocalDisableGlow(null);
                 },
             },
         );
@@ -41,6 +67,8 @@ export const AccessibilitySettings: React.FC = () => {
 
     const handleReset = (): void => {
         setLocalDisableFonts(null);
+        setLocalDisableColors(null);
+        setLocalDisableGlow(null);
     };
 
     if (isLoading) {
@@ -64,34 +92,84 @@ export const AccessibilitySettings: React.FC = () => {
                         needs.
                     </Text>
 
-                    {/* Disable Custom Username Fonts */}
+                    {/* Appearance Overrides */}
                     <div>
                         <Heading className="mb-4" level={4} variant="sub">
                             Appearance Overrides
                         </Heading>
-                        <div className="flex items-start justify-between gap-4 rounded-lg border border-border-subtle bg-bg-subtle p-4">
-                            <div className="space-y-1">
-                                <div className="flex items-center gap-2">
-                                    <Eye
-                                        className="text-muted-foreground"
-                                        size={16}
-                                    />
-                                    <Text weight="medium">
-                                        Disable Custom Username Fonts
+                        <div className="space-y-3">
+                            {/* Disable Custom Username Fonts */}
+                            <div className="flex items-start justify-between gap-4 rounded-lg border border-border-subtle bg-bg-subtle p-4">
+                                <div className="space-y-1">
+                                    <div className="flex items-center gap-2">
+                                        <Eye
+                                            className="text-muted-foreground"
+                                            size={16}
+                                        />
+                                        <Text weight="medium">
+                                            Disable Custom Username Fonts
+                                        </Text>
+                                    </div>
+                                    <Text size="sm" variant="muted">
+                                        Ignore custom font families set by other
+                                        users on their usernames. This will
+                                        reset them to the default system font
+                                        for improved readability.
                                     </Text>
                                 </div>
-                                <Text size="sm" variant="muted">
-                                    Ignore custom font families set by other
-                                    users on their usernames. This will reset
-                                    them to the default system font for improved
-                                    readability while keeping their chosen
-                                    colors.
-                                </Text>
+                                <Toggle
+                                    checked={disableCustomFonts}
+                                    onCheckedChange={setLocalDisableFonts}
+                                />
                             </div>
-                            <Toggle
-                                checked={disableCustomFonts}
-                                onCheckedChange={setLocalDisableFonts}
-                            />
+
+                            {/* Disable Custom Username Colors */}
+                            <div className="flex items-start justify-between gap-4 rounded-lg border border-border-subtle bg-bg-subtle p-4">
+                                <div className="space-y-1">
+                                    <div className="flex items-center gap-2">
+                                        <Eye
+                                            className="text-muted-foreground"
+                                            size={16}
+                                        />
+                                        <Text weight="medium">
+                                            Disable Custom Username Colors
+                                        </Text>
+                                    </div>
+                                    <Text size="sm" variant="muted">
+                                        Ignore custom colors and gradients set
+                                        by other users on their usernames. This
+                                        will reset them to the default text
+                                        color.
+                                    </Text>
+                                </div>
+                                <Toggle
+                                    checked={disableCustomColors}
+                                    onCheckedChange={setLocalDisableColors}
+                                />
+                            </div>
+
+                            {/* Disable Custom Username Glow */}
+                            <div className="flex items-start justify-between gap-4 rounded-lg border border-border-subtle bg-bg-subtle p-4">
+                                <div className="space-y-1">
+                                    <div className="flex items-center gap-2">
+                                        <Eye
+                                            className="text-muted-foreground"
+                                            size={16}
+                                        />
+                                        <Text weight="medium">
+                                            Disable Custom Username Glow
+                                        </Text>
+                                    </div>
+                                    <Text size="sm" variant="muted">
+                                        Ignore glow effects set by other users
+                                        on their usernames.
+                                    </Text>
+                                </div>
+                                <Toggle
+                                    checked={disableCustomGlow}
+                                    onCheckedChange={setLocalDisableGlow}
+                                />
+                            </div>
                         </div>
                     </div>
                 </div>

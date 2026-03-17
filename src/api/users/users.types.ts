@@ -39,6 +39,8 @@ export interface UserSettings {
     ownMessageColor?: string;
     otherMessageColor?: string;
     disableCustomUsernameFonts?: boolean;
+    disableCustomUsernameColors?: boolean;
+    disableCustomUsernameGlow?: boolean;
 }
 
 export interface ServerFolder {

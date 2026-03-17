@@ -55,9 +55,13 @@ export const MiniProfile: React.FC = () => {
                 <Box className="flex min-w-0 flex-1 flex-col">
                     <StyledUserName
                         className="!text-header-primary text-sm leading-tight font-semibold"
+                        disableColors={
+                            user.settings?.disableCustomUsernameColors
+                        }
                         disableCustomFonts={
                             user.settings?.disableCustomUsernameFonts
                         }
+                        disableGlow={user.settings?.disableCustomUsernameGlow}
                         user={user}
                     >
                         {user.displayName || user.username}

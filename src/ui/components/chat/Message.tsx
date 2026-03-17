@@ -42,6 +42,8 @@ interface MessageProps {
     onReplyToMessage?: (message: ProcessedChatMessage) => void;
     disableCustomFonts?: boolean;
     disableGlowAndColors?: boolean;
+    disableColors?: boolean;
+    disableGlow?: boolean;
 }
 
 export const Message: React.FC<MessageProps> = ({
@@ -55,6 +57,8 @@ export const Message: React.FC<MessageProps> = ({
     onReplyToMessage,
     disableCustomFonts,
     disableGlowAndColors,
+    disableColors,
+    disableGlow,
 }) => {
     const [showProfile, setShowProfile] = React.useState(false);
     const [showPicker, setShowPicker] = React.useState(false);
@@ -262,7 +266,9 @@ export const Message: React.FC<MessageProps> = ({
                 {/* Reply Preview */}
                 {isGroupStart && message.replyTo && (
                     <ReplyPreview
+                        disableColors={disableColors}
                         disableCustomFonts={disableCustomFonts}
+                        disableGlow={disableGlow}
                         disableGlowAndColors={disableGlowAndColors}
                         replyToId={message.replyTo._id}
                         role={message.replyTo.role}
@@ -304,7 +310,9 @@ export const Message: React.FC<MessageProps> = ({
                     {/* Content Area */}
                     <Box className="min-w-0 flex-1">
                         <MessageHeader
+                            disableColors={disableColors}
                             disableCustomFonts={disableCustomFonts}
+                            disableGlow={disableGlow}
                             disableGlowAndColors={disableGlowAndColors}
                             editedAt={message.editedAt}
                             iconRole={iconRole}
@@ -438,7 +446,9 @@ export const Message: React.FC<MessageProps> = ({
                 </Box>
 
                 <ProfilePopup
+                    disableColors={disableColors}
                     disableCustomFonts={disableCustomFonts}
+                    disableGlow={disableGlow}
                     disableGlowAndColors={disableGlowAndColors}
                     iconRole={iconRole}
                     isOpen={showProfile}

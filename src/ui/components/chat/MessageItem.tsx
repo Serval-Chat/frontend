@@ -16,6 +16,8 @@ interface MessageItemProps {
     onReplyToMessage?: (message: ProcessedChatMessage) => void;
     disableCustomFonts?: boolean;
     disableGlowAndColors?: boolean;
+    disableColors?: boolean;
+    disableGlow?: boolean;
 }
 
 export const MessageItem: React.FC<MessageItemProps> = ({
@@ -28,6 +30,8 @@ export const MessageItem: React.FC<MessageItemProps> = ({
     onReplyToMessage,
     disableCustomFonts,
     disableGlowAndColors,
+    disableColors,
+    disableGlow,
 }) => {
     const isGroupStart =
         !prevMessage ||
@@ -38,7 +42,9 @@ export const MessageItem: React.FC<MessageItemProps> = ({
 
     return (
         <Message
+            disableColors={disableColors}
             disableCustomFonts={disableCustomFonts}
+            disableGlow={disableGlow}
             disableGlowAndColors={disableGlowAndColors}
             iconRole={iconRole || message.iconRole}
             isGroupStart={isGroupStart}

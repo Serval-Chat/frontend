@@ -27,6 +27,8 @@ interface ProfilePopupProps {
     disableFetch?: boolean;
     disableCustomFonts?: boolean;
     disableGlowAndColors?: boolean;
+    disableColors?: boolean;
+    disableGlow?: boolean;
     adminView?: boolean;
 }
 
@@ -44,6 +46,8 @@ export const ProfilePopup: React.FC<ProfilePopupProps> = ({
     disableFetch,
     disableCustomFonts,
     disableGlowAndColors,
+    disableColors,
+    disableGlow,
     adminView = false,
 }) => {
     const popupRef = useRef<HTMLDivElement>(null);
@@ -130,7 +134,9 @@ export const ProfilePopup: React.FC<ProfilePopupProps> = ({
                                 text: presenceCustomText,
                                 emoji: presenceCustomEmoji,
                             }}
+                            disableColors={disableColors}
                             disableCustomFonts={disableCustomFonts}
+                            disableGlow={disableGlow}
                             disableGlowAndColors={disableGlowAndColors}
                             iconRole={iconRole}
                             joinedAt={joinedAt}
