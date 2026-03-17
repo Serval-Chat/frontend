@@ -60,7 +60,7 @@ export const GifPlayer: React.FC<GifPlayerProps> = ({ klipyId, url }) => {
                 '/api/v1/klipy/favorites/toggle',
                 {
                     klipyId,
-                    url: metadata?.url,
+                    url,
                     previewUrl: metadata?.previewUrl,
                     width: metadata?.width,
                     height: metadata?.height,
