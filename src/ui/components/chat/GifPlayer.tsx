@@ -1,26 +1,19 @@
 import React, { useEffect, useState } from 'react';
 
-import { Loader2, Star } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 
-import { apiClient as axios } from '@/api/client';
-import { Button } from '@/ui/components/common/Button';
+import { klipyApi } from '@/api/klipy/klipy.api';
+import type { KlipyFavorite } from '@/api/klipy/klipy.types';
+import { GifStarButton } from '@/ui/components/chat/GifStarButton';
 import { Box } from '@/ui/components/layout/Box';
-import { cn } from '@/utils/cn';
 
 interface GifPlayerProps {
     klipyId: string;
     url: string;
 }
 
-interface GifMetadata {
-    url: string;
-    previewUrl: string;
-    width: number;
-    height: number;
-}
-
 export const GifPlayer: React.FC<GifPlayerProps> = ({ klipyId, url }) => {
-    const [metadata, setMetadata] = useState<GifMetadata | null>(null);
+    const [metadata, setMetadata] = useState<KlipyFavorite | null>(null);
     const [loading, setLoading] = useState(true);
     const [isFavorited, setIsFavorited] = useState(false);
     const [error, setError] = useState(false);
@@ -28,18 +21,13 @@ export const GifPlayer: React.FC<GifPlayerProps> = ({ klipyId, url }) => {
     useEffect(() => {
         const fetchMetadata = async (): Promise<void> => {
             try {
-                const response = await axios.get(
-                    `/api/v1/klipy/resolve?id=${klipyId}`,
-                );
-                setMetadata(response.data);
+                const data = await klipyApi.resolveGif(klipyId);
+                setMetadata(data);
 
                 // Check if favorited
-                const favsResponse = await axios.get('/api/v1/klipy/favorites');
-                const favs = favsResponse.data;
+                const favorites = await klipyApi.getFavorites();
                 setIsFavorited(
-                    favs.some(
-                        (f: { klipyId: string }) => f.klipyId === klipyId,
-                    ),
+                    favorites.some((f) => String(f.klipyId) === klipyId),
                 );
             } catch (err) {
                 console.error('Failed to resolve Klipy GIF:', err);
@@ -55,18 +43,18 @@ export const GifPlayer: React.FC<GifPlayerProps> = ({ klipyId, url }) => {
     const toggleFavorite = async (e: React.MouseEvent): Promise<void> => {
         e.preventDefault();
         e.stopPropagation();
+
+        if (!metadata) return;
+
         try {
-            const response = await axios.post(
-                '/api/v1/klipy/favorites/toggle',
-                {
-                    klipyId,
-                    url,
-                    previewUrl: metadata?.previewUrl,
-                    width: metadata?.width,
-                    height: metadata?.height,
-                },
-            );
-            setIsFavorited(response.data.favorited);
+            const { favorited } = await klipyApi.toggleFavorite({
+                klipyId,
+                url,
+                previewUrl: metadata.previewUrl,
+                width: metadata.width,
+                height: metadata.height,
+            });
+            setIsFavorited(favorited);
         } catch (err) {
             console.error('Failed to toggle favorite:', err);
         }
@@ -113,21 +101,10 @@ export const GifPlayer: React.FC<GifPlayerProps> = ({ klipyId, url }) => {
             />
 
             <Box className="absolute top-2 right-2 opacity-0 transition-opacity group-hover:opacity-100">
-                <Button
-                    className={cn(
-                        'rounded-full bg-black/50 backdrop-blur-sm hover:bg-black/70',
-                        isFavorited && 'text-yellow-400',
-                    )}
-                    size="sm"
-                    variant="normal"
-                    onClick={(e) => {
-                        void toggleFavorite(e);
-                    }}
-                >
-                    <Star
-                        className={cn('h-4 w-4', isFavorited && 'fill-current')}
-                    />
-                </Button>
+                <GifStarButton
+                    isFavorited={isFavorited}
+                    onClick={(e) => void toggleFavorite(e)}
+                />
             </Box>
 
             <Box className="pointer-events-none absolute right-2 bottom-1 flex items-center gap-1 opacity-50">

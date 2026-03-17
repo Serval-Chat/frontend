@@ -293,7 +293,7 @@ const CodeEmbed: React.FC<{
     return (
         <>
             <Box className="my-2 max-w-[600px] overflow-hidden rounded-lg border border-border-subtle/50 bg-bg-secondary">
-                <div className="bg-bg-primary/50 flex items-center justify-between border-b border-border-subtle/50 px-3 py-2">
+                <div className="flex items-center justify-between border-b border-border-subtle/50 bg-bg-primary/50 px-3 py-2">
                     <div className="flex min-w-0 items-center gap-2">
                         <Code className="text-muted-foreground" size={14} />
                         <Text
@@ -343,7 +343,7 @@ const CodeEmbed: React.FC<{
                 </div>
 
                 {isTruncated && (
-                    <div className="bg-bg-primary/30 flex justify-center border-t border-border-subtle/30 px-3 py-2">
+                    <div className="flex justify-center border-t border-border-subtle/30 bg-bg-primary/30 px-3 py-2">
                         <Button
                             className="flex items-center gap-1.5 border-none bg-transparent text-[11px] font-bold text-primary shadow-none transition-colors hover:text-primary-hover"
                             size="sm"

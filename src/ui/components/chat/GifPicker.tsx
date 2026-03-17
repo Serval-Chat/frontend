@@ -9,24 +9,15 @@ import {
     X,
 } from 'lucide-react';
 
-import { apiClient as axios } from '@/api/client';
+import { klipyApi } from '@/api/klipy/klipy.api';
+import type { KlipyGif } from '@/api/klipy/klipy.types';
 import { useDebounce } from '@/hooks/useDebounce';
+import { GifStarButton } from '@/ui/components/chat/GifStarButton';
 import { Button } from '@/ui/components/common/Button';
 import { Input } from '@/ui/components/common/Input';
 import { Box } from '@/ui/components/layout/Box';
 
-interface GifItem {
-    klipyId?: string;
-    id?: string;
-    url?: string;
-    previewUrl?: string;
-    width?: number;
-    height?: number;
-    file?: {
-        sm?: { gif?: { url?: string; width?: number; height?: number } };
-        xs?: { gif?: { url?: string } };
-    };
-}
+type GifItem = KlipyGif;
 
 interface GifPickerProps {
     onSelect: (url: string) => void;
@@ -44,6 +35,7 @@ export const GifPicker: React.FC<GifPickerProps> = ({ onSelect, onClose }) => {
     const [tab, setTab] = useState<'trending' | 'favorites'>('trending');
     const [gifs, setGifs] = useState<GifItem[]>([]);
     const [loading, setLoading] = useState(false);
+    const [favoritedIds, setFavoritedIds] = useState<Set<string>>(new Set());
     const debouncedSearch = useDebounce(search, 500);
 
     const [size, setSize] = useState(() => {
@@ -111,22 +103,35 @@ export const GifPicker: React.FC<GifPickerProps> = ({ onSelect, onClose }) => {
         };
     }, [size]);
 
+    const fetchFavorites = useCallback(async () => {
+        try {
+            const favorites = await klipyApi.getFavorites();
+            const favIds = new Set<string>(
+                favorites.map((f) => String(f.klipyId)),
+            );
+            setFavoritedIds(favIds);
+        } catch (err) {
+            console.error('Failed to fetch favorites:', err);
+        }
+    }, []);
+
     const fetchGifs = useCallback(async () => {
         setLoading(true);
         try {
-            let response;
+            let fetchedGifs: KlipyGif[];
             if (tab === 'favorites') {
-                response = await axios.get('/api/v1/klipy/favorites');
-                setGifs(response.data);
-            } else if (debouncedSearch) {
-                response = await axios.get(
-                    `/api/v1/klipy/search?q=${debouncedSearch}`,
+                const favorites = await klipyApi.getFavorites();
+                fetchedGifs = favorites;
+                const favIds = new Set<string>(
+                    favorites.map((f) => String(f.klipyId)),
                 );
-                setGifs(response.data.data.data);
+                setFavoritedIds(favIds);
+            } else if (debouncedSearch) {
+                fetchedGifs = await klipyApi.searchGifs(debouncedSearch);
             } else {
-                response = await axios.get('/api/v1/klipy/trending');
-                setGifs(response.data.data.data);
+                fetchedGifs = await klipyApi.getTrendingGifs();
             }
+            setGifs(fetchedGifs);
         } catch (err) {
             console.error('Failed to fetch GIFs:', err);
         } finally {
@@ -138,9 +143,65 @@ export const GifPicker: React.FC<GifPickerProps> = ({ onSelect, onClose }) => {
         void fetchGifs();
     }, [fetchGifs]);
 
+    useEffect(() => {
+        if (tab !== 'favorites') {
+            void fetchFavorites();
+        }
+    }, [tab, fetchFavorites]);
+
+    const handleToggleFavorite = async (
+        e: React.MouseEvent,
+        gif: GifItem,
+    ): Promise<void> => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const klipyId = String(gif.klipyId || gif.id);
+        if (!klipyId || klipyId === 'undefined') return;
+
+        const url = gif.url || `https://klipy.com/g/${klipyId}`;
+        const previewUrl =
+            gif.previewUrl ||
+            gif.file?.sm?.gif?.url ||
+            gif.file?.xs?.gif?.url ||
+            '';
+        const width = gif.width || gif.file?.sm?.gif?.width || 200;
+        const height = gif.height || gif.file?.sm?.gif?.height || 150;
+
+        try {
+            const { favorited: isNowFavorited } = await klipyApi.toggleFavorite(
+                {
+                    klipyId,
+                    url,
+                    previewUrl,
+                    width,
+                    height,
+                },
+            );
+
+            setFavoritedIds((prev) => {
+                const next = new Set(prev);
+                if (isNowFavorited) {
+                    next.add(klipyId);
+                } else {
+                    next.delete(klipyId);
+                }
+                return next;
+            });
+
+            if (tab === 'favorites' && !isNowFavorited) {
+                setGifs((prev) =>
+                    prev.filter((g) => String(g.klipyId || g.id) !== klipyId),
+                );
+            }
+        } catch (err) {
+            console.error('Failed to toggle favorite:', err);
+        }
+    };
+
     return (
         <Box
-            className="bg-bg-primary relative flex flex-col rounded-xl border border-border-subtle shadow-2xl"
+            className="relative flex flex-col rounded-xl border border-border-subtle bg-bg-primary shadow-2xl"
             style={{ width: `${size.width}px`, height: `${size.height}px` }}
         >
             <div
@@ -209,7 +270,7 @@ export const GifPicker: React.FC<GifPickerProps> = ({ onSelect, onClose }) => {
                         style={{ columns: size.width > 450 ? 3 : 2 }}
                     >
                         {gifs.map((gif) => {
-                            const klipyId = gif.klipyId || gif.id;
+                            const klipyId = String(gif.klipyId || gif.id);
                             const url =
                                 gif.url || `https://klipy.com/g/${klipyId}`;
                             const previewUrl =
@@ -237,6 +298,19 @@ export const GifPicker: React.FC<GifPickerProps> = ({ onSelect, onClose }) => {
                                         src={previewUrl}
                                     />
                                     <Box className="absolute inset-0 bg-black/20 opacity-0 transition-opacity group-hover:opacity-100" />
+                                    <div className="absolute top-1 right-1 opacity-0 transition-opacity group-hover:opacity-100">
+                                        <GifStarButton
+                                            isFavorited={favoritedIds.has(
+                                                klipyId!,
+                                            )}
+                                            onClick={(e) =>
+                                                void handleToggleFavorite(
+                                                    e,
+                                                    gif,
+                                                )
+                                            }
+                                        />
+                                    </div>
                                 </Box>
                             );
                         })}

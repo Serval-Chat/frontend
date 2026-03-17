@@ -314,7 +314,7 @@ export const MainChat: React.FC = () => {
 
             {/* Drag and Drop Overlay */}
             {isDragging && (
-                <Box className="bg-bg-primary/80 animate-in fade-in zoom-in pointer-events-none absolute inset-0 z-[var(--z-index-backdrop)] m-4 flex flex-col items-center justify-center rounded-3xl border-4 border-dashed border-primary/50 p-8 backdrop-blur-sm transition-all duration-200">
+                <Box className="animate-in fade-in zoom-in pointer-events-none absolute inset-0 z-[var(--z-index-backdrop)] m-4 flex flex-col items-center justify-center rounded-3xl border-4 border-dashed border-primary/50 bg-bg-primary/80 p-8 backdrop-blur-sm transition-all duration-200">
                     <div className="mb-4 rounded-full bg-primary/10 p-6">
                         <Upload className="text-primary" size={48} />
                     </div>

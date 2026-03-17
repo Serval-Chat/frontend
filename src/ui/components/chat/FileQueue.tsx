@@ -53,7 +53,7 @@ const FileQueueItem: React.FC<{
     );
 
     return (
-        <Box className="group bg-bg-primary relative h-24 w-24 overflow-hidden rounded-lg border border-border-subtle">
+        <Box className="group relative h-24 w-24 overflow-hidden rounded-lg border border-border-subtle bg-bg-primary">
             {isImage && previewUrl ? (
                 <img
                     alt={file.file.name}
