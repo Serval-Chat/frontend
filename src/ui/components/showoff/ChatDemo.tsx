@@ -14,7 +14,7 @@ const MOCK_USERS: Record<string, User> = {
         createdAt: new Date(),
         username: 'catflare',
         displayName: 'Catflare',
-        profilePicture: 'https://catfla.re/images/servals/serval-1.jpg',
+        profilePicture: 'https://rolling.catfla.re/images/servals/serval-1.jpg',
         usernameGradient: {
             enabled: true,
             angle: 90,
@@ -32,7 +32,7 @@ const MOCK_USERS: Record<string, User> = {
         createdAt: new Date(),
         username: 'hexagon',
         displayName: 'hexagon',
-        profilePicture: 'https://catfla.re/images/servals/serval-4.jpg',
+        profilePicture: 'https://rolling.catfla.re/images/servals/serval-4.jpg',
         usernameGradient: {
             enabled: true,
             angle: 135,
@@ -51,7 +51,7 @@ const MOCK_USERS: Record<string, User> = {
         createdAt: new Date(),
         username: 'evalyn',
         displayName: 'Evalyn',
-        profilePicture: 'https://catfla.re/images/servals/serval-5.jpg',
+        profilePicture: 'https://rolling.catfla.re/images/servals/serval-5.jpg',
         usernameGradient: {
             enabled: true,
             angle: 45,
@@ -69,7 +69,7 @@ const MOCK_USERS: Record<string, User> = {
         createdAt: new Date(),
         username: 'mintsuki',
         displayName: 'Mintsuki',
-        profilePicture: 'https://catfla.re/images/servals/serval-6.jpg',
+        profilePicture: 'https://rolling.catfla.re/images/servals/serval-6.jpg',
         usernameGradient: {
             enabled: false,
             colors: [],

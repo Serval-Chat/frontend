@@ -6,6 +6,7 @@ import { GripVertical, Plus, Trash2 } from 'lucide-react';
 import type { Role } from '@/api/servers/servers.types';
 import { IconButton } from '@/ui/components/common/IconButton';
 import { RoleDot } from '@/ui/components/common/RoleDot';
+import { SettingsFloatingBar } from '@/ui/components/common/SettingsFloatingBar';
 import { Text } from '@/ui/components/common/Text';
 import { getRoleStyle } from '@/utils/roleColor';
 
@@ -37,12 +38,21 @@ export const RoleNavbar: React.FC<RoleNavbarProps> = ({
         setPrevRoles(roles);
     }
 
-    const handleDragEnd = (): void => {
+    const originalSorted = [...roles].sort((a, b) => b.position - a.position);
+    const hasOrderChanged = localRoles.some(
+        (role, idx) => role._id !== originalSorted[idx]?._id,
+    );
+
+    const handleSave = (): void => {
         const updated = localRoles.map((role, index) => ({
             ...role,
             position: localRoles.length - index,
         }));
         onReorderRoles(updated);
+    };
+
+    const handleReset = (): void => {
+        setLocalRoles([...roles].sort((a, b) => b.position - a.position));
     };
 
     return (
@@ -73,12 +83,20 @@ export const RoleNavbar: React.FC<RoleNavbarProps> = ({
                             key={role._id}
                             role={role}
                             onDelete={() => onDeleteRole(role._id)}
-                            onDragEnd={handleDragEnd}
+                            onDragEnd={() => {}}
                             onSelect={() => onSelectRole(role._id)}
                         />
                     ))}
                 </Reorder.Group>
             </div>
+            <SettingsFloatingBar
+                isFixed
+                isVisible={hasOrderChanged}
+                message="Careful - you have unsaved role order changes!"
+                offset="0px"
+                onReset={handleReset}
+                onSave={handleSave}
+            />
         </div>
     );
 };

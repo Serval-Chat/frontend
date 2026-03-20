@@ -423,6 +423,7 @@ export const WsEvents = {
     CATEGORY_PERMISSIONS_UPDATED: 'category_permissions_updated',
     EMOJI_UPDATED: 'emoji_updated',
     MENTION: 'mention',
+    AUDIT_LOG_ENTRY_CREATED: 'audit_log_entry_created',
 } as const;
 
 export interface IReactionEventPayload {

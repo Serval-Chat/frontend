@@ -4,6 +4,7 @@ import {
     Ban,
     ChevronLeft,
     Handshake,
+    ScrollText,
     Settings,
     Shield,
     Smile,
@@ -24,6 +25,7 @@ import { ServerEmojiSettings } from './ServerEmojiSettings';
 import { ServerInviteSettings } from './ServerInviteSettings';
 import { ServerOverviewSettings } from './ServerOverviewSettings';
 import { ServerRoleSettings } from './ServerRoleSettings';
+import { AuditLogSettings } from './auditLog/AuditLogSettings';
 
 interface ServerSettingsModalProps {
     isOpen: boolean;
@@ -58,6 +60,12 @@ const ALL_SECTIONS: {
         permission: 'manageServer',
     },
     { id: 'bans', label: 'Bans', icon: Ban, permission: 'banMembers' },
+    {
+        id: 'audit-log',
+        label: 'Audit Log',
+        icon: ScrollText,
+        permission: 'manageServer',
+    },
 ];
 
 export const ServerSettingsModal: React.FC<ServerSettingsModalProps> = ({
@@ -177,6 +185,9 @@ export const ServerSettingsModal: React.FC<ServerSettingsModalProps> = ({
                             )}
                             {activeSection === 'bans' && (
                                 <ServerBansSettings serverId={serverId} />
+                            )}
+                            {activeSection === 'audit-log' && (
+                                <AuditLogSettings serverId={serverId} />
                             )}
                         </div>
                     </div>

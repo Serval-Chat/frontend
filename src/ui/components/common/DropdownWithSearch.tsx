@@ -85,7 +85,7 @@ export const DropdownWithSearch: React.FC<DropdownWithSearchProps> = ({
         setSearchQuery('');
     };
 
-    const handleClear = (e: React.MouseEvent): void => {
+    const handleClear = (e: React.SyntheticEvent): void => {
         e.stopPropagation();
         onChange(null);
     };
@@ -134,15 +134,19 @@ export const DropdownWithSearch: React.FC<DropdownWithSearchProps> = ({
 
                 <div className="ml-2 flex flex-shrink-0 items-center gap-1">
                     {allowClear && value && (
-                        <Button
-                            className="h-6 w-6 rounded-full border-none p-1 text-muted-foreground shadow-none transition-colors hover:bg-bg-subtle"
-                            size="sm"
-                            type="button"
-                            variant="ghost"
+                        <div
+                            className="flex h-6 w-6 cursor-pointer items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-bg-subtle"
+                            role="button"
+                            tabIndex={0}
                             onClick={handleClear}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter' || e.key === ' ') {
+                                    handleClear(e);
+                                }
+                            }}
                         >
                             <X size={14} />
-                        </Button>
+                        </div>
                     )}
                     <ChevronDown
                         className={cn(
@@ -193,6 +197,7 @@ export const DropdownWithSearch: React.FC<DropdownWithSearchProps> = ({
                                                 : 'text-muted-foreground hover:bg-bg-subtle hover:text-foreground',
                                         )}
                                         innerClassName="w-full justify-start"
+                                        key={option.id || option.label}
                                         size="md"
                                         variant="ghost"
                                         onClick={() => handleSelect(option.id)}

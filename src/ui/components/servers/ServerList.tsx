@@ -11,7 +11,8 @@ import {
 import type { Server } from '@/api/servers/servers.types';
 import { useMe } from '@/api/users/users.queries';
 import type { ServerFolder as IServerFolder } from '@/api/users/users.types';
-import { useAppSelector } from '@/store/hooks';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { openFolder } from '@/store/slices/navSlice';
 
 import { ServerFolder } from './ServerFolder';
 import { ServerItem } from './ServerItem';
@@ -32,7 +33,27 @@ export const ServerList: React.FC = () => {
     const lastOpenedChannelByServer = useAppSelector(
         (state) => state.nav.lastOpenedChannelByServer,
     );
+    const openedFolders = useAppSelector((state) => state.nav.openedFolders);
+    const dispatch = useAppDispatch();
     const navigate = useNavigate();
+
+    // Auto-open folder if navigating to a server inside it
+    React.useEffect(() => {
+        if (!selectedServerId || !me?.serverSettings?.order) return;
+
+        // Find which folder contains this server
+        const folderWithServer = me.serverSettings.order.find(
+            (item) =>
+                typeof item !== 'string' &&
+                item.serverIds.includes(selectedServerId),
+        );
+
+        if (folderWithServer && typeof folderWithServer !== 'string') {
+            if (!openedFolders.includes(folderWithServer.id)) {
+                dispatch(openFolder(folderWithServer.id));
+            }
+        }
+    }, [selectedServerId, me?.serverSettings?.order, openedFolders, dispatch]);
 
     const items = React.useMemo(() => {
         if (!me || !servers) return [];

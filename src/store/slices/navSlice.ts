@@ -112,6 +112,11 @@ const navSlice = createSlice({
                 state.openedFolders.push(action.payload);
             }
         },
+        openFolder: (state, action: PayloadAction<string>) => {
+            if (!state.openedFolders.includes(action.payload)) {
+                state.openedFolders.push(action.payload);
+            }
+        },
     },
 });
 
@@ -124,5 +129,6 @@ export const {
     toggleMobileHomeTab,
     toggleMobileMemberList,
     toggleFolder,
+    openFolder,
 } = navSlice.actions;
 export const navReducer = navSlice.reducer;
