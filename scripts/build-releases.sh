@@ -15,7 +15,7 @@ fi
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 KEYSTORE="$(realpath "${SCRIPT_DIR}/../debug.keystore")"
 RELEASES_DIR="${SCRIPT_DIR}/releases"
-BUILD_WIN="${SCRIPT_DIR}/scripts/build-win.sh"
+BUILD_WIN="${SCRIPT_DIR}/build-win.sh"
 
 [[ -f "$KEYSTORE"  ]] || { echo "错误：在 ${KEYSTORE} 找不到 debug.keystore" >&2; exit 1; }
 [[ -f "$BUILD_WIN" ]] || { echo "错误：找不到 scripts/build-win.sh" >&2; exit 1; }

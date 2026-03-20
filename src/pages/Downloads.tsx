@@ -69,7 +69,7 @@ export const Downloads = (): ReactNode => (
                             <a
                                 download
                                 className="w-full"
-                                href="/releases/windows_x64/Serchat_v0.7.9.exe"
+                                href="/releases/windows_x64/Serchat_v0.7.11.exe"
                             >
                                 <Button
                                     className="h-14 w-full text-lg"
@@ -101,7 +101,7 @@ export const Downloads = (): ReactNode => (
                             <a
                                 download
                                 className="w-full"
-                                href="/releases/linux_x64/Serchat_v0.7.9.AppImage"
+                                href="/releases/linux_x64/Serchat_v0.7.11.AppImage"
                             >
                                 <Button
                                     className="h-14 w-full text-lg"
@@ -115,7 +115,7 @@ export const Downloads = (): ReactNode => (
                                 <a
                                     download
                                     className="w-full flex-1"
-                                    href="/releases/ubuntu/Serchat_v0.7.9.deb"
+                                    href="/releases/ubuntu/Serchat_v0.7.11.deb"
                                 >
                                     <Button className="w-full" variant="normal">
                                         .deb
@@ -124,7 +124,7 @@ export const Downloads = (): ReactNode => (
                                 <a
                                     download
                                     className="w-full flex-1"
-                                    href="/releases/rhel/Serchat_v0.7.9.rpm"
+                                    href="/releases/rhel/Serchat_v0.7.11.rpm"
                                 >
                                     <Button className="w-full" variant="normal">
                                         .rpm
@@ -153,7 +153,7 @@ export const Downloads = (): ReactNode => (
                             <a
                                 download
                                 className="w-full"
-                                href="/releases/android/Serchat_v0.7.9.apk"
+                                href="/releases/android/Serchat_v0.7.11.apk"
                             >
                                 <Button
                                     className="h-14 w-full text-lg"
