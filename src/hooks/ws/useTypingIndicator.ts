@@ -28,11 +28,11 @@ export function useTypingIndicator(): {
         // Clear existing timeout for this user
         const existingTimeout = timeoutsRef.current.get(userId);
         if (existingTimeout) {
-            clearTimeout(existingTimeout);
+            window.clearTimeout(existingTimeout);
         }
 
         // Remove user after 3 seconds of inactivity
-        const timeout = setTimeout(() => {
+        const timeout = window.setTimeout(() => {
             setTypingUsers((prev) => prev.filter((u) => u.userId !== userId));
             timeoutsRef.current.delete(userId);
         }, 3000);
@@ -42,7 +42,7 @@ export function useTypingIndicator(): {
 
     const clearTypingUsers = useCallback(() => {
         setTypingUsers([]);
-        timeoutsRef.current.forEach((timeout) => clearTimeout(timeout));
+        timeoutsRef.current.forEach((timeout) => window.clearTimeout(timeout));
         timeoutsRef.current.clear();
     }, []);
 
@@ -50,7 +50,7 @@ export function useTypingIndicator(): {
         const timeouts = timeoutsRef.current;
         return () => {
             // Cleanup all timeouts on unmount
-            timeouts.forEach((timeout) => clearTimeout(timeout));
+            timeouts.forEach((timeout) => window.clearTimeout(timeout));
         };
     }, []);
 
