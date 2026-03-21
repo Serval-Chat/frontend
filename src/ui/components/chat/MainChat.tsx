@@ -19,6 +19,7 @@ import { useFileQueue } from '@/hooks/chat/useFileQueue';
 import { useMemberMaps } from '@/hooks/chat/useMemberMaps';
 import { usePaginatedMessages } from '@/hooks/chat/usePaginatedMessages';
 import { useProcessedMessages } from '@/hooks/chat/useProcessedMessages';
+import { useSlowMode } from '@/hooks/chat/useSlowMode';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useChatWS } from '@/hooks/ws/useChatWS';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
@@ -122,6 +123,13 @@ export const MainChat: React.FC = () => {
         selectedFriendId ?? undefined,
         selectedServerId ?? undefined,
         selectedChannelId ?? undefined,
+    );
+
+    const canBypassSlowMode =
+        !selectedServerId || hasPermission('bypassSlowmode');
+    const { cooldown, setCooldown } = useSlowMode(
+        selectedChannel,
+        canBypassSlowMode,
     );
 
     const handleDragOver = (e: React.DragEvent): void => {
@@ -283,10 +291,20 @@ export const MainChat: React.FC = () => {
                         onReplyToMessage={(msg) => setReplyingTo(msg)}
                     />
                 )}
-                <TypingIndicator typingUsers={typingUsers} />
+                <TypingIndicator
+                    canBypassSlowMode={canBypassSlowMode}
+                    cooldown={cooldown}
+                    isSlowModeEnabled={
+                        !!selectedChannel?.slowMode &&
+                        selectedChannel.slowMode > 0
+                    }
+                    typingUsers={typingUsers}
+                />
             </Box>
             {canSendMessages ? (
                 <MessageInput
+                    canBypassSlowMode={canBypassSlowMode}
+                    cooldown={cooldown}
                     disableColors={
                         currentUser?.settings?.disableCustomUsernameColors
                     }
@@ -302,6 +320,7 @@ export const MainChat: React.FC = () => {
                     }
                     fileQueueResult={fileQueueResult}
                     replyingTo={replyingTo}
+                    setCooldown={setCooldown}
                     onCancelReply={() => setReplyingTo(null)}
                 />
             ) : (

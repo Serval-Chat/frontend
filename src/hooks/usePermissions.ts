@@ -62,6 +62,7 @@ export const usePermissions = (
             addReactions: false,
             viewChannels: false,
             export_channel_messages: false,
+            bypassSlowmode: false,
         };
 
         if (!serverId || !currentUser) return perms;

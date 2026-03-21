@@ -108,6 +108,7 @@ export interface IMessageServerSent {
     text: string;
     createdAt: string;
     replyToId?: string;
+    slowModeNextMessageAllowedAt?: string | null;
 }
 
 /**

@@ -4,15 +4,23 @@ import { cn } from '@/utils/cn';
 
 interface TypingIndicatorProps {
     typingUsers: Array<{ userId: string; username: string }>;
+    cooldown?: number;
+    isSlowModeEnabled?: boolean;
+    canBypassSlowMode?: boolean;
 }
 
 /**
- * @description Component to display typing indicators
+ * @description Component to display typing indicators and slow mode cooldown
  */
 export const TypingIndicator: React.FC<TypingIndicatorProps> = ({
     typingUsers,
+    cooldown = 0,
+    isSlowModeEnabled = false,
+    canBypassSlowMode = false,
 }) => {
     const isTyping = typingUsers.length > 0;
+    const hasCooldown = cooldown > 0;
+    const showSlowModeInfo = isSlowModeEnabled || hasCooldown;
 
     const getTypingText = (): string => {
         if (!isTyping) {
@@ -26,18 +34,35 @@ export const TypingIndicator: React.FC<TypingIndicatorProps> = ({
         }
     };
 
+    const getSlowModeText = (): string => {
+        if (canBypassSlowMode) {
+            return "Slowmode enabled. Huh? It doesn't affect YOU!";
+        }
+        return hasCooldown
+            ? `Slowmode enabled. (${cooldown}s)`
+            : 'Slowmode enabled.';
+    };
+
     return (
         <Box
             className={cn(
                 'pointer-events-none absolute right-0 bottom-0 left-0 z-10',
                 'px-4 pt-6 pb-2 transition-opacity duration-300 ease-in-out',
                 'bg-gradient-to-t from-[var(--chat-bg)] via-[var(--chat-bg)]/80 to-transparent',
-                isTyping ? 'opacity-100' : 'opacity-0',
+                isTyping || showSlowModeInfo ? 'opacity-100' : 'opacity-0',
             )}
         >
-            <Text color="muted" fontStyle="italic" size="sm">
-                {getTypingText()}
-            </Text>
+            <Box className="flex items-center justify-between gap-4">
+                <Text color="muted" fontStyle="italic" size="sm">
+                    {getTypingText()}
+                </Text>
+
+                {showSlowModeInfo && (
+                    <Text className="font-medium text-primary" size="sm">
+                        {getSlowModeText()}
+                    </Text>
+                )}
+            </Box>
         </Box>
     );
 };

@@ -43,6 +43,8 @@ export interface Channel {
     lastReadAt?: string | null;
     link?: string;
     permissions?: Record<string, Record<string, boolean>>;
+    slowMode?: number;
+    slowModeNextMessageAllowedAt?: string | null;
 }
 
 export interface Category {
@@ -69,6 +71,7 @@ export interface RolePermissions {
     addReactions: boolean;
     viewChannels: boolean;
     export_channel_messages: boolean;
+    bypassSlowmode: boolean;
 }
 
 export interface Role {

@@ -4,6 +4,8 @@ import { type InfiniteData, useQueryClient } from '@tanstack/react-query';
 
 import { CHAT_QUERY_KEYS } from '@/api/chat/chat.queries';
 import { type ChatMessage, type MessageReaction } from '@/api/chat/chat.types';
+import { SERVERS_QUERY_KEYS } from '@/api/servers/servers.queries';
+import type { Channel } from '@/api/servers/servers.types';
 import { useMe } from '@/api/users/users.queries';
 import {
     type IMessageDm,
@@ -227,6 +229,22 @@ export function useChatWS(
                         ),
                         convertServerMessageToChatMessage(message),
                     );
+
+                    queryClient.setQueryData<Channel[]>(
+                        SERVERS_QUERY_KEYS.channels(selectedServerId),
+                        (oldChannels) => {
+                            if (!oldChannels) return oldChannels;
+                            return oldChannels.map((ch) =>
+                                ch._id === selectedChannelId
+                                    ? {
+                                          ...ch,
+                                          slowModeNextMessageAllowedAt:
+                                              message.slowModeNextMessageAllowedAt,
+                                      }
+                                    : ch,
+                            );
+                        },
+                    );
                 }
             },
             [
@@ -234,6 +252,7 @@ export function useChatWS(
                 selectedServerId,
                 addMessageToCache,
                 convertServerMessageToChatMessage,
+                queryClient,
             ],
         ),
     );

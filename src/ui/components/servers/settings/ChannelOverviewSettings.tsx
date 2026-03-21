@@ -37,6 +37,10 @@ export const ChannelOverviewSettings: React.FC<
     const [originalIcon, setOriginalIcon] = useState(channel.icon || '');
     const [linkUrl, setLinkUrl] = useState(channel.link || '');
     const [originalLinkUrl, setOriginalLinkUrl] = useState(channel.link || '');
+    const [slowMode, setSlowMode] = useState(channel.slowMode || 0);
+    const [originalSlowMode, setOriginalSlowMode] = useState(
+        channel.slowMode || 0,
+    );
     const [error, setError] = useState<string | null>(null);
 
     const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
@@ -68,13 +72,16 @@ export const ChannelOverviewSettings: React.FC<
         setOriginalIcon(channel.icon || '');
         setLinkUrl(channel.link || '');
         setOriginalLinkUrl(channel.link || '');
+        setSlowMode(channel.slowMode || 0);
+        setOriginalSlowMode(channel.slowMode || 0);
     }
 
     const hasChanges =
         name !== originalName ||
         description !== originalDescription ||
         selectedIcon !== originalIcon ||
-        linkUrl !== originalLinkUrl;
+        linkUrl !== originalLinkUrl ||
+        slowMode !== originalSlowMode;
 
     const handleSave = (): void => {
         setError(null);
@@ -102,6 +109,7 @@ export const ChannelOverviewSettings: React.FC<
                 ...(channel.type === 'link'
                     ? { link: linkUrl || undefined }
                     : {}),
+                slowMode,
             },
             {
                 onSuccess: () => {
@@ -111,6 +119,7 @@ export const ChannelOverviewSettings: React.FC<
                     if (channel.type === 'link') {
                         setOriginalLinkUrl(linkUrl);
                     }
+                    setOriginalSlowMode(slowMode);
                 },
             },
         );
@@ -121,6 +130,7 @@ export const ChannelOverviewSettings: React.FC<
         setDescription(originalDescription);
         setSelectedIcon(originalIcon);
         setLinkUrl(originalLinkUrl);
+        setSlowMode(originalSlowMode);
         setError(null);
     };
 
@@ -227,6 +237,84 @@ export const ChannelOverviewSettings: React.FC<
                         )}
                     </div>
                 </div>
+
+                {channel.type === 'text' && (
+                    <div className="space-y-4 pt-4">
+                        <div className="flex items-center justify-between">
+                            <label
+                                className="text-xs font-bold tracking-wider text-muted-foreground uppercase"
+                                htmlFor="slow-mode"
+                            >
+                                Slow Mode
+                            </label>
+                            <div className="flex items-center gap-3">
+                                <span className="text-sm font-medium text-primary">
+                                    {slowMode === 0
+                                        ? 'Off'
+                                        : slowMode < 60
+                                          ? `${slowMode}s`
+                                          : slowMode < 3600
+                                            ? `${Math.floor(slowMode / 60)}m`
+                                            : `${Math.floor(slowMode / 3600)}h`}
+                                </span>
+                                <div className="flex items-center gap-1.5">
+                                    <Input
+                                        className="h-7 w-20 px-2 text-center text-xs"
+                                        max={21600}
+                                        min={0}
+                                        placeholder="0"
+                                        type="number"
+                                        value={slowMode === 0 ? '' : slowMode}
+                                        onChange={(e) => {
+                                            const val = e.target.value;
+                                            if (val === '') {
+                                                setSlowMode(0);
+                                                return;
+                                            }
+                                            const num = Number(val);
+                                            if (!isNaN(num)) {
+                                                setSlowMode(
+                                                    Math.min(
+                                                        21600,
+                                                        Math.max(0, num),
+                                                    ),
+                                                );
+                                            }
+                                        }}
+                                    />
+                                    <span className="text-[10px] font-bold text-muted-foreground uppercase">
+                                        sec
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <input
+                            className="h-1.5 w-full cursor-pointer appearance-none rounded-lg bg-bg-secondary accent-primary"
+                            id="slow-mode"
+                            max="21600"
+                            min="0"
+                            step={
+                                slowMode < 60
+                                    ? 5
+                                    : slowMode < 600
+                                      ? 10
+                                      : slowMode < 3600
+                                        ? 60
+                                        : 3600
+                            }
+                            type="range"
+                            value={slowMode}
+                            onChange={(e) =>
+                                setSlowMode(Number(e.target.value))
+                            }
+                        />
+                        <Text className="text-[11px]" variant="muted">
+                            Members will be restricted to sending one message
+                            per this interval. This does not apply to users with
+                            the Bypass Slow Mode permission.
+                        </Text>
+                    </div>
+                )}
             </div>
 
             {/* Export Messages Section */}

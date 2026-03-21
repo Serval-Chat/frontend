@@ -83,6 +83,9 @@ interface MessageInputProps {
     disableGlowAndColors?: boolean;
     disableColors?: boolean;
     disableGlow?: boolean;
+    cooldown: number;
+    setCooldown: (c: number) => void;
+    canBypassSlowMode: boolean;
 }
 
 const theme = {
@@ -103,6 +106,9 @@ export const MessageInput: React.FC<MessageInputProps> = ({
     disableGlowAndColors,
     disableColors,
     disableGlow,
+    cooldown,
+    setCooldown,
+    canBypassSlowMode,
 }) => {
     const [isUploading, setIsUploading] = useState(false);
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
@@ -194,6 +200,11 @@ export const MessageInput: React.FC<MessageInputProps> = ({
         [friendsList],
     );
 
+    const currentChannel = useMemo(
+        () => channels.find((c) => c._id === selectedChannelId),
+        [channels, selectedChannelId],
+    );
+
     const allServerEmojis = useMemo(
         () =>
             customCategories.flatMap((cat) =>
@@ -280,6 +291,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
         async (text: string): Promise<void> => {
             const trimmedText = text.trim();
             if (!trimmedText && files.length === 0) return;
+            if (cooldown > 0 && !canBypassSlowMode) return;
 
             const uploadedUrls = await handleUploadFiles();
 
@@ -294,6 +306,9 @@ export const MessageInput: React.FC<MessageInputProps> = ({
 
             if (finalMessage) {
                 sendMessage(finalMessage, replyingTo?._id);
+                if (currentChannel?.slowMode && currentChannel.slowMode > 0) {
+                    setCooldown(currentChannel.slowMode);
+                }
                 clearQueue();
                 onCancelReply?.();
             }
@@ -305,6 +320,10 @@ export const MessageInput: React.FC<MessageInputProps> = ({
             sendMessage,
             replyingTo,
             onCancelReply,
+            currentChannel?.slowMode,
+            cooldown,
+            canBypassSlowMode,
+            setCooldown,
         ],
     );
 
@@ -324,6 +343,14 @@ export const MessageInput: React.FC<MessageInputProps> = ({
 
     const getPlaceholder = (): string => {
         if (isUploading) return 'Uploading...';
+
+        if (currentChannel?.slowMode && currentChannel.slowMode > 0) {
+            if (canBypassSlowMode) {
+                return "Slowmode enabled. Huh? It doesn't affect YOU!";
+            }
+            return 'Slowmode enabled.';
+        }
+
         const hasLastMessage = findLastMyMessage !== null;
         if (hasLastMessage && !hasText) {
             return 'Type a message... (ArrowUp to edit last message)';
@@ -390,6 +417,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                 />
                 <Button
                     className="mb-1 h-8 w-8 shrink-0 p-0"
+                    disabled={cooldown > 0 && !canBypassSlowMode}
                     size="sm"
                     variant="ghost"
                     onClick={() => fileInputRef.current?.click()}
