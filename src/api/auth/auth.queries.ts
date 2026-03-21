@@ -22,7 +22,9 @@ export const useLogin = (): UseMutationResult<
     useMutation({
         mutationFn: authApi.login,
         onSuccess: async (data) => {
-            await setAuthToken(data.token);
+            if (data.token) {
+                await setAuthToken(data.token);
+            }
         },
     });
 

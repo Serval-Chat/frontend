@@ -20,6 +20,12 @@ interface LoginFormResult {
     setPassword: React.Dispatch<React.SetStateAction<string>>;
     status: StatusState;
     setStatus: React.Dispatch<React.SetStateAction<StatusState>>;
+    requiresTwoFactor: boolean;
+    twoFactorCode: string;
+    setTwoFactorCode: React.Dispatch<React.SetStateAction<string>>;
+    useBackupCode: boolean;
+    setUseBackupCode: React.Dispatch<React.SetStateAction<boolean>>;
+    resetTwoFactorState: () => void;
     handleSubmit: (e: React.FormEvent) => Promise<void>;
 }
 
@@ -30,22 +36,71 @@ export const useLoginForm = (): LoginFormResult => {
         message: '',
         type: '',
     });
+    const [requiresTwoFactor, setRequiresTwoFactor] = useState(false);
+    const [tempToken, setTempToken] = useState('');
+    const [twoFactorCode, setTwoFactorCode] = useState('');
+    const [useBackupCode, setUseBackupCode] = useState(false);
     const navigate = useNavigate();
     const queryClient = useQueryClient();
+
+    const resetTwoFactorState = (): void => {
+        setRequiresTwoFactor(false);
+        setTempToken('');
+        setTwoFactorCode('');
+        setUseBackupCode(false);
+    };
 
     const handleSubmit = async (e: React.FormEvent): Promise<void> => {
         e.preventDefault();
         setStatus({ message: '', type: '' });
 
-        if (!loginInput || !password) {
+        if (!requiresTwoFactor && (!loginInput || !password)) {
             setStatus({ message: 'Please fill in all fields.', type: 'error' });
+            return;
+        }
+        if (requiresTwoFactor && !twoFactorCode.trim()) {
+            setStatus({
+                message: useBackupCode
+                    ? 'Please enter your backup code.'
+                    : 'Please enter your 2FA code.',
+                type: 'error',
+            });
             return;
         }
 
         try {
-            const data = await authApi.login({ login: loginInput, password });
+            let data;
+            if (!requiresTwoFactor) {
+                data = await authApi.login({ login: loginInput, password });
+                if (data.two_factor_required && data.temp_token) {
+                    setRequiresTwoFactor(true);
+                    setTempToken(data.temp_token);
+                    setStatus({
+                        message:
+                            'Two-factor authentication is enabled. Enter your code to continue.',
+                        type: 'success',
+                    });
+                    return;
+                }
+            } else {
+                data = await authApi.verifyTwoFactor({
+                    tempToken,
+                    ...(useBackupCode
+                        ? { backupCode: twoFactorCode }
+                        : { code: twoFactorCode }),
+                });
+            }
+
+            if (!data?.token) {
+                setStatus({
+                    message: 'Login failed',
+                    type: 'error',
+                });
+                return;
+            }
             await setAuthToken(data.token);
             await queryClient.invalidateQueries({ queryKey: ['me'] });
+            resetTwoFactorState();
 
             await setupWebPush();
             await checkAndMigrateVapid();
@@ -73,6 +128,12 @@ export const useLoginForm = (): LoginFormResult => {
         setPassword,
         status,
         setStatus,
+        requiresTwoFactor,
+        twoFactorCode,
+        setTwoFactorCode,
+        useBackupCode,
+        setUseBackupCode,
+        resetTwoFactorState,
         handleSubmit,
     };
 };

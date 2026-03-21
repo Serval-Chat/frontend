@@ -101,4 +101,5 @@ export interface User {
     settings?: UserSettings;
     banner?: string;
     serverSettings?: ServerSettings;
+    totpEnabled?: boolean;
 }

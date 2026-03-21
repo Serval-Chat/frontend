@@ -4,8 +4,33 @@ export interface LoginRequest {
 }
 
 export interface LoginResponse {
-    token: string;
+    token?: string;
+    temp_token?: string;
+    two_factor_required?: boolean;
     username: string;
+}
+
+export interface VerifyTwoFactorRequest {
+    tempToken: string;
+    code?: string;
+    backupCode?: string;
+}
+
+export interface TotpSetupResponse {
+    otpauthUri: string;
+}
+
+export interface TotpSetupConfirmRequest {
+    code: string;
+}
+
+export interface TotpSetupConfirmResponse {
+    backupCodes: string[];
+}
+
+export interface TotpSensitiveActionRequest {
+    code?: string;
+    backupCode?: string;
 }
 
 export interface RegisterRequest {

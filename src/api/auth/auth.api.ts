@@ -13,6 +13,11 @@ import type {
     RegisterResponse,
     RequestPasswordResetRequest,
     RequestPasswordResetResponse,
+    TotpSensitiveActionRequest,
+    TotpSetupConfirmRequest,
+    TotpSetupConfirmResponse,
+    TotpSetupResponse,
+    VerifyTwoFactorRequest,
 } from './auth.types';
 
 export const authApi = {
@@ -50,5 +55,36 @@ export const authApi = {
                 '/api/v1/auth/password/reset/confirm',
                 data,
             )
+            .then((r) => r.data),
+
+    verifyTwoFactor: (data: VerifyTwoFactorRequest) =>
+        apiClient
+            .post<LoginResponse>('/api/v1/auth/2fa/verify', data)
+            .then((r) => r.data),
+
+    setupTwoFactor: () =>
+        apiClient
+            .post<TotpSetupResponse>('/api/v1/auth/2fa/setup')
+            .then((r) => r.data),
+
+    confirmTwoFactorSetup: (data: TotpSetupConfirmRequest) =>
+        apiClient
+            .post<TotpSetupConfirmResponse>(
+                '/api/v1/auth/2fa/setup/confirm',
+                data,
+            )
+            .then((r) => r.data),
+
+    regenerateBackupCodes: (data: TotpSensitiveActionRequest) =>
+        apiClient
+            .post<TotpSetupConfirmResponse>(
+                '/api/v1/auth/2fa/backup-codes/regenerate',
+                data,
+            )
+            .then((r) => r.data),
+
+    disableTwoFactor: (data: TotpSensitiveActionRequest) =>
+        apiClient
+            .post<{ message: string }>('/api/v1/auth/2fa/disable', data)
             .then((r) => r.data),
 };

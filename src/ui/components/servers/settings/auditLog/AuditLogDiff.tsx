@@ -9,9 +9,7 @@ interface AuditLogDiffProps {
     changes: IAuditLogChange[];
 }
 
-function flattenChange(
-    change: IAuditLogChange,
-): Array<{
+function flattenChange(change: IAuditLogChange): Array<{
     field: string;
     before: string | React.ReactNode;
     after: string | React.ReactNode;
@@ -79,9 +77,9 @@ function formatValue(value: unknown, field?: string): string | React.ReactNode {
             return (
                 <div className="flex flex-wrap items-center gap-1.5">
                     {value.map((v, i) => (
-                        // eslint-disable-next-line react/no-array-index-key
                         <div
                             className="flex items-center gap-1.5"
+                            // eslint-disable-next-line react/no-array-index-key
                             key={`color-${v}-${i}`}
                         >
                             <div

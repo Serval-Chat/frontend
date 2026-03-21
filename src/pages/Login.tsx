@@ -26,6 +26,12 @@ export const Login: React.FC = () => {
         password,
         setPassword,
         status,
+        requiresTwoFactor,
+        twoFactorCode,
+        setTwoFactorCode,
+        useBackupCode,
+        setUseBackupCode,
+        resetTwoFactorState,
         handleSubmit,
     } = useLoginForm();
 
@@ -55,37 +61,85 @@ export const Login: React.FC = () => {
                     onSubmit={(e) => void handleSubmit(e)}
                 >
                     <InputWrapper>
-                        <Input
-                            className="bg-background/50"
-                            placeholder="E-mail"
-                            type="text"
-                            value={loginInput}
-                            onChange={(e) => setLoginInput(e.target.value)}
-                        />
+                        {requiresTwoFactor ? (
+                            <Input
+                                className="bg-background/50"
+                                placeholder={
+                                    useBackupCode
+                                        ? 'Backup code (XXXX-XXXX)'
+                                        : '6-digit authenticator code'
+                                }
+                                type="text"
+                                value={twoFactorCode}
+                                onChange={(e) =>
+                                    setTwoFactorCode(
+                                        e.target.value
+                                            .toUpperCase()
+                                            .replace(/\s+/g, ''),
+                                    )
+                                }
+                            />
+                        ) : (
+                            <Input
+                                className="bg-background/50"
+                                placeholder="E-mail"
+                                type="text"
+                                value={loginInput}
+                                onChange={(e) => setLoginInput(e.target.value)}
+                            />
+                        )}
                     </InputWrapper>
-                    <InputWrapper>
-                        <Input
-                            className="bg-background/50"
-                            placeholder="Password"
-                            type="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                        />
-                    </InputWrapper>
-                    <div className="text-right">
-                        <Link
-                            className="text-sm text-primary hover:underline"
-                            to="/forgot-password"
-                        >
-                            Forgot Password?
-                        </Link>
-                    </div>
+                    {!requiresTwoFactor && (
+                        <>
+                            <InputWrapper>
+                                <Input
+                                    className="bg-background/50"
+                                    placeholder="Password"
+                                    type="password"
+                                    value={password}
+                                    onChange={(e) =>
+                                        setPassword(e.target.value)
+                                    }
+                                />
+                            </InputWrapper>
+                            <div className="text-right">
+                                <Link
+                                    className="text-sm text-primary hover:underline"
+                                    to="/forgot-password"
+                                >
+                                    Forgot Password?
+                                </Link>
+                            </div>
+                        </>
+                    )}
+                    {requiresTwoFactor && (
+                        <div className="flex items-center justify-between text-sm">
+                            <button
+                                className="text-primary hover:underline"
+                                type="button"
+                                onClick={() =>
+                                    setUseBackupCode((current) => !current)
+                                }
+                            >
+                                {useBackupCode
+                                    ? 'Use authenticator code'
+                                    : 'Use backup code'}
+                            </button>
+                            <button
+                                className="text-muted-foreground hover:underline"
+                                type="button"
+                                onClick={resetTwoFactorState}
+                            >
+                                Back
+                            </button>
+                        </div>
+                    )}
                     <Button
                         className="w-full py-sm text-lg font-semibold"
                         type="submit"
                         variant="normal"
                     >
-                        There we go!
+                        {requiresTwoFactor ? 'Verify 2FA' : 'There we go!'}
                     </Button>
                 </form>
 
