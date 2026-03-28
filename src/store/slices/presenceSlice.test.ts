@@ -11,6 +11,7 @@ import {
 describe('presenceSlice', () => {
     const initialState = {
         users: {},
+        backendInstanceId: null,
     };
 
     it('should handle setOnlineUsers', () => {
@@ -58,6 +59,7 @@ describe('presenceSlice', () => {
                     customStatus: { text: 'Coding' },
                 },
             },
+            backendInstanceId: null,
         };
         const state = presenceReducer(
             existingState,
@@ -96,6 +98,7 @@ describe('presenceSlice', () => {
                     customStatus: null,
                 },
             },
+            backendInstanceId: null,
         };
         const state = presenceReducer(
             existingState,
