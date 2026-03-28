@@ -52,6 +52,7 @@ import { FileQueue } from './FileQueue';
 import { GifPicker } from './GifPicker';
 import { $createChipNode, ChipNode } from './lexical/ChipNode';
 import { LexicalAutocompletePlugin } from './lexical/LexicalAutocompletePlugin';
+import { LexicalPastePlugin } from './lexical/LexicalPastePlugin';
 import { LexicalSubmitPlugin } from './lexical/LexicalSubmitPlugin';
 import { $getRawMessageText } from './lexical/lexicalUtils';
 
@@ -250,10 +251,9 @@ export const MessageInput: React.FC<MessageInputProps> = ({
         if (files.length === 0) return [];
 
         setIsUploading(true);
-        const uploadedUrls: string[] = [];
 
         try {
-            await Promise.all(
+            const uploadedUrls = await Promise.all(
                 files.map(async (queuedFile) => {
                     updateFileStatus(queuedFile.id, 'uploading');
                     try {
@@ -264,9 +264,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                             },
                         );
                         updateFileStatus(queuedFile.id, 'completed');
-                        uploadedUrls.push(
-                            queuedFile.isSpoiler ? `${url}#spoiler` : url,
-                        );
+                        return queuedFile.isSpoiler ? `${url}#spoiler` : url;
                     } catch (error) {
                         updateFileStatus(queuedFile.id, 'error');
                         throw error;
@@ -473,6 +471,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                             isAutocompleteOpenRef={isAutocompleteOpenRef}
                             onSendMessage={handleSendMessage}
                         />
+                        <LexicalPastePlugin onPasteFiles={addFiles} />
                         <LexicalAutocompletePlugin
                             channels={channels}
                             friends={friendUsers}

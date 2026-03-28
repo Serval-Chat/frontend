@@ -29,16 +29,17 @@ interface FileEmbedProps {
 }
 
 export const FileEmbed: React.FC<FileEmbedProps> = ({ url }) => {
+    const baseUrl = url.split('#')[0];
     const isLocal =
-        url.includes('catfla.re/api/v1/files/download/') ||
-        url.includes(window.location.origin);
-    const filename = isLocal ? url.split('/').pop() : null;
+        baseUrl.includes('catfla.re/api/v1/files/download/') ||
+        baseUrl.includes(window.location.origin);
+    const filename = isLocal ? baseUrl.split('/').pop() : null;
 
     const { data: localMeta, isLoading: loadingLocal } = useFileMetadata(
         filename ?? null,
     );
     const { data: remoteMeta, isLoading: loadingRemote } = useProxyMetadata(
-        isLocal ? null : url,
+        isLocal ? null : baseUrl,
     );
 
     const isLoading = loadingLocal || loadingRemote;
@@ -86,7 +87,7 @@ export const FileEmbed: React.FC<FileEmbedProps> = ({ url }) => {
         return (
             <>
                 <Box
-                    className="relative my-2 w-fit cursor-pointer rounded-lg bg-bg-secondary"
+                    className="group relative my-2 w-fit cursor-pointer rounded-lg bg-bg-secondary"
                     onClick={() => {
                         if (isSpoiler && !isRevealed) {
                             setIsRevealed(true);
@@ -97,15 +98,18 @@ export const FileEmbed: React.FC<FileEmbedProps> = ({ url }) => {
                 >
                     <img
                         alt={displayName || 'File content'}
-                        className={`block h-auto max-h-[min(450px,70vh)] w-auto max-w-[min(550px,100%)] rounded-lg object-contain transition-all duration-300 ${isSpoiler && !isRevealed ? 'blur-2xl' : ''}`}
+                        className={`block h-auto max-h-[min(450px,70vh)] w-auto max-w-[min(550px,100%)] rounded-lg object-contain transition-opacity duration-300 ${isSpoiler && !isRevealed ? 'opacity-0' : 'opacity-100'}`}
                         src={displayUrl!}
                     />
                     {isSpoiler && !isRevealed && (
-                        <div className="absolute inset-0 flex items-center justify-center bg-black/20 backdrop-blur-sm">
-                            <div className="flex items-center gap-2 rounded-full border border-white/20 bg-black/60 px-3 py-1.5">
-                                <EyeOff size={16} />
+                        <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-background">
+                            <div className="flex items-center gap-2 rounded-full border border-border-subtle bg-bg-secondary px-3 py-1.5">
+                                <EyeOff
+                                    className="text-muted-foreground"
+                                    size={16}
+                                />
                                 <Text
-                                    className="text-white"
+                                    className="text-muted-foreground"
                                     size="xs"
                                     weight="bold"
                                 >
@@ -113,6 +117,19 @@ export const FileEmbed: React.FC<FileEmbedProps> = ({ url }) => {
                                 </Text>
                             </div>
                         </div>
+                    )}
+                    {isSpoiler && isRevealed && (
+                        <Button
+                            className="absolute top-2 right-2 h-7 w-7 rounded-full bg-black/40 p-0 text-white opacity-0 backdrop-blur-md transition-opacity group-hover:opacity-100"
+                            size="sm"
+                            variant="ghost"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setIsRevealed(false);
+                            }}
+                        >
+                            <EyeOff size={14} />
+                        </Button>
                     )}
                 </Box>
                 <ImageLightbox
@@ -135,15 +152,18 @@ export const FileEmbed: React.FC<FileEmbedProps> = ({ url }) => {
 
         return (
             <Box
-                className="relative my-2 max-h-[min(450px,70vh)] w-fit max-w-[min(550px,100%)] overflow-hidden rounded-lg bg-bg-secondary"
+                className="group relative my-2 max-h-[min(450px,70vh)] w-fit max-w-[min(550px,100%)] overflow-hidden rounded-lg bg-bg-secondary"
                 onClick={() => isSpoiler && !isRevealed && setIsRevealed(true)}
             >
                 {isSpoiler && !isRevealed ? (
-                    <div className="relative flex h-48 w-80 cursor-pointer items-center justify-center bg-bg-secondary">
-                        <div className="flex items-center gap-2 rounded-full border border-white/20 bg-black/60 px-3 py-1.5">
-                            <EyeOff size={16} />
+                    <div className="relative flex h-48 w-80 cursor-pointer items-center justify-center bg-background">
+                        <div className="flex items-center gap-2 rounded-full border border-border-subtle bg-bg-secondary px-3 py-1.5">
+                            <EyeOff
+                                className="text-muted-foreground"
+                                size={16}
+                            />
                             <Text
-                                className="text-white"
+                                className="text-muted-foreground"
                                 size="xs"
                                 weight="bold"
                             >
@@ -152,13 +172,28 @@ export const FileEmbed: React.FC<FileEmbedProps> = ({ url }) => {
                         </div>
                     </div>
                 ) : (
-                    <video
-                        controls
-                        className="max-h-inherit h-auto w-auto max-w-full"
-                        src={displayUrl!}
-                    >
-                        <track kind="captions" />
-                    </video>
+                    <>
+                        <video
+                            controls
+                            className="max-h-inherit h-auto w-auto max-w-full"
+                            src={displayUrl!}
+                        >
+                            <track kind="captions" />
+                        </video>
+                        {isSpoiler && isRevealed && (
+                            <Button
+                                className="absolute top-2 right-2 h-7 w-7 rounded-full bg-black/40 p-0 text-white opacity-0 backdrop-blur-md transition-opacity group-hover:opacity-100"
+                                size="sm"
+                                variant="ghost"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setIsRevealed(false);
+                                }}
+                            >
+                                <EyeOff size={14} />
+                            </Button>
+                        )}
+                    </>
                 )}
             </Box>
         );

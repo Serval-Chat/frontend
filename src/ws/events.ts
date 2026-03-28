@@ -47,6 +47,7 @@ export interface IWsAuthenticatedEvent {
         displayName?: string;
         profilePicture?: string;
     };
+    instanceId: string;
 }
 
 /**

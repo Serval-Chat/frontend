@@ -15,6 +15,7 @@ import { SERVERS_QUERY_KEYS } from '@/api/servers/servers.queries';
 import type { ServerMember } from '@/api/servers/servers.types';
 import type { User } from '@/api/users/users.types';
 import {
+    setBackendInstanceId,
     setOnlineUsers,
     setUserOffline,
     setUserOnline,
@@ -98,6 +99,7 @@ export const setupGlobalWsHandlers = (
                             status: undefined,
                         }),
                     );
+                    dispatch(setBackendInstanceId(payload.instanceId));
                     // Fetch initial unread status for servers
                     serversApi
                         .getUnreadStatus()

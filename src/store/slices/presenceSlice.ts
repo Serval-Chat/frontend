@@ -14,16 +14,21 @@ interface UserPresence {
 
 interface PresenceState {
     users: Record<string, UserPresence>;
+    backendInstanceId: string | null;
 }
 
 const initialState: PresenceState = {
     users: {},
+    backendInstanceId: null,
 };
 
 const presenceSlice = createSlice({
     name: 'presence',
     initialState,
     reducers: {
+        setBackendInstanceId: (state, action: PayloadAction<string>) => {
+            state.backendInstanceId = action.payload;
+        },
         setOnlineUsers: (
             state,
             action: PayloadAction<
@@ -113,6 +118,7 @@ const presenceSlice = createSlice({
 });
 
 export const {
+    setBackendInstanceId,
     setOnlineUsers,
     setUserOnline,
     setUserOffline,

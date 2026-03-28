@@ -17,6 +17,9 @@ export const MiniProfile: React.FC = () => {
     const presence = useAppSelector(
         (state) => state.presence.users[user?._id || ''],
     );
+    const backendInstanceId = useAppSelector(
+        (state) => state.presence.backendInstanceId,
+    );
     const presenceStatus = presence?.status || 'offline';
 
     const customStatus = user?.customStatus;
@@ -79,6 +82,14 @@ export const MiniProfile: React.FC = () => {
                             'Set specific status'
                         )}
                     </Box>
+                    {backendInstanceId && (
+                        <Box
+                            className="text-header-secondary mt-1 max-w-[150px] truncate text-[10px] opacity-40 hover:opacity-100"
+                            title={`Backend Instance: ${backendInstanceId}`}
+                        >
+                            Instance: {backendInstanceId}
+                        </Box>
+                    )}
                 </Box>
             </Box>
 
