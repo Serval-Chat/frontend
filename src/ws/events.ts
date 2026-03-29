@@ -140,6 +140,34 @@ export interface IUserOfflineEvent {
     username: string;
 }
 
+export interface IUserJoinedVoiceEvent {
+    serverId: string;
+    channelId: string;
+    userId: string;
+}
+
+export interface IUserLeftVoiceEvent {
+    serverId: string;
+    channelId: string;
+    userId: string;
+}
+
+export interface IVoiceStateUpdatedEvent {
+    serverId: string;
+    channelId: string;
+    userId: string;
+    isMuted: boolean;
+    isDeafened: boolean;
+}
+
+export interface IVoiceJoinedEvent {
+    success: boolean;
+    serverId: string;
+    channelId: string;
+    participants?: string[];
+    voiceStates?: Record<string, { isMuted: boolean; isDeafened: boolean }>;
+}
+
 /**
  * @description Status updated.
  */
@@ -204,6 +232,14 @@ export interface IOwnershipTransferredEvent {
     oldOwnerId: string;
     newOwnerId: string;
     senderId?: string;
+}
+
+/**
+ * @description Server joined.
+ */
+export interface IServerJoinedEvent {
+    serverId: string;
+    voiceStates?: Record<string, string[]>;
 }
 
 /**
@@ -382,6 +418,11 @@ export const WsEvents = {
     JOIN_CHANNEL: 'join_channel',
     CHANNEL_JOINED: 'channel_joined',
     LEAVE_CHANNEL: 'leave_channel',
+    JOIN_VOICE: 'join_voice',
+    LEAVE_VOICE: 'leave_voice',
+    VOICE_JOINED: 'voice_joined',
+    UPDATE_VOICE_STATE: 'update_voice_state',
+    VOICE_STATE_UPDATED: 'voice_state_updated',
 
     // Presence
     PRESENCE_SYNC: 'presence_sync',
@@ -389,6 +430,8 @@ export const WsEvents = {
     USER_OFFLINE: 'user_offline',
     SET_STATUS: 'set_status',
     STATUS_UPDATED: 'status_update',
+    USER_JOINED_VOICE: 'user_joined_voice',
+    USER_LEFT_VOICE: 'user_left_voice',
 
     // Friends
     FRIEND_ADDED: 'friend_added',

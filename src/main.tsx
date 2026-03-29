@@ -148,6 +148,10 @@ createRoot(document.getElementById('root')!).render(
                                                 element={<NavigationSync />}
                                                 path="standing"
                                             />
+                                            <Route
+                                                element={<NavigationSync />}
+                                                path="developer"
+                                            />
                                         </Route>
                                     </Route>
                                     <Route

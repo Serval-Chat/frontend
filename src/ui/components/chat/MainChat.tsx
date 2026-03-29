@@ -262,85 +262,100 @@ export const MainChat: React.FC = () => {
                 </Box>
             )}
 
-            <Box className="relative flex min-h-0 flex-1 flex-col">
-                {isLoading ? (
-                    <ChatLoadingState />
-                ) : (
-                    <MessagesList
-                        activeHighlightId={targetMessageId}
-                        disableColors={
-                            currentUser?.settings?.disableCustomUsernameColors
-                        }
-                        disableCustomFonts={
-                            serverDetails?.disableCustomFonts ||
-                            currentUser?.settings?.disableCustomUsernameFonts
-                        }
-                        disableGlow={
-                            currentUser?.settings?.disableCustomUsernameGlow
-                        }
-                        disableGlowAndColors={
-                            serverDetails?.disableUsernameGlowAndCustomColor
-                        }
-                        hasMore={hasNextPage}
-                        hasMoreNewer={isViewingOlderMessages}
-                        isLoadingMore={isFetchingNextPage}
-                        messages={messages}
-                        onLoadMore={() => void fetchNextPage()}
-                        onLoadMoreNewer={handleJumpToLatest}
-                        onReplyClick={handleReplyClick}
-                        onReplyToMessage={(msg) => setReplyingTo(msg)}
-                    />
-                )}
-                <TypingIndicator
-                    canBypassSlowMode={canBypassSlowMode}
-                    cooldown={cooldown}
-                    isSlowModeEnabled={
-                        !!selectedChannel?.slowMode &&
-                        selectedChannel.slowMode > 0
-                    }
-                    typingUsers={typingUsers}
-                />
-            </Box>
-            {canSendMessages ? (
-                <MessageInput
-                    canBypassSlowMode={canBypassSlowMode}
-                    cooldown={cooldown}
-                    disableColors={
-                        currentUser?.settings?.disableCustomUsernameColors
-                    }
-                    disableCustomFonts={
-                        serverDetails?.disableCustomFonts ||
-                        currentUser?.settings?.disableCustomUsernameFonts
-                    }
-                    disableGlow={
-                        currentUser?.settings?.disableCustomUsernameGlow
-                    }
-                    disableGlowAndColors={
-                        serverDetails?.disableUsernameGlowAndCustomColor
-                    }
-                    fileQueueResult={fileQueueResult}
-                    replyingTo={replyingTo}
-                    setCooldown={setCooldown}
-                    onCancelReply={() => setReplyingTo(null)}
-                />
+            {selectedChannel?.type === 'voice' ? (
+                <Box className="flex flex-1 items-center justify-center bg-[var(--chat-bg)] p-8">
+                    <Text className="text-muted-foreground">
+                        This is a Voice Channel. Connect to it via the sidebar.
+                    </Text>
+                </Box>
             ) : (
-                <Box className="mx-4 mb-4 flex h-[56px] items-center rounded-lg border border-border-subtle bg-[var(--bg-msg-input)] px-4">
-                    <Text className="text-muted-foreground" size="sm">
-                        You can&apos;t type in this channel.
-                    </Text>
-                </Box>
-            )}
+                <>
+                    <Box className="relative flex min-h-0 flex-1 flex-col">
+                        {isLoading ? (
+                            <ChatLoadingState />
+                        ) : (
+                            <MessagesList
+                                activeHighlightId={targetMessageId}
+                                disableColors={
+                                    currentUser?.settings
+                                        ?.disableCustomUsernameColors
+                                }
+                                disableCustomFonts={
+                                    serverDetails?.disableCustomFonts ||
+                                    currentUser?.settings
+                                        ?.disableCustomUsernameFonts
+                                }
+                                disableGlow={
+                                    currentUser?.settings
+                                        ?.disableCustomUsernameGlow
+                                }
+                                disableGlowAndColors={
+                                    serverDetails?.disableUsernameGlowAndCustomColor
+                                }
+                                hasMore={hasNextPage}
+                                hasMoreNewer={isViewingOlderMessages}
+                                isLoadingMore={isFetchingNextPage}
+                                messages={messages}
+                                onLoadMore={() => void fetchNextPage()}
+                                onLoadMoreNewer={handleJumpToLatest}
+                                onReplyClick={handleReplyClick}
+                                onReplyToMessage={(msg) => setReplyingTo(msg)}
+                            />
+                        )}
+                        <TypingIndicator
+                            canBypassSlowMode={canBypassSlowMode}
+                            cooldown={cooldown}
+                            isSlowModeEnabled={
+                                !!selectedChannel?.slowMode &&
+                                selectedChannel.slowMode > 0
+                            }
+                            typingUsers={typingUsers}
+                        />
+                    </Box>
+                    {canSendMessages ? (
+                        <MessageInput
+                            canBypassSlowMode={canBypassSlowMode}
+                            cooldown={cooldown}
+                            disableColors={
+                                currentUser?.settings
+                                    ?.disableCustomUsernameColors
+                            }
+                            disableCustomFonts={
+                                serverDetails?.disableCustomFonts ||
+                                currentUser?.settings
+                                    ?.disableCustomUsernameFonts
+                            }
+                            disableGlow={
+                                currentUser?.settings?.disableCustomUsernameGlow
+                            }
+                            disableGlowAndColors={
+                                serverDetails?.disableUsernameGlowAndCustomColor
+                            }
+                            fileQueueResult={fileQueueResult}
+                            replyingTo={replyingTo}
+                            setCooldown={setCooldown}
+                            onCancelReply={() => setReplyingTo(null)}
+                        />
+                    ) : (
+                        <Box className="mx-4 mb-4 flex h-[56px] items-center rounded-lg border border-border-subtle bg-[var(--bg-msg-input)] px-4">
+                            <Text className="text-muted-foreground" size="sm">
+                                You can&apos;t type in this channel.
+                            </Text>
+                        </Box>
+                    )}
 
-            {/* Drag and Drop Overlay */}
-            {isDragging && (
-                <Box className="animate-in fade-in zoom-in pointer-events-none absolute inset-0 z-[var(--z-index-backdrop)] m-4 flex flex-col items-center justify-center rounded-3xl border-4 border-dashed border-primary/50 bg-bg-primary/80 p-8 backdrop-blur-sm transition-all duration-200">
-                    <div className="mb-4 rounded-full bg-primary/10 p-6">
-                        <Upload className="text-primary" size={48} />
-                    </div>
-                    <Text size="xl" weight="bold">
-                        Drop files to upload
-                    </Text>
-                </Box>
+                    {/* Drag and Drop Overlay */}
+                    {isDragging && (
+                        <Box className="animate-in fade-in zoom-in pointer-events-none absolute inset-0 z-[var(--z-index-backdrop)] m-4 flex flex-col items-center justify-center rounded-3xl border-4 border-dashed border-primary/50 bg-bg-primary/80 p-8 backdrop-blur-sm transition-all duration-200">
+                            <div className="mb-4 rounded-full bg-primary/10 p-6">
+                                <Upload className="text-primary" size={48} />
+                            </div>
+                            <Text size="xl" weight="bold">
+                                Drop files to upload
+                            </Text>
+                        </Box>
+                    )}
+                </>
             )}
         </Box>
     );

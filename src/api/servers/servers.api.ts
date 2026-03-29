@@ -461,4 +461,23 @@ export const serversApi = {
         }>('/api/v1/settings/server-settings', settings);
         return response.data;
     },
+
+    getVoiceStates: async (
+        serverId: string,
+    ): Promise<Record<string, string[]>> => {
+        const response = await apiClient.get<Record<string, string[]>>(
+            `/api/v1/servers/${serverId}/voice-states`,
+        );
+        return response.data;
+    },
+
+    getVoiceToken: async (
+        serverId: string,
+        channelId: string,
+    ): Promise<{ token: string; url: string }> => {
+        const response = await apiClient.get<{ token: string; url: string }>(
+            `/api/v1/servers/${serverId}/channels/${channelId}/voice-token`,
+        );
+        return response.data;
+    },
 };

@@ -77,7 +77,17 @@ const PERMISSION_GROUPS = [
             },
         ],
     },
-] as const;
+    {
+        label: 'Voice Channel Permissions',
+        permissions: [
+            {
+                key: 'connect',
+                label: 'Connect',
+                description: 'Allows members to connect to this voice channel.',
+            },
+        ],
+    },
+];
 
 const normalizeOverrides = (perms: Overrides, roles: Role[]): Overrides => {
     const everyoneRoleId = roles.find((r) => r.name === '@everyone')?._id;

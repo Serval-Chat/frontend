@@ -4,12 +4,15 @@ import {
     Ban,
     Check,
     Copy,
+    HeadphoneOff,
     MessageSquare,
+    MicOff,
     Shield,
     User as UserIcon,
     UserMinus,
     UserPlus,
     UserX,
+    Volume2,
 } from 'lucide-react';
 
 import {
@@ -30,6 +33,7 @@ import { useMe, useUserById } from '@/api/users/users.queries';
 import type { User } from '@/api/users/users.types';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { setSelectedFriendId } from '@/store/slices/navSlice';
+import { setUserVolume } from '@/store/slices/voiceSlice';
 import { Text } from '@/ui/components/common/Text';
 import { Box } from '@/ui/components/layout/Box';
 import { ProfilePopup } from '@/ui/components/profile/ProfilePopup';
@@ -139,6 +143,24 @@ export const UserItem: React.FC<UserItemProps> = ({
     const isFriend = friends?.some((f) => f._id === userId);
     const isMe = currentUser?._id === userId;
 
+    const {
+        activeVoiceChannelId,
+        voiceParticipants,
+        userVolumes,
+        voiceUserStates,
+    } = useAppSelector((state) => state.voice);
+
+    const userVoiceChannelId = Object.keys(voiceParticipants).find((cid) =>
+        voiceParticipants[cid]?.includes(userId),
+    );
+
+    const userVoiceState = voiceUserStates[userId];
+
+    const isInSameVoiceChannel =
+        activeVoiceChannelId &&
+        userVoiceChannelId === activeVoiceChannelId &&
+        !isMe;
+
     const items: ContextMenuItem[] = [];
 
     // Group 0: Profile
@@ -155,6 +177,44 @@ export const UserItem: React.FC<UserItemProps> = ({
             label: 'Open DMs',
             icon: MessageSquare,
             onClick: () => dispatch(setSelectedFriendId(userId)),
+        });
+    }
+
+    // Group 1.5: Voice Volume
+    if (isInSameVoiceChannel) {
+        const volume = userVolumes[userId] ?? 1;
+        items.push({ type: 'divider' });
+        items.push({
+            type: 'custom',
+            content: (
+                <div className="flex flex-col gap-2 p-1">
+                    <div className="flex items-center justify-between text-xs font-bold tracking-wider text-muted-foreground uppercase">
+                        <div className="flex items-center gap-1.5">
+                            <Volume2 size={12} />
+                            User Volume
+                        </div>
+                        <span>
+                            {Math.round((isNaN(volume) ? 1.0 : volume) * 100)}%
+                        </span>
+                    </div>
+                    <input
+                        className="w-full cursor-pointer accent-primary"
+                        max="2"
+                        min="0"
+                        step="0.01"
+                        type="range"
+                        value={volume}
+                        onChange={(e) => {
+                            dispatch(
+                                setUserVolume({
+                                    userId,
+                                    volume: parseFloat(e.target.value),
+                                }),
+                            );
+                        }}
+                    />
+                </div>
+            ),
         });
     }
 
@@ -391,7 +451,11 @@ export const UserItem: React.FC<UserItemProps> = ({
                             role={role}
                             user={userProfile}
                         >
-                            {displayName || username}
+                            <Box className="flex min-w-0 items-center gap-1.5">
+                                <span className="truncate">
+                                    {displayName || username}
+                                </span>
+                            </Box>
                         </StyledUserName>
                         {(presenceCustomText || presenceCustomEmoji) && (
                             <Box className="text-foreground-muted flex min-w-0 items-center gap-1 text-xs">
@@ -424,6 +488,27 @@ export const UserItem: React.FC<UserItemProps> = ({
                             </Box>
                         )}
                     </Box>
+
+                    {userVoiceChannelId && (
+                        <Box
+                            className={cn(
+                                'ml-1 flex shrink-0 items-center gap-1.5',
+                            )}
+                        >
+                            {userVoiceState?.isMuted && (
+                                <MicOff
+                                    className="text-destructive"
+                                    size={14}
+                                />
+                            )}
+                            {userVoiceState?.isDeafened && (
+                                <HeadphoneOff
+                                    className="text-destructive"
+                                    size={14}
+                                />
+                            )}
+                        </Box>
+                    )}
                 </Box>
             </ContextMenu>
             <ProfilePopup

@@ -48,6 +48,37 @@ export const wsMessages = {
     },
 
     /**
+     * Join a voice channel room.
+     */
+    joinVoice: (serverId: string, channelId: string) => {
+        wsClient.send(WsEvents.JOIN_VOICE, { serverId, channelId });
+    },
+
+    /**
+     * Leave a voice channel room.
+     */
+    leaveVoice: (serverId: string, channelId: string) => {
+        wsClient.send(WsEvents.LEAVE_VOICE, { serverId, channelId });
+    },
+
+    /**
+     * Update voice state (mute/deafen).
+     */
+    updateVoiceState: (
+        serverId: string,
+        channelId: string,
+        isMuted: boolean,
+        isDeafened: boolean,
+    ) => {
+        wsClient.send(WsEvents.UPDATE_VOICE_STATE, {
+            serverId,
+            channelId,
+            isMuted,
+            isDeafened,
+        });
+    },
+
+    /**
      * Set user status.
      */
     setStatus: (status: string) => {

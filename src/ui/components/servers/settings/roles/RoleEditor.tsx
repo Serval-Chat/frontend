@@ -669,6 +669,14 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
                                 }
                             />
                             <PermissionToggle
+                                description="Allows member to connect to voice channels."
+                                label="Connect"
+                                value={permissions.connect !== false}
+                                onChange={(val) =>
+                                    updatePermission('connect', val)
+                                }
+                            />
+                            <PermissionToggle
                                 description="Allows member to send messages in text channels."
                                 label="Send Messages"
                                 value={permissions.sendMessages !== false}

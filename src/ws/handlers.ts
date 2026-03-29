@@ -27,6 +27,13 @@ import {
     setServerUnread,
     setUnreadServers,
 } from '@/store/slices/unreadSlice';
+import {
+    addVoiceParticipant,
+    clearUserFromAllVoiceChannels,
+    removeVoiceParticipant,
+    setVoiceParticipants,
+    setVoiceUserState,
+} from '@/store/slices/voiceSlice';
 
 import { wsClient } from './client';
 import {
@@ -52,12 +59,17 @@ import {
     type IRolesReorderedEvent,
     type IServerBannerUpdatedEvent,
     type IServerIconUpdatedEvent,
+    type IServerJoinedEvent,
     type IServerUpdatedEvent,
     type IStatusUpdatedEvent,
     type IUserBannerUpdatedEvent,
+    type IUserJoinedVoiceEvent,
+    type IUserLeftVoiceEvent,
     type IUserOfflineEvent,
     type IUserOnlineEvent,
     type IUserUpdatedEvent,
+    type IVoiceJoinedEvent,
+    type IVoiceStateUpdatedEvent,
     type IWsAuthenticatedEvent,
     type IWsErrorEvent,
     WsEvents,
@@ -245,7 +257,84 @@ export const setupGlobalWsHandlers = (
     cleanups.push(
         wsClient.on<IUserOfflineEvent>(WsEvents.USER_OFFLINE, (payload) => {
             dispatch(setUserOffline(payload));
+            dispatch(clearUserFromAllVoiceChannels(payload.userId));
         }),
+    );
+
+    cleanups.push(
+        wsClient.on<IUserJoinedVoiceEvent>(
+            WsEvents.USER_JOINED_VOICE,
+            (payload) => {
+                dispatch(
+                    addVoiceParticipant({
+                        channelId: payload.channelId,
+                        userId: payload.userId,
+                    }),
+                );
+            },
+        ),
+    );
+
+    cleanups.push(
+        wsClient.on<IUserLeftVoiceEvent>(
+            WsEvents.USER_LEFT_VOICE,
+            (payload) => {
+                dispatch(
+                    removeVoiceParticipant({
+                        channelId: payload.channelId,
+                        userId: payload.userId,
+                    }),
+                );
+            },
+        ),
+    );
+
+    cleanups.push(
+        wsClient.on<IVoiceJoinedEvent>(WsEvents.VOICE_JOINED, (payload) => {
+            dispatch(
+                setVoiceParticipants({
+                    channelId: payload.channelId,
+                    userIds: payload.participants ?? [],
+                }),
+            );
+            if (payload.voiceStates) {
+                Object.entries(payload.voiceStates).forEach(
+                    ([userId, state]) => {
+                        dispatch(
+                            setVoiceUserState({
+                                userId,
+                                isMuted: state.isMuted,
+                                isDeafened: state.isDeafened,
+                            }),
+                        );
+                    },
+                );
+            }
+        }),
+    );
+
+    cleanups.push(
+        wsClient.on<IVoiceStateUpdatedEvent>(
+            WsEvents.VOICE_STATE_UPDATED,
+            (payload) => {
+                dispatch(
+                    setVoiceUserState({
+                        userId: payload.userId,
+                        isMuted: payload.isMuted,
+                        isDeafened: payload.isDeafened,
+                    }),
+                );
+
+                if (payload.channelId) {
+                    dispatch(
+                        addVoiceParticipant({
+                            channelId: payload.channelId,
+                            userId: payload.userId,
+                        }),
+                    );
+                }
+            },
+        ),
     );
 
     cleanups.push(
@@ -578,6 +667,18 @@ export const setupGlobalWsHandlers = (
     );
 
     // Server events
+    cleanups.push(
+        wsClient.on<IServerJoinedEvent>(WsEvents.SERVER_JOINED, (payload) => {
+            if (payload.voiceStates) {
+                Object.entries(
+                    payload.voiceStates as Record<string, string[]>,
+                ).forEach(([channelId, userIds]) => {
+                    dispatch(setVoiceParticipants({ channelId, userIds }));
+                });
+            }
+        }),
+    );
+
     cleanups.push(
         wsClient.on<IServerUpdatedEvent>(WsEvents.SERVER_UPDATED, (payload) => {
             if (payload.senderId === currentUser?.id) return;

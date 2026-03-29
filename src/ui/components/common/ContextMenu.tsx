@@ -34,6 +34,11 @@ export type ContextMenuItem =
           label: string;
           icon?: LucideIcon;
           items: ContextMenuItem[];
+      }
+    | {
+          id?: string;
+          type: 'custom';
+          content: React.ReactNode;
       };
 
 interface ContextMenuProps {
@@ -137,10 +142,13 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
                                     item={item}
                                     key={
                                         item.id ??
-                                        (item.type !== 'divider' &&
-                                        typeof item.label === 'string'
-                                            ? `item-${item.label}`
-                                            : `index-${index}`)
+                                        (item.type === 'divider'
+                                            ? `divider-${index}`
+                                            : item.type === 'custom'
+                                              ? `custom-${index}`
+                                              : typeof item.label === 'string'
+                                                ? `item-${item.label}`
+                                                : `index-${index}`)
                                     }
                                 />
                             ))}
@@ -205,6 +213,10 @@ const ContextMenuItemRenderer: React.FC<ContextMenuItemProps> = ({
                 {item.label}
             </div>
         );
+    }
+
+    if (item.type === 'custom') {
+        return <div className="px-3 py-1.5">{item.content}</div>;
     }
 
     if (item.type === 'submenu') {
@@ -383,10 +395,13 @@ const SubMenu: React.FC<SubMenuProps> = ({
                     item={item}
                     key={
                         item.id ??
-                        (item.type !== 'divider' &&
-                        typeof item.label === 'string'
-                            ? `sub-item-${item.label}`
-                            : `sub-index-${index}`)
+                        (item.type === 'divider'
+                            ? `sub-divider-${index}`
+                            : item.type === 'custom'
+                              ? `sub-custom-${index}`
+                              : typeof item.label === 'string'
+                                ? `sub-item-${item.label}`
+                                : `sub-index-${index}`)
                     }
                 />
             ))}

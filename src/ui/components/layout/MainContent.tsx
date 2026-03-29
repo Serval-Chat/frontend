@@ -5,6 +5,7 @@ import { Provider, useStore } from 'react-redux';
 import type { RootState } from '@/store';
 import { useAppSelector } from '@/store/hooks';
 import { useMobileSwipeContext } from '@/ui/MobileSwipeContext';
+import { ActiveVoiceRoom } from '@/ui/components/chat/ActiveVoiceRoom';
 import { MainChat } from '@/ui/components/chat/MainChat';
 import { FriendRequestList } from '@/ui/components/friends/FriendRequestList';
 import { cn } from '@/utils/cn';
@@ -147,6 +148,7 @@ export const MainContent: React.FC = () => {
             ) : (
                 <MainChat key={conversationKey} />
             )}
+            <ActiveVoiceRoom />
         </main>
     );
 };

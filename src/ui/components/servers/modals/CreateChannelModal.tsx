@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-import { Hash, Link } from 'lucide-react';
+import { Hash, Link, Volume2 } from 'lucide-react';
 
 import { serversApi } from '@/api/servers/servers.api';
 import type { ChannelType } from '@/api/servers/servers.types';
@@ -28,6 +28,12 @@ const CHANNEL_TYPES: {
         label: 'Text',
         description: 'Send messages, images and other files',
         Icon: Hash,
+    },
+    {
+        type: 'voice',
+        label: 'Voice',
+        description: 'Talk with voice (and video in the future)',
+        Icon: Volume2,
     },
     {
         type: 'link',

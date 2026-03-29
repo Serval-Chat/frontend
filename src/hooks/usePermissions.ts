@@ -61,6 +61,7 @@ export const usePermissions = (
             manageReactions: false,
             addReactions: false,
             viewChannels: false,
+            connect: false,
             export_channel_messages: false,
             bypassSlowmode: false,
         };
@@ -79,7 +80,17 @@ export const usePermissions = (
             return perms;
         }
 
-        if (!member) return perms;
+        if (!member) {
+            console.warn(
+                '[usePermissions] No member record found for current user — all permissions default to false.',
+                {
+                    serverId,
+                    currentUserId: currentUser?._id,
+                    memberUserIds: members?.map((m) => m.userId),
+                },
+            );
+            return perms;
+        }
 
         // Administrator has all permissions
         if (userRoles.some((r) => r.permissions?.administrator)) {
@@ -89,98 +100,102 @@ export const usePermissions = (
             return perms;
         }
 
-        if (everyoneRole?.permissions) {
-            Object.entries(everyoneRole.permissions).forEach(([key, value]) => {
-                if (value === true) {
-                    perms[key as keyof RolePermissions] = true;
-                }
-            });
-        }
-
-        // Aggregate permissions from other roles
-        userRoles.forEach((role) => {
-            if (role.permissions) {
-                Object.entries(role.permissions).forEach(([key, value]) => {
-                    if (value === true) {
-                        perms[key as keyof RolePermissions] = true;
-                    }
-                });
-            }
-        });
-
-        // Apply channel/category overrides if channelId is provided
-        if (channelId && channels) {
-            const channel = channels.find((c) => c._id === channelId);
-            if (channel) {
-                const category =
-                    channel.categoryId && categories
-                        ? categories.find((c) => c._id === channel.categoryId)
-                        : null;
-
-                const sortedRolesAsc = [...userRoles].sort(
-                    (a, b) => a.position - b.position,
-                );
-                // include everyone as the lowest role for overrides
-                if (
-                    everyoneRole &&
-                    !sortedRolesAsc.some((r) => r._id === everyoneRole._id)
-                ) {
-                    sortedRolesAsc.unshift(everyoneRole);
-                }
-
-                Object.keys(perms).forEach((key) => {
-                    const permKey = key as keyof RolePermissions;
-
-                    // Channel Overrides, higher position wins
-                    let overrideValue: boolean | undefined;
-                    sortedRolesAsc.forEach((role) => {
-                        const overrides = channel.permissions || {};
-                        const roleOverrides =
-                            overrides[role._id] ||
-                            (role._id === everyoneRole?._id
-                                ? overrides['everyone']
-                                : undefined);
-
+        const evaluatePermission = (
+            permKey: keyof RolePermissions,
+        ): boolean => {
+            if (channelId && channels) {
+                const channel = channels.find((c) => c._id === channelId);
+                if (channel && channel.permissions) {
+                    for (const role of userRoles) {
+                        const roleOverrides = channel.permissions[role._id];
                         if (
                             roleOverrides &&
                             roleOverrides[permKey] !== undefined
                         ) {
-                            overrideValue = roleOverrides[permKey];
-                        }
-                    });
-
-                    if (overrideValue !== undefined) {
-                        perms[permKey] = overrideValue;
-                        return;
-                    }
-
-                    // Category Overrides, fallback if no channel override
-                    if (category) {
-                        let catOverrideValue: boolean | undefined;
-                        sortedRolesAsc.forEach((role) => {
-                            const overrides = category.permissions || {};
-                            const roleOverrides =
-                                overrides[role._id] ||
-                                (role._id === everyoneRole?._id
-                                    ? overrides['everyone']
-                                    : undefined);
-
-                            if (
-                                roleOverrides &&
-                                roleOverrides[permKey] !== undefined
-                            ) {
-                                catOverrideValue = roleOverrides[permKey];
-                            }
-                        });
-
-                        if (catOverrideValue !== undefined) {
-                            perms[permKey] = catOverrideValue;
+                            return roleOverrides[permKey] as boolean;
                         }
                     }
-                });
+                    const everyoneOverrides = channel.permissions['everyone'];
+                    if (
+                        everyoneOverrides &&
+                        everyoneOverrides[permKey] !== undefined
+                    ) {
+                        return everyoneOverrides[permKey] as boolean;
+                    }
+                }
+
+                const category =
+                    channel?.categoryId && categories
+                        ? categories.find((c) => c._id === channel.categoryId)
+                        : null;
+
+                if (category && category.permissions) {
+                    for (const role of userRoles) {
+                        const roleOverrides = category.permissions[role._id];
+                        if (
+                            roleOverrides &&
+                            roleOverrides[permKey] !== undefined
+                        ) {
+                            return roleOverrides[permKey] as boolean;
+                        }
+                    }
+                    const everyoneOverrides = category.permissions['everyone'];
+                    if (
+                        everyoneOverrides &&
+                        everyoneOverrides[permKey] !== undefined
+                    ) {
+                        return everyoneOverrides[permKey] as boolean;
+                    }
+                }
             }
-        }
 
+            for (const role of userRoles) {
+                if (
+                    role.permissions &&
+                    role.permissions[permKey] !== undefined
+                ) {
+                    return role.permissions[permKey] as boolean;
+                }
+            }
+
+            if (
+                everyoneRole &&
+                everyoneRole.permissions &&
+                everyoneRole.permissions[permKey] !== undefined
+            ) {
+                return everyoneRole.permissions[permKey] as boolean;
+            }
+
+            if (permKey === 'viewChannels' || permKey === 'connect')
+                return true;
+            return false;
+        };
+
+        Object.keys(perms).forEach((key) => {
+            perms[key as keyof RolePermissions] = evaluatePermission(
+                key as keyof RolePermissions,
+            );
+        });
+
+        if (!perms.viewChannels && channelId) {
+            console.warn(
+                `[usePermissions] viewChannels=false for channel ${channelId} (server ${serverId})`,
+                {
+                    channelPermissions:
+                        channelId && channels
+                            ? channels.find((c) => c._id === channelId)
+                                  ?.permissions
+                            : undefined,
+                    userRoles: userRoles.map((r) => ({
+                        id: r._id,
+                        name: r.name,
+                        position: r.position,
+                    })),
+                    everyonePermissions: everyoneRole?.permissions,
+                    computedPerms: perms,
+                },
+            );
+        }
         return perms;
     }, [
         serverId,
@@ -192,6 +207,7 @@ export const usePermissions = (
         channelId,
         channels,
         categories,
+        members,
     ]);
 
     const hasPermission = (permission: keyof RolePermissions): boolean =>

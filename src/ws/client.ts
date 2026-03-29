@@ -1,6 +1,7 @@
 /* eslint-disable no-console */
 import { v4 as uuidv4 } from 'uuid';
 
+import { addWsDebugEvent } from './debug';
 import {
     type IWsAuthenticatedEvent,
     type IWsEnvelope,
@@ -90,6 +91,12 @@ class WsClient {
         }
 
         console.debug(`[WsClient] SENDING message of type: ${type}`);
+        addWsDebugEvent({
+            direction: 'out',
+            type: envelope.event.type,
+            payload: envelope.event.payload,
+            meta: envelope.meta,
+        });
         this.socket.send(message);
     }
 
@@ -146,6 +153,8 @@ class WsClient {
             const { type, payload } = envelope.event;
             const { meta } = envelope;
 
+            addWsDebugEvent({ direction: 'in', type, payload, meta });
+
             console.debug(
                 `[WsClient] RECEIVED message of type: ${type}`,
                 payload,
@@ -179,8 +188,19 @@ class WsClient {
                         console.debug(
                             `[WsClient] Flushing message of type: ${parsed.event.type}`,
                         );
+                        addWsDebugEvent({
+                            direction: 'out',
+                            type: parsed.event.type,
+                            payload: parsed.event.payload,
+                            meta: parsed.meta,
+                        });
                     } catch {
                         console.debug('[WsClient] Flushing raw message');
+                        addWsDebugEvent({
+                            direction: 'out',
+                            type: 'unknown',
+                            payload: msg,
+                        });
                     }
                     this.socket.send(msg);
                 }

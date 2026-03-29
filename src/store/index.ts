@@ -3,12 +3,14 @@ import { configureStore } from '@reduxjs/toolkit';
 import { navReducer, saveLastChannels } from './slices/navSlice';
 import { presenceReducer } from './slices/presenceSlice';
 import { unreadReducer } from './slices/unreadSlice';
+import { voiceReducer } from './slices/voiceSlice';
 
 export const store = configureStore({
     reducer: {
         nav: navReducer,
         presence: presenceReducer,
         unread: unreadReducer,
+        voice: voiceReducer,
     },
 });
 

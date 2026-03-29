@@ -17,8 +17,14 @@ import { useNavigate } from 'react-router-dom';
 import { usePings } from '@/api/pings/pings.queries';
 import { serversApi } from '@/api/servers/servers.api';
 import type { Category, Channel } from '@/api/servers/servers.types';
+import { useMe } from '@/api/users/users.queries';
 import { usePermissions } from '@/hooks/usePermissions';
-import { useAppSelector } from '@/store/hooks';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import {
+    addVoiceParticipant,
+    joinVoiceRoom,
+    setVoiceParticipants,
+} from '@/store/slices/voiceSlice';
 import { ConfirmLinkModal } from '@/ui/components/common/ConfirmLinkModal';
 import { ContextMenu } from '@/ui/components/common/ContextMenu';
 import type { ContextMenuItem } from '@/ui/components/common/ContextMenu';
@@ -42,6 +48,89 @@ type ListItem =
     | { type: 'category'; id: string; data: Category }
     | { type: 'channel'; id: string; data: Channel };
 
+interface ChannelRowProps {
+    channel: Channel;
+    selectedServerId: string | null;
+    selectedChannelId: string | null;
+    voiceParticipants: Record<string, string[]>;
+    channelPings: Record<string, number>;
+    canManageChannels: boolean;
+    handleChannelClick: (channel: Channel) => void;
+    setSettingsChannel: (channel: Channel) => void;
+    getChannelMenuItems: (channel: Channel) => ContextMenuItem[];
+}
+
+const ChannelRow: React.FC<ChannelRowProps> = ({
+    channel,
+    selectedServerId,
+    selectedChannelId,
+    voiceParticipants,
+    channelPings,
+    canManageChannels,
+    handleChannelClick,
+    setSettingsChannel,
+    getChannelMenuItems,
+}) => {
+    const { hasPermission, isLoading, permissions } = usePermissions(
+        selectedServerId,
+        channel._id,
+    );
+    const canView = hasPermission('viewChannels');
+    const canConnect = hasPermission('connect');
+
+    // Only hide if loading is finished and canView is explicitly false
+    if (!isLoading && !canView) {
+        console.warn(
+            `[ChannelRow] Hiding channel "${channel.name}" (${channel._id}) — viewChannels=false.`,
+            {
+                channelPermissionOverrides: channel.permissions,
+                computedPermissions: permissions,
+                serverId: selectedServerId,
+            },
+        );
+        return null;
+    }
+
+    const isUnread =
+        channel.type !== 'link' &&
+        channel.lastMessageAt &&
+        (!channel.lastReadAt ||
+            new Date(channel.lastMessageAt) > new Date(channel.lastReadAt));
+
+    const connectedUserIds =
+        channel.type === 'voice'
+            ? voiceParticipants[channel._id] || []
+            : undefined;
+
+    return (
+        <ContextMenu
+            className="block w-full"
+            items={getChannelMenuItems(channel)}
+            key={channel._id}
+        >
+            <ChannelItem
+                connectedUserIds={connectedUserIds}
+                disabled={channel.type === 'voice' && !canConnect}
+                icon={channel.icon}
+                isActive={selectedChannelId === channel._id}
+                isUnread={!!isUnread}
+                name={channel.name}
+                pingCount={channelPings[channel._id]}
+                type={channel.type}
+                onClick={() => handleChannelClick(channel)}
+                onSettingsClick={
+                    canManageChannels
+                        ? (e) => {
+                              e.stopPropagation();
+                              setSettingsChannel(channel);
+                          }
+                        : undefined
+                }
+            />
+        </ContextMenu>
+    );
+};
+
 /**
  * @description Renders the list of channels grouped by categories.
  */
@@ -53,6 +142,11 @@ export const ChannelList: React.FC<ChannelListProps> = ({
     const selectedServerId = useAppSelector(
         (state) => state.nav.selectedServerId,
     );
+    const dispatch = useAppDispatch();
+    const voiceParticipants = useAppSelector(
+        (state) => state.voice.voiceParticipants,
+    );
+    const { data: me } = useMe();
     const { data: pingsData } = usePings();
 
     const channelPings = React.useMemo(() => {
@@ -92,6 +186,19 @@ export const ChannelList: React.FC<ChannelListProps> = ({
     const [isReordering, setIsReordering] = useState(false);
     const [syncLock, setSyncLock] = useState(false);
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+    useEffect(() => {
+        if (selectedServerId) {
+            serversApi
+                .getVoiceStates(selectedServerId)
+                .then((states) => {
+                    Object.entries(states).forEach(([channelId, userIds]) => {
+                        dispatch(setVoiceParticipants({ channelId, userIds }));
+                    });
+                })
+                .catch(() => {});
+        }
+    }, [selectedServerId, dispatch]);
 
     useEffect(() => {
         const handleResize = (): void => setIsMobile(window.innerWidth < 768);
@@ -485,10 +592,15 @@ export const ChannelList: React.FC<ChannelListProps> = ({
             // Filter out current category
             const currentCatId = channel.categoryId || null;
             const availableOptions = moveOptions.filter((opt) => {
-                if (opt.type === 'divider') return false;
-                if (opt.label === 'Uncategorized') return currentCatId !== null;
-                const targetCat = categories.find((c) => c.name === opt.label);
-                return targetCat?._id !== currentCatId;
+                if ('label' in opt && typeof opt.label === 'string') {
+                    if (opt.label === 'Uncategorized')
+                        return currentCatId !== null;
+                    const targetCat = categories.find(
+                        (c) => c.name === opt.label,
+                    );
+                    return targetCat?._id !== currentCatId;
+                }
+                return false;
             });
 
             if (availableOptions.length > 0) {
@@ -608,6 +720,27 @@ export const ChannelList: React.FC<ChannelListProps> = ({
     const handleChannelClick = (channel: Channel): void => {
         if (activeItemId || isReordering || syncLock) return;
 
+        if (channel.type === 'voice') {
+            if (selectedServerId) {
+                dispatch(
+                    joinVoiceRoom({
+                        serverId: selectedServerId,
+                        channelId: channel._id,
+                    }),
+                );
+
+                if (me?._id) {
+                    dispatch(
+                        addVoiceParticipant({
+                            channelId: channel._id,
+                            userId: me._id,
+                        }),
+                    );
+                }
+            }
+            return;
+        }
+
         if (channel.type === 'link') {
             const url = channel.link || '#';
             try {
@@ -635,40 +768,6 @@ export const ChannelList: React.FC<ChannelListProps> = ({
                 `/chat/@server/${selectedServerId}/channel/${channel._id}`,
             );
         }
-    };
-
-    const renderChannel = (channel: Channel): React.ReactNode => {
-        const isUnread =
-            channel.type !== 'link' &&
-            channel.lastMessageAt &&
-            (!channel.lastReadAt ||
-                new Date(channel.lastMessageAt) > new Date(channel.lastReadAt));
-
-        return (
-            <ContextMenu
-                className="block w-full"
-                items={getChannelMenuItems(channel)}
-                key={channel._id}
-            >
-                <ChannelItem
-                    icon={channel.icon}
-                    isActive={selectedChannelId === channel._id}
-                    isUnread={!!isUnread}
-                    name={channel.name}
-                    pingCount={channelPings[channel._id]}
-                    type={channel.type}
-                    onClick={() => handleChannelClick(channel)}
-                    onSettingsClick={
-                        canManageChannels
-                            ? (e) => {
-                                  e.stopPropagation();
-                                  setSettingsChannel(channel);
-                              }
-                            : undefined
-                    }
-                />
-            </ContextMenu>
-        );
     };
 
     return (
@@ -788,7 +887,19 @@ export const ChannelList: React.FC<ChannelListProps> = ({
                                     onDragEnd={() => void handleDragEnd()}
                                     onDragStart={() => setActiveItemId(item.id)}
                                 >
-                                    {renderChannel(channel)}
+                                    <ChannelRow
+                                        canManageChannels={canManageChannels}
+                                        channel={channel}
+                                        channelPings={channelPings}
+                                        getChannelMenuItems={
+                                            getChannelMenuItems
+                                        }
+                                        handleChannelClick={handleChannelClick}
+                                        selectedChannelId={selectedChannelId}
+                                        selectedServerId={selectedServerId}
+                                        setSettingsChannel={setSettingsChannel}
+                                        voiceParticipants={voiceParticipants}
+                                    />
                                 </Reorder.Item>
                             );
                         }

@@ -18,6 +18,7 @@ export const SettingsSidebar: React.FC<SettingsSidebarProps> = ({
         { id: 'appearance', label: 'Appearance', icon: Palette },
         { id: 'accessibility', label: 'Accessibility', icon: Eye },
         { id: 'standing', label: 'Standing', icon: ShieldAlert },
+        { id: 'developer', label: 'Developer', icon: ShieldAlert },
     ];
 
     return (

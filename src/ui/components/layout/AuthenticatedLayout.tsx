@@ -8,10 +8,13 @@ import { syncWebPush } from '@/lib/pushClient';
 import { WebSocketProvider } from '@/providers/WebSocketProvider';
 import { LoadingSpinner } from '@/ui/components/common/LoadingSpinner';
 import { PushPrompt } from '@/ui/components/common/PushPrompt';
+import { WsDebugger } from '@/ui/components/settings/WsDebugger';
+import { useWsDebugWindowOpen } from '@/ws/debug';
 
 export const AuthenticatedLayout = (): ReactNode => {
     const { isAuthenticated } = useAuth();
     const { data: user, isLoading } = useMe();
+    const isDebugWindowOpen = useWsDebugWindowOpen();
 
     React.useEffect(() => {
         if (isAuthenticated && user) {
@@ -38,6 +41,7 @@ export const AuthenticatedLayout = (): ReactNode => {
     return (
         <WebSocketProvider>
             <PushPrompt />
+            {isDebugWindowOpen && <WsDebugger />}
             <Outlet />
         </WebSocketProvider>
     );

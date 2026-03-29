@@ -3,6 +3,7 @@ import React from 'react';
 import { useResizable } from '@/hooks/useResizable';
 import { useAppSelector } from '@/store/hooks';
 import { useMobileSwipeContext } from '@/ui/MobileSwipeContext';
+import { ActiveVoicePanel } from '@/ui/components/chat/ActiveVoicePanel';
 import { Resizer } from '@/ui/components/common/Resizer';
 import { FriendsSection } from '@/ui/components/friends/FriendsSection';
 import { Box } from '@/ui/components/layout/Box';
@@ -56,6 +57,7 @@ export const SecondaryNavBar: React.FC = () => {
                 {navMode === 'servers' && <ServerSection />}
             </Box>
 
+            <ActiveVoicePanel />
             <MiniProfile />
 
             <Resizer
