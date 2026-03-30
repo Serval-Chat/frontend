@@ -3,7 +3,7 @@ import React from 'react';
 import type { Role, ServerMember } from '@/api/servers/servers.types';
 import type { User } from '@/api/users/users.types';
 import {
-    getHighestRoleForMember,
+    getHighestColorRoleForMember,
     getHighestRoleWithIconForMember,
 } from '@/ui/utils/chat';
 
@@ -43,7 +43,7 @@ export const useMemberMaps = (
         if (!members || !roles) return map;
 
         members.forEach((m) => {
-            const highestRole = getHighestRoleForMember(m.roles, roleMap);
+            const highestRole = getHighestColorRoleForMember(m.roles, roleMap);
             if (highestRole) map.set(m.userId, highestRole);
         });
         return map;

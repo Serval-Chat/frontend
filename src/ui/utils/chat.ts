@@ -24,6 +24,30 @@ export const getHighestRoleForMember = (
 };
 
 /**
+ * Finds the highest role for a member that has a color.
+ */
+export const getHighestColorRoleForMember = (
+    roleIds: string[] | undefined,
+    roleMap: Map<string, Role>,
+): Role | undefined => {
+    if (!roleIds || roleIds.length === 0) return undefined;
+
+    let highestRole: Role | undefined = undefined;
+    roleIds.forEach((roleId) => {
+        const role = roleMap.get(roleId);
+        if (
+            role &&
+            (role.color || (role.colors && role.colors.length > 0)) &&
+            (!highestRole || role.position > highestRole.position)
+        ) {
+            highestRole = role;
+        }
+    });
+
+    return highestRole;
+};
+
+/**
  * Finds the highest role for a member that has an icon.
  */
 export const getHighestRoleWithIconForMember = (

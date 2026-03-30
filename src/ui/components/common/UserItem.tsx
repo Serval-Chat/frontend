@@ -430,7 +430,7 @@ export const UserItem: React.FC<UserItemProps> = ({
                         }}
                     />
 
-                    <Box className="flex min-w-0 flex-1 flex-col overflow-hidden">
+                    <Box className="flex min-w-0 flex-1 flex-col">
                         <StyledUserName
                             disableColors={
                                 disableColors ||
@@ -451,11 +451,7 @@ export const UserItem: React.FC<UserItemProps> = ({
                             role={role}
                             user={userProfile}
                         >
-                            <Box className="flex min-w-0 items-center gap-1.5">
-                                <span className="truncate">
-                                    {displayName || username}
-                                </span>
-                            </Box>
+                            {displayName || username}
                         </StyledUserName>
                         {(presenceCustomText || presenceCustomEmoji) && (
                             <Box className="text-foreground-muted flex min-w-0 items-center gap-1 text-xs">

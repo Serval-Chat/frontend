@@ -103,68 +103,52 @@ export const usePermissions = (
         const evaluatePermission = (
             permKey: keyof RolePermissions,
         ): boolean => {
-            if (channelId && channels) {
-                const channel = channels.find((c) => c._id === channelId);
-                if (channel && channel.permissions) {
-                    for (const role of userRoles) {
-                        const roleOverrides = channel.permissions[role._id];
-                        if (
-                            roleOverrides &&
-                            roleOverrides[permKey] !== undefined
-                        ) {
-                            return roleOverrides[permKey] as boolean;
-                        }
-                    }
-                    const everyoneOverrides = channel.permissions['everyone'];
-                    if (
-                        everyoneOverrides &&
-                        everyoneOverrides[permKey] !== undefined
-                    ) {
-                        return everyoneOverrides[permKey] as boolean;
+            const getOverride = (
+                overrides?: Record<string, Record<string, boolean>>,
+            ): boolean | undefined => {
+                if (!overrides) return undefined;
+                let hasDeny = false;
+
+                for (const role of userRoles) {
+                    const roleOver = overrides[role._id];
+                    if (roleOver && roleOver[permKey] !== undefined) {
+                        if (roleOver[permKey]) return true;
+                        hasDeny = true;
                     }
                 }
 
+                const everyoneId = everyoneRole?._id;
+                const everyoneOver =
+                    (everyoneId ? overrides[everyoneId] : undefined) ??
+                    overrides['everyone'];
+
+                if (everyoneOver && everyoneOver[permKey] !== undefined) {
+                    if (everyoneOver[permKey]) return true;
+                    hasDeny = true;
+                }
+
+                return hasDeny ? false : undefined;
+            };
+
+            if (channelId && channels) {
+                const channel = channels.find((c) => c._id === channelId);
+
+                // 1. Channel Overrides
+                const channelOverride = getOverride(channel?.permissions);
+                if (channelOverride !== undefined) return channelOverride;
+
+                // 2. Category Overrides
                 const category =
                     channel?.categoryId && categories
                         ? categories.find((c) => c._id === channel.categoryId)
                         : null;
-
-                if (category && category.permissions) {
-                    for (const role of userRoles) {
-                        const roleOverrides = category.permissions[role._id];
-                        if (
-                            roleOverrides &&
-                            roleOverrides[permKey] !== undefined
-                        ) {
-                            return roleOverrides[permKey] as boolean;
-                        }
-                    }
-                    const everyoneOverrides = category.permissions['everyone'];
-                    if (
-                        everyoneOverrides &&
-                        everyoneOverrides[permKey] !== undefined
-                    ) {
-                        return everyoneOverrides[permKey] as boolean;
-                    }
-                }
+                const categoryOverride = getOverride(category?.permissions);
+                if (categoryOverride !== undefined) return categoryOverride;
             }
 
-            for (const role of userRoles) {
-                if (
-                    role.permissions &&
-                    role.permissions[permKey] !== undefined
-                ) {
-                    return role.permissions[permKey] as boolean;
-                }
-            }
-
-            if (
-                everyoneRole &&
-                everyoneRole.permissions &&
-                everyoneRole.permissions[permKey] !== undefined
-            ) {
-                return everyoneRole.permissions[permKey] as boolean;
-            }
+            // 3. Base Server Permissions
+            if (userRoles.some((r) => r.permissions?.[permKey])) return true;
+            if (everyoneRole?.permissions?.[permKey]) return true;
 
             if (permKey === 'viewChannels' || permKey === 'connect')
                 return true;

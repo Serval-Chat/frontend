@@ -136,6 +136,19 @@ export const StyledUserName: React.FC<StyledUserNameProps> = ({
             usernameFont && usernameFont !== 'default'
                 ? usernameFont
                 : undefined,
+        color: !hasGradient && solidColor ? solidColor : undefined,
+        ...(hasGradient && {
+            backgroundImage: `${gradientFunction}(${gradientArgs})`,
+            backgroundClip: 'text',
+            WebkitBackgroundClip: 'text',
+            color: 'transparent',
+            WebkitTextFillColor: 'transparent',
+        }),
+        ...(hasGlow && {
+            textShadow: hasGradient
+                ? undefined
+                : `0 0 ${1.5 * glowIntensity}px ${solidColor || 'currentColor'}`,
+        }),
     };
 
     // helper to render text with per-character effects
@@ -260,7 +273,13 @@ export const StyledUserName: React.FC<StyledUserNameProps> = ({
     };
 
     const content =
-        typeof children === 'string' ? renderStyledText(children) : children;
+        typeof children === 'string'
+            ? renderStyledText(children)
+            : Array.isArray(children) &&
+                children.length === 1 &&
+                typeof children[0] === 'string'
+              ? renderStyledText(children[0])
+              : children;
 
     return (
         <Text
