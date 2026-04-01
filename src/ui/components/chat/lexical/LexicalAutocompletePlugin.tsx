@@ -10,14 +10,13 @@ import { $getSelection, $isRangeSelection, TextNode } from 'lexical';
 import type { Emoji } from '@/api/emojis/emojis.types';
 import type { Channel, Role, ServerMember } from '@/api/servers/servers.types';
 import type { User } from '@/api/users/users.types';
+import { $createChipNode } from '@/ui/components/chat/lexical/ChipNode';
 import {
     AutocompleteSuggestion,
     type Suggestion,
 } from '@/ui/components/common/AutocompleteSuggestion';
 import { getUnicode, groupedEmojis } from '@/utils/emoji';
 import type { EmojiData } from '@/utils/emoji';
-
-import { $createChipNode } from './ChipNode';
 
 interface LexicalAutocompletePluginProps {
     members?: ServerMember[];
@@ -245,7 +244,11 @@ export const LexicalAutocompletePlugin: React.FC<
                     const unicode = getUnicode(suggestion.emoji);
                     const selection = $getSelection();
                     if ($isRangeSelection(selection)) {
-                        selection.insertText(unicode);
+                        selection.insertNodes([
+                            $createChipNode('unicode-emoji', {
+                                id: unicode,
+                            }),
+                        ]);
                     }
                     closeMenu();
                     return;

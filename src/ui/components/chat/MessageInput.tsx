@@ -38,6 +38,10 @@ import { useCustomEmojis } from '@/hooks/useCustomEmojis';
 import { useChatWS } from '@/hooks/ws/useChatWS';
 import { useAppSelector } from '@/store/hooks';
 import type { ProcessedChatMessage } from '@/types/chat.ui';
+import {
+    $createChipNode,
+    ChipNode,
+} from '@/ui/components/chat/lexical/ChipNode';
 import { Button } from '@/ui/components/common/Button';
 import { ParsedText } from '@/ui/components/common/ParsedText';
 import { StyledUserName } from '@/ui/components/common/StyledUserName';
@@ -50,8 +54,8 @@ import { ParserPresets, parseText } from '@/utils/textParser/parser';
 
 import { FileQueue } from './FileQueue';
 import { GifPicker } from './GifPicker';
-import { $createChipNode, ChipNode } from './lexical/ChipNode';
 import { LexicalAutocompletePlugin } from './lexical/LexicalAutocompletePlugin';
+import { LexicalEmojiPlugin } from './lexical/LexicalEmojiPlugin';
 import { LexicalPastePlugin } from './lexical/LexicalPastePlugin';
 import { LexicalSubmitPlugin } from './lexical/LexicalSubmitPlugin';
 import { $getRawMessageText } from './lexical/lexicalUtils';
@@ -472,6 +476,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                             isAutocompleteOpenRef={isAutocompleteOpenRef}
                             onSendMessage={handleSendMessage}
                         />
+                        <LexicalEmojiPlugin />
                         <LexicalPastePlugin onPasteFiles={addFiles} />
                         <LexicalAutocompletePlugin
                             channels={channels}
@@ -587,11 +592,15 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                             });
                             editor?.focus();
                         }}
-                        onEmojiSelect={(emoji) => {
+                        onEmojiSelect={(emoji: string): void => {
                             editor?.update(() => {
                                 const selection = $getSelection();
                                 if ($isRangeSelection(selection)) {
-                                    selection.insertText(emoji);
+                                    selection.insertNodes([
+                                        $createChipNode('unicode-emoji', {
+                                            id: emoji,
+                                        }),
+                                    ]);
                                 }
                             });
                             editor?.focus();

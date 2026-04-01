@@ -6,7 +6,7 @@ import {
     type LexicalNode,
 } from 'lexical';
 
-import { $isChipNode } from './ChipNode';
+import { $isChipNode } from '@/ui/components/chat/lexical/ChipNode';
 
 export function $getRawMessageText(): string {
     let rawText = '';
@@ -35,6 +35,9 @@ export function $getRawMessageText(): string {
                     break;
                 case 'channel':
                     rawText += `#${payload.label || payload.id}`;
+                    break;
+                case 'unicode-emoji':
+                    rawText += payload.id;
                     break;
             }
         }

@@ -9,7 +9,7 @@ import {
     $getRoot,
 } from 'lexical';
 
-import { $createChipNode } from './ChipNode';
+import { $createChipNode } from '@/ui/components/chat/lexical/ChipNode';
 
 export const LexicalInitPlugin = ({
     initialText,

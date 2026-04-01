@@ -10,9 +10,16 @@ import {
 import { ChannelLink } from '@/ui/components/chat/ChannelLink';
 import { Mention } from '@/ui/components/common/Mention';
 import { ParsedEmoji } from '@/ui/components/common/ParsedEmoji';
+import { ParsedUnicodeEmoji } from '@/ui/components/common/ParsedUnicodeEmoji';
 import { RoleMention } from '@/ui/components/common/RoleMention';
 
-export type ChipType = 'user' | 'role' | 'everyone' | 'emoji' | 'channel';
+export type ChipType =
+    | 'user'
+    | 'role'
+    | 'everyone'
+    | 'emoji'
+    | 'channel'
+    | 'unicode-emoji';
 
 export interface ChipPayload {
     id: string;
@@ -47,8 +54,6 @@ export class ChipNode extends DecoratorNode<React.ReactNode> {
 
     createDOM(): HTMLElement {
         const dom = document.createElement('span');
-        dom.style.display = 'inline-flex';
-        dom.style.alignItems = 'baseline';
         return dom;
     }
 
@@ -84,6 +89,8 @@ export class ChipNode extends DecoratorNode<React.ReactNode> {
                 return `#${this.__payload.label || this.__payload.id}`;
             case 'emoji':
                 return `:${this.__payload.label || this.__payload.id}:`;
+            case 'unicode-emoji':
+                return this.__payload.id;
             default:
                 return '';
         }
@@ -135,15 +142,19 @@ export class ChipNode extends DecoratorNode<React.ReactNode> {
             case 'emoji':
                 return (
                     <ParsedEmoji
-                        className="mx-px align-middle"
                         emojiId={this.__payload.id}
                         style={{
-                            width: '1.2em',
-                            height: '1.2em',
-                            transform: 'translateY(-1px)',
+                            width: '1.5em',
+                            height: '1.5em',
+                            verticalAlign: 'middle',
+                            position: 'relative',
+                            top: '0.1em',
                         }}
                     />
                 );
+
+            case 'unicode-emoji':
+                return <ParsedUnicodeEmoji content={this.__payload.id} />;
 
             default:
                 return null;

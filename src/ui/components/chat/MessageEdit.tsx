@@ -24,13 +24,17 @@ import {
 } from '@/api/servers/servers.queries';
 import type { User } from '@/api/users/users.types';
 import { useCustomEmojis } from '@/hooks/useCustomEmojis';
+import {
+    $createChipNode,
+    ChipNode,
+} from '@/ui/components/chat/lexical/ChipNode';
 import { Button } from '@/ui/components/common/Button';
 import { EmojiPicker } from '@/ui/components/emoji/EmojiPicker';
 import { Box } from '@/ui/components/layout/Box';
 import { cn } from '@/utils/cn';
 
-import { $createChipNode, ChipNode } from './lexical/ChipNode';
 import { LexicalAutocompletePlugin } from './lexical/LexicalAutocompletePlugin';
+import { LexicalEmojiPlugin } from './lexical/LexicalEmojiPlugin';
 import { LexicalInitPlugin } from './lexical/LexicalInitPlugin';
 import { LexicalSubmitPlugin } from './lexical/LexicalSubmitPlugin';
 import { $getRawMessageText } from './lexical/lexicalUtils';
@@ -148,11 +152,13 @@ export const MessageEdit: React.FC<MessageEditProps> = ({
     const handleEmojiSelect = (emoji: string): void => {
         if (editorInstance) {
             editorInstance.update(() => {
-                const selection = editorInstance
-                    .getEditorState()
-                    .read(() => $getSelection());
+                const selection = $getSelection();
                 if ($isRangeSelection(selection)) {
-                    selection.insertText(emoji);
+                    selection.insertNodes([
+                        $createChipNode('unicode-emoji', {
+                            id: emoji,
+                        }),
+                    ]);
                 }
             });
             editorInstance.focus();
@@ -264,6 +270,7 @@ export const MessageEdit: React.FC<MessageEditProps> = ({
                     />
                     <HistoryPlugin />
                     <ClearEditorPlugin />
+                    <LexicalEmojiPlugin />
                     <LexicalSubmitPlugin
                         isAutocompleteOpenRef={isAutocompleteOpenRef}
                         onSendMessage={(msg) => {
