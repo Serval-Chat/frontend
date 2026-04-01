@@ -20,7 +20,7 @@ import {
     CLEAR_EDITOR_COMMAND,
     type LexicalEditor,
 } from 'lexical';
-import { FileImage, Plus, Send, Smile, X } from 'lucide-react';
+import { ArrowUp, FileImage, Plus, Send, Smile, X } from 'lucide-react';
 
 import { useChannelMessages, useUserMessages } from '@/api/chat/chat.queries';
 import type { ChatMessage } from '@/api/chat/chat.types';
@@ -343,7 +343,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
         theme,
     };
 
-    const getPlaceholder = (): string => {
+    const getPlaceholder = (): React.ReactNode => {
         if (isUploading) return 'Uploading...';
 
         if (currentChannel?.slowMode && currentChannel.slowMode > 0) {
@@ -354,10 +354,32 @@ export const MessageInput: React.FC<MessageInputProps> = ({
         }
 
         const hasLastMessage = findLastMyMessage !== null;
-        if (hasLastMessage && !hasText) {
-            return 'Type a message... (ArrowUp to edit last message)';
-        }
-        return 'Type a message...';
+        return (
+            <div className="flex items-center gap-1.5 overflow-hidden">
+                <span className="shrink-0">Type a message...</span>
+                <span className="flex shrink items-center gap-1 text-[11px] font-medium whitespace-nowrap">
+                    <span className="ml-1 opacity-70">(</span>
+                    <kbd className="flex h-[18px] min-w-[18px] items-center justify-center rounded border border-white/20 bg-white/10 px-1.5 shadow-sm">
+                        Shift
+                    </kbd>
+                    <span className="opacity-70">+</span>
+                    <kbd className="flex h-[18px] min-w-[18px] items-center justify-center rounded border border-white/20 bg-white/10 px-1.5 shadow-sm">
+                        Enter
+                    </kbd>
+                    <span className="opacity-70">new line</span>
+                    {hasLastMessage && (
+                        <>
+                            <span className="mx-0.5 h-3 w-px bg-white/10" />
+                            <kbd className="flex h-[18px] min-w-[18px] items-center justify-center rounded border border-white/20 bg-white/10 px-1 shadow-sm">
+                                <ArrowUp size={10} strokeWidth={3} />
+                            </kbd>
+                            <span className="opacity-70">edit</span>
+                        </>
+                    )}
+                    <span className="opacity-70">)</span>
+                </span>
+            </div>
+        );
     };
 
     return (
@@ -465,7 +487,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                                 />
                             }
                             placeholder={
-                                <div className="pointer-events-none absolute top-[9px] left-3 text-sm text-placeholder select-none">
+                                <div className="pointer-events-none absolute top-[9px] left-3 max-w-[calc(100%-24px)] truncate text-sm text-placeholder select-none">
                                     {getPlaceholder()}
                                 </div>
                             }

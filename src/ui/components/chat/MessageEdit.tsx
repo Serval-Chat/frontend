@@ -263,7 +263,7 @@ export const MessageEdit: React.FC<MessageEditProps> = ({
                             />
                         }
                         placeholder={
-                            <div className="pointer-events-none absolute top-[9px] left-3 text-sm text-placeholder select-none">
+                            <div className="pointer-events-none absolute top-[9px] left-3 max-w-[calc(100%-24px)] truncate text-sm text-placeholder select-none">
                                 Editing message...
                             </div>
                         }
