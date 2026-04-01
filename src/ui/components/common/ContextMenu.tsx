@@ -50,6 +50,21 @@ interface ContextMenuProps {
 /**
  * @description A context menu that appears on right-click.
  */
+const filterItems = (items: ContextMenuItem[]): ContextMenuItem[] =>
+    items
+        .filter((item, index) => {
+            if (item.type !== 'divider') return true;
+            if (index === 0) return false;
+            const prevItem = items[index - 1];
+            if (prevItem && prevItem.type === 'divider') return false;
+            return true;
+        })
+        .filter((item, index, array) => {
+            if (item.type === 'divider' && index === array.length - 1)
+                return false;
+            return true;
+        });
+
 export const ContextMenu: React.FC<ContextMenuProps> = ({
     items,
     children,
@@ -108,6 +123,8 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
         };
     }, [isOpen]);
 
+    const filteredItems = filterItems(items);
+
     return (
         <>
             <Box
@@ -136,7 +153,7 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
                             }}
                             transition={{ duration: 0.15, ease: 'easeOut' }}
                         >
-                            {items.map((item, index) => (
+                            {filteredItems.map((item, index) => (
                                 <ContextMenuItemRenderer
                                     closeMenu={closeMenu}
                                     item={item}
@@ -373,6 +390,8 @@ const SubMenu: React.FC<SubMenuProps> = ({
 
     if (!isOpen) return null;
 
+    const filteredItems = filterItems(items);
+
     return createPortal(
         <motion.div
             animate={{ opacity: 1, scale: 1, x: 0 }}
@@ -389,7 +408,7 @@ const SubMenu: React.FC<SubMenuProps> = ({
             onMouseEnter={onMouseEnter}
             onMouseLeave={onMouseLeave}
         >
-            {items.map((item, index) => (
+            {filteredItems.map((item: ContextMenuItem, index: number) => (
                 <ContextMenuItemRenderer
                     closeMenu={closeAll}
                     item={item}
