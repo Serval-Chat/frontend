@@ -4,16 +4,18 @@ import { Navigate, Outlet } from 'react-router-dom';
 
 import { useMe } from '@/api/users/users.queries';
 import { useAuth } from '@/hooks/useAuth';
+import { useConnectivity } from '@/hooks/useConnectivity';
 import { syncWebPush } from '@/lib/pushClient';
 import { WebSocketProvider } from '@/providers/WebSocketProvider';
-import { LoadingSpinner } from '@/ui/components/common/LoadingSpinner';
+import { LoadingScreen } from '@/ui/components/common/LoadingScreen';
 import { PushPrompt } from '@/ui/components/common/PushPrompt';
 import { WsDebugger } from '@/ui/components/settings/WsDebugger';
 import { useWsDebugWindowOpen } from '@/ws/debug';
 
 export const AuthenticatedLayout = (): ReactNode => {
     const { isAuthenticated } = useAuth();
-    const { data: user, isLoading } = useMe();
+    const { data: user, isLoading: isUserLoading } = useMe();
+    const { isOnline, isWsConnected } = useConnectivity();
     const isDebugWindowOpen = useWsDebugWindowOpen();
 
     React.useEffect(() => {
@@ -26,23 +28,24 @@ export const AuthenticatedLayout = (): ReactNode => {
         return <Navigate replace to="/login" />;
     }
 
-    if (isLoading) {
-        return (
-            <div className="flex h-screen items-center justify-center bg-background">
-                <LoadingSpinner size="lg" />
-            </div>
-        );
-    }
-
-    if (!user) {
-        return null;
-    }
-
     return (
         <WebSocketProvider>
-            <PushPrompt />
-            {isDebugWindowOpen && <WsDebugger />}
-            <Outlet />
+            {isUserLoading || !isOnline || !isWsConnected ? (
+                <LoadingScreen
+                    message={
+                        !isWsConnected && isOnline
+                            ? 'Sharpening claws and connecting...'
+                            : undefined
+                    }
+                    type={isUserLoading ? 'loading' : 'offline'}
+                />
+            ) : (
+                <>
+                    <PushPrompt />
+                    {isDebugWindowOpen && <WsDebugger />}
+                    <Outlet />
+                </>
+            )}
         </WebSocketProvider>
     );
 };
