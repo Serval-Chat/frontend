@@ -384,6 +384,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                         </StyledUserName>
                         <Box className="flex items-center gap-1 truncate overflow-hidden text-xs whitespace-nowrap text-muted-foreground opacity-80">
                             <ParsedText
+                                condenseFiles
                                 nodes={parseText(
                                     replyingTo.text || '',
                                     ParserPresets.MESSAGE,

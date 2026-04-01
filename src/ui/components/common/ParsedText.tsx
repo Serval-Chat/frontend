@@ -53,14 +53,52 @@ export const ParsedText: React.FC<ParsedTextProps> = ({
     wrap,
     isNested,
 }) => {
-    const fileNodesCount = nodes.filter((n) => n.type === 'file').length;
+    const countAttachments = (n: ASTNode): number => {
+        let count = n.type === 'file' || n.type === 'klipy' ? 1 : 0;
+        if ('content' in n && Array.isArray(n.content)) {
+            count += n.content.reduce(
+                (acc, curr) => acc + countAttachments(curr),
+                0,
+            );
+        }
+        if ('text' in n && Array.isArray(n.text)) {
+            count += n.text.reduce(
+                (acc, curr) => acc + countAttachments(curr),
+                0,
+            );
+        }
+        return count;
+    };
+
+    const hasVisibleContentRecursively = (n: ASTNode): boolean => {
+        if (n.type === 'file' || n.type === 'klipy') return !condenseFiles;
+        if (n.type === 'text') return n.content.trim().length > 0;
+        if ('content' in n && Array.isArray(n.content)) {
+            return n.content.some(hasVisibleContentRecursively);
+        }
+        if ('text' in n && Array.isArray(n.text)) {
+            return n.text.some(hasVisibleContentRecursively);
+        }
+        return true;
+    };
+
+    const fileNodesCount = nodes.reduce(
+        (acc, curr) => acc + countAttachments(curr),
+        0,
+    );
     const displayNodes = condenseFiles
-        ? nodes.filter((n) => n.type !== 'file')
+        ? nodes.filter((n) => n.type !== 'file' && n.type !== 'klipy')
         : nodes;
 
-    const hasVisibleContent = displayNodes.some(
-        (node) => node.type !== 'text' || node.content.trim().length > 0,
-    );
+    const hasVisibleContent = nodes.some(hasVisibleContentRecursively);
+
+    const nestedProps = {
+        condenseFiles,
+        largeEmojis,
+        isNested: true,
+        size,
+        wrap,
+    };
 
     return (
         <span className={className}>
@@ -90,9 +128,8 @@ export const ParsedText: React.FC<ParsedTextProps> = ({
                                     node.content
                                 ) : (
                                     <ParsedText
+                                        {...nestedProps}
                                         nodes={node.content}
-                                        size={size}
-                                        wrap={wrap}
                                     />
                                 )}
                             </Text>
@@ -110,10 +147,8 @@ export const ParsedText: React.FC<ParsedTextProps> = ({
                                     node.content
                                 ) : (
                                     <ParsedText
-                                        isNested
+                                        {...nestedProps}
                                         nodes={node.content}
-                                        size={size}
-                                        wrap={wrap}
                                     />
                                 )}
                             </Text>
@@ -132,10 +167,8 @@ export const ParsedText: React.FC<ParsedTextProps> = ({
                                     node.content
                                 ) : (
                                     <ParsedText
-                                        isNested
+                                        {...nestedProps}
                                         nodes={node.content}
-                                        size={size}
-                                        wrap={wrap}
                                     />
                                 )}
                             </Text>
@@ -153,10 +186,8 @@ export const ParsedText: React.FC<ParsedTextProps> = ({
                                     node.content
                                 ) : (
                                     <ParsedText
-                                        isNested
+                                        {...nestedProps}
                                         nodes={node.content}
-                                        size={size}
-                                        wrap={wrap}
                                     />
                                 )}
                             </Text>
@@ -174,9 +205,8 @@ export const ParsedText: React.FC<ParsedTextProps> = ({
                                     node.content
                                 ) : (
                                     <ParsedText
+                                        {...nestedProps}
                                         nodes={node.content}
-                                        size={size}
-                                        wrap={wrap}
                                     />
                                 )}
                             </Text>
@@ -207,9 +237,8 @@ export const ParsedText: React.FC<ParsedTextProps> = ({
                                     node.text || node.url
                                 ) : node.text ? (
                                     <ParsedText
+                                        {...nestedProps}
                                         nodes={node.text}
-                                        size={size}
-                                        wrap={wrap}
                                     />
                                 ) : (
                                     node.url
@@ -224,9 +253,8 @@ export const ParsedText: React.FC<ParsedTextProps> = ({
                                     node.content
                                 ) : (
                                     <ParsedText
+                                        {...nestedProps}
                                         nodes={node.content}
-                                        size={size}
-                                        wrap={wrap}
                                     />
                                 )}
                             </Heading>
@@ -239,9 +267,8 @@ export const ParsedText: React.FC<ParsedTextProps> = ({
                                     node.content
                                 ) : (
                                     <ParsedText
+                                        {...nestedProps}
                                         nodes={node.content}
-                                        size={size}
-                                        wrap={wrap}
                                     />
                                 )}
                             </Heading>
@@ -254,9 +281,8 @@ export const ParsedText: React.FC<ParsedTextProps> = ({
                                     node.content
                                 ) : (
                                     <ParsedText
+                                        {...nestedProps}
                                         nodes={node.content}
-                                        size={size}
-                                        wrap={wrap}
                                     />
                                 )}
                             </Heading>
@@ -274,9 +300,8 @@ export const ParsedText: React.FC<ParsedTextProps> = ({
                                     node.content
                                 ) : (
                                     <ParsedText
+                                        {...nestedProps}
                                         nodes={node.content}
-                                        size={size}
-                                        wrap={wrap}
                                     />
                                 )}
                             </Text>
@@ -289,9 +314,8 @@ export const ParsedText: React.FC<ParsedTextProps> = ({
                                     node.content
                                 ) : (
                                     <ParsedText
+                                        {...nestedProps}
                                         nodes={node.content}
-                                        size={size}
-                                        wrap={wrap}
                                     />
                                 )}
                             </Spoiler>
@@ -383,9 +407,8 @@ export const ParsedText: React.FC<ParsedTextProps> = ({
                                         </Text>
                                     ) : (
                                         <ParsedText
+                                            {...nestedProps}
                                             nodes={node.content}
-                                            size={size}
-                                            wrap={wrap}
                                         />
                                     )}
                                 </Box>
@@ -411,9 +434,8 @@ export const ParsedText: React.FC<ParsedTextProps> = ({
                                         </Text>
                                     ) : (
                                         <ParsedText
+                                            {...nestedProps}
                                             nodes={node.content}
-                                            size={size}
-                                            wrap={wrap}
                                         />
                                     )}
                                 </Box>
@@ -433,9 +455,8 @@ export const ParsedText: React.FC<ParsedTextProps> = ({
                                                         header
                                                     ) : (
                                                         <ParsedText
+                                                            {...nestedProps}
                                                             nodes={header}
-                                                            size={size}
-                                                            wrap={wrap}
                                                         />
                                                     )}
                                                 </TableHead>
@@ -453,9 +474,8 @@ export const ParsedText: React.FC<ParsedTextProps> = ({
                                                         cell
                                                     ) : (
                                                         <ParsedText
+                                                            {...nestedProps}
                                                             nodes={cell}
-                                                            size={size}
-                                                            wrap={wrap}
                                                         />
                                                     )}
                                                 </TableCell>
@@ -498,10 +518,8 @@ export const ParsedText: React.FC<ParsedTextProps> = ({
                                     </Text>
                                 ) : (
                                     <ParsedText
-                                        isNested
+                                        {...nestedProps}
                                         nodes={node.content}
-                                        size={size}
-                                        wrap={wrap}
                                     />
                                 )}
                             </div>
@@ -520,10 +538,8 @@ export const ParsedText: React.FC<ParsedTextProps> = ({
                                     </Text>
                                 ) : node.content.length > 0 ? (
                                     <ParsedText
-                                        isNested
+                                        {...nestedProps}
                                         nodes={node.content}
-                                        size={size}
-                                        wrap={wrap}
                                     />
                                 ) : null}
                             </Admonition>
@@ -542,11 +558,14 @@ export const ParsedText: React.FC<ParsedTextProps> = ({
                         return null;
                 }
             })}
-            {condenseFiles && fileNodesCount > 0 && !hasVisibleContent && (
-                <span className="ml-1 text-[11px] italic opacity-80">
-                    Attachments: {fileNodesCount}
-                </span>
-            )}
+            {condenseFiles &&
+                fileNodesCount > 0 &&
+                !hasVisibleContent &&
+                !isNested && (
+                    <span className="ml-1 text-[11px] italic opacity-80">
+                        Attachments: {fileNodesCount}
+                    </span>
+                )}
         </span>
     );
 };
