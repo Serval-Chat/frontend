@@ -75,7 +75,7 @@ export const MessagesList: React.FC<MessagesListProps> = ({
         if (!container) return;
 
         const { scrollTop, scrollHeight, clientHeight } = container;
-        const atBottom = scrollHeight - scrollTop - clientHeight < 50;
+        const atBottom = scrollHeight - scrollTop - clientHeight < 5;
         setIsAtBottom(atBottom);
 
         // Trigger load more when reaching top
@@ -93,8 +93,9 @@ export const MessagesList: React.FC<MessagesListProps> = ({
 
         // If at bottom, stay at bottom
         if (isAtBottom) {
-            container.scrollTop = newScrollHeight;
-            lastScrollHeightRef.current = newScrollHeight;
+            container.scrollTop =
+                container.scrollHeight - container.clientHeight;
+            lastScrollHeightRef.current = container.scrollHeight;
             return;
         }
 
@@ -151,10 +152,14 @@ export const MessagesList: React.FC<MessagesListProps> = ({
         <Box
             className="custom-scrollbar relative flex min-h-0 flex-1 flex-col overflow-y-auto pt-4"
             ref={scrollContainerRef}
+            style={{ overflowAnchor: 'auto' }}
             onScroll={handleScroll}
         >
             {hasMore && (
-                <Box className="flex justify-center py-4">
+                <Box
+                    className="flex justify-center py-4"
+                    style={{ overflowAnchor: 'none' }}
+                >
                     {isLoadingMore ? (
                         <LoadingSpinner size="sm" />
                     ) : (
