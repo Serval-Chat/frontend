@@ -97,10 +97,24 @@ export const ServerSidebarSection: React.FC<ServerSidebarSectionProps> = ({
             }
         });
 
-        const result: MemberGroup[] = [];
-        groupsMap.forEach((g) => {
-            if (g.members.length > 0) result.push(g);
-        });
+        const result: MemberGroup[] = Array.from(groupsMap.values())
+            .filter((g) => g.members.length > 0)
+            .map((g) => ({
+                ...g,
+                members: [...g.members].sort((a, b) => {
+                    const nameA = (
+                        a.user.displayName ||
+                        a.user.username ||
+                        ''
+                    ).toLowerCase();
+                    const nameB = (
+                        b.user.displayName ||
+                        b.user.username ||
+                        ''
+                    ).toLowerCase();
+                    return nameA.localeCompare(nameB);
+                }),
+            }));
 
         result.sort((a, b) => b.position - a.position);
 
