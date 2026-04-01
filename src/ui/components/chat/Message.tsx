@@ -278,7 +278,7 @@ export const Message: React.FC<MessageProps> = ({
                     />
                 )}
 
-                <Box className="flex gap-1">
+                <Box className="flex items-start gap-1">
                     {/* Avatar */}
                     <Box
                         className="mt-1 flex w-12 flex-shrink-0 justify-center"
