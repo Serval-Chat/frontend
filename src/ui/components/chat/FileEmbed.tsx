@@ -23,6 +23,7 @@ import { LoadingSpinner } from '@/ui/components/common/LoadingSpinner';
 import { Text } from '@/ui/components/common/Text';
 import { Box } from '@/ui/components/layout/Box';
 import { resolveApiUrl } from '@/utils/apiUrl';
+import { cn } from '@/utils/cn';
 
 interface FileEmbedProps {
     url: string;
@@ -87,7 +88,7 @@ export const FileEmbed: React.FC<FileEmbedProps> = ({ url }) => {
         return (
             <>
                 <Box
-                    className="group relative my-2 w-fit cursor-pointer rounded-lg bg-bg-secondary"
+                    className="group relative my-2 w-fit cursor-pointer rounded-lg"
                     onClick={() => {
                         if (isSpoiler && !isRevealed) {
                             setIsRevealed(true);
@@ -98,7 +99,12 @@ export const FileEmbed: React.FC<FileEmbedProps> = ({ url }) => {
                 >
                     <img
                         alt={displayName || 'File content'}
-                        className={`block h-auto max-h-[min(450px,70vh)] w-auto max-w-[min(550px,100%)] rounded-lg object-contain transition-opacity duration-300 ${isSpoiler && !isRevealed ? 'opacity-0' : 'opacity-100'}`}
+                        className={cn(
+                            'block h-auto max-h-[min(450px,70vh)] w-auto max-w-full rounded-lg transition-opacity duration-300',
+                            isSpoiler && !isRevealed
+                                ? 'opacity-0'
+                                : 'opacity-100',
+                        )}
                         src={displayUrl!}
                     />
                     {isSpoiler && !isRevealed && (
@@ -152,7 +158,7 @@ export const FileEmbed: React.FC<FileEmbedProps> = ({ url }) => {
 
         return (
             <Box
-                className="group relative my-2 max-h-[min(450px,70vh)] w-fit max-w-[min(550px,100%)] overflow-hidden rounded-lg bg-bg-secondary"
+                className="group relative my-2 max-h-[min(450px,70vh)] w-fit max-w-[min(550px,100%)] overflow-hidden rounded-lg"
                 onClick={() => isSpoiler && !isRevealed && setIsRevealed(true)}
             >
                 {isSpoiler && !isRevealed ? (
