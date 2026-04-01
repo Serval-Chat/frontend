@@ -2,6 +2,7 @@ import React, { useRef, useState } from 'react';
 
 import { ClearEditorPlugin } from '@lexical/react/LexicalClearEditorPlugin';
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';
 import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary';
 import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
@@ -33,6 +34,18 @@ import { LexicalAutocompletePlugin } from './lexical/LexicalAutocompletePlugin';
 import { LexicalInitPlugin } from './lexical/LexicalInitPlugin';
 import { LexicalSubmitPlugin } from './lexical/LexicalSubmitPlugin';
 import { $getRawMessageText } from './lexical/lexicalUtils';
+
+const EditorBridge = ({
+    onReady,
+}: {
+    onReady: (e: LexicalEditor) => void;
+}): React.ReactNode => {
+    const [editor] = useLexicalComposerContext();
+    React.useEffect(() => {
+        onReady(editor);
+    }, [editor, onReady]);
+    return null;
+};
 
 interface MessageEditProps {
     messageId: string;
@@ -95,8 +108,37 @@ export const MessageEdit: React.FC<MessageEditProps> = ({
     React.useEffect(() => {
         const handleResize = (): void => setIsMobile(window.innerWidth <= 768);
         window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
-    }, []);
+
+        const handleGlobalKeyDown = (e: KeyboardEvent): void => {
+            if (
+                e.target instanceof HTMLInputElement ||
+                e.target instanceof HTMLTextAreaElement ||
+                (e.target as HTMLElement).isContentEditable
+            ) {
+                return;
+            }
+
+            if (e.key.length === 1 && !e.ctrlKey && !e.altKey && !e.metaKey) {
+                if (editorInstance) {
+                    editorInstance.focus();
+                    setShowEmojiPicker(false);
+                }
+            }
+        };
+
+        window.addEventListener('keydown', handleGlobalKeyDown);
+
+        if (editorInstance) {
+            setTimeout(() => {
+                editorInstance.focus();
+            }, 0);
+        }
+
+        return () => {
+            window.removeEventListener('resize', handleResize);
+            window.removeEventListener('keydown', handleGlobalKeyDown);
+        };
+    }, [editorInstance]);
 
     // Close emoji picker when clicking outside
     useClickAway(emojiPickerRef, () => {
@@ -192,6 +234,7 @@ export const MessageEdit: React.FC<MessageEditProps> = ({
         <Box className="relative w-full">
             <div className="relative flex min-h-[60px] flex-1 cursor-text items-start rounded-md border border-border-subtle bg-bg-secondary transition-all duration-200 focus-within:border-primary/30 focus-within:ring-2 focus-within:ring-primary/20 focus-within:outline-none">
                 <LexicalComposer initialConfig={initialConfig}>
+                    <EditorBridge onReady={setEditorInstance} />
                     <LexicalInitPlugin initialText={initialText} />
                     <RichTextPlugin
                         ErrorBoundary={LexicalErrorBoundary}
