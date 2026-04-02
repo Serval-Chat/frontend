@@ -339,7 +339,6 @@ export const setupGlobalWsHandlers = (
 
     cleanups.push(
         wsClient.on<IStatusUpdatedEvent>(WsEvents.STATUS_UPDATED, (payload) => {
-            // Update presence state by username
             dispatch(
                 updateUserStatusByUsername({
                     username: payload.username,
@@ -348,8 +347,80 @@ export const setupGlobalWsHandlers = (
             );
 
             if (currentUser && payload.username === currentUser.username) {
-                void queryClient.invalidateQueries({ queryKey: ['me'] });
+                queryClient.setQueryData<User>(['me'], (old) => {
+                    if (!old) return old;
+                    return {
+                        ...old,
+                        customStatus: payload.status
+                            ? {
+                                  text: payload.status.text,
+                                  emoji: payload.status.emoji || undefined,
+                                  expiresAt: payload.status.expiresAt
+                                      ? new Date(payload.status.expiresAt)
+                                      : null,
+                                  updatedAt: new Date(payload.status.updatedAt),
+                              }
+                            : null,
+                    };
+                });
             }
+
+            queryClient.setQueriesData<ServerMember[]>(
+                { queryKey: ['servers', 'members'] },
+                (old) => {
+                    if (!old) return old;
+                    return old.map((member) =>
+                        member.user.username === payload.username
+                            ? {
+                                  ...member,
+                                  user: {
+                                      ...member.user,
+                                      customStatus: payload.status
+                                          ? {
+                                                text: payload.status.text,
+                                                emoji:
+                                                    payload.status.emoji ||
+                                                    undefined,
+                                                expiresAt: payload.status
+                                                    .expiresAt
+                                                    ? new Date(
+                                                          payload.status
+                                                              .expiresAt,
+                                                      )
+                                                    : null,
+                                                updatedAt: new Date(
+                                                    payload.status.updatedAt,
+                                                ),
+                                            }
+                                          : null,
+                                  },
+                              }
+                            : member,
+                    );
+                },
+            );
+
+            queryClient.setQueriesData<Friend[]>(
+                { queryKey: FRIENDS_QUERY_KEY },
+                (old) => {
+                    if (!old) return old;
+                    return old.map((friend) =>
+                        friend.username === payload.username
+                            ? {
+                                  ...friend,
+                                  customStatus: payload.status
+                                      ? {
+                                            text: payload.status.text,
+                                            emoji:
+                                                payload.status.emoji ||
+                                                undefined,
+                                        }
+                                      : null,
+                              }
+                            : friend,
+                    );
+                },
+            );
         }),
     );
 
