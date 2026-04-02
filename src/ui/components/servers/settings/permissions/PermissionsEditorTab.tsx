@@ -89,13 +89,46 @@ const PERMISSION_GROUPS = [
     },
 ];
 
+const VALID_PERMISSION_KEYS = new Set([
+    'sendMessages',
+    'manageMessages',
+    'deleteMessagesOfOthers',
+    'manageChannels',
+    'manageRoles',
+    'banMembers',
+    'kickMembers',
+    'manageInvites',
+    'manageServer',
+    'administrator',
+    'manageWebhooks',
+    'pingRolesAndEveryone',
+    'addReactions',
+    'manageReactions',
+    'export_channel_messages',
+    'viewChannels',
+    'bypassSlowmode',
+    'connect',
+]);
+
+const stripUnknownKeys = (
+    permsObj: Record<string, unknown>,
+): Record<string, boolean> => {
+    const clean: Record<string, boolean> = {};
+    for (const [k, v] of Object.entries(permsObj)) {
+        if (VALID_PERMISSION_KEYS.has(k) && typeof v === 'boolean') {
+            clean[k] = v;
+        }
+    }
+    return clean;
+};
+
 const normalizeOverrides = (perms: Overrides, roles: Role[]): Overrides => {
     const everyoneRoleId = roles.find((r) => r.name === '@everyone')?._id;
     const normalized: Overrides = {};
 
     for (const [id, permsObj] of Object.entries(perms)) {
         const key = id === 'everyone' && everyoneRoleId ? everyoneRoleId : id;
-        normalized[key] = permsObj;
+        normalized[key] = stripUnknownKeys(permsObj as Record<string, unknown>);
     }
     return normalized;
 };
