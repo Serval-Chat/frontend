@@ -34,7 +34,6 @@ import type { User } from '@/api/users/users.types';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { setSelectedFriendId } from '@/store/slices/navSlice';
 import { setUserVolume } from '@/store/slices/voiceSlice';
-import { Text } from '@/ui/components/common/Text';
 import { Box } from '@/ui/components/layout/Box';
 import { ProfilePopup } from '@/ui/components/profile/ProfilePopup';
 import { BanUserModal } from '@/ui/components/servers/modals/BanUserModal';
@@ -42,6 +41,7 @@ import { KickUserModal } from '@/ui/components/servers/modals/KickUserModal';
 import { cn } from '@/utils/cn';
 
 import { ContextMenu, type ContextMenuItem } from './ContextMenu';
+import { MarqueeText } from './MarqueeText';
 import { ParsedEmoji } from './ParsedEmoji';
 import { ParsedUnicodeEmoji } from './ParsedUnicodeEmoji';
 import { RoleDot } from './RoleDot';
@@ -399,11 +399,10 @@ export const UserItem: React.FC<UserItemProps> = ({
 
     return (
         <>
-            <ContextMenu className="w-full" items={contextMenuItems}>
+            <ContextMenu items={contextMenuItems}>
                 <Box
                     className={cn(
-                        'flex w-full min-w-0 cursor-pointer items-center gap-3 rounded-md px-3 py-1 transition-colors',
-
+                        'flex h-11 w-60 shrink-0 cursor-pointer items-center gap-3 overflow-hidden rounded-md px-3 transition-colors',
                         'hover:bg-bg-subtle',
                         isActive
                             ? 'bg-bg-subtle text-foreground'
@@ -430,7 +429,7 @@ export const UserItem: React.FC<UserItemProps> = ({
                         }}
                     />
 
-                    <Box className="flex min-w-0 flex-1 flex-col">
+                    <Box className="flex min-w-0 flex-1 flex-col overflow-hidden">
                         <StyledUserName
                             disableColors={
                                 disableColors ||
@@ -453,10 +452,11 @@ export const UserItem: React.FC<UserItemProps> = ({
                         >
                             {displayName || username}
                         </StyledUserName>
+
                         {(presenceCustomText || presenceCustomEmoji) && (
-                            <Box className="text-foreground-muted flex min-w-0 items-center gap-1 text-xs">
+                            <div className="flex min-w-0 items-center gap-1">
                                 {presenceCustomEmoji && (
-                                    <Box className="flex shrink-0 items-center">
+                                    <span className="flex shrink-0 items-center">
                                         {/^[0-9a-fA-F]{24}$/.test(
                                             presenceCustomEmoji,
                                         ) ? (
@@ -470,25 +470,24 @@ export const UserItem: React.FC<UserItemProps> = ({
                                                 content={presenceCustomEmoji}
                                             />
                                         )}
-                                    </Box>
+                                    </span>
                                 )}
                                 {presenceCustomText && (
-                                    <Text
-                                        as="div"
-                                        className="min-w-0 truncate"
-                                        size="xs"
+                                    <MarqueeText
+                                        className="text-foreground-muted min-w-0 flex-1 text-xs"
+                                        speed={40}
                                     >
                                         {presenceCustomText}
-                                    </Text>
+                                    </MarqueeText>
                                 )}
-                            </Box>
+                            </div>
                         )}
                     </Box>
 
                     {userVoiceChannelId && (
                         <Box
                             className={cn(
-                                'ml-1 flex shrink-0 items-center gap-1.5',
+                                'ml-auto flex shrink-0 items-center gap-1.5',
                             )}
                         >
                             {userVoiceState?.isMuted && (
