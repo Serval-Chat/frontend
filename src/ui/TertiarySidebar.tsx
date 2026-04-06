@@ -76,38 +76,49 @@ export const TertiarySidebar: React.FC = () => {
                 side="left"
                 onMouseDown={handleMouseDown}
             />
-            <div className="flex h-12 items-center justify-between px-3">
-                <span className="text-xs font-bold tracking-wider text-muted-foreground uppercase">
-                    {selectedFriendId ? 'Direct Message' : 'Members'}
-                </span>
-                <div className="flex items-center gap-1">
-                    <button
-                        aria-label="Toggle search"
-                        className={cn(
-                            'p-1 text-muted-foreground transition-colors hover:text-foreground',
-                            isSearchOpen && 'text-primary',
-                        )}
-                        onClick={() => {
-                            setIsSearchOpen(!isSearchOpen);
-                            if (isSearchOpen) setSearchQuery('');
-                        }}
-                    >
-                        <Search className="h-4 w-4" />
-                    </button>
-                    {showMobileMemberList && (
-                        <button
-                            aria-label="Close member list"
-                            className="p-1 text-muted-foreground transition-colors hover:text-foreground md:hidden"
-                            onClick={() => dispatch(toggleMobileMemberList())}
-                        >
-                            <X className="h-4 w-4" />
-                        </button>
+            {(selectedServerId || showMobileMemberList) && (
+                <div
+                    className={cn(
+                        'flex h-12 items-center justify-between px-3',
+                        selectedFriendId && 'md:hidden',
                     )}
+                >
+                    <span className="text-xs font-bold tracking-wider text-muted-foreground uppercase">
+                        Members
+                    </span>
+                    <div className="flex items-center gap-1">
+                        {selectedServerId && (
+                            <button
+                                aria-label="Toggle search"
+                                className={cn(
+                                    'p-1 text-muted-foreground transition-colors hover:text-foreground',
+                                    isSearchOpen && 'text-primary',
+                                )}
+                                onClick={() => {
+                                    setIsSearchOpen(!isSearchOpen);
+                                    if (isSearchOpen) setSearchQuery('');
+                                }}
+                            >
+                                <Search className="h-4 w-4" />
+                            </button>
+                        )}
+                        {showMobileMemberList && (
+                            <button
+                                aria-label="Close member list"
+                                className="p-1 text-muted-foreground transition-colors hover:text-foreground md:hidden"
+                                onClick={() =>
+                                    dispatch(toggleMobileMemberList())
+                                }
+                            >
+                                <X className="h-4 w-4" />
+                            </button>
+                        )}
+                    </div>
                 </div>
-            </div>
+            )}
 
             <AnimatePresence>
-                {isSearchOpen && (
+                {isSearchOpen && selectedServerId && (
                     <motion.div
                         animate={{ height: 'auto', opacity: 1 }}
                         className="overflow-hidden border-b border-border-subtle bg-bg-subtle/50"
@@ -129,11 +140,7 @@ export const TertiarySidebar: React.FC = () => {
             <Box className="flex min-w-0 flex-col gap-4 p-3">
                 {/* DM Context */}
                 {selectedFriendId && friend && me && (
-                    <DMSidebarSection
-                        friend={friend}
-                        me={me}
-                        searchQuery={searchQuery}
-                    />
+                    <DMSidebarSection friend={friend} me={me} />
                 )}
 
                 {/* Server Context */}
