@@ -275,6 +275,7 @@ export const MessageEdit: React.FC<MessageEditProps> = ({
                         isAutocompleteOpenRef={isAutocompleteOpenRef}
                         onSendMessage={(msg) => {
                             if (!isMobile) handleSubmit(msg);
+                            return true;
                         }}
                     />
                     <LexicalAutocompletePlugin
