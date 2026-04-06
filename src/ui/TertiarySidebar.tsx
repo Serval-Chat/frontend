@@ -1,9 +1,13 @@
-import { X } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
+
+import { AnimatePresence, motion } from 'framer-motion';
+import { Search, X } from 'lucide-react';
 
 import { useResizable } from '@/hooks/useResizable';
 import { useTertiarySidebarData } from '@/hooks/useTertiarySidebarData';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { toggleMobileMemberList } from '@/store/slices/navSlice';
+import { Input } from '@/ui/components/common/Input';
 import { Resizer } from '@/ui/components/common/Resizer';
 import { Box } from '@/ui/components/layout/Box';
 import { DMSidebarSection } from '@/ui/components/sidebar/DMSidebarSection';
@@ -30,6 +34,19 @@ export const TertiarySidebar: React.FC = () => {
     const showMobileMemberList = useAppSelector(
         (state) => state.nav.showMobileMemberList,
     );
+
+    const [isSearchOpen, setIsSearchOpen] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
+    const searchInputRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        if (isSearchOpen) {
+            const timeoutId = setTimeout(() => {
+                searchInputRef.current?.focus();
+            }, 100);
+            return () => clearTimeout(timeoutId);
+        }
+    }, [isSearchOpen]);
 
     const { width, isResizing, handleMouseDown } = useResizable({
         initialWidth: 240,
@@ -59,25 +76,64 @@ export const TertiarySidebar: React.FC = () => {
                 side="left"
                 onMouseDown={handleMouseDown}
             />
-            {/* Mobile close button row */}
-            {showMobileMemberList && (
-                <div className="flex items-center justify-between px-3 pt-3 pb-1 md:hidden">
-                    <span className="text-xs font-bold tracking-wider text-muted-foreground uppercase">
-                        Members
-                    </span>
+            <div className="flex h-12 items-center justify-between px-3">
+                <span className="text-xs font-bold tracking-wider text-muted-foreground uppercase">
+                    {selectedFriendId ? 'Direct Message' : 'Members'}
+                </span>
+                <div className="flex items-center gap-1">
                     <button
-                        aria-label="Close member list"
-                        className="p-1 text-muted-foreground transition-colors hover:text-foreground"
-                        onClick={() => dispatch(toggleMobileMemberList())}
+                        aria-label="Toggle search"
+                        className={cn(
+                            'p-1 text-muted-foreground transition-colors hover:text-foreground',
+                            isSearchOpen && 'text-primary',
+                        )}
+                        onClick={() => {
+                            setIsSearchOpen(!isSearchOpen);
+                            if (isSearchOpen) setSearchQuery('');
+                        }}
                     >
-                        <X className="h-4 w-4" />
+                        <Search className="h-4 w-4" />
                     </button>
+                    {showMobileMemberList && (
+                        <button
+                            aria-label="Close member list"
+                            className="p-1 text-muted-foreground transition-colors hover:text-foreground md:hidden"
+                            onClick={() => dispatch(toggleMobileMemberList())}
+                        >
+                            <X className="h-4 w-4" />
+                        </button>
+                    )}
                 </div>
-            )}
+            </div>
+
+            <AnimatePresence>
+                {isSearchOpen && (
+                    <motion.div
+                        animate={{ height: 'auto', opacity: 1 }}
+                        className="overflow-hidden border-b border-border-subtle bg-bg-subtle/50"
+                        exit={{ height: 0, opacity: 0 }}
+                        initial={{ height: 0, opacity: 0 }}
+                    >
+                        <div className="p-3">
+                            <Input
+                                className="h-8 text-xs"
+                                placeholder="Search (supports regex /pattern/)..."
+                                ref={searchInputRef}
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                            />
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
             <Box className="flex min-w-0 flex-col gap-4 p-3">
                 {/* DM Context */}
                 {selectedFriendId && friend && me && (
-                    <DMSidebarSection friend={friend} me={me} />
+                    <DMSidebarSection
+                        friend={friend}
+                        me={me}
+                        searchQuery={searchQuery}
+                    />
                 )}
 
                 {/* Server Context */}
@@ -87,6 +143,7 @@ export const TertiarySidebar: React.FC = () => {
                         memberRoleMap={memberRoleMap}
                         members={members}
                         roles={roles}
+                        searchQuery={searchQuery}
                         serverDetails={serverDetails}
                     />
                 )}

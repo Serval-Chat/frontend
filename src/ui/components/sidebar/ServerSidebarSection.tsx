@@ -12,6 +12,7 @@ interface ServerSidebarSectionProps {
     memberRoleMap: Map<string, Role>;
     serverDetails?: Server;
     roles?: Role[];
+    searchQuery?: string;
 }
 
 interface MemberGroup {
@@ -30,12 +31,46 @@ export const ServerSidebarSection: React.FC<ServerSidebarSectionProps> = ({
     memberRoleMap,
     serverDetails,
     roles,
+    searchQuery,
 }) => {
     const presenceMap = useAppSelector((state) => state.presence.users);
     const { data: me } = useMe();
 
     const groups = useMemo(() => {
         if (!members) return [];
+
+        let filteredMembers = members;
+
+        if (searchQuery) {
+            const query = searchQuery.trim();
+            if (query.startsWith('/') && query.length > 2) {
+                try {
+                    const lastSlashIndex = query.lastIndexOf('/');
+                    const pattern = query.slice(1, lastSlashIndex);
+                    const flags = query.slice(lastSlashIndex + 1);
+                    const regex = new RegExp(pattern, flags);
+
+                    filteredMembers = members.filter(
+                        (m) =>
+                            regex.test(m.user.displayName || '') ||
+                            regex.test(m.user.username || ''),
+                    );
+                } catch {
+                    filteredMembers = [];
+                }
+            } else {
+                const lowercaseQuery = query.toLowerCase();
+                filteredMembers = members.filter(
+                    (m) =>
+                        (m.user.displayName || '')
+                            .toLowerCase()
+                            .includes(lowercaseQuery) ||
+                        (m.user.username || '')
+                            .toLowerCase()
+                            .includes(lowercaseQuery),
+                );
+            }
+        }
 
         const groupsMap = new Map<string, MemberGroup>();
 
@@ -58,7 +93,7 @@ export const ServerSidebarSection: React.FC<ServerSidebarSectionProps> = ({
         const offlineGroup = getGroup('offline', 'Offline', -9999);
         const onlineGroup = getGroup('online', 'Online', -1);
 
-        members.forEach((member) => {
+        filteredMembers.forEach((member) => {
             const presence = presenceMap[member.userId];
             const isMe = me && member.userId === me._id;
             const isOnline =
@@ -119,7 +154,7 @@ export const ServerSidebarSection: React.FC<ServerSidebarSectionProps> = ({
         result.sort((a, b) => b.position - a.position);
 
         return result;
-    }, [members, roles, presenceMap, me]);
+    }, [members, searchQuery, roles, presenceMap, me]);
 
     return (
         <div className="space-y-4 pb-4">
