@@ -62,7 +62,13 @@ const PERMISSION_GROUPS = [
                 key: 'manageMessages',
                 label: 'Manage Messages',
                 description:
-                    'Allows members to delete or pin messages by other members.',
+                    'Allows members to delete messages by other members.',
+            },
+            {
+                key: 'pinMessages',
+                label: 'Pin Messages',
+                description:
+                    'Allows members to pin or unpin messages in this channel.',
             },
             {
                 key: 'addReactions',
@@ -106,6 +112,7 @@ const VALID_PERMISSION_KEYS = new Set([
     'manageReactions',
     'export_channel_messages',
     'viewChannels',
+    'pinMessages',
     'bypassSlowmode',
     'connect',
 ]);

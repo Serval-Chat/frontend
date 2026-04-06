@@ -19,11 +19,13 @@ import {
 } from 'lucide-react';
 
 import type { AuditLogEntry as IAuditLogEntry } from '@/api/auditLog/auditLog.types';
-import { useRoles } from '@/api/servers/servers.queries';
+import { useMembers, useRoles } from '@/api/servers/servers.queries';
+import type { Role } from '@/api/servers/servers.types';
 import { Text } from '@/ui/components/common/Text';
 import { Tooltip } from '@/ui/components/common/Tooltip';
 import { UserProfilePicture } from '@/ui/components/common/UserProfilePicture';
 import { Box } from '@/ui/components/layout/Box';
+import { ProfilePopup } from '@/ui/components/profile/ProfilePopup';
 import { getRoleStyle } from '@/utils/roleColor';
 
 import { AuditLogDiff } from './AuditLogDiff';
@@ -144,6 +146,16 @@ export const AuditLogEntry: React.FC<AuditLogEntryProps> = ({
 }) => {
     const { icon: Icon, color, bg } = getActionDetails(entry.action);
     const [expandedRoles, setExpandedRoles] = useState(false);
+    const [profileState, setProfileState] = useState<{
+        id: string;
+        x: number;
+        y: number;
+    } | null>(null);
+
+    const handleProfileClick = (id: string) => (e: React.MouseEvent) => {
+        e.stopPropagation();
+        setProfileState({ id, x: e.clientX, y: e.clientY });
+    };
 
     const [prevGlobalExpandState, setPrevGlobalExpandState] =
         useState(globalExpandState);
@@ -157,43 +169,121 @@ export const AuditLogEntry: React.FC<AuditLogEntryProps> = ({
     }
 
     const { data: roles } = useRoles(serverId);
+    const { data: members } = useMembers(serverId);
 
-    const getTargetDisplay = (): string => {
+    const currentMember = profileState?.id
+        ? members?.find((m) => m.user._id === profileState.id)
+        : undefined;
+
+    const currentMemberRoles = currentMember?.roles
+        ? (currentMember.roles
+              .map((roleId) => roles?.find((r) => r._id === roleId))
+              .filter(Boolean) as Role[])
+        : undefined;
+
+    const topRoleWithColor = currentMemberRoles
+        ? [...currentMemberRoles]
+              .sort((a, b) => b.position - a.position)
+              .find((r) => r.color || r.startColor)
+        : undefined;
+
+    const topRoleWithIcon = currentMemberRoles
+        ? [...currentMemberRoles]
+              .sort((a, b) => b.position - a.position)
+              .find((r) => r.icon)
+        : undefined;
+
+    const getTargetDisplay = (): React.ReactNode => {
+        const renderUserWithAvatar = (
+            username: string,
+            avatarUrl?: string,
+            userId?: string,
+        ): React.ReactNode => (
+            <span
+                className={`relative top-[-1px] inline-flex items-center gap-1.5 align-middle mix-blend-plus-lighter ${userId ? 'cursor-pointer hover:underline' : ''}`}
+                role={userId ? 'button' : undefined}
+                tabIndex={userId ? 0 : undefined}
+                onClick={userId ? handleProfileClick(userId) : undefined}
+                onKeyDown={
+                    userId
+                        ? (e) => {
+                              if (e.key === 'Enter' || e.key === ' ')
+                                  handleProfileClick(userId)(
+                                      e as unknown as React.MouseEvent,
+                                  );
+                          }
+                        : undefined
+                }
+            >
+                <UserProfilePicture
+                    noIndicator
+                    size="xs"
+                    src={avatarUrl}
+                    username={username}
+                />
+                {`@${username}`}
+            </span>
+        );
+
         if (entry.action === 'role_given' || entry.action === 'role_removed') {
             const roleName = entry.metadata?.roleName
                 ? `role "${String(entry.metadata.roleName)}"`
                 : 'a role';
-            const userName = entry.target?.username
-                ? ` @${entry.target.username}`
+            const userNode = entry.target?.username
+                ? renderUserWithAvatar(
+                      entry.target.username,
+                      entry.target.avatarUrl,
+                      entry.target.id,
+                  )
                 : entry.target?.name
                   ? ` @${entry.target.name}`
                   : '';
-            const preposition = entry.action === 'role_given' ? 'to' : 'from';
-            return `${roleName}${userName ? ` ${preposition}${userName}` : ''}`;
+            const preposition = entry.action === 'role_given' ? 'to ' : 'from ';
+            return (
+                <span className="inline-flex items-center gap-1">
+                    {roleName}
+                    {userNode ? (
+                        <>
+                            {` ${preposition}`}
+                            {userNode}
+                        </>
+                    ) : (
+                        ''
+                    )}
+                </span>
+            );
         }
 
-        if (entry.action === 'delete_message') {
-            const author = entry.target?.username
-                ? `${entry.target.username}'s`
-                : 'a';
+        if (
+            entry.action === 'delete_message' ||
+            entry.action === 'edit_message' ||
+            entry.action === 'pin_message' ||
+            entry.action === 'unpin_message' ||
+            entry.action === 'sticky_message' ||
+            entry.action === 'unsticky_message'
+        ) {
+            const author = entry.target?.username ? (
+                <>
+                    {renderUserWithAvatar(
+                        entry.target.username,
+                        entry.target.avatarUrl,
+                        entry.target.id,
+                    )}
+                    's
+                </>
+            ) : (
+                'a'
+            );
             const channel = entry.metadata?.channelName
                 ? `#${entry.metadata.channelName}`
                 : entry.metadata?.channelId
                   ? `channel ${entry.metadata.channelId}`
                   : 'a channel';
-            return `${author} message in ${channel}`;
-        }
-
-        if (entry.action === 'edit_message') {
-            const author = entry.target?.username
-                ? `${entry.target.username}'s`
-                : 'a';
-            const channel = entry.metadata?.channelName
-                ? `#${entry.metadata.channelName}`
-                : entry.metadata?.channelId
-                  ? `channel ${entry.metadata.channelId}`
-                  : 'a channel';
-            return `${author} message in ${channel}`;
+            return (
+                <span className="inline-flex items-center gap-1">
+                    {author} message in {channel}
+                </span>
+            );
         }
 
         if (
@@ -218,15 +308,28 @@ export const AuditLogEntry: React.FC<AuditLogEntryProps> = ({
             const code = entry.metadata?.inviteCode
                 ? ` via ${String(entry.metadata.inviteCode)}`
                 : '';
-            return entry.target?.username
-                ? `server${code} as @${entry.target.username}`
-                : `server${code}`;
+            return entry.target?.username ? (
+                <span className="inline-flex items-center gap-1">
+                    server{code} as{' '}
+                    {renderUserWithAvatar(
+                        entry.target.username,
+                        entry.target.avatarUrl,
+                        entry.target.id,
+                    )}
+                </span>
+            ) : (
+                `server${code}`
+            );
         }
 
         if (entry.action === 'roles_reordered') return 'role order';
         if (entry.action === 'owner_changed') {
             return entry.target?.username
-                ? `@${entry.target.username}`
+                ? renderUserWithAvatar(
+                      entry.target.username,
+                      entry.target.avatarUrl,
+                      entry.target.id,
+                  )
                 : 'new owner';
         }
 
@@ -238,7 +341,16 @@ export const AuditLogEntry: React.FC<AuditLogEntryProps> = ({
             if (entry.targetType === 'category')
                 return `category "${entry.target.name}"`;
             if (entry.targetType === 'user')
-                return `user @${entry.target.name}`;
+                return (
+                    <span className="inline-flex items-center gap-1">
+                        user{' '}
+                        {renderUserWithAvatar(
+                            entry.target.name,
+                            entry.target.avatarUrl,
+                            entry.target.id,
+                        )}
+                    </span>
+                );
             return `target "${entry.target.name}"`;
         }
 
@@ -249,7 +361,12 @@ export const AuditLogEntry: React.FC<AuditLogEntryProps> = ({
         if (entry.metadata?.categoryName)
             return `category "${entry.metadata.categoryName}"`;
 
-        if (entry.target?.username) return `user @${entry.target.username}`;
+        if (entry.target?.username)
+            return renderUserWithAvatar(
+                entry.target.username,
+                entry.target.avatarUrl,
+                entry.target.id,
+            );
 
         if (entry.targetType === 'server') return 'the server';
 
@@ -441,11 +558,17 @@ export const AuditLogEntry: React.FC<AuditLogEntryProps> = ({
                     <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1">
                         <Box className="mr-0.5 flex items-center gap-2">
                             <UserProfilePicture
-                                size="sm"
+                                noIndicator
+                                size="xs"
                                 src={entry.moderator.avatarUrl}
                                 username={entry.moderator.username}
+                                onClick={handleProfileClick(entry.moderator.id)}
                             />
-                            <Text weight="medium">
+                            <Text
+                                className="cursor-pointer hover:underline"
+                                weight="medium"
+                                onClick={handleProfileClick(entry.moderator.id)}
+                            >
                                 {entry.moderator.username}
                             </Text>
                         </Box>
@@ -477,7 +600,7 @@ export const AuditLogEntry: React.FC<AuditLogEntryProps> = ({
                 )}
 
                 {Boolean(entry.metadata?.messageText) && (
-                    <div className="bg-bg-base text-text-muted mt-2 rounded border-l-2 border-red-500/50 p-2 text-sm">
+                    <div className="bg-bg-base text-text-muted mt-2 rounded border-l-2 border-red-500/50 p-2 text-sm break-words whitespace-pre-wrap">
                         {String(entry.metadata!.messageText)}
                     </div>
                 )}
@@ -602,6 +725,19 @@ export const AuditLogEntry: React.FC<AuditLogEntryProps> = ({
                     </div>
                 )}
             </div>
+
+            {profileState && (
+                <ProfilePopup
+                    iconRole={topRoleWithIcon}
+                    isOpen={!!profileState}
+                    joinedAt={currentMember?.joinedAt}
+                    position={{ x: profileState.x, y: profileState.y }}
+                    role={topRoleWithColor}
+                    roles={currentMemberRoles}
+                    userId={profileState.id}
+                    onClose={() => setProfileState(null)}
+                />
+            )}
         </div>
     );
 };

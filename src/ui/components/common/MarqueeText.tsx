@@ -23,7 +23,7 @@ export const MarqueeText: React.FC<MarqueeTextProps> = ({
     const [duration, setDuration] = useState(5);
 
     useLayoutEffect(() => {
-        const measure = () => {
+        const measure = (): void => {
             if (!containerRef.current || !textRef.current) return;
             const cw = containerRef.current.offsetWidth;
             const tw = textRef.current.scrollWidth;

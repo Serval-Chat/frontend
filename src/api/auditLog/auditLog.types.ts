@@ -29,7 +29,11 @@ export type AuditLogAction =
     | 'emoji_create'
     | 'emoji_delete'
     | 'invite_create'
-    | 'invite_delete';
+    | 'invite_delete'
+    | 'pin_message'
+    | 'unpin_message'
+    | 'sticky_message'
+    | 'unsticky_message';
 
 export interface IAuditLogChange {
     field: string;
@@ -47,6 +51,7 @@ export interface IAuditLogTarget {
     id?: string;
     username?: string;
     name?: string;
+    avatarUrl?: string;
 }
 
 export interface AuditLogEntry {

@@ -1,10 +1,22 @@
 import React from 'react';
 
-import { Copy, CornerUpLeft, Edit, SmilePlus, Trash2 } from 'lucide-react';
+import {
+    Copy,
+    CornerUpLeft,
+    Edit,
+    Pin,
+    SmilePlus,
+    StickyNote,
+    Trash2,
+} from 'lucide-react';
 import { createPortal } from 'react-dom';
 import { useClickAway, useEvent } from 'react-use';
 
-import { useDeleteMessage } from '@/api/chat/chat.queries';
+import {
+    useDeleteMessage,
+    useTogglePin,
+    useToggleSticky,
+} from '@/api/chat/chat.queries';
 import { useAddReaction } from '@/api/reactions/reactions.queries';
 import { useMembers, useRoles } from '@/api/servers/servers.queries';
 import type { Role } from '@/api/servers/servers.types';
@@ -44,6 +56,7 @@ interface MessageProps {
     disableGlowAndColors?: boolean;
     disableColors?: boolean;
     disableGlow?: boolean;
+    disableActions?: boolean;
 }
 
 export const Message: React.FC<MessageProps> = ({
@@ -59,6 +72,7 @@ export const Message: React.FC<MessageProps> = ({
     disableGlowAndColors,
     disableColors,
     disableGlow,
+    disableActions = false,
 }) => {
     const [showProfile, setShowProfile] = React.useState(false);
     const [showPicker, setShowPicker] = React.useState(false);
@@ -84,6 +98,8 @@ export const Message: React.FC<MessageProps> = ({
     }, [senderMember, serverRoles]);
     const addReaction = useAddReaction();
     const deleteMessage = useDeleteMessage();
+    const { mutate: togglePin } = useTogglePin();
+    const { mutate: toggleSticky } = useToggleSticky();
     const { hasPermission, isOwner } = usePermissions(
         message.serverId === 'preview' ? null : (message.serverId ?? null),
     );
@@ -159,6 +175,9 @@ export const Message: React.FC<MessageProps> = ({
         hasPermission('manageMessages') ||
         hasPermission('deleteMessagesOfOthers');
 
+    const canPin =
+        hasPermission('administrator') || hasPermission('pinMessages');
+
     const handleDelete = React.useCallback((): void => {
         if (!message.serverId || !message.channelId) return;
         deleteMessage.mutate({
@@ -219,6 +238,32 @@ export const Message: React.FC<MessageProps> = ({
             });
         }
 
+        if (canPin && message.serverId && message.channelId) {
+            items.push({ type: 'divider' });
+            items.push({
+                label: message.isPinned ? 'Unpin Message' : 'Pin Message',
+                icon: Pin,
+                onClick: () => {
+                    togglePin({
+                        serverId: message.serverId!,
+                        channelId: message.channelId!,
+                        messageId: message._id,
+                    });
+                },
+            });
+            items.push({
+                label: message.isSticky ? 'Unsticky Message' : 'Sticky Message',
+                icon: StickyNote,
+                onClick: () => {
+                    toggleSticky({
+                        serverId: message.serverId!,
+                        channelId: message.channelId!,
+                        messageId: message._id,
+                    });
+                },
+            });
+        }
+
         if (canDelete) {
             items.push({ type: 'divider' });
             items.push({
@@ -237,6 +282,9 @@ export const Message: React.FC<MessageProps> = ({
         onReplyToMessage,
         handleEdit,
         handleDelete,
+        canPin,
+        togglePin,
+        toggleSticky,
     ]);
 
     const isMobile =
@@ -251,101 +299,92 @@ export const Message: React.FC<MessageProps> = ({
         offset: 8,
     });
 
-    return (
-        <Box
-            className={cn(
-                'group relative flex flex-col px-4 py-0.5 transition-colors hover:bg-white/2',
-                isGroupStart ? 'mt-1' : 'mt-0',
-                isHighlighted && 'bg-blue-500/10 hover:bg-blue-500/15',
-                mentionsMe && 'border-l-2 border-caution',
+    const messageContent = (
+        <>
+            {/* Reply Preview */}
+            {isGroupStart && message.replyTo && (
+                <ReplyPreview
+                    disableColors={disableColors}
+                    disableCustomFonts={disableCustomFonts}
+                    disableGlow={disableGlow}
+                    disableGlowAndColors={disableGlowAndColors}
+                    replyToId={message.replyTo._id}
+                    role={message.replyTo.role}
+                    text={message.replyTo.text}
+                    user={message.replyTo.user}
+                    onClick={onReplyClick}
+                />
             )}
-            id={`message-${message._id}`}
-            onMouseLeave={() => setShowPicker(false)}
-        >
-            <ContextMenu className="h-full w-full" items={contextMenuItems}>
-                {/* Reply Preview */}
-                {isGroupStart && message.replyTo && (
-                    <ReplyPreview
+
+            <Box className="flex items-start gap-1">
+                {/* Avatar */}
+                <Box
+                    className="mt-1 flex w-12 flex-shrink-0 justify-center"
+                    ref={avatarRef}
+                >
+                    {isGroupStart ? (
+                        <UserProfilePicture
+                            noIndicator
+                            size="md"
+                            src={user.profilePicture}
+                            username={user.username}
+                            onClick={() => setShowProfile(true)}
+                        />
+                    ) : (
+                        <Text className="mt-1 text-[10px] font-medium text-muted-foreground opacity-0 select-none group-hover:opacity-40">
+                            {
+                                new Date(message.createdAt)
+                                    .toLocaleTimeString([], {
+                                        hour: '2-digit',
+                                        minute: '2-digit',
+                                        hour12: false,
+                                    })
+                                    .split(' ')[0]
+                            }
+                        </Text>
+                    )}
+                </Box>
+
+                {/* Content Area */}
+                <Box className="min-w-0 flex-1">
+                    <MessageHeader
                         disableColors={disableColors}
                         disableCustomFonts={disableCustomFonts}
                         disableGlow={disableGlow}
                         disableGlowAndColors={disableGlowAndColors}
-                        replyToId={message.replyTo._id}
-                        role={message.replyTo.role}
-                        text={message.replyTo.text}
-                        user={message.replyTo.user}
-                        onClick={onReplyClick}
+                        editedAt={message.editedAt}
+                        iconRole={iconRole || message.iconRole}
+                        isEdited={message.isEdited}
+                        isGroupStart={isGroupStart}
+                        role={role || message.role}
+                        timestamp={message.createdAt}
+                        user={user}
+                        onClickName={() => setShowProfile(true)}
                     />
-                )}
-
-                <Box className="flex items-start gap-1">
-                    {/* Avatar */}
-                    <Box
-                        className="mt-1 flex w-12 flex-shrink-0 justify-center"
-                        ref={avatarRef}
-                    >
-                        {isGroupStart ? (
-                            <UserProfilePicture
-                                noIndicator
-                                size="md"
-                                src={user.profilePicture}
-                                username={user.username}
-                                onClick={() => setShowProfile(true)}
-                            />
-                        ) : (
-                            <Text className="mt-1 text-[10px] font-medium text-muted-foreground opacity-0 select-none group-hover:opacity-40">
-                                {
-                                    new Date(message.createdAt)
-                                        .toLocaleTimeString([], {
-                                            hour: '2-digit',
-                                            minute: '2-digit',
-                                            hour12: false,
-                                        })
-                                        .split(' ')[0]
-                                }
-                            </Text>
-                        )}
-                    </Box>
-
-                    {/* Content Area */}
-                    <Box className="min-w-0 flex-1">
-                        <MessageHeader
-                            disableColors={disableColors}
-                            disableCustomFonts={disableCustomFonts}
-                            disableGlow={disableGlow}
-                            disableGlowAndColors={disableGlowAndColors}
-                            editedAt={message.editedAt}
-                            iconRole={iconRole}
-                            isEdited={message.isEdited}
-                            isGroupStart={isGroupStart}
-                            role={role}
-                            timestamp={message.createdAt}
-                            user={user}
-                            onClickName={() => setShowProfile(true)}
-                        />
-                        {isEditing ? (
-                            <MessageEdit
-                                channelId={message.channelId}
-                                initialText={message.text}
-                                messageId={message._id}
-                                receiverId={message.receiverId}
-                                serverId={message.serverId}
-                                onCancel={() => setIsEditing(false)}
-                            />
-                        ) : (
-                            <MessageContent text={message.text} />
-                        )}
-                        <Reactions
+                    {isEditing ? (
+                        <MessageEdit
                             channelId={message.channelId}
+                            initialText={message.text}
                             messageId={message._id}
-                            reactions={message.reactions || []}
+                            receiverId={message.receiverId}
                             serverId={message.serverId}
-                            onAddClick={() => setShowPicker(true)}
+                            onCancel={() => setIsEditing(false)}
                         />
-                    </Box>
+                    ) : (
+                        <MessageContent text={message.text} />
+                    )}
+                    <Reactions
+                        channelId={message.channelId}
+                        messageId={message._id}
+                        reactions={message.reactions || []}
+                        serverId={message.serverId}
+                        onAddClick={() => setShowPicker(true)}
+                    />
                 </Box>
+            </Box>
 
-                {/* Hover Actions */}
+            {/* Hover Actions */}
+            {!disableActions && (
                 <Box
                     className={cn(
                         'absolute top-0 right-4 z-[var(--z-index-effect-md)] -translate-y-1/2 opacity-0 transition-all group-hover:opacity-100',
@@ -388,6 +427,67 @@ export const Message: React.FC<MessageProps> = ({
                             >
                                 <Edit size={18} />
                             </Button>
+                        )}
+
+                        {canPin && message.serverId && message.channelId && (
+                            <>
+                                <Button
+                                    className={cn(
+                                        'h-8 w-8 rounded p-1.5 text-muted-foreground transition-colors hover:bg-white/5 hover:text-foreground',
+                                        message.isPinned && 'text-primary',
+                                    )}
+                                    size="sm"
+                                    title={
+                                        message.isPinned
+                                            ? 'Unpin Message'
+                                            : 'Pin Message'
+                                    }
+                                    variant="ghost"
+                                    onClick={() =>
+                                        togglePin({
+                                            serverId: message.serverId!,
+                                            channelId: message.channelId!,
+                                            messageId: message._id,
+                                        })
+                                    }
+                                >
+                                    <Pin
+                                        className={cn(
+                                            'h-4 w-4',
+                                            message.isPinned && 'fill-primary',
+                                        )}
+                                        size={18}
+                                    />
+                                </Button>
+                                <Button
+                                    className={cn(
+                                        'h-8 w-8 rounded p-1.5 text-muted-foreground transition-colors hover:bg-white/5 hover:text-foreground',
+                                        message.isSticky && 'text-primary',
+                                    )}
+                                    size="sm"
+                                    title={
+                                        message.isSticky
+                                            ? 'Unsticky Message'
+                                            : 'Sticky Message'
+                                    }
+                                    variant="ghost"
+                                    onClick={() =>
+                                        toggleSticky({
+                                            serverId: message.serverId!,
+                                            channelId: message.channelId!,
+                                            messageId: message._id,
+                                        })
+                                    }
+                                >
+                                    <StickyNote
+                                        className={cn(
+                                            'h-4 w-4',
+                                            message.isSticky && 'fill-primary',
+                                        )}
+                                        size={18}
+                                    />
+                                </Button>
+                            </>
                         )}
 
                         {canDelete && (
@@ -444,23 +544,45 @@ export const Message: React.FC<MessageProps> = ({
                             )
                         ))}
                 </Box>
+            )}
+        </>
+    );
 
-                <ProfilePopup
-                    disableColors={disableColors}
-                    disableCustomFonts={disableCustomFonts}
-                    disableGlow={disableGlow}
-                    disableGlowAndColors={disableGlowAndColors}
-                    iconRole={iconRole}
-                    isOpen={showProfile}
-                    joinedAt={senderMember?.joinedAt}
-                    role={role}
-                    roles={senderRoles}
-                    triggerRef={avatarRef}
-                    user={user}
-                    userId={user._id}
-                    onClose={() => setShowProfile(false)}
-                />
-            </ContextMenu>
+    return (
+        <Box
+            className={cn(
+                'group relative flex flex-col px-4 py-0.5 transition-all duration-500 hover:bg-white/2',
+                isGroupStart ? 'mt-1' : 'mt-0',
+                isHighlighted &&
+                    'border-l-2 border-[var(--primary)] bg-[var(--primary-muted)]',
+                mentionsMe && 'border-l-2 border-[var(--caution)]',
+            )}
+            id={`message-${message._id}`}
+            onMouseLeave={() => setShowPicker(false)}
+        >
+            {disableActions ? (
+                messageContent
+            ) : (
+                <ContextMenu className="h-full w-full" items={contextMenuItems}>
+                    {messageContent}
+                </ContextMenu>
+            )}
+
+            <ProfilePopup
+                disableColors={disableColors}
+                disableCustomFonts={disableCustomFonts}
+                disableGlow={disableGlow}
+                disableGlowAndColors={disableGlowAndColors}
+                iconRole={iconRole}
+                isOpen={showProfile}
+                joinedAt={senderMember?.joinedAt}
+                role={role}
+                roles={senderRoles}
+                triggerRef={avatarRef}
+                user={user}
+                userId={user._id}
+                onClose={() => setShowProfile(false)}
+            />
         </Box>
     );
 };

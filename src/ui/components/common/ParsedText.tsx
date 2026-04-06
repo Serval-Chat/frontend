@@ -1,4 +1,5 @@
 /* eslint-disable react/no-array-index-key */
+/* eslint-disable react/jsx-props-no-spreading */
 import React from 'react';
 
 import { ChannelLink } from '@/ui/components/chat/ChannelLink';

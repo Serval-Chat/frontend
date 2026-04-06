@@ -685,11 +685,19 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
                                 }
                             />
                             <PermissionToggle
-                                description="Allows member to delete or pin messages by other members."
+                                description="Allows member to delete messages by other members."
                                 label="Manage Messages"
                                 value={permissions.manageMessages || false}
                                 onChange={(val) =>
                                     updatePermission('manageMessages', val)
+                                }
+                            />
+                            <PermissionToggle
+                                description="Allows member to pin or unpin messages."
+                                label="Pin Messages"
+                                value={permissions.pinMessages || false}
+                                onChange={(val) =>
+                                    updatePermission('pinMessages', val)
                                 }
                             />
                             <PermissionToggle

@@ -35,6 +35,8 @@ import { Text } from '@/ui/components/common/Text';
 import { Box } from '@/ui/components/layout/Box';
 import { wsMessages } from '@/ws';
 
+import { StickyMessageBar } from './StickyMessageBar';
+
 /**
  * @description Main chat area component that displays messages for the selected conversation.
  */
@@ -60,6 +62,7 @@ export const MainChat: React.FC = () => {
     const [replyingTo, setReplyingTo] = useState<ProcessedChatMessage | null>(
         null,
     );
+    const [showPins, setShowPins] = useState(false);
 
     // Data Fetching
     const { data: currentUser } = useMe();
@@ -234,6 +237,8 @@ export const MainChat: React.FC = () => {
         );
     }
 
+    const isServerContext = !!selectedServerId && !!selectedChannelId;
+
     return (
         <Box
             className="relative flex min-h-0 flex-1 flex-col overflow-hidden"
@@ -245,7 +250,16 @@ export const MainChat: React.FC = () => {
                 friendUser={friendUser}
                 selectedChannel={selectedChannel}
                 selectedFriendId={selectedFriendId}
+                showPins={showPins}
+                onTogglePins={() => setShowPins((v) => !v)}
             />
+
+            {isServerContext && (
+                <StickyMessageBar
+                    channelId={selectedChannelId}
+                    serverId={selectedServerId}
+                />
+            )}
 
             {isViewingOlderMessages && (
                 <Box className="bg-warning/10 border-warning/30 flex items-center justify-between border-b px-6 py-3">
@@ -312,6 +326,7 @@ export const MainChat: React.FC = () => {
                             typingUsers={typingUsers}
                         />
                     </Box>
+
                     {canSendMessages ? (
                         <MessageInput
                             canBypassSlowMode={canBypassSlowMode}

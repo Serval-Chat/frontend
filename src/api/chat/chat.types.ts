@@ -36,6 +36,8 @@ export interface ChatMessage {
     referenced_message?: ChatMessage;
     isEdited?: boolean;
     editedAt?: string;
+    isPinned?: boolean;
+    isSticky?: boolean;
     isWebhook?: boolean;
     webhookUsername?: string;
     webhookAvatarUrl?: string;

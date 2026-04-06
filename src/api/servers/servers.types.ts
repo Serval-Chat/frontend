@@ -70,6 +70,7 @@ export interface RolePermissions {
     manageReactions: boolean;
     addReactions: boolean;
     viewChannels: boolean;
+    pinMessages: boolean;
     connect: boolean;
     export_channel_messages: boolean;
     bypassSlowmode: boolean;

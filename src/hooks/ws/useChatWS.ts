@@ -355,6 +355,10 @@ export function useChatWS(
                         };
                     },
                 );
+
+                void queryClient.invalidateQueries({
+                    queryKey: CHAT_QUERY_KEYS.channelPins(payload.channelId),
+                });
             },
             [queryClient],
         ),
@@ -399,6 +403,52 @@ export function useChatWS(
                         };
                     },
                 );
+            },
+            [queryClient],
+        ),
+    );
+
+    useWebSocket(
+        WsEvents.MESSAGE_SERVER_PIN_UPDATED,
+        useCallback(
+            (payload: {
+                messageId: string;
+                serverId: string;
+                channelId: string;
+                isPinned: boolean;
+                isSticky: boolean;
+            }): void => {
+                queryClient.setQueriesData<InfiniteData<ChatMessage[]>>(
+                    {
+                        predicate: (query) =>
+                            query.queryKey[0] === 'chat' &&
+                            query.queryKey[1] === 'messages' &&
+                            query.queryKey[2] === 'channel' &&
+                            query.queryKey[3] === payload.serverId &&
+                            query.queryKey[4] === payload.channelId,
+                    },
+                    (oldData) => {
+                        if (!oldData) return oldData;
+                        return {
+                            ...oldData,
+                            pages: oldData.pages.map((page) =>
+                                page.map((msg) =>
+                                    msg._id === payload.messageId
+                                        ? {
+                                              ...msg,
+                                              isPinned: payload.isPinned,
+                                              isSticky: payload.isSticky,
+                                          }
+                                        : msg,
+                                ),
+                            ),
+                        };
+                    },
+                );
+
+                void queryClient.invalidateQueries({
+                    queryKey: CHAT_QUERY_KEYS.channelPins(payload.channelId),
+                });
             },
             [queryClient],
         ),

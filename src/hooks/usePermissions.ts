@@ -64,6 +64,7 @@ export const usePermissions = (
             connect: false,
             export_channel_messages: false,
             bypassSlowmode: false,
+            pinMessages: false,
         };
 
         if (!serverId || !currentUser) return perms;

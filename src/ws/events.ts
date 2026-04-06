@@ -469,6 +469,7 @@ export const WsEvents = {
     EMOJI_UPDATED: 'emoji_updated',
     MENTION: 'mention',
     AUDIT_LOG_ENTRY_CREATED: 'audit_log_entry_created',
+    MESSAGE_SERVER_PIN_UPDATED: 'message_server_pin_updated',
 } as const;
 
 export interface IReactionEventPayload {

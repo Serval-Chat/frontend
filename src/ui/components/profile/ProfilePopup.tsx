@@ -113,7 +113,7 @@ export const ProfilePopup: React.FC<ProfilePopupProps> = ({
     return createPortal(
         <AnimatePresence>
             {isOpen && (
-                <Box className="pointer-events-none fixed inset-0 z-backdrop">
+                <Box className="pointer-events-none fixed inset-0 z-[9999]">
                     <motion.div
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         className="pointer-events-auto"

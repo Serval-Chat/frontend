@@ -1,5 +1,7 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
+import { useAppDispatch } from '@/store/hooks';
+import { setTargetMessageId } from '@/store/slices/navSlice';
 import type { ProcessedChatMessage } from '@/types/chat.ui';
 import { MessageItem } from '@/ui/components/chat/MessageItem';
 import { Button } from '@/ui/components/common/Button';
@@ -43,29 +45,18 @@ export const MessagesList: React.FC<MessagesListProps> = ({
     disableColors,
     disableGlow,
 }) => {
+    const dispatch = useAppDispatch();
     const scrollContainerRef = useRef<HTMLDivElement>(null);
     const [isAtBottom, setIsAtBottom] = useState(true);
     const lastScrollHeightRef = useRef<number>(0);
-    const [highlightId, setInternalHighlightId] = useState<string | null>(
-        activeHighlightId || null,
-    );
-    const highlightTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
-        null,
-    );
+    const [highlightId, setInternalHighlightId] = useState<string | null>(null);
 
     const handleReplyClick = (messageId: string): void => {
-        setInternalHighlightId(messageId);
         const el = document.getElementById(`message-${messageId}`);
         if (el) {
             el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            setInternalHighlightId(messageId);
         }
-
-        // Clear highlight after animation
-        if (highlightTimerRef.current) clearTimeout(highlightTimerRef.current);
-        highlightTimerRef.current = setTimeout(() => {
-            setInternalHighlightId(null);
-            highlightTimerRef.current = null;
-        }, 2000);
 
         onReplyClick?.(messageId);
     };
@@ -112,10 +103,10 @@ export const MessagesList: React.FC<MessagesListProps> = ({
 
     const lastScrolledIdRef = useRef<string | null>(null);
 
-    // Handle explicit scroll requests
     useEffect(() => {
         if (!activeHighlightId) {
             lastScrolledIdRef.current = null;
+            setTimeout(() => setInternalHighlightId(null), 0);
             return;
         }
 
@@ -125,27 +116,32 @@ export const MessagesList: React.FC<MessagesListProps> = ({
 
         const el = document.getElementById(`message-${activeHighlightId}`);
         if (el) {
-            requestAnimationFrame(() => {
-                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                setInternalHighlightId(activeHighlightId);
-            });
+            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            setTimeout(() => setInternalHighlightId(activeHighlightId), 0);
             lastScrolledIdRef.current = activeHighlightId;
-
-            if (highlightTimerRef.current)
-                clearTimeout(highlightTimerRef.current);
-            highlightTimerRef.current = setTimeout(() => {
-                setInternalHighlightId(null);
-                highlightTimerRef.current = null;
-            }, 2000);
         }
     }, [activeHighlightId, messages]);
 
+    useEffect(() => {
+        if (!highlightId) return;
+
+        const timer = setTimeout(() => {
+            setInternalHighlightId(null);
+            dispatch(setTargetMessageId(null));
+        }, 2000);
+
+        return () => {
+            clearTimeout(timer);
+        };
+    }, [highlightId, dispatch]);
+
     useEffect(
         () => () => {
-            if (highlightTimerRef.current)
-                clearTimeout(highlightTimerRef.current);
+            if (activeHighlightId) {
+                dispatch(setTargetMessageId(null));
+            }
         },
-        [],
+        [activeHighlightId, dispatch],
     );
 
     return (

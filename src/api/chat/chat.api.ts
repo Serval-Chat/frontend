@@ -82,4 +82,45 @@ export const chatApi = {
         );
         return response.data;
     },
+
+    /**
+     * @description Toggle message pin
+     */
+    togglePin: async (
+        serverId: string,
+        channelId: string,
+        messageId: string,
+    ): Promise<ChatMessage> => {
+        const response = await apiClient.post<ChatMessage>(
+            `/api/v1/servers/${serverId}/channels/${channelId}/messages/${messageId}/pin`,
+        );
+        return response.data;
+    },
+
+    /**
+     * @description Toggle message sticky
+     */
+    toggleSticky: async (
+        serverId: string,
+        channelId: string,
+        messageId: string,
+    ): Promise<ChatMessage> => {
+        const response = await apiClient.post<ChatMessage>(
+            `/api/v1/servers/${serverId}/channels/${channelId}/messages/${messageId}/sticky`,
+        );
+        return response.data;
+    },
+
+    /**
+     * @description Fetch all pinned messages for a channel
+     */
+    getPinnedMessages: async (
+        serverId: string,
+        channelId: string,
+    ): Promise<ChatMessage[]> => {
+        const response = await apiClient.get<ChatMessage[]>(
+            `/api/v1/servers/${serverId}/channels/${channelId}/messages/pins`,
+        );
+        return response.data;
+    },
 };

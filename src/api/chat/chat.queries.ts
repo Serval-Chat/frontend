@@ -1,8 +1,10 @@
 import {
     type InfiniteData,
     type UseInfiniteQueryResult,
+    type UseQueryResult,
     useInfiniteQuery,
     useMutation,
+    useQuery,
     useQueryClient,
 } from '@tanstack/react-query';
 
@@ -31,6 +33,8 @@ export const CHAT_QUERY_KEYS = {
             channelId,
             targetMessageId,
         ] as const,
+    channelPins: (channelId: string | null) =>
+        ['chat', 'pins', channelId] as const,
 };
 
 const LIMIT = 50;
@@ -320,3 +324,88 @@ export const useEditUserMessage = (): {
         isPending: mutation.isPending,
     };
 };
+
+/**
+ * @description Hook to toggle message pin
+ */
+export const useTogglePin = (): {
+    mutate: (vars: {
+        serverId: string;
+        channelId: string;
+        messageId: string;
+    }) => void;
+    isPending: boolean;
+} => {
+    const queryClient = useQueryClient();
+
+    const mutation = useMutation({
+        mutationFn: ({
+            serverId,
+            channelId,
+            messageId,
+        }: {
+            serverId: string;
+            channelId: string;
+            messageId: string;
+        }) => chatApi.togglePin(serverId, channelId, messageId),
+        onSuccess: (_data, variables) => {
+            void queryClient.invalidateQueries({
+                queryKey: CHAT_QUERY_KEYS.channelPins(variables.channelId),
+            });
+        },
+    });
+
+    return {
+        mutate: mutation.mutate,
+        isPending: mutation.isPending,
+    };
+};
+
+/**
+ * @description Hook to toggle message sticky
+ */
+export const useToggleSticky = (): {
+    mutate: (vars: {
+        serverId: string;
+        channelId: string;
+        messageId: string;
+    }) => void;
+    isPending: boolean;
+} => {
+    const queryClient = useQueryClient();
+
+    const mutation = useMutation({
+        mutationFn: ({
+            serverId,
+            channelId,
+            messageId,
+        }: {
+            serverId: string;
+            channelId: string;
+            messageId: string;
+        }) => chatApi.toggleSticky(serverId, channelId, messageId),
+        onSuccess: (_data, variables) => {
+            void queryClient.invalidateQueries({
+                queryKey: CHAT_QUERY_KEYS.channelPins(variables.channelId),
+            });
+        },
+    });
+
+    return {
+        mutate: mutation.mutate,
+        isPending: mutation.isPending,
+    };
+};
+
+/**
+ * @description Hook to fetch pinned messages
+ */
+export const usePinnedMessages = (
+    serverId: string | null,
+    channelId: string | null,
+): UseQueryResult<ChatMessage[], Error> =>
+    useQuery({
+        queryKey: [...CHAT_QUERY_KEYS.channelPins(channelId), serverId],
+        queryFn: () => chatApi.getPinnedMessages(serverId!, channelId!),
+        enabled: !!serverId && !!channelId,
+    });
