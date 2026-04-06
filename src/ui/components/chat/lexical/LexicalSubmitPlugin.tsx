@@ -11,7 +11,7 @@ import {
 import { $getRawMessageText } from './lexicalUtils';
 
 interface LexicalSubmitPluginProps {
-    onSendMessage: (text: string) => void | Promise<void>;
+    onSendMessage: (text: string) => boolean | Promise<boolean>;
     isAutocompleteOpenRef?: React.MutableRefObject<boolean>;
 }
 
@@ -42,12 +42,16 @@ export const LexicalSubmitPlugin: React.FC<LexicalSubmitPluginProps> = ({
 
                     editor.getEditorState().read(() => {
                         const rawText = $getRawMessageText();
-                        void onSendMessage(rawText);
+                        void (async () => {
+                            const result = await onSendMessage(rawText);
+                            if (result) {
+                                editor.dispatchCommand(
+                                    CLEAR_EDITOR_COMMAND,
+                                    undefined,
+                                );
+                            }
+                        })();
                     });
-
-                    setTimeout(() => {
-                        editor.dispatchCommand(CLEAR_EDITOR_COMMAND, undefined);
-                    }, 0);
 
                     return true;
                 },

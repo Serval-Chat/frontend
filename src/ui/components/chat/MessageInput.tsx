@@ -121,6 +121,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
     const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
     const [hasText, setHasText] = useState(false);
     const [editor, setEditor] = useState<LexicalEditor | null>(null);
+    const [isSlowModeError, setIsSlowModeError] = useState(false);
 
     const isAutocompleteOpenRef = useRef<boolean>(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -290,15 +291,19 @@ export const MessageInput: React.FC<MessageInputProps> = ({
     }, [files, updateFileStatus, updateFileProgress, showToast]);
 
     const handleSendMessage = useCallback(
-        async (text: string): Promise<void> => {
+        async (text: string): Promise<boolean> => {
             const trimmedText = text.trim();
-            if (!trimmedText && files.length === 0) return;
-            if (cooldown > 0 && !canBypassSlowMode) return;
+            if (!trimmedText && files.length === 0) return false;
+            if (cooldown > 0 && !canBypassSlowMode) {
+                setIsSlowModeError(true);
+                setTimeout(() => setIsSlowModeError(false), 500);
+                return false;
+            }
 
             const uploadedUrls = await handleUploadFiles();
 
             if (uploadedUrls.length === 0 && !trimmedText && files.length > 0) {
-                return;
+                return false;
             }
 
             const formattedUrls = uploadedUrls.map((url) => `[%file%](${url})`);
@@ -313,7 +318,10 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                 }
                 clearQueue();
                 onCancelReply?.();
+                return true;
             }
+
+            return false;
         },
         [
             files,
@@ -383,7 +391,12 @@ export const MessageInput: React.FC<MessageInputProps> = ({
     };
 
     return (
-        <Box className="relative mx-4 mb-4 flex flex-col overflow-visible rounded-lg border border-border-subtle bg-[var(--bg-msg-input)] transition-colors focus-within:border-primary/50">
+        <Box
+            className={cn(
+                'relative mx-4 mb-4 flex flex-col overflow-visible rounded-lg border border-border-subtle bg-[var(--bg-msg-input)] transition-colors focus-within:border-primary/50',
+                isSlowModeError && 'animate-shake !border-danger',
+            )}
+        >
             <FileQueue
                 files={files}
                 onRemove={removeFile}
@@ -450,7 +463,13 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                     <Plus size={20} />
                 </Button>
 
-                <div className="relative flex min-h-[40px] flex-1 cursor-text items-center rounded-md border border-border-subtle bg-bg-subtle transition-all duration-200 focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-1 focus-within:outline-none">
+                <div
+                    className={cn(
+                        'relative flex min-h-[40px] flex-1 cursor-text items-center rounded-md border border-border-subtle bg-bg-subtle transition-all duration-200 focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-1 focus-within:outline-none',
+                        isSlowModeError &&
+                            '!border-danger ring-2 !ring-danger ring-offset-1',
+                    )}
+                >
                     <LexicalComposer initialConfig={initialConfig}>
                         <EditorBridge onReady={setEditor} />
                         <RichTextPlugin
@@ -560,7 +579,16 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                                 onClose={() => setShowGifPicker(false)}
                                 onSelect={(url) => {
                                     if (editor) {
-                                        void handleSendMessage(url);
+                                        void (async () => {
+                                            const result =
+                                                await handleSendMessage(url);
+                                            if (result) {
+                                                editor.dispatchCommand(
+                                                    CLEAR_EDITOR_COMMAND,
+                                                    undefined,
+                                                );
+                                            }
+                                        })();
                                     }
                                     setShowGifPicker(false);
                                 }}
@@ -579,12 +607,17 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                             if (editor) {
                                 editor.getEditorState().read(() => {
                                     const text = $getRawMessageText();
-                                    void handleSendMessage(text);
+                                    void (async () => {
+                                        const result =
+                                            await handleSendMessage(text);
+                                        if (result) {
+                                            editor.dispatchCommand(
+                                                CLEAR_EDITOR_COMMAND,
+                                                undefined,
+                                            );
+                                        }
+                                    })();
                                 });
-                                editor.dispatchCommand(
-                                    CLEAR_EDITOR_COMMAND,
-                                    undefined,
-                                );
                             }
                         }}
                     >
