@@ -16,6 +16,7 @@ import {
 import { Text } from '@/ui/components/common/Text';
 import { Box } from '@/ui/components/layout/Box';
 import { ICON_MAP } from '@/ui/utils/iconMap';
+import { cn } from '@/utils/cn';
 
 interface ChatHeaderProps {
     selectedFriendId: string | null;
@@ -39,6 +40,8 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
     const [descExpanded, setDescExpanded] = useState(false);
 
     const hasDescription = !selectedFriendId && !!selectedChannel?.description;
+    const hasStatus = !!selectedFriendId && !!friendUser?.customStatus?.text;
+    const showSecondary = hasDescription || hasStatus;
 
     const handleBackClick = (): void => {
         if (selectedFriendId) {
@@ -56,8 +59,18 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
             className="flex shrink-0 items-start border-b border-white/5 bg-[var(--bg-chat-header)] px-4 backdrop-blur-sm"
         >
             {/* Left: icon + name + description */}
-            <Box className="flex min-w-0 flex-1 items-start gap-2 overflow-hidden py-3">
-                <Box className="text-foreground-muted mt-0.5 shrink-0">
+            <Box
+                className={cn(
+                    'flex min-w-0 flex-1 gap-2 overflow-hidden py-3',
+                    showSecondary ? 'items-start' : 'items-center',
+                )}
+            >
+                <Box
+                    className={cn(
+                        'text-foreground-muted shrink-0',
+                        showSecondary && 'mt-0.5',
+                    )}
+                >
                     {selectedFriendId ? (
                         <Text className="text-xl">@</Text>
                     ) : (
@@ -114,6 +127,11 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
                                 </span>
                             </motion.div>
                         </motion.button>
+                    )}
+                    {hasStatus && (
+                        <Text className="text-foreground-muted truncate text-xs">
+                            {friendUser?.customStatus?.text}
+                        </Text>
                     )}
                 </Box>
             </Box>
