@@ -4,7 +4,11 @@ import { ChevronDown, ChevronUp } from 'lucide-react';
 
 import { usePinnedMessages } from '@/api/chat/chat.queries';
 import type { ChatMessage } from '@/api/chat/chat.types';
-import { useMembers, useRoles } from '@/api/servers/servers.queries';
+import {
+    useMembers,
+    useRoles,
+    useServerDetails,
+} from '@/api/servers/servers.queries';
 import { useAppDispatch } from '@/store/hooks';
 import { setTargetMessageId } from '@/store/slices/navSlice';
 import type { ProcessedChatMessage } from '@/types/chat.ui';
@@ -33,6 +37,7 @@ export const StickyMessageBar: React.FC<StickyMessageBarProps> = ({
     const { data: pins } = usePinnedMessages(serverId, channelId);
     const { data: members } = useMembers(serverId);
     const { data: serverRoles } = useRoles(serverId);
+    const { data: server } = useServerDetails(serverId);
 
     const latestSticky = React.useMemo(() => {
         if (!pins) return null;
@@ -70,6 +75,8 @@ export const StickyMessageBar: React.FC<StickyMessageBarProps> = ({
         if (lastStickyId.current !== latestSticky._id) {
             if (contentRef.current && contentRef.current.scrollHeight > 80) {
                 setViewState('compact');
+            } else {
+                setViewState('expanded');
             }
             lastStickyId.current = latestSticky._id;
         }
@@ -77,14 +84,23 @@ export const StickyMessageBar: React.FC<StickyMessageBarProps> = ({
 
     if (!latestSticky) return null;
 
+    const isExceeding = (): boolean =>
+        Boolean(contentRef.current && contentRef.current.scrollHeight > 80);
+
     const handleNext = (): void => {
-        if (viewState === 'expanded') setViewState('compact');
-        else if (viewState === 'compact') setViewState('hidden');
+        if (viewState === 'expanded') {
+            setViewState(isExceeding() ? 'compact' : 'hidden');
+        } else if (viewState === 'compact') {
+            setViewState('hidden');
+        }
     };
 
     const handlePrev = (): void => {
-        if (viewState === 'hidden') setViewState('compact');
-        else if (viewState === 'compact') setViewState('expanded');
+        if (viewState === 'hidden') {
+            setViewState(isExceeding() ? 'compact' : 'expanded');
+        } else if (viewState === 'compact') {
+            setViewState('expanded');
+        }
     };
 
     return (
@@ -110,6 +126,7 @@ export const StickyMessageBar: React.FC<StickyMessageBarProps> = ({
                 <Box className="min-w-0 flex-1" ref={contentRef}>
                     <Message
                         disableActions
+                        disableGlow={server?.disableUsernameGlowAndCustomColor}
                         iconRole={latestSticky.iconRole}
                         message={latestSticky}
                         role={latestSticky.role}
