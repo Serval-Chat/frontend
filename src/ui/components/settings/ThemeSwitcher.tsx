@@ -12,7 +12,9 @@ interface ThemeSwitcherProps {
 const THEMES = [
     { id: 'serval', label: 'Serval' },
     { id: 'dark', label: 'Dark' },
+    { id: 'deep-ocean', label: 'Deep Ocean' },
     { id: 'light', label: 'Light' },
+    { id: 'cherry', label: 'Cherry' },
     { id: 'violet', label: 'Violet' },
     { id: 'forest-green', label: 'Forest Green' },
     { id: 'high-contrast', label: 'High Contrast' },

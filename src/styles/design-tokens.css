@@ -121,7 +121,7 @@
     --local-primary-bg: color-mix(in srgb, black 25%, var(--bg-secondary));
 }
 
-.theme-dark {
+.theme-deep-ocean {
     --primary: hsl(210 100% 60%);
     --primary-hover: hsl(210 100% 50%);
     --danger: hsl(0 85% 60%);
@@ -147,6 +147,38 @@
     /* Slate 400 */
     --muted-foreground-hover: #cbd5e1;
     /* Slate 300 */
+    --border-subtle: rgba(255, 255, 255, 0.1);
+    --bg-subtle: rgba(255, 255, 255, 0.05);
+    --bg-secondary: rgba(255, 255, 255, 0.08);
+    --placeholder: rgba(255, 255, 255, 0.2);
+    --divider: rgba(255, 255, 255, 0.1);
+
+    --local-chat-bg: color-mix(in srgb, black 30%, var(--background));
+    --local-primary-bg: color-mix(in srgb, black 30%, var(--background));
+}
+
+.theme-dark {
+    --primary: hsl(210 100% 80%);
+    --primary-hover: hsl(210 100% 70%);
+    --danger: hsl(0 85% 65%);
+    --danger-hover: hsl(0 85% 55%);
+    --caution: hsl(35 90% 65%);
+    --caution-hover: hsl(35 90% 55%);
+    --success: hsl(142 70% 60%);
+    --success-hover: hsl(142 70% 50%);
+    --primary-muted: hsl(210 100% 12%);
+    --primary-muted-text: hsl(210 100% 75%);
+    --danger-muted: hsl(0 85% 12%);
+    --danger-muted-text: hsl(0 85% 75%);
+    --caution-muted: hsl(35 90% 12%);
+    --caution-muted-text: hsl(35 90% 75%);
+    --success-muted: hsl(142 70% 12%);
+    --success-muted-text: hsl(142 70% 75%);
+    --background: #18181b;
+    --foreground: #f4f4f5;
+    --foreground-inverse: #18181b;
+    --muted-foreground: #a1a1aa;
+    --muted-foreground-hover: #d4d4d8;
     --border-subtle: rgba(255, 255, 255, 0.1);
     --bg-subtle: rgba(255, 255, 255, 0.05);
     --bg-secondary: rgba(255, 255, 255, 0.08);
@@ -251,6 +283,38 @@
 
     --local-chat-bg: #000000;
     --local-primary-bg: #000000;
+}
+
+.theme-cherry {
+    --primary: hsl(330 100% 50%);
+    --primary-hover: hsl(330 100% 40%);
+    --danger: hsl(0 85% 55%);
+    --danger-hover: hsl(0 85% 45%);
+    --caution: hsl(35 90% 55%);
+    --caution-hover: hsl(35 90% 45%);
+    --success: hsl(142 70% 40%);
+    --success-hover: hsl(142 70% 30%);
+    --primary-muted: hsl(330 100% 90%);
+    --primary-muted-text: hsl(330 100% 30%);
+    --danger-muted: hsl(0 85% 95%);
+    --danger-muted-text: hsl(0 85% 30%);
+    --caution-muted: hsl(35 90% 95%);
+    --caution-muted-text: hsl(35 90% 30%);
+    --success-muted: hsl(142 70% 95%);
+    --success-muted-text: hsl(142 70% 30%);
+    --background: #ffdbe6;
+    --foreground: #600028;
+    --foreground-inverse: #ffffff;
+    --muted-foreground: #d13076;
+    --muted-foreground-hover: #b31b5c;
+    --border-subtle: rgba(255, 20, 147, 0.3);
+    --bg-subtle: rgba(255, 105, 180, 0.15);
+    --bg-secondary: rgba(255, 105, 180, 0.25);
+    --placeholder: rgba(96, 0, 40, 0.5);
+    --divider: rgba(255, 20, 147, 0.2);
+
+    --local-chat-bg: #ffe4ef;
+    --local-primary-bg: #ffe4ef;
 }
 
 .theme-violet {

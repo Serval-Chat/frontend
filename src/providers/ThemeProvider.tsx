@@ -3,7 +3,9 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 export type Theme =
     | 'serval'
     | 'dark'
+    | 'deep-ocean'
     | 'light'
+    | 'cherry'
     | 'high-contrast'
     | 'violet'
     | 'forest-green';
@@ -28,7 +30,9 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
         root.classList.remove(
             'theme-serval',
             'theme-dark',
+            'theme-deep-ocean',
             'theme-light',
+            'theme-cherry',
             'theme-high-contrast',
             'theme-violet',
             'theme-forest-green',
