@@ -214,3 +214,5 @@ export const StatChart = ({
         </Box>
     );
 };
+
+StatChart.displayName = 'StatChart';
