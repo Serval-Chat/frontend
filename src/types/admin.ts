@@ -2,15 +2,15 @@ import type { Badge } from '@/api/users/users.types';
 
 export interface AdminStats {
     users: number;
-    usersTrend: number;
+    usersSparkline: number[];
     activeUsers: number;
-    activeUsersTrend: number;
+    activeUsersSparkline: number[];
     bans: number;
-    bansTrend: number;
+    bansSparkline: number[];
     servers: number;
-    serversTrend: number;
+    serversSparkline: number[];
     messages: number;
-    messagesTrend: number;
+    messagesSparkline: number[];
 }
 
 export interface AuditLog {

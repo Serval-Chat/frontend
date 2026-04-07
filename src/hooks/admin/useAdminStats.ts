@@ -5,12 +5,16 @@ import { apiClient } from '@/api/client';
 import { ADMIN_CONSTANTS } from '@/constants/admin';
 import type { AdminStats } from '@/types/admin';
 
-export const useAdminStats = (): UseQueryResult<AdminStats, Error> =>
+export type StatsRange = '24h' | '7d' | '30d' | 'all';
+
+export const useAdminStats = (
+    range: StatsRange = '24h',
+): UseQueryResult<AdminStats, Error> =>
     useQuery<AdminStats>({
-        queryKey: ['admin-stats'],
+        queryKey: ['admin-stats', range],
         queryFn: async () => {
             const { data } = await apiClient.get<AdminStats>(
-                '/api/v1/admin/stats',
+                `/api/v1/admin/stats?range=${range}`,
             );
             return data;
         },
