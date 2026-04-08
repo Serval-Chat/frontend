@@ -13,4 +13,14 @@ export const adminInvitesApi = {
         apiClient
             .delete<{ message: string }>(`/api/v1/admin/invites/${token}`)
             .then((r) => r.data),
+
+    createBatchInvites: (count: number) =>
+        apiClient
+            .post<{
+                message: string;
+                tokens: string[];
+            }>('/api/v1/admin/invites/batch', { count })
+            .then((r) => r.data),
+
+    getExportInvitesUrl: () => '/api/v1/admin/invites/export',
 };

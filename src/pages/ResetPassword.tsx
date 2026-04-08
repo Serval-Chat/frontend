@@ -123,8 +123,10 @@ export const ResetPassword: React.FC = () => {
                     <InputWrapper>
                         <Input
                             required
+                            autoComplete="new-password"
                             className="bg-background/50"
                             minLength={8}
+                            name="password"
                             placeholder="New Password"
                             type="password"
                             value={newPassword}
@@ -134,8 +136,10 @@ export const ResetPassword: React.FC = () => {
                     <InputWrapper>
                         <Input
                             required
+                            autoComplete="new-password"
                             className="bg-background/50"
                             minLength={8}
+                            name="confirm-password"
                             placeholder="Confirm New Password"
                             type="password"
                             value={confirmPassword}

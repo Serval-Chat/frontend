@@ -40,3 +40,18 @@ export const useDeleteAdminInvite = (): UseMutationResult<
         },
     });
 };
+export const useCreateBatchAdminInvites = (): UseMutationResult<
+    { message: string; tokens: string[] },
+    Error,
+    { count: number },
+    unknown
+> => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: ({ count }) => adminInvitesApi.createBatchInvites(count),
+        onSuccess: () => {
+            void queryClient.invalidateQueries({ queryKey: ['admin-invites'] });
+        },
+    });
+};

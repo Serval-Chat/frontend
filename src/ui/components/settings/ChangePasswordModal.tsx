@@ -91,7 +91,9 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
                             Current Password
                         </label>
                         <Input
+                            autoComplete="current-password"
                             id="current-password"
+                            name="current-password"
                             type="password"
                             value={currentPassword}
                             onChange={(e) => setCurrentPassword(e.target.value)}
@@ -111,7 +113,9 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
                             New Password
                         </label>
                         <Input
+                            autoComplete="new-password"
                             id="new-password"
+                            name="new-password"
                             type="password"
                             value={newPassword}
                             onChange={(e) => setNewPassword(e.target.value)}
@@ -131,7 +135,9 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
                             Confirm New Password
                         </label>
                         <Input
+                            autoComplete="new-password"
                             id="confirm-password"
+                            name="confirm-password"
                             type="password"
                             value={confirmPassword}
                             onChange={(e) => setConfirmPassword(e.target.value)}

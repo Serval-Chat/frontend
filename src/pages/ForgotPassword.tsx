@@ -72,7 +72,9 @@ export const ForgotPassword: React.FC = () => {
                     <InputWrapper>
                         <Input
                             required
+                            autoComplete="email"
                             className="bg-background/50"
+                            name="email"
                             placeholder="Email"
                             type="email"
                             value={email}

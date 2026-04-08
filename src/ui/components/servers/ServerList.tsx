@@ -53,7 +53,8 @@ export const ServerList: React.FC = () => {
                 dispatch(openFolder(folderWithServer.id));
             }
         }
-    }, [selectedServerId, me?.serverSettings?.order, openedFolders, dispatch]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [selectedServerId, me?.serverSettings?.order, dispatch]);
 
     const items = React.useMemo(() => {
         if (!me || !servers) return [];

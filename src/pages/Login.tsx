@@ -81,9 +81,11 @@ export const Login: React.FC = () => {
                             />
                         ) : (
                             <Input
+                                autoComplete="username"
                                 className="bg-background/50"
+                                name="email"
                                 placeholder="E-mail"
-                                type="text"
+                                type="email"
                                 value={loginInput}
                                 onChange={(e) => setLoginInput(e.target.value)}
                             />
@@ -93,7 +95,9 @@ export const Login: React.FC = () => {
                         <>
                             <InputWrapper>
                                 <Input
+                                    autoComplete="current-password"
                                     className="bg-background/50"
+                                    name="password"
                                     placeholder="Password"
                                     type="password"
                                     value={password}

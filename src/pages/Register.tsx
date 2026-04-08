@@ -51,9 +51,11 @@ export const Register: React.FC = () => {
                 >
                     <InputWrapper>
                         <Input
+                            autoComplete="username"
                             className="bg-background/50"
+                            name="email"
                             placeholder="E-mail"
-                            type="text"
+                            type="email"
                             value={login}
                             onChange={(e) => setLogin(e.target.value)}
                         />
@@ -72,7 +74,9 @@ export const Register: React.FC = () => {
                     </InputWrapper>
                     <InputWrapper>
                         <Input
+                            autoComplete="nickname"
                             className="bg-background/50"
+                            name="username"
                             placeholder="Username (display name)"
                             type="text"
                             value={username}
@@ -93,7 +97,9 @@ export const Register: React.FC = () => {
                     </InputWrapper>
                     <InputWrapper>
                         <Input
+                            autoComplete="new-password"
                             className="bg-background/50"
+                            name="password"
                             placeholder="Password"
                             type="password"
                             value={password}
