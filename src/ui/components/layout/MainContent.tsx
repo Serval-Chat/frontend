@@ -1,14 +1,23 @@
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 
 import { Provider, useStore } from 'react-redux';
 
 import type { RootState } from '@/store';
 import { useAppSelector } from '@/store/hooks';
 import { useMobileSwipeContext } from '@/ui/MobileSwipeContext';
-import { ActiveVoiceRoom } from '@/ui/components/chat/ActiveVoiceRoom';
-import { MainChat } from '@/ui/components/chat/MainChat';
 import { FriendRequestList } from '@/ui/components/friends/FriendRequestList';
 import { cn } from '@/utils/cn';
+
+const ActiveVoiceRoom = lazy(() =>
+    import('@/ui/components/chat/ActiveVoiceRoom').then((m) => ({
+        default: m.ActiveVoiceRoom,
+    })),
+);
+const MainChat = lazy(() =>
+    import('@/ui/components/chat/MainChat').then((m) => ({
+        default: m.MainChat,
+    })),
+);
 
 /**
  * @description A wrapper that intercepts Redux state to trick child components into
@@ -98,6 +107,9 @@ export const MainContent: React.FC = () => {
         mobileHomeTab,
         lastOpenedChannelByServer,
     } = useAppSelector((state) => state.nav);
+    const activeVoiceChannelId = useAppSelector(
+        (state) => state.voice.activeVoiceChannelId,
+    );
     const inSwipePanel = useMobileSwipeContext();
 
     const isNothingSelected = !selectedFriendId && !selectedChannelId;
@@ -139,16 +151,24 @@ export const MainContent: React.FC = () => {
                             }
                             overrideServerId={selectedServerId}
                         >
-                            <MainChat
-                                key={`channel-${selectedServerId}-${lastOpenedChannelByServer[selectedServerId || '']}`}
-                            />
+                            <Suspense fallback={null}>
+                                <MainChat
+                                    key={`channel-${selectedServerId}-${lastOpenedChannelByServer[selectedServerId || '']}`}
+                                />
+                            </Suspense>
                         </ProxyProvider>
                     )
                 )
             ) : (
-                <MainChat key={conversationKey} />
+                <Suspense fallback={null}>
+                    <MainChat key={conversationKey} />
+                </Suspense>
             )}
-            <ActiveVoiceRoom />
+            {activeVoiceChannelId && (
+                <Suspense fallback={null}>
+                    <ActiveVoiceRoom />
+                </Suspense>
+            )}
         </main>
     );
 };

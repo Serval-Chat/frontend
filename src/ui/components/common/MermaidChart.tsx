@@ -1,17 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 
-import mermaid from 'mermaid';
-
 interface MermaidChartProps {
     content: string;
 }
-
-mermaid.initialize({
-    startOnLoad: false,
-    theme: 'dark',
-    securityLevel: 'loose',
-    fontFamily: 'Inter, sans-serif',
-});
 
 /**
  * @description Renders a mermaid chart
@@ -24,6 +15,16 @@ export const MermaidChart: React.FC<MermaidChartProps> = ({ content }) => {
     useEffect(() => {
         const renderChart = async (): Promise<void> => {
             try {
+                const mermaidModule = await import('mermaid');
+                const mermaid = mermaidModule.default;
+
+                mermaid.initialize({
+                    startOnLoad: false,
+                    theme: 'dark',
+                    securityLevel: 'loose',
+                    fontFamily: 'Inter, sans-serif',
+                });
+
                 const id = `mermaid-${Math.random().toString(36).substring(2, 9)}`;
                 const { svg } = await mermaid.render(id, content);
                 setSvgContent(svg);

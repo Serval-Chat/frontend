@@ -37,12 +37,15 @@ export const ServerItem: React.FC<ServerItemProps> = ({
     onClick,
 }) => {
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-    const { hasPermission, isOwner } = usePermissions(server._id);
+    const { hasPermission, isOwner } = usePermissions(server._id, null, {
+        enabled: isActive || isSettingsOpen,
+    });
     const { mutate: markAsRead } = useMarkServerRead();
     const { data: me } = useMe();
     const { mutate: updateSettings } = useUpdateServerSettings();
 
     const canManageServer =
+        server.ownerId === me?._id ||
         isOwner ||
         hasPermission('manageServer') ||
         hasPermission('manageRoles') ||
@@ -171,11 +174,13 @@ export const ServerItem: React.FC<ServerItemProps> = ({
                 )}
             </div>
 
-            <ServerSettingsModal
-                isOpen={isSettingsOpen}
-                serverId={server._id}
-                onClose={() => setIsSettingsOpen(false)}
-            />
+            {isSettingsOpen && (
+                <ServerSettingsModal
+                    isOpen={isSettingsOpen}
+                    serverId={server._id}
+                    onClose={() => setIsSettingsOpen(false)}
+                />
+            )}
         </>
     );
 };

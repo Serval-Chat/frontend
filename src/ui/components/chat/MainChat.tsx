@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { Suspense, lazy, useState } from 'react';
 
 import { Upload, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -28,7 +28,6 @@ import type { ProcessedChatMessage } from '@/types/chat.ui';
 import { ChatEmptyState } from '@/ui/components/chat/ChatEmptyState';
 import { ChatHeader } from '@/ui/components/chat/ChatHeader';
 import { ChatLoadingState } from '@/ui/components/chat/ChatLoadingState';
-import { MessageInput } from '@/ui/components/chat/MessageInput';
 import { MessagesList } from '@/ui/components/chat/MessagesList';
 import { TypingIndicator } from '@/ui/components/chat/TypingIndicator';
 import { Text } from '@/ui/components/common/Text';
@@ -36,6 +35,12 @@ import { Box } from '@/ui/components/layout/Box';
 import { wsMessages } from '@/ws';
 
 import { StickyMessageBar } from './StickyMessageBar';
+
+const MessageInput = lazy(() =>
+    import('@/ui/components/chat/MessageInput').then((m) => ({
+        default: m.MessageInput,
+    })),
+);
 
 /**
  * @description Main chat area component that displays messages for the selected conversation.
@@ -328,29 +333,36 @@ export const MainChat: React.FC = () => {
                     </Box>
 
                     {canSendMessages ? (
-                        <MessageInput
-                            canBypassSlowMode={canBypassSlowMode}
-                            cooldown={cooldown}
-                            disableColors={
-                                currentUser?.settings
-                                    ?.disableCustomUsernameColors
+                        <Suspense
+                            fallback={
+                                <Box className="mx-4 mb-4 flex h-[56px] items-center rounded-lg border border-border-subtle bg-[var(--bg-msg-input)] px-4" />
                             }
-                            disableCustomFonts={
-                                serverDetails?.disableCustomFonts ||
-                                currentUser?.settings
-                                    ?.disableCustomUsernameFonts
-                            }
-                            disableGlow={
-                                currentUser?.settings?.disableCustomUsernameGlow
-                            }
-                            disableGlowAndColors={
-                                serverDetails?.disableUsernameGlowAndCustomColor
-                            }
-                            fileQueueResult={fileQueueResult}
-                            replyingTo={replyingTo}
-                            setCooldown={setCooldown}
-                            onCancelReply={() => setReplyingTo(null)}
-                        />
+                        >
+                            <MessageInput
+                                canBypassSlowMode={canBypassSlowMode}
+                                cooldown={cooldown}
+                                disableColors={
+                                    currentUser?.settings
+                                        ?.disableCustomUsernameColors
+                                }
+                                disableCustomFonts={
+                                    serverDetails?.disableCustomFonts ||
+                                    currentUser?.settings
+                                        ?.disableCustomUsernameFonts
+                                }
+                                disableGlow={
+                                    currentUser?.settings
+                                        ?.disableCustomUsernameGlow
+                                }
+                                disableGlowAndColors={
+                                    serverDetails?.disableUsernameGlowAndCustomColor
+                                }
+                                fileQueueResult={fileQueueResult}
+                                replyingTo={replyingTo}
+                                setCooldown={setCooldown}
+                                onCancelReply={() => setReplyingTo(null)}
+                            />
+                        </Suspense>
                     ) : (
                         <Box className="mx-4 mb-4 flex h-[56px] items-center rounded-lg border border-border-subtle bg-[var(--bg-msg-input)] px-4">
                             <Text className="text-muted-foreground" size="sm">

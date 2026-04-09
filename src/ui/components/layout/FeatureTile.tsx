@@ -10,6 +10,8 @@ interface FeatureTileProps {
     title: string;
     description?: string;
     className?: string;
+    width?: number;
+    height?: number;
 }
 
 export const FeatureTile: React.FC<FeatureTileProps> = ({
@@ -17,6 +19,8 @@ export const FeatureTile: React.FC<FeatureTileProps> = ({
     title,
     description,
     className,
+    width,
+    height,
 }) => (
     <Box
         className={cn(
@@ -28,7 +32,10 @@ export const FeatureTile: React.FC<FeatureTileProps> = ({
             <img
                 alt={title}
                 className="h-auto w-full transition-transform duration-500 group-hover:scale-105"
+                height={height}
+                loading="lazy"
                 src={image}
+                width={width}
             />
         </div>
         <div className="flex flex-1 flex-col gap-1 p-5">

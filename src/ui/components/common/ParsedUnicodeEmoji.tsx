@@ -22,7 +22,7 @@ export const ParsedUnicodeEmoji: React.FC<ParsedUnicodeEmojiProps> = ({
 
     return (
         <span
-            aria-label={emojiData.short_name}
+            aria-label={emojiData.s}
             className={
                 className ||
                 cn(
@@ -30,7 +30,7 @@ export const ParsedUnicodeEmoji: React.FC<ParsedUnicodeEmojiProps> = ({
                     isLarge ? 'h-[2.5em] w-[2.5em]' : 'h-[1.5em] w-[1.5em]',
                 )
             }
-            title={emojiData.short_name}
+            title={emojiData.s}
         >
             <span style={getSpriteStyle(emojiData)} />
         </span>

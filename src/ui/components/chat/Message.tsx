@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 
 import {
     Copy,
@@ -38,10 +38,13 @@ import { ProfilePopup } from '@/ui/components/profile/ProfilePopup';
 import { cn } from '@/utils/cn';
 
 import { MessageContent } from './MessageContent';
-import { MessageEdit } from './MessageEdit';
 import { MessageHeader } from './MessageHeader';
 import { Reactions } from './Reactions';
 import { ReplyPreview } from './ReplyPreview';
+
+const MessageEdit = lazy(() =>
+    import('./MessageEdit').then((m) => ({ default: m.MessageEdit })),
+);
 
 interface MessageProps {
     message: ProcessedChatMessage;
@@ -362,14 +365,16 @@ export const Message: React.FC<MessageProps> = ({
                         onClickName={() => setShowProfile(true)}
                     />
                     {isEditing ? (
-                        <MessageEdit
-                            channelId={message.channelId}
-                            initialText={message.text}
-                            messageId={message._id}
-                            receiverId={message.receiverId}
-                            serverId={message.serverId}
-                            onCancel={() => setIsEditing(false)}
-                        />
+                        <Suspense fallback={null}>
+                            <MessageEdit
+                                channelId={message.channelId}
+                                initialText={message.text}
+                                messageId={message._id}
+                                receiverId={message.receiverId}
+                                serverId={message.serverId}
+                                onCancel={() => setIsEditing(false)}
+                            />
+                        </Suspense>
                     ) : (
                         <MessageContent text={message.text} />
                     )}

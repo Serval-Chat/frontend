@@ -187,6 +187,8 @@ export const ServerFolder: React.FC<ServerFolderProps> = ({
                 <ContextMenu items={contextMenuItems}>
                     <Tooltip content={folder.name}>
                         <motion.button
+                            aria-expanded={isOpen}
+                            aria-label={`Folder: ${folder.name}`}
                             className={cn(
                                 'relative flex h-12 w-12 items-center justify-center bg-[--color-bg-subtle] transition-all duration-200 hover:rounded-[0.75rem]',
                                 isOpen

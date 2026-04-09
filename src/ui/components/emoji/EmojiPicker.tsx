@@ -15,10 +15,9 @@ import { resolveApiUrl } from '@/utils/apiUrl';
 import { cn } from '@/utils/cn';
 import {
     type EmojiData,
-    categories,
-    categoryIconMap,
+    getFullEmojiMetadata,
     getUnicode,
-    groupedEmojis,
+    loadFullEmojiData,
 } from '@/utils/emoji';
 
 export interface CustomEmojiCategory {
@@ -56,6 +55,9 @@ type RowItem =
           emojis: (EmojiData | { id: string; name: string; url: string })[];
           isCustom: boolean;
           id: string;
+      }
+    | {
+          type: 'loading';
       };
 
 export const EmojiPicker: React.FC<EmojiPickerProps> = ({
@@ -69,6 +71,20 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
         useMeasure<HTMLDivElement>();
     const [activeCategoryId, setActiveCategoryId] = React.useState<string>('');
     const [isScrollingTo, setIsScrollingTo] = React.useState(false);
+    const [standardData, setStandardData] = React.useState<{
+        grouped: Record<string, EmojiData[]>;
+        cats: string[];
+        icons: Record<string, EmojiData | undefined>;
+    } | null>(null);
+
+    React.useEffect(() => {
+        const init = async () => {
+            const data = await loadFullEmojiData();
+            const metadata = getFullEmojiMetadata(data);
+            setStandardData(metadata);
+        };
+        void init();
+    }, []);
 
     // Compute dynamic column count based on width. Min 8 columns, scale up if wider.
     const columnCount = React.useMemo(() => {
@@ -84,13 +100,13 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
                 icon: c.icon,
                 type: 'custom' as const,
             })),
-            ...categories.map((c) => ({
+            ...(standardData?.cats.map((c) => ({
                 id: c,
                 name: c,
                 type: 'standard' as const,
-            })),
+            })) || []),
         ],
-        [customCategories],
+        [customCategories, standardData],
     );
 
     const flatRows = React.useMemo(() => {
@@ -116,16 +132,21 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
             }
         });
 
+        if (!standardData) {
+            rows.push({ type: 'loading' });
+            return rows;
+        }
+
         // Standard categories
-        categories.forEach((catId) => {
+        standardData.cats.forEach((catId) => {
             rows.push({
                 type: 'header',
                 id: catId,
                 name: catId,
                 isCustom: false,
-                standardIcon: categoryIconMap[catId],
+                standardIcon: standardData.icons[catId],
             });
-            const emojis = groupedEmojis[catId] || [];
+            const emojis = standardData.grouped[catId] || [];
             const emojiCount = emojis.length;
             for (let i = 0; i < emojiCount; i += columnCount) {
                 rows.push({
@@ -138,7 +159,7 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
         });
 
         return rows;
-    }, [customCategories, columnCount]);
+    }, [customCategories, columnCount, standardData]);
 
     // Initial active category
     React.useEffect(() => {
@@ -214,7 +235,7 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
         if (isScrollingTo) return;
 
         const firstVisibleRow = flatRows[visibleStartIndex];
-        if (firstVisibleRow) {
+        if (firstVisibleRow && firstVisibleRow.type !== 'loading') {
             const categoryId = firstVisibleRow.id;
             if (categoryId && categoryId !== activeCategoryId) {
                 setActiveCategoryId(categoryId);
@@ -232,6 +253,19 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
         }): React.ReactElement | null => {
             const row = flatRows[index];
             if (!row) return null;
+
+            if (row.type === 'loading') {
+                return (
+                    <div
+                        className="flex animate-pulse items-center justify-center py-4"
+                        style={style}
+                    >
+                        <Text size="xs" variant="muted">
+                            Loading emojis...
+                        </Text>
+                    </div>
+                );
+            }
 
             if (row.type === 'header') {
                 return (
@@ -255,7 +289,9 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
                                 {row.standardIcon ? (
                                     <ParsedUnicodeEmoji
                                         className="inline-block h-[14px] w-[14px] flex-shrink-0"
-                                        content={getUnicode(row.standardIcon)}
+                                        content={getUnicode(
+                                            row.standardIcon.unified,
+                                        )}
                                     />
                                 ) : null}
                             </div>
@@ -304,12 +340,16 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
                                     title={standardEmoji.short_name}
                                     variant="ghost"
                                     onClick={() =>
-                                        onEmojiSelect(getUnicode(standardEmoji))
+                                        onEmojiSelect(
+                                            getUnicode(standardEmoji.unified),
+                                        )
                                     }
                                 >
                                     <ParsedUnicodeEmoji
                                         className="inline-block h-[26px] w-[26px] transition-transform duration-200 group-hover/emoji:scale-110"
-                                        content={getUnicode(standardEmoji)}
+                                        content={getUnicode(
+                                            standardEmoji.unified,
+                                        )}
                                     />
                                 </Button>
                             );
@@ -369,17 +409,18 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
                                     ? 'scale-110 !rounded-lg text-primary'
                                     : 'text-muted-foreground hover:scale-105 hover:text-foreground',
                             )}
+                            disabled={!standardData}
                             key={cat.id}
                             title={cat.name}
                             variant="nav"
                             onClick={() => handleCategoryClick(cat.id)}
                         >
                             <div className="flex h-8 w-8 items-center justify-center overflow-hidden p-1">
-                                {categoryIconMap[cat.id] ? (
+                                {standardData?.icons[cat.id] ? (
                                     <ParsedUnicodeEmoji
                                         className="inline-block h-[24px] w-[24px] flex-shrink-0"
                                         content={getUnicode(
-                                            categoryIconMap[cat.id]!,
+                                            standardData.icons[cat.id]!.unified,
                                         )}
                                     />
                                 ) : null}

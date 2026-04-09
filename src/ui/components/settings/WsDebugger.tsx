@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import SyntaxHighlighter from 'react-syntax-highlighter/dist/esm/prism';
 import { vs } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 import { Window } from '@/ui/components/common/Window';

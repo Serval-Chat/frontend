@@ -11,7 +11,14 @@ export const TopNavBar: React.FC = () => (
                 className="flex items-center gap-2 no-underline hover:no-underline"
                 to="/"
             >
-                <img alt="Serchat" className="h-8 w-8" src="/serval.png" />
+                <img
+                    alt=""
+                    className="h-8 w-8"
+                    decoding="async"
+                    height={32}
+                    src="/serval.webp"
+                    width={32}
+                />
                 <span className="text-xl font-bold tracking-tight text-foreground">
                     Serchat
                 </span>

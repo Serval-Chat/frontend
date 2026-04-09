@@ -15,8 +15,9 @@ import {
     AutocompleteSuggestion,
     type Suggestion,
 } from '@/ui/components/common/AutocompleteSuggestion';
-import { getUnicode, groupedEmojis } from '@/utils/emoji';
+import { getUnicode } from '@/utils/emoji';
 import type { EmojiData } from '@/utils/emoji';
+import emojiDataSlim from '@/utils/emojiDataSlim.json';
 
 interface LexicalAutocompletePluginProps {
     members?: ServerMember[];
@@ -86,13 +87,16 @@ export const LexicalAutocompletePlugin: React.FC<
     const [editor] = useLexicalComposerContext();
     const [queryString, setQueryString] = useState<string | null>(null);
 
-    const allEmojis = useMemo(() => {
-        const emojis: EmojiData[] = [];
-        Object.values(groupedEmojis).forEach((categoryEmojis) => {
-            emojis.push(...categoryEmojis);
-        });
-        return emojis;
-    }, []);
+    const allEmojis = useMemo(
+        () =>
+            emojiDataSlim.map((e) => ({
+                sheet_x: e.x,
+                sheet_y: e.y,
+                short_name: e.s,
+                unified: e.u,
+            })) as unknown as EmojiData[],
+        [],
+    );
 
     const options = useMemo(() => {
         if (queryString === null) return [];
@@ -241,7 +245,7 @@ export const LexicalAutocompletePlugin: React.FC<
                 const suggestion = selectedOption.suggestion;
 
                 if (suggestion.type === 'emoji') {
-                    const unicode = getUnicode(suggestion.emoji);
+                    const unicode = getUnicode(suggestion.emoji.unified);
                     const selection = $getSelection();
                     if ($isRangeSelection(selection)) {
                         selection.insertNodes([

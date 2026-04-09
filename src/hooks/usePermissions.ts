@@ -20,13 +20,15 @@ export interface UsePermissionsReturn {
 export const usePermissions = (
     serverId: string | null,
     channelId?: string | null,
+    options: { enabled?: boolean } = {},
 ): UsePermissionsReturn => {
+    const isEnabled = options.enabled ?? true;
     const { data: currentUser } = useMe();
-    const { data: members } = useMembers(serverId);
-    const { data: roles } = useRoles(serverId);
-    const { data: server } = useServerDetails(serverId);
-    const { data: channels } = useChannels(serverId);
-    const { data: categories } = useCategories(serverId);
+    const { data: members } = useMembers(isEnabled ? serverId : null);
+    const { data: roles } = useRoles(isEnabled ? serverId : null);
+    const { data: server } = useServerDetails(isEnabled ? serverId : null);
+    const { data: channels } = useChannels(isEnabled ? serverId : null);
+    const { data: categories } = useCategories(isEnabled ? serverId : null);
 
     const member = useMemo(() => {
         if (!members || !currentUser || !serverId) return null;

@@ -200,6 +200,7 @@ export const PinsDrawer: React.FC<PinsDrawerProps> = ({
                         </Text>
                     </Box>
                     <button
+                        aria-label="Close"
                         className="p-1 text-muted-foreground transition-colors hover:text-foreground"
                         onClick={onClose}
                     >

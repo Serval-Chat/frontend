@@ -87,6 +87,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                         <div className="flex items-center gap-2">
                             <div className="md:hidden">
                                 <IconButton
+                                    aria-label="Back to sidebar"
                                     className="text-muted-foreground hover:bg-bg-subtle hover:text-foreground"
                                     icon={ChevronLeft}
                                     iconSize={24}
@@ -102,6 +103,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                             </Heading>
                         </div>
                         <IconButton
+                            aria-label="Close settings"
                             className="border border-border-subtle text-muted-foreground hover:bg-danger-muted hover:text-danger"
                             icon={X}
                             iconSize={20}

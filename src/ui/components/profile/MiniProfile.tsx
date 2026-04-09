@@ -70,7 +70,7 @@ export const MiniProfile: React.FC = () => {
                         {user.displayName || user.username}
                     </StyledUserName>
                     <Box
-                        className="text-header-secondary flex cursor-pointer items-center truncate text-xs leading-tight opacity-70 transition-opacity hover:opacity-100"
+                        className="text-header-secondary flex cursor-pointer items-center truncate text-xs leading-tight opacity-90 transition-opacity hover:opacity-100"
                         onClick={handleStatusClick}
                     >
                         {statusEmoji || statusText ? (
@@ -84,7 +84,7 @@ export const MiniProfile: React.FC = () => {
                     </Box>
                     {backendInstanceId && (
                         <Box
-                            className="text-header-secondary mt-1 max-w-[150px] truncate text-[10px] opacity-40 hover:opacity-100"
+                            className="text-header-secondary mt-1 max-w-[150px] truncate text-[10px] opacity-80 hover:opacity-100"
                             title={`Backend Instance: ${backendInstanceId}`}
                         >
                             Instance: {backendInstanceId}

@@ -139,7 +139,10 @@ export const AutocompleteSuggestion: React.FC<AutocompleteSuggestionProps> = ({
                             <>
                                 <Box className="h-6 w-6 shrink-0">
                                     <div
-                                        style={getSpriteStyle(suggestion.emoji)}
+                                        style={getSpriteStyle({
+                                            x: suggestion.emoji.sheet_x,
+                                            y: suggestion.emoji.sheet_y,
+                                        })}
                                     />
                                 </Box>
                                 <span

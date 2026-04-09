@@ -75,18 +75,24 @@ export const App = (): ReactNode => (
                 <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                     <FeatureTile
                         description="Give users in your servers nice colors to make them standout or just look awesome!"
-                        image="/feature-colorful-usernames.png"
+                        height={588}
+                        image="/feature-colorful-usernames.webp"
                         title="Colorful usernames for free"
+                        width={350}
                     />
                     <FeatureTile
                         description="Want your server to be unique? Just get yourself vanity link!!"
-                        image="/feature-vanity-links.png"
+                        height={289}
+                        image="/feature-vanity-links.webp"
                         title="Free vanity links"
+                        width={405}
                     />
                     <FeatureTile
                         description="Isn't it? Your roles can be expressive and we just allow that"
-                        image="/feature-role-freedom.png"
+                        height={68}
+                        image="/feature-role-freedom.webp"
                         title="Customizability is great"
+                        width={498}
                     />
                 </div>
             </section>

@@ -434,6 +434,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                         </Box>
                     </Box>
                     <Button
+                        aria-label="Cancel reply"
                         className="h-7 w-7 shrink-0 p-0"
                         size="sm"
                         title="Cancel reply"
@@ -454,6 +455,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                     onChange={handleFileChange}
                 />
                 <Button
+                    aria-label="Upload file"
                     className="mb-1 h-8 w-8 shrink-0 p-0"
                     disabled={cooldown > 0 && !canBypassSlowMode}
                     size="sm"
@@ -544,6 +546,8 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                 </div>
 
                 <Button
+                    aria-expanded={showEmojiPicker}
+                    aria-label="Open emoji picker"
                     className={cn(
                         'mb-1 h-8 w-8 shrink-0 p-0',
                         showEmojiPicker && 'text-primary',
@@ -560,6 +564,8 @@ export const MessageInput: React.FC<MessageInputProps> = ({
 
                 <Box className="relative">
                     <Button
+                        aria-expanded={showGifPicker}
+                        aria-label="Open GIF picker"
                         className={cn(
                             'mb-1 h-8 w-8 shrink-0 p-0',
                             showGifPicker && 'text-primary',
@@ -599,6 +605,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
 
                 {(hasText || files.length > 0) && isMobile && (
                     <Button
+                        aria-label="Send message"
                         className="mb-1 h-8 w-8 shrink-0 p-0 text-primary"
                         disabled={isUploading}
                         size="sm"

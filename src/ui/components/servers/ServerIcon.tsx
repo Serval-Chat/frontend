@@ -58,6 +58,7 @@ export const ServerIcon: React.FC<ServerIconProps> = ({
 
     return (
         <div
+            aria-label={server.name}
             className={cn(
                 'group relative flex cursor-pointer items-center justify-center transition-all duration-200',
                 isActive

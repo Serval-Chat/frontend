@@ -63,9 +63,12 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({
                     <div className="flex flex-col items-center gap-8">
                         <div className="relative">
                             <img
-                                alt="Serchat"
+                                alt=""
                                 className="h-24 w-24 drop-shadow-[0_0_15px_rgba(var(--primary-rgb),0.3)] select-none"
-                                src="/serval.png"
+                                decoding="async"
+                                height={96}
+                                src="/serval.webp"
+                                width={96}
                             />
                         </div>
 

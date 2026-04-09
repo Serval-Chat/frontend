@@ -1,12 +1,18 @@
 import React, { useState } from 'react';
 
 import { Check, Copy } from 'lucide-react';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import type { SyntaxHighlighterProps } from 'react-syntax-highlighter';
 
 import { customSyntaxTheme } from '@/styles/syntax-theme';
 
 import { Button } from './Button';
 import { CodeModal } from './CodeModal';
+
+const SyntaxHighlighter = React.lazy(() =>
+    import('react-syntax-highlighter/dist/esm/prism').then((m) => ({
+        default: m.default,
+    })),
+) as React.ComponentType<SyntaxHighlighterProps>;
 
 interface CodeBlockProps {
     content: string;
@@ -74,19 +80,27 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({
                     </Button>
                 </div>
                 <div className="custom-scrollbar overflow-x-auto bg-black/10 p-0 font-mono text-sm">
-                    <SyntaxHighlighter
-                        customStyle={{
-                            margin: 0,
-                            padding: '1rem',
-                            fontSize: '0.875rem',
-                            lineHeight: '1.5',
-                            backgroundColor: 'transparent',
-                        }}
-                        language={(language || 'text').toLowerCase()}
-                        style={customSyntaxTheme}
+                    <React.Suspense
+                        fallback={
+                            <pre className="p-4 whitespace-pre-wrap">
+                                {content}
+                            </pre>
+                        }
                     >
-                        {content}
-                    </SyntaxHighlighter>
+                        <SyntaxHighlighter
+                            customStyle={{
+                                margin: 0,
+                                padding: '1rem',
+                                fontSize: '0.875rem',
+                                lineHeight: '1.5',
+                                backgroundColor: 'transparent',
+                            }}
+                            language={(language || 'text').toLowerCase()}
+                            style={customSyntaxTheme}
+                        >
+                            {content}
+                        </SyntaxHighlighter>
+                    </React.Suspense>
                 </div>
             </div>
 

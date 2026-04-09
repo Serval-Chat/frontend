@@ -74,6 +74,7 @@ export const PrimaryNavBar: React.FC = () => {
             <Box>
                 <Tooltip content="Direct Messages">
                     <IconButton
+                        aria-label="Direct Messages"
                         badgeCount={totalUnreadDms}
                         icon={Home}
                         isActive={navMode === 'friends'}
@@ -89,6 +90,7 @@ export const PrimaryNavBar: React.FC = () => {
             <Box>
                 <Tooltip content="Add a Server">
                     <IconButton
+                        aria-label="Add a Server"
                         className="bg-bg-subtle text-green-500 hover:bg-bg-subtle-hover hover:text-green-400"
                         icon={Plus}
                         onClick={() => setShowCreateServer(true)}
@@ -99,6 +101,7 @@ export const PrimaryNavBar: React.FC = () => {
             <Box>
                 <Tooltip content="Explore Servers">
                     <IconButton
+                        aria-label="Explore Servers"
                         className="bg-bg-subtle text-text-subtle hover:bg-bg-subtle-hover hover:text-text-normal"
                         icon={Compass}
                         onClick={() => setShowJoinServer(true)}
@@ -111,6 +114,7 @@ export const PrimaryNavBar: React.FC = () => {
             <Box className="relative">
                 <Tooltip content="Inbox">
                     <IconButton
+                        aria-label="Inbox"
                         badgeCount={pingCount}
                         icon={Bell}
                         isActive={showInbox}
@@ -135,7 +139,11 @@ export const PrimaryNavBar: React.FC = () => {
 
             <Box>
                 <Tooltip content="User Settings">
-                    <IconButton icon={Settings} onClick={handleSettingsClick} />
+                    <IconButton
+                        aria-label="User Settings"
+                        icon={Settings}
+                        onClick={handleSettingsClick}
+                    />
                 </Tooltip>
             </Box>
 

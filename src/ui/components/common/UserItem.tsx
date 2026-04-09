@@ -31,6 +31,7 @@ import {
 import type { Role } from '@/api/servers/servers.types';
 import { useMe, useUserById } from '@/api/users/users.queries';
 import type { User } from '@/api/users/users.types';
+import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { setSelectedFriendId } from '@/store/slices/navSlice';
 import { setUserVolume } from '@/store/slices/voiceSlice';
@@ -122,8 +123,20 @@ export const UserItem: React.FC<UserItemProps> = ({
     const [isKickModalOpen, setIsKickModalOpen] = React.useState(false);
     const [isBanModalOpen, setIsBanModalOpen] = React.useState(false);
 
+    const [hasBeenVisible, setHasBeenVisible] = React.useState(false);
+    const itemRef = React.useRef<HTMLDivElement>(null);
+    const entry = useIntersectionObserver(itemRef, {
+        rootMargin: '200px',
+    });
+
+    React.useEffect(() => {
+        if (entry?.isIntersecting) {
+            setHasBeenVisible(true);
+        }
+    }, [entry?.isIntersecting]);
+
     const { data: fetchedUser } = useUserById(userId, {
-        enabled: !noFetch && !providedUser,
+        enabled: !noFetch && !providedUser && hasBeenVisible,
     });
     const userProfile = providedUser || fetchedUser;
     const { data: friends } = useFriends();
@@ -132,7 +145,6 @@ export const UserItem: React.FC<UserItemProps> = ({
     const { mutate: removeFriend } = useRemoveFriend();
 
     const [showProfile, setShowProfile] = React.useState(false);
-    const itemRef = React.useRef<HTMLDivElement>(null);
 
     const username = userProfile?.username || initialData?.username || '';
     const displayName = userProfile?.displayName || initialData?.displayName;
