@@ -1,0 +1,1961 @@
+commit ffd1ef017e9d2facae40a1435360081b3937b471
+Author: Catflare <nekoflare@users.noreply.github.com>
+Date:   Fri Mar 20 19:12:10 2026 +0100
+
+    server audit log!
+
+diff --git a/.env b/.env
+index 56c4ad3..8904d88 100644
+--- a/.env
++++ b/.env
+@@ -1,2 +1,2 @@
+-VITE_API_BASE_URL=https://rolling.catfla.re/
+-VITE_WS_BASE_URL=wss://rolling.catfla.re/
++VITE_API_BASE_URL=http://127.0.0.1:8001/
++VITE_WS_BASE_URL=ws://127.0.0.1:8001/
+diff --git a/.env.dev b/.env.dev
+deleted file mode 100644
+index 8904d88..0000000
+--- a/.env.dev
++++ /dev/null
+@@ -1,2 +0,0 @@
+-VITE_API_BASE_URL=http://127.0.0.1:8001/
+-VITE_WS_BASE_URL=ws://127.0.0.1:8001/
+diff --git a/.env.prod b/.env.prod
+new file mode 100644
+index 0000000..56c4ad3
+--- /dev/null
++++ b/.env.prod
+@@ -0,0 +1,2 @@
++VITE_API_BASE_URL=https://rolling.catfla.re/
++VITE_WS_BASE_URL=wss://rolling.catfla.re/
+diff --git a/src/api/auditLog/auditLog.api.ts b/src/api/auditLog/auditLog.api.ts
+new file mode 100644
+index 0000000..40168a4
+--- /dev/null
++++ b/src/api/auditLog/auditLog.api.ts
+@@ -0,0 +1,44 @@
++import { apiClient } from '@/api/client';
++
++import type { AuditLogFilters, AuditLogResponse } from './auditLog.types';
++
++interface GetAuditLogParams extends AuditLogFilters {
++    cursor?: string;
++    limit?: number;
++}
++
++export const auditLogApi = {
++    /**
++     * Fetch the audit log for a given server
++     *
++     * @param serverId - The server ID
++     * @param params - Filters and pagination params
++     */
++    getServerAuditLog: async (
++        serverId: string,
++        params?: GetAuditLogParams,
++    ): Promise<AuditLogResponse> => {
++        const rawParams = {
++            limit: params?.limit,
++            cursor: params?.cursor,
++            action: params?.actionType,
++            moderatorId: params?.moderatorId,
++            targetId: params?.targetId,
++            reason: params?.reason,
++        };
++
++        const cleanParams = Object.fromEntries(
++            Object.entries(rawParams).filter(
++                ([_, v]) => v !== undefined && v !== null && v !== '',
++            ),
++        );
++
++        const response = await apiClient.get<AuditLogResponse>(
++            `/api/v1/servers/${serverId}/audit-log`,
++            {
++                params: cleanParams,
++            },
++        );
++        return response.data;
++    },
++};
+diff --git a/src/api/auditLog/auditLog.queries.ts b/src/api/auditLog/auditLog.queries.ts
+new file mode 100644
+index 0000000..b3b3eca
+--- /dev/null
++++ b/src/api/auditLog/auditLog.queries.ts
+@@ -0,0 +1,29 @@
++import {
++    type InfiniteData,
++    type UseInfiniteQueryResult,
++    useInfiniteQuery,
++} from '@tanstack/react-query';
++
++import { auditLogApi } from './auditLog.api';
++import type { AuditLogFilters, AuditLogResponse } from './auditLog.types';
++
++export const AUDIT_LOG_QUERY_KEYS = {
++    serverAuditLog: (serverId: string | null, filters: AuditLogFilters) =>
++        ['server', 'auditLog', serverId, filters] as const,
++};
++
++export const useServerAuditLog = (
++    serverId: string | null,
++    filters: AuditLogFilters,
++): UseInfiniteQueryResult<InfiniteData<AuditLogResponse>, Error> =>
++    useInfiniteQuery({
++        queryKey: AUDIT_LOG_QUERY_KEYS.serverAuditLog(serverId, filters),
++        queryFn: ({ pageParam }) =>
++            auditLogApi.getServerAuditLog(serverId!, {
++                ...filters,
++                cursor: pageParam,
++            }),
++        initialPageParam: undefined as string | undefined,
++        getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
++        enabled: Boolean(serverId),
++    });
+diff --git a/src/api/auditLog/auditLog.types.ts b/src/api/auditLog/auditLog.types.ts
+new file mode 100644
+index 0000000..6cc2546
+--- /dev/null
++++ b/src/api/auditLog/auditLog.types.ts
+@@ -0,0 +1,82 @@
++export type AuditLogAction =
++    | 'update_server'
++    | 'create_channel'
++    | 'edit_channel'
++    | 'delete_channel'
++    | 'create_category'
++    | 'edit_category'
++    | 'delete_category'
++    | 'role_created'
++    | 'role_edited'
++    | 'role_removed'
++    | 'role_create'
++    | 'role_update'
++    | 'role_delete'
++    | 'role_given'
++    | 'role_icon_updated'
++    | 'roles_reordered'
++    | 'user_kick'
++    | 'user_ban'
++    | 'user_unban'
++    | 'user_join'
++    | 'member_join'
++    | 'user_leave'
++    | 'owner_changed'
++    | 'delete_message'
++    | 'edit_message'
++    | 'reactions_removed'
++    | 'reaction_clear'
++    | 'emoji_create'
++    | 'emoji_delete'
++    | 'invite_create'
++    | 'invite_delete';
++
++export interface IAuditLogChange {
++    field: string;
++    before?: unknown;
++    after?: unknown;
++}
++
++export interface IAuditLogActor {
++    id: string;
++    username: string;
++    avatarUrl?: string;
++}
++
++export interface IAuditLogTarget {
++    id?: string;
++    username?: string;
++    name?: string;
++}
++
++export interface AuditLogEntry {
++    id: string;
++    action: AuditLogAction;
++    moderatorId: string;
++    moderator: IAuditLogActor;
++    targetId?: string;
++    targetType?:
++        | 'user'
++        | 'channel'
++        | 'category'
++        | 'role'
++        | 'message'
++        | 'server';
++    target?: IAuditLogTarget;
++    changes?: IAuditLogChange[];
++    reason?: string;
++    metadata?: Record<string, unknown>;
++    createdAt: string;
++}
++
++export interface AuditLogResponse {
++    entries: AuditLogEntry[];
++    nextCursor: string | null;
++}
++
++export interface AuditLogFilters {
++    actionType?: AuditLogAction | '';
++    moderatorId?: string;
++    targetId?: string;
++    reason?: string;
++}
+diff --git a/src/store/slices/navSlice.ts b/src/store/slices/navSlice.ts
+index 5f16776..3b8add7 100644
+--- a/src/store/slices/navSlice.ts
++++ b/src/store/slices/navSlice.ts
+@@ -112,6 +112,11 @@ const navSlice = createSlice({
+                 state.openedFolders.push(action.payload);
+             }
+         },
++        openFolder: (state, action: PayloadAction<string>) => {
++            if (!state.openedFolders.includes(action.payload)) {
++                state.openedFolders.push(action.payload);
++            }
++        },
+     },
+ });
+ 
+@@ -124,5 +129,6 @@ export const {
+     toggleMobileHomeTab,
+     toggleMobileMemberList,
+     toggleFolder,
++    openFolder,
+ } = navSlice.actions;
+ export const navReducer = navSlice.reducer;
+diff --git a/src/ui/components/common/DropdownWithSearch.tsx b/src/ui/components/common/DropdownWithSearch.tsx
+index a3cdd54..5f79a40 100644
+--- a/src/ui/components/common/DropdownWithSearch.tsx
++++ b/src/ui/components/common/DropdownWithSearch.tsx
+@@ -85,7 +85,7 @@ export const DropdownWithSearch: React.FC<DropdownWithSearchProps> = ({
+         setSearchQuery('');
+     };
+ 
+-    const handleClear = (e: React.MouseEvent): void => {
++    const handleClear = (e: React.SyntheticEvent): void => {
+         e.stopPropagation();
+         onChange(null);
+     };
+@@ -134,15 +134,19 @@ export const DropdownWithSearch: React.FC<DropdownWithSearchProps> = ({
+ 
+                 <div className="ml-2 flex flex-shrink-0 items-center gap-1">
+                     {allowClear && value && (
+-                        <Button
+-                            className="h-6 w-6 rounded-full border-none p-1 text-muted-foreground shadow-none transition-colors hover:bg-bg-subtle"
+-                            size="sm"
+-                            type="button"
+-                            variant="ghost"
++                        <div
++                            className="flex h-6 w-6 cursor-pointer items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-bg-subtle"
++                            role="button"
++                            tabIndex={0}
+                             onClick={handleClear}
++                            onKeyDown={(e) => {
++                                if (e.key === 'Enter' || e.key === ' ') {
++                                    handleClear(e);
++                                }
++                            }}
+                         >
+                             <X size={14} />
+-                        </Button>
++                        </div>
+                     )}
+                     <ChevronDown
+                         className={cn(
+@@ -193,6 +197,7 @@ export const DropdownWithSearch: React.FC<DropdownWithSearchProps> = ({
+                                                 : 'text-muted-foreground hover:bg-bg-subtle hover:text-foreground',
+                                         )}
+                                         innerClassName="w-full justify-start"
++                                        key={option.id || option.label}
+                                         size="md"
+                                         variant="ghost"
+                                         onClick={() => handleSelect(option.id)}
+diff --git a/src/ui/components/servers/ServerList.tsx b/src/ui/components/servers/ServerList.tsx
+index f1f440f..4e4f694 100644
+--- a/src/ui/components/servers/ServerList.tsx
++++ b/src/ui/components/servers/ServerList.tsx
+@@ -11,7 +11,8 @@ import {
+ import type { Server } from '@/api/servers/servers.types';
+ import { useMe } from '@/api/users/users.queries';
+ import type { ServerFolder as IServerFolder } from '@/api/users/users.types';
+-import { useAppSelector } from '@/store/hooks';
++import { useAppDispatch, useAppSelector } from '@/store/hooks';
++import { openFolder } from '@/store/slices/navSlice';
+ 
+ import { ServerFolder } from './ServerFolder';
+ import { ServerItem } from './ServerItem';
+@@ -32,8 +33,28 @@ export const ServerList: React.FC = () => {
+     const lastOpenedChannelByServer = useAppSelector(
+         (state) => state.nav.lastOpenedChannelByServer,
+     );
++    const openedFolders = useAppSelector((state) => state.nav.openedFolders);
++    const dispatch = useAppDispatch();
+     const navigate = useNavigate();
+ 
++    // Auto-open folder if navigating to a server inside it
++    React.useEffect(() => {
++        if (!selectedServerId || !me?.serverSettings?.order) return;
++
++        // Find which folder contains this server
++        const folderWithServer = me.serverSettings.order.find(
++            (item) =>
++                typeof item !== 'string' &&
++                item.serverIds.includes(selectedServerId),
++        );
++
++        if (folderWithServer && typeof folderWithServer !== 'string') {
++            if (!openedFolders.includes(folderWithServer.id)) {
++                dispatch(openFolder(folderWithServer.id));
++            }
++        }
++    }, [selectedServerId, me?.serverSettings?.order, openedFolders, dispatch]);
++
+     const items = React.useMemo(() => {
+         if (!me || !servers) return [];
+ 
+diff --git a/src/ui/components/servers/settings/ServerSettingsModal.tsx b/src/ui/components/servers/settings/ServerSettingsModal.tsx
+index 4c0749e..375d81c 100644
+--- a/src/ui/components/servers/settings/ServerSettingsModal.tsx
++++ b/src/ui/components/servers/settings/ServerSettingsModal.tsx
+@@ -4,6 +4,7 @@ import {
+     Ban,
+     ChevronLeft,
+     Handshake,
++    ScrollText,
+     Settings,
+     Shield,
+     Smile,
+@@ -24,6 +25,7 @@ import { ServerEmojiSettings } from './ServerEmojiSettings';
+ import { ServerInviteSettings } from './ServerInviteSettings';
+ import { ServerOverviewSettings } from './ServerOverviewSettings';
+ import { ServerRoleSettings } from './ServerRoleSettings';
++import { AuditLogSettings } from './auditLog/AuditLogSettings';
+ 
+ interface ServerSettingsModalProps {
+     isOpen: boolean;
+@@ -58,6 +60,12 @@ const ALL_SECTIONS: {
+         permission: 'manageServer',
+     },
+     { id: 'bans', label: 'Bans', icon: Ban, permission: 'banMembers' },
++    {
++        id: 'audit-log',
++        label: 'Audit Log',
++        icon: ScrollText,
++        permission: 'manageServer',
++    },
+ ];
+ 
+ export const ServerSettingsModal: React.FC<ServerSettingsModalProps> = ({
+@@ -178,6 +186,9 @@ export const ServerSettingsModal: React.FC<ServerSettingsModalProps> = ({
+                             {activeSection === 'bans' && (
+                                 <ServerBansSettings serverId={serverId} />
+                             )}
++                            {activeSection === 'audit-log' && (
++                                <AuditLogSettings serverId={serverId} />
++                            )}
+                         </div>
+                     </div>
+                 </div>
+diff --git a/src/ui/components/servers/settings/auditLog/AuditLogDiff.tsx b/src/ui/components/servers/settings/auditLog/AuditLogDiff.tsx
+new file mode 100644
+index 0000000..c49b872
+--- /dev/null
++++ b/src/ui/components/servers/settings/auditLog/AuditLogDiff.tsx
+@@ -0,0 +1,214 @@
++import React, { useState } from 'react';
++
++import { ChevronDown, ChevronRight } from 'lucide-react';
++
++import type { IAuditLogChange } from '@/api/auditLog/auditLog.types';
++import { resolveApiUrl } from '@/utils/apiUrl';
++
++interface AuditLogDiffProps {
++    changes: IAuditLogChange[];
++}
++
++function flattenChange(
++    change: IAuditLogChange,
++): Array<{
++    field: string;
++    before: string | React.ReactNode;
++    after: string | React.ReactNode;
++    isColor?: boolean;
++}> {
++    if (
++        change.field === 'permissions' &&
++        change.before !== null &&
++        change.before !== undefined &&
++        change.after !== null &&
++        change.after !== undefined &&
++        typeof change.before === 'object' &&
++        typeof change.after === 'object'
++    ) {
++        const before = change.before as Record<string, boolean>;
++        const after = change.after as Record<string, boolean>;
++        const allKeys = Array.from(
++            new Set([...Object.keys(before), ...Object.keys(after)]),
++        );
++        const rows = allKeys
++            .filter((k) => before[k] !== after[k])
++            .map((k) => ({
++                field: k,
++                before: formatBool(before[k]),
++                after: formatBool(after[k]),
++            }));
++        if (rows.length === 0) return [];
++        return rows;
++    }
++
++    const isColor =
++        change.field === 'color' ||
++        change.field === 'startColor' ||
++        change.field === 'endColor' ||
++        change.field === 'colors';
++
++    return [
++        {
++            field: change.field,
++            before: formatValue(change.before, change.field),
++            after: formatValue(change.after, change.field),
++            isColor,
++        },
++    ];
++}
++
++function formatBool(v: boolean | undefined): string {
++    if (v === undefined) return 'None';
++    return v ? 'Enabled' : 'Disabled';
++}
++
++function formatValue(value: unknown, field?: string): string | React.ReactNode {
++    if (value === null || value === undefined) return 'None';
++    if (typeof value === 'boolean') return value ? 'Yes' : 'No';
++
++    const isColorField =
++        field &&
++        (field === 'color' ||
++            field === 'startColor' ||
++            field === 'endColor' ||
++            field === 'colors');
++
++    if (isColorField) {
++        if (Array.isArray(value)) {
++            return (
++                <div className="flex flex-wrap items-center gap-1.5">
++                    {value.map((v, i) => (
++                        // eslint-disable-next-line react/no-array-index-key
++                        <div
++                            className="flex items-center gap-1.5"
++                            key={`color-${v}-${i}`}
++                        >
++                            <div
++                                className="h-3 w-3 rounded-full border border-white/20 shadow-sm"
++                                style={{ backgroundColor: String(v) }}
++                            />
++                            <span className="text-xs opacity-80">
++                                {String(v)}
++                            </span>
++                        </div>
++                    ))}
++                </div>
++            );
++        }
++        return (
++            <div className="flex items-center gap-1.5">
++                <div
++                    className="h-3.5 w-3.5 rounded-full border border-white/20 shadow-sm"
++                    style={{ backgroundColor: String(value) }}
++                />
++                <span>{String(value)}</span>
++            </div>
++        );
++    }
++
++    if (
++        typeof value === 'string' &&
++        (value.startsWith('/api/v1/servers/banner/') ||
++            value.startsWith('/api/v1/servers/icon/') ||
++            value.startsWith('/api/v1/roles/icon/'))
++    ) {
++        return (
++            <div className="bg-bg-base/50 mt-1 flex justify-center rounded p-1">
++                <img
++                    alt="Preview"
++                    className="max-h-16 max-w-full rounded object-contain"
++                    src={resolveApiUrl(value) ?? undefined}
++                />
++            </div>
++        );
++    }
++
++    if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
++        const obj = value as Record<string, unknown>;
++        if (
++            obj.type === 'image' &&
++            typeof obj.value === 'string' &&
++            obj.value.startsWith('/api/v1/')
++        ) {
++            return (
++                <div className="bg-bg-base/50 mt-1 flex justify-center rounded p-1">
++                    <img
++                        alt="Preview"
++                        className="max-h-16 max-w-full rounded object-contain"
++                        src={resolveApiUrl(obj.value) ?? undefined}
++                    />
++                </div>
++            );
++        }
++    }
++
++    if (Array.isArray(value)) {
++        return value.join(', ');
++    }
++
++    if (typeof value === 'object') return JSON.stringify(value);
++
++    return String(value);
++}
++
++export const AuditLogDiff: React.FC<AuditLogDiffProps> = ({ changes }) => {
++    const [expanded, setExpanded] = useState(false);
++
++    if (!changes || changes.length === 0) return null;
++
++    const rows = changes.flatMap(flattenChange);
++    if (rows.length === 0) return null;
++
++    return (
++        <div className="mt-2 text-sm">
++            <button
++                className="text-text-muted hover:text-text flex items-center gap-1 text-xs"
++                onClick={() => setExpanded(!expanded)}
++            >
++                {expanded ? (
++                    <ChevronDown className="h-3 w-3" />
++                ) : (
++                    <ChevronRight className="h-3 w-3" />
++                )}
++                {expanded
++                    ? 'Hide Changes'
++                    : `Show ${rows.length} Change${rows.length === 1 ? '' : 's'}`}
++            </button>
++
++            {expanded && (
++                <div className="bg-bg-surface mt-2 rounded-md p-3">
++                    {/* Header */}
++                    <div className="text-text-muted mb-2 grid grid-cols-3 gap-2 border-b border-border-subtle pb-1 text-xs font-semibold">
++                        <span>Field</span>
++                        <span>Before</span>
++                        <span>After</span>
++                    </div>
++                    <div className="space-y-4">
++                        {rows.map((row, index) => (
++                            <div
++                                className="grid grid-cols-3 items-center gap-2 border-b border-border-subtle pb-3 last:border-0 last:pb-0"
++                                // eslint-disable-next-line react/no-array-index-key
++                                key={`row-${row.field}-${index}`}
++                            >
++                                <div className="text-text-muted font-medium break-all">
++                                    {row.field}
++                                </div>
++                                <div
++                                    className={`break-all ${row.isColor ? 'text-white' : 'text-red-400'}`}
++                                >
++                                    {row.before}
++                                </div>
++                                <div
++                                    className={`break-all ${row.isColor ? 'text-white' : 'text-green-400'}`}
++                                >
++                                    {row.after}
++                                </div>
++                            </div>
++                        ))}
++                    </div>
++                </div>
++            )}
++        </div>
++    );
++};
+diff --git a/src/ui/components/servers/settings/auditLog/AuditLogEntry.tsx b/src/ui/components/servers/settings/auditLog/AuditLogEntry.tsx
+new file mode 100644
+index 0000000..83e28f6
+--- /dev/null
++++ b/src/ui/components/servers/settings/auditLog/AuditLogEntry.tsx
+@@ -0,0 +1,607 @@
++import React, { useState } from 'react';
++
++import {
++    AtSign,
++    ChevronDown,
++    ChevronRight,
++    Crown,
++    Edit2,
++    Link,
++    PlusCircle,
++    Repeat,
++    Settings,
++    ShieldAlert,
++    Smile,
++    Trash2,
++    UserMinus,
++    UserPlus,
++    UserX,
++} from 'lucide-react';
++
++import type { AuditLogEntry as IAuditLogEntry } from '@/api/auditLog/auditLog.types';
++import { useRoles } from '@/api/servers/servers.queries';
++import { Text } from '@/ui/components/common/Text';
++import { Tooltip } from '@/ui/components/common/Tooltip';
++import { UserProfilePicture } from '@/ui/components/common/UserProfilePicture';
++import { Box } from '@/ui/components/layout/Box';
++import { getRoleStyle } from '@/utils/roleColor';
++
++import { AuditLogDiff } from './AuditLogDiff';
++
++interface AuditLogEntryProps {
++    entry: IAuditLogEntry;
++    serverId: string;
++    globalExpandState?: 'expanded' | 'collapsed' | null;
++}
++
++const getActionDetails = (
++    action: string,
++): { icon: React.ElementType; color: string; bg: string } => {
++    switch (action) {
++        case 'create_channel':
++        case 'create_category':
++        case 'role_created':
++        case 'role_create':
++            return {
++                icon: PlusCircle,
++                color: 'text-green-500',
++                bg: 'bg-green-500/10',
++            };
++        case 'edit_channel':
++        case 'edit_category':
++        case 'role_edited':
++        case 'role_update':
++        case 'update_server':
++        case 'role_icon_updated':
++        case 'edit_message':
++            return {
++                icon: Edit2,
++                color: 'text-yellow-500',
++                bg: 'bg-yellow-500/10',
++            };
++        case 'delete_channel':
++        case 'delete_category':
++        case 'role_removed':
++        case 'role_delete':
++        case 'delete_message':
++        case 'reactions_removed':
++        case 'reaction_clear':
++            return { icon: Trash2, color: 'text-red-500', bg: 'bg-red-500/10' };
++        case 'user_kick':
++            return {
++                icon: UserMinus,
++                color: 'text-orange-500',
++                bg: 'bg-orange-500/10',
++            };
++        case 'user_ban':
++            return { icon: UserX, color: 'text-red-500', bg: 'bg-red-500/10' };
++        case 'user_unban':
++            return {
++                icon: UserPlus,
++                color: 'text-green-500',
++                bg: 'bg-green-500/10',
++            };
++        case 'user_join':
++        case 'member_join':
++            return {
++                icon: UserPlus,
++                color: 'text-green-500',
++                bg: 'bg-green-500/10',
++            };
++        case 'user_leave':
++            return {
++                icon: UserMinus,
++                color: 'text-orange-500',
++                bg: 'bg-orange-500/10',
++            };
++        case 'owner_changed':
++            return {
++                icon: Crown,
++                color: 'text-yellow-400',
++                bg: 'bg-yellow-400/10',
++            };
++        case 'role_given':
++            return {
++                icon: ShieldAlert,
++                color: 'text-blue-500',
++                bg: 'bg-blue-500/10',
++            };
++        case 'emoji_create':
++        case 'emoji_delete':
++            return {
++                icon: Smile,
++                color: 'text-purple-500',
++                bg: 'bg-purple-500/10',
++            };
++        case 'invite_create':
++        case 'invite_delete':
++            return { icon: Link, color: 'text-cyan-500', bg: 'bg-cyan-500/10' };
++        case 'roles_reordered':
++            return {
++                icon: Repeat,
++                color: 'text-yellow-500',
++                bg: 'bg-yellow-500/10',
++            };
++        default:
++            return {
++                icon: Settings,
++                color: 'text-gray-500',
++                bg: 'bg-gray-500/10',
++            };
++    }
++};
++
++const formatActionName = (action: string): string =>
++    action
++        .split('_')
++        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
++        .join(' ');
++
++export const AuditLogEntry: React.FC<AuditLogEntryProps> = ({
++    entry,
++    serverId,
++    globalExpandState,
++}) => {
++    const { icon: Icon, color, bg } = getActionDetails(entry.action);
++    const [expandedRoles, setExpandedRoles] = useState(false);
++
++    const [prevGlobalExpandState, setPrevGlobalExpandState] =
++        useState(globalExpandState);
++    if (globalExpandState !== prevGlobalExpandState) {
++        setPrevGlobalExpandState(globalExpandState);
++        if (globalExpandState === 'expanded') {
++            setExpandedRoles(true);
++        } else if (globalExpandState === 'collapsed') {
++            setExpandedRoles(false);
++        }
++    }
++
++    const { data: roles } = useRoles(serverId);
++
++    const getTargetDisplay = (): string => {
++        if (entry.action === 'role_given' || entry.action === 'role_removed') {
++            const roleName = entry.metadata?.roleName
++                ? `role "${String(entry.metadata.roleName)}"`
++                : 'a role';
++            const userName = entry.target?.username
++                ? ` @${entry.target.username}`
++                : entry.target?.name
++                  ? ` @${entry.target.name}`
++                  : '';
++            const preposition = entry.action === 'role_given' ? 'to' : 'from';
++            return `${roleName}${userName ? ` ${preposition}${userName}` : ''}`;
++        }
++
++        if (entry.action === 'delete_message') {
++            const author = entry.target?.username
++                ? `${entry.target.username}'s`
++                : 'a';
++            const channel = entry.metadata?.channelName
++                ? `#${entry.metadata.channelName}`
++                : entry.metadata?.channelId
++                  ? `channel ${entry.metadata.channelId}`
++                  : 'a channel';
++            return `${author} message in ${channel}`;
++        }
++
++        if (entry.action === 'edit_message') {
++            const author = entry.target?.username
++                ? `${entry.target.username}'s`
++                : 'a';
++            const channel = entry.metadata?.channelName
++                ? `#${entry.metadata.channelName}`
++                : entry.metadata?.channelId
++                  ? `channel ${entry.metadata.channelId}`
++                  : 'a channel';
++            return `${author} message in ${channel}`;
++        }
++
++        if (
++            entry.action === 'emoji_create' ||
++            entry.action === 'emoji_delete'
++        ) {
++            return entry.metadata?.emojiName
++                ? `emoji :${entry.metadata.emojiName}:`
++                : 'an emoji';
++        }
++
++        if (
++            entry.action === 'invite_create' ||
++            entry.action === 'invite_delete'
++        ) {
++            return entry.metadata?.code
++                ? `invite ${String(entry.metadata.code)}`
++                : 'an invite';
++        }
++
++        if (entry.action === 'member_join') {
++            const code = entry.metadata?.inviteCode
++                ? ` via ${String(entry.metadata.inviteCode)}`
++                : '';
++            return entry.target?.username
++                ? `server${code} as @${entry.target.username}`
++                : `server${code}`;
++        }
++
++        if (entry.action === 'roles_reordered') return 'role order';
++        if (entry.action === 'owner_changed') {
++            return entry.target?.username
++                ? `@${entry.target.username}`
++                : 'new owner';
++        }
++
++        if (entry.target?.name) {
++            if (entry.targetType === 'channel')
++                return `channel "#${entry.target.name}"`;
++            if (entry.targetType === 'role')
++                return `role "${entry.target.name}"`;
++            if (entry.targetType === 'category')
++                return `category "${entry.target.name}"`;
++            if (entry.targetType === 'user')
++                return `user @${entry.target.name}`;
++            return `target "${entry.target.name}"`;
++        }
++
++        if (entry.metadata?.channelName)
++            return `channel "#${entry.metadata.channelName}"`;
++        if (entry.metadata?.roleName)
++            return `role "${entry.metadata.roleName}"`;
++        if (entry.metadata?.categoryName)
++            return `category "${entry.metadata.categoryName}"`;
++
++        if (entry.target?.username) return `user @${entry.target.username}`;
++
++        if (entry.targetType === 'server') return 'the server';
++
++        if (entry.metadata?.channelId)
++            return `channel ${entry.metadata.channelId}`;
++        if (entry.targetId) return `ID: ${entry.targetId}`;
++
++        return 'the server';
++    };
++
++    const targetDisplay = getTargetDisplay();
++
++    const renderRoleReorderVisualizer = (
++        oldOrder: string[],
++        newOrder: string[],
++    ): React.ReactNode => {
++        const ITEM_HEIGHT_PX = 28;
++        const SVG_WIDTH_PX = 50;
++
++        const renderRoleItem = (
++            roleName: string,
++            indicator?: React.ReactNode,
++        ): React.ReactNode => {
++            const role = roles?.find((r) => r.name === roleName);
++            const style = getRoleStyle(role);
++
++            return (
++                <li
++                    className={`mb-1.5 flex items-center truncate rounded px-2 text-sm shadow-sm transition-all ${role ? 'font-medium text-white' : 'bg-bg-base text-text-muted border border-border-subtle'}`}
++                    key={String(roleName)}
++                    style={{
++                        height: ITEM_HEIGHT_PX,
++                        ...(role ? style : {}),
++                    }}
++                    title={String(roleName)}
++                >
++                    <AtSign className="mr-1 shrink-0" size={14} />
++                    <span className="truncate">{String(roleName)}</span>
++                    {indicator && (
++                        <div className="ml-auto flex items-center pl-2">
++                            {indicator}
++                        </div>
++                    )}
++                </li>
++            );
++        };
++
++        return (
++            <div className="relative mt-4 flex items-start gap-2 overflow-x-auto pb-2 opacity-90">
++                {/* Left List */}
++                <div className="min-w-[120px] flex-1">
++                    <div className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">
++                        Previous
++                    </div>
++                    <ul
++                        className="flex flex-col"
++                        style={{ padding: 0, margin: 0 }}
++                    >
++                        {oldOrder.map((roleName) =>
++                            renderRoleItem(String(roleName)),
++                        )}
++                    </ul>
++                </div>
++
++                {/* Middle SVG Canvas */}
++                <div
++                    className="hidden flex-none pt-6 sm:block"
++                    style={{ width: SVG_WIDTH_PX }}
++                >
++                    <svg
++                        height={oldOrder.length * (ITEM_HEIGHT_PX + 6)}
++                        style={{ overflow: 'visible' }}
++                        width={SVG_WIDTH_PX}
++                    >
++                        <defs>
++                            <marker
++                                id="arrowhead-moved"
++                                markerHeight="8"
++                                markerUnits="userSpaceOnUse"
++                                markerWidth="8"
++                                orient="auto"
++                                refX="0"
++                                refY="4"
++                            >
++                                <polygon
++                                    fill="#3b82f6"
++                                    points="0 0, 8 4, 0 8"
++                                />
++                            </marker>
++                            <marker
++                                id="arrowhead-static"
++                                markerHeight="8"
++                                markerUnits="userSpaceOnUse"
++                                markerWidth="8"
++                                orient="auto"
++                                refX="0"
++                                refY="4"
++                            >
++                                <polygon
++                                    fill="#52525b"
++                                    opacity="0.5"
++                                    points="0 0, 8 4, 0 8"
++                                />
++                            </marker>
++                        </defs>
++                        {oldOrder.map((roleName, i) => {
++                            const j = newOrder.indexOf(roleName);
++                            if (j === -1) return null;
++
++                            const gap = 6;
++                            const y1 =
++                                i * (ITEM_HEIGHT_PX + gap) + ITEM_HEIGHT_PX / 2;
++                            const y2 =
++                                j * (ITEM_HEIGHT_PX + gap) + ITEM_HEIGHT_PX / 2;
++
++                            const isMoved = i !== j;
++                            const strokeColor = isMoved ? '#3b82f6' : '#52525b';
++                            const opacity = isMoved ? 1 : 0.3;
++                            const marker = isMoved
++                                ? 'url(#arrowhead-moved)'
++                                : 'url(#arrowhead-static)';
++
++                            const endX = SVG_WIDTH_PX - 8;
++                            const d = `M 0 ${y1} C ${SVG_WIDTH_PX / 2} ${y1}, ${SVG_WIDTH_PX / 2} ${y2}, ${endX} ${y2}`;
++
++                            return (
++                                <path
++                                    className="transition-all duration-300"
++                                    d={d}
++                                    fill="none"
++                                    key={`path-${roleName}`}
++                                    markerEnd={marker}
++                                    opacity={opacity}
++                                    stroke={strokeColor}
++                                    strokeWidth="1.5"
++                                />
++                            );
++                        })}
++                    </svg>
++                </div>
++
++                {/* Right List */}
++                <div className="min-w-[140px] flex-1">
++                    <div className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">
++                        New
++                    </div>
++                    <ul
++                        className="flex flex-col"
++                        style={{ padding: 0, margin: 0 }}
++                    >
++                        {newOrder.map((roleName) => {
++                            const oldIndex = oldOrder.indexOf(String(roleName));
++                            const newIndex = newOrder.indexOf(String(roleName));
++                            const diff =
++                                oldIndex !== -1 ? oldIndex - newIndex : 0;
++                            let indicator = null;
++                            if (diff > 0) {
++                                indicator = (
++                                    <span className="rounded bg-black/20 px-1 text-xs font-bold text-green-300">
++                                        ↑ {diff}
++                                    </span>
++                                );
++                            } else if (diff < 0) {
++                                indicator = (
++                                    <span className="rounded bg-black/20 px-1 text-xs font-bold text-red-300">
++                                        ↓ {Math.abs(diff)}
++                                    </span>
++                                );
++                            }
++
++                            return renderRoleItem(String(roleName), indicator);
++                        })}
++                    </ul>
++                </div>
++            </div>
++        );
++    };
++
++    return (
++        <div className="bg-bg-surface flex items-center gap-4 rounded-lg border border-border-subtle p-4 transition-colors hover:bg-bg-subtle">
++            <div
++                className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full ${bg}`}
++            >
++                <Icon className={`h-5 w-5 ${color}`} />
++            </div>
++
++            <div className="min-w-0 flex-1">
++                <div className="flex items-start justify-between gap-4">
++                    <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1">
++                        <Box className="mr-0.5 flex items-center gap-2">
++                            <UserProfilePicture
++                                size="sm"
++                                src={entry.moderator.avatarUrl}
++                                username={entry.moderator.username}
++                            />
++                            <Text weight="medium">
++                                {entry.moderator.username}
++                            </Text>
++                        </Box>
++                        <Text variant="muted">performed</Text>
++                        <Text className={color} weight="medium">
++                            {formatActionName(entry.action)}
++                        </Text>
++                        <Text variant="muted">on</Text>
++                        <Text weight="medium">{targetDisplay}</Text>
++                    </div>
++
++                    <Tooltip
++                        content={new Date(entry.createdAt).toLocaleString()}
++                    >
++                        <Text
++                            className="cursor-help whitespace-nowrap"
++                            size="sm"
++                            variant="muted"
++                        >
++                            {new Date(entry.createdAt).toLocaleString()}
++                        </Text>
++                    </Tooltip>
++                </div>
++
++                {entry.reason && (
++                    <Text className="mt-2 italic" size="sm" variant="muted">
++                        Reason: {entry.reason}
++                    </Text>
++                )}
++
++                {Boolean(entry.metadata?.messageText) && (
++                    <div className="bg-bg-base text-text-muted mt-2 rounded border-l-2 border-red-500/50 p-2 text-sm">
++                        {String(entry.metadata!.messageText)}
++                    </div>
++                )}
++
++                {entry.action !== 'roles_reordered' &&
++                    entry.changes &&
++                    entry.changes.length > 0 && (
++                        <AuditLogDiff changes={entry.changes} />
++                    )}
++
++                {entry.action === 'roles_reordered' &&
++                    Array.isArray(entry.metadata?.roleOrder) && (
++                        <div className="mt-2 text-sm">
++                            <button
++                                className="text-text-muted hover:text-text flex items-center gap-1 text-xs"
++                                onClick={() => setExpandedRoles(!expandedRoles)}
++                            >
++                                {expandedRoles ? (
++                                    <ChevronDown className="h-3 w-3" />
++                                ) : (
++                                    <ChevronRight className="h-3 w-3" />
++                                )}
++                                {expandedRoles
++                                    ? 'Hide Order Changes'
++                                    : 'Show Order Changes'}
++                            </button>
++                            {expandedRoles && (
++                                <div className="bg-bg-surface mt-2 rounded-md p-3">
++                                    {entry.metadata.oldRoleOrder &&
++                                    Array.isArray(
++                                        entry.metadata.oldRoleOrder,
++                                    ) ? (
++                                        renderRoleReorderVisualizer(
++                                            entry.metadata
++                                                .oldRoleOrder as string[],
++                                            entry.metadata
++                                                .roleOrder as string[],
++                                        )
++                                    ) : (
++                                        <>
++                                            <div className="text-text-muted mb-2 text-xs font-medium">
++                                                New Order (Highest to Lowest):
++                                            </div>
++                                            <ol className="text-text-muted ml-1 list-inside list-decimal space-y-0.5">
++                                                {(
++                                                    entry.metadata
++                                                        .roleOrder as string[]
++                                                ).map((roleName, i) => (
++                                                    // eslint-disable-next-line react/no-array-index-key
++                                                    <li key={i}>
++                                                        {String(roleName)}
++                                                    </li>
++                                                ))}
++                                            </ol>
++                                        </>
++                                    )}
++                                </div>
++                            )}
++                        </div>
++                    )}
++
++                {!!(
++                    entry.metadata?.uses !== undefined ||
++                    entry.metadata?.inviteUses !== undefined ||
++                    entry.metadata?.maxUses !== undefined ||
++                    entry.metadata?.inviteMaxUses !== undefined ||
++                    entry.metadata?.expiresAt ||
++                    entry.metadata?.inviteExpiresAt
++                ) && (
++                    <div className="text-text-muted mt-2 flex flex-wrap gap-x-4 gap-y-1 border-t border-border-subtle pt-2 text-sm">
++                        {!!(
++                            entry.metadata?.uses !== undefined ||
++                            entry.metadata?.inviteUses !== undefined
++                        ) && (
++                            <Text size="sm">
++                                Uses:{' '}
++                                <span className="text-text-base">
++                                    {
++                                        (entry.metadata?.uses ??
++                                            entry.metadata?.inviteUses) as
++                                            | string
++                                            | number
++                                    }
++                                </span>
++                            </Text>
++                        )}
++                        {!!(
++                            entry.metadata?.maxUses !== undefined ||
++                            entry.metadata?.inviteMaxUses !== undefined
++                        ) && (
++                            <Text size="sm">
++                                Max Uses:{' '}
++                                <span className="text-text-base">
++                                    {Number(
++                                        entry.metadata?.maxUses ??
++                                            entry.metadata?.inviteMaxUses,
++                                    ) > 0
++                                        ? ((entry.metadata?.maxUses ??
++                                              entry.metadata?.inviteMaxUses) as
++                                              | string
++                                              | number)
++                                        : 'Infinite'}
++                                </span>
++                            </Text>
++                        )}
++                        {!!(
++                            entry.metadata?.expiresAt ||
++                            entry.metadata?.inviteExpiresAt
++                        ) && (
++                            <Text size="sm">
++                                Expires:{' '}
++                                <span className="text-text-base">
++                                    {new Date(
++                                        String(
++                                            entry.metadata?.expiresAt ??
++                                                entry.metadata?.inviteExpiresAt,
++                                        ),
++                                    ).toLocaleString()}
++                                </span>
++                            </Text>
++                        )}
++                    </div>
++                )}
++            </div>
++        </div>
++    );
++};
+diff --git a/src/ui/components/servers/settings/auditLog/AuditLogFilters.tsx b/src/ui/components/servers/settings/auditLog/AuditLogFilters.tsx
+new file mode 100644
+index 0000000..ad394d3
+--- /dev/null
++++ b/src/ui/components/servers/settings/auditLog/AuditLogFilters.tsx
+@@ -0,0 +1,286 @@
++import React from 'react';
++
++import {
++    Crown,
++    Edit2,
++    Link,
++    PlusCircle,
++    Repeat,
++    Search,
++    Settings,
++    ShieldAlert,
++    Smile,
++    Trash2,
++    UserMinus,
++    UserPlus,
++    UserX,
++    X,
++} from 'lucide-react';
++
++import type {
++    AuditLogAction,
++    AuditLogFilters as IAuditLogFilters,
++} from '@/api/auditLog/auditLog.types';
++import { Button } from '@/ui/components/common/Button';
++import { DropdownWithSearch } from '@/ui/components/common/DropdownWithSearch';
++import { Input } from '@/ui/components/common/Input';
++
++interface AuditLogFiltersProps {
++    filters: IAuditLogFilters;
++    onFiltersChange: (filters: IAuditLogFilters) => void;
++}
++
++// Options grouped logically and sorted alphabetically within groups
++const ACTION_OPTIONS = [
++    { value: '', label: 'All Actions', group: undefined },
++    {
++        value: 'create_category',
++        label: 'Create Category',
++        group: 'Channels & Categories',
++    },
++    {
++        value: 'create_channel',
++        label: 'Create Channel',
++        group: 'Channels & Categories',
++    },
++    {
++        value: 'delete_category',
++        label: 'Delete Category',
++        group: 'Channels & Categories',
++    },
++    {
++        value: 'delete_channel',
++        label: 'Delete Channel',
++        group: 'Channels & Categories',
++    },
++    {
++        value: 'edit_category',
++        label: 'Edit Category',
++        group: 'Channels & Categories',
++    },
++    {
++        value: 'edit_channel',
++        label: 'Edit Channel',
++        group: 'Channels & Categories',
++    },
++
++    { value: 'emoji_create', label: 'Emoji Created', group: 'Emojis' },
++    { value: 'emoji_delete', label: 'Emoji Deleted', group: 'Emojis' },
++
++    { value: 'invite_create', label: 'Invite Created', group: 'Invites' },
++    { value: 'invite_delete', label: 'Invite Deleted', group: 'Invites' },
++
++    { value: 'user_ban', label: 'Ban Member', group: 'Members' },
++    { value: 'user_kick', label: 'Kick Member', group: 'Members' },
++    { value: 'member_join', label: 'Member Joined', group: 'Members' },
++    {
++        value: 'owner_changed',
++        label: 'Ownership Transferred',
++        group: 'Members',
++    },
++    { value: 'user_unban', label: 'Unban Member', group: 'Members' },
++    { value: 'user_leave', label: 'User Leave', group: 'Members' },
++
++    { value: 'delete_message', label: 'Delete Message', group: 'Messages' },
++    { value: 'edit_message', label: 'Edit Message', group: 'Messages' },
++    { value: 'reaction_clear', label: 'Remove Reactions', group: 'Messages' },
++
++    { value: 'role_create', label: 'Create Role', group: 'Roles' },
++    { value: 'role_delete', label: 'Delete Role', group: 'Roles' },
++    { value: 'role_update', label: 'Edit Role', group: 'Roles' },
++    { value: 'role_given', label: 'Role Given', group: 'Roles' },
++    { value: 'role_icon_updated', label: 'Role Icon Updated', group: 'Roles' },
++    { value: 'roles_reordered', label: 'Roles Reordered', group: 'Roles' },
++
++    { value: 'update_server', label: 'Update Server', group: 'Server' },
++];
++
++const getActionIcon = (action: string): React.ReactNode | undefined => {
++    switch (action) {
++        case 'create_channel':
++        case 'create_category':
++        case 'role_created':
++        case 'role_create':
++            return <PlusCircle className="h-4 w-4 text-green-500" />;
++        case 'edit_channel':
++        case 'edit_category':
++        case 'role_edited':
++        case 'role_update':
++        case 'update_server':
++        case 'role_icon_updated':
++        case 'edit_message':
++            return <Edit2 className="h-4 w-4 text-yellow-500" />;
++        case 'delete_channel':
++        case 'delete_category':
++        case 'role_removed':
++        case 'role_delete':
++        case 'delete_message':
++        case 'reactions_removed':
++        case 'reaction_clear':
++            return <Trash2 className="h-4 w-4 text-red-500" />;
++        case 'user_kick':
++            return <UserMinus className="h-4 w-4 text-orange-500" />;
++        case 'user_ban':
++            return <UserX className="h-4 w-4 text-red-500" />;
++        case 'user_unban':
++        case 'user_join':
++        case 'member_join':
++            return <UserPlus className="h-4 w-4 text-green-500" />;
++        case 'user_leave':
++            return <UserMinus className="h-4 w-4 text-orange-500" />;
++        case 'owner_changed':
++            return <Crown className="h-4 w-4 text-yellow-400" />;
++        case 'role_given':
++            return <ShieldAlert className="h-4 w-4 text-blue-500" />;
++        case 'emoji_create':
++            return <Smile className="h-4 w-4 text-green-500" />;
++        case 'emoji_delete':
++            return <Smile className="h-4 w-4 text-red-500" />;
++        case 'invite_create':
++            return <Link className="h-4 w-4 text-green-500" />;
++        case 'invite_delete':
++            return <Link className="h-4 w-4 text-red-500" />;
++        case 'roles_reordered':
++            return <Repeat className="h-4 w-4 text-yellow-500" />;
++        case '':
++            return undefined;
++        default:
++            return <Settings className="h-4 w-4 text-gray-500" />;
++    }
++};
++
++const DROPDOWN_OPTIONS = ACTION_OPTIONS.map((opt) => ({
++    id: opt.value,
++    label: opt.label,
++    description: opt.group,
++    icon: getActionIcon(opt.value),
++}));
++
++export const AuditLogFilters: React.FC<AuditLogFiltersProps> = ({
++    filters,
++    onFiltersChange,
++}) => {
++    const handleActionChange = (value: string | null): void => {
++        onFiltersChange({
++            ...filters,
++            actionType: (value || '') as AuditLogAction | '',
++        });
++    };
++
++    const handleModeratorChange = (
++        e: React.ChangeEvent<HTMLInputElement>,
++    ): void => {
++        onFiltersChange({ ...filters, moderatorId: e.target.value });
++    };
++
++    const handleTargetChange = (
++        e: React.ChangeEvent<HTMLInputElement>,
++    ): void => {
++        onFiltersChange({ ...filters, targetId: e.target.value });
++    };
++
++    const handleReasonChange = (
++        e: React.ChangeEvent<HTMLInputElement>,
++    ): void => {
++        onFiltersChange({ ...filters, reason: e.target.value });
++    };
++
++    const clearFilters = (): void => {
++        onFiltersChange({
++            actionType: '',
++            moderatorId: '',
++            targetId: '',
++            reason: '',
++        });
++    };
++
++    const hasActiveFilters = Boolean(
++        filters.actionType ||
++        filters.moderatorId ||
++        filters.targetId ||
++        filters.reason,
++    );
++
++    return (
++        <div className="flex flex-col gap-4 rounded-lg border border-border-subtle bg-bg-subtle p-4">
++            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
++                <div className="z-10 flex w-full flex-col gap-1.5">
++                    <DropdownWithSearch
++                        allowClear
++                        label="Action"
++                        options={DROPDOWN_OPTIONS}
++                        placeholder="All Actions"
++                        searchPlaceholder="Search actions..."
++                        value={filters.actionType || ''}
++                        onChange={handleActionChange}
++                    />
++                </div>
++
++                <div className="flex flex-col gap-1.5">
++                    <label
++                        className="text-text-muted text-xs font-medium"
++                        htmlFor="audit-filter-moderator"
++                    >
++                        Moderator ID
++                    </label>
++                    <Input
++                        className="h-10"
++                        id="audit-filter-moderator"
++                        placeholder="Filter by User ID"
++                        value={filters.moderatorId || ''}
++                        onChange={handleModeratorChange}
++                    />
++                </div>
++
++                <div className="flex flex-col gap-1.5">
++                    <label
++                        className="text-text-muted text-xs font-medium"
++                        htmlFor="audit-filter-target"
++                    >
++                        Target ID
++                    </label>
++                    <Input
++                        className="h-10"
++                        id="audit-filter-target"
++                        placeholder="Filter by Target ID"
++                        value={filters.targetId || ''}
++                        onChange={handleTargetChange}
++                    />
++                </div>
++
++                <div className="flex flex-col gap-1.5">
++                    <label
++                        className="text-text-muted text-xs font-medium"
++                        htmlFor="audit-filter-reason"
++                    >
++                        Reason
++                    </label>
++                    <div className="relative">
++                        <Input
++                            className="h-10 pl-9"
++                            id="audit-filter-reason"
++                            placeholder="Search in reason..."
++                            value={filters.reason || ''}
++                            onChange={handleReasonChange}
++                        />
++                        <Search className="text-text-muted absolute top-2.5 left-3 h-4 w-4" />
++                    </div>
++                </div>
++            </div>
++
++            {hasActiveFilters && (
++                <div className="flex justify-end">
++                    <Button
++                        className="text-text-muted hover:text-text"
++                        size="sm"
++                        variant="ghost"
++                        onClick={clearFilters}
++                    >
++                        <X className="mr-2 h-4 w-4" />
++                        Clear Filters
++                    </Button>
++                </div>
++            )}
++        </div>
++    );
++};
+diff --git a/src/ui/components/servers/settings/auditLog/AuditLogSettings.tsx b/src/ui/components/servers/settings/auditLog/AuditLogSettings.tsx
+new file mode 100644
+index 0000000..b05c7dc
+--- /dev/null
++++ b/src/ui/components/servers/settings/auditLog/AuditLogSettings.tsx
+@@ -0,0 +1,180 @@
++import React, { useState } from 'react';
++import { useEffect } from 'react';
++
++import { useQueryClient } from '@tanstack/react-query';
++import { ShieldAlert } from 'lucide-react';
++import { ChevronDown, ChevronUp } from 'lucide-react';
++
++import { useServerAuditLog } from '@/api/auditLog/auditLog.queries';
++import type {
++    AuditLogEntry as IAuditLogEntry,
++    AuditLogFilters as IAuditLogFilters,
++} from '@/api/auditLog/auditLog.types';
++import { useWebSocket } from '@/hooks/ws/useWebSocket';
++import { Button } from '@/ui/components/common/Button';
++import { Heading } from '@/ui/components/common/Heading';
++import { LoadingSpinner } from '@/ui/components/common/LoadingSpinner';
++import { Text } from '@/ui/components/common/Text';
++import { WsEvents, wsMessages } from '@/ws';
++
++import { AuditLogEntry } from './AuditLogEntry';
++import { AuditLogFilters } from './AuditLogFilters';
++
++interface AuditLogSettingsProps {
++    serverId: string;
++}
++
++export const AuditLogSettings: React.FC<AuditLogSettingsProps> = ({
++    serverId,
++}) => {
++    const [filters, setFilters] = useState<IAuditLogFilters>({});
++    const [globalExpandState, setGlobalExpandState] = useState<
++        'expanded' | 'collapsed' | null
++    >(null);
++
++    const {
++        data,
++        isLoading,
++        isError,
++        fetchNextPage,
++        hasNextPage,
++        isFetchingNextPage,
++    } = useServerAuditLog(serverId, filters);
++
++    const queryClient = useQueryClient();
++
++    useEffect(() => {
++        if (serverId) {
++            wsMessages.joinServer(serverId);
++        }
++    }, [serverId]);
++
++    const handleAuditLogEntry = React.useCallback(
++        (payload: { serverId: string; entry: IAuditLogEntry }) => {
++            if (payload.serverId !== serverId) {
++                return;
++            }
++
++            void queryClient.invalidateQueries({
++                queryKey: ['server', 'auditLog', serverId],
++            });
++        },
++        [serverId, queryClient],
++    );
++
++    useWebSocket(WsEvents.AUDIT_LOG_ENTRY_CREATED, handleAuditLogEntry);
++
++    if (isError) {
++        return (
++            <div className="flex flex-col items-center justify-center py-20 text-center">
++                <ShieldAlert className="mb-4 h-12 w-12 text-red-500" />
++                <Heading className="text-red-500" level={3}>
++                    Failed to load audit logs
++                </Heading>
++                <Text variant="muted">
++                    You might not have permission, or there was a server error.
++                </Text>
++            </div>
++        );
++    }
++
++    const entries =
++        data?.pages.flatMap((page) => page?.entries || []).filter(Boolean) ??
++        [];
++
++    return (
++        <div className="max-w-5xl space-y-6 pb-20">
++            <div>
++                <Heading className="mb-1" level={2} variant="section">
++                    Server Audit Log
++                </Heading>
++                <Text variant="muted">
++                    A record of moderation actions and server changes. Only
++                    visible to users with the Manage Server permission.
++                </Text>
++            </div>
++
++            <AuditLogFilters filters={filters} onFiltersChange={setFilters} />
++
++            {isLoading ? (
++                <div className="flex items-center justify-center py-20">
++                    <LoadingSpinner />
++                </div>
++            ) : entries.length === 0 ? (
++                <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-border-subtle bg-bg-subtle py-12 text-center opacity-50">
++                    <ShieldAlert className="mb-3 h-12 w-12 text-muted-foreground" />
++                    <Text className="mb-1" size="lg" weight="medium">
++                        No audit log entries found
++                    </Text>
++                    <Text size="sm">
++                        Try adjusting your filters, or check back later after
++                        some actions have occurred.
++                    </Text>
++                </div>
++            ) : (
++                <div className="space-y-4">
++                    <div className="flex items-center justify-between">
++                        <Text size="sm" variant="muted">
++                            Showing {entries.length} entries
++                        </Text>
++                        <div className="flex items-center gap-2">
++                            <Button
++                                className="h-8 px-3 text-xs"
++                                variant="ghost"
++                                onClick={() => {
++                                    setGlobalExpandState(null);
++                                    setTimeout(
++                                        () => setGlobalExpandState('expanded'),
++                                        0,
++                                    );
++                                }}
++                            >
++                                <ChevronDown className="mr-1.5 h-3.5 w-3.5" />
++                                Expand All
++                            </Button>
++                            <Button
++                                className="h-8 px-3 text-xs"
++                                variant="ghost"
++                                onClick={() => {
++                                    setGlobalExpandState(null);
++                                    setTimeout(
++                                        () => setGlobalExpandState('collapsed'),
++                                        0,
++                                    );
++                                }}
++                            >
++                                <ChevronUp className="mr-1.5 h-3.5 w-3.5" />
++                                Collapse All
++                            </Button>
++                        </div>
++                    </div>
++
++                    <div className="flex flex-col gap-3">
++                        {entries.map((entry) => (
++                            <AuditLogEntry
++                                entry={entry}
++                                globalExpandState={globalExpandState}
++                                key={entry.id}
++                                serverId={serverId}
++                            />
++                        ))}
++                    </div>
++
++                    {hasNextPage && (
++                        <div className="flex justify-center pt-4">
++                            <Button
++                                disabled={isFetchingNextPage}
++                                variant="ghost"
++                                onClick={() => void fetchNextPage()}
++                            >
++                                {isFetchingNextPage
++                                    ? 'Loading more...'
++                                    : 'Load More'}
++                            </Button>
++                        </div>
++                    )}
++                </div>
++            )}
++        </div>
++    );
++};
+diff --git a/src/ui/components/servers/settings/roles/RoleNavbar.tsx b/src/ui/components/servers/settings/roles/RoleNavbar.tsx
+index 392b3fb..93b0379 100644
+--- a/src/ui/components/servers/settings/roles/RoleNavbar.tsx
++++ b/src/ui/components/servers/settings/roles/RoleNavbar.tsx
+@@ -6,6 +6,7 @@ import { GripVertical, Plus, Trash2 } from 'lucide-react';
+ import type { Role } from '@/api/servers/servers.types';
+ import { IconButton } from '@/ui/components/common/IconButton';
+ import { RoleDot } from '@/ui/components/common/RoleDot';
++import { SettingsFloatingBar } from '@/ui/components/common/SettingsFloatingBar';
+ import { Text } from '@/ui/components/common/Text';
+ import { getRoleStyle } from '@/utils/roleColor';
+ 
+@@ -37,7 +38,12 @@ export const RoleNavbar: React.FC<RoleNavbarProps> = ({
+         setPrevRoles(roles);
+     }
+ 
+-    const handleDragEnd = (): void => {
++    const originalSorted = [...roles].sort((a, b) => b.position - a.position);
++    const hasOrderChanged = localRoles.some(
++        (role, idx) => role._id !== originalSorted[idx]?._id,
++    );
++
++    const handleSave = (): void => {
+         const updated = localRoles.map((role, index) => ({
+             ...role,
+             position: localRoles.length - index,
+@@ -45,6 +51,10 @@ export const RoleNavbar: React.FC<RoleNavbarProps> = ({
+         onReorderRoles(updated);
+     };
+ 
++    const handleReset = (): void => {
++        setLocalRoles([...roles].sort((a, b) => b.position - a.position));
++    };
++
+     return (
+         <div className="flex h-full w-full shrink-0 flex-col overflow-hidden border-l border-border-subtle bg-bg-subtle md:w-64">
+             <div className="flex items-center justify-between border-b border-border-subtle p-3">
+@@ -73,12 +83,20 @@ export const RoleNavbar: React.FC<RoleNavbarProps> = ({
+                             key={role._id}
+                             role={role}
+                             onDelete={() => onDeleteRole(role._id)}
+-                            onDragEnd={handleDragEnd}
++                            onDragEnd={() => {}}
+                             onSelect={() => onSelectRole(role._id)}
+                         />
+                     ))}
+                 </Reorder.Group>
+             </div>
++            <SettingsFloatingBar
++                isFixed
++                isVisible={hasOrderChanged}
++                message="Careful - you have unsaved role order changes!"
++                offset="0px"
++                onReset={handleReset}
++                onSave={handleSave}
++            />
+         </div>
+     );
+ };
+diff --git a/src/ui/components/showoff/ChatDemo.tsx b/src/ui/components/showoff/ChatDemo.tsx
+index e21e2be..a77abc1 100644
+--- a/src/ui/components/showoff/ChatDemo.tsx
++++ b/src/ui/components/showoff/ChatDemo.tsx
+@@ -14,7 +14,7 @@ const MOCK_USERS: Record<string, User> = {
+         createdAt: new Date(),
+         username: 'catflare',
+         displayName: 'Catflare',
+-        profilePicture: 'https://catfla.re/images/servals/serval-1.jpg',
++        profilePicture: 'https://rolling.catfla.re/images/servals/serval-1.jpg',
+         usernameGradient: {
+             enabled: true,
+             angle: 90,
+@@ -32,7 +32,7 @@ const MOCK_USERS: Record<string, User> = {
+         createdAt: new Date(),
+         username: 'hexagon',
+         displayName: 'hexagon',
+-        profilePicture: 'https://catfla.re/images/servals/serval-4.jpg',
++        profilePicture: 'https://rolling.catfla.re/images/servals/serval-4.jpg',
+         usernameGradient: {
+             enabled: true,
+             angle: 135,
+@@ -51,7 +51,7 @@ const MOCK_USERS: Record<string, User> = {
+         createdAt: new Date(),
+         username: 'evalyn',
+         displayName: 'Evalyn',
+-        profilePicture: 'https://catfla.re/images/servals/serval-5.jpg',
++        profilePicture: 'https://rolling.catfla.re/images/servals/serval-5.jpg',
+         usernameGradient: {
+             enabled: true,
+             angle: 45,
+@@ -69,7 +69,7 @@ const MOCK_USERS: Record<string, User> = {
+         createdAt: new Date(),
+         username: 'mintsuki',
+         displayName: 'Mintsuki',
+-        profilePicture: 'https://catfla.re/images/servals/serval-6.jpg',
++        profilePicture: 'https://rolling.catfla.re/images/servals/serval-6.jpg',
+         usernameGradient: {
+             enabled: false,
+             colors: [],
+diff --git a/src/ws/client.ts b/src/ws/client.ts
+index 317d96b..310c710 100644
+--- a/src/ws/client.ts
++++ b/src/ws/client.ts
+@@ -24,6 +24,8 @@ class WsClient {
+     private reconnectDelay = 1000;
+     private pingInterval: number | null = null;
+     private token: string | null = null;
++    private messageQueue: string[] = [];
++    private isAuthenticated = false;
+ 
+     constructor() {
+         const baseUrl =
+@@ -52,6 +54,7 @@ class WsClient {
+      */
+     public disconnect(): void {
+         this.stopPing();
++        this.isAuthenticated = false;
+         if (this.socket) {
+             this.socket.close();
+             this.socket = null;
+@@ -62,11 +65,6 @@ class WsClient {
+      * Send an event to the server.
+      */
+     public send(type: string, payload: unknown = {}, replyTo?: string): void {
+-        if (this.socket?.readyState !== WebSocket.OPEN) {
+-            console.warn('[WS] Cannot send message, socket not open');
+-            return;
+-        }
+-
+         const envelope: IWsEnvelope = {
+             id: uuidv4(),
+             event: { type, payload },
+@@ -76,17 +74,36 @@ class WsClient {
+             },
+         };
+ 
+-        this.socket.send(JSON.stringify(envelope));
++        const message = JSON.stringify(envelope);
++
++        if (
++            this.socket?.readyState !== WebSocket.OPEN ||
++            (this.token &&
++                !this.isAuthenticated &&
++                type !== WsEvents.AUTHENTICATE)
++        ) {
++            console.debug(
++                `[WsClient] QUEUING message of type: ${type}. Socket state: ${this.socket?.readyState}, Authenticated: ${this.isAuthenticated}`,
++            );
++            this.messageQueue.push(message);
++            return;
++        }
++
++        console.debug(`[WsClient] SENDING message of type: ${type}`);
++        this.socket.send(message);
+     }
+ 
+     /**
+      * Subscribe to an event.
+      */
+     public on<T = unknown>(type: string, handler: EventHandler<T>): () => void {
++        console.debug(`[WsClient] SUBSCRIBING to event: ${type}`);
+         if (!this.handlers.has(type)) {
+             this.handlers.set(type, new Set());
+         }
+-        this.handlers.get(type)!.add(handler as EventHandler<unknown>);
++        const set = this.handlers.get(type)!;
++        set.add(handler as EventHandler<unknown>);
++        console.debug(`[WsClient] Total handlers for ${type}: ${set.size}`);
+ 
+         return () => this.off(type, handler);
+     }
+@@ -95,9 +112,15 @@ class WsClient {
+      * Unsubscribe from an event.
+      */
+     public off<T = unknown>(type: string, handler: EventHandler<T>): void {
++        console.debug(`[WsClient] UNSUBSCRIBING from event: ${type}`);
+         const typeHandlers = this.handlers.get(type);
+         if (typeHandlers) {
+-            typeHandlers.delete(handler as EventHandler<unknown>);
++            const deleted = typeHandlers.delete(
++                handler as EventHandler<unknown>,
++            );
++            console.debug(
++                `[WsClient] Unsubscribe for ${type}: ${deleted ? 'SUCCESS' : 'FAILED (handler not found)'}. Remaining: ${typeHandlers.size}`,
++            );
+         }
+     }
+ 
+@@ -107,7 +130,13 @@ class WsClient {
+         this.startPing();
+ 
+         if (this.token) {
++            console.debug('[WsClient] Token found, initiating authentication');
+             this.authenticate(this.token);
++        } else {
++            console.debug(
++                '[WsClient] No token found, flushing queue for guest',
++            );
++            this.flushQueue();
+         }
+     }
+ 
+@@ -117,11 +146,18 @@ class WsClient {
+             const { type, payload } = envelope.event;
+             const { meta } = envelope;
+ 
++            console.debug(
++                `[WsClient] RECEIVED message of type: ${type}`,
++                payload,
++            );
++
+             if (type === WsEvents.AUTHENTICATED) {
+                 console.log(
+                     '[WS] Authenticated as:',
+                     (payload as IWsAuthenticatedEvent).user.username,
+                 );
++                this.isAuthenticated = true;
++                this.flushQueue();
+             }
+ 
+             this.emit(type, payload, meta);
+@@ -130,14 +166,47 @@ class WsClient {
+         }
+     }
+ 
++    private flushQueue(): void {
++        if (this.socket?.readyState === WebSocket.OPEN) {
++            console.log(
++                `[WS] Flushing ${this.messageQueue.length} queued messages`,
++            );
++            while (this.messageQueue.length > 0) {
++                const msg = this.messageQueue.shift();
++                if (msg) {
++                    try {
++                        const parsed = JSON.parse(msg) as IWsEnvelope;
++                        console.debug(
++                            `[WsClient] Flushing message of type: ${parsed.event.type}`,
++                        );
++                    } catch {
++                        console.debug('[WsClient] Flushing raw message');
++                    }
++                    this.socket.send(msg);
++                }
++            }
++        }
++    }
++
+     private emit<T = unknown>(
+         type: string,
+         payload: T,
+         meta: IWsEnvelope['meta'] = { ts: Date.now() },
+     ): void {
+         const typeHandlers = this.handlers.get(type);
++        console.debug(
++            `[WsClient] EMITTING ${type}. Registered handlers: ${typeHandlers?.size || 0}`,
++        );
++
+         if (typeHandlers) {
+-            typeHandlers.forEach((handler) => handler(payload, meta));
++            typeHandlers.forEach((handler) => {
++                try {
++                    console.debug(`[WsClient] Executing handler for ${type}`);
++                    handler(payload, meta);
++                } catch (error) {
++                    console.error(`[WS] Error in handler for ${type}:`, error);
++                }
++            });
+         }
+     }
+ 
+@@ -149,6 +218,7 @@ class WsClient {
+         console.warn('Connection lost, reconnecting... for WS');
+         console.log('[WS] Connection closed:', event.reason);
+         this.stopPing();
++        this.isAuthenticated = false;
+         this.emit(WsEvents.DISCONNECTED, {
+             code: event.code,
+             reason: event.reason,
+diff --git a/src/ws/events.ts b/src/ws/events.ts
+index d7223af..e4b70fe 100644
+--- a/src/ws/events.ts
++++ b/src/ws/events.ts
+@@ -423,6 +423,7 @@ export const WsEvents = {
+     CATEGORY_PERMISSIONS_UPDATED: 'category_permissions_updated',
+     EMOJI_UPDATED: 'emoji_updated',
+     MENTION: 'mention',
++    AUDIT_LOG_ENTRY_CREATED: 'audit_log_entry_created',
+ } as const;
+ 
+ export interface IReactionEventPayload {

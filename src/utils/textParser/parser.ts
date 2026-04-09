@@ -1,3 +1,5 @@
+import { FLAGS } from '@/flags';
+import { censorText } from '@/utils/censorship';
 import { emojiRegex } from '@/utils/emoji';
 
 import {
@@ -8,10 +10,12 @@ import {
 
 export interface ParserOptions {
     readonly features: readonly ParserFeatureType[];
+    readonly enableCensorship?: boolean;
 }
 
 export const ParserPresets = {
     MESSAGE: {
+        enableCensorship: FLAGS.ENABLE_CENSORSHIP,
         features: [
             ParserFeature.BOLD,
             ParserFeature.ITALIC,
@@ -136,10 +140,7 @@ export class TextParser {
             const charCode = char.charCodeAt(0);
 
             if (char === '\\' && this.index + 1 < this.text.length) {
-                if (currentText) {
-                    nodes.push({ type: 'text', content: currentText });
-                    currentText = '';
-                }
+                currentText = this.flushText(nodes, currentText);
 
                 const escapedChar = this.text[this.index + 1];
 
@@ -156,10 +157,7 @@ export class TextParser {
             ) {
                 const emojiNode = this.tryParseUnicodeEmoji();
                 if (emojiNode) {
-                    if (currentText) {
-                        nodes.push({ type: 'text', content: currentText });
-                        currentText = '';
-                    }
+                    currentText = this.flushText(nodes, currentText);
                     nodes.push(emojiNode);
                     continue;
                 }
@@ -176,10 +174,7 @@ export class TextParser {
                 ) {
                     const fileNode = this.tryParseFile();
                     if (fileNode) {
-                        if (currentText) {
-                            nodes.push({ type: 'text', content: currentText });
-                            currentText = '';
-                        }
+                        currentText = this.flushText(nodes, currentText);
                         nodes.push(fileNode);
                         continue;
                     }
@@ -188,10 +183,7 @@ export class TextParser {
                 // Try named link
                 const linkNode = this.tryParseNamedLink();
                 if (linkNode) {
-                    if (currentText) {
-                        nodes.push({ type: 'text', content: currentText });
-                        currentText = '';
-                    }
+                    currentText = this.flushText(nodes, currentText);
                     nodes.push(linkNode);
                     continue;
                 }
@@ -205,10 +197,7 @@ export class TextParser {
             ) {
                 const emojiNode = this.tryParseEmoji();
                 if (emojiNode) {
-                    if (currentText) {
-                        nodes.push({ type: 'text', content: currentText });
-                        currentText = '';
-                    }
+                    currentText = this.flushText(nodes, currentText);
                     nodes.push(emojiNode);
                     continue;
                 }
@@ -224,10 +213,7 @@ export class TextParser {
             ) {
                 const listNode = this.tryParseUnorderedList();
                 if (listNode) {
-                    if (currentText) {
-                        nodes.push({ type: 'text', content: currentText });
-                        currentText = '';
-                    }
+                    currentText = this.flushText(nodes, currentText);
                     nodes.push(listNode);
 
                     if (this.peek('\n')) {
@@ -246,10 +232,7 @@ export class TextParser {
             ) {
                 const formatNode = this.tryParseFormatting();
                 if (formatNode) {
-                    if (currentText) {
-                        nodes.push({ type: 'text', content: currentText });
-                        currentText = '';
-                    }
+                    currentText = this.flushText(nodes, currentText);
                     nodes.push(formatNode);
                     continue;
                 }
@@ -263,10 +246,7 @@ export class TextParser {
             ) {
                 const underlineNode = this.tryParseUnderline();
                 if (underlineNode) {
-                    if (currentText) {
-                        nodes.push({ type: 'text', content: currentText });
-                        currentText = '';
-                    }
+                    currentText = this.flushText(nodes, currentText);
                     nodes.push(underlineNode);
                     continue;
                 }
@@ -280,10 +260,7 @@ export class TextParser {
             ) {
                 const strikethroughNode = this.tryParseStrikethrough();
                 if (strikethroughNode) {
-                    if (currentText) {
-                        nodes.push({ type: 'text', content: currentText });
-                        currentText = '';
-                    }
+                    currentText = this.flushText(nodes, currentText);
                     nodes.push(strikethroughNode);
                     continue;
                 }
@@ -297,10 +274,7 @@ export class TextParser {
             ) {
                 const mentionNode = this.tryParseMention();
                 if (mentionNode) {
-                    if (currentText) {
-                        nodes.push({ type: 'text', content: currentText });
-                        currentText = '';
-                    }
+                    currentText = this.flushText(nodes, currentText);
                     nodes.push(mentionNode);
                     continue;
                 }
@@ -314,10 +288,7 @@ export class TextParser {
             ) {
                 const roleMentionNode = this.tryParseRoleMention();
                 if (roleMentionNode) {
-                    if (currentText) {
-                        nodes.push({ type: 'text', content: currentText });
-                        currentText = '';
-                    }
+                    currentText = this.flushText(nodes, currentText);
                     nodes.push(roleMentionNode);
                     continue;
                 }
@@ -333,10 +304,7 @@ export class TextParser {
             ) {
                 const everyoneNode = this.tryParseEveryoneMention();
                 if (everyoneNode) {
-                    if (currentText) {
-                        nodes.push({ type: 'text', content: currentText });
-                        currentText = '';
-                    }
+                    currentText = this.flushText(nodes, currentText);
                     nodes.push(everyoneNode);
                     continue;
                 }
@@ -351,10 +319,7 @@ export class TextParser {
             ) {
                 const channelLinkNode = this.tryParseChannelLink();
                 if (channelLinkNode) {
-                    if (currentText) {
-                        nodes.push({ type: 'text', content: currentText });
-                        currentText = '';
-                    }
+                    currentText = this.flushText(nodes, currentText);
                     nodes.push(channelLinkNode);
                     continue;
                 }
@@ -368,10 +333,7 @@ export class TextParser {
             ) {
                 const inviteNode = this.tryParseInvite();
                 if (inviteNode) {
-                    if (currentText) {
-                        nodes.push({ type: 'text', content: currentText });
-                        currentText = '';
-                    }
+                    currentText = this.flushText(nodes, currentText);
                     nodes.push(inviteNode);
                     continue;
                 }
@@ -385,10 +347,7 @@ export class TextParser {
             ) {
                 const linkNode = this.tryParseLink();
                 if (linkNode) {
-                    if (currentText) {
-                        nodes.push({ type: 'text', content: currentText });
-                        currentText = '';
-                    }
+                    currentText = this.flushText(nodes, currentText);
                     nodes.push(linkNode);
                     continue;
                 }
@@ -401,10 +360,7 @@ export class TextParser {
             ) {
                 const breakNode = this.tryParseThematicBreak();
                 if (breakNode) {
-                    if (currentText) {
-                        nodes.push({ type: 'text', content: currentText });
-                        currentText = '';
-                    }
+                    currentText = this.flushText(nodes, currentText);
                     nodes.push(breakNode);
                     continue;
                 }
@@ -420,10 +376,7 @@ export class TextParser {
             ) {
                 const headingNode = this.tryParseHeading();
                 if (headingNode) {
-                    if (currentText) {
-                        nodes.push({ type: 'text', content: currentText });
-                        currentText = '';
-                    }
+                    currentText = this.flushText(nodes, currentText);
                     nodes.push(headingNode);
                     continue;
                 }
@@ -436,10 +389,7 @@ export class TextParser {
             ) {
                 const listNode = this.tryParseOrderedList();
                 if (listNode) {
-                    if (currentText) {
-                        nodes.push({ type: 'text', content: currentText });
-                        currentText = '';
-                    }
+                    currentText = this.flushText(nodes, currentText);
                     nodes.push(listNode);
 
                     if (this.peek('\n')) {
@@ -457,10 +407,7 @@ export class TextParser {
             ) {
                 const tableNode = this.tryParseTable();
                 if (tableNode) {
-                    if (currentText) {
-                        nodes.push({ type: 'text', content: currentText });
-                        currentText = '';
-                    }
+                    currentText = this.flushText(nodes, currentText);
                     nodes.push(tableNode);
                     continue;
                 }
@@ -474,10 +421,7 @@ export class TextParser {
             ) {
                 const spoilerNode = this.tryParseSpoiler();
                 if (spoilerNode) {
-                    if (currentText) {
-                        nodes.push({ type: 'text', content: currentText });
-                        currentText = '';
-                    }
+                    currentText = this.flushText(nodes, currentText);
                     nodes.push(spoilerNode);
                     continue;
                 }
@@ -492,10 +436,7 @@ export class TextParser {
             ) {
                 const codeNode = this.tryParseCode();
                 if (codeNode) {
-                    if (currentText) {
-                        nodes.push({ type: 'text', content: currentText });
-                        currentText = '';
-                    }
+                    currentText = this.flushText(nodes, currentText);
                     nodes.push(codeNode);
                     continue;
                 }
@@ -509,10 +450,7 @@ export class TextParser {
             ) {
                 const latexNode = this.tryParseLatex();
                 if (latexNode) {
-                    if (currentText) {
-                        nodes.push({ type: 'text', content: currentText });
-                        currentText = '';
-                    }
+                    currentText = this.flushText(nodes, currentText);
                     nodes.push(latexNode);
                     continue;
                 }
@@ -549,10 +487,7 @@ export class TextParser {
             ) {
                 const blockquoteNode = this.tryParseBlockquote();
                 if (blockquoteNode) {
-                    if (currentText) {
-                        nodes.push({ type: 'text', content: currentText });
-                        currentText = '';
-                    }
+                    currentText = this.flushText(nodes, currentText);
                     nodes.push(blockquoteNode);
                     continue;
                 }
@@ -562,11 +497,19 @@ export class TextParser {
             this.index++;
         }
 
-        if (currentText) {
-            nodes.push({ type: 'text', content: currentText });
-        }
+        currentText = this.flushText(nodes, currentText);
 
         return nodes;
+    }
+
+    private flushText(nodes: ASTNode[], currentText: string): string {
+        if (currentText) {
+            const finalContent = this.options.enableCensorship
+                ? censorText(currentText)
+                : currentText;
+            nodes.push({ type: 'text', content: finalContent });
+        }
+        return '';
     }
 
     private peek(str: string): boolean {
