@@ -1,3 +1,3 @@
 export const FLAGS = {
-    ENABLE_CENSORSHIP: true,
+    ENABLE_CENSORSHIP: false,
 } as const;
