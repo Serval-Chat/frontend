@@ -9,6 +9,7 @@ import {
     Folder,
     FolderPlus,
     Link as LinkIcon,
+    LogOut,
     Plus,
     Settings,
 } from 'lucide-react';
@@ -16,6 +17,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { usePings } from '@/api/pings/pings.queries';
 import { serversApi } from '@/api/servers/servers.api';
+import { useServerDetails } from '@/api/servers/servers.queries';
 import type { Category, Channel } from '@/api/servers/servers.types';
 import { useMe } from '@/api/users/users.queries';
 import { usePermissions } from '@/hooks/usePermissions';
@@ -37,6 +39,7 @@ import { CategorySettingsModal } from './modals/CategorySettingsModal';
 import { ChannelSettingsModal } from './modals/ChannelSettingsModal';
 import { CreateCategoryModal } from './modals/CreateCategoryModal';
 import { CreateChannelModal } from './modals/CreateChannelModal';
+import { LeaveServerModal } from './modals/LeaveServerModal';
 
 interface ChannelListProps {
     channels: Channel[];
@@ -172,8 +175,9 @@ export const ChannelList: React.FC<ChannelListProps> = ({
     const [selectedLinkChannel, setSelectedLinkChannel] =
         useState<Channel | null>(null);
 
-    const { hasPermission } = usePermissions(selectedServerId);
+    const { hasPermission, isOwner } = usePermissions(selectedServerId);
     const canManageChannels = hasPermission('manageChannels');
+    const { data: server } = useServerDetails(selectedServerId);
 
     const [createModalOpen, setCreateModalOpen] = useState(false);
     const [createCategoryModalOpen, setCreateCategoryModalOpen] =
@@ -181,6 +185,7 @@ export const ChannelList: React.FC<ChannelListProps> = ({
     const [createCategoryId, setCreateCategoryId] = useState<string | null>(
         null,
     );
+    const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false);
 
     const [items, setItems] = useState<ListItem[]>([]);
     const [isReordering, setIsReordering] = useState(false);
@@ -712,6 +717,16 @@ export const ChannelList: React.FC<ChannelListProps> = ({
             });
         }
 
+        if (selectedServerId && !isOwner) {
+            items.push({ type: 'divider' });
+            items.push({
+                label: 'Leave Server',
+                icon: LogOut,
+                variant: 'danger',
+                onClick: () => setIsLeaveModalOpen(true),
+            });
+        }
+
         return items;
     };
 
@@ -957,6 +972,13 @@ export const ChannelList: React.FC<ChannelListProps> = ({
                         }}
                     />
                 )}
+
+                <LeaveServerModal
+                    isOpen={isLeaveModalOpen}
+                    serverId={selectedServerId || ''}
+                    serverName={server?.name || ''}
+                    onClose={() => setIsLeaveModalOpen(false)}
+                />
             </div>
         </ContextMenu>
     );

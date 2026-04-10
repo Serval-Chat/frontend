@@ -480,4 +480,8 @@ export const serversApi = {
         );
         return response.data;
     },
+
+    leaveServer: async (serverId: string): Promise<void> => {
+        await apiClient.delete(`/api/v1/servers/${serverId}/members/me`);
+    },
 };

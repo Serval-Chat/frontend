@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-import { Check, FolderInput, FolderPlus, Settings } from 'lucide-react';
+import { Check, FolderInput, FolderPlus, LogOut, Settings } from 'lucide-react';
 
 import { useMarkServerRead } from '@/api/servers/servers.queries';
 import { useUpdateServerSettings } from '@/api/servers/servers.queries';
@@ -16,6 +16,7 @@ import { Tooltip } from '@/ui/components/common/Tooltip';
 import { cn } from '@/utils/cn';
 
 import { ServerIcon } from './ServerIcon';
+import { LeaveServerModal } from './modals/LeaveServerModal';
 import { ServerSettingsModal } from './settings/ServerSettingsModal';
 
 interface ServerItemProps {
@@ -37,6 +38,7 @@ export const ServerItem: React.FC<ServerItemProps> = ({
     onClick,
 }) => {
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+    const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false);
     const { hasPermission, isOwner } = usePermissions(server._id);
     const { mutate: markAsRead } = useMarkServerRead();
     const { data: me } = useMe();
@@ -135,6 +137,16 @@ export const ServerItem: React.FC<ServerItemProps> = ({
         });
     }
 
+    if (!isOwner) {
+        contextMenuItems.push({ type: 'divider' });
+        contextMenuItems.push({
+            label: 'Leave Server',
+            icon: LogOut,
+            variant: 'danger',
+            onClick: () => setIsLeaveModalOpen(true),
+        });
+    }
+
     return (
         <>
             <div className="group relative flex w-full items-center justify-center">
@@ -175,6 +187,13 @@ export const ServerItem: React.FC<ServerItemProps> = ({
                 isOpen={isSettingsOpen}
                 serverId={server._id}
                 onClose={() => setIsSettingsOpen(false)}
+            />
+
+            <LeaveServerModal
+                isOpen={isLeaveModalOpen}
+                serverId={server._id}
+                serverName={server.name}
+                onClose={() => setIsLeaveModalOpen(false)}
             />
         </>
     );

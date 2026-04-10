@@ -9,6 +9,7 @@ import {
 } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
 import { useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 
 import type { Emoji } from '@/api/emojis/emojis.types';
 import type { ServerSettings, User } from '@/api/users/users.types';
@@ -524,6 +525,26 @@ export const useTransferOwnership = (
             void queryClient.invalidateQueries({
                 queryKey: SERVERS_QUERY_KEYS.details(serverId),
             });
+        },
+    });
+};
+
+export const useLeaveServer = (): UseMutationResult<void, Error, string> => {
+    const queryClient = useQueryClient();
+    const navigate = useNavigate();
+    const { showToast } = useToast();
+
+    return useMutation({
+        mutationFn: (serverId: string) => serversApi.leaveServer(serverId),
+        onSuccess: () => {
+            void queryClient.invalidateQueries({
+                queryKey: SERVERS_QUERY_KEYS.list,
+            });
+            showToast('Left server successfully', 'success');
+            void navigate('/chat/@me');
+        },
+        onError: (error) => {
+            showToast(error.message || 'Failed to leave server', 'error');
         },
     });
 };
