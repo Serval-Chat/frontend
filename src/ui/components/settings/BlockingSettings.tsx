@@ -100,11 +100,6 @@ const FLAG_GROUPS = [
                 icon: EyeOff,
             },
             {
-                flag: BlockFlags.BLOCK_FRIEND_REQUESTS,
-                label: 'Block friend requests',
-                icon: Shield,
-            },
-            {
                 flag: BlockFlags.HIDE_BIO,
                 label: 'Hide your bio/profile fields from them',
                 icon: Shield,
@@ -156,7 +151,6 @@ export const BlockingSettings: React.FC = () => {
             flags:
                 BlockFlags.BLOCK_REACTIONS |
                 BlockFlags.HIDE_MESSAGES |
-                BlockFlags.BLOCK_FRIEND_REQUESTS |
                 BlockFlags.HIDE_MY_PRESENCE |
                 BlockFlags.HIDE_THEIR_PRESENCE,
         });
@@ -483,20 +477,22 @@ export const BlockingSettings: React.FC = () => {
                                                                         )
                                                                     }
                                                                 >
-                                                                    <Box
-                                                                        className={cn(
-                                                                            'rounded-md p-1.5 transition-colors',
-                                                                            isActive
-                                                                                ? 'bg-primary/20'
-                                                                                : 'bg-white/5 group-hover:bg-white/10',
-                                                                        )}
-                                                                    >
-                                                                        <Icon
-                                                                            size={
-                                                                                14
-                                                                            }
-                                                                        />
-                                                                    </Box>
+                                                                    {Icon && (
+                                                                        <Box
+                                                                            className={cn(
+                                                                                'rounded-md p-1.5 transition-colors',
+                                                                                isActive
+                                                                                    ? 'bg-primary/20'
+                                                                                    : 'bg-white/5 group-hover:bg-white/10',
+                                                                            )}
+                                                                        >
+                                                                            <Icon
+                                                                                size={
+                                                                                    14
+                                                                                }
+                                                                            />
+                                                                        </Box>
+                                                                    )}
                                                                     <Text
                                                                         className="flex-1 leading-tight font-medium"
                                                                         size="sm"

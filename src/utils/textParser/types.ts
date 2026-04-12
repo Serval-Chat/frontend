@@ -194,7 +194,7 @@ export interface ChannelLinkNode {
     type: 'channel_link';
     serverId: string;
     channelId: string;
-    url: string;
+    url?: string;
     messageId?: string;
 }
 

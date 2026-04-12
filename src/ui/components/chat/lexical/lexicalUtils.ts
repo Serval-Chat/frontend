@@ -34,7 +34,7 @@ export function $getRawMessageText(): string {
                     rawText += '<everyone>';
                     break;
                 case 'channel':
-                    rawText += `#${payload.label || payload.id}`;
+                    rawText += `${window.location.origin}/chat/@server/${payload.serverId}/channel/${payload.id}`;
                     break;
                 case 'unicode-emoji':
                     rawText += payload.id;

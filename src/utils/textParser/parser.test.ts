@@ -229,6 +229,19 @@ describe('TextParser', () => {
             },
         ]);
     });
+    it('should parse channel mention URL as channel_link', () => {
+        const text =
+            'http://localhost:5173/chat/@server/serv456/channel/chan123';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            {
+                type: 'channel_link',
+                serverId: 'serv456',
+                channelId: 'chan123',
+                url: 'http://localhost:5173/chat/@server/serv456/channel/chan123',
+            },
+        ]);
+    });
     it('should parse file embeds', () => {
         const text = '[%file%](https://example.com/image.png)';
         const nodes = parseText(text, ParserPresets.MESSAGE);
