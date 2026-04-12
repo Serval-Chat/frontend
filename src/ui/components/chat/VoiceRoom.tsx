@@ -1,13 +1,19 @@
 import React, { useEffect, useState } from 'react';
 
 import {
+    ControlBar,
+    GridLayout,
     LiveKitRoom,
+    ParticipantTile,
     RoomAudioRenderer,
-    VideoConference,
+    useTracks,
 } from '@livekit/components-react';
 import '@livekit/components-styles';
+import { Track } from 'livekit-client';
 
 import { serversApi } from '@/api/servers/servers.api';
+import { useAppSelector } from '@/store/hooks';
+import { BlockFlags } from '@/types/blocks';
 import { ChatLoadingState } from '@/ui/components/chat/ChatLoadingState';
 import { Text } from '@/ui/components/common/Text';
 import { Box } from '@/ui/components/layout/Box';
@@ -16,6 +22,30 @@ interface VoiceRoomProps {
     serverId: string;
     channelId: string;
 }
+
+const FilteredVoiceGrid: React.FC = () => {
+    const blocks = useAppSelector((state) => state.blocking.blocks);
+    const tracks = useTracks([
+        { source: Track.Source.Camera, withPlaceholder: false },
+        { source: Track.Source.ScreenShare, withPlaceholder: false },
+        { source: Track.Source.Microphone, withPlaceholder: false },
+    ]);
+
+    const filteredTracks = tracks.filter((track) => {
+        const userId = track.participant.identity;
+        const userBlocks = blocks[userId] || 0;
+        return !(userBlocks & BlockFlags.HIDE_VOICE_CHANNEL);
+    });
+
+    return (
+        <Box className="relative flex flex-1 flex-col">
+            <GridLayout tracks={filteredTracks}>
+                <ParticipantTile />
+            </GridLayout>
+            <ControlBar variation="minimal" />
+        </Box>
+    );
+};
 
 export const VoiceRoom: React.FC<VoiceRoomProps> = ({
     serverId,
@@ -73,11 +103,16 @@ export const VoiceRoom: React.FC<VoiceRoomProps> = ({
                 audio
                 data-lk-theme="default"
                 serverUrl={serverUrl}
-                style={{ height: '100%', flex: 1, display: 'flex' }}
+                style={{
+                    height: '100%',
+                    flex: 1,
+                    display: 'flex',
+                    flexDirection: 'column',
+                }}
                 token={token}
                 video={false}
             >
-                <VideoConference />
+                <FilteredVoiceGrid />
                 <RoomAudioRenderer />
             </LiveKitRoom>
         </Box>

@@ -83,7 +83,7 @@ export const usePermissions = (
 
         if (!member) {
             console.warn(
-                '[usePermissions] No member record found for current user — all permissions default to false.',
+                '[usePermissions] No member record found for current user - all permissions default to false.',
                 {
                     serverId,
                     currentUserId: currentUser?._id,

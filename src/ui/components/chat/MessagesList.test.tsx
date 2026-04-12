@@ -1,8 +1,14 @@
 import { render } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import type { ProcessedChatMessage } from '@/types/chat.ui';
 import { MessagesList } from '@/ui/components/chat/MessagesList';
+
+vi.mock('@/store/hooks', () => ({
+    useAppDispatch: vi.fn(),
+    useAppSelector: vi.fn(),
+}));
 
 // Mock MessageItem so we don't have to render its entire tree
 vi.mock('@/ui/components/chat/MessageItem', () => ({
@@ -27,7 +33,13 @@ describe('MessagesList Scroll Behavior', () => {
     let scrollIntoViewMock: ReturnType<typeof vi.fn>;
     let requestAnimationFrameMock: ReturnType<typeof vi.fn>;
 
+    const mockDispatch = vi.fn();
+
     beforeEach(() => {
+        vi.clearAllMocks();
+        vi.mocked(useAppDispatch).mockReturnValue(mockDispatch);
+        vi.mocked(useAppSelector).mockReturnValue({}); // default blocks
+
         scrollIntoViewMock = vi.fn();
         window.HTMLElement.prototype.scrollIntoView =
             scrollIntoViewMock as unknown as typeof window.HTMLElement.prototype.scrollIntoView;

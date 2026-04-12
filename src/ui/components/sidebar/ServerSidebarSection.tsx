@@ -3,6 +3,7 @@ import React, { useMemo } from 'react';
 import type { Role, Server, ServerMember } from '@/api/servers/servers.types';
 import { useMe } from '@/api/users/users.queries';
 import { useAppSelector } from '@/store/hooks';
+import { BlockFlags } from '@/types/blocks';
 import { LoadingSpinner } from '@/ui/components/common/LoadingSpinner';
 import { UserItem } from '@/ui/components/common/UserItem';
 
@@ -34,12 +35,18 @@ export const ServerSidebarSection: React.FC<ServerSidebarSectionProps> = ({
     searchQuery,
 }) => {
     const presenceMap = useAppSelector((state) => state.presence.users);
+    const blocks = useAppSelector((state) => state.blocking.blocks);
     const { data: me } = useMe();
 
     const groups = useMemo(() => {
         if (!members) return [];
 
-        let filteredMembers = members;
+        let filteredMembers = members.filter((m) => m && m.user);
+
+        filteredMembers = filteredMembers.filter((m) => {
+            const userBlocks = blocks[m.userId] || 0;
+            return !(userBlocks & BlockFlags.HIDE_FROM_MEMBER_LIST);
+        });
 
         if (searchQuery) {
             const query = searchQuery.trim();
@@ -50,7 +57,7 @@ export const ServerSidebarSection: React.FC<ServerSidebarSectionProps> = ({
                     const flags = query.slice(lastSlashIndex + 1);
                     const regex = new RegExp(pattern, flags);
 
-                    filteredMembers = members.filter(
+                    filteredMembers = filteredMembers.filter(
                         (m) =>
                             regex.test(m.user.displayName || '') ||
                             regex.test(m.user.username || ''),
@@ -60,7 +67,7 @@ export const ServerSidebarSection: React.FC<ServerSidebarSectionProps> = ({
                 }
             } else {
                 const lowercaseQuery = query.toLowerCase();
-                filteredMembers = members.filter(
+                filteredMembers = filteredMembers.filter(
                     (m) =>
                         (m.user.displayName || '')
                             .toLowerCase()
@@ -96,8 +103,15 @@ export const ServerSidebarSection: React.FC<ServerSidebarSectionProps> = ({
         filteredMembers.forEach((member) => {
             const presence = presenceMap[member.userId];
             const isMe = me && member.userId === me._id;
+
+            const userBlocks = blocks[member.userId] || 0;
+            const forceOffline = !!(
+                userBlocks & BlockFlags.HIDE_THEIR_PRESENCE
+            );
+
             const isOnline =
-                (member.online ?? presence?.status === 'online') || isMe;
+                !forceOffline &&
+                ((member.online ?? presence?.status === 'online') || isMe);
 
             if (!isOnline) {
                 offlineGroup.members.push(member);
@@ -154,7 +168,7 @@ export const ServerSidebarSection: React.FC<ServerSidebarSectionProps> = ({
         result.sort((a, b) => b.position - a.position);
 
         return result;
-    }, [members, searchQuery, roles, presenceMap, me]);
+    }, [members, searchQuery, roles, presenceMap, me, blocks]);
 
     return (
         <div className="space-y-4 pb-4">

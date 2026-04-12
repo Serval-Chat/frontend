@@ -85,7 +85,7 @@ export const Login: React.FC = () => {
                                 className="bg-background/50"
                                 name="email"
                                 placeholder="E-mail"
-                                type="email"
+                                type="text"
                                 value={loginInput}
                                 onChange={(e) => setLoginInput(e.target.value)}
                             />

@@ -18,6 +18,7 @@ import {
     setConnectionQuality,
     setSpeakingUsers,
 } from '@/store/slices/voiceSlice';
+import { BlockFlags } from '@/types/blocks';
 import { wsMessages } from '@/ws';
 
 const ParticipantStateSync: React.FC = () => {
@@ -184,6 +185,7 @@ const RemoteTrackItem: React.FC<{
 
 const RemoteAudioRenderer: React.FC = () => {
     const { userVolumes, isDeafened } = useAppSelector((state) => state.voice);
+    const blocks = useAppSelector((state) => state.blocking.blocks);
     const trackReferences = useTracks([Track.Source.Microphone]);
 
     if (isDeafened) return null;
@@ -195,6 +197,18 @@ const RemoteAudioRenderer: React.FC = () => {
                 if (participant.isLocal || !publication?.track) return null;
 
                 const userId = participant.identity;
+
+                const userBlocks = blocks[userId] || 0;
+                if (userBlocks & BlockFlags.HIDE_VOICE_CHANNEL) {
+                    return (
+                        <RemoteTrackItem
+                            key={publication.trackSid}
+                            trackRef={trackRef}
+                            volume={0}
+                        />
+                    );
+                }
+
                 const rawVolume = userVolumes[userId] ?? 1.0;
                 const perceivedVolume = isNaN(rawVolume)
                     ? 1.0

@@ -10,6 +10,8 @@ import { $getSelection, $isRangeSelection, TextNode } from 'lexical';
 import type { Emoji } from '@/api/emojis/emojis.types';
 import type { Channel, Role, ServerMember } from '@/api/servers/servers.types';
 import type { User } from '@/api/users/users.types';
+import { useAppSelector } from '@/store/hooks';
+import { BlockFlags } from '@/types/blocks';
 import { $createChipNode } from '@/ui/components/chat/lexical/ChipNode';
 import {
     AutocompleteSuggestion,
@@ -84,6 +86,7 @@ export const LexicalAutocompletePlugin: React.FC<
     onOpenChange,
 }) => {
     const [editor] = useLexicalComposerContext();
+    const blocks = useAppSelector((state) => state.blocking.blocks);
     const [queryString, setQueryString] = useState<string | null>(null);
 
     const allEmojis = useMemo(() => {
@@ -119,6 +122,9 @@ export const LexicalAutocompletePlugin: React.FC<
         if (triggerChar === '@') {
             const userSuggestions: Suggestion[] = [];
             members.forEach((member) => {
+                const userBlocks = blocks[member.userId] || 0;
+                if (userBlocks & BlockFlags.HIDE_FROM_MENTIONS) return;
+
                 const username = member.user.username.toLowerCase();
                 const displayName =
                     member.user.displayName?.toLowerCase() || '';
@@ -129,6 +135,10 @@ export const LexicalAutocompletePlugin: React.FC<
 
             friends.forEach((friend) => {
                 if (!friend) return;
+
+                const userBlocks = blocks[friend._id] || 0;
+                if (userBlocks & BlockFlags.HIDE_FROM_MENTIONS) return;
+
                 const username = friend.username.toLowerCase();
                 const displayName = friend.displayName?.toLowerCase() || '';
                 const alreadyAdded = userSuggestions.some(
@@ -205,6 +215,7 @@ export const LexicalAutocompletePlugin: React.FC<
         serverEmojis,
         channels,
         editor,
+        blocks,
     ]);
 
     const isOpen = queryString !== null && options.length > 0;

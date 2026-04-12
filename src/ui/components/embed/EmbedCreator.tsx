@@ -222,7 +222,7 @@ const EmbedEditor = ({
         <Section
             badge={total > 1 ? `${index + 1}/${total}` : undefined}
             defaultOpen={index === 0}
-            title={`Embed ${index + 1}${embed.title ? ` — ${embed.title}` : ''}`}
+            title={`Embed ${index + 1}${embed.title ? ` - ${embed.title}` : ''}`}
         >
             <div className="flex flex-col gap-4">
                 {/* Basic */}

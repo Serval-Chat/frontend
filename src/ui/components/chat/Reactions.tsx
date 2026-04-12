@@ -9,6 +9,8 @@ import {
 } from '@/api/reactions/reactions.queries';
 import { useMe } from '@/api/users/users.queries';
 import { useCustomEmojis } from '@/hooks/useCustomEmojis';
+import { useAppSelector } from '@/store/hooks';
+import { BlockFlags } from '@/types/blocks';
 import { Button } from '@/ui/components/common/Button';
 import { ParsedUnicodeEmoji } from '@/ui/components/common/ParsedUnicodeEmoji';
 import { Text } from '@/ui/components/common/Text';
@@ -32,6 +34,7 @@ export const Reactions: React.FC<ReactionsProps> = ({
     channelId,
 }) => {
     const { data: me } = useMe();
+    const blocks = useAppSelector((state) => state.blocking.blocks);
     const addReaction = useAddReaction();
     const removeReaction = useRemoveReaction();
     const [showPicker, setShowPicker] = React.useState(false);
@@ -116,9 +119,24 @@ export const Reactions: React.FC<ReactionsProps> = ({
         }
     };
 
+    const filteredReactions = reactions
+        .map((r) => {
+            const filteredUsers = r.users.filter((uid) => {
+                if (uid === me?._id) return true;
+                const userBlocks = blocks[uid] || 0;
+                return !(userBlocks & BlockFlags.HIDE_THEIR_REACTIONS);
+            });
+            return {
+                ...r,
+                users: filteredUsers,
+                count: filteredUsers.length,
+            };
+        })
+        .filter((r) => r.count > 0);
+
     return (
         <Box className="mt-1 mb-1 flex flex-wrap gap-1">
-            {reactions.map((reaction) => {
+            {filteredReactions.map((reaction) => {
                 const hasReacted = reaction.users.includes(me?._id || '');
                 return (
                     <Box

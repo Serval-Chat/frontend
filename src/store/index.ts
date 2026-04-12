@@ -1,5 +1,6 @@
 import { configureStore } from '@reduxjs/toolkit';
 
+import { blockingReducer } from './slices/blockingSlice';
 import { navReducer, saveLastChannels } from './slices/navSlice';
 import { presenceReducer } from './slices/presenceSlice';
 import { unreadReducer } from './slices/unreadSlice';
@@ -11,6 +12,7 @@ export const store = configureStore({
         presence: presenceReducer,
         unread: unreadReducer,
         voice: voiceReducer,
+        blocking: blockingReducer,
     },
 });
 

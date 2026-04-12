@@ -6,6 +6,7 @@ import { useMe } from '@/api/users/users.queries';
 import { useAuth } from '@/hooks/useAuth';
 import { useConnectivity } from '@/hooks/useConnectivity';
 import { syncWebPush } from '@/lib/pushClient';
+import { BlockSyncProvider } from '@/providers/BlockSyncProvider';
 import { WebSocketProvider } from '@/providers/WebSocketProvider';
 import { LoadingScreen } from '@/ui/components/common/LoadingScreen';
 import { PushPrompt } from '@/ui/components/common/PushPrompt';
@@ -41,6 +42,7 @@ export const AuthenticatedLayout = (): ReactNode => {
                 />
             ) : (
                 <>
+                    <BlockSyncProvider />
                     <PushPrompt />
                     {isDebugWindowOpen && <WsDebugger />}
                     <Outlet />

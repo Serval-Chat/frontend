@@ -1,3 +1,4 @@
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render } from '@testing-library/react';
 import { useNavigate } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -52,6 +53,13 @@ vi.mock('@/api/servers/servers.queries', () => ({
     useServerDetails: vi.fn().mockReturnValue({ data: undefined }),
 }));
 
+vi.mock('@/api/chat/chat.queries', () => ({
+    usePinnedMessages: vi.fn().mockReturnValue({ data: [], isLoading: false }),
+    CHAT_QUERY_KEYS: {
+        channelPins: (id: string | null) => ['chat', 'pins', id] as const,
+    },
+}));
+
 vi.mock('@/api/pings/pings.queries', () => ({
     usePings: vi.fn().mockReturnValue({ data: { pings: [] } }),
     useClearChannelPings: vi.fn().mockReturnValue({ mutate: vi.fn() }),
@@ -93,6 +101,10 @@ vi.mock('@/ui/components/layout/Box', () => ({
     Box: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }));
 
+const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+});
+
 describe('channel send permission gating', () => {
     const mockNavigate = vi.fn();
 
@@ -129,7 +141,11 @@ describe('channel send permission gating', () => {
             isLoading: false,
         });
 
-        const { getByText, queryByTestId } = render(<MainChat />);
+        const { getByText, queryByTestId } = render(
+            <QueryClientProvider client={queryClient}>
+                <MainChat />
+            </QueryClientProvider>,
+        );
 
         expect(getByText("You can't type in this channel.")).toBeDefined();
         expect(queryByTestId('message-input')).toBeNull();
@@ -143,7 +159,11 @@ describe('channel send permission gating', () => {
             isLoading: false,
         });
 
-        const { getByTestId, queryByText } = render(<MainChat />);
+        const { getByTestId, queryByText } = render(
+            <QueryClientProvider client={queryClient}>
+                <MainChat />
+            </QueryClientProvider>,
+        );
 
         expect(getByTestId('message-input')).toBeDefined();
         expect(queryByText("You can't type in this channel.")).toBeNull();
@@ -171,7 +191,11 @@ describe('MainChat fallback logic', () => {
             isError: true,
         } as never);
 
-        render(<MainChat />);
+        render(
+            <QueryClientProvider client={queryClient}>
+                <MainChat />
+            </QueryClientProvider>,
+        );
 
         expect(mockNavigate).toHaveBeenCalledWith('/chat/@me', {
             replace: true,
@@ -191,7 +215,11 @@ describe('MainChat fallback logic', () => {
             isError: false,
         } as never);
 
-        render(<MainChat />);
+        render(
+            <QueryClientProvider client={queryClient}>
+                <MainChat />
+            </QueryClientProvider>,
+        );
 
         expect(mockNavigate).not.toHaveBeenCalled();
     });

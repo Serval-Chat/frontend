@@ -1,13 +1,14 @@
 import { act, render } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { useAppDispatch } from '@/store/hooks';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import type { ProcessedChatMessage } from '@/types/chat.ui';
 import { MessagesList } from '@/ui/components/chat/MessagesList';
 
 // Mock dependencies
 vi.mock('@/store/hooks', () => ({
     useAppDispatch: vi.fn(),
+    useAppSelector: vi.fn(),
 }));
 
 vi.mock('@/store/slices/navSlice', () => ({
@@ -78,9 +79,8 @@ describe('MessagesList Highlight Logic', () => {
     beforeEach(() => {
         vi.useFakeTimers();
         vi.clearAllMocks();
-        (useAppDispatch as unknown as ReturnType<typeof vi.fn>).mockReturnValue(
-            mockDispatch,
-        );
+        vi.mocked(useAppDispatch).mockReturnValue(mockDispatch);
+        vi.mocked(useAppSelector).mockReturnValue({}); // default blocks
 
         window.HTMLElement.prototype.scrollIntoView = vi.fn();
         window.requestAnimationFrame = vi.fn((cb) => cb());

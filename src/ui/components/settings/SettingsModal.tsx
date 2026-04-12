@@ -11,6 +11,7 @@ import { cn } from '@/utils/cn';
 import { AccessibilitySettings } from './AccessibilitySettings';
 import { AccountSettings } from './AccountSettings';
 import { AppearanceSettings } from './AppearanceSettings';
+import { BlockingSettings } from './BlockingSettings';
 import { DeveloperSettings } from './DeveloperSettings';
 import { SettingsSidebar } from './SettingsSidebar';
 import { StandingSettings } from './StandingSettings';
@@ -24,6 +25,7 @@ const SECTION_URL_MAP: Record<string, string> = {
     'my-account': 'account',
     appearance: 'appearance',
     accessibility: 'accessibility',
+    blocking: 'blocking',
     standing: 'standing',
     developer: 'developer',
 };
@@ -32,6 +34,7 @@ const SECTION_ID_TO_URL: Record<string, string> = {
     account: 'my-account',
     appearance: 'appearance',
     accessibility: 'accessibility',
+    blocking: 'blocking',
     standing: 'standing',
     developer: 'developer',
 };
@@ -117,6 +120,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                         {activeSection === 'accessibility' && (
                             <AccessibilitySettings />
                         )}
+                        {activeSection === 'blocking' && <BlockingSettings />}
                         {activeSection === 'standing' && <StandingSettings />}
                         {activeSection === 'developer' && <DeveloperSettings />}
                     </div>

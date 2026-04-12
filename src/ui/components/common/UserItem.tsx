@@ -16,6 +16,13 @@ import {
 } from 'lucide-react';
 
 import {
+    useBlockProfiles,
+    useBlocks,
+    useCreateBlockProfile,
+    useRemoveBlock,
+    useUpsertBlock,
+} from '@/api/blocks/blocks.queries';
+import {
     useFriends,
     useRemoveFriend,
     useSendFriendRequest,
@@ -36,6 +43,7 @@ import { setSelectedFriendId } from '@/store/slices/navSlice';
 import { setUserVolume } from '@/store/slices/voiceSlice';
 import { Box } from '@/ui/components/layout/Box';
 import { ProfilePopup } from '@/ui/components/profile/ProfilePopup';
+import { BlockUserModal } from '@/ui/components/profile/modals/BlockUserModal';
 import { BanUserModal } from '@/ui/components/servers/modals/BanUserModal';
 import { KickUserModal } from '@/ui/components/servers/modals/KickUserModal';
 import { cn } from '@/utils/cn';
@@ -121,6 +129,7 @@ export const UserItem: React.FC<UserItemProps> = ({
 
     const [isKickModalOpen, setIsKickModalOpen] = React.useState(false);
     const [isBanModalOpen, setIsBanModalOpen] = React.useState(false);
+    const [isBlockModalOpen, setIsBlockModalOpen] = React.useState(false);
 
     const { data: fetchedUser } = useUserById(userId, {
         enabled: !noFetch && !providedUser,
@@ -130,6 +139,12 @@ export const UserItem: React.FC<UserItemProps> = ({
 
     const { mutate: sendFriendRequest } = useSendFriendRequest();
     const { mutate: removeFriend } = useRemoveFriend();
+
+    const { data: blocks } = useBlocks();
+    const { data: blockProfiles } = useBlockProfiles();
+    const { mutate: upsertBlock } = useUpsertBlock();
+    const { mutate: removeBlock } = useRemoveBlock();
+    const { mutateAsync: createProfile } = useCreateBlockProfile();
 
     const [showProfile, setShowProfile] = React.useState(false);
     const itemRef = React.useRef<HTMLDivElement>(null);
@@ -233,6 +248,49 @@ export const UserItem: React.FC<UserItemProps> = ({
                 label: 'Add Friend',
                 icon: UserPlus,
                 onClick: () => sendFriendRequest(username),
+            });
+        }
+
+        const isUserBlocked = blocks?.some((b) => b.targetUserId === userId);
+        if (isUserBlocked) {
+            items.push({
+                label: 'Unblock User',
+                icon: Shield,
+                onClick: () => removeBlock(userId),
+            });
+        } else {
+            items.push({
+                label: 'Block User',
+                icon: Ban,
+                onClick: () => {
+                    void (async () => {
+                        const profiles = blockProfiles || [];
+                        if (profiles.length === 0) {
+                            try {
+                                const profileToAssign = await createProfile({
+                                    name: 'Default',
+                                    flags: 4095,
+                                });
+                                if (profileToAssign) {
+                                    upsertBlock({
+                                        targetUserId: userId,
+                                        profileId: profileToAssign.id,
+                                    });
+                                }
+                            } catch {
+                                // Ignore
+                            }
+                        } else if (profiles.length === 1) {
+                            upsertBlock({
+                                targetUserId: userId,
+                                profileId: profiles[0].id,
+                            });
+                        } else {
+                            setIsBlockModalOpen(true);
+                        }
+                    })();
+                },
+                variant: 'danger',
             });
         }
     }
@@ -545,6 +603,17 @@ export const UserItem: React.FC<UserItemProps> = ({
                 username={username}
                 onClose={() => setIsBanModalOpen(false)}
                 onConfirm={(reason) => banMember({ userId, reason })}
+            />
+
+            <BlockUserModal
+                isOpen={isBlockModalOpen}
+                profiles={blockProfiles || []}
+                userAvatar={userProfile?.profilePicture}
+                username={username}
+                onClose={() => setIsBlockModalOpen(false)}
+                onConfirm={(profileId) =>
+                    upsertBlock({ targetUserId: userId, profileId })
+                }
             />
         </>
     );

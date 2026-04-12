@@ -84,7 +84,7 @@ const ChannelRow: React.FC<ChannelRowProps> = ({
     // Only hide if loading is finished and canView is explicitly false
     if (!isLoading && !canView) {
         console.warn(
-            `[ChannelRow] Hiding channel "${channel.name}" (${channel._id}) — viewChannels=false.`,
+            `[ChannelRow] Hiding channel "${channel.name}" (${channel._id}) - viewChannels=false.`,
             {
                 channelPermissionOverrides: channel.permissions,
                 computedPermissions: permissions,
