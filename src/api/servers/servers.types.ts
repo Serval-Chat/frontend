@@ -24,6 +24,9 @@ export interface Server {
     allTimeHigh?: number;
     disableCustomFonts?: boolean;
     disableUsernameGlowAndCustomColor?: boolean;
+    verified?: boolean;
+    verificationRequested?: boolean;
+    tags?: string[];
     createdAt?: string;
     updatedAt?: string;
 }

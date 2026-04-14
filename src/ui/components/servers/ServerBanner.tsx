@@ -1,5 +1,7 @@
 import React from 'react';
 
+import { BadgeCheck } from 'lucide-react';
+
 import type { ServerBanner as ServerBannerData } from '@/api/servers/servers.types';
 import { Text } from '@/ui/components/common/Text';
 import { resolveApiUrl } from '@/utils/apiUrl';
@@ -9,6 +11,7 @@ interface ServerBannerProps {
     name: string;
     banner?: ServerBannerData;
     loading?: boolean;
+    verified?: boolean;
 }
 
 /**
@@ -18,6 +21,7 @@ export const ServerBanner: React.FC<ServerBannerProps> = ({
     name,
     banner,
     loading,
+    verified,
 }) => {
     const bannerUrl = resolveApiUrl(banner?.value);
 
@@ -44,10 +48,24 @@ export const ServerBanner: React.FC<ServerBannerProps> = ({
 
             <div
                 className={cn(
-                    'relative z-content flex h-12 items-center px-4',
+                    'relative z-content flex h-12 items-center gap-1.5 px-4',
                     banner && 'absolute bottom-0',
                 )}
             >
+                {verified && (
+                    <BadgeCheck
+                        className={cn(
+                            'shrink-0',
+                            loading
+                                ? 'text-muted-foreground'
+                                : banner
+                                  ? 'text-white'
+                                  : 'text-primary',
+                        )}
+                        size={18}
+                        strokeWidth={2.5}
+                    />
+                )}
                 <Text
                     className={cn(
                         'truncate text-[15px] drop-shadow-lg transition-colors',

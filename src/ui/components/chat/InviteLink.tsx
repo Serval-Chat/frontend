@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Check, Copy } from 'lucide-react';
+import { BadgeCheck, Check, Copy, Tag } from 'lucide-react';
 
 import { useInviteDetails, useJoinServer } from '@/api/invites/invites.queries';
 import { useServers } from '@/api/servers/servers.queries';
@@ -117,9 +117,18 @@ export const InviteLink: React.FC<InviteLinkProps> = ({ code, url }) => {
                     )}
 
                     <div className="flex min-w-0 flex-col">
-                        <Text className="truncate" size="lg" weight="bold">
-                            {invite.server.name}
-                        </Text>
+                        <div className="flex items-center gap-1.5">
+                            {invite.server.verified && (
+                                <BadgeCheck
+                                    className="shrink-0 text-primary"
+                                    size={18}
+                                    strokeWidth={2.5}
+                                />
+                            )}
+                            <Text className="truncate" size="lg" weight="bold">
+                                {invite.server.name}
+                            </Text>
+                        </div>
                         <div className="flex items-center gap-2">
                             <div className="h-2 w-2 animate-pulse rounded-full bg-success" />
                             <Text size="xs" variant="muted">
@@ -131,6 +140,20 @@ export const InviteLink: React.FC<InviteLinkProps> = ({ code, url }) => {
                         </div>
                     </div>
                 </div>
+
+                {invite.server.tags && invite.server.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5">
+                        {invite.server.tags.map((tag) => (
+                            <div
+                                className="flex items-center gap-1 rounded-md bg-primary/10 px-1.5 py-0.5 text-[9px] font-bold text-primary ring-1 ring-primary/20"
+                                key={tag}
+                            >
+                                <Tag className="opacity-60" size={8} />
+                                {tag}
+                            </div>
+                        ))}
+                    </div>
+                )}
 
                 <Button
                     className="w-full"

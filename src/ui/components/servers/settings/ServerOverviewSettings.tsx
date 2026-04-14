@@ -1,10 +1,19 @@
 import React, { useRef, useState } from 'react';
 
-import { Trash2, Upload, UserPlus } from 'lucide-react';
+import {
+    BadgeCheck,
+    Plus,
+    Tag,
+    Trash2,
+    Upload,
+    UserPlus,
+    X,
+} from 'lucide-react';
 
 import {
     useDeleteServer,
     useMembers,
+    useRequestServerVerification,
     useServerDetails,
     useTransferOwnership,
     useUpdateServer,
@@ -42,6 +51,11 @@ export const ServerOverviewSettings: React.FC<ServerOverviewSettingsProps> = ({
 
     const [name, setName] = useState(server?.name || '');
     const [originalName, setOriginalName] = useState(server?.name || '');
+    const [tags, setTags] = useState<string[]>(server?.tags || []);
+    const [originalTags, setOriginalTags] = useState<string[]>(
+        server?.tags || [],
+    );
+    const [tagInput, setTagInput] = useState('');
 
     const [cropFile, setCropFile] = useState<File | null>(null);
     const [cropType, setCropType] = useState<
@@ -53,22 +67,38 @@ export const ServerOverviewSettings: React.FC<ServerOverviewSettingsProps> = ({
         if (server) {
             setName(server.name);
             setOriginalName(server.name);
+            setTags(server.tags || []);
+            setOriginalTags(server.tags || []);
         }
     }, [server]);
 
-    const hasChanges = name !== originalName;
+    const hasChanges =
+        name !== originalName ||
+        JSON.stringify(tags) !== JSON.stringify(originalTags);
     const isPending = isUpdatingServer || isUpdatingIcon || isUpdatingBanner;
 
     const handleSave = (): void => {
         if (!hasChanges) return;
         updateServer(
-            { name },
+            { name, tags },
             {
                 onSuccess: () => {
                     setOriginalName(name);
+                    setOriginalTags(tags);
                 },
             },
         );
+    };
+
+    const handleAddTag = (): void => {
+        const trimmed = tagInput.trim();
+        if (!trimmed || tags.includes(trimmed) || tags.length >= 8) return;
+        setTags([...tags, trimmed]);
+        setTagInput('');
+    };
+
+    const handleRemoveTag = (tagToRemove: string): void => {
+        setTags(tags.filter((t) => t !== tagToRemove));
     };
 
     const handleIconChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
@@ -106,6 +136,8 @@ export const ServerOverviewSettings: React.FC<ServerOverviewSettingsProps> = ({
     const { mutate: deleteServer, isPending: isDeleting } = useDeleteServer();
     const { mutate: transferOwnership, isPending: isTransferring } =
         useTransferOwnership(serverId);
+    const { mutate: requestVerification, isPending: isRequestingVerification } =
+        useRequestServerVerification(serverId);
 
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
@@ -283,6 +315,79 @@ export const ServerOverviewSettings: React.FC<ServerOverviewSettingsProps> = ({
                             onChange={(e) => setName(e.target.value)}
                         />
                     </div>
+
+                    <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                            <label
+                                className="text-xs font-bold tracking-wider text-muted-foreground uppercase"
+                                htmlFor="serverTags"
+                            >
+                                Server Tags
+                            </label>
+                            <Text size="2xs" variant="muted" weight="bold">
+                                {tags.length}/8 Tags
+                            </Text>
+                        </div>
+                        <div className="space-y-3">
+                            <div className="flex gap-2">
+                                <Input
+                                    className="flex-1"
+                                    id="serverTags"
+                                    maxLength={25}
+                                    placeholder="Add a tag..."
+                                    value={tagInput}
+                                    onChange={(e) =>
+                                        setTagInput(e.target.value)
+                                    }
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter') {
+                                            e.preventDefault();
+                                            handleAddTag();
+                                        }
+                                    }}
+                                />
+                                <Button
+                                    className="px-4"
+                                    disabled={
+                                        !tagInput.trim() || tags.length >= 8
+                                    }
+                                    size="sm"
+                                    variant="primary"
+                                    onClick={handleAddTag}
+                                >
+                                    <Plus size={16} />
+                                </Button>
+                            </div>
+
+                            <div className="flex flex-wrap gap-2">
+                                {tags.map((tag) => (
+                                    <div
+                                        className="group flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/10 py-1 pr-1 pl-3 text-xs font-bold text-primary"
+                                        key={tag}
+                                    >
+                                        <Tag className="opacity-60" size={10} />
+                                        {tag}
+                                        <button
+                                            className="rounded-full p-1 opacity-60 transition-all hover:bg-primary/20 hover:opacity-100"
+                                            onClick={() => handleRemoveTag(tag)}
+                                        >
+                                            <X size={12} />
+                                        </button>
+                                    </div>
+                                ))}
+                                {tags.length === 0 && (
+                                    <Text
+                                        className="py-1 italic"
+                                        size="xs"
+                                        variant="muted"
+                                    >
+                                        No tags added yet. Try "Hangout" or
+                                        "Gaming".
+                                    </Text>
+                                )}
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -290,6 +395,57 @@ export const ServerOverviewSettings: React.FC<ServerOverviewSettingsProps> = ({
             {isOwner && (
                 <div className="space-y-6 pt-10">
                     <div className="border-b border-border-subtle pb-4">
+                        <Heading
+                            className="text-primary"
+                            level={2}
+                            variant="section"
+                        >
+                            Verification
+                        </Heading>
+                    </div>
+
+                    <div className="divide-y divide-border-subtle rounded-lg border border-bg-secondary">
+                        <div className="flex items-center justify-between gap-4 p-4">
+                            <div className="space-y-1">
+                                <Text as="p" weight="bold">
+                                    Apply for Server Verification
+                                </Text>
+                                <Text as="p" size="xs" variant="muted">
+                                    Verified servers get a badge to tell
+                                    everyone this is the official community
+                                    server.
+                                </Text>
+                            </div>
+                            {server.verified ? (
+                                <Text
+                                    className="flex items-center gap-1.5 px-4 font-semibold text-primary"
+                                    size="sm"
+                                >
+                                    <BadgeCheck size={16} /> Verified
+                                </Text>
+                            ) : server.verificationRequested ? (
+                                <Text
+                                    className="px-4 font-semibold"
+                                    size="sm"
+                                    variant="muted"
+                                >
+                                    Pending Review
+                                </Text>
+                            ) : (
+                                <Button
+                                    className="min-w-[120px]"
+                                    loading={isRequestingVerification}
+                                    variant="primary"
+                                    onClick={() => requestVerification()}
+                                >
+                                    <BadgeCheck className="mr-2 h-4 w-4" />
+                                    Apply
+                                </Button>
+                            )}
+                        </div>
+                    </div>
+
+                    <div className="border-b border-border-subtle pt-4 pb-4">
                         <Heading
                             className="text-error"
                             level={2}
@@ -348,6 +504,8 @@ export const ServerOverviewSettings: React.FC<ServerOverviewSettingsProps> = ({
                 isVisible={hasChanges}
                 onReset={() => {
                     setName(originalName);
+                    setTags(originalTags);
+                    setTagInput('');
                 }}
                 onSave={handleSave}
             />

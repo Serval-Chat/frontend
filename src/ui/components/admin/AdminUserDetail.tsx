@@ -36,6 +36,7 @@ import { resolveApiUrl } from '@/utils/apiUrl';
 import { cn } from '@/utils/cn';
 
 import { AdminErrorDisplay } from './AdminErrorDisplay';
+import { AdminNotesSection } from './AdminNotesSection';
 
 interface AdminUserDetailProps {
     userId: string;
@@ -148,7 +149,6 @@ export const AdminUserDetail = ({
 
     return (
         <div className="animate-in fade-in slide-in-from-bottom-4 flex h-full flex-col duration-700">
-            {/* Back Button */}
             <Button className="mb-4 w-fit" variant="ghost" onClick={onBack}>
                 <ArrowLeft
                     className="transition-transform group-hover:-translate-x-1"
@@ -157,9 +157,7 @@ export const AdminUserDetail = ({
                 Back to User List
             </Button>
 
-            {/* Split Screen Layout */}
             <div className="grid flex-1 grid-cols-1 gap-6 overflow-hidden lg:grid-cols-3">
-                {/* LEFT: Normal User Profile Card - 1 column */}
                 <div className="flex flex-col overflow-hidden lg:col-span-1">
                     <div className="mb-3 flex items-center gap-2 text-xs font-black tracking-widest text-muted-foreground uppercase">
                         <Users size={12} />
@@ -180,7 +178,6 @@ export const AdminUserDetail = ({
                     </div>
                 </div>
 
-                {/* RIGHT: Administrative Intelligence - 2 columns */}
                 <div className="flex flex-col overflow-hidden lg:col-span-2">
                     <div className="mb-3 flex items-center gap-2 text-xs font-black tracking-widest text-danger uppercase">
                         <Shield size={12} />
@@ -594,6 +591,14 @@ export const AdminUserDetail = ({
                                     ))
                                 )}
                             </div>
+                        </div>
+
+                        {/* Admin Notes */}
+                        <div className="rounded-2xl border border-border-subtle bg-bg-subtle p-6">
+                            <AdminNotesSection
+                                targetId={userId}
+                                targetType="User"
+                            />
                         </div>
                     </div>
                 </div>

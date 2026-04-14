@@ -1,5 +1,23 @@
 import type { AdminPermissions } from '@/types/admin';
 
+export const ADMIN_UI_CONFIG = {
+    typography: {
+        badge: 'text-[9px]',
+        metadata: 'text-[10px]',
+        subtext: 'text-xs',
+        body: 'text-sm',
+        metric: 'text-xl',
+    },
+    spacing: {
+        containerPadding: 'p-4',
+        compactPadding: 'p-3',
+        cardGap: 'gap-4',
+        compactGap: 'gap-3',
+        rounding: 'rounded-xl',
+        compactRounding: 'rounded-lg',
+    },
+} as const;
+
 export const ADMIN_CONSTANTS = {
     STATS_REFETCH_INTERVAL: 30_000,
     SEARCH_DEBOUNCE_MS: 500,

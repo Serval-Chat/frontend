@@ -39,13 +39,14 @@ function validateCrop(
     imgWidth: number,
     imgHeight: number,
 ): void {
+    const margin = 0.5;
     if (
-        crop.x < 0 ||
-        crop.y < 0 ||
+        crop.x < -margin ||
+        crop.y < -margin ||
         crop.width <= 0 ||
         crop.height <= 0 ||
-        crop.x + crop.width > imgWidth ||
-        crop.y + crop.height > imgHeight
+        crop.x + crop.width > imgWidth + margin ||
+        crop.y + crop.height > imgHeight + margin
     ) {
         throw new Error('Invalid crop selection: out of bounds or zero size.');
     }

@@ -98,10 +98,10 @@ export const ImageCropper: React.FC<ImageCropperProps> = ({
         // Report initial selection in real image coordinates
         const scale = imgWidth / dWidth;
         onCropChange({
-            x: initialSelection.x * scale,
-            y: initialSelection.y * scale,
-            width: initialSelection.width * scale,
-            height: initialSelection.height * scale,
+            x: Math.round(initialSelection.x * scale),
+            y: Math.round(initialSelection.y * scale),
+            width: Math.round(initialSelection.width * scale),
+            height: Math.round(initialSelection.height * scale),
         });
     }, [image, aspectRatio, onCropChange]);
 
@@ -336,10 +336,10 @@ export const ImageCropper: React.FC<ImageCropperProps> = ({
         // Update parent with real coordinates
         const scale = image.width / displaySize.width;
         onCropChange({
-            x: nextSel.x * scale,
-            y: nextSel.y * scale,
-            width: nextSel.width * scale,
-            height: nextSel.height * scale,
+            x: Math.round(nextSel.x * scale),
+            y: Math.round(nextSel.y * scale),
+            width: Math.round(nextSel.width * scale),
+            height: Math.round(nextSel.height * scale),
         });
     };
 

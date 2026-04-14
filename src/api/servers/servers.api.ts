@@ -452,6 +452,14 @@ export const serversApi = {
         }>(`/api/v1/servers/${serverId}/channels/${channelId}/export`);
         return response.data;
     },
+    requestServerVerification: async (
+        serverId: string,
+    ): Promise<{ message: string }> => {
+        const response = await apiClient.post<{ message: string }>(
+            `/api/v1/servers/${serverId}/verification-request`,
+        );
+        return response.data;
+    },
     updateServerSettings: async (
         settings: ServerSettings,
     ): Promise<{ message: string; serverSettings: ServerSettings }> => {

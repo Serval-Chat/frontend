@@ -117,6 +117,7 @@ export const ServerSection: React.FC = () => {
                 banner={server?.banner}
                 loading={isLoadingServer}
                 name={server?.name || ''}
+                verified={server?.verified}
             />
 
             {isLoadingChannels || isLoadingCategories ? (

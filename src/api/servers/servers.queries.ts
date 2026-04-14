@@ -936,3 +936,32 @@ export const useUpdateServerSettings = (): UseMutationResult<
         },
     });
 };
+
+export const useRequestServerVerification = (
+    serverId: string,
+): UseMutationResult<{ message: string }, Error, void> => {
+    const queryClient = useQueryClient();
+    const { showToast } = useToast();
+    return useMutation({
+        mutationFn: () => serversApi.requestServerVerification(serverId),
+        onSuccess: () => {
+            void queryClient.invalidateQueries({
+                queryKey: SERVERS_QUERY_KEYS.details(serverId),
+            });
+            void queryClient.invalidateQueries({
+                queryKey: SERVERS_QUERY_KEYS.list,
+            });
+            showToast('Verification requested successfully!', 'success');
+        },
+        onError: (error) => {
+            let message = error.message || 'Failed to request verification';
+            if (error instanceof AxiosError && error.response?.data?.message) {
+                const apiMessage = error.response.data.message;
+                message = Array.isArray(apiMessage)
+                    ? apiMessage[0]
+                    : apiMessage;
+            }
+            showToast(message, 'error');
+        },
+    });
+};

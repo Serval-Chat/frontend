@@ -178,7 +178,7 @@ createRoot(document.getElementById('root')!).render(
                                                 <Admin />
                                             </WebOnly>
                                         }
-                                        path="/admin"
+                                        path="/admin/*"
                                     />
                                 </Route>
                                 <Route element={<NotFound />} path="*" />

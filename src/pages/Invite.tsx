@@ -2,7 +2,9 @@ import React from 'react';
 
 import {
     Infinity as InfinityIcon /* This is to prevent name shadowing, thx javascript */,
+    BadgeCheck,
     CircleOff,
+    Tag,
 } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 
@@ -154,9 +156,15 @@ export const Invite: React.FC = () => {
                             <Skeleton className="h-7 w-40" variant="text" />
                         ) : (
                             <Heading
-                                className="text-xl leading-tight"
+                                className="flex items-center justify-center gap-2 text-xl leading-tight"
                                 variant="page"
                             >
+                                {data?.server.verified && (
+                                    <BadgeCheck
+                                        className="shrink-0 text-primary"
+                                        size={20}
+                                    />
+                                )}
                                 {data?.server.name}
                             </Heading>
                         )}
@@ -170,6 +178,26 @@ export const Invite: React.FC = () => {
                                 {data?.memberCount === 1 ? 'member' : 'members'}
                             </MutedText>
                         )}
+
+                        {/* Server Tags */}
+                        {!showSkeleton &&
+                            data?.server.tags &&
+                            data.server.tags.length > 0 && (
+                                <div className="flex flex-wrap justify-center gap-1.5 pt-0.5">
+                                    {data.server.tags.map((tag) => (
+                                        <span
+                                            className="inline-flex items-center gap-1 rounded-full border border-primary/20 bg-primary/10 px-2 py-0.5 text-[9px] font-bold text-primary"
+                                            key={tag}
+                                        >
+                                            <Tag
+                                                className="opacity-60"
+                                                size={10}
+                                            />
+                                            {tag}
+                                        </span>
+                                    ))}
+                                </div>
+                            )}
 
                         <Divider />
 

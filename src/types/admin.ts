@@ -67,3 +67,69 @@ export interface AdminExtendedUser extends AdminUser {
     deletedReason?: string;
     servers: AdminUserServer[];
 }
+export interface AdminServerOwner {
+    _id: string;
+    username: string;
+    displayName: string | null;
+    profilePicture: string | null;
+}
+
+export interface AdminServerListItem {
+    _id: string;
+    name: string;
+    icon: string | null;
+    banner?: {
+        type: 'color' | 'image' | 'gif' | 'gradient';
+        value: string;
+    };
+    ownerId: string;
+    memberCount: number;
+    createdAt: string | Date;
+    deletedAt?: string | Date;
+    owner: AdminServerOwner | null;
+    verified: boolean;
+    verificationRequested: boolean;
+    realMessageCount?: number;
+    weightScore?: number;
+}
+
+export interface AdminChannelShort {
+    _id: string;
+    name: string;
+    type: 'text' | 'voice' | 'link';
+    position: number;
+}
+
+export interface AdminServerDetails extends AdminServerListItem {
+    channels: AdminChannelShort[];
+    messageVolume: number;
+    recentBanCount: number;
+    recentKickCount: number;
+}
+
+export interface AdminNoteAdminInfo {
+    _id: string;
+    username: string;
+    displayName?: string;
+    profilePicture?: string;
+}
+
+export interface AdminNoteHistory {
+    content: string;
+    editorId: AdminNoteAdminInfo;
+    editedAt: string | Date;
+}
+
+export interface AdminNote {
+    _id: string;
+    targetId: string;
+    targetType: 'User' | 'Server';
+    adminId: AdminNoteAdminInfo;
+    content: string;
+    history: AdminNoteHistory[];
+    deletedAt?: string | Date;
+    deletedBy?: AdminNoteAdminInfo;
+    deleteReason?: string;
+    createdAt: string | Date;
+    updatedAt: string | Date;
+}

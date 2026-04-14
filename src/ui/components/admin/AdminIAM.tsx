@@ -291,7 +291,7 @@ export const AdminIAM = ({
     useEffect(() => {
         const timer = setTimeout(() => {
             setDebouncedSearch(searchTerm);
-            setPage(0); // Reset page on new search
+            setPage(0);
         }, ADMIN_CONSTANTS.SEARCH_DEBOUNCE_MS);
         return () => clearTimeout(timer);
     }, [searchTerm]);
@@ -303,7 +303,7 @@ export const AdminIAM = ({
     );
 
     return (
-        <div className="animate-in fade-in slide-in-from-bottom-4 space-y-6 duration-700">
+        <div className="animate-in fade-in slide-in-from-bottom-4 space-y-4 duration-700">
             {/* Header */}
             <div className="flex flex-col gap-1">
                 <Heading
@@ -320,7 +320,7 @@ export const AdminIAM = ({
             </div>
 
             {/* Toolbar */}
-            <div className="flex items-center gap-4 rounded-2xl border border-border-subtle bg-bg-subtle p-4">
+            <div className="flex items-center gap-4 rounded-lg border border-border-subtle bg-bg-subtle p-3">
                 <div className="relative flex-1">
                     <Search
                         className="absolute top-1/2 left-3 -translate-y-1/2 text-muted-foreground"
@@ -360,19 +360,19 @@ export const AdminIAM = ({
                     ) : users && users.length > 0 ? (
                         users.map((user) => (
                             <TableRow key={user._id}>
-                                <TableCell>
-                                    <div className="flex items-center gap-3 overflow-hidden">
+                                <TableCell className="min-w-0">
+                                    <div className="flex min-w-0 items-center gap-3 overflow-hidden">
                                         <UserProfilePicture
-                                            className="h-10 w-10 rounded-full ring-2 ring-border-subtle"
+                                            size="sm"
                                             src={user.profilePicture}
                                             username={user.username}
                                         />
-                                        <div className="flex flex-col truncate">
+                                        <div className="flex max-w-[150px] min-w-0 flex-col truncate md:max-w-[250px]">
                                             <span className="truncate font-bold text-foreground">
                                                 {user.displayName ||
                                                     user.username}
                                             </span>
-                                            <span className="text-xs text-muted-foreground">
+                                            <span className="truncate text-[10px] text-muted-foreground opacity-60">
                                                 @{user.username}
                                             </span>
                                         </div>
@@ -417,7 +417,6 @@ export const AdminIAM = ({
                                 <TableCell align="right">
                                     <div className="flex justify-end gap-1">
                                         <Button
-                                            className="opacity-0 group-hover:opacity-100"
                                             size="sm"
                                             title="View Full Details"
                                             variant="ghost"
@@ -426,7 +425,6 @@ export const AdminIAM = ({
                                             <Eye size={16} />
                                         </Button>
                                         <Button
-                                            className="opacity-0 group-hover:opacity-100"
                                             size="sm"
                                             title="Edit Permissions"
                                             variant="ghost"
@@ -465,7 +463,7 @@ export const AdminIAM = ({
 
             {/* Pagination Controls */}
             {!isLoading && users && (users.length > 0 || page > 0) && (
-                <div className="flex items-center justify-between rounded-2xl border border-border-subtle bg-bg-subtle px-6 py-4">
+                <div className="flex items-center justify-between rounded-xl border border-border-subtle bg-bg-subtle px-4 py-2">
                     <Button
                         disabled={page === 0}
                         variant="ghost"

@@ -78,7 +78,7 @@ export const ServerIcon: React.FC<ServerIconProps> = ({
         >
             <div
                 className={cn(
-                    'flex h-full w-full items-center justify-center overflow-hidden transition-all duration-200',
+                    'flex h-full w-full items-center justify-center overflow-hidden bg-bg-secondary transition-all duration-200',
                     isActive
                         ? activeRoundedClasses[size]
                         : `${roundedClasses[size]} group-hover:${activeRoundedClasses[size]}`,

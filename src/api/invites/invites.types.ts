@@ -8,6 +8,8 @@ export interface InviteServer {
     name: string;
     icon?: string;
     banner?: InviteServerBanner;
+    verified?: boolean;
+    tags?: string[];
 }
 
 export interface InviteDetails {
