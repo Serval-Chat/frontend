@@ -450,14 +450,10 @@ export const setupGlobalWsHandlers = (
 
             if (isMe) {
                 void queryClient.invalidateQueries({ queryKey: ['me'] });
-                if (payload.userId === currentUser?.id) return;
             }
             void queryClient.invalidateQueries({
                 queryKey: ['user', payload.userId],
             });
-            if (currentUser && payload.userId === currentUser.id) {
-                void queryClient.invalidateQueries({ queryKey: ['me'] });
-            }
 
             queryClient.setQueriesData<ServerMember[]>(
                 { queryKey: ['servers', 'members'] },
