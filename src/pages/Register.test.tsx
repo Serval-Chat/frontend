@@ -20,7 +20,7 @@ vi.mock('@/lib/pushClient', () => ({
     listenForSwNavigation: vi.fn(),
 }));
 
-const LocationDisplay = () => {
+const LocationDisplay = (): React.ReactElement => {
     const location = useLocation();
     return <div data-testid="location-display">{location.pathname}</div>;
 };

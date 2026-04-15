@@ -14,7 +14,24 @@ export function $getRawMessageText(): string {
 
     const traverse = (node: LexicalNode): void => {
         if ($isTextNode(node)) {
-            rawText += node.getTextContent();
+            let text = node.getTextContent();
+            if (node.hasFormat('code')) {
+                text = `\`${text}\``;
+            } else {
+                if (node.hasFormat('bold')) {
+                    text = `**${text}**`;
+                }
+                if (node.hasFormat('italic')) {
+                    text = `*${text}*`;
+                }
+                if (node.hasFormat('strikethrough')) {
+                    text = `~~${text}~~`;
+                }
+                if (node.hasFormat('underline')) {
+                    text = `__${text}__`;
+                }
+            }
+            rawText += text;
         } else if ($isLineBreakNode(node)) {
             rawText += '\n';
         } else if ($isChipNode(node)) {
