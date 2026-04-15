@@ -329,7 +329,7 @@ export const MessagesList: React.FC<MessagesListProps> = ({
                 </Box>
             )}
 
-            <VerticalSpacer verticalSpace={20} />
+            <VerticalSpacer verticalSpace={22} />
         </Box>
     );
 };

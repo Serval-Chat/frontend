@@ -13,10 +13,10 @@ import {
     setSelectedChannelId,
     setTargetMessageId,
 } from '@/store/slices/navSlice';
-import { LoadingSpinner } from '@/ui/components/common/LoadingSpinner';
 
 import { ChannelList } from './ChannelList';
 import { ServerBanner } from './ServerBanner';
+import { SidebarSkeleton } from './SidebarSkeleton';
 
 /**
  * @description Orchestrates server-specific navigation (banner, channels, categories).
@@ -122,9 +122,7 @@ export const ServerSection: React.FC = () => {
 
             {(!channels && !isPlaceholderChannels) ||
             (!categories && !isPlaceholderCategories) ? (
-                <div className="flex flex-1 items-center justify-center">
-                    <LoadingSpinner />
-                </div>
+                <SidebarSkeleton />
             ) : (
                 <ChannelList
                     categories={categories || []}

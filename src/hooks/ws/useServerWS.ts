@@ -99,7 +99,7 @@ export const useServerWS = (serverId?: string): void => {
         useCallback(
             (payload: { serverId: string }): void => {
                 if (payload.serverId === serverId) {
-                    void navigate('/');
+                    void navigate('/chat/@me');
                 }
                 invalidateServer();
             },

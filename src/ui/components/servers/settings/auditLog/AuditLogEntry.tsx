@@ -734,6 +734,7 @@ export const AuditLogEntry: React.FC<AuditLogEntryProps> = ({
                     position={{ x: profileState.x, y: profileState.y }}
                     role={topRoleWithColor}
                     roles={currentMemberRoles}
+                    serverId={serverId}
                     userId={profileState.id}
                     onClose={() => setProfileState(null)}
                 />

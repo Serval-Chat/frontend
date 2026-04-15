@@ -9,6 +9,7 @@ import {
     UserPlus,
     X,
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 import {
     useDeleteServer,
@@ -38,6 +39,7 @@ interface ServerOverviewSettingsProps {
 export const ServerOverviewSettings: React.FC<ServerOverviewSettingsProps> = ({
     serverId,
 }) => {
+    const navigate = useNavigate();
     const { data: server, isLoading } = useServerDetails(serverId);
     const { mutate: updateServer, isPending: isUpdatingServer } =
         useUpdateServer(serverId);
@@ -150,7 +152,7 @@ export const ServerOverviewSettings: React.FC<ServerOverviewSettingsProps> = ({
         if (!server || confirmDeleteName !== server.name) return;
         deleteServer(serverId, {
             onSuccess: () => {
-                window.location.href = '/chat/@me';
+                void navigate('/chat/@me');
             },
         });
     };

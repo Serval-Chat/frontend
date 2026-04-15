@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 
 import { Plus, X } from 'lucide-react';
 import { HexColorPicker } from 'react-colorful';
+import { createPortal } from 'react-dom';
 
 import { useMe, useUpdateStyle } from '@/api/users/users.queries';
 import type { User, UsernameFont } from '@/api/users/users.types';
+import { useSmartPosition } from '@/hooks/useSmartPosition';
 import { Button } from '@/ui/components/common/Button';
 import { DropdownWithSearch } from '@/ui/components/common/DropdownWithSearch';
 import { Heading } from '@/ui/components/common/Heading';
@@ -126,6 +128,16 @@ const AppearanceSettingsForm: React.FC<AppearanceSettingsFormProps> = ({
         type: 'glow' | 'gradient';
         index?: number;
     } | null>(null);
+    const pickerRef = useRef<HTMLDivElement>(null);
+    const triggerRef = useRef<HTMLButtonElement | null>(null);
+
+    const pickerCoords = useSmartPosition({
+        isOpen: !!activeColorPicker,
+        elementRef: pickerRef,
+        triggerRef,
+        padding: 16,
+        offset: 12,
+    });
 
     const handleResetToDefaults = (): void => {
         setUsernameFont('default');
@@ -287,7 +299,9 @@ const AppearanceSettingsForm: React.FC<AppearanceSettingsFormProps> = ({
                                                                 colorItem.value,
                                                         }}
                                                         variant="ghost"
-                                                        onClick={() =>
+                                                        onClick={(e) => {
+                                                            triggerRef.current =
+                                                                e.currentTarget;
                                                             setActiveColorPicker(
                                                                 activeColorPicker?.type ===
                                                                     'gradient' &&
@@ -298,8 +312,8 @@ const AppearanceSettingsForm: React.FC<AppearanceSettingsFormProps> = ({
                                                                           type: 'gradient',
                                                                           index,
                                                                       },
-                                                            )
-                                                        }
+                                                            );
+                                                        }}
                                                     >
                                                         <span className="sr-only">
                                                             Select color{' '}
@@ -322,8 +336,18 @@ const AppearanceSettingsForm: React.FC<AppearanceSettingsFormProps> = ({
                                                     {activeColorPicker?.type ===
                                                         'gradient' &&
                                                         activeColorPicker.index ===
-                                                            index && (
-                                                            <div className="absolute top-12 left-0 z-dropdown">
+                                                            index &&
+                                                        createPortal(
+                                                            <div
+                                                                className="z-[9999]"
+                                                                ref={pickerRef}
+                                                                style={{
+                                                                    position:
+                                                                        'fixed',
+                                                                    left: pickerCoords.x,
+                                                                    top: pickerCoords.y,
+                                                                }}
+                                                            >
                                                                 <div
                                                                     aria-label="Close color picker"
                                                                     className="fixed inset-0"
@@ -363,7 +387,8 @@ const AppearanceSettingsForm: React.FC<AppearanceSettingsFormProps> = ({
                                                                         }
                                                                     />
                                                                 </div>
-                                                            </div>
+                                                            </div>,
+                                                            document.body,
                                                         )}
                                                 </div>
                                             ),

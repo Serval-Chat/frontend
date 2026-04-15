@@ -6,9 +6,13 @@ import { ParserPresets, parseText } from '@/utils/textParser/parser';
 
 interface MessageContentProps {
     text: string;
+    serverId?: string;
 }
 
-export const MessageContent: React.FC<MessageContentProps> = ({ text }) => {
+export const MessageContent: React.FC<MessageContentProps> = ({
+    text,
+    serverId,
+}) => {
     const nodes = useMemo(() => parseText(text, ParserPresets.MESSAGE), [text]);
 
     const isEmojiOnly = useMemo(() => {
@@ -30,6 +34,7 @@ export const MessageContent: React.FC<MessageContentProps> = ({ text }) => {
             <ParsedText
                 largeEmojis={isEmojiOnly}
                 nodes={nodes}
+                serverId={serverId}
                 wrap="preWrap"
             />
         </Box>

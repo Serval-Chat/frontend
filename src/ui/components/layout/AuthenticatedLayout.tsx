@@ -46,7 +46,7 @@ export const AuthenticatedLayout = (): ReactNode => {
     const serverId = serverIdMatch ? serverIdMatch[1] : null;
 
     const isServerRoute = location.pathname.includes('/@server/');
-    const { isLoading: isMembersLoading } = useMembers(serverId, {
+    useMembers(serverId, {
         enabled: isAuthenticated && !!serverId && isServerRoute,
     });
 
@@ -60,8 +60,7 @@ export const AuthenticatedLayout = (): ReactNode => {
         (isHomeRoute && isFriendsLoading) ||
         (isHomeRoute && isBlocksLoading) ||
         (isHomeRoute && isRelationshipsLoading) ||
-        (isHomeRoute && isFriendProfilesLoading) ||
-        (!!serverId && isMembersLoading);
+        (isHomeRoute && isFriendProfilesLoading);
     const [showReconnecting, setShowReconnecting] = React.useState(false);
     const isDebugWindowOpen = useWsDebugWindowOpen();
 

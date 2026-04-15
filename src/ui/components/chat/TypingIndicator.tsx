@@ -55,22 +55,21 @@ export const TypingIndicator: React.FC<TypingIndicatorProps> = ({
         <Box
             className={cn(
                 'pointer-events-none absolute right-0 bottom-0 left-0 z-10',
-                'px-4 pt-6 pb-2 transition-opacity duration-300 ease-in-out',
+                'flex h-6 items-center justify-between px-4',
                 'bg-gradient-to-t from-[var(--chat-bg)] via-[var(--chat-bg)]/80 to-transparent',
                 isTyping || showSlowModeInfo ? 'opacity-100' : 'opacity-0',
+                'transition-opacity duration-300 ease-in-out',
             )}
         >
-            <Box className="flex items-center justify-between gap-4">
-                <Text color="muted" fontStyle="italic" size="sm">
-                    {getTypingText()}
-                </Text>
+            <Text color="muted" fontStyle="italic" size="xs">
+                {getTypingText()}
+            </Text>
 
-                {showSlowModeInfo && (
-                    <Text className="font-medium text-primary" size="sm">
-                        {getSlowModeText()}
-                    </Text>
-                )}
-            </Box>
+            {showSlowModeInfo && (
+                <Text className="font-medium text-primary" size="xs">
+                    {getSlowModeText()}
+                </Text>
+            )}
         </Box>
     );
 };

@@ -7,12 +7,13 @@ import { ProfilePopup } from '@/ui/components/profile/ProfilePopup';
 
 interface MentionProps {
     userId: string;
+    serverId?: string;
 }
 
 /**
  * @description Beautifully renders a user mention.
  */
-export const Mention: React.FC<MentionProps> = ({ userId }) => {
+export const Mention: React.FC<MentionProps> = ({ userId, serverId }) => {
     const [isPopupOpen, setIsPopupOpen] = useState(false);
     const triggerRef = useRef<HTMLSpanElement>(null);
     const { data: user, isLoading } = useUserById(userId);
@@ -38,6 +39,7 @@ export const Mention: React.FC<MentionProps> = ({ userId }) => {
 
             <ProfilePopup
                 isOpen={isPopupOpen}
+                serverId={serverId}
                 triggerRef={triggerRef}
                 userId={userId}
                 onClose={() => setIsPopupOpen(false)}

@@ -588,6 +588,7 @@ export const UserItem: React.FC<UserItemProps> = ({
                 joinedAt={joinedAt}
                 role={role}
                 roles={allRoles}
+                serverId={serverId}
                 triggerRef={itemRef}
                 user={userProfile || undefined}
                 userId={userId}

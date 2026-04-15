@@ -3,6 +3,11 @@ import React, { useEffect, useRef } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { createPortal } from 'react-dom';
 
+import {
+    useMembers,
+    useRoles,
+    useServerDetails,
+} from '@/api/servers/servers.queries';
 import type { Role } from '@/api/servers/servers.types';
 import { useUserById } from '@/api/users/users.queries';
 import type { User } from '@/api/users/users.types';
@@ -10,6 +15,10 @@ import { useAdminUserDetail } from '@/hooks/admin/useAdminUsers';
 import { useSmartPosition } from '@/hooks/useSmartPosition';
 import { useAppSelector } from '@/store/hooks';
 import { Box } from '@/ui/components/layout/Box';
+import {
+    getHighestColorRoleForMember,
+    getHighestRoleWithIconForMember,
+} from '@/ui/utils/chat';
 
 import { UserProfileCard } from './UserProfileCard';
 
@@ -30,6 +39,7 @@ interface ProfilePopupProps {
     disableColors?: boolean;
     disableGlow?: boolean;
     adminView?: boolean;
+    serverId?: string;
 }
 
 export const ProfilePopup: React.FC<ProfilePopupProps> = ({
@@ -49,6 +59,7 @@ export const ProfilePopup: React.FC<ProfilePopupProps> = ({
     disableColors,
     disableGlow,
     adminView = false,
+    serverId,
 }) => {
     const popupRef = useRef<HTMLDivElement>(null);
 
@@ -58,6 +69,46 @@ export const ProfilePopup: React.FC<ProfilePopupProps> = ({
     const { data: adminData } = useAdminUserDetail(
         adminView && isOpen ? userId : null,
     );
+    const { data: members } = useMembers(serverId || null, {
+        enabled: !!serverId && isOpen,
+    });
+    const { data: serverRoles } = useRoles(serverId || null, {
+        enabled: !!serverId && isOpen,
+    });
+    const { data: serverDetails } = useServerDetails(serverId || null, {
+        enabled: !!serverId && isOpen,
+    });
+
+    const member = React.useMemo(
+        () => members?.find((m) => m.userId === userId),
+        [members, userId],
+    );
+
+    const finalRoles = React.useMemo(() => {
+        if (roles) return roles;
+        if (!member || !serverRoles) return undefined;
+        return serverRoles.filter((r) => member.roles.includes(r._id));
+    }, [roles, member, serverRoles]);
+
+    const roleMap = React.useMemo(() => {
+        const map = new Map<string, Role>();
+        serverRoles?.forEach((r) => map.set(r._id, r));
+        return map;
+    }, [serverRoles]);
+
+    const resolvedRole = React.useMemo(() => {
+        if (role) return role;
+        if (!member || !roleMap.size) return undefined;
+        return getHighestColorRoleForMember(member.roles, roleMap);
+    }, [role, member, roleMap]);
+
+    const resolvedIconRole = React.useMemo(() => {
+        if (iconRole) return iconRole;
+        if (!member || !roleMap.size) return undefined;
+        return getHighestRoleWithIconForMember(member.roles, roleMap);
+    }, [iconRole, member, roleMap]);
+
+    const finalJoinedAt = joinedAt || member?.joinedAt;
 
     const user = adminData || fetchedUser || providedUser;
 
@@ -134,15 +185,27 @@ export const ProfilePopup: React.FC<ProfilePopupProps> = ({
                                 text: presenceCustomText,
                                 emoji: presenceCustomEmoji,
                             }}
-                            disableColors={disableColors}
-                            disableCustomFonts={disableCustomFonts}
-                            disableGlow={disableGlow}
-                            disableGlowAndColors={disableGlowAndColors}
-                            iconRole={iconRole}
-                            joinedAt={joinedAt}
+                            disableColors={
+                                disableColors ||
+                                serverDetails?.disableUsernameGlowAndCustomColor
+                            }
+                            disableCustomFonts={
+                                disableCustomFonts ||
+                                serverDetails?.disableCustomFonts
+                            }
+                            disableGlow={
+                                disableGlow ||
+                                serverDetails?.disableUsernameGlowAndCustomColor
+                            }
+                            disableGlowAndColors={
+                                disableGlowAndColors ||
+                                serverDetails?.disableUsernameGlowAndCustomColor
+                            }
+                            iconRole={resolvedIconRole}
+                            joinedAt={finalJoinedAt}
                             presenceStatus={presenceStatus}
-                            role={role}
-                            roles={roles}
+                            role={resolvedRole}
+                            roles={finalRoles}
                             user={user as User}
                         />
                     </motion.div>

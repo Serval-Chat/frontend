@@ -128,8 +128,9 @@ export const StyledUserName: React.FC<StyledUserNameProps> = ({
         solidColor = fallbackColor;
     }
 
-    // Enable glow if user has it enabled and glow is not disabled
-    const hasGlow = !effectiveDisableGlow && usernameGlow?.enabled;
+    const hasGlow =
+        !effectiveDisableGlow &&
+        (usernameGlow?.enabled || (!!role && (!!solidColor || hasGradient)));
 
     const containerStyle: React.CSSProperties = {
         fontFamily:

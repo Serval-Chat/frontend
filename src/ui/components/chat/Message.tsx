@@ -379,7 +379,10 @@ export const Message: React.FC<MessageProps> = ({
                             onCancel={() => setIsEditing(false)}
                         />
                     ) : (
-                        <MessageContent text={message.text} />
+                        <MessageContent
+                            serverId={message.serverId}
+                            text={message.text}
+                        />
                     )}
                     <Reactions
                         channelId={message.channelId}
@@ -586,6 +589,7 @@ export const Message: React.FC<MessageProps> = ({
                 joinedAt={senderMember?.joinedAt}
                 role={role}
                 roles={senderRoles}
+                serverId={message.serverId}
                 triggerRef={avatarRef}
                 user={user}
                 userId={user._id}

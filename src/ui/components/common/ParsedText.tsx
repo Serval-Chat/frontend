@@ -40,6 +40,7 @@ interface ParsedTextProps {
     largeEmojis?: boolean;
     wrap?: TextProps['wrap'];
     isNested?: boolean;
+    serverId?: string;
 }
 
 /**
@@ -53,6 +54,7 @@ export const ParsedText: React.FC<ParsedTextProps> = ({
     largeEmojis,
     wrap,
     isNested,
+    serverId,
 }) => {
     const countAttachments = (n: ASTNode): number => {
         let count = n.type === 'file' || n.type === 'klipy' ? 1 : 0;
@@ -99,6 +101,7 @@ export const ParsedText: React.FC<ParsedTextProps> = ({
         isNested: true,
         size,
         wrap,
+        serverId,
     };
 
     return (
@@ -358,7 +361,13 @@ export const ParsedText: React.FC<ParsedTextProps> = ({
                         return <FileEmbed key={idx} url={node.url} />;
 
                     case 'mention':
-                        return <Mention key={idx} userId={node.userId} />;
+                        return (
+                            <Mention
+                                key={idx}
+                                serverId={serverId}
+                                userId={node.userId}
+                            />
+                        );
 
                     case 'role_mention':
                         return <RoleMention key={idx} roleId={node.roleId} />;

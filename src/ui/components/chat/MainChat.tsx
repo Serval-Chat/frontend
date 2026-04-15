@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { Upload, X } from 'lucide-react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
@@ -65,6 +65,19 @@ export const MainChat: React.FC = () => {
         null,
     );
     const [showPins, setShowPins] = useState(false);
+    const [debugTypingCount, setDebugTypingCount] = useState(0);
+
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent): void => {
+            if (e.altKey && e.code === 'Digit1') {
+                e.preventDefault();
+                e.stopPropagation();
+                setDebugTypingCount((prev) => (prev + 1) % 4);
+            }
+        };
+        window.addEventListener('keydown', handleKeyDown, true);
+        return () => window.removeEventListener('keydown', handleKeyDown, true);
+    }, []);
 
     // Data Fetching
     const { data: currentUser } = useMe();
@@ -340,7 +353,17 @@ export const MainChat: React.FC = () => {
                                 !!selectedChannel?.slowMode &&
                                 selectedChannel.slowMode > 0
                             }
-                            typingUsers={typingUsers}
+                            typingUsers={[
+                                ...typingUsers,
+                                ...Array.from({ length: debugTypingCount }).map(
+                                    (_, i) => ({
+                                        userId: `__debug_${i}__`,
+                                        username: `TestUser${
+                                            i > 0 ? i + 1 : ''
+                                        }`,
+                                    }),
+                                ),
+                            ]}
                         />
                     </Box>
 
