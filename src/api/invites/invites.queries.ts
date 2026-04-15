@@ -23,11 +23,12 @@ export const inviteKeys = {
 
 export const useInviteDetails = (
     code: string,
+    options: { enabled?: boolean } = {},
 ): UseQueryResult<InviteDetails, Error> =>
     useQuery({
         queryKey: inviteKeys.details(code),
         queryFn: () => invitesApi.getInviteDetails(code),
-        enabled: !!code,
+        enabled: (options.enabled ?? true) && !!code,
         staleTime: 1000 * 60 * 5, // 5 minutes
     });
 

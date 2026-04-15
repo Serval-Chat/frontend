@@ -114,6 +114,9 @@ export const UserItem: React.FC<UserItemProps> = ({
         providedServerId || role?.serverId || serverRoles?.[0]?.serverId || '';
     const sid = serverId || null;
 
+    // Only enable member/role fetches if we have an explicit serverId prop
+    const isServerContext = !!providedServerId && !noFetch;
+
     const { mutate: addRole, isPending: isAdding } =
         useAddRoleToMember(serverId);
     const { mutate: removeRole, isPending: isRemoving } =
@@ -122,8 +125,10 @@ export const UserItem: React.FC<UserItemProps> = ({
     const { mutate: kickMember } = useKickMember(serverId);
     const { mutate: banMember } = useBanMember(serverId);
 
-    const { data: serverDetails } = useServerDetails(sid);
-    const { data: members } = useMembers(sid);
+    const { data: serverDetails } = useServerDetails(sid, {
+        enabled: isServerContext,
+    });
+    const { data: members } = useMembers(sid, { enabled: isServerContext });
 
     const { data: currentUser } = useMe();
 

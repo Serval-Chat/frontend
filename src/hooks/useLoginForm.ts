@@ -18,6 +18,8 @@ interface LoginFormResult {
     setLoginInput: React.Dispatch<React.SetStateAction<string>>;
     password: string;
     setPassword: React.Dispatch<React.SetStateAction<string>>;
+    rememberMe: boolean;
+    setRememberMe: React.Dispatch<React.SetStateAction<boolean>>;
     status: StatusState;
     setStatus: React.Dispatch<React.SetStateAction<StatusState>>;
     requiresTwoFactor: boolean;
@@ -27,11 +29,14 @@ interface LoginFormResult {
     setUseBackupCode: React.Dispatch<React.SetStateAction<boolean>>;
     resetTwoFactorState: () => void;
     handleSubmit: (e: React.FormEvent) => Promise<void>;
+    isLoading: boolean;
+    isFormValid: boolean;
 }
 
 export const useLoginForm = (): LoginFormResult => {
     const [loginInput, setLoginInput] = useState('');
     const [password, setPassword] = useState('');
+    const [rememberMe, setRememberMe] = useState(true);
     const [status, setStatus] = useState<StatusState>({
         message: '',
         type: '',
@@ -40,6 +45,7 @@ export const useLoginForm = (): LoginFormResult => {
     const [tempToken, setTempToken] = useState('');
     const [twoFactorCode, setTwoFactorCode] = useState('');
     const [useBackupCode, setUseBackupCode] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
     const queryClient = useQueryClient();
 
@@ -49,6 +55,10 @@ export const useLoginForm = (): LoginFormResult => {
         setTwoFactorCode('');
         setUseBackupCode(false);
     };
+
+    const isFormValid = requiresTwoFactor
+        ? twoFactorCode.trim().length > 0
+        : !!loginInput && !!password;
 
     const handleSubmit = async (e: React.FormEvent): Promise<void> => {
         e.preventDefault();
@@ -67,6 +77,7 @@ export const useLoginForm = (): LoginFormResult => {
             });
             return;
         }
+        setIsLoading(true);
 
         try {
             let data;
@@ -80,6 +91,7 @@ export const useLoginForm = (): LoginFormResult => {
                             'Two-factor authentication is enabled. Enter your code to continue.',
                         type: 'success',
                     });
+                    setIsLoading(false);
                     return;
                 }
             } else {
@@ -96,9 +108,10 @@ export const useLoginForm = (): LoginFormResult => {
                     message: 'Login failed',
                     type: 'error',
                 });
+                setIsLoading(false);
                 return;
             }
-            await setAuthToken(data.token);
+            await setAuthToken(data.token, rememberMe);
             await queryClient.invalidateQueries({ queryKey: ['me'] });
             resetTwoFactorState();
 
@@ -108,7 +121,7 @@ export const useLoginForm = (): LoginFormResult => {
                 void navigate(url);
             });
 
-            void navigate('/chat');
+            void navigate('/chat/@me');
         } catch (error: unknown) {
             let errorMessage = 'Login failed';
             if (isAxiosError(error)) {
@@ -118,6 +131,8 @@ export const useLoginForm = (): LoginFormResult => {
                 message: errorMessage,
                 type: 'error',
             });
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -126,6 +141,8 @@ export const useLoginForm = (): LoginFormResult => {
         setLoginInput,
         password,
         setPassword,
+        rememberMe,
+        setRememberMe,
         status,
         setStatus,
         requiresTwoFactor,
@@ -135,5 +152,7 @@ export const useLoginForm = (): LoginFormResult => {
         setUseBackupCode,
         resetTwoFactorState,
         handleSubmit,
+        isLoading,
+        isFormValid,
     };
 };

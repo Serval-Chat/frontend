@@ -77,7 +77,7 @@ export const AccountSettings: React.FC = () => {
     const [backupCodes, setBackupCodes] = useState<string[]>([]);
 
     const { data: friendsList = [] } = useFriends();
-    const { customCategories } = useCustomEmojis();
+    const { customCategories } = useCustomEmojis({ enabled: true });
 
     const friendUsers = useMemo(
         () => friendsList as unknown as User[],

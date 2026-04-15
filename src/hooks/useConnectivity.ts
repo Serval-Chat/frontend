@@ -4,27 +4,38 @@ import { wsClient } from '@/ws/client';
 import { WsEvents } from '@/ws/events';
 
 interface ConnectivityState {
-    isOnline: boolean;
-    isWsConnected: boolean;
+    status:
+        | 'online'
+        | 'offline'
+        | 'connecting'
+        | 'reconnecting'
+        | 'authenticating';
 }
 
 export function useConnectivity(): ConnectivityState {
-    const [isOnline, setIsOnline] = useState(navigator.onLine);
-    const [isWsConnected, setIsWsConnected] = useState(false);
+    const [status, setStatus] = useState<ConnectivityState['status']>(() => {
+        if (!navigator.onLine) return 'offline';
+        const wsStatus = wsClient.getStatus();
+        if (wsStatus === 'authenticated') return 'online';
+        if (wsStatus === 'connecting') return 'connecting';
+        return 'connecting';
+    });
 
     useEffect(() => {
-        const handleOnline = (): void => setIsOnline(true);
-        const handleOffline = (): void => setIsOnline(false);
+        const handleOnline = (): void => setStatus('connecting');
+        const handleOffline = (): void => setStatus('offline');
 
         window.addEventListener('online', handleOnline);
         window.addEventListener('offline', handleOffline);
 
         const unsubscribeAuth = wsClient.on(WsEvents.AUTHENTICATED, () => {
-            setIsWsConnected(true);
+            setStatus('online');
         });
 
         const unsubscribeDisc = wsClient.on(WsEvents.DISCONNECTED, () => {
-            setIsWsConnected(false);
+            setStatus((prev) =>
+                prev === 'offline' ? 'offline' : 'reconnecting',
+            );
         });
 
         return () => {
@@ -35,5 +46,5 @@ export function useConnectivity(): ConnectivityState {
         };
     }, []);
 
-    return { isOnline, isWsConnected };
+    return { status };
 }

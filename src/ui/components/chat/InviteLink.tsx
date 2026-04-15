@@ -1,5 +1,6 @@
 import React from 'react';
 
+import { useQueryClient } from '@tanstack/react-query';
 import { BadgeCheck, Check, Copy, Tag } from 'lucide-react';
 
 import { useInviteDetails, useJoinServer } from '@/api/invites/invites.queries';
@@ -17,7 +18,40 @@ interface InviteLinkProps {
 }
 
 export const InviteLink: React.FC<InviteLinkProps> = ({ code, url }) => {
-    const { data: invite, isLoading, error } = useInviteDetails(code);
+    const [inView, setInView] = React.useState(false);
+    const containerRef = React.useRef<HTMLDivElement>(null);
+    const queryClient = useQueryClient();
+
+    const isCached = !!queryClient.getQueryData(['invites', 'details', code]);
+
+    React.useEffect(() => {
+        if (isCached || inView) return;
+
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                if (entry.isIntersecting) {
+                    setInView(true);
+                    observer.disconnect();
+                }
+            },
+            { rootMargin: '200px' },
+        );
+
+        if (containerRef.current) {
+            observer.observe(containerRef.current);
+        }
+
+        return () => observer.disconnect();
+    }, [isCached, inView]);
+
+    const {
+        data: invite,
+        isLoading,
+        error,
+    } = useInviteDetails(code, {
+        enabled: isCached || inView,
+    });
+
     const { data: servers } = useServers();
     const joinServerMutation = useJoinServer();
 
@@ -33,9 +67,12 @@ export const InviteLink: React.FC<InviteLinkProps> = ({ code, url }) => {
         showToast('Copied the invite URL in to the clipboard!', 'success');
     };
 
-    if (isLoading) {
+    if (isLoading || (!isCached && !inView)) {
         return (
-            <Box className="my-2 flex w-fit min-w-75 items-center gap-2 rounded-lg border border-border-subtle bg-bg-secondary p-4">
+            <Box
+                className="my-2 flex w-fit min-w-75 items-center gap-2 rounded-lg border border-border-subtle bg-bg-secondary p-4"
+                innerRef={containerRef}
+            >
                 <LoadingSpinner size="sm" />
                 <Text size="sm" variant="muted">
                     Fetching invite details...
@@ -46,14 +83,23 @@ export const InviteLink: React.FC<InviteLinkProps> = ({ code, url }) => {
 
     if (error || !invite) {
         return (
-            <a
-                className="text-primary transition-all hover:underline"
-                href={url}
-                rel="noopener noreferrer"
-                target="_blank"
-            >
-                {url}
-            </a>
+            <Box className="my-2 flex w-80 flex-col overflow-hidden rounded-lg border border-border-subtle bg-bg-secondary p-4 opacity-60">
+                <Text className="text-error" size="sm" weight="bold">
+                    Invite Invalid or Expired
+                </Text>
+                <Text className="mt-1" size="xs" variant="muted">
+                    This server invite is either invalid or has reached its
+                    maximum uses.
+                </Text>
+                <a
+                    className="mt-3 text-xs text-primary transition-all hover:underline"
+                    href={url}
+                    rel="noopener noreferrer"
+                    target="_blank"
+                >
+                    {url}
+                </a>
+            </Box>
         );
     }
 

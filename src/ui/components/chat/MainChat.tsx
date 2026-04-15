@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
 import { Upload, X } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 
 import {
     useClearChannelPings,
@@ -43,6 +43,8 @@ import { StickyMessageBar } from './StickyMessageBar';
 export const MainChat: React.FC = () => {
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
+    const location = useLocation();
+    const params = useParams();
     const selectedFriendId = useAppSelector(
         (state) => state.nav.selectedFriendId,
     );
@@ -72,13 +74,28 @@ export const MainChat: React.FC = () => {
             enabled: !!selectedFriendId,
         },
     );
-    const { data: serverDetails } = useServerDetails(selectedServerId);
-    const { data: channels } = useChannels(selectedServerId);
-    const { data: members } = useMembers(selectedServerId);
-    const { data: roles } = useRoles(selectedServerId);
+    const isServerRoute = location.pathname.includes('/@server/');
+    const isServerContextReady =
+        !!selectedServerId &&
+        isServerRoute &&
+        selectedServerId === params.serverId;
+
+    const { data: serverDetails } = useServerDetails(selectedServerId, {
+        enabled: isServerContextReady,
+    });
+    const { data: channels } = useChannels(selectedServerId, {
+        enabled: isServerContextReady,
+    });
+    const { data: members } = useMembers(selectedServerId, {
+        enabled: isServerContextReady,
+    });
+    const { data: roles } = useRoles(selectedServerId, {
+        enabled: isServerContextReady,
+    });
     const { hasPermission } = usePermissions(
         selectedServerId,
         selectedChannelId,
+        { enabled: isServerContextReady },
     );
     const { data: pings } = usePings();
     const { mutate: clearChannelPings } = useClearChannelPings();

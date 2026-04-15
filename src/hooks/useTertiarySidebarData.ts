@@ -1,5 +1,7 @@
 import React from 'react';
 
+import { useLocation, useParams } from 'react-router-dom';
+
 import {
     useMembers,
     useRoles,
@@ -26,21 +28,33 @@ interface TertiarySidebarDataResult {
  * @description Hook to manage data fetching and role computation for the TertiarySidebar.
  */
 export const useTertiarySidebarData = (): TertiarySidebarDataResult => {
+    const location = useLocation();
+    const params = useParams();
     const selectedFriendId = useAppSelector(
         (state) => state.nav.selectedFriendId,
     );
     const selectedServerId = useAppSelector(
         (state) => state.nav.selectedServerId,
     );
+    const isServerContextReady =
+        location.pathname.includes('/@server/') &&
+        selectedServerId === params.serverId;
 
     const { data: me } = useMe();
     const { data: friend } = useUserById(selectedFriendId ?? '', {
         enabled: !!selectedFriendId,
     });
-    const { data: serverDetails } = useServerDetails(selectedServerId);
-    const { data: members, isLoading: isLoadingMembers } =
-        useMembers(selectedServerId);
-    const { data: roles } = useRoles(selectedServerId);
+
+    const { data: serverDetails } = useServerDetails(selectedServerId, {
+        enabled: isServerContextReady,
+    });
+    const { data: members, isLoading: isLoadingMembers } = useMembers(
+        selectedServerId,
+        { enabled: isServerContextReady },
+    );
+    const { data: roles } = useRoles(selectedServerId, {
+        enabled: isServerContextReady,
+    });
 
     // Build role lookup maps
     const memberRoleMap = React.useMemo(() => {

@@ -35,9 +35,11 @@ export const StickyMessageBar: React.FC<StickyMessageBarProps> = ({
     const lastStickyId = React.useRef<string | null>(null);
 
     const { data: pins } = usePinnedMessages(serverId, channelId);
-    const { data: members } = useMembers(serverId);
-    const { data: serverRoles } = useRoles(serverId);
-    const { data: server } = useServerDetails(serverId);
+    const { data: members } = useMembers(serverId, { enabled: !!serverId });
+    const { data: serverRoles } = useRoles(serverId, { enabled: !!serverId });
+    const { data: server } = useServerDetails(serverId, {
+        enabled: !!serverId,
+    });
 
     const latestSticky = React.useMemo(() => {
         if (!pins) return null;

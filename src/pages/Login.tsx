@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 
+import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import { Link, Navigate } from 'react-router-dom';
 
 import { useAuth } from '@/hooks/useAuth';
@@ -25,6 +26,8 @@ export const Login: React.FC = () => {
         setLoginInput,
         password,
         setPassword,
+        rememberMe,
+        setRememberMe,
         status,
         requiresTwoFactor,
         twoFactorCode,
@@ -33,9 +36,12 @@ export const Login: React.FC = () => {
         setUseBackupCode,
         resetTwoFactorState,
         handleSubmit,
+        isLoading,
+        isFormValid,
     } = useLoginForm();
+    const [showPassword, setShowPassword] = useState(false);
 
-    if (isAuthenticated) return <Navigate replace to="/chat" />;
+    if (isAuthenticated) return <Navigate replace to="/chat/@me" />;
 
     return (
         <Box className="relative flex min-h-screen w-full flex-col items-center justify-center overflow-hidden bg-background p-md">
@@ -94,21 +100,61 @@ export const Login: React.FC = () => {
                     {!requiresTwoFactor && (
                         <>
                             <InputWrapper>
-                                <Input
-                                    autoComplete="current-password"
-                                    className="bg-background/50"
-                                    name="password"
-                                    placeholder="Password"
-                                    type="password"
-                                    value={password}
-                                    onChange={(e) =>
-                                        setPassword(e.target.value)
-                                    }
-                                />
+                                <div className="relative">
+                                    <Input
+                                        autoComplete="current-password"
+                                        className="bg-background/50 pr-10"
+                                        name="password"
+                                        placeholder="Password"
+                                        type={
+                                            showPassword ? 'text' : 'password'
+                                        }
+                                        value={password}
+                                        onChange={(e) =>
+                                            setPassword(e.target.value)
+                                        }
+                                    />
+                                    <button
+                                        aria-label={
+                                            showPassword
+                                                ? 'Hide password'
+                                                : 'Show password'
+                                        }
+                                        className="absolute top-1/2 right-3 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                                        title={
+                                            showPassword
+                                                ? 'Hide password'
+                                                : 'Show password'
+                                        }
+                                        type="button"
+                                        onClick={() =>
+                                            setShowPassword(!showPassword)
+                                        }
+                                    >
+                                        {showPassword ? (
+                                            <EyeOff size={18} />
+                                        ) : (
+                                            <Eye size={18} />
+                                        )}
+                                    </button>
+                                </div>
                             </InputWrapper>
-                            <div className="text-right">
+                            <div className="flex items-center justify-between text-sm">
+                                <label className="flex cursor-pointer items-center gap-2">
+                                    <input
+                                        checked={rememberMe}
+                                        className="border-border/50 h-4 w-4 rounded bg-background/50 text-primary focus:ring-primary"
+                                        type="checkbox"
+                                        onChange={(e) =>
+                                            setRememberMe(e.target.checked)
+                                        }
+                                    />
+                                    <Text className="text-muted-foreground select-none">
+                                        Remember Me
+                                    </Text>
+                                </label>
                                 <Link
-                                    className="text-sm text-primary hover:underline"
+                                    className="text-primary hover:underline"
                                     to="/forgot-password"
                                 >
                                     Forgot Password?
@@ -139,11 +185,18 @@ export const Login: React.FC = () => {
                         </div>
                     )}
                     <Button
-                        className="w-full py-sm text-lg font-semibold"
+                        className="flex w-full items-center justify-center gap-2 py-sm text-lg font-semibold"
+                        disabled={!isFormValid || isLoading}
                         type="submit"
                         variant="normal"
                     >
-                        {requiresTwoFactor ? 'Verify 2FA' : 'There we go!'}
+                        {isLoading ? (
+                            <Loader2 className="animate-spin" size={20} />
+                        ) : requiresTwoFactor ? (
+                            'Verify 2FA'
+                        ) : (
+                            'There we go!'
+                        )}
                     </Button>
                 </form>
 

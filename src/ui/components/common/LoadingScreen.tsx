@@ -7,7 +7,7 @@ import { cn } from '@/utils/cn';
 
 interface LoadingScreenProps {
     message?: string;
-    type?: 'loading' | 'offline';
+    type?: 'loading' | 'offline' | 'reconnecting';
     isVisible?: boolean;
 }
 
@@ -45,7 +45,11 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({
 
     const displayMessage =
         message ||
-        (type === 'offline' ? 'Serval is sleeping (Offline)' : randomMessage);
+        (type === 'offline'
+            ? 'Serval is sleeping (Offline)'
+            : type === 'reconnecting'
+              ? 'Sharpening claws and reconnecting...'
+              : randomMessage);
 
     return (
         <AnimatePresence>
@@ -58,6 +62,7 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({
                     )}
                     exit={{ opacity: 0 }}
                     initial={{ opacity: 0 }}
+                    key={type}
                     transition={{ duration: 0.4 }}
                 >
                     <div className="flex flex-col items-center gap-8">
@@ -80,10 +85,16 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({
                                         'text-lg font-bold tracking-tight',
                                         type === 'offline'
                                             ? 'text-danger'
-                                            : 'text-primary',
+                                            : type === 'reconnecting'
+                                              ? 'text-warning'
+                                              : 'text-primary',
                                     )}
                                 >
-                                    {type === 'loading' ? 'Serchat' : 'Offline'}
+                                    {type === 'loading'
+                                        ? 'Serchat'
+                                        : type === 'reconnecting'
+                                          ? 'Reconnecting'
+                                          : 'Offline'}
                                 </span>
                             </motion.div>
 

@@ -13,28 +13,26 @@ import {
     setServerPingCount,
     setUnreadServers,
 } from '@/store/slices/unreadSlice';
+import { hasAuthToken } from '@/utils/authToken';
 
 import { pingsApi } from './pings.api';
 import type {
     ClearChannelPingsResponse,
     DeletePingResponse,
+    GetPingsResponse,
     PingNotification,
 } from './pings.types';
 
-const PINGS_KEYS = {
+export const PINGS_KEYS = {
     all: ['pings'] as const,
 };
 
-export function usePings(): UseQueryResult<
-    { pings: PingNotification[] },
-    Error
-> {
-    return useQuery({
+export const usePings = (): UseQueryResult<GetPingsResponse, Error> =>
+    useQuery({
         queryKey: PINGS_KEYS.all,
         queryFn: pingsApi.getPings,
-        staleTime: 1000 * 60, // 1 minute
+        enabled: hasAuthToken(),
     });
-}
 
 export function useDeletePing(): UseMutationResult<
     DeletePingResponse,

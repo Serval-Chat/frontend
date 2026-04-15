@@ -22,6 +22,7 @@ interface ValidationErrors {
     login?: string;
     username?: string;
     password?: string;
+    confirmPassword?: string;
     inviteToken?: string;
 }
 
@@ -32,12 +33,15 @@ interface RegisterFormResult {
     setUsername: (value: string) => void;
     password: string;
     setPassword: (value: string) => void;
+    confirmPassword: string;
+    setConfirmPassword: (value: string) => void;
     inviteToken: string;
     setInviteToken: (value: string) => void;
     status: StatusState;
     setStatus: React.Dispatch<React.SetStateAction<StatusState>>;
     errors: ValidationErrors;
     isLoading: boolean;
+    isFormValid: boolean;
     handleSubmit: (e: React.FormEvent) => Promise<void>;
 }
 
@@ -45,6 +49,7 @@ export const useRegisterForm = (): RegisterFormResult => {
     const [login, setLogin] = useState('');
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
     const [inviteToken, setInviteToken] = useState('');
     const [status, setStatus] = useState<StatusState>({
         message: '',
@@ -66,6 +71,21 @@ export const useRegisterForm = (): RegisterFormResult => {
                 break;
             case 'password':
                 error = validatePassword(value);
+                if (confirmPassword && value !== confirmPassword) {
+                    setErrors((prev) => ({
+                        ...prev,
+                        confirmPassword: 'Passwords do not match',
+                        password: error,
+                    }));
+                    return;
+                } else if (confirmPassword && value === confirmPassword) {
+                    setErrors((prev) => ({ ...prev, confirmPassword: '' }));
+                }
+                break;
+            case 'confirmPassword':
+                if (value !== password) {
+                    error = 'Passwords do not match';
+                }
                 break;
             case 'inviteToken':
                 error = validateInviteToken(value);
@@ -89,10 +109,24 @@ export const useRegisterForm = (): RegisterFormResult => {
         validateField('password', val);
     };
 
+    const handleSetConfirmPassword = (val: string): void => {
+        setConfirmPassword(val);
+        validateField('confirmPassword', val);
+    };
+
     const handleSetInviteToken = (val: string): void => {
         setInviteToken(val);
         validateField('inviteToken', val);
     };
+
+    const isFormValid =
+        !!login &&
+        !!username &&
+        !!password &&
+        !!confirmPassword &&
+        !!inviteToken &&
+        password === confirmPassword &&
+        !Object.values(errors).some((e) => e);
 
     const handleSubmit = async (e: React.FormEvent): Promise<void> => {
         e.preventDefault();
@@ -103,6 +137,9 @@ export const useRegisterForm = (): RegisterFormResult => {
         currentErrors.login = validateLogin(login);
         currentErrors.username = validateUsername(username);
         currentErrors.password = validatePassword(password);
+        if (password !== confirmPassword) {
+            currentErrors.confirmPassword = 'Passwords do not match';
+        }
         currentErrors.inviteToken = validateInviteToken(inviteToken);
 
         if (
@@ -133,7 +170,7 @@ export const useRegisterForm = (): RegisterFormResult => {
                 void navigate(url);
             });
 
-            void navigate('/chat');
+            void navigate('/chat/@me');
         } catch (error: unknown) {
             let errorMessage = 'Registration failed';
             if (isAxiosError(error)) {
@@ -158,12 +195,15 @@ export const useRegisterForm = (): RegisterFormResult => {
         setUsername: handleSetUsername,
         password,
         setPassword: handleSetPassword,
+        confirmPassword,
+        setConfirmPassword: handleSetConfirmPassword,
         inviteToken,
         setInviteToken: handleSetInviteToken,
         status,
         setStatus,
         errors,
         isLoading,
+        isFormValid,
         handleSubmit,
     };
 };

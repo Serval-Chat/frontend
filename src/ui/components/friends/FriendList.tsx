@@ -39,6 +39,7 @@ export const FriendList: React.FC = () => {
             ) : (
                 friends?.map((friend) => (
                     <UserItem
+                        noFetch
                         initialData={friend}
                         isActive={selectedFriendId === String(friend._id)}
                         key={String(friend._id)}

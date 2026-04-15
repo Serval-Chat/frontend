@@ -37,7 +37,7 @@ export const StatusModal: React.FC<StatusModalProps> = ({
     const emojiPickerRef = useRef<HTMLDivElement>(null);
     const triggerRef = useRef<HTMLButtonElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
-    const { customCategories } = useCustomEmojis();
+    const { customCategories } = useCustomEmojis({ enabled: isOpen });
     const { mutate: updateStatus, isPending } = useUpdateStatus();
 
     useClickAway(emojiPickerRef, (e) => {

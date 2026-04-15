@@ -492,4 +492,9 @@ export const serversApi = {
     leaveServer: async (serverId: string): Promise<void> => {
         await apiClient.delete(`/api/v1/servers/${serverId}/members/me`);
     },
+
+    getAllServerEmojis: async (): Promise<Emoji[]> => {
+        const response = await apiClient.get<Emoji[]>('/api/v1/servers/emojis');
+        return response.data;
+    },
 };

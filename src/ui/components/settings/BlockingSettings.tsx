@@ -248,7 +248,10 @@ export const BlockingSettings: React.FC = () => {
                                         className="flex items-center justify-between rounded-xl border border-white/5 bg-white/[0.02] p-3 transition-colors hover:border-white/10"
                                         key={block.targetUserId}
                                     >
-                                        <UserItem userId={block.targetUserId} />
+                                        <UserItem
+                                            noFetch
+                                            userId={block.targetUserId}
+                                        />
                                         <Box className="flex items-center gap-3">
                                             <select
                                                 className="rounded-md border border-white/10 bg-black/40 px-2 py-1 text-xs text-foreground outline-none focus:border-primary"

@@ -1,4 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react';
+import { MemoryRouter, Route, Routes } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { Admin } from './Admin';
@@ -22,34 +24,27 @@ vi.mock('@/ui/components/admin/AdminLayout', () => ({
 }));
 
 vi.mock('@/ui/components/admin/AdminSidebar', () => ({
-    AdminSidebar: ({
-        activeSection,
-        onSectionChange,
-    }: {
-        activeSection: string;
-        onSectionChange: (s: string) => void;
-    }) => (
-        <div data-active={activeSection} data-testid="admin-sidebar-inner">
-            {[
-                'overview',
-                'users',
-                'logs',
-                'badges',
-                'settings',
-                'servers',
-                'bans',
-            ].map((s) => (
-                <button
-                    data-testid={`nav-${s}`}
-                    key={s}
-                    type="button"
-                    onClick={() => onSectionChange(s)}
-                >
-                    {s}
-                </button>
-            ))}
-        </div>
-    ),
+    AdminSidebar: () => {
+        const location = useLocation();
+        const activeSection = location.pathname.split('/')[2] || 'overview';
+        return (
+            <div data-active={activeSection} data-testid="admin-sidebar-inner">
+                {[
+                    'overview',
+                    'users',
+                    'logs',
+                    'badges',
+                    'settings',
+                    'servers',
+                    'bans',
+                ].map((s) => (
+                    <Link data-testid={`nav-${s}`} key={s} to={`/admin/${s}`}>
+                        {s}
+                    </Link>
+                ))}
+            </div>
+        );
+    },
 }));
 
 vi.mock('@/ui/components/admin/AdminOverview', () => ({
@@ -98,6 +93,35 @@ vi.mock('@/ui/components/admin/AdminSettings', () => ({
     AdminSettings: () => <div data-testid="admin-settings" />,
 }));
 
+vi.mock('@/ui/components/admin/AdminServers', () => ({
+    AdminServers: ({
+        onViewServer,
+    }: {
+        onViewServer: (id: string) => void;
+    }) => (
+        <div data-testid="admin-servers">
+            <button
+                data-testid="view-server-btn"
+                onClick={() => onViewServer('server-1')}
+            >
+                View
+            </button>
+        </div>
+    ),
+}));
+
+vi.mock('@/ui/components/admin/AdminAwaitingReview', () => ({
+    AdminAwaitingReview: () => <div data-testid="admin-awaiting-review" />,
+}));
+
+vi.mock('@/ui/components/admin/AdminServerDetail', () => ({
+    AdminServerDetail: () => <div data-testid="admin-server-detail" />,
+}));
+
+vi.mock('@/ui/components/admin/AdminInvites', () => ({
+    AdminInvites: () => <div data-testid="admin-invites" />,
+}));
+
 vi.mock('@/ui/components/common/Text', () => ({
     Text: ({ children }: { children: React.ReactNode }) => (
         <span>{children}</span>
@@ -108,19 +132,37 @@ describe('Admin page', () => {
     beforeEach(() => vi.clearAllMocks());
 
     it('renders the Overview section by default', () => {
-        render(<Admin />);
+        render(
+            <MemoryRouter initialEntries={['/admin/overview']}>
+                <Routes>
+                    <Route element={<Admin />} path="/admin/*" />
+                </Routes>
+            </MemoryRouter>,
+        );
         expect(screen.getByTestId('admin-overview')).toBeInTheDocument();
     });
 
     it('shows "System Overview" as the title by default', () => {
-        render(<Admin />);
+        render(
+            <MemoryRouter initialEntries={['/admin/overview']}>
+                <Routes>
+                    <Route element={<Admin />} path="/admin/*" />
+                </Routes>
+            </MemoryRouter>,
+        );
         expect(screen.getByTestId('admin-title')).toHaveTextContent(
             'System Overview',
         );
     });
 
     it('passes "overview" as the active section to the sidebar by default', () => {
-        render(<Admin />);
+        render(
+            <MemoryRouter initialEntries={['/admin/overview']}>
+                <Routes>
+                    <Route element={<Admin />} path="/admin/*" />
+                </Routes>
+            </MemoryRouter>,
+        );
         expect(screen.getByTestId('admin-sidebar-inner')).toHaveAttribute(
             'data-active',
             'overview',
@@ -128,7 +170,13 @@ describe('Admin page', () => {
     });
 
     it('switches to the Users section when the sidebar emits "users"', () => {
-        render(<Admin />);
+        render(
+            <MemoryRouter initialEntries={['/admin/overview']}>
+                <Routes>
+                    <Route element={<Admin />} path="/admin/*" />
+                </Routes>
+            </MemoryRouter>,
+        );
         fireEvent.click(screen.getByTestId('nav-users'));
         expect(screen.getByTestId('admin-iam')).toBeInTheDocument();
         expect(screen.getByTestId('admin-title')).toHaveTextContent(
@@ -137,7 +185,13 @@ describe('Admin page', () => {
     });
 
     it('switches to Audit Logs when the sidebar emits "logs"', () => {
-        render(<Admin />);
+        render(
+            <MemoryRouter initialEntries={['/admin/overview']}>
+                <Routes>
+                    <Route element={<Admin />} path="/admin/*" />
+                </Routes>
+            </MemoryRouter>,
+        );
         fireEvent.click(screen.getByTestId('nav-logs'));
         expect(screen.getByTestId('admin-audit-logs')).toBeInTheDocument();
         expect(screen.getByTestId('admin-title')).toHaveTextContent(
@@ -146,14 +200,26 @@ describe('Admin page', () => {
     });
 
     it('switches to Badges when the sidebar emits "badges"', () => {
-        render(<Admin />);
+        render(
+            <MemoryRouter initialEntries={['/admin/overview']}>
+                <Routes>
+                    <Route element={<Admin />} path="/admin/*" />
+                </Routes>
+            </MemoryRouter>,
+        );
         fireEvent.click(screen.getByTestId('nav-badges'));
         expect(screen.getByTestId('admin-badges')).toBeInTheDocument();
         expect(screen.getByTestId('admin-title')).toHaveTextContent('Badges');
     });
 
     it('switches to Settings when the sidebar emits "settings"', () => {
-        render(<Admin />);
+        render(
+            <MemoryRouter initialEntries={['/admin/overview']}>
+                <Routes>
+                    <Route element={<Admin />} path="/admin/*" />
+                </Routes>
+            </MemoryRouter>,
+        );
         fireEvent.click(screen.getByTestId('nav-settings'));
         expect(screen.getByTestId('admin-settings')).toBeInTheDocument();
         expect(screen.getByTestId('admin-title')).toHaveTextContent(
@@ -162,16 +228,28 @@ describe('Admin page', () => {
     });
 
     it('shows "Coming Soon" content for "servers" section (no component implemented yet)', () => {
-        render(<Admin />);
+        render(
+            <MemoryRouter initialEntries={['/admin/overview']}>
+                <Routes>
+                    <Route element={<Admin />} path="/admin/*" />
+                </Routes>
+            </MemoryRouter>,
+        );
         fireEvent.click(screen.getByTestId('nav-servers'));
-        expect(screen.getByText('Coming Soon')).toBeInTheDocument();
+        expect(screen.getByTestId('admin-servers')).toBeInTheDocument();
         expect(screen.getByTestId('admin-title')).toHaveTextContent(
             'Server Moderation',
         );
     });
 
     it('shows "Coming Soon" content for "bans" section (no component implemented yet)', () => {
-        render(<Admin />);
+        render(
+            <MemoryRouter initialEntries={['/admin/overview']}>
+                <Routes>
+                    <Route element={<Admin />} path="/admin/*" />
+                </Routes>
+            </MemoryRouter>,
+        );
         fireEvent.click(screen.getByTestId('nav-bans'));
         expect(screen.getByText('Coming Soon')).toBeInTheDocument();
         expect(screen.getByTestId('admin-title')).toHaveTextContent(
@@ -180,7 +258,13 @@ describe('Admin page', () => {
     });
 
     it('shows UserDetail when AdminIAM emits onViewUser, and title becomes "User Details"', () => {
-        render(<Admin />);
+        render(
+            <MemoryRouter initialEntries={['/admin/overview']}>
+                <Routes>
+                    <Route element={<Admin />} path="/admin/*" />
+                </Routes>
+            </MemoryRouter>,
+        );
 
         fireEvent.click(screen.getByTestId('nav-users'));
         expect(screen.getByTestId('admin-iam')).toBeInTheDocument();
@@ -197,7 +281,13 @@ describe('Admin page', () => {
     });
 
     it('returns to the IAM list when UserDetail emits onBack', () => {
-        render(<Admin />);
+        render(
+            <MemoryRouter initialEntries={['/admin/overview']}>
+                <Routes>
+                    <Route element={<Admin />} path="/admin/*" />
+                </Routes>
+            </MemoryRouter>,
+        );
 
         fireEvent.click(screen.getByTestId('nav-users'));
         fireEvent.click(screen.getByTestId('view-user-btn'));
@@ -215,7 +305,13 @@ describe('Admin page', () => {
     });
 
     it('clears the selected user when navigating away from users and back', () => {
-        render(<Admin />);
+        render(
+            <MemoryRouter initialEntries={['/admin/overview']}>
+                <Routes>
+                    <Route element={<Admin />} path="/admin/*" />
+                </Routes>
+            </MemoryRouter>,
+        );
 
         fireEvent.click(screen.getByTestId('nav-users'));
         fireEvent.click(screen.getByTestId('view-user-btn'));

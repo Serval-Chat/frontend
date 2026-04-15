@@ -42,10 +42,10 @@ export const ServerSection: React.FC = () => {
     } = useServerDetails(selectedServerId);
     const {
         data: channels,
-        isLoading: isLoadingChannels,
+        isPlaceholderData: isPlaceholderChannels,
         isError: isChannelsError,
     } = useChannels(selectedServerId);
-    const { data: categories, isLoading: isLoadingCategories } =
+    const { data: categories, isPlaceholderData: isPlaceholderCategories } =
         useCategories(selectedServerId);
 
     useServerWS(selectedServerId ?? undefined);
@@ -58,7 +58,7 @@ export const ServerSection: React.FC = () => {
             return;
         }
 
-        if (!isLoadingChannels && channels) {
+        if (!isPlaceholderChannels && channels) {
             if (selectedChannelId) {
                 const channelExists = channels.some(
                     (c) => c._id === selectedChannelId,
@@ -99,7 +99,7 @@ export const ServerSection: React.FC = () => {
     }, [
         isServerError,
         isChannelsError,
-        isLoadingChannels,
+        isPlaceholderChannels,
         channels,
         selectedChannelId,
         selectedServerId,
@@ -120,7 +120,8 @@ export const ServerSection: React.FC = () => {
                 verified={server?.verified}
             />
 
-            {isLoadingChannels || isLoadingCategories ? (
+            {(!channels && !isPlaceholderChannels) ||
+            (!categories && !isPlaceholderCategories) ? (
                 <div className="flex flex-1 items-center justify-center">
                     <LoadingSpinner />
                 </div>

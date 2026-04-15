@@ -39,7 +39,7 @@ export const Reactions: React.FC<ReactionsProps> = ({
     const removeReaction = useRemoveReaction();
     const [showPicker, setShowPicker] = React.useState(false);
     const pickerRef = React.useRef<HTMLDivElement>(null);
-    const { customCategories } = useCustomEmojis();
+    const { customCategories } = useCustomEmojis({ enabled: showPicker });
 
     // Close picker when clicking outside
     React.useEffect(() => {

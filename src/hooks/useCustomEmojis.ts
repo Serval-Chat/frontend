@@ -1,33 +1,28 @@
 import React from 'react';
 
-import { useQueries } from '@tanstack/react-query';
-
-import { serversApi } from '@/api/servers/servers.api';
-import { useServers } from '@/api/servers/servers.queries';
+import { useAllServerEmojis, useServers } from '@/api/servers/servers.queries';
 import type { CustomEmojiCategory } from '@/ui/components/emoji/EmojiPicker';
 
-export const useCustomEmojis = (): {
+export const useCustomEmojis = (options?: {
+    enabled?: boolean;
+}): {
     customCategories: CustomEmojiCategory[];
     isLoading: boolean;
 } => {
     const { data: servers } = useServers();
-
-    const emojiQueries = useQueries({
-        queries: (servers || []).map((server) => ({
-            queryKey: ['servers', 'emojis', server._id],
-            queryFn: () => serversApi.getEmojis(server._id),
-            staleTime: 1000 * 60 * 5, // 5 minutes
-        })),
+    const { data: allEmojis, isLoading: isEmojisLoading } = useAllServerEmojis({
+        enabled: options?.enabled ?? true,
     });
 
     const customCategories = React.useMemo(() => {
-        if (!servers) return [];
+        if (!servers || !allEmojis) return [];
 
         return servers
-            .map((server, index) => {
-                const query = emojiQueries[index];
-                const emojis = query?.data;
-                if (!emojis || emojis.length === 0) return null;
+            .map((server) => {
+                const emojis = allEmojis.filter(
+                    (e) => e.serverId?.toString() === server._id,
+                );
+                if (emojis.length === 0) return null;
 
                 return {
                     id: server._id,
@@ -41,10 +36,10 @@ export const useCustomEmojis = (): {
                 } as CustomEmojiCategory;
             })
             .filter((cat): cat is CustomEmojiCategory => cat !== null);
-    }, [servers, emojiQueries]); // eslint-disable-line @tanstack/query/no-unstable-deps
+    }, [servers, allEmojis]);
 
     return {
         customCategories,
-        isLoading: emojiQueries.some((q) => q.isLoading),
+        isLoading: isEmojisLoading,
     };
 };

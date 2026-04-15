@@ -21,6 +21,7 @@ import {
     type LexicalEditor,
 } from 'lexical';
 import { ArrowUp, FileImage, Plus, Send, Smile, X } from 'lucide-react';
+import { useLocation, useParams } from 'react-router-dom';
 
 import { useChannelMessages, useUserMessages } from '@/api/chat/chat.queries';
 import type { ChatMessage } from '@/api/chat/chat.types';
@@ -121,6 +122,8 @@ export const MessageInput: React.FC<MessageInputProps> = ({
     const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
     const [hasText, setHasText] = useState(false);
     const [editor, setEditor] = useState<LexicalEditor | null>(null);
+    const location = useLocation();
+    const params = useParams();
     const [isSlowModeError, setIsSlowModeError] = useState(false);
 
     const isAutocompleteOpenRef = useRef<boolean>(false);
@@ -187,13 +190,25 @@ export const MessageInput: React.FC<MessageInputProps> = ({
         selectedChannelId ?? undefined,
     );
 
-    const { customCategories } = useCustomEmojis();
+    const { customCategories } = useCustomEmojis({ enabled: showEmojiPicker });
+
+    const isServerRoute = location.pathname.includes('/@server/');
+    const isServerContextReady =
+        !!selectedServerId &&
+        isServerRoute &&
+        selectedServerId === params.serverId;
 
     const { data: me } = useMe();
     const { data: friendsList = [] } = useFriends();
-    const { data: members = [] } = useMembers(selectedServerId);
-    const { data: roles = [] } = useRoles(selectedServerId);
-    const { data: channels = [] } = useChannels(selectedServerId);
+    const { data: members = [] } = useMembers(selectedServerId, {
+        enabled: isServerContextReady,
+    });
+    const { data: roles = [] } = useRoles(selectedServerId, {
+        enabled: isServerContextReady,
+    });
+    const { data: channels = [] } = useChannels(selectedServerId, {
+        enabled: isServerContextReady,
+    });
 
     const { data: channelMessages } = useChannelMessages(
         selectedServerId,

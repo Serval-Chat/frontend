@@ -81,11 +81,17 @@ export const Message: React.FC<MessageProps> = ({
     const pickerRef = React.useRef<HTMLDivElement>(null);
     const reactRef = React.useRef<HTMLButtonElement>(null);
     const { data: me } = useMe();
+    const isServerMessage =
+        !!message.serverId &&
+        (message.serverId === 'preview' ||
+            /^[a-f\d]{24}$/i.test(message.serverId));
     const { data: members } = useMembers(
-        message.serverId === 'preview' ? null : (message.serverId ?? null),
+        isServerMessage ? message.serverId! : null,
+        { enabled: isServerMessage },
     );
     const { data: serverRoles } = useRoles(
-        message.serverId === 'preview' ? null : (message.serverId ?? null),
+        isServerMessage ? message.serverId! : null,
+        { enabled: isServerMessage },
     );
 
     const senderMember = React.useMemo(
@@ -101,9 +107,11 @@ export const Message: React.FC<MessageProps> = ({
     const { mutate: togglePin } = useTogglePin();
     const { mutate: toggleSticky } = useToggleSticky();
     const { hasPermission, isOwner } = usePermissions(
-        message.serverId === 'preview' ? null : (message.serverId ?? null),
+        isServerMessage ? message.serverId! : null,
+        null,
+        { enabled: isServerMessage },
     );
-    const { customCategories } = useCustomEmojis();
+    const { customCategories } = useCustomEmojis({ enabled: showPicker });
 
     const myId = me?._id;
     const mentionsMe = React.useMemo(() => {

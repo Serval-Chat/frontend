@@ -6,6 +6,7 @@ import { CHAT_QUERY_KEYS } from '@/api/chat/chat.queries';
 import type { ChatMessage } from '@/api/chat/chat.types';
 import {
     FRIENDS_QUERY_KEY,
+    FRIEND_PROFILES_QUERY_KEY,
     FRIEND_REQUESTS_QUERY_KEY,
 } from '@/api/friends/friends.queries';
 import type { Friend } from '@/api/friends/friends.types';
@@ -112,13 +113,30 @@ export const setupGlobalWsHandlers = (
                         }),
                     );
                     dispatch(setBackendInstanceId(payload.instanceId));
-                    // Fetch initial unread status for servers
                     serversApi
                         .getUnreadStatus()
                         .then((unreadMap) => {
                             dispatch(setUnreadServers(unreadMap));
                         })
                         .catch(() => {});
+
+                    // Synchronize master lists after successful connection.
+                    // Because these master lists inherently seed the individual
+                    // user/server caches via their queryFn, this synchronizes
+                    // everything efficiently without N+1 fetch storms.
+                    void queryClient.invalidateQueries({ queryKey: ['me'] });
+                    void queryClient.invalidateQueries({
+                        queryKey: SERVERS_QUERY_KEYS.list,
+                    });
+                    void queryClient.invalidateQueries({
+                        queryKey: FRIENDS_QUERY_KEY,
+                    });
+                    void queryClient.invalidateQueries({
+                        queryKey: FRIEND_PROFILES_QUERY_KEY,
+                    });
+                    void queryClient.invalidateQueries({
+                        queryKey: FRIEND_REQUESTS_QUERY_KEY,
+                    });
                 }
             },
         ),
@@ -914,7 +932,9 @@ export const setupGlobalWsHandlers = (
 
     cleanups.push(
         wsClient.on(WsEvents.DISCONNECTED, () => {
-            void queryClient.invalidateQueries();
+            // We consciously do not invalidate active queries here to avoid
+            // triggering a giant fetch storm while the network might be down.
+            // Queries will be automatically invalidated on the AUTHENTICATED event.
         }),
     );
 

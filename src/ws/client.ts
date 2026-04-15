@@ -1,17 +1,20 @@
 /* eslint-disable no-console */
 import { v4 as uuidv4 } from 'uuid';
 
+import { removeAuthToken } from '@/utils/authToken';
+
 import { addWsDebugEvent } from './debug';
-import {
-    type IWsAuthenticatedEvent,
-    type IWsEnvelope,
-    WsEvents,
-} from './events';
+import { type IWsEnvelope, WsEvents } from './events';
 
 type EventHandler<T = unknown> = (
     payload: T,
     meta: IWsEnvelope['meta'],
 ) => void;
+
+interface IWsErrorPayload {
+    code: string;
+    details: { message: string; [key: string]: unknown };
+}
 
 /**
  * @description WebSocket client
@@ -27,6 +30,11 @@ class WsClient {
     private token: string | null = null;
     private messageQueue: string[] = [];
     private isAuthenticated = false;
+    private state:
+        | 'disconnected'
+        | 'connecting'
+        | 'connected'
+        | 'authenticated' = 'disconnected';
 
     constructor() {
         const baseUrl =
@@ -35,13 +43,25 @@ class WsClient {
     }
 
     /**
+     * Get the current state.
+     */
+    public getStatus():
+        | 'disconnected'
+        | 'connecting'
+        | 'connected'
+        | 'authenticated' {
+        return this.state;
+    }
+
+    /**
      * Connect to the WebSocket server.
      */
     public connect(token?: string): void {
-        if (token) this.token = token;
+        this.token = token || null;
         if (this.socket?.readyState === WebSocket.OPEN) return;
 
         console.log('[WS] Connecting to:', this.url);
+        this.state = 'connecting';
         this.socket = new WebSocket(this.url);
 
         this.socket.onopen = this.handleOpen.bind(this);
@@ -60,6 +80,8 @@ class WsClient {
             this.socket.close();
             this.socket = null;
         }
+        this.state = 'disconnected';
+        this.token = null;
     }
 
     /**
@@ -83,14 +105,10 @@ class WsClient {
                 !this.isAuthenticated &&
                 type !== WsEvents.AUTHENTICATE)
         ) {
-            console.debug(
-                `[WsClient] QUEUING message of type: ${type}. Socket state: ${this.socket?.readyState}, Authenticated: ${this.isAuthenticated}`,
-            );
             this.messageQueue.push(message);
             return;
         }
 
-        console.debug(`[WsClient] SENDING message of type: ${type}`);
         addWsDebugEvent({
             direction: 'out',
             type: envelope.event.type,
@@ -104,13 +122,11 @@ class WsClient {
      * Subscribe to an event.
      */
     public on<T = unknown>(type: string, handler: EventHandler<T>): () => void {
-        console.debug(`[WsClient] SUBSCRIBING to event: ${type}`);
         if (!this.handlers.has(type)) {
             this.handlers.set(type, new Set());
         }
         const set = this.handlers.get(type)!;
         set.add(handler as EventHandler<unknown>);
-        console.debug(`[WsClient] Total handlers for ${type}: ${set.size}`);
 
         return () => this.off(type, handler);
     }
@@ -119,30 +135,21 @@ class WsClient {
      * Unsubscribe from an event.
      */
     public off<T = unknown>(type: string, handler: EventHandler<T>): void {
-        console.debug(`[WsClient] UNSUBSCRIBING from event: ${type}`);
         const typeHandlers = this.handlers.get(type);
         if (typeHandlers) {
-            const deleted = typeHandlers.delete(
-                handler as EventHandler<unknown>,
-            );
-            console.debug(
-                `[WsClient] Unsubscribe for ${type}: ${deleted ? 'SUCCESS' : 'FAILED (handler not found)'}. Remaining: ${typeHandlers.size}`,
-            );
+            typeHandlers.delete(handler as EventHandler<unknown>);
         }
     }
 
     private handleOpen(): void {
         console.log('[WS] Connection established');
+        this.state = 'connected';
         this.reconnectAttempts = 0;
         this.startPing();
 
         if (this.token) {
-            console.debug('[WsClient] Token found, initiating authentication');
             this.authenticate(this.token);
         } else {
-            console.debug(
-                '[WsClient] No token found, flushing queue for guest',
-            );
             this.flushQueue();
         }
     }
@@ -155,18 +162,20 @@ class WsClient {
 
             addWsDebugEvent({ direction: 'in', type, payload, meta });
 
-            console.debug(
-                `[WsClient] RECEIVED message of type: ${type}`,
-                payload,
-            );
-
             if (type === WsEvents.AUTHENTICATED) {
-                console.log(
-                    '[WS] Authenticated as:',
-                    (payload as IWsAuthenticatedEvent).user.username,
-                );
                 this.isAuthenticated = true;
+                this.state = 'authenticated';
                 this.flushQueue();
+            }
+
+            if (type === 'error') {
+                const errorPayload = payload as IWsErrorPayload;
+                if (errorPayload.code === 'UNAUTHORIZED') {
+                    console.error(
+                        '[WS] Authentication failed, clearing token...',
+                    );
+                    void removeAuthToken();
+                }
             }
 
             this.emit(type, payload, meta);
@@ -177,17 +186,11 @@ class WsClient {
 
     private flushQueue(): void {
         if (this.socket?.readyState === WebSocket.OPEN) {
-            console.log(
-                `[WS] Flushing ${this.messageQueue.length} queued messages`,
-            );
             while (this.messageQueue.length > 0) {
                 const msg = this.messageQueue.shift();
                 if (msg) {
                     try {
                         const parsed = JSON.parse(msg) as IWsEnvelope;
-                        console.debug(
-                            `[WsClient] Flushing message of type: ${parsed.event.type}`,
-                        );
                         addWsDebugEvent({
                             direction: 'out',
                             type: parsed.event.type,
@@ -195,7 +198,6 @@ class WsClient {
                             meta: parsed.meta,
                         });
                     } catch {
-                        console.debug('[WsClient] Flushing raw message');
                         addWsDebugEvent({
                             direction: 'out',
                             type: 'unknown',
@@ -214,14 +216,10 @@ class WsClient {
         meta: IWsEnvelope['meta'] = { ts: Date.now() },
     ): void {
         const typeHandlers = this.handlers.get(type);
-        console.debug(
-            `[WsClient] EMITTING ${type}. Registered handlers: ${typeHandlers?.size || 0}`,
-        );
 
         if (typeHandlers) {
             typeHandlers.forEach((handler) => {
                 try {
-                    console.debug(`[WsClient] Executing handler for ${type}`);
                     handler(payload, meta);
                 } catch (error) {
                     console.error(`[WS] Error in handler for ${type}:`, error);
@@ -239,6 +237,7 @@ class WsClient {
         console.log('[WS] Connection closed:', event.reason);
         this.stopPing();
         this.isAuthenticated = false;
+        this.state = 'disconnected';
         this.emit(WsEvents.DISCONNECTED, {
             code: event.code,
             reason: event.reason,

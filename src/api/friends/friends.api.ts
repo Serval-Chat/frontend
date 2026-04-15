@@ -1,10 +1,18 @@
 import { apiClient } from '@/api/client';
+import type { User } from '@/api/users/users.types';
 
 import type { Friend, FriendRequest } from './friends.types';
 
 export const friendsApi = {
     getFriends: async (): Promise<Friend[]> => {
         const response = await apiClient.get<Friend[]>('/api/v1/friends');
+        return response.data;
+    },
+
+    getFriendProfiles: async (): Promise<User[]> => {
+        const response = await apiClient.get<User[]>(
+            '/api/v1/friends/profiles',
+        );
         return response.data;
     },
 

@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 import {
     type UseMutationResult,
     type UseQueryResult,
+    keepPreviousData,
     useMutation,
     useQuery,
     useQueryClient,
@@ -14,7 +15,9 @@ import { useNavigate } from 'react-router-dom';
 import type { Emoji } from '@/api/emojis/emojis.types';
 import type { ServerSettings, User } from '@/api/users/users.types';
 import { setUnreadServers } from '@/store/slices/unreadSlice';
+import { setVoiceParticipants } from '@/store/slices/voiceSlice';
 import { useToast } from '@/ui/components/common/Toast';
+import { hasAuthToken } from '@/utils/authToken';
 
 import { serversApi } from './servers.api';
 import type {
@@ -26,6 +29,12 @@ import type {
     ServerBan,
     ServerMember,
 } from './servers.types';
+
+const isValidId = (id: string | null | undefined): boolean => {
+    if (!id) return false;
+    if (id === 'preview') return true; // Account for the special 'preview' ID
+    return /^[a-f\d]{24}$/i.test(id);
+};
 
 export const SERVERS_QUERY_KEYS = {
     list: ['servers', 'list'] as const,
@@ -42,13 +51,27 @@ export const SERVERS_QUERY_KEYS = {
     emojis: (serverId: string | null) =>
         ['servers', 'emojis', serverId] as const,
     bans: (serverId: string | null) => ['servers', 'bans', serverId] as const,
+    voiceStates: (serverId: string | null) =>
+        ['servers', 'voice-states', serverId] as const,
 };
 
-export const useServers = (): UseQueryResult<Server[], Error> =>
-    useQuery({
+export const useServers = (): UseQueryResult<Server[], Error> => {
+    const queryClient = useQueryClient();
+    return useQuery({
         queryKey: SERVERS_QUERY_KEYS.list,
-        queryFn: () => serversApi.getServers(),
+        queryFn: async () => {
+            const servers = await serversApi.getServers();
+            for (const server of servers) {
+                queryClient.setQueryData(
+                    SERVERS_QUERY_KEYS.details(server._id),
+                    server,
+                );
+            }
+            return servers;
+        },
+        enabled: hasAuthToken(),
     });
+};
 
 export const useUnreadStatus = (): UseQueryResult<
     Record<string, { hasUnread: boolean; pingCount: number }>,
@@ -58,6 +81,7 @@ export const useUnreadStatus = (): UseQueryResult<
     const query = useQuery({
         queryKey: SERVERS_QUERY_KEYS.unread(),
         queryFn: () => serversApi.getUnreadStatus(),
+        enabled: hasAuthToken(),
     });
 
     useEffect(() => {
@@ -169,47 +193,78 @@ export const useJoinServer = (): UseMutationResult<
 
 export const useServerDetails = (
     serverId: string | null,
+    options: { enabled?: boolean } = {},
 ): UseQueryResult<Server, Error> =>
     useQuery({
         queryKey: SERVERS_QUERY_KEYS.details(serverId),
         queryFn: () => serversApi.getServerDetails(serverId!),
-        enabled: !!serverId,
+        enabled:
+            (options.enabled ?? true) &&
+            !!serverId &&
+            isValidId(serverId) &&
+            hasAuthToken(),
+        staleTime: 5 * 60 * 1000,
+        placeholderData: keepPreviousData,
     });
 
 export const useChannels = (
     serverId: string | null,
+    options: { enabled?: boolean } = {},
 ): UseQueryResult<Channel[], Error> =>
     useQuery({
         queryKey: SERVERS_QUERY_KEYS.channels(serverId),
         queryFn: () => serversApi.getChannels(serverId!),
-        enabled: !!serverId,
+        enabled:
+            (options.enabled ?? true) &&
+            !!serverId &&
+            isValidId(serverId) &&
+            hasAuthToken(),
+        placeholderData: keepPreviousData,
     });
 
 export const useCategories = (
     serverId: string | null,
+    options: { enabled?: boolean } = {},
 ): UseQueryResult<Category[], Error> =>
     useQuery({
         queryKey: SERVERS_QUERY_KEYS.categories(serverId),
         queryFn: () => serversApi.getCategories(serverId!),
-        enabled: !!serverId,
+        enabled:
+            (options.enabled ?? true) &&
+            !!serverId &&
+            isValidId(serverId) &&
+            hasAuthToken(),
+        placeholderData: keepPreviousData,
     });
 
 export const useMembers = (
     serverId: string | null,
+    options: { enabled?: boolean } = {},
 ): UseQueryResult<ServerMember[], Error> =>
     useQuery({
         queryKey: SERVERS_QUERY_KEYS.members(serverId),
         queryFn: () => serversApi.getMembers(serverId!),
-        enabled: !!serverId,
+        enabled:
+            (options.enabled ?? true) &&
+            !!serverId &&
+            isValidId(serverId) &&
+            hasAuthToken(),
+        placeholderData: keepPreviousData,
     });
 
 export const useRoles = (
     serverId: string | null,
+    options: { enabled?: boolean } = {},
 ): UseQueryResult<Role[], Error> =>
     useQuery({
         queryKey: SERVERS_QUERY_KEYS.roles(serverId),
         queryFn: () => serversApi.getRoles(serverId!),
-        enabled: !!serverId,
+        enabled:
+            (options.enabled ?? true) &&
+            !!serverId &&
+            isValidId(serverId) &&
+            hasAuthToken(),
+        placeholderData: keepPreviousData,
     });
 
 export const useServerEmojis = (
@@ -218,7 +273,17 @@ export const useServerEmojis = (
     useQuery({
         queryKey: SERVERS_QUERY_KEYS.emojis(serverId),
         queryFn: () => serversApi.getEmojis(serverId!),
-        enabled: !!serverId,
+        enabled: !!serverId && hasAuthToken(),
+    });
+
+export const useAllServerEmojis = (options?: {
+    enabled?: boolean;
+}): UseQueryResult<Emoji[], Error> =>
+    useQuery({
+        queryKey: ['servers', 'emojis', 'all'],
+        queryFn: () => serversApi.getAllServerEmojis(),
+        enabled: options?.enabled ?? true,
+        staleTime: 1000 * 60 * 5, // 5 minutes
     });
 
 export const useUploadEmoji = (
@@ -331,6 +396,27 @@ export const useServerRoles = (
         queryFn: () => serversApi.getRoles(serverId),
         enabled: !!serverId,
     });
+
+export const useVoiceStates = (
+    serverId: string | null,
+): UseQueryResult<Record<string, string[]>, Error> => {
+    const dispatch = useDispatch();
+    const query = useQuery({
+        queryKey: SERVERS_QUERY_KEYS.voiceStates(serverId),
+        queryFn: () => serversApi.getVoiceStates(serverId!),
+        enabled: !!serverId && isValidId(serverId) && hasAuthToken(),
+    });
+
+    useEffect(() => {
+        if (query.data) {
+            Object.entries(query.data).forEach(([channelId, userIds]) => {
+                dispatch(setVoiceParticipants({ channelId, userIds }));
+            });
+        }
+    }, [query.data, dispatch]);
+
+    return query;
+};
 
 export const useChannelPermissions = (
     serverId: string,

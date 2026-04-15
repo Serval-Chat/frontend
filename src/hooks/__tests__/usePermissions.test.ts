@@ -19,6 +19,11 @@ vi.mock('@/api/users/users.queries', () => ({
     useMe: vi.fn(),
 }));
 
+vi.mock('react-router-dom', () => ({
+    useLocation: vi.fn().mockReturnValue({ pathname: '/chat/@server/server1' }),
+    useParams: vi.fn().mockReturnValue({ serverId: 'server1' }),
+}));
+
 describe('usePermissions', () => {
     const mockMe = { _id: 'user1' } as User;
     const mockServer = { _id: 'server1', ownerId: 'owner1' } as Server;

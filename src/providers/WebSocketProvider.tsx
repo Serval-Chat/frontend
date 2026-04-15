@@ -24,9 +24,11 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
     const dispatch = useAppDispatch();
 
     useEffect(() => {
-        initTauriNotifications(queryClient).catch(console.error);
+        if (isAuthenticated) {
+            initTauriNotifications(queryClient).catch(console.error);
+        }
         return setupGlobalWsHandlers(queryClient, dispatch);
-    }, [queryClient, dispatch]);
+    }, [queryClient, dispatch, isAuthenticated]);
 
     useEffect(() => {
         if (isAuthenticated) {

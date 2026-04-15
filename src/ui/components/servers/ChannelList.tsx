@@ -17,16 +17,15 @@ import { useNavigate } from 'react-router-dom';
 
 import { usePings } from '@/api/pings/pings.queries';
 import { serversApi } from '@/api/servers/servers.api';
-import { useServerDetails } from '@/api/servers/servers.queries';
+import {
+    useServerDetails,
+    useVoiceStates,
+} from '@/api/servers/servers.queries';
 import type { Category, Channel } from '@/api/servers/servers.types';
 import { useMe } from '@/api/users/users.queries';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import {
-    addVoiceParticipant,
-    joinVoiceRoom,
-    setVoiceParticipants,
-} from '@/store/slices/voiceSlice';
+import { addVoiceParticipant, joinVoiceRoom } from '@/store/slices/voiceSlice';
 import { ConfirmLinkModal } from '@/ui/components/common/ConfirmLinkModal';
 import { ContextMenu } from '@/ui/components/common/ContextMenu';
 import type { ContextMenuItem } from '@/ui/components/common/ContextMenu';
@@ -192,18 +191,7 @@ export const ChannelList: React.FC<ChannelListProps> = ({
     const [syncLock, setSyncLock] = useState(false);
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
-    useEffect(() => {
-        if (selectedServerId) {
-            serversApi
-                .getVoiceStates(selectedServerId)
-                .then((states) => {
-                    Object.entries(states).forEach(([channelId, userIds]) => {
-                        dispatch(setVoiceParticipants({ channelId, userIds }));
-                    });
-                })
-                .catch(() => {});
-        }
-    }, [selectedServerId, dispatch]);
+    useVoiceStates(selectedServerId);
 
     useEffect(() => {
         const handleResize = (): void => setIsMobile(window.innerWidth < 768);
@@ -211,7 +199,7 @@ export const ChannelList: React.FC<ChannelListProps> = ({
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
-    // Sync items when props change (only when not reordering and not locked)
+    // Sync items when props change
     useEffect(() => {
         if (isReordering || syncLock) return;
 

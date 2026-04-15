@@ -150,7 +150,7 @@ export const ServerOverviewSettings: React.FC<ServerOverviewSettingsProps> = ({
         if (!server || confirmDeleteName !== server.name) return;
         deleteServer(serverId, {
             onSuccess: () => {
-                window.location.href = '/';
+                window.location.href = '/chat/@me';
             },
         });
     };

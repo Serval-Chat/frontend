@@ -1,3 +1,5 @@
+import * as EmailValidator from 'email-validator';
+
 /**
  * @description Validation utilities for various fields.
  */
@@ -6,6 +8,7 @@ export const validateLogin = (value: string): string => {
     if (!value.trim()) return 'Login is required';
     if (value.length < 3) return 'Login must be at least 3 characters';
     if (value.length > 50) return 'Login must be at most 50 characters';
+    if (!EmailValidator.validate(value)) return 'Invalid email';
     return '';
 };
 

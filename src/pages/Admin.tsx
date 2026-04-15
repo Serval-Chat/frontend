@@ -54,11 +54,8 @@ export const Admin = (): ReactNode => {
 
     const renderContent = (): ReactNode => (
         <Routes>
-            <Route
-                element={<Navigate replace to="/admin/overview" />}
-                path="/"
-            />
-            <Route element={<AdminOverview />} path="/overview" />
+            <Route element={<Navigate replace to="overview" />} path="/" />
+            <Route element={<AdminOverview />} path="overview" />
 
             <Route
                 element={
@@ -66,9 +63,9 @@ export const Admin = (): ReactNode => {
                         onViewUser={(id) => void navigate(`/admin/users/${id}`)}
                     />
                 }
-                path="/users"
+                path="users"
             />
-            <Route element={<AdminUserDetailWrapper />} path="/users/:userId" />
+            <Route element={<AdminUserDetailWrapper />} path="users/:userId" />
 
             <Route
                 element={
@@ -78,7 +75,7 @@ export const Admin = (): ReactNode => {
                         }
                     />
                 }
-                path="/servers"
+                path="servers"
             />
             <Route
                 element={
@@ -88,17 +85,17 @@ export const Admin = (): ReactNode => {
                         }
                     />
                 }
-                path="/servers/review"
+                path="servers/review"
             />
             <Route
                 element={<AdminServerDetailWrapper />}
-                path="/servers/:serverId"
+                path="servers/:serverId"
             />
 
-            <Route element={<AdminAuditLogs />} path="/logs" />
-            <Route element={<AdminBadges />} path="/badges" />
-            <Route element={<AdminInvites />} path="/invites" />
-            <Route element={<AdminSettings />} path="/settings" />
+            <Route element={<AdminAuditLogs />} path="logs" />
+            <Route element={<AdminBadges />} path="badges" />
+            <Route element={<AdminInvites />} path="invites" />
+            <Route element={<AdminSettings />} path="settings" />
 
             <Route
                 element={

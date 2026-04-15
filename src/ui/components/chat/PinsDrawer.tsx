@@ -30,8 +30,8 @@ const PinnedMessageItem: React.FC<{
     channelId: string;
     onJump: (id: string) => void;
 }> = ({ pin, serverId, channelId, onJump }) => {
-    const { data: members } = useMembers(serverId);
-    const { data: serverRoles } = useRoles(serverId);
+    const { data: members } = useMembers(serverId, { enabled: !!serverId });
+    const { data: serverRoles } = useRoles(serverId, { enabled: !!serverId });
 
     const processedPin = React.useMemo(() => {
         const member = members?.find((m) => m.userId === pin.senderId);

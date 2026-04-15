@@ -77,12 +77,16 @@ export const MessageEdit: React.FC<MessageEditProps> = ({
 
     const editChannelMessage = useEditChannelMessage();
     const editUserMessage = useEditUserMessage();
-    const { customCategories } = useCustomEmojis();
+    const { customCategories } = useCustomEmojis({ enabled: showEmojiPicker });
 
     const { data: friends } = useFriends();
-    const { data: channels } = useChannels(serverId || '');
-    const { data: members } = useMembers(serverId || '');
-    const { data: roles } = useRoles(serverId || '');
+    const { data: channels } = useChannels(serverId || '', {
+        enabled: !!serverId,
+    });
+    const { data: members } = useMembers(serverId || '', {
+        enabled: !!serverId,
+    });
+    const { data: roles } = useRoles(serverId || '', { enabled: !!serverId });
 
     const friendUsers = React.useMemo(() => {
         if (!friends) return [];

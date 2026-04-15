@@ -16,6 +16,8 @@ import { MainChat } from './MainChat';
 
 vi.mock('react-router-dom', () => ({
     useNavigate: vi.fn(),
+    useLocation: vi.fn().mockReturnValue({ pathname: '/chat/@server/server1' }),
+    useParams: vi.fn().mockReturnValue({ serverId: 'server1' }),
 }));
 
 vi.mock('@/store/hooks', () => ({

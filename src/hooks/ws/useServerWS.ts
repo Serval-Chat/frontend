@@ -47,7 +47,7 @@ export const useServerWS = (serverId?: string): void => {
         WsEvents.SERVER_UPDATED,
         useCallback(
             (payload: { serverId: string }): void => {
-                if (payload.serverId === serverId || !serverId) {
+                if (payload.serverId === serverId) {
                     invalidateServer();
                 }
             },
@@ -60,7 +60,7 @@ export const useServerWS = (serverId?: string): void => {
         WsEvents.SERVER_ICON_UPDATED,
         useCallback(
             (payload: { serverId: string }): void => {
-                if (payload.serverId === serverId || !serverId) {
+                if (payload.serverId === serverId) {
                     invalidateServer();
                 }
             },
@@ -72,7 +72,7 @@ export const useServerWS = (serverId?: string): void => {
         WsEvents.SERVER_BANNER_UPDATED,
         useCallback(
             (payload: { serverId: string }): void => {
-                if (payload.serverId === serverId || !serverId) {
+                if (payload.serverId === serverId) {
                     invalidateServer();
                 }
             },
@@ -84,7 +84,7 @@ export const useServerWS = (serverId?: string): void => {
         WsEvents.OWNERSHIP_TRANSFERRED,
         useCallback(
             (payload: { serverId: string }): void => {
-                if (payload.serverId === serverId || !serverId) {
+                if (payload.serverId === serverId) {
                     invalidateServer();
                     // Also invalidate me to update ownership status if we are involved
                     void queryClient.invalidateQueries({ queryKey: ['me'] });
@@ -211,7 +211,7 @@ export const useServerWS = (serverId?: string): void => {
         WsEvents.MEMBER_UPDATED,
         useCallback(
             (payload: { serverId: string }): void => {
-                if (payload.serverId === serverId || !serverId) {
+                if (payload.serverId === serverId) {
                     void queryClient.invalidateQueries({
                         queryKey: SERVERS_QUERY_KEYS.members(payload.serverId),
                     });
@@ -225,7 +225,7 @@ export const useServerWS = (serverId?: string): void => {
         WsEvents.MEMBER_REMOVED,
         useCallback(
             (payload: { serverId: string; userId: string }): void => {
-                if (payload.serverId === serverId || !serverId) {
+                if (payload.serverId === serverId) {
                     void queryClient.invalidateQueries({
                         queryKey: SERVERS_QUERY_KEYS.members(payload.serverId),
                     });
@@ -241,7 +241,7 @@ export const useServerWS = (serverId?: string): void => {
         WsEvents.MEMBER_ADDED,
         useCallback(
             (payload: { serverId: string; userId: string }): void => {
-                if (payload.serverId === serverId || !serverId) {
+                if (payload.serverId === serverId) {
                     void queryClient.invalidateQueries({
                         queryKey: SERVERS_QUERY_KEYS.members(payload.serverId),
                     });
@@ -256,7 +256,7 @@ export const useServerWS = (serverId?: string): void => {
         WsEvents.CHANNEL_UNREAD_UPDATED,
         useCallback(
             (payload: { serverId: string; channelId: string }): void => {
-                if (payload.serverId === serverId || !serverId) {
+                if (payload.serverId === serverId) {
                     invalidateChannels();
                 }
             },

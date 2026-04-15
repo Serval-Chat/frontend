@@ -1,5 +1,7 @@
 import { useMemo } from 'react';
 
+import { useLocation, useParams } from 'react-router-dom';
+
 import {
     useCategories,
     useChannels,
@@ -20,13 +22,26 @@ export interface UsePermissionsReturn {
 export const usePermissions = (
     serverId: string | null,
     channelId?: string | null,
+    options?: { enabled?: boolean },
 ): UsePermissionsReturn => {
+    const location = useLocation();
+    const params = useParams();
+    const isServerRoute = location.pathname.includes('/@server/');
+    const isEnabled =
+        (options?.enabled ?? true) &&
+        isServerRoute &&
+        serverId === params.serverId;
+
     const { data: currentUser } = useMe();
-    const { data: members } = useMembers(serverId);
-    const { data: roles } = useRoles(serverId);
-    const { data: server } = useServerDetails(serverId);
-    const { data: channels } = useChannels(serverId);
-    const { data: categories } = useCategories(serverId);
+    const { data: members } = useMembers(serverId, { enabled: isEnabled });
+    const { data: roles } = useRoles(serverId, { enabled: isEnabled });
+    const { data: server } = useServerDetails(serverId, { enabled: isEnabled });
+    const { data: channels } = useChannels(serverId, {
+        enabled: isEnabled && !!channelId,
+    });
+    const { data: categories } = useCategories(serverId, {
+        enabled: isEnabled && !!channelId,
+    });
 
     const member = useMemo(() => {
         if (!members || !currentUser || !serverId) return null;
@@ -211,7 +226,6 @@ export const usePermissions = (
             !members ||
             !roles ||
             !server ||
-            !channels ||
-            !categories,
+            (!!channelId && (!channels || !categories)),
     };
 };

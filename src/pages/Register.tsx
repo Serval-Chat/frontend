@@ -1,5 +1,7 @@
+import React, { useState } from 'react';
+
 import { AnimatePresence, motion } from 'framer-motion';
-import { Loader2 } from 'lucide-react';
+import { Eye, EyeOff, Loader2 } from 'lucide-react';
 
 import { useRegisterForm } from '@/hooks/useRegisterForm';
 import { FormContent } from '@/ui/components/auth/FormContent';
@@ -23,13 +25,19 @@ export const Register: React.FC = () => {
         setUsername,
         password,
         setPassword,
+        confirmPassword,
+        setConfirmPassword,
         inviteToken,
         setInviteToken,
         status,
         errors,
         isLoading,
+        isFormValid,
         handleSubmit,
     } = useRegisterForm();
+
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
     return (
         <Box className="relative flex min-h-screen w-full flex-col items-center justify-center overflow-hidden bg-background p-md">
@@ -96,15 +104,38 @@ export const Register: React.FC = () => {
                         </AnimatePresence>
                     </InputWrapper>
                     <InputWrapper>
-                        <Input
-                            autoComplete="new-password"
-                            className="bg-background/50"
-                            name="password"
-                            placeholder="Password"
-                            type="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                        />
+                        <div className="relative">
+                            <Input
+                                autoComplete="new-password"
+                                className="bg-background/50 pr-10"
+                                name="password"
+                                placeholder="Password"
+                                type={showPassword ? 'text' : 'password'}
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                            />
+                            <button
+                                aria-label={
+                                    showPassword
+                                        ? 'Hide password'
+                                        : 'Show password'
+                                }
+                                className="absolute top-1/2 right-3 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                                title={
+                                    showPassword
+                                        ? 'Hide password'
+                                        : 'Show password'
+                                }
+                                type="button"
+                                onClick={() => setShowPassword(!showPassword)}
+                            >
+                                {showPassword ? (
+                                    <EyeOff size={18} />
+                                ) : (
+                                    <Eye size={18} />
+                                )}
+                            </button>
+                        </div>
                         <AnimatePresence>
                             {errors.password && (
                                 <motion.small
@@ -114,6 +145,56 @@ export const Register: React.FC = () => {
                                     initial={{ opacity: 0, height: 0 }}
                                 >
                                     {errors.password}
+                                </motion.small>
+                            )}
+                        </AnimatePresence>
+                    </InputWrapper>
+                    <InputWrapper>
+                        <div className="relative">
+                            <Input
+                                autoComplete="new-password"
+                                className="bg-background/50 pr-10"
+                                name="confirmPassword"
+                                placeholder="Confirm Password"
+                                type={showConfirmPassword ? 'text' : 'password'}
+                                value={confirmPassword}
+                                onChange={(e) =>
+                                    setConfirmPassword(e.target.value)
+                                }
+                            />
+                            <button
+                                aria-label={
+                                    showConfirmPassword
+                                        ? 'Hide password'
+                                        : 'Show password'
+                                }
+                                className="absolute top-1/2 right-3 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                                title={
+                                    showConfirmPassword
+                                        ? 'Hide password'
+                                        : 'Show password'
+                                }
+                                type="button"
+                                onClick={() =>
+                                    setShowConfirmPassword(!showConfirmPassword)
+                                }
+                            >
+                                {showConfirmPassword ? (
+                                    <EyeOff size={18} />
+                                ) : (
+                                    <Eye size={18} />
+                                )}
+                            </button>
+                        </div>
+                        <AnimatePresence>
+                            {errors.confirmPassword && (
+                                <motion.small
+                                    animate={{ opacity: 1, height: 'auto' }}
+                                    className="mt-1 block h-0 overflow-hidden text-xs text-red-400"
+                                    exit={{ opacity: 0, height: 0 }}
+                                    initial={{ opacity: 0, height: 0 }}
+                                >
+                                    {errors.confirmPassword}
                                 </motion.small>
                             )}
                         </AnimatePresence>
@@ -141,7 +222,7 @@ export const Register: React.FC = () => {
                     </InputWrapper>
                     <Button
                         className="flex h-12 w-full items-center justify-center gap-2 py-sm text-lg font-semibold"
-                        disabled={isLoading}
+                        disabled={isLoading || !isFormValid}
                         type="submit"
                         variant="normal"
                     >

@@ -7,6 +7,7 @@ import {
 } from '@tanstack/react-query';
 
 import { useToast } from '@/ui/components/common/Toast';
+import { hasAuthToken } from '@/utils/authToken';
 
 import {
     type BlockProfile,
@@ -21,10 +22,13 @@ export const BLOCKS_QUERY_KEYS = {
     list: ['blocks', 'list'] as const,
 };
 
-export const useBlockProfiles = (): UseQueryResult<BlockProfile[], Error> =>
+export const useBlockProfiles = (
+    options: { enabled?: boolean } = {},
+): UseQueryResult<BlockProfile[], Error> =>
     useQuery({
         queryKey: BLOCKS_QUERY_KEYS.profiles,
         queryFn: blocksApi.getProfiles,
+        enabled: (options.enabled ?? true) && hasAuthToken(),
     });
 
 export const useCreateBlockProfile = (): UseMutationResult<
@@ -111,10 +115,13 @@ export const useDeleteBlockProfile = (): UseMutationResult<
     });
 };
 
-export const useBlocks = (): UseQueryResult<BlockRelationship[], Error> =>
+export const useBlocks = (
+    options: { enabled?: boolean } = {},
+): UseQueryResult<BlockRelationship[], Error> =>
     useQuery({
         queryKey: BLOCKS_QUERY_KEYS.list,
         queryFn: blocksApi.getBlocks,
+        enabled: (options.enabled ?? true) && hasAuthToken(),
     });
 
 export const useUpsertBlock = (): UseMutationResult<

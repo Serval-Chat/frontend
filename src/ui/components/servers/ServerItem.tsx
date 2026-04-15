@@ -39,11 +39,14 @@ export const ServerItem: React.FC<ServerItemProps> = ({
 }) => {
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
     const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false);
-    const { hasPermission, isOwner } = usePermissions(server._id);
+    const { hasPermission, isOwner } = usePermissions(server._id, null, {
+        enabled: isActive,
+    });
     const { mutate: markAsRead } = useMarkServerRead();
     const { data: me } = useMe();
     const { mutate: updateSettings } = useUpdateServerSettings();
 
+    // The owner check is instant off the cache. The role-based permissions will only resolve if the server is actively selected.
     const canManageServer =
         isOwner ||
         hasPermission('manageServer') ||

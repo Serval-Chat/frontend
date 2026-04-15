@@ -46,6 +46,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "deepfilternet3-noise-filter": "^1.2.1",
+    "email-validator": "^2.0.4",
     "emoji-datasource-apple": "^16.0.0",
     "framer-motion": "^12.23.26",
     "gif.js": "^0.2.0",

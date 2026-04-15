@@ -19,7 +19,9 @@ export const RoleMention: React.FC<RoleMentionProps> = ({ roleId }) => {
     const selectedServerId = useAppSelector(
         (state) => state.nav.selectedServerId,
     );
-    const { data: roles, isLoading } = useRoles(selectedServerId);
+    const { data: roles, isLoading } = useRoles(selectedServerId, {
+        enabled: !!selectedServerId,
+    });
 
     const role = roles?.find((r) => r._id === roleId);
 

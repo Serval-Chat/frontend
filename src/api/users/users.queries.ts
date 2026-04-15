@@ -32,6 +32,7 @@ export const useUserById = (
         queryKey: ['user', id],
         queryFn: () => usersApi.getById(id),
         enabled: (options.enabled ?? true) && !!id,
+        staleTime: 5 * 60 * 1000,
     });
 
 export const useUpdateBio = (): UseMutationResult<
