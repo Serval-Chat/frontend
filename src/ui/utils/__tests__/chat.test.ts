@@ -33,9 +33,6 @@ describe('chat utils', () => {
 
     describe('getHighestColorRoleForMember', () => {
         it('returns the highest role with a color', () => {
-            // role1: pos 1, #ff0000
-            // role2: pos 2, null
-            // role3: pos 3, #00ff00
             expect(getHighestColorRoleForMember(['1', '2'], roleMap)).toBe(
                 role1,
             );
@@ -56,6 +53,69 @@ describe('chat utils', () => {
             ).toBeUndefined();
         });
 
+        it('ignores the default color #99aab5 and passes through to the next role', () => {
+            const defaultColorRole = {
+                _id: '8',
+                position: 8,
+                color: '#99aab5',
+            } as Role;
+            const customColorRole = {
+                _id: '9',
+                position: 5,
+                color: '#ff00ff',
+            } as Role;
+            const localMap = new Map<string, Role>([
+                ['8', defaultColorRole],
+                ['9', customColorRole],
+            ]);
+
+            expect(getHighestColorRoleForMember(['8', '9'], localMap)).toBe(
+                customColorRole,
+            );
+
+            expect(
+                getHighestColorRoleForMember(['8'], localMap),
+            ).toBeUndefined();
+        });
+
+        it('handles @everyone role properly (passes through if default, applies if custom)', () => {
+            const everyoneDefault = {
+                _id: '10',
+                name: '@everyone',
+                position: 0,
+                color: '#99aab5',
+            } as Role;
+            const everyoneCustom = {
+                _id: '11',
+                name: '@everyone',
+                position: 0,
+                color: '#123456',
+            } as Role;
+            const someRole = {
+                _id: '12',
+                name: 'Some Role',
+                position: 1,
+                color: '#99aab5',
+            } as Role;
+
+            const mapDefault = new Map<string, Role>([
+                ['10', everyoneDefault],
+                ['12', someRole],
+            ]);
+            const mapCustom = new Map<string, Role>([
+                ['11', everyoneCustom],
+                ['12', someRole],
+            ]);
+
+            expect(
+                getHighestColorRoleForMember(['10', '12'], mapDefault),
+            ).toBeUndefined();
+
+            expect(getHighestColorRoleForMember(['11', '12'], mapCustom)).toBe(
+                everyoneCustom,
+            );
+        });
+
         it('supports multi-color roles', () => {
             const multiColorRole = {
                 _id: '6',
@@ -65,6 +125,19 @@ describe('chat utils', () => {
             const localMap = new Map<string, Role>([['6', multiColorRole]]);
             expect(getHighestColorRoleForMember(['6'], localMap)).toBe(
                 multiColorRole,
+            );
+        });
+
+        it('supports gradient roles defined by startColor/endColor', () => {
+            const gradientRole = {
+                _id: '7',
+                position: 7,
+                startColor: '#111111',
+                endColor: '#222222',
+            } as Role;
+            const localMap = new Map<string, Role>([['7', gradientRole]]);
+            expect(getHighestColorRoleForMember(['7'], localMap)).toBe(
+                gradientRole,
             );
         });
     });

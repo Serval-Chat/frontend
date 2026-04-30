@@ -81,6 +81,7 @@ export interface User {
     _id: string;
     login: string;
     username: string;
+    isBot?: boolean;
     displayName?: string | null;
     profilePicture?: string;
     usernameFont?: UsernameFont;
@@ -100,6 +101,7 @@ export interface User {
 
     settings?: UserSettings;
     banner?: string;
+    bannerColor?: string;
     serverSettings?: ServerSettings;
     totpEnabled?: boolean;
 }

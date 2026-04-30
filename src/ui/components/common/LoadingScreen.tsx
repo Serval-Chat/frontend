@@ -70,7 +70,7 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({
                             <img
                                 alt="Serchat"
                                 className="h-24 w-24 drop-shadow-[0_0_15px_rgba(var(--primary-rgb),0.3)] select-none"
-                                src="/serval.png"
+                                src="/serchat.svg"
                             />
                         </div>
 

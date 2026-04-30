@@ -79,7 +79,6 @@ function formatValue(value: unknown, field?: string): string | React.ReactNode {
                     {value.map((v, i) => (
                         <div
                             className="flex items-center gap-1.5"
-                            // eslint-disable-next-line react/no-array-index-key
                             key={`color-${v}-${i}`}
                         >
                             <div
@@ -161,7 +160,7 @@ export const AuditLogDiff: React.FC<AuditLogDiffProps> = ({ changes }) => {
     return (
         <div className="mt-2 text-sm">
             <button
-                className="text-text-muted hover:text-text flex items-center gap-1 text-xs"
+                className="hover:text-text flex items-center gap-1 text-xs text-text-muted"
                 onClick={() => setExpanded(!expanded)}
             >
                 {expanded ? (
@@ -177,7 +176,7 @@ export const AuditLogDiff: React.FC<AuditLogDiffProps> = ({ changes }) => {
             {expanded && (
                 <div className="bg-bg-surface mt-2 rounded-md p-3">
                     {/* Header */}
-                    <div className="text-text-muted mb-2 grid grid-cols-3 gap-2 border-b border-border-subtle pb-1 text-xs font-semibold">
+                    <div className="mb-2 grid grid-cols-3 gap-2 border-b border-border-subtle pb-1 text-xs font-semibold text-text-muted">
                         <span>Field</span>
                         <span>Before</span>
                         <span>After</span>
@@ -186,10 +185,9 @@ export const AuditLogDiff: React.FC<AuditLogDiffProps> = ({ changes }) => {
                         {rows.map((row, index) => (
                             <div
                                 className="grid grid-cols-3 items-center gap-2 border-b border-border-subtle pb-3 last:border-0 last:pb-0"
-                                // eslint-disable-next-line react/no-array-index-key
                                 key={`row-${row.field}-${index}`}
                             >
-                                <div className="text-text-muted font-medium break-all">
+                                <div className="font-medium break-all text-text-muted">
                                     {row.field}
                                 </div>
                                 <div

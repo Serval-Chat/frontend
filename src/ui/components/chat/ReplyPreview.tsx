@@ -2,6 +2,8 @@ import React, { useMemo } from 'react';
 
 import type { Role } from '@/api/servers/servers.types';
 import type { User } from '@/api/users/users.types';
+import type { InteractionValue } from '@/types/interactions';
+import { BotTag } from '@/ui/components/common/BotTag';
 import { ParsedText } from '@/ui/components/common/ParsedText';
 import { StyledUserName } from '@/ui/components/common/StyledUserName';
 import { Text } from '@/ui/components/common/Text';
@@ -13,6 +15,11 @@ interface ReplyPreviewProps {
     user: User;
     role?: Role;
     text: string;
+    interaction?: {
+        command: string;
+        options?: { name: string; value: InteractionValue }[];
+        user: { id: string; username: string };
+    };
     replyToId?: string;
     onClick?: (messageId: string) => void;
     disableCustomFonts?: boolean;
@@ -25,6 +32,7 @@ export const ReplyPreview: React.FC<ReplyPreviewProps> = ({
     user,
     role,
     text,
+    interaction,
     replyToId,
     onClick,
     disableCustomFonts,
@@ -60,12 +68,22 @@ export const ReplyPreview: React.FC<ReplyPreviewProps> = ({
                 >
                     {user.displayName || user.username}
                 </StyledUserName>
+                {user.isBot && <BotTag className="h-3.5 px-1 text-[8px]" />}
                 <Text
                     as="span"
-                    className="truncate text-xs font-medium text-muted-foreground"
+                    className="truncate text-xs font-medium text-text-muted"
                 >
+                    {interaction && !text && (
+                        <span className="mr-1 opacity-70">
+                            used{' '}
+                            <span className="text-primary">
+                                /{interaction.command}
+                            </span>
+                        </span>
+                    )}
                     <ParsedText
                         condenseFiles
+                        condenseInvites
                         nodes={nodes}
                         size="xs"
                         wrap="nowrap"

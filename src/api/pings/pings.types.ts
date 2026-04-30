@@ -1,3 +1,17 @@
+export interface PingMentionMessage {
+    _id: string;
+    text: string;
+    senderId: string;
+    senderUsername: string;
+}
+
+export interface PingExportMessage {
+    type: 'export';
+    url: string;
+    format: string;
+    expiresAt: string;
+}
+
 export interface PingNotification {
     id: string;
     type: 'mention' | 'reply' | 'system';
@@ -5,7 +19,7 @@ export interface PingNotification {
     senderId: string;
     serverId?: string;
     channelId?: string;
-    message: Record<string, unknown>;
+    message: PingMentionMessage | PingExportMessage;
     timestamp: number;
 }
 

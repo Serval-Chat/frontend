@@ -7,6 +7,8 @@ import { type ChatMessage, type MessageReaction } from '@/api/chat/chat.types';
 import { SERVERS_QUERY_KEYS } from '@/api/servers/servers.queries';
 import type { Channel } from '@/api/servers/servers.types';
 import { useMe } from '@/api/users/users.queries';
+import { usePermissions } from '@/hooks/usePermissions';
+import type { InteractionValue } from '@/types/interactions';
 import {
     type IMessageDm,
     type IMessageServer,
@@ -25,9 +27,6 @@ interface ChatWSResult {
     typingUsers: TypingUser[];
 }
 
-/**
- * @description Hook for WebSockets stuff
- */
 export function useChatWS(
     selectedFriendId?: string,
     selectedServerId?: string,
@@ -39,6 +38,8 @@ export function useChatWS(
         useTypingIndicator();
     const lastTypingSentRef = useRef<number>(0);
     const prevChannelRef = useRef<string | null>(null);
+
+    usePermissions(selectedServerId || null, selectedChannelId || null);
 
     const convertDmToChatMessage = useCallback(
         (message: IMessageDm): ChatMessage => ({
@@ -73,11 +74,29 @@ export function useChatWS(
                 'webhookAvatarUrl' in message
                     ? message.webhookAvatarUrl
                     : undefined,
+            embeds: 'embeds' in message ? message.embeds : undefined,
+            interaction:
+                'interaction' in message && message.interaction
+                    ? {
+                          command: message.interaction.command,
+                          options: (message.interaction.options ||
+                              []) as unknown as {
+                              name: string;
+                              value: InteractionValue;
+                          }[],
+                          user: message.interaction.user || {
+                              id: message.senderId,
+                              username:
+                                  'senderUsername' in message
+                                      ? message.senderUsername
+                                      : 'Unknown',
+                          },
+                      }
+                    : undefined,
         }),
         [],
     );
 
-    // Helper to add message to cache
     const addMessageToCache = useCallback(
         (queryKey: readonly unknown[], newMessage: ChatMessage): void => {
             queryClient.setQueryData<InfiniteData<ChatMessage[]>>(
@@ -87,12 +106,10 @@ export function useChatWS(
 
                     const firstPage = oldData.pages[0] || [];
 
-                    // Check if message already exists
                     if (firstPage.some((msg) => msg._id === newMessage._id)) {
                         return oldData;
                     }
 
-                    // Add to the end of the first page (newest messages)
                     return {
                         ...oldData,
                         pages: [
@@ -106,7 +123,6 @@ export function useChatWS(
         [queryClient],
     );
 
-    // Helper to update reaction in cache
     const updateReactionInCache = useCallback(
         (payload: IReactionEventPayload, isRemoval: boolean): void => {
             const queryKey = getQueryKey(
@@ -142,7 +158,6 @@ export function useChatWS(
         [queryClient, selectedServerId, selectedChannelId, selectedFriendId],
     );
 
-    // Handle incoming DMs
     useWebSocket(
         WsEvents.MESSAGE_DM,
         useCallback(
@@ -162,7 +177,6 @@ export function useChatWS(
         ),
     );
 
-    // Handle DM sent acknowledgment
     useWebSocket(
         WsEvents.MESSAGE_DM_SENT,
         useCallback(
@@ -182,7 +196,6 @@ export function useChatWS(
         ),
     );
 
-    // Handle incoming server messages
     useWebSocket(
         WsEvents.MESSAGE_SERVER,
         useCallback(
@@ -211,7 +224,6 @@ export function useChatWS(
         ),
     );
 
-    // Handle server message sent acknowledgment
     useWebSocket(
         WsEvents.MESSAGE_SERVER_SENT,
         useCallback(
@@ -257,21 +269,18 @@ export function useChatWS(
         ),
     );
 
-    // Auto-join server when selectedServerId changes
     useEffect(() => {
         if (selectedServerId) {
             wsMessages.joinServer(selectedServerId);
         }
     }, [selectedServerId]);
 
-    // Auto-join channel when selectedChannelId changes
     useEffect(() => {
         if (selectedServerId && selectedChannelId) {
             wsMessages.joinChannel(selectedServerId, selectedChannelId);
         }
     }, [selectedServerId, selectedChannelId]);
 
-    // Refetch channel messages when switching to a channel so we always see fresh data
     useEffect(() => {
         if (!selectedServerId || !selectedChannelId) {
             prevChannelRef.current = null;
@@ -288,7 +297,6 @@ export function useChatWS(
         }
     }, [queryClient, selectedServerId, selectedChannelId]);
 
-    // Handle typing indicators for DMs
     useWebSocket(
         WsEvents.TYPING_DM,
         useCallback(
@@ -305,7 +313,6 @@ export function useChatWS(
         ),
     );
 
-    // Handle typing indicators for server messages
     useWebSocket(
         WsEvents.TYPING_SERVER,
         useCallback(
@@ -326,7 +333,6 @@ export function useChatWS(
         ),
     );
 
-    // Handle server message deleted - update cache for that channel regardless of selection
     useWebSocket(
         WsEvents.MESSAGE_SERVER_DELETED,
         useCallback(
@@ -334,6 +340,7 @@ export function useChatWS(
                 messageId: string;
                 channelId: string;
                 serverId?: string;
+                hard?: boolean;
             }): void => {
                 queryClient.setQueriesData<InfiniteData<ChatMessage[]>>(
                     {
@@ -347,11 +354,22 @@ export function useChatWS(
                         if (!oldData) return oldData;
                         return {
                             ...oldData,
-                            pages: oldData.pages.map((page) =>
-                                page.filter(
+                            pages: oldData.pages.map((page) => {
+                                if (payload.hard === false) {
+                                    return page.map((msg) =>
+                                        msg._id === payload.messageId
+                                            ? {
+                                                  ...msg,
+                                                  deletedAt:
+                                                      new Date().toISOString(),
+                                              }
+                                            : msg,
+                                    );
+                                }
+                                return page.filter(
                                     (msg) => msg._id !== payload.messageId,
-                                ),
-                            ),
+                                );
+                            }),
                         };
                     },
                 );
@@ -364,7 +382,55 @@ export function useChatWS(
         ),
     );
 
-    // Handle server message edited - update cache for that channel regardless of selection
+    useWebSocket(
+        WsEvents.MESSAGES_SERVER_BULK_DELETED,
+        useCallback(
+            (payload: {
+                messageIds: string[];
+                channelId: string;
+                hard?: boolean;
+            }): void => {
+                queryClient.setQueriesData<InfiniteData<ChatMessage[]>>(
+                    {
+                        predicate: (query) =>
+                            query.queryKey[0] === 'chat' &&
+                            query.queryKey[1] === 'messages' &&
+                            query.queryKey[2] === 'channel' &&
+                            query.queryKey[4] === payload.channelId,
+                    },
+                    (oldData) => {
+                        if (!oldData) return oldData;
+                        return {
+                            ...oldData,
+                            pages: oldData.pages.map((page) => {
+                                if (payload.hard === false) {
+                                    return page.map((msg) =>
+                                        payload.messageIds.includes(msg._id)
+                                            ? {
+                                                  ...msg,
+                                                  deletedAt:
+                                                      new Date().toISOString(),
+                                              }
+                                            : msg,
+                                    );
+                                }
+                                return page.filter(
+                                    (msg) =>
+                                        !payload.messageIds.includes(msg._id),
+                                );
+                            }),
+                        };
+                    },
+                );
+
+                void queryClient.invalidateQueries({
+                    queryKey: CHAT_QUERY_KEYS.channelPins(payload.channelId),
+                });
+            },
+            [queryClient],
+        ),
+    );
+
     useWebSocket(
         WsEvents.MESSAGE_SERVER_EDITED,
         useCallback(
@@ -454,7 +520,6 @@ export function useChatWS(
         ),
     );
 
-    // Handle reaction added
     useWebSocket(
         WsEvents.REACTION_ADDED,
         useCallback(
@@ -465,7 +530,6 @@ export function useChatWS(
         ),
     );
 
-    // Handle reaction removed
     useWebSocket(
         WsEvents.REACTION_REMOVED,
         useCallback(
@@ -476,7 +540,6 @@ export function useChatWS(
         ),
     );
 
-    // Handle DM unread updates
     useWebSocket(
         WsEvents.DM_UNREAD_UPDATED,
         useCallback((): void => {
@@ -484,7 +547,6 @@ export function useChatWS(
         }, [queryClient]),
     );
 
-    // Clear typing users when conversation changes
     useEffect(() => {
         clearTypingUsers();
     }, [selectedFriendId, selectedChannelId, clearTypingUsers]);
@@ -507,7 +569,6 @@ export function useChatWS(
 
     const sendTyping = useCallback((): void => {
         const now = Date.now();
-        // Throttle to once every 2 seconds
         if (now - lastTypingSentRef.current < 2000) {
             return;
         }
@@ -528,7 +589,6 @@ export function useChatWS(
     };
 }
 
-// Extract helper functions
 function getQueryKey(
     payload: IReactionEventPayload,
     serverId?: string,

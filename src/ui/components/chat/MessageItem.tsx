@@ -38,6 +38,7 @@ export const MessageItem: React.FC<MessageItemProps> = ({
         !!message.replyTo ||
         !!message.replyToId ||
         !!message.repliedToMessageId ||
+        !!message.interaction?.user ||
         !shouldGroupMessages(prevMessage, message);
 
     return (

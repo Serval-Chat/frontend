@@ -5,6 +5,7 @@ import type { Role, ServerMember } from '@/api/servers/servers.types';
 import { useMe } from '@/api/users/users.queries';
 import type { User } from '@/api/users/users.types';
 import { useAppSelector } from '@/store/hooks';
+import { BlockFlags } from '@/types/blocks';
 import { ServerSidebarSection } from '@/ui/components/sidebar/ServerSidebarSection';
 
 // Mock dependencies
@@ -101,24 +102,70 @@ describe('ServerSidebarSection', () => {
     memberRoleMap.set('u3', mockRoles[0]);
     memberRoleMap.set('u4', mockRoles[2]);
 
+    const applySelectorState = ({
+        presenceMap = {},
+        blocks = {},
+    }: {
+        presenceMap?: Record<string, { status: 'online' | 'offline' }>;
+        blocks?: Record<string, number>;
+    }): void => {
+        (useAppSelector as Mock).mockImplementation(
+            (selector: (state: unknown) => unknown) =>
+                selector({
+                    presence: { users: presenceMap },
+                    blocking: { blocks },
+                }),
+        );
+    };
+
+    const makeMember = ({
+        id,
+        username,
+        roles = ['role-default'],
+        online,
+        isBot = false,
+    }: {
+        id: string;
+        username: string;
+        roles?: string[];
+        online?: boolean;
+        isBot?: boolean;
+    }): ServerMember =>
+        ({
+            _id: `m-${id}`,
+            userId: id,
+            serverId: 'srv-1',
+            user: {
+                _id: id,
+                username,
+                isBot,
+            } as User,
+            roles,
+            online,
+            joinedAt: new Date().toISOString(),
+        }) as ServerMember;
+
     beforeEach(() => {
         vi.clearAllMocks();
         // Default: everyone is offline except 'me'
         (useMe as Mock).mockReturnValue({ data: mockMe });
-        (useAppSelector as Mock).mockReturnValue({}); // presenceMap is empty
+        applySelectorState({}); // presenceMap and blocks are empty
     });
 
     it('ranks and groups members by separated roles and online status', () => {
         // Set u1, u2, u3 as online
-        (useAppSelector as Mock).mockReturnValue({
-            u1: { status: 'online' },
-            u2: { status: 'online' },
-            u3: { status: 'online' },
+        applySelectorState({
+            presenceMap: {
+                u1: { status: 'online' },
+                u2: { status: 'online' },
+                u3: { status: 'online' },
+            },
         });
 
         render(
             <ServerSidebarSection
                 isLoading={false}
+                memberIconRoleMap={new Map()}
                 memberRoleMap={memberRoleMap}
                 members={mockMembers}
                 roles={mockRoles}
@@ -137,16 +184,19 @@ describe('ServerSidebarSection', () => {
 
     it('sorts members alphabetically within each group', () => {
         // Set all as online
-        (useAppSelector as Mock).mockReturnValue({
-            u1: { status: 'online' },
-            u2: { status: 'online' },
-            u3: { status: 'online' },
-            u4: { status: 'online' },
+        applySelectorState({
+            presenceMap: {
+                u1: { status: 'online' },
+                u2: { status: 'online' },
+                u3: { status: 'online' },
+                u4: { status: 'online' },
+            },
         });
 
         render(
             <ServerSidebarSection
                 isLoading={false}
+                memberIconRoleMap={new Map()}
                 memberRoleMap={memberRoleMap}
                 members={mockMembers}
                 roles={mockRoles}
@@ -160,13 +210,16 @@ describe('ServerSidebarSection', () => {
 
     it('moves a user to Offline group when they go offline', async () => {
         // Initial state: u1 is online
-        (useAppSelector as Mock).mockReturnValue({
-            u1: { status: 'online' },
+        applySelectorState({
+            presenceMap: {
+                u1: { status: 'online' },
+            },
         });
 
         const { rerender } = render(
             <ServerSidebarSection
                 isLoading={false}
+                memberIconRoleMap={new Map()}
                 memberRoleMap={memberRoleMap}
                 members={[mockMembers[0]]} // Only Alice
                 roles={mockRoles}
@@ -177,13 +230,16 @@ describe('ServerSidebarSection', () => {
         expect(screen.queryByText(/Offline/)).toBeNull();
 
         // Update presence: u1 goes offline
-        (useAppSelector as Mock).mockReturnValue({
-            u1: { status: 'offline' },
+        applySelectorState({
+            presenceMap: {
+                u1: { status: 'offline' },
+            },
         });
 
         rerender(
             <ServerSidebarSection
                 isLoading={false}
+                memberIconRoleMap={new Map()}
                 memberRoleMap={memberRoleMap}
                 members={[mockMembers[0]]}
                 roles={mockRoles}
@@ -196,13 +252,16 @@ describe('ServerSidebarSection', () => {
 
     it('respects role separation permissions', () => {
         // Dave (u4) is online. His highest role "Member" is NOT separated.
-        (useAppSelector as Mock).mockReturnValue({
-            u4: { status: 'online' },
+        applySelectorState({
+            presenceMap: {
+                u4: { status: 'online' },
+            },
         });
 
         render(
             <ServerSidebarSection
                 isLoading={false}
+                memberIconRoleMap={new Map()}
                 memberRoleMap={memberRoleMap}
                 members={[mockMembers[3]]}
                 roles={mockRoles}
@@ -211,5 +270,161 @@ describe('ServerSidebarSection', () => {
 
         expect(screen.getByText(/Online - 1/)).toBeDefined();
         expect(screen.queryByText(/Member/)).toBeNull();
+    });
+
+    it('moves stale offline snapshots to Online group when presence turns online (regression)', () => {
+        const members = [
+            makeMember({ id: 'u10', username: 'Human', online: false }),
+            makeMember({
+                id: 'b10',
+                username: 'HelperBot',
+                online: false,
+                isBot: true,
+            }),
+        ];
+
+        applySelectorState({
+            presenceMap: {
+                u10: { status: 'offline' },
+                b10: { status: 'offline' },
+            },
+        });
+        const { rerender } = render(
+            <ServerSidebarSection
+                isLoading={false}
+                memberIconRoleMap={new Map()}
+                memberRoleMap={new Map()}
+                members={members}
+                roles={mockRoles}
+            />,
+        );
+
+        expect(screen.getByText(/Offline - 2/)).toBeDefined();
+        expect(screen.queryByText(/Online - 2/)).toBeNull();
+
+        applySelectorState({
+            presenceMap: {
+                u10: { status: 'online' },
+                b10: { status: 'online' },
+            },
+        });
+        rerender(
+            <ServerSidebarSection
+                isLoading={false}
+                memberIconRoleMap={new Map()}
+                memberRoleMap={new Map()}
+                members={members}
+                roles={mockRoles}
+            />,
+        );
+
+        expect(screen.queryByText(/Offline - 2/)).toBeNull();
+        expect(screen.getByText(/Online - 2/)).toBeDefined();
+    });
+
+    it('moves stale online snapshots to Offline group when presence turns offline (regression)', () => {
+        const member = makeMember({
+            id: 'u20',
+            username: 'AlwaysOnlineSnapshot',
+            online: true,
+        });
+
+        applySelectorState({
+            presenceMap: {
+                u20: { status: 'online' },
+            },
+        });
+        const { rerender } = render(
+            <ServerSidebarSection
+                isLoading={false}
+                memberIconRoleMap={new Map()}
+                memberRoleMap={new Map()}
+                members={[member]}
+                roles={mockRoles}
+            />,
+        );
+
+        expect(screen.getByText(/Online - 1/)).toBeDefined();
+        expect(screen.queryByText(/Offline - 1/)).toBeNull();
+
+        applySelectorState({
+            presenceMap: {
+                u20: { status: 'offline' },
+            },
+        });
+        rerender(
+            <ServerSidebarSection
+                isLoading={false}
+                memberIconRoleMap={new Map()}
+                memberRoleMap={new Map()}
+                members={[member]}
+                roles={mockRoles}
+            />,
+        );
+
+        expect(screen.queryByText(/Online - 1/)).toBeNull();
+        expect(screen.getByText(/Offline - 1/)).toBeDefined();
+    });
+
+    it.each([
+        {
+            caseName: 'uses presence when member.online is undefined',
+            online: undefined,
+            presenceStatus: 'online' as const,
+            blocks: {} as Record<string, number>,
+            expectedOnline: true,
+        },
+        {
+            caseName:
+                'uses live presence when member.online is false and presence is online',
+            online: false,
+            presenceStatus: 'online' as const,
+            blocks: {} as Record<string, number>,
+            expectedOnline: true,
+        },
+        {
+            caseName:
+                'uses live presence when member.online is true and presence is offline',
+            online: true,
+            presenceStatus: 'offline' as const,
+            blocks: {} as Record<string, number>,
+            expectedOnline: false,
+        },
+        {
+            caseName: 'forceOffline overrides online signals',
+            online: true,
+            presenceStatus: 'online' as const,
+            blocks: { u30: BlockFlags.HIDE_THEIR_PRESENCE },
+            expectedOnline: false,
+        },
+    ])('$caseName', ({ online, presenceStatus, blocks, expectedOnline }) => {
+        const member = makeMember({
+            id: 'u30',
+            username: 'MatrixUser',
+            online,
+        });
+
+        applySelectorState({
+            presenceMap: { u30: { status: presenceStatus } },
+            blocks,
+        });
+
+        render(
+            <ServerSidebarSection
+                isLoading={false}
+                memberIconRoleMap={new Map()}
+                memberRoleMap={new Map()}
+                members={[member]}
+                roles={mockRoles}
+            />,
+        );
+
+        if (expectedOnline) {
+            expect(screen.getByText(/Online - 1/)).toBeDefined();
+            expect(screen.queryByText(/Offline - 1/)).toBeNull();
+        } else {
+            expect(screen.getByText(/Offline - 1/)).toBeDefined();
+            expect(screen.queryByText(/Online - 1/)).toBeNull();
+        }
     });
 });

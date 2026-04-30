@@ -121,7 +121,12 @@ const NoiseFilterProcessor: React.FC = () => {
 
                 await (
                     currentTrack as {
-                        setProcessor: (p: unknown) => Promise<void>;
+                        setProcessor: (
+                            p: {
+                                destroy: () => void;
+                                setSuppressionLevel?: (level: number) => void;
+                            } | null,
+                        ) => Promise<void>;
                     }
                 ).setProcessor(processor);
                 console.warn(

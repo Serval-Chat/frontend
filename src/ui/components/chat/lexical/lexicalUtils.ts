@@ -8,6 +8,9 @@ import {
 
 import { $isChipNode } from '@/ui/components/chat/lexical/ChipNode';
 
+import { $isSlashArgChipNode } from './SlashArgChipNode';
+import { $isSlashCommandChipNode } from './SlashCommandChipNode';
+
 export function $getRawMessageText(): string {
     let rawText = '';
     const root = $getRoot();
@@ -34,6 +37,10 @@ export function $getRawMessageText(): string {
             rawText += text;
         } else if ($isLineBreakNode(node)) {
             rawText += '\n';
+        } else if ($isSlashCommandChipNode(node)) {
+            rawText += node.getTextContent();
+        } else if ($isSlashArgChipNode(node)) {
+            rawText += node.getValue();
         } else if ($isChipNode(node)) {
             const type = node.getChipType();
             const payload = node.getPayload();

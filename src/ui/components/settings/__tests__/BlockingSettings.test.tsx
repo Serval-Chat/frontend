@@ -46,51 +46,40 @@ describe('BlockingSettings', () => {
         vi.mocked(blocksQueries.useBlocks).mockReturnValue({
             data: [],
             isLoading: false,
-        } as unknown as UseQueryResult<
-            blocksQueries.BlockRelationship[],
-            Error
-        >);
+        } as any as UseQueryResult<blocksQueries.BlockRelationship[], Error>);
 
         vi.mocked(blocksQueries.useBlockProfiles).mockReturnValue({
             data: [{ id: 'default-profile-id', name: 'Default', flags: 0 }],
             isLoading: false,
-        } as unknown as UseQueryResult<blocksQueries.BlockProfile[], Error>);
+        } as any as UseQueryResult<blocksQueries.BlockProfile[], Error>);
 
         vi.mocked(blocksQueries.useUpsertBlock).mockReturnValue({
             mutate: mockUpsertBlock,
-        } as unknown as UseMutationResult<
+        } as any as UseMutationResult<
             blocksQueries.BlockRelationship,
             Error,
             { targetUserId: string; profileId: string }
         >);
         vi.mocked(blocksQueries.useRemoveBlock).mockReturnValue({
             mutate: mockRemoveBlock,
-        } as unknown as UseMutationResult<
-            Record<string, unknown>,
-            Error,
-            string
-        >);
+        } as any as UseMutationResult<Record<string, any>, Error, string>);
         vi.mocked(blocksQueries.useCreateBlockProfile).mockReturnValue({
             mutate: mockCreateProfile,
-        } as unknown as UseMutationResult<
+        } as any as UseMutationResult<
             blocksQueries.BlockProfile,
             Error,
             { name: string; flags: number }
         >);
         vi.mocked(blocksQueries.useUpdateBlockProfile).mockReturnValue({
             mutate: mockUpdateProfile,
-        } as unknown as UseMutationResult<
+        } as any as UseMutationResult<
             blocksQueries.BlockProfile,
             Error,
             { id: string; data: { name?: string; flags?: number } }
         >);
         vi.mocked(blocksQueries.useDeleteBlockProfile).mockReturnValue({
             mutate: mockDeleteProfile,
-        } as unknown as UseMutationResult<
-            Record<string, unknown>,
-            Error,
-            string
-        >);
+        } as any as UseMutationResult<Record<string, any>, Error, string>);
     });
 
     describe('Users Tab', () => {
@@ -112,7 +101,7 @@ describe('BlockingSettings', () => {
                     },
                 ],
                 isLoading: false,
-            } as unknown as UseQueryResult<
+            } as any as UseQueryResult<
                 blocksQueries.BlockRelationship[],
                 Error
             >);
@@ -137,7 +126,7 @@ describe('BlockingSettings', () => {
                     },
                 ],
                 isLoading: false,
-            } as unknown as UseQueryResult<
+            } as any as UseQueryResult<
                 blocksQueries.BlockRelationship[],
                 Error
             >);
@@ -167,7 +156,7 @@ describe('BlockingSettings', () => {
                     },
                 ],
                 isLoading: false,
-            } as unknown as UseQueryResult<
+            } as any as UseQueryResult<
                 blocksQueries.BlockRelationship[],
                 Error
             >);
@@ -242,10 +231,7 @@ describe('BlockingSettings', () => {
                     { id: 'p2', name: 'Profile 2', flags: 0 },
                 ],
                 isLoading: false,
-            } as unknown as UseQueryResult<
-                blocksQueries.BlockProfile[],
-                Error
-            >);
+            } as any as UseQueryResult<blocksQueries.BlockProfile[], Error>);
 
             renderComponent();
             fireEvent.click(screen.getByText('Block Profiles'));

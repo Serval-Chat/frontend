@@ -34,8 +34,8 @@ export const PingItem: React.FC<PingItemProps> = ({ ping, onClick }) => {
     };
 
     let snippet = '';
-    if (ping.message && typeof ping.message.content === 'string') {
-        snippet = ping.message.content;
+    if (ping.message && 'text' in ping.message) {
+        snippet = ping.message.text;
     }
 
     return (

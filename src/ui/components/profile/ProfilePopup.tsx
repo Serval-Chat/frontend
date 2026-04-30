@@ -98,15 +98,25 @@ export const ProfilePopup: React.FC<ProfilePopupProps> = ({
 
     const resolvedRole = React.useMemo(() => {
         if (role) return role;
-        if (!member || !roleMap.size) return undefined;
-        return getHighestColorRoleForMember(member.roles, roleMap);
-    }, [role, member, roleMap]);
+        if (!member || !roleMap.size || !serverRoles) return undefined;
+        const memberRoleIds = [...member.roles];
+        const everyoneRole = serverRoles.find((r) => r.name === '@everyone');
+        if (everyoneRole && !memberRoleIds.includes(everyoneRole._id)) {
+            memberRoleIds.push(everyoneRole._id);
+        }
+        return getHighestColorRoleForMember(memberRoleIds, roleMap);
+    }, [role, member, roleMap, serverRoles]);
 
     const resolvedIconRole = React.useMemo(() => {
         if (iconRole) return iconRole;
-        if (!member || !roleMap.size) return undefined;
-        return getHighestRoleWithIconForMember(member.roles, roleMap);
-    }, [iconRole, member, roleMap]);
+        if (!member || !roleMap.size || !serverRoles) return undefined;
+        const memberRoleIds = [...member.roles];
+        const everyoneRole = serverRoles.find((r) => r.name === '@everyone');
+        if (everyoneRole && !memberRoleIds.includes(everyoneRole._id)) {
+            memberRoleIds.push(everyoneRole._id);
+        }
+        return getHighestRoleWithIconForMember(memberRoleIds, roleMap);
+    }, [iconRole, member, roleMap, serverRoles]);
 
     const finalJoinedAt = joinedAt || member?.joinedAt;
 

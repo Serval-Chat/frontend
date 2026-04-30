@@ -43,7 +43,7 @@ describe('useResizable', () => {
             result.current.handleMouseDown({
                 preventDefault: vi.fn(),
                 clientX: 100,
-            } as unknown as React.MouseEvent);
+            } as any as React.MouseEvent);
         });
 
         act(() => {
@@ -66,7 +66,7 @@ describe('useResizable', () => {
             result.current.handleMouseDown({
                 preventDefault: vi.fn(),
                 clientX: 1000,
-            } as unknown as React.MouseEvent);
+            } as any as React.MouseEvent);
         });
 
         act(() => {
@@ -86,7 +86,7 @@ describe('useResizable', () => {
             result.current.handleMouseDown({
                 preventDefault: vi.fn(),
                 clientX: 100,
-            } as unknown as React.MouseEvent);
+            } as any as React.MouseEvent);
         });
 
         // Test minWidth (200)
@@ -112,7 +112,7 @@ describe('useResizable', () => {
             result.current.handleMouseDown({
                 preventDefault: vi.fn(),
                 clientX: 100,
-            } as unknown as React.MouseEvent);
+            } as any as React.MouseEvent);
         });
 
         act(() => {

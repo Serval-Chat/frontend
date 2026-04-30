@@ -881,6 +881,31 @@ export const useBanMember = (
     });
 };
 
+export const useTimeoutMember = (
+    serverId: string,
+): UseMutationResult<
+    void,
+    Error,
+    { userId: string; duration: number; reason?: string }
+> => {
+    const queryClient = useQueryClient();
+    const { showToast } = useToast();
+
+    return useMutation({
+        mutationFn: ({ userId, duration, reason }) =>
+            serversApi.timeoutMember(serverId, userId, duration, reason),
+        onSuccess: () => {
+            void queryClient.invalidateQueries({
+                queryKey: SERVERS_QUERY_KEYS.members(serverId),
+            });
+            showToast('Member timed out successfully', 'success');
+        },
+        onError: (error) => {
+            showToast(error.message || 'Failed to timeout member', 'error');
+        },
+    });
+};
+
 export const useUnbanMember = (
     serverId: string,
 ): UseMutationResult<void, Error, string> => {

@@ -11,6 +11,7 @@ import importPlugin from 'eslint-plugin-import';
 import jsxA11y from 'eslint-plugin-jsx-a11y';
 import query from '@tanstack/eslint-plugin-query';
 import tailwindcss from 'eslint-plugin-tailwindcss';
+import noUiRules from './eslint-rules/no-ui.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -47,6 +48,7 @@ export default tseslint.config(
       'jsx-a11y': jsxA11y,
       '@tanstack/query': query,
       tailwindcss,
+      'no-ui': noUiRules,
     },
     rules: {
       ...reactHooks.configs.recommended.rules,
@@ -99,12 +101,20 @@ export default tseslint.config(
             'Use Tailwind utility classes instead of inline var(--color-*). ' +
             'These tokens are registered in @theme and available as direct utilities ' +
             '(e.g., text-muted-foreground, bg-bg-subtle, border-border-subtle).',
-        },
+        }
       ],
       'tailwindcss/classnames-order': 'warn',
       'tailwindcss/no-contradicting-classname': 'error',
       'react/display-name': 'warn',
+
       'react/no-multi-comp': ['warn', { ignoreStateless: true }],
+    },
+  },
+  {
+    files: ['**/*.test.{ts,tsx}'],
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
+      'no-restricted-syntax': 'off',
     },
   },
 );

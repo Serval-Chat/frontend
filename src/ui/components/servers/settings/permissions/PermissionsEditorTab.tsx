@@ -48,6 +48,12 @@ const PERMISSION_GROUPS = [
                 description:
                     'Allows members to create, edit, or delete channels.',
             },
+            {
+                key: 'moderateMembers',
+                label: 'Moderate Members',
+                description:
+                    'Allows members to timeout (mute) other members for a specific duration.',
+            },
         ],
     },
     {
@@ -80,6 +86,12 @@ const PERMISSION_GROUPS = [
                 label: 'Mention @everyone',
                 description:
                     'Allows members to use @everyone and @here to notify all members.',
+            },
+            {
+                key: 'seeDeletedMessages',
+                label: 'See Deleted Messages',
+                description:
+                    'Allows members to see messages that have been deleted (rendered in red).',
             },
         ],
     },
@@ -115,6 +127,8 @@ const VALID_PERMISSION_KEYS = new Set([
     'pinMessages',
     'bypassSlowmode',
     'connect',
+    'seeDeletedMessages',
+    'moderateMembers',
 ]);
 
 const stripUnknownKeys = (

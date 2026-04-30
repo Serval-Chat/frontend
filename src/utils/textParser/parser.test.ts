@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import { ParserPresets, parseText } from './parser';
 import type { AdmonitionNode } from './types';
@@ -1600,5 +1600,41 @@ describe('TextParser', () => {
                 admonitionType: t,
             });
         }
+    });
+
+    describe('Alternative URLs', () => {
+        it('should parse invite links from alternative URLs', () => {
+            vi.stubEnv('VITE_ALTERNATIVE_URLS', '["http://localhost:5173"]');
+            const text = 'Join: http://localhost:5173/invite/osdev';
+            const nodes = parseText(text, ParserPresets.MESSAGE);
+            expect(nodes).toEqual([
+                { type: 'text', content: 'Join: ' },
+                {
+                    type: 'invite',
+                    code: 'osdev',
+                    url: 'http://localhost:5173/invite/osdev',
+                },
+            ]);
+            vi.unstubAllEnvs();
+        });
+
+        it('should parse channel links from alternative URLs', () => {
+            vi.stubEnv(
+                'VITE_ALTERNATIVE_URLS',
+                '["https://my-custom-domain.com"]',
+            );
+            const text =
+                'https://my-custom-domain.com/chat/@server/s1/channel/c1';
+            const nodes = parseText(text, ParserPresets.MESSAGE);
+            expect(nodes).toEqual([
+                {
+                    type: 'channel_link',
+                    serverId: 's1',
+                    channelId: 'c1',
+                    url: 'https://my-custom-domain.com/chat/@server/s1/channel/c1',
+                },
+            ]);
+            vi.unstubAllEnvs();
+        });
     });
 });

@@ -39,7 +39,7 @@ describe('useLoginForm', () => {
         await act(async () => {
             await result.current.handleSubmit({
                 preventDefault: vi.fn(),
-            } as unknown as React.FormEvent<HTMLFormElement>);
+            } as any as React.FormEvent<HTMLFormElement>);
         });
 
         expect(result.current.status).toEqual({
@@ -63,7 +63,7 @@ describe('useLoginForm', () => {
         await act(async () => {
             await result.current.handleSubmit({
                 preventDefault: vi.fn(),
-            } as unknown as React.FormEvent<HTMLFormElement>);
+            } as any as React.FormEvent<HTMLFormElement>);
         });
 
         expect(authApi.login).toHaveBeenCalledWith({
@@ -88,7 +88,7 @@ describe('useLoginForm', () => {
         await act(async () => {
             await result.current.handleSubmit({
                 preventDefault: vi.fn(),
-            } as unknown as React.FormEvent<HTMLFormElement>);
+            } as any as React.FormEvent<HTMLFormElement>);
         });
 
         expect(result.current.status).toEqual({

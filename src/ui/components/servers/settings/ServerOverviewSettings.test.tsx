@@ -1,10 +1,22 @@
 import { fireEvent, render, screen } from '@testing-library/react';
+import type * as ReactRouterDom from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import * as ServerQueries from '@/api/servers/servers.queries';
 import * as UserQueries from '@/api/users/users.queries';
 
 import { ServerOverviewSettings } from './ServerOverviewSettings';
+
+const mockNavigate = vi.fn();
+
+vi.mock('react-router-dom', async () => {
+    const actual =
+        await vi.importActual<typeof ReactRouterDom>('react-router-dom');
+    return {
+        ...actual,
+        useNavigate: () => mockNavigate,
+    };
+});
 
 vi.mock('@/api/servers/servers.queries', () => ({
     useDeleteServer: vi.fn(),
@@ -30,6 +42,7 @@ describe('ServerOverviewSettings', () => {
             value: { href: 'http://localhost/' },
             writable: true,
         });
+        mockNavigate.mockReset();
 
         vi.mocked(ServerQueries.useServerDetails).mockReturnValue({
             data: {
@@ -102,6 +115,6 @@ describe('ServerOverviewSettings', () => {
             'server123',
             expect.any(Object),
         );
-        expect(window.location.href).toBe('/chat/@me');
+        expect(mockNavigate).toHaveBeenCalledWith('/chat/@me');
     });
 });

@@ -25,9 +25,18 @@ const formatTimestamp = (iso: string | undefined): string | undefined => {
 interface EmbedCardProps {
     embed: Embed;
     index: number;
+    variant: 'preview' | 'chat';
+    serverId?: string;
+    isDeleted?: boolean;
 }
 
-const EmbedCard = ({ embed, index }: EmbedCardProps): ReactNode => {
+const EmbedCard = ({
+    embed,
+    index,
+    variant,
+    serverId,
+    isDeleted,
+}: EmbedCardProps): ReactNode => {
     const barColor = colorToCss(embed.color);
     const hasContent =
         embed.title ??
@@ -69,13 +78,25 @@ const EmbedCard = ({ embed, index }: EmbedCardProps): ReactNode => {
             className="mt-1 flex max-w-[520px] overflow-hidden rounded-r-sm"
             key={index}
             style={{
-                borderLeft: `4px solid ${barColor ?? 'var(--color-border-subtle)'}`,
+                borderLeft: `4px solid ${barColor ?? 'var(--color-embed-border)'}`,
             }}
         >
-            <div className="flex w-full flex-col rounded-r-sm bg-bg-secondary px-4 py-3">
+            <div
+                className={cn(
+                    'flex w-full flex-col rounded-r-sm px-4 py-3',
+                    variant === 'preview' ? 'bg-embed-bg' : 'bg-embed-bg/70',
+                )}
+            >
                 {/* Provider */}
                 {embed.provider?.name && (
-                    <p className="mb-0.5 text-xs text-muted-foreground">
+                    <p
+                        className={cn(
+                            'mb-0.5 text-xs',
+                            isDeleted
+                                ? 'text-danger/80'
+                                : 'text-muted-foreground',
+                        )}
+                    >
                         {embed.provider.url ? (
                             <a
                                 className="hover:underline"
@@ -101,7 +122,12 @@ const EmbedCard = ({ embed, index }: EmbedCardProps): ReactNode => {
                                 src={embed.author.icon_url}
                             />
                         )}
-                        <span className="text-sm font-semibold text-foreground">
+                        <span
+                            className={cn(
+                                'text-sm font-semibold',
+                                isDeleted ? 'text-danger' : 'text-foreground',
+                            )}
+                        >
                             {embed.author.url ? (
                                 <a
                                     className="hover:underline"
@@ -123,7 +149,14 @@ const EmbedCard = ({ embed, index }: EmbedCardProps): ReactNode => {
                     <div className="flex-1">
                         {/* Title */}
                         {embed.title && (
-                            <p className="mb-1 text-base font-semibold text-foreground">
+                            <p
+                                className={cn(
+                                    'mb-1 text-base font-semibold',
+                                    isDeleted
+                                        ? 'text-danger'
+                                        : 'text-foreground',
+                                )}
+                            >
                                 {embed.url ? (
                                     <a
                                         className="text-primary hover:underline"
@@ -136,7 +169,11 @@ const EmbedCard = ({ embed, index }: EmbedCardProps): ReactNode => {
                                                 embed.title,
                                                 ParserPresets.EMBED_INLINE,
                                             )}
+                                            serverId={serverId}
                                             size="base"
+                                            variant={
+                                                isDeleted ? 'danger' : undefined
+                                            }
                                         />
                                     </a>
                                 ) : (
@@ -145,7 +182,11 @@ const EmbedCard = ({ embed, index }: EmbedCardProps): ReactNode => {
                                             embed.title,
                                             ParserPresets.EMBED_INLINE,
                                         )}
+                                        serverId={serverId}
                                         size="base"
+                                        variant={
+                                            isDeleted ? 'danger' : undefined
+                                        }
                                     />
                                 )}
                             </p>
@@ -162,7 +203,9 @@ const EmbedCard = ({ embed, index }: EmbedCardProps): ReactNode => {
                                         embed.description,
                                         ParserPresets.EMBED,
                                     )}
+                                    serverId={serverId}
                                     size="sm"
+                                    variant={isDeleted ? 'danger' : undefined}
                                     wrap="preWrap"
                                 />
                             </div>
@@ -185,7 +228,14 @@ const EmbedCard = ({ embed, index }: EmbedCardProps): ReactNode => {
                                             <div
                                                 key={`${field.name}-${field.value}`}
                                             >
-                                                <p className="text-xs font-semibold text-foreground">
+                                                <p
+                                                    className={cn(
+                                                        'text-xs font-semibold',
+                                                        isDeleted
+                                                            ? 'text-danger'
+                                                            : 'text-foreground',
+                                                    )}
+                                                >
                                                     {field.name}
                                                 </p>
                                                 <div
@@ -199,7 +249,13 @@ const EmbedCard = ({ embed, index }: EmbedCardProps): ReactNode => {
                                                             field.value,
                                                             ParserPresets.EMBED,
                                                         )}
+                                                        serverId={serverId}
                                                         size="sm"
+                                                        variant={
+                                                            isDeleted
+                                                                ? 'danger'
+                                                                : undefined
+                                                        }
                                                         wrap="preWrap"
                                                     />
                                                 </div>
@@ -215,7 +271,10 @@ const EmbedCard = ({ embed, index }: EmbedCardProps): ReactNode => {
                     {embed.thumbnail?.url && (
                         <img
                             alt=""
-                            className="ml-auto h-20 w-20 shrink-0 rounded object-cover"
+                            className={cn(
+                                'ml-auto h-20 w-20 shrink-0 rounded object-cover',
+                                isDeleted && 'opacity-50 grayscale',
+                            )}
                             src={embed.thumbnail.url}
                         />
                     )}
@@ -225,7 +284,10 @@ const EmbedCard = ({ embed, index }: EmbedCardProps): ReactNode => {
                 {embed.image?.url && (
                     <img
                         alt=""
-                        className="mt-3 max-h-72 w-full rounded object-contain"
+                        className={cn(
+                            'mt-3 max-h-72 w-full rounded object-contain',
+                            isDeleted && 'opacity-50 grayscale',
+                        )}
                         src={embed.image.url}
                     />
                 )}
@@ -236,11 +298,21 @@ const EmbedCard = ({ embed, index }: EmbedCardProps): ReactNode => {
                         {embed.footer?.icon_url && (
                             <img
                                 alt=""
-                                className="h-5 w-5 rounded-full object-cover"
+                                className={cn(
+                                    'h-5 w-5 rounded-full object-cover',
+                                    isDeleted && 'opacity-50 grayscale',
+                                )}
                                 src={embed.footer.icon_url}
                             />
                         )}
-                        <p className="text-xs text-muted-foreground">
+                        <p
+                            className={cn(
+                                'text-xs',
+                                isDeleted
+                                    ? 'text-danger/80'
+                                    : 'text-muted-foreground',
+                            )}
+                        >
                             {[
                                 embed.footer?.text,
                                 formatTimestamp(embed.timestamp),
@@ -260,18 +332,24 @@ const EmbedCard = ({ embed, index }: EmbedCardProps): ReactNode => {
 export interface EmbedRendererProps {
     payload: MessagePayload;
     className?: string;
+    variant?: 'preview' | 'chat';
+    serverId?: string;
+    isDeleted?: boolean;
 }
 
 export const EmbedRenderer = ({
     payload,
     className,
+    variant = 'preview',
+    serverId,
+    isDeleted,
 }: EmbedRendererProps): ReactNode => {
     const hasAnything =
         payload.content ??
         (payload.embeds && payload.embeds.length > 0) ??
         payload.poll;
 
-    if (!hasAnything) {
+    if (!hasAnything && variant === 'preview') {
         return (
             <div
                 className={cn(
@@ -289,10 +367,14 @@ export const EmbedRenderer = ({
         );
     }
 
+    if (!hasAnything) return null;
+
     return (
         <div
             className={cn(
-                'flex flex-col gap-0.5 rounded-md bg-bg-subtle p-4 font-sans shadow-lg',
+                variant === 'preview'
+                    ? 'flex flex-col gap-0.5 rounded-md bg-bg-subtle p-4 font-sans shadow-lg'
+                    : 'flex flex-col gap-0.5',
                 className,
             )}
         >
@@ -304,6 +386,7 @@ export const EmbedRenderer = ({
                 >
                     <ParsedText
                         nodes={parseText(payload.content, ParserPresets.EMBED)}
+                        serverId={serverId}
                         size="sm"
                         wrap="preWrap"
                     />
@@ -315,7 +398,10 @@ export const EmbedRenderer = ({
                 <EmbedCard
                     embed={embed}
                     index={i}
+                    isDeleted={isDeleted}
                     key={`embed-${embed.title ?? ''}-${embed.color ?? i}`}
+                    serverId={serverId}
+                    variant={variant}
                 />
             ))}
 
@@ -331,7 +417,12 @@ export const EmbedRenderer = ({
                     )
                         return null;
                     return (
-                        <div className="mt-2 max-w-[520px] overflow-hidden rounded-lg border border-border-subtle bg-bg-secondary">
+                        <div
+                            className={cn(
+                                'mt-2 max-w-[520px] overflow-hidden rounded-lg border border-border-subtle bg-embed-bg',
+                                isDeleted && 'opacity-60 grayscale',
+                            )}
+                        >
                             {/* Header */}
                             <div className="px-4 pt-4 pb-3">
                                 <span className="mb-1 inline-flex items-center gap-1.5 rounded-full border border-border-subtle bg-bg-subtle px-2.5 py-0.5 text-[10px] font-semibold tracking-widest text-muted-foreground uppercase">

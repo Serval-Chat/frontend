@@ -5,20 +5,15 @@ import type {
     Server,
     ServerBanner,
 } from '@/api/servers/servers.types';
-import type {
-    Badge,
-    UserSettings,
-    UsernameFont,
-    UsernameGlow,
-    UsernameGradient,
-} from '@/api/users/users.types';
+import type { Embed } from '@/types/embed';
+import type { JsonValue } from '@/types/json';
 
 export type { Category, Channel, Server, ServerBanner };
 
 /**
  * @description WebSocket envelope structure for all messages.
  */
-export interface IWsEnvelope<T = unknown> {
+export interface IWsEnvelope<T = JsonValue> {
     id: string; // Unique message ID
     event: {
         type: string;
@@ -56,7 +51,7 @@ export interface IWsAuthenticatedEvent {
 export interface IWsErrorEvent {
     code: string;
     message: string;
-    details?: unknown;
+    details?: JsonValue;
 }
 
 /**
@@ -96,6 +91,22 @@ export interface IMessageServer {
     isWebhook: boolean;
     webhookUsername?: string;
     webhookAvatarUrl?: string;
+    embeds?: Embed[];
+    interaction?: {
+        command: string;
+        options: { name: string; value: JsonValue }[];
+        user?: { id: string; username: string };
+    };
+}
+
+/**
+ * @description Multiple server messages deleted.
+ */
+export interface IMessagesServerBulkDeleted {
+    messageIds: string[];
+    serverId: string;
+    channelId: string;
+    hard?: boolean;
 }
 
 /**
@@ -110,6 +121,12 @@ export interface IMessageServerSent {
     createdAt: string;
     replyToId?: string;
     slowModeNextMessageAllowedAt?: string | null;
+    embeds?: Embed[];
+    interaction?: {
+        command: string;
+        options: { name: string; value: JsonValue }[];
+        user?: { id: string; username: string };
+    };
 }
 
 /**
@@ -119,7 +136,12 @@ export interface IPresenceSyncEvent {
     online: Array<{
         userId: string;
         username: string;
-        status?: { text: string; emoji?: string | null } | null;
+        status?: {
+            text: string;
+            emoji: string | null;
+            expiresAt: string | null;
+            updatedAt: string;
+        } | null;
     }>;
 }
 
@@ -129,7 +151,12 @@ export interface IPresenceSyncEvent {
 export interface IUserOnlineEvent {
     userId: string;
     username: string;
-    status?: { text: string; emoji?: string | null } | null;
+    status?: {
+        text: string;
+        emoji: string | null;
+        expiresAt: string | null;
+        updatedAt: string;
+    } | null;
 }
 
 /**
@@ -172,10 +199,11 @@ export interface IVoiceJoinedEvent {
  * @description Status updated.
  */
 export interface IStatusUpdatedEvent {
+    userId: string;
     username: string;
     status: {
         text: string;
-        emoji?: string | null;
+        emoji: string | null;
         expiresAt: string | null;
         updatedAt: string;
     } | null;
@@ -189,7 +217,9 @@ export interface IMemberUpdatedEvent {
     userId: string;
     member: {
         userId: string;
+        serverId: string;
         roles: string[];
+        nickname?: string;
     };
     senderId?: string;
 }
@@ -212,6 +242,7 @@ export interface IMentionEvent {
 export interface IMemberAddedEvent {
     serverId: string;
     userId: string;
+    username: string;
     senderId?: string;
 }
 
@@ -406,6 +437,7 @@ export const WsEvents = {
     MESSAGE_SERVER_EDITED: 'message_server_edited',
     DELETE_MESSAGE_SERVER: 'delete_message_server',
     MESSAGE_SERVER_DELETED: 'message_server_deleted',
+    MESSAGES_SERVER_BULK_DELETED: 'messages_server_bulk_deleted',
     MARK_CHANNEL_READ: 'mark_channel_read',
     CHANNEL_UNREAD_UPDATED: 'channel_unread_updated',
     SERVER_UNREAD_UPDATED: 'server_unread_updated',
@@ -470,6 +502,7 @@ export const WsEvents = {
     MENTION: 'mention',
     AUDIT_LOG_ENTRY_CREATED: 'audit_log_entry_created',
     MESSAGE_SERVER_PIN_UPDATED: 'message_server_pin_updated',
+    INTERACTION_CREATE_SERVER: 'interaction_create_server',
 } as const;
 
 export interface IReactionEventPayload {
@@ -486,18 +519,35 @@ export interface IUserUpdatedEvent {
     userId: string;
     username?: string;
     displayName?: string | null;
-    profilePicture?: string;
-    bio?: string;
-    pronouns?: string;
-    usernameFont?: UsernameFont;
-    usernameGradient?: UsernameGradient;
-    usernameGlow?: UsernameGlow;
-    language?: string;
-    settings?: UserSettings;
-    banner?: string;
-    badges?: Badge[] | string[];
+    profilePicture?: string | null;
+    bio?: string | null;
+    pronouns?: string | null;
+    badges?: string[];
     oldUsername?: string;
     newUsername?: string;
+    usernameFont?: string;
+    usernameGradient?: {
+        enabled: boolean;
+        colors: string[];
+        angle: number;
+    };
+    usernameGlow?: {
+        enabled: boolean;
+        color: string;
+        intensity: number;
+    };
+    settings?: {
+        muteNotifications?: boolean;
+        useDiscordStyleMessages?: boolean;
+        ownMessagesAlign?: 'left' | 'right';
+        otherMessagesAlign?: 'left' | 'right';
+        showYouLabel?: boolean;
+        ownMessageColor?: string;
+        otherMessageColor?: string;
+        disableCustomUsernameFonts?: boolean;
+        disableCustomUsernameColors?: boolean;
+        disableCustomUsernameGlow?: boolean;
+    };
     senderId?: string;
 }
 

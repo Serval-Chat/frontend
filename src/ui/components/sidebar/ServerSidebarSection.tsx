@@ -11,6 +11,7 @@ interface ServerSidebarSectionProps {
     members?: ServerMember[];
     isLoading: boolean;
     memberRoleMap: Map<string, Role>;
+    memberIconRoleMap: Map<string, Role>;
     serverDetails?: Server;
     roles?: Role[];
     searchQuery?: string;
@@ -30,6 +31,7 @@ export const ServerSidebarSection: React.FC<ServerSidebarSectionProps> = ({
     members,
     isLoading,
     memberRoleMap,
+    memberIconRoleMap,
     serverDetails,
     roles,
     searchQuery,
@@ -109,9 +111,14 @@ export const ServerSidebarSection: React.FC<ServerSidebarSectionProps> = ({
                 userBlocks & BlockFlags.HIDE_THEIR_PRESENCE
             );
 
-            const isOnline =
-                !forceOffline &&
-                ((member.online ?? presence?.status === 'online') || isMe);
+            const onlineFromPresence =
+                presence?.status !== undefined
+                    ? presence.status === 'online'
+                    : undefined;
+            const onlineFromMemberSnapshot = member.online ?? false;
+            const effectiveOnline =
+                onlineFromPresence ?? onlineFromMemberSnapshot;
+            const isOnline = !forceOffline && (effectiveOnline || isMe);
 
             if (!isOnline) {
                 offlineGroup.members.push(member);
@@ -200,6 +207,9 @@ export const ServerSidebarSection: React.FC<ServerSidebarSectionProps> = ({
                                         disableGlowAndColors={
                                             serverDetails?.disableUsernameGlowAndCustomColor
                                         }
+                                        iconRole={memberIconRoleMap.get(
+                                            member.userId,
+                                        )}
                                         initialPresenceStatus={
                                             group.id === 'offline'
                                                 ? 'offline'

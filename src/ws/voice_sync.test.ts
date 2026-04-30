@@ -64,7 +64,7 @@ describe('Voice Synchronization WS Handlers', () => {
             static CLOSING = 2;
             static CLOSED = 3;
             constructor() {
-                return mockWs as unknown as WebSocket;
+                return mockWs as any as WebSocket;
             }
         }
         vi.stubGlobal('WebSocket', WebSocketMock);
@@ -76,7 +76,7 @@ describe('Voice Synchronization WS Handlers', () => {
         });
 
         mockDispatch = vi.fn();
-        dispatch = mockDispatch as unknown as Dispatch<UnknownAction>;
+        dispatch = mockDispatch as any as Dispatch<UnknownAction>;
 
         cleanup = setupGlobalWsHandlers(queryClient, dispatch);
     });

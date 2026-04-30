@@ -29,7 +29,7 @@ interface RoleEditorProps {
     disableGlowAndColors?: boolean;
 }
 
-type ColorType = 'solid' | 'linear' | 'custom';
+type ColorType = 'solid' | 'custom';
 
 export const RoleEditor: React.FC<RoleEditorProps> = ({
     role,
@@ -46,23 +46,33 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
         role.colors && role.colors.length > 0
             ? 'custom'
             : role.startColor && role.endColor
-              ? 'linear'
+              ? 'custom'
               : 'solid',
     );
     const [solidColor, setSolidColor] = useState(role.color || '#99aab5');
-    const [startColor, setStartColor] = useState(role.startColor || '#99aab5');
-    const [endColor, setEndColor] = useState(role.endColor || '#2c2f33');
     const [customColorItems, setCustomColorItems] = useState<
         { id: string; color: string }[]
-    >(() =>
-        (role.colors || ['#99aab5', '#2c2f33']).map((c, i) => ({
-            id: `color-${role._id}-${i}`,
-            color: c,
-        })),
-    );
+    >(() => {
+        if (role.colors && role.colors.length > 0) {
+            return role.colors.map((c, i) => ({
+                id: `color-${role._id}-${i}`,
+                color: c,
+            }));
+        } else if (role.startColor && role.endColor) {
+            return [
+                { id: `color-${role._id}-0`, color: role.startColor },
+                { id: `color-${role._id}-1`, color: role.endColor },
+            ];
+        }
+        return [
+            { id: `color-${role._id}-0`, color: '#99aab5' },
+            { id: `color-${role._id}-1`, color: '#2c2f33' },
+        ];
+    });
     const [gradientRepeat, setGradientRepeat] = useState(
         role.gradientRepeat || 1,
     );
+    const [glowEnabled, setGlowEnabled] = useState(role.glowEnabled !== false);
 
     const [permissions, setPermissions] = useState<Partial<RolePermissions>>(
         role.permissions || {},
@@ -114,19 +124,24 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
             role.colors && role.colors.length > 0
                 ? 'custom'
                 : role.startColor && role.endColor
-                  ? 'linear'
+                  ? 'custom'
                   : 'solid';
         setColorType(type);
         setSolidColor(role.color || '#99aab5');
-        setStartColor(role.startColor || '#99aab5');
-        setEndColor(role.endColor || '#2c2f33');
+        const colors =
+            role.colors && role.colors.length > 0
+                ? role.colors
+                : role.startColor && role.endColor
+                  ? [role.startColor, role.endColor]
+                  : ['#99aab5', '#2c2f33'];
         setCustomColorItems(
-            (role.colors || ['#99aab5', '#2c2f33']).map((c, i) => ({
+            colors.map((c, i) => ({
                 id: `color-${role._id}-${i}`,
                 color: c,
             })),
         );
         setGradientRepeat(role.gradientRepeat || 1);
+        setGlowEnabled(role.glowEnabled !== false);
         setPermissions(role.permissions || {});
         setHasChanges(false);
     };
@@ -145,11 +160,6 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
             updates.startColor = undefined;
             updates.endColor = undefined;
             updates.colors = undefined;
-        } else if (colorType === 'linear') {
-            updates.color = undefined;
-            updates.startColor = startColor;
-            updates.endColor = endColor;
-            updates.colors = undefined;
         } else if (colorType === 'custom') {
             updates.color = undefined;
             updates.startColor = undefined;
@@ -158,7 +168,7 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
             updates.gradientRepeat = gradientRepeat;
         }
 
-        onSave(updates);
+        onSave({ ...updates, glowEnabled });
         setHasChanges(false);
     };
 
@@ -184,11 +194,6 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
             preview.startColor = undefined;
             preview.endColor = undefined;
             preview.colors = undefined;
-        } else if (colorType === 'linear') {
-            preview.color = null;
-            preview.startColor = startColor;
-            preview.endColor = endColor;
-            preview.colors = undefined;
         } else if (colorType === 'custom') {
             preview.color = null;
             preview.startColor = undefined;
@@ -196,6 +201,7 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
             preview.colors = customColorItems.map((item) => item.color);
             preview.gradientRepeat = gradientRepeat;
         }
+        preview.glowEnabled = glowEnabled;
         return preview;
     };
 
@@ -234,6 +240,17 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
                                 }}
                             />
                         </div>
+                    </section>
+
+                    {/* Appearance Settings */}
+                    <section className="space-y-4 border-t border-border-subtle pt-4">
+                        <Heading
+                            className="border-b border-border-subtle pb-2"
+                            level={3}
+                            variant="section"
+                        >
+                            Appearance
+                        </Heading>
 
                         <div className="space-y-2">
                             <label
@@ -292,31 +309,50 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
 
                         <div className="space-y-4 pt-4">
                             <div className="flex items-center justify-between">
+                                <div className="space-y-0.5">
+                                    <Text weight="semibold">Role Glow</Text>
+                                    <br />
+                                    <Text size="xs" variant="muted">
+                                        Adds a glowing effect to the role color.
+                                    </Text>
+                                </div>
+                                <Toggle
+                                    checked={glowEnabled}
+                                    onCheckedChange={(val) => {
+                                        setGlowEnabled(val);
+                                        setHasChanges(true);
+                                    }}
+                                />
+                            </div>
+                        </div>
+
+                        <div className="space-y-4 pt-4">
+                            <div className="flex items-center justify-between">
                                 <span className="text-xs font-bold text-muted-foreground uppercase">
                                     Role Color
                                 </span>
                                 <div className="flex rounded-md border border-border-subtle bg-bg-secondary p-1">
-                                    {(
-                                        ['solid', 'linear', 'custom'] as const
-                                    ).map((type) => (
-                                        <Button
-                                            className={cn(
-                                                'rounded border-none px-3 py-1 text-xs font-semibold capitalize shadow-none transition-all',
-                                                colorType === type
-                                                    ? 'bg-primary text-foreground-inverse hover:bg-primary-hover'
-                                                    : 'text-muted-foreground hover:bg-bg-secondary hover:text-foreground',
-                                            )}
-                                            key={type}
-                                            size="sm"
-                                            variant="ghost"
-                                            onClick={() => {
-                                                setColorType(type);
-                                                setHasChanges(true);
-                                            }}
-                                        >
-                                            {type}
-                                        </Button>
-                                    ))}
+                                    {(['solid', 'custom'] as const).map(
+                                        (type) => (
+                                            <Button
+                                                className={cn(
+                                                    'rounded border-none px-3 py-1 text-xs font-semibold capitalize shadow-none transition-all',
+                                                    colorType === type
+                                                        ? 'bg-primary text-foreground-inverse hover:bg-primary-hover'
+                                                        : 'text-muted-foreground hover:bg-bg-secondary hover:text-foreground',
+                                                )}
+                                                key={type}
+                                                size="sm"
+                                                variant="ghost"
+                                                onClick={() => {
+                                                    setColorType(type);
+                                                    setHasChanges(true);
+                                                }}
+                                            >
+                                                {type}
+                                            </Button>
+                                        ),
+                                    )}
                                 </div>
                             </div>
 
@@ -342,43 +378,6 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
                                                     setHasChanges(true);
                                                 }}
                                             />
-                                        </div>
-                                    )}
-
-                                    {colorType === 'linear' && (
-                                        <div className="space-y-4">
-                                            <div className="space-y-2">
-                                                <Text
-                                                    size="xs"
-                                                    variant="muted"
-                                                    weight="bold"
-                                                >
-                                                    START COLOR
-                                                </Text>
-                                                <HexColorPicker
-                                                    color={startColor}
-                                                    onChange={(val) => {
-                                                        setStartColor(val);
-                                                        setHasChanges(true);
-                                                    }}
-                                                />
-                                            </div>
-                                            <div className="space-y-2">
-                                                <Text
-                                                    size="xs"
-                                                    variant="muted"
-                                                    weight="bold"
-                                                >
-                                                    END COLOR
-                                                </Text>
-                                                <HexColorPicker
-                                                    color={endColor}
-                                                    onChange={(val) => {
-                                                        setEndColor(val);
-                                                        setHasChanges(true);
-                                                    }}
-                                                />
-                                            </div>
                                         </div>
                                     )}
 
@@ -661,6 +660,15 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
                                 }
                             />
                             <PermissionToggle
+                                danger
+                                description="Allows member to timeout other members."
+                                label="Moderate Members"
+                                value={permissions.moderateMembers || false}
+                                onChange={(val) =>
+                                    updatePermission('moderateMembers', val)
+                                }
+                            />
+                            <PermissionToggle
                                 description="Allows member to view channels."
                                 label="View Channels"
                                 value={permissions.viewChannels !== false}
@@ -719,6 +727,14 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
                                         'pingRolesAndEveryone',
                                         val,
                                     )
+                                }
+                            />
+                            <PermissionToggle
+                                description="Allows member to see messages that have been deleted (rendered in red)."
+                                label="See Deleted Messages"
+                                value={permissions.seeDeletedMessages || false}
+                                onChange={(val) =>
+                                    updatePermission('seeDeletedMessages', val)
                                 }
                             />
                         </div>

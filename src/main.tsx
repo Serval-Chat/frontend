@@ -7,7 +7,9 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { teardownWebPush } from '@/lib/pushClient';
 import { Admin } from '@/pages/Admin';
 import { App } from '@/pages/App';
+import { BotAuthorize } from '@/pages/BotAuthorize';
 import { Chat } from '@/pages/Chat';
+import { Developer } from '@/pages/Developer';
 import { Downloads } from '@/pages/Downloads';
 import { EmbedBuilder } from '@/pages/EmbedBuilder';
 import { ForgotPassword } from '@/pages/ForgotPassword';
@@ -181,6 +183,14 @@ createRoot(document.getElementById('root')!).render(
                                         path="/admin/*"
                                     />
                                 </Route>
+                                <Route
+                                    element={<BotAuthorize />}
+                                    path="/authorize"
+                                />
+                                <Route
+                                    element={<Developer />}
+                                    path="/developer/*"
+                                />
                                 <Route element={<NotFound />} path="*" />
                             </Routes>
                         </BrowserRouter>

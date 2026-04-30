@@ -497,4 +497,15 @@ export const serversApi = {
         const response = await apiClient.get<Emoji[]>('/api/v1/servers/emojis');
         return response.data;
     },
+    timeoutMember: async (
+        serverId: string,
+        userId: string,
+        duration: number,
+        reason?: string,
+    ): Promise<void> => {
+        await apiClient.post(
+            `/api/v1/servers/${serverId}/members/${userId}/timeout`,
+            { duration, reason },
+        );
+    },
 };

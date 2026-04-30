@@ -87,7 +87,7 @@ describe('Frontend Blocking Content Filters', () => {
 
             render(
                 <MessagesList
-                    messages={messages as unknown as ProcessedChatMessage[]}
+                    messages={messages as any as ProcessedChatMessage[]}
                 />,
             );
 
@@ -138,7 +138,7 @@ describe('Frontend Blocking Content Filters', () => {
 
             render(
                 <MessagesList
-                    messages={messages as unknown as ProcessedChatMessage[]}
+                    messages={messages as any as ProcessedChatMessage[]}
                 />,
             );
 
@@ -193,7 +193,7 @@ describe('Frontend Blocking Content Filters', () => {
                 <QueryClientProvider client={queryClient}>
                     <Reactions
                         messageId="m1"
-                        reactions={reactions as unknown as MessageReaction[]}
+                        reactions={reactions as any as MessageReaction[]}
                     />
                 </QueryClientProvider>,
             );

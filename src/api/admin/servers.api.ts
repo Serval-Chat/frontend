@@ -26,7 +26,9 @@ export const adminServersApi = {
 
     getServerInvites: (serverId: string) =>
         apiClient
-            .get<unknown[]>(`/api/v1/admin/servers/${serverId}/invites`)
+            .get<
+                Record<string, unknown>[]
+            >(`/api/v1/admin/servers/${serverId}/invites`)
             .then((r) => r.data),
 
     deleteServerInvite: (serverId: string, inviteId: string) =>

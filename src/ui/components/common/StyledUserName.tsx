@@ -130,7 +130,10 @@ export const StyledUserName: React.FC<StyledUserNameProps> = ({
 
     const hasGlow =
         !effectiveDisableGlow &&
-        (usernameGlow?.enabled || (!!role && (!!solidColor || hasGradient)));
+        (usernameGlow?.enabled ||
+            (!!role &&
+                role.glowEnabled !== false &&
+                (!!solidColor || hasGradient)));
 
     const containerStyle: React.CSSProperties = {
         fontFamily:
@@ -184,7 +187,7 @@ export const StyledUserName: React.FC<StyledUserNameProps> = ({
                 <span
                     className="relative isolate inline-block"
                     // index is the only stable unique identifier for character position in dynamic text
-                    // eslint-disable-next-line react/no-array-index-key
+
                     key={i}
                     style={charStyle}
                 >

@@ -218,7 +218,7 @@ export const AuditLogFilters: React.FC<AuditLogFiltersProps> = ({
 
                 <div className="flex flex-col gap-1.5">
                     <label
-                        className="text-text-muted text-xs font-medium"
+                        className="text-xs font-medium text-text-muted"
                         htmlFor="audit-filter-moderator"
                     >
                         Moderator ID
@@ -234,7 +234,7 @@ export const AuditLogFilters: React.FC<AuditLogFiltersProps> = ({
 
                 <div className="flex flex-col gap-1.5">
                     <label
-                        className="text-text-muted text-xs font-medium"
+                        className="text-xs font-medium text-text-muted"
                         htmlFor="audit-filter-target"
                     >
                         Target ID
@@ -250,7 +250,7 @@ export const AuditLogFilters: React.FC<AuditLogFiltersProps> = ({
 
                 <div className="flex flex-col gap-1.5">
                     <label
-                        className="text-text-muted text-xs font-medium"
+                        className="text-xs font-medium text-text-muted"
                         htmlFor="audit-filter-reason"
                     >
                         Reason
@@ -263,7 +263,7 @@ export const AuditLogFilters: React.FC<AuditLogFiltersProps> = ({
                             value={filters.reason || ''}
                             onChange={handleReasonChange}
                         />
-                        <Search className="text-text-muted absolute top-2.5 left-3 h-4 w-4" />
+                        <Search className="absolute top-2.5 left-3 h-4 w-4 text-text-muted" />
                     </div>
                 </div>
             </div>
@@ -271,7 +271,7 @@ export const AuditLogFilters: React.FC<AuditLogFiltersProps> = ({
             {hasActiveFilters && (
                 <div className="flex justify-end">
                     <Button
-                        className="text-text-muted hover:text-text"
+                        className="hover:text-text text-text-muted"
                         size="sm"
                         variant="ghost"
                         onClick={clearFilters}

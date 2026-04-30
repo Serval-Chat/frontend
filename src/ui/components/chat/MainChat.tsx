@@ -22,6 +22,7 @@ import { useProcessedMessages } from '@/hooks/chat/useProcessedMessages';
 import { useSlowMode } from '@/hooks/chat/useSlowMode';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useChatWS } from '@/hooks/ws/useChatWS';
+import { type Theme, useTheme } from '@/providers/ThemeProvider';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { setTargetMessageId } from '@/store/slices/navSlice';
 import type { ProcessedChatMessage } from '@/types/chat.ui';
@@ -33,13 +34,22 @@ import { MessagesList } from '@/ui/components/chat/MessagesList';
 import { TypingIndicator } from '@/ui/components/chat/TypingIndicator';
 import { Text } from '@/ui/components/common/Text';
 import { Box } from '@/ui/components/layout/Box';
+import { applyServalBackground } from '@/utils/servalFur';
 import { wsMessages } from '@/ws';
 
 import { StickyMessageBar } from './StickyMessageBar';
 
-/**
- * @description Main chat area component that displays messages for the selected conversation.
- */
+const THEMES: Theme[] = [
+    'serval',
+    'dark',
+    'deep-ocean',
+    'light',
+    'cherry',
+    'high-contrast',
+    'violet',
+    'forest-green',
+];
+
 export const MainChat: React.FC = () => {
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
@@ -58,7 +68,6 @@ export const MainChat: React.FC = () => {
         (state) => state.nav.targetMessageId,
     );
 
-    // File Upload State
     const [isDragging, setIsDragging] = useState(false);
     const fileQueueResult = useFileQueue();
     const [replyingTo, setReplyingTo] = useState<ProcessedChatMessage | null>(
@@ -66,20 +75,71 @@ export const MainChat: React.FC = () => {
     );
     const [showPins, setShowPins] = useState(false);
     const [debugTypingCount, setDebugTypingCount] = useState(0);
+    const { theme, setTheme } = useTheme();
+    const chatContainerRef = React.useRef<HTMLElement>(null);
+    const { spotCount, opacity, seed, base, spotColor } = useAppSelector(
+        (state) => state.furTweaker,
+    );
+
+    React.useEffect(() => {
+        if (theme !== 'serval' || !chatContainerRef.current) return;
+
+        const opts = {
+            base,
+            opacity,
+            spotColor,
+            spotCount: spotCount || undefined,
+            seed,
+        };
+
+        let cleanup = applyServalBackground(chatContainerRef.current, opts);
+
+        const observer = new ResizeObserver(() => {
+            cleanup();
+            if (chatContainerRef.current) {
+                cleanup = applyServalBackground(chatContainerRef.current, opts);
+            }
+        });
+        observer.observe(chatContainerRef.current);
+
+        return () => {
+            cleanup();
+            observer.disconnect();
+        };
+    }, [theme, opacity, seed, base, spotColor, spotCount]);
 
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent): void => {
             if (e.altKey && e.code === 'Digit1') {
                 e.preventDefault();
                 e.stopPropagation();
-                setDebugTypingCount((prev) => (prev + 1) % 4);
+                setDebugTypingCount((prev) => (prev + 1) % 5);
+            }
+            if (e.altKey && e.code === 'Digit2') {
+                e.preventDefault();
+                e.stopPropagation();
+                setDebugTypingCount((prev) => (prev - 1 + 5) % 5);
+            }
+            if (e.altKey && e.code === 'Digit3') {
+                e.preventDefault();
+                e.stopPropagation();
+                const currentIndex = THEMES.indexOf(theme);
+                const nextIndex =
+                    (currentIndex - 1 + THEMES.length) % THEMES.length;
+                setTheme(THEMES[nextIndex]);
+            }
+            if (e.altKey && e.code === 'Digit4') {
+                e.preventDefault();
+                e.stopPropagation();
+                const currentIndex = THEMES.indexOf(theme);
+                const nextIndex = (currentIndex + 1) % THEMES.length;
+                setTheme(THEMES[nextIndex]);
             }
         };
         window.addEventListener('keydown', handleKeyDown, true);
         return () => window.removeEventListener('keydown', handleKeyDown, true);
-    }, []);
+    }, [theme, setTheme]);
 
-    // Data Fetching
     const { data: currentUser } = useMe();
     const { data: friendUser, isError: isFriendError } = useUserById(
         selectedFriendId ?? '',
@@ -105,7 +165,7 @@ export const MainChat: React.FC = () => {
     const { data: roles } = useRoles(selectedServerId, {
         enabled: isServerContextReady,
     });
-    const { hasPermission } = usePermissions(
+    const { hasPermission, isTimedOut } = usePermissions(
         selectedServerId,
         selectedChannelId,
         { enabled: isServerContextReady },
@@ -114,8 +174,8 @@ export const MainChat: React.FC = () => {
     const { mutate: clearChannelPings } = useClearChannelPings();
     const { mutate: deletePing } = useDeletePing();
 
-    // dms have no permissions therefore always allow.
-    const canSendMessages = !selectedServerId || hasPermission('sendMessages');
+    const canSendMessages =
+        !selectedServerId || hasPermission('sendMessages') || isTimedOut;
 
     const selectedChannel = React.useMemo(
         () => channels?.find((c) => c._id === selectedChannelId),
@@ -208,7 +268,6 @@ export const MainChat: React.FC = () => {
         }
     }, [isFriendError, selectedFriendId, navigate]);
 
-    // Auto-clear pings when seen in chat
     React.useEffect(() => {
         if (selectedServerId && selectedChannelId) {
             wsMessages.markChannelRead(selectedServerId, selectedChannelId);
@@ -307,14 +366,20 @@ export const MainChat: React.FC = () => {
             )}
 
             {selectedChannel?.type === 'voice' ? (
-                <Box className="flex flex-1 items-center justify-center bg-[var(--chat-bg)] p-8">
+                <Box
+                    className="flex flex-1 items-center justify-center bg-[var(--chat-bg)] p-8"
+                    ref={chatContainerRef}
+                >
                     <Text className="text-muted-foreground">
                         This is a Voice Channel. Connect to it via the sidebar.
                     </Text>
                 </Box>
             ) : (
                 <>
-                    <Box className="relative flex min-h-0 flex-1 flex-col">
+                    <Box
+                        className="relative flex min-h-0 flex-1 flex-col"
+                        ref={chatContainerRef}
+                    >
                         {isLoading ? (
                             <ChatLoadingState />
                         ) : (
@@ -399,7 +464,6 @@ export const MainChat: React.FC = () => {
                         </Box>
                     )}
 
-                    {/* Drag and Drop Overlay */}
                     {isDragging && (
                         <Box className="animate-in fade-in zoom-in pointer-events-none absolute inset-0 z-[var(--z-index-backdrop)] m-4 flex flex-col items-center justify-center rounded-3xl border-4 border-dashed border-primary/50 bg-bg-primary/80 p-8 backdrop-blur-sm transition-all duration-200">
                             <div className="mb-4 rounded-full bg-primary/10 p-6">

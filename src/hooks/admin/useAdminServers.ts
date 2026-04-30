@@ -71,7 +71,7 @@ export const useAdminServerInvites = (
     useQuery({
         queryKey: ['admin-server-invites', serverId],
         queryFn: () =>
-            adminServersApi.getServerInvites(serverId!) as Promise<
+            adminServersApi.getServerInvites(serverId!) as unknown as Promise<
                 ServerInvite[]
             >,
         enabled: !!serverId,

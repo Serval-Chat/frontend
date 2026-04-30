@@ -103,6 +103,15 @@ export const ParserPresets = {
             ParserFeature.H3,
             ParserFeature.SUBTEXT,
             ParserFeature.THEMATIC_BREAK,
+            ParserFeature.EMOJI,
+            ParserFeature.UNICODE_EMOJI,
+            ParserFeature.MENTION,
+            ParserFeature.ROLE_MENTION,
+            ParserFeature.EVERYONE_MENTION,
+            ParserFeature.CHANNEL_LINK,
+            ParserFeature.LATEX,
+            ParserFeature.INLINE_LATEX,
+            ParserFeature.ADMONITION,
         ],
     },
     EMBED_INLINE: {
@@ -115,6 +124,13 @@ export const ParserPresets = {
             ParserFeature.INLINE_CODE,
             ParserFeature.LINK,
             ParserFeature.SPOILER,
+            ParserFeature.EMOJI,
+            ParserFeature.UNICODE_EMOJI,
+            ParserFeature.MENTION,
+            ParserFeature.ROLE_MENTION,
+            ParserFeature.EVERYONE_MENTION,
+            ParserFeature.CHANNEL_LINK,
+            ParserFeature.INLINE_LATEX,
         ],
     },
 } as const;
@@ -129,6 +145,28 @@ export class TextParser {
         this.text = text;
         this.options = options;
         this.startsWithEmojiRegex = new RegExp('^' + emojiRegex.source);
+    }
+
+    private getBaseUrlPattern(): string {
+        const alternativeUrlsStr =
+            import.meta.env.VITE_ALTERNATIVE_URLS || '[]';
+        let alternativeUrls: string[] = [];
+        try {
+            alternativeUrls = JSON.parse(alternativeUrlsStr);
+        } catch (e) {
+            console.warn('Failed to parse VITE_ALTERNATIVE_URLS:', e);
+        }
+
+        const defaultDomains = [
+            'https?://(?:rolling\\.)?catfla\\.re',
+            'https?://localhost:(?:5173|8001)',
+        ];
+
+        const escapedAlts = alternativeUrls.map((url) =>
+            url.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\/$/, ''),
+        );
+
+        return `(?:${[...defaultDomains, ...escapedAlts].join('|')})`;
     }
 
     public parse(): ASTNode[] {
@@ -150,7 +188,6 @@ export class TextParser {
                 continue;
             }
 
-            // Unicode Emoji
             if (
                 charCode > 127 &&
                 this.options.features.includes(ParserFeature.UNICODE_EMOJI)
@@ -163,7 +200,6 @@ export class TextParser {
                 }
             }
 
-            // [%file%](url) or [label](url)
             if (
                 char === '[' &&
                 this.options.features.includes(ParserFeature.LINK)
@@ -180,7 +216,6 @@ export class TextParser {
                     }
                 }
 
-                // Try named link
                 const linkNode = this.tryParseNamedLink();
                 if (linkNode) {
                     currentText = this.flushText(nodes, currentText);
@@ -189,7 +224,6 @@ export class TextParser {
                 }
             }
 
-            // <emoji:id>
             if (
                 char === '<' &&
                 this.options.features.includes(ParserFeature.EMOJI) &&
@@ -203,7 +237,6 @@ export class TextParser {
                 }
             }
 
-            // - item, * item, + item
             if (
                 (char === '-' ||
                     char === '*' ||
@@ -223,7 +256,6 @@ export class TextParser {
                 }
             }
 
-            // ***text***, **text**, *text*
             if (
                 char === '*' &&
                 (this.options.features.includes(ParserFeature.BOLD) ||
@@ -238,7 +270,6 @@ export class TextParser {
                 }
             }
 
-            // __underline__
             if (
                 char === '_' &&
                 this.options.features.includes(ParserFeature.UNDERLINE) &&
@@ -252,7 +283,6 @@ export class TextParser {
                 }
             }
 
-            // ~~strikethrough~~
             if (
                 char === '~' &&
                 this.options.features.includes(ParserFeature.STRIKETHROUGH) &&
@@ -266,7 +296,6 @@ export class TextParser {
                 }
             }
 
-            // <userid:'id'>
             if (
                 char === '<' &&
                 this.options.features.includes(ParserFeature.MENTION) &&
@@ -280,7 +309,6 @@ export class TextParser {
                 }
             }
 
-            // <roleid:'id'>
             if (
                 char === '<' &&
                 this.options.features.includes(ParserFeature.ROLE_MENTION) &&
@@ -294,7 +322,6 @@ export class TextParser {
                 }
             }
 
-            // <everyone>
             if (
                 char === '<' &&
                 this.options.features.includes(
@@ -310,8 +337,6 @@ export class TextParser {
                 }
             }
 
-            // Channel links: http(-s)://localhost:xxxx/chat/@server/{serverId}/channel/{channelId}
-            // or http(-s)://(rolling.)catfla.re/chat/@server/{serverId}/channel/{channelId}
             if (
                 char === 'h' &&
                 this.options.features.includes(ParserFeature.CHANNEL_LINK) &&
@@ -325,7 +350,6 @@ export class TextParser {
                 }
             }
 
-            // Invite links: http(-s)://(rolling.)catfla.re/invite/(id)
             if (
                 char === 'h' &&
                 this.options.features.includes(ParserFeature.INVITE) &&
@@ -339,7 +363,6 @@ export class TextParser {
                 }
             }
 
-            // http:// or https://
             if (
                 char === 'h' &&
                 this.options.features.includes(ParserFeature.LINK) &&
@@ -353,7 +376,6 @@ export class TextParser {
                 }
             }
 
-            // --- (Thematic Break)
             if (
                 char === '-' &&
                 this.options.features.includes(ParserFeature.THEMATIC_BREAK)
@@ -366,7 +388,6 @@ export class TextParser {
                 }
             }
 
-            // #, ##, ###, -#
             if (
                 (char === '#' || (char === '-' && this.peek('-#'))) &&
                 (this.options.features.includes(ParserFeature.H1) ||
@@ -382,7 +403,6 @@ export class TextParser {
                 }
             }
 
-            // 1. item
             if (
                 ((char >= '0' && char <= '9') || char === ' ') &&
                 this.options.features.includes(ParserFeature.ORDERED_LIST)
@@ -399,7 +419,6 @@ export class TextParser {
                 }
             }
 
-            // ||text||
             if (
                 char === '|' &&
                 this.options.features.includes(ParserFeature.TABLE) &&
@@ -427,7 +446,6 @@ export class TextParser {
                 }
             }
 
-            // `code` or ```code```
             if (
                 char === '`' &&
                 (this.options.features.includes(ParserFeature.INLINE_CODE) ||
@@ -442,7 +460,6 @@ export class TextParser {
                 }
             }
 
-            // $$text$$ (inline) or $\ntext\n$
             if (
                 char === '$' &&
                 (this.options.features.includes(ParserFeature.INLINE_LATEX) ||
@@ -456,7 +473,6 @@ export class TextParser {
                 }
             }
 
-            // MyST admonitions: :::type
             if (
                 char === ':' &&
                 this.options.features.includes(ParserFeature.ADMONITION) &&
@@ -478,7 +494,6 @@ export class TextParser {
                 }
             }
 
-            // Blockquotes (and GitHub/Obsidian admonitions)
             if (
                 char === '>' &&
                 (this.options.features.includes(ParserFeature.BLOCKQUOTE) ||
@@ -537,7 +552,6 @@ export class TextParser {
 
         while (this.index < this.text.length && this.text[this.index] !== '>') {
             const c = this.text[this.index];
-            // Valid emoji characters: a-z, A-Z, 0-9, _, -
             if (
                 (c >= 'a' && c <= 'z') ||
                 (c >= 'A' && c <= 'Z') ||
@@ -570,7 +584,6 @@ export class TextParser {
         const start = this.index;
         let starCount = 0;
 
-        // Count leading stars up to 3
         while (
             this.index < this.text.length &&
             this.text[this.index] === '*' &&
@@ -582,7 +595,6 @@ export class TextParser {
 
         if (starCount === 0) return null;
 
-        // Features check
         if (
             starCount === 3 &&
             !this.options.features.includes(ParserFeature.BOLD_ITALIC)
@@ -745,7 +757,7 @@ export class TextParser {
 
     private tryParseSpoiler(): ASTNode | null {
         const start = this.index;
-        this.index += 2; // skip '||'
+        this.index += 2;
 
         let content = '';
         let foundClosing = false;
@@ -760,7 +772,7 @@ export class TextParser {
         }
 
         if (foundClosing && content) {
-            this.index += 2; // skip '||'
+            this.index += 2;
             return {
                 type: 'spoiler',
                 content: this.parseContent(content),
@@ -774,12 +786,10 @@ export class TextParser {
     private tryParseCode(): ASTNode | null {
         const start = this.index;
 
-        // Try parse multiline code block first
         if (this.peek('```')) {
             this.index += 3;
             let language = '';
 
-            // Optional language
             while (
                 this.index < this.text.length &&
                 this.text[this.index] !== '\n' &&
@@ -952,8 +962,10 @@ export class TextParser {
 
     private tryParseInvite(): ASTNode | null {
         const start = this.index;
-        const inviteRegex =
-            /^https?:\/\/(?:rolling\.)?catfla\.re\/invite\/([a-zA-Z0-9_-]+)/;
+        const baseUrlPattern = this.getBaseUrlPattern();
+        const inviteRegex = new RegExp(
+            `^${baseUrlPattern}/invite/([a-zA-Z0-9_-]+)`,
+        );
         const remainingText = this.text.slice(this.index);
         const match = remainingText.match(inviteRegex);
 
@@ -1315,11 +1327,10 @@ export class TextParser {
 
     private tryParseChannelLink(): ASTNode | null {
         const start = this.index;
-        // Pattern: http(s)://localhost:5173/chat/@server/{serverId}/channel/{channelId}(/message/{messageId})?
-        // or http(s)://localhost:8001/chat/@server/{serverId}/channel/{channelId}(/message/{messageId})?
-        // or http(s)://(rolling.)catfla.re/chat/@server/{serverId}/channel/{channelId}(/message/{messageId})?
-        const channelLinkRegex =
-            /^https?:\/\/(?:localhost:(?:5173|8001)|(?:rolling\.)?catfla\.re)\/chat\/@server\/([a-zA-Z0-9]+)\/channel\/([a-zA-Z0-9]+)(?:\/message\/([a-zA-Z0-9]+))?/;
+        const baseUrlPattern = this.getBaseUrlPattern();
+        const channelLinkRegex = new RegExp(
+            `^${baseUrlPattern}/chat/@server/([a-zA-Z0-9]+)/channel/([a-zA-Z0-9]+)(?:/message/([a-zA-Z0-9]+))?`,
+        );
         const remainingText = this.text.slice(this.index);
         const match = remainingText.match(channelLinkRegex);
 

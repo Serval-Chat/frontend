@@ -71,7 +71,7 @@ export const InviteLink: React.FC<InviteLinkProps> = ({ code, url }) => {
         return (
             <Box
                 className="my-2 flex w-fit min-w-75 items-center gap-2 rounded-lg border border-border-subtle bg-bg-secondary p-4"
-                innerRef={containerRef}
+                ref={containerRef}
             >
                 <LoadingSpinner size="sm" />
                 <Text size="sm" variant="muted">

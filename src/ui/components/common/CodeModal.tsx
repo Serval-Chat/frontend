@@ -47,7 +47,6 @@ const AstRenderer: React.FC<{ nodes: AstNode[] }> = memo(({ nodes }) => (
                 }
 
                 return (
-                    // eslint-disable-next-line react/no-array-index-key
                     <Tag className={className} key={i} style={style}>
                         <AstRenderer nodes={node.children || []} />
                     </Tag>
@@ -102,7 +101,6 @@ export const CodeModal: React.FC<CodeModalProps> = memo(
                         {codeLines.map((lineNodes, i) => (
                             <div
                                 className="group flex transition-colors hover:bg-white/5"
-                                // eslint-disable-next-line react/no-array-index-key
                                 key={i}
                             >
                                 <div

@@ -37,7 +37,7 @@ describe('WsClient', () => {
             static CLOSING = 2;
             static CLOSED = 3;
             constructor() {
-                return mockWebSocket as unknown as WebSocket;
+                return mockWebSocket as any as WebSocket;
             }
         }
 

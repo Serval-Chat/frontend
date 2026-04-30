@@ -42,8 +42,17 @@ export const useMemberMaps = (
         const map = new Map<string, Role>();
         if (!members || !roles) return map;
 
+        const everyoneRole = roles.find((r) => r.name === '@everyone');
+
         members.forEach((m) => {
-            const highestRole = getHighestColorRoleForMember(m.roles, roleMap);
+            const memberRoleIds = m.roles ? [...m.roles] : [];
+            if (everyoneRole && !memberRoleIds.includes(everyoneRole._id)) {
+                memberRoleIds.push(everyoneRole._id);
+            }
+            const highestRole = getHighestColorRoleForMember(
+                memberRoleIds,
+                roleMap,
+            );
             if (highestRole) map.set(m.userId, highestRole);
         });
         return map;
@@ -54,8 +63,17 @@ export const useMemberMaps = (
         const map = new Map<string, Role>();
         if (!members || !roles) return map;
 
+        const everyoneRole = roles.find((r) => r.name === '@everyone');
+
         members.forEach((m) => {
-            const iconRole = getHighestRoleWithIconForMember(m.roles, roleMap);
+            const memberRoleIds = m.roles ? [...m.roles] : [];
+            if (everyoneRole && !memberRoleIds.includes(everyoneRole._id)) {
+                memberRoleIds.push(everyoneRole._id);
+            }
+            const iconRole = getHighestRoleWithIconForMember(
+                memberRoleIds,
+                roleMap,
+            );
             if (iconRole) map.set(m.userId, iconRole);
         });
         return map;

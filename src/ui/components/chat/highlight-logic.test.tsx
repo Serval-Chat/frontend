@@ -74,7 +74,7 @@ describe('MessagesList Highlight Logic', () => {
     const mockMessages = [
         { _id: '1', text: 'Msg 1' },
         { _id: '2', text: 'Msg 2' },
-    ] as unknown as ProcessedChatMessage[];
+    ] as any as ProcessedChatMessage[];
 
     beforeEach(() => {
         vi.useFakeTimers();
@@ -154,7 +154,7 @@ describe('MessagesList Highlight Logic', () => {
         );
         const newMessages = [
             ...mockMessages,
-            { _id: '3', text: 'Msg 3' } as unknown as ProcessedChatMessage,
+            { _id: '3', text: 'Msg 3' } as any as ProcessedChatMessage,
         ];
         act(() => {
             rerender(

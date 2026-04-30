@@ -20,17 +20,20 @@ import {
     CLEAR_EDITOR_COMMAND,
     type LexicalEditor,
 } from 'lexical';
-import { ArrowUp, FileImage, Plus, Send, Smile, X } from 'lucide-react';
+import { ArrowUp, Clock, FileImage, Plus, Send, Smile, X } from 'lucide-react';
 import { useLocation, useParams } from 'react-router-dom';
 
 import { useChannelMessages, useUserMessages } from '@/api/chat/chat.queries';
 import type { ChatMessage } from '@/api/chat/chat.types';
 import { filesApi } from '@/api/files/files.api';
 import { useFriends } from '@/api/friends/friends.queries';
+import { interactionsApi } from '@/api/interactions/interactions.api';
+import { useServerCommands } from '@/api/interactions/interactions.queries';
 import {
     useChannels,
     useMembers,
     useRoles,
+    useServerDetails,
 } from '@/api/servers/servers.queries';
 import { useMe } from '@/api/users/users.queries';
 import type { User } from '@/api/users/users.types';
@@ -43,6 +46,10 @@ import {
     $createChipNode,
     ChipNode,
 } from '@/ui/components/chat/lexical/ChipNode';
+import { SlashArgChipNode } from '@/ui/components/chat/lexical/SlashArgChipNode';
+import { SlashCommandChipNode } from '@/ui/components/chat/lexical/SlashCommandChipNode';
+import { $getSlashChipState } from '@/ui/components/chat/lexical/slashChipHelpers';
+import { BotTag } from '@/ui/components/common/BotTag';
 import { Button } from '@/ui/components/common/Button';
 import { ParsedText } from '@/ui/components/common/ParsedText';
 import { StyledUserName } from '@/ui/components/common/StyledUserName';
@@ -58,8 +65,11 @@ import { GifPicker } from './GifPicker';
 import { LexicalAutocompletePlugin } from './lexical/LexicalAutocompletePlugin';
 import { LexicalEmojiPlugin } from './lexical/LexicalEmojiPlugin';
 import { LexicalPastePlugin } from './lexical/LexicalPastePlugin';
+import { LexicalSlashCommandPlugin } from './lexical/LexicalSlashCommandPlugin';
 import { LexicalSubmitPlugin } from './lexical/LexicalSubmitPlugin';
 import { $getRawMessageText } from './lexical/lexicalUtils';
+import { tryExecuteSlashCommand } from './lexical/slashCommandExecution';
+import { parseSlashInput } from './lexical/slashCommands';
 
 const EditorBridge = ({
     onReady,
@@ -121,10 +131,23 @@ export const MessageInput: React.FC<MessageInputProps> = ({
     const [showGifPicker, setShowGifPicker] = useState(false);
     const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
     const [hasText, setHasText] = useState(false);
+    const [currentInputText, setCurrentInputText] = useState('');
     const [editor, setEditor] = useState<LexicalEditor | null>(null);
+    const [isMentionAutocompleteOpen, setIsMentionAutocompleteOpen] =
+        useState(false);
+    const [isSlashAutocompleteOpen, setIsSlashAutocompleteOpen] =
+        useState(false);
+    const [slashChipState, setSlashChipState] = useState<{
+        commandName: string;
+        argValues: string[];
+    } | null>(null);
     const location = useLocation();
     const params = useParams();
     const [isSlowModeError, setIsSlowModeError] = useState(false);
+    const MAX_LENGTH = Number(import.meta.env.VITE_MAX_MESSAGE_LENGTH || 2000);
+    const remainingChars = MAX_LENGTH - currentInputText.length;
+    const showCounter =
+        remainingChars <= MAX_LENGTH * 0.1 || remainingChars < 0;
 
     const isAutocompleteOpenRef = useRef<boolean>(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -136,7 +159,6 @@ export const MessageInput: React.FC<MessageInputProps> = ({
         window.addEventListener('resize', handleResize);
 
         const handleGlobalKeyDown = (e: KeyboardEvent): void => {
-            // don't refocus when already in input
             if (
                 e.target instanceof HTMLInputElement ||
                 e.target instanceof HTMLTextAreaElement ||
@@ -145,12 +167,9 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                 return;
             }
 
-            // check if printable
             if (e.key.length === 1 && !e.ctrlKey && !e.altKey && !e.metaKey) {
-                // focus editor
                 editor?.focus();
 
-                // close pickers if they are open
                 setShowEmojiPicker(false);
                 setShowGifPicker(false);
             }
@@ -209,6 +228,141 @@ export const MessageInput: React.FC<MessageInputProps> = ({
     const { data: channels = [] } = useChannels(selectedServerId, {
         enabled: isServerContextReady,
     });
+    const { data: serverDetails } = useServerDetails(selectedServerId, {
+        enabled: isServerContextReady,
+    });
+    const { data: serverCommands = [] } = useServerCommands(
+        isServerContextReady ? selectedServerId : null,
+    );
+    const myMember = useMemo(
+        () => members.find((m) => m.userId === me?._id),
+        [members, me?._id],
+    );
+
+    const isOwner = serverDetails?.ownerId === me?._id;
+    const [remainingTimeoutMs, setRemainingTimeoutMs] = useState<number>(0);
+
+    useEffect(() => {
+        if (!myMember?.communicationDisabledUntil || isOwner) {
+            setRemainingTimeoutMs(0);
+            return;
+        }
+
+        const update = (): void => {
+            const until = new Date(
+                myMember.communicationDisabledUntil!,
+            ).getTime();
+            const now = Date.now();
+            const diff = until - now;
+            setRemainingTimeoutMs(Math.max(0, diff));
+        };
+
+        update();
+        const interval = setInterval(update, 1000);
+        return () => clearInterval(interval);
+    }, [myMember?.communicationDisabledUntil, isOwner]);
+
+    const isTimedOut = remainingTimeoutMs > 0;
+
+    const formatTimeout = (ms: number): string => {
+        const seconds = Math.floor(ms / 1000);
+        const minutes = Math.floor(seconds / 60);
+        const hours = Math.floor(minutes / 60);
+        const days = Math.floor(hours / 24);
+
+        if (days > 0) return `${days}d ${hours % 24}h`;
+        if (hours > 0) return `${hours}h ${minutes % 60}m`;
+        if (minutes > 0) return `${minutes}m ${seconds % 60}s`;
+        return `${seconds}s`;
+    };
+    const slashPreview = useMemo(() => {
+        if (slashChipState) {
+            const command = serverCommands.find(
+                (c) => c.name === slashChipState.commandName,
+            );
+            if (!command) return null;
+
+            const options = command.options ?? [];
+            const requiredCount = options.filter((o) => o.required).length;
+            const providedCount = slashChipState.argValues.filter(
+                (v) => (v ?? '').trim() !== '',
+            ).length;
+            const nextOption = options[providedCount];
+            const usage =
+                options.length > 0
+                    ? options
+                          .map((option) =>
+                              option.required
+                                  ? `<${option.name}>`
+                                  : `[${option.name}]`,
+                          )
+                          .join(' ')
+                    : 'No arguments';
+
+            if (requiredCount > providedCount) {
+                return {
+                    commandName: command.name,
+                    status: `Missing required arguments (${providedCount}/${requiredCount}). Next: ${nextOption?.name ?? 'argument'}`,
+                    usage,
+                };
+            }
+
+            return {
+                commandName: command.name,
+                status: options.length
+                    ? `Arguments ready (${Math.min(providedCount, options.length)}/${options.length})`
+                    : 'Ready to execute',
+                usage,
+            };
+        }
+
+        const parsed = parseSlashInput(currentInputText);
+        if (!parsed) return null;
+        const command = serverCommands.find(
+            (c) => c.name === parsed.commandName,
+        );
+        if (!command) {
+            return {
+                commandName: parsed.commandName,
+                status: `Unknown command /${parsed.commandName}`,
+            };
+        }
+
+        const options = command.options ?? [];
+        const requiredCount = options.filter(
+            (option) => option.required,
+        ).length;
+        const providedCount = parsed.args.filter(
+            (arg) => arg.trim() !== '',
+        ).length;
+        const nextOption = options[Math.min(providedCount, options.length - 1)];
+        const usage =
+            options.length > 0
+                ? options
+                      .map((option) =>
+                          option.required
+                              ? `<${option.name}>`
+                              : `[${option.name}]`,
+                      )
+                      .join(' ')
+                : 'No arguments';
+
+        if (requiredCount > providedCount) {
+            return {
+                commandName: command.name,
+                status: `Missing required arguments (${providedCount}/${requiredCount}). Next: ${nextOption?.name ?? 'argument'}`,
+                usage,
+            };
+        }
+
+        return {
+            commandName: command.name,
+            status: options.length
+                ? `Arguments ready (${Math.min(providedCount, options.length)}/${options.length})`
+                : 'Ready to execute',
+            usage,
+        };
+    }, [currentInputText, serverCommands, slashChipState]);
 
     const { data: channelMessages } = useChannelMessages(
         selectedServerId,
@@ -308,11 +462,34 @@ export const MessageInput: React.FC<MessageInputProps> = ({
     const handleSendMessage = useCallback(
         async (text: string): Promise<boolean> => {
             const trimmedText = text.trim();
-            if (!trimmedText && files.length === 0) return false;
+            const hasSlashChips = editor
+                ? editor.getEditorState().read($getSlashChipState) !== null
+                : false;
+            if (!trimmedText && files.length === 0 && !hasSlashChips)
+                return false;
             if (cooldown > 0 && !canBypassSlowMode) {
                 setIsSlowModeError(true);
                 setTimeout(() => setIsSlowModeError(false), 500);
                 return false;
+            }
+
+            const slashResult = await tryExecuteSlashCommand({
+                text: trimmedText,
+                filesCount: files.length,
+                selectedServerId,
+                selectedChannelId,
+                isServerRoute,
+                serverCommands,
+                editor,
+                showToast,
+                createInteraction: interactionsApi.createInteraction,
+                onSuccess: () => {
+                    clearQueue();
+                    onCancelReply?.();
+                },
+            });
+            if (slashResult.handled) {
+                return slashResult.success;
             }
 
             const uploadedUrls = await handleUploadFiles();
@@ -349,8 +526,19 @@ export const MessageInput: React.FC<MessageInputProps> = ({
             cooldown,
             canBypassSlowMode,
             setCooldown,
+            selectedServerId,
+            selectedChannelId,
+            isServerRoute,
+            showToast,
+            serverCommands,
+            editor,
         ],
     );
+
+    useEffect(() => {
+        isAutocompleteOpenRef.current =
+            isMentionAutocompleteOpen || isSlashAutocompleteOpen;
+    }, [isMentionAutocompleteOpen, isSlashAutocompleteOpen]);
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
         if (e.target.files) {
@@ -361,7 +549,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
 
     const initialConfig = {
         namespace: 'MessageInput',
-        nodes: [ChipNode],
+        nodes: [ChipNode, SlashCommandChipNode, SlashArgChipNode],
         onError: (error: Error) => console.error(error),
         theme,
     };
@@ -405,6 +593,32 @@ export const MessageInput: React.FC<MessageInputProps> = ({
         );
     };
 
+    if (isTimedOut) {
+        return (
+            <Box
+                className={cn(
+                    'relative mx-4 mb-4 flex h-[56px] items-center gap-3 overflow-visible rounded-lg border border-danger/30 bg-danger/5 px-4 transition-colors',
+                )}
+            >
+                <Clock className="shrink-0 text-danger" size={20} />
+                <div className="flex flex-1 items-center gap-2 overflow-hidden text-danger">
+                    <Text
+                        className="font-bold whitespace-nowrap"
+                        variant="danger"
+                    >
+                        You've been timed out.
+                    </Text>
+                    <Text
+                        className="text-sm whitespace-nowrap opacity-80"
+                        variant="danger"
+                    >
+                        Remaining time: {formatTimeout(remainingTimeoutMs)}
+                    </Text>
+                </div>
+            </Box>
+        );
+    }
+
     return (
         <Box
             className={cn(
@@ -436,9 +650,21 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                             {replyingTo.user.displayName ||
                                 replyingTo.user.username}
                         </StyledUserName>
+                        {replyingTo.user.isBot && (
+                            <BotTag className="h-3.5 px-1 text-[8px]" />
+                        )}
                         <Box className="flex items-center gap-1 truncate overflow-hidden text-xs whitespace-nowrap text-muted-foreground opacity-80">
+                            {replyingTo.interaction && !replyingTo.text && (
+                                <span className="opacity-70">
+                                    used{' '}
+                                    <span className="font-bold text-primary">
+                                        /{replyingTo.interaction.command}
+                                    </span>
+                                </span>
+                            )}
                             <ParsedText
                                 condenseFiles
+                                condenseInvites
                                 nodes={parseText(
                                     replyingTo.text || '',
                                     ParserPresets.MESSAGE,
@@ -541,21 +767,48 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                             roles={roles}
                             serverEmojis={allServerEmojis}
                             onOpenChange={(isOpen) => {
-                                isAutocompleteOpenRef.current = isOpen;
+                                setIsMentionAutocompleteOpen(isOpen);
                             }}
+                        />
+                        <LexicalSlashCommandPlugin
+                            commands={serverCommands}
+                            enabled={isServerContextReady}
+                            members={members}
+                            onOpenChange={setIsSlashAutocompleteOpen}
                         />
                         <OnChangePlugin
                             onChange={(editorState) => {
                                 editorState.read(() => {
                                     const text = $getRawMessageText();
-                                    setHasText(text.trim().length > 0);
-                                    if (text.trim().length > 0) {
+                                    const chipState = $getSlashChipState();
+                                    setCurrentInputText(text);
+                                    setSlashChipState(chipState);
+                                    const nonEmpty =
+                                        text.trim().length > 0 ||
+                                        chipState !== null;
+                                    setHasText(nonEmpty);
+                                    if (nonEmpty) {
                                         sendTyping();
                                     }
                                 });
                             }}
                         />
                     </LexicalComposer>
+
+                    {showCounter && (
+                        <div
+                            className={cn(
+                                'pointer-events-none absolute right-2 bottom-1 text-[10px] font-bold select-none',
+                                remainingChars < 0
+                                    ? 'text-danger'
+                                    : 'text-muted-foreground/60',
+                            )}
+                        >
+                            {remainingChars < 0
+                                ? `-${Math.abs(remainingChars)}`
+                                : remainingChars}
+                        </div>
+                    )}
                 </div>
 
                 <Button
@@ -677,6 +930,20 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                         }}
                     />
                 </div>
+            )}
+
+            {slashPreview && (
+                <Box className="border-t border-border-subtle px-3 py-1.5 text-xs text-muted-foreground">
+                    <span className="font-semibold text-foreground">
+                        /{slashPreview.commandName}
+                    </span>
+                    <span className="ml-2">{slashPreview.status}</span>
+                    {'usage' in slashPreview && slashPreview.usage && (
+                        <span className="ml-2 opacity-80">
+                            Usage: {slashPreview.usage}
+                        </span>
+                    )}
+                </Box>
             )}
         </Box>
     );

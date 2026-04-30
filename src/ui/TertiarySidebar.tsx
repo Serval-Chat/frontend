@@ -27,6 +27,7 @@ export const TertiarySidebar: React.FC = () => {
         members,
         isLoadingMembers,
         memberRoleMap,
+        memberIconRoleMap,
         roles,
     } = useTertiarySidebarData();
 
@@ -147,6 +148,7 @@ export const TertiarySidebar: React.FC = () => {
                 {selectedServerId && (
                     <ServerSidebarSection
                         isLoading={isLoadingMembers}
+                        memberIconRoleMap={memberIconRoleMap}
                         memberRoleMap={memberRoleMap}
                         members={members}
                         roles={roles}

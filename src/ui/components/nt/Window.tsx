@@ -246,7 +246,6 @@ export const Window: React.FC<WindowProps> = ({
                     {title}
                 </span>
 
-                {/* Close Button */}
                 <button
                     className="flex h-[14px] w-[16px] items-center justify-center bg-[#c0c0c0] font-bold text-black active:pt-[1px] active:pl-[1px]"
                     style={{
@@ -272,7 +271,6 @@ export const Window: React.FC<WindowProps> = ({
                 </button>
             </div>
 
-            {/* Content Area */}
             <div
                 className="flex min-h-0 flex-1 flex-col overflow-hidden bg-white text-black"
                 style={{

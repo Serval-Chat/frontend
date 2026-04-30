@@ -40,7 +40,7 @@ export const RenameFolderModal: React.FC<RenameFolderModalProps> = ({
                 <Box className="flex flex-col gap-4">
                     <Box className="flex flex-col gap-1.5">
                         <label
-                            className="text-text-muted text-[10px] font-bold tracking-wider uppercase"
+                            className="text-[10px] font-bold tracking-wider text-text-muted uppercase"
                             htmlFor="folder-name"
                         >
                             Folder Name

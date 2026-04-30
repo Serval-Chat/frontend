@@ -1,3 +1,6 @@
+import type { Embed } from '@/types/embed';
+import type { InteractionValue } from '@/types/interactions';
+
 export interface UnicodeReactionData {
     emoji: string;
     emojiType: 'unicode';
@@ -41,5 +44,12 @@ export interface ChatMessage {
     isWebhook?: boolean;
     webhookUsername?: string;
     webhookAvatarUrl?: string;
+    embeds?: Embed[];
     reactions?: MessageReaction[];
+    interaction?: {
+        command: string;
+        options: { name: string; value: InteractionValue }[];
+        user: { id: string; username: string };
+    };
+    deletedAt?: string;
 }

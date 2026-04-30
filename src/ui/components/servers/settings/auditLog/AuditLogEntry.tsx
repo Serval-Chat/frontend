@@ -395,7 +395,7 @@ export const AuditLogEntry: React.FC<AuditLogEntryProps> = ({
 
             return (
                 <li
-                    className={`mb-1.5 flex items-center truncate rounded px-2 text-sm shadow-sm transition-all ${role ? 'font-medium text-white' : 'bg-bg-base text-text-muted border border-border-subtle'}`}
+                    className={`mb-1.5 flex items-center truncate rounded px-2 text-sm shadow-sm transition-all ${role ? 'font-medium text-white' : 'bg-bg-base border border-border-subtle text-text-muted'}`}
                     key={String(roleName)}
                     style={{
                         height: ITEM_HEIGHT_PX,
@@ -418,7 +418,7 @@ export const AuditLogEntry: React.FC<AuditLogEntryProps> = ({
             <div className="relative mt-4 flex items-start gap-2 overflow-x-auto pb-2 opacity-90">
                 {/* Left List */}
                 <div className="min-w-[120px] flex-1">
-                    <div className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">
+                    <div className="mb-2 text-xs font-medium tracking-wider text-text-muted uppercase">
                         Previous
                     </div>
                     <ul
@@ -510,7 +510,7 @@ export const AuditLogEntry: React.FC<AuditLogEntryProps> = ({
 
                 {/* Right List */}
                 <div className="min-w-[140px] flex-1">
-                    <div className="text-text-muted mb-2 text-xs font-medium tracking-wider uppercase">
+                    <div className="mb-2 text-xs font-medium tracking-wider text-text-muted uppercase">
                         New
                     </div>
                     <ul
@@ -600,7 +600,7 @@ export const AuditLogEntry: React.FC<AuditLogEntryProps> = ({
                 )}
 
                 {Boolean(entry.metadata?.messageText) && (
-                    <div className="bg-bg-base text-text-muted mt-2 rounded border-l-2 border-red-500/50 p-2 text-sm break-words whitespace-pre-wrap">
+                    <div className="bg-bg-base mt-2 rounded border-l-2 border-red-500/50 p-2 text-sm break-words whitespace-pre-wrap text-text-muted">
                         {String(entry.metadata!.messageText)}
                     </div>
                 )}
@@ -615,7 +615,7 @@ export const AuditLogEntry: React.FC<AuditLogEntryProps> = ({
                     Array.isArray(entry.metadata?.roleOrder) && (
                         <div className="mt-2 text-sm">
                             <button
-                                className="text-text-muted hover:text-text flex items-center gap-1 text-xs"
+                                className="hover:text-text flex items-center gap-1 text-xs text-text-muted"
                                 onClick={() => setExpandedRoles(!expandedRoles)}
                             >
                                 {expandedRoles ? (
@@ -641,15 +641,14 @@ export const AuditLogEntry: React.FC<AuditLogEntryProps> = ({
                                         )
                                     ) : (
                                         <>
-                                            <div className="text-text-muted mb-2 text-xs font-medium">
+                                            <div className="mb-2 text-xs font-medium text-text-muted">
                                                 New Order (Highest to Lowest):
                                             </div>
-                                            <ol className="text-text-muted ml-1 list-inside list-decimal space-y-0.5">
+                                            <ol className="ml-1 list-inside list-decimal space-y-0.5 text-text-muted">
                                                 {(
                                                     entry.metadata
                                                         .roleOrder as string[]
                                                 ).map((roleName, i) => (
-                                                    // eslint-disable-next-line react/no-array-index-key
                                                     <li key={i}>
                                                         {String(roleName)}
                                                     </li>
@@ -670,7 +669,7 @@ export const AuditLogEntry: React.FC<AuditLogEntryProps> = ({
                     entry.metadata?.expiresAt ||
                     entry.metadata?.inviteExpiresAt
                 ) && (
-                    <div className="text-text-muted mt-2 flex flex-wrap gap-x-4 gap-y-1 border-t border-border-subtle pt-2 text-sm">
+                    <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 border-t border-border-subtle pt-2 text-sm text-text-muted">
                         {!!(
                             entry.metadata?.uses !== undefined ||
                             entry.metadata?.inviteUses !== undefined

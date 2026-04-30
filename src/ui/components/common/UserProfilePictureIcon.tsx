@@ -51,7 +51,7 @@ export const UserProfilePictureIcon: React.FC<UserProfilePictureIconProps> = ({
     return (
         <Box
             className={cn(
-                'text-foreground-muted flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-bg-subtle font-bold',
+                'text-foreground-muted flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-muted-foreground/20 font-bold',
                 sizeClasses[size],
                 className,
             )}

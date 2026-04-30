@@ -1,9 +1,8 @@
-/**
- * @description Serval theme
- */
+import type React from 'react';
+
 export const customSyntaxTheme: { [key: string]: React.CSSProperties } = {
     'code[class*="language-"]': {
-        color: 'var(--color-foreground)',
+        color: 'var(--syntax-variable)',
         background: 'none',
         fontFamily: 'var(--font-mono)',
         textAlign: 'left',
@@ -21,7 +20,7 @@ export const customSyntaxTheme: { [key: string]: React.CSSProperties } = {
         hyphens: 'none',
     },
     'pre[class*="language-"]': {
-        color: 'var(--color-foreground)',
+        color: 'var(--syntax-variable)',
         background: 'none',
         fontFamily: 'var(--font-mono)',
         textAlign: 'left',
@@ -41,105 +40,98 @@ export const customSyntaxTheme: { [key: string]: React.CSSProperties } = {
         overflow: 'auto',
     },
     comment: {
-        color: 'var(--color-muted-foreground)',
+        color: 'var(--syntax-comment)',
         fontStyle: 'italic',
     },
     prolog: {
-        color: 'var(--color-muted-foreground)',
+        color: 'var(--syntax-comment)',
     },
     doctype: {
-        color: 'var(--color-muted-foreground)',
+        color: 'var(--syntax-comment)',
     },
     cdata: {
-        color: 'var(--color-muted-foreground)',
+        color: 'var(--syntax-comment)',
     },
     punctuation: {
-        color: 'var(--color-foreground)',
-        opacity: 0.7,
+        color: 'var(--syntax-operator)',
+        opacity: 0.8,
     },
     namespace: {
         opacity: 0.7,
     },
     property: {
-        color: 'var(--color-caution-muted-text)',
+        color: 'var(--syntax-type)',
     },
     tag: {
-        color: 'var(--color-primary)',
+        color: 'var(--syntax-keyword)',
     },
     'class-name': {
-        color: 'var(--color-caution-muted-text)',
+        color: 'var(--syntax-type)',
     },
     boolean: {
-        color: 'var(--color-danger-muted-text)',
+        color: 'var(--syntax-number)',
     },
     number: {
-        color: 'var(--color-danger-muted-text)',
+        color: 'var(--syntax-number)',
     },
     constant: {
-        color: 'var(--color-caution-muted-text)',
+        color: 'var(--syntax-variable)',
     },
     symbol: {
-        color: 'var(--color-primary)',
+        color: 'var(--syntax-keyword)',
     },
     deleted: {
         color: 'var(--color-danger)',
     },
     selector: {
-        color: 'var(--color-success-muted-text)',
+        color: 'var(--syntax-string)',
     },
     'attr-name': {
-        color: 'var(--color-caution-muted-text)',
+        color: 'var(--syntax-type)',
     },
     string: {
-        color: 'var(--color-success-muted-text)',
+        color: 'var(--syntax-string)',
     },
     char: {
-        color: 'var(--color-success-muted-text)',
+        color: 'var(--syntax-string)',
     },
     builtin: {
-        color: 'var(--color-caution-muted-text)',
+        color: 'var(--syntax-type)',
     },
     inserted: {
         color: 'var(--color-success)',
     },
     operator: {
-        color: 'var(--color-foreground)',
-        opacity: 0.6,
+        color: 'var(--syntax-operator)',
     },
     entity: {
-        color: 'var(--color-caution-muted-text)',
+        color: 'var(--syntax-type)',
         cursor: 'help',
     },
     url: {
-        color: 'var(--color-primary)',
-    },
-    '.language-css .token.string': {
-        color: 'var(--color-success-muted-text)',
-    },
-    '.style .token.string': {
-        color: 'var(--color-success-muted-text)',
+        color: 'var(--syntax-keyword)',
     },
     variable: {
-        color: 'var(--color-foreground)',
+        color: 'var(--syntax-variable)',
     },
     atrule: {
-        color: 'var(--color-danger-muted-text)',
+        color: 'var(--syntax-keyword)',
     },
     'attr-value': {
-        color: 'var(--color-success-muted-text)',
+        color: 'var(--syntax-string)',
     },
     function: {
-        color: 'var(--color-caution-muted-text)',
+        color: 'var(--syntax-function)',
     },
     keyword: {
-        color: 'var(--color-danger-muted-text)',
+        color: 'var(--syntax-keyword)',
         fontWeight: 'bold',
     },
     regex: {
-        color: 'var(--color-caution)',
+        color: 'var(--syntax-string)',
     },
     important: {
-        color: 'var(--color-primary)',
+        color: 'var(--syntax-keyword)',
         fontWeight: 'bold',
     },
     bold: {

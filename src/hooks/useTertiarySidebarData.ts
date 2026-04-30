@@ -11,6 +11,10 @@ import type { Role, Server, ServerMember } from '@/api/servers/servers.types';
 import { useMe, useUserById } from '@/api/users/users.queries';
 import type { User } from '@/api/users/users.types';
 import { useAppSelector } from '@/store/hooks';
+import {
+    getHighestColorRoleForMember,
+    getHighestRoleWithIconForMember,
+} from '@/ui/utils/chat';
 
 interface TertiarySidebarDataResult {
     selectedFriendId: null | string;
@@ -21,6 +25,7 @@ interface TertiarySidebarDataResult {
     members: ServerMember[] | undefined;
     isLoadingMembers: boolean;
     memberRoleMap: Map<string, Role>;
+    memberIconRoleMap: Map<string, Role>;
     roles: Role[] | undefined;
 }
 
@@ -57,33 +62,41 @@ export const useTertiarySidebarData = (): TertiarySidebarDataResult => {
     });
 
     // Build role lookup maps
-    const memberRoleMap = React.useMemo(() => {
-        if (!members || !roles) return new Map<string, Role>();
+    const { memberRoleMap, memberIconRoleMap } = React.useMemo(() => {
+        const mrMap = new Map<string, Role>();
+        const mirMap = new Map<string, Role>();
+        if (!members || !roles)
+            return { memberRoleMap: mrMap, memberIconRoleMap: mirMap };
 
         const roleMap = new Map<string, Role>();
         roles.forEach((r) => roleMap.set(r._id, r));
 
-        const mrMap = new Map<string, Role>();
+        const everyoneRole = roles.find((r) => r.name === '@everyone');
+
         members.forEach((m) => {
-            if (!m.roles || m.roles.length === 0) return;
+            const memberRoleIds = m.roles ? [...m.roles] : [];
+            if (everyoneRole && !memberRoleIds.includes(everyoneRole._id)) {
+                memberRoleIds.push(everyoneRole._id);
+            }
 
-            let highestRole: Role | null = null;
-            m.roles.forEach((roleId) => {
-                const role = roleMap.get(roleId);
-                if (
-                    role &&
-                    (!highestRole || role.position > highestRole.position)
-                ) {
-                    highestRole = role;
-                }
-            });
-
+            const highestRole = getHighestColorRoleForMember(
+                memberRoleIds,
+                roleMap,
+            );
             if (highestRole) {
                 mrMap.set(m.userId, highestRole);
             }
+
+            const iconRole = getHighestRoleWithIconForMember(
+                memberRoleIds,
+                roleMap,
+            );
+            if (iconRole) {
+                mirMap.set(m.userId, iconRole);
+            }
         });
 
-        return mrMap;
+        return { memberRoleMap: mrMap, memberIconRoleMap: mirMap };
     }, [members, roles]);
 
     return {
@@ -95,6 +108,7 @@ export const useTertiarySidebarData = (): TertiarySidebarDataResult => {
         members,
         isLoadingMembers,
         memberRoleMap,
+        memberIconRoleMap,
         roles,
     };
 };

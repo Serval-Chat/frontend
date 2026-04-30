@@ -5,6 +5,7 @@ import { SettingsContentPane } from '@/ui/components/common/settings/SettingsCon
 import { SettingsModalLayout } from '@/ui/components/common/settings/SettingsModalLayout';
 import { ChannelOverviewSettings } from '@/ui/components/servers/settings/ChannelOverviewSettings';
 import { ChannelSettingsSidebar } from '@/ui/components/servers/settings/ChannelSettingsSidebar';
+import { ChannelWebhookSettings } from '@/ui/components/servers/settings/ChannelWebhookSettings';
 import { PermissionsEditorTab } from '@/ui/components/servers/settings/permissions/PermissionsEditorTab';
 
 interface ChannelSettingsModalProps {
@@ -48,6 +49,13 @@ export const ChannelSettingsModal: React.FC<ChannelSettingsModalProps> = ({
                     <ChannelOverviewSettings
                         channel={channel}
                         onDeleted={onClose}
+                    />
+                </SettingsContentPane>
+            ) : activeSection === 'webhooks' ? (
+                <SettingsContentPane>
+                    <ChannelWebhookSettings
+                        channelId={channel._id}
+                        serverId={channel.serverId}
                     />
                 </SettingsContentPane>
             ) : (

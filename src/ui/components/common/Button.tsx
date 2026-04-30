@@ -1,6 +1,3 @@
-/**
- * @description A button component. Quite versatile.
- */
 import React, { useLayoutEffect, useRef, useState } from 'react';
 
 import { type VariantProps, cva } from 'class-variance-authority';
@@ -15,9 +12,8 @@ const mutedClasses = {
     success: 'bg-success-muted text-success-muted-text hover:bg-success-muted',
 };
 
-// eslint-disable-next-line react-refresh/only-export-components
 export const buttonVariants = cva(
-    'inline-flex cursor-pointer items-center justify-center rounded-md bg-background font-sans whitespace-nowrap transition-colors duration-300 disabled:pointer-events-none disabled:opacity-50',
+    'inline-flex cursor-pointer items-center justify-center gap-2 rounded-md bg-background font-sans whitespace-nowrap transition-colors duration-300 disabled:pointer-events-none disabled:opacity-50',
     {
         variants: {
             variant: {
@@ -60,6 +56,9 @@ export interface ButtonProps
     loading?: boolean;
     retainSize?: boolean;
     innerClassName?: string;
+    icon?: React.ElementType;
+    iconClassName?: string;
+    iconPosition?: 'left' | 'right';
 }
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
@@ -73,6 +72,9 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
             retainSize,
             innerClassName,
             disabled,
+            icon: Icon,
+            iconClassName,
+            iconPosition = 'left',
             ...props
         },
         ref,
@@ -112,7 +114,6 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
                 ? { width: dimensions.width, height: dimensions.height }
                 : undefined;
 
-        // Sync local ref with external ref
         React.useImperativeHandle(ref, () => buttonRef.current!);
 
         return (
@@ -135,7 +136,19 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
                         innerClassName,
                     )}
                 >
+                    {Icon && iconPosition === 'left' && (
+                        <Icon
+                            className={cn('shrink-0', iconClassName)}
+                            size={16}
+                        />
+                    )}
                     {children}
+                    {Icon && iconPosition === 'right' && (
+                        <Icon
+                            className={cn('shrink-0', iconClassName)}
+                            size={16}
+                        />
+                    )}
                 </span>
                 {loading && (
                     <div className="absolute inset-0 flex items-center justify-center">

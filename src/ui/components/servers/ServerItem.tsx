@@ -186,18 +186,22 @@ export const ServerItem: React.FC<ServerItemProps> = ({
                 )}
             </div>
 
-            <ServerSettingsModal
-                isOpen={isSettingsOpen}
-                serverId={server._id}
-                onClose={() => setIsSettingsOpen(false)}
-            />
+            {isSettingsOpen && (
+                <ServerSettingsModal
+                    isOpen={isSettingsOpen}
+                    serverId={server._id}
+                    onClose={() => setIsSettingsOpen(false)}
+                />
+            )}
 
-            <LeaveServerModal
-                isOpen={isLeaveModalOpen}
-                serverId={server._id}
-                serverName={server.name}
-                onClose={() => setIsLeaveModalOpen(false)}
-            />
+            {isLeaveModalOpen && (
+                <LeaveServerModal
+                    isOpen={isLeaveModalOpen}
+                    serverId={server._id}
+                    serverName={server.name}
+                    onClose={() => setIsLeaveModalOpen(false)}
+                />
+            )}
         </>
     );
 };

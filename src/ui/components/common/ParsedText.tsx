@@ -37,9 +37,11 @@ interface ParsedTextProps {
     className?: string;
     size?: 'xs' | 'sm' | 'base' | 'lg' | 'xl' | '2xl';
     condenseFiles?: boolean;
+    condenseInvites?: boolean;
     largeEmojis?: boolean;
     wrap?: TextProps['wrap'];
     isNested?: boolean;
+    variant?: TextProps['variant'];
     serverId?: string;
 }
 
@@ -51,9 +53,11 @@ export const ParsedText: React.FC<ParsedTextProps> = ({
     className,
     size,
     condenseFiles,
+    condenseInvites,
     largeEmojis,
     wrap,
     isNested,
+    variant,
     serverId,
 }) => {
     const countAttachments = (n: ASTNode): number => {
@@ -97,10 +101,12 @@ export const ParsedText: React.FC<ParsedTextProps> = ({
 
     const nestedProps = {
         condenseFiles,
+        condenseInvites,
         largeEmojis,
         isNested: true,
         size,
         wrap,
+        variant,
         serverId,
     };
 
@@ -114,6 +120,7 @@ export const ParsedText: React.FC<ParsedTextProps> = ({
                                 data-source={JSON.stringify(node.content)}
                                 key={idx}
                                 size={size}
+                                variant={variant}
                                 wrap={wrap}
                             >
                                 {node.content}
@@ -125,6 +132,7 @@ export const ParsedText: React.FC<ParsedTextProps> = ({
                             <Text
                                 key={idx}
                                 size={size}
+                                variant={variant}
                                 weight="bold"
                                 wrap={wrap}
                             >
@@ -145,6 +153,7 @@ export const ParsedText: React.FC<ParsedTextProps> = ({
                                 fontStyle="italic"
                                 key={idx}
                                 size={size}
+                                variant={variant}
                                 wrap={wrap}
                             >
                                 {typeof node.content === 'string' ? (
@@ -164,6 +173,7 @@ export const ParsedText: React.FC<ParsedTextProps> = ({
                                 fontStyle="italic"
                                 key={idx}
                                 size={size}
+                                variant={variant}
                                 weight="bold"
                                 wrap={wrap}
                             >
@@ -184,6 +194,7 @@ export const ParsedText: React.FC<ParsedTextProps> = ({
                                 decoration="underline"
                                 key={idx}
                                 size={size}
+                                variant={variant}
                                 wrap={wrap}
                             >
                                 {typeof node.content === 'string' ? (
@@ -203,6 +214,7 @@ export const ParsedText: React.FC<ParsedTextProps> = ({
                                 decoration="strike"
                                 key={idx}
                                 size={size}
+                                variant={variant}
                                 wrap={wrap}
                             >
                                 {typeof node.content === 'string' ? (
@@ -297,7 +309,7 @@ export const ParsedText: React.FC<ParsedTextProps> = ({
                             <Text
                                 key={idx}
                                 size="xs"
-                                variant="muted"
+                                variant={variant || 'muted'}
                                 wrap={wrap}
                             >
                                 {typeof node.content === 'string' ? (
@@ -349,6 +361,13 @@ export const ParsedText: React.FC<ParsedTextProps> = ({
                         );
 
                     case 'invite':
+                        if (condenseInvites) {
+                            return (
+                                <Link href={node.url} key={idx} size={size}>
+                                    {node.url}
+                                </Link>
+                            );
+                        }
                         return (
                             <InviteLink
                                 code={node.code}
@@ -393,6 +412,7 @@ export const ParsedText: React.FC<ParsedTextProps> = ({
                                     as="span"
                                     className="leading-none drop-shadow-md"
                                     size="sm"
+                                    variant={variant}
                                 >
                                     @everyone
                                 </Text>
@@ -407,12 +427,21 @@ export const ParsedText: React.FC<ParsedTextProps> = ({
                                     paddingLeft: `${(node.depth ?? 0) * 1.5}rem`,
                                 }}
                             >
-                                <Text size={size} variant="muted" wrap={wrap}>
+                                <Text
+                                    size={size}
+                                    variant={variant || 'muted'}
+                                    wrap={wrap}
+                                >
                                     •
                                 </Text>
                                 <Box className="min-w-0 flex-1">
                                     {typeof node.content === 'string' ? (
-                                        <Text key={idx} size={size} wrap={wrap}>
+                                        <Text
+                                            key={idx}
+                                            size={size}
+                                            variant={variant}
+                                            wrap={wrap}
+                                        >
                                             {node.content}
                                         </Text>
                                     ) : (
@@ -434,12 +463,21 @@ export const ParsedText: React.FC<ParsedTextProps> = ({
                                     paddingLeft: `${(node.depth ?? 0) * 1.5}rem`,
                                 }}
                             >
-                                <Text size={size} variant="muted" wrap={wrap}>
+                                <Text
+                                    size={size}
+                                    variant={variant || 'muted'}
+                                    wrap={wrap}
+                                >
                                     {node.number}.
                                 </Text>
                                 <Box className="flex-1">
                                     {typeof node.content === 'string' ? (
-                                        <Text key={idx} size={size} wrap={wrap}>
+                                        <Text
+                                            key={idx}
+                                            size={size}
+                                            variant={variant}
+                                            wrap={wrap}
+                                        >
                                             {node.content}
                                         </Text>
                                     ) : (
@@ -523,7 +561,11 @@ export const ParsedText: React.FC<ParsedTextProps> = ({
                                 key={idx}
                             >
                                 {typeof node.content === 'string' ? (
-                                    <Text size={size} wrap={wrap}>
+                                    <Text
+                                        size={size}
+                                        variant={variant}
+                                        wrap={wrap}
+                                    >
                                         {node.content}
                                     </Text>
                                 ) : (
@@ -543,7 +585,11 @@ export const ParsedText: React.FC<ParsedTextProps> = ({
                                 node={node}
                             >
                                 {typeof node.content === 'string' ? (
-                                    <Text size={size} wrap={wrap}>
+                                    <Text
+                                        size={size}
+                                        variant={variant}
+                                        wrap={wrap}
+                                    >
                                         {node.content}
                                     </Text>
                                 ) : node.content.length > 0 ? (

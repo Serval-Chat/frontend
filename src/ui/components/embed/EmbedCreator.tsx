@@ -118,7 +118,6 @@ const FieldsEditor = ({ fields, onChange }: FieldsEditorProps): ReactNode => {
             {fields.map((field, idx) => (
                 <div
                     className="rounded-md border border-border-subtle bg-bg-subtle p-3"
-                    // eslint-disable-next-line react/no-array-index-key
                     key={idx}
                 >
                     <div className="mb-2 flex items-center justify-between">
@@ -468,7 +467,6 @@ const PollAnswersEditor = ({
     return (
         <div className="flex flex-col gap-2">
             {answers.map((answer, idx) => (
-                // eslint-disable-next-line react/no-array-index-key
                 <div className="flex items-center gap-2" key={idx}>
                     <Input
                         placeholder={`Answer ${idx + 1}`}
@@ -565,7 +563,9 @@ export const EmbedCreator = ({
                         label="Content"
                     >
                         <TextArea
-                            maxLength={2000}
+                            maxLength={Number(
+                                import.meta.env.VITE_MAX_MESSAGE_LENGTH || 2000,
+                            )}
                             placeholder="Message content…"
                             value={value.content ?? ''}
                             onChange={(e) => {
@@ -622,7 +622,6 @@ export const EmbedCreator = ({
                     <EmbedEditor
                         embed={embed}
                         index={idx}
-                        // eslint-disable-next-line react/no-array-index-key
                         key={idx}
                         total={value.embeds?.length ?? 1}
                         onChange={(e) => {

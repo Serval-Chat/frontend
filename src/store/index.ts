@@ -1,8 +1,10 @@
 import { configureStore } from '@reduxjs/toolkit';
 
 import { blockingReducer } from './slices/blockingSlice';
+import { furTweakerReducer } from './slices/furTweakerSlice';
 import { navReducer, saveLastChannels } from './slices/navSlice';
 import { presenceReducer } from './slices/presenceSlice';
+import { themeTweakerReducer } from './slices/themeTweakerSlice';
 import { unreadReducer } from './slices/unreadSlice';
 import { voiceReducer } from './slices/voiceSlice';
 
@@ -13,6 +15,8 @@ export const store = configureStore({
         unread: unreadReducer,
         voice: voiceReducer,
         blocking: blockingReducer,
+        furTweaker: furTweakerReducer,
+        themeTweaker: themeTweakerReducer,
     },
 });
 

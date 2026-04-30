@@ -29,6 +29,7 @@ export interface Server {
     tags?: string[];
     createdAt?: string;
     updatedAt?: string;
+    canManage?: boolean;
 }
 
 export type ChannelType = 'text' | 'voice' | 'link';
@@ -68,6 +69,7 @@ export interface RolePermissions {
     kickMembers: boolean;
     manageInvites: boolean;
     manageServer: boolean;
+    manageWebhooks?: boolean;
     administrator: boolean;
     pingRolesAndEveryone?: boolean;
     manageReactions: boolean;
@@ -77,6 +79,8 @@ export interface RolePermissions {
     connect: boolean;
     export_channel_messages: boolean;
     bypassSlowmode: boolean;
+    seeDeletedMessages: boolean;
+    moderateMembers: boolean;
 }
 
 export interface Role {
@@ -91,6 +95,7 @@ export interface Role {
     position: number;
     separateFromOtherRoles?: boolean;
     icon?: string;
+    glowEnabled?: boolean;
     permissions?: RolePermissions;
 }
 
@@ -102,6 +107,7 @@ export interface ServerMember {
     joinedAt: string;
     user: User;
     online?: boolean;
+    communicationDisabledUntil?: string;
 }
 
 export interface ServerBan {

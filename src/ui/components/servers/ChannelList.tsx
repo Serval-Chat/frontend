@@ -961,12 +961,14 @@ export const ChannelList: React.FC<ChannelListProps> = ({
                     />
                 )}
 
-                <LeaveServerModal
-                    isOpen={isLeaveModalOpen}
-                    serverId={selectedServerId || ''}
-                    serverName={server?.name || ''}
-                    onClose={() => setIsLeaveModalOpen(false)}
-                />
+                {isLeaveModalOpen && (
+                    <LeaveServerModal
+                        isOpen={isLeaveModalOpen}
+                        serverId={selectedServerId || ''}
+                        serverName={server?.name || ''}
+                        onClose={() => setIsLeaveModalOpen(false)}
+                    />
+                )}
             </div>
         </ContextMenu>
     );

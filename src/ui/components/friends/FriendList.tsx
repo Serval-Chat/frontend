@@ -25,7 +25,6 @@ export const FriendList: React.FC = () => {
             {isLoading ? (
                 <Box className="flex flex-col gap-3 p-4">
                     {[...Array(5)].map((_, i) => (
-                        // eslint-disable-next-line react/no-array-index-key
                         <Box className="flex items-center gap-3" key={i}>
                             <Skeleton
                                 height={32}

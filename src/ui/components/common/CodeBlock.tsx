@@ -43,7 +43,7 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({
     return (
         <>
             <div
-                className="group relative my-2 cursor-pointer overflow-hidden rounded-lg border border-border-subtle bg-background shadow-sm transition-all duration-200 hover:border-primary/40 hover:shadow-md"
+                className="group relative my-2 cursor-pointer overflow-hidden rounded-lg border border-border-subtle bg-background shadow-sm"
                 role="button"
                 tabIndex={0}
                 onClick={() => setIsModalOpen(true)}
@@ -53,7 +53,7 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({
                     }
                 }}
             >
-                <div className="flex items-center justify-between border-b border-border-subtle bg-bg-subtle px-3 py-2 transition-colors group-hover:bg-bg-secondary">
+                <div className="flex items-center justify-between border-b border-border-subtle bg-bg-subtle px-3 py-2">
                     <span className="text-[10px] font-black tracking-wider text-primary uppercase">
                         {language || 'text'}
                     </span>
@@ -73,7 +73,7 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({
                         </span>
                     </Button>
                 </div>
-                <div className="custom-scrollbar overflow-x-auto bg-black/10 p-0 font-mono text-sm">
+                <div className="custom-scrollbar overflow-x-auto bg-bg-secondary/50 p-0 font-mono text-sm">
                     <SyntaxHighlighter
                         customStyle={{
                             margin: 0,

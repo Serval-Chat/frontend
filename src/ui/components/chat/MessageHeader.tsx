@@ -1,5 +1,6 @@
 import type { Role } from '@/api/servers/servers.types';
 import type { User } from '@/api/users/users.types';
+import { BotTag } from '@/ui/components/common/BotTag';
 import { StyledUserName } from '@/ui/components/common/StyledUserName';
 import { Text } from '@/ui/components/common/Text';
 import { Box } from '@/ui/components/layout/Box';
@@ -8,6 +9,7 @@ import { formatTimestamp } from '@/utils/timestamp';
 
 interface MessageHeaderProps {
     user: User;
+    isWebhook?: boolean;
     role?: Role;
     iconRole?: Role;
     timestamp: string;
@@ -23,6 +25,7 @@ interface MessageHeaderProps {
 
 export const MessageHeader: React.FC<MessageHeaderProps> = ({
     user,
+    isWebhook,
     role,
     iconRole,
     timestamp,
@@ -59,13 +62,17 @@ export const MessageHeader: React.FC<MessageHeaderProps> = ({
                     {user.displayName || user.username}
                 </StyledUserName>
             </Box>
+            {user.isBot && <BotTag className="h-4" />}
+            {isWebhook && !user.isBot && (
+                <BotTag className="h-4" label="WEBHOOK" />
+            )}
 
-            <Text className="text-[10px] font-medium tracking-wider text-muted-foreground uppercase">
+            <Text className="text-[10px] font-medium tracking-wider text-text-muted uppercase">
                 {formatTimestamp(timestamp)}
             </Text>
 
             {isEdited && (
-                <Text className="text-[10px] font-medium text-muted-foreground italic">
+                <Text className="text-[10px] font-medium text-text-muted italic">
                     (edited{editedAt ? ` ${formatTimestamp(editedAt)}` : ''})
                 </Text>
             )}

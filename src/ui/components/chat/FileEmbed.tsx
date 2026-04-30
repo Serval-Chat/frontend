@@ -324,7 +324,10 @@ const CodeEmbed: React.FC<{
     }
 
     const lines = (content || '').split('\n');
-    const isTruncated = lines.length > 20 || (content || '').length > 2000;
+    const isTruncated =
+        lines.length > 20 ||
+        (content || '').length >
+            Number(import.meta.env.VITE_MAX_MESSAGE_LENGTH || 2000);
     const previewContent = isTruncated
         ? lines.slice(0, 20).join('\n')
         : content;

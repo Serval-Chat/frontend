@@ -1,6 +1,7 @@
 /* eslint-disable no-console */
 import { v4 as uuidv4 } from 'uuid';
 
+import type { JsonValue } from '@/types/json';
 import { removeAuthToken } from '@/utils/authToken';
 
 import { addWsDebugEvent } from './debug';
@@ -90,7 +91,7 @@ class WsClient {
     public send(type: string, payload: unknown = {}, replyTo?: string): void {
         const envelope: IWsEnvelope = {
             id: uuidv4(),
-            event: { type, payload },
+            event: { type, payload: payload as unknown as JsonValue },
             meta: {
                 ts: Date.now(),
                 replyTo,
@@ -169,7 +170,7 @@ class WsClient {
             }
 
             if (type === 'error') {
-                const errorPayload = payload as IWsErrorPayload;
+                const errorPayload = payload as unknown as IWsErrorPayload;
                 if (errorPayload.code === 'UNAUTHORIZED') {
                     console.error(
                         '[WS] Authentication failed, clearing token...',

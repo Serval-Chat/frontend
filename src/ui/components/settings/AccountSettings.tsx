@@ -482,9 +482,9 @@ export const AccountSettings: React.FC = () => {
                         <div className="space-y-4">
                             <div className="flex items-center justify-between gap-4 rounded-lg border border-border-subtle bg-bg-subtle p-6">
                                 <div className="flex flex-col gap-1">
-                                    <Text weight="bold">Login</Text>
+                                    <Text weight="bold">E-mail</Text>
                                     <Text size="xs" variant="muted">
-                                        Change your login email address
+                                        Change your e-mail address
                                     </Text>
                                 </div>
                                 <Button
@@ -492,7 +492,7 @@ export const AccountSettings: React.FC = () => {
                                     variant="normal"
                                     onClick={() => setIsLoginModalOpen(true)}
                                 >
-                                    Change Login
+                                    Change E-mail
                                 </Button>
                             </div>
                             <div className="flex items-center justify-between gap-4 rounded-lg border border-border-subtle bg-bg-subtle p-6">

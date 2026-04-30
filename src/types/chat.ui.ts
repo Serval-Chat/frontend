@@ -18,6 +18,7 @@ export interface ProcessedChatMessage extends Omit<
         role?: Role;
         iconRole?: Role;
         text: string;
+        interaction?: ChatMessage['interaction'];
     };
     repliedToMessageId?: ChatMessage['repliedToMessageId'];
 }

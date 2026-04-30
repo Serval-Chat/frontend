@@ -31,9 +31,6 @@ interface MessagesListProps {
     disableGlow?: boolean;
 }
 
-/**
- * @description List of messages with scroll management and loading more functionality.
- */
 export const MessagesList: React.FC<MessagesListProps> = ({
     messages,
     onLoadMore,

@@ -10,7 +10,11 @@ import {
     FRIEND_REQUESTS_QUERY_KEY,
 } from '@/api/friends/friends.queries';
 import type { Friend } from '@/api/friends/friends.types';
-import type { PingNotification } from '@/api/pings/pings.types';
+import type {
+    PingExportMessage,
+    PingMentionMessage,
+    PingNotification,
+} from '@/api/pings/pings.types';
 import { serversApi } from '@/api/servers/servers.api';
 import { SERVERS_QUERY_KEYS } from '@/api/servers/servers.queries';
 import type { ServerMember } from '@/api/servers/servers.types';
@@ -120,10 +124,6 @@ export const setupGlobalWsHandlers = (
                         })
                         .catch(() => {});
 
-                    // Synchronize master lists after successful connection.
-                    // Because these master lists inherently seed the individual
-                    // user/server caches via their queryFn, this synchronizes
-                    // everything efficiently without N+1 fetch storms.
                     void queryClient.invalidateQueries({ queryKey: ['me'] });
                     void queryClient.invalidateQueries({
                         queryKey: SERVERS_QUERY_KEYS.list,
@@ -142,7 +142,6 @@ export const setupGlobalWsHandlers = (
         ),
     );
 
-    // Server unread (from WebSocket)
     cleanups.push(
         wsClient.on<{ serverId: string; hasUnread: boolean }>(
             WsEvents.SERVER_UNREAD_UPDATED,
@@ -157,7 +156,6 @@ export const setupGlobalWsHandlers = (
         ),
     );
 
-    // DM unread (from WebSocket) - sync Redux with backend
     cleanups.push(
         wsClient.on<{ peerId: string; count: number }>(
             WsEvents.DM_UNREAD_UPDATED,
@@ -172,7 +170,6 @@ export const setupGlobalWsHandlers = (
         ),
     );
 
-    // Mentions
     cleanups.push(
         wsClient.on<IMentionEvent>(WsEvents.MENTION, (payload) => {
             if (payload.serverId) {
@@ -191,10 +188,9 @@ export const setupGlobalWsHandlers = (
                         senderId: payload.senderId,
                         serverId: payload.serverId,
                         channelId: payload.channelId,
-                        message: payload.message as unknown as Record<
-                            string,
-                            unknown
-                        >,
+                        message: payload.message as unknown as
+                            | PingMentionMessage
+                            | PingExportMessage,
                         timestamp: Date.now(),
                     };
 
@@ -211,7 +207,6 @@ export const setupGlobalWsHandlers = (
         }),
     );
 
-    // Friendship events
     cleanups.push(
         wsClient.on(WsEvents.FRIEND_ADDED, () => {
             void queryClient.invalidateQueries({ queryKey: FRIENDS_QUERY_KEY });
@@ -248,7 +243,6 @@ export const setupGlobalWsHandlers = (
         }),
     );
 
-    // Presence events
     cleanups.push(
         wsClient.on<IPresenceSyncEvent>(WsEvents.PRESENCE_SYNC, (payload) => {
             const onlineUsers = [...payload.online];
@@ -565,7 +559,6 @@ export const setupGlobalWsHandlers = (
                 queryKey: SERVERS_QUERY_KEYS.members(payload.serverId),
             });
             if (currentUser && payload.userId === currentUser.id) {
-                // Invalidate 'me' if my own roles changed
                 void queryClient.invalidateQueries({ queryKey: ['me'] });
             }
         }),
@@ -584,7 +577,6 @@ export const setupGlobalWsHandlers = (
         }),
     );
 
-    // Role events
     cleanups.push(
         wsClient.on<IRoleEvent>(WsEvents.ROLE_CREATED, (payload) => {
             if (payload.senderId === currentUser?.id) return;
@@ -624,7 +616,6 @@ export const setupGlobalWsHandlers = (
         ),
     );
 
-    // Channel events
     cleanups.push(
         wsClient.on<IChannelEvent>(WsEvents.CHANNEL_CREATED, (payload) => {
             if (payload.senderId === currentUser?.id) return;
@@ -667,7 +658,6 @@ export const setupGlobalWsHandlers = (
         ),
     );
 
-    // Category events
     cleanups.push(
         wsClient.on<ICategoryEvent>(WsEvents.CATEGORY_CREATED, (payload) => {
             if (payload.senderId === currentUser?.id) return;
@@ -713,7 +703,6 @@ export const setupGlobalWsHandlers = (
         ),
     );
 
-    // Permission events
     cleanups.push(
         wsClient.on<IPermissionsUpdatedEvent>(
             WsEvents.CHANNEL_PERMISSIONS_UPDATED,
@@ -751,7 +740,6 @@ export const setupGlobalWsHandlers = (
         ),
     );
 
-    // Server events
     cleanups.push(
         wsClient.on<IServerJoinedEvent>(WsEvents.SERVER_JOINED, (payload) => {
             if (payload.voiceStates) {

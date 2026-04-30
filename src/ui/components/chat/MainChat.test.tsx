@@ -79,6 +79,8 @@ vi.mock('@/hooks/usePermissions', () => ({
         permissions: {},
         isOwner: false,
         isLoading: false,
+        isTimedOut: false,
+        remainingTimeoutMs: 0,
     }),
 }));
 
@@ -141,6 +143,8 @@ describe('channel send permission gating', () => {
             permissions: {} as never,
             isOwner: false,
             isLoading: false,
+            isTimedOut: false,
+            remainingTimeoutMs: 0,
         });
 
         const { getByText, queryByTestId } = render(
@@ -159,6 +163,8 @@ describe('channel send permission gating', () => {
             permissions: {} as never,
             isOwner: false,
             isLoading: false,
+            isTimedOut: false,
+            remainingTimeoutMs: 0,
         });
 
         const { getByTestId, queryByText } = render(

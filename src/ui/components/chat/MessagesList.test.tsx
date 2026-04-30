@@ -42,11 +42,11 @@ describe('MessagesList Scroll Behavior', () => {
 
         scrollIntoViewMock = vi.fn();
         window.HTMLElement.prototype.scrollIntoView =
-            scrollIntoViewMock as unknown as typeof window.HTMLElement.prototype.scrollIntoView;
+            scrollIntoViewMock as any as typeof window.HTMLElement.prototype.scrollIntoView;
 
         requestAnimationFrameMock = vi.fn((cb) => cb());
         window.requestAnimationFrame =
-            requestAnimationFrameMock as unknown as typeof window.requestAnimationFrame;
+            requestAnimationFrameMock as any as typeof window.requestAnimationFrame;
     });
 
     const mockMessages: ProcessedChatMessage[] = [
@@ -66,7 +66,7 @@ describe('MessagesList Scroll Behavior', () => {
                 email: 'user1@test.com',
                 status: 'online',
             },
-        } as unknown as ProcessedChatMessage,
+        } as any as ProcessedChatMessage,
         {
             _id: 'msg-2',
             text: 'World',
@@ -83,7 +83,7 @@ describe('MessagesList Scroll Behavior', () => {
                 email: 'user2@test.com',
                 status: 'online',
             },
-        } as unknown as ProcessedChatMessage,
+        } as any as ProcessedChatMessage,
     ];
 
     it('scrolls to message immediately if element is in the DOM', () => {

@@ -37,7 +37,7 @@ export const getRoleStyle = (role?: Role): React.CSSProperties => {
     } else if (role.color) {
         style.backgroundColor = role.color;
     } else {
-        style.backgroundColor = 'var(--primary)';
+        style.backgroundColor = '#99aab5';
     }
 
     return style;

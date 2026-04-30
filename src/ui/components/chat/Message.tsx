@@ -37,6 +37,7 @@ import { Box } from '@/ui/components/layout/Box';
 import { ProfilePopup } from '@/ui/components/profile/ProfilePopup';
 import { cn } from '@/utils/cn';
 
+import { InteractionHeader } from './InteractionHeader';
 import { MessageContent } from './MessageContent';
 import { MessageEdit } from './MessageEdit';
 import { MessageHeader } from './MessageHeader';
@@ -117,13 +118,10 @@ export const Message: React.FC<MessageProps> = ({
     const mentionsMe = React.useMemo(() => {
         if (!myId) return false;
 
-        // Direct mention
         if (message.text.includes(`<userid:'${myId}'>`)) return true;
 
-        // Everyone mention
         if (message.text.includes('<everyone>')) return true;
 
-        // Role mention
         const myMember = members?.find((m) => m.userId === myId);
         if (
             myMember &&
@@ -136,6 +134,39 @@ export const Message: React.FC<MessageProps> = ({
 
         return false;
     }, [message.text, myId, members]);
+
+    const interactionUser = React.useMemo(() => {
+        if (!message.interaction?.user?.id || !members) return undefined;
+        const member = members.find(
+            (m) => m.userId === message.interaction!.user!.id,
+        );
+        if (!member) return undefined;
+        return {
+            ...member.user,
+            _id: member.userId,
+            username:
+                member.user.username || message.interaction!.user.username,
+            displayName: member.user.displayName,
+            profilePicture: member.user.profilePicture,
+            bannerColor: member.user.bannerColor,
+            usernameGradient: member.user.usernameGradient,
+            isBot: member.user.isBot,
+        } as unknown as User;
+    }, [message.interaction, members]);
+
+    const interactionRole = React.useMemo(() => {
+        if (!message.interaction?.user?.id || !members || !serverRoles)
+            return undefined;
+        const member = members.find(
+            (m) => m.userId === message.interaction!.user!.id,
+        );
+        if (!member || !member.roles.length) return undefined;
+
+        const roles = serverRoles.filter((r) => member.roles.includes(r._id));
+        if (!roles.length) return undefined;
+
+        return roles.sort((a, b) => b.position - a.position)[0];
+    }, [message.interaction, members, serverRoles]);
 
     const handleEmojiSelect = (emoji: string): void => {
         addReaction.mutate({
@@ -160,15 +191,13 @@ export const Message: React.FC<MessageProps> = ({
         setShowPicker(false);
     };
 
-    // Close picker when clicking outside
     useClickAway(pickerRef, () => {
         setShowPicker(false);
     });
 
     const isMessageSender = me?._id === message.senderId;
-    const canEdit = isMessageSender;
+    const canEdit = isMessageSender && !message.deletedAt;
 
-    // Listen for editLastMessage event from MessageInput
     useEvent('editLastMessage', (event: CustomEvent) => {
         const { messageId } = event.detail;
         if (messageId === message._id && canEdit) {
@@ -177,14 +206,16 @@ export const Message: React.FC<MessageProps> = ({
     });
 
     const canDelete =
-        isMessageSender ||
-        isOwner ||
-        hasPermission('administrator') ||
-        hasPermission('manageMessages') ||
-        hasPermission('deleteMessagesOfOthers');
+        !message.deletedAt &&
+        (isMessageSender ||
+            isOwner ||
+            hasPermission('administrator') ||
+            hasPermission('manageMessages') ||
+            hasPermission('deleteMessagesOfOthers'));
 
     const canPin =
-        hasPermission('administrator') || hasPermission('pinMessages');
+        !message.deletedAt &&
+        (hasPermission('administrator') || hasPermission('pinMessages'));
 
     const handleDelete = React.useCallback((): void => {
         if (!message.serverId || !message.channelId) return;
@@ -309,13 +340,13 @@ export const Message: React.FC<MessageProps> = ({
 
     const messageContent = (
         <>
-            {/* Reply Preview */}
             {isGroupStart && message.replyTo && (
                 <ReplyPreview
                     disableColors={disableColors}
                     disableCustomFonts={disableCustomFonts}
                     disableGlow={disableGlow}
                     disableGlowAndColors={disableGlowAndColors}
+                    interaction={message.replyTo.interaction}
                     replyToId={message.replyTo._id}
                     role={message.replyTo.role}
                     text={message.replyTo.text}
@@ -324,8 +355,23 @@ export const Message: React.FC<MessageProps> = ({
                 />
             )}
 
+            {isGroupStart &&
+                message.interaction &&
+                message.interaction.user && (
+                    <InteractionHeader
+                        command={message.interaction.command}
+                        disableColors={disableColors}
+                        disableCustomFonts={disableCustomFonts}
+                        disableGlow={disableGlow}
+                        disableGlowAndColors={disableGlowAndColors}
+                        isDeleted={!!message.deletedAt}
+                        resolvedUser={interactionUser}
+                        role={interactionRole}
+                        user={message.interaction.user}
+                    />
+                )}
+
             <Box className="flex items-start gap-1">
-                {/* Avatar */}
                 <Box
                     className="mt-1 flex w-12 flex-shrink-0 justify-center"
                     ref={avatarRef}
@@ -353,7 +399,6 @@ export const Message: React.FC<MessageProps> = ({
                     )}
                 </Box>
 
-                {/* Content Area */}
                 <Box className="min-w-0 flex-1">
                     <MessageHeader
                         disableColors={disableColors}
@@ -364,6 +409,7 @@ export const Message: React.FC<MessageProps> = ({
                         iconRole={iconRole || message.iconRole}
                         isEdited={message.isEdited}
                         isGroupStart={isGroupStart}
+                        isWebhook={message.isWebhook}
                         role={role || message.role}
                         timestamp={message.createdAt}
                         user={user}
@@ -380,6 +426,8 @@ export const Message: React.FC<MessageProps> = ({
                         />
                     ) : (
                         <MessageContent
+                            embeds={message.embeds}
+                            isDeleted={!!message.deletedAt}
                             serverId={message.serverId}
                             text={message.text}
                         />
@@ -394,7 +442,6 @@ export const Message: React.FC<MessageProps> = ({
                 </Box>
             </Box>
 
-            {/* Hover Actions */}
             {!disableActions && (
                 <Box
                     className={cn(

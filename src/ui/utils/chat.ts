@@ -35,9 +35,15 @@ export const getHighestColorRoleForMember = (
     let highestRole: Role | undefined = undefined;
     roleIds.forEach((roleId) => {
         const role = roleMap.get(roleId);
+        const isDefaultColor = (c: string): boolean =>
+            c.toLowerCase() === '#99aab5';
+        const hasColor =
+            (!!role?.color && !isDefaultColor(role.color)) ||
+            !!(role?.colors && role.colors.length > 0) ||
+            (!!role?.startColor && !!role?.endColor);
         if (
             role &&
-            (role.color || (role.colors && role.colors.length > 0)) &&
+            hasColor &&
             (!highestRole || role.position > highestRole.position)
         ) {
             highestRole = role;
@@ -97,6 +103,7 @@ export const resolveReplyTo = (
             } as User,
             role: undefined,
             iconRole: undefined,
+            interaction: msg.referenced_message.interaction,
         };
     }
 
@@ -114,6 +121,7 @@ export const resolveReplyTo = (
             } as User,
             role: undefined,
             iconRole: undefined,
+            interaction: msg.repliedToMessageId.interaction,
         };
     }
 
@@ -135,6 +143,7 @@ export const resolveReplyTo = (
                     } as User,
                     role: undefined,
                     iconRole: undefined,
+                    interaction: repliedMsg.interaction,
                 };
             }
         }

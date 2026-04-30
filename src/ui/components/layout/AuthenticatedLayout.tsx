@@ -18,7 +18,9 @@ import { BlockSyncProvider } from '@/providers/BlockSyncProvider';
 import { WebSocketProvider } from '@/providers/WebSocketProvider';
 import { LoadingScreen } from '@/ui/components/common/LoadingScreen';
 import { PushPrompt } from '@/ui/components/common/PushPrompt';
-import { WsDebugger } from '@/ui/components/settings/WsDebugger';
+import { FurTweaker } from '@/ui/components/nt/FurTweaker';
+import { ThemeTweaker } from '@/ui/components/nt/ThemeTweaker';
+import { WsDebugger } from '@/ui/components/nt/WsDebugger';
 import { useWsDebugWindowOpen } from '@/ws/debug';
 
 export const AuthenticatedLayout = (): ReactNode => {
@@ -108,6 +110,8 @@ export const AuthenticatedLayout = (): ReactNode => {
             <BlockSyncProvider />
             <PushPrompt />
             {isDebugWindowOpen && <WsDebugger />}
+            <FurTweaker />
+            <ThemeTweaker />
             <Outlet />
         </WebSocketProvider>
     );

@@ -11,7 +11,7 @@ export const TopNavBar: React.FC = () => (
                 className="flex items-center gap-2 no-underline hover:no-underline"
                 to="/"
             >
-                <img alt="Serchat" className="h-8 w-8" src="/serval.png" />
+                <img alt="Serchat" className="h-8 w-8" src="/serchat.svg" />
                 <span className="text-xl font-bold tracking-tight text-foreground">
                     Serchat
                 </span>

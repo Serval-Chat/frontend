@@ -7,6 +7,7 @@ import { useMe } from '@/api/users/users.queries';
 import type { User } from '@/api/users/users.types';
 import { useAppSelector } from '@/store/hooks';
 import type { AdminExtendedUser } from '@/types/admin';
+import { BotTag } from '@/ui/components/common/BotTag';
 import { Heading } from '@/ui/components/common/Heading';
 import { ParsedEmoji } from '@/ui/components/common/ParsedEmoji';
 import { ParsedText } from '@/ui/components/common/ParsedText';
@@ -18,6 +19,7 @@ import { UserBadge } from '@/ui/components/common/UserBadge';
 import { UserProfilePicture } from '@/ui/components/common/UserProfilePicture';
 import { type UserStatus } from '@/ui/components/common/UserProfileStatusIndicator';
 import { Box } from '@/ui/components/layout/Box';
+import { ProfileBanner } from '@/ui/components/profile/ProfileBanner';
 import { resolveApiUrl } from '@/utils/apiUrl';
 import { cn } from '@/utils/cn';
 import { ParserPresets, parseText } from '@/utils/textParser/parser';
@@ -76,9 +78,6 @@ export const UserProfileCard: React.FC<UserProfileCardProps> = ({
         customStatus?.emoji ??
         presence?.customStatus?.emoji ??
         user?.customStatus?.emoji;
-    const defaultColor = '#5865F2';
-    const bannerColor = user?.usernameGradient?.colors?.[0] || defaultColor;
-
     const userBio = user?.bio;
     const bioNodes = useMemo(
         () => (userBio ? parseText(userBio, ParserPresets.BIO) : []),
@@ -90,27 +89,13 @@ export const UserProfileCard: React.FC<UserProfileCardProps> = ({
             className={`flex w-[340px] flex-col overflow-hidden rounded-2xl border border-border-subtle bg-background shadow-2xl ${className || ''}`}
             style={style}
         >
-            <Box
-                className={`relative h-[120px] w-full shrink-0 overflow-hidden ${onBannerClick ? 'group/banner cursor-pointer' : ''}`}
-                style={{
-                    backgroundColor: bannerColor,
-                }}
-                onClick={onBannerClick}
-            >
-                {user?.banner && user.banner.trim() !== '' && (
-                    <img
-                        alt="User Banner"
-                        className="h-full w-full object-cover"
-                        src={resolveApiUrl(user.banner) || ''}
-                    />
-                )}
-                {onBannerClick && (
-                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/50 text-xs font-bold text-white uppercase opacity-0 transition-opacity duration-200 group-hover/banner:opacity-100">
-                        <Camera size={24} />
-                        <span>Change Banner</span>
-                    </div>
-                )}
-            </Box>
+            <ProfileBanner
+                banner={user?.banner}
+                bannerColor={user?.bannerColor}
+                height={120}
+                usernameGradient={user?.usernameGradient}
+                onBannerClick={onBannerClick}
+            />
 
             <Box className="relative z-content -mt-[50px] px-4">
                 <Box
@@ -134,29 +119,34 @@ export const UserProfileCard: React.FC<UserProfileCardProps> = ({
 
             <Box className="p-4 pt-2">
                 <Box className="mb-4">
-                    <StyledUserName
-                        className="w-full truncate text-xl leading-tight font-bold"
-                        disableColors={
-                            disableColors ||
-                            currentUser?.settings?.disableCustomUsernameColors
-                        }
-                        disableCustomFonts={
-                            disableCustomFonts ||
-                            currentUser?.settings?.disableCustomUsernameFonts
-                        }
-                        disableGlow={
-                            disableGlow ||
-                            currentUser?.settings?.disableCustomUsernameGlow
-                        }
-                        disableGlowAndColors={disableGlowAndColors}
-                        iconRole={iconRole}
-                        role={role}
-                        user={user as User}
-                    >
-                        {user?.displayName || user?.username}
-                    </StyledUserName>
+                    <Box className="flex min-w-0 items-center gap-2">
+                        <StyledUserName
+                            className="min-w-0 truncate text-xl leading-tight font-bold"
+                            disableColors={
+                                disableColors ||
+                                currentUser?.settings
+                                    ?.disableCustomUsernameColors
+                            }
+                            disableCustomFonts={
+                                disableCustomFonts ||
+                                currentUser?.settings
+                                    ?.disableCustomUsernameFonts
+                            }
+                            disableGlow={
+                                disableGlow ||
+                                currentUser?.settings?.disableCustomUsernameGlow
+                            }
+                            disableGlowAndColors={disableGlowAndColors}
+                            iconRole={iconRole}
+                            role={role}
+                            user={user as User}
+                        >
+                            {user?.displayName || user?.username}
+                        </StyledUserName>
+                        {user?.isBot && <BotTag className="ml-0" />}
+                    </Box>
 
-                    <Box className="text-sm font-medium text-muted-foreground select-text">
+                    <Box className="mt-1 text-sm font-medium text-muted-foreground select-text">
                         @{user?.username}
                         {user?.pronouns && (
                             <Text

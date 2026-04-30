@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useSyncExternalStore } from 'react';
 
 import { useLocation, useParams } from 'react-router-dom';
 
@@ -16,8 +16,26 @@ export interface UsePermissionsReturn {
     permissions: Record<keyof RolePermissions, boolean>;
     hasPermission: (permission: keyof RolePermissions) => boolean;
     isOwner: boolean;
+    isTimedOut: boolean;
+    remainingTimeoutMs: number;
     isLoading: boolean;
 }
+
+let globalNow = Date.now();
+const timeListeners = new Set<() => void>();
+
+setInterval(() => {
+    globalNow = Date.now();
+    timeListeners.forEach((l) => l());
+}, 1000);
+
+const subscribeTime = (callback: () => void): (() => void) => {
+    timeListeners.add(callback);
+    return () => timeListeners.delete(callback);
+};
+
+const getTimeSnapshot = (): number => globalNow;
+const getServerTimeSnapshot = (): number => 0;
 
 export const usePermissions = (
     serverId: string | null,
@@ -33,6 +51,11 @@ export const usePermissions = (
         serverId === params.serverId;
 
     const { data: currentUser } = useMe();
+    const now = useSyncExternalStore(
+        subscribeTime,
+        getTimeSnapshot,
+        getServerTimeSnapshot,
+    );
     const { data: members } = useMembers(serverId, { enabled: isEnabled });
     const { data: roles } = useRoles(serverId, { enabled: isEnabled });
     const { data: server } = useServerDetails(serverId, { enabled: isEnabled });
@@ -71,6 +94,7 @@ export const usePermissions = (
             kickMembers: false,
             manageInvites: false,
             manageServer: false,
+            manageWebhooks: false,
             administrator: false,
             pingRolesAndEveryone: false,
             manageReactions: false,
@@ -80,6 +104,8 @@ export const usePermissions = (
             export_channel_messages: false,
             bypassSlowmode: false,
             pinMessages: false,
+            seeDeletedMessages: false,
+            moderateMembers: false,
         };
 
         if (!serverId || !currentUser) return perms;
@@ -210,17 +236,34 @@ export const usePermissions = (
         members,
     ]);
 
+    const isOwner = !!(
+        server?.ownerId &&
+        currentUser?._id &&
+        server.ownerId === currentUser._id
+    );
+
+    const isTimedOut =
+        !!member?.communicationDisabledUntil &&
+        !isOwner &&
+        new Date(member.communicationDisabledUntil).getTime() > now;
+
+    const remainingTimeoutMs =
+        !member?.communicationDisabledUntil || isOwner
+            ? 0
+            : Math.max(
+                  0,
+                  new Date(member.communicationDisabledUntil).getTime() - now,
+              );
+
     const hasPermission = (permission: keyof RolePermissions): boolean =>
         permissions[permission] || false;
 
     return {
         permissions,
         hasPermission,
-        isOwner: !!(
-            server?.ownerId &&
-            currentUser?._id &&
-            server.ownerId === currentUser._id
-        ),
+        isOwner,
+        isTimedOut,
+        remainingTimeoutMs,
         isLoading:
             !currentUser ||
             !members ||

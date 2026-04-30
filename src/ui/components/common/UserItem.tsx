@@ -34,6 +34,7 @@ import {
     useMembers,
     useRemoveRoleFromMember,
     useServerDetails,
+    useTimeoutMember,
 } from '@/api/servers/servers.queries';
 import type { Role } from '@/api/servers/servers.types';
 import { useMe, useUserById } from '@/api/users/users.queries';
@@ -46,8 +47,10 @@ import { ProfilePopup } from '@/ui/components/profile/ProfilePopup';
 import { BlockUserModal } from '@/ui/components/profile/modals/BlockUserModal';
 import { BanUserModal } from '@/ui/components/servers/modals/BanUserModal';
 import { KickUserModal } from '@/ui/components/servers/modals/KickUserModal';
+import { TimeoutUserModal } from '@/ui/components/servers/modals/TimeoutUserModal';
 import { cn } from '@/utils/cn';
 
+import { BotTag } from './BotTag';
 import { ContextMenu, type ContextMenuItem } from './ContextMenu';
 import { MarqueeText } from './MarqueeText';
 import { ParsedEmoji } from './ParsedEmoji';
@@ -124,6 +127,7 @@ export const UserItem: React.FC<UserItemProps> = ({
 
     const { mutate: kickMember } = useKickMember(serverId);
     const { mutate: banMember } = useBanMember(serverId);
+    const { mutate: timeoutMember } = useTimeoutMember(serverId);
 
     const { data: serverDetails } = useServerDetails(sid, {
         enabled: isServerContext,
@@ -134,6 +138,7 @@ export const UserItem: React.FC<UserItemProps> = ({
 
     const [isKickModalOpen, setIsKickModalOpen] = React.useState(false);
     const [isBanModalOpen, setIsBanModalOpen] = React.useState(false);
+    const [isTimeoutModalOpen, setIsTimeoutModalOpen] = React.useState(false);
     const [isBlockModalOpen, setIsBlockModalOpen] = React.useState(false);
 
     const { data: fetchedUser } = useUserById(userId, {
@@ -248,7 +253,7 @@ export const UserItem: React.FC<UserItemProps> = ({
                 onClick: () => removeFriend(userId),
                 variant: 'danger',
             });
-        } else {
+        } else if (!userProfile?.isBot) {
             items.push({
                 label: 'Add Friend',
                 icon: UserPlus,
@@ -401,6 +406,12 @@ export const UserItem: React.FC<UserItemProps> = ({
         myRoles?.some(
             (r) => r.permissions?.administrator || r.permissions?.banMembers,
         );
+    const canTimeout =
+        isOwner ||
+        myRoles?.some(
+            (r) =>
+                r.permissions?.administrator || r.permissions?.moderateMembers,
+        );
 
     const targetMember = members?.find((m) => m.userId === userId);
     const targetRoles = serverRoles?.filter((r) =>
@@ -418,7 +429,22 @@ export const UserItem: React.FC<UserItemProps> = ({
     const isHigherHierarchy =
         isOwner || myHighestPosition > targetHighestPosition;
 
-    if (!isMe && sid && (canKick || canBan) && isHigherHierarchy) {
+    if (
+        !isMe &&
+        sid &&
+        (canKick || canBan || canTimeout) &&
+        isHigherHierarchy
+    ) {
+        if (canTimeout) {
+            items.push({
+                label: 'Timeout Member',
+                icon: Shield,
+                onClick: () => {
+                    setIsTimeoutModalOpen(true);
+                },
+                variant: 'danger',
+            });
+        }
         if (canKick) {
             items.push({
                 label: 'Kick Member',
@@ -493,28 +519,32 @@ export const UserItem: React.FC<UserItemProps> = ({
                     />
 
                     <Box className="flex min-w-0 flex-1 flex-col overflow-hidden">
-                        <StyledUserName
-                            disableColors={
-                                disableColors ||
-                                currentUser?.settings
-                                    ?.disableCustomUsernameColors
-                            }
-                            disableCustomFonts={
-                                disableCustomFonts ||
-                                currentUser?.settings
-                                    ?.disableCustomUsernameFonts
-                            }
-                            disableGlow={
-                                disableGlow ||
-                                currentUser?.settings?.disableCustomUsernameGlow
-                            }
-                            disableGlowAndColors={disableGlowAndColors}
-                            iconRole={iconRole}
-                            role={role}
-                            user={userProfile}
-                        >
-                            {displayName || username}
-                        </StyledUserName>
+                        <Box className="flex min-w-0 items-center gap-1.5">
+                            <StyledUserName
+                                disableColors={
+                                    disableColors ||
+                                    currentUser?.settings
+                                        ?.disableCustomUsernameColors
+                                }
+                                disableCustomFonts={
+                                    disableCustomFonts ||
+                                    currentUser?.settings
+                                        ?.disableCustomUsernameFonts
+                                }
+                                disableGlow={
+                                    disableGlow ||
+                                    currentUser?.settings
+                                        ?.disableCustomUsernameGlow
+                                }
+                                disableGlowAndColors={disableGlowAndColors}
+                                iconRole={iconRole}
+                                role={role}
+                                user={userProfile}
+                            >
+                                {displayName || username}
+                            </StyledUserName>
+                            {userProfile?.isBot && <BotTag className="h-4" />}
+                        </Box>
 
                         {(presenceCustomText || presenceCustomEmoji) && (
                             <div className="flex min-w-0 items-center gap-1">
@@ -619,6 +649,16 @@ export const UserItem: React.FC<UserItemProps> = ({
                 onClose={() => setIsBlockModalOpen(false)}
                 onConfirm={(profileId) =>
                     upsertBlock({ targetUserId: userId, profileId })
+                }
+            />
+
+            <TimeoutUserModal
+                isOpen={isTimeoutModalOpen}
+                userAvatar={userProfile?.profilePicture}
+                username={username}
+                onClose={() => setIsTimeoutModalOpen(false)}
+                onConfirm={(duration, reason) =>
+                    timeoutMember({ userId, duration, reason })
                 }
             />
         </>
