@@ -1,8 +1,10 @@
 import { type ReactNode } from 'react';
 
 import type { Embed, MessagePayload } from '@/types/embed';
+import { Link } from '@/ui/components/common/Link';
 import { ParsedText } from '@/ui/components/common/ParsedText';
 import { cn } from '@/utils/cn';
+import { getProxyUrl } from '@/utils/proxy';
 import { ParserPresets, parseText } from '@/utils/textParser/parser';
 
 const colorToCss = (color: number | undefined): string | undefined => {
@@ -98,14 +100,12 @@ const EmbedCard = ({
                         )}
                     >
                         {embed.provider.url ? (
-                            <a
+                            <Link
                                 className="hover:underline"
                                 href={embed.provider.url}
-                                rel="noreferrer"
-                                target="_blank"
                             >
                                 {embed.provider.name}
-                            </a>
+                            </Link>
                         ) : (
                             embed.provider.name
                         )}
@@ -119,7 +119,7 @@ const EmbedCard = ({
                             <img
                                 alt=""
                                 className="h-6 w-6 rounded-full object-cover"
-                                src={embed.author.icon_url}
+                                src={getProxyUrl(embed.author.icon_url)}
                             />
                         )}
                         <span
@@ -129,14 +129,12 @@ const EmbedCard = ({
                             )}
                         >
                             {embed.author.url ? (
-                                <a
+                                <Link
                                     className="hover:underline"
                                     href={embed.author.url}
-                                    rel="noreferrer"
-                                    target="_blank"
                                 >
                                     {embed.author.name}
-                                </a>
+                                </Link>
                             ) : (
                                 embed.author.name
                             )}
@@ -158,11 +156,9 @@ const EmbedCard = ({
                                 )}
                             >
                                 {embed.url ? (
-                                    <a
+                                    <Link
                                         className="text-primary hover:underline"
                                         href={embed.url}
-                                        rel="noreferrer"
-                                        target="_blank"
                                     >
                                         <ParsedText
                                             nodes={parseText(
@@ -175,7 +171,7 @@ const EmbedCard = ({
                                                 isDeleted ? 'danger' : undefined
                                             }
                                         />
-                                    </a>
+                                    </Link>
                                 ) : (
                                     <ParsedText
                                         nodes={parseText(
@@ -275,7 +271,7 @@ const EmbedCard = ({
                                 'ml-auto h-20 w-20 shrink-0 rounded object-cover',
                                 isDeleted && 'opacity-50 grayscale',
                             )}
-                            src={embed.thumbnail.url}
+                            src={getProxyUrl(embed.thumbnail.url)}
                         />
                     )}
                 </div>
@@ -288,7 +284,7 @@ const EmbedCard = ({
                             'mt-3 max-h-72 w-full rounded object-contain',
                             isDeleted && 'opacity-50 grayscale',
                         )}
-                        src={embed.image.url}
+                        src={getProxyUrl(embed.image.url)}
                     />
                 )}
 
@@ -302,7 +298,7 @@ const EmbedCard = ({
                                     'h-5 w-5 rounded-full object-cover',
                                     isDeleted && 'opacity-50 grayscale',
                                 )}
-                                src={embed.footer.icon_url}
+                                src={getProxyUrl(embed.footer.icon_url)}
                             />
                         )}
                         <p

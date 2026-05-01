@@ -14,6 +14,10 @@ import { useAppSelector } from '@/store/hooks';
 
 import { MainChat } from './MainChat';
 
+vi.mock('@/providers/ThemeProvider', () => ({
+    useTheme: vi.fn().mockReturnValue({ theme: 'dark', setTheme: vi.fn() }),
+}));
+
 vi.mock('react-router-dom', () => ({
     useNavigate: vi.fn(),
     useLocation: vi.fn().mockReturnValue({ pathname: '/chat/@server/server1' }),
@@ -118,6 +122,7 @@ describe('channel send permission gating', () => {
         vi.mocked(useAppSelector).mockImplementation((selector) => {
             const state = {
                 nav: { selectedServerId: 'server1', selectedChannelId: 'ch1' },
+                furTweaker: {},
             };
             return selector(state as never);
         });
@@ -190,6 +195,7 @@ describe('MainChat fallback logic', () => {
         vi.mocked(useAppSelector).mockImplementation((selector) => {
             const state = {
                 nav: { selectedFriendId: 'fakeUserId123' },
+                furTweaker: {},
             };
             return selector(state as never);
         });
@@ -214,6 +220,7 @@ describe('MainChat fallback logic', () => {
         vi.mocked(useAppSelector).mockImplementation((selector) => {
             const state = {
                 nav: { selectedFriendId: 'validUserId123' },
+                furTweaker: {},
             };
             return selector(state as never);
         });

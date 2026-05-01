@@ -4,6 +4,7 @@ import { Text } from '@/ui/components/common/Text';
 import { Box } from '@/ui/components/layout/Box';
 import { resolveApiUrl } from '@/utils/apiUrl';
 import { cn } from '@/utils/cn';
+import { getProxyUrl } from '@/utils/proxy';
 
 interface UserProfilePictureIconProps {
     src?: string | null;
@@ -31,7 +32,9 @@ export const UserProfilePictureIcon: React.FC<UserProfilePictureIconProps> = ({
 }) => {
     const isFilename = src && !isAbsoluteUrl(src) && !src.includes('/');
     const effectiveSrc = isFilename ? `/api/v1/profile/picture/${src}` : src;
-    const iconUrl = resolveApiUrl(effectiveSrc || undefined);
+    const iconUrl = getProxyUrl(
+        resolveApiUrl(effectiveSrc || undefined) || undefined,
+    );
 
     const initials = (username || '')
         .split(' ')

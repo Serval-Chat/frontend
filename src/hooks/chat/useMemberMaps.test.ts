@@ -25,7 +25,7 @@ describe('useMemberMaps', () => {
                 _id: 'everyone',
                 serverId: 'server-1',
                 name: '@everyone',
-                color: '#99aab5',
+                color: '#ff0000',
                 position: 0,
             } as Role,
         ];

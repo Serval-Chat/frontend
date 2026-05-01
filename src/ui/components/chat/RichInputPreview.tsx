@@ -191,7 +191,7 @@ function renderNode(
         case 'everyone':
             return (
                 <span
-                    className="inline-flex items-baseline rounded bg-primary px-1.5 font-medium text-white shadow-sm"
+                    className="inline-flex items-baseline rounded bg-primary px-1.5 font-medium text-foreground-inverse shadow-sm"
                     key={idx}
                     style={{ verticalAlign: 'baseline' }}
                 >

@@ -412,7 +412,7 @@ export const ParsedText: React.FC<ParsedTextProps> = ({
                                     as="span"
                                     className="leading-none drop-shadow-md"
                                     size="sm"
-                                    variant={variant}
+                                    variant="inverse"
                                 >
                                     @everyone
                                 </Text>

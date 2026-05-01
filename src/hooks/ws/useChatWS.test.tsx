@@ -2,6 +2,7 @@ import React from 'react';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act, renderHook } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { CHAT_QUERY_KEYS } from '@/api/chat/chat.queries';
@@ -72,9 +73,11 @@ describe('useChatWS embeds mapping', () => {
         }: {
             children: React.ReactNode;
         }): React.JSX.Element => (
-            <QueryClientProvider client={queryClient}>
-                {children}
-            </QueryClientProvider>
+            <MemoryRouter>
+                <QueryClientProvider client={queryClient}>
+                    {children}
+                </QueryClientProvider>
+            </MemoryRouter>
         );
 
         renderHook(() => useChatWS(undefined, 's1', 'c1'), { wrapper });

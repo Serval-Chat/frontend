@@ -29,6 +29,7 @@ vi.mock('@/api/servers/servers.queries', () => ({
     useRemoveRoleFromMember: () => ({ mutate: vi.fn(), isPending: false }),
     useKickMember: () => ({ mutate: vi.fn() }),
     useBanMember: () => ({ mutate: vi.fn() }),
+    useTimeoutMember: () => ({ mutate: vi.fn() }),
     useServerDetails: () => ({ data: null }),
     useMembers: () => ({ data: [] }),
 }));

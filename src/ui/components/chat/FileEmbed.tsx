@@ -22,8 +22,8 @@ import { Link } from '@/ui/components/common/Link';
 import { LoadingSpinner } from '@/ui/components/common/LoadingSpinner';
 import { Text } from '@/ui/components/common/Text';
 import { Box } from '@/ui/components/layout/Box';
-import { resolveApiUrl } from '@/utils/apiUrl';
 import { cn } from '@/utils/cn';
+import { getProxyUrl, isInternalUrl } from '@/utils/proxy';
 
 interface FileEmbedProps {
     url: string;
@@ -31,9 +31,7 @@ interface FileEmbedProps {
 
 export const FileEmbed: React.FC<FileEmbedProps> = ({ url }) => {
     const baseUrl = url.split('#')[0];
-    const isLocal =
-        baseUrl.includes('catfla.re/api/v1/files/download/') ||
-        baseUrl.includes(window.location.origin);
+    const isLocal = isInternalUrl(baseUrl);
     const filename = isLocal ? baseUrl.split('/').pop() : null;
 
     const { data: localMeta, isLoading: loadingLocal } = useFileMetadata(
@@ -79,11 +77,7 @@ export const FileEmbed: React.FC<FileEmbedProps> = ({ url }) => {
 
     // Image rendering
     if (mimeType?.startsWith('image/')) {
-        const displayUrl = isLocal
-            ? url
-            : resolveApiUrl(
-                  `/api/v1/file-proxy?url=${encodeURIComponent(url)}`,
-              );
+        const displayUrl = getProxyUrl(url);
 
         return (
             <>
@@ -150,11 +144,7 @@ export const FileEmbed: React.FC<FileEmbedProps> = ({ url }) => {
 
     // Video rendering
     if (mimeType?.startsWith('video/')) {
-        const displayUrl = isLocal
-            ? url
-            : resolveApiUrl(
-                  `/api/v1/file-proxy?url=${encodeURIComponent(url)}`,
-              );
+        const displayUrl = getProxyUrl(url);
 
         return (
             <Box
