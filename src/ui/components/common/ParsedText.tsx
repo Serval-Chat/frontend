@@ -8,9 +8,10 @@ import { GifPlayer } from '@/ui/components/chat/GifPlayer';
 import { InviteLink } from '@/ui/components/chat/InviteLink';
 import { Box } from '@/ui/components/layout/Box';
 import { cn } from '@/utils/cn';
-import type { ASTNode } from '@/utils/textParser/types';
+import type { ASTNode, ChecklistNode } from '@/utils/textParser/types';
 
 import { Admonition } from './Admonition';
+import { ChecklistGroup } from './ChecklistGroup';
 import { CodeBlock } from './CodeBlock';
 import { Divider } from './Divider';
 import { Heading } from './Heading';
@@ -97,6 +98,21 @@ export const ParsedText: React.FC<ParsedTextProps> = ({
         ? nodes.filter((n) => n.type !== 'file' && n.type !== 'klipy')
         : nodes;
 
+    type GroupedNode = ASTNode | { type: '_cl_group'; items: ChecklistNode[] };
+    const groupedNodes: GroupedNode[] = [];
+    for (const node of displayNodes) {
+        if (node.type === 'checklist') {
+            const last = groupedNodes[groupedNodes.length - 1];
+            if (last !== undefined && last.type === '_cl_group') {
+                last.items.push(node);
+            } else {
+                groupedNodes.push({ type: '_cl_group', items: [node] });
+            }
+        } else {
+            groupedNodes.push(node);
+        }
+    }
+
     const hasVisibleContent = nodes.some(hasVisibleContentRecursively);
 
     const nestedProps = {
@@ -112,7 +128,30 @@ export const ParsedText: React.FC<ParsedTextProps> = ({
 
     return (
         <span className={className}>
-            {displayNodes.map((node, idx) => {
+            {groupedNodes.map((item, idx) => {
+                if (item.type === '_cl_group') {
+                    const { items } = item as {
+                        type: '_cl_group';
+                        items: ChecklistNode[];
+                    };
+                    return (
+                        <ChecklistGroup
+                            key={idx}
+                            nodes={items}
+                            renderContent={(node) =>
+                                typeof node.content === 'string' ? (
+                                    <span>{node.content}</span>
+                                ) : (
+                                    <ParsedText
+                                        {...nestedProps}
+                                        nodes={node.content}
+                                    />
+                                )
+                            }
+                        />
+                    );
+                }
+                const node = item as ASTNode;
                 switch (node.type) {
                     case 'text':
                         return (
@@ -418,6 +457,10 @@ export const ParsedText: React.FC<ParsedTextProps> = ({
                                 </Text>
                             </Box>
                         );
+
+                    case 'checklist':
+                        return null;
+
                     case 'unordered_list':
                         return (
                             <Box

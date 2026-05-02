@@ -48,6 +48,7 @@ export const ParserPresets = {
             ParserFeature.MERMAID,
             ParserFeature.UNORDERED_LIST,
             ParserFeature.KLIPY,
+            ParserFeature.CHECKLIST,
         ],
     },
     BIO: {
@@ -82,6 +83,7 @@ export const ParserPresets = {
             ParserFeature.ADMONITION,
             ParserFeature.MERMAID,
             ParserFeature.UNORDERED_LIST,
+            ParserFeature.CHECKLIST,
         ],
     },
     EMBED: {
@@ -233,6 +235,25 @@ export class TextParser {
                 if (emojiNode) {
                     currentText = this.flushText(nodes, currentText);
                     nodes.push(emojiNode);
+                    continue;
+                }
+            }
+
+            if (
+                (char === '-' ||
+                    char === '*' ||
+                    char === '+' ||
+                    char === ' ') &&
+                this.options.features.includes(ParserFeature.CHECKLIST)
+            ) {
+                const checklistNode = this.tryParseChecklist();
+                if (checklistNode) {
+                    currentText = this.flushText(nodes, currentText);
+                    nodes.push(checklistNode);
+
+                    if (this.peek('\n')) {
+                        this.index++;
+                    }
                     continue;
                 }
             }
@@ -1077,6 +1098,43 @@ export class TextParser {
         if (content.trim()) {
             return {
                 type: 'unordered_list',
+                content: this.parseContent(content.trim()),
+                depth: Math.floor(indentation / 2),
+            } as ASTNode;
+        }
+
+        this.index = start;
+        return null;
+    }
+
+    private tryParseChecklist(): ASTNode | null {
+        const start = this.index;
+
+        if (this.index > 0 && this.text[this.index - 1] !== '\n') {
+            return null;
+        }
+
+        const remaining = this.text.slice(this.index);
+        const match = remaining.match(/^( *)[-*+] \[([ xX])\] /);
+        if (!match) return null;
+
+        const indentation = match[1].length;
+        const checked = match[2].toLowerCase() === 'x';
+        this.index += match[0].length;
+
+        let content = '';
+        while (
+            this.index < this.text.length &&
+            this.text[this.index] !== '\n'
+        ) {
+            content += this.text[this.index];
+            this.index++;
+        }
+
+        if (content.trim()) {
+            return {
+                type: 'checklist',
+                checked,
                 content: this.parseContent(content.trim()),
                 depth: Math.floor(indentation / 2),
             } as ASTNode;

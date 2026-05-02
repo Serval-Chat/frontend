@@ -34,6 +34,7 @@ export const ParserFeature = {
     MERMAID: 'MERMAID',
     UNORDERED_LIST: 'UNORDERED_LIST',
     KLIPY: 'KLIPY',
+    CHECKLIST: 'CHECKLIST',
 } as const;
 
 export type ParserFeature = (typeof ParserFeature)[keyof typeof ParserFeature];
@@ -70,7 +71,8 @@ export type ASTNodeType =
     | 'admonition'
     | 'mermaid'
     | 'unordered_list'
-    | 'klipy';
+    | 'klipy'
+    | 'checklist';
 
 export interface TextNode {
     type: 'text';
@@ -211,6 +213,13 @@ export interface UnorderedListNode {
     depth?: number;
 }
 
+export interface ChecklistNode {
+    type: 'checklist';
+    checked: boolean;
+    content: string | ASTNode[];
+    depth?: number;
+}
+
 export interface TableNode {
     type: 'table';
     headers: (string | ASTNode[])[];
@@ -285,4 +294,5 @@ export type ASTNode =
     | AdmonitionNode
     | MermaidNode
     | UnorderedListNode
-    | KlipyNode;
+    | KlipyNode
+    | ChecklistNode;
