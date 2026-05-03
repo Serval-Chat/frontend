@@ -717,6 +717,14 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
                                 }
                             />
                             <PermissionToggle
+                                description="Allows member to remove reactions added by other members."
+                                label="Manage Reactions"
+                                value={permissions.manageReactions || false}
+                                onChange={(val) =>
+                                    updatePermission('manageReactions', val)
+                                }
+                            />
+                            <PermissionToggle
                                 description="Allows member to use @everyone and @here to notify all members."
                                 label="Mention @everyone"
                                 value={

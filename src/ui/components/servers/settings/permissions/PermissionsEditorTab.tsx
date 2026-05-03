@@ -82,6 +82,12 @@ const PERMISSION_GROUPS = [
                 description: 'Allows members to add new reactions to messages.',
             },
             {
+                key: 'manageReactions',
+                label: 'Manage Reactions',
+                description:
+                    'Allows members to remove reactions added by other members.',
+            },
+            {
                 key: 'pingRolesAndEveryone',
                 label: 'Mention @everyone',
                 description:

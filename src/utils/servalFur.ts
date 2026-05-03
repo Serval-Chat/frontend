@@ -102,18 +102,18 @@ export function applyServalBackground(
         spotColor = 'rgb(40,22,5)',
     } = opts;
 
-    const w = element.clientWidth || element.offsetWidth;
-    const h = element.clientHeight || element.offsetHeight;
-    if (w === 0 || h === 0) return () => {};
+    const virtualW = 3840;
+    const virtualH = 2160;
 
-    const area = w * h;
-    const n = opts.spotCount ?? Math.max(20, Math.round(area / 12000));
+    const n =
+        opts.spotCount ??
+        Math.max(20, Math.round((virtualW * virtualH) / 12000));
 
     const spots: Spot[] = Array.from({ length: n }, () => {
         const rx = 7 + Math.random() * 14;
         return {
-            x: Math.random() * w,
-            y: Math.random() * h,
+            x: Math.random() * virtualW,
+            y: Math.random() * virtualH,
             rx,
             ry: rx * (0.45 + Math.random() * 0.65),
             rot: Math.random() * Math.PI,
@@ -123,36 +123,45 @@ export function applyServalBackground(
         };
     });
 
-    relaxSpots(spots, w, h);
+    relaxSpots(spots, virtualW, virtualH);
 
     const canvas = document.createElement('canvas');
-    canvas.width = w;
-    canvas.height = h;
+
+    const canvasW = virtualW;
+    const canvasH = virtualH;
+
+    canvas.width = canvasW;
+    canvas.height = canvasH;
     Object.assign(canvas.style, {
         position: 'absolute',
-        inset: '0',
-        width: '100%',
-        height: '100%',
+        top: '0',
+        left: '0',
+        width: `${canvasW}px`,
+        height: `${canvasH}px`,
         pointerEvents: 'none',
         zIndex: '0',
     });
 
     const ctx = canvas.getContext('2d')!;
     ctx.fillStyle = base;
-    ctx.fillRect(0, 0, w, h);
+    ctx.fillRect(0, 0, canvasW, canvasH);
 
     for (const s of spots) {
         drawSpot(ctx, s, spotColor);
     }
 
     const prevPosition = element.style.position;
+    const prevOverflow = element.style.overflow;
+
     if (!element.style.position || element.style.position === 'static') {
         element.style.position = 'relative';
     }
+    element.style.overflow = 'hidden';
     element.insertBefore(canvas, element.firstChild);
 
     return () => {
         canvas.remove();
         element.style.position = prevPosition;
+        element.style.overflow = prevOverflow;
     };
 }

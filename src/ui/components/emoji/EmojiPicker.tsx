@@ -1,11 +1,9 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
 import { motion } from 'framer-motion';
-import { useMeasure } from 'react-use';
-import { AutoSizer } from 'react-virtualized-auto-sizer';
+import { useLockBodyScroll, useMeasure } from 'react-use';
 import { VariableSizeList as List } from 'react-window';
 
-import type { Server } from '@/api/servers/servers.types';
 import { useEmojiInfoBox } from '@/hooks/useEmojiInfoBox';
 import { Button } from '@/ui/components/common/Button';
 import { ParsedUnicodeEmoji } from '@/ui/components/common/ParsedUnicodeEmoji';
@@ -43,6 +41,7 @@ interface EmojiPickerProps {
 
 const HEADER_HEIGHT = 32;
 const ROW_HEIGHT = 40;
+const SIDEBAR_WIDTH = 44;
 
 type RowItem =
     | {
@@ -60,17 +59,28 @@ type RowItem =
           id: string;
       };
 
-export const EmojiPicker: React.FC<EmojiPickerProps> = ({
+const EmojiPickerContent: React.FC<{
+    width: number;
+    height: number;
+    customCategories: CustomEmojiCategory[];
+    onEmojiSelect: (emoji: string) => void;
+    onCustomEmojiSelect?: (emoji: {
+        id: string;
+        name: string;
+        url: string;
+    }) => void;
+}> = ({
+    width,
+    height,
+    customCategories,
     onEmojiSelect,
     onCustomEmojiSelect,
-    customCategories = [],
-    className,
 }) => {
     const listRef = React.useRef<List>(null);
-    const [listContainerRef, { width: listWidth }] =
-        useMeasure<HTMLDivElement>();
-    const [activeCategoryId, setActiveCategoryId] = React.useState<string>('');
-    const [isScrollingTo, setIsScrollingTo] = React.useState(false);
+    const scrollOffsetRef = React.useRef<number>(0);
+    const [activeCategoryId, setActiveCategoryId] = useState<string>('');
+    const [isScrollingTo, setIsScrollingTo] = useState(false);
+
     const {
         selectedEmoji,
         infoBoxPosition,
@@ -79,12 +89,124 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
         closeInfoBox,
     } = useEmojiInfoBox();
 
-    const columnCount = React.useMemo(() => {
-        if (!listWidth) return 8;
-        return Math.max(1, Math.floor((listWidth - 8) / 40));
-    }, [listWidth]);
+    const listAreaWidth = width - SIDEBAR_WIDTH;
+    const columnCount = useMemo(() => {
+        if (width <= 0) return 1;
+        return Math.max(1, Math.floor((listAreaWidth - 4) / 36));
+    }, [listAreaWidth, width]);
 
-    const displayCategories = React.useMemo(
+    const flatRows = useMemo(() => {
+        const rows: RowItem[] = [];
+        if (columnCount <= 0 || width <= 0 || height <= 0) return rows;
+
+        customCategories.forEach((cat) => {
+            rows.push({
+                type: 'header',
+                id: cat.id,
+                name: cat.name,
+                icon: cat.icon,
+                isCustom: true,
+            });
+            const count = cat.emojis.length;
+            for (let i = 0; i < count; i += columnCount) {
+                rows.push({
+                    type: 'row',
+                    emojis: cat.emojis.slice(i, i + columnCount),
+                    isCustom: true,
+                    id: cat.id,
+                });
+            }
+        });
+
+        categories.forEach((catId) => {
+            rows.push({
+                type: 'header',
+                id: catId,
+                name: catId,
+                isCustom: false,
+                standardIcon: categoryIconMap[catId],
+            });
+            const emojis = groupedEmojis[catId] || [];
+            const count = emojis.length;
+            for (let i = 0; i < count; i += columnCount) {
+                rows.push({
+                    type: 'row',
+                    emojis: emojis.slice(i, i + columnCount),
+                    isCustom: false,
+                    id: catId,
+                });
+            }
+        });
+        return rows;
+    }, [customCategories, columnCount, width, height]);
+
+    const categoryOffsets = useMemo(() => {
+        const offsets: Record<string, number> = {};
+        if (width <= 0 || height <= 0) return offsets;
+        let currentOffset = 0;
+        flatRows.forEach((row) => {
+            if (row.type === 'header' && !offsets[row.id])
+                offsets[row.id] = currentOffset;
+            currentOffset += row.type === 'header' ? HEADER_HEIGHT : ROW_HEIGHT;
+        });
+        return offsets;
+    }, [flatRows, width, height]);
+
+    const getRowHeight = useCallback(
+        (index: number): number =>
+            flatRows[index]?.type === 'header' ? HEADER_HEIGHT : ROW_HEIGHT,
+        [flatRows],
+    );
+
+    const smoothScrollTo = useCallback((targetOffset: number): void => {
+        if (!listRef.current) return;
+        const startOffset = scrollOffsetRef.current;
+        const distance = targetOffset - startOffset;
+        const duration = 300;
+        const startTime = performance.now();
+
+        const animateScroll = (currentTime: number): void => {
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            const easeProgress = 1 - Math.pow(1 - progress, 3);
+            const currentScroll = startOffset + distance * easeProgress;
+            listRef.current?.scrollTo(currentScroll);
+
+            if (progress < 1) requestAnimationFrame(animateScroll);
+            else setTimeout(() => setIsScrollingTo(false), 50);
+        };
+
+        setIsScrollingTo(true);
+        requestAnimationFrame(animateScroll);
+    }, []);
+
+    const handleCategoryClick = (categoryId: string): void => {
+        const offset = categoryOffsets[categoryId];
+        if (offset !== undefined) {
+            smoothScrollTo(offset);
+            setActiveCategoryId(categoryId);
+        }
+    };
+
+    const handleItemsRendered = useCallback(
+        ({ visibleStartIndex }: { visibleStartIndex: number }): void => {
+            if (isScrollingTo) return;
+            const firstVisibleRow = flatRows[visibleStartIndex];
+            if (firstVisibleRow && firstVisibleRow.id !== activeCategoryId) {
+                setActiveCategoryId(firstVisibleRow.id);
+            }
+        },
+        [isScrollingTo, flatRows, activeCategoryId],
+    );
+
+    const handleScroll = useCallback(
+        ({ scrollOffset }: { scrollOffset: number }): void => {
+            scrollOffsetRef.current = scrollOffset;
+        },
+        [],
+    );
+
+    const displayCategories = useMemo(
         () => [
             ...customCategories.map((c) => ({
                 id: c.id,
@@ -101,143 +223,15 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
         [customCategories],
     );
 
-    const flatRows = React.useMemo(() => {
-        const rows: RowItem[] = [];
-
-        // Custom categories
-        customCategories.forEach((cat) => {
-            rows.push({
-                type: 'header',
-                id: cat.id,
-                name: cat.name,
-                icon: cat.icon,
-                isCustom: true,
-            });
-            const emojiCount = cat.emojis.length;
-            for (let i = 0; i < emojiCount; i += columnCount) {
-                rows.push({
-                    type: 'row',
-                    emojis: cat.emojis.slice(i, i + columnCount),
-                    isCustom: true,
-                    id: cat.id,
-                });
-            }
-        });
-
-        // Standard categories
-        categories.forEach((catId) => {
-            rows.push({
-                type: 'header',
-                id: catId,
-                name: catId,
-                isCustom: false,
-                standardIcon: categoryIconMap[catId],
-            });
-            const emojis = groupedEmojis[catId] || [];
-            const emojiCount = emojis.length;
-            for (let i = 0; i < emojiCount; i += columnCount) {
-                rows.push({
-                    type: 'row',
-                    emojis: emojis.slice(i, i + columnCount),
-                    isCustom: false,
-                    id: catId,
-                });
-            }
-        });
-
-        return rows;
-    }, [customCategories, columnCount]);
-
-    // Initial active category
     React.useEffect(() => {
+        if (width <= 0 || height <= 0) return;
         if (displayCategories.length > 0 && !activeCategoryId) {
             setActiveCategoryId(displayCategories[0].id);
         }
-    }, [displayCategories, activeCategoryId]);
-
-    const categoryOffsets = React.useMemo(() => {
-        const offsets: Record<string, number> = {};
-        let currentOffset = 0;
-        flatRows.forEach((row) => {
-            if (row.type === 'header' && !offsets[row.id]) {
-                offsets[row.id] = currentOffset;
-            }
-            currentOffset += row.type === 'header' ? HEADER_HEIGHT : ROW_HEIGHT;
-        });
-        return offsets;
-    }, [flatRows]);
-
-    const getRowHeight = useCallback(
-        (index: number): number =>
-            flatRows[index].type === 'header' ? HEADER_HEIGHT : ROW_HEIGHT,
-        [flatRows],
-    );
-
-    const smoothScrollTo = useCallback((targetOffset: number): void => {
-        if (!listRef.current) return;
-
-        const startOffset = (
-            listRef.current as unknown as { state: { scrollOffset: number } }
-        ).state.scrollOffset;
-        const distance = targetOffset - startOffset;
-        const duration = 300;
-        const startTime = performance.now();
-
-        const animateScroll = (currentTime: number): void => {
-            const elapsed = currentTime - startTime;
-            const progress = Math.min(elapsed / duration, 1);
-
-            // Ease out cubic
-            const easeProgress = 1 - Math.pow(1 - progress, 3);
-
-            const currentScroll = startOffset + distance * easeProgress;
-            if (listRef.current) {
-                listRef.current.scrollTo(currentScroll);
-            }
-
-            if (progress < 1) {
-                requestAnimationFrame(animateScroll);
-            } else {
-                setTimeout(() => setIsScrollingTo(false), 50);
-            }
-        };
-
-        setIsScrollingTo(true);
-        requestAnimationFrame(animateScroll);
-    }, []);
-
-    const handleCategoryClick = (categoryId: string): void => {
-        const offset = categoryOffsets[categoryId];
-        if (offset !== undefined && listRef.current) {
-            smoothScrollTo(offset);
-            setActiveCategoryId(categoryId);
-        }
-    };
-
-    const handleItemsRendered = ({
-        visibleStartIndex,
-    }: {
-        visibleStartIndex: number;
-    }): void => {
-        if (isScrollingTo) return;
-
-        const firstVisibleRow = flatRows[visibleStartIndex];
-        if (firstVisibleRow) {
-            const categoryId = firstVisibleRow.id;
-            if (categoryId && categoryId !== activeCategoryId) {
-                setActiveCategoryId(categoryId);
-            }
-        }
-    };
+    }, [displayCategories, activeCategoryId, width, height]);
 
     const Row = useCallback(
-        ({
-            index,
-            style,
-        }: {
-            index: number;
-            style: React.CSSProperties;
-        }): React.ReactElement | null => {
+        ({ index, style }: { index: number; style: React.CSSProperties }) => {
             const row = flatRows[index];
             if (!row) return null;
 
@@ -250,10 +244,7 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
                         {row.isCustom ? (
                             <ServerIcon
                                 className="!cursor-default !rounded-sm"
-                                server={{
-                                    name: row.name,
-                                    icon: row.icon,
-                                }}
+                                server={{ name: row.name, icon: row.icon }}
                                 size="xs"
                             />
                         ) : (
@@ -275,104 +266,95 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
                 );
             }
 
-            if (row.type === 'row') {
-                return (
-                    <Box className="flex flex-wrap gap-1 p-1" style={style}>
-                        {row.emojis.map((emoji) => {
-                            if (typeof emoji === 'string') {
-                                return (
-                                    <Button
-                                        className="h-8 w-8 shrink-0 rounded-md bg-bg-subtle transition-colors hover:bg-bg-subtle-hover"
-                                        key={emoji}
-                                        title={`:${getUnicode(emoji)}:`}
-                                        variant="ghost"
-                                        onClick={() => onEmojiSelect(emoji)}
-                                    >
-                                        <ParsedUnicodeEmoji
-                                            content={getUnicode(emoji)}
-                                        />
-                                    </Button>
-                                );
-                            }
-                            if (
-                                emoji &&
-                                typeof emoji === 'object' &&
-                                'id' in emoji &&
-                                'url' in emoji
-                            ) {
-                                return (
-                                    <Button
-                                        className="h-8 w-8 shrink-0 rounded-md bg-bg-subtle transition-colors hover:bg-bg-subtle-hover"
-                                        key={emoji.id}
-                                        title={`:${emoji.name}:`}
-                                        variant="ghost"
-                                        onClick={() =>
-                                            onCustomEmojiSelect?.(emoji)
-                                        }
-                                        onContextMenu={(e) =>
-                                            showEmojiInfo(emoji, e)
-                                        }
-                                    >
-                                        <img
-                                            alt={emoji.name}
-                                            className="h-6 w-6 object-contain"
-                                            src={resolveApiUrl(emoji.url) || ''}
-                                        />
-                                    </Button>
-                                );
-                            }
-                            return null;
-                        })}
-                    </Box>
-                );
-            }
-
-            return null;
+            return (
+                <Box className="flex flex-wrap gap-1 p-1" style={style}>
+                    {row.emojis.map((emoji) => {
+                        if (
+                            emoji &&
+                            typeof emoji === 'object' &&
+                            'unified' in emoji
+                        ) {
+                            const unicode = getUnicode(emoji as EmojiData);
+                            return (
+                                <Button
+                                    className="h-8 w-8 shrink-0 rounded-md transition-colors hover:bg-bg-subtle"
+                                    key={(emoji as EmojiData).unified}
+                                    title={`:${(emoji as EmojiData).short_name}:`}
+                                    variant="ghost"
+                                    onClick={() => onEmojiSelect(unicode)}
+                                >
+                                    <ParsedUnicodeEmoji content={unicode} />
+                                </Button>
+                            );
+                        }
+                        if (
+                            emoji &&
+                            typeof emoji === 'object' &&
+                            'id' in emoji &&
+                            'url' in emoji
+                        ) {
+                            const custom = emoji as {
+                                id: string;
+                                name: string;
+                                url: string;
+                            };
+                            return (
+                                <Button
+                                    className="h-8 w-8 shrink-0 rounded-md transition-colors hover:bg-bg-subtle"
+                                    key={custom.id}
+                                    title={`:${custom.name}:`}
+                                    variant="ghost"
+                                    onClick={() =>
+                                        onCustomEmojiSelect?.(custom)
+                                    }
+                                    onContextMenu={(e) =>
+                                        showEmojiInfo(custom, e)
+                                    }
+                                >
+                                    <img
+                                        alt={custom.name}
+                                        className="h-6 w-6 object-contain"
+                                        src={resolveApiUrl(custom.url) || ''}
+                                    />
+                                </Button>
+                            );
+                        }
+                        return null;
+                    })}
+                </Box>
+            );
         },
         [flatRows, onEmojiSelect, onCustomEmojiSelect, showEmojiInfo],
     );
 
+    if (width <= 0 || height <= 0) return null;
+
     return (
-        <motion.div
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            className={cn(
-                'flex h-[380px] w-[350px] overflow-hidden rounded-xl border border-divider bg-background shadow-2xl',
-                className,
-            )}
-            initial={{ opacity: 0, scale: 0.95, y: 10 }}
-            transition={{ duration: 0.2, ease: 'easeOut' }}
-        >
-            {/* Sidebar */}
+        <div className="flex h-full w-full overflow-hidden">
             <Box className="scrollbar-hide flex w-[44px] flex-shrink-0 flex-col items-center gap-2 overflow-y-auto border-r border-divider/50 bg-bg-subtle/50 py-3 shadow-inner">
                 {displayCategories.map((cat) => {
                     const isActive = activeCategoryId === cat.id;
-
-                    if (cat.type === 'custom') {
-                        return (
-                            <Box
-                                className="relative flex-shrink-0"
-                                key={cat.id}
-                            >
-                                <ServerIcon
-                                    className="!rounded-lg transition-transform"
-                                    isActive={isActive}
-                                    server={
-                                        {
-                                            name: cat.name,
-                                            icon: cat.icon,
-                                        } as Omit<Server, '_id' | 'ownerId'>
-                                    }
-                                    size="xs"
-                                    onClick={() => handleCategoryClick(cat.id)}
-                                />
-                                {isActive && (
-                                    <div className="absolute top-1/2 -left-3.5 h-6 w-1.5 -translate-y-1/2 rounded-full bg-primary shadow-[0_0_8px_rgba(var(--primary),0.5)]" />
-                                )}
-                            </Box>
-                        );
-                    }
-
-                    return (
+                    return cat.type === 'custom' ? (
+                        <Box className="relative flex-shrink-0" key={cat.id}>
+                            <ServerIcon
+                                className="!rounded-lg transition-transform"
+                                isActive={isActive}
+                                server={
+                                    {
+                                        name: cat.name,
+                                        icon: cat.icon,
+                                    } as Parameters<
+                                        typeof ServerIcon
+                                    >[0]['server']
+                                }
+                                size="xs"
+                                onClick={() => handleCategoryClick(cat.id)}
+                            />
+                            {isActive && (
+                                <div className="absolute top-1/2 -left-3.5 h-6 w-1.5 -translate-y-1/2 rounded-full bg-primary shadow-[0_0_8px_rgba(var(--primary),0.5)]" />
+                            )}
+                        </Box>
+                    ) : (
                         <Button
                             className={cn(
                                 'group relative h-9 w-9 flex-shrink-0 !bg-transparent',
@@ -386,14 +368,14 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
                             onClick={() => handleCategoryClick(cat.id)}
                         >
                             <div className="flex h-8 w-8 items-center justify-center overflow-hidden p-1">
-                                {categoryIconMap[cat.id] ? (
+                                {categoryIconMap[cat.id] && (
                                     <ParsedUnicodeEmoji
                                         className="inline-block h-[24px] w-[24px] flex-shrink-0"
                                         content={getUnicode(
                                             categoryIconMap[cat.id]!,
                                         )}
                                     />
-                                ) : null}
+                                )}
                             </div>
                             {isActive && (
                                 <div className="absolute top-1/2 -left-3.5 h-6 w-1.5 -translate-y-1/2 rounded-full bg-primary shadow-[0_0_8px_rgba(var(--primary),0.5)]" />
@@ -403,58 +385,29 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
                 })}
             </Box>
 
-            {/* Scrolling List */}
-            <Box className="flex min-w-0 flex-1 flex-col bg-background">
+            <Box className="relative flex min-w-0 flex-1 flex-col bg-background">
                 <Box className="sticky top-0 z-[var(--z-index-content)] flex h-[32px] items-center justify-between border-b border-divider/30 bg-background/80 px-3 py-1.5 backdrop-blur-md">
                     <Text className="text-[9px] font-bold tracking-[0.2em] text-muted-foreground/70 uppercase">
-                        {(
-                            flatRows.find(
-                                (r) =>
-                                    r.type === 'header' &&
-                                    r.id === activeCategoryId,
-                            ) as { name?: string } | undefined
+                        {flatRows.find(
+                            (r) =>
+                                r.type === 'header' &&
+                                r.id === activeCategoryId,
                         )?.name || 'Emojis'}
                     </Text>
                 </Box>
-                <div
-                    className="relative h-full w-full flex-1"
-                    ref={listContainerRef}
+
+                <List
+                    className="scrollbar-thin scrollbar-thumb-divider hover:scrollbar-thumb-muted-foreground/30 scrollbar-track-transparent pr-1"
+                    height={height - 32}
+                    itemCount={flatRows.length}
+                    itemSize={getRowHeight}
+                    ref={listRef}
+                    width={listAreaWidth}
+                    onItemsRendered={handleItemsRendered}
+                    onScroll={handleScroll}
                 >
-                    <AutoSizer
-                        renderProp={({ height, width }) => {
-                            if (!height || !width) return null;
-                            return (
-                                <List
-                                    className="scrollbar-thin scrollbar-thumb-divider hover:scrollbar-thumb-muted-foreground/30 scrollbar-track-transparent pr-1"
-                                    height={height}
-                                    itemCount={flatRows.length}
-                                    itemSize={getRowHeight}
-                                    ref={listRef}
-                                    width={width}
-                                    onItemsRendered={handleItemsRendered}
-                                >
-                                    {Row}
-                                </List>
-                            );
-                        }}
-                    />
-                </div>
-                <div
-                    aria-label="Close emoji info"
-                    role="button"
-                    tabIndex={0}
-                    onClick={closeInfoBox}
-                    onContextMenu={closeInfoBox}
-                    onKeyDown={(e) => {
-                        if (
-                            e.key === 'Escape' ||
-                            e.key === 'Enter' ||
-                            e.key === ' '
-                        ) {
-                            closeInfoBox();
-                        }
-                    }}
-                />
+                    {Row}
+                </List>
 
                 {selectedEmoji && infoBoxPosition && (
                     <EmojiInfoBox
@@ -472,18 +425,56 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
                         tabIndex={0}
                         onClick={closeInfoBox}
                         onContextMenu={closeInfoBox}
-                        onKeyDown={(e) => {
-                            if (
-                                e.key === 'Escape' ||
+                        onKeyDown={(e) =>
+                            (e.key === 'Escape' ||
                                 e.key === 'Enter' ||
-                                e.key === ' '
-                            ) {
-                                closeInfoBox();
-                            }
-                        }}
+                                e.key === ' ') &&
+                            closeInfoBox()
+                        }
                     />
                 )}
             </Box>
+        </div>
+    );
+};
+
+export const EmojiPicker: React.FC<EmojiPickerProps> = ({
+    onEmojiSelect,
+    onCustomEmojiSelect,
+    customCategories = [],
+    className,
+}) => {
+    const [containerRef, { width, height }] = useMeasure<HTMLDivElement>();
+
+    useLockBodyScroll(true);
+
+    React.useEffect(() => {
+        document.body.classList.add('picker-open');
+        return () => {
+            document.body.classList.remove('picker-open');
+        };
+    }, []);
+
+    return (
+        <motion.div
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            className={cn(
+                'relative flex h-[380px] w-[350px] overflow-hidden rounded-xl border border-divider bg-background shadow-2xl',
+                className,
+            )}
+            initial={{ opacity: 0, scale: 0.95, y: 10 }}
+            ref={containerRef}
+            transition={{ duration: 0.2, ease: 'easeOut' }}
+        >
+            {width > 0 && height > 0 && (
+                <EmojiPickerContent
+                    customCategories={customCategories}
+                    height={height}
+                    width={width}
+                    onCustomEmojiSelect={onCustomEmojiSelect}
+                    onEmojiSelect={onEmojiSelect}
+                />
+            )}
         </motion.div>
     );
 };

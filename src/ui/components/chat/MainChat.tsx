@@ -92,19 +92,10 @@ export const MainChat: React.FC = () => {
             seed,
         };
 
-        let cleanup = applyServalBackground(chatContainerRef.current, opts);
-
-        const observer = new ResizeObserver(() => {
-            cleanup();
-            if (chatContainerRef.current) {
-                cleanup = applyServalBackground(chatContainerRef.current, opts);
-            }
-        });
-        observer.observe(chatContainerRef.current);
+        const cleanup = applyServalBackground(chatContainerRef.current, opts);
 
         return () => {
             cleanup();
-            observer.disconnect();
         };
     }, [theme, opacity, seed, base, spotColor, spotCount]);
 

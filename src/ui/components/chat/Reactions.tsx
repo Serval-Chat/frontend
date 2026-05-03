@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { SmilePlus } from 'lucide-react';
+import { SmilePlus, Trash2 } from 'lucide-react';
 
 import type { MessageReaction } from '@/api/chat/chat.types';
 import {
@@ -9,9 +9,11 @@ import {
 } from '@/api/reactions/reactions.queries';
 import { useMe } from '@/api/users/users.queries';
 import { useCustomEmojis } from '@/hooks/useCustomEmojis';
+import { usePermissions } from '@/hooks/usePermissions';
 import { useAppSelector } from '@/store/hooks';
 import { BlockFlags } from '@/types/blocks';
 import { Button } from '@/ui/components/common/Button';
+import { ContextMenu } from '@/ui/components/common/ContextMenu';
 import { ParsedUnicodeEmoji } from '@/ui/components/common/ParsedUnicodeEmoji';
 import { Text } from '@/ui/components/common/Text';
 import { EmojiPicker } from '@/ui/components/emoji/EmojiPicker';
@@ -41,6 +43,11 @@ export const Reactions: React.FC<ReactionsProps> = ({
 
     const pickerRef = React.useRef<HTMLDivElement>(null);
     const { customCategories } = useCustomEmojis({ enabled: showPicker });
+    const { hasPermission } = usePermissions(
+        serverId ?? null,
+        channelId ?? null,
+    );
+    const canManageReactions = hasPermission('manageReactions');
 
     // Close picker when clicking outside
     React.useEffect(() => {
@@ -139,15 +146,16 @@ export const Reactions: React.FC<ReactionsProps> = ({
         <Box className="mt-1 mb-1 flex flex-wrap gap-1">
             {filteredReactions.map((reaction) => {
                 const hasReacted = reaction.users.includes(me?._id || '');
-                return (
+                const reactionKey = `${reaction.emoji}-${reaction.users.join(',')}`;
+
+                const reactionElement = (
                     <Box
                         className={cn(
                             'flex cursor-pointer items-center gap-1.5 rounded-md border px-1.5 py-0.5 transition-all select-none',
                             hasReacted
                                 ? 'border-primary/30 bg-primary/10 text-primary'
-                                : 'border-white/5 bg-white/5 text-muted-foreground hover:border-white/10 hover:bg-white/10',
+                                : 'border-border-subtle bg-bg-subtle text-muted-foreground hover:border-border-subtle/80 hover:bg-bg-subtle-hover',
                         )}
-                        key={`${reaction.emoji}-${reaction.users.join(',')}`}
                         title={
                             reaction.users.length > 0
                                 ? `${reaction.count} reactions`
@@ -160,12 +168,15 @@ export const Reactions: React.FC<ReactionsProps> = ({
                             reaction.emojiUrl ? (
                                 <img
                                     alt={reaction.emoji}
-                                    className="h-4 w-4 cursor-pointer object-contain"
+                                    className="inline-block h-5 w-5 cursor-pointer object-contain align-middle"
                                     src={resolveApiUrl(reaction.emojiUrl) || ''}
                                     title={reaction.emojiName || reaction.emoji}
                                 />
                             ) : (
-                                <ParsedUnicodeEmoji content={reaction.emoji} />
+                                <ParsedUnicodeEmoji
+                                    className="!top-0 h-5 w-5"
+                                    content={reaction.emoji}
+                                />
                             )}
                         </Text>
                         <Text className="font-semibold" size="xs">
@@ -173,11 +184,51 @@ export const Reactions: React.FC<ReactionsProps> = ({
                         </Text>
                     </Box>
                 );
+
+                if (canManageReactions && serverId && channelId) {
+                    return (
+                        <ContextMenu
+                            items={[
+                                {
+                                    id: 'remove-reaction',
+                                    label: 'Remove Emoji',
+                                    icon: Trash2,
+                                    variant: 'danger',
+                                    onClick: () => {
+                                        removeReaction.mutate({
+                                            messageId,
+                                            serverId,
+                                            channelId,
+                                            data: {
+                                                emoji: reaction.emoji,
+                                                emojiId:
+                                                    reaction.emojiType ===
+                                                    'custom'
+                                                        ? reaction.emojiId
+                                                        : undefined,
+                                                scope: 'all',
+                                            },
+                                        });
+                                    },
+                                },
+                            ]}
+                            key={reactionKey}
+                        >
+                            {reactionElement}
+                        </ContextMenu>
+                    );
+                }
+
+                return (
+                    <React.Fragment key={reactionKey}>
+                        {reactionElement}
+                    </React.Fragment>
+                );
             })}
 
             <Box className="relative h-full">
                 <Button
-                    className="h-full min-h-[24px] border border-white/5 bg-white/5 px-1.5 py-0.5 text-muted-foreground hover:border-white/10 hover:bg-white/10"
+                    className="h-full min-h-[24px] border border-border-subtle bg-bg-subtle text-muted-foreground hover:border-border-subtle/80 hover:bg-bg-subtle-hover"
                     size="sm"
                     title="Add Reaction"
                     variant="ghost"

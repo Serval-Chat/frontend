@@ -22,6 +22,7 @@ import {
 } from 'lexical';
 import { ArrowUp, Clock, FileImage, Plus, Send, Smile, X } from 'lucide-react';
 import { useLocation, useParams } from 'react-router-dom';
+import { useClickAway } from 'react-use';
 
 import { useChannelMessages, useUserMessages } from '@/api/chat/chat.queries';
 import type { ChatMessage } from '@/api/chat/chat.types';
@@ -153,6 +154,10 @@ export const MessageInput: React.FC<MessageInputProps> = ({
     const fileInputRef = useRef<HTMLInputElement>(null);
     const emojiPickerRef = useRef<HTMLDivElement>(null);
     const { showToast } = useToast();
+
+    useClickAway(emojiPickerRef, () => {
+        setShowEmojiPicker(false);
+    });
 
     useEffect(() => {
         const handleResize = (): void => setIsMobile(window.innerWidth <= 768);
