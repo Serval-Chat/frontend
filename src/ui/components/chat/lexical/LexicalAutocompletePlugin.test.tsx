@@ -10,7 +10,9 @@ const createMatchTrigger =
             const matchingUnicodeEmojis = allEmojis.filter(
                 (emoji) =>
                     emoji.short_name === emojiName ||
-                    emoji.short_names.some((name) => name === emojiName),
+                    emoji.short_names.some(
+                        (name: string) => name === emojiName,
+                    ),
             );
 
             const matchingCustomEmojis = serverEmojis.filter(
@@ -78,7 +80,7 @@ describe('Emoji Autocomplete Logic', () => {
         const matchingEmojis = availableEmojis.filter(
             (emoji) =>
                 emoji.short_name === emojiName ||
-                emoji.short_names.some((name) => name === emojiName),
+                emoji.short_names.some((name: string) => name === emojiName),
         );
 
         expect(matchingEmojis).toHaveLength(1);
@@ -100,7 +102,9 @@ describe('Emoji Autocomplete Logic', () => {
         const matchingEmojis = multipleEmojis.filter(
             (emoji) =>
                 emoji.short_name.includes(emojiName) ||
-                emoji.short_names.some((name) => name.includes(emojiName)),
+                emoji.short_names.some((name: string) =>
+                    name.includes(emojiName),
+                ),
         );
 
         expect(matchingEmojis.length).toBeGreaterThan(1);
@@ -113,7 +117,7 @@ describe('Emoji Autocomplete Logic', () => {
         const matchingEmojis = availableEmojis.filter(
             (emoji) =>
                 emoji.short_name === emojiName ||
-                emoji.short_names.some((name) => name === emojiName),
+                emoji.short_names.some((name: string) => name === emojiName),
         );
 
         expect(matchingEmojis).toHaveLength(1);
