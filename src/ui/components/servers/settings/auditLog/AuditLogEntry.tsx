@@ -650,7 +650,7 @@ export const AuditLogEntry: React.FC<AuditLogEntryProps> = ({
                                                         .roleOrder as string[]
                                                 ).map((roleName, i) => (
                                                     <li
-                                                        key={`role-${String(roleName)}-${i + 1}`}
+                                                        key={`role-${roleName}-${i}`}
                                                     >
                                                         {String(roleName)}
                                                     </li>

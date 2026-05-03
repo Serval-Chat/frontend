@@ -37,7 +37,7 @@ export const BouncingDots: React.FC<BouncingDotsProps> = ({
                 animate="animate"
                 className={cn('rounded-full', color, dotClassName)}
                 custom={i}
-                key={`bouncing-dot-position-${i + 1}`}
+                key={`dot-${i}`}
                 style={{
                     width: size,
                     height: size,

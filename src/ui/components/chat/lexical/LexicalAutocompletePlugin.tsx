@@ -326,7 +326,7 @@ export const LexicalAutocompletePlugin: React.FC<
             }
             return null;
         },
-        [editor, allEmojis, serverEmojis],
+        [editor, allEmojis, serverEmojis, getUnicode],
     );
 
     const onSelectOption = useCallback(

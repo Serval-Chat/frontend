@@ -27,7 +27,7 @@ export const FriendList: React.FC = () => {
                     {[...Array(5)].map((_, i) => (
                         <Box
                             className="flex items-center gap-3"
-                            key={`friend-skeleton-placeholder-${i + 1}`}
+                            key={`friend-skeleton-${i}`}
                         >
                             <Skeleton
                                 height={32}

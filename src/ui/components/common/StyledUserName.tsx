@@ -187,7 +187,7 @@ export const StyledUserName: React.FC<StyledUserNameProps> = ({
                 <span
                     className="relative isolate inline-block"
                     // use character and position for unique identifier
-                    key={`char-${char}-${i}-${charStyle.color || 'default'}-${charStyle.fontWeight || 'normal'}`}
+                    key={`char-${char}-${i}`}
                     style={charStyle}
                 >
                     {hasGlow && (

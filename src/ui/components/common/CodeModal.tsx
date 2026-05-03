@@ -22,11 +22,11 @@ interface AstNode {
 
 const AstRenderer: React.FC<{ nodes: AstNode[] }> = memo(({ nodes }) => (
     <>
-        {nodes.map((node) => {
+        {nodes.map((node, i) => {
             if (node.type === 'text') {
                 return (
                     <React.Fragment
-                        key={`text-${node.value?.slice(0, 20)}-${node.value?.length || 0}`}
+                        key={`text-${i}-${node.value?.slice(0, 20)}`}
                     >
                         {node.value}
                     </React.Fragment>
@@ -55,7 +55,7 @@ const AstRenderer: React.FC<{ nodes: AstNode[] }> = memo(({ nodes }) => (
                 return (
                     <Tag
                         className={className}
-                        key={`element-${node.tagName}-${node.children?.length || 0}`}
+                        key={`element-${i}-${node.tagName}`}
                         style={style}
                     >
                         <AstRenderer nodes={node.children || []} />
@@ -111,7 +111,7 @@ export const CodeModal: React.FC<CodeModalProps> = memo(
                         {codeLines.map((lineNodes, i) => (
                             <div
                                 className="group flex transition-colors hover:bg-white/5"
-                                key={`line-${lineNodes.length}-${lineNodes.map((n) => n.type || 'text').join('-')}`}
+                                key={`line-${i}-${lineNodes.length}`}
                             >
                                 <div
                                     className="sticky left-0 z-[var(--z-index-content)] w-16 flex-shrink-0 border-r border-border-subtle/20 bg-bg-secondary/30 pr-4 text-right text-muted-foreground/50 select-none"
@@ -129,12 +129,7 @@ export const CodeModal: React.FC<CodeModalProps> = memo(
                                         backgroundColor: 'transparent',
                                     }}
                                 >
-                                    {lineNodes.map((node) => (
-                                        <AstRenderer
-                                            key={`node-${node.type}-${typeof node.value === 'string' ? node.value.slice(0, 10) : 'complex'}`}
-                                            nodes={[node]}
-                                        />
-                                    ))}
+                                    <AstRenderer nodes={lineNodes} />
                                     {lineNodes.length === 0 && '\u200b'}
                                 </div>
                             </div>
