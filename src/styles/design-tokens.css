@@ -106,6 +106,7 @@
 
     --checklist-spine: #888;
     --color-checklist-spine: var(--checklist-spine);
+    --color-activity-indicator: var(--activity-indicator);
 }
 
 .theme-serval {
@@ -158,6 +159,7 @@
     --spoiler-reveal-bg: rgba(54, 37, 0, 0.05);
 
     --checklist-spine: #362500;
+    --activity-indicator: var(--muted-foreground);
 }
 
 .theme-serval .styled-user-name {
@@ -230,6 +232,8 @@
 
     --spoiler-bg: #60a5fa;
     --spoiler-reveal-bg: rgba(255, 255, 255, 0.05);
+
+    --activity-indicator: #ffffff;
 }
 
 .theme-dark {
@@ -274,6 +278,8 @@
 
     --spoiler-bg: #52525b;
     --spoiler-reveal-bg: rgba(255, 255, 255, 0.05);
+
+    --activity-indicator: #ffffff;
 }
 
 .theme-forest-green {
@@ -320,6 +326,8 @@
 
     --spoiler-bg: #4ade80;
     --spoiler-reveal-bg: rgba(255, 255, 255, 0.05);
+
+    --activity-indicator: #4ade80;
 }
 
 .theme-light {
@@ -364,6 +372,8 @@
 
     --spoiler-bg: #334155;
     --spoiler-reveal-bg: rgba(0, 0, 0, 0.05);
+
+    --activity-indicator: #020617;
 }
 
 .theme-high-contrast {
@@ -399,6 +409,8 @@
 
     --spoiler-bg: #ffff00;
     --spoiler-reveal-bg: rgba(255, 255, 255, 0.2);
+
+    --activity-indicator: #ffff00;
 }
 
 .theme-cherry {
@@ -434,6 +446,8 @@
 
     --spoiler-bg: #9d174d;
     --spoiler-reveal-bg: rgba(0, 0, 0, 0.05);
+
+    --activity-indicator: #d13076;
 }
 
 .theme-violet {
@@ -471,4 +485,6 @@
 
     --spoiler-bg: #a78bfa;
     --spoiler-reveal-bg: rgba(255, 255, 255, 0.05);
+
+    --activity-indicator: #a78bfa;
 }

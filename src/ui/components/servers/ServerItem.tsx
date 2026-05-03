@@ -172,7 +172,7 @@ export const ServerItem: React.FC<ServerItemProps> = ({
                 {/* Active / Unread indicator */}
                 <div
                     className={cn(
-                        'absolute top-1/2 left-0 w-1 -translate-y-1/2 rounded-r-full bg-white transition-all duration-200',
+                        'absolute top-1/2 left-0 w-1 -translate-y-1/2 rounded-r-full bg-muted-foreground transition-all duration-200',
                         isActive
                             ? 'h-10'
                             : isUnread
