@@ -226,17 +226,101 @@ export const LexicalAutocompletePlugin: React.FC<
         }
     }, [isOpen, onOpenChange]);
 
-    const matchTrigger = useCallback((text: string) => {
-        const match = text.match(/(^|\s)([@:#])([^@:#\s]{0,20})$/);
-        if (match !== null) {
-            return {
-                leadOffset: match.index! + match[1].length,
-                matchingString: match[3],
-                replaceableString: match[2] + match[3],
-            };
-        }
-        return null;
-    }, []);
+    const matchTrigger = useCallback(
+        (text: string) => {
+            const completeEmojiMatch = text.match(/(^|\s):([^@#\s:]+):$/);
+            if (completeEmojiMatch !== null) {
+                const emojiName = completeEmojiMatch[2].toLowerCase();
+
+                const matchingUnicodeEmojis = allEmojis.filter(
+                    (emoji) =>
+                        emoji.short_name === emojiName ||
+                        emoji.short_names.some((name) => name === emojiName),
+                );
+
+                const matchingCustomEmojis = serverEmojis.filter(
+                    (emoji) => emoji.name.toLowerCase() === emojiName,
+                );
+
+                const totalMatches =
+                    matchingUnicodeEmojis.length + matchingCustomEmojis.length;
+
+                if (totalMatches === 1) {
+                    editor.update(() => {
+                        const selection = $getSelection();
+                        if ($isRangeSelection(selection)) {
+                            const node = selection.anchor.getNode();
+                            if (node instanceof TextNode) {
+                                const textContent = node.getTextContent();
+                                const offset = selection.anchor.offset;
+
+                                const beforeCursor = textContent.slice(
+                                    0,
+                                    offset,
+                                );
+                                const patternMatch =
+                                    beforeCursor.match(/(^|\s):([^:\s]+):$/);
+
+                                if (patternMatch) {
+                                    const patternStart =
+                                        offset - patternMatch[0].length;
+                                    const beforePattern = textContent.slice(
+                                        0,
+                                        patternStart,
+                                    );
+                                    const afterPattern =
+                                        textContent.slice(offset);
+
+                                    if (matchingUnicodeEmojis.length === 1) {
+                                        const unicode = getUnicode(
+                                            matchingUnicodeEmojis[0],
+                                        );
+                                        node.setTextContent(
+                                            beforePattern +
+                                                unicode +
+                                                afterPattern,
+                                        );
+                                    } else if (
+                                        matchingCustomEmojis.length === 1
+                                    ) {
+                                        const customEmoji =
+                                            matchingCustomEmojis[0];
+                                        node.setTextContent(
+                                            beforePattern + afterPattern,
+                                        );
+                                        const selection2 = $getSelection();
+                                        if ($isRangeSelection(selection2)) {
+                                            selection2.insertNodes([
+                                                $createChipNode('emoji', {
+                                                    id: customEmoji._id,
+                                                    label: customEmoji.name,
+                                                    imageUrl:
+                                                        customEmoji.imageUrl,
+                                                }),
+                                            ]);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+
+                    return null;
+                }
+            }
+
+            const match = text.match(/(^|\s)([@:#])([^@#\s]{0,20})$/);
+            if (match !== null) {
+                return {
+                    leadOffset: match.index! + match[1].length,
+                    matchingString: match[3],
+                    replaceableString: match[2] + match[3],
+                };
+            }
+            return null;
+        },
+        [editor, allEmojis, serverEmojis, getUnicode],
+    );
 
     const onSelectOption = useCallback(
         (
