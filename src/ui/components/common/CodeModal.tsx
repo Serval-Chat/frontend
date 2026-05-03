@@ -24,7 +24,13 @@ const AstRenderer: React.FC<{ nodes: AstNode[] }> = memo(({ nodes }) => (
     <>
         {nodes.map((node, i) => {
             if (node.type === 'text') {
-                return node.value;
+                return (
+                    <React.Fragment
+                        key={`text-${i}-${node.value?.slice(0, 20)}`}
+                    >
+                        {node.value}
+                    </React.Fragment>
+                );
             }
             if (node.type === 'element' && node.tagName) {
                 const Tag = node.tagName as keyof React.JSX.IntrinsicElements;
@@ -47,7 +53,11 @@ const AstRenderer: React.FC<{ nodes: AstNode[] }> = memo(({ nodes }) => (
                 }
 
                 return (
-                    <Tag className={className} key={i} style={style}>
+                    <Tag
+                        className={className}
+                        key={`element-${i}-${node.tagName}`}
+                        style={style}
+                    >
                         <AstRenderer nodes={node.children || []} />
                     </Tag>
                 );
@@ -101,7 +111,7 @@ export const CodeModal: React.FC<CodeModalProps> = memo(
                         {codeLines.map((lineNodes, i) => (
                             <div
                                 className="group flex transition-colors hover:bg-white/5"
-                                key={i}
+                                key={`line-${i}-${lineNodes.length}`}
                             >
                                 <div
                                     className="sticky left-0 z-[var(--z-index-content)] w-16 flex-shrink-0 border-r border-border-subtle/20 bg-bg-secondary/30 pr-4 text-right text-muted-foreground/50 select-none"

@@ -1,6 +1,13 @@
 import React, { useState } from 'react';
 
-import { Check, FolderInput, FolderPlus, LogOut, Settings } from 'lucide-react';
+import {
+    Check,
+    Copy,
+    FolderInput,
+    FolderPlus,
+    LogOut,
+    Settings,
+} from 'lucide-react';
 
 import { useMarkServerRead } from '@/api/servers/servers.queries';
 import { useUpdateServerSettings } from '@/api/servers/servers.queries';
@@ -139,6 +146,15 @@ export const ServerItem: React.FC<ServerItemProps> = ({
             })),
         });
     }
+
+    contextMenuItems.push({ type: 'divider' });
+    contextMenuItems.push({
+        label: 'Copy Server ID',
+        icon: Copy,
+        onClick: () => {
+            void navigator.clipboard.writeText(server._id);
+        },
+    });
 
     if (!isOwner) {
         contextMenuItems.push({ type: 'divider' });

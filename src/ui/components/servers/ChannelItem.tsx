@@ -18,13 +18,13 @@ import { useMe, useUserById } from '@/api/users/users.queries';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { setSelectedFriendId } from '@/store/slices/navSlice';
 import { setUserVolume } from '@/store/slices/voiceSlice';
-import { buttonVariants } from '@/ui/components/common/Button';
 import {
     ContextMenu,
     type ContextMenuItem,
 } from '@/ui/components/common/ContextMenu';
 import { IconButton } from '@/ui/components/common/IconButton';
 import { UserProfilePicture } from '@/ui/components/common/UserProfilePicture';
+import { buttonVariants } from '@/ui/components/common/buttonVariants';
 import { ICON_MAP } from '@/ui/utils/iconMap';
 import { cn } from '@/utils/cn';
 

@@ -31,6 +31,7 @@ class WsClient {
     private token: string | null = null;
     private messageQueue: string[] = [];
     private isAuthenticated = false;
+    private intentionallyClosed = false;
     private state:
         | 'disconnected'
         | 'connecting'
@@ -58,6 +59,7 @@ class WsClient {
      * Connect to the WebSocket server.
      */
     public connect(token?: string): void {
+        this.intentionallyClosed = false;
         this.token = token || null;
         if (this.socket?.readyState === WebSocket.OPEN) return;
 
@@ -75,6 +77,7 @@ class WsClient {
      * Disconnect from the WebSocket server.
      */
     public disconnect(): void {
+        this.intentionallyClosed = true;
         this.stopPing();
         this.isAuthenticated = false;
         if (this.socket) {
@@ -234,6 +237,12 @@ class WsClient {
     }
 
     private handleClose(event: CloseEvent): void {
+        if (this.intentionallyClosed) {
+            this.intentionallyClosed = false;
+            console.log('[WS] Connection closed intentionally');
+            return;
+        }
+
         console.warn('Connection lost, reconnecting... for WS');
         console.log('[WS] Connection closed:', event.reason);
         this.stopPing();
@@ -254,7 +263,7 @@ class WsClient {
             );
             setTimeout(() => {
                 this.reconnectAttempts++;
-                this.connect();
+                this.connect(this.token ?? undefined);
             }, delay);
         }
     }

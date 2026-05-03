@@ -104,10 +104,26 @@ const EmbedCard = ({
                                 className="hover:underline"
                                 href={embed.provider.url}
                             >
-                                {embed.provider.name}
+                                <ParsedText
+                                    nodes={parseText(
+                                        embed.provider.name,
+                                        ParserPresets.EMBED_INLINE,
+                                    )}
+                                    serverId={serverId}
+                                    size="xs"
+                                    variant={isDeleted ? 'danger' : undefined}
+                                />
                             </Link>
                         ) : (
-                            embed.provider.name
+                            <ParsedText
+                                nodes={parseText(
+                                    embed.provider.name,
+                                    ParserPresets.EMBED_INLINE,
+                                )}
+                                serverId={serverId}
+                                size="xs"
+                                variant={isDeleted ? 'danger' : undefined}
+                            />
                         )}
                     </p>
                 )}
@@ -133,10 +149,28 @@ const EmbedCard = ({
                                     className="hover:underline"
                                     href={embed.author.url}
                                 >
-                                    {embed.author.name}
+                                    <ParsedText
+                                        nodes={parseText(
+                                            embed.author.name,
+                                            ParserPresets.EMBED_INLINE,
+                                        )}
+                                        serverId={serverId}
+                                        size="sm"
+                                        variant={
+                                            isDeleted ? 'danger' : undefined
+                                        }
+                                    />
                                 </Link>
                             ) : (
-                                embed.author.name
+                                <ParsedText
+                                    nodes={parseText(
+                                        embed.author.name,
+                                        ParserPresets.EMBED_INLINE,
+                                    )}
+                                    serverId={serverId}
+                                    size="sm"
+                                    variant={isDeleted ? 'danger' : undefined}
+                                />
                             )}
                         </span>
                     </div>
@@ -224,16 +258,31 @@ const EmbedCard = ({
                                             <div
                                                 key={`${field.name}-${field.value}`}
                                             >
-                                                <p
+                                                <div
                                                     className={cn(
                                                         'text-xs font-semibold',
                                                         isDeleted
                                                             ? 'text-danger'
                                                             : 'text-foreground',
                                                     )}
+                                                    style={{
+                                                        display: 'flow-root',
+                                                    }}
                                                 >
-                                                    {field.name}
-                                                </p>
+                                                    <ParsedText
+                                                        nodes={parseText(
+                                                            field.name,
+                                                            ParserPresets.EMBED_INLINE,
+                                                        )}
+                                                        serverId={serverId}
+                                                        size="xs"
+                                                        variant={
+                                                            isDeleted
+                                                                ? 'danger'
+                                                                : undefined
+                                                        }
+                                                    />
+                                                </div>
                                                 <div
                                                     className="text-sm text-muted-foreground"
                                                     style={{
@@ -301,21 +350,31 @@ const EmbedCard = ({
                                 src={getProxyUrl(embed.footer.icon_url)}
                             />
                         )}
-                        <p
+                        <div
                             className={cn(
                                 'text-xs',
                                 isDeleted
                                     ? 'text-danger/80'
                                     : 'text-muted-foreground',
                             )}
+                            style={{ display: 'flow-root' }}
                         >
-                            {[
-                                embed.footer?.text,
-                                formatTimestamp(embed.timestamp),
-                            ]
-                                .filter(Boolean)
-                                .join(' • ')}
-                        </p>
+                            <ParsedText
+                                nodes={parseText(
+                                    [
+                                        embed.footer?.text,
+                                        formatTimestamp(embed.timestamp),
+                                    ]
+                                        .filter(Boolean)
+                                        .join(' • '),
+                                    ParserPresets.EMBED,
+                                )}
+                                serverId={serverId}
+                                size="xs"
+                                variant={isDeleted ? 'danger' : 'muted'}
+                                wrap="preWrap"
+                            />
+                        </div>
                     </div>
                 )}
             </div>
