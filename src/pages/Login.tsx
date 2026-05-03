@@ -6,6 +6,7 @@ import { Link, Navigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useLoginForm } from '@/hooks/useLoginForm';
 import { FormContent } from '@/ui/components/auth/FormContent';
+import { Admonition } from '@/ui/components/common/Admonition';
 import { Button } from '@/ui/components/common/Button';
 import { Heading } from '@/ui/components/common/Heading';
 import { Input } from '@/ui/components/common/Input';
@@ -199,6 +200,20 @@ export const Login: React.FC = () => {
                         )}
                     </Button>
                 </form>
+
+                <Admonition
+                    node={{
+                        type: 'admonition',
+                        admonitionType: 'info',
+                        style: 'github',
+                        content: [],
+                    }}
+                >
+                    If you created an account without an e-mail (as in just
+                    text) you probably won't be able to log in. Please contact{' '}
+                    <Text weight="bold">@catflare</Text> on Discord for
+                    assistance! I'm sorry for this inconvenience.
+                </Admonition>
 
                 <StatusMessage message={status.message} type={status.type} />
             </FormContent>
