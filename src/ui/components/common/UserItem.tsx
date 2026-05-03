@@ -491,7 +491,7 @@ export const UserItem: React.FC<UserItemProps> = ({
             <ContextMenu items={contextMenuItems}>
                 <Box
                     className={cn(
-                        'flex h-11 w-60 shrink-0 cursor-pointer items-center gap-3 overflow-hidden rounded-md px-3 transition-colors',
+                        'flex h-11 w-full shrink-0 cursor-pointer items-center gap-3 overflow-hidden rounded-md px-3 transition-colors',
                         'hover:bg-bg-subtle',
                         isActive
                             ? 'bg-bg-subtle text-foreground'
