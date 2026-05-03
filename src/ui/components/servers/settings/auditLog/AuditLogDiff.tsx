@@ -76,10 +76,10 @@ function formatValue(value: unknown, field?: string): string | React.ReactNode {
         if (Array.isArray(value)) {
             return (
                 <div className="flex flex-wrap items-center gap-1.5">
-                    {value.map((v, i) => (
+                    {value.map((v) => (
                         <div
                             className="flex items-center gap-1.5"
-                            key={`color-${v}-${i}`}
+                            key={`color-${String(v)}-${typeof v}`}
                         >
                             <div
                                 className="h-3 w-3 rounded-full border border-white/20 shadow-sm"
@@ -182,10 +182,10 @@ export const AuditLogDiff: React.FC<AuditLogDiffProps> = ({ changes }) => {
                         <span>After</span>
                     </div>
                     <div className="space-y-4">
-                        {rows.map((row, index) => (
+                        {rows.map((row) => (
                             <div
                                 className="grid grid-cols-3 items-center gap-2 border-b border-border-subtle pb-3 last:border-0 last:pb-0"
-                                key={`row-${row.field}-${index}`}
+                                key={`row-${row.field}-${String(row.before)}-${String(row.after)}`}
                             >
                                 <div className="font-medium break-all text-text-muted">
                                     {row.field}

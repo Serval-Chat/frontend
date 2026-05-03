@@ -118,7 +118,7 @@ const FieldsEditor = ({ fields, onChange }: FieldsEditorProps): ReactNode => {
             {fields.map((field, idx) => (
                 <div
                     className="rounded-md border border-border-subtle bg-bg-subtle p-3"
-                    key={`field-${idx}-${field.name?.slice(0, 10)}`}
+                    key={`field-${field.name?.slice(0, 20) || 'unnamed'}-${field.value?.slice(0, 10) || 'novalue'}`}
                 >
                     <div className="mb-2 flex items-center justify-between">
                         <span className="text-xs font-semibold text-muted-foreground">
@@ -469,7 +469,7 @@ const PollAnswersEditor = ({
             {answers.map((answer, idx) => (
                 <div
                     className="flex items-center gap-2"
-                    key={`answer-${idx}-${answer.text?.slice(0, 10)}`}
+                    key={`answer-${answer.text?.slice(0, 20) || 'empty'}`}
                 >
                     <Input
                         placeholder={`Answer ${idx + 1}`}
@@ -625,7 +625,7 @@ export const EmbedCreator = ({
                     <EmbedEditor
                         embed={embed}
                         index={idx}
-                        key={`embed-${idx}-${embed.title?.slice(0, 10)}`}
+                        key={`embed-${embed.title?.slice(0, 20) || 'untitled'}-${embed.description?.slice(0, 10) || 'nodesc'}`}
                         total={value.embeds?.length ?? 1}
                         onChange={(e) => {
                             updateEmbed(idx, e);

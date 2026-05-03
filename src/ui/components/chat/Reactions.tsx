@@ -38,6 +38,7 @@ export const Reactions: React.FC<ReactionsProps> = ({
     const addReaction = useAddReaction();
     const removeReaction = useRemoveReaction();
     const [showPicker, setShowPicker] = React.useState(false);
+
     const pickerRef = React.useRef<HTMLDivElement>(null);
     const { customCategories } = useCustomEmojis({ enabled: showPicker });
 
@@ -159,8 +160,9 @@ export const Reactions: React.FC<ReactionsProps> = ({
                             reaction.emojiUrl ? (
                                 <img
                                     alt={reaction.emoji}
-                                    className="h-4 w-4 object-contain"
+                                    className="h-4 w-4 cursor-pointer object-contain"
                                     src={resolveApiUrl(reaction.emojiUrl) || ''}
+                                    title={reaction.emojiName || reaction.emoji}
                                 />
                             ) : (
                                 <ParsedUnicodeEmoji content={reaction.emoji} />

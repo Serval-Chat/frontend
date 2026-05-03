@@ -6,9 +6,11 @@ import { AutoSizer } from 'react-virtualized-auto-sizer';
 import { VariableSizeList as List } from 'react-window';
 
 import type { Server } from '@/api/servers/servers.types';
+import { useEmojiInfoBox } from '@/hooks/useEmojiInfoBox';
 import { Button } from '@/ui/components/common/Button';
 import { ParsedUnicodeEmoji } from '@/ui/components/common/ParsedUnicodeEmoji';
 import { Text } from '@/ui/components/common/Text';
+import { EmojiInfoBox } from '@/ui/components/emoji/EmojiInfoBox';
 import { Box } from '@/ui/components/layout/Box';
 import { ServerIcon } from '@/ui/components/servers/ServerIcon';
 import { resolveApiUrl } from '@/utils/apiUrl';
@@ -25,7 +27,7 @@ export interface CustomEmojiCategory {
     id: string;
     name: string;
     icon?: string;
-    emojis: Array<{ id: string; name: string; url: string }>;
+    emojis: Array<{ id: string; name: string; url: string; serverId?: string }>;
 }
 
 interface EmojiPickerProps {
@@ -69,10 +71,16 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
         useMeasure<HTMLDivElement>();
     const [activeCategoryId, setActiveCategoryId] = React.useState<string>('');
     const [isScrollingTo, setIsScrollingTo] = React.useState(false);
+    const {
+        selectedEmoji,
+        infoBoxPosition,
+        server,
+        showEmojiInfo,
+        closeInfoBox,
+    } = useEmojiInfoBox();
 
-    // Compute dynamic column count based on width. Min 8 columns, scale up if wider.
     const columnCount = React.useMemo(() => {
-        if (!listWidth) return 8; // Default to 8 until measured
+        if (!listWidth) return 8;
         return Math.max(1, Math.floor((listWidth - 8) / 40));
     }, [listWidth]);
 
@@ -242,12 +250,10 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
                         {row.isCustom ? (
                             <ServerIcon
                                 className="!cursor-default !rounded-sm"
-                                server={
-                                    {
-                                        name: row.name,
-                                        icon: row.icon,
-                                    } as Omit<Server, '_id' | 'ownerId'>
-                                }
+                                server={{
+                                    name: row.name,
+                                    icon: row.icon,
+                                }}
                                 size="xs"
                             />
                         ) : (
@@ -257,7 +263,9 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
                                         className="inline-block h-[14px] w-[14px] flex-shrink-0"
                                         content={getUnicode(row.standardIcon)}
                                     />
-                                ) : null}
+                                ) : (
+                                    <Text size="xs">?</Text>
+                                )}
                             </div>
                         )}
                         <Text className="truncate text-[10px] font-bold tracking-widest text-muted-foreground uppercase">
@@ -267,58 +275,61 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
                 );
             }
 
-            return (
-                <div className="flex items-center px-1" style={style}>
-                    {row.emojis.map((emoji) => {
-                        if (row.isCustom) {
-                            const customEmoji = emoji as {
-                                id: string;
-                                name: string;
-                                url: string;
-                            };
-                            return (
-                                <Button
-                                    className="group/emoji flex h-10 w-10 items-center justify-center rounded border-none p-1.5 shadow-none transition-transform hover:bg-white/5 active:scale-90"
-                                    key={customEmoji.id}
-                                    title={customEmoji.name}
-                                    variant="ghost"
-                                    onClick={() =>
-                                        onCustomEmojiSelect?.(customEmoji)
-                                    }
-                                >
-                                    <img
-                                        alt={customEmoji.name}
-                                        className="h-full w-full object-contain transition-transform duration-200 group-hover/emoji:scale-110"
-                                        src={
-                                            resolveApiUrl(customEmoji.url) || ''
+            if (row.type === 'row') {
+                return (
+                    <Box className="flex flex-wrap gap-1 p-1" style={style}>
+                        {row.emojis.map((emoji) => {
+                            if (typeof emoji === 'string') {
+                                return (
+                                    <Button
+                                        className="h-8 w-8 shrink-0 rounded-md bg-bg-subtle transition-colors hover:bg-bg-subtle-hover"
+                                        key={emoji}
+                                        title={`:${getUnicode(emoji)}:`}
+                                        variant="ghost"
+                                        onClick={() => onEmojiSelect(emoji)}
+                                    >
+                                        <ParsedUnicodeEmoji
+                                            content={getUnicode(emoji)}
+                                        />
+                                    </Button>
+                                );
+                            }
+                            if (
+                                emoji &&
+                                typeof emoji === 'object' &&
+                                'id' in emoji &&
+                                'url' in emoji
+                            ) {
+                                return (
+                                    <Button
+                                        className="h-8 w-8 shrink-0 rounded-md bg-bg-subtle transition-colors hover:bg-bg-subtle-hover"
+                                        key={emoji.id}
+                                        title={`:${emoji.name}:`}
+                                        variant="ghost"
+                                        onClick={() =>
+                                            onCustomEmojiSelect?.(emoji)
                                         }
-                                    />
-                                </Button>
-                            );
-                        } else {
-                            const standardEmoji = emoji as EmojiData;
-                            return (
-                                <Button
-                                    className="group/emoji flex h-10 w-10 items-center justify-center rounded border-none p-1.5 shadow-none transition-transform hover:bg-white/5 active:scale-90"
-                                    key={standardEmoji.unified}
-                                    title={standardEmoji.short_name}
-                                    variant="ghost"
-                                    onClick={() =>
-                                        onEmojiSelect(getUnicode(standardEmoji))
-                                    }
-                                >
-                                    <ParsedUnicodeEmoji
-                                        className="inline-block h-[26px] w-[26px] transition-transform duration-200 group-hover/emoji:scale-110"
-                                        content={getUnicode(standardEmoji)}
-                                    />
-                                </Button>
-                            );
-                        }
-                    })}
-                </div>
-            );
+                                        onContextMenu={(e) =>
+                                            showEmojiInfo(emoji, e)
+                                        }
+                                    >
+                                        <img
+                                            alt={emoji.name}
+                                            className="h-6 w-6 object-contain"
+                                            src={resolveApiUrl(emoji.url) || ''}
+                                        />
+                                    </Button>
+                                );
+                            }
+                            return null;
+                        })}
+                    </Box>
+                );
+            }
+
+            return null;
         },
-        [flatRows, onEmojiSelect, onCustomEmojiSelect],
+        [flatRows, onEmojiSelect, onCustomEmojiSelect, showEmojiInfo],
     );
 
     return (
@@ -428,6 +439,50 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
                         }}
                     />
                 </div>
+                <div
+                    aria-label="Close emoji info"
+                    role="button"
+                    tabIndex={0}
+                    onClick={closeInfoBox}
+                    onContextMenu={closeInfoBox}
+                    onKeyDown={(e) => {
+                        if (
+                            e.key === 'Escape' ||
+                            e.key === 'Enter' ||
+                            e.key === ' '
+                        ) {
+                            closeInfoBox();
+                        }
+                    }}
+                />
+
+                {selectedEmoji && infoBoxPosition && (
+                    <EmojiInfoBox
+                        emoji={selectedEmoji}
+                        position={infoBoxPosition}
+                        server={server}
+                    />
+                )}
+
+                {selectedEmoji && (
+                    <div
+                        aria-label="Close emoji info"
+                        className="fixed inset-0 z-[1060]"
+                        role="button"
+                        tabIndex={0}
+                        onClick={closeInfoBox}
+                        onContextMenu={closeInfoBox}
+                        onKeyDown={(e) => {
+                            if (
+                                e.key === 'Escape' ||
+                                e.key === 'Enter' ||
+                                e.key === ' '
+                            ) {
+                                closeInfoBox();
+                            }
+                        }}
+                    />
+                )}
             </Box>
         </motion.div>
     );

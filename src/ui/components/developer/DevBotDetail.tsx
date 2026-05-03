@@ -235,7 +235,7 @@ export const DevBotDetail = ({
                 {Array.from({ length: 3 }).map((_, i) => (
                     <div
                         className="h-36 animate-pulse rounded-xl bg-bg-secondary"
-                        key={`skeleton-${i}`}
+                        key={`skeleton-placeholder-${i + 1}`}
                     />
                 ))}
             </div>

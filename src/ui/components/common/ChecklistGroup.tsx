@@ -131,7 +131,7 @@ export const ChecklistGroup: React.FC<ChecklistGroupProps> = ({
             {nodes.map((node, idx) => (
                 <ChecklistRow
                     idx={idx}
-                    key={`cl-${node.depth}-${idx}-${node.checked}`}
+                    key={`cl-${node.depth}-${node.checked}-${typeof node.content === 'string' ? node.content.slice(0, 20) : 'complex'}`}
                     node={node}
                     renderContent={renderContent}
                     setBoxRef={setBoxRef}

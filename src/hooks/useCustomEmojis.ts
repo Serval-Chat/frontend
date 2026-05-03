@@ -32,6 +32,7 @@ export const useCustomEmojis = (options?: {
                         id: e._id,
                         name: e.name,
                         url: e.imageUrl,
+                        serverId: e.serverId,
                     })),
                 } as CustomEmojiCategory;
             })

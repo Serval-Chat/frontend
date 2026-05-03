@@ -20,7 +20,7 @@ export const Resizer: React.FC<ResizerProps> = ({
 }) => (
     <div
         className={cn(
-            'group absolute top-0 bottom-0 z-50 w-1 cursor-col-resize transition-colors hover:bg-primary/30',
+            'group absolute top-0 bottom-0 z-10 w-1 cursor-col-resize transition-colors hover:bg-primary/30',
             side === 'left' ? 'left-0' : 'right-0',
             isResizing && 'bg-primary/50',
             className,
