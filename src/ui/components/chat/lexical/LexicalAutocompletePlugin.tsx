@@ -311,10 +311,17 @@ export const LexicalAutocompletePlugin: React.FC<
 
             const match = text.match(/(^|\s)([@:#])([^@#\s]{0,20})$/);
             if (match !== null) {
+                const triggerChar = match[2];
+                const matchingString = match[3];
+
+                if (triggerChar === ':' && matchingString.length < 2) {
+                    return null;
+                }
+
                 return {
                     leadOffset: match.index! + match[1].length,
-                    matchingString: match[3],
-                    replaceableString: match[2] + match[3],
+                    matchingString: matchingString,
+                    replaceableString: triggerChar + matchingString,
                 };
             }
             return null;

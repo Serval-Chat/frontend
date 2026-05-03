@@ -1,5 +1,48 @@
 import { describe, expect, it } from 'vitest';
 
+const createMatchTrigger =
+    (allEmojis: any[] = [], serverEmojis: any[] = []) =>
+    (text: string) => {
+        const completeEmojiMatch = text.match(/(^|\s):([^@#\s:]+):$/);
+        if (completeEmojiMatch !== null) {
+            const emojiName = completeEmojiMatch[2].toLowerCase();
+
+            const matchingUnicodeEmojis = allEmojis.filter(
+                (emoji) =>
+                    emoji.short_name === emojiName ||
+                    emoji.short_names.some((name) => name === emojiName),
+            );
+
+            const matchingCustomEmojis = serverEmojis.filter(
+                (emoji) => emoji.name.toLowerCase() === emojiName,
+            );
+
+            const totalMatches =
+                matchingUnicodeEmojis.length + matchingCustomEmojis.length;
+
+            if (totalMatches === 1) {
+                return null;
+            }
+        }
+
+        const match = text.match(/(^|\s)([@:#])([^@#\s]{0,20})$/);
+        if (match !== null) {
+            const triggerChar = match[2];
+            const matchingString = match[3];
+
+            if (triggerChar === ':' && matchingString.length < 2) {
+                return null;
+            }
+
+            return {
+                leadOffset: match.index! + match[1].length,
+                matchingString: matchingString,
+                replaceableString: triggerChar + matchingString,
+            };
+        }
+        return null;
+    };
+
 const mockEmojiData = [
     {
         name: 'sob',
@@ -106,5 +149,67 @@ describe('Emoji Autocomplete Logic', () => {
 
         expect(matchingCustomEmojis).toHaveLength(1);
         expect(matchingCustomEmojis[0].name).toBe('pepega');
+    });
+});
+
+describe('Emoji Autocomplete Trigger Behavior', () => {
+    const matchTrigger = createMatchTrigger(mockEmojiData, []);
+
+    it('should NOT trigger emoji suggestions for :3 (1 character after colon)', () => {
+        const result = matchTrigger(':3');
+        expect(result).toBe(null);
+    });
+
+    it('should NOT trigger emoji suggestions for :a (1 character after colon)', () => {
+        const result = matchTrigger(':a');
+        expect(result).toBe(null);
+    });
+
+    it('should trigger emoji suggestions for :33 (2 characters after colon)', () => {
+        const result = matchTrigger(':33');
+        expect(result).not.toBe(null);
+        expect(result?.matchingString).toBe('33');
+        expect(result?.replaceableString).toBe(':33');
+    });
+
+    it('should trigger emoji suggestions for :smile (5 characters after colon)', () => {
+        const result = matchTrigger(':smile');
+        expect(result).not.toBe(null);
+        expect(result?.matchingString).toBe('smile');
+        expect(result?.replaceableString).toBe(':smile');
+    });
+
+    it('should trigger emoji suggestions for :so (2 characters after colon)', () => {
+        const result = matchTrigger(':so');
+        expect(result).not.toBe(null);
+        expect(result?.matchingString).toBe('so');
+        expect(result?.replaceableString).toBe(':so');
+    });
+
+    it('should handle emoji trigger with preceding space', () => {
+        const result = matchTrigger('hello :33');
+        expect(result).not.toBe(null);
+        expect(result?.matchingString).toBe('33');
+        expect(result?.replaceableString).toBe(':33');
+    });
+
+    it('should NOT trigger for @ mentions with 1 character', () => {
+        const result = matchTrigger('@a');
+        expect(result).not.toBe(null);
+    });
+
+    it('should NOT trigger for # channels with 1 character', () => {
+        const result = matchTrigger('#a');
+        expect(result).not.toBe(null);
+    });
+
+    it('should handle edge case of just colon without characters', () => {
+        const result = matchTrigger(':');
+        expect(result).toBe(null);
+    });
+
+    it('should handle empty string', () => {
+        const result = matchTrigger('');
+        expect(result).toBe(null);
     });
 });
