@@ -388,10 +388,12 @@ const EmojiPickerContent: React.FC<{
             <Box className="relative flex min-w-0 flex-1 flex-col bg-background">
                 <Box className="sticky top-0 z-[var(--z-index-content)] flex h-[32px] items-center justify-between border-b border-divider/30 bg-background/80 px-3 py-1.5 backdrop-blur-md">
                     <Text className="text-[9px] font-bold tracking-[0.2em] text-muted-foreground/70 uppercase">
-                        {flatRows.find(
-                            (r) =>
-                                r.type === 'header' &&
-                                r.id === activeCategoryId,
+                        {(
+                            flatRows.find(
+                                (r): r is RowItem & { type: 'header' } =>
+                                    r.type === 'header' &&
+                                    r.id === activeCategoryId,
+                            ) as (RowItem & { type: 'header' }) | undefined
                         )?.name || 'Emojis'}
                     </Text>
                 </Box>
