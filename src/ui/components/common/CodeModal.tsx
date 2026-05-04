@@ -25,6 +25,7 @@ const AstRenderer: React.FC<{ nodes: AstNode[] }> = memo(({ nodes }) => (
         {nodes.map((node, i) => {
             if (node.type === 'text') {
                 return (
+                    // eslint-disable-next-line react/no-array-index-key
                     <React.Fragment
                         key={`text-${i}-${node.value?.slice(0, 20)}`}
                     >
