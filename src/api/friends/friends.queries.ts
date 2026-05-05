@@ -42,7 +42,6 @@ export const useFriendProfiles = (
             return profiles;
         },
         enabled: (options.enabled ?? true) && hasAuthToken(),
-        staleTime: 5 * 60 * 1000,
     });
 };
 

@@ -515,6 +515,7 @@ export const WsEvents = {
     AUDIT_LOG_ENTRY_CREATED: 'audit_log_entry_created',
     MESSAGE_SERVER_PIN_UPDATED: 'message_server_pin_updated',
     INTERACTION_CREATE_SERVER: 'interaction_create_server',
+    ADMIN_STATS_UPDATED: 'admin_stats_updated',
 } as const;
 
 export interface IReactionEventPayload {

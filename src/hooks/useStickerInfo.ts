@@ -53,7 +53,6 @@ export const useStickerInfo = ({
             );
             return servers?.find((s) => s._id === serverIdToUse);
         },
-        staleTime: 5 * 60 * 1000,
         retry: false,
     });
 

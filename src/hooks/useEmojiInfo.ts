@@ -50,7 +50,6 @@ export const useEmojiInfo = ({
             );
             return servers?.find((s) => s._id === serverId);
         },
-        staleTime: 5 * 60 * 1000,
         retry: false,
     });
 

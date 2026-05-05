@@ -29,7 +29,6 @@ export const useInviteDetails = (
         queryKey: inviteKeys.details(code),
         queryFn: () => invitesApi.getInviteDetails(code),
         enabled: (options.enabled ?? true) && !!code,
-        staleTime: 1000 * 60 * 5, // 5 minutes
     });
 
 export const useServerInvites = (

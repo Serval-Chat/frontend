@@ -332,9 +332,7 @@ export async function processImage(
     ]);
 
     const isGif = file.type === 'image/gif';
-    const isWebP = file.type === 'image/webp';
 
-    // Skip if no crop and already within bounds and in WebP/GIF format
     if (!crop) {
         let dims: ImageSize;
         if (isGif) {
@@ -344,7 +342,9 @@ export async function processImage(
         }
 
         const withinBounds = dims.width <= maxWidth && dims.height <= maxHeight;
-        const correctFormat = isGif || isWebP;
+        const correctFormat = isGif
+            ? file.type === 'image/gif'
+            : file.type === 'image/webp';
 
         if (withinBounds && correctFormat) {
             return file;

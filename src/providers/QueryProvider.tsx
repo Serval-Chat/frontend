@@ -8,8 +8,8 @@ const queryClient = new QueryClient({
             retry: 3,
             retryDelay: (attemptIndex) =>
                 Math.min(1000 * 2 ** attemptIndex, 30000),
-            gcTime: 5 * 60 * 1000,
-            staleTime: 1 * 60 * 1000,
+            gcTime: 30 * 60 * 1000,
+            staleTime: 10 * 60 * 1000,
         },
     },
 });

@@ -5,7 +5,7 @@ import { ChevronLeft } from 'lucide-react';
 import {
     useCategoryPermissions,
     useChannelPermissions,
-    useServerRoles,
+    useRoles,
     useUpdateCategoryPermissions,
     useUpdateChannelPermissions,
 } from '@/api/servers/servers.queries';
@@ -165,7 +165,7 @@ export const PermissionsEditorTab: React.FC<PermissionsEditorTabProps> = ({
     targetId,
     targetType,
 }) => {
-    const { data: roles = [] } = useServerRoles(serverId);
+    const { data: roles = [] } = useRoles(serverId);
 
     const { data: channelPerms } = useChannelPermissions(serverId, targetId, {
         enabled: targetType === 'channel',

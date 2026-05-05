@@ -8,7 +8,6 @@ import {
     useQuery,
     useQueryClient,
 } from '@tanstack/react-query';
-import { AxiosError } from 'axios';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 
@@ -19,6 +18,7 @@ import { setUnreadServers } from '@/store/slices/unreadSlice';
 import { setVoiceParticipants } from '@/store/slices/voiceSlice';
 import { useToast } from '@/ui/components/common/Toast';
 import { hasAuthToken } from '@/utils/authToken';
+import { extractApiError } from '@/utils/extractApiError';
 
 import { serversApi } from './servers.api';
 import type { Sticker } from './servers.api';
@@ -34,7 +34,7 @@ import type {
 
 const isValidId = (id: string | null | undefined): boolean => {
     if (!id) return false;
-    if (id === 'preview') return true; // Account for the special 'preview' ID
+    if (id === 'preview') return true;
     return /^[a-f\d]{24}$/i.test(id);
 };
 
@@ -113,7 +113,7 @@ export const useExportChannelState = (
         queryFn: () => serversApi.getExportState(serverId, channelId),
         enabled: !!serverId && !!channelId,
         refetchInterval: (query) =>
-            query.state.data?.state === 'in_progress' ? 5000 : false,
+            query.state.data?.state === 'in_progress' ? 10000 : false,
     });
 
 export const useRequestExportChannel = (
@@ -132,7 +132,10 @@ export const useRequestExportChannel = (
             showToast('Export requested successfully', 'success');
         },
         onError: (error) => {
-            showToast(error.message || 'Failed to request export', 'error');
+            showToast(
+                extractApiError(error, 'Failed to request export'),
+                'error',
+            );
         },
     });
 };
@@ -154,14 +157,10 @@ export const useCreateServer = (): UseMutationResult<
             showToast('Server created successfully', 'success');
         },
         onError: (error) => {
-            let message = error.message || 'Failed to create server';
-            if (error instanceof AxiosError && error.response?.data?.message) {
-                const apiMessage = error.response.data.message;
-                message = Array.isArray(apiMessage)
-                    ? apiMessage[0]
-                    : apiMessage;
-            }
-            showToast(message, 'error');
+            showToast(
+                extractApiError(error, 'Failed to create server'),
+                'error',
+            );
         },
     });
 };
@@ -183,14 +182,7 @@ export const useJoinServer = (): UseMutationResult<
             showToast('Joined server successfully', 'success');
         },
         onError: (error) => {
-            let message = error.message || 'Failed to join server';
-            if (error instanceof AxiosError && error.response?.data?.message) {
-                const apiMessage = error.response.data.message;
-                message = Array.isArray(apiMessage)
-                    ? apiMessage[0]
-                    : apiMessage;
-            }
-            showToast(message, 'error');
+            showToast(extractApiError(error, 'Failed to join server'), 'error');
         },
     });
 };
@@ -207,7 +199,6 @@ export const useServerDetails = (
             !!serverId &&
             isValidId(serverId) &&
             hasAuthToken(),
-        staleTime: 5 * 60 * 1000,
         placeholderData: keepPreviousData,
     });
 
@@ -287,7 +278,7 @@ export const useAllServerEmojis = (options?: {
         queryKey: ['servers', 'emojis', 'all'],
         queryFn: () => serversApi.getAllServerEmojis(),
         enabled: options?.enabled ?? true,
-        staleTime: 1000 * 60 * 5, // 5 minutes
+        staleTime: Infinity, // Emojis are static
     });
 
 export const useUploadEmoji = (
@@ -306,14 +297,10 @@ export const useUploadEmoji = (
             showToast('Emoji uploaded successfully', 'success');
         },
         onError: (error) => {
-            let message = error.message || 'Failed to upload emoji';
-            if (error instanceof AxiosError && error.response?.data?.message) {
-                const apiMessage = error.response.data.message;
-                message = Array.isArray(apiMessage)
-                    ? apiMessage[0]
-                    : apiMessage;
-            }
-            showToast(message, 'error');
+            showToast(
+                extractApiError(error, 'Failed to upload emoji'),
+                'error',
+            );
         },
     });
 };
@@ -334,7 +321,10 @@ export const useDeleteEmoji = (
             showToast('Emoji deleted successfully', 'success');
         },
         onError: (error) => {
-            showToast(error.message || 'Failed to delete emoji', 'error');
+            showToast(
+                extractApiError(error, 'Failed to delete emoji'),
+                'error',
+            );
         },
     });
 };
@@ -373,14 +363,10 @@ export const useUploadSticker = (
             showToast('Sticker uploaded successfully', 'success');
         },
         onError: (error) => {
-            let message = error.message || 'Failed to upload sticker';
-            if (error instanceof AxiosError && error.response?.data?.message) {
-                const apiMessage = error.response.data.message;
-                message = Array.isArray(apiMessage)
-                    ? apiMessage[0]
-                    : apiMessage;
-            }
-            showToast(message, 'error');
+            showToast(
+                extractApiError(error, 'Failed to upload sticker'),
+                'error',
+            );
         },
     });
 };
@@ -401,7 +387,10 @@ export const useDeleteSticker = (
             showToast('Sticker deleted successfully', 'success');
         },
         onError: (error) => {
-            showToast(error.message || 'Failed to delete sticker', 'error');
+            showToast(
+                extractApiError(error, 'Failed to delete sticker'),
+                'error',
+            );
         },
     });
 };
@@ -473,15 +462,6 @@ export const useUpdateServerBanner = (
     });
 };
 
-export const useServerRoles = (
-    serverId: string,
-): UseQueryResult<Role[], Error> =>
-    useQuery({
-        queryKey: SERVERS_QUERY_KEYS.roles(serverId),
-        queryFn: () => serversApi.getRoles(serverId),
-        enabled: !!serverId,
-    });
-
 export const useVoiceStates = (
     serverId: string | null,
 ): UseQueryResult<Record<string, string[]>, Error> => {
@@ -545,7 +525,7 @@ export const useUpdateChannelPermissions = (
         },
         onError: (error) => {
             showToast(
-                error.message || 'Failed to update channel permissions',
+                extractApiError(error, 'Failed to update channel permissions'),
                 'error',
             );
         },
@@ -594,7 +574,7 @@ export const useUpdateCategoryPermissions = (
         },
         onError: (error) => {
             showToast(
-                error.message || 'Failed to update category permissions',
+                extractApiError(error, 'Failed to update category permissions'),
                 'error',
             );
         },
@@ -632,7 +612,10 @@ export const useDeleteChannel = (
             showToast('Channel deleted successfully', 'success');
         },
         onError: (error) => {
-            showToast(error.message || 'Failed to delete channel', 'error');
+            showToast(
+                extractApiError(error, 'Failed to delete channel'),
+                'error',
+            );
         },
     });
 };
@@ -668,7 +651,10 @@ export const useDeleteCategory = (
             showToast('Category deleted successfully', 'success');
         },
         onError: (error) => {
-            showToast(error.message || 'Failed to delete category', 'error');
+            showToast(
+                extractApiError(error, 'Failed to delete category'),
+                'error',
+            );
         },
     });
 };
@@ -715,7 +701,10 @@ export const useLeaveServer = (): UseMutationResult<void, Error, string> => {
             void navigate('/chat/@me');
         },
         onError: (error) => {
-            showToast(error.message || 'Failed to leave server', 'error');
+            showToast(
+                extractApiError(error, 'Failed to leave server'),
+                'error',
+            );
         },
     });
 };
@@ -738,7 +727,7 @@ export const useCreateRole = (
             showToast('Role created successfully', 'success');
         },
         onError: (error) => {
-            showToast(error.message || 'Failed to create role', 'error');
+            showToast(extractApiError(error, 'Failed to create role'), 'error');
         },
     });
 };
@@ -765,7 +754,7 @@ export const useUpdateRole = (
             showToast('Role updated successfully', 'success');
         },
         onError: (error) => {
-            showToast(error.message || 'Failed to update role', 'error');
+            showToast(extractApiError(error, 'Failed to update role'), 'error');
         },
     });
 };
@@ -784,7 +773,7 @@ export const useDeleteRole = (
             showToast('Role deleted successfully', 'success');
         },
         onError: (error) => {
-            showToast(error.message || 'Failed to delete role', 'error');
+            showToast(extractApiError(error, 'Failed to delete role'), 'error');
         },
     });
 };
@@ -803,7 +792,10 @@ export const useReorderRoles = (
             });
         },
         onError: (error) => {
-            showToast(error.message || 'Failed to reorder roles', 'error');
+            showToast(
+                extractApiError(error, 'Failed to reorder roles'),
+                'error',
+            );
         },
     });
 };
@@ -853,7 +845,7 @@ export const useAddRoleToMember = (
                     context.previousMembers,
                 );
             }
-            showToast(error.message || 'Failed to add role', 'error');
+            showToast(extractApiError(error, 'Failed to add role'), 'error');
         },
     });
 };
@@ -908,7 +900,7 @@ export const useRemoveRoleFromMember = (
                     context.previousMembers,
                 );
             }
-            showToast(error.message || 'Failed to remove role', 'error');
+            showToast(extractApiError(error, 'Failed to remove role'), 'error');
         },
     });
 };
@@ -937,7 +929,7 @@ export const useKickMember = (
             showToast('Member kicked successfully', 'success');
         },
         onError: (error) => {
-            showToast(error.message || 'Failed to kick member', 'error');
+            showToast(extractApiError(error, 'Failed to kick member'), 'error');
         },
     });
 };
@@ -961,7 +953,7 @@ export const useBanMember = (
             showToast('User banned successfully', 'success');
         },
         onError: (error) => {
-            showToast(error.message || 'Failed to ban user', 'error');
+            showToast(extractApiError(error, 'Failed to ban user'), 'error');
         },
     });
 };
@@ -986,7 +978,10 @@ export const useTimeoutMember = (
             showToast('Member timed out successfully', 'success');
         },
         onError: (error) => {
-            showToast(error.message || 'Failed to timeout member', 'error');
+            showToast(
+                extractApiError(error, 'Failed to timeout member'),
+                'error',
+            );
         },
     });
 };
@@ -1006,7 +1001,7 @@ export const useUnbanMember = (
             showToast('User unbanned successfully', 'success');
         },
         onError: (error) => {
-            showToast(error.message || 'Failed to unban user', 'error');
+            showToast(extractApiError(error, 'Failed to unban user'), 'error');
         },
     });
 };
@@ -1150,14 +1145,10 @@ export const useRequestServerVerification = (
             showToast('Verification requested successfully!', 'success');
         },
         onError: (error) => {
-            let message = error.message || 'Failed to request verification';
-            if (error instanceof AxiosError && error.response?.data?.message) {
-                const apiMessage = error.response.data.message;
-                message = Array.isArray(apiMessage)
-                    ? apiMessage[0]
-                    : apiMessage;
-            }
-            showToast(message, 'error');
+            showToast(
+                extractApiError(error, 'Failed to request verification'),
+                'error',
+            );
         },
     });
 };

@@ -17,6 +17,7 @@ import { GifStarButton } from '@/ui/components/chat/GifStarButton';
 import { Button } from '@/ui/components/common/Button';
 import { Input } from '@/ui/components/common/Input';
 import { Box } from '@/ui/components/layout/Box';
+import { cn } from '@/utils/cn';
 
 type GifItem = KlipyGif;
 
