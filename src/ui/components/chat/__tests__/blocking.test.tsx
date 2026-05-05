@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { fireEvent, render, screen } from '@testing-library/react';
+import { BrowserRouter } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { MessageReaction } from '@/api/chat/chat.types';
@@ -18,6 +19,14 @@ vi.mock('@/store/hooks', () => ({
 const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
 });
+
+const TestWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+    <BrowserRouter>
+        <QueryClientProvider client={queryClient}>
+            {children}
+        </QueryClientProvider>
+    </BrowserRouter>
+);
 
 interface MockMessage {
     _id: string;
@@ -190,12 +199,12 @@ describe('Frontend Blocking Content Filters', () => {
             ];
 
             const { container } = render(
-                <QueryClientProvider client={queryClient}>
+                <TestWrapper>
                     <Reactions
                         messageId="m1"
                         reactions={reactions as any as MessageReaction[]}
                     />
-                </QueryClientProvider>,
+                </TestWrapper>,
             );
 
             expect(container.textContent).toMatch(/1/);

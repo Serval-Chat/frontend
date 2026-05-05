@@ -24,6 +24,8 @@ export const useMe = (): UseQueryResult<User, Error> =>
         enabled: hasAuthToken(),
     });
 
+const isValidUserId = (id: string): boolean => /^[a-f\d]{24}$/i.test(id);
+
 export const useUserById = (
     id: string,
     options: { enabled?: boolean } = {},
@@ -31,7 +33,7 @@ export const useUserById = (
     useQuery({
         queryKey: ['user', id],
         queryFn: () => usersApi.getById(id),
-        enabled: (options.enabled ?? true) && !!id,
+        enabled: (options.enabled ?? true) && isValidUserId(id),
         staleTime: 5 * 60 * 1000,
     });
 

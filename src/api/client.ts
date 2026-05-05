@@ -14,10 +14,24 @@ export const apiClient = axios.create({
     adapter: isTauri() ? tauriAdapter : undefined,
 });
 
+const isInvalidRequest = (url: string | undefined): boolean => {
+    if (!url) return false;
+    if (url.includes('/profile/@')) return true;
+    return false;
+};
+
 apiClient.interceptors.request.use((config) => {
     const token = getAuthToken();
     if (token) {
         config.headers.Authorization = `Bearer ${token}`;
+    }
+    if (config.url && isInvalidRequest(config.url)) {
+        const readableUrl = config.url.replace(/^https?:\/\/[^/]+\//, '/');
+        const trace = new Error(
+            `[INVALID REQUEST] ${config.method?.toUpperCase() || 'GET'} ${readableUrl}`,
+        );
+        console.error(trace.message);
+        console.error(trace.stack);
     }
     return config;
 });

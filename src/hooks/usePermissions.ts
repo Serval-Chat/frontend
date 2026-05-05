@@ -22,16 +22,31 @@ export interface UsePermissionsReturn {
 }
 
 let globalNow = Date.now();
+let intervalId: ReturnType<typeof setInterval> | null = null;
 const timeListeners = new Set<() => void>();
 
-setInterval(() => {
-    globalNow = Date.now();
-    timeListeners.forEach((l) => l());
-}, 1000);
+const startTimeInterval = (): void => {
+    if (intervalId !== null) return;
+    intervalId = setInterval(() => {
+        globalNow = Date.now();
+        timeListeners.forEach((l) => l());
+    }, 1000);
+};
+
+const stopTimeInterval = (): void => {
+    if (timeListeners.size === 0 && intervalId !== null) {
+        clearInterval(intervalId);
+        intervalId = null;
+    }
+};
 
 const subscribeTime = (callback: () => void): (() => void) => {
     timeListeners.add(callback);
-    return () => timeListeners.delete(callback);
+    startTimeInterval();
+    return () => {
+        timeListeners.delete(callback);
+        stopTimeInterval();
+    };
 };
 
 const getTimeSnapshot = (): number => globalNow;
@@ -51,11 +66,6 @@ export const usePermissions = (
         serverId === params.serverId;
 
     const { data: currentUser } = useMe();
-    const now = useSyncExternalStore(
-        subscribeTime,
-        getTimeSnapshot,
-        getServerTimeSnapshot,
-    );
     const { data: members } = useMembers(serverId, { enabled: isEnabled });
     const { data: roles } = useRoles(serverId, { enabled: isEnabled });
     const { data: server } = useServerDetails(serverId, { enabled: isEnabled });
@@ -70,6 +80,20 @@ export const usePermissions = (
         if (!members || !currentUser || !serverId) return null;
         return members.find((m) => m.userId === currentUser._id);
     }, [members, currentUser, serverId]);
+
+    const isOwner = !!(
+        server?.ownerId &&
+        currentUser?._id &&
+        server.ownerId === currentUser._id
+    );
+
+    const shouldTrackTime = !!member?.communicationDisabledUntil && !isOwner;
+
+    const now = useSyncExternalStore(
+        shouldTrackTime ? subscribeTime : () => () => {},
+        shouldTrackTime ? getTimeSnapshot : () => 0,
+        shouldTrackTime ? getServerTimeSnapshot : () => 0,
+    );
 
     const userRoles = useMemo(() => {
         if (!member || !roles) return [];
@@ -236,12 +260,6 @@ export const usePermissions = (
         categories,
         members,
     ]);
-
-    const isOwner = !!(
-        server?.ownerId &&
-        currentUser?._id &&
-        server.ownerId === currentUser._id
-    );
 
     const isTimedOut =
         !!member?.communicationDisabledUntil &&

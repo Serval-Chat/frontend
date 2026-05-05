@@ -5,6 +5,7 @@ import {
     Loader2,
     Search,
     Star,
+    Sticker,
     TrendingUp,
     X,
 } from 'lucide-react';
@@ -32,7 +33,9 @@ const MAX_HEIGHT = 800;
 
 export const GifPicker: React.FC<GifPickerProps> = ({ onSelect, onClose }) => {
     const [search, setSearch] = useState('');
-    const [tab, setTab] = useState<'trending' | 'favorites'>('trending');
+    const [tab, setTab] = useState<'trending' | 'stickers' | 'favorites'>(
+        'trending',
+    );
     const [gifs, setGifs] = useState<GifItem[]>([]);
     const [loading, setLoading] = useState(false);
     const [favoritedIds, setFavoritedIds] = useState<Set<string>>(new Set());
@@ -126,6 +129,14 @@ export const GifPicker: React.FC<GifPickerProps> = ({ onSelect, onClose }) => {
                     favorites.map((f) => String(f.klipyId)),
                 );
                 setFavoritedIds(favIds);
+                setFavoritedIds(favIds);
+            } else if (tab === 'stickers') {
+                if (debouncedSearch) {
+                    fetchedGifs =
+                        await klipyApi.searchStickers(debouncedSearch);
+                } else {
+                    fetchedGifs = await klipyApi.getTrendingStickers();
+                }
             } else if (debouncedSearch) {
                 fetchedGifs = await klipyApi.searchGifs(debouncedSearch);
             } else {
@@ -238,6 +249,14 @@ export const GifPicker: React.FC<GifPickerProps> = ({ onSelect, onClose }) => {
                         <Star className="h-4 w-4" />
                         <span className="text-[10px]">Favorites</span>
                     </Button>
+                    <Button
+                        className="flex h-auto min-w-[80px] flex-col gap-1 py-2"
+                        variant={tab === 'stickers' ? 'primary' : 'ghost'}
+                        onClick={() => setTab('stickers')}
+                    >
+                        <Sticker className="h-4 w-4" />
+                        <span className="text-[10px]">Stickers</span>
+                    </Button>
                 </Box>
                 <Button size="sm" variant="ghost" onClick={onClose}>
                     <X className="h-4 w-4" />
@@ -253,7 +272,7 @@ export const GifPicker: React.FC<GifPickerProps> = ({ onSelect, onClose }) => {
                         value={search}
                         onChange={(e) => {
                             setSearch(e.target.value);
-                            setTab('trending');
+                            if (tab === 'favorites') setTab('trending');
                         }}
                     />
                 </Box>
@@ -267,7 +286,14 @@ export const GifPicker: React.FC<GifPickerProps> = ({ onSelect, onClose }) => {
                 ) : gifs.length > 0 ? (
                     <Box
                         className="gap-2 space-y-2"
-                        style={{ columns: size.width > 450 ? 3 : 2 }}
+                        style={{
+                            columns:
+                                tab === 'stickers'
+                                    ? 3
+                                    : size.width > 450
+                                      ? 3
+                                      : 2,
+                        }}
                     >
                         {gifs.map((gif) => {
                             const klipyId = String(gif.klipyId || gif.id);
@@ -292,8 +318,13 @@ export const GifPicker: React.FC<GifPickerProps> = ({ onSelect, onClose }) => {
                                     onClick={() => onSelect(url)}
                                 >
                                     <img
-                                        alt="GIF"
-                                        className="h-full w-full object-cover"
+                                        alt="Klipy Content"
+                                        className={cn(
+                                            'h-full w-full',
+                                            tab === 'stickers'
+                                                ? 'object-contain p-1'
+                                                : 'object-cover',
+                                        )}
                                         loading="lazy"
                                         src={previewUrl}
                                     />

@@ -10,6 +10,8 @@ interface MentionProps {
     serverId?: string;
 }
 
+const isValidUserId = (id: string): boolean => /^[a-f\d]{24}$/i.test(id);
+
 /**
  * @description Beautifully renders a user mention.
  */
@@ -17,6 +19,19 @@ export const Mention: React.FC<MentionProps> = ({ userId, serverId }) => {
     const [isPopupOpen, setIsPopupOpen] = useState(false);
     const triggerRef = useRef<HTMLSpanElement>(null);
     const { data: user, isLoading } = useUserById(userId);
+
+    if (!isValidUserId(userId)) {
+        return (
+            <Box
+                as="span"
+                className="inline-flex cursor-default items-baseline rounded bg-primary/10 px-1.5 py-[4px] font-medium text-primary transition-colors select-none"
+            >
+                <Text as="span" className="leading-none" size="sm">
+                    @unknown user
+                </Text>
+            </Box>
+        );
+    }
 
     const displayName = user
         ? user.displayName || user.username

@@ -1,5 +1,5 @@
 import { renderHook } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import * as ServerQueries from '@/api/servers/servers.queries';
 import type { Role, Server, ServerMember } from '@/api/servers/servers.types';
@@ -25,6 +25,10 @@ vi.mock('react-router-dom', () => ({
 }));
 
 describe('usePermissions', () => {
+    beforeEach(() => {
+        vi.clearAllMocks();
+    });
+
     const mockMe = { _id: 'user1' } as User;
     const mockServer = { _id: 'server1', ownerId: 'owner1' } as Server;
     const mockMember = { userId: 'user1', roles: ['role1'] } as ServerMember;
@@ -268,5 +272,23 @@ describe('usePermissions', () => {
         );
 
         expect(result.current.hasPermission('sendMessages')).toBe(true);
+    });
+
+    it('does not subscribe to the global time ticker when user has no timeout', () => {
+        setupMocks();
+        const renderCount = { value: 0 };
+
+        const { result } = renderHook(() => {
+            renderCount.value++;
+            return usePermissions('server1', 'channel1');
+        });
+
+        const initialRenderCount = renderCount.value;
+        expect(result.current.isTimedOut).toBe(false);
+        expect(result.current.remainingTimeoutMs).toBe(0);
+
+        return new Promise((resolve) => setTimeout(resolve, 1100)).then(() => {
+            expect(renderCount.value).toBe(initialRenderCount);
+        });
     });
 });

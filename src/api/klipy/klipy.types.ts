@@ -9,6 +9,7 @@ export interface KlipyGif {
         sm?: { gif?: { url?: string; width?: number; height?: number } };
         xs?: { gif?: { url?: string } };
     };
+    contentType?: 'gif' | 'sticker';
 }
 
 export interface KlipyFavorite {
@@ -17,6 +18,7 @@ export interface KlipyFavorite {
     previewUrl: string;
     width: number;
     height: number;
+    contentType: 'gif' | 'sticker';
 }
 
 export interface KlipyApiResponse<T> {

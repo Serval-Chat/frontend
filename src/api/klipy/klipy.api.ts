@@ -11,14 +11,40 @@ export const klipyApi = {
         const response = await apiClient.get<KlipySearchResponse>(
             '/api/v1/klipy/trending',
         );
-        return response.data.data.data;
+        return response.data.data.data.map((g) => ({
+            ...g,
+            contentType: 'gif',
+        }));
     },
 
     searchGifs: async (query: string): Promise<KlipyGif[]> => {
         const response = await apiClient.get<KlipySearchResponse>(
             `/api/v1/klipy/search?q=${encodeURIComponent(query)}`,
         );
-        return response.data.data.data;
+        return response.data.data.data.map((g) => ({
+            ...g,
+            contentType: 'gif',
+        }));
+    },
+
+    getTrendingStickers: async (): Promise<KlipyGif[]> => {
+        const response = await apiClient.get<KlipySearchResponse>(
+            '/api/v1/klipy/stickers/trending',
+        );
+        return response.data.data.data.map((s) => ({
+            ...s,
+            contentType: 'sticker',
+        }));
+    },
+
+    searchStickers: async (query: string): Promise<KlipyGif[]> => {
+        const response = await apiClient.get<KlipySearchResponse>(
+            `/api/v1/klipy/stickers/search?q=${encodeURIComponent(query)}`,
+        );
+        return response.data.data.data.map((s) => ({
+            ...s,
+            contentType: 'sticker',
+        }));
     },
 
     getFavorites: async (): Promise<KlipyFavorite[]> => {
@@ -28,9 +54,12 @@ export const klipyApi = {
         return response.data;
     },
 
-    resolveGif: async (klipyId: string): Promise<KlipyFavorite> => {
+    resolveGif: async (
+        klipyId: string,
+        type: 'gif' | 'sticker' = 'gif',
+    ): Promise<KlipyFavorite> => {
         const response = await apiClient.get<KlipyFavorite>(
-            `/api/v1/klipy/resolve?id=${klipyId}`,
+            `/api/v1/klipy/resolve?id=${klipyId}&type=${type}`,
         );
         return response.data;
     },
