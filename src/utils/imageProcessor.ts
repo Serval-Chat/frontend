@@ -1,6 +1,8 @@
 import GIF from 'gif.js';
 import { decompressFrames, parseGIF } from 'gifuct-js';
 
+import { STICKER_MAX_HEIGHT, STICKER_MAX_WIDTH } from '@/constants/stickers';
+
 interface ImageSize {
     width: number;
     height: number;
@@ -107,6 +109,8 @@ async function processStaticImage(
                         'Failed to get 2D context for static image processing',
                     );
                 }
+
+                ctx.imageSmoothingQuality = 'high';
 
                 if (crop) {
                     ctx.drawImage(
@@ -376,13 +380,38 @@ export async function processImage(
 
 export async function processProfileImage(
     file: File,
-    type: 'avatar' | 'banner' | 'server-banner',
+    type:
+        | 'avatar'
+        | 'banner'
+        | 'server-banner'
+        | 'emoji'
+        | 'role-icon'
+        | 'sticker',
     crop?: CropSelection,
 ): Promise<File> {
-    const isAvatar = type === 'avatar';
+    const isAvatar =
+        type === 'avatar' || type === 'emoji' || type === 'role-icon';
     const isServerBanner = type === 'server-banner';
+    const isSticker = type === 'sticker';
 
-    const maxWidth = isAvatar ? 256 : isServerBanner ? 960 : 1136;
-    const maxHeight = isAvatar ? 256 : isServerBanner ? 540 : 400;
+    const maxWidth = isAvatar
+        ? 256
+        : isServerBanner
+          ? 960
+          : isSticker
+            ? STICKER_MAX_WIDTH
+            : 1136;
+    const maxHeight = isAvatar
+        ? 256
+        : isServerBanner
+          ? 540
+          : isSticker
+            ? STICKER_MAX_HEIGHT
+            : 400;
+
+    if (isSticker && file.type === 'image/gif') {
+        return processStaticImage(file, { maxWidth, maxHeight, crop });
+    }
+
     return processImage(file, maxWidth, maxHeight, crop);
 }

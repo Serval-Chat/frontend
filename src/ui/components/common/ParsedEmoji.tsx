@@ -5,6 +5,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { emojiKeys, useEmoji } from '@/api/emojis/emojis.queries';
 import type { Emoji } from '@/api/emojis/emojis.types';
 import { useEmojiInfoBox } from '@/hooks/useEmojiInfoBox';
+import { Tooltip } from '@/ui/components/common/Tooltip';
 import { EmojiInfoBox } from '@/ui/components/emoji/EmojiInfoBox';
 import { Box } from '@/ui/components/layout/Box';
 import { resolveApiUrl } from '@/utils/apiUrl';
@@ -94,37 +95,38 @@ export const ParsedEmoji: React.FC<ParsedEmojiProps> = ({
 
     return (
         <>
-            <Box
-                as="button"
-                className={cn(
-                    'inline-block cursor-pointer rounded-sm border-none bg-transparent p-0 align-text-bottom outline-none focus-visible:ring-1 focus-visible:ring-primary',
-                    isLarge ? 'h-10 w-10' : 'h-5 w-5',
-                    className,
-                )}
-                title={`:${emoji.name}: (Click for info)`}
-                onClick={(e: React.MouseEvent) =>
-                    showEmojiInfo(
-                        {
-                            id: emoji._id,
-                            name: emoji.name,
-                            url: emoji.imageUrl,
-                            serverId: emoji.serverId,
-                        },
-                        e,
-                    )
-                }
-            >
-                <img
-                    alt={emoji.name || 'emoji'}
-                    className="h-full w-full object-contain"
-                    ref={containerRef as React.RefObject<HTMLImageElement>}
-                    src={emojiUrl || ''}
-                    style={style}
-                    onError={(e) => {
-                        e.currentTarget.style.display = 'none';
-                    }}
-                />
-            </Box>
+            <Tooltip content={`:${emoji.name}:`} position="top">
+                <Box
+                    as="button"
+                    className={cn(
+                        'inline-block cursor-pointer rounded-sm border-none bg-transparent p-0 align-text-bottom outline-none focus-visible:ring-1 focus-visible:ring-primary',
+                        isLarge ? 'h-10 w-10' : 'h-5 w-5',
+                        className,
+                    )}
+                    onClick={(e: React.MouseEvent) =>
+                        showEmojiInfo(
+                            {
+                                id: emoji._id,
+                                name: emoji.name,
+                                url: emoji.imageUrl,
+                                serverId: emoji.serverId,
+                            },
+                            e,
+                        )
+                    }
+                >
+                    <img
+                        alt={emoji.name || 'emoji'}
+                        className="h-full w-full object-contain"
+                        ref={containerRef as React.RefObject<HTMLImageElement>}
+                        src={emojiUrl || ''}
+                        style={style}
+                        onError={(e) => {
+                            e.currentTarget.style.display = 'none';
+                        }}
+                    />
+                </Box>
+            </Tooltip>
 
             {selectedEmoji && infoBoxPosition && (
                 <EmojiInfoBox

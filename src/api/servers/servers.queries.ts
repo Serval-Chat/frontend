@@ -12,6 +12,7 @@ import { AxiosError } from 'axios';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 
+import { apiClient } from '@/api/client';
 import type { Emoji } from '@/api/emojis/emojis.types';
 import type { ServerSettings, User } from '@/api/users/users.types';
 import { setUnreadServers } from '@/store/slices/unreadSlice';
@@ -20,6 +21,7 @@ import { useToast } from '@/ui/components/common/Toast';
 import { hasAuthToken } from '@/utils/authToken';
 
 import { serversApi } from './servers.api';
+import type { Sticker } from './servers.api';
 import type {
     Category,
     Channel,
@@ -50,6 +52,8 @@ export const SERVERS_QUERY_KEYS = {
     roles: (serverId: string | null) => ['servers', 'roles', serverId] as const,
     emojis: (serverId: string | null) =>
         ['servers', 'emojis', serverId] as const,
+    stickers: (serverId: string | null) =>
+        ['servers', 'stickers', serverId] as const,
     bans: (serverId: string | null) => ['servers', 'bans', serverId] as const,
     voiceStates: (serverId: string | null) =>
         ['servers', 'voice-states', serverId] as const,
@@ -334,6 +338,87 @@ export const useDeleteEmoji = (
         },
     });
 };
+
+export const useServerStickers = (
+    serverId: string | null,
+): UseQueryResult<Sticker[], Error> =>
+    useQuery({
+        queryKey: SERVERS_QUERY_KEYS.stickers(serverId),
+        queryFn: () => serversApi.getStickers(serverId!),
+        enabled: !!serverId && hasAuthToken(),
+    });
+
+export const useAllStickers = (options?: {
+    enabled?: boolean;
+}): UseQueryResult<Sticker[], Error> =>
+    useQuery({
+        queryKey: ['stickers', 'all'],
+        queryFn: () => serversApi.getAllStickers(),
+        enabled: options?.enabled ?? true,
+    });
+
+export const useUploadSticker = (
+    serverId: string,
+): UseMutationResult<Sticker, Error, { name: string; file: File }> => {
+    const queryClient = useQueryClient();
+    const { showToast } = useToast();
+
+    return useMutation({
+        mutationFn: ({ name, file }) =>
+            serversApi.uploadSticker(serverId, name, file),
+        onSuccess: () => {
+            void queryClient.invalidateQueries({
+                queryKey: SERVERS_QUERY_KEYS.stickers(serverId),
+            });
+            showToast('Sticker uploaded successfully', 'success');
+        },
+        onError: (error) => {
+            let message = error.message || 'Failed to upload sticker';
+            if (error instanceof AxiosError && error.response?.data?.message) {
+                const apiMessage = error.response.data.message;
+                message = Array.isArray(apiMessage)
+                    ? apiMessage[0]
+                    : apiMessage;
+            }
+            showToast(message, 'error');
+        },
+    });
+};
+
+export const useDeleteSticker = (
+    serverId: string,
+): UseMutationResult<void, Error, string> => {
+    const queryClient = useQueryClient();
+    const { showToast } = useToast();
+
+    return useMutation({
+        mutationFn: (stickerId: string) =>
+            serversApi.deleteSticker(serverId, stickerId),
+        onSuccess: () => {
+            void queryClient.invalidateQueries({
+                queryKey: SERVERS_QUERY_KEYS.stickers(serverId),
+            });
+            showToast('Sticker deleted successfully', 'success');
+        },
+        onError: (error) => {
+            showToast(error.message || 'Failed to delete sticker', 'error');
+        },
+    });
+};
+
+export const useSticker = (
+    stickerId: string | null,
+): UseQueryResult<Sticker, Error> =>
+    useQuery({
+        queryKey: ['stickers', stickerId],
+        queryFn: async () => {
+            const response = await apiClient.get<Sticker>(
+                `/api/v1/stickers/${stickerId}`,
+            );
+            return response.data;
+        },
+        enabled: !!stickerId && hasAuthToken(),
+    });
 
 export const useUpdateServer = (
     serverId: string,

@@ -29,6 +29,7 @@ export interface ChatMessage {
     channelId?: string;
     receiverId?: string; // For DMs
     replyToId?: string;
+    stickerId?: string;
     repliedToMessageId?: string | ChatMessage;
     repliedTo?: {
         messageId: string;

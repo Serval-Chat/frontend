@@ -10,6 +10,9 @@ interface TooltipProps {
     children: React.ReactNode;
     position?: 'right' | 'top' | 'bottom' | 'left';
     className?: string;
+    triggerClassName?: string;
+    fullWidth?: boolean;
+    delay?: number;
 }
 
 export const Tooltip: React.FC<TooltipProps> = ({
@@ -17,10 +20,14 @@ export const Tooltip: React.FC<TooltipProps> = ({
     children,
     position = 'right',
     className,
+    triggerClassName,
+    fullWidth = false,
+    delay = 100,
 }) => {
     const [isVisible, setIsVisible] = useState(false);
     const [coords, setCoords] = useState({ x: 0, y: 0 });
     const triggerRef = useRef<HTMLDivElement>(null);
+    const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
     const updatePosition = useCallback(() => {
         if (!triggerRef.current) return;
@@ -31,19 +38,19 @@ export const Tooltip: React.FC<TooltipProps> = ({
 
         switch (position) {
             case 'right':
-                x = rect.right + 12;
+                x = rect.right + 8;
                 y = rect.top + rect.height / 2;
                 break;
             case 'top':
                 x = rect.left + rect.width / 2;
-                y = rect.top - 12;
+                y = rect.top - 8;
                 break;
             case 'bottom':
                 x = rect.left + rect.width / 2;
-                y = rect.bottom + 12;
+                y = rect.bottom + 8;
                 break;
             case 'left':
-                x = rect.left - 12;
+                x = rect.left - 8;
                 y = rect.top + rect.height / 2;
                 break;
         }
@@ -51,62 +58,76 @@ export const Tooltip: React.FC<TooltipProps> = ({
         setCoords({ x, y });
     }, [position]);
 
+    const handleMouseEnter = () => {
+        if (timeoutRef.current) clearTimeout(timeoutRef.current);
+        timeoutRef.current = setTimeout(() => {
+            setIsVisible(true);
+            updatePosition();
+        }, delay);
+    };
+
+    const handleMouseLeave = () => {
+        if (timeoutRef.current) clearTimeout(timeoutRef.current);
+        setIsVisible(false);
+    };
+
     React.useLayoutEffect(() => {
         if (isVisible) {
             updatePosition();
-            window.addEventListener('scroll', updatePosition);
-            window.addEventListener('resize', updatePosition);
+            const hide = () => setIsVisible(false);
+            window.addEventListener('scroll', hide, true);
+            window.addEventListener('resize', hide);
+            return () => {
+                window.removeEventListener('scroll', hide, true);
+                window.removeEventListener('resize', hide);
+            };
         }
-        return () => {
-            window.removeEventListener('scroll', updatePosition);
-            window.removeEventListener('resize', updatePosition);
-        };
     }, [isVisible, updatePosition]);
 
     const variants = {
-        right: { x: 5, y: '-50%', opacity: 0, scale: 0.9 },
-        top: { x: '-50%', y: -5, opacity: 0, scale: 0.9 },
-        bottom: { x: '-50%', y: 5, opacity: 0, scale: 0.9 },
-        left: { x: -5, y: '-50%', opacity: 0, scale: 0.9 },
+        right: { x: -5, y: '-50%', opacity: 0, scale: 0.95 },
+        top: { x: '-50%', y: '-95%', opacity: 0, scale: 0.95 },
+        bottom: { x: '-50%', y: 5, opacity: 0, scale: 0.95 },
+        left: { x: '-95%', y: '-50%', opacity: 0, scale: 0.95 },
+    };
+
+    const animate = {
+        right: { x: 0, y: '-50%', opacity: 1, scale: 1 },
+        top: { x: '-50%', y: '-100%', opacity: 1, scale: 1 },
+        bottom: { x: '-50%', y: 0, opacity: 1, scale: 1 },
+        left: { x: '-100%', y: '-50%', opacity: 1, scale: 1 },
     };
 
     return (
         <>
             <div
-                className="inline-block"
+                className={cn(
+                    'relative',
+                    fullWidth ? 'block w-full' : 'inline-block',
+                    triggerClassName,
+                )}
                 ref={triggerRef}
-                onMouseEnter={() => setIsVisible(true)}
-                onMouseLeave={() => setIsVisible(false)}
+                onMouseEnter={handleMouseEnter}
+                onMouseLeave={handleMouseLeave}
             >
                 {children}
             </div>
-            {isVisible &&
-                createPortal(
-                    <AnimatePresence>
+            {createPortal(
+                <AnimatePresence>
+                    {isVisible && (
                         <motion.div
-                            animate={{
-                                x:
-                                    position === 'right' || position === 'left'
-                                        ? 0
-                                        : '-50%',
-                                y:
-                                    position === 'top' || position === 'bottom'
-                                        ? 0
-                                        : '-50%',
-                                opacity: 1,
-                                scale: 1,
-                            }}
+                            animate={animate[position]}
                             className={cn(
-                                'pointer-events-none fixed z-[var(--z-index-tooltip)] rounded-lg bg-[#111214] px-4 py-2 text-sm font-bold whitespace-nowrap text-[#f2f3f5] shadow-2xl',
-                                'before:absolute before:border-[6px] before:border-transparent',
+                                'pointer-events-none fixed z-[var(--z-index-tooltip)] rounded-lg bg-[#111214] px-3 py-1.5 text-[13px] font-bold whitespace-nowrap text-[#f2f3f5] shadow-2xl',
+                                'before:absolute before:border-[6px] before:border-transparent before:content-[""]',
                                 position === 'right' &&
-                                    'before:top-1/2 before:right-full before:-translate-y-1/2 before:border-r-[#111214]',
+                                    'before:top-1/2 before:right-full before:-mr-[1px] before:-translate-y-1/2 before:border-r-[#111214]',
                                 position === 'top' &&
-                                    'before:top-full before:left-1/2 before:-translate-x-1/2 before:border-t-[#111214]',
+                                    'before:top-full before:left-1/2 before:-mt-[1px] before:-translate-x-1/2 before:border-t-[#111214]',
                                 position === 'bottom' &&
-                                    'before:bottom-full before:left-1/2 before:-translate-x-1/2 before:border-b-[#111214]',
+                                    'before:bottom-full before:left-1/2 before:-mb-[1px] before:-translate-x-1/2 before:border-b-[#111214]',
                                 position === 'left' &&
-                                    'before:top-1/2 before:left-full before:-translate-y-1/2 before:border-l-[#111214]',
+                                    'before:top-1/2 before:left-full before:-ml-[1px] before:-translate-y-1/2 before:border-l-[#111214]',
                                 className,
                             )}
                             exit={variants[position]}
@@ -119,9 +140,10 @@ export const Tooltip: React.FC<TooltipProps> = ({
                         >
                             {content}
                         </motion.div>
-                    </AnimatePresence>,
-                    document.body,
-                )}
+                    )}
+                </AnimatePresence>,
+                document.body,
+            )}
         </>
     );
 };

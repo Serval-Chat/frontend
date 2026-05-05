@@ -14,13 +14,23 @@ import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary';
 import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
 import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin';
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
+import { useQueryClient } from '@tanstack/react-query';
 import {
     $getSelection,
     $isRangeSelection,
     CLEAR_EDITOR_COMMAND,
     type LexicalEditor,
 } from 'lexical';
-import { ArrowUp, Clock, FileImage, Plus, Send, Smile, X } from 'lucide-react';
+import {
+    ArrowUp,
+    Clock,
+    FileImage,
+    Plus,
+    Send,
+    Smile,
+    Sticker,
+    X,
+} from 'lucide-react';
 import { useLocation, useParams } from 'react-router-dom';
 import { useClickAway } from 'react-use';
 
@@ -31,16 +41,21 @@ import { useFriends } from '@/api/friends/friends.queries';
 import { interactionsApi } from '@/api/interactions/interactions.api';
 import { useServerCommands } from '@/api/interactions/interactions.queries';
 import {
+    SERVERS_QUERY_KEYS,
+    useAllStickers,
     useChannels,
     useMembers,
     useRoles,
     useServerDetails,
+    useServerStickers,
+    useServers,
 } from '@/api/servers/servers.queries';
 import { useMe } from '@/api/users/users.queries';
 import type { User } from '@/api/users/users.types';
 import type { QueuedFile } from '@/hooks/chat/useFileQueue';
 import { useCustomEmojis } from '@/hooks/useCustomEmojis';
 import { useChatWS } from '@/hooks/ws/useChatWS';
+import { useWebSocket } from '@/hooks/ws/useWebSocket';
 import { useAppSelector } from '@/store/hooks';
 import type { ProcessedChatMessage } from '@/types/chat.ui';
 import {
@@ -57,9 +72,14 @@ import { StyledUserName } from '@/ui/components/common/StyledUserName';
 import { Text } from '@/ui/components/common/Text';
 import { useToast } from '@/ui/components/common/Toast';
 import { EmojiPicker } from '@/ui/components/emoji/EmojiPicker';
+import {
+    type StickerCategory,
+    StickerPicker,
+} from '@/ui/components/emoji/StickerPicker';
 import { Box } from '@/ui/components/layout/Box';
 import { cn } from '@/utils/cn';
 import { ParserPresets, parseText } from '@/utils/textParser/parser';
+import { WsEvents } from '@/ws';
 
 import { FileQueue } from './FileQueue';
 import { GifPicker } from './GifPicker';
@@ -129,6 +149,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
 }) => {
     const [isUploading, setIsUploading] = useState(false);
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+    const [showStickerPicker, setShowStickerPicker] = useState(false);
     const [showGifPicker, setShowGifPicker] = useState(false);
     const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
     const [hasText, setHasText] = useState(false);
@@ -142,6 +163,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
         commandName: string;
         argValues: string[];
     } | null>(null);
+    const queryClient = useQueryClient();
     const location = useLocation();
     const params = useParams();
     const [isSlowModeError, setIsSlowModeError] = useState(false);
@@ -157,6 +179,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
 
     useClickAway(emojiPickerRef, () => {
         setShowEmojiPicker(false);
+        setShowStickerPicker(false);
     });
 
     useEffect(() => {
@@ -187,6 +210,21 @@ export const MessageInput: React.FC<MessageInputProps> = ({
             window.removeEventListener('keydown', handleGlobalKeyDown);
         };
     }, [editor]);
+
+    useWebSocket(
+        WsEvents.STICKER_UPDATED,
+        useCallback(
+            (payload: { serverId: string }): void => {
+                void queryClient.invalidateQueries({
+                    queryKey: SERVERS_QUERY_KEYS.stickers(payload.serverId),
+                });
+                void queryClient.invalidateQueries({
+                    queryKey: ['stickers', 'all'],
+                });
+            },
+            [queryClient],
+        ),
+    );
 
     const {
         files,
@@ -239,6 +277,13 @@ export const MessageInput: React.FC<MessageInputProps> = ({
     const { data: serverCommands = [] } = useServerCommands(
         isServerContextReady ? selectedServerId : null,
     );
+    const { data: serverList = [] } = useServers();
+    const { data: currentServerStickers = [] } = useServerStickers(
+        isServerContextReady ? selectedServerId : null,
+    );
+    const { data: allStickers = [] } = useAllStickers({
+        enabled: showStickerPicker,
+    });
     const myMember = useMemo(
         () => members.find((m) => m.userId === me?._id),
         [members, me?._id],
@@ -399,6 +444,46 @@ export const MessageInput: React.FC<MessageInputProps> = ({
             ),
         [customCategories],
     );
+
+    const stickerCategories = useMemo(() => {
+        const cats: StickerCategory[] = [];
+
+        if (isServerContextReady && serverDetails) {
+            cats.push({
+                id: serverDetails._id,
+                name: serverDetails.name,
+                icon: serverDetails.icon,
+                stickers: currentServerStickers,
+            });
+        }
+
+        const otherServerIds = new Set(allStickers.map((s) => s.serverId));
+        if (selectedServerId) otherServerIds.delete(selectedServerId);
+
+        otherServerIds.forEach((sid) => {
+            const serverStickers = allStickers.filter(
+                (s) => s.serverId === sid,
+            );
+            if (serverStickers.length > 0) {
+                const serverInfo = serverList.find((s) => s._id === sid);
+                cats.push({
+                    id: sid,
+                    name: serverInfo?.name || 'Other Server',
+                    icon: serverInfo?.icon,
+                    stickers: serverStickers,
+                });
+            }
+        });
+
+        return cats;
+    }, [
+        isServerContextReady,
+        serverDetails,
+        currentServerStickers,
+        allStickers,
+        selectedServerId,
+        serverList,
+    ]);
 
     const findLastMyMessage = useMemo(() => {
         if (!me?._id) return null;
@@ -825,10 +910,27 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                     variant="ghost"
                     onClick={() => {
                         setShowEmojiPicker(!showEmojiPicker);
+                        setShowStickerPicker(false);
                         setShowGifPicker(false);
                     }}
                 >
                     <Smile size={20} />
+                </Button>
+
+                <Button
+                    className={cn(
+                        'mb-1 h-8 w-8 shrink-0 p-0',
+                        showStickerPicker && 'text-primary',
+                    )}
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => {
+                        setShowStickerPicker(!showStickerPicker);
+                        setShowEmojiPicker(false);
+                        setShowGifPicker(false);
+                    }}
+                >
+                    <Sticker size={20} />
                 </Button>
 
                 <Box className="relative">
@@ -842,6 +944,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                         onClick={() => {
                             setShowGifPicker(!showGifPicker);
                             setShowEmojiPicker(false);
+                            setShowStickerPicker(false);
                         }}
                     >
                         <FileImage size={20} />
@@ -932,6 +1035,21 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                                 }
                             });
                             editor?.focus();
+                        }}
+                    />
+                </div>
+            )}
+
+            {showStickerPicker && (
+                <div
+                    className="absolute right-0 bottom-full z-[var(--z-index-popover)] mb-2"
+                    ref={emojiPickerRef}
+                >
+                    <StickerPicker
+                        categories={stickerCategories}
+                        onStickerSelect={(sticker) => {
+                            sendMessage('', undefined, sticker.id);
+                            setShowStickerPicker(false);
                         }}
                     />
                 </div>

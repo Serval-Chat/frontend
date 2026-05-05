@@ -73,6 +73,7 @@ export interface IMessageDm {
         text: string;
     };
     isEdited: boolean;
+    stickerId?: string;
 }
 
 /**
@@ -97,6 +98,7 @@ export interface IMessageServer {
         options: { name: string; value: JsonValue }[];
         user?: { id: string; username: string };
     };
+    stickerId?: string;
 }
 
 /**
@@ -127,6 +129,7 @@ export interface IMessageServerSent {
         options: { name: string; value: JsonValue }[];
         user?: { id: string; username: string };
     };
+    stickerId?: string;
 }
 
 /**
@@ -383,6 +386,14 @@ export interface IEmojiUpdatedEvent {
 }
 
 /**
+ * @description Sticker updated.
+ */
+export interface IStickerUpdatedEvent {
+    serverId: string;
+    senderId?: string;
+}
+
+/**
  * @description Server icon updated.
  */
 export interface IServerIconUpdatedEvent {
@@ -499,6 +510,7 @@ export const WsEvents = {
     CHANNEL_PERMISSIONS_UPDATED: 'channel_permissions_updated',
     CATEGORY_PERMISSIONS_UPDATED: 'category_permissions_updated',
     EMOJI_UPDATED: 'emoji_updated',
+    STICKER_UPDATED: 'sticker_updated',
     MENTION: 'mention',
     AUDIT_LOG_ENTRY_CREATED: 'audit_log_entry_created',
     MESSAGE_SERVER_PIN_UPDATED: 'message_server_pin_updated',

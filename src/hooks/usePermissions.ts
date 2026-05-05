@@ -106,6 +106,7 @@ export const usePermissions = (
             pinMessages: false,
             seeDeletedMessages: false,
             moderateMembers: false,
+            manageStickers: false,
         };
 
         if (!serverId || !currentUser) return perms;

@@ -22,7 +22,7 @@ import { type TypingUser, useTypingIndicator } from './useTypingIndicator';
 import { useWebSocket } from './useWebSocket';
 
 interface ChatWSResult {
-    sendMessage: (text: string, replyToId?: string) => void;
+    sendMessage: (text: string, replyToId?: string, stickerId?: string) => void;
     sendTyping: () => void;
     typingUsers: TypingUser[];
 }
@@ -51,6 +51,7 @@ export function useChatWS(
             replyToId: message.replyToId,
             repliedTo: message.repliedTo,
             isEdited: message.isEdited,
+            stickerId: message.stickerId,
         }),
         [],
     );
@@ -64,6 +65,7 @@ export function useChatWS(
             serverId: message.serverId,
             channelId: message.channelId,
             replyToId: message.replyToId,
+            stickerId: message.stickerId,
             isEdited: 'isEdited' in message ? message.isEdited : false,
             isWebhook: 'isWebhook' in message ? message.isWebhook : false,
             webhookUsername:
@@ -552,15 +554,21 @@ export function useChatWS(
     }, [selectedFriendId, selectedChannelId, clearTypingUsers]);
 
     const sendMessage = useCallback(
-        (text: string, replyToId?: string): void => {
+        (text: string, replyToId?: string, stickerId?: string): void => {
             if (selectedFriendId) {
-                wsMessages.sendMessageDm(selectedFriendId, text, replyToId);
+                wsMessages.sendMessageDm(
+                    selectedFriendId,
+                    text,
+                    replyToId,
+                    stickerId,
+                );
             } else if (selectedServerId && selectedChannelId) {
                 wsMessages.sendMessageServer(
                     selectedServerId,
                     selectedChannelId,
                     text,
                     replyToId,
+                    stickerId,
                 );
             }
         },

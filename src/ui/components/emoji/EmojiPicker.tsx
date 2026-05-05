@@ -8,6 +8,7 @@ import { useEmojiInfoBox } from '@/hooks/useEmojiInfoBox';
 import { Button } from '@/ui/components/common/Button';
 import { ParsedUnicodeEmoji } from '@/ui/components/common/ParsedUnicodeEmoji';
 import { Text } from '@/ui/components/common/Text';
+import { Tooltip } from '@/ui/components/common/Tooltip';
 import { EmojiInfoBox } from '@/ui/components/emoji/EmojiInfoBox';
 import { Box } from '@/ui/components/layout/Box';
 import { ServerIcon } from '@/ui/components/servers/ServerIcon';
@@ -276,15 +277,19 @@ const EmojiPickerContent: React.FC<{
                         ) {
                             const unicode = getUnicode(emoji as EmojiData);
                             return (
-                                <Button
-                                    className="h-8 w-8 shrink-0 rounded-md transition-colors hover:bg-bg-subtle"
+                                <Tooltip
+                                    content={`:${(emoji as EmojiData).short_name}:`}
                                     key={(emoji as EmojiData).unified}
-                                    title={`:${(emoji as EmojiData).short_name}:`}
-                                    variant="ghost"
-                                    onClick={() => onEmojiSelect(unicode)}
+                                    position="top"
                                 >
-                                    <ParsedUnicodeEmoji content={unicode} />
-                                </Button>
+                                    <Button
+                                        className="h-8 w-8 shrink-0 rounded-md transition-colors hover:bg-bg-subtle"
+                                        variant="ghost"
+                                        onClick={() => onEmojiSelect(unicode)}
+                                    >
+                                        <ParsedUnicodeEmoji content={unicode} />
+                                    </Button>
+                                </Tooltip>
                             );
                         }
                         if (
@@ -299,24 +304,30 @@ const EmojiPickerContent: React.FC<{
                                 url: string;
                             };
                             return (
-                                <Button
-                                    className="h-8 w-8 shrink-0 rounded-md transition-colors hover:bg-bg-subtle"
+                                <Tooltip
+                                    content={`:${custom.name}:`}
                                     key={custom.id}
-                                    title={`:${custom.name}:`}
-                                    variant="ghost"
-                                    onClick={() =>
-                                        onCustomEmojiSelect?.(custom)
-                                    }
-                                    onContextMenu={(e) =>
-                                        showEmojiInfo(custom, e)
-                                    }
+                                    position="top"
                                 >
-                                    <img
-                                        alt={custom.name}
-                                        className="h-6 w-6 object-contain"
-                                        src={resolveApiUrl(custom.url) || ''}
-                                    />
-                                </Button>
+                                    <Button
+                                        className="h-8 w-8 shrink-0 rounded-md transition-colors hover:bg-bg-subtle"
+                                        variant="ghost"
+                                        onClick={() =>
+                                            onCustomEmojiSelect?.(custom)
+                                        }
+                                        onContextMenu={(e) =>
+                                            showEmojiInfo(custom, e)
+                                        }
+                                    >
+                                        <img
+                                            alt={custom.name}
+                                            className="h-6 w-6 object-contain"
+                                            src={
+                                                resolveApiUrl(custom.url) || ''
+                                            }
+                                        />
+                                    </Button>
+                                </Tooltip>
                             );
                         }
                         return null;

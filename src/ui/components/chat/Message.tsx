@@ -429,6 +429,7 @@ export const Message: React.FC<MessageProps> = ({
                             embeds={message.embeds}
                             isDeleted={!!message.deletedAt}
                             serverId={message.serverId}
+                            stickerId={message.stickerId}
                             text={message.text}
                         />
                     )}

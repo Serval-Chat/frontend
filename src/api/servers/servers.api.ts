@@ -12,6 +12,15 @@ import type {
     ServerMember,
 } from './servers.types';
 
+export interface Sticker {
+    id: string;
+    name: string;
+    imageUrl: string;
+    serverId: string;
+    createdBy: string;
+    createdAt?: string;
+}
+
 export const serversApi = {
     getServers: async (): Promise<Server[]> => {
         const response = await apiClient.get<Server[]>('/api/v1/servers');
@@ -506,6 +515,47 @@ export const serversApi = {
         await apiClient.post(
             `/api/v1/servers/${serverId}/members/${userId}/timeout`,
             { duration, reason },
+        );
+    },
+
+    getStickers: async (serverId: string): Promise<Sticker[]> => {
+        const response = await apiClient.get<Sticker[]>(
+            `/api/v1/servers/${serverId}/stickers`,
+        );
+        return response.data;
+    },
+
+    getAllStickers: async (): Promise<Sticker[]> => {
+        const response = await apiClient.get<Sticker[]>('/api/v1/stickers');
+        return response.data;
+    },
+
+    uploadSticker: async (
+        serverId: string,
+        name: string,
+        file: File,
+    ): Promise<Sticker> => {
+        const formData = new FormData();
+        formData.append('sticker', file);
+        formData.append('name', name);
+        const response = await apiClient.post<Sticker>(
+            `/api/v1/servers/${serverId}/stickers`,
+            formData,
+            {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            },
+        );
+        return response.data;
+    },
+
+    deleteSticker: async (
+        serverId: string,
+        stickerId: string,
+    ): Promise<void> => {
+        await apiClient.delete(
+            `/api/v1/servers/${serverId}/stickers/${stickerId}`,
         );
     },
 };

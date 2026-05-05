@@ -8,6 +8,7 @@ import {
     Settings,
     Shield,
     Smile,
+    Sticker,
     X,
     Zap,
 } from 'lucide-react';
@@ -25,6 +26,7 @@ import { ServerEmojiSettings } from './ServerEmojiSettings';
 import { ServerInviteSettings } from './ServerInviteSettings';
 import { ServerOverviewSettings } from './ServerOverviewSettings';
 import { ServerRoleSettings } from './ServerRoleSettings';
+import { ServerStickerSettings } from './ServerStickerSettings';
 import { AuditLogSettings } from './auditLog/AuditLogSettings';
 
 interface ServerSettingsModalProps {
@@ -47,6 +49,12 @@ const ALL_SECTIONS: {
     },
     { id: 'roles', label: 'Roles', icon: Shield, permission: 'manageRoles' },
     { id: 'emojis', label: 'Emojis', icon: Smile, permission: 'manageServer' },
+    {
+        id: 'stickers',
+        label: 'Stickers',
+        icon: Sticker,
+        permission: 'manageServer',
+    },
     {
         id: 'invites',
         label: 'Invites',
@@ -176,6 +184,9 @@ export const ServerSettingsModal: React.FC<ServerSettingsModalProps> = ({
                             )}
                             {activeSection === 'emojis' && (
                                 <ServerEmojiSettings serverId={serverId} />
+                            )}
+                            {activeSection === 'stickers' && (
+                                <ServerStickerSettings serverId={serverId} />
                             )}
                             {activeSection === 'invites' && (
                                 <ServerInviteSettings serverId={serverId} />

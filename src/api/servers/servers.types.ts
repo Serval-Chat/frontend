@@ -81,6 +81,7 @@ export interface RolePermissions {
     bypassSlowmode: boolean;
     seeDeletedMessages: boolean;
     moderateMembers: boolean;
+    manageStickers: boolean;
 }
 
 export interface Role {

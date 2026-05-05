@@ -8,11 +8,17 @@ export const wsMessages = {
     /**
      * Send a direct message.
      */
-    sendMessageDm: (receiverId: string, text: string, replyToId?: string) => {
+    sendMessageDm: (
+        receiverId: string,
+        text: string,
+        replyToId?: string,
+        stickerId?: string,
+    ) => {
         wsClient.send(WsEvents.SEND_MESSAGE_DM, {
             receiverId,
             text,
             replyToId,
+            stickerId,
         });
     },
 
@@ -24,12 +30,14 @@ export const wsMessages = {
         channelId: string,
         text: string,
         replyToId?: string,
+        stickerId?: string,
     ) => {
         wsClient.send(WsEvents.SEND_MESSAGE_SERVER, {
             serverId,
             channelId,
             text,
             replyToId,
+            stickerId,
         });
     },
 

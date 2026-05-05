@@ -725,6 +725,14 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
                                 }
                             />
                             <PermissionToggle
+                                description="Allows member to upload, edit, and delete server stickers."
+                                label="Manage Stickers"
+                                value={permissions.manageStickers || false}
+                                onChange={(val) =>
+                                    updatePermission('manageStickers', val)
+                                }
+                            />
+                            <PermissionToggle
                                 description="Allows member to use @everyone and @here to notify all members."
                                 label="Mention @everyone"
                                 value={
