@@ -829,6 +829,205 @@ describe('TextParser', () => {
         ]);
     });
 
+    it('should parse curly underline text', () => {
+        const text = 'Hello _~curly underline~_ world';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            { type: 'text', content: 'Hello ' },
+            { type: 'curly_underline', content: 'curly underline' },
+            { type: 'text', content: ' world' },
+        ]);
+    });
+
+    it('should parse jagged underline text', () => {
+        const text = 'Hello _^jagged underline^_ world';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            { type: 'text', content: 'Hello ' },
+            { type: 'jagged_underline', content: 'jagged underline' },
+            { type: 'text', content: ' world' },
+        ]);
+    });
+
+    it('should parse double underline text', () => {
+        const text = 'Hello ___double underline___ world';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            { type: 'text', content: 'Hello ' },
+            { type: 'double_underline', content: 'double underline' },
+            { type: 'text', content: ' world' },
+        ]);
+    });
+
+    it('should prefer double underline over single underline', () => {
+        const text = '___double___ and __single__';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            { type: 'double_underline', content: 'double' },
+            { type: 'text', content: ' and ' },
+            { type: 'underline', content: 'single' },
+        ]);
+    });
+
+    it('should parse doubly curly underline text', () => {
+        const text = 'Hello _~~doubly curly~~_ world';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            { type: 'text', content: 'Hello ' },
+            { type: 'double_curly_underline', content: 'doubly curly' },
+            { type: 'text', content: ' world' },
+        ]);
+    });
+
+    it('should prefer doubly curly over single curly and strikethrough', () => {
+        const text = '_~~double~~_, _~single~_, and ~~strike~~';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            { type: 'double_curly_underline', content: 'double' },
+            { type: 'text', content: ', ' },
+            { type: 'curly_underline', content: 'single' },
+            { type: 'text', content: ', and ' },
+            { type: 'strikethrough', content: 'strike' },
+        ]);
+    });
+
+    it('should parse dashed underline text', () => {
+        const text = 'Hello _-dashed underline-_ world';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            { type: 'text', content: 'Hello ' },
+            { type: 'dashed_underline', content: 'dashed underline' },
+            { type: 'text', content: ' world' },
+        ]);
+    });
+
+    it('should parse dotted underline text', () => {
+        const text = 'Hello _.dotted underline._ world';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            { type: 'text', content: 'Hello ' },
+            { type: 'dotted_underline', content: 'dotted underline' },
+            { type: 'text', content: ' world' },
+        ]);
+    });
+
+    it('should parse rhythm underline text', () => {
+        const text = 'Hello _-.rhythm underline.-_ world';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            { type: 'text', content: 'Hello ' },
+            { type: 'rhythm_underline', content: 'rhythm underline' },
+            { type: 'text', content: ' world' },
+        ]);
+    });
+
+    it('should parse superscript text', () => {
+        const text = 'E = mc^2^';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            { type: 'text', content: 'E = mc' },
+            { type: 'superscript', content: '2' },
+        ]);
+    });
+
+    it('should parse subscript text', () => {
+        const text = 'H~2~O';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            { type: 'text', content: 'H' },
+            { type: 'subscript', content: '2' },
+            { type: 'text', content: 'O' },
+        ]);
+    });
+
+    it('should handle nested formatting within super/subscript', () => {
+        const text = '^**bold**^ and ~*italic*~';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            {
+                type: 'superscript',
+                content: [{ type: 'bold', content: 'bold' }],
+            },
+            { type: 'text', content: ' and ' },
+            {
+                type: 'subscript',
+                content: [{ type: 'italic', content: 'italic' }],
+            },
+        ]);
+    });
+
+    it('should prefer strikethrough over subscript', () => {
+        const text = '~~strike~~ and ~sub~';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            { type: 'strikethrough', content: 'strike' },
+            { type: 'text', content: ' and ' },
+            { type: 'subscript', content: 'sub' },
+        ]);
+    });
+
+    it('should prefer jagged underline over superscript', () => {
+        const text = '_^jagged^_ and ^super^';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            { type: 'jagged_underline', content: 'jagged' },
+            { type: 'text', content: ' and ' },
+            { type: 'superscript', content: 'super' },
+        ]);
+    });
+
+    it('should not parse unclosed super/subscript', () => {
+        const text = '^unclosed and ~unclosed';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            { type: 'text', content: '^unclosed and ~unclosed' },
+        ]);
+    });
+
+    it('should not parse multiline super/subscript', () => {
+        const text = '^line1\nline2^';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([{ type: 'text', content: '^line1\nline2^' }]);
+    });
+
+    it('should parse stacked superscript/subscript text', () => {
+        const text = '^top|bottom^';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            {
+                type: 'stacked_script',
+                sup: 'top',
+                sub: 'bottom',
+            },
+        ]);
+    });
+
+    it('should parse stacked script with nested formatting', () => {
+        const text = '^**bold**|*italic*^';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            {
+                type: 'stacked_script',
+                sup: [{ type: 'bold', content: 'bold' }],
+                sub: [{ type: 'italic', content: 'italic' }],
+            },
+        ]);
+    });
+
+    it('should fall back to normal superscript if no pipe is present', () => {
+        const text = '^normal^';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([{ type: 'superscript', content: 'normal' }]);
+    });
+
+    it('should not parse C/C++/C# programmer as header', () => {
+        const text = 'C/C++/C# programmer';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            { type: 'text', content: 'C/C++/C# programmer' },
+        ]);
+    });
+
     it('should parse complex nested formatting with underline and strikethrough', () => {
         const text =
             'This is **bold and ~~strikethrough and __underlined__~~**';

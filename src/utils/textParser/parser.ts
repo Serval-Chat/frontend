@@ -49,6 +49,16 @@ export const ParserPresets = {
             ParserFeature.UNORDERED_LIST,
             ParserFeature.KLIPY,
             ParserFeature.CHECKLIST,
+            ParserFeature.CURLY_UNDERLINE,
+            ParserFeature.JAGGED_UNDERLINE,
+            ParserFeature.DOUBLE_UNDERLINE,
+            ParserFeature.DOUBLE_CURLY_UNDERLINE,
+            ParserFeature.DASHED_UNDERLINE,
+            ParserFeature.DOTTED_UNDERLINE,
+            ParserFeature.RHYTHM_UNDERLINE,
+            ParserFeature.SUPERSCRIPT,
+            ParserFeature.SUBSCRIPT,
+            ParserFeature.STACKED_SCRIPT,
         ],
     },
     BIO: {
@@ -84,6 +94,16 @@ export const ParserPresets = {
             ParserFeature.MERMAID,
             ParserFeature.UNORDERED_LIST,
             ParserFeature.CHECKLIST,
+            ParserFeature.CURLY_UNDERLINE,
+            ParserFeature.JAGGED_UNDERLINE,
+            ParserFeature.DOUBLE_UNDERLINE,
+            ParserFeature.DOUBLE_CURLY_UNDERLINE,
+            ParserFeature.DASHED_UNDERLINE,
+            ParserFeature.DOTTED_UNDERLINE,
+            ParserFeature.RHYTHM_UNDERLINE,
+            ParserFeature.SUPERSCRIPT,
+            ParserFeature.SUBSCRIPT,
+            ParserFeature.STACKED_SCRIPT,
         ],
     },
     EMBED: {
@@ -103,6 +123,16 @@ export const ParserPresets = {
             ParserFeature.EVERYONE_MENTION,
             ParserFeature.CHANNEL_LINK,
             ParserFeature.INLINE_LATEX,
+            ParserFeature.CURLY_UNDERLINE,
+            ParserFeature.JAGGED_UNDERLINE,
+            ParserFeature.DOUBLE_UNDERLINE,
+            ParserFeature.DOUBLE_CURLY_UNDERLINE,
+            ParserFeature.DASHED_UNDERLINE,
+            ParserFeature.DOTTED_UNDERLINE,
+            ParserFeature.RHYTHM_UNDERLINE,
+            ParserFeature.SUPERSCRIPT,
+            ParserFeature.SUBSCRIPT,
+            ParserFeature.STACKED_SCRIPT,
         ],
     },
     EMBED_INLINE: {
@@ -122,6 +152,16 @@ export const ParserPresets = {
             ParserFeature.EVERYONE_MENTION,
             ParserFeature.CHANNEL_LINK,
             ParserFeature.INLINE_LATEX,
+            ParserFeature.CURLY_UNDERLINE,
+            ParserFeature.JAGGED_UNDERLINE,
+            ParserFeature.DOUBLE_UNDERLINE,
+            ParserFeature.DOUBLE_CURLY_UNDERLINE,
+            ParserFeature.DASHED_UNDERLINE,
+            ParserFeature.DOTTED_UNDERLINE,
+            ParserFeature.RHYTHM_UNDERLINE,
+            ParserFeature.SUPERSCRIPT,
+            ParserFeature.SUBSCRIPT,
+            ParserFeature.STACKED_SCRIPT,
         ],
     },
 } as const;
@@ -282,6 +322,21 @@ export class TextParser {
 
             if (
                 char === '_' &&
+                this.options.features.includes(
+                    ParserFeature.DOUBLE_UNDERLINE,
+                ) &&
+                this.peek('___')
+            ) {
+                const doubleUnderlineNode = this.tryParseDoubleUnderline();
+                if (doubleUnderlineNode) {
+                    currentText = this.flushText(nodes, currentText);
+                    nodes.push(doubleUnderlineNode);
+                    continue;
+                }
+            }
+
+            if (
+                char === '_' &&
                 this.options.features.includes(ParserFeature.UNDERLINE) &&
                 this.peek('__')
             ) {
@@ -289,6 +344,95 @@ export class TextParser {
                 if (underlineNode) {
                     currentText = this.flushText(nodes, currentText);
                     nodes.push(underlineNode);
+                    continue;
+                }
+            }
+
+            if (
+                char === '_' &&
+                this.options.features.includes(
+                    ParserFeature.DOUBLE_CURLY_UNDERLINE,
+                ) &&
+                this.peek('_~~')
+            ) {
+                const doubleCurlyUnderlineNode =
+                    this.tryParseDoubleCurlyUnderline();
+                if (doubleCurlyUnderlineNode) {
+                    currentText = this.flushText(nodes, currentText);
+                    nodes.push(doubleCurlyUnderlineNode);
+                    continue;
+                }
+            }
+
+            if (
+                char === '_' &&
+                this.options.features.includes(ParserFeature.CURLY_UNDERLINE) &&
+                this.peek('_~')
+            ) {
+                const curlyUnderlineNode = this.tryParseCurlyUnderline();
+                if (curlyUnderlineNode) {
+                    currentText = this.flushText(nodes, currentText);
+                    nodes.push(curlyUnderlineNode);
+                    continue;
+                }
+            }
+
+            if (
+                char === '_' &&
+                this.options.features.includes(
+                    ParserFeature.RHYTHM_UNDERLINE,
+                ) &&
+                this.peek('_-.')
+            ) {
+                const rhythmUnderlineNode = this.tryParseRhythmUnderline();
+                if (rhythmUnderlineNode) {
+                    currentText = this.flushText(nodes, currentText);
+                    nodes.push(rhythmUnderlineNode);
+                    continue;
+                }
+            }
+
+            if (
+                char === '_' &&
+                this.options.features.includes(
+                    ParserFeature.DOTTED_UNDERLINE,
+                ) &&
+                this.peek('_.')
+            ) {
+                const dottedUnderlineNode = this.tryParseDottedUnderline();
+                if (dottedUnderlineNode) {
+                    currentText = this.flushText(nodes, currentText);
+                    nodes.push(dottedUnderlineNode);
+                    continue;
+                }
+            }
+
+            if (
+                char === '_' &&
+                this.options.features.includes(
+                    ParserFeature.DASHED_UNDERLINE,
+                ) &&
+                this.peek('_-')
+            ) {
+                const dashedUnderlineNode = this.tryParseDashedUnderline();
+                if (dashedUnderlineNode) {
+                    currentText = this.flushText(nodes, currentText);
+                    nodes.push(dashedUnderlineNode);
+                    continue;
+                }
+            }
+
+            if (
+                char === '_' &&
+                this.options.features.includes(
+                    ParserFeature.JAGGED_UNDERLINE,
+                ) &&
+                this.peek('_^')
+            ) {
+                const jaggedUnderlineNode = this.tryParseJaggedUnderline();
+                if (jaggedUnderlineNode) {
+                    currentText = this.flushText(nodes, currentText);
+                    nodes.push(jaggedUnderlineNode);
                     continue;
                 }
             }
@@ -302,6 +446,30 @@ export class TextParser {
                 if (strikethroughNode) {
                     currentText = this.flushText(nodes, currentText);
                     nodes.push(strikethroughNode);
+                    continue;
+                }
+            }
+
+            if (
+                char === '~' &&
+                this.options.features.includes(ParserFeature.SUBSCRIPT)
+            ) {
+                const subscriptNode = this.tryParseSubscript();
+                if (subscriptNode) {
+                    currentText = this.flushText(nodes, currentText);
+                    nodes.push(subscriptNode);
+                    continue;
+                }
+            }
+
+            if (
+                char === '^' &&
+                this.options.features.includes(ParserFeature.SUPERSCRIPT)
+            ) {
+                const superscriptNode = this.tryParseSuperscript();
+                if (superscriptNode) {
+                    currentText = this.flushText(nodes, currentText);
+                    nodes.push(superscriptNode);
                     continue;
                 }
             }
@@ -669,6 +837,10 @@ export class TextParser {
     }
 
     private tryParseHeading(): ASTNode | null {
+        if (this.index > 0 && this.text[this.index - 1] !== '\n') {
+            return null;
+        }
+
         const start = this.index;
 
         if (this.peek('### ')) {
@@ -1526,6 +1698,288 @@ export class TextParser {
             this.index += 2; // skip '__'
             return {
                 type: 'underline',
+                content: this.parseContent(content),
+            } as ASTNode;
+        }
+
+        this.index = start;
+        return null;
+    }
+
+    private tryParseCurlyUnderline(): ASTNode | null {
+        const start = this.index;
+        this.index += 2; // skip '_~'
+
+        let content = '';
+        let foundClosing = false;
+
+        while (this.index < this.text.length) {
+            if (this.peek('~_')) {
+                foundClosing = true;
+                break;
+            }
+            content += this.text[this.index];
+            this.index++;
+        }
+
+        if (foundClosing && content) {
+            this.index += 2; // skip '~_'
+            return {
+                type: 'curly_underline',
+                content: this.parseContent(content),
+            } as ASTNode;
+        }
+
+        this.index = start;
+        return null;
+    }
+
+    private tryParseDoubleCurlyUnderline(): ASTNode | null {
+        const start = this.index;
+        this.index += 3; // skip '_~~'
+
+        let content = '';
+        let foundClosing = false;
+
+        while (this.index < this.text.length) {
+            if (this.peek('~~_')) {
+                foundClosing = true;
+                break;
+            }
+            content += this.text[this.index];
+            this.index++;
+        }
+
+        if (foundClosing && content) {
+            this.index += 3; // skip '~~_'
+            return {
+                type: 'double_curly_underline',
+                content: this.parseContent(content),
+            } as ASTNode;
+        }
+
+        this.index = start;
+        return null;
+    }
+
+    private tryParseDashedUnderline(): ASTNode | null {
+        const start = this.index;
+        this.index += 2; // skip '_-'
+
+        let content = '';
+        let foundClosing = false;
+
+        while (this.index < this.text.length) {
+            if (this.peek('-_')) {
+                foundClosing = true;
+                break;
+            }
+            content += this.text[this.index];
+            this.index++;
+        }
+
+        if (foundClosing && content) {
+            this.index += 2; // skip '-_'
+            return {
+                type: 'dashed_underline',
+                content: this.parseContent(content),
+            } as ASTNode;
+        }
+
+        this.index = start;
+        return null;
+    }
+
+    private tryParseDottedUnderline(): ASTNode | null {
+        const start = this.index;
+        this.index += 2; // skip '_.'
+
+        let content = '';
+        let foundClosing = false;
+
+        while (this.index < this.text.length) {
+            if (this.peek('._')) {
+                foundClosing = true;
+                break;
+            }
+            content += this.text[this.index];
+            this.index++;
+        }
+
+        if (foundClosing && content) {
+            this.index += 2; // skip '._'
+            return {
+                type: 'dotted_underline',
+                content: this.parseContent(content),
+            } as ASTNode;
+        }
+
+        this.index = start;
+        return null;
+    }
+
+    private tryParseRhythmUnderline(): ASTNode | null {
+        const start = this.index;
+        this.index += 3; // skip '_-.'
+
+        let content = '';
+        let foundClosing = false;
+
+        while (this.index < this.text.length) {
+            if (this.peek('.-_')) {
+                foundClosing = true;
+                break;
+            }
+            content += this.text[this.index];
+            this.index++;
+        }
+
+        if (foundClosing && content) {
+            this.index += 3; // skip '.-_'
+            return {
+                type: 'rhythm_underline',
+                content: this.parseContent(content),
+            } as ASTNode;
+        }
+
+        this.index = start;
+        return null;
+    }
+
+    private tryParseSuperscript(): ASTNode | null {
+        const start = this.index;
+        this.index += 1; // skip '^'
+
+        let firstPart = '';
+        let secondPart = '';
+        let hasPipe = false;
+        let foundClosing = false;
+
+        while (this.index < this.text.length) {
+            const char = this.text[this.index];
+            if (char === '^') {
+                foundClosing = true;
+                break;
+            }
+            if (char === '|' && !hasPipe) {
+                hasPipe = true;
+                this.index++;
+                continue;
+            }
+            if (char === '\n') {
+                break; // No multiline superscript
+            }
+            if (hasPipe) {
+                secondPart += char;
+            } else {
+                firstPart += char;
+            }
+            this.index++;
+        }
+
+        if (foundClosing && (firstPart || secondPart)) {
+            this.index += 1; // skip '^'
+            if (
+                hasPipe &&
+                this.options.features.includes(ParserFeature.STACKED_SCRIPT)
+            ) {
+                return {
+                    type: 'stacked_script',
+                    sup: this.parseContent(firstPart),
+                    sub: this.parseContent(secondPart),
+                } as ASTNode;
+            }
+            return {
+                type: 'superscript',
+                content: this.parseContent(
+                    firstPart + (hasPipe ? '|' : '') + secondPart,
+                ),
+            } as ASTNode;
+        }
+
+        this.index = start;
+        return null;
+    }
+
+    private tryParseSubscript(): ASTNode | null {
+        const start = this.index;
+        this.index += 1; // skip '~'
+
+        let content = '';
+        let foundClosing = false;
+
+        while (this.index < this.text.length) {
+            if (this.text[this.index] === '~') {
+                foundClosing = true;
+                break;
+            }
+            if (this.text[this.index] === '\n') {
+                break; // No multiline subscript
+            }
+            content += this.text[this.index];
+            this.index++;
+        }
+
+        if (foundClosing && content) {
+            this.index += 1; // skip '~'
+            return {
+                type: 'subscript',
+                content: this.parseContent(content),
+            } as ASTNode;
+        }
+
+        this.index = start;
+        return null;
+    }
+
+    private tryParseJaggedUnderline(): ASTNode | null {
+        const start = this.index;
+        this.index += 2; // skip '_^'
+
+        let content = '';
+        let foundClosing = false;
+
+        while (this.index < this.text.length) {
+            if (this.peek('^_')) {
+                foundClosing = true;
+                break;
+            }
+            content += this.text[this.index];
+            this.index++;
+        }
+
+        if (foundClosing && content) {
+            this.index += 2; // skip '^_'
+            return {
+                type: 'jagged_underline',
+                content: this.parseContent(content),
+            } as ASTNode;
+        }
+
+        this.index = start;
+        return null;
+    }
+
+    private tryParseDoubleUnderline(): ASTNode | null {
+        const start = this.index;
+        this.index += 3; // skip '___'
+
+        let content = '';
+        let foundClosing = false;
+
+        while (this.index < this.text.length) {
+            if (this.peek('___')) {
+                foundClosing = true;
+                break;
+            }
+            content += this.text[this.index];
+            this.index++;
+        }
+
+        if (foundClosing && content) {
+            this.index += 3; // skip '___'
+            return {
+                type: 'double_underline',
                 content: this.parseContent(content),
             } as ASTNode;
         }

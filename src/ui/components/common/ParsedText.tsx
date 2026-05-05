@@ -247,6 +247,200 @@ export const ParsedText: React.FC<ParsedTextProps> = ({
                             </Text>
                         );
 
+                    case 'curly_underline':
+                        return (
+                            <Text
+                                className="curly-underline"
+                                key={idx}
+                                size={size}
+                                variant={variant}
+                                wrap={wrap}
+                            >
+                                {typeof node.content === 'string' ? (
+                                    node.content
+                                ) : (
+                                    <ParsedText
+                                        {...nestedProps}
+                                        nodes={node.content}
+                                    />
+                                )}
+                            </Text>
+                        );
+
+                    case 'jagged_underline':
+                        return (
+                            <Text
+                                className="jagged-underline"
+                                key={idx}
+                                size={size}
+                                variant={variant}
+                                wrap={wrap}
+                            >
+                                {typeof node.content === 'string' ? (
+                                    node.content
+                                ) : (
+                                    <ParsedText
+                                        {...nestedProps}
+                                        nodes={node.content}
+                                    />
+                                )}
+                            </Text>
+                        );
+
+                    case 'double_underline':
+                        return (
+                            <Text
+                                className="double-underline"
+                                key={idx}
+                                size={size}
+                                variant={variant}
+                                wrap={wrap}
+                            >
+                                {typeof node.content === 'string' ? (
+                                    node.content
+                                ) : (
+                                    <ParsedText
+                                        {...nestedProps}
+                                        nodes={node.content}
+                                    />
+                                )}
+                            </Text>
+                        );
+
+                    case 'double_curly_underline':
+                        return (
+                            <Text
+                                className="double-curly-underline"
+                                key={idx}
+                                size={size}
+                                variant={variant}
+                                wrap={wrap}
+                            >
+                                {typeof node.content === 'string' ? (
+                                    node.content
+                                ) : (
+                                    <ParsedText
+                                        {...nestedProps}
+                                        nodes={node.content}
+                                    />
+                                )}
+                            </Text>
+                        );
+
+                    case 'dashed_underline':
+                        return (
+                            <Text
+                                className="dashed-underline"
+                                key={idx}
+                                size={size}
+                                variant={variant}
+                                wrap={wrap}
+                            >
+                                {typeof node.content === 'string' ? (
+                                    node.content
+                                ) : (
+                                    <ParsedText
+                                        {...nestedProps}
+                                        nodes={node.content}
+                                    />
+                                )}
+                            </Text>
+                        );
+
+                    case 'dotted_underline':
+                        return (
+                            <Text
+                                className="dotted-underline"
+                                key={idx}
+                                size={size}
+                                variant={variant}
+                                wrap={wrap}
+                            >
+                                {typeof node.content === 'string' ? (
+                                    node.content
+                                ) : (
+                                    <ParsedText
+                                        {...nestedProps}
+                                        nodes={node.content}
+                                    />
+                                )}
+                            </Text>
+                        );
+
+                    case 'rhythm_underline':
+                        return (
+                            <Text
+                                className="rhythm-underline"
+                                key={idx}
+                                size={size}
+                                variant={variant}
+                                wrap={wrap}
+                            >
+                                {typeof node.content === 'string' ? (
+                                    node.content
+                                ) : (
+                                    <ParsedText
+                                        {...nestedProps}
+                                        nodes={node.content}
+                                    />
+                                )}
+                            </Text>
+                        );
+
+                    case 'superscript':
+                        return (
+                            <sup key={idx}>
+                                {typeof node.content === 'string' ? (
+                                    node.content
+                                ) : (
+                                    <ParsedText
+                                        {...nestedProps}
+                                        nodes={node.content}
+                                    />
+                                )}
+                            </sup>
+                        );
+
+                    case 'subscript':
+                        return (
+                            <sub key={idx}>
+                                {typeof node.content === 'string' ? (
+                                    node.content
+                                ) : (
+                                    <ParsedText
+                                        {...nestedProps}
+                                        nodes={node.content}
+                                    />
+                                )}
+                            </sub>
+                        );
+
+                    case 'stacked_script':
+                        return (
+                            <span className="stacked-script" key={idx}>
+                                <sup className="stacked-sup">
+                                    {typeof node.sup === 'string' ? (
+                                        node.sup
+                                    ) : (
+                                        <ParsedText
+                                            {...nestedProps}
+                                            nodes={node.sup}
+                                        />
+                                    )}
+                                </sup>
+                                <sub className="stacked-sub">
+                                    {typeof node.sub === 'string' ? (
+                                        node.sub
+                                    ) : (
+                                        <ParsedText
+                                            {...nestedProps}
+                                            nodes={node.sub}
+                                        />
+                                    )}
+                                </sub>
+                            </span>
+                        );
+
                     case 'strikethrough':
                         return (
                             <Text

@@ -198,7 +198,7 @@ export const UserProfileCard: React.FC<UserProfileCardProps> = ({
                         >
                             About Me
                         </Heading>
-                        <Box className="text-sm leading-relaxed whitespace-pre-wrap text-foreground/90">
+                        <Box className="text-[10px] leading-relaxed whitespace-pre-wrap text-foreground/90">
                             <ParsedText
                                 nodes={bioNodes}
                                 size="xs"

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-import { Check, Copy } from 'lucide-react';
+import { Check, Copy, Maximize } from 'lucide-react';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 
 import { customSyntaxTheme } from '@/styles/syntax-theme';
@@ -32,6 +32,19 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({
         setTimeout(() => setIsCopied(false), 2000);
     };
 
+    const handleOpenFullScreen = (e: React.MouseEvent): void => {
+        e.stopPropagation();
+        setIsModalOpen(true);
+    };
+
+    const handleContainerClick = (): void => {
+        const selection = window.getSelection();
+        if (selection && selection.toString().length > 0) {
+            return;
+        }
+        setIsModalOpen(true);
+    };
+
     if (inline) {
         return (
             <code className="rounded bg-bg-secondary px-1 py-0.5 font-mono text-sm">
@@ -46,7 +59,7 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({
                 className="group relative my-2 cursor-pointer overflow-hidden rounded-lg border border-border-subtle bg-background shadow-sm"
                 role="button"
                 tabIndex={0}
-                onClick={() => setIsModalOpen(true)}
+                onClick={handleContainerClick}
                 onKeyDown={(e) => {
                     if (e.key === 'Enter' || e.key === ' ') {
                         setIsModalOpen(true);
@@ -57,32 +70,73 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({
                     <span className="text-[10px] font-black tracking-wider text-primary uppercase">
                         {language || 'text'}
                     </span>
-                    <Button
-                        className="flex items-center gap-2 rounded-md border-none p-1.5 text-muted-foreground shadow-none transition-all hover:bg-primary/10 hover:text-primary"
-                        size="sm"
-                        variant="ghost"
-                        onClick={handleCopy}
-                    >
-                        {isCopied ? (
-                            <Check className="text-success" size={14} />
-                        ) : (
-                            <Copy size={14} />
-                        )}
-                        <span className="text-[10px] font-bold">
-                            {isCopied ? 'COPIED' : 'COPY CODE'}
-                        </span>
-                    </Button>
+                    <div className="flex items-center gap-1">
+                        <Button
+                            className="flex items-center gap-3 rounded-md border-none p-1.5 text-muted-foreground shadow-none transition-all hover:bg-primary/10 hover:text-primary"
+                            size="sm"
+                            title="Full Screen"
+                            variant="ghost"
+                            onClick={handleOpenFullScreen}
+                        >
+                            <Maximize size={14} />
+                            <span className="text-[10px] font-bold">
+                                FULL SCREEN
+                            </span>
+                        </Button>
+                        <div className="mx-1 h-3 w-[1px] bg-border-subtle" />
+                        <Button
+                            className="flex items-center gap-3 rounded-md border-none p-1.5 text-muted-foreground shadow-none transition-all hover:bg-primary/10 hover:text-primary"
+                            size="sm"
+                            variant="ghost"
+                            onClick={handleCopy}
+                        >
+                            {isCopied ? (
+                                <Check className="text-success" size={14} />
+                            ) : (
+                                <Copy size={14} />
+                            )}
+                            <span className="text-[10px] font-bold">
+                                {isCopied ? 'COPIED' : 'COPY CODE'}
+                            </span>
+                        </Button>
+                    </div>
                 </div>
-                <div className="custom-scrollbar overflow-x-auto bg-bg-secondary/50 p-0 font-mono text-sm">
+                <div className="custom-scrollbar overflow-hidden bg-bg-secondary/50 p-0 font-mono text-sm">
                     <SyntaxHighlighter
+                        showLineNumbers
+                        wrapLines
+                        wrapLongLines
                         customStyle={{
                             margin: 0,
                             padding: '1rem',
                             fontSize: '0.875rem',
-                            lineHeight: '1.5',
+                            lineHeight: '1.5rem',
                             backgroundColor: 'transparent',
+                            whiteSpace: 'pre-wrap',
+                            wordBreak: 'break-all',
                         }}
                         language={(language || 'text').toLowerCase()}
+                        lineNumberClassName="code-block-line-number"
+                        lineNumberStyle={{
+                            minWidth: '3.5em',
+                            paddingRight: '1em',
+                            textAlign: 'right',
+                            userSelect: 'none',
+                            opacity: 0.5,
+                            borderRight: '1px solid var(--color-border-subtle)',
+                            marginRight: '1em',
+                            height: 'auto',
+                            display: 'inline-block',
+                        }}
+                        lineProps={{
+                            style: {
+                                whiteSpace: 'pre-wrap',
+                                wordBreak: 'break-all',
+                                display: 'flex',
+                                width: '100%',
+                            },
+                        }}
+                        lineTagName="div"
                         style={customSyntaxTheme}
                     >
                         {content}

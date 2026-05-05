@@ -32,11 +32,13 @@
         font-weight: 400;
     }
 }
+
 @layer utilities {
     @keyframes marquee {
         0% {
             transform: translateX(0);
         }
+
         100% {
             transform: translateX(-50%);
         }
@@ -47,9 +49,11 @@
         100% {
             transform: translateX(0);
         }
+
         25% {
             transform: translateX(-4px);
         }
+
         75% {
             transform: translateX(4px);
         }
@@ -132,4 +136,196 @@
 
 body.picker-open .custom-scrollbar {
     overflow: hidden !important;
+}
+
+.curly-underline {
+    position: relative;
+    display: inline;
+    text-decoration: none !important;
+}
+
+.curly-underline::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -2px;
+    width: 100%;
+    height: 6px;
+    background-image: url("data:image/svg+xml,%3Csvg width='12' height='6' viewBox='0 0 12 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M-3 3 Q -1.5 0, 0 3 T 3 3 T 6 3 T 9 3 T 12 3 T 15 3' stroke='currentColor' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");
+    background-repeat: repeat-x;
+    background-size: 12px 6px;
+    opacity: 0.7;
+}
+
+.jagged-underline {
+    position: relative;
+    display: inline;
+    text-decoration: none !important;
+}
+
+.jagged-underline::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -2px;
+    width: 100%;
+    height: 4px;
+    background-image: url("data:image/svg+xml,%3Csvg width='10' height='4' viewBox='0 0 10 4' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M-2.5 4 L 0 0 L 2.5 4 L 5 0 L 7.5 4 L 10 0 L 12.5 4' stroke='currentColor' stroke-width='1' stroke-linejoin='miter' stroke-miterlimit='10' fill='none'/%3E%3C/svg%3E");
+    background-repeat: repeat-x;
+    background-size: 10px 4px;
+    opacity: 0.8;
+}
+
+.double-underline {
+    position: relative;
+    display: inline;
+    text-decoration: none !important;
+}
+
+.double-underline::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -1px;
+    width: 100%;
+    height: 3px;
+    border-bottom: 3px double currentColor;
+    opacity: 0.8;
+}
+
+.double-curly-underline {
+    position: relative;
+    display: inline;
+    text-decoration: none !important;
+}
+
+.double-curly-underline::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -3px;
+    width: 100%;
+    height: 6px;
+    background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M-2.5 2 Q -1.25 0, 0 2 T 2.5 2 T 5 2 T 7.5 2 T 10 2 T 12.5 2 M-2.5 5 Q -1.25 3, 0 5 T 2.5 5 T 5 5 T 7.5 5 T 10 5 T 12.5 5' stroke='currentColor' stroke-width='1.2' fill='none'/%3E%3C/svg%3E");
+    background-repeat: repeat-x;
+    background-size: 10px 6px;
+    opacity: 0.7;
+}
+
+.dashed-underline {
+    position: relative;
+    display: inline;
+    text-decoration: none !important;
+}
+
+.dashed-underline::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -1px;
+    width: 100%;
+    height: 0;
+    border-bottom: 2px dashed currentColor;
+    opacity: 0.8;
+}
+
+.dotted-underline {
+    position: relative;
+    display: inline;
+    text-decoration: none !important;
+}
+
+.dotted-underline::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -1px;
+    width: 100%;
+    height: 0;
+    border-bottom: 2px dotted currentColor;
+    opacity: 0.8;
+}
+
+.rhythm-underline {
+    position: relative;
+    display: inline;
+    text-decoration: none !important;
+}
+
+.rhythm-underline::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -1px;
+    width: 100%;
+    height: 2px;
+    background-image: url("data:image/svg+xml,%3Csvg width='12' height='2' viewBox='0 0 12 2' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1 L 6 1 M 10 1 L 10 1' stroke='currentColor' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: repeat-x;
+    background-size: 12px 2px;
+    opacity: 0.8;
+}
+
+sup,
+sub {
+    font-size: 0.7em;
+    line-height: 0;
+    position: relative;
+    vertical-align: baseline;
+}
+
+sup {
+    top: -0.5em;
+}
+
+sub {
+    bottom: -0.25em;
+}
+.stacked-script {
+    display: inline-flex;
+    flex-direction: column;
+    vertical-align: middle;
+    line-height: 1;
+    margin: 0 0.1em;
+}
+
+.stacked-sup,
+.stacked-sub {
+    font-size: 0.6em !important;
+    position: static !important;
+    display: block !important;
+    line-height: 1 !important;
+    vertical-align: baseline !important;
+}
+
+.stacked-sup {
+    margin-bottom: -0.1em;
+}
+
+.stacked-sub {
+    margin-top: 0.1em;
+}
+
+.code-block-line-number {
+    position: relative;
+    overflow: hidden;
+}
+
+.code-block-line-number::after {
+    content: '↳';
+    position: absolute;
+    top: 1.5rem;
+    left: 0;
+    right: 0;
+    text-align: center;
+    color: var(--color-primary);
+    opacity: 0.6;
+    font-size: 0.8rem;
+    line-height: 1.5rem;
+    pointer-events: none;
+    display: block;
+}
+
+.react-syntax-highlighter-line {
+    display: flex !important;
+    align-items: stretch;
 }

@@ -90,7 +90,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
             >
                 <span
                     className={cn(
-                        'gap-inherit flex items-center justify-center',
+                        'flex items-center justify-center gap-[inherit]',
                         loading ? 'opacity-0' : undefined,
                         innerClassName,
                     )}

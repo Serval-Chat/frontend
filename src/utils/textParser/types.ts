@@ -35,6 +35,16 @@ export const ParserFeature = {
     UNORDERED_LIST: 'UNORDERED_LIST',
     KLIPY: 'KLIPY',
     CHECKLIST: 'CHECKLIST',
+    CURLY_UNDERLINE: 'CURLY_UNDERLINE',
+    JAGGED_UNDERLINE: 'JAGGED_UNDERLINE',
+    DOUBLE_UNDERLINE: 'DOUBLE_UNDERLINE',
+    DOUBLE_CURLY_UNDERLINE: 'DOUBLE_CURLY_UNDERLINE',
+    DASHED_UNDERLINE: 'DASHED_UNDERLINE',
+    DOTTED_UNDERLINE: 'DOTTED_UNDERLINE',
+    RHYTHM_UNDERLINE: 'RHYTHM_UNDERLINE',
+    SUPERSCRIPT: 'SUPERSCRIPT',
+    SUBSCRIPT: 'SUBSCRIPT',
+    STACKED_SCRIPT: 'STACKED_SCRIPT',
 } as const;
 
 export type ParserFeature = (typeof ParserFeature)[keyof typeof ParserFeature];
@@ -72,7 +82,17 @@ export type ASTNodeType =
     | 'mermaid'
     | 'unordered_list'
     | 'klipy'
-    | 'checklist';
+    | 'checklist'
+    | 'curly_underline'
+    | 'jagged_underline'
+    | 'double_underline'
+    | 'double_curly_underline'
+    | 'dashed_underline'
+    | 'dotted_underline'
+    | 'rhythm_underline'
+    | 'superscript'
+    | 'subscript'
+    | 'stacked_script';
 
 export interface TextNode {
     type: 'text';
@@ -220,6 +240,57 @@ export interface ChecklistNode {
     depth?: number;
 }
 
+export interface CurlyUnderlineNode {
+    type: 'curly_underline';
+    content: string | ASTNode[];
+}
+
+export interface JaggedUnderlineNode {
+    type: 'jagged_underline';
+    content: string | ASTNode[];
+}
+
+export interface DoubleUnderlineNode {
+    type: 'double_underline';
+    content: string | ASTNode[];
+}
+
+export interface DoubleCurlyUnderlineNode {
+    type: 'double_curly_underline';
+    content: string | ASTNode[];
+}
+
+export interface DashedUnderlineNode {
+    type: 'dashed_underline';
+    content: string | ASTNode[];
+}
+
+export interface DottedUnderlineNode {
+    type: 'dotted_underline';
+    content: string | ASTNode[];
+}
+
+export interface RhythmUnderlineNode {
+    type: 'rhythm_underline';
+    content: string | ASTNode[];
+}
+
+export interface SuperscriptNode {
+    type: 'superscript';
+    content: string | ASTNode[];
+}
+
+export interface SubscriptNode {
+    type: 'subscript';
+    content: string | ASTNode[];
+}
+
+export interface StackedScriptNode {
+    type: 'stacked_script';
+    sup: string | ASTNode[];
+    sub: string | ASTNode[];
+}
+
 export interface TableNode {
     type: 'table';
     headers: (string | ASTNode[])[];
@@ -295,4 +366,14 @@ export type ASTNode =
     | MermaidNode
     | UnorderedListNode
     | KlipyNode
-    | ChecklistNode;
+    | ChecklistNode
+    | CurlyUnderlineNode
+    | JaggedUnderlineNode
+    | DoubleUnderlineNode
+    | DoubleCurlyUnderlineNode
+    | DashedUnderlineNode
+    | DottedUnderlineNode
+    | RhythmUnderlineNode
+    | SuperscriptNode
+    | SubscriptNode
+    | StackedScriptNode;
