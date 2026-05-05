@@ -342,11 +342,8 @@ export async function processImage(
         }
 
         const withinBounds = dims.width <= maxWidth && dims.height <= maxHeight;
-        const correctFormat = isGif
-            ? file.type === 'image/gif'
-            : file.type === 'image/webp';
 
-        if (withinBounds && correctFormat) {
+        if (isGif && withinBounds) {
             return file;
         }
     }
@@ -362,13 +359,9 @@ export async function processImage(
         });
     }
 
-    // If processing made the file larger without a crop/resize, prefer original
-    if (!crop) {
+    if (!crop && isGif) {
         if (processed.size > file.size) {
-            // Re-verify dimensions to ensure original is actually safe
-            const dims = isGif
-                ? await getGifDimensions(file)
-                : await getImageDimensions(file);
+            const dims = await getGifDimensions(file);
             if (dims.width <= maxWidth && dims.height <= maxHeight) {
                 return file;
             }
