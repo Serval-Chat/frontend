@@ -6,20 +6,31 @@ import { useIncomingRequests } from '@/api/friends/friends.queries';
 import { Heading } from '@/ui/components/common/Heading';
 import { MutedText } from '@/ui/components/common/MutedText';
 import { Skeleton } from '@/ui/components/common/Skeleton';
-import { Text } from '@/ui/components/common/Text';
 import { Box } from '@/ui/components/layout/Box';
+import { cn } from '@/utils/cn';
 
+import { AddFriendForm } from './AddFriendForm';
+import { BlockedListMain } from './BlockedListMain';
+import { FriendListMain } from './FriendListMain';
 import { FriendRequestItem } from './FriendRequestItem';
 
 export const FriendRequestList: React.FC = () => {
     const { data: requests, isLoading } = useIncomingRequests();
+    const [view, setView] = React.useState<
+        'all' | 'pending' | 'blocked' | 'add'
+    >('pending');
+
+    React.useEffect(() => {
+        if (!isLoading && (!requests || requests.length === 0)) {
+            setView('all');
+        }
+    }, [isLoading, requests]);
 
     if (isLoading) {
         return (
             <Box className="flex h-full flex-col overflow-hidden">
-                <Box className="space-y-2 border-b border-bg-subtle p-6">
-                    <Skeleton height={28} width={180} />
-                    <Skeleton height={16} width={140} />
+                <Box className="flex h-12 shrink-0 items-center border-b border-bg-subtle px-4">
+                    <Skeleton height={20} width={120} />
                 </Box>
                 <Box className="flex-1 space-y-4 p-4">
                     {['skeleton-1', 'skeleton-2', 'skeleton-3'].map((key) => (
@@ -57,51 +68,139 @@ export const FriendRequestList: React.FC = () => {
         );
     }
 
-    if (!requests || requests.length === 0) {
-        return (
-            <Box className="animate-in fade-in zoom-in flex h-full flex-col items-center justify-center p-8 text-center duration-300">
-                <Box className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-bg-subtle">
-                    <CheckCircle className="text-foreground-muted h-8 w-8 opacity-20" />
-                </Box>
-                <Heading className="mb-2" level={3}>
-                    No pending requests
-                </Heading>
-                <MutedText>
-                    You're all caught up! When you receive friend requests,
-                    they'll show up here.
-                </MutedText>
-            </Box>
-        );
-    }
-
     return (
         <Box className="flex h-full flex-col overflow-hidden">
-            <Box className="border-b border-bg-subtle p-6">
-                <Heading
-                    className="flex items-center gap-2 text-xl font-bold"
-                    level={2}
-                >
-                    Friend Requests
-                    <Text
-                        className="rounded-full bg-primary/20 px-2 py-0.5"
-                        size="xs"
-                        variant="primary"
-                    >
-                        {requests.length}
-                    </Text>
-                </Heading>
-                <MutedText>Accept or decline friend requests.</MutedText>
+            <Box className="flex h-12 shrink-0 items-center border-b border-bg-subtle bg-bg-secondary px-4 shadow-sm">
+                <Box className="flex flex-1 items-center gap-4">
+                    <Heading className="text-sm font-bold" level={2}>
+                        Friends
+                    </Heading>
+
+                    <Box className="h-6 w-[1px] bg-bg-subtle" />
+
+                    <Box className="flex items-center gap-2">
+                        <button
+                            className={cn(
+                                'rounded px-3 py-1 text-sm font-semibold transition-all duration-200',
+                                view === 'all'
+                                    ? 'bg-primary text-foreground-inverse hover:bg-primary-hover'
+                                    : 'text-foreground-muted hover:bg-bg-tertiary hover:text-foreground',
+                            )}
+                            onClick={() => setView('all')}
+                        >
+                            All
+                        </button>
+                        <button
+                            className={cn(
+                                'relative rounded px-3 py-1 text-sm font-semibold transition-all duration-200',
+                                view === 'pending'
+                                    ? 'bg-primary text-foreground-inverse hover:bg-primary-hover'
+                                    : 'text-foreground-muted hover:bg-bg-tertiary hover:text-foreground',
+                            )}
+                            onClick={() => setView('pending')}
+                        >
+                            Pending
+                            {requests && requests.length > 0 && (
+                                <Box className="absolute -top-1 -right-1 flex h-4 min-w-[1rem] items-center justify-center rounded-full bg-danger px-1 text-[10px] font-bold text-white shadow-sm">
+                                    {requests.length}
+                                </Box>
+                            )}
+                        </button>
+
+                        <button
+                            className={cn(
+                                'rounded px-3 py-1 text-sm font-semibold transition-all duration-200',
+                                view === 'blocked'
+                                    ? 'bg-primary text-foreground-inverse hover:bg-primary-hover'
+                                    : 'text-foreground-muted hover:bg-bg-tertiary hover:text-foreground',
+                            )}
+                            onClick={() => setView('blocked')}
+                        >
+                            Blocked
+                        </button>
+
+                        <button
+                            className={cn(
+                                'ml-2 rounded px-3 py-1 text-sm font-bold transition-all duration-200',
+                                view === 'add'
+                                    ? 'bg-success text-white'
+                                    : 'bg-success/20 text-success hover:bg-success hover:text-white',
+                            )}
+                            onClick={() => setView('add')}
+                        >
+                            Add friend
+                        </button>
+                    </Box>
+                </Box>
             </Box>
 
-            <Box className="flex-1 space-y-2 overflow-y-auto p-4">
-                {requests.map((request) => (
-                    <FriendRequestItem
-                        fromId={request.fromId || ''}
-                        fromUsername={request.from || ''}
-                        key={request._id}
-                        requestId={request._id}
-                    />
-                ))}
+            <Box className="flex-1 overflow-y-auto">
+                {view === 'add' ? (
+                    <Box className="animate-in fade-in slide-in-from-top-4 flex h-full flex-col p-8">
+                        <Box className="mb-8">
+                            <Heading className="mb-2" level={2}>
+                                Add friend
+                            </Heading>
+                            <MutedText>
+                                You can add friends with their username.
+                            </MutedText>
+                        </Box>
+                        <Box className="max-w-md">
+                            <AddFriendForm />
+                        </Box>
+                    </Box>
+                ) : view === 'pending' ? (
+                    !requests || requests.length === 0 ? (
+                        <Box className="animate-in fade-in zoom-in flex h-full flex-col items-center justify-center p-8 text-center duration-300">
+                            <Box className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-bg-subtle">
+                                <CheckCircle className="text-foreground-muted h-8 w-8 opacity-20" />
+                            </Box>
+                            <Heading className="mb-2" level={3}>
+                                No pending requests
+                            </Heading>
+                            <MutedText>
+                                You're all caught up! When you receive friend
+                                requests, they'll show up here.
+                            </MutedText>
+                        </Box>
+                    ) : (
+                        <Box className="space-y-2 p-4">
+                            {requests.map((request) => (
+                                <FriendRequestItem
+                                    fromId={request.fromId || ''}
+                                    fromUsername={request.from || ''}
+                                    key={request._id}
+                                    requestId={request._id}
+                                />
+                            ))}
+                        </Box>
+                    )
+                ) : view === 'blocked' ? (
+                    <Box className="flex h-full flex-col">
+                        <Box className="flex-1 overflow-y-auto">
+                            <BlockedListMain />
+                        </Box>
+                    </Box>
+                ) : view === 'all' ? (
+                    <Box className="flex h-full flex-col">
+                        <Box className="flex-1 overflow-y-auto">
+                            <FriendListMain />
+                        </Box>
+                    </Box>
+                ) : (
+                    <Box className="animate-in fade-in zoom-in flex h-full flex-col items-center justify-center p-8 text-center duration-300">
+                        <Box className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-bg-subtle">
+                            <CheckCircle className="text-foreground-muted h-8 w-8 opacity-20" />
+                        </Box>
+                        <Heading className="mb-2" level={3}>
+                            No pending requests
+                        </Heading>
+                        <MutedText>
+                            You're all caught up! When you receive friend
+                            requests, they'll show up here.
+                        </MutedText>
+                    </Box>
+                )}
             </Box>
         </Box>
     );

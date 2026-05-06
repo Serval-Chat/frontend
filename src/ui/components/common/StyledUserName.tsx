@@ -21,6 +21,20 @@ interface StyledUserNameProps {
 
 const glowIntensity = 0.7;
 
+export const SUPPORTED_USERNAME_FONTS = [
+    'default',
+    'Audiowide',
+    'Bebas Neue',
+    'Betania Patmos',
+    'Google Sans Code',
+    'Noto Sans',
+    'Pacifico',
+    'Playpen Sans Deva',
+    'Rampart One',
+    'Roboto',
+    'Workbench',
+] as const;
+
 export const StyledUserName: React.FC<StyledUserNameProps> = ({
     user,
     role,
@@ -44,7 +58,17 @@ export const StyledUserName: React.FC<StyledUserNameProps> = ({
     }
 
     // Determine basic styling from user or role
-    const usernameFont = disableCustomFonts ? undefined : user?.usernameFont;
+    let usernameFont = disableCustomFonts ? undefined : user?.usernameFont;
+
+    if (
+        usernameFont &&
+        !SUPPORTED_USERNAME_FONTS.includes(
+            usernameFont as (typeof SUPPORTED_USERNAME_FONTS)[number],
+        )
+    ) {
+        usernameFont = undefined;
+    }
+
     const usernameGlow = user?.usernameGlow;
 
     // Gradients
@@ -186,6 +210,7 @@ export const StyledUserName: React.FC<StyledUserNameProps> = ({
             return (
                 <span
                     className="relative isolate inline-block"
+                    // eslint-disable-next-line react/no-array-index-key
                     key={`char-${char}-${i}`}
                     style={charStyle}
                 >
@@ -205,7 +230,9 @@ export const StyledUserName: React.FC<StyledUserNameProps> = ({
                                     zIndex: 'var(--z-index-effect-sm)',
                                     color: hasGradient
                                         ? undefined
-                                        : solidColor || undefined,
+                                        : usernameGlow?.color ||
+                                          solidColor ||
+                                          undefined,
                                     backgroundImage: hasGradient
                                         ? `${gradientFunction}(${gradientArgs})`
                                         : undefined,
@@ -230,7 +257,9 @@ export const StyledUserName: React.FC<StyledUserNameProps> = ({
                                     zIndex: 'var(--z-index-effect-md)',
                                     color: hasGradient
                                         ? undefined
-                                        : solidColor || undefined,
+                                        : usernameGlow?.color ||
+                                          solidColor ||
+                                          undefined,
                                     backgroundImage: hasGradient
                                         ? `${gradientFunction}(${gradientArgs})`
                                         : undefined,
@@ -255,7 +284,9 @@ export const StyledUserName: React.FC<StyledUserNameProps> = ({
                                     zIndex: 'var(--z-index-effect-lg)',
                                     color: hasGradient
                                         ? undefined
-                                        : solidColor || undefined,
+                                        : usernameGlow?.color ||
+                                          solidColor ||
+                                          undefined,
                                     backgroundImage: hasGradient
                                         ? `${gradientFunction}(${gradientArgs})`
                                         : undefined,

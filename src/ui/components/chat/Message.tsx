@@ -8,6 +8,8 @@ import {
     SmilePlus,
     StickyNote,
     Trash2,
+    UserMinus,
+    UserPlus,
 } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import { useClickAway, useEvent } from 'react-use';
@@ -17,6 +19,11 @@ import {
     useTogglePin,
     useToggleSticky,
 } from '@/api/chat/chat.queries';
+import {
+    useFriends,
+    useRemoveFriend,
+    useSendFriendRequest,
+} from '@/api/friends/friends.queries';
 import { useAddReaction } from '@/api/reactions/reactions.queries';
 import { useMembers, useRoles } from '@/api/servers/servers.queries';
 import type { Role } from '@/api/servers/servers.types';
@@ -107,6 +114,9 @@ export const Message: React.FC<MessageProps> = ({
     const deleteMessage = useDeleteMessage();
     const { mutate: togglePin } = useTogglePin();
     const { mutate: toggleSticky } = useToggleSticky();
+    const { data: friends } = useFriends();
+    const { mutate: sendFriendRequest } = useSendFriendRequest();
+    const { mutate: removeFriend } = useRemoveFriend();
     const { hasPermission, isOwner } = usePermissions(
         isServerMessage ? message.serverId! : null,
         null,
@@ -255,6 +265,26 @@ export const Message: React.FC<MessageProps> = ({
             },
         });
 
+        if (!isMessageSender) {
+            const isFriend = friends?.some((f) => f._id === message.senderId);
+            items.push({ type: 'divider' });
+
+            if (isFriend) {
+                items.push({
+                    label: 'Remove Friend',
+                    icon: UserMinus,
+                    variant: 'danger',
+                    onClick: () => removeFriend(message.senderId),
+                });
+            } else if (!user?.isBot) {
+                items.push({
+                    label: 'Add Friend',
+                    icon: UserPlus,
+                    onClick: () => sendFriendRequest(user.username),
+                });
+            }
+        }
+
         if (onReplyToMessage) {
             items.unshift({
                 label: 'Reply',
@@ -324,6 +354,11 @@ export const Message: React.FC<MessageProps> = ({
         canPin,
         togglePin,
         toggleSticky,
+        friends,
+        isMessageSender,
+        removeFriend,
+        sendFriendRequest,
+        user,
     ]);
 
     const isMobile =

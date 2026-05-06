@@ -61,7 +61,7 @@ export const TertiarySidebar: React.FC = () => {
         <Box
             as="aside"
             className={cn(
-                'custom-scrollbar relative h-full shrink-0 overflow-x-hidden overflow-y-auto bg-[var(--tertiary-bg)]',
+                'relative flex h-full shrink-0 flex-col bg-[var(--tertiary-bg)]',
                 'pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]',
                 'md:block',
                 'max-md:fixed max-md:inset-y-0 max-md:right-0 max-md:z-50 max-md:w-64 max-md:shadow-2xl',
@@ -70,92 +70,103 @@ export const TertiarySidebar: React.FC = () => {
                     ? 'max-md:translate-x-0'
                     : 'max-md:translate-x-full',
             )}
-            style={{ width: `${width}px` }}
+            style={{
+                width: `${width}px`,
+                minWidth: '200px',
+                maxWidth: '480px',
+                zIndex: 40,
+            }}
         >
             <Resizer
                 isResizing={isResizing}
                 side="left"
                 onMouseDown={handleMouseDown}
             />
-            {(selectedServerId || showMobileMemberList) && (
-                <div
-                    className={cn(
-                        'flex h-12 items-center justify-between px-3',
-                        selectedFriendId && 'md:hidden',
-                    )}
-                >
-                    <span className="text-xs font-bold tracking-wider text-muted-foreground uppercase">
-                        Members
-                    </span>
-                    <div className="flex items-center gap-1">
-                        {selectedServerId && (
-                            <button
-                                aria-label="Toggle search"
-                                className={cn(
-                                    'p-1 text-muted-foreground transition-colors hover:text-foreground',
-                                    isSearchOpen && 'text-primary',
-                                )}
-                                onClick={() => {
-                                    setIsSearchOpen(!isSearchOpen);
-                                    if (isSearchOpen) setSearchQuery('');
-                                }}
-                            >
-                                <Search className="h-4 w-4" />
-                            </button>
-                        )}
-                        {showMobileMemberList && (
-                            <button
-                                aria-label="Close member list"
-                                className="p-1 text-muted-foreground transition-colors hover:text-foreground md:hidden"
-                                onClick={() =>
-                                    dispatch(toggleMobileMemberList())
-                                }
-                            >
-                                <X className="h-4 w-4" />
-                            </button>
-                        )}
-                    </div>
-                </div>
-            )}
 
-            <AnimatePresence>
-                {isSearchOpen && selectedServerId && (
-                    <motion.div
-                        animate={{ height: 'auto', opacity: 1 }}
-                        className="overflow-hidden border-b border-border-subtle bg-bg-subtle/50"
-                        exit={{ height: 0, opacity: 0 }}
-                        initial={{ height: 0, opacity: 0 }}
+            <Box className="custom-scrollbar flex min-h-0 flex-1 flex-col overflow-x-hidden overflow-y-auto">
+                {(selectedServerId || showMobileMemberList) && (
+                    <div
+                        className={cn(
+                            'flex h-12 shrink-0 items-center justify-between px-3',
+                            selectedFriendId && 'md:hidden',
+                        )}
                     >
-                        <div className="p-3">
-                            <Input
-                                className="h-8 text-xs"
-                                placeholder="Search (supports regex /pattern/)..."
-                                ref={searchInputRef}
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                            />
+                        <span className="text-xs font-bold tracking-wider text-muted-foreground uppercase">
+                            Members
+                        </span>
+                        <div className="flex items-center gap-1">
+                            {selectedServerId && (
+                                <button
+                                    aria-label="Toggle search"
+                                    className={cn(
+                                        'p-1 text-muted-foreground transition-colors hover:text-foreground',
+                                        isSearchOpen && 'text-primary',
+                                    )}
+                                    onClick={() => {
+                                        setIsSearchOpen(!isSearchOpen);
+                                        if (isSearchOpen) setSearchQuery('');
+                                    }}
+                                >
+                                    <Search className="h-4 w-4" />
+                                </button>
+                            )}
+                            {showMobileMemberList && (
+                                <button
+                                    aria-label="Close member list"
+                                    className="p-1 text-muted-foreground transition-colors hover:text-foreground md:hidden"
+                                    onClick={() =>
+                                        dispatch(toggleMobileMemberList())
+                                    }
+                                >
+                                    <X className="h-4 w-4" />
+                                </button>
+                            )}
                         </div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
-            <Box className="flex min-w-0 flex-col gap-4 p-3">
-                {/* DM Context */}
-                {selectedFriendId && friend && me && (
-                    <DMSidebarSection friend={friend} me={me} />
+                    </div>
                 )}
 
-                {/* Server Context */}
-                {selectedServerId && (
-                    <ServerSidebarSection
-                        isLoading={isLoadingMembers}
-                        memberIconRoleMap={memberIconRoleMap}
-                        memberRoleMap={memberRoleMap}
-                        members={members}
-                        roles={roles}
-                        searchQuery={searchQuery}
-                        serverDetails={serverDetails}
-                    />
-                )}
+                <AnimatePresence>
+                    {isSearchOpen && selectedServerId && (
+                        <motion.div
+                            animate={{ height: 'auto', opacity: 1 }}
+                            className="shrink-0 overflow-hidden border-b border-border-subtle bg-bg-subtle/50"
+                            exit={{ height: 0, opacity: 0 }}
+                            initial={{ height: 0, opacity: 0 }}
+                        >
+                            <div className="p-3">
+                                <Input
+                                    className="h-8 text-xs"
+                                    placeholder="Search (supports regex /pattern/)..."
+                                    ref={searchInputRef}
+                                    value={searchQuery}
+                                    onChange={(e) =>
+                                        setSearchQuery(e.target.value)
+                                    }
+                                />
+                            </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+
+                <Box className="flex min-w-0 flex-col gap-4 p-3">
+                    {/* DM Context */}
+                    {selectedFriendId && friend && me && (
+                        <DMSidebarSection friend={friend} me={me} />
+                    )}
+
+                    {/* Server Context */}
+                    {selectedServerId && (
+                        <ServerSidebarSection
+                            isLoading={isLoadingMembers}
+                            memberIconRoleMap={memberIconRoleMap}
+                            memberRoleMap={memberRoleMap}
+                            members={members}
+                            roles={roles}
+                            searchQuery={searchQuery}
+                            serverDetails={serverDetails}
+                        />
+                    )}
+                </Box>
             </Box>
         </Box>
     );

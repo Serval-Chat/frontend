@@ -280,6 +280,7 @@ sup {
 sub {
     bottom: -0.25em;
 }
+
 .stacked-script {
     display: inline-flex;
     flex-direction: column;

@@ -1,13 +1,27 @@
 import React, { useMemo } from 'react';
 
-import { Calendar, Camera, Server } from 'lucide-react';
+import {
+    Calendar,
+    Camera,
+    MessageSquare,
+    Server,
+    UserMinus,
+    UserPlus,
+} from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
+import {
+    useFriends,
+    useRemoveFriend,
+    useSendFriendRequest,
+} from '@/api/friends/friends.queries';
 import type { Role } from '@/api/servers/servers.types';
 import { useMe } from '@/api/users/users.queries';
 import type { User } from '@/api/users/users.types';
 import { useAppSelector } from '@/store/hooks';
 import type { AdminExtendedUser } from '@/types/admin';
 import { BotTag } from '@/ui/components/common/BotTag';
+import { Button } from '@/ui/components/common/Button';
 import { Heading } from '@/ui/components/common/Heading';
 import { ParsedEmoji } from '@/ui/components/common/ParsedEmoji';
 import { ParsedText } from '@/ui/components/common/ParsedText';
@@ -62,6 +76,11 @@ export const UserProfileCard: React.FC<UserProfileCardProps> = ({
     adminData,
 }) => {
     const { data: currentUser } = useMe();
+    const navigate = useNavigate();
+    const { data: friends } = useFriends();
+    const { mutate: sendFriendRequest } = useSendFriendRequest();
+    const { mutate: removeFriend } = useRemoveFriend();
+
     const userId = user?._id;
     const presence = useAppSelector((state) =>
         userId ? state.presence.users[userId] : undefined,
@@ -283,6 +302,51 @@ export const UserProfileCard: React.FC<UserProfileCardProps> = ({
                                     </Box>
                                 ))}
                         </Box>
+                    </Box>
+                )}
+
+                {currentUser?._id !== user?._id && !user?.isBot && (
+                    <Box className="mt-4 flex gap-2">
+                        <Button
+                            className="flex-1 gap-2"
+                            size="sm"
+                            onClick={() => {
+                                if (user?._id) {
+                                    void navigate(`/chat/@user/${user._id}`);
+                                }
+                            }}
+                        >
+                            <MessageSquare size={14} />
+                            Message
+                        </Button>
+                        {friends?.some((f) => f._id === user?._id) ? (
+                            <Button
+                                className="gap-2"
+                                size="sm"
+                                variant="danger"
+                                onClick={() => {
+                                    if (user?._id) {
+                                        removeFriend(user._id);
+                                    }
+                                }}
+                            >
+                                <UserMinus size={14} />
+                            </Button>
+                        ) : (
+                            <Button
+                                className="gap-2"
+                                size="sm"
+                                variant="normal"
+                                onClick={() => {
+                                    if (user?.username) {
+                                        sendFriendRequest(user.username);
+                                    }
+                                }}
+                            >
+                                <UserPlus size={14} />
+                                Add Friend
+                            </Button>
+                        )}
                     </Box>
                 )}
 

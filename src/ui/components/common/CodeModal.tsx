@@ -26,6 +26,7 @@ const AstRenderer: React.FC<{ nodes: AstNode[] }> = memo(({ nodes }) => (
             if (node.type === 'text') {
                 return (
                     <React.Fragment
+                        // eslint-disable-next-line react/no-array-index-key
                         key={`text-${i}-${node.value?.slice(0, 20)}`}
                     >
                         {node.value}
@@ -55,6 +56,7 @@ const AstRenderer: React.FC<{ nodes: AstNode[] }> = memo(({ nodes }) => (
                 return (
                     <Tag
                         className={className}
+                        // eslint-disable-next-line react/no-array-index-key
                         key={`element-${i}-${node.tagName}`}
                         style={style}
                     >
@@ -111,6 +113,7 @@ export const CodeModal: React.FC<CodeModalProps> = memo(
                         {codeLines.map((lineNodes, i) => (
                             <div
                                 className="group flex transition-colors hover:bg-white/5"
+                                // eslint-disable-next-line react/no-array-index-key
                                 key={`line-${i}-${lineNodes.length}`}
                             >
                                 <div

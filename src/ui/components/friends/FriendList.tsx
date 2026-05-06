@@ -24,10 +24,10 @@ export const FriendList: React.FC = () => {
         <Box className="flex flex-col gap-1 p-2">
             {isLoading ? (
                 <Box className="flex flex-col gap-3 p-4">
-                    {[...Array(5)].map((_, i) => (
+                    {[1, 2, 3, 4, 5].map((id) => (
                         <Box
                             className="flex items-center gap-3"
-                            key={`friend-skeleton-${i}`}
+                            key={`friend-skeleton-${id}`}
                         >
                             <Skeleton
                                 height={32}

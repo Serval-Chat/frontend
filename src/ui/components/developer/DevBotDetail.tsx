@@ -232,10 +232,10 @@ export const DevBotDetail = ({
     if (isLoading || !bot || !user || !permissions) {
         return (
             <div className="flex flex-col gap-4">
-                {Array.from({ length: 3 }).map((_, i) => (
+                {[1, 2, 3].map((id) => (
                     <div
                         className="h-36 animate-pulse rounded-xl bg-bg-secondary"
-                        key={`skeleton-${i}`}
+                        key={`skeleton-${id}`}
                     />
                 ))}
             </div>

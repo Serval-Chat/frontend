@@ -79,6 +79,7 @@ function formatValue(value: unknown, field?: string): string | React.ReactNode {
                     {value.map((v, i) => (
                         <div
                             className="flex items-center gap-1.5"
+                            // eslint-disable-next-line react/no-array-index-key
                             key={`color-${v}-${i}`}
                         >
                             <div
@@ -185,6 +186,7 @@ export const AuditLogDiff: React.FC<AuditLogDiffProps> = ({ changes }) => {
                         {rows.map((row, index) => (
                             <div
                                 className="grid grid-cols-3 items-center gap-2 border-b border-border-subtle pb-3 last:border-0 last:pb-0"
+                                // eslint-disable-next-line react/no-array-index-key
                                 key={`row-${row.field}-${index}`}
                             >
                                 <div className="font-medium break-all text-text-muted">

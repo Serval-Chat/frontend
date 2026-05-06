@@ -162,19 +162,6 @@
     --activity-indicator: var(--muted-foreground);
 }
 
-.theme-serval .styled-user-name {
-    filter: drop-shadow(0px 1px 0.5px rgba(54, 37, 0, 0.6)) brightness(0.9)
-        contrast(1.1);
-}
-
-.theme-serval .styled-user-name [aria-hidden='true'] {
-    color: #362500 !important;
-    background-image: none !important;
-    -webkit-text-fill-color: #362500 !important;
-    opacity: 0.15 !important;
-    filter: blur(1.5px) !important;
-}
-
 .theme-serval a,
 .theme-serval a.text-primary {
     color: #cc5500;

@@ -267,6 +267,16 @@ function renderNode(
         case 'admonition':
         case 'unordered_list':
         case 'checklist':
+        case 'subscript':
+        case 'superscript':
+        case 'curly_underline':
+        case 'jagged_underline':
+        case 'double_underline':
+        case 'double_curly_underline':
+        case 'dashed_underline':
+        case 'dotted_underline':
+        case 'rhythm_underline':
+        case 'stacked_script':
         case 'klipy':
         default:
             return null;

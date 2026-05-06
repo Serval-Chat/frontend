@@ -37,6 +37,7 @@ export const BouncingDots: React.FC<BouncingDotsProps> = ({
                 animate="animate"
                 className={cn('rounded-full', color, dotClassName)}
                 custom={i}
+                // eslint-disable-next-line react/no-array-index-key
                 key={`dot-${i}`}
                 style={{
                     width: size,

@@ -58,7 +58,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
         setCoords({ x, y });
     }, [position]);
 
-    const handleMouseEnter = () => {
+    const handleMouseEnter = (): void => {
         if (timeoutRef.current) clearTimeout(timeoutRef.current);
         timeoutRef.current = setTimeout(() => {
             setIsVisible(true);
@@ -66,7 +66,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
         }, delay);
     };
 
-    const handleMouseLeave = () => {
+    const handleMouseLeave = (): void => {
         if (timeoutRef.current) clearTimeout(timeoutRef.current);
         setIsVisible(false);
     };
@@ -74,7 +74,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
     React.useLayoutEffect(() => {
         if (isVisible) {
             updatePosition();
-            const hide = () => setIsVisible(false);
+            const hide = (): void => setIsVisible(false);
             window.addEventListener('scroll', hide, true);
             window.addEventListener('resize', hide);
             return () => {
