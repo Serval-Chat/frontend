@@ -6,6 +6,7 @@ import { klipyApi } from '@/api/klipy/klipy.api';
 import type { KlipyFavorite } from '@/api/klipy/klipy.types';
 import { GifStarButton } from '@/ui/components/chat/GifStarButton';
 import { Box } from '@/ui/components/layout/Box';
+import { cn } from '@/utils/cn';
 
 interface GifPlayerProps {
     klipyId: string;
@@ -21,7 +22,7 @@ export const GifPlayer: React.FC<GifPlayerProps> = ({ klipyId, url }) => {
     useEffect(() => {
         const fetchMetadata = async (): Promise<void> => {
             try {
-                const data = await klipyApi.resolveGif(klipyId);
+                const data = await klipyApi.resolveGif(klipyId, 'gif');
                 setMetadata(data);
 
                 // Check if favorited
@@ -30,7 +31,7 @@ export const GifPlayer: React.FC<GifPlayerProps> = ({ klipyId, url }) => {
                     favorites.some((f) => String(f.klipyId) === klipyId),
                 );
             } catch (err) {
-                console.error('Failed to resolve Klipy GIF:', err);
+                console.error('Failed to resolve Klipy content:', err);
                 setError(true);
             } finally {
                 setLoading(false);
@@ -53,6 +54,7 @@ export const GifPlayer: React.FC<GifPlayerProps> = ({ klipyId, url }) => {
                 previewUrl: metadata.previewUrl,
                 width: metadata.width,
                 height: metadata.height,
+                contentType: metadata.contentType,
             });
             setIsFavorited(favorited);
         } catch (err) {
@@ -86,9 +88,14 @@ export const GifPlayer: React.FC<GifPlayerProps> = ({ klipyId, url }) => {
     if (!metadata) return null;
 
     return (
-        <Box className="group relative my-2 w-fit max-w-full overflow-hidden rounded-lg border border-border-subtle bg-black">
+        <Box
+            className={cn(
+                'group relative my-2 w-fit max-w-full overflow-hidden rounded-lg border border-border-subtle',
+                metadata.contentType === 'gif' ? 'bg-black' : 'bg-transparent',
+            )}
+        >
             <img
-                alt="GIF from Klipy"
+                alt="Klipy Content"
                 className="block"
                 src={metadata.url}
                 style={{
@@ -97,6 +104,7 @@ export const GifPlayer: React.FC<GifPlayerProps> = ({ klipyId, url }) => {
                     maxWidth: metadata.width,
                     maxHeight: 400,
                     objectFit: 'contain',
+                    padding: metadata.contentType === 'sticker' ? '4px' : '0',
                 }}
             />
 

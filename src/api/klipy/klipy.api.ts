@@ -70,6 +70,7 @@ export const klipyApi = {
         previewUrl: string;
         width: number;
         height: number;
+        contentType?: 'gif' | 'sticker';
     }): Promise<{ favorited: boolean }> => {
         const response = await apiClient.post<{ favorited: boolean }>(
             '/api/v1/klipy/favorites/toggle',

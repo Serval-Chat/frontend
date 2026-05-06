@@ -58,6 +58,20 @@ describe('TextParser', () => {
         ]);
     });
 
+    it('should parse Klipy links', () => {
+        const text = 'Check out https://klipy.com/g/4823106377700464 for more';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            { type: 'text', content: 'Check out ' },
+            {
+                type: 'klipy',
+                klipyId: '4823106377700464',
+                url: 'https://klipy.com/g/4823106377700464',
+            },
+            { type: 'text', content: ' for more' },
+        ]);
+    });
+
     it('should handle complex mixed text', () => {
         const text =
             '***Bold Italic*** and **Bold** with <emoji:test> and https://link.com';
