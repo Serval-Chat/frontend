@@ -61,6 +61,48 @@ export default defineConfig(({ mode }) => {
             if (id.includes('emoji-datasource')) {
               return 'emoji-data';
             }
+            if (id.includes('langium')) {
+              return 'langium';
+            }
+            if (id.includes('cytoscape')) {
+              return 'cytoscape';
+            }
+            if (id.includes('livekit-client')) {
+              return 'livekit-client';
+            }
+            if (id.includes('mermaid')) {
+              return 'mermaid';
+            }
+            if (id.includes('recharts')) {
+              return 'recharts';
+            }
+            if (id.includes('chevrotain')) {
+              return 'chevrotain';
+            }
+            if (id.includes('vscode-jsonrpc')) {
+              return 'vscode-jsonrpc';
+            }
+            if (id.includes('vscode-languageserver-protocol')) {
+              return 'vscode-languageserver-protocol';
+            }
+            if (id.includes('dompurify')) {
+              return 'dompurify';
+            }
+            if (id.includes('@tanstack')) {
+              return 'tanstack';
+            }
+            if (id.includes('katex')) {
+              return 'katex';
+            }
+            if (id.includes('lexical')) {
+              return 'lexical';
+            }
+            if (id.includes('layout-base')) {
+              return 'layout-base';
+            }
+            if (id.includes('dagre-d3-es')) {
+              return 'dagre-d3-es';
+            }
             return 'common-libs';
           }
         },

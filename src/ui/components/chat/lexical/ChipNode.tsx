@@ -7,31 +7,11 @@ import {
     type SerializedLexicalNode,
 } from 'lexical';
 
-const ChannelLink = React.lazy(() =>
-    import('@/ui/components/chat/ChannelLink').then((m) => ({
-        default: m.ChannelLink,
-    })),
-);
-const Mention = React.lazy(() =>
-    import('@/ui/components/common/Mention').then((m) => ({
-        default: m.Mention,
-    })),
-);
-const ParsedEmoji = React.lazy(() =>
-    import('@/ui/components/common/ParsedEmoji').then((m) => ({
-        default: m.ParsedEmoji,
-    })),
-);
-const ParsedUnicodeEmoji = React.lazy(() =>
-    import('@/ui/components/common/ParsedUnicodeEmoji').then((m) => ({
-        default: m.ParsedUnicodeEmoji,
-    })),
-);
-const RoleMention = React.lazy(() =>
-    import('@/ui/components/common/RoleMention').then((m) => ({
-        default: m.RoleMention,
-    })),
-);
+import { ChannelLink } from '@/ui/components/chat/ChannelLink';
+import { Mention } from '@/ui/components/common/Mention';
+import { ParsedEmoji } from '@/ui/components/common/ParsedEmoji';
+import { ParsedUnicodeEmoji } from '@/ui/components/common/ParsedUnicodeEmoji';
+import { RoleMention } from '@/ui/components/common/RoleMention';
 
 export type ChipType =
     | 'user'
@@ -134,11 +114,7 @@ export class ChipNode extends DecoratorNode<React.ReactNode> {
     }
 
     decorate(): React.ReactNode {
-        return (
-            <React.Suspense fallback={<span>{this.getTextContent()}</span>}>
-                {this.renderContent()}
-            </React.Suspense>
-        );
+        return this.renderContent();
     }
 
     private renderContent(): React.ReactNode {
