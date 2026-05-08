@@ -123,4 +123,14 @@ export const chatApi = {
         );
         return response.data;
     },
+
+    /**
+     * @description Fetch unread DM counts for all peers
+     */
+    getUnreadCounts: async (): Promise<Record<string, number>> => {
+        const response = await apiClient.get<{
+            counts: Record<string, number>;
+        }>('/api/v1/messages/unread');
+        return response.data.counts;
+    },
 };

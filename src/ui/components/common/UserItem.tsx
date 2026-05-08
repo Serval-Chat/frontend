@@ -49,6 +49,7 @@ import { BanUserModal } from '@/ui/components/servers/modals/BanUserModal';
 import { KickUserModal } from '@/ui/components/servers/modals/KickUserModal';
 import { TimeoutUserModal } from '@/ui/components/servers/modals/TimeoutUserModal';
 import { cn } from '@/utils/cn';
+import { wsMessages } from '@/ws/messages';
 
 import { BotTag } from './BotTag';
 import { ContextMenu, type ContextMenuItem } from './ContextMenu';
@@ -186,6 +187,11 @@ export const UserItem: React.FC<UserItemProps> = ({
         userVoiceChannelId === activeVoiceChannelId &&
         !isMe;
 
+    const unreadCount = useAppSelector(
+        (state) => state.unread.unreadDms[userId] || 0,
+    );
+    const hasUnread = unreadCount > 0;
+
     const items: ContextMenuItem[] = [];
 
     // Group 0: Profile
@@ -203,6 +209,16 @@ export const UserItem: React.FC<UserItemProps> = ({
             icon: MessageSquare,
             onClick: () => dispatch(setSelectedFriendId(userId)),
         });
+
+        if (hasUnread) {
+            items.push({
+                label: 'Mark as Read',
+                icon: Check,
+                onClick: () => {
+                    wsMessages.markDmRead(userId);
+                },
+            });
+        }
     }
 
     // Group 1.5: Voice Volume
@@ -476,9 +492,10 @@ export const UserItem: React.FC<UserItemProps> = ({
         },
     });
 
+    const presence = useAppSelector((state) => state.presence.users[userId]);
+
     const contextMenuItems = items;
 
-    const presence = useAppSelector((state) => state.presence.users[userId]);
     const presenceStatus =
         presence?.status ?? initialPresenceStatus ?? 'offline';
     const presenceCustomText =
@@ -495,7 +512,9 @@ export const UserItem: React.FC<UserItemProps> = ({
                         'hover:bg-bg-subtle',
                         isActive
                             ? 'bg-bg-subtle text-foreground'
-                            : 'text-foreground-muted',
+                            : hasUnread
+                              ? 'bg-bg-subtle/40 font-medium text-foreground'
+                              : 'text-foreground-muted',
                         className,
                     )}
                     ref={itemRef}
@@ -576,6 +595,12 @@ export const UserItem: React.FC<UserItemProps> = ({
                             </div>
                         )}
                     </Box>
+
+                    {hasUnread && !userVoiceChannelId && (
+                        <Box className="ml-auto flex h-4 min-w-[16px] shrink-0 items-center justify-center rounded-full bg-danger px-1 text-[10px] font-bold text-white shadow-sm">
+                            {unreadCount}
+                        </Box>
+                    )}
 
                     {userVoiceChannelId && (
                         <Box

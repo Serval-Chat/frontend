@@ -50,6 +50,7 @@ vi.mock('@/store/hooks', () => ({
                 voiceUserStates: {},
             },
             presence: { users: {} },
+            unread: { unreadDms: {} },
         }),
 }));
 

@@ -1,7 +1,3 @@
-const isTauri = (): boolean =>
-    typeof window !== 'undefined' &&
-    (window as Window & { __TAURI__?: unknown }).__TAURI__ !== undefined;
-
 export const isInternalUrl = (url: string | undefined): boolean => {
     if (!url) return false;
 
@@ -41,18 +37,10 @@ export const isInternalUrl = (url: string | undefined): boolean => {
     return false;
 };
 
-export const getProxyUrl = (url: string | undefined): string => {
-    if (!url) return '';
+export const getSafeUrl = (url: string | undefined): string | undefined => {
+    if (!url) return undefined;
     if (isInternalUrl(url)) return url;
 
-    try {
-        if (new URL(url).pathname.includes('/api/v1/file-proxy')) return url;
-    } catch {
-        /* invalid URL */
-    }
-
-    const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || '';
-    const baseUrl = isTauri() ? apiBaseUrl : '';
-
-    return `${baseUrl}/api/v1/file-proxy?url=${encodeURIComponent(url)}`;
+    console.warn(`Blocked cross-origin request to: ${url}`);
+    return undefined;
 };

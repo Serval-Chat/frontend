@@ -2,7 +2,11 @@ import React, { useCallback, useMemo, useState } from 'react';
 
 import { motion } from 'framer-motion';
 import { useLockBodyScroll, useMeasure } from 'react-use';
-import { VariableSizeList as List } from 'react-window';
+import {
+    List,
+    type ListImperativeAPI,
+    type RowComponentProps,
+} from 'react-window';
 
 import { useEmojiInfoBox } from '@/hooks/useEmojiInfoBox';
 import { Button } from '@/ui/components/common/Button';
@@ -77,7 +81,7 @@ const EmojiPickerContent: React.FC<{
     onEmojiSelect,
     onCustomEmojiSelect,
 }) => {
-    const listRef = React.useRef<List>(null);
+    const listRef = React.useRef<ListImperativeAPI>(null);
     const scrollOffsetRef = React.useRef<number>(0);
     const [activeCategoryId, setActiveCategoryId] = useState<string>('');
     const [isScrollingTo, setIsScrollingTo] = useState(false);
@@ -171,7 +175,9 @@ const EmojiPickerContent: React.FC<{
             const progress = Math.min(elapsed / duration, 1);
             const easeProgress = 1 - Math.pow(1 - progress, 3);
             const currentScroll = startOffset + distance * easeProgress;
-            listRef.current?.scrollTo(currentScroll);
+            if (listRef.current?.element) {
+                listRef.current.element.scrollTop = currentScroll;
+            }
 
             if (progress < 1) requestAnimationFrame(animateScroll);
             else setTimeout(() => setIsScrollingTo(false), 50);
@@ -232,7 +238,7 @@ const EmojiPickerContent: React.FC<{
     }, [displayCategories, activeCategoryId, width, height]);
 
     const Row = useCallback(
-        ({ index, style }: { index: number; style: React.CSSProperties }) => {
+        ({ index, style }: RowComponentProps) => {
             const row = flatRows[index];
             if (!row) return null;
 
@@ -411,16 +417,21 @@ const EmojiPickerContent: React.FC<{
 
                 <List
                     className="scrollbar-thin scrollbar-thumb-divider hover:scrollbar-thumb-muted-foreground/30 scrollbar-track-transparent pr-1"
-                    height={height - 32}
-                    itemCount={flatRows.length}
-                    itemSize={getRowHeight}
-                    ref={listRef}
-                    width={listAreaWidth}
-                    onItemsRendered={handleItemsRendered}
-                    onScroll={handleScroll}
-                >
-                    {Row}
-                </List>
+                    listRef={listRef}
+                    rowComponent={Row}
+                    rowCount={flatRows.length}
+                    rowHeight={getRowHeight}
+                    rowProps={{}}
+                    style={{ height: height - 32, width: listAreaWidth }}
+                    onRowsRendered={({ startIndex }) =>
+                        handleItemsRendered({ visibleStartIndex: startIndex })
+                    }
+                    onScroll={(e: React.UIEvent<HTMLDivElement>) =>
+                        handleScroll({
+                            scrollOffset: e.currentTarget.scrollTop,
+                        })
+                    }
+                />
 
                 {selectedEmoji && infoBoxPosition && (
                     <EmojiInfoBox

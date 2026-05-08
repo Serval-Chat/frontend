@@ -118,6 +118,6 @@ export const wsMessages = {
      * Mark a DM as read.
      */
     markDmRead: (peerId: string) => {
-        wsClient.send(WsEvents.MARK_DM_READ, { userId: peerId });
+        wsClient.send(WsEvents.MARK_DM_READ, { peerId });
     },
 };

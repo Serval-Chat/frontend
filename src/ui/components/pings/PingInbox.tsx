@@ -32,8 +32,10 @@ export const PingInbox: React.FC<PingInboxProps> = ({ onClose }) => {
         if (!query) return pings;
         return pings.filter(
             (p: PingNotification) =>
-                p.sender.toLowerCase().includes(query) ||
-                ('text' in p.message &&
+                (p.sender && p.sender.toLowerCase().includes(query)) ||
+                (p.message &&
+                    'text' in p.message &&
+                    p.message.text &&
                     p.message.text.toLowerCase().includes(query)),
         );
     }, [pings, searchQuery]);

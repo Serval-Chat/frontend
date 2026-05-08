@@ -2,6 +2,7 @@ import { type Dispatch } from '@reduxjs/toolkit';
 import { type QueryClient } from '@tanstack/react-query';
 import type { InfiniteData } from '@tanstack/react-query';
 
+import { chatApi } from '@/api/chat/chat.api';
 import { CHAT_QUERY_KEYS } from '@/api/chat/chat.queries';
 import type { ChatMessage } from '@/api/chat/chat.types';
 import {
@@ -30,6 +31,7 @@ import {
     incrementServerPing,
     setDmUnread,
     setServerUnread,
+    setUnreadDms,
     setUnreadServers,
 } from '@/store/slices/unreadSlice';
 import {
@@ -121,6 +123,13 @@ export const setupGlobalWsHandlers = (
                         .getUnreadStatus()
                         .then((unreadMap) => {
                             dispatch(setUnreadServers(unreadMap));
+                        })
+                        .catch(() => {});
+
+                    chatApi
+                        .getUnreadCounts()
+                        .then((counts) => {
+                            dispatch(setUnreadDms(counts));
                         })
                         .catch(() => {});
 

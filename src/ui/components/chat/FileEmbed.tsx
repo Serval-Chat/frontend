@@ -23,7 +23,7 @@ import { LoadingSpinner } from '@/ui/components/common/LoadingSpinner';
 import { Text } from '@/ui/components/common/Text';
 import { Box } from '@/ui/components/layout/Box';
 import { cn } from '@/utils/cn';
-import { getProxyUrl, isInternalUrl } from '@/utils/proxy';
+import { getSafeUrl, isInternalUrl } from '@/utils/proxy';
 
 interface FileEmbedProps {
     url: string;
@@ -77,7 +77,7 @@ export const FileEmbed: React.FC<FileEmbedProps> = ({ url }) => {
 
     // Image rendering
     if (mimeType?.startsWith('image/')) {
-        const displayUrl = getProxyUrl(url);
+        const displayUrl = getSafeUrl(url);
 
         return (
             <>
@@ -144,7 +144,7 @@ export const FileEmbed: React.FC<FileEmbedProps> = ({ url }) => {
 
     // Video rendering
     if (mimeType?.startsWith('video/')) {
-        const displayUrl = getProxyUrl(url);
+        const displayUrl = getSafeUrl(url);
 
         return (
             <Box

@@ -4,7 +4,7 @@ import type { Embed, MessagePayload } from '@/types/embed';
 import { Link } from '@/ui/components/common/Link';
 import { ParsedText } from '@/ui/components/common/ParsedText';
 import { cn } from '@/utils/cn';
-import { getProxyUrl } from '@/utils/proxy';
+import { getSafeUrl } from '@/utils/proxy';
 import { ParserPresets, parseText } from '@/utils/textParser/parser';
 
 const colorToCss = (color: number | undefined): string | undefined => {
@@ -135,7 +135,7 @@ const EmbedCard = ({
                             <img
                                 alt=""
                                 className="h-6 w-6 rounded-full object-cover"
-                                src={getProxyUrl(embed.author.icon_url)}
+                                src={getSafeUrl(embed.author.icon_url)}
                             />
                         )}
                         <span
@@ -320,7 +320,7 @@ const EmbedCard = ({
                                 'ml-auto h-20 w-20 shrink-0 rounded object-cover',
                                 isDeleted && 'opacity-50 grayscale',
                             )}
-                            src={getProxyUrl(embed.thumbnail.url)}
+                            src={getSafeUrl(embed.thumbnail.url)}
                         />
                     )}
                 </div>
@@ -333,7 +333,7 @@ const EmbedCard = ({
                             'mt-3 max-h-72 w-full rounded object-contain',
                             isDeleted && 'opacity-50 grayscale',
                         )}
-                        src={getProxyUrl(embed.image.url)}
+                        src={getSafeUrl(embed.image.url)}
                     />
                 )}
 
@@ -347,7 +347,7 @@ const EmbedCard = ({
                                     'h-5 w-5 rounded-full object-cover',
                                     isDeleted && 'opacity-50 grayscale',
                                 )}
-                                src={getProxyUrl(embed.footer.icon_url)}
+                                src={getSafeUrl(embed.footer.icon_url)}
                             />
                         )}
                         <div

@@ -13,12 +13,23 @@ export const FriendList: React.FC = () => {
     const selectedFriendId = useAppSelector(
         (state) => state.nav.selectedFriendId,
     );
+    const unreadDms = useAppSelector((state) => state.unread.unreadDms);
 
     const navigate = useNavigate();
 
     const handleFriendClick = (friendId: string): void => {
         void navigate(`/chat/@user/${friendId}`);
     };
+
+    const sortedFriends = friends?.slice().sort((a, b) => {
+        const aUnread = unreadDms[a._id] || 0;
+        const bUnread = unreadDms[b._id] || 0;
+
+        if (aUnread > 0 && bUnread === 0) return -1;
+        if (bUnread > 0 && aUnread === 0) return 1;
+
+        return 0;
+    });
 
     return (
         <Box className="flex flex-col gap-1 p-2">
@@ -39,9 +50,8 @@ export const FriendList: React.FC = () => {
                     ))}
                 </Box>
             ) : (
-                friends?.map((friend) => (
+                sortedFriends?.map((friend) => (
                     <UserItem
-                        noFetch
                         initialData={friend}
                         isActive={selectedFriendId === String(friend._id)}
                         key={String(friend._id)}
