@@ -50,7 +50,7 @@ import {
     useServerStickers,
     useServers,
 } from '@/api/servers/servers.queries';
-import { useMe } from '@/api/users/users.queries';
+import { useMe, useUserById } from '@/api/users/users.queries';
 import type { User } from '@/api/users/users.types';
 import type { QueuedFile } from '@/hooks/chat/useFileQueue';
 import { useCustomEmojis } from '@/hooks/useCustomEmojis';
@@ -723,6 +723,18 @@ export const MessageInput: React.FC<MessageInputProps> = ({
         }
     }, [editor, selectedFriendId, selectedServerId, selectedChannelId]);
 
+    const isUnknownReplyingUser = replyingTo?.user?.username === 'Unknown';
+    const { data: fetchedReplyingUser } = useUserById(
+        replyingTo?.user?._id || '',
+        {
+            enabled: !!replyingTo && isUnknownReplyingUser,
+        },
+    );
+    const replyingUser =
+        isUnknownReplyingUser && fetchedReplyingUser
+            ? fetchedReplyingUser
+            : replyingTo?.user;
+
     if (isTimedOut) {
         return (
             <Box
@@ -762,7 +774,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                 onToggleSpoiler={toggleSpoiler}
             />
 
-            {replyingTo && (
+            {replyingTo && replyingUser && (
                 <Box className="flex items-center justify-between gap-3 border-b border-border-subtle bg-bg-subtle/30 px-3 py-2">
                     <Box className="flex min-w-0 items-center gap-2">
                         <Text className="text-xs whitespace-nowrap text-muted-foreground">
@@ -775,12 +787,11 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                             disableGlow={disableGlow}
                             disableGlowAndColors={disableGlowAndColors}
                             role={replyingTo.role}
-                            user={replyingTo.user}
+                            user={replyingUser}
                         >
-                            {replyingTo.user.displayName ||
-                                replyingTo.user.username}
+                            {replyingUser.displayName || replyingUser.username}
                         </StyledUserName>
-                        {replyingTo.user.isBot && (
+                        {replyingUser.isBot && (
                             <BotTag className="h-3.5 px-1 text-[8px]" />
                         )}
                         <Box className="flex items-center gap-1 truncate overflow-hidden text-xs whitespace-nowrap text-muted-foreground opacity-80">

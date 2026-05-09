@@ -27,7 +27,7 @@ import {
 import { useAddReaction } from '@/api/reactions/reactions.queries';
 import { useMembers, useRoles } from '@/api/servers/servers.queries';
 import type { Role } from '@/api/servers/servers.types';
-import { useMe } from '@/api/users/users.queries';
+import { useMe, useUserById } from '@/api/users/users.queries';
 import type { User } from '@/api/users/users.types';
 import { useCustomEmojis } from '@/hooks/useCustomEmojis';
 import { usePermissions } from '@/hooks/usePermissions';
@@ -74,7 +74,7 @@ interface MessageProps {
 
 export const Message: React.FC<MessageProps> = ({
     message,
-    user,
+    user: initialUser,
     role,
     iconRole,
     isGroupStart = true,
@@ -87,6 +87,12 @@ export const Message: React.FC<MessageProps> = ({
     disableGlow,
     disableActions = false,
 }) => {
+    const isUnknownUser = initialUser.username === 'Unknown';
+    const { data: fetchedUser } = useUserById(initialUser._id, {
+        enabled: isUnknownUser,
+    });
+    const user = isUnknownUser && fetchedUser ? fetchedUser : initialUser;
+
     const [showProfile, setShowProfile] = React.useState(false);
     const [showPicker, setShowPicker] = React.useState(false);
     const [isEditing, setIsEditing] = React.useState(false);

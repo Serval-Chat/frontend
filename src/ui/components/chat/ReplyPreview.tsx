@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 
 import type { Role } from '@/api/servers/servers.types';
+import { useUserById } from '@/api/users/users.queries';
 import type { User } from '@/api/users/users.types';
 import type { InteractionValue } from '@/types/interactions';
 import { BotTag } from '@/ui/components/common/BotTag';
@@ -29,7 +30,7 @@ interface ReplyPreviewProps {
 }
 
 export const ReplyPreview: React.FC<ReplyPreviewProps> = ({
-    user,
+    user: initialUser,
     role,
     text,
     interaction,
@@ -40,6 +41,12 @@ export const ReplyPreview: React.FC<ReplyPreviewProps> = ({
     disableColors,
     disableGlow,
 }) => {
+    const isUnknownUser = initialUser.username === 'Unknown';
+    const { data: fetchedUser } = useUserById(initialUser._id, {
+        enabled: isUnknownUser,
+    });
+    const user = isUnknownUser && fetchedUser ? fetchedUser : initialUser;
+
     const nodes = useMemo(() => parseText(text, ParserPresets.MESSAGE), [text]);
     return (
         <Box
