@@ -262,6 +262,16 @@ export const Message: React.FC<MessageProps> = ({
             items.push({ type: 'divider' });
         }
 
+        if (message.text) {
+            items.push({
+                label: 'Copy Text',
+                icon: Copy,
+                onClick: () => {
+                    void navigator.clipboard.writeText(message.text);
+                },
+            });
+        }
+
         items.push({
             label: 'Copy Message ID',
             icon: Copy,
