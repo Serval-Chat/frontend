@@ -187,7 +187,7 @@ export const Poll: React.FC<PollProps> = ({
                                     'relative flex cursor-pointer items-center justify-between overflow-hidden rounded-md border p-2 transition-colors',
                                     isExpired
                                         ? isWinner
-                                            ? 'cursor-default border-yellow-400/60 bg-yellow-400/10'
+                                            ? 'cursor-default border-caution/60 bg-caution-muted'
                                             : 'bg-bg-tertiary cursor-default border-border-subtle opacity-70'
                                         : isVoted
                                           ? 'border-primary/50 bg-primary/10 hover:bg-primary/20'
@@ -207,7 +207,7 @@ export const Poll: React.FC<PollProps> = ({
                                         className={cn(
                                             'absolute inset-y-0 left-0 transition-all duration-500 ease-in-out',
                                             isExpired && isWinner
-                                                ? 'bg-yellow-400/20'
+                                                ? 'bg-caution/20'
                                                 : 'bg-primary/20',
                                         )}
                                         style={{ width: `${percentage}%` }}
@@ -217,7 +217,7 @@ export const Poll: React.FC<PollProps> = ({
                                 <Box className="relative z-10 flex items-center gap-2">
                                     {isExpired ? (
                                         isWinner ? (
-                                            <Trophy className="h-4 w-4 shrink-0 text-yellow-400" />
+                                            <Trophy className="h-4 w-4 shrink-0 text-caution" />
                                         ) : (
                                             <Box className="h-4 w-4 shrink-0 rounded-full border border-muted-foreground/30" />
                                         )
@@ -246,7 +246,7 @@ export const Poll: React.FC<PollProps> = ({
                                         className={cn(
                                             'text-sm font-medium',
                                             isExpired && isWinner
-                                                ? 'text-yellow-300'
+                                                ? 'text-caution-muted-text'
                                                 : 'text-foreground',
                                         )}
                                     >
