@@ -2,11 +2,8 @@ import React, { useCallback, useMemo, useState } from 'react';
 
 import { motion } from 'framer-motion';
 import { useLockBodyScroll, useMeasure } from 'react-use';
-import {
-    List,
-    type ListImperativeAPI,
-    type RowComponentProps,
-} from 'react-window';
+import { List } from 'react-window';
+import type { ListImperativeAPI, RowComponentProps } from 'react-window';
 
 import { useEmojiInfoBox } from '@/hooks/useEmojiInfoBox';
 import { Button } from '@/ui/components/common/Button';
@@ -423,7 +420,7 @@ const EmojiPickerContent: React.FC<{
                     rowHeight={getRowHeight}
                     rowProps={{}}
                     style={{ height: height - 32, width: listAreaWidth }}
-                    onRowsRendered={({ startIndex }) =>
+                    onRowsRendered={({ startIndex }: { startIndex: number }) =>
                         handleItemsRendered({ visibleStartIndex: startIndex })
                     }
                     onScroll={(e: React.UIEvent<HTMLDivElement>) =>
