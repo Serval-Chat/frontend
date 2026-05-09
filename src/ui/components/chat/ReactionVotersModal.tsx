@@ -1,39 +1,57 @@
 import React, { useMemo, useState } from 'react';
 
-import type { MessagePoll } from '@/api/chat/chat.types';
+import type { MessageReaction } from '@/api/chat/chat.types';
 import { useMembers, useRoles } from '@/api/servers/servers.queries';
 import { useUsers } from '@/hooks/useUsers';
 import { LoadingSpinner } from '@/ui/components/common/LoadingSpinner';
 import { Modal } from '@/ui/components/common/Modal';
-import { ParsedEmoji } from '@/ui/components/common/ParsedEmoji';
 import { ParsedUnicodeEmoji } from '@/ui/components/common/ParsedUnicodeEmoji';
 import { Text } from '@/ui/components/common/Text';
 import { UserItem } from '@/ui/components/common/UserItem';
 import { Box } from '@/ui/components/layout/Box';
+import { resolveApiUrl } from '@/utils/apiUrl';
 import { cn } from '@/utils/cn';
+import { emojiMap } from '@/utils/emoji';
 
-interface PollVotersModalProps {
+interface ReactionVotersModalProps {
     isOpen: boolean;
     onClose: () => void;
-    poll: MessagePoll;
+    reactions: MessageReaction[];
     serverId?: string;
+    initialEmoji?: string;
 }
 
-export const PollVotersModal: React.FC<PollVotersModalProps> = ({
+export const ReactionVotersModal: React.FC<ReactionVotersModalProps> = ({
     isOpen,
     onClose,
-    poll,
+    reactions,
     serverId,
+    initialEmoji,
 }) => {
-    const [selectedOptionId, setSelectedOptionId] = useState<string | null>(
-        poll.options?.[0]?.id || null,
+    const [selectedEmoji, setSelectedEmoji] = useState<string | null>(null);
+    const [prevInitialEmoji, setPrevInitialEmoji] = useState<string | null>(
+        null,
     );
+    const [prevIsOpen, setPrevIsOpen] = useState(false);
+
+    const normalizedInitialEmoji = initialEmoji || null;
+    if (isOpen !== prevIsOpen || normalizedInitialEmoji !== prevInitialEmoji) {
+        setPrevIsOpen(isOpen);
+        setPrevInitialEmoji(normalizedInitialEmoji);
+        if (isOpen) {
+            setSelectedEmoji(
+                normalizedInitialEmoji || reactions[0]?.emoji || null,
+            );
+        }
+    }
 
     const allVoterIds = useMemo(() => {
         const ids = new Set<string>();
-        poll.options?.forEach((opt) => opt.votes?.forEach((id) => ids.add(id)));
+        reactions.forEach((reaction) =>
+            reaction.users.forEach((id) => ids.add(id)),
+        );
         return Array.from(ids);
-    }, [poll.options]);
+    }, [reactions]);
 
     const { data: users, isLoading } = useUsers(isOpen ? allVoterIds : []);
     const { data: members } = useMembers(serverId || null, {
@@ -45,64 +63,76 @@ export const PollVotersModal: React.FC<PollVotersModalProps> = ({
 
     const votersForSelected = useMemo(() => {
         if (!users) return [];
-        const selectedOption = poll.options?.find(
-            (opt) => opt.id === selectedOptionId,
+        const selectedReaction = reactions.find(
+            (r) => r.emoji === selectedEmoji,
         );
-        const voterIds = selectedOption?.votes || [];
+        const voterIds = selectedReaction?.users || [];
         return users.filter((u) => voterIds.includes(u._id));
-    }, [users, poll.options, selectedOptionId]);
+    }, [users, reactions, selectedEmoji]);
 
     return (
         <Modal
             noPadding
             className="max-w-3xl"
             isOpen={isOpen}
-            title="Poll Voters"
+            title="Reactions"
             onClose={onClose}
         >
             <Box className="flex h-[500px]">
                 <Box className="flex w-1/3 flex-col overflow-y-auto border-r border-border-subtle bg-bg-subtle">
-                    {poll.options?.map((option) => (
+                    {reactions.map((reaction) => (
                         <button
                             className={cn(
                                 'flex items-center justify-between px-4 py-3 text-left transition-colors',
-                                selectedOptionId === option.id
+                                selectedEmoji === reaction.emoji
                                     ? 'border-r-2 border-r-primary bg-primary/10 text-primary'
                                     : 'hover:bg-white/5',
                             )}
-                            key={option.id}
-                            onClick={() => setSelectedOptionId(option.id)}
+                            key={reaction.emoji}
+                            onClick={() => setSelectedEmoji(reaction.emoji)}
                         >
                             <Box className="flex min-w-0 items-center gap-2">
-                                {option.emoji && (
-                                    <Box className="flex shrink-0 items-center justify-center">
-                                        {option.emojiType === 'custom' &&
-                                        option.emojiId ? (
-                                            <ParsedEmoji
-                                                className="h-4 w-4"
-                                                emojiId={option.emojiId}
-                                            />
-                                        ) : (
-                                            <ParsedUnicodeEmoji
-                                                className="text-base"
-                                                content={option.emoji}
-                                            />
-                                        )}
-                                    </Box>
-                                )}
+                                <Box className="flex shrink-0 items-center justify-center">
+                                    {reaction.emojiType === 'custom' &&
+                                    reaction.emojiUrl ? (
+                                        <img
+                                            alt={reaction.emoji}
+                                            className="inline-block h-5 w-5 cursor-pointer object-contain align-middle"
+                                            src={
+                                                resolveApiUrl(
+                                                    reaction.emojiUrl,
+                                                ) || ''
+                                            }
+                                            title={
+                                                reaction.emojiName ||
+                                                reaction.emoji
+                                            }
+                                        />
+                                    ) : (
+                                        <ParsedUnicodeEmoji
+                                            className="text-base"
+                                            content={reaction.emoji}
+                                        />
+                                    )}
+                                </Box>
                                 <span
                                     className={cn(
                                         'truncate text-sm font-medium',
-                                        selectedOptionId === option.id
+                                        selectedEmoji === reaction.emoji
                                             ? 'text-primary'
                                             : 'text-foreground',
                                     )}
                                 >
-                                    {option.text || 'Untitled Option'}
+                                    {reaction.emojiType === 'custom'
+                                        ? reaction.emojiName || reaction.emoji
+                                        : emojiMap
+                                              .get(reaction.emoji)
+                                              ?.name.toLowerCase() ||
+                                          reaction.emoji}
                                 </span>
                             </Box>
                             <Text className="ml-2 rounded bg-muted-foreground/10 px-1.5 py-0.5 text-[10px] font-bold opacity-60">
-                                {option.votes?.length || 0}
+                                {reaction.count}
                             </Text>
                         </button>
                     ))}
@@ -116,7 +146,7 @@ export const PollVotersModal: React.FC<PollVotersModalProps> = ({
                     ) : votersForSelected.length > 0 ? (
                         <>
                             <Text className="mb-2 px-1 text-[10px] font-bold tracking-widest text-muted-foreground uppercase">
-                                Users who voted for "{selectedOption?.text}"
+                                Users who reacted
                             </Text>
                             {votersForSelected.map((user) => {
                                 const member = members?.find(
@@ -152,7 +182,7 @@ export const PollVotersModal: React.FC<PollVotersModalProps> = ({
                     ) : (
                         <Box className="flex h-full flex-col items-center justify-center text-muted-foreground italic opacity-50">
                             <Text className="text-sm">
-                                No votes for this option yet.
+                                No reactions for this emoji.
                             </Text>
                         </Box>
                     )}

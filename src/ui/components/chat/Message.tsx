@@ -25,7 +25,11 @@ import {
     useSendFriendRequest,
 } from '@/api/friends/friends.queries';
 import { useAddReaction } from '@/api/reactions/reactions.queries';
-import { useMembers, useRoles } from '@/api/servers/servers.queries';
+import {
+    useMembers,
+    useRoles,
+    useServerDetails,
+} from '@/api/servers/servers.queries';
 import type { Role } from '@/api/servers/servers.types';
 import { useMe, useUserById } from '@/api/users/users.queries';
 import type { User } from '@/api/users/users.types';
@@ -109,6 +113,10 @@ export const Message: React.FC<MessageProps> = ({
         { enabled: isServerMessage },
     );
     const { data: serverRoles } = useRoles(
+        isServerMessage ? message.serverId! : null,
+        { enabled: isServerMessage },
+    );
+    const { data: serverDetails } = useServerDetails(
         isServerMessage ? message.serverId! : null,
         { enabled: isServerMessage },
     );
@@ -398,9 +406,21 @@ export const Message: React.FC<MessageProps> = ({
         <>
             {isGroupStart && message.replyTo && (
                 <ReplyPreview
-                    disableColors={disableColors}
-                    disableCustomFonts={disableCustomFonts}
-                    disableGlow={disableGlow}
+                    disableColors={
+                        disableColors ||
+                        me?.settings?.disableCustomUsernameColors ||
+                        serverDetails?.disableUsernameGlowAndCustomColor
+                    }
+                    disableCustomFonts={
+                        disableCustomFonts ||
+                        me?.settings?.disableCustomUsernameFonts ||
+                        serverDetails?.disableCustomFonts
+                    }
+                    disableGlow={
+                        disableGlow ||
+                        me?.settings?.disableCustomUsernameGlow ||
+                        serverDetails?.disableUsernameGlowAndCustomColor
+                    }
                     disableGlowAndColors={disableGlowAndColors}
                     interaction={message.replyTo.interaction}
                     replyToId={message.replyTo._id}
@@ -416,9 +436,21 @@ export const Message: React.FC<MessageProps> = ({
                 message.interaction.user && (
                     <InteractionHeader
                         command={message.interaction.command}
-                        disableColors={disableColors}
-                        disableCustomFonts={disableCustomFonts}
-                        disableGlow={disableGlow}
+                        disableColors={
+                            disableColors ||
+                            me?.settings?.disableCustomUsernameColors ||
+                            serverDetails?.disableUsernameGlowAndCustomColor
+                        }
+                        disableCustomFonts={
+                            disableCustomFonts ||
+                            me?.settings?.disableCustomUsernameFonts ||
+                            serverDetails?.disableCustomFonts
+                        }
+                        disableGlow={
+                            disableGlow ||
+                            me?.settings?.disableCustomUsernameGlow ||
+                            serverDetails?.disableUsernameGlowAndCustomColor
+                        }
                         disableGlowAndColors={disableGlowAndColors}
                         isDeleted={!!message.deletedAt}
                         resolvedUser={interactionUser}
@@ -457,9 +489,21 @@ export const Message: React.FC<MessageProps> = ({
 
                 <Box className="min-w-0 flex-1">
                     <MessageHeader
-                        disableColors={disableColors}
-                        disableCustomFonts={disableCustomFonts}
-                        disableGlow={disableGlow}
+                        disableColors={
+                            disableColors ||
+                            me?.settings?.disableCustomUsernameColors ||
+                            serverDetails?.disableUsernameGlowAndCustomColor
+                        }
+                        disableCustomFonts={
+                            disableCustomFonts ||
+                            me?.settings?.disableCustomUsernameFonts ||
+                            serverDetails?.disableCustomFonts
+                        }
+                        disableGlow={
+                            disableGlow ||
+                            me?.settings?.disableCustomUsernameGlow ||
+                            serverDetails?.disableUsernameGlowAndCustomColor
+                        }
                         disableGlowAndColors={disableGlowAndColors}
                         editedAt={message.editedAt}
                         iconRole={iconRole || message.iconRole}
@@ -703,9 +747,21 @@ export const Message: React.FC<MessageProps> = ({
             )}
 
             <ProfilePopup
-                disableColors={disableColors}
-                disableCustomFonts={disableCustomFonts}
-                disableGlow={disableGlow}
+                disableColors={
+                    disableColors ||
+                    me?.settings?.disableCustomUsernameColors ||
+                    serverDetails?.disableUsernameGlowAndCustomColor
+                }
+                disableCustomFonts={
+                    disableCustomFonts ||
+                    me?.settings?.disableCustomUsernameFonts ||
+                    serverDetails?.disableCustomFonts
+                }
+                disableGlow={
+                    disableGlow ||
+                    me?.settings?.disableCustomUsernameGlow ||
+                    serverDetails?.disableUsernameGlowAndCustomColor
+                }
                 disableGlowAndColors={disableGlowAndColors}
                 iconRole={iconRole}
                 isOpen={showProfile}

@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { SmilePlus, Trash2 } from 'lucide-react';
+import { SmilePlus, Trash2, Users } from 'lucide-react';
 
 import type { MessageReaction } from '@/api/chat/chat.types';
 import {
@@ -14,12 +14,15 @@ import { useAppSelector } from '@/store/hooks';
 import { BlockFlags } from '@/types/blocks';
 import { Button } from '@/ui/components/common/Button';
 import { ContextMenu } from '@/ui/components/common/ContextMenu';
+import type { ContextMenuItem } from '@/ui/components/common/ContextMenu';
 import { ParsedUnicodeEmoji } from '@/ui/components/common/ParsedUnicodeEmoji';
 import { Text } from '@/ui/components/common/Text';
 import { EmojiPicker } from '@/ui/components/emoji/EmojiPicker';
 import { Box } from '@/ui/components/layout/Box';
 import { resolveApiUrl } from '@/utils/apiUrl';
 import { cn } from '@/utils/cn';
+
+import { ReactionVotersModal } from './ReactionVotersModal';
 
 interface ReactionsProps {
     messageId: string;
@@ -40,6 +43,10 @@ export const Reactions: React.FC<ReactionsProps> = ({
     const addReaction = useAddReaction();
     const removeReaction = useRemoveReaction();
     const [showPicker, setShowPicker] = React.useState(false);
+    const [isVotersModalOpen, setIsVotersModalOpen] = React.useState(false);
+    const [votersModalEmoji, setVotersModalEmoji] = React.useState<
+        string | undefined
+    >();
 
     const pickerRef = React.useRef<HTMLDivElement>(null);
     const { customCategories } = useCustomEmojis({ enabled: showPicker });
@@ -185,44 +192,46 @@ export const Reactions: React.FC<ReactionsProps> = ({
                     </Box>
                 );
 
+                const contextMenuItems: ContextMenuItem[] = [
+                    {
+                        id: 'view-reactions',
+                        label: 'View Reactions',
+                        icon: Users,
+                        onClick: () => {
+                            setVotersModalEmoji(reaction.emoji);
+                            setIsVotersModalOpen(true);
+                        },
+                    },
+                ];
+
                 if (canManageReactions && serverId && channelId) {
-                    return (
-                        <ContextMenu
-                            items={[
-                                {
-                                    id: 'remove-reaction',
-                                    label: 'Remove Emoji',
-                                    icon: Trash2,
-                                    variant: 'danger',
-                                    onClick: () => {
-                                        removeReaction.mutate({
-                                            messageId,
-                                            serverId,
-                                            channelId,
-                                            data: {
-                                                emoji: reaction.emoji,
-                                                emojiId:
-                                                    reaction.emojiType ===
-                                                    'custom'
-                                                        ? reaction.emojiId
-                                                        : undefined,
-                                                scope: 'all',
-                                            },
-                                        });
-                                    },
+                    contextMenuItems.push({
+                        id: 'remove-reaction',
+                        label: 'Remove Emoji',
+                        icon: Trash2,
+                        variant: 'danger',
+                        onClick: () => {
+                            removeReaction.mutate({
+                                messageId,
+                                serverId,
+                                channelId,
+                                data: {
+                                    emoji: reaction.emoji,
+                                    emojiId:
+                                        reaction.emojiType === 'custom'
+                                            ? reaction.emojiId
+                                            : undefined,
+                                    scope: 'all',
                                 },
-                            ]}
-                            key={reactionKey}
-                        >
-                            {reactionElement}
-                        </ContextMenu>
-                    );
+                            });
+                        },
+                    });
                 }
 
                 return (
-                    <React.Fragment key={reactionKey}>
+                    <ContextMenu items={contextMenuItems} key={reactionKey}>
                         {reactionElement}
-                    </React.Fragment>
+                    </ContextMenu>
                 );
             })}
 
@@ -250,6 +259,14 @@ export const Reactions: React.FC<ReactionsProps> = ({
                     </div>
                 )}
             </Box>
+
+            <ReactionVotersModal
+                initialEmoji={votersModalEmoji}
+                isOpen={isVotersModalOpen}
+                reactions={filteredReactions}
+                serverId={serverId}
+                onClose={() => setIsVotersModalOpen(false)}
+            />
         </Box>
     );
 };

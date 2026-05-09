@@ -6,8 +6,14 @@ import { createPortal } from 'react-dom';
 
 import { usePinnedMessages } from '@/api/chat/chat.queries';
 import type { ChatMessage } from '@/api/chat/chat.types';
-import { useMembers, useRoles } from '@/api/servers/servers.queries';
+import {
+    useMembers,
+    useRoles,
+    useServerDetails,
+} from '@/api/servers/servers.queries';
+import type { Server } from '@/api/servers/servers.types';
 import { useMe } from '@/api/users/users.queries';
+import type { User } from '@/api/users/users.types';
 import { useAppDispatch } from '@/store/hooks';
 import { setTargetMessageId } from '@/store/slices/navSlice';
 import type { ProcessedChatMessage } from '@/types/chat.ui';
@@ -28,8 +34,10 @@ const PinnedMessageItem: React.FC<{
     pin: ChatMessage;
     serverId: string;
     channelId: string;
+    me?: User | null;
+    serverDetails?: Server | null;
     onJump: (id: string) => void;
-}> = ({ pin, serverId, channelId, onJump }) => {
+}> = ({ pin, serverId, channelId, me, serverDetails, onJump }) => {
     const { data: members } = useMembers(serverId, { enabled: !!serverId });
     const { data: serverRoles } = useRoles(serverId, { enabled: !!serverId });
 
@@ -62,7 +70,18 @@ const PinnedMessageItem: React.FC<{
             <Box className="pointer-events-none pb-2">
                 <Message
                     disableActions
-                    disableGlow={false}
+                    disableColors={
+                        me?.settings?.disableCustomUsernameColors ||
+                        serverDetails?.disableUsernameGlowAndCustomColor
+                    }
+                    disableCustomFonts={
+                        me?.settings?.disableCustomUsernameFonts ||
+                        serverDetails?.disableCustomFonts
+                    }
+                    disableGlow={
+                        me?.settings?.disableCustomUsernameGlow ||
+                        serverDetails?.disableUsernameGlowAndCustomColor
+                    }
                     iconRole={processedPin.iconRole}
                     message={processedPin}
                     role={processedPin.role}
@@ -95,6 +114,9 @@ export const PinsDrawer: React.FC<PinsDrawerProps> = ({
     const dispatch = useAppDispatch();
     const { data: pins, isLoading } = usePinnedMessages(serverId, channelId);
     const { data: me } = useMe();
+    const { data: serverDetails } = useServerDetails(serverId, {
+        enabled: !!serverId,
+    });
 
     useEffect(() => {
         if (me?._id && channelId) {
@@ -221,7 +243,9 @@ export const PinsDrawer: React.FC<PinsDrawerProps> = ({
                                 <PinnedMessageItem
                                     channelId={channelId}
                                     key={pin._id}
+                                    me={me}
                                     pin={pin}
+                                    serverDetails={serverDetails}
                                     serverId={serverId}
                                     onJump={handleJump}
                                 />

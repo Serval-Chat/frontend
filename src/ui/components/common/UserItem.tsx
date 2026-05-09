@@ -543,17 +543,20 @@ export const UserItem: React.FC<UserItemProps> = ({
                                 disableColors={
                                     disableColors ||
                                     currentUser?.settings
-                                        ?.disableCustomUsernameColors
+                                        ?.disableCustomUsernameColors ||
+                                    serverDetails?.disableUsernameGlowAndCustomColor
                                 }
                                 disableCustomFonts={
                                     disableCustomFonts ||
                                     currentUser?.settings
-                                        ?.disableCustomUsernameFonts
+                                        ?.disableCustomUsernameFonts ||
+                                    serverDetails?.disableCustomFonts
                                 }
                                 disableGlow={
                                     disableGlow ||
                                     currentUser?.settings
-                                        ?.disableCustomUsernameGlow
+                                        ?.disableCustomUsernameGlow ||
+                                    serverDetails?.disableUsernameGlowAndCustomColor
                                 }
                                 disableGlowAndColors={disableGlowAndColors}
                                 iconRole={iconRole}
@@ -627,15 +630,18 @@ export const UserItem: React.FC<UserItemProps> = ({
             <ProfilePopup
                 disableColors={
                     disableColors ||
-                    currentUser?.settings?.disableCustomUsernameColors
+                    currentUser?.settings?.disableCustomUsernameColors ||
+                    serverDetails?.disableUsernameGlowAndCustomColor
                 }
                 disableCustomFonts={
                     disableCustomFonts ||
-                    currentUser?.settings?.disableCustomUsernameFonts
+                    currentUser?.settings?.disableCustomUsernameFonts ||
+                    serverDetails?.disableCustomFonts
                 }
                 disableGlow={
                     disableGlow ||
-                    currentUser?.settings?.disableCustomUsernameGlow
+                    currentUser?.settings?.disableCustomUsernameGlow ||
+                    serverDetails?.disableUsernameGlowAndCustomColor
                 }
                 disableGlowAndColors={disableGlowAndColors}
                 iconRole={iconRole}
