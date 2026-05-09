@@ -71,7 +71,6 @@ import { ParsedText } from '@/ui/components/common/ParsedText';
 import { StyledUserName } from '@/ui/components/common/StyledUserName';
 import { Text } from '@/ui/components/common/Text';
 import { useToast } from '@/ui/components/common/Toast';
-import { EmojiPicker } from '@/ui/components/emoji/EmojiPicker';
 import {
     type StickerCategory,
     StickerPicker,
@@ -91,6 +90,12 @@ import { LexicalSubmitPlugin } from './lexical/LexicalSubmitPlugin';
 import { $getRawMessageText } from './lexical/lexicalUtils';
 import { tryExecuteSlashCommand } from './lexical/slashCommandExecution';
 import { parseSlashInput } from './lexical/slashCommands';
+
+const EmojiPicker = React.lazy(() =>
+    import('@/ui/components/emoji/EmojiPicker').then((m) => ({
+        default: m.EmojiPicker,
+    })),
+);
 
 const EditorBridge = ({
     onReady,
@@ -1007,36 +1012,44 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                     className="absolute right-0 bottom-full z-[var(--z-index-popover)] mb-2"
                     ref={emojiPickerRef}
                 >
-                    <EmojiPicker
-                        customCategories={customCategories}
-                        onCustomEmojiSelect={(emoji) => {
-                            editor?.update(() => {
-                                const selection = $getSelection();
-                                if ($isRangeSelection(selection)) {
-                                    const chip = $createChipNode('emoji', {
-                                        id: emoji.id,
-                                        label: emoji.name,
-                                        imageUrl: emoji.url,
-                                    });
-                                    selection.insertNodes([chip]);
-                                }
-                            });
-                            editor?.focus();
-                        }}
-                        onEmojiSelect={(emoji: string): void => {
-                            editor?.update(() => {
-                                const selection = $getSelection();
-                                if ($isRangeSelection(selection)) {
-                                    selection.insertNodes([
-                                        $createChipNode('unicode-emoji', {
-                                            id: emoji,
-                                        }),
-                                    ]);
-                                }
-                            });
-                            editor?.focus();
-                        }}
-                    />
+                    <React.Suspense
+                        fallback={
+                            <div className="flex h-[400px] w-[320px] items-center justify-center rounded-lg border border-border-subtle bg-bg-primary text-muted-foreground shadow-xl">
+                                Loading emojis...
+                            </div>
+                        }
+                    >
+                        <EmojiPicker
+                            customCategories={customCategories}
+                            onCustomEmojiSelect={(emoji) => {
+                                editor?.update(() => {
+                                    const selection = $getSelection();
+                                    if ($isRangeSelection(selection)) {
+                                        const chip = $createChipNode('emoji', {
+                                            id: emoji.id,
+                                            label: emoji.name,
+                                            imageUrl: emoji.url,
+                                        });
+                                        selection.insertNodes([chip]);
+                                    }
+                                });
+                                editor?.focus();
+                            }}
+                            onEmojiSelect={(emoji: string): void => {
+                                editor?.update(() => {
+                                    const selection = $getSelection();
+                                    if ($isRangeSelection(selection)) {
+                                        selection.insertNodes([
+                                            $createChipNode('unicode-emoji', {
+                                                id: emoji,
+                                            }),
+                                        ]);
+                                    }
+                                });
+                                editor?.focus();
+                            }}
+                        />
+                    </React.Suspense>
                 </div>
             )}
 

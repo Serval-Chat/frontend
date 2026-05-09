@@ -11,7 +11,8 @@
     "prepare": "husky",
     "format": "prettier --write src/",
     "test": "vitest",
-    "lint:fix": "eslint . --fix --cache"
+    "lint:fix": "eslint . --fix --cache",
+    "knip": "knip"
   },
   "lint-staged": {
     "src/**/*.{ts,tsx,js,jsx}": [
@@ -33,10 +34,6 @@
     "@tauri-apps/plugin-http": "^2.5.7",
     "@tauri-apps/plugin-notification": "^2.3.3",
     "@tauri-apps/plugin-os": "^2.3.2",
-    "@types/katex": "^0.16.8",
-    "@types/mermaid": "^9.1.0",
-    "@types/react-router-dom": "^5.3.3",
-    "@types/uuid": "^10.0.0",
     "axios": "^1.13.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -80,7 +77,6 @@
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
     "@types/react-syntax-highlighter": "^15.5.13",
-    "@types/react-window": "^1.8.8",
     "@vitejs/plugin-react": "^5.1.2",
     "eslint": "^9.39.1",
     "eslint-plugin-import": "^2.32.0",

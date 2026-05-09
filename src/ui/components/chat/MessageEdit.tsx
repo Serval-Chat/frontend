@@ -29,7 +29,6 @@ import {
     ChipNode,
 } from '@/ui/components/chat/lexical/ChipNode';
 import { Button } from '@/ui/components/common/Button';
-import { EmojiPicker } from '@/ui/components/emoji/EmojiPicker';
 import { Box } from '@/ui/components/layout/Box';
 import { cn } from '@/utils/cn';
 
@@ -38,6 +37,12 @@ import { LexicalEmojiPlugin } from './lexical/LexicalEmojiPlugin';
 import { LexicalInitPlugin } from './lexical/LexicalInitPlugin';
 import { LexicalSubmitPlugin } from './lexical/LexicalSubmitPlugin';
 import { $getRawMessageText } from './lexical/lexicalUtils';
+
+const EmojiPicker = React.lazy(() =>
+    import('@/ui/components/emoji/EmojiPicker').then((m) => ({
+        default: m.EmojiPicker,
+    })),
+);
 
 const EditorBridge = ({
     onReady,
@@ -355,11 +360,19 @@ export const MessageEdit: React.FC<MessageEditProps> = ({
                     className="absolute right-0 bottom-full z-[var(--z-index-popover)] mb-2"
                     ref={emojiPickerRef}
                 >
-                    <EmojiPicker
-                        customCategories={customCategories}
-                        onCustomEmojiSelect={handleCustomEmojiSelect}
-                        onEmojiSelect={handleEmojiSelect}
-                    />
+                    <React.Suspense
+                        fallback={
+                            <div className="flex h-[400px] w-[320px] items-center justify-center rounded-lg border border-border-subtle bg-bg-primary text-muted-foreground shadow-xl">
+                                Loading emojis...
+                            </div>
+                        }
+                    >
+                        <EmojiPicker
+                            customCategories={customCategories}
+                            onCustomEmojiSelect={handleCustomEmojiSelect}
+                            onEmojiSelect={handleEmojiSelect}
+                        />
+                    </React.Suspense>
                 </Box>
             )}
         </Box>

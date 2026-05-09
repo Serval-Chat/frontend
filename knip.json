@@ -1,0 +1,19 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "project": [
+    "src/**/*.{ts,tsx,js,jsx}"
+  ],
+  "ignoreExportsUsedInFile": true,
+  "ignore": [
+    "**/*.d.ts"
+  ],
+
+  "ignoreBinaries": [
+    "knip"
+  ],
+  "rules": {
+    "exports": "off",
+    "types": "off",
+    "unlisted": "off"
+  }
+}

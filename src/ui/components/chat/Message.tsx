@@ -39,7 +39,6 @@ import type { ContextMenuItem } from '@/ui/components/common/ContextMenu';
 import { Modal } from '@/ui/components/common/Modal';
 import { Text } from '@/ui/components/common/Text';
 import { UserProfilePicture } from '@/ui/components/common/UserProfilePicture';
-import { EmojiPicker } from '@/ui/components/emoji/EmojiPicker';
 import { Box } from '@/ui/components/layout/Box';
 import { ProfilePopup } from '@/ui/components/profile/ProfilePopup';
 import { cn } from '@/utils/cn';
@@ -50,6 +49,12 @@ import { MessageEdit } from './MessageEdit';
 import { MessageHeader } from './MessageHeader';
 import { Reactions } from './Reactions';
 import { ReplyPreview } from './ReplyPreview';
+
+const EmojiPicker = React.lazy(() =>
+    import('@/ui/components/emoji/EmojiPicker').then((m) => ({
+        default: m.EmojiPicker,
+    })),
+);
 
 interface MessageProps {
     message: ProcessedChatMessage;
@@ -606,14 +611,22 @@ export const Message: React.FC<MessageProps> = ({
                                 title="Add Reaction"
                                 onClose={() => setShowPicker(false)}
                             >
-                                <EmojiPicker
-                                    className="h-full !max-h-none w-full !max-w-none rounded-none border-none shadow-none"
-                                    customCategories={customCategories}
-                                    onCustomEmojiSelect={
-                                        handleCustomEmojiSelect
+                                <React.Suspense
+                                    fallback={
+                                        <div className="flex h-full items-center justify-center p-4">
+                                            Loading emojis...
+                                        </div>
                                     }
-                                    onEmojiSelect={handleEmojiSelect}
-                                />
+                                >
+                                    <EmojiPicker
+                                        className="h-full !max-h-none w-full !max-w-none rounded-none border-none shadow-none"
+                                        customCategories={customCategories}
+                                        onCustomEmojiSelect={
+                                            handleCustomEmojiSelect
+                                        }
+                                        onEmojiSelect={handleEmojiSelect}
+                                    />
+                                </React.Suspense>
                             </Modal>
                         ) : (
                             createPortal(
@@ -626,13 +639,21 @@ export const Message: React.FC<MessageProps> = ({
                                         top: pickerCoords.y,
                                     }}
                                 >
-                                    <EmojiPicker
-                                        customCategories={customCategories}
-                                        onCustomEmojiSelect={
-                                            handleCustomEmojiSelect
+                                    <React.Suspense
+                                        fallback={
+                                            <div className="flex h-[400px] w-[320px] items-center justify-center rounded-lg border border-border-subtle bg-bg-primary text-muted-foreground shadow-xl">
+                                                Loading emojis...
+                                            </div>
                                         }
-                                        onEmojiSelect={handleEmojiSelect}
-                                    />
+                                    >
+                                        <EmojiPicker
+                                            customCategories={customCategories}
+                                            onCustomEmojiSelect={
+                                                handleCustomEmojiSelect
+                                            }
+                                            onEmojiSelect={handleEmojiSelect}
+                                        />
+                                    </React.Suspense>
                                 </Box>,
                                 document.body,
                             )

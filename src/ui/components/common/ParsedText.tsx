@@ -12,13 +12,10 @@ import type { ASTNode, ChecklistNode } from '@/utils/textParser/types';
 
 import { Admonition } from './Admonition';
 import { ChecklistGroup } from './ChecklistGroup';
-import { CodeBlock } from './CodeBlock';
 import { Divider } from './Divider';
 import { Heading } from './Heading';
-import { LatexRenderer } from './LatexRenderer';
 import { Link } from './Link';
 import { Mention } from './Mention';
-import { MermaidChart } from './MermaidChart';
 import { ParsedEmoji } from './ParsedEmoji';
 import { ParsedUnicodeEmoji } from './ParsedUnicodeEmoji';
 import { RoleMention } from './RoleMention';
@@ -32,6 +29,18 @@ import {
     TableRow,
 } from './Table';
 import { Text, type TextProps } from './Text';
+
+const CodeBlock = React.lazy(() =>
+    import('./CodeBlock').then((m) => ({ default: m.CodeBlock })),
+);
+
+const LatexRenderer = React.lazy(() =>
+    import('./LatexRenderer').then((m) => ({ default: m.LatexRenderer })),
+);
+
+const MermaidChart = React.lazy(() =>
+    import('./MermaidChart').then((m) => ({ default: m.MermaidChart })),
+);
 
 interface ParsedTextProps {
     nodes: ASTNode[];
@@ -572,25 +581,45 @@ export const ParsedText: React.FC<ParsedTextProps> = ({
 
                     case 'inline_code':
                         return (
-                            <CodeBlock
-                                inline
-                                content={node.content}
+                            <React.Suspense
+                                fallback={
+                                    <span className="opacity-50">...</span>
+                                }
                                 key={idx}
-                            />
+                            >
+                                <CodeBlock inline content={node.content} />
+                            </React.Suspense>
                         );
 
                     case 'code_block':
                         return (
-                            <CodeBlock
-                                content={node.content}
+                            <React.Suspense
+                                fallback={
+                                    <div className="p-4 opacity-50">
+                                        Loading code block...
+                                    </div>
+                                }
                                 key={idx}
-                                language={node.language}
-                            />
+                            >
+                                <CodeBlock
+                                    content={node.content}
+                                    language={node.language}
+                                />
+                            </React.Suspense>
                         );
 
                     case 'mermaid':
                         return (
-                            <MermaidChart content={node.content} key={idx} />
+                            <React.Suspense
+                                fallback={
+                                    <div className="p-4 opacity-50">
+                                        Loading chart...
+                                    </div>
+                                }
+                                key={idx}
+                            >
+                                <MermaidChart content={node.content} />
+                            </React.Suspense>
                         );
 
                     case 'invite':
@@ -773,16 +802,33 @@ export const ParsedText: React.FC<ParsedTextProps> = ({
 
                     case 'latex':
                         return (
-                            <LatexRenderer
-                                displayMode
-                                content={node.content}
+                            <React.Suspense
+                                fallback={
+                                    <span className="opacity-50">
+                                        Loading math...
+                                    </span>
+                                }
                                 key={idx}
-                            />
+                            >
+                                <LatexRenderer
+                                    displayMode
+                                    content={node.content}
+                                />
+                            </React.Suspense>
                         );
 
                     case 'inline_latex':
                         return (
-                            <LatexRenderer content={node.content} key={idx} />
+                            <React.Suspense
+                                fallback={
+                                    <span className="opacity-50">
+                                        Loading math...
+                                    </span>
+                                }
+                                key={idx}
+                            >
+                                <LatexRenderer content={node.content} />
+                            </React.Suspense>
                         );
 
                     case 'thematic_break':
