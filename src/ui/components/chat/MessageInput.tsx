@@ -77,6 +77,7 @@ import {
 } from '@/ui/components/emoji/StickerPicker';
 import { Box } from '@/ui/components/layout/Box';
 import { cn } from '@/utils/cn';
+import { clearDraft, getDraft, saveDraft } from '@/utils/drafts';
 import { ParserPresets, parseText } from '@/utils/textParser/parser';
 import { WsEvents } from '@/ws';
 
@@ -584,6 +585,13 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                 },
             });
             if (slashResult.handled) {
+                if (slashResult.success) {
+                    clearDraft(
+                        selectedFriendId,
+                        selectedServerId,
+                        selectedChannelId,
+                    );
+                }
                 return slashResult.success;
             }
 
@@ -605,6 +613,11 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                 }
                 clearQueue();
                 onCancelReply?.();
+                clearDraft(
+                    selectedFriendId,
+                    selectedServerId,
+                    selectedChannelId,
+                );
                 return true;
             }
 
@@ -687,6 +700,28 @@ export const MessageInput: React.FC<MessageInputProps> = ({
             </div>
         );
     };
+
+    useEffect(() => {
+        if (!editor) return;
+
+        const draftJson = getDraft(
+            selectedFriendId,
+            selectedServerId,
+            selectedChannelId,
+        );
+
+        if (draftJson) {
+            try {
+                const parsedState = editor.parseEditorState(draftJson);
+                editor.setEditorState(parsedState);
+            } catch (e) {
+                console.error('Failed to parse draft state:', e);
+                editor.dispatchCommand(CLEAR_EDITOR_COMMAND, undefined);
+            }
+        } else {
+            editor.dispatchCommand(CLEAR_EDITOR_COMMAND, undefined);
+        }
+    }, [editor, selectedFriendId, selectedServerId, selectedChannelId]);
 
     if (isTimedOut) {
         return (
@@ -873,9 +908,13 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                         />
                         <OnChangePlugin
                             onChange={(editorState) => {
+                                let currentText = '';
+                                let currentChip = null;
                                 editorState.read(() => {
                                     const text = $getRawMessageText();
                                     const chipState = $getSlashChipState();
+                                    currentText = text;
+                                    currentChip = chipState;
                                     setCurrentInputText(text);
                                     setSlashChipState(chipState);
                                     const nonEmpty =
@@ -886,6 +925,27 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                                         sendTyping();
                                     }
                                 });
+
+                                if (
+                                    currentText.trim().length === 0 &&
+                                    currentChip === null
+                                ) {
+                                    clearDraft(
+                                        selectedFriendId,
+                                        selectedServerId,
+                                        selectedChannelId,
+                                    );
+                                } else {
+                                    const json = JSON.stringify(
+                                        editorState.toJSON(),
+                                    );
+                                    saveDraft(
+                                        json,
+                                        selectedFriendId,
+                                        selectedServerId,
+                                        selectedChannelId,
+                                    );
+                                }
                             }}
                         />
                     </LexicalComposer>
