@@ -1,3 +1,4 @@
+import type { MessagePoll, OutgoingPoll } from '@/api/chat/chat.types';
 import type {
     Category,
     Channel,
@@ -21,7 +22,7 @@ export interface IWsEnvelope<T = JsonValue> {
     };
     meta: {
         replyTo?: string; // ID of the request being replied to
-        ts: number; // Unix timestamp in ms
+        ts: number; // Unix timestamp
     };
 }
 
@@ -74,6 +75,7 @@ export interface IMessageDm {
     };
     isEdited: boolean;
     stickerId?: string;
+    poll?: MessagePoll;
 }
 
 /**
@@ -99,6 +101,7 @@ export interface IMessageServer {
         user?: { id: string; username: string };
     };
     stickerId?: string;
+    poll?: MessagePoll;
 }
 
 /**
@@ -130,6 +133,7 @@ export interface IMessageServerSent {
         user?: { id: string; username: string };
     };
     stickerId?: string;
+    poll?: MessagePoll;
 }
 
 /**
@@ -516,7 +520,28 @@ export const WsEvents = {
     MESSAGE_SERVER_PIN_UPDATED: 'message_server_pin_updated',
     INTERACTION_CREATE_SERVER: 'interaction_create_server',
     ADMIN_STATS_UPDATED: 'admin_stats_updated',
+    POLL_VOTE_UPDATED_DM: 'poll_vote_updated_dm',
+    POLL_VOTE_UPDATED_SERVER: 'poll_vote_updated_server',
 } as const;
+
+export interface ISendMessageServerEventPayload {
+    serverId: string;
+    channelId: string;
+    text: string;
+    replyToId?: string;
+    stickerId?: string;
+    poll?: OutgoingPoll;
+}
+
+export interface IPollVoteUpdatedDmPayload {
+    messageId: string;
+    poll: MessagePoll;
+}
+
+export interface IPollVoteUpdatedServerPayload {
+    messageId: string;
+    poll: MessagePoll;
+}
 
 export interface IReactionEventPayload {
     messageId: string;

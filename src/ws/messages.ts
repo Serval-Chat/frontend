@@ -1,3 +1,5 @@
+import type { OutgoingPoll } from '@/api/chat/chat.types';
+
 import { wsClient } from './client';
 import { WsEvents } from './events';
 
@@ -13,12 +15,14 @@ export const wsMessages = {
         text: string,
         replyToId?: string,
         stickerId?: string,
+        poll?: OutgoingPoll,
     ) => {
         wsClient.send(WsEvents.SEND_MESSAGE_DM, {
             receiverId,
             text,
             replyToId,
             stickerId,
+            poll,
         });
     },
 
@@ -31,6 +35,7 @@ export const wsMessages = {
         text: string,
         replyToId?: string,
         stickerId?: string,
+        poll?: OutgoingPoll,
     ) => {
         wsClient.send(WsEvents.SEND_MESSAGE_SERVER, {
             serverId,
@@ -38,6 +43,7 @@ export const wsMessages = {
             text,
             replyToId,
             stickerId,
+            poll,
         });
     },
 

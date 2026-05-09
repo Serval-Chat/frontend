@@ -14,6 +14,11 @@ export const usersApi = {
     getById: (id: string) =>
         apiClient.get<User>(`/api/v1/profile/${id}`).then((r) => r.data),
 
+    getBulk: (ids: string[]) =>
+        apiClient
+            .post<User[]>('/api/v1/profile/bulk', { ids })
+            .then((r) => r.data),
+
     updateBio: (bio: string) =>
         apiClient
             .patch<{

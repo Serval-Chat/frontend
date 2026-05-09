@@ -116,7 +116,6 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({
                             wordBreak: 'break-all',
                         }}
                         language={(language || 'text').toLowerCase()}
-                        lineNumberClassName="code-block-line-number"
                         lineNumberStyle={{
                             minWidth: '3.5em',
                             paddingRight: '1em',
@@ -136,7 +135,8 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({
                                 width: '100%',
                             },
                         }}
-                        lineTagName="div"
+                        linenumberclassname="code-block-line-number"
+                        linetagname="div"
                         style={customSyntaxTheme}
                     >
                         {content}

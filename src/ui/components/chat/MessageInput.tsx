@@ -23,6 +23,7 @@ import {
 } from 'lexical';
 import {
     ArrowUp,
+    BarChart2,
     Clock,
     FileImage,
     Plus,
@@ -35,7 +36,7 @@ import { useLocation, useParams } from 'react-router-dom';
 import { useClickAway } from 'react-use';
 
 import { useChannelMessages, useUserMessages } from '@/api/chat/chat.queries';
-import type { ChatMessage } from '@/api/chat/chat.types';
+import { type ChatMessage, type OutgoingPoll } from '@/api/chat/chat.types';
 import { filesApi } from '@/api/files/files.api';
 import { useFriends } from '@/api/friends/friends.queries';
 import { interactionsApi } from '@/api/interactions/interactions.api';
@@ -81,6 +82,7 @@ import { clearDraft, getDraft, saveDraft } from '@/utils/drafts';
 import { ParserPresets, parseText } from '@/utils/textParser/parser';
 import { WsEvents } from '@/ws';
 
+import { CreatePollModal } from './CreatePollModal';
 import { FileQueue } from './FileQueue';
 import { GifPicker } from './GifPicker';
 import { LexicalAutocompletePlugin } from './lexical/LexicalAutocompletePlugin';
@@ -157,6 +159,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
     const [showStickerPicker, setShowStickerPicker] = useState(false);
     const [showGifPicker, setShowGifPicker] = useState(false);
+    const [showPollModal, setShowPollModal] = useState(false);
     const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
     const [hasText, setHasText] = useState(false);
     const [currentInputText, setCurrentInputText] = useState('');
@@ -636,11 +639,20 @@ export const MessageInput: React.FC<MessageInputProps> = ({
             setCooldown,
             selectedServerId,
             selectedChannelId,
+            selectedFriendId,
             isServerRoute,
             showToast,
             serverCommands,
             editor,
         ],
+    );
+
+    const handleSendPoll = useCallback(
+        (poll: OutgoingPoll): void => {
+            sendMessage('', replyingTo?._id, undefined, poll);
+            onCancelReply?.();
+        },
+        [sendMessage, replyingTo?._id, onCancelReply],
     );
 
     useEffect(() => {
@@ -1049,6 +1061,23 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                     )}
                 </Box>
 
+                <Button
+                    className={cn(
+                        'mb-1 h-8 w-8 shrink-0 p-0',
+                        showPollModal && 'text-primary',
+                    )}
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => {
+                        setShowPollModal(true);
+                        setShowEmojiPicker(false);
+                        setShowStickerPicker(false);
+                        setShowGifPicker(false);
+                    }}
+                >
+                    <BarChart2 size={20} />
+                </Button>
+
                 {(hasText || files.length > 0) && isMobile && (
                     <Button
                         className="mb-1 h-8 w-8 shrink-0 p-0 text-primary"
@@ -1152,6 +1181,12 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                     )}
                 </Box>
             )}
+
+            <CreatePollModal
+                isOpen={showPollModal}
+                onClose={() => setShowPollModal(false)}
+                onSubmit={handleSendPoll}
+            />
         </Box>
     );
 };

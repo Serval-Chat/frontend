@@ -3,7 +3,12 @@ import { useCallback, useEffect, useRef } from 'react';
 import { type InfiniteData, useQueryClient } from '@tanstack/react-query';
 
 import { CHAT_QUERY_KEYS } from '@/api/chat/chat.queries';
-import { type ChatMessage, type MessageReaction } from '@/api/chat/chat.types';
+import type {
+    ChatMessage,
+    MessagePoll,
+    MessageReaction,
+    OutgoingPoll,
+} from '@/api/chat/chat.types';
 import { SERVERS_QUERY_KEYS } from '@/api/servers/servers.queries';
 import type { Channel } from '@/api/servers/servers.types';
 import { useMe } from '@/api/users/users.queries';
@@ -22,7 +27,12 @@ import { type TypingUser, useTypingIndicator } from './useTypingIndicator';
 import { useWebSocket } from './useWebSocket';
 
 interface ChatWSResult {
-    sendMessage: (text: string, replyToId?: string, stickerId?: string) => void;
+    sendMessage: (
+        text: string,
+        replyToId?: string,
+        stickerId?: string,
+        poll?: OutgoingPoll,
+    ) => void;
     sendTyping: () => void;
     typingUsers: TypingUser[];
 }
@@ -52,6 +62,7 @@ export function useChatWS(
             repliedTo: message.repliedTo,
             isEdited: message.isEdited,
             stickerId: message.stickerId,
+            poll: message.poll,
         }),
         [],
     );
@@ -66,6 +77,7 @@ export function useChatWS(
             channelId: message.channelId,
             replyToId: message.replyToId,
             stickerId: message.stickerId,
+            poll: 'poll' in message ? message.poll : undefined,
             isEdited: 'isEdited' in message ? message.isEdited : false,
             isWebhook: 'isWebhook' in message ? message.isWebhook : false,
             webhookUsername:
@@ -523,6 +535,76 @@ export function useChatWS(
     );
 
     useWebSocket(
+        WsEvents.POLL_VOTE_UPDATED_DM,
+        useCallback(
+            (payload: { messageId: string; poll: MessagePoll }): void => {
+                if (selectedFriendId) {
+                    queryClient.setQueriesData<InfiniteData<ChatMessage[]>>(
+                        {
+                            predicate: (query) =>
+                                query.queryKey[0] === 'chat' &&
+                                query.queryKey[1] === 'messages' &&
+                                query.queryKey[2] === 'user' &&
+                                query.queryKey[3] === selectedFriendId,
+                        },
+                        (oldData) => {
+                            if (!oldData) return oldData;
+                            return {
+                                ...oldData,
+                                pages: oldData.pages.map((page) =>
+                                    page.map((msg) =>
+                                        msg._id === payload.messageId
+                                            ? { ...msg, poll: payload.poll }
+                                            : msg,
+                                    ),
+                                ),
+                            };
+                        },
+                    );
+                }
+            },
+            [queryClient, selectedFriendId],
+        ),
+    );
+
+    useWebSocket(
+        WsEvents.POLL_VOTE_UPDATED_SERVER,
+        useCallback(
+            (payload: {
+                messageId: string;
+                serverId: string;
+                channelId: string;
+                poll: MessagePoll;
+            }): void => {
+                queryClient.setQueriesData<InfiniteData<ChatMessage[]>>(
+                    {
+                        predicate: (query) =>
+                            query.queryKey[0] === 'chat' &&
+                            query.queryKey[1] === 'messages' &&
+                            query.queryKey[2] === 'channel' &&
+                            query.queryKey[3] === payload.serverId &&
+                            query.queryKey[4] === payload.channelId,
+                    },
+                    (oldData) => {
+                        if (!oldData) return oldData;
+                        return {
+                            ...oldData,
+                            pages: oldData.pages.map((page) =>
+                                page.map((msg) =>
+                                    msg._id === payload.messageId
+                                        ? { ...msg, poll: payload.poll }
+                                        : msg,
+                                ),
+                            ),
+                        };
+                    },
+                );
+            },
+            [queryClient],
+        ),
+    );
+
+    useWebSocket(
         WsEvents.REACTION_ADDED,
         useCallback(
             (payload: IReactionEventPayload): void => {
@@ -554,13 +636,19 @@ export function useChatWS(
     }, [selectedFriendId, selectedChannelId, clearTypingUsers]);
 
     const sendMessage = useCallback(
-        (text: string, replyToId?: string, stickerId?: string): void => {
+        (
+            text: string,
+            replyToId?: string,
+            stickerId?: string,
+            poll?: OutgoingPoll,
+        ): void => {
             if (selectedFriendId) {
                 wsMessages.sendMessageDm(
                     selectedFriendId,
                     text,
                     replyToId,
                     stickerId,
+                    poll,
                 );
             } else if (selectedServerId && selectedChannelId) {
                 wsMessages.sendMessageServer(
@@ -569,6 +657,7 @@ export function useChatWS(
                     text,
                     replyToId,
                     stickerId,
+                    poll,
                 );
             }
         },

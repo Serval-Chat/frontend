@@ -133,4 +133,34 @@ export const chatApi = {
         }>('/api/v1/messages/unread');
         return response.data.counts;
     },
+
+    /**
+     * @description Vote on a DM poll
+     */
+    votePollDm: async (
+        messageId: string,
+        optionIds: string[],
+    ): Promise<ChatMessage> => {
+        const response = await apiClient.post<ChatMessage>(
+            `/api/v1/messages/${messageId}/poll/vote`,
+            { optionIds },
+        );
+        return response.data;
+    },
+
+    /**
+     * @description Vote on a Server poll
+     */
+    votePollServer: async (
+        serverId: string,
+        channelId: string,
+        messageId: string,
+        optionIds: string[],
+    ): Promise<ChatMessage> => {
+        const response = await apiClient.post<ChatMessage>(
+            `/api/v1/servers/${serverId}/channels/${channelId}/messages/${messageId}/poll/vote`,
+            { optionIds },
+        );
+        return response.data;
+    },
 };

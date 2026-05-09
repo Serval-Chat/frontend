@@ -482,8 +482,11 @@ export const Message: React.FC<MessageProps> = ({
                         />
                     ) : (
                         <MessageContent
+                            channelId={message.channelId}
                             embeds={message.embeds}
                             isDeleted={!!message.deletedAt}
+                            messageId={message._id}
+                            poll={message.poll}
                             serverId={message.serverId}
                             stickerId={message.stickerId}
                             text={message.text}

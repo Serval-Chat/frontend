@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 
+import type { MessagePoll } from '@/api/chat/chat.types';
 import { useSticker } from '@/api/servers/servers.queries';
 import { useStickerInfoBox } from '@/hooks/useStickerInfoBox';
 import type { Embed } from '@/types/embed';
@@ -12,12 +13,17 @@ import { resolveApiUrl } from '@/utils/apiUrl';
 import { cn } from '@/utils/cn';
 import { ParserPresets, parseText } from '@/utils/textParser/parser';
 
+import { Poll } from './Poll';
+
 interface MessageContentProps {
     text: string;
     serverId?: string;
     stickerId?: string;
     embeds?: Embed[];
+    poll?: MessagePoll;
     isDeleted?: boolean;
+    messageId?: string;
+    channelId?: string;
 }
 
 export const MessageContent: React.FC<MessageContentProps> = ({
@@ -25,7 +31,10 @@ export const MessageContent: React.FC<MessageContentProps> = ({
     serverId,
     stickerId,
     embeds,
+    poll,
     isDeleted,
+    messageId,
+    channelId,
 }) => {
     const { data: sticker } = useSticker(stickerId || null);
     const nodes = useMemo(() => parseText(text, ParserPresets.MESSAGE), [text]);
@@ -76,6 +85,16 @@ export const MessageContent: React.FC<MessageContentProps> = ({
                     variant="chat"
                 />
             )}
+
+            {poll && (
+                <Poll
+                    channelId={channelId}
+                    messageId={messageId || 'unknown'}
+                    poll={poll}
+                    serverId={serverId}
+                />
+            )}
+
             {sticker && (
                 <div className="mt-1 flex max-w-[240px] flex-col gap-1">
                     <Tooltip content={sticker.name} position="top">
