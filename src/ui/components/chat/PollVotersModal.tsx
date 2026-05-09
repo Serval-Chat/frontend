@@ -43,6 +43,10 @@ export const PollVotersModal: React.FC<PollVotersModalProps> = ({
         enabled: isOpen && !!serverId,
     });
 
+    const selectedOption = poll.options?.find(
+        (opt) => opt.id === selectedOptionId,
+    );
+
     const votersForSelected = useMemo(() => {
         if (!users) return [];
         const selectedOption = poll.options?.find(
