@@ -3,7 +3,7 @@ import { useCallback, useEffect, useRef } from 'react';
 import { type InfiniteData, useQueryClient } from '@tanstack/react-query';
 
 import { chatApi } from '@/api/chat/chat.api';
-import { CHAT_QUERY_KEYS } from '@/api/chat/chat.queries';
+import { CHAT_QUERY_KEYS, PREFETCH_LIMIT } from '@/api/chat/chat.queries';
 import type {
     ChatMessage,
     MessagePoll,
@@ -321,7 +321,7 @@ export function useChatWS(
                         chatApi.getChannelMessages(
                             selectedServerId,
                             selectedChannelId,
-                            50,
+                            PREFETCH_LIMIT,
                             pageParam as string | undefined,
                         ),
                     initialPageParam: undefined,

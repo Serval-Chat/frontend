@@ -39,6 +39,7 @@ export const CHAT_QUERY_KEYS = {
 };
 
 const LIMIT = 50;
+export const PREFETCH_LIMIT = 15;
 
 /**
  * @description Hook to fetch messages for a specific user

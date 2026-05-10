@@ -17,7 +17,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 
 import { chatApi } from '@/api/chat/chat.api';
-import { CHAT_QUERY_KEYS } from '@/api/chat/chat.queries';
+import { CHAT_QUERY_KEYS, PREFETCH_LIMIT } from '@/api/chat/chat.queries';
 import { usePings } from '@/api/pings/pings.queries';
 import { serversApi } from '@/api/servers/servers.api';
 import {
@@ -98,7 +98,7 @@ const ChannelRow: React.FC<ChannelRowProps> = React.memo(
                     chatApi.getChannelMessages(
                         selectedServerId,
                         channel._id,
-                        50,
+                        PREFETCH_LIMIT,
                         pageParam as string | undefined,
                     ),
                 initialPageParam: undefined,
