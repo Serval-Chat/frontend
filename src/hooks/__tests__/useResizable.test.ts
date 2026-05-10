@@ -20,17 +20,15 @@ describe('useResizable', () => {
     });
 
     it('should respect minWidth and maxWidth on initialization', () => {
-        vi.spyOn(Storage.prototype, 'getItem').mockReturnValue('500'); // Out of bounds
+        localStorage.setItem('test-resizable', '500');
         const { result } = renderHook(() => useResizable(defaultOptions));
         expect(result.current.width).toBe(240); // Falls back to initialWidth
-        vi.restoreAllMocks();
     });
 
     it('should initialize from localStorage if available and within bounds', () => {
-        vi.spyOn(Storage.prototype, 'getItem').mockReturnValue('300');
+        localStorage.setItem('test-resizable', '300');
         const { result } = renderHook(() => useResizable(defaultOptions));
         expect(result.current.width).toBe(300);
-        vi.restoreAllMocks();
     });
 
     it('should update width on mouse move when resizing (side: left)', () => {
@@ -105,7 +103,6 @@ describe('useResizable', () => {
     });
 
     it('should save to localStorage ONLY on mouseup', () => {
-        const setItemSpy = vi.spyOn(Storage.prototype, 'setItem');
         const { result } = renderHook(() => useResizable(defaultOptions));
 
         act(() => {
@@ -120,14 +117,13 @@ describe('useResizable', () => {
             window.dispatchEvent(moveEvent);
         });
 
-        expect(setItemSpy).not.toHaveBeenCalled();
+        expect(localStorage.getItem('test-resizable')).toBeNull();
 
         act(() => {
             const upEvent = new MouseEvent('mouseup');
             window.dispatchEvent(upEvent);
         });
 
-        expect(setItemSpy).toHaveBeenCalledWith('test-resizable', '290');
-        vi.restoreAllMocks();
+        expect(localStorage.getItem('test-resizable')).toBe('290');
     });
 });

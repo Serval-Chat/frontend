@@ -48,7 +48,9 @@ export const useWsDebugEvents = (): DebugWsEvent[] => {
     return currentEvents;
 };
 
-let isWindowOpen = localStorage.getItem('serchat:debug-window') === 'true';
+let isWindowOpen =
+    typeof localStorage !== 'undefined' &&
+    localStorage.getItem('serchat:debug-window') === 'true';
 
 export const toggleWsDebugWindow = (force?: boolean): void => {
     isWindowOpen = force !== undefined ? force : !isWindowOpen;

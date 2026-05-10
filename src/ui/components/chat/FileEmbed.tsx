@@ -144,7 +144,7 @@ export const FileEmbed: React.FC<FileEmbedProps> = ({ url }) => {
 
     // Video rendering
     if (mimeType?.startsWith('video/')) {
-        const displayUrl = getSafeUrl(url);
+        const displayUrl = url;
 
         return (
             <Box
@@ -171,7 +171,9 @@ export const FileEmbed: React.FC<FileEmbedProps> = ({ url }) => {
                     <>
                         <video
                             controls
+                            playsInline
                             className="max-h-inherit h-auto w-auto max-w-full"
+                            preload="metadata"
                             src={displayUrl!}
                         >
                             <track kind="captions" />

@@ -47,9 +47,43 @@ const EmbedCard = ({
         embed.footer ??
         embed.thumbnail ??
         embed.image ??
+        embed.video ??
         (embed.fields && embed.fields.length > 0);
 
     if (!hasContent) return null;
+
+    if (embed.type === 'video' && embed.video?.url) {
+        return (
+            <div className="mt-1 flex" key={index}>
+                {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
+                <video
+                    controls
+                    playsInline
+                    className={cn(
+                        'max-h-96 max-w-[520px] rounded-md object-contain',
+                        isDeleted && 'opacity-50 grayscale',
+                    )}
+                    preload="metadata"
+                    src={embed.video.url}
+                />
+            </div>
+        );
+    }
+
+    if (embed.type === 'image' && embed.image?.url) {
+        return (
+            <div className="mt-1 flex" key={index}>
+                <img
+                    alt={embed.title || 'Image'}
+                    className={cn(
+                        'max-h-96 max-w-[520px] rounded-md object-contain',
+                        isDeleted && 'opacity-50 grayscale',
+                    )}
+                    src={getSafeUrl(embed.image.url)}
+                />
+            </div>
+        );
+    }
 
     type FieldRow = { fields: typeof embed.fields; inline: boolean };
     const fieldRows: FieldRow[] = [];

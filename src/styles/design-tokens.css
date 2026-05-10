@@ -1,5 +1,4 @@
 @theme {
-    /* Theme-agnostic variables */
     --spacing: 0.25rem;
     --spacing-xs: calc(var(--spacing) * 1);
     --spacing-sm: calc(var(--spacing) * 2);
@@ -165,7 +164,6 @@
 .theme-serval a,
 .theme-serval a.text-primary {
     color: #cc5500;
-    text-decoration: underline;
     transition: color 0.2s ease;
 }
 

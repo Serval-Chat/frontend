@@ -454,7 +454,8 @@ export function useChatWS(
                 channelId: string;
                 text: string;
                 editedAt: string;
-                isEdited: true;
+                isEdited: boolean;
+                embeds?: ChatMessage['embeds'];
             }): void => {
                 queryClient.setQueriesData<InfiniteData<ChatMessage[]>>(
                     {
@@ -485,6 +486,126 @@ export function useChatWS(
                 );
             },
             [queryClient],
+        ),
+    );
+
+    useWebSocket(
+        WsEvents.MESSAGE_DM_EDITED,
+        useCallback(
+            (payload: {
+                messageId: string;
+                text: string;
+                editedAt: string;
+                isEdited: boolean;
+                embeds?: ChatMessage['embeds'];
+            }): void => {
+                if (!selectedFriendId) return;
+                queryClient.setQueriesData<InfiniteData<ChatMessage[]>>(
+                    {
+                        predicate: (query) =>
+                            query.queryKey[0] === 'chat' &&
+                            query.queryKey[1] === 'messages' &&
+                            query.queryKey[2] === 'user' &&
+                            query.queryKey[3] === selectedFriendId,
+                    },
+                    (oldData) => {
+                        if (!oldData) return oldData;
+                        return {
+                            ...oldData,
+                            pages: oldData.pages.map((page) =>
+                                page.map((msg) =>
+                                    msg._id === payload.messageId
+                                        ? {
+                                              ...msg,
+                                              text: payload.text,
+                                              isEdited: payload.isEdited,
+                                          }
+                                        : msg,
+                                ),
+                            ),
+                        };
+                    },
+                );
+            },
+            [queryClient, selectedFriendId],
+        ),
+    );
+
+    useWebSocket(
+        WsEvents.MESSAGE_SERVER_EMBEDS_UPDATED,
+        useCallback(
+            (payload: {
+                messageId: string;
+                serverId: string;
+                channelId: string;
+                embeds: ChatMessage['embeds'];
+            }): void => {
+                queryClient.setQueriesData<InfiniteData<ChatMessage[]>>(
+                    {
+                        predicate: (query) =>
+                            query.queryKey[0] === 'chat' &&
+                            query.queryKey[1] === 'messages' &&
+                            query.queryKey[2] === 'channel' &&
+                            query.queryKey[3] === payload.serverId &&
+                            query.queryKey[4] === payload.channelId,
+                    },
+                    (oldData) => {
+                        if (!oldData) return oldData;
+                        return {
+                            ...oldData,
+                            pages: oldData.pages.map((page) =>
+                                page.map((msg) =>
+                                    msg._id === payload.messageId
+                                        ? {
+                                              ...msg,
+                                              embeds: payload.embeds,
+                                          }
+                                        : msg,
+                                ),
+                            ),
+                        };
+                    },
+                );
+            },
+            [queryClient],
+        ),
+    );
+
+    useWebSocket(
+        WsEvents.MESSAGE_DM_EMBEDS_UPDATED,
+        useCallback(
+            (payload: {
+                messageId: string;
+                embeds: ChatMessage['embeds'];
+            }): void => {
+                if (!selectedFriendId) return;
+                queryClient.setQueriesData<InfiniteData<ChatMessage[]>>(
+                    {
+                        predicate: (query) =>
+                            query.queryKey[0] === 'chat' &&
+                            query.queryKey[1] === 'messages' &&
+                            query.queryKey[2] === 'user' &&
+                            query.queryKey[3] === selectedFriendId,
+                    },
+                    (oldData) => {
+                        if (!oldData) return oldData;
+                        return {
+                            ...oldData,
+                            pages: oldData.pages.map((page) =>
+                                page.map((msg) =>
+                                    msg._id === payload.messageId
+                                        ? {
+                                              ...msg,
+                                              embeds: payload.embeds,
+                                          }
+                                        : msg,
+                                ),
+                            ),
+                        };
+                    },
+                );
+            },
+            [queryClient, selectedFriendId],
         ),
     );
 

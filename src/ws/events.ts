@@ -76,6 +76,7 @@ export interface IMessageDm {
     isEdited: boolean;
     stickerId?: string;
     poll?: MessagePoll;
+    embeds?: Embed[];
 }
 
 /**
@@ -134,6 +135,24 @@ export interface IMessageServerSent {
     };
     stickerId?: string;
     poll?: MessagePoll;
+}
+
+/**
+ * @description DM embeds updated.
+ */
+export interface IMessageDmEmbedsUpdated {
+    messageId: string;
+    embeds: Embed[];
+}
+
+/**
+ * @description Server message embeds updated.
+ */
+export interface IMessageServerEmbedsUpdated {
+    messageId: string;
+    serverId: string;
+    channelId: string;
+    embeds: Embed[];
 }
 
 /**
@@ -443,6 +462,7 @@ export const WsEvents = {
     MARK_DM_READ: 'mark_dm_read',
     DM_UNREAD_UPDATED: 'dm_unread_updated',
     TYPING_DM: 'typing_dm',
+    MESSAGE_DM_EMBEDS_UPDATED: 'message_dm_embeds_updated',
 
     // Server Messages
     SEND_MESSAGE_SERVER: 'send_message_server',
@@ -457,6 +477,7 @@ export const WsEvents = {
     CHANNEL_UNREAD_UPDATED: 'channel_unread_updated',
     SERVER_UNREAD_UPDATED: 'server_unread_updated',
     TYPING_SERVER: 'typing_server',
+    MESSAGE_SERVER_EMBEDS_UPDATED: 'message_server_embeds_updated',
 
     // Management
     JOIN_SERVER: 'join_server',
