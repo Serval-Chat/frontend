@@ -177,6 +177,22 @@ export const ServerSidebarSection: React.FC<ServerSidebarSectionProps> = ({
         return result;
     }, [members, searchQuery, roles, presenceMap, me, blocks]);
 
+    const allRolesMap = useMemo(() => {
+        const map = new Map<string, Role[]>();
+        if (!members || !roles) return map;
+        members.forEach((m) => {
+            if (m && m.roles) {
+                map.set(
+                    m.userId,
+                    roles.filter((r) =>
+                        m.roles.map(String).includes(String(r._id)),
+                    ),
+                );
+            }
+        });
+        return map;
+    }, [members, roles]);
+
     return (
         <div className="space-y-4 pb-4">
             {isLoading ? (
@@ -196,10 +212,8 @@ export const ServerSidebarSection: React.FC<ServerSidebarSectionProps> = ({
                                 {group.members.map((member) => (
                                     <UserItem
                                         noFetch
-                                        allRoles={roles?.filter((r) =>
-                                            member.roles
-                                                .map(String)
-                                                .includes(String(r._id)),
+                                        allRoles={allRolesMap.get(
+                                            member.userId,
                                         )}
                                         disableCustomFonts={
                                             serverDetails?.disableCustomFonts

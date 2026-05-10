@@ -667,12 +667,13 @@ export const MessageInput: React.FC<MessageInputProps> = ({
         }
     };
 
-    const initialConfig = {
+    const initialConfigRef = React.useRef({
         namespace: 'MessageInput',
         nodes: [ChipNode, SlashCommandChipNode, SlashArgChipNode],
         onError: (error: Error) => console.error(error),
         theme,
-    };
+    });
+    const initialConfig = initialConfigRef.current;
 
     const getPlaceholder = (): React.ReactNode => {
         if (isUploading) return 'Uploading...';

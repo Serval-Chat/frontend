@@ -54,7 +54,7 @@ interface ChannelRowProps {
     channel: Channel;
     selectedServerId: string | null;
     selectedChannelId: string | null;
-    voiceParticipants: Record<string, string[]>;
+    connectedUserIds: string[] | undefined;
     channelPings: Record<string, number>;
     canManageChannels: boolean;
     handleChannelClick: (channel: Channel) => void;
@@ -62,76 +62,75 @@ interface ChannelRowProps {
     getChannelMenuItems: (channel: Channel) => ContextMenuItem[];
 }
 
-const ChannelRow: React.FC<ChannelRowProps> = ({
-    channel,
-    selectedServerId,
-    selectedChannelId,
-    voiceParticipants,
-    channelPings,
-    canManageChannels,
-    handleChannelClick,
-    setSettingsChannel,
-    getChannelMenuItems,
-}) => {
-    const { hasPermission, isLoading, permissions } = usePermissions(
+const ChannelRow: React.FC<ChannelRowProps> = React.memo(
+    ({
+        channel,
         selectedServerId,
-        channel._id,
-    );
-    const canView = hasPermission('viewChannels');
-    const canConnect = hasPermission('connect');
-
-    // Only hide if loading is finished and canView is explicitly false
-    if (!isLoading && !canView) {
-        console.warn(
-            `[ChannelRow] Hiding channel "${channel.name}" (${channel._id}) - viewChannels=false.`,
-            {
-                channelPermissionOverrides: channel.permissions,
-                computedPermissions: permissions,
-                serverId: selectedServerId,
-            },
+        selectedChannelId,
+        connectedUserIds,
+        channelPings,
+        canManageChannels,
+        handleChannelClick,
+        setSettingsChannel,
+        getChannelMenuItems,
+    }) => {
+        const { hasPermission, isLoading, permissions } = usePermissions(
+            selectedServerId,
+            channel._id,
         );
-        return null;
-    }
+        const canView = hasPermission('viewChannels');
+        const canConnect = hasPermission('connect');
 
-    const isUnread =
-        channel.type !== 'link' &&
-        channel.lastMessageAt &&
-        (!channel.lastReadAt ||
-            new Date(channel.lastMessageAt) > new Date(channel.lastReadAt));
+        // Only hide if loading is finished and canView is explicitly false
+        if (!isLoading && !canView) {
+            console.warn(
+                `[ChannelRow] Hiding channel "${channel.name}" (${channel._id}) - viewChannels=false.`,
+                {
+                    channelPermissionOverrides: channel.permissions,
+                    computedPermissions: permissions,
+                    serverId: selectedServerId,
+                },
+            );
+            return null;
+        }
 
-    const connectedUserIds =
-        channel.type === 'voice'
-            ? voiceParticipants[channel._id] || []
-            : undefined;
+        const isUnread =
+            channel.type !== 'link' &&
+            channel.lastMessageAt &&
+            (!channel.lastReadAt ||
+                new Date(channel.lastMessageAt) > new Date(channel.lastReadAt));
 
-    return (
-        <ContextMenu
-            className="block w-full"
-            items={getChannelMenuItems(channel)}
-            key={channel._id}
-        >
-            <ChannelItem
-                connectedUserIds={connectedUserIds}
-                disabled={channel.type === 'voice' && !canConnect}
-                icon={channel.icon}
-                isActive={selectedChannelId === channel._id}
-                isUnread={!!isUnread}
-                name={channel.name}
-                pingCount={channelPings[channel._id]}
-                type={channel.type}
-                onClick={() => handleChannelClick(channel)}
-                onSettingsClick={
-                    canManageChannels
-                        ? (e) => {
-                              e.stopPropagation();
-                              setSettingsChannel(channel);
-                          }
-                        : undefined
-                }
-            />
-        </ContextMenu>
-    );
-};
+        return (
+            <ContextMenu
+                className="block w-full"
+                items={getChannelMenuItems(channel)}
+                key={channel._id}
+            >
+                <ChannelItem
+                    connectedUserIds={connectedUserIds}
+                    disabled={channel.type === 'voice' && !canConnect}
+                    icon={channel.icon}
+                    isActive={selectedChannelId === channel._id}
+                    isUnread={!!isUnread}
+                    name={channel.name}
+                    pingCount={channelPings[channel._id]}
+                    type={channel.type}
+                    onClick={() => handleChannelClick(channel)}
+                    onSettingsClick={
+                        canManageChannels
+                            ? (e) => {
+                                  e.stopPropagation();
+                                  setSettingsChannel(channel);
+                              }
+                            : undefined
+                    }
+                />
+            </ContextMenu>
+        );
+    },
+);
+
+ChannelRow.displayName = 'ChannelRow';
 
 /**
  * @description Renders the list of channels grouped by categories.
@@ -289,7 +288,7 @@ export const ChannelList: React.FC<ChannelListProps> = ({
         setItems(newItems);
     };
 
-    const handleDragEnd = async (): Promise<void> => {
+    const handleDragEnd = React.useCallback(async (): Promise<void> => {
         if (!selectedServerId || !canManageChannels) {
             setIsReordering(false);
             return;
@@ -377,303 +376,330 @@ export const ChannelList: React.FC<ChannelListProps> = ({
             setSyncLock(true);
             setTimeout(() => setSyncLock(false), 500);
         }
-    };
+    }, [selectedServerId, canManageChannels, items]);
 
-    const handleMoveToCategory = async (
-        channelId: string,
-        categoryId: string | null,
-    ): Promise<void> => {
-        if (!selectedServerId) return;
+    const handleDragStartItem = React.useCallback((id: string) => {
+        setActiveItemId(id);
+    }, []);
 
-        try {
-            await serversApi.updateChannel(selectedServerId, channelId, {
-                categoryId,
-            });
-        } catch (error) {
-            console.error('Failed to move channel to category:', error);
-        }
-    };
+    const handleMoveToCategory = React.useCallback(
+        async (channelId: string, categoryId: string | null): Promise<void> => {
+            if (!selectedServerId) return;
 
-    const handleMoveItemMobile = async (
-        itemToMove: ListItem,
-        direction: 'up' | 'down',
-    ): Promise<void> => {
-        if (!selectedServerId || !canManageChannels) return;
-
-        // Find items of the same type and scope to determine who to swap with
-        let siblings: ListItem[] = [];
-        if (itemToMove.type === 'category') {
-            siblings = items.filter((i) => i.type === 'category');
-        } else {
-            const channel = itemToMove.data as Channel;
-            siblings = items.filter(
-                (i) =>
-                    i.type === 'channel' &&
-                    i.data.categoryId === channel.categoryId,
-            );
-        }
-
-        const currentIndex = siblings.findIndex((i) => i.id === itemToMove.id);
-        const targetIndex =
-            direction === 'up' ? currentIndex - 1 : currentIndex + 1;
-
-        if (targetIndex < 0 || targetIndex >= siblings.length) return;
-
-        const targetItem = siblings[targetIndex];
-
-        // Optimistic UI update
-        const newItems = [...items];
-        if (itemToMove.type === 'category') {
-            const idxA = newItems.findIndex((i) => i.id === itemToMove.id);
-            const idxB = newItems.findIndex((i) => i.id === targetItem.id);
-            const blockA = [
-                newItems[idxA],
-                ...newItems.filter(
-                    (i) =>
-                        i.type === 'channel' &&
-                        i.data.categoryId === itemToMove.id,
-                ),
-            ];
-            const blockB = [
-                newItems[idxB],
-                ...newItems.filter(
-                    (i) =>
-                        i.type === 'channel' &&
-                        i.data.categoryId === targetItem.id,
-                ),
-            ];
-            const minIdx = Math.min(idxA, idxB);
-
-            const filtered = newItems.filter(
-                (i) =>
-                    !(
-                        i.id === itemToMove.id ||
-                        i.id === targetItem.id ||
-                        (i.type === 'channel' &&
-                            (i.data.categoryId === itemToMove.id ||
-                                i.data.categoryId === targetItem.id))
-                    ),
-            );
-
-            if (direction === 'up') {
-                filtered.splice(minIdx, 0, ...blockA, ...blockB);
-            } else {
-                filtered.splice(minIdx, 0, ...blockB, ...blockA);
+            try {
+                await serversApi.updateChannel(selectedServerId, channelId, {
+                    categoryId,
+                });
+            } catch (error) {
+                console.error('Failed to move channel to category:', error);
             }
-            setItems(filtered);
-        } else {
-            const idxA = newItems.findIndex((i) => i.id === itemToMove.id);
-            const idxB = newItems.findIndex((i) => i.id === targetItem.id);
+        },
+        [selectedServerId],
+    );
 
-            newItems[idxA] = items[idxB];
-            newItems[idxB] = items[idxA];
-            setItems(newItems);
-        }
+    const handleMoveItemMobile = React.useCallback(
+        async (
+            itemToMove: ListItem,
+            direction: 'up' | 'down',
+        ): Promise<void> => {
+            if (!selectedServerId || !canManageChannels) return;
 
-        try {
-            setSyncLock(true);
-
+            // Find items of the same type and scope to determine who to swap with
+            let siblings: ListItem[] = [];
             if (itemToMove.type === 'category') {
-                const item1 = itemToMove.data as Category;
-                const item2 = targetItem.data as Category;
-
-                await serversApi.reorderCategories(selectedServerId, [
-                    { categoryId: item1._id, position: item2.position },
-                    { categoryId: item2._id, position: item1.position },
-                ]);
+                siblings = items.filter((i) => i.type === 'category');
             } else {
-                const item1 = itemToMove.data as Channel;
-                const item2 = targetItem.data as Channel;
-                await serversApi.reorderChannels(selectedServerId, [
-                    { channelId: item1._id, position: item2.position },
-                    { channelId: item2._id, position: item1.position },
-                ]);
-            }
-        } catch (error) {
-            console.error('Failed to reorder items:', error);
-        } finally {
-            setTimeout(() => setSyncLock(false), 500);
-        }
-    };
-
-    const getChannelMenuItems = (channel: Channel): ContextMenuItem[] => {
-        const items: ContextMenuItem[] = [
-            {
-                label: 'Copy Channel Link',
-                icon: LinkIcon,
-                onClick: () => {
-                    const url = `${window.location.origin}/chat/@server/${channel.serverId}/channel/${channel._id}`;
-                    void navigator.clipboard.writeText(url);
-                },
-            },
-            {
-                label: 'Copy Channel ID',
-                icon: Copy,
-                onClick: () => {
-                    void navigator.clipboard.writeText(channel._id);
-                },
-            },
-        ];
-
-        if (canManageChannels) {
-            items.push({
-                label: 'Edit Channel',
-                icon: Settings,
-                onClick: () => {
-                    setSettingsChannel(channel);
-                },
-            });
-
-            if (isMobile) {
-                // Check if it can move up/down
-                const siblings = channels
-                    .filter((c) => c.categoryId === channel.categoryId)
-                    .sort((a, b) => a.position - b.position);
-                const index = siblings.findIndex((c) => c._id === channel._id);
-
-                items.push({ type: 'divider' });
-
-                if (index > 0) {
-                    items.push({
-                        label: 'Move Up',
-                        icon: ArrowUp,
-                        onClick: () =>
-                            void handleMoveItemMobile(
-                                {
-                                    type: 'channel',
-                                    id: channel._id,
-                                    data: channel,
-                                },
-                                'up',
-                            ),
-                    });
-                }
-                if (index < siblings.length - 1) {
-                    items.push({
-                        label: 'Move Down',
-                        icon: ArrowDown,
-                        onClick: () =>
-                            void handleMoveItemMobile(
-                                {
-                                    type: 'channel',
-                                    id: channel._id,
-                                    data: channel,
-                                },
-                                'down',
-                            ),
-                    });
-                }
+                const channel = itemToMove.data as Channel;
+                siblings = items.filter(
+                    (i) =>
+                        i.type === 'channel' &&
+                        i.data.categoryId === channel.categoryId,
+                );
             }
 
-            // Move to Category options
-            const moveOptions: ContextMenuItem[] = [
+            const currentIndex = siblings.findIndex(
+                (i) => i.id === itemToMove.id,
+            );
+            const targetIndex =
+                direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+
+            if (targetIndex < 0 || targetIndex >= siblings.length) return;
+
+            const targetItem = siblings[targetIndex];
+
+            // Optimistic UI update
+            const newItems = [...items];
+            if (itemToMove.type === 'category') {
+                const idxA = newItems.findIndex((i) => i.id === itemToMove.id);
+                const idxB = newItems.findIndex((i) => i.id === targetItem.id);
+                const blockA = [
+                    newItems[idxA],
+                    ...newItems.filter(
+                        (i) =>
+                            i.type === 'channel' &&
+                            i.data.categoryId === itemToMove.id,
+                    ),
+                ];
+                const blockB = [
+                    newItems[idxB],
+                    ...newItems.filter(
+                        (i) =>
+                            i.type === 'channel' &&
+                            i.data.categoryId === targetItem.id,
+                    ),
+                ];
+                const minIdx = Math.min(idxA, idxB);
+
+                const filtered = newItems.filter(
+                    (i) =>
+                        !(
+                            i.id === itemToMove.id ||
+                            i.id === targetItem.id ||
+                            (i.type === 'channel' &&
+                                (i.data.categoryId === itemToMove.id ||
+                                    i.data.categoryId === targetItem.id))
+                        ),
+                );
+
+                if (direction === 'up') {
+                    filtered.splice(minIdx, 0, ...blockA, ...blockB);
+                } else {
+                    filtered.splice(minIdx, 0, ...blockB, ...blockA);
+                }
+                setItems(filtered);
+            } else {
+                const idxA = newItems.findIndex((i) => i.id === itemToMove.id);
+                const idxB = newItems.findIndex((i) => i.id === targetItem.id);
+
+                newItems[idxA] = items[idxB];
+                newItems[idxB] = items[idxA];
+                setItems(newItems);
+            }
+
+            try {
+                setSyncLock(true);
+
+                if (itemToMove.type === 'category') {
+                    const item1 = itemToMove.data as Category;
+                    const item2 = targetItem.data as Category;
+
+                    await serversApi.reorderCategories(selectedServerId, [
+                        { categoryId: item1._id, position: item2.position },
+                        { categoryId: item2._id, position: item1.position },
+                    ]);
+                } else {
+                    const item1 = itemToMove.data as Channel;
+                    const item2 = targetItem.data as Channel;
+                    await serversApi.reorderChannels(selectedServerId, [
+                        { channelId: item1._id, position: item2.position },
+                        { channelId: item2._id, position: item1.position },
+                    ]);
+                }
+            } catch (error) {
+                console.error('Failed to reorder items:', error);
+            } finally {
+                setTimeout(() => setSyncLock(false), 500);
+            }
+        },
+        [selectedServerId, canManageChannels, items],
+    );
+
+    const getChannelMenuItems = React.useCallback(
+        (channel: Channel): ContextMenuItem[] => {
+            const items: ContextMenuItem[] = [
                 {
-                    label: 'Uncategorized',
-                    icon: Folder,
-                    onClick: () => void handleMoveToCategory(channel._id, null),
+                    label: 'Copy Channel Link',
+                    icon: LinkIcon,
+                    onClick: () => {
+                        const url = `${window.location.origin}/chat/@server/${channel.serverId}/channel/${channel._id}`;
+                        void navigator.clipboard.writeText(url);
+                    },
                 },
-                ...[...categories]
-                    .sort((a, b) => a.position - b.position)
-                    .map((cat) => ({
-                        label: cat.name,
+                {
+                    label: 'Copy Channel ID',
+                    icon: Copy,
+                    onClick: () => {
+                        void navigator.clipboard.writeText(channel._id);
+                    },
+                },
+            ];
+
+            if (canManageChannels) {
+                items.push({
+                    label: 'Edit Channel',
+                    icon: Settings,
+                    onClick: () => {
+                        setSettingsChannel(channel);
+                    },
+                });
+
+                if (isMobile) {
+                    // Check if it can move up/down
+                    const siblings = channels
+                        .filter((c) => c.categoryId === channel.categoryId)
+                        .sort((a, b) => a.position - b.position);
+                    const index = siblings.findIndex(
+                        (c) => c._id === channel._id,
+                    );
+
+                    items.push({ type: 'divider' });
+
+                    if (index > 0) {
+                        items.push({
+                            label: 'Move Up',
+                            icon: ArrowUp,
+                            onClick: () =>
+                                void handleMoveItemMobile(
+                                    {
+                                        type: 'channel',
+                                        id: channel._id,
+                                        data: channel,
+                                    },
+                                    'up',
+                                ),
+                        });
+                    }
+                    if (index < siblings.length - 1) {
+                        items.push({
+                            label: 'Move Down',
+                            icon: ArrowDown,
+                            onClick: () =>
+                                void handleMoveItemMobile(
+                                    {
+                                        type: 'channel',
+                                        id: channel._id,
+                                        data: channel,
+                                    },
+                                    'down',
+                                ),
+                        });
+                    }
+                }
+
+                // Move to Category options
+                const moveOptions: ContextMenuItem[] = [
+                    {
+                        label: 'Uncategorized',
                         icon: Folder,
                         onClick: () =>
-                            void handleMoveToCategory(channel._id, cat._id),
-                    })),
+                            void handleMoveToCategory(channel._id, null),
+                    },
+                    ...[...categories]
+                        .sort((a, b) => a.position - b.position)
+                        .map((cat) => ({
+                            label: cat.name,
+                            icon: Folder,
+                            onClick: () =>
+                                void handleMoveToCategory(channel._id, cat._id),
+                        })),
+                ];
+
+                // Filter out current category
+                const currentCatId = channel.categoryId || null;
+                const availableOptions = moveOptions.filter((opt) => {
+                    if ('label' in opt && typeof opt.label === 'string') {
+                        if (opt.label === 'Uncategorized')
+                            return currentCatId !== null;
+                        const targetCat = categories.find(
+                            (c) => c.name === opt.label,
+                        );
+                        return targetCat?._id !== currentCatId;
+                    }
+                    return false;
+                });
+
+                if (availableOptions.length > 0) {
+                    items.push({ type: 'divider' });
+                    items.push({ label: 'Move to Category:', type: 'label' });
+                    items.push(...availableOptions);
+                }
+            }
+
+            return items;
+        },
+        [
+            canManageChannels,
+            isMobile,
+            channels,
+            categories,
+            handleMoveItemMobile,
+            handleMoveToCategory,
+        ],
+    );
+
+    const getCategoryMenuItems = React.useCallback(
+        (category: Category): ContextMenuItem[] => {
+            const items: ContextMenuItem[] = [
+                {
+                    label: 'Copy Category ID',
+                    icon: Copy,
+                    onClick: () => {
+                        void navigator.clipboard.writeText(category._id);
+                    },
+                },
             ];
 
-            // Filter out current category
-            const currentCatId = channel.categoryId || null;
-            const availableOptions = moveOptions.filter((opt) => {
-                if ('label' in opt && typeof opt.label === 'string') {
-                    if (opt.label === 'Uncategorized')
-                        return currentCatId !== null;
-                    const targetCat = categories.find(
-                        (c) => c.name === opt.label,
+            if (canManageChannels) {
+                items.unshift({
+                    label: 'Edit Category',
+                    icon: Settings,
+                    onClick: () => {
+                        setSettingsCategory(category);
+                    },
+                });
+
+                if (isMobile) {
+                    const siblings = [...categories].sort(
+                        (a, b) => a.position - b.position,
                     );
-                    return targetCat?._id !== currentCatId;
-                }
-                return false;
-            });
+                    const index = siblings.findIndex(
+                        (c) => c._id === category._id,
+                    );
 
-            if (availableOptions.length > 0) {
-                items.push({ type: 'divider' });
-                items.push({ label: 'Move to Category:', type: 'label' });
-                items.push(...availableOptions);
-            }
-        }
+                    const moveItems: ContextMenuItem[] = [];
+                    if (index > 0) {
+                        moveItems.push({
+                            label: 'Move Up',
+                            icon: ArrowUp,
+                            onClick: () =>
+                                void handleMoveItemMobile(
+                                    {
+                                        type: 'category',
+                                        id: category._id,
+                                        data: category,
+                                    },
+                                    'up',
+                                ),
+                        });
+                    }
+                    if (index < siblings.length - 1) {
+                        moveItems.push({
+                            label: 'Move Down',
+                            icon: ArrowDown,
+                            onClick: () =>
+                                void handleMoveItemMobile(
+                                    {
+                                        type: 'category',
+                                        id: category._id,
+                                        data: category,
+                                    },
+                                    'down',
+                                ),
+                        });
+                    }
 
-        return items;
-    };
-
-    const getCategoryMenuItems = (category: Category): ContextMenuItem[] => {
-        const items: ContextMenuItem[] = [
-            {
-                label: 'Copy Category ID',
-                icon: Copy,
-                onClick: () => {
-                    void navigator.clipboard.writeText(category._id);
-                },
-            },
-        ];
-
-        if (canManageChannels) {
-            items.unshift({
-                label: 'Edit Category',
-                icon: Settings,
-                onClick: () => {
-                    setSettingsCategory(category);
-                },
-            });
-
-            if (isMobile) {
-                const siblings = [...categories].sort(
-                    (a, b) => a.position - b.position,
-                );
-                const index = siblings.findIndex((c) => c._id === category._id);
-
-                const moveItems: ContextMenuItem[] = [];
-                if (index > 0) {
-                    moveItems.push({
-                        label: 'Move Up',
-                        icon: ArrowUp,
-                        onClick: () =>
-                            void handleMoveItemMobile(
-                                {
-                                    type: 'category',
-                                    id: category._id,
-                                    data: category,
-                                },
-                                'up',
-                            ),
-                    });
-                }
-                if (index < siblings.length - 1) {
-                    moveItems.push({
-                        label: 'Move Down',
-                        icon: ArrowDown,
-                        onClick: () =>
-                            void handleMoveItemMobile(
-                                {
-                                    type: 'category',
-                                    id: category._id,
-                                    data: category,
-                                },
-                                'down',
-                            ),
-                    });
-                }
-
-                if (moveItems.length > 0) {
-                    items.splice(1, 0, { type: 'divider' }, ...moveItems);
+                    if (moveItems.length > 0) {
+                        items.splice(1, 0, { type: 'divider' }, ...moveItems);
+                    }
                 }
             }
-        }
 
-        return items;
-    };
+            return items;
+        },
+        [canManageChannels, isMobile, categories, handleMoveItemMobile],
+    );
 
-    const getGlobalMenuItems = (): ContextMenuItem[] => {
+    const getGlobalMenuItems = React.useCallback((): ContextMenuItem[] => {
         const items: ContextMenuItem[] = [];
 
         if (canManageChannels) {
@@ -716,62 +742,73 @@ export const ChannelList: React.FC<ChannelListProps> = ({
         }
 
         return items;
-    };
+    }, [canManageChannels, selectedServerId, isOwner]);
 
     const navigate = useNavigate();
 
-    const handleChannelClick = (channel: Channel): void => {
-        if (activeItemId || isReordering || syncLock) return;
+    const handleChannelClick = React.useCallback(
+        (channel: Channel): void => {
+            if (activeItemId || isReordering || syncLock) return;
 
-        if (channel.type === 'voice') {
-            if (selectedServerId) {
-                dispatch(
-                    joinVoiceRoom({
-                        serverId: selectedServerId,
-                        channelId: channel._id,
-                    }),
-                );
-
-                if (me?._id) {
+            if (channel.type === 'voice') {
+                if (selectedServerId) {
                     dispatch(
-                        addVoiceParticipant({
+                        joinVoiceRoom({
+                            serverId: selectedServerId,
                             channelId: channel._id,
-                            userId: me._id,
                         }),
                     );
-                }
-            }
-            return;
-        }
 
-        if (channel.type === 'link') {
-            const url = channel.link || '#';
-            try {
-                const parsed = new URL(url);
-                if (
-                    parsed.hostname === 'catfla.re' ||
-                    parsed.hostname.endsWith('.catfla.re')
-                ) {
-                    if (parsed.pathname.startsWith('/chat/@setting')) {
-                        void navigate(parsed.pathname);
+                    if (me?._id) {
+                        dispatch(
+                            addVoiceParticipant({
+                                channelId: channel._id,
+                                userId: me._id,
+                            }),
+                        );
+                    }
+                }
+                return;
+            }
+
+            if (channel.type === 'link') {
+                const url = channel.link || '#';
+                try {
+                    const parsed = new URL(url);
+                    if (
+                        parsed.hostname === 'catfla.re' ||
+                        parsed.hostname.endsWith('.catfla.re')
+                    ) {
+                        if (parsed.pathname.startsWith('/chat/@setting')) {
+                            void navigate(parsed.pathname);
+                            return;
+                        }
+                        window.open(url, '_blank', 'noopener,noreferrer');
                         return;
                     }
-                    window.open(url, '_blank', 'noopener,noreferrer');
-                    return;
+                } catch {
+                    // Ignore
                 }
-            } catch {
-                // Ignore
+                setSelectedLinkChannel(channel);
+                return;
             }
-            setSelectedLinkChannel(channel);
-            return;
-        }
 
-        if (selectedServerId) {
-            void navigate(
-                `/chat/@server/${selectedServerId}/channel/${channel._id}`,
-            );
-        }
-    };
+            if (selectedServerId) {
+                void navigate(
+                    `/chat/@server/${selectedServerId}/channel/${channel._id}`,
+                );
+            }
+        },
+        [
+            activeItemId,
+            isReordering,
+            syncLock,
+            selectedServerId,
+            dispatch,
+            me?._id,
+            navigate,
+        ],
+    );
 
     return (
         <ContextMenu className="flex-1" items={getGlobalMenuItems()}>
@@ -797,8 +834,12 @@ export const ChannelList: React.FC<ChannelListProps> = ({
                                     key={item.id}
                                     layout="position"
                                     value={item}
-                                    onDragEnd={() => void handleDragEnd()}
-                                    onDragStart={() => setActiveItemId(item.id)}
+                                    onDragEnd={() => {
+                                        void handleDragEnd();
+                                    }}
+                                    onDragStart={() =>
+                                        handleDragStartItem(item.id)
+                                    }
                                 >
                                     <ContextMenu
                                         className="pt-4 first:pt-0"
@@ -887,13 +928,22 @@ export const ChannelList: React.FC<ChannelListProps> = ({
                                     key={item.id}
                                     layout="position"
                                     value={item}
-                                    onDragEnd={() => void handleDragEnd()}
-                                    onDragStart={() => setActiveItemId(item.id)}
+                                    onDragEnd={() => {
+                                        void handleDragEnd();
+                                    }}
+                                    onDragStart={() =>
+                                        handleDragStartItem(item.id)
+                                    }
                                 >
                                     <ChannelRow
                                         canManageChannels={canManageChannels}
                                         channel={channel}
                                         channelPings={channelPings}
+                                        connectedUserIds={
+                                            channel.type === 'voice'
+                                                ? voiceParticipants[channel._id]
+                                                : undefined
+                                        }
                                         getChannelMenuItems={
                                             getChannelMenuItems
                                         }
@@ -901,7 +951,6 @@ export const ChannelList: React.FC<ChannelListProps> = ({
                                         selectedChannelId={selectedChannelId}
                                         selectedServerId={selectedServerId}
                                         setSettingsChannel={setSettingsChannel}
-                                        voiceParticipants={voiceParticipants}
                                     />
                                 </Reorder.Item>
                             );

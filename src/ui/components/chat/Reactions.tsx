@@ -32,241 +32,249 @@ interface ReactionsProps {
     onAddClick?: () => void;
 }
 
-export const Reactions: React.FC<ReactionsProps> = ({
-    messageId,
-    reactions,
-    serverId,
-    channelId,
-}) => {
-    const { data: me } = useMe();
-    const blocks = useAppSelector((state) => state.blocking.blocks);
-    const addReaction = useAddReaction();
-    const removeReaction = useRemoveReaction();
-    const [showPicker, setShowPicker] = React.useState(false);
-    const [isVotersModalOpen, setIsVotersModalOpen] = React.useState(false);
-    const [votersModalEmoji, setVotersModalEmoji] = React.useState<
-        string | undefined
-    >();
+export const Reactions: React.FC<ReactionsProps> = React.memo(
+    ({ messageId, reactions, serverId, channelId }) => {
+        const { data: me } = useMe();
+        const blocks = useAppSelector((state) => state.blocking.blocks);
+        const addReaction = useAddReaction();
+        const removeReaction = useRemoveReaction();
+        const [showPicker, setShowPicker] = React.useState(false);
+        const [isVotersModalOpen, setIsVotersModalOpen] = React.useState(false);
+        const [votersModalEmoji, setVotersModalEmoji] = React.useState<
+            string | undefined
+        >();
 
-    const pickerRef = React.useRef<HTMLDivElement>(null);
-    const { customCategories } = useCustomEmojis({ enabled: showPicker });
-    const { hasPermission } = usePermissions(
-        serverId ?? null,
-        channelId ?? null,
-    );
-    const canManageReactions = hasPermission('manageReactions');
+        const pickerRef = React.useRef<HTMLDivElement>(null);
+        const { customCategories } = useCustomEmojis({ enabled: showPicker });
+        const { hasPermission } = usePermissions(
+            serverId ?? null,
+            channelId ?? null,
+        );
+        const canManageReactions = hasPermission('manageReactions');
 
-    // Close picker when clicking outside
-    React.useEffect(() => {
-        if (!showPicker) return;
+        // Close picker when clicking outside
+        React.useEffect(() => {
+            if (!showPicker) return;
 
-        const handleClickOutside = (event: MouseEvent): void => {
-            if (
-                pickerRef.current &&
-                !pickerRef.current.contains(event.target as Node)
-            ) {
-                setShowPicker(false);
-            }
-        };
+            const handleClickOutside = (event: MouseEvent): void => {
+                if (
+                    pickerRef.current &&
+                    !pickerRef.current.contains(event.target as Node)
+                ) {
+                    setShowPicker(false);
+                }
+            };
 
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
-        };
-    }, [showPicker]);
+            document.addEventListener('mousedown', handleClickOutside);
+            return () => {
+                document.removeEventListener('mousedown', handleClickOutside);
+            };
+        }, [showPicker]);
 
-    const handleEmojiSelect = (emoji: string): void => {
-        addReaction.mutate({
-            messageId,
-            serverId,
-            channelId,
-            data: { emoji, emojiType: 'unicode' },
-        });
-        setShowPicker(false);
-    };
-
-    const handleCustomEmojiSelect = (emoji: {
-        id: string;
-        name: string;
-    }): void => {
-        addReaction.mutate({
-            messageId,
-            serverId,
-            channelId,
-            data: { emoji: emoji.name, emojiType: 'custom', emojiId: emoji.id },
-        });
-        setShowPicker(false);
-    };
-
-    if (!reactions.length && !showPicker) return null;
-
-    const handleReactionClick = (reaction: MessageReaction): void => {
-        const hasReacted = reaction.users.includes(me?._id || '');
-
-        if (hasReacted) {
-            removeReaction.mutate({
+        const handleEmojiSelect = (emoji: string): void => {
+            addReaction.mutate({
                 messageId,
                 serverId,
                 channelId,
-                data: {
-                    emoji: reaction.emoji,
-                    emojiId:
-                        reaction.emojiType === 'custom'
-                            ? reaction.emojiId
-                            : undefined,
-                    scope: 'me',
-                },
+                data: { emoji, emojiType: 'unicode' },
             });
-        } else {
+            setShowPicker(false);
+        };
+
+        const handleCustomEmojiSelect = (emoji: {
+            id: string;
+            name: string;
+        }): void => {
             addReaction.mutate({
                 messageId,
                 serverId,
                 channelId,
                 data: {
-                    emoji: reaction.emoji,
-                    emojiType: reaction.emojiType,
-                    emojiId:
-                        reaction.emojiType === 'custom'
-                            ? reaction.emojiId
-                            : undefined,
+                    emoji: emoji.name,
+                    emojiType: 'custom',
+                    emojiId: emoji.id,
                 },
             });
-        }
-    };
+            setShowPicker(false);
+        };
 
-    const filteredReactions = reactions
-        .map((r) => {
-            const filteredUsers = r.users.filter((uid) => {
-                if (uid === me?._id) return true;
-                const userBlocks = blocks[uid] || 0;
-                return !(userBlocks & BlockFlags.HIDE_THEIR_REACTIONS);
-            });
-            return {
-                ...r,
-                users: filteredUsers,
-                count: filteredUsers.length,
-            };
-        })
-        .filter((r) => r.count > 0);
+        if (!reactions.length && !showPicker) return null;
 
-    return (
-        <Box className="mt-1 mb-1 flex flex-wrap gap-1">
-            {filteredReactions.map((reaction) => {
-                const hasReacted = reaction.users.includes(me?._id || '');
-                const reactionKey = `${reaction.emoji}-${reaction.users.join(',')}`;
+        const handleReactionClick = (reaction: MessageReaction): void => {
+            const hasReacted = reaction.users.includes(me?._id || '');
 
-                const reactionElement = (
-                    <Box
-                        className={cn(
-                            'flex cursor-pointer items-center gap-1.5 rounded-md border px-1.5 py-0.5 transition-all select-none',
-                            hasReacted
-                                ? 'border-primary/30 bg-primary/10 text-primary'
-                                : 'border-border-subtle bg-bg-subtle text-muted-foreground hover:border-border-subtle/80 hover:bg-bg-subtle-hover',
-                        )}
-                        title={
-                            reaction.users.length > 0
-                                ? `${reaction.count} reactions`
-                                : undefined
-                        }
-                        onClick={() => handleReactionClick(reaction)}
-                    >
-                        <Text className="text-base leading-none">
-                            {reaction.emojiType === 'custom' &&
-                            reaction.emojiUrl ? (
-                                <img
-                                    alt={reaction.emoji}
-                                    className="inline-block h-5 w-5 cursor-pointer object-contain align-middle"
-                                    src={resolveApiUrl(reaction.emojiUrl) || ''}
-                                    title={reaction.emojiName || reaction.emoji}
-                                />
-                            ) : (
-                                <ParsedUnicodeEmoji
-                                    className="!top-0 h-5 w-5"
-                                    content={reaction.emoji}
-                                />
-                            )}
-                        </Text>
-                        <Text className="font-semibold" size="xs">
-                            {reaction.count}
-                        </Text>
-                    </Box>
-                );
-
-                const contextMenuItems: ContextMenuItem[] = [
-                    {
-                        id: 'view-reactions',
-                        label: 'View Reactions',
-                        icon: Users,
-                        onClick: () => {
-                            setVotersModalEmoji(reaction.emoji);
-                            setIsVotersModalOpen(true);
-                        },
+            if (hasReacted) {
+                removeReaction.mutate({
+                    messageId,
+                    serverId,
+                    channelId,
+                    data: {
+                        emoji: reaction.emoji,
+                        emojiId:
+                            reaction.emojiType === 'custom'
+                                ? reaction.emojiId
+                                : undefined,
+                        scope: 'me',
                     },
-                ];
+                });
+            } else {
+                addReaction.mutate({
+                    messageId,
+                    serverId,
+                    channelId,
+                    data: {
+                        emoji: reaction.emoji,
+                        emojiType: reaction.emojiType,
+                        emojiId:
+                            reaction.emojiType === 'custom'
+                                ? reaction.emojiId
+                                : undefined,
+                    },
+                });
+            }
+        };
 
-                if (canManageReactions && serverId && channelId) {
-                    contextMenuItems.push({
-                        id: 'remove-reaction',
-                        label: 'Remove Emoji',
-                        icon: Trash2,
-                        variant: 'danger',
-                        onClick: () => {
-                            removeReaction.mutate({
-                                messageId,
-                                serverId,
-                                channelId,
-                                data: {
-                                    emoji: reaction.emoji,
-                                    emojiId:
-                                        reaction.emojiType === 'custom'
-                                            ? reaction.emojiId
-                                            : undefined,
-                                    scope: 'all',
-                                },
-                            });
+        const filteredReactions = reactions
+            .map((r) => {
+                const filteredUsers = r.users.filter((uid) => {
+                    if (uid === me?._id) return true;
+                    const userBlocks = blocks[uid] || 0;
+                    return !(userBlocks & BlockFlags.HIDE_THEIR_REACTIONS);
+                });
+                return {
+                    ...r,
+                    users: filteredUsers,
+                    count: filteredUsers.length,
+                };
+            })
+            .filter((r) => r.count > 0);
+
+        return (
+            <Box className="mt-1 mb-1 flex flex-wrap gap-1">
+                {filteredReactions.map((reaction) => {
+                    const hasReacted = reaction.users.includes(me?._id || '');
+                    const reactionKey = `${reaction.emoji}-${reaction.users.join(',')}`;
+
+                    const reactionElement = (
+                        <Box
+                            className={cn(
+                                'flex cursor-pointer items-center gap-1.5 rounded-md border px-1.5 py-0.5 transition-all select-none',
+                                hasReacted
+                                    ? 'border-primary/30 bg-primary/10 text-primary'
+                                    : 'border-border-subtle bg-bg-subtle text-muted-foreground hover:border-border-subtle/80 hover:bg-bg-subtle-hover',
+                            )}
+                            title={
+                                reaction.users.length > 0
+                                    ? `${reaction.count} reactions`
+                                    : undefined
+                            }
+                            onClick={() => handleReactionClick(reaction)}
+                        >
+                            <Text className="text-base leading-none">
+                                {reaction.emojiType === 'custom' &&
+                                reaction.emojiUrl ? (
+                                    <img
+                                        alt={reaction.emoji}
+                                        className="inline-block h-5 w-5 cursor-pointer object-contain align-middle"
+                                        src={
+                                            resolveApiUrl(reaction.emojiUrl) ||
+                                            ''
+                                        }
+                                        title={
+                                            reaction.emojiName || reaction.emoji
+                                        }
+                                    />
+                                ) : (
+                                    <ParsedUnicodeEmoji
+                                        className="!top-0 h-5 w-5"
+                                        content={reaction.emoji}
+                                    />
+                                )}
+                            </Text>
+                            <Text className="font-semibold" size="xs">
+                                {reaction.count}
+                            </Text>
+                        </Box>
+                    );
+
+                    const contextMenuItems: ContextMenuItem[] = [
+                        {
+                            id: 'view-reactions',
+                            label: 'View Reactions',
+                            icon: Users,
+                            onClick: () => {
+                                setVotersModalEmoji(reaction.emoji);
+                                setIsVotersModalOpen(true);
+                            },
                         },
-                    });
-                }
+                    ];
 
-                return (
-                    <ContextMenu items={contextMenuItems} key={reactionKey}>
-                        {reactionElement}
-                    </ContextMenu>
-                );
-            })}
+                    if (canManageReactions && serverId && channelId) {
+                        contextMenuItems.push({
+                            id: 'remove-reaction',
+                            label: 'Remove Emoji',
+                            icon: Trash2,
+                            variant: 'danger',
+                            onClick: () => {
+                                removeReaction.mutate({
+                                    messageId,
+                                    serverId,
+                                    channelId,
+                                    data: {
+                                        emoji: reaction.emoji,
+                                        emojiId:
+                                            reaction.emojiType === 'custom'
+                                                ? reaction.emojiId
+                                                : undefined,
+                                        scope: 'all',
+                                    },
+                                });
+                            },
+                        });
+                    }
 
-            <Box className="relative h-full">
-                <Button
-                    className="h-full min-h-[24px] border border-border-subtle bg-bg-subtle text-muted-foreground hover:border-border-subtle/80 hover:bg-bg-subtle-hover"
-                    size="sm"
-                    title="Add Reaction"
-                    variant="ghost"
-                    onClick={() => setShowPicker(!showPicker)}
-                >
-                    <SmilePlus size={16} />
-                </Button>
+                    return (
+                        <ContextMenu items={contextMenuItems} key={reactionKey}>
+                            {reactionElement}
+                        </ContextMenu>
+                    );
+                })}
 
-                {showPicker && (
-                    <div
-                        className="absolute bottom-full left-0 z-[var(--z-index-popover)] pb-2"
-                        ref={pickerRef}
+                <Box className="relative h-full">
+                    <Button
+                        className="h-full min-h-[24px] border border-border-subtle bg-bg-subtle text-muted-foreground hover:border-border-subtle/80 hover:bg-bg-subtle-hover"
+                        size="sm"
+                        title="Add Reaction"
+                        variant="ghost"
+                        onClick={() => setShowPicker(!showPicker)}
                     >
-                        <EmojiPicker
-                            customCategories={customCategories}
-                            onCustomEmojiSelect={handleCustomEmojiSelect}
-                            onEmojiSelect={handleEmojiSelect}
-                        />
-                    </div>
-                )}
-            </Box>
+                        <SmilePlus size={16} />
+                    </Button>
 
-            <ReactionVotersModal
-                initialEmoji={votersModalEmoji}
-                isOpen={isVotersModalOpen}
-                reactions={filteredReactions}
-                serverId={serverId}
-                onClose={() => setIsVotersModalOpen(false)}
-            />
-        </Box>
-    );
-};
+                    {showPicker && (
+                        <div
+                            className="absolute bottom-full left-0 z-[var(--z-index-popover)] pb-2"
+                            ref={pickerRef}
+                        >
+                            <EmojiPicker
+                                customCategories={customCategories}
+                                onCustomEmojiSelect={handleCustomEmojiSelect}
+                                onEmojiSelect={handleEmojiSelect}
+                            />
+                        </div>
+                    )}
+                </Box>
+
+                <ReactionVotersModal
+                    initialEmoji={votersModalEmoji}
+                    isOpen={isVotersModalOpen}
+                    reactions={filteredReactions}
+                    serverId={serverId}
+                    onClose={() => setIsVotersModalOpen(false)}
+                />
+            </Box>
+        );
+    },
+);
+
+Reactions.displayName = 'Reactions';

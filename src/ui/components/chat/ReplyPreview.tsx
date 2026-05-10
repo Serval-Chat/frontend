@@ -29,74 +29,81 @@ interface ReplyPreviewProps {
     disableGlow?: boolean;
 }
 
-export const ReplyPreview: React.FC<ReplyPreviewProps> = ({
-    user: initialUser,
-    role,
-    text,
-    interaction,
-    replyToId,
-    onClick,
-    disableCustomFonts,
-    disableGlowAndColors,
-    disableColors,
-    disableGlow,
-}) => {
-    const isUnknownUser = initialUser.username === 'Unknown';
-    const { data: fetchedUser } = useUserById(initialUser._id, {
-        enabled: isUnknownUser,
-    });
-    const user = isUnknownUser && fetchedUser ? fetchedUser : initialUser;
+export const ReplyPreview: React.FC<ReplyPreviewProps> = React.memo(
+    ({
+        user: initialUser,
+        role,
+        text,
+        interaction,
+        replyToId,
+        onClick,
+        disableCustomFonts,
+        disableGlowAndColors,
+        disableColors,
+        disableGlow,
+    }) => {
+        const isUnknownUser = initialUser.username === 'Unknown';
+        const { data: fetchedUser } = useUserById(initialUser._id, {
+            enabled: isUnknownUser,
+        });
+        const user = isUnknownUser && fetchedUser ? fetchedUser : initialUser;
 
-    const nodes = useMemo(() => parseText(text, ParserPresets.MESSAGE), [text]);
-    return (
-        <Box
-            className="group/reply ml-[24px] flex cursor-pointer items-center gap-2 opacity-60 transition-opacity select-none hover:opacity-100"
-            onClick={() => replyToId && onClick?.(replyToId)}
-        >
-            {/* Spine */}
-            <Box className="mt-[11px] h-[18px] w-[36px] flex-shrink-0 rounded-tl-lg border-t-2 border-l-2 border-border-subtle" />
+        const nodes = useMemo(
+            () => parseText(text, ParserPresets.MESSAGE),
+            [text],
+        );
+        return (
+            <Box
+                className="group/reply ml-[24px] flex cursor-pointer items-center gap-2 opacity-60 transition-opacity select-none hover:opacity-100"
+                onClick={() => replyToId && onClick?.(replyToId)}
+            >
+                {/* Spine */}
+                <Box className="mt-[11px] h-[18px] w-[36px] flex-shrink-0 rounded-tl-lg border-t-2 border-l-2 border-border-subtle" />
 
-            <Box className="flex min-w-0 items-center gap-1.5 overflow-hidden">
-                <UserProfilePicture
-                    noIndicator
-                    size="xs"
-                    src={user.profilePicture}
-                    username={user.username}
-                />
-                <StyledUserName
-                    showIcon
-                    className="text-xs font-bold whitespace-nowrap opacity-90"
-                    disableColors={disableColors}
-                    disableCustomFonts={disableCustomFonts}
-                    disableGlow={disableGlow}
-                    disableGlowAndColors={disableGlowAndColors}
-                    role={role}
-                    user={user}
-                >
-                    {user.displayName || user.username}
-                </StyledUserName>
-                {user.isBot && <BotTag className="h-3.5 px-1 text-[8px]" />}
-                <Text
-                    as="span"
-                    className="truncate text-xs font-medium text-text-muted"
-                >
-                    {interaction && !text && (
-                        <span className="mr-1 opacity-70">
-                            used{' '}
-                            <span className="text-primary">
-                                /{interaction.command}
-                            </span>
-                        </span>
-                    )}
-                    <ParsedText
-                        condenseFiles
-                        condenseInvites
-                        nodes={nodes}
+                <Box className="flex min-w-0 items-center gap-1.5 overflow-hidden">
+                    <UserProfilePicture
+                        noIndicator
                         size="xs"
-                        wrap="nowrap"
+                        src={user.profilePicture}
+                        username={user.username}
                     />
-                </Text>
+                    <StyledUserName
+                        showIcon
+                        className="text-xs font-bold whitespace-nowrap opacity-90"
+                        disableColors={disableColors}
+                        disableCustomFonts={disableCustomFonts}
+                        disableGlow={disableGlow}
+                        disableGlowAndColors={disableGlowAndColors}
+                        role={role}
+                        user={user}
+                    >
+                        {user.displayName || user.username}
+                    </StyledUserName>
+                    {user.isBot && <BotTag className="h-3.5 px-1 text-[8px]" />}
+                    <Text
+                        as="span"
+                        className="truncate text-xs font-medium text-text-muted"
+                    >
+                        {interaction && !text && (
+                            <span className="mr-1 opacity-70">
+                                used{' '}
+                                <span className="text-primary">
+                                    /{interaction.command}
+                                </span>
+                            </span>
+                        )}
+                        <ParsedText
+                            condenseFiles
+                            condenseInvites
+                            nodes={nodes}
+                            size="xs"
+                            wrap="nowrap"
+                        />
+                    </Text>
+                </Box>
             </Box>
-        </Box>
-    );
-};
+        );
+    },
+);
+
+ReplyPreview.displayName = 'ReplyPreview';

@@ -17,11 +17,10 @@ import type { User } from '@/api/users/users.types';
 import { useAppDispatch } from '@/store/hooks';
 import { setTargetMessageId } from '@/store/slices/navSlice';
 import type { ProcessedChatMessage } from '@/types/chat.ui';
+import { Message } from '@/ui/components/chat/Message';
 import { Button } from '@/ui/components/common/Button';
 import { Text } from '@/ui/components/common/Text';
 import { Box } from '@/ui/components/layout/Box';
-
-import { Message } from './Message';
 
 interface PinsDrawerProps {
     serverId: string;

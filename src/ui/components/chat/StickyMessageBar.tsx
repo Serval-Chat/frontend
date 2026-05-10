@@ -12,11 +12,10 @@ import {
 import { useAppDispatch } from '@/store/hooks';
 import { setTargetMessageId } from '@/store/slices/navSlice';
 import type { ProcessedChatMessage } from '@/types/chat.ui';
+import { Message } from '@/ui/components/chat/Message';
 import { Button } from '@/ui/components/common/Button';
 import { Box } from '@/ui/components/layout/Box';
 import { cn } from '@/utils/cn';
-
-import { Message } from './Message';
 
 interface StickyMessageBarProps {
     serverId: string;

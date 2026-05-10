@@ -6,6 +6,8 @@ import type { User } from '@/api/users/users.types';
 import type { ProcessedChatMessage } from '@/types/chat.ui';
 import { resolveReplyTo } from '@/ui/utils/chat';
 
+const PROCESSED_CACHE = new WeakMap<ChatMessage, ProcessedChatMessage>();
+
 /**
  * @description Hook to process raw message data into a flattened, resolved list.
  */
@@ -31,7 +33,7 @@ export const useProcessedMessages = (
                     new Date(b.createdAt).getTime(),
             );
 
-        return allMessages.map((msg) => {
+        const result = allMessages.map((msg) => {
             let user: User | undefined = undefined;
             let role: Role | undefined = undefined;
             let iconRole: Role | undefined = undefined;
@@ -74,7 +76,7 @@ export const useProcessedMessages = (
                 iconRoleMap,
             );
 
-            return {
+            const next = {
                 ...msg,
                 user:
                     user ||
@@ -87,7 +89,35 @@ export const useProcessedMessages = (
                         ? msg.createdAt
                         : new Date(msg.createdAt).toISOString(),
             } as ProcessedChatMessage;
+
+            const prev = PROCESSED_CACHE.get(msg);
+            if (prev) {
+                const sameCore =
+                    prev.text === next.text &&
+                    prev.editedAt === next.editedAt &&
+                    prev.deletedAt === next.deletedAt &&
+                    prev.isEdited === next.isEdited &&
+                    prev.isPinned === next.isPinned &&
+                    prev.isSticky === next.isSticky &&
+                    prev.reactions === next.reactions &&
+                    prev.embeds === next.embeds &&
+                    prev.poll === next.poll &&
+                    prev.user === next.user &&
+                    prev.role === next.role &&
+                    prev.iconRole === next.iconRole &&
+                    JSON.stringify(prev.replyTo) ===
+                        JSON.stringify(next.replyTo);
+
+                if (sameCore) {
+                    return prev;
+                }
+            }
+
+            PROCESSED_CACHE.set(msg, next);
+            return next;
         });
+
+        return result;
     }, [
         rawMessagesData,
         currentUser,

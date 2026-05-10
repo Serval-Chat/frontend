@@ -2,9 +2,8 @@ import React from 'react';
 
 import type { Role } from '@/api/servers/servers.types';
 import type { ProcessedChatMessage } from '@/types/chat.ui';
+import { Message } from '@/ui/components/chat/Message';
 import { shouldGroupMessages } from '@/utils/timestamp';
-
-import { Message } from './Message';
 
 interface MessageItemProps {
     message: ProcessedChatMessage;

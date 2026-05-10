@@ -242,7 +242,7 @@ export const MainChat: React.FC = () => {
         }
     };
 
-    const handleJumpToLatest = (): void => {
+    const handleJumpToLatest = React.useCallback((): void => {
         dispatch(setTargetMessageId(null));
         if (selectedServerId && selectedChannelId) {
             void navigate(
@@ -251,7 +251,13 @@ export const MainChat: React.FC = () => {
         } else if (selectedFriendId) {
             void navigate(`/chat/@user/${selectedFriendId}`);
         }
-    };
+    }, [
+        dispatch,
+        selectedServerId,
+        selectedChannelId,
+        selectedFriendId,
+        navigate,
+    ]);
 
     React.useEffect(() => {
         if (isFriendError && selectedFriendId) {
@@ -292,17 +298,31 @@ export const MainChat: React.FC = () => {
         deletePing,
     ]);
 
-    const handleReplyClick = (messageId: string): void => {
-        if (selectedServerId && selectedChannelId) {
-            void navigate(
-                `/chat/@server/${selectedServerId}/channel/${selectedChannelId}/message/${messageId}`,
-            );
-        } else if (selectedFriendId) {
-            void navigate(
-                `/chat/@user/${selectedFriendId}/message/${messageId}`,
-            );
-        }
-    };
+    const handleReplyClick = React.useCallback(
+        (messageId: string): void => {
+            if (selectedServerId && selectedChannelId) {
+                void navigate(
+                    `/chat/@server/${selectedServerId}/channel/${selectedChannelId}/message/${messageId}`,
+                );
+            } else if (selectedFriendId) {
+                void navigate(
+                    `/chat/@user/${selectedFriendId}/message/${messageId}`,
+                );
+            }
+        },
+        [navigate, selectedServerId, selectedChannelId, selectedFriendId],
+    );
+
+    const handleReplyToMessage = React.useCallback(
+        (msg: ProcessedChatMessage) => {
+            setReplyingTo(msg);
+        },
+        [],
+    );
+
+    const handleLoadMore = React.useCallback(() => {
+        void fetchNextPage();
+    }, [fetchNextPage]);
 
     if (!selectedFriendId && !selectedChannelId) {
         return (
@@ -396,10 +416,10 @@ export const MainChat: React.FC = () => {
                                 hasMoreNewer={isViewingOlderMessages}
                                 isLoadingMore={isFetchingNextPage}
                                 messages={messages}
-                                onLoadMore={() => void fetchNextPage()}
+                                onLoadMore={handleLoadMore}
                                 onLoadMoreNewer={handleJumpToLatest}
                                 onReplyClick={handleReplyClick}
-                                onReplyToMessage={(msg) => setReplyingTo(msg)}
+                                onReplyToMessage={handleReplyToMessage}
                             />
                         )}
                         <TypingIndicator
