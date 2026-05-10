@@ -36,6 +36,7 @@ import { Box } from '@/ui/components/layout/Box';
 import { ProfileBanner } from '@/ui/components/profile/ProfileBanner';
 import { resolveApiUrl } from '@/utils/apiUrl';
 import { cn } from '@/utils/cn';
+import { APP_LOCALE } from '@/utils/locale';
 import { ParserPresets, parseText } from '@/utils/textParser/parser';
 
 interface UserProfileCardProps {
@@ -242,7 +243,7 @@ export const UserProfileCard: React.FC<UserProfileCardProps> = ({
                             <Text as="span" className="truncate">
                                 {user?.createdAt &&
                                     new Date(user.createdAt).toLocaleDateString(
-                                        'en-GB',
+                                        APP_LOCALE,
                                         {
                                             day: 'numeric',
                                             month: 'short',
@@ -265,7 +266,7 @@ export const UserProfileCard: React.FC<UserProfileCardProps> = ({
                                 <Calendar className="shrink-0" size={14} />
                                 <Text as="span" className="truncate">
                                     {new Date(joinedAt).toLocaleDateString(
-                                        'en-GB',
+                                        APP_LOCALE,
                                         {
                                             day: 'numeric',
                                             month: 'short',
@@ -397,7 +398,7 @@ export const UserProfileCard: React.FC<UserProfileCardProps> = ({
                                 <span className="mt-0.5 block font-black">
                                     {new Date(
                                         adminData.banExpiry,
-                                    ).toLocaleString()}
+                                    ).toLocaleString(APP_LOCALE)}
                                 </span>
                             </div>
                         )}
@@ -447,7 +448,9 @@ export const UserProfileCard: React.FC<UserProfileCardProps> = ({
                                                 Joined{' '}
                                                 {new Date(
                                                     server.joinedAt,
-                                                ).toLocaleDateString()}
+                                                ).toLocaleDateString(
+                                                    APP_LOCALE,
+                                                )}
                                             </div>
                                         </div>
                                     </div>

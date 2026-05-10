@@ -14,6 +14,7 @@ import { Input } from '@/ui/components/common/Input';
 import { Modal } from '@/ui/components/common/Modal';
 import { Text } from '@/ui/components/common/Text';
 import { resolveApiUrl } from '@/utils/apiUrl';
+import { APP_LOCALE } from '@/utils/locale';
 
 interface ChannelWebhookSettingsProps {
     serverId: string;
@@ -169,7 +170,9 @@ export const ChannelWebhookSettings: React.FC<ChannelWebhookSettingsProps> = ({
                                                     Created{' '}
                                                     {new Date(
                                                         webhook.createdAt,
-                                                    ).toLocaleString()}
+                                                    ).toLocaleString(
+                                                        APP_LOCALE,
+                                                    )}
                                                 </Text>
                                             </div>
                                         </div>

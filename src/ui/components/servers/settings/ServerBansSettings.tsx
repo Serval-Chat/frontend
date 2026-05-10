@@ -18,6 +18,7 @@ import { Text } from '@/ui/components/common/Text';
 import { useToast } from '@/ui/components/common/Toast';
 import { UserProfilePicture } from '@/ui/components/common/UserProfilePicture';
 import { Box } from '@/ui/components/layout/Box';
+import { APP_LOCALE } from '@/utils/locale';
 
 interface ServerBansSettingsProps {
     serverId: string;
@@ -135,7 +136,7 @@ export const ServerBansSettings: React.FC<ServerBansSettingsProps> = ({
                                     <TableCell muted>
                                         {new Date(
                                             ban.createdAt,
-                                        ).toLocaleDateString()}
+                                        ).toLocaleDateString(APP_LOCALE)}
                                     </TableCell>
                                     <TableCell align="right">
                                         <Button

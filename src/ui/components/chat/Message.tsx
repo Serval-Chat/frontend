@@ -46,6 +46,7 @@ import { UserProfilePicture } from '@/ui/components/common/UserProfilePicture';
 import { Box } from '@/ui/components/layout/Box';
 import { ProfilePopup } from '@/ui/components/profile/ProfilePopup';
 import { cn } from '@/utils/cn';
+import { APP_LOCALE } from '@/utils/locale';
 
 import { InteractionHeader } from './InteractionHeader';
 import { MessageContent } from './MessageContent';
@@ -476,7 +477,7 @@ export const Message: React.FC<MessageProps> = ({
                         <Text className="mt-1 text-[10px] font-medium text-muted-foreground opacity-0 select-none group-hover:opacity-40">
                             {
                                 new Date(message.createdAt)
-                                    .toLocaleTimeString([], {
+                                    .toLocaleTimeString(APP_LOCALE, {
                                         hour: '2-digit',
                                         minute: '2-digit',
                                         hour12: false,

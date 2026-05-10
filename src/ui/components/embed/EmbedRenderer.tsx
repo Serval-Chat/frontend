@@ -4,6 +4,7 @@ import type { Embed, MessagePayload } from '@/types/embed';
 import { Link } from '@/ui/components/common/Link';
 import { ParsedText } from '@/ui/components/common/ParsedText';
 import { cn } from '@/utils/cn';
+import { APP_LOCALE } from '@/utils/locale';
 import { getSafeUrl } from '@/utils/proxy';
 import { ParserPresets, parseText } from '@/utils/textParser/parser';
 
@@ -15,7 +16,7 @@ const colorToCss = (color: number | undefined): string | undefined => {
 const formatTimestamp = (iso: string | undefined): string | undefined => {
     if (!iso) return undefined;
     try {
-        return new Intl.DateTimeFormat(undefined, {
+        return new Intl.DateTimeFormat(APP_LOCALE, {
             dateStyle: 'medium',
             timeStyle: 'short',
         }).format(new Date(iso));

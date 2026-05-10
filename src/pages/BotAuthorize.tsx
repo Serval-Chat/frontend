@@ -28,6 +28,7 @@ import { DefaultBackground } from '@/ui/components/layout/DefaultBackground';
 import { ProfileBanner } from '@/ui/components/profile/ProfileBanner';
 import { bitmaskToPermissions } from '@/utils/botPermissions';
 import { cn } from '@/utils/cn';
+import { APP_LOCALE } from '@/utils/locale';
 
 const PERMISSION_LABELS: Partial<Record<keyof BotPermissions, string>> = {
     readMessages: 'Read messages',
@@ -261,7 +262,7 @@ export const BotAuthorize = (): ReactNode => {
                                 <Server className="opacity-60" size={13} />
                                 {botInfo!.serverCount === 0
                                     ? 'Not in any servers yet'
-                                    : `In ${botInfo!.serverCount.toLocaleString()} ${botInfo!.serverCount === 1 ? 'server' : 'servers'}`}
+                                    : `In ${botInfo!.serverCount.toLocaleString(APP_LOCALE)} ${botInfo!.serverCount === 1 ? 'server' : 'servers'}`}
                             </MutedText>
                         )}
 

@@ -1,3 +1,5 @@
+import { APP_LOCALE } from './locale';
+
 /**
  * Format a message timestamp
  */
@@ -13,7 +15,7 @@ export function formatTimestamp(isoString: string): string {
     const diffTime = currentDay.getTime() - msgDay.getTime();
     const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
 
-    const timeString = messageDate.toLocaleTimeString([], {
+    const timeString = messageDate.toLocaleTimeString(APP_LOCALE, {
         hour: '2-digit',
         minute: '2-digit',
     });
@@ -27,11 +29,13 @@ export function formatTimestamp(isoString: string): string {
     }
 
     if (diffDays < 7) {
-        const weekday = messageDate.toLocaleDateString([], { weekday: 'long' });
+        const weekday = messageDate.toLocaleDateString(APP_LOCALE, {
+            weekday: 'long',
+        });
         return `${weekday} at ${timeString}`;
     }
 
-    return messageDate.toLocaleDateString([], {
+    return messageDate.toLocaleDateString(APP_LOCALE, {
         month: 'short',
         day: 'numeric',
         year:
@@ -46,7 +50,7 @@ export function formatTimestamp(isoString: string): string {
  */
 export function formatDate(date: string | Date): string {
     const d = new Date(date);
-    return d.toLocaleDateString([], {
+    return d.toLocaleDateString(APP_LOCALE, {
         month: 'short',
         day: 'numeric',
         year: 'numeric',

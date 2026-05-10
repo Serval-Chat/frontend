@@ -14,6 +14,7 @@ import { Text } from '@/ui/components/common/Text';
 import { Box } from '@/ui/components/layout/Box';
 import { Stack } from '@/ui/components/layout/Stack';
 import { cn } from '@/utils/cn';
+import { APP_LOCALE } from '@/utils/locale';
 
 import { AdminErrorDisplay } from './AdminErrorDisplay';
 import { StatCard } from './StatCard';
@@ -59,27 +60,27 @@ export const AdminOverview = (): ReactNode => {
                 <StatCard
                     icon={<Users size={20} />}
                     title="Total Users"
-                    value={stats.users.toLocaleString()}
+                    value={stats.users.toLocaleString(APP_LOCALE)}
                 />
                 <StatCard
                     icon={<UserCheck size={20} />}
                     title="Online Now"
-                    value={stats.activeUsers.toLocaleString()}
+                    value={stats.activeUsers.toLocaleString(APP_LOCALE)}
                 />
                 <StatCard
                     icon={<ShieldAlert size={20} />}
                     title="Active Bans"
-                    value={stats.bans.toLocaleString()}
+                    value={stats.bans.toLocaleString(APP_LOCALE)}
                 />
                 <StatCard
                     icon={<Server size={20} />}
                     title="Total Servers"
-                    value={stats.servers.toLocaleString()}
+                    value={stats.servers.toLocaleString(APP_LOCALE)}
                 />
                 <StatCard
                     icon={<MessageSquare size={20} />}
                     title="Messages Sent"
-                    value={stats.messages.toLocaleString()}
+                    value={stats.messages.toLocaleString(APP_LOCALE)}
                 />
             </Box>
 

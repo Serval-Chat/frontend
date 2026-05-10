@@ -11,6 +11,7 @@ import { ParsedUnicodeEmoji } from '@/ui/components/common/ParsedUnicodeEmoji';
 import { Text } from '@/ui/components/common/Text';
 import { Box } from '@/ui/components/layout/Box';
 import { cn } from '@/utils/cn';
+import { APP_LOCALE } from '@/utils/locale';
 
 import { PollVotersModal } from './PollVotersModal';
 
@@ -280,13 +281,20 @@ export const Poll: React.FC<PollProps> = ({
                     {totalVotes} vote{totalVotes !== 1 ? 's' : ''}
                     {!isExpired && expiresAt !== null && ' · closes '}
                     {!isExpired && expiresAt !== null && (
-                        <span title={new Date(expiresAt).toLocaleString()}>
-                            {new Date(expiresAt).toLocaleDateString(undefined, {
-                                month: 'short',
-                                day: 'numeric',
-                                hour: '2-digit',
-                                minute: '2-digit',
-                            })}
+                        <span
+                            title={new Date(expiresAt).toLocaleString(
+                                APP_LOCALE,
+                            )}
+                        >
+                            {new Date(expiresAt).toLocaleDateString(
+                                APP_LOCALE,
+                                {
+                                    month: 'short',
+                                    day: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit',
+                                },
+                            )}
                         </span>
                     )}
                 </Text>

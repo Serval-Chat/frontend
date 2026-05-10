@@ -34,6 +34,7 @@ import { UserProfileCard } from '@/ui/components/profile/UserProfileCard';
 import { ServerIcon } from '@/ui/components/servers/ServerIcon';
 import { resolveApiUrl } from '@/utils/apiUrl';
 import { cn } from '@/utils/cn';
+import { APP_LOCALE } from '@/utils/locale';
 
 import { AdminErrorDisplay } from './AdminErrorDisplay';
 import { AdminNotesSection } from './AdminNotesSection';
@@ -308,7 +309,7 @@ export const AdminUserDetail = ({
                                         <Text as="span" weight="black">
                                             {new Date(
                                                 adminData.banExpiry,
-                                            ).toLocaleString()}
+                                            ).toLocaleString(APP_LOCALE)}
                                         </Text>
                                     </Text>
                                 </div>
@@ -500,7 +501,7 @@ export const AdminUserDetail = ({
                                     >
                                         {new Date(
                                             adminData.createdAt,
-                                        ).toLocaleDateString()}
+                                        ).toLocaleDateString(APP_LOCALE)}
                                     </Text>
                                 </div>
                             </div>
@@ -569,7 +570,9 @@ export const AdminUserDetail = ({
                                                     <Text as="span">
                                                         {new Date(
                                                             warning.timestamp,
-                                                        ).toLocaleDateString()}
+                                                        ).toLocaleDateString(
+                                                            APP_LOCALE,
+                                                        )}
                                                     </Text>
                                                 </div>
                                                 {warning.acknowledgedAt && (
@@ -581,7 +584,9 @@ export const AdminUserDetail = ({
                                                                 Ack:{' '}
                                                                 {new Date(
                                                                     warning.acknowledgedAt,
-                                                                ).toLocaleDateString()}
+                                                                ).toLocaleDateString(
+                                                                    APP_LOCALE,
+                                                                )}
                                                             </Text>
                                                         </div>
                                                     </>
@@ -642,7 +647,9 @@ export const AdminUserDetail = ({
                                             {server.joinedAt
                                                 ? new Date(
                                                       server.joinedAt,
-                                                  ).toLocaleDateString()
+                                                  ).toLocaleDateString(
+                                                      APP_LOCALE,
+                                                  )
                                                 : 'Unknown'}
                                         </Text>
                                     </div>

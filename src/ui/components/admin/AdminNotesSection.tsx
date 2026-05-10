@@ -27,6 +27,7 @@ import { TextArea } from '@/ui/components/common/TextArea';
 import { useToast } from '@/ui/components/common/Toast';
 import { UserProfilePicture } from '@/ui/components/common/UserProfilePicture';
 import { cn } from '@/utils/cn';
+import { APP_LOCALE } from '@/utils/locale';
 
 interface AdminNotesSectionProps {
     targetId: string;
@@ -210,7 +211,7 @@ export const AdminNotesSection = ({
                                             <Text size="xs" variant="muted">
                                                 {new Date(
                                                     note.createdAt,
-                                                ).toLocaleString()}
+                                                ).toLocaleString(APP_LOCALE)}
                                             </Text>
                                         </div>
                                     </div>
@@ -304,7 +305,9 @@ export const AdminNotesSection = ({
                                                                     <Text size="xs">
                                                                         {new Date(
                                                                             history.editedAt,
-                                                                        ).toLocaleString()}
+                                                                        ).toLocaleString(
+                                                                            APP_LOCALE,
+                                                                        )}
                                                                     </Text>
                                                                 </div>
                                                             </div>
@@ -334,7 +337,9 @@ export const AdminNotesSection = ({
                                                             <Text size="xs">
                                                                 {new Date(
                                                                     note.createdAt,
-                                                                ).toLocaleString()}
+                                                                ).toLocaleString(
+                                                                    APP_LOCALE,
+                                                                )}
                                                             </Text>
                                                         </div>
                                                     </div>
@@ -350,7 +355,9 @@ export const AdminNotesSection = ({
                                             <span>
                                                 {new Date(
                                                     note.deletedAt!,
-                                                ).toLocaleDateString()}
+                                                ).toLocaleDateString(
+                                                    APP_LOCALE,
+                                                )}
                                             </span>
                                         </div>
                                         <Text

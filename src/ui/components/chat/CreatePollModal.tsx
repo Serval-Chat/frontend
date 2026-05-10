@@ -14,6 +14,7 @@ import { Slider } from '@/ui/components/common/Slider';
 import { Text } from '@/ui/components/common/Text';
 import { Toggle } from '@/ui/components/common/Toggle';
 import { Box } from '@/ui/components/layout/Box';
+import { APP_LOCALE } from '@/utils/locale';
 
 const EmojiPicker = React.lazy(() =>
     import('@/ui/components/emoji/EmojiPicker').then((m) => ({
@@ -153,7 +154,7 @@ export const CreatePollModal: React.FC<CreatePollModalProps> = ({
         if (isOpen) {
             setExpiryPreview(
                 new Date(Date.now() + getDurationMs()).toLocaleString(
-                    undefined,
+                    APP_LOCALE,
                     {
                         month: 'short',
                         day: 'numeric',

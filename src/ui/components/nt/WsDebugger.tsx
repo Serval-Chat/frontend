@@ -5,6 +5,7 @@ import { vs } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 import { NTTable } from '@/ui/components/nt/NTTable';
 import { Window } from '@/ui/components/nt/Window';
+import { APP_LOCALE } from '@/utils/locale';
 import { toggleWsDebugWindow, useWsDebugEvents } from '@/ws/debug';
 
 const PAYLOAD_STYLE = {
@@ -55,7 +56,7 @@ export const WsDebugger: React.FC = () => {
                                     key={event.id}
                                 >
                                     <td className="w-16 p-1 align-top whitespace-nowrap text-gray-600">
-                                        {date.toLocaleTimeString()}
+                                        {date.toLocaleTimeString(APP_LOCALE)}
                                         <br />
                                         <span className="text-[9px]">
                                             .{ms}

@@ -22,6 +22,7 @@ import { DefaultBackground } from '@/ui/components/layout/DefaultBackground';
 import { ServerIcon } from '@/ui/components/servers/ServerIcon';
 import { resolveApiUrl } from '@/utils/apiUrl';
 import { cn } from '@/utils/cn';
+import { APP_LOCALE } from '@/utils/locale';
 
 interface InviteBannerHeaderProps {
     name: string;
@@ -174,7 +175,7 @@ export const Invite: React.FC = () => {
                             <Skeleton className="h-4 w-24" variant="text" />
                         ) : (
                             <MutedText className="text-sm">
-                                {data?.memberCount.toLocaleString()}{' '}
+                                {data?.memberCount.toLocaleString(APP_LOCALE)}{' '}
                                 {data?.memberCount === 1 ? 'member' : 'members'}
                             </MutedText>
                         )}
@@ -223,7 +224,7 @@ export const Invite: React.FC = () => {
                                         Expires{' '}
                                         {new Date(
                                             data.expiresAt,
-                                        ).toLocaleDateString(undefined, {
+                                        ).toLocaleDateString(APP_LOCALE, {
                                             month: 'short',
                                             day: 'numeric',
                                             year: 'numeric',

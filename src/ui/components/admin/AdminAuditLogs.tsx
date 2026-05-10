@@ -28,6 +28,7 @@ import {
 } from '@/ui/components/common/Table';
 import { Text } from '@/ui/components/common/Text';
 import { cn } from '@/utils/cn';
+import { APP_LOCALE } from '@/utils/locale';
 
 import { AdminErrorDisplay } from './AdminErrorDisplay';
 
@@ -72,8 +73,8 @@ const LogEntry = ({ log }: LogEntryProps): ReactNode => {
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Clock size={14} />
                         <Text as="span" size="sm" variant="muted">
-                            {date.toLocaleDateString()}{' '}
-                            {date.toLocaleTimeString([], {
+                            {date.toLocaleDateString(APP_LOCALE)}{' '}
+                            {date.toLocaleTimeString(APP_LOCALE, {
                                 hour: '2-digit',
                                 minute: '2-digit',
                             })}

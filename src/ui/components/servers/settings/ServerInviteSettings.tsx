@@ -21,6 +21,7 @@ import {
 } from '@/ui/components/common/Table';
 import { Text } from '@/ui/components/common/Text';
 import { useToast } from '@/ui/components/common/Toast';
+import { APP_LOCALE } from '@/utils/locale';
 
 interface ServerInviteSettingsProps {
     serverId: string;
@@ -80,7 +81,7 @@ export const ServerInviteSettings: React.FC<ServerInviteSettingsProps> = ({
     const formatExpiry = (expiresAt?: string): string => {
         if (!expiresAt) return 'Never';
         const date = new Date(expiresAt);
-        return date.toLocaleString();
+        return date.toLocaleString(APP_LOCALE);
     };
 
     if (isLoading) {

@@ -8,6 +8,7 @@ import { Text } from '@/ui/components/common/Text';
 import { Box } from '@/ui/components/layout/Box';
 import { ServerIcon } from '@/ui/components/servers/ServerIcon';
 import { resolveApiUrl } from '@/utils/apiUrl';
+import { APP_LOCALE } from '@/utils/locale';
 
 interface AdminServerPreviewProps {
     server: Server & { deletedAt?: string };
@@ -81,7 +82,7 @@ export const AdminServerPreview = ({
                         <Text as="span" className="truncate">
                             {server.createdAt
                                 ? new Date(server.createdAt).toLocaleDateString(
-                                      'en-GB',
+                                      APP_LOCALE,
                                       {
                                           day: 'numeric',
                                           month: 'short',

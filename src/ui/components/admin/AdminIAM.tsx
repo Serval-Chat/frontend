@@ -39,6 +39,7 @@ import { Text } from '@/ui/components/common/Text';
 import { Toggle } from '@/ui/components/common/Toggle';
 import { UserProfilePicture } from '@/ui/components/common/UserProfilePicture';
 import { cn } from '@/utils/cn';
+import { APP_LOCALE } from '@/utils/locale';
 
 const createDefaultPermissions = (): AdminPermissions => ({
     adminAccess: false,
@@ -411,7 +412,7 @@ export const AdminIAM = ({
                                 <TableCell muted>
                                     {new Date(
                                         user.createdAt,
-                                    ).toLocaleDateString()}
+                                    ).toLocaleDateString(APP_LOCALE)}
                                 </TableCell>
 
                                 <TableCell align="right">

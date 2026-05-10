@@ -26,6 +26,7 @@ import { Tooltip } from '@/ui/components/common/Tooltip';
 import { UserProfilePicture } from '@/ui/components/common/UserProfilePicture';
 import { Box } from '@/ui/components/layout/Box';
 import { ProfilePopup } from '@/ui/components/profile/ProfilePopup';
+import { APP_LOCALE } from '@/utils/locale';
 import { getRoleStyle } from '@/utils/roleColor';
 
 import { AuditLogDiff } from './AuditLogDiff';
@@ -581,14 +582,18 @@ export const AuditLogEntry: React.FC<AuditLogEntryProps> = ({
                     </div>
 
                     <Tooltip
-                        content={new Date(entry.createdAt).toLocaleString()}
+                        content={new Date(entry.createdAt).toLocaleString(
+                            APP_LOCALE,
+                        )}
                     >
                         <Text
                             className="cursor-help whitespace-nowrap"
                             size="sm"
                             variant="muted"
                         >
-                            {new Date(entry.createdAt).toLocaleString()}
+                            {new Date(entry.createdAt).toLocaleString(
+                                APP_LOCALE,
+                            )}
                         </Text>
                     </Tooltip>
                 </div>
@@ -719,7 +724,7 @@ export const AuditLogEntry: React.FC<AuditLogEntryProps> = ({
                                             entry.metadata?.expiresAt ??
                                                 entry.metadata?.inviteExpiresAt,
                                         ),
-                                    ).toLocaleString()}
+                                    ).toLocaleString(APP_LOCALE)}
                                 </span>
                             </Text>
                         )}

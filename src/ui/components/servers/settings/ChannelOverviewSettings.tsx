@@ -18,6 +18,7 @@ import { SettingsFloatingBar } from '@/ui/components/common/SettingsFloatingBar'
 import { Text } from '@/ui/components/common/Text';
 import { ICON_MAP } from '@/ui/utils/iconMap';
 import { cn } from '@/utils/cn';
+import { APP_LOCALE } from '@/utils/locale';
 
 interface ChannelOverviewSettingsProps {
     channel: Channel;
@@ -354,7 +355,9 @@ export const ChannelOverviewSettings: React.FC<
                                                 available:{' '}
                                                 {new Date(
                                                     exportState.nextExportAt,
-                                                ).toLocaleDateString()}
+                                                ).toLocaleDateString(
+                                                    APP_LOCALE,
+                                                )}
                                             </Text>
                                         </div>
                                     )}

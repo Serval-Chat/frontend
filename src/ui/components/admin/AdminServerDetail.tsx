@@ -35,6 +35,7 @@ import { UserProfilePicture } from '@/ui/components/common/UserProfilePicture';
 import { Box } from '@/ui/components/layout/Box';
 import { Stack } from '@/ui/components/layout/Stack';
 import { resolveApiUrl } from '@/utils/apiUrl';
+import { APP_LOCALE } from '@/utils/locale';
 
 import { AdminErrorDisplay } from './AdminErrorDisplay';
 import { AdminNotesSection } from './AdminNotesSection';
@@ -384,7 +385,9 @@ export const AdminServerDetail = ({
                                                     {invite.expiresAt
                                                         ? new Date(
                                                               invite.expiresAt,
-                                                          ).toLocaleDateString()
+                                                          ).toLocaleDateString(
+                                                              APP_LOCALE,
+                                                          )
                                                         : 'Never'}
                                                 </span>
                                             </div>
