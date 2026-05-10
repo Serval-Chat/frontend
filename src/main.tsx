@@ -4,6 +4,7 @@ import { Suspense, lazy } from 'react';
 import 'katex/dist/katex.min.css';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { scan } from 'react-scan';
 
 import { teardownWebPush } from '@/lib/pushClient';
 import { QueryProvider } from '@/providers/QueryProvider';
@@ -15,6 +16,12 @@ import { AdminRoute } from '@/ui/components/layout/AdminRoute';
 import { AuthenticatedLayout } from '@/ui/components/layout/AuthenticatedLayout';
 import { NavigationSync } from '@/ui/components/layout/NavigationSync';
 import { hasAuthToken } from '@/utils/authToken';
+
+if (typeof window !== 'undefined' && import.meta.env.DEV) {
+    scan({
+        enabled: true,
+    });
+}
 
 const Admin = lazy(() =>
     import('@/pages/Admin').then((m) => ({ default: m.Admin })),

@@ -1,4 +1,11 @@
-import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import React, {
+    useCallback,
+    useEffect,
+    useLayoutEffect,
+    useRef,
+    useState,
+    useTransition,
+} from 'react';
 
 import { ChevronDown, ChevronRight } from 'lucide-react';
 
@@ -57,36 +64,49 @@ export const MessagesList: React.FC<MessagesListProps> = ({
         string | null
     >(null);
 
+    const [, startTransitionHighlight] = useTransition();
+
     const normalizedHighlightId = activeHighlightId ?? null;
     if (normalizedHighlightId !== prevActiveHighlightId) {
         setPrevActiveHighlightId(normalizedHighlightId);
-        setInternalHighlightId(normalizedHighlightId);
+        startTransitionHighlight(() => {
+            setInternalHighlightId(normalizedHighlightId);
+        });
     }
     const [expandedGroups, setExpandedGroups] = useState<Set<string>>(
         new Set(),
     );
 
-    const toggleGroup = (groupId: string): void => {
-        setExpandedGroups((prev) => {
-            const next = new Set(prev);
-            if (next.has(groupId)) {
-                next.delete(groupId);
-            } else {
-                next.add(groupId);
-            }
-            return next;
+    const [, startTransitionGroup] = useTransition();
+
+    const toggleGroup = useCallback((groupId: string): void => {
+        startTransitionGroup(() => {
+            setExpandedGroups((prev) => {
+                const next = new Set(prev);
+                if (next.has(groupId)) {
+                    next.delete(groupId);
+                } else {
+                    next.add(groupId);
+                }
+                return next;
+            });
         });
-    };
+    }, []);
 
-    const handleReplyClick = (messageId: string): void => {
-        const el = document.getElementById(`message-${messageId}`);
-        if (el) {
-            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            setInternalHighlightId(messageId);
-        }
+    const handleReplyClick = useCallback(
+        (messageId: string): void => {
+            const el = document.getElementById(`message-${messageId}`);
+            if (el) {
+                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                startTransitionHighlight(() => {
+                    setInternalHighlightId(messageId);
+                });
+            }
 
-        onReplyClick?.(messageId);
-    };
+            onReplyClick?.(messageId);
+        },
+        [onReplyClick],
+    );
 
     const handleScroll = (): void => {
         const container = scrollContainerRef.current;

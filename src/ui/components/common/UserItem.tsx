@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 import {
     Ban,
@@ -14,6 +14,7 @@ import {
     UserX,
     Volume2,
 } from 'lucide-react';
+import { shallowEqual } from 'react-redux';
 
 import {
     useBlockProfiles,
@@ -88,10 +89,69 @@ interface UserItemProps {
     initialPresenceStatus?: UserStatus;
 }
 
+interface ServerData {
+    addRole: ReturnType<typeof useAddRoleToMember>['mutate'];
+    isAdding: boolean;
+    removeRole: ReturnType<typeof useRemoveRoleFromMember>['mutate'];
+    isRemoving: boolean;
+    kickMember: ReturnType<typeof useKickMember>['mutate'];
+    banMember: ReturnType<typeof useBanMember>['mutate'];
+    timeoutMember: ReturnType<typeof useTimeoutMember>['mutate'];
+    serverDetails: ReturnType<typeof useServerDetails>['data'];
+    members: ReturnType<typeof useMembers>['data'];
+}
+
+const ServerDataInjector: React.FC<{
+    serverId: string;
+    children: (data: ServerData) => React.ReactNode;
+}> = React.memo(({ serverId, children }) => {
+    const { mutate: addRole, isPending: isAdding } =
+        useAddRoleToMember(serverId);
+    const { mutate: removeRole, isPending: isRemoving } =
+        useRemoveRoleFromMember(serverId);
+    const { mutate: kickMember } = useKickMember(serverId);
+    const { mutate: banMember } = useBanMember(serverId);
+    const { mutate: timeoutMember } = useTimeoutMember(serverId);
+    const { data: serverDetails } = useServerDetails(serverId, {
+        enabled: true,
+    });
+    const { data: members } = useMembers(serverId, { enabled: true });
+
+    const data = useMemo(
+        () => ({
+            addRole,
+            isAdding,
+            removeRole,
+            isRemoving,
+            kickMember,
+            banMember,
+            timeoutMember,
+            serverDetails,
+            members,
+        }),
+        [
+            addRole,
+            isAdding,
+            removeRole,
+            isRemoving,
+            kickMember,
+            banMember,
+            timeoutMember,
+            serverDetails,
+            members,
+        ],
+    );
+
+    return <>{children(data)}</>;
+});
+
 /**
  * @description Renders a user item with avatar, styled username, and custom status.
  */
-export const UserItem: React.FC<UserItemProps> = ({
+const UserItemInner: React.FC<
+    UserItemProps & { serverData: ServerData | null }
+> = ({
+    serverData,
     userId,
     serverId: providedServerId,
     user: providedUser,
@@ -118,22 +178,18 @@ export const UserItem: React.FC<UserItemProps> = ({
         providedServerId || role?.serverId || serverRoles?.[0]?.serverId || '';
     const sid = serverId || null;
 
-    // Only enable member/role fetches if we have an explicit serverId prop
-    const isServerContext = !!providedServerId && !noFetch;
-
-    const { mutate: addRole, isPending: isAdding } =
-        useAddRoleToMember(serverId);
-    const { mutate: removeRole, isPending: isRemoving } =
-        useRemoveRoleFromMember(serverId);
-
-    const { mutate: kickMember } = useKickMember(serverId);
-    const { mutate: banMember } = useBanMember(serverId);
-    const { mutate: timeoutMember } = useTimeoutMember(serverId);
-
-    const { data: serverDetails } = useServerDetails(sid, {
-        enabled: isServerContext,
-    });
-    const { data: members } = useMembers(sid, { enabled: isServerContext });
+    const noopMutate = useCallback((..._args: unknown[]) => {}, []);
+    const {
+        addRole = noopMutate,
+        isAdding = false,
+        removeRole = noopMutate,
+        isRemoving = false,
+        kickMember = noopMutate,
+        banMember = noopMutate,
+        timeoutMember = noopMutate,
+        serverDetails,
+        members,
+    } = serverData || {};
 
     const { data: currentUser } = useMe();
 
@@ -160,348 +216,443 @@ export const UserItem: React.FC<UserItemProps> = ({
     const [showProfile, setShowProfile] = React.useState(false);
     const itemRef = React.useRef<HTMLDivElement>(null);
 
-    const username = userProfile?.username || initialData?.username || '';
-    const displayName = userProfile?.displayName || initialData?.displayName;
-    const profilePicture =
-        userProfile?.profilePicture || initialData?.profilePicture || null;
-    const customStatus = userProfile?.customStatus || initialData?.customStatus;
-
-    const isFriend = friends?.some((f) => f._id === userId);
-    const isMe = currentUser?._id === userId;
-
-    const {
-        activeVoiceChannelId,
-        voiceParticipants,
-        userVolumes,
-        voiceUserStates,
-    } = useAppSelector((state) => state.voice);
-
-    const userVoiceChannelId = Object.keys(voiceParticipants).find((cid) =>
-        voiceParticipants[cid]?.includes(userId),
+    const { username, displayName, profilePicture, customStatus } = useMemo(
+        () => ({
+            username: userProfile?.username || initialData?.username || '',
+            displayName: userProfile?.displayName || initialData?.displayName,
+            profilePicture:
+                userProfile?.profilePicture ||
+                initialData?.profilePicture ||
+                null,
+            customStatus:
+                userProfile?.customStatus || initialData?.customStatus,
+        }),
+        [userProfile, initialData],
     );
 
-    const userVoiceState = voiceUserStates[userId];
+    const isFriend = friends?.some((f) => f._id === userId) ?? false;
+    const isMe = currentUser?._id === userId;
 
-    const isInSameVoiceChannel =
-        activeVoiceChannelId &&
-        userVoiceChannelId === activeVoiceChannelId &&
-        !isMe;
-
+    const activeVoiceChannelId = useAppSelector(
+        (state) => state.voice.activeVoiceChannelId,
+    );
+    const userVoiceChannelId = useAppSelector((state) => {
+        const vp = state.voice.voiceParticipants;
+        return Object.keys(vp).find((cid) => vp[cid]?.includes(userId));
+    });
+    const userVolume = useAppSelector(
+        (state) => state.voice.userVolumes[userId],
+    );
+    const userVoiceState = useAppSelector(
+        (state) => state.voice.voiceUserStates[userId],
+        shallowEqual,
+    );
     const unreadCount = useAppSelector(
         (state) => state.unread.unreadDms[userId] || 0,
     );
+    const storePresenceStatus = useAppSelector(
+        (state) => state.presence.users[userId]?.status,
+    );
+    const storePresenceCustomText = useAppSelector(
+        (state) => state.presence.users[userId]?.customStatus?.text,
+    );
+    const storePresenceCustomEmoji = useAppSelector(
+        (state) => state.presence.users[userId]?.customStatus?.emoji,
+    );
+
+    const isInSameVoiceChannel = Boolean(
+        activeVoiceChannelId &&
+        userVoiceChannelId === activeVoiceChannelId &&
+        !isMe,
+    );
     const hasUnread = unreadCount > 0;
 
-    const items: ContextMenuItem[] = [];
-
-    // Group 0: Profile
-    items.push({
-        label: 'Show Profile',
-        icon: UserIcon,
-        onClick: () => setShowProfile(true),
-    });
-
-    // Group 1: DM Actions
-    if (isFriend) {
-        items.push({ type: 'divider' });
-        items.push({
-            label: 'Open DMs',
-            icon: MessageSquare,
-            onClick: () => dispatch(setSelectedFriendId(userId)),
-        });
-
-        if (hasUnread) {
-            items.push({
-                label: 'Mark as Read',
-                icon: Check,
-                onClick: () => {
-                    wsMessages.markDmRead(userId);
-                },
-            });
-        }
-    }
-
-    // Group 1.5: Voice Volume
-    if (isInSameVoiceChannel) {
-        const volume = userVolumes[userId] ?? 1;
-        items.push({ type: 'divider' });
-        items.push({
-            type: 'custom',
-            content: (
-                <div className="flex flex-col gap-2 p-1">
-                    <div className="flex items-center justify-between text-xs font-bold tracking-wider text-muted-foreground uppercase">
-                        <div className="flex items-center gap-1.5">
-                            <Volume2 size={12} />
-                            User Volume
-                        </div>
-                        <span>
-                            {Math.round((isNaN(volume) ? 1.0 : volume) * 100)}%
-                        </span>
-                    </div>
-                    <input
-                        className="w-full cursor-pointer accent-primary"
-                        max="2"
-                        min="0"
-                        step="0.01"
-                        type="range"
-                        value={volume}
-                        onChange={(e) => {
-                            dispatch(
-                                setUserVolume({
-                                    userId,
-                                    volume: parseFloat(e.target.value),
-                                }),
-                            );
-                        }}
-                    />
-                </div>
+    const myMember = useMemo(
+        () => members?.find((m) => m.userId === currentUser?._id),
+        [members, currentUser?._id],
+    );
+    const myRoles = useMemo(
+        () =>
+            serverRoles?.filter(
+                (r) =>
+                    myMember?.roles.includes(r._id) || r.name === '@everyone',
             ),
-        });
-    }
-
-    // Group 2: Friend Management (only if not me)
-    if (!isMe) {
-        items.push({ type: 'divider' });
-        if (isFriend) {
-            items.push({
-                label: 'Remove Friend',
-                icon: UserMinus,
-                onClick: () => removeFriend(userId),
-                variant: 'danger',
-            });
-        } else if (!userProfile?.isBot) {
-            items.push({
-                label: 'Add Friend',
-                icon: UserPlus,
-                onClick: () => sendFriendRequest(username),
-            });
-        }
-
-        const isUserBlocked = blocks?.some((b) => b.targetUserId === userId);
-        if (isUserBlocked) {
-            items.push({
-                label: 'Unblock User',
-                icon: Shield,
-                onClick: () => removeBlock(userId),
-            });
-        } else {
-            items.push({
-                label: 'Block User',
-                icon: Ban,
-                onClick: () => {
-                    void (async () => {
-                        const profiles = blockProfiles || [];
-                        if (profiles.length === 0) {
-                            try {
-                                const profileToAssign = await createProfile({
-                                    name: 'Default',
-                                    flags: 4095,
-                                });
-                                if (profileToAssign) {
-                                    upsertBlock({
-                                        targetUserId: userId,
-                                        profileId: profileToAssign.id,
-                                    });
-                                }
-                            } catch {
-                                // Ignore
-                            }
-                        } else if (profiles.length === 1) {
-                            upsertBlock({
-                                targetUserId: userId,
-                                profileId: profiles[0].id,
-                            });
-                        } else {
-                            setIsBlockModalOpen(true);
-                        }
-                    })();
-                },
-                variant: 'danger',
-            });
-        }
-    }
-
-    // Group 3: Server Management (Roles)
-    const myMember = members?.find((m) => m.userId === currentUser?._id);
-    const myRoles = serverRoles?.filter(
-        (r) => myMember?.roles.includes(r._id) || r.name === '@everyone',
+        [serverRoles, myMember?.roles],
     );
     const isOwner = serverDetails?.ownerId === currentUser?._id;
 
-    const myHighestRole = myRoles?.sort((a, b) => b.position - a.position)[0];
+    const myHighestRole = useMemo(
+        () => myRoles?.sort((a, b) => b.position - a.position)[0],
+        [myRoles],
+    );
 
     const canManageRoles =
         isOwner ||
-        myRoles?.some(
+        (myRoles?.some(
             (r) => r.permissions?.administrator || r.permissions?.manageRoles,
-        );
+        ) ??
+            false);
 
-    if (serverRoles && sid && canManageRoles) {
-        items.push({ type: 'divider' });
-
-        // Sort roles by position (descending)
-        const sortedRoles = [...serverRoles].sort(
-            (a, b) => b.position - a.position,
-        );
-        const rolesToDisplay = sortedRoles.filter(
-            (r) => r.name !== '@everyone',
-        );
-
-        items.push({
-            icon: Shield,
-            items:
-                rolesToDisplay.length > 0
-                    ? rolesToDisplay.map((r) => {
-                          const hasRole = allRoles?.some(
-                              (ur) => String(ur._id) === String(r._id),
-                          );
-
-                          // Hierarchy check: can only manage roles strictly below your highest role
-                          // unless you are the owner
-                          const canManageThisRole =
-                              isOwner ||
-                              (myHighestRole &&
-                                  myHighestRole.position > r.position);
-
-                          return {
-                              indent: false,
-                              label: (
-                                  <Box className="flex items-center gap-2">
-                                      <RoleDot role={r} size={8} />
-                                      <span className="truncate">{r.name}</span>
-                                  </Box>
-                              ),
-                              onClick: () => {
-                                  if (isAdding || isRemoving) return;
-
-                                  if (hasRole) {
-                                      removeRole({
-                                          roleId: r._id,
-                                          userId,
-                                      });
-                                  } else {
-                                      addRole({
-                                          roleId: r._id,
-                                          userId,
-                                      });
-                                  }
-                              },
-                              preventClose: true,
-                              rightIcon: hasRole ? Check : undefined,
-                              type: 'action',
-                              variant: !canManageThisRole
-                                  ? 'ghost'
-                                  : isAdding || isRemoving
-                                    ? 'ghost'
-                                    : 'normal',
-                          };
-                      })
-                    : [
-                          {
-                              label: 'No roles',
-                              onClick: () => {},
-                              type: 'action',
-                              variant: 'ghost',
-                          },
-                      ],
-            label: 'Roles',
-            type: 'submenu',
-        });
-    }
-
-    items.push({ type: 'divider' });
-
-    // Group 4: Moderation
     const canKick =
         isOwner ||
-        myRoles?.some(
+        (myRoles?.some(
             (r) => r.permissions?.administrator || r.permissions?.kickMembers,
-        );
+        ) ??
+            false);
+
     const canBan =
         isOwner ||
-        myRoles?.some(
+        (myRoles?.some(
             (r) => r.permissions?.administrator || r.permissions?.banMembers,
-        );
+        ) ??
+            false);
+
     const canTimeout =
         isOwner ||
-        myRoles?.some(
+        (myRoles?.some(
             (r) =>
                 r.permissions?.administrator || r.permissions?.moderateMembers,
-        );
+        ) ??
+            false);
 
-    const targetMember = members?.find((m) => m.userId === userId);
-    const targetRoles = serverRoles?.filter((r) =>
-        targetMember?.roles.includes(r._id),
+    const targetMember = useMemo(
+        () => members?.find((m) => m.userId === userId),
+        [members, userId],
     );
-    const targetHighestRole = targetRoles?.sort(
-        (a, b) => b.position - a.position,
-    )[0];
+    const targetRoles = useMemo(
+        () => serverRoles?.filter((r) => targetMember?.roles.includes(r._id)),
+        [serverRoles, targetMember?.roles],
+    );
+    const targetHighestRole = useMemo(
+        () => targetRoles?.sort((a, b) => b.position - a.position)[0],
+        [targetRoles],
+    );
     const targetHighestPosition = targetHighestRole
         ? targetHighestRole.position
         : -1;
     const myHighestPosition = myHighestRole ? myHighestRole.position : -1;
 
-    // Current user must have strictly higher role than target, OR be owner
     const isHigherHierarchy =
         isOwner || myHighestPosition > targetHighestPosition;
 
-    if (
-        !isMe &&
-        sid &&
-        (canKick || canBan || canTimeout) &&
-        isHigherHierarchy
-    ) {
-        if (canTimeout) {
+    const contextMenuItems = useMemo(() => {
+        const items: ContextMenuItem[] = [];
+
+        // Group 0: Profile
+        items.push({
+            label: 'Show Profile',
+            icon: UserIcon,
+            onClick: () => setShowProfile(true),
+        });
+
+        // Group 1: DM Actions
+        if (isFriend) {
+            items.push({ type: 'divider' });
             items.push({
-                label: 'Timeout Member',
+                label: 'Open DMs',
+                icon: MessageSquare,
+                onClick: () => dispatch(setSelectedFriendId(userId)),
+            });
+
+            if (hasUnread) {
+                items.push({
+                    label: 'Mark as Read',
+                    icon: Check,
+                    onClick: () => {
+                        wsMessages.markDmRead(userId);
+                    },
+                });
+            }
+        }
+
+        // Group 1.5: Voice Volume
+        if (isInSameVoiceChannel) {
+            const volume = userVolume ?? 1;
+            items.push({ type: 'divider' });
+            items.push({
+                type: 'custom',
+                content: (
+                    <div className="flex flex-col gap-2 p-1">
+                        <div className="flex items-center justify-between text-xs font-bold tracking-wider text-muted-foreground uppercase">
+                            <div className="flex items-center gap-1.5">
+                                <Volume2 size={12} />
+                                User Volume
+                            </div>
+                            <span>
+                                {Math.round(
+                                    (isNaN(volume) ? 1.0 : volume) * 100,
+                                )}
+                                %
+                            </span>
+                        </div>
+                        <input
+                            className="w-full cursor-pointer accent-primary"
+                            max="2"
+                            min="0"
+                            step="0.01"
+                            type="range"
+                            value={volume}
+                            onChange={(e) => {
+                                dispatch(
+                                    setUserVolume({
+                                        userId,
+                                        volume: parseFloat(e.target.value),
+                                    }),
+                                );
+                            }}
+                        />
+                    </div>
+                ),
+            });
+        }
+
+        // Group 2: Friend Management (only if not me)
+        if (!isMe) {
+            items.push({ type: 'divider' });
+            if (isFriend) {
+                items.push({
+                    label: 'Remove Friend',
+                    icon: UserMinus,
+                    onClick: () => removeFriend(userId),
+                    variant: 'danger',
+                });
+            } else if (!userProfile?.isBot) {
+                items.push({
+                    label: 'Add Friend',
+                    icon: UserPlus,
+                    onClick: () => sendFriendRequest(username),
+                });
+            }
+
+            const isUserBlocked = blocks?.some(
+                (b) => b.targetUserId === userId,
+            );
+            if (isUserBlocked) {
+                items.push({
+                    label: 'Unblock User',
+                    icon: Shield,
+                    onClick: () => removeBlock(userId),
+                });
+            } else {
+                items.push({
+                    label: 'Block User',
+                    icon: Ban,
+                    onClick: () => {
+                        void (async () => {
+                            const profiles = blockProfiles || [];
+                            if (profiles.length === 0) {
+                                try {
+                                    const profileToAssign = await createProfile(
+                                        {
+                                            name: 'Default',
+                                            flags: 4095,
+                                        },
+                                    );
+                                    if (profileToAssign) {
+                                        upsertBlock({
+                                            targetUserId: userId,
+                                            profileId: profileToAssign.id,
+                                        });
+                                    }
+                                } catch {
+                                    // Ignore
+                                }
+                            } else if (profiles.length === 1) {
+                                upsertBlock({
+                                    targetUserId: userId,
+                                    profileId: profiles[0].id,
+                                });
+                            } else {
+                                setIsBlockModalOpen(true);
+                            }
+                        })();
+                    },
+                    variant: 'danger',
+                });
+            }
+        }
+
+        // Group 3: Server Management (Roles)
+        if (serverRoles && sid && canManageRoles) {
+            items.push({ type: 'divider' });
+
+            // Sort roles by position (descending)
+            const sortedRoles = [...serverRoles].sort(
+                (a, b) => b.position - a.position,
+            );
+            const rolesToDisplay = sortedRoles.filter(
+                (r) => r.name !== '@everyone',
+            );
+
+            items.push({
                 icon: Shield,
-                onClick: () => {
-                    setIsTimeoutModalOpen(true);
-                },
-                variant: 'danger',
+                items:
+                    rolesToDisplay.length > 0
+                        ? rolesToDisplay.map((r) => {
+                              const hasRole = allRoles?.some(
+                                  (ur) => String(ur._id) === String(r._id),
+                              );
+
+                              // Hierarchy check: can only manage roles strictly below your highest role
+                              // unless you are the owner
+                              const canManageThisRole =
+                                  isOwner ||
+                                  (myHighestRole &&
+                                      myHighestRole.position > r.position);
+
+                              return {
+                                  indent: false,
+                                  label: (
+                                      <Box className="flex items-center gap-2">
+                                          <RoleDot role={r} size={8} />
+                                          <span className="truncate">
+                                              {r.name}
+                                          </span>
+                                      </Box>
+                                  ),
+                                  onClick: () => {
+                                      if (isAdding || isRemoving) return;
+
+                                      if (hasRole) {
+                                          removeRole({
+                                              roleId: r._id,
+                                              userId,
+                                          });
+                                      } else {
+                                          addRole({
+                                              roleId: r._id,
+                                              userId,
+                                          });
+                                      }
+                                  },
+                                  preventClose: true,
+                                  rightIcon: hasRole ? Check : undefined,
+                                  type: 'action',
+                                  variant: !canManageThisRole
+                                      ? 'ghost'
+                                      : isAdding || isRemoving
+                                        ? 'ghost'
+                                        : 'normal',
+                              };
+                          })
+                        : [
+                              {
+                                  label: 'No roles',
+                                  onClick: () => {},
+                                  type: 'action',
+                                  variant: 'ghost',
+                              },
+                          ],
+                label: 'Roles',
+                type: 'submenu',
             });
         }
-        if (canKick) {
-            items.push({
-                label: 'Kick Member',
-                icon: UserX,
-                onClick: () => {
-                    setIsKickModalOpen(true);
-                },
-                variant: 'danger',
-            });
-        }
-        if (canBan) {
-            items.push({
-                label: 'Ban Member',
-                icon: Ban,
-                onClick: () => {
-                    setIsBanModalOpen(true);
-                },
-                variant: 'danger',
-            });
-        }
+
         items.push({ type: 'divider' });
-    }
 
-    items.push({
-        label: 'Copy User ID',
-        icon: Copy,
-        onClick: () => {
-            void navigator.clipboard.writeText(userId);
-        },
-    });
+        if (
+            !isMe &&
+            sid &&
+            (canKick || canBan || canTimeout) &&
+            isHigherHierarchy
+        ) {
+            if (canTimeout) {
+                items.push({
+                    label: 'Timeout Member',
+                    icon: Shield,
+                    onClick: () => {
+                        setIsTimeoutModalOpen(true);
+                    },
+                    variant: 'danger',
+                });
+            }
+            if (canKick) {
+                items.push({
+                    label: 'Kick Member',
+                    icon: UserX,
+                    onClick: () => {
+                        setIsKickModalOpen(true);
+                    },
+                    variant: 'danger',
+                });
+            }
+            if (canBan) {
+                items.push({
+                    label: 'Ban Member',
+                    icon: Ban,
+                    onClick: () => {
+                        setIsBanModalOpen(true);
+                    },
+                    variant: 'danger',
+                });
+            }
+            items.push({ type: 'divider' });
+        }
 
-    const presence = useAppSelector((state) => state.presence.users[userId]);
+        items.push({
+            label: 'Copy User ID',
+            icon: Copy,
+            onClick: () => {
+                void navigator.clipboard.writeText(userId);
+            },
+        });
 
-    const contextMenuItems = items;
+        return items;
+    }, [
+        setShowProfile,
+        isFriend,
+        dispatch,
+        userId,
+        hasUnread,
+        isInSameVoiceChannel,
+        userVolume,
+        isMe,
+        removeFriend,
+        userProfile?.isBot,
+        sendFriendRequest,
+        username,
+        blocks,
+        blockProfiles,
+        createProfile,
+        upsertBlock,
+        removeBlock,
+        setIsBlockModalOpen,
+        serverRoles,
+        sid,
+        canManageRoles,
+        allRoles,
+        isOwner,
+        myHighestRole,
+        isAdding,
+        isRemoving,
+        removeRole,
+        addRole,
+        canKick,
+        canBan,
+        canTimeout,
+        isHigherHierarchy,
+        setIsTimeoutModalOpen,
+        setIsKickModalOpen,
+        setIsBanModalOpen,
+    ]);
 
     const presenceStatus =
-        presence?.status ?? initialPresenceStatus ?? 'offline';
-    const presenceCustomText =
-        presence?.customStatus?.text ?? customStatus?.text;
-    const presenceCustomEmoji =
-        presence?.customStatus?.emoji ?? customStatus?.emoji;
+        storePresenceStatus ?? initialPresenceStatus ?? 'offline';
+    const presenceCustomText = storePresenceCustomText ?? customStatus?.text;
+    const presenceCustomEmoji = storePresenceCustomEmoji ?? customStatus?.emoji;
+
+    const handleItemClick = useCallback(() => {
+        if (onClick) {
+            onClick();
+        } else {
+            setShowProfile(true);
+        }
+    }, [onClick]);
+
+    const handleAvatarClick = useCallback((e: React.MouseEvent) => {
+        e.stopPropagation();
+        setShowProfile(true);
+    }, []);
 
     return (
         <>
@@ -518,23 +669,14 @@ export const UserItem: React.FC<UserItemProps> = ({
                         className,
                     )}
                     ref={itemRef}
-                    onClick={() => {
-                        if (onClick) {
-                            onClick();
-                        } else {
-                            setShowProfile(true);
-                        }
-                    }}
+                    onClick={handleItemClick}
                 >
                     <UserProfilePicture
                         size="sm"
                         src={profilePicture}
                         status={presenceStatus}
                         username={displayName || username}
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            setShowProfile(true);
-                        }}
+                        onClick={handleAvatarClick}
                     />
 
                     <Box className="flex min-w-0 flex-1 flex-col overflow-hidden">
@@ -656,42 +798,72 @@ export const UserItem: React.FC<UserItemProps> = ({
                 onClose={() => setShowProfile(false)}
             />
 
-            <KickUserModal
-                isOpen={isKickModalOpen}
-                userAvatar={userProfile?.profilePicture}
-                username={username}
-                onClose={() => setIsKickModalOpen(false)}
-                onConfirm={() => kickMember(userId)}
-            />
+            {isKickModalOpen && (
+                <KickUserModal
+                    isOpen={isKickModalOpen}
+                    userAvatar={userProfile?.profilePicture}
+                    username={username}
+                    onClose={() => setIsKickModalOpen(false)}
+                    onConfirm={() => kickMember(userId)}
+                />
+            )}
 
-            <BanUserModal
-                isOpen={isBanModalOpen}
-                userAvatar={userProfile?.profilePicture}
-                username={username}
-                onClose={() => setIsBanModalOpen(false)}
-                onConfirm={(reason) => banMember({ userId, reason })}
-            />
+            {isBanModalOpen && (
+                <BanUserModal
+                    isOpen={isBanModalOpen}
+                    userAvatar={userProfile?.profilePicture}
+                    username={username}
+                    onClose={() => setIsBanModalOpen(false)}
+                    onConfirm={(reason) => banMember({ userId, reason })}
+                />
+            )}
 
-            <BlockUserModal
-                isOpen={isBlockModalOpen}
-                profiles={blockProfiles || []}
-                userAvatar={userProfile?.profilePicture}
-                username={username}
-                onClose={() => setIsBlockModalOpen(false)}
-                onConfirm={(profileId) =>
-                    upsertBlock({ targetUserId: userId, profileId })
-                }
-            />
+            {isBlockModalOpen && (
+                <BlockUserModal
+                    isOpen={isBlockModalOpen}
+                    profiles={blockProfiles || []}
+                    userAvatar={userProfile?.profilePicture}
+                    username={username}
+                    onClose={() => setIsBlockModalOpen(false)}
+                    onConfirm={(profileId) =>
+                        upsertBlock({ targetUserId: userId, profileId })
+                    }
+                />
+            )}
 
-            <TimeoutUserModal
-                isOpen={isTimeoutModalOpen}
-                userAvatar={userProfile?.profilePicture}
-                username={username}
-                onClose={() => setIsTimeoutModalOpen(false)}
-                onConfirm={(duration, reason) =>
-                    timeoutMember({ userId, duration, reason })
-                }
-            />
+            {isTimeoutModalOpen && (
+                <TimeoutUserModal
+                    isOpen={isTimeoutModalOpen}
+                    userAvatar={userProfile?.profilePicture}
+                    username={username}
+                    onClose={() => setIsTimeoutModalOpen(false)}
+                    onConfirm={(duration, reason) =>
+                        timeoutMember({ userId, duration, reason })
+                    }
+                />
+            )}
         </>
     );
 };
+
+export const UserItem = React.memo((props: UserItemProps) => {
+    const isServerContext = !!props.serverId && !props.noFetch;
+    const serverId =
+        props.serverId ||
+        props.role?.serverId ||
+        props.serverRoles?.[0]?.serverId ||
+        '';
+    const sid = serverId || null;
+
+    if (isServerContext && sid) {
+        return (
+            <ServerDataInjector serverId={sid}>
+                {(serverData) => (
+                    <UserItemInner {...props} serverData={serverData} />
+                )}
+            </ServerDataInjector>
+        );
+    }
+
+    return <UserItemInner {...props} serverData={null} />;
+});

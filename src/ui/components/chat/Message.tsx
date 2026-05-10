@@ -77,336 +77,709 @@ interface MessageProps {
     disableActions?: boolean;
 }
 
-export const Message: React.FC<MessageProps> = ({
-    message,
-    user: initialUser,
-    role,
-    iconRole,
-    isGroupStart = true,
-    isHighlighted = false,
-    onReplyClick,
-    onReplyToMessage,
-    disableCustomFonts,
-    disableGlowAndColors,
-    disableColors,
-    disableGlow,
-    disableActions = false,
-}) => {
-    const isUnknownUser = initialUser.username === 'Unknown';
-    const { data: fetchedUser } = useUserById(initialUser._id, {
-        enabled: isUnknownUser,
-    });
-    const user = isUnknownUser && fetchedUser ? fetchedUser : initialUser;
-
-    const [showProfile, setShowProfile] = React.useState(false);
-    const [showPicker, setShowPicker] = React.useState(false);
-    const [isEditing, setIsEditing] = React.useState(false);
-    const avatarRef = React.useRef<HTMLDivElement>(null);
-    const pickerRef = React.useRef<HTMLDivElement>(null);
-    const reactRef = React.useRef<HTMLButtonElement>(null);
-    const { data: me } = useMe();
-    const isServerMessage =
-        !!message.serverId &&
-        (message.serverId === 'preview' ||
-            /^[a-f\d]{24}$/i.test(message.serverId));
-    const { data: members } = useMembers(
-        isServerMessage ? message.serverId! : null,
-        { enabled: isServerMessage },
-    );
-    const { data: serverRoles } = useRoles(
-        isServerMessage ? message.serverId! : null,
-        { enabled: isServerMessage },
-    );
-    const { data: serverDetails } = useServerDetails(
-        isServerMessage ? message.serverId! : null,
-        { enabled: isServerMessage },
-    );
-
-    const senderMember = React.useMemo(
-        () => members?.find((m) => m.userId === message.senderId),
-        [members, message.senderId],
-    );
-    const senderRoles = React.useMemo(() => {
-        if (!senderMember || !serverRoles) return undefined;
-        return serverRoles.filter((r) => senderMember.roles.includes(r._id));
-    }, [senderMember, serverRoles]);
-    const addReaction = useAddReaction();
-    const deleteMessage = useDeleteMessage();
-    const { mutate: togglePin } = useTogglePin();
-    const { mutate: toggleSticky } = useToggleSticky();
-    const { data: friends } = useFriends();
-    const { mutate: sendFriendRequest } = useSendFriendRequest();
-    const { mutate: removeFriend } = useRemoveFriend();
-    const { hasPermission, isOwner } = usePermissions(
-        isServerMessage ? message.serverId! : null,
-        null,
-        { enabled: isServerMessage },
-    );
-    const { customCategories } = useCustomEmojis({ enabled: showPicker });
-
-    const myId = me?._id;
-    const mentionsMe = React.useMemo(() => {
-        if (!myId) return false;
-
-        if (message.text.includes(`<userid:'${myId}'>`)) return true;
-
-        if (message.text.includes('<everyone>')) return true;
-
-        const myMember = members?.find((m) => m.userId === myId);
-        if (
-            myMember &&
-            myMember.roles.some((roleId) =>
-                message.text.includes(`<roleid:'${roleId}'>`),
-            )
-        ) {
-            return true;
-        }
-
-        return false;
-    }, [message.text, myId, members]);
-
-    const interactionUser = React.useMemo(() => {
-        if (!message.interaction?.user?.id || !members) return undefined;
-        const member = members.find(
-            (m) => m.userId === message.interaction!.user!.id,
-        );
-        if (!member) return undefined;
-        return {
-            ...member.user,
-            _id: member.userId,
-            username:
-                member.user.username || message.interaction!.user.username,
-            displayName: member.user.displayName,
-            profilePicture: member.user.profilePicture,
-            bannerColor: member.user.bannerColor,
-            usernameGradient: member.user.usernameGradient,
-            isBot: member.user.isBot,
-        } as unknown as User;
-    }, [message.interaction, members]);
-
-    const interactionRole = React.useMemo(() => {
-        if (!message.interaction?.user?.id || !members || !serverRoles)
-            return undefined;
-        const member = members.find(
-            (m) => m.userId === message.interaction!.user!.id,
-        );
-        if (!member || !member.roles.length) return undefined;
-
-        const roles = serverRoles.filter((r) => member.roles.includes(r._id));
-        if (!roles.length) return undefined;
-
-        return roles.sort((a, b) => b.position - a.position)[0];
-    }, [message.interaction, members, serverRoles]);
-
-    const handleEmojiSelect = (emoji: string): void => {
-        addReaction.mutate({
-            messageId: message._id,
-            serverId: message.serverId,
-            channelId: message.channelId,
-            data: { emoji, emojiType: 'unicode' },
+export const Message = React.memo(
+    ({
+        message,
+        user: initialUser,
+        role,
+        iconRole,
+        isGroupStart = true,
+        isHighlighted = false,
+        onReplyClick,
+        onReplyToMessage,
+        disableCustomFonts,
+        disableGlowAndColors,
+        disableColors,
+        disableGlow,
+        disableActions = false,
+    }: MessageProps) => {
+        const isUnknownUser = initialUser.username === 'Unknown';
+        const { data: fetchedUser } = useUserById(initialUser._id, {
+            enabled: isUnknownUser,
         });
-        setShowPicker(false);
-    };
+        const user = isUnknownUser && fetchedUser ? fetchedUser : initialUser;
 
-    const handleCustomEmojiSelect = (emoji: {
-        id: string;
-        name: string;
-    }): void => {
-        addReaction.mutate({
-            messageId: message._id,
-            serverId: message.serverId,
-            channelId: message.channelId,
-            data: { emoji: emoji.name, emojiType: 'custom', emojiId: emoji.id },
+        const [showProfile, setShowProfile] = React.useState(false);
+        const [showPicker, setShowPicker] = React.useState(false);
+        const [isEditing, setIsEditing] = React.useState(false);
+        const avatarRef = React.useRef<HTMLDivElement>(null);
+        const pickerRef = React.useRef<HTMLDivElement>(null);
+        const reactRef = React.useRef<HTMLButtonElement>(null);
+        const { data: me } = useMe();
+        const isServerMessage =
+            !!message.serverId &&
+            (message.serverId === 'preview' ||
+                /^[a-f\d]{24}$/i.test(message.serverId));
+        const { data: membersRaw } = useMembers(
+            isServerMessage ? message.serverId! : null,
+            { enabled: isServerMessage },
+        );
+        const { data: serverRolesRaw } = useRoles(
+            isServerMessage ? message.serverId! : null,
+            { enabled: isServerMessage },
+        );
+        const { data: serverDetailsRaw } = useServerDetails(
+            isServerMessage ? message.serverId! : null,
+            { enabled: isServerMessage },
+        );
+
+        const members = React.useDeferredValue(membersRaw);
+        const serverRoles = React.useDeferredValue(serverRolesRaw);
+        const serverDetails = React.useDeferredValue(serverDetailsRaw);
+
+        const senderMember = React.useMemo(
+            () => members?.find((m) => m.userId === message.senderId),
+            [members, message.senderId],
+        );
+        const senderRoles = React.useMemo(() => {
+            if (!senderMember || !serverRoles) return undefined;
+            return serverRoles.filter((r) =>
+                senderMember.roles.includes(r._id),
+            );
+        }, [senderMember, serverRoles]);
+        const addReaction = useAddReaction();
+        const deleteMessage = useDeleteMessage();
+        const { mutate: togglePin } = useTogglePin();
+        const { mutate: toggleSticky } = useToggleSticky();
+        const { data: friends } = useFriends();
+        const { mutate: sendFriendRequest } = useSendFriendRequest();
+        const { mutate: removeFriend } = useRemoveFriend();
+        const { hasPermission, isOwner } = usePermissions(
+            isServerMessage ? message.serverId! : null,
+            null,
+            { enabled: isServerMessage },
+        );
+        const { customCategories } = useCustomEmojis({ enabled: showPicker });
+
+        const myId = me?._id;
+        const mentionsMe = React.useMemo(() => {
+            if (!myId) return false;
+
+            if (message.text.includes(`<userid:'${myId}'>`)) return true;
+
+            if (message.text.includes('<everyone>')) return true;
+
+            const myMember = members?.find((m) => m.userId === myId);
+            if (
+                myMember &&
+                myMember.roles.some((roleId) =>
+                    message.text.includes(`<roleid:'${roleId}'>`),
+                )
+            ) {
+                return true;
+            }
+
+            return false;
+        }, [message.text, myId, members]);
+
+        const interactionUser = React.useMemo(() => {
+            if (!message.interaction?.user?.id || !members) return undefined;
+            const member = members.find(
+                (m) => m.userId === message.interaction!.user!.id,
+            );
+            if (!member) return undefined;
+            return {
+                ...member.user,
+                _id: member.userId,
+                username:
+                    member.user.username || message.interaction!.user.username,
+                displayName: member.user.displayName,
+                profilePicture: member.user.profilePicture,
+                bannerColor: member.user.bannerColor,
+                usernameGradient: member.user.usernameGradient,
+                isBot: member.user.isBot,
+            } as unknown as User;
+        }, [message.interaction, members]);
+
+        const interactionRole = React.useMemo(() => {
+            if (!message.interaction?.user?.id || !members || !serverRoles)
+                return undefined;
+            const member = members.find(
+                (m) => m.userId === message.interaction!.user!.id,
+            );
+            if (!member || !member.roles.length) return undefined;
+
+            const roles = serverRoles.filter((r) =>
+                member.roles.includes(r._id),
+            );
+            if (!roles.length) return undefined;
+
+            return roles.sort((a, b) => b.position - a.position)[0];
+        }, [message.interaction, members, serverRoles]);
+
+        const handleEmojiSelect = (emoji: string): void => {
+            addReaction.mutate({
+                messageId: message._id,
+                serverId: message.serverId,
+                channelId: message.channelId,
+                data: { emoji, emojiType: 'unicode' },
+            });
+            setShowPicker(false);
+        };
+
+        const handleCustomEmojiSelect = (emoji: {
+            id: string;
+            name: string;
+        }): void => {
+            addReaction.mutate({
+                messageId: message._id,
+                serverId: message.serverId,
+                channelId: message.channelId,
+                data: {
+                    emoji: emoji.name,
+                    emojiType: 'custom',
+                    emojiId: emoji.id,
+                },
+            });
+            setShowPicker(false);
+        };
+
+        useClickAway(pickerRef, () => {
+            setShowPicker(false);
         });
-        setShowPicker(false);
-    };
 
-    useClickAway(pickerRef, () => {
-        setShowPicker(false);
-    });
+        const isMessageSender = me?._id === message.senderId;
+        const canEdit = isMessageSender && !message.deletedAt;
 
-    const isMessageSender = me?._id === message.senderId;
-    const canEdit = isMessageSender && !message.deletedAt;
+        useEvent('editLastMessage', (event: CustomEvent) => {
+            const { messageId } = event.detail;
+            if (messageId === message._id && canEdit) {
+                setIsEditing(true);
+            }
+        });
 
-    useEvent('editLastMessage', (event: CustomEvent) => {
-        const { messageId } = event.detail;
-        if (messageId === message._id && canEdit) {
+        const canDelete =
+            !message.deletedAt &&
+            (isMessageSender ||
+                isOwner ||
+                hasPermission('administrator') ||
+                hasPermission('manageMessages') ||
+                hasPermission('deleteMessagesOfOthers'));
+
+        const canPin =
+            !message.deletedAt &&
+            (hasPermission('administrator') || hasPermission('pinMessages'));
+
+        const handleDelete = React.useCallback((): void => {
+            if (!message.serverId || !message.channelId) return;
+            deleteMessage.mutate({
+                serverId: message.serverId,
+                channelId: message.channelId,
+                messageId: message._id,
+            });
+        }, [message.serverId, message.channelId, message._id, deleteMessage]);
+
+        const handleEdit = React.useCallback((): void => {
             setIsEditing(true);
-        }
-    });
+        }, []);
 
-    const canDelete =
-        !message.deletedAt &&
-        (isMessageSender ||
-            isOwner ||
-            hasPermission('administrator') ||
-            hasPermission('manageMessages') ||
-            hasPermission('deleteMessagesOfOthers'));
+        const contextMenuItems = React.useMemo(() => {
+            const items: ContextMenuItem[] = [];
 
-    const canPin =
-        !message.deletedAt &&
-        (hasPermission('administrator') || hasPermission('pinMessages'));
-
-    const handleDelete = React.useCallback((): void => {
-        if (!message.serverId || !message.channelId) return;
-        deleteMessage.mutate({
-            serverId: message.serverId,
-            channelId: message.channelId,
-            messageId: message._id,
-        });
-    }, [message.serverId, message.channelId, message._id, deleteMessage]);
-
-    const handleEdit = React.useCallback((): void => {
-        setIsEditing(true);
-    }, []);
-
-    const contextMenuItems = React.useMemo(() => {
-        const items: ContextMenuItem[] = [];
-
-        if (message.serverId && message.channelId) {
-            items.push({
-                label: 'Copy Message Link',
-                icon: Copy,
-                onClick: () => {
-                    const link = `/chat/@server/${message.serverId}/channel/${message.channelId}/message/${message._id}`;
-                    void navigator.clipboard.writeText(
-                        `${window.location.origin}${link}`,
-                    );
-                },
-            });
-            items.push({ type: 'divider' });
-        }
-
-        if (message.text) {
-            items.push({
-                label: 'Copy Text',
-                icon: Copy,
-                onClick: () => {
-                    void navigator.clipboard.writeText(message.text);
-                },
-            });
-        }
-
-        items.push({
-            label: 'Copy Message ID',
-            icon: Copy,
-            onClick: () => {
-                void navigator.clipboard.writeText(message._id);
-            },
-        });
-
-        if (!isMessageSender) {
-            const isFriend = friends?.some((f) => f._id === message.senderId);
-            items.push({ type: 'divider' });
-
-            if (isFriend) {
+            if (message.serverId && message.channelId) {
                 items.push({
-                    label: 'Remove Friend',
-                    icon: UserMinus,
-                    variant: 'danger',
-                    onClick: () => removeFriend(message.senderId),
+                    label: 'Copy Message Link',
+                    icon: Copy,
+                    onClick: () => {
+                        const link = `/chat/@server/${message.serverId}/channel/${message.channelId}/message/${message._id}`;
+                        void navigator.clipboard.writeText(
+                            `${window.location.origin}${link}`,
+                        );
+                    },
                 });
-            } else if (!user?.isBot) {
+                items.push({ type: 'divider' });
+            }
+
+            if (message.text) {
                 items.push({
-                    label: 'Add Friend',
-                    icon: UserPlus,
-                    onClick: () => sendFriendRequest(user.username),
+                    label: 'Copy Text',
+                    icon: Copy,
+                    onClick: () => {
+                        void navigator.clipboard.writeText(message.text);
+                    },
                 });
             }
-        }
 
-        if (onReplyToMessage) {
-            items.unshift({
-                label: 'Reply',
-                icon: CornerUpLeft,
-                onClick: () => onReplyToMessage(message),
+            items.push({
+                label: 'Copy Message ID',
+                icon: Copy,
+                onClick: () => {
+                    void navigator.clipboard.writeText(message._id);
+                },
             });
-        }
 
-        items.splice(onReplyToMessage ? 1 : 0, 0, {
-            label: 'Add Reaction',
-            icon: SmilePlus,
-            onClick: () => setShowPicker(true),
+            if (!isMessageSender) {
+                const isFriend = friends?.some(
+                    (f) => f._id === message.senderId,
+                );
+                items.push({ type: 'divider' });
+
+                if (isFriend) {
+                    items.push({
+                        label: 'Remove Friend',
+                        icon: UserMinus,
+                        variant: 'danger',
+                        onClick: () => removeFriend(message.senderId),
+                    });
+                } else if (!user?.isBot) {
+                    items.push({
+                        label: 'Add Friend',
+                        icon: UserPlus,
+                        onClick: () => sendFriendRequest(user.username),
+                    });
+                }
+            }
+
+            if (onReplyToMessage) {
+                items.unshift({
+                    label: 'Reply',
+                    icon: CornerUpLeft,
+                    onClick: () => onReplyToMessage(message),
+                });
+            }
+
+            items.splice(onReplyToMessage ? 1 : 0, 0, {
+                label: 'Add Reaction',
+                icon: SmilePlus,
+                onClick: () => setShowPicker(true),
+            });
+
+            if (canEdit) {
+                items.push({
+                    label: 'Edit Message',
+                    icon: Edit,
+                    onClick: handleEdit,
+                });
+            }
+
+            if (canPin && message.serverId && message.channelId) {
+                items.push({ type: 'divider' });
+                items.push({
+                    label: message.isPinned ? 'Unpin Message' : 'Pin Message',
+                    icon: Pin,
+                    onClick: () => {
+                        togglePin({
+                            serverId: message.serverId!,
+                            channelId: message.channelId!,
+                            messageId: message._id,
+                        });
+                    },
+                });
+                items.push({
+                    label: message.isSticky
+                        ? 'Unsticky Message'
+                        : 'Sticky Message',
+                    icon: StickyNote,
+                    onClick: () => {
+                        toggleSticky({
+                            serverId: message.serverId!,
+                            channelId: message.channelId!,
+                            messageId: message._id,
+                        });
+                    },
+                });
+            }
+
+            if (canDelete) {
+                items.push({ type: 'divider' });
+                items.push({
+                    label: 'Delete Message',
+                    icon: Trash2,
+                    variant: 'danger',
+                    onClick: handleDelete,
+                });
+            }
+
+            return items;
+        }, [
+            message,
+            canEdit,
+            canDelete,
+            onReplyToMessage,
+            handleEdit,
+            handleDelete,
+            canPin,
+            togglePin,
+            toggleSticky,
+            friends,
+            isMessageSender,
+            removeFriend,
+            sendFriendRequest,
+            user,
+        ]);
+
+        const isMobile =
+            typeof window !== 'undefined' &&
+            window.matchMedia('(pointer: coarse)').matches;
+
+        const pickerCoords = useSmartPosition({
+            isOpen: showPicker && !isMobile,
+            elementRef: pickerRef,
+            triggerRef: reactRef,
+            padding: 16,
+            offset: 8,
         });
 
-        if (canEdit) {
-            items.push({
-                label: 'Edit Message',
-                icon: Edit,
-                onClick: handleEdit,
-            });
-        }
+        const messageContent = (
+            <>
+                {isGroupStart && message.replyTo && (
+                    <ReplyPreview
+                        disableColors={
+                            disableColors ||
+                            me?.settings?.disableCustomUsernameColors ||
+                            serverDetails?.disableUsernameGlowAndCustomColor
+                        }
+                        disableCustomFonts={
+                            disableCustomFonts ||
+                            me?.settings?.disableCustomUsernameFonts ||
+                            serverDetails?.disableCustomFonts
+                        }
+                        disableGlow={
+                            disableGlow ||
+                            me?.settings?.disableCustomUsernameGlow ||
+                            serverDetails?.disableUsernameGlowAndCustomColor
+                        }
+                        disableGlowAndColors={disableGlowAndColors}
+                        interaction={message.replyTo.interaction}
+                        replyToId={message.replyTo._id}
+                        role={message.replyTo.role}
+                        text={message.replyTo.text}
+                        user={message.replyTo.user}
+                        onClick={onReplyClick}
+                    />
+                )}
 
-        if (canPin && message.serverId && message.channelId) {
-            items.push({ type: 'divider' });
-            items.push({
-                label: message.isPinned ? 'Unpin Message' : 'Pin Message',
-                icon: Pin,
-                onClick: () => {
-                    togglePin({
-                        serverId: message.serverId!,
-                        channelId: message.channelId!,
-                        messageId: message._id,
-                    });
-                },
-            });
-            items.push({
-                label: message.isSticky ? 'Unsticky Message' : 'Sticky Message',
-                icon: StickyNote,
-                onClick: () => {
-                    toggleSticky({
-                        serverId: message.serverId!,
-                        channelId: message.channelId!,
-                        messageId: message._id,
-                    });
-                },
-            });
-        }
+                {isGroupStart &&
+                    message.interaction &&
+                    message.interaction.user && (
+                        <InteractionHeader
+                            command={message.interaction.command}
+                            disableColors={
+                                disableColors ||
+                                me?.settings?.disableCustomUsernameColors ||
+                                serverDetails?.disableUsernameGlowAndCustomColor
+                            }
+                            disableCustomFonts={
+                                disableCustomFonts ||
+                                me?.settings?.disableCustomUsernameFonts ||
+                                serverDetails?.disableCustomFonts
+                            }
+                            disableGlow={
+                                disableGlow ||
+                                me?.settings?.disableCustomUsernameGlow ||
+                                serverDetails?.disableUsernameGlowAndCustomColor
+                            }
+                            disableGlowAndColors={disableGlowAndColors}
+                            isDeleted={!!message.deletedAt}
+                            resolvedUser={interactionUser}
+                            role={interactionRole}
+                            user={message.interaction.user}
+                        />
+                    )}
 
-        if (canDelete) {
-            items.push({ type: 'divider' });
-            items.push({
-                label: 'Delete Message',
-                icon: Trash2,
-                variant: 'danger',
-                onClick: handleDelete,
-            });
-        }
+                <Box className="flex items-start gap-1">
+                    <Box
+                        className="mt-1 flex w-12 flex-shrink-0 justify-center"
+                        ref={avatarRef}
+                    >
+                        {isGroupStart ? (
+                            <UserProfilePicture
+                                noIndicator
+                                size="md"
+                                src={user.profilePicture}
+                                username={user.username}
+                                onClick={() => setShowProfile(true)}
+                            />
+                        ) : (
+                            <Text className="mt-1 text-[10px] font-medium text-muted-foreground opacity-0 select-none group-hover:opacity-40">
+                                {
+                                    new Date(message.createdAt)
+                                        .toLocaleTimeString(APP_LOCALE, {
+                                            hour: '2-digit',
+                                            minute: '2-digit',
+                                            hour12: false,
+                                        })
+                                        .split(' ')[0]
+                                }
+                            </Text>
+                        )}
+                    </Box>
 
-        return items;
-    }, [
-        message,
-        canEdit,
-        canDelete,
-        onReplyToMessage,
-        handleEdit,
-        handleDelete,
-        canPin,
-        togglePin,
-        toggleSticky,
-        friends,
-        isMessageSender,
-        removeFriend,
-        sendFriendRequest,
-        user,
-    ]);
+                    <Box className="min-w-0 flex-1">
+                        <MessageHeader
+                            disableColors={
+                                disableColors ||
+                                me?.settings?.disableCustomUsernameColors ||
+                                serverDetails?.disableUsernameGlowAndCustomColor
+                            }
+                            disableCustomFonts={
+                                disableCustomFonts ||
+                                me?.settings?.disableCustomUsernameFonts ||
+                                serverDetails?.disableCustomFonts
+                            }
+                            disableGlow={
+                                disableGlow ||
+                                me?.settings?.disableCustomUsernameGlow ||
+                                serverDetails?.disableUsernameGlowAndCustomColor
+                            }
+                            disableGlowAndColors={disableGlowAndColors}
+                            editedAt={message.editedAt}
+                            iconRole={iconRole || message.iconRole}
+                            isEdited={message.isEdited}
+                            isGroupStart={isGroupStart}
+                            isWebhook={message.isWebhook}
+                            role={role || message.role}
+                            timestamp={message.createdAt}
+                            user={user}
+                            onClickName={() => setShowProfile(true)}
+                        />
+                        {isEditing ? (
+                            <MessageEdit
+                                channelId={message.channelId}
+                                initialText={message.text}
+                                messageId={message._id}
+                                receiverId={message.receiverId}
+                                serverId={message.serverId}
+                                onCancel={() => setIsEditing(false)}
+                            />
+                        ) : (
+                            <MessageContent
+                                channelId={message.channelId}
+                                embeds={message.embeds}
+                                isDeleted={!!message.deletedAt}
+                                messageId={message._id}
+                                poll={message.poll}
+                                serverId={message.serverId}
+                                stickerId={message.stickerId}
+                                text={message.text}
+                            />
+                        )}
+                        <Reactions
+                            channelId={message.channelId}
+                            messageId={message._id}
+                            reactions={message.reactions || []}
+                            serverId={message.serverId}
+                            onAddClick={() => setShowPicker(true)}
+                        />
+                    </Box>
+                </Box>
 
-    const isMobile =
-        typeof window !== 'undefined' &&
-        window.matchMedia('(pointer: coarse)').matches;
+                {!disableActions && (
+                    <Box
+                        className={cn(
+                            'absolute top-0 right-4 z-[var(--z-index-effect-md)] -translate-y-1/2 opacity-0 transition-all group-hover:opacity-100',
+                            showPicker && 'opacity-100',
+                        )}
+                    >
+                        <Box className="flex items-center gap-1 rounded border border-white/5 bg-bg-secondary px-1 py-1 shadow-xl max-md:hidden">
+                            {onReplyToMessage && (
+                                <Button
+                                    className="h-8 w-8 rounded p-1.5 text-muted-foreground transition-colors hover:bg-white/5 hover:text-foreground"
+                                    size="sm"
+                                    title="Reply"
+                                    variant="ghost"
+                                    onClick={() => onReplyToMessage(message)}
+                                >
+                                    <CornerUpLeft size={18} />
+                                </Button>
+                            )}
+                            <Button
+                                className={cn(
+                                    'h-8 w-8 rounded p-1.5 text-muted-foreground transition-colors hover:bg-white/5 hover:text-foreground',
+                                    showPicker && 'bg-white/10 text-foreground',
+                                )}
+                                ref={reactRef}
+                                size="sm"
+                                title="Add Reaction"
+                                variant="ghost"
+                                onClick={() => setShowPicker(!showPicker)}
+                            >
+                                <SmilePlus size={18} />
+                            </Button>
 
-    const pickerCoords = useSmartPosition({
-        isOpen: showPicker && !isMobile,
-        elementRef: pickerRef,
-        triggerRef: reactRef,
-        padding: 16,
-        offset: 8,
-    });
+                            {canEdit && (
+                                <Button
+                                    className="h-8 w-8 rounded p-1.5 text-muted-foreground transition-colors hover:bg-white/5 hover:text-foreground"
+                                    size="sm"
+                                    title="Edit Message"
+                                    variant="ghost"
+                                    onClick={handleEdit}
+                                >
+                                    <Edit size={18} />
+                                </Button>
+                            )}
 
-    const messageContent = (
-        <>
-            {isGroupStart && message.replyTo && (
-                <ReplyPreview
+                            {canPin &&
+                                message.serverId &&
+                                message.channelId && (
+                                    <>
+                                        <Button
+                                            className={cn(
+                                                'h-8 w-8 rounded p-1.5 text-muted-foreground transition-colors hover:bg-white/5 hover:text-foreground',
+                                                message.isPinned &&
+                                                    'text-primary',
+                                            )}
+                                            size="sm"
+                                            title={
+                                                message.isPinned
+                                                    ? 'Unpin Message'
+                                                    : 'Pin Message'
+                                            }
+                                            variant="ghost"
+                                            onClick={() =>
+                                                togglePin({
+                                                    serverId: message.serverId!,
+                                                    channelId:
+                                                        message.channelId!,
+                                                    messageId: message._id,
+                                                })
+                                            }
+                                        >
+                                            <Pin
+                                                className={cn(
+                                                    'h-4 w-4',
+                                                    message.isPinned &&
+                                                        'fill-primary',
+                                                )}
+                                                size={18}
+                                            />
+                                        </Button>
+                                        <Button
+                                            className={cn(
+                                                'h-8 w-8 rounded p-1.5 text-muted-foreground transition-colors hover:bg-white/5 hover:text-foreground',
+                                                message.isSticky &&
+                                                    'text-primary',
+                                            )}
+                                            size="sm"
+                                            title={
+                                                message.isSticky
+                                                    ? 'Unsticky Message'
+                                                    : 'Sticky Message'
+                                            }
+                                            variant="ghost"
+                                            onClick={() =>
+                                                toggleSticky({
+                                                    serverId: message.serverId!,
+                                                    channelId:
+                                                        message.channelId!,
+                                                    messageId: message._id,
+                                                })
+                                            }
+                                        >
+                                            <StickyNote
+                                                className={cn(
+                                                    'h-4 w-4',
+                                                    message.isSticky &&
+                                                        'fill-primary',
+                                                )}
+                                                size={18}
+                                            />
+                                        </Button>
+                                    </>
+                                )}
+
+                            {canDelete && (
+                                <Button
+                                    className="h-8 w-8 rounded p-1.5 text-muted-foreground transition-colors hover:bg-danger/20 hover:text-danger"
+                                    size="sm"
+                                    title="Delete Message"
+                                    variant="ghost"
+                                    onClick={handleDelete}
+                                >
+                                    <Trash2 size={18} />
+                                </Button>
+                            )}
+                        </Box>
+
+                        {showPicker &&
+                            (isMobile ? (
+                                <Modal
+                                    fullScreen
+                                    noPadding
+                                    isOpen={showPicker}
+                                    title="Add Reaction"
+                                    onClose={() => setShowPicker(false)}
+                                >
+                                    <React.Suspense
+                                        fallback={
+                                            <div className="flex h-full items-center justify-center p-4">
+                                                Loading emojis...
+                                            </div>
+                                        }
+                                    >
+                                        <EmojiPicker
+                                            className="h-full !max-h-none w-full !max-w-none rounded-none border-none shadow-none"
+                                            customCategories={customCategories}
+                                            onCustomEmojiSelect={
+                                                handleCustomEmojiSelect
+                                            }
+                                            onEmojiSelect={handleEmojiSelect}
+                                        />
+                                    </React.Suspense>
+                                </Modal>
+                            ) : (
+                                createPortal(
+                                    <Box
+                                        className="z-[var(--z-index-popover)]"
+                                        ref={pickerRef}
+                                        style={{
+                                            position: 'fixed',
+                                            left: pickerCoords.x,
+                                            top: pickerCoords.y,
+                                        }}
+                                    >
+                                        <React.Suspense
+                                            fallback={
+                                                <div className="flex h-[400px] w-[320px] items-center justify-center rounded-lg border border-border-subtle bg-bg-primary text-muted-foreground shadow-xl">
+                                                    Loading emojis...
+                                                </div>
+                                            }
+                                        >
+                                            <EmojiPicker
+                                                customCategories={
+                                                    customCategories
+                                                }
+                                                onCustomEmojiSelect={
+                                                    handleCustomEmojiSelect
+                                                }
+                                                onEmojiSelect={
+                                                    handleEmojiSelect
+                                                }
+                                            />
+                                        </React.Suspense>
+                                    </Box>,
+                                    document.body,
+                                )
+                            ))}
+                    </Box>
+                )}
+            </>
+        );
+
+        return (
+            <Box
+                className={cn(
+                    'group relative flex flex-col px-4 py-0.5 transition-all duration-500 hover:bg-white/2',
+                    isGroupStart ? 'mt-1' : 'mt-0',
+                    isHighlighted &&
+                        'border-l-2 border-[var(--primary)] bg-[var(--primary-muted)]',
+                    mentionsMe && 'border-l-2 border-[var(--caution)]',
+                )}
+                id={`message-${message._id}`}
+                onMouseLeave={() => setShowPicker(false)}
+            >
+                {disableActions ? (
+                    messageContent
+                ) : (
+                    <ContextMenu
+                        className="h-full w-full"
+                        items={contextMenuItems}
+                    >
+                        {messageContent}
+                    </ContextMenu>
+                )}
+
+                <ProfilePopup
                     disableColors={
                         disableColors ||
                         me?.settings?.disableCustomUsernameColors ||
@@ -423,358 +796,20 @@ export const Message: React.FC<MessageProps> = ({
                         serverDetails?.disableUsernameGlowAndCustomColor
                     }
                     disableGlowAndColors={disableGlowAndColors}
-                    interaction={message.replyTo.interaction}
-                    replyToId={message.replyTo._id}
-                    role={message.replyTo.role}
-                    text={message.replyTo.text}
-                    user={message.replyTo.user}
-                    onClick={onReplyClick}
+                    iconRole={iconRole}
+                    isOpen={showProfile}
+                    joinedAt={senderMember?.joinedAt}
+                    role={role}
+                    roles={senderRoles}
+                    serverId={message.serverId}
+                    triggerRef={avatarRef}
+                    user={user}
+                    userId={user._id}
+                    onClose={() => setShowProfile(false)}
                 />
-            )}
-
-            {isGroupStart &&
-                message.interaction &&
-                message.interaction.user && (
-                    <InteractionHeader
-                        command={message.interaction.command}
-                        disableColors={
-                            disableColors ||
-                            me?.settings?.disableCustomUsernameColors ||
-                            serverDetails?.disableUsernameGlowAndCustomColor
-                        }
-                        disableCustomFonts={
-                            disableCustomFonts ||
-                            me?.settings?.disableCustomUsernameFonts ||
-                            serverDetails?.disableCustomFonts
-                        }
-                        disableGlow={
-                            disableGlow ||
-                            me?.settings?.disableCustomUsernameGlow ||
-                            serverDetails?.disableUsernameGlowAndCustomColor
-                        }
-                        disableGlowAndColors={disableGlowAndColors}
-                        isDeleted={!!message.deletedAt}
-                        resolvedUser={interactionUser}
-                        role={interactionRole}
-                        user={message.interaction.user}
-                    />
-                )}
-
-            <Box className="flex items-start gap-1">
-                <Box
-                    className="mt-1 flex w-12 flex-shrink-0 justify-center"
-                    ref={avatarRef}
-                >
-                    {isGroupStart ? (
-                        <UserProfilePicture
-                            noIndicator
-                            size="md"
-                            src={user.profilePicture}
-                            username={user.username}
-                            onClick={() => setShowProfile(true)}
-                        />
-                    ) : (
-                        <Text className="mt-1 text-[10px] font-medium text-muted-foreground opacity-0 select-none group-hover:opacity-40">
-                            {
-                                new Date(message.createdAt)
-                                    .toLocaleTimeString(APP_LOCALE, {
-                                        hour: '2-digit',
-                                        minute: '2-digit',
-                                        hour12: false,
-                                    })
-                                    .split(' ')[0]
-                            }
-                        </Text>
-                    )}
-                </Box>
-
-                <Box className="min-w-0 flex-1">
-                    <MessageHeader
-                        disableColors={
-                            disableColors ||
-                            me?.settings?.disableCustomUsernameColors ||
-                            serverDetails?.disableUsernameGlowAndCustomColor
-                        }
-                        disableCustomFonts={
-                            disableCustomFonts ||
-                            me?.settings?.disableCustomUsernameFonts ||
-                            serverDetails?.disableCustomFonts
-                        }
-                        disableGlow={
-                            disableGlow ||
-                            me?.settings?.disableCustomUsernameGlow ||
-                            serverDetails?.disableUsernameGlowAndCustomColor
-                        }
-                        disableGlowAndColors={disableGlowAndColors}
-                        editedAt={message.editedAt}
-                        iconRole={iconRole || message.iconRole}
-                        isEdited={message.isEdited}
-                        isGroupStart={isGroupStart}
-                        isWebhook={message.isWebhook}
-                        role={role || message.role}
-                        timestamp={message.createdAt}
-                        user={user}
-                        onClickName={() => setShowProfile(true)}
-                    />
-                    {isEditing ? (
-                        <MessageEdit
-                            channelId={message.channelId}
-                            initialText={message.text}
-                            messageId={message._id}
-                            receiverId={message.receiverId}
-                            serverId={message.serverId}
-                            onCancel={() => setIsEditing(false)}
-                        />
-                    ) : (
-                        <MessageContent
-                            channelId={message.channelId}
-                            embeds={message.embeds}
-                            isDeleted={!!message.deletedAt}
-                            messageId={message._id}
-                            poll={message.poll}
-                            serverId={message.serverId}
-                            stickerId={message.stickerId}
-                            text={message.text}
-                        />
-                    )}
-                    <Reactions
-                        channelId={message.channelId}
-                        messageId={message._id}
-                        reactions={message.reactions || []}
-                        serverId={message.serverId}
-                        onAddClick={() => setShowPicker(true)}
-                    />
-                </Box>
             </Box>
+        );
+    },
+);
 
-            {!disableActions && (
-                <Box
-                    className={cn(
-                        'absolute top-0 right-4 z-[var(--z-index-effect-md)] -translate-y-1/2 opacity-0 transition-all group-hover:opacity-100',
-                        showPicker && 'opacity-100',
-                    )}
-                >
-                    <Box className="flex items-center gap-1 rounded border border-white/5 bg-bg-secondary px-1 py-1 shadow-xl max-md:hidden">
-                        {onReplyToMessage && (
-                            <Button
-                                className="h-8 w-8 rounded p-1.5 text-muted-foreground transition-colors hover:bg-white/5 hover:text-foreground"
-                                size="sm"
-                                title="Reply"
-                                variant="ghost"
-                                onClick={() => onReplyToMessage(message)}
-                            >
-                                <CornerUpLeft size={18} />
-                            </Button>
-                        )}
-                        <Button
-                            className={cn(
-                                'h-8 w-8 rounded p-1.5 text-muted-foreground transition-colors hover:bg-white/5 hover:text-foreground',
-                                showPicker && 'bg-white/10 text-foreground',
-                            )}
-                            ref={reactRef}
-                            size="sm"
-                            title="Add Reaction"
-                            variant="ghost"
-                            onClick={() => setShowPicker(!showPicker)}
-                        >
-                            <SmilePlus size={18} />
-                        </Button>
-
-                        {canEdit && (
-                            <Button
-                                className="h-8 w-8 rounded p-1.5 text-muted-foreground transition-colors hover:bg-white/5 hover:text-foreground"
-                                size="sm"
-                                title="Edit Message"
-                                variant="ghost"
-                                onClick={handleEdit}
-                            >
-                                <Edit size={18} />
-                            </Button>
-                        )}
-
-                        {canPin && message.serverId && message.channelId && (
-                            <>
-                                <Button
-                                    className={cn(
-                                        'h-8 w-8 rounded p-1.5 text-muted-foreground transition-colors hover:bg-white/5 hover:text-foreground',
-                                        message.isPinned && 'text-primary',
-                                    )}
-                                    size="sm"
-                                    title={
-                                        message.isPinned
-                                            ? 'Unpin Message'
-                                            : 'Pin Message'
-                                    }
-                                    variant="ghost"
-                                    onClick={() =>
-                                        togglePin({
-                                            serverId: message.serverId!,
-                                            channelId: message.channelId!,
-                                            messageId: message._id,
-                                        })
-                                    }
-                                >
-                                    <Pin
-                                        className={cn(
-                                            'h-4 w-4',
-                                            message.isPinned && 'fill-primary',
-                                        )}
-                                        size={18}
-                                    />
-                                </Button>
-                                <Button
-                                    className={cn(
-                                        'h-8 w-8 rounded p-1.5 text-muted-foreground transition-colors hover:bg-white/5 hover:text-foreground',
-                                        message.isSticky && 'text-primary',
-                                    )}
-                                    size="sm"
-                                    title={
-                                        message.isSticky
-                                            ? 'Unsticky Message'
-                                            : 'Sticky Message'
-                                    }
-                                    variant="ghost"
-                                    onClick={() =>
-                                        toggleSticky({
-                                            serverId: message.serverId!,
-                                            channelId: message.channelId!,
-                                            messageId: message._id,
-                                        })
-                                    }
-                                >
-                                    <StickyNote
-                                        className={cn(
-                                            'h-4 w-4',
-                                            message.isSticky && 'fill-primary',
-                                        )}
-                                        size={18}
-                                    />
-                                </Button>
-                            </>
-                        )}
-
-                        {canDelete && (
-                            <Button
-                                className="h-8 w-8 rounded p-1.5 text-muted-foreground transition-colors hover:bg-danger/20 hover:text-danger"
-                                size="sm"
-                                title="Delete Message"
-                                variant="ghost"
-                                onClick={handleDelete}
-                            >
-                                <Trash2 size={18} />
-                            </Button>
-                        )}
-                    </Box>
-
-                    {showPicker &&
-                        (isMobile ? (
-                            <Modal
-                                fullScreen
-                                noPadding
-                                isOpen={showPicker}
-                                title="Add Reaction"
-                                onClose={() => setShowPicker(false)}
-                            >
-                                <React.Suspense
-                                    fallback={
-                                        <div className="flex h-full items-center justify-center p-4">
-                                            Loading emojis...
-                                        </div>
-                                    }
-                                >
-                                    <EmojiPicker
-                                        className="h-full !max-h-none w-full !max-w-none rounded-none border-none shadow-none"
-                                        customCategories={customCategories}
-                                        onCustomEmojiSelect={
-                                            handleCustomEmojiSelect
-                                        }
-                                        onEmojiSelect={handleEmojiSelect}
-                                    />
-                                </React.Suspense>
-                            </Modal>
-                        ) : (
-                            createPortal(
-                                <Box
-                                    className="z-[var(--z-index-popover)]"
-                                    ref={pickerRef}
-                                    style={{
-                                        position: 'fixed',
-                                        left: pickerCoords.x,
-                                        top: pickerCoords.y,
-                                    }}
-                                >
-                                    <React.Suspense
-                                        fallback={
-                                            <div className="flex h-[400px] w-[320px] items-center justify-center rounded-lg border border-border-subtle bg-bg-primary text-muted-foreground shadow-xl">
-                                                Loading emojis...
-                                            </div>
-                                        }
-                                    >
-                                        <EmojiPicker
-                                            customCategories={customCategories}
-                                            onCustomEmojiSelect={
-                                                handleCustomEmojiSelect
-                                            }
-                                            onEmojiSelect={handleEmojiSelect}
-                                        />
-                                    </React.Suspense>
-                                </Box>,
-                                document.body,
-                            )
-                        ))}
-                </Box>
-            )}
-        </>
-    );
-
-    return (
-        <Box
-            className={cn(
-                'group relative flex flex-col px-4 py-0.5 transition-all duration-500 hover:bg-white/2',
-                isGroupStart ? 'mt-1' : 'mt-0',
-                isHighlighted &&
-                    'border-l-2 border-[var(--primary)] bg-[var(--primary-muted)]',
-                mentionsMe && 'border-l-2 border-[var(--caution)]',
-            )}
-            id={`message-${message._id}`}
-            onMouseLeave={() => setShowPicker(false)}
-        >
-            {disableActions ? (
-                messageContent
-            ) : (
-                <ContextMenu className="h-full w-full" items={contextMenuItems}>
-                    {messageContent}
-                </ContextMenu>
-            )}
-
-            <ProfilePopup
-                disableColors={
-                    disableColors ||
-                    me?.settings?.disableCustomUsernameColors ||
-                    serverDetails?.disableUsernameGlowAndCustomColor
-                }
-                disableCustomFonts={
-                    disableCustomFonts ||
-                    me?.settings?.disableCustomUsernameFonts ||
-                    serverDetails?.disableCustomFonts
-                }
-                disableGlow={
-                    disableGlow ||
-                    me?.settings?.disableCustomUsernameGlow ||
-                    serverDetails?.disableUsernameGlowAndCustomColor
-                }
-                disableGlowAndColors={disableGlowAndColors}
-                iconRole={iconRole}
-                isOpen={showProfile}
-                joinedAt={senderMember?.joinedAt}
-                role={role}
-                roles={senderRoles}
-                serverId={message.serverId}
-                triggerRef={avatarRef}
-                user={user}
-                userId={user._id}
-                onClose={() => setShowProfile(false)}
-            />
-        </Box>
-    );
-};
+Message.displayName = 'Message';

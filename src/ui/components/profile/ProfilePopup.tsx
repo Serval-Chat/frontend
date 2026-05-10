@@ -42,9 +42,16 @@ interface ProfilePopupProps {
     serverId?: string;
 }
 
-export const ProfilePopup: React.FC<ProfilePopupProps> = ({
+export const ProfilePopup: React.FC<ProfilePopupProps> = (props) =>
+    createPortal(
+        <AnimatePresence>
+            {props.isOpen && <ProfilePopupContent {...props} />}
+        </AnimatePresence>,
+        document.body,
+    );
+
+const ProfilePopupContent: React.FC<ProfilePopupProps> = ({
     userId,
-    isOpen,
     onClose,
     position,
     triggerRef,
@@ -64,19 +71,17 @@ export const ProfilePopup: React.FC<ProfilePopupProps> = ({
     const popupRef = useRef<HTMLDivElement>(null);
 
     const { data: fetchedUser } = useUserById(userId, {
-        enabled: isOpen && !disableFetch && !adminView,
+        enabled: !disableFetch && !adminView,
     });
-    const { data: adminData } = useAdminUserDetail(
-        adminView && isOpen ? userId : null,
-    );
+    const { data: adminData } = useAdminUserDetail(adminView ? userId : null);
     const { data: members } = useMembers(serverId || null, {
-        enabled: !!serverId && isOpen,
+        enabled: !!serverId,
     });
     const { data: serverRoles } = useRoles(serverId || null, {
-        enabled: !!serverId && isOpen,
+        enabled: !!serverId,
     });
     const { data: serverDetails } = useServerDetails(serverId || null, {
-        enabled: !!serverId && isOpen,
+        enabled: !!serverId,
     });
 
     const member = React.useMemo(
@@ -133,7 +138,7 @@ export const ProfilePopup: React.FC<ProfilePopupProps> = ({
         (user && 'customStatus' in user ? user.customStatus?.emoji : undefined);
 
     const coords = useSmartPosition({
-        isOpen,
+        isOpen: true,
         elementRef: popupRef,
         position,
         triggerRef,
@@ -150,78 +155,68 @@ export const ProfilePopup: React.FC<ProfilePopupProps> = ({
             }
         };
 
-        if (isOpen) {
-            document.addEventListener('mousedown', handleClickOutside);
-        }
+        document.addEventListener('mousedown', handleClickOutside);
         return () => {
             document.removeEventListener('mousedown', handleClickOutside);
         };
-    }, [isOpen, onClose]);
+    }, [onClose]);
 
     // Close on escape
     useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent): void => {
             if (event.key === 'Escape') onClose();
         };
-        if (isOpen) window.addEventListener('keydown', handleKeyDown);
+        window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [isOpen, onClose]);
-
-    if (!isOpen) return null;
+    }, [onClose]);
 
     if (!user && !userId) return null;
 
-    return createPortal(
-        <AnimatePresence>
-            {isOpen && (
-                <Box className="pointer-events-none fixed inset-0 z-[9999]">
-                    <motion.div
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        className="pointer-events-auto"
-                        exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                        initial={{ opacity: 0, scale: 0.95, y: 10 }}
-                        ref={popupRef}
-                        style={{
-                            position: 'absolute',
-                            left: coords.x,
-                            top: coords.y,
-                        }}
-                        transition={{ duration: 0.15, ease: 'easeOut' }}
-                    >
-                        <UserProfileCard
-                            adminData={adminData}
-                            className="custom-scrollbar max-h-[calc(100vh-32px)] overflow-x-hidden overflow-y-auto"
-                            customStatus={{
-                                text: presenceCustomText,
-                                emoji: presenceCustomEmoji,
-                            }}
-                            disableColors={
-                                disableColors ||
-                                serverDetails?.disableUsernameGlowAndCustomColor
-                            }
-                            disableCustomFonts={
-                                disableCustomFonts ||
-                                serverDetails?.disableCustomFonts
-                            }
-                            disableGlow={
-                                disableGlow ||
-                                serverDetails?.disableUsernameGlowAndCustomColor
-                            }
-                            disableGlowAndColors={
-                                disableGlowAndColors ||
-                                serverDetails?.disableUsernameGlowAndCustomColor
-                            }
-                            iconRole={resolvedIconRole}
-                            joinedAt={finalJoinedAt}
-                            presenceStatus={presenceStatus}
-                            role={resolvedRole}
-                            roles={finalRoles}
-                            user={user as User}
-                        />
-                    </motion.div>
-                </Box>
-            )}
-        </AnimatePresence>,
-        document.body,
+    return (
+        <Box className="pointer-events-none fixed inset-0 z-[9999]">
+            <motion.div
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                className="pointer-events-auto"
+                exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                ref={popupRef}
+                style={{
+                    position: 'absolute',
+                    left: coords.x,
+                    top: coords.y,
+                }}
+                transition={{ duration: 0.15, ease: 'easeOut' }}
+            >
+                <UserProfileCard
+                    adminData={adminData}
+                    className="custom-scrollbar max-h-[calc(100vh-32px)] overflow-x-hidden overflow-y-auto"
+                    customStatus={{
+                        text: presenceCustomText,
+                        emoji: presenceCustomEmoji,
+                    }}
+                    disableColors={
+                        disableColors ||
+                        serverDetails?.disableUsernameGlowAndCustomColor
+                    }
+                    disableCustomFonts={
+                        disableCustomFonts || serverDetails?.disableCustomFonts
+                    }
+                    disableGlow={
+                        disableGlow ||
+                        serverDetails?.disableUsernameGlowAndCustomColor
+                    }
+                    disableGlowAndColors={
+                        disableGlowAndColors ||
+                        serverDetails?.disableUsernameGlowAndCustomColor
+                    }
+                    iconRole={resolvedIconRole}
+                    joinedAt={finalJoinedAt}
+                    presenceStatus={presenceStatus}
+                    role={resolvedRole}
+                    roles={finalRoles}
+                    user={user as User}
+                />
+            </motion.div>
+        </Box>
     );
 };

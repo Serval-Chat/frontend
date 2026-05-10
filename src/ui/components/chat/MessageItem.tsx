@@ -20,41 +20,45 @@ interface MessageItemProps {
     disableGlow?: boolean;
 }
 
-export const MessageItem: React.FC<MessageItemProps> = ({
-    message,
-    role,
-    iconRole,
-    prevMessage,
-    isHighlighted,
-    onReplyClick,
-    onReplyToMessage,
-    disableCustomFonts,
-    disableGlowAndColors,
-    disableColors,
-    disableGlow,
-}) => {
-    const isGroupStart =
-        !prevMessage ||
-        !!message.replyTo ||
-        !!message.replyToId ||
-        !!message.repliedToMessageId ||
-        !!message.interaction?.user ||
-        !shouldGroupMessages(prevMessage, message);
+export const MessageItem = React.memo(
+    ({
+        message,
+        role,
+        iconRole,
+        prevMessage,
+        isHighlighted,
+        onReplyClick,
+        onReplyToMessage,
+        disableCustomFonts,
+        disableGlowAndColors,
+        disableColors,
+        disableGlow,
+    }: MessageItemProps) => {
+        const isGroupStart =
+            !prevMessage ||
+            !!message.replyTo ||
+            !!message.replyToId ||
+            !!message.repliedToMessageId ||
+            !!message.interaction?.user ||
+            !shouldGroupMessages(prevMessage, message);
 
-    return (
-        <Message
-            disableColors={disableColors}
-            disableCustomFonts={disableCustomFonts}
-            disableGlow={disableGlow}
-            disableGlowAndColors={disableGlowAndColors}
-            iconRole={iconRole || message.iconRole}
-            isGroupStart={isGroupStart}
-            isHighlighted={isHighlighted}
-            message={message}
-            role={role || message.role}
-            user={message.user}
-            onReplyClick={onReplyClick}
-            onReplyToMessage={onReplyToMessage}
-        />
-    );
-};
+        return (
+            <Message
+                disableColors={disableColors}
+                disableCustomFonts={disableCustomFonts}
+                disableGlow={disableGlow}
+                disableGlowAndColors={disableGlowAndColors}
+                iconRole={iconRole || message.iconRole}
+                isGroupStart={isGroupStart}
+                isHighlighted={isHighlighted}
+                message={message}
+                role={role || message.role}
+                user={message.user}
+                onReplyClick={onReplyClick}
+                onReplyToMessage={onReplyToMessage}
+            />
+        );
+    },
+);
+
+MessageItem.displayName = 'MessageItem';
