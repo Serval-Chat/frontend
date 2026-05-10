@@ -104,6 +104,8 @@ export const resolveReplyTo = (
             role: undefined,
             iconRole: undefined,
             interaction: msg.referenced_message.interaction,
+            isEdited: msg.referenced_message.isEdited,
+            deletedAt: msg.referenced_message.deletedAt,
         };
     }
 
@@ -122,6 +124,8 @@ export const resolveReplyTo = (
             role: undefined,
             iconRole: undefined,
             interaction: msg.repliedToMessageId.interaction,
+            isEdited: msg.repliedToMessageId.isEdited,
+            deletedAt: msg.repliedToMessageId.deletedAt,
         };
     }
 
@@ -144,6 +148,8 @@ export const resolveReplyTo = (
                     role: undefined,
                     iconRole: undefined,
                     interaction: repliedMsg.interaction,
+                    isEdited: repliedMsg.isEdited,
+                    deletedAt: repliedMsg.deletedAt,
                 };
             }
         }

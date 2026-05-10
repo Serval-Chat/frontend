@@ -156,7 +156,7 @@ export const MainChat: React.FC = () => {
     const { data: roles } = useRoles(selectedServerId, {
         enabled: isServerContextReady,
     });
-    const { hasPermission, isTimedOut } = usePermissions(
+    const { hasPermission, isOwner, isTimedOut } = usePermissions(
         selectedServerId,
         selectedChannelId,
         { enabled: isServerContextReady },
@@ -173,10 +173,14 @@ export const MainChat: React.FC = () => {
         [channels, selectedChannelId],
     );
 
-    const { serverMemberMap, highestRoleMap, iconRoleMap } = useMemberMaps(
-        members,
-        roles,
-    );
+    const {
+        serverMemberMap,
+        fullMemberMap,
+        roleMap,
+        userRolesMap,
+        highestRoleMap,
+        iconRoleMap,
+    } = useMemberMaps(members, roles);
 
     const {
         rawMessagesData,
@@ -288,12 +292,11 @@ export const MainChat: React.FC = () => {
                 }
             }
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [
         selectedChannelId,
         selectedServerId,
         selectedFriendId,
-        pings?.pings,
-        messages?.length,
         clearChannelPings,
         deletePing,
     ]);
@@ -412,10 +415,17 @@ export const MainChat: React.FC = () => {
                                 disableGlowAndColors={
                                     serverDetails?.disableUsernameGlowAndCustomColor
                                 }
+                                fullMemberMap={fullMemberMap}
                                 hasMore={hasNextPage}
                                 hasMoreNewer={isViewingOlderMessages}
+                                hasPermission={hasPermission}
                                 isLoadingMore={isFetchingNextPage}
+                                isOwner={isOwner}
+                                me={currentUser}
                                 messages={messages}
+                                roleMap={roleMap}
+                                serverDetails={serverDetails}
+                                userRolesMap={userRolesMap}
                                 onLoadMore={handleLoadMore}
                                 onLoadMoreNewer={handleJumpToLatest}
                                 onReplyClick={handleReplyClick}

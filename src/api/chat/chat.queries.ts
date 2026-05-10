@@ -97,6 +97,8 @@ export const useChannelMessages = (
         },
         enabled: !!serverId && !!channelId,
         placeholderData: keepPreviousData,
+        staleTime: Infinity,
+        gcTime: 30 * 60 * 1000,
     });
 
 /**
@@ -159,17 +161,6 @@ export const useDeleteMessage = (): {
             return {};
         },
         onError: (_err, variables, _context) => {
-            void queryClient.invalidateQueries({
-                predicate: (query) =>
-                    query.queryKey[0] === 'chat' &&
-                    query.queryKey[1] === 'messages' &&
-                    query.queryKey[2] === 'channel' &&
-                    query.queryKey[3] === variables.serverId &&
-                    query.queryKey[4] === variables.channelId,
-            });
-        },
-        onSettled: (_data, _error, variables) => {
-            // always refetch after error or success
             void queryClient.invalidateQueries({
                 predicate: (query) =>
                     query.queryKey[0] === 'chat' &&
@@ -258,16 +249,6 @@ export const useEditChannelMessage = (): {
             return {};
         },
         onError: (_err, variables, _context) => {
-            void queryClient.invalidateQueries({
-                predicate: (query) =>
-                    query.queryKey[0] === 'chat' &&
-                    query.queryKey[1] === 'messages' &&
-                    query.queryKey[2] === 'channel' &&
-                    query.queryKey[3] === variables.serverId &&
-                    query.queryKey[4] === variables.channelId,
-            });
-        },
-        onSettled: (_data, _error, variables) => {
             void queryClient.invalidateQueries({
                 predicate: (query) =>
                     query.queryKey[0] === 'chat' &&

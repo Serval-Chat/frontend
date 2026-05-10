@@ -20,6 +20,8 @@ export interface ProcessedChatMessage extends Omit<
         text: string;
         stickerId?: string;
         interaction?: ChatMessage['interaction'];
+        isEdited?: boolean;
+        deletedAt?: string;
     };
     repliedToMessageId?: ChatMessage['repliedToMessageId'];
 }

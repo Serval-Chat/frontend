@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef } from 'react';
 
 import { type InfiniteData, useQueryClient } from '@tanstack/react-query';
 
+import { chatApi } from '@/api/chat/chat.api';
 import { CHAT_QUERY_KEYS } from '@/api/chat/chat.queries';
 import type {
     ChatMessage,
@@ -302,12 +303,30 @@ export function useChatWS(
         }
         if (prevChannelRef.current !== selectedChannelId) {
             prevChannelRef.current = selectedChannelId;
-            void queryClient.invalidateQueries({
-                queryKey: CHAT_QUERY_KEYS.channelMessages(
+
+            const existing = queryClient.getQueryData(
+                CHAT_QUERY_KEYS.channelMessages(
                     selectedServerId,
                     selectedChannelId,
                 ),
-            });
+            );
+
+            if (!existing) {
+                void queryClient.prefetchInfiniteQuery({
+                    queryKey: CHAT_QUERY_KEYS.channelMessages(
+                        selectedServerId,
+                        selectedChannelId,
+                    ),
+                    queryFn: ({ pageParam }) =>
+                        chatApi.getChannelMessages(
+                            selectedServerId,
+                            selectedChannelId,
+                            50,
+                            pageParam as string | undefined,
+                        ),
+                    initialPageParam: undefined,
+                });
+            }
         }
     }, [queryClient, selectedServerId, selectedChannelId]);
 

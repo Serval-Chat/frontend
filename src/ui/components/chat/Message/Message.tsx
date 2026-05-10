@@ -37,7 +37,7 @@ import { MessageEmojiPicker } from './MessageEmojiPicker';
 
 const EMPTY_REACTIONS: never[] = [];
 
-export const Message = React.memo(
+export const Message: React.FC<MessageProps> = React.memo(
     ({
         message,
         user: initialUser,
@@ -52,7 +52,15 @@ export const Message = React.memo(
         disableColors,
         disableGlow,
         disableActions = false,
-    }: MessageProps) => {
+        me: passedMe,
+        serverDetails: passedServerDetails,
+        senderMember: passedSenderMember,
+        senderRoles: passedSenderRoles,
+        hasPermission: passedHasPermission,
+        isOwner: passedIsOwner,
+        fullMemberMap,
+        roleMap,
+    }) => {
         const {
             user,
             me,
@@ -64,20 +72,30 @@ export const Message = React.memo(
             mentionsMe,
             interactionUser,
             interactionRole,
-        } = useMessageData(message, initialUser);
+        } = useMessageData(message, initialUser, {
+            me: passedMe,
+            serverDetails: passedServerDetails,
+            senderMember: passedSenderMember,
+            senderRoles: passedSenderRoles,
+            hasPermission: passedHasPermission,
+            isOwner: passedIsOwner,
+            fullMemberMap,
+            roleMap,
+        });
 
         const [showProfile, setShowProfile] = React.useState(false);
         const [showPicker, setShowPicker] = React.useState(false);
         const [isEditing, setIsEditing] = React.useState(false);
+        const [isContextMenuOpen, setIsContextMenuOpen] = React.useState(false);
         const avatarRef = React.useRef<HTMLDivElement>(null);
         const pickerRef = React.useRef<HTMLDivElement>(null);
         const reactRef = React.useRef<HTMLButtonElement>(null);
 
-        const addReaction = useAddReaction();
-        const deleteMessage = useDeleteMessage();
+        const { mutate: addReaction } = useAddReaction();
+        const { mutate: deleteMessage } = useDeleteMessage();
         const { mutate: togglePin } = useTogglePin();
         const { mutate: toggleSticky } = useToggleSticky();
-        const { data: friends } = useFriends();
+        const { data: friends } = useFriends({ enabled: isContextMenuOpen });
         const { mutate: sendFriendRequest } = useSendFriendRequest();
         const { mutate: removeFriend } = useRemoveFriend();
         const { customCategories } = useCustomEmojis({ enabled: showPicker });
@@ -92,7 +110,7 @@ export const Message = React.memo(
 
         const handleEmojiSelect = React.useCallback(
             (emoji: string): void => {
-                addReaction.mutate({
+                addReaction({
                     messageId: message._id,
                     serverId: message.serverId,
                     channelId: message.channelId,
@@ -100,12 +118,12 @@ export const Message = React.memo(
                 });
                 setShowPicker(false);
             },
-            [addReaction, message],
+            [addReaction, message._id, message.serverId, message.channelId],
         );
 
         const handleCustomEmojiSelect = React.useCallback(
             (emoji: { id: string; name: string }): void => {
-                addReaction.mutate({
+                addReaction({
                     messageId: message._id,
                     serverId: message.serverId,
                     channelId: message.channelId,
@@ -117,7 +135,7 @@ export const Message = React.memo(
                 });
                 setShowPicker(false);
             },
-            [addReaction, message],
+            [addReaction, message._id, message.serverId, message.channelId],
         );
 
         useClickAway(pickerRef, () => setShowPicker(false));
@@ -131,7 +149,7 @@ export const Message = React.memo(
 
         const handleDelete = React.useCallback((): void => {
             if (!message.serverId || !message.channelId) return;
-            deleteMessage.mutate({
+            deleteMessage({
                 serverId: message.serverId,
                 channelId: message.channelId,
                 messageId: message._id,
@@ -186,6 +204,10 @@ export const Message = React.memo(
             setShowPicker(false);
         }, []);
 
+        const handleCloseProfile = React.useCallback((): void => {
+            setShowProfile(false);
+        }, []);
+
         const contextMenuItems = useMessageContextMenu({
             message,
             user,
@@ -204,9 +226,24 @@ export const Message = React.memo(
             onShowPicker: handleShowPicker,
         });
 
-        const isMobile =
-            typeof window !== 'undefined' &&
-            window.matchMedia('(pointer: coarse)').matches;
+        const isMobile = React.useMemo(
+            () =>
+                typeof window !== 'undefined' &&
+                window.matchMedia('(pointer: coarse)').matches,
+            [],
+        );
+
+        const timeLabel = React.useMemo(
+            () =>
+                new Date(message.createdAt)
+                    .toLocaleTimeString(APP_LOCALE, {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        hour12: false,
+                    })
+                    .split(' ')[0],
+            [message.createdAt],
+        );
         const pickerCoords = useSmartPosition({
             isOpen: showPicker && !isMobile,
             elementRef: pickerRef,
@@ -276,15 +313,7 @@ export const Message = React.memo(
                             />
                         ) : (
                             <Text className="mt-1 text-[10px] font-medium text-muted-foreground opacity-0 select-none group-hover:opacity-40">
-                                {
-                                    new Date(message.createdAt)
-                                        .toLocaleTimeString(APP_LOCALE, {
-                                            hour: '2-digit',
-                                            minute: '2-digit',
-                                            hour12: false,
-                                        })
-                                        .split(' ')[0]
-                                }
+                                {timeLabel}
                             </Text>
                         )}
                     </Box>
@@ -391,6 +420,7 @@ export const Message = React.memo(
                     <ContextMenu
                         className="h-full w-full"
                         items={contextMenuItems}
+                        onOpenChange={setIsContextMenuOpen}
                     >
                         {messageContent}
                     </ContextMenu>
@@ -410,7 +440,7 @@ export const Message = React.memo(
                     triggerRef={avatarRef}
                     user={user}
                     userId={user._id}
-                    onClose={() => setShowProfile(false)}
+                    onClose={handleCloseProfile}
                 />
             </Box>
         );

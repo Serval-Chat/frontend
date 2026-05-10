@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
+import { useQueryClient } from '@tanstack/react-query';
 import { Reorder } from 'framer-motion';
 import {
     ArrowDown,
@@ -15,6 +16,8 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
+import { chatApi } from '@/api/chat/chat.api';
+import { CHAT_QUERY_KEYS } from '@/api/chat/chat.queries';
 import { usePings } from '@/api/pings/pings.queries';
 import { serversApi } from '@/api/servers/servers.api';
 import {
@@ -74,12 +77,34 @@ const ChannelRow: React.FC<ChannelRowProps> = React.memo(
         setSettingsChannel,
         getChannelMenuItems,
     }) => {
+        const queryClient = useQueryClient();
         const { hasPermission, isLoading, permissions } = usePermissions(
             selectedServerId,
             channel._id,
         );
         const canView = hasPermission('viewChannels');
         const canConnect = hasPermission('connect');
+
+        const handleMouseEnter = React.useCallback(() => {
+            if (channel.type !== 'text' || !selectedServerId) return;
+
+            void queryClient.prefetchInfiniteQuery({
+                queryKey: CHAT_QUERY_KEYS.channelMessages(
+                    selectedServerId,
+                    channel._id,
+                    null,
+                ),
+                queryFn: ({ pageParam }) =>
+                    chatApi.getChannelMessages(
+                        selectedServerId,
+                        channel._id,
+                        50,
+                        pageParam as string | undefined,
+                    ),
+                initialPageParam: undefined,
+                staleTime: Infinity,
+            });
+        }, [queryClient, selectedServerId, channel._id, channel.type]);
 
         // Only hide if loading is finished and canView is explicitly false
         if (!isLoading && !canView) {
@@ -116,6 +141,7 @@ const ChannelRow: React.FC<ChannelRowProps> = React.memo(
                     pingCount={channelPings[channel._id]}
                     type={channel.type}
                     onClick={() => handleChannelClick(channel)}
+                    onMouseEnter={handleMouseEnter}
                     onSettingsClick={
                         canManageChannels
                             ? (e) => {

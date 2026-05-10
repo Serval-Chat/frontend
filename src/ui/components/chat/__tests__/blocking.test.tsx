@@ -16,6 +16,20 @@ vi.mock('@/store/hooks', () => ({
     useAppSelector: vi.fn(),
 }));
 
+vi.mock('@tanstack/react-virtual', () => ({
+    useVirtualizer: vi.fn().mockImplementation((options: any) => ({
+        getVirtualItems: () =>
+            Array.from({ length: options.count }).map((_, i) => ({
+                index: i,
+                start: 0,
+                key: i,
+            })),
+        getTotalSize: () => options.count * 100,
+        scrollToIndex: vi.fn(),
+        measureElement: vi.fn(),
+    })),
+}));
+
 const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
 });

@@ -43,23 +43,31 @@ export const usePaginatedMessages = (
     const isViewingOlderMessages = React.useMemo(() => {
         if (!targetMessageId || !channelMessages.data) return false;
 
-        // Flatten all pages to see the full set of fetched messages
-        const allMessages = channelMessages.data.pages.flat();
-        const targetIndex = allMessages.findIndex(
-            (m) => m._id === targetMessageId,
-        );
+        const pages = channelMessages.data.pages;
+        let targetMsg: ChatMessage | undefined;
 
-        if (targetIndex === -1) return true; // Safety fallback
+        // Find target message without flattening
+        for (const page of pages) {
+            targetMsg = page.find((m) => m._id === targetMessageId);
+            if (targetMsg) break;
+        }
 
-        // Count messages after the target
-        const newerMessages = allMessages.filter(
-            (m) =>
-                new Date(m.createdAt) >
-                new Date(allMessages[targetIndex].createdAt),
-        );
+        if (!targetMsg) return true;
 
-        // If we found 50 newer messages, it means we probably haven't reached the bottom
-        return newerMessages.length >= limit;
+        const targetTime = targetMsg.createdAt;
+        let newerCount = 0;
+
+        // Count messages newer than target without flattening
+        for (const page of pages) {
+            for (const msg of page) {
+                if (msg.createdAt > targetTime) {
+                    newerCount++;
+                    if (newerCount >= limit) return true;
+                }
+            }
+        }
+
+        return false;
     }, [targetMessageId, channelMessages.data]);
 
     if (selectedFriendId) {

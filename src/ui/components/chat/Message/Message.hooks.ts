@@ -1,30 +1,31 @@
 import React from 'react';
 
-import {
-    useMembers,
-    useRoles,
-    useServerDetails,
-} from '@/api/servers/servers.queries';
 import type {
     Role,
     RolePermissions,
     Server,
     ServerMember,
 } from '@/api/servers/servers.types';
-import { useMe, useUserById } from '@/api/users/users.queries';
+import { useUserById } from '@/api/users/users.queries';
 import type { User } from '@/api/users/users.types';
-import { usePermissions } from '@/hooks/usePermissions';
 import type { ProcessedChatMessage } from '@/types/chat.ui';
 
 export function useMessageData(
     message: ProcessedChatMessage,
     initialUser: User,
+    data?: {
+        me?: User;
+        serverDetails?: Server;
+        senderMember?: ServerMember;
+        senderRoles?: Role[];
+        hasPermission?: (permission: keyof RolePermissions) => boolean;
+        isOwner?: boolean;
+        fullMemberMap?: Map<string, ServerMember>;
+        roleMap?: Map<string, Role>;
+    },
 ): {
     user: User;
     me: User | undefined;
-    isServerMessage: boolean;
-    members: ServerMember[] | undefined;
-    serverRoles: Role[] | undefined;
     serverDetails: Server | undefined;
     senderMember: ServerMember | undefined;
     senderRoles: Role[] | undefined;
@@ -40,42 +41,19 @@ export function useMessageData(
     });
     const user = isUnknownUser && fetchedUser ? fetchedUser : initialUser;
 
-    const { data: me } = useMe();
-    const isServerMessage =
-        !!message.serverId &&
-        (message.serverId === 'preview' ||
-            /^[a-f\d]{24}$/i.test(message.serverId));
-    const { data: membersRaw } = useMembers(
-        isServerMessage ? message.serverId! : null,
-        { enabled: isServerMessage },
-    );
-    const { data: serverRolesRaw } = useRoles(
-        isServerMessage ? message.serverId! : null,
-        { enabled: isServerMessage },
-    );
-    const { data: serverDetailsRaw } = useServerDetails(
-        isServerMessage ? message.serverId! : null,
-        { enabled: isServerMessage },
-    );
+    const me = data?.me;
+    const serverDetails = data?.serverDetails;
+    const senderMember = data?.senderMember;
+    const senderRoles = data?.senderRoles;
 
-    const members = React.useDeferredValue(membersRaw);
-    const serverRoles = React.useDeferredValue(serverRolesRaw);
-    const serverDetails = React.useDeferredValue(serverDetailsRaw);
-
-    const senderMember = React.useMemo(
-        () => members?.find((m) => m.userId === message.senderId),
-        [members, message.senderId],
+    const hasPermission = React.useMemo(
+        () => data?.hasPermission ?? (() => false),
+        [data?.hasPermission],
     );
-    const senderRoles = React.useMemo(() => {
-        if (!senderMember || !serverRoles) return undefined;
-        return serverRoles.filter((r) => senderMember.roles.includes(r._id));
-    }, [senderMember, serverRoles]);
+    const isOwner = !!data?.isOwner;
 
-    const { hasPermission, isOwner } = usePermissions(
-        isServerMessage ? message.serverId! : null,
-        null,
-        { enabled: isServerMessage },
-    );
+    const fullMemberMap = data?.fullMemberMap;
+    const roleMap = data?.roleMap;
 
     const myId = me?._id;
     const mentionsMe = React.useMemo(() => {
@@ -85,7 +63,7 @@ export function useMessageData(
 
         if (message.text.includes('<everyone>')) return true;
 
-        const myMember = members?.find((m) => m.userId === myId);
+        const myMember = fullMemberMap?.get(myId);
         if (
             myMember &&
             myMember.roles.some((roleId) =>
@@ -96,13 +74,11 @@ export function useMessageData(
         }
 
         return false;
-    }, [message.text, myId, members]);
+    }, [message.text, myId, fullMemberMap]);
 
     const interactionUser = React.useMemo(() => {
-        if (!message.interaction?.user?.id || !members) return undefined;
-        const member = members.find(
-            (m) => m.userId === message.interaction!.user!.id,
-        );
+        if (!message.interaction?.user?.id || !fullMemberMap) return undefined;
+        const member = fullMemberMap.get(message.interaction!.user!.id);
         if (!member) return undefined;
         return {
             ...member.user,
@@ -115,28 +91,25 @@ export function useMessageData(
             usernameGradient: member.user.usernameGradient,
             isBot: member.user.isBot,
         } as unknown as User;
-    }, [message.interaction, members]);
+    }, [message.interaction, fullMemberMap]);
 
     const interactionRole = React.useMemo(() => {
-        if (!message.interaction?.user?.id || !members || !serverRoles)
+        if (!message.interaction?.user?.id || !fullMemberMap || !roleMap)
             return undefined;
-        const member = members.find(
-            (m) => m.userId === message.interaction!.user!.id,
-        );
+        const member = fullMemberMap.get(message.interaction!.user!.id);
         if (!member || !member.roles.length) return undefined;
 
-        const roles = serverRoles.filter((r) => member.roles.includes(r._id));
+        const roles = member.roles
+            .map((id) => roleMap.get(id))
+            .filter((r): r is Role => !!r);
         if (!roles.length) return undefined;
 
         return roles.sort((a, b) => b.position - a.position)[0];
-    }, [message.interaction, members, serverRoles]);
+    }, [message.interaction, fullMemberMap, roleMap]);
 
     return {
         user,
         me,
-        isServerMessage,
-        members,
-        serverRoles,
         serverDetails,
         senderMember,
         senderRoles,

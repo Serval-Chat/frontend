@@ -29,20 +29,32 @@ vi.mock('@/ui/components/chat/MessageItem', () => ({
     ),
 }));
 
+const mockScrollToIndex = vi.fn();
+
+vi.mock('@tanstack/react-virtual', () => ({
+    useVirtualizer: vi.fn().mockImplementation((options: any) => ({
+        getVirtualItems: () =>
+            Array.from({ length: options.count }).map((_, i) => ({
+                index: i,
+                start: 0,
+                key: i,
+            })),
+        getTotalSize: () => options.count * 100,
+        scrollToIndex: mockScrollToIndex,
+        measureElement: vi.fn(),
+    })),
+}));
+
 describe('MessagesList Scroll Behavior', () => {
-    let scrollIntoViewMock: ReturnType<typeof vi.fn>;
     let requestAnimationFrameMock: ReturnType<typeof vi.fn>;
 
     const mockDispatch = vi.fn();
 
     beforeEach(() => {
         vi.clearAllMocks();
+        mockScrollToIndex.mockClear();
         vi.mocked(useAppDispatch).mockReturnValue(mockDispatch);
         vi.mocked(useAppSelector).mockReturnValue({}); // default blocks
-
-        scrollIntoViewMock = vi.fn();
-        window.HTMLElement.prototype.scrollIntoView =
-            scrollIntoViewMock as any as typeof window.HTMLElement.prototype.scrollIntoView;
 
         requestAnimationFrameMock = vi.fn((cb) => cb());
         window.requestAnimationFrame =
@@ -95,12 +107,7 @@ describe('MessagesList Scroll Behavior', () => {
             />,
         );
 
-        // Expect it to have scrolled into view since it rendered with the message
-        expect(scrollIntoViewMock).toHaveBeenCalledTimes(1);
-        expect(scrollIntoViewMock).toHaveBeenCalledWith({
-            behavior: 'smooth',
-            block: 'center',
-        });
+        expect(mockScrollToIndex).toHaveBeenCalledWith(1, { align: 'center' });
     });
 
     it('waits for the message to render before scrolling and only scrolls once', () => {
@@ -112,7 +119,9 @@ describe('MessagesList Scroll Behavior', () => {
             />,
         );
 
-        expect(scrollIntoViewMock).not.toHaveBeenCalled();
+        expect(mockScrollToIndex).not.toHaveBeenCalledWith(1, {
+            align: 'center',
+        });
 
         rerender(
             <MessagesList
@@ -122,7 +131,9 @@ describe('MessagesList Scroll Behavior', () => {
             />,
         );
 
-        expect(scrollIntoViewMock).toHaveBeenCalledTimes(1);
+        expect(mockScrollToIndex).toHaveBeenCalledWith(1, { align: 'center' });
+
+        mockScrollToIndex.mockClear();
 
         const newMessages = [
             ...mockMessages,
@@ -136,6 +147,8 @@ describe('MessagesList Scroll Behavior', () => {
             />,
         );
 
-        expect(scrollIntoViewMock).toHaveBeenCalledTimes(1);
+        expect(mockScrollToIndex).not.toHaveBeenCalledWith(1, {
+            align: 'center',
+        });
     });
 });

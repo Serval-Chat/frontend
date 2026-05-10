@@ -1,10 +1,23 @@
-import type { Role } from '@/api/servers/servers.types';
+import type {
+    Role,
+    RolePermissions,
+    Server,
+    ServerMember,
+} from '@/api/servers/servers.types';
 import type { User } from '@/api/users/users.types';
 import type { ProcessedChatMessage } from '@/types/chat.ui';
 
 export interface MessageProps {
     message: ProcessedChatMessage;
     user: User;
+    me?: User;
+    serverDetails?: Server;
+    senderMember?: ServerMember;
+    senderRoles?: Role[];
+    fullMemberMap?: Map<string, ServerMember>;
+    roleMap?: Map<string, Role>;
+    hasPermission?: (permission: keyof RolePermissions) => boolean;
+    isOwner?: boolean;
     role?: Role;
     iconRole?: Role;
     isGroupStart?: boolean;

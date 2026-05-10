@@ -45,6 +45,7 @@ interface ContextMenuProps {
     items: ContextMenuItem[];
     children: React.ReactNode;
     className?: string;
+    onOpenChange?: (open: boolean) => void;
 }
 
 /**
@@ -69,6 +70,7 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
     items,
     children,
     className,
+    onOpenChange,
 }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [clickPosition, setClickPosition] = useState({ x: 0, y: 0 });
@@ -82,9 +84,13 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
 
         setClickPosition({ x: e.clientX, y: e.clientY });
         setIsOpen(true);
+        onOpenChange?.(true);
     };
 
-    const closeMenu = (): void => setIsOpen(false);
+    const closeMenu = React.useCallback((): void => {
+        setIsOpen(false);
+        onOpenChange?.(false);
+    }, [onOpenChange]);
 
     const position = useSmartPosition({
         isOpen,
@@ -121,7 +127,7 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
         return () => {
             document.removeEventListener('mousedown', handleClickOutside);
         };
-    }, [isOpen]);
+    }, [isOpen, closeMenu]);
 
     const filteredItems = filterItems(items);
 

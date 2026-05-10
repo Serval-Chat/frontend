@@ -9,7 +9,9 @@ import {
 
 interface MemberMapsResult {
     serverMemberMap: Map<string, User>;
+    fullMemberMap: Map<string, ServerMember>;
     roleMap: Map<string, Role>;
+    userRolesMap: Map<string, Role[]>;
     highestRoleMap: Map<string, Role>;
     iconRoleMap: Map<string, Role>;
 }
@@ -30,12 +32,33 @@ export const useMemberMaps = (
         return map;
     }, [members]);
 
+    // Lookup for full member objects by userId
+    const fullMemberMap = React.useMemo(() => {
+        const map = new Map<string, ServerMember>();
+        members?.forEach((m) => {
+            map.set(m.userId, m);
+        });
+        return map;
+    }, [members]);
+
     // Lookup for Role objects by roleId
     const roleMap = React.useMemo(() => {
         const map = new Map<string, Role>();
         roles?.forEach((r) => map.set(r._id, r));
         return map;
     }, [roles]);
+
+    // Lookup for Role[] by userId
+    const userRolesMap = React.useMemo(() => {
+        const map = new Map<string, Role[]>();
+        if (!members || !roles) return map;
+
+        members.forEach((m) => {
+            const memberRoles = roles.filter((r) => m.roles.includes(r._id));
+            map.set(m.userId, memberRoles);
+        });
+        return map;
+    }, [members, roles]);
 
     // Lookup for highest Role by userId
     const highestRoleMap = React.useMemo(() => {
@@ -79,5 +102,12 @@ export const useMemberMaps = (
         return map;
     }, [members, roles, roleMap]);
 
-    return { serverMemberMap, roleMap, highestRoleMap, iconRoleMap };
+    return {
+        serverMemberMap,
+        fullMemberMap,
+        roleMap,
+        userRolesMap,
+        highestRoleMap,
+        iconRoleMap,
+    };
 };

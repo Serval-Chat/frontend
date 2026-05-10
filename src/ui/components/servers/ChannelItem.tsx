@@ -39,6 +39,7 @@ interface ChannelItemProps {
     disabled?: boolean;
     onClick?: () => void;
     onSettingsClick?: (e: React.MouseEvent) => void;
+    onMouseEnter?: () => void;
 }
 
 /**
@@ -56,6 +57,7 @@ export const ChannelItem: React.FC<ChannelItemProps> = React.memo(
         disabled,
         onClick,
         onSettingsClick,
+        onMouseEnter,
     }) => {
         // custom icons don't apply to pseudochannels
         const CustomIcon = type !== 'link' && icon ? ICON_MAP[icon] : null;
@@ -93,6 +95,7 @@ export const ChannelItem: React.FC<ChannelItemProps> = React.memo(
                             onClick?.();
                         }
                     }}
+                    onMouseEnter={disabled ? undefined : onMouseEnter}
                 >
                     <div className="flex w-full items-center justify-between">
                         <div className="flex min-w-0 flex-1 items-center">

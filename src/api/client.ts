@@ -8,7 +8,7 @@ const isTauri = (): boolean =>
     typeof window !== 'undefined' && '__TAURI__' in window;
 
 export const apiClient = axios.create({
-    baseURL: isTauri() ? import.meta.env.VITE_API_BASE_URL : '',
+    baseURL: import.meta.env.VITE_API_BASE_URL || '',
     timeout: 30000,
     withCredentials: true,
     adapter: isTauri() ? tauriAdapter : undefined,

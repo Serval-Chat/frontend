@@ -1,3 +1,3 @@
-rm -r ../backend/public
-mkdir ../backend/public
-cp -r ./dist/* ../backend/public
+rm -r ../quickserve/dist
+mkdir ../quickserve/dist
+cp -r ./dist/* ../quickserve/dist

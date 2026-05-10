@@ -71,68 +71,81 @@ export const Reactions: React.FC<ReactionsProps> = React.memo(
             };
         }, [showPicker]);
 
-        const handleEmojiSelect = (emoji: string): void => {
-            addReaction.mutate({
-                messageId,
-                serverId,
-                channelId,
-                data: { emoji, emojiType: 'unicode' },
-            });
-            setShowPicker(false);
-        };
-
-        const handleCustomEmojiSelect = (emoji: {
-            id: string;
-            name: string;
-        }): void => {
-            addReaction.mutate({
-                messageId,
-                serverId,
-                channelId,
-                data: {
-                    emoji: emoji.name,
-                    emojiType: 'custom',
-                    emojiId: emoji.id,
-                },
-            });
-            setShowPicker(false);
-        };
-
-        if (!reactions.length && !showPicker) return null;
-
-        const handleReactionClick = (reaction: MessageReaction): void => {
-            const hasReacted = reaction.users.includes(me?._id || '');
-
-            if (hasReacted) {
-                removeReaction.mutate({
+        const handleEmojiSelect = React.useCallback(
+            (emoji: string): void => {
+                addReaction.mutate({
                     messageId,
                     serverId,
                     channelId,
-                    data: {
-                        emoji: reaction.emoji,
-                        emojiId:
-                            reaction.emojiType === 'custom'
-                                ? reaction.emojiId
-                                : undefined,
-                        scope: 'me',
-                    },
+                    data: { emoji, emojiType: 'unicode' },
                 });
-            } else {
+                setShowPicker(false);
+            },
+            [addReaction, messageId, serverId, channelId],
+        );
+
+        const handleCustomEmojiSelect = React.useCallback(
+            (emoji: { id: string; name: string }): void => {
                 addReaction.mutate({
                     messageId,
                     serverId,
                     channelId,
                     data: {
-                        emoji: reaction.emoji,
-                        emojiType: reaction.emojiType,
-                        emojiId:
-                            reaction.emojiType === 'custom'
-                                ? reaction.emojiId
-                                : undefined,
+                        emoji: emoji.name,
+                        emojiType: 'custom',
+                        emojiId: emoji.id,
                     },
                 });
-            }
-        };
+                setShowPicker(false);
+            },
+            [addReaction, messageId, serverId, channelId],
+        );
+
+        const handleReactionClick = React.useCallback(
+            (reaction: MessageReaction): void => {
+                const hasReacted = reaction.users.includes(me?._id || '');
+
+                if (hasReacted) {
+                    removeReaction.mutate({
+                        messageId,
+                        serverId,
+                        channelId,
+                        data: {
+                            emoji: reaction.emoji,
+                            emojiId:
+                                reaction.emojiType === 'custom'
+                                    ? reaction.emojiId
+                                    : undefined,
+                            scope: 'me',
+                        },
+                    });
+                } else {
+                    addReaction.mutate({
+                        messageId,
+                        serverId,
+                        channelId,
+                        data: {
+                            emoji: reaction.emoji,
+                            emojiType: reaction.emojiType,
+                            emojiId:
+                                reaction.emojiType === 'custom'
+                                    ? reaction.emojiId
+                                    : undefined,
+                        },
+                    });
+                }
+            },
+            [
+                addReaction,
+                removeReaction,
+                messageId,
+                serverId,
+                channelId,
+                me?._id,
+            ],
+        );
+
+        if (!reactions.length && !showPicker) return null;
 
         const filteredReactions = reactions
             .map((r) => {
@@ -153,7 +166,10 @@ export const Reactions: React.FC<ReactionsProps> = React.memo(
             <Box className="mt-1 mb-1 flex flex-wrap gap-1">
                 {filteredReactions.map((reaction) => {
                     const hasReacted = reaction.users.includes(me?._id || '');
-                    const reactionKey = `${reaction.emoji}-${reaction.users.join(',')}`;
+                    const reactionKey =
+                        reaction.emojiType === 'custom'
+                            ? reaction.emojiId
+                            : reaction.emoji;
 
                     const reactionElement = (
                         <Box

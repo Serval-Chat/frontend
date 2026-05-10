@@ -1,12 +1,10 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 
 import type { ChatMessage } from '@/api/chat/chat.types';
 import type { Role } from '@/api/servers/servers.types';
 import type { User } from '@/api/users/users.types';
 import type { ProcessedChatMessage } from '@/types/chat.ui';
 import { resolveReplyTo } from '@/ui/utils/chat';
-
-const PROCESSED_CACHE = new WeakMap<ChatMessage, ProcessedChatMessage>();
 
 /**
  * @description Hook to process raw message data into a flattened, resolved list.
@@ -20,17 +18,23 @@ export const useProcessedMessages = (
     serverMemberMap: Map<string, User>,
     highestRoleMap: Map<string, Role>,
     iconRoleMap: Map<string, Role>,
-): ProcessedChatMessage[] =>
-    useMemo(() => {
+): ProcessedChatMessage[] => {
+    const [cache] = useState(
+        () => new WeakMap<ChatMessage, ProcessedChatMessage>(),
+    );
+
+    return useMemo(() => {
         if (!rawMessagesData) return [];
 
         // Flatten all pages and sort chronologically
         const allMessages = rawMessagesData.pages
             .flat()
-            .sort(
-                (a, b) =>
-                    new Date(a.createdAt).getTime() -
-                    new Date(b.createdAt).getTime(),
+            .sort((a, b) =>
+                a.createdAt < b.createdAt
+                    ? -1
+                    : a.createdAt > b.createdAt
+                      ? 1
+                      : 0,
             );
 
         const result = allMessages.map((msg) => {
@@ -90,7 +94,7 @@ export const useProcessedMessages = (
                         : new Date(msg.createdAt).toISOString(),
             } as ProcessedChatMessage;
 
-            const prev = PROCESSED_CACHE.get(msg);
+            const prev = cache.get(msg);
             if (prev) {
                 const sameCore =
                     prev.text === next.text &&
@@ -105,15 +109,17 @@ export const useProcessedMessages = (
                     prev.user === next.user &&
                     prev.role === next.role &&
                     prev.iconRole === next.iconRole &&
-                    JSON.stringify(prev.replyTo) ===
-                        JSON.stringify(next.replyTo);
+                    prev.replyTo?._id === next.replyTo?._id &&
+                    prev.replyTo?.text === next.replyTo?.text &&
+                    prev.replyTo?.isEdited === next.replyTo?.isEdited &&
+                    prev.replyTo?.deletedAt === next.replyTo?.deletedAt;
 
                 if (sameCore) {
                     return prev;
                 }
             }
 
-            PROCESSED_CACHE.set(msg, next);
+            cache.set(msg, next);
             return next;
         });
 
@@ -127,4 +133,6 @@ export const useProcessedMessages = (
         serverMemberMap,
         highestRoleMap,
         iconRoleMap,
+        cache,
     ]);
+};
