@@ -1,6 +1,7 @@
 import React, { useCallback, useRef, useState } from 'react';
 
 import { useQueryClient } from '@tanstack/react-query';
+import JSZip from 'jszip';
 import { Loader2, Plus, Trash2 } from 'lucide-react';
 
 import {
@@ -10,6 +11,7 @@ import {
     useUploadEmoji,
 } from '@/api/servers/servers.queries';
 import { useWebSocket } from '@/hooks/ws/useWebSocket';
+import { BulkUploadModal } from '@/ui/components/common/BulkUploadModal';
 import { Button } from '@/ui/components/common/Button';
 import { Heading } from '@/ui/components/common/Heading';
 import { Input } from '@/ui/components/common/Input';
@@ -27,15 +29,30 @@ export const ServerEmojiSettings: React.FC<ServerEmojiSettingsProps> = ({
 }) => {
     const queryClient = useQueryClient();
     const { data: emojis = [], isLoading } = useServerEmojis(serverId);
-    const { mutate: uploadEmoji, isPending: isUploading } =
-        useUploadEmoji(serverId);
-    const { mutate: deleteEmoji } = useDeleteEmoji(serverId);
+    const {
+        mutate: uploadEmoji,
+        mutateAsync: uploadEmojiAsync,
+        isPending: isUploading,
+    } = useUploadEmoji(serverId);
+    const { mutate: deleteEmoji, mutateAsync: deleteEmojiAsync } =
+        useDeleteEmoji(serverId);
 
     const [emojiName, setEmojiName] = useState('');
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [isCropModalOpen, setIsCropModalOpen] = useState(false);
     const [hoveredEmojiId, setHoveredEmojiId] = useState<string | null>(null);
+    const [isBulkUploading, setIsBulkUploading] = useState(false);
+    const [isCancelling, setIsCancelling] = useState(false);
+    const isCancelledRef = useRef(false);
+    const uploadedIdsRef = useRef<string[]>([]);
+    const [bulkStatus, setBulkStatus] = useState({
+        total: 0,
+        uploaded: 0,
+        errors: 0,
+        isOpen: false,
+    });
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const bulkFileInputRef = useRef<HTMLInputElement>(null);
 
     useWebSocket(
         WsEvents.EMOJI_UPDATED,
@@ -93,6 +110,142 @@ export const ServerEmojiSettings: React.FC<ServerEmojiSettingsProps> = ({
         fileInputRef.current?.click();
     };
 
+    const convertToWebp = (blob: Blob, fileName: string): Promise<File> =>
+        new Promise((resolve, reject) => {
+            const url = URL.createObjectURL(blob);
+            const img = new Image();
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                canvas.width = img.width;
+                canvas.height = img.height;
+                const ctx = canvas.getContext('2d');
+                if (!ctx) {
+                    reject(new Error('Failed to get canvas context'));
+                    return;
+                }
+                ctx.drawImage(img, 0, 0);
+                canvas.toBlob((convertedBlob) => {
+                    if (convertedBlob) {
+                        const newName =
+                            fileName.replace(/\.[^/.]+$/, '') + '.webp';
+                        resolve(
+                            new File([convertedBlob], newName, {
+                                type: 'image/webp',
+                            }),
+                        );
+                    } else {
+                        reject(new Error('Failed to convert to webp'));
+                    }
+                    URL.revokeObjectURL(url);
+                }, 'image/webp');
+            };
+            img.onerror = () => {
+                URL.revokeObjectURL(url);
+                reject(new Error('Failed to load image'));
+            };
+            img.src = url;
+        });
+
+    const handleBulkFileSelect = async (
+        event: React.ChangeEvent<HTMLInputElement>,
+    ): Promise<void> => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+
+        if (bulkFileInputRef.current) {
+            bulkFileInputRef.current.value = '';
+        }
+
+        try {
+            const zip = new JSZip();
+            const loadedZip = await zip.loadAsync(file);
+
+            const validFiles = Object.entries(loadedZip.files).filter(
+                ([relativePath, zipEntry]) => {
+                    if (zipEntry.dir) return false;
+                    const isImage = relativePath.match(
+                        /\.(png|jpg|jpeg|webp|gif)$/i,
+                    );
+                    if (!isImage) return false;
+                    const fileName = zipEntry.name.split('/').pop() || '';
+                    if (fileName.startsWith('.')) return false;
+                    return true;
+                },
+            );
+
+            if (validFiles.length === 0) return;
+
+            setBulkStatus({
+                total: validFiles.length,
+                uploaded: 0,
+                errors: 0,
+                isOpen: true,
+            });
+
+            setIsBulkUploading(true);
+            isCancelledRef.current = false;
+            uploadedIdsRef.current = [];
+
+            for (const [, zipEntry] of validFiles) {
+                if (isCancelledRef.current) break;
+
+                const fileName = zipEntry.name.split('/').pop() || '';
+                const name = fileName
+                    .split('.')[0]
+                    .replace(/[^a-zA-Z0-9_-]/g, '_');
+
+                const blob = await zipEntry.async('blob');
+                try {
+                    let fileToUpload: File;
+                    if (fileName.toLowerCase().endsWith('.gif')) {
+                        fileToUpload = new File([blob], fileName, {
+                            type: 'image/gif',
+                        });
+                    } else {
+                        fileToUpload = await convertToWebp(blob, fileName);
+                    }
+                    const newEmoji = await uploadEmojiAsync({
+                        name,
+                        file: fileToUpload,
+                    });
+                    uploadedIdsRef.current.push(newEmoji._id);
+                    setBulkStatus((prev) => ({
+                        ...prev,
+                        uploaded: prev.uploaded + 1,
+                    }));
+                } catch (err) {
+                    console.error(`Failed to process ${fileName}:`, err);
+                    setBulkStatus((prev) => ({
+                        ...prev,
+                        errors: prev.errors + 1,
+                    }));
+                }
+            }
+        } catch (err) {
+            console.error('Failed to process zip file', err);
+        } finally {
+            setIsBulkUploading(false);
+        }
+    };
+
+    const handleCancelBulk = async (): Promise<void> => {
+        isCancelledRef.current = true;
+        setIsCancelling(true);
+
+        const idsToDelete = [...uploadedIdsRef.current];
+        for (const id of idsToDelete) {
+            try {
+                await deleteEmojiAsync(id);
+            } catch (err) {
+                console.error(`Failed to delete emoji ${id}:`, err);
+            }
+        }
+
+        uploadedIdsRef.current = [];
+        setIsCancelling(false);
+        setBulkStatus((prev) => ({ ...prev, isOpen: false }));
+    };
+
     return (
         <div className="max-w-5xl space-y-10 pb-20">
             <div>
@@ -131,6 +284,13 @@ export const ServerEmojiSettings: React.FC<ServerEmojiSettingsProps> = ({
                     type="file"
                     onChange={handleFileSelect}
                 />
+                <input
+                    accept=".zip,application/zip"
+                    className="hidden"
+                    ref={bulkFileInputRef}
+                    type="file"
+                    onChange={handleBulkFileSelect}
+                />
 
                 {isLoading ? (
                     <div className="flex justify-center p-12">
@@ -141,7 +301,9 @@ export const ServerEmojiSettings: React.FC<ServerEmojiSettingsProps> = ({
                         {/* Upload Box */}
                         <button
                             className="flex aspect-square flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border-subtle p-3 transition-all hover:border-primary hover:bg-bg-subtle disabled:cursor-not-allowed disabled:opacity-50"
-                            disabled={isUploading || !emojiName}
+                            disabled={
+                                isUploading || isBulkUploading || !emojiName
+                            }
                             type="button"
                             onClick={handleUploadClick}
                         >
@@ -157,6 +319,30 @@ export const ServerEmojiSettings: React.FC<ServerEmojiSettingsProps> = ({
                                         variant="muted"
                                     >
                                         Upload
+                                    </Text>
+                                </>
+                            )}
+                        </button>
+
+                        {/* Bulk Upload Box */}
+                        <button
+                            className="flex aspect-square flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border-subtle p-3 transition-all hover:border-primary hover:bg-bg-subtle disabled:cursor-not-allowed disabled:opacity-50"
+                            disabled={isUploading || isBulkUploading}
+                            type="button"
+                            onClick={() => bulkFileInputRef.current?.click()}
+                        >
+                            {isBulkUploading ? (
+                                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                            ) : (
+                                <>
+                                    <Plus className="h-6 w-6 text-muted-foreground" />
+                                    <Text
+                                        align="center"
+                                        leading="tight"
+                                        size="xs"
+                                        variant="muted"
+                                    >
+                                        Bulk
                                     </Text>
                                 </>
                             )}
@@ -220,6 +406,19 @@ export const ServerEmojiSettings: React.FC<ServerEmojiSettingsProps> = ({
                     setSelectedFile(null);
                 }}
                 onConfirm={handleCropConfirm}
+            />
+
+            <BulkUploadModal
+                errors={bulkStatus.errors}
+                isCancelling={isCancelling}
+                isOpen={bulkStatus.isOpen}
+                title="Bulk Upload Emojis"
+                total={bulkStatus.total}
+                uploaded={bulkStatus.uploaded}
+                onCancel={handleCancelBulk}
+                onClose={() =>
+                    setBulkStatus((prev) => ({ ...prev, isOpen: false }))
+                }
             />
         </div>
     );

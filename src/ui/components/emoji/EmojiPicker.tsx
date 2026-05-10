@@ -41,9 +41,9 @@ interface EmojiPickerProps {
     className?: string;
 }
 
-const HEADER_HEIGHT = 32;
-const ROW_HEIGHT = 40;
-const SIDEBAR_WIDTH = 44;
+const HEADER_HEIGHT = 40;
+const ROW_HEIGHT = 56;
+const SIDEBAR_WIDTH = 52;
 
 type RowItem =
     | {
@@ -94,7 +94,7 @@ const EmojiPickerContent: React.FC<{
     const listAreaWidth = width - SIDEBAR_WIDTH;
     const columnCount = useMemo(() => {
         if (width <= 0) return 1;
-        return Math.max(1, Math.floor((listAreaWidth - 4) / 36));
+        return Math.floor((listAreaWidth - 4) / 52);
     }, [listAreaWidth, width]);
 
     const flatRows = useMemo(() => {
@@ -255,7 +255,7 @@ const EmojiPickerContent: React.FC<{
                             <div className="flex h-4 w-4 items-center justify-center overflow-hidden">
                                 {row.standardIcon ? (
                                     <ParsedUnicodeEmoji
-                                        className="inline-block h-[14px] w-[14px] flex-shrink-0"
+                                        className="inline-block h-[22px] w-[22px] flex-shrink-0"
                                         content={getUnicode(row.standardIcon)}
                                     />
                                 ) : (
@@ -286,11 +286,14 @@ const EmojiPickerContent: React.FC<{
                                     position="top"
                                 >
                                     <Button
-                                        className="h-8 w-8 shrink-0 rounded-md transition-colors hover:bg-bg-subtle"
+                                        className="h-12 w-12 shrink-0 rounded-md transition-colors hover:bg-bg-subtle"
                                         variant="ghost"
                                         onClick={() => onEmojiSelect(unicode)}
                                     >
-                                        <ParsedUnicodeEmoji content={unicode} />
+                                        <ParsedUnicodeEmoji
+                                            className="h-10 w-10"
+                                            content={unicode}
+                                        />
                                     </Button>
                                 </Tooltip>
                             );
@@ -313,7 +316,7 @@ const EmojiPickerContent: React.FC<{
                                     position="top"
                                 >
                                     <Button
-                                        className="h-8 w-8 shrink-0 rounded-md transition-colors hover:bg-bg-subtle"
+                                        className="h-12 w-12 shrink-0 rounded-md transition-colors hover:bg-bg-subtle"
                                         variant="ghost"
                                         onClick={() =>
                                             onCustomEmojiSelect?.(custom)
@@ -324,7 +327,7 @@ const EmojiPickerContent: React.FC<{
                                     >
                                         <img
                                             alt={custom.name}
-                                            className="h-6 w-6 object-contain"
+                                            className="h-10 w-10 object-contain"
                                             src={
                                                 resolveApiUrl(custom.url) || ''
                                             }
@@ -480,7 +483,7 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
         <motion.div
             animate={{ opacity: 1, scale: 1, y: 0 }}
             className={cn(
-                'relative flex h-[380px] w-[350px] overflow-hidden rounded-xl border border-divider bg-background shadow-2xl',
+                'relative flex h-[500px] w-[480px] overflow-hidden rounded-xl border border-divider bg-background shadow-2xl',
                 className,
             )}
             initial={{ opacity: 0, scale: 0.95, y: 10 }}

@@ -25,7 +25,7 @@ export const ParsedUnicodeEmoji: React.FC<ParsedUnicodeEmojiProps> = ({
             aria-label={emojiData.short_name}
             className={cn(
                 'relative top-[0.1em] inline-block align-middle',
-                isLarge ? 'h-[2.5em] w-[2.5em]' : 'h-[1.5em] w-[1.5em]',
+                isLarge ? 'h-16 w-16' : 'h-[1.5em] w-[1.5em]',
                 className,
             )}
             title={emojiData.short_name}

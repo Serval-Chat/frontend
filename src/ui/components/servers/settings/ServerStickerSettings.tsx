@@ -1,6 +1,7 @@
 import React, { useCallback, useRef, useState } from 'react';
 
 import { useQueryClient } from '@tanstack/react-query';
+import JSZip from 'jszip';
 import { Loader2, Plus, Trash2 } from 'lucide-react';
 
 import {
@@ -15,6 +16,7 @@ import {
     STICKER_NAME_MAX_LENGTH,
 } from '@/constants/stickers';
 import { useWebSocket } from '@/hooks/ws/useWebSocket';
+import { BulkUploadModal } from '@/ui/components/common/BulkUploadModal';
 import { Button } from '@/ui/components/common/Button';
 import { Heading } from '@/ui/components/common/Heading';
 import { Input } from '@/ui/components/common/Input';
@@ -32,9 +34,13 @@ export const ServerStickerSettings: React.FC<ServerStickerSettingsProps> = ({
 }) => {
     const queryClient = useQueryClient();
     const { data: stickers = [], isLoading } = useServerStickers(serverId);
-    const { mutate: uploadSticker, isPending: isUploading } =
-        useUploadSticker(serverId);
-    const { mutate: deleteSticker } = useDeleteSticker(serverId);
+    const {
+        mutate: uploadSticker,
+        mutateAsync: uploadStickerAsync,
+        isPending: isUploading,
+    } = useUploadSticker(serverId);
+    const { mutate: deleteSticker, mutateAsync: deleteStickerAsync } =
+        useDeleteSticker(serverId);
 
     const [stickerName, setStickerName] = useState('');
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -42,7 +48,18 @@ export const ServerStickerSettings: React.FC<ServerStickerSettingsProps> = ({
     const [hoveredStickerId, setHoveredStickerId] = useState<string | null>(
         null,
     );
+    const [isBulkUploading, setIsBulkUploading] = useState(false);
+    const [isCancelling, setIsCancelling] = useState(false);
+    const isCancelledRef = useRef(false);
+    const uploadedIdsRef = useRef<string[]>([]);
+    const [bulkStatus, setBulkStatus] = useState({
+        total: 0,
+        uploaded: 0,
+        errors: 0,
+        isOpen: false,
+    });
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const bulkFileInputRef = useRef<HTMLInputElement>(null);
 
     useWebSocket(
         WsEvents.STICKER_UPDATED,
@@ -105,6 +122,144 @@ export const ServerStickerSettings: React.FC<ServerStickerSettingsProps> = ({
         fileInputRef.current?.click();
     };
 
+    const convertToWebp = (blob: Blob, fileName: string): Promise<File> =>
+        new Promise((resolve, reject) => {
+            const url = URL.createObjectURL(blob);
+            const img = new Image();
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                canvas.width = img.width;
+                canvas.height = img.height;
+                const ctx = canvas.getContext('2d');
+                if (!ctx) {
+                    reject(new Error('Failed to get canvas context'));
+                    return;
+                }
+                ctx.drawImage(img, 0, 0);
+                canvas.toBlob((convertedBlob) => {
+                    if (convertedBlob) {
+                        const newName =
+                            fileName.replace(/\.[^/.]+$/, '') + '.webp';
+                        resolve(
+                            new File([convertedBlob], newName, {
+                                type: 'image/webp',
+                            }),
+                        );
+                    } else {
+                        reject(new Error('Failed to convert to webp'));
+                    }
+                    URL.revokeObjectURL(url);
+                }, 'image/webp');
+            };
+            img.onerror = () => {
+                URL.revokeObjectURL(url);
+                reject(new Error('Failed to load image'));
+            };
+            img.src = url;
+        });
+
+    const handleBulkFileSelect = async (
+        event: React.ChangeEvent<HTMLInputElement>,
+    ): Promise<void> => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+
+        if (bulkFileInputRef.current) {
+            bulkFileInputRef.current.value = '';
+        }
+
+        try {
+            const zip = new JSZip();
+            const loadedZip = await zip.loadAsync(file);
+
+            const validFiles = Object.entries(loadedZip.files).filter(
+                ([relativePath, zipEntry]) => {
+                    if (zipEntry.dir) return false;
+                    const isImage = relativePath.match(
+                        /\.(png|jpg|jpeg|webp|gif)$/i,
+                    );
+                    if (!isImage) return false;
+                    const fileName = zipEntry.name.split('/').pop() || '';
+                    if (fileName.startsWith('.')) return false;
+                    return true;
+                },
+            );
+
+            if (validFiles.length === 0) return;
+
+            setBulkStatus({
+                total: validFiles.length,
+                uploaded: 0,
+                errors: 0,
+                isOpen: true,
+            });
+
+            setIsBulkUploading(true);
+            isCancelledRef.current = false;
+            uploadedIdsRef.current = [];
+
+            for (const [, zipEntry] of validFiles) {
+                if (isCancelledRef.current) break;
+
+                const fileName = zipEntry.name.split('/').pop() || '';
+                const name = fileName
+                    .split('.')[0]
+                    .replace(INVALID_STICKER_NAME_CHARS_REGEX, '');
+                const finalName = name.slice(0, STICKER_NAME_MAX_LENGTH);
+
+                const blob = await zipEntry.async('blob');
+                try {
+                    let fileToUpload: File;
+                    if (fileName.toLowerCase().endsWith('.gif')) {
+                        fileToUpload = new File([blob], fileName, {
+                            type: 'image/gif',
+                        });
+                    } else {
+                        fileToUpload = await convertToWebp(blob, fileName);
+                    }
+                    const newSticker = await uploadStickerAsync({
+                        name: finalName,
+                        file: fileToUpload,
+                    });
+                    uploadedIdsRef.current.push(newSticker.id);
+                    setBulkStatus((prev) => ({
+                        ...prev,
+                        uploaded: prev.uploaded + 1,
+                    }));
+                } catch (err) {
+                    console.error(`Failed to process ${fileName}:`, err);
+                    setBulkStatus((prev) => ({
+                        ...prev,
+                        errors: prev.errors + 1,
+                    }));
+                }
+            }
+        } catch (err) {
+            console.error('Failed to process zip file', err);
+        } finally {
+            setIsBulkUploading(false);
+        }
+    };
+
+    const handleCancelBulk = async (): Promise<void> => {
+        isCancelledRef.current = true;
+        setIsCancelling(true);
+
+        // Delete already uploaded stickers
+        const idsToDelete = [...uploadedIdsRef.current];
+        for (const id of idsToDelete) {
+            try {
+                await deleteStickerAsync(id);
+            } catch (err) {
+                console.error(`Failed to delete sticker ${id}:`, err);
+            }
+        }
+
+        uploadedIdsRef.current = [];
+        setIsCancelling(false);
+        setBulkStatus((prev) => ({ ...prev, isOpen: false }));
+    };
+
     return (
         <div className="max-w-5xl space-y-10 pb-20">
             <div>
@@ -143,6 +298,13 @@ export const ServerStickerSettings: React.FC<ServerStickerSettingsProps> = ({
                     type="file"
                     onChange={handleFileSelect}
                 />
+                <input
+                    accept=".zip,application/zip"
+                    className="hidden"
+                    ref={bulkFileInputRef}
+                    type="file"
+                    onChange={handleBulkFileSelect}
+                />
 
                 {isLoading ? (
                     <div className="flex justify-center p-12">
@@ -153,7 +315,9 @@ export const ServerStickerSettings: React.FC<ServerStickerSettingsProps> = ({
                         {/* Upload Box */}
                         <button
                             className="flex aspect-square flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border-subtle p-3 transition-all hover:border-primary hover:bg-bg-subtle disabled:cursor-not-allowed disabled:opacity-50"
-                            disabled={isUploading || !stickerName}
+                            disabled={
+                                isUploading || isBulkUploading || !stickerName
+                            }
                             type="button"
                             onClick={handleUploadClick}
                         >
@@ -169,6 +333,30 @@ export const ServerStickerSettings: React.FC<ServerStickerSettingsProps> = ({
                                         variant="muted"
                                     >
                                         Upload
+                                    </Text>
+                                </>
+                            )}
+                        </button>
+
+                        {/* Bulk Upload Box */}
+                        <button
+                            className="flex aspect-square flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border-subtle p-3 transition-all hover:border-primary hover:bg-bg-subtle disabled:cursor-not-allowed disabled:opacity-50"
+                            disabled={isUploading || isBulkUploading}
+                            type="button"
+                            onClick={() => bulkFileInputRef.current?.click()}
+                        >
+                            {isBulkUploading ? (
+                                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                            ) : (
+                                <>
+                                    <Plus className="h-6 w-6 text-muted-foreground" />
+                                    <Text
+                                        align="center"
+                                        leading="tight"
+                                        size="xs"
+                                        variant="muted"
+                                    >
+                                        Bulk
                                     </Text>
                                 </>
                             )}
@@ -233,6 +421,19 @@ export const ServerStickerSettings: React.FC<ServerStickerSettingsProps> = ({
                     setSelectedFile(null);
                 }}
                 onConfirm={handleCropConfirm}
+            />
+
+            <BulkUploadModal
+                errors={bulkStatus.errors}
+                isCancelling={isCancelling}
+                isOpen={bulkStatus.isOpen}
+                title="Bulk Upload Stickers"
+                total={bulkStatus.total}
+                uploaded={bulkStatus.uploaded}
+                onCancel={handleCancelBulk}
+                onClose={() =>
+                    setBulkStatus((prev) => ({ ...prev, isOpen: false }))
+                }
             />
         </div>
     );
