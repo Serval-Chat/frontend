@@ -42,7 +42,7 @@ interface EmojiPickerProps {
 }
 
 const HEADER_HEIGHT = 40;
-const ROW_HEIGHT = 56;
+const ROW_HEIGHT = 48;
 const SIDEBAR_WIDTH = 52;
 
 type RowItem =
@@ -94,7 +94,7 @@ const EmojiPickerContent: React.FC<{
     const listAreaWidth = width - SIDEBAR_WIDTH;
     const columnCount = useMemo(() => {
         if (width <= 0) return 1;
-        return Math.floor((listAreaWidth - 4) / 52);
+        return Math.floor((listAreaWidth - 4) / 42);
     }, [listAreaWidth, width]);
 
     const flatRows = useMemo(() => {
@@ -271,7 +271,7 @@ const EmojiPickerContent: React.FC<{
             }
 
             return (
-                <Box className="flex flex-wrap gap-1 p-1" style={style}>
+                <Box className="flex flex-wrap gap-0.5 p-1" style={style}>
                     {row.emojis.map((emoji) => {
                         if (
                             emoji &&
@@ -286,12 +286,12 @@ const EmojiPickerContent: React.FC<{
                                     position="top"
                                 >
                                     <Button
-                                        className="h-12 w-12 shrink-0 rounded-md transition-colors hover:bg-bg-subtle"
+                                        className="h-10 w-10 shrink-0 rounded-md transition-colors hover:bg-bg-subtle"
                                         variant="ghost"
                                         onClick={() => onEmojiSelect(unicode)}
                                     >
                                         <ParsedUnicodeEmoji
-                                            className="h-10 w-10"
+                                            className="h-8 w-8"
                                             content={unicode}
                                         />
                                     </Button>
@@ -316,7 +316,7 @@ const EmojiPickerContent: React.FC<{
                                     position="top"
                                 >
                                     <Button
-                                        className="h-12 w-12 shrink-0 rounded-md transition-colors hover:bg-bg-subtle"
+                                        className="h-10 w-10 shrink-0 rounded-md transition-colors hover:bg-bg-subtle"
                                         variant="ghost"
                                         onClick={() =>
                                             onCustomEmojiSelect?.(custom)
@@ -327,7 +327,7 @@ const EmojiPickerContent: React.FC<{
                                     >
                                         <img
                                             alt={custom.name}
-                                            className="h-10 w-10 object-contain"
+                                            className="h-8 w-8 object-contain"
                                             src={
                                                 resolveApiUrl(custom.url) || ''
                                             }
@@ -483,7 +483,7 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
         <motion.div
             animate={{ opacity: 1, scale: 1, y: 0 }}
             className={cn(
-                'relative flex h-[500px] w-[480px] overflow-hidden rounded-xl border border-divider bg-background shadow-2xl',
+                'relative flex h-[500px] w-[min(480px,calc(100vw-24px))] overflow-hidden rounded-xl border border-divider bg-background shadow-2xl',
                 className,
             )}
             initial={{ opacity: 0, scale: 0.95, y: 10 }}
