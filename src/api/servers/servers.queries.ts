@@ -215,6 +215,7 @@ export const useChannels = (
             isValidId(serverId) &&
             hasAuthToken(),
         placeholderData: keepPreviousData,
+        staleTime: Infinity,
     });
 
 export const useCategories = (
@@ -230,6 +231,7 @@ export const useCategories = (
             isValidId(serverId) &&
             hasAuthToken(),
         placeholderData: keepPreviousData,
+        staleTime: Infinity,
     });
 
 export const useMembers = (
@@ -1099,9 +1101,6 @@ export const useMarkServerRead = (): UseMutationResult<void, Error, string> => {
             });
             void queryClient.invalidateQueries({
                 queryKey: ['pings'],
-            });
-            void queryClient.invalidateQueries({
-                queryKey: SERVERS_QUERY_KEYS.channels(serverId),
             });
             void queryClient.invalidateQueries({
                 queryKey: SERVERS_QUERY_KEYS.details(serverId),

@@ -4,6 +4,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 
 import { SERVERS_QUERY_KEYS } from '@/api/servers/servers.queries';
+import type { Channel } from '@/api/servers/servers.types';
 import { WsEvents } from '@/ws';
 
 import { useWebSocket } from './useWebSocket';
@@ -257,10 +258,21 @@ export const useServerWS = (serverId?: string): void => {
         useCallback(
             (payload: { serverId: string; channelId: string }): void => {
                 if (payload.serverId === serverId) {
-                    invalidateChannels();
+                    queryClient.setQueryData<Channel[]>(
+                        SERVERS_QUERY_KEYS.channels(serverId),
+                        (old) =>
+                            old?.map((c) =>
+                                c._id === payload.channelId
+                                    ? {
+                                          ...c,
+                                          lastReadAt: new Date().toISOString(),
+                                      }
+                                    : c,
+                            ) ?? old,
+                    );
                 }
             },
-            [serverId, invalidateChannels],
+            [serverId, queryClient],
         ),
     );
 };
