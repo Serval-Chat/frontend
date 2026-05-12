@@ -24,7 +24,7 @@ export const ParsedUnicodeEmoji: React.FC<ParsedUnicodeEmojiProps> = ({
         <span
             aria-label={emojiData.short_name}
             className={cn(
-                'relative top-[0.1em] inline-block align-middle',
+                'relative top-[0.1em] inline-block overflow-hidden align-middle',
                 isLarge ? 'h-16 w-16' : 'h-[1.5em] w-[1.5em]',
                 className,
             )}

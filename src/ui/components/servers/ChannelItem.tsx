@@ -23,6 +23,8 @@ import {
     type ContextMenuItem,
 } from '@/ui/components/common/ContextMenu';
 import { IconButton } from '@/ui/components/common/IconButton';
+import { ParsedEmoji } from '@/ui/components/common/ParsedEmoji';
+import { ParsedUnicodeEmoji } from '@/ui/components/common/ParsedUnicodeEmoji';
 import { UserProfilePicture } from '@/ui/components/common/UserProfilePicture';
 import { buttonVariants } from '@/ui/components/common/buttonVariants';
 import { ICON_MAP } from '@/ui/utils/iconMap';
@@ -32,6 +34,8 @@ interface ChannelItemProps {
     name: string;
     type: ChannelType;
     icon?: string;
+    emoji?: string;
+    emojiType?: 'custom' | 'unicode';
     isActive?: boolean;
     isUnread?: boolean;
     pingCount?: number;
@@ -50,6 +54,8 @@ export const ChannelItem: React.FC<ChannelItemProps> = React.memo(
         name,
         type,
         icon,
+        emoji,
+        emojiType,
         isActive,
         isUnread,
         pingCount,
@@ -99,14 +105,30 @@ export const ChannelItem: React.FC<ChannelItemProps> = React.memo(
                 >
                     <div className="flex w-full items-center justify-between">
                         <div className="flex min-w-0 flex-1 items-center">
-                            <Icon
-                                className={cn(
-                                    'mr-1.5 h-[18px] w-[18px] shrink-0 transition-colors',
-                                    isActive || isUnread
-                                        ? 'text-foreground'
-                                        : 'text-muted-foreground group-hover:text-foreground/80',
-                                )}
-                            />
+                            {emoji && emojiType ? (
+                                <div className="mr-1.5 flex h-[18px] w-[18px] shrink-0 items-center justify-center transition-colors">
+                                    {emojiType === 'custom' ? (
+                                        <ParsedEmoji
+                                            className="h-full w-full"
+                                            emojiId={emoji}
+                                        />
+                                    ) : (
+                                        <ParsedUnicodeEmoji
+                                            className="h-full w-full"
+                                            content={emoji}
+                                        />
+                                    )}
+                                </div>
+                            ) : (
+                                <Icon
+                                    className={cn(
+                                        'mr-1.5 h-[18px] w-[18px] shrink-0 transition-colors',
+                                        isActive || isUnread
+                                            ? 'text-foreground'
+                                            : 'text-muted-foreground group-hover:text-foreground/80',
+                                    )}
+                                />
+                            )}
                             <span
                                 className={cn(
                                     'truncate text-left text-[15px] font-medium',

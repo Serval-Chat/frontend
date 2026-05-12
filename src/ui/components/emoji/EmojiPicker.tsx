@@ -43,7 +43,7 @@ interface EmojiPickerProps {
 
 const HEADER_HEIGHT = 40;
 const ROW_HEIGHT = 48;
-const SIDEBAR_WIDTH = 52;
+const SIDEBAR_WIDTH = 44;
 
 type RowItem =
     | {
@@ -94,7 +94,7 @@ const EmojiPickerContent: React.FC<{
     const listAreaWidth = width - SIDEBAR_WIDTH;
     const columnCount = useMemo(() => {
         if (width <= 0) return 1;
-        return Math.floor((listAreaWidth - 4) / 42);
+        return Math.max(1, Math.floor((listAreaWidth - 16) / 42));
     }, [listAreaWidth, width]);
 
     const flatRows = useMemo(() => {
@@ -271,7 +271,10 @@ const EmojiPickerContent: React.FC<{
             }
 
             return (
-                <Box className="flex flex-wrap gap-0.5 p-1" style={style}>
+                <Box
+                    className="flex flex-nowrap gap-0.5 overflow-hidden p-1"
+                    style={style}
+                >
                     {row.emojis.map((emoji) => {
                         if (
                             emoji &&

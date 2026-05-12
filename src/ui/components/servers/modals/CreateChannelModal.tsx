@@ -4,10 +4,15 @@ import { Hash, Link, Volume2 } from 'lucide-react';
 
 import { serversApi } from '@/api/servers/servers.api';
 import type { ChannelType } from '@/api/servers/servers.types';
+import { useCustomEmojis } from '@/hooks/useCustomEmojis';
 import { Button } from '@/ui/components/common/Button';
 import { Input } from '@/ui/components/common/Input';
 import { Modal } from '@/ui/components/common/Modal';
+import { ParsedEmoji } from '@/ui/components/common/ParsedEmoji';
+import { ParsedUnicodeEmoji } from '@/ui/components/common/ParsedUnicodeEmoji';
+import { Popover } from '@/ui/components/common/Popover';
 import { Text } from '@/ui/components/common/Text';
+import { EmojiPicker } from '@/ui/components/emoji/EmojiPicker';
 import { cn } from '@/utils/cn';
 
 interface CreateChannelModalProps {
@@ -52,14 +57,24 @@ export const CreateChannelModal: React.FC<CreateChannelModalProps> = ({
     const [name, setName] = useState('');
     const [channelType, setChannelType] = useState<ChannelType>('text');
     const [linkUrl, setLinkUrl] = useState('');
+    const [emoji, setEmoji] = useState('');
+    const [emojiType, setEmojiType] = useState<
+        'custom' | 'unicode' | undefined
+    >(undefined);
+    const [isEmojiPickerOpen, setIsEmojiPickerOpen] = useState(false);
+    const emojiTriggerRef = React.useRef<HTMLButtonElement>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    const { customCategories } = useCustomEmojis();
 
     const handleClose = (): void => {
         if (isLoading) return;
         onClose();
         setName('');
         setLinkUrl('');
+        setEmoji('');
+        setEmojiType(undefined);
         setChannelType('text');
         setError(null);
     };
@@ -90,6 +105,8 @@ export const CreateChannelModal: React.FC<CreateChannelModalProps> = ({
                 name: name.trim(),
                 categoryId,
                 type: channelType,
+                emoji: emoji || undefined,
+                emojiType,
                 ...(channelType === 'link' ? { link: linkUrl.trim() } : {}),
             });
             handleClose();
@@ -204,6 +221,81 @@ export const CreateChannelModal: React.FC<CreateChannelModalProps> = ({
                         />
                     </div>
                 )}
+
+                <div className="space-y-2">
+                    <Text
+                        size="xs"
+                        transform="uppercase"
+                        variant="muted"
+                        weight="bold"
+                    >
+                        Channel Emoji (Optional)
+                    </Text>
+                    <div className="flex items-center gap-4">
+                        <Button
+                            className="h-16 w-16 border border-dashed border-border-subtle bg-bg-secondary hover:bg-white/5"
+                            ref={emojiTriggerRef}
+                            type="button"
+                            variant="ghost"
+                            onClick={() =>
+                                setIsEmojiPickerOpen(!isEmojiPickerOpen)
+                            }
+                        >
+                            {emoji && emojiType ? (
+                                <div className="h-10 w-10">
+                                    {emojiType === 'custom' ? (
+                                        <ParsedEmoji
+                                            className="h-full w-full"
+                                            emojiId={emoji}
+                                        />
+                                    ) : (
+                                        <ParsedUnicodeEmoji
+                                            className="h-full w-full text-2xl"
+                                            content={emoji}
+                                        />
+                                    )}
+                                </div>
+                            ) : (
+                                <Text size="xs" variant="muted">
+                                    Select
+                                </Text>
+                            )}
+                        </Button>
+                        {emoji && (
+                            <Button
+                                size="sm"
+                                type="button"
+                                variant="ghost"
+                                onClick={() => {
+                                    setEmoji('');
+                                    setEmojiType(undefined);
+                                }}
+                            >
+                                Clear
+                            </Button>
+                        )}
+                    </div>
+
+                    <Popover
+                        isOpen={isEmojiPickerOpen}
+                        triggerRef={emojiTriggerRef}
+                        onClose={() => setIsEmojiPickerOpen(false)}
+                    >
+                        <EmojiPicker
+                            customCategories={customCategories}
+                            onCustomEmojiSelect={(e) => {
+                                setEmoji(e.id);
+                                setEmojiType('custom');
+                                setIsEmojiPickerOpen(false);
+                            }}
+                            onEmojiSelect={(e) => {
+                                setEmoji(e);
+                                setEmojiType('unicode');
+                                setIsEmojiPickerOpen(false);
+                            }}
+                        />
+                    </Popover>
+                </div>
 
                 {error && (
                     <Text size="xs" variant="danger">

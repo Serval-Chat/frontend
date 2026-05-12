@@ -134,6 +134,8 @@ const ChannelRow: React.FC<ChannelRowProps> = React.memo(
                 <ChannelItem
                     connectedUserIds={connectedUserIds}
                     disabled={channel.type === 'voice' && !canConnect}
+                    emoji={channel.emoji}
+                    emojiType={channel.emojiType}
                     icon={channel.icon}
                     isActive={selectedChannelId === channel._id}
                     isUnread={!!isUnread}

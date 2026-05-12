@@ -9,13 +9,18 @@ import {
     useUpdateChannel,
 } from '@/api/servers/servers.queries';
 import { type Channel } from '@/api/servers/servers.types';
+import { useCustomEmojis } from '@/hooks/useCustomEmojis';
 import { usePermissions } from '@/hooks/usePermissions';
 import { Button } from '@/ui/components/common/Button';
 import { Heading } from '@/ui/components/common/Heading';
 import { Input } from '@/ui/components/common/Input';
 import { Modal } from '@/ui/components/common/Modal';
+import { ParsedEmoji } from '@/ui/components/common/ParsedEmoji';
+import { ParsedUnicodeEmoji } from '@/ui/components/common/ParsedUnicodeEmoji';
+import { Popover } from '@/ui/components/common/Popover';
 import { SettingsFloatingBar } from '@/ui/components/common/SettingsFloatingBar';
 import { Text } from '@/ui/components/common/Text';
+import { EmojiPicker } from '@/ui/components/emoji/EmojiPicker';
 import { ICON_MAP } from '@/ui/utils/iconMap';
 import { cn } from '@/utils/cn';
 import { APP_LOCALE } from '@/utils/locale';
@@ -42,6 +47,18 @@ export const ChannelOverviewSettings: React.FC<
     const [originalSlowMode, setOriginalSlowMode] = useState(
         channel.slowMode || 0,
     );
+    const [emoji, setEmoji] = useState(channel.emoji || '');
+    const [originalEmoji, setOriginalEmoji] = useState(channel.emoji || '');
+    const [emojiType, setEmojiType] = useState<
+        'custom' | 'unicode' | undefined
+    >(channel.emojiType);
+    const [originalEmojiType, setOriginalEmojiType] = useState<
+        'custom' | 'unicode' | undefined
+    >(channel.emojiType);
+    const [isEmojiPickerOpen, setIsEmojiPickerOpen] = useState(false);
+    const emojiTriggerRef = React.useRef<HTMLButtonElement>(null);
+
+    const { customCategories } = useCustomEmojis();
     const [error, setError] = useState<string | null>(null);
 
     const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
@@ -75,6 +92,10 @@ export const ChannelOverviewSettings: React.FC<
         setOriginalLinkUrl(channel.link || '');
         setSlowMode(channel.slowMode || 0);
         setOriginalSlowMode(channel.slowMode || 0);
+        setEmoji(channel.emoji || '');
+        setOriginalEmoji(channel.emoji || '');
+        setEmojiType(channel.emojiType);
+        setOriginalEmojiType(channel.emojiType);
     }
 
     const hasChanges =
@@ -82,7 +103,9 @@ export const ChannelOverviewSettings: React.FC<
         description !== originalDescription ||
         selectedIcon !== originalIcon ||
         linkUrl !== originalLinkUrl ||
-        slowMode !== originalSlowMode;
+        slowMode !== originalSlowMode ||
+        emoji !== originalEmoji ||
+        emojiType !== originalEmojiType;
 
     const handleSave = (): void => {
         setError(null);
@@ -111,6 +134,8 @@ export const ChannelOverviewSettings: React.FC<
                     ? { link: linkUrl || undefined }
                     : {}),
                 slowMode,
+                emoji: emoji || undefined,
+                emojiType,
             },
             {
                 onSuccess: () => {
@@ -121,6 +146,8 @@ export const ChannelOverviewSettings: React.FC<
                         setOriginalLinkUrl(linkUrl);
                     }
                     setOriginalSlowMode(slowMode);
+                    setOriginalEmoji(emoji);
+                    setOriginalEmojiType(emojiType);
                 },
             },
         );
@@ -132,6 +159,8 @@ export const ChannelOverviewSettings: React.FC<
         setSelectedIcon(originalIcon);
         setLinkUrl(originalLinkUrl);
         setSlowMode(originalSlowMode);
+        setEmoji(originalEmoji);
+        setEmojiType(originalEmojiType);
         setError(null);
     };
 
@@ -218,6 +247,23 @@ export const ChannelOverviewSettings: React.FC<
                         className="custom-scrollbar grid max-h-48 grid-cols-6 gap-2 overflow-y-auto rounded-md border border-border-subtle bg-bg-secondary p-3 md:grid-cols-10"
                         id="channel-icons"
                     >
+                        <Button
+                            className={cn(
+                                'h-auto border p-2 text-muted-foreground transition-all hover:text-foreground',
+                                !selectedIcon && !emoji
+                                    ? 'border-primary bg-primary/20 text-primary shadow-[0_0_8px_var(--color-primary)]'
+                                    : 'border-transparent',
+                            )}
+                            title="None"
+                            variant="ghost"
+                            onClick={() => {
+                                setSelectedIcon('');
+                                setEmoji('');
+                                setEmojiType(undefined);
+                            }}
+                        >
+                            None
+                        </Button>
                         {Object.entries(ICON_MAP).map(
                             ([key, IconComponent]) => (
                                 <Button
@@ -230,13 +276,91 @@ export const ChannelOverviewSettings: React.FC<
                                     key={key}
                                     title={key}
                                     variant="ghost"
-                                    onClick={() => setSelectedIcon(key)}
+                                    onClick={() => {
+                                        setSelectedIcon(key);
+                                        setEmoji('');
+                                        setEmojiType(undefined);
+                                    }}
                                 >
                                     <IconComponent size={20} />
                                 </Button>
                             ),
                         )}
                     </div>
+                </div>
+
+                <div className="space-y-2">
+                    <label
+                        className="text-xs font-bold tracking-wider text-muted-foreground uppercase"
+                        htmlFor="channel-emoji"
+                    >
+                        Or choose an Emoji
+                    </label>
+                    <div className="flex items-center gap-4">
+                        <Button
+                            className="h-20 w-20 border border-dashed border-border-subtle bg-bg-secondary hover:bg-white/5"
+                            id="channel-emoji"
+                            ref={emojiTriggerRef}
+                            variant="ghost"
+                            onClick={() =>
+                                setIsEmojiPickerOpen(!isEmojiPickerOpen)
+                            }
+                        >
+                            {emoji && emojiType ? (
+                                <div className="h-12 w-12">
+                                    {emojiType === 'custom' ? (
+                                        <ParsedEmoji
+                                            className="h-full w-full"
+                                            emojiId={emoji}
+                                        />
+                                    ) : (
+                                        <ParsedUnicodeEmoji
+                                            className="h-full w-full text-4xl"
+                                            content={emoji}
+                                        />
+                                    )}
+                                </div>
+                            ) : (
+                                <Text size="xs" variant="muted">
+                                    Select Emoji
+                                </Text>
+                            )}
+                        </Button>
+                        {emoji && (
+                            <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => {
+                                    setEmoji('');
+                                    setEmojiType(undefined);
+                                }}
+                            >
+                                Clear Emoji
+                            </Button>
+                        )}
+                    </div>
+
+                    <Popover
+                        isOpen={isEmojiPickerOpen}
+                        triggerRef={emojiTriggerRef}
+                        onClose={() => setIsEmojiPickerOpen(false)}
+                    >
+                        <EmojiPicker
+                            customCategories={customCategories}
+                            onCustomEmojiSelect={(e) => {
+                                setEmoji(e.id);
+                                setEmojiType('custom');
+                                setSelectedIcon('');
+                                setIsEmojiPickerOpen(false);
+                            }}
+                            onEmojiSelect={(e) => {
+                                setEmoji(e);
+                                setEmojiType('unicode');
+                                setSelectedIcon('');
+                                setIsEmojiPickerOpen(false);
+                            }}
+                        />
+                    </Popover>
                 </div>
 
                 {channel.type === 'text' && (

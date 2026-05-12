@@ -40,6 +40,8 @@ export interface Channel {
     serverId: string;
     type: ChannelType;
     icon?: string;
+    emoji?: string;
+    emojiType?: 'custom' | 'unicode';
     position: number;
     categoryId?: string | null;
     description?: string;

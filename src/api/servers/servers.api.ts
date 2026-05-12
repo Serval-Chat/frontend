@@ -217,6 +217,8 @@ export const serversApi = {
             type?: 'text' | 'voice' | 'link';
             categoryId?: string | null;
             position?: number;
+            emoji?: string;
+            emojiType?: 'custom' | 'unicode';
             link?: string;
         },
     ): Promise<Channel> => {
