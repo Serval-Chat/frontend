@@ -34,6 +34,22 @@ vi.mock('@/ui/components/common/UserItem', () => ({
     ),
 }));
 
+vi.mock('@tanstack/react-virtual', () => ({
+    useVirtualizer: vi.fn().mockImplementation((options: any) => ({
+        getVirtualItems: () =>
+            Array.from({ length: options.count }).map((_, i) => ({
+                index: i,
+                start: i * 44,
+                key: i,
+            })),
+        getTotalSize: () => options.count * 44,
+        scrollToIndex: vi.fn(),
+        measureElement: vi.fn(),
+    })),
+}));
+
+const mockScrollRef = { current: document.createElement('div') };
+
 describe('ServerSidebarSection', () => {
     const mockMe = { _id: 'me-id', username: 'Me' } as User;
     const mockRoles: Role[] = [
@@ -169,6 +185,7 @@ describe('ServerSidebarSection', () => {
                 memberRoleMap={memberRoleMap}
                 members={mockMembers}
                 roles={mockRoles}
+                scrollRef={mockScrollRef as any}
             />,
         );
 
@@ -200,6 +217,7 @@ describe('ServerSidebarSection', () => {
                 memberRoleMap={memberRoleMap}
                 members={mockMembers}
                 roles={mockRoles}
+                scrollRef={mockScrollRef as any}
             />,
         );
 
@@ -223,6 +241,7 @@ describe('ServerSidebarSection', () => {
                 memberRoleMap={memberRoleMap}
                 members={[mockMembers[0]]} // Only Alice
                 roles={mockRoles}
+                scrollRef={mockScrollRef as any}
             />,
         );
 
@@ -243,6 +262,7 @@ describe('ServerSidebarSection', () => {
                 memberRoleMap={memberRoleMap}
                 members={[mockMembers[0]]}
                 roles={mockRoles}
+                scrollRef={mockScrollRef as any}
             />,
         );
 
@@ -265,6 +285,7 @@ describe('ServerSidebarSection', () => {
                 memberRoleMap={memberRoleMap}
                 members={[mockMembers[3]]}
                 roles={mockRoles}
+                scrollRef={mockScrollRef as any}
             />,
         );
 
@@ -296,6 +317,7 @@ describe('ServerSidebarSection', () => {
                 memberRoleMap={new Map()}
                 members={members}
                 roles={mockRoles}
+                scrollRef={mockScrollRef as any}
             />,
         );
 
@@ -315,6 +337,7 @@ describe('ServerSidebarSection', () => {
                 memberRoleMap={new Map()}
                 members={members}
                 roles={mockRoles}
+                scrollRef={mockScrollRef as any}
             />,
         );
 
@@ -341,6 +364,7 @@ describe('ServerSidebarSection', () => {
                 memberRoleMap={new Map()}
                 members={[member]}
                 roles={mockRoles}
+                scrollRef={mockScrollRef as any}
             />,
         );
 
@@ -359,6 +383,7 @@ describe('ServerSidebarSection', () => {
                 memberRoleMap={new Map()}
                 members={[member]}
                 roles={mockRoles}
+                scrollRef={mockScrollRef as any}
             />,
         );
 
@@ -416,6 +441,7 @@ describe('ServerSidebarSection', () => {
                 memberRoleMap={new Map()}
                 members={[member]}
                 roles={mockRoles}
+                scrollRef={mockScrollRef as any}
             />,
         );
 

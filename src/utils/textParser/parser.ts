@@ -8,6 +8,49 @@ import {
     type ParserFeature as ParserFeatureType,
 } from './types';
 
+const STARTS_WITH_EMOJI_REGEX = new RegExp('^' + emojiRegex.source);
+const featureSetCache = new WeakMap<
+    readonly ParserFeatureType[],
+    ReadonlySet<ParserFeatureType>
+>();
+let cachedBaseUrlPattern: string | null = null;
+
+const getFeatureSet = (
+    features: readonly ParserFeatureType[],
+): ReadonlySet<ParserFeatureType> => {
+    const cached = featureSetCache.get(features);
+    if (cached) return cached;
+
+    const set = new Set(features);
+    featureSetCache.set(features, set);
+    return set;
+};
+
+const getBaseUrlPattern = (): string => {
+    if (cachedBaseUrlPattern && import.meta.env.NODE_ENV !== 'test')
+        return cachedBaseUrlPattern;
+
+    const alternativeUrlsStr = import.meta.env.VITE_ALTERNATIVE_URLS || '[]';
+    let alternativeUrls: string[] = [];
+    try {
+        alternativeUrls = JSON.parse(alternativeUrlsStr);
+    } catch (e) {
+        console.warn('Failed to parse VITE_ALTERNATIVE_URLS:', e);
+    }
+
+    const defaultDomains = [
+        'https?://(?:rolling\\.)?catfla\\.re',
+        'https?://localhost:(?:5173|8001)',
+    ];
+
+    const escapedAlts = alternativeUrls.map((url) =>
+        url.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\/$/, ''),
+    );
+
+    cachedBaseUrlPattern = `(?:${[...defaultDomains, ...escapedAlts].join('|')})`;
+    return cachedBaseUrlPattern;
+};
+
 export interface ParserOptions {
     readonly features: readonly ParserFeatureType[];
     readonly enableCensorship?: boolean;
@@ -170,34 +213,16 @@ export class TextParser {
     private text: string;
     private index: number = 0;
     private options: ParserOptions;
-    private startsWithEmojiRegex: RegExp;
+    private featureSet: ReadonlySet<ParserFeatureType>;
 
     constructor(text: string, options: ParserOptions) {
         this.text = text;
         this.options = options;
-        this.startsWithEmojiRegex = new RegExp('^' + emojiRegex.source);
+        this.featureSet = getFeatureSet(options.features);
     }
 
-    private getBaseUrlPattern(): string {
-        const alternativeUrlsStr =
-            import.meta.env.VITE_ALTERNATIVE_URLS || '[]';
-        let alternativeUrls: string[] = [];
-        try {
-            alternativeUrls = JSON.parse(alternativeUrlsStr);
-        } catch (e) {
-            console.warn('Failed to parse VITE_ALTERNATIVE_URLS:', e);
-        }
-
-        const defaultDomains = [
-            'https?://(?:rolling\\.)?catfla\\.re',
-            'https?://localhost:(?:5173|8001)',
-        ];
-
-        const escapedAlts = alternativeUrls.map((url) =>
-            url.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\/$/, ''),
-        );
-
-        return `(?:${[...defaultDomains, ...escapedAlts].join('|')})`;
+    private has(feature: ParserFeatureType): boolean {
+        return this.featureSet.has(feature);
     }
 
     public parse(): ASTNode[] {
@@ -219,10 +244,7 @@ export class TextParser {
                 continue;
             }
 
-            if (
-                charCode > 127 &&
-                this.options.features.includes(ParserFeature.UNICODE_EMOJI)
-            ) {
+            if (charCode > 127 && this.has(ParserFeature.UNICODE_EMOJI)) {
                 const emojiNode = this.tryParseUnicodeEmoji();
                 if (emojiNode) {
                     currentText = this.flushText(nodes, currentText);
@@ -231,14 +253,8 @@ export class TextParser {
                 }
             }
 
-            if (
-                char === '[' &&
-                this.options.features.includes(ParserFeature.LINK)
-            ) {
-                if (
-                    this.options.features.includes(ParserFeature.FILE) &&
-                    this.peek('[%file%]')
-                ) {
+            if (char === '[' && this.has(ParserFeature.LINK)) {
+                if (this.has(ParserFeature.FILE) && this.peek('[%file%]')) {
                     const fileNode = this.tryParseFile();
                     if (fileNode) {
                         currentText = this.flushText(nodes, currentText);
@@ -257,7 +273,7 @@ export class TextParser {
 
             if (
                 char === '<' &&
-                this.options.features.includes(ParserFeature.EMOJI) &&
+                this.has(ParserFeature.EMOJI) &&
                 this.peek('<emoji:')
             ) {
                 const emojiNode = this.tryParseEmoji();
@@ -273,7 +289,7 @@ export class TextParser {
                     char === '*' ||
                     char === '+' ||
                     char === ' ') &&
-                this.options.features.includes(ParserFeature.CHECKLIST)
+                this.has(ParserFeature.CHECKLIST)
             ) {
                 const checklistNode = this.tryParseChecklist();
                 if (checklistNode) {
@@ -292,7 +308,7 @@ export class TextParser {
                     char === '*' ||
                     char === '+' ||
                     char === ' ') &&
-                this.options.features.includes(ParserFeature.UNORDERED_LIST)
+                this.has(ParserFeature.UNORDERED_LIST)
             ) {
                 const listNode = this.tryParseUnorderedList();
                 if (listNode) {
@@ -308,9 +324,9 @@ export class TextParser {
 
             if (
                 char === '*' &&
-                (this.options.features.includes(ParserFeature.BOLD) ||
-                    this.options.features.includes(ParserFeature.ITALIC) ||
-                    this.options.features.includes(ParserFeature.BOLD_ITALIC))
+                (this.has(ParserFeature.BOLD) ||
+                    this.has(ParserFeature.ITALIC) ||
+                    this.has(ParserFeature.BOLD_ITALIC))
             ) {
                 const formatNode = this.tryParseFormatting();
                 if (formatNode) {
@@ -322,9 +338,7 @@ export class TextParser {
 
             if (
                 char === '_' &&
-                this.options.features.includes(
-                    ParserFeature.DOUBLE_UNDERLINE,
-                ) &&
+                this.has(ParserFeature.DOUBLE_UNDERLINE) &&
                 this.peek('___')
             ) {
                 const doubleUnderlineNode = this.tryParseDoubleUnderline();
@@ -337,7 +351,7 @@ export class TextParser {
 
             if (
                 char === '_' &&
-                this.options.features.includes(ParserFeature.UNDERLINE) &&
+                this.has(ParserFeature.UNDERLINE) &&
                 this.peek('__')
             ) {
                 const underlineNode = this.tryParseUnderline();
@@ -350,9 +364,7 @@ export class TextParser {
 
             if (
                 char === '_' &&
-                this.options.features.includes(
-                    ParserFeature.DOUBLE_CURLY_UNDERLINE,
-                ) &&
+                this.has(ParserFeature.DOUBLE_CURLY_UNDERLINE) &&
                 this.peek('_~~')
             ) {
                 const doubleCurlyUnderlineNode =
@@ -366,7 +378,7 @@ export class TextParser {
 
             if (
                 char === '_' &&
-                this.options.features.includes(ParserFeature.CURLY_UNDERLINE) &&
+                this.has(ParserFeature.CURLY_UNDERLINE) &&
                 this.peek('_~')
             ) {
                 const curlyUnderlineNode = this.tryParseCurlyUnderline();
@@ -379,9 +391,7 @@ export class TextParser {
 
             if (
                 char === '_' &&
-                this.options.features.includes(
-                    ParserFeature.RHYTHM_UNDERLINE,
-                ) &&
+                this.has(ParserFeature.RHYTHM_UNDERLINE) &&
                 this.peek('_-.')
             ) {
                 const rhythmUnderlineNode = this.tryParseRhythmUnderline();
@@ -394,9 +404,7 @@ export class TextParser {
 
             if (
                 char === '_' &&
-                this.options.features.includes(
-                    ParserFeature.DOTTED_UNDERLINE,
-                ) &&
+                this.has(ParserFeature.DOTTED_UNDERLINE) &&
                 this.peek('_.')
             ) {
                 const dottedUnderlineNode = this.tryParseDottedUnderline();
@@ -409,9 +417,7 @@ export class TextParser {
 
             if (
                 char === '_' &&
-                this.options.features.includes(
-                    ParserFeature.DASHED_UNDERLINE,
-                ) &&
+                this.has(ParserFeature.DASHED_UNDERLINE) &&
                 this.peek('_-')
             ) {
                 const dashedUnderlineNode = this.tryParseDashedUnderline();
@@ -424,9 +430,7 @@ export class TextParser {
 
             if (
                 char === '_' &&
-                this.options.features.includes(
-                    ParserFeature.JAGGED_UNDERLINE,
-                ) &&
+                this.has(ParserFeature.JAGGED_UNDERLINE) &&
                 this.peek('_^')
             ) {
                 const jaggedUnderlineNode = this.tryParseJaggedUnderline();
@@ -439,7 +443,7 @@ export class TextParser {
 
             if (
                 char === '~' &&
-                this.options.features.includes(ParserFeature.STRIKETHROUGH) &&
+                this.has(ParserFeature.STRIKETHROUGH) &&
                 this.peek('~~')
             ) {
                 const strikethroughNode = this.tryParseStrikethrough();
@@ -450,10 +454,7 @@ export class TextParser {
                 }
             }
 
-            if (
-                char === '~' &&
-                this.options.features.includes(ParserFeature.SUBSCRIPT)
-            ) {
+            if (char === '~' && this.has(ParserFeature.SUBSCRIPT)) {
                 const subscriptNode = this.tryParseSubscript();
                 if (subscriptNode) {
                     currentText = this.flushText(nodes, currentText);
@@ -462,10 +463,7 @@ export class TextParser {
                 }
             }
 
-            if (
-                char === '^' &&
-                this.options.features.includes(ParserFeature.SUPERSCRIPT)
-            ) {
+            if (char === '^' && this.has(ParserFeature.SUPERSCRIPT)) {
                 const superscriptNode = this.tryParseSuperscript();
                 if (superscriptNode) {
                     currentText = this.flushText(nodes, currentText);
@@ -476,7 +474,7 @@ export class TextParser {
 
             if (
                 char === '<' &&
-                this.options.features.includes(ParserFeature.MENTION) &&
+                this.has(ParserFeature.MENTION) &&
                 this.peek("<userid:'")
             ) {
                 const mentionNode = this.tryParseMention();
@@ -489,7 +487,7 @@ export class TextParser {
 
             if (
                 char === '<' &&
-                this.options.features.includes(ParserFeature.ROLE_MENTION) &&
+                this.has(ParserFeature.ROLE_MENTION) &&
                 this.peek("<roleid:'")
             ) {
                 const roleMentionNode = this.tryParseRoleMention();
@@ -502,9 +500,7 @@ export class TextParser {
 
             if (
                 char === '<' &&
-                this.options.features.includes(
-                    ParserFeature.EVERYONE_MENTION,
-                ) &&
+                this.has(ParserFeature.EVERYONE_MENTION) &&
                 this.peek('<everyone>')
             ) {
                 const everyoneNode = this.tryParseEveryoneMention();
@@ -517,7 +513,7 @@ export class TextParser {
 
             if (
                 char === 'h' &&
-                this.options.features.includes(ParserFeature.CHANNEL_LINK) &&
+                this.has(ParserFeature.CHANNEL_LINK) &&
                 (this.peek('http://') || this.peek('https://'))
             ) {
                 const channelLinkNode = this.tryParseChannelLink();
@@ -530,7 +526,7 @@ export class TextParser {
 
             if (
                 char === 'h' &&
-                this.options.features.includes(ParserFeature.INVITE) &&
+                this.has(ParserFeature.INVITE) &&
                 (this.peek('http://') || this.peek('https://'))
             ) {
                 const inviteNode = this.tryParseInvite();
@@ -543,7 +539,7 @@ export class TextParser {
 
             if (
                 char === 'h' &&
-                this.options.features.includes(ParserFeature.LINK) &&
+                this.has(ParserFeature.LINK) &&
                 (this.peek('http://') || this.peek('https://'))
             ) {
                 const linkNode = this.tryParseLink();
@@ -554,10 +550,7 @@ export class TextParser {
                 }
             }
 
-            if (
-                char === '-' &&
-                this.options.features.includes(ParserFeature.THEMATIC_BREAK)
-            ) {
+            if (char === '-' && this.has(ParserFeature.THEMATIC_BREAK)) {
                 const breakNode = this.tryParseThematicBreak();
                 if (breakNode) {
                     currentText = this.flushText(nodes, currentText);
@@ -568,10 +561,10 @@ export class TextParser {
 
             if (
                 (char === '#' || (char === '-' && this.peek('-#'))) &&
-                (this.options.features.includes(ParserFeature.H1) ||
-                    this.options.features.includes(ParserFeature.H2) ||
-                    this.options.features.includes(ParserFeature.H3) ||
-                    this.options.features.includes(ParserFeature.SUBTEXT))
+                (this.has(ParserFeature.H1) ||
+                    this.has(ParserFeature.H2) ||
+                    this.has(ParserFeature.H3) ||
+                    this.has(ParserFeature.SUBTEXT))
             ) {
                 const headingNode = this.tryParseHeading();
                 if (headingNode) {
@@ -583,7 +576,7 @@ export class TextParser {
 
             if (
                 ((char >= '0' && char <= '9') || char === ' ') &&
-                this.options.features.includes(ParserFeature.ORDERED_LIST)
+                this.has(ParserFeature.ORDERED_LIST)
             ) {
                 const listNode = this.tryParseOrderedList();
                 if (listNode) {
@@ -599,7 +592,7 @@ export class TextParser {
 
             if (
                 char === '|' &&
-                this.options.features.includes(ParserFeature.TABLE) &&
+                this.has(ParserFeature.TABLE) &&
                 (this.index === 0 || this.text[this.index - 1] === '\n')
             ) {
                 const tableNode = this.tryParseTable();
@@ -613,7 +606,7 @@ export class TextParser {
             // ||text||
             if (
                 char === '|' &&
-                this.options.features.includes(ParserFeature.SPOILER) &&
+                this.has(ParserFeature.SPOILER) &&
                 this.peek('||')
             ) {
                 const spoilerNode = this.tryParseSpoiler();
@@ -626,9 +619,9 @@ export class TextParser {
 
             if (
                 char === '`' &&
-                (this.options.features.includes(ParserFeature.INLINE_CODE) ||
-                    this.options.features.includes(ParserFeature.CODE_BLOCK) ||
-                    this.options.features.includes(ParserFeature.MERMAID))
+                (this.has(ParserFeature.INLINE_CODE) ||
+                    this.has(ParserFeature.CODE_BLOCK) ||
+                    this.has(ParserFeature.MERMAID))
             ) {
                 const codeNode = this.tryParseCode();
                 if (codeNode) {
@@ -640,8 +633,8 @@ export class TextParser {
 
             if (
                 char === '$' &&
-                (this.options.features.includes(ParserFeature.INLINE_LATEX) ||
-                    this.options.features.includes(ParserFeature.LATEX))
+                (this.has(ParserFeature.INLINE_LATEX) ||
+                    this.has(ParserFeature.LATEX))
             ) {
                 const latexNode = this.tryParseLatex();
                 if (latexNode) {
@@ -653,7 +646,7 @@ export class TextParser {
 
             if (
                 char === ':' &&
-                this.options.features.includes(ParserFeature.ADMONITION) &&
+                this.has(ParserFeature.ADMONITION) &&
                 this.peek(':::') &&
                 (this.index === 0 || this.text[this.index - 1] === '\n')
             ) {
@@ -674,8 +667,8 @@ export class TextParser {
 
             if (
                 char === '>' &&
-                (this.options.features.includes(ParserFeature.BLOCKQUOTE) ||
-                    this.options.features.includes(ParserFeature.ADMONITION)) &&
+                (this.has(ParserFeature.BLOCKQUOTE) ||
+                    this.has(ParserFeature.ADMONITION)) &&
                 (this.index === 0 || this.text[this.index - 1] === '\n')
             ) {
                 const blockquoteNode = this.tryParseBlockquote();
@@ -712,7 +705,7 @@ export class TextParser {
     private tryParseUnicodeEmoji(): ASTNode | null {
         // Optimization: use slice to create a substring for matching
         const remaining = this.text.slice(this.index);
-        const match = remaining.match(this.startsWithEmojiRegex);
+        const match = remaining.match(STARTS_WITH_EMOJI_REGEX);
 
         if (match) {
             const content = match[0];
@@ -773,24 +766,15 @@ export class TextParser {
 
         if (starCount === 0) return null;
 
-        if (
-            starCount === 3 &&
-            !this.options.features.includes(ParserFeature.BOLD_ITALIC)
-        ) {
+        if (starCount === 3 && !this.has(ParserFeature.BOLD_ITALIC)) {
             this.index = start;
             return null;
         }
-        if (
-            starCount === 2 &&
-            !this.options.features.includes(ParserFeature.BOLD)
-        ) {
+        if (starCount === 2 && !this.has(ParserFeature.BOLD)) {
             this.index = start;
             return null;
         }
-        if (
-            starCount === 1 &&
-            !this.options.features.includes(ParserFeature.ITALIC)
-        ) {
+        if (starCount === 1 && !this.has(ParserFeature.ITALIC)) {
             this.index = start;
             return null;
         }
@@ -1006,10 +990,7 @@ export class TextParser {
                 this.index += 3;
                 const lang = language.trim();
 
-                if (
-                    lang === 'mermaid' &&
-                    this.options.features.includes(ParserFeature.MERMAID)
-                ) {
+                if (lang === 'mermaid' && this.has(ParserFeature.MERMAID)) {
                     return {
                         type: 'mermaid',
                         content: content.trim(),
@@ -1144,7 +1125,7 @@ export class TextParser {
 
     private tryParseInvite(): ASTNode | null {
         const start = this.index;
-        const baseUrlPattern = this.getBaseUrlPattern();
+        const baseUrlPattern = getBaseUrlPattern();
         const inviteRegex = new RegExp(
             `^${baseUrlPattern}/invite/([a-zA-Z0-9_-]+)`,
         );
@@ -1181,10 +1162,7 @@ export class TextParser {
                 /^https?:\/\/(?:www\.)?klipy\.com\/g\/([a-zA-Z0-9_-]+)/;
             const klipyMatch = url.match(klipyRegex);
 
-            if (
-                klipyMatch &&
-                this.options.features.includes(ParserFeature.KLIPY)
-            ) {
+            if (klipyMatch && this.has(ParserFeature.KLIPY)) {
                 return { type: 'klipy', klipyId: klipyMatch[1], url };
             }
 
@@ -1546,7 +1524,7 @@ export class TextParser {
 
     private tryParseChannelLink(): ASTNode | null {
         const start = this.index;
-        const baseUrlPattern = this.getBaseUrlPattern();
+        const baseUrlPattern = getBaseUrlPattern();
         const channelLinkRegex = new RegExp(
             `^${baseUrlPattern}/chat/@server/([a-zA-Z0-9]+)/channel/([a-zA-Z0-9]+)(?:/message/([a-zA-Z0-9]+))?`,
         );
@@ -1577,10 +1555,7 @@ export class TextParser {
 
         // Display LaTeX: $ at end of line or start, content on separate lines, closing $ on its own line
         // Syntax: $\ncontent\n$
-        if (
-            this.options.features.includes(ParserFeature.LATEX) &&
-            this.peek('$\n')
-        ) {
+        if (this.has(ParserFeature.LATEX) && this.peek('$\n')) {
             this.index += 2; // skip '$\n'
             let content = '';
             let foundClosing = false;
@@ -1609,10 +1584,7 @@ export class TextParser {
         }
 
         // Inline LaTeX: $$content$$
-        if (
-            this.options.features.includes(ParserFeature.INLINE_LATEX) &&
-            this.peek('$$')
-        ) {
+        if (this.has(ParserFeature.INLINE_LATEX) && this.peek('$$')) {
             this.index += 2; // skip '$$'
             let content = '';
             let foundClosing = false;
@@ -1879,10 +1851,7 @@ export class TextParser {
 
         if (foundClosing && (firstPart || secondPart)) {
             this.index += 1; // skip '^'
-            if (
-                hasPipe &&
-                this.options.features.includes(ParserFeature.STACKED_SCRIPT)
-            ) {
+            if (hasPipe && this.has(ParserFeature.STACKED_SCRIPT)) {
                 return {
                     type: 'stacked_script',
                     sup: this.parseContent(firstPart),
@@ -2069,7 +2038,7 @@ export class TextParser {
 
             if (lines.length > 0) {
                 // Check for GitHub/Obsidian admonition
-                if (this.options.features.includes(ParserFeature.ADMONITION)) {
+                if (this.has(ParserFeature.ADMONITION)) {
                     const firstLine = lines[0];
                     let parsedType = '';
                     let parsedFoldModifier = '';
@@ -2215,7 +2184,7 @@ export class TextParser {
                     }
                 }
 
-                if (this.options.features.includes(ParserFeature.BLOCKQUOTE)) {
+                if (this.has(ParserFeature.BLOCKQUOTE)) {
                     this.index = tempIndex;
                     return {
                         type: 'blockquote',

@@ -5,24 +5,51 @@ import { Bell, Compass, Home, Plus, Settings } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 import { usePings } from '@/api/pings/pings.queries';
-import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import {
+    useAppDispatch,
+    useAppSelector,
+    useAppShallowSelector,
+} from '@/store/hooks';
 import { toggleMobileHomeTab } from '@/store/slices/navSlice';
 import { useMobileSwipeContext } from '@/ui/MobileSwipeContext';
 import { Divider } from '@/ui/components/common/Divider';
 import { IconButton } from '@/ui/components/common/IconButton';
 import { Tooltip } from '@/ui/components/common/Tooltip';
 import { Box } from '@/ui/components/layout/Box';
-import { PingInbox } from '@/ui/components/pings/PingInbox';
-import { CreateServerModal } from '@/ui/components/servers/CreateServerModal';
-import { JoinServerModal } from '@/ui/components/servers/JoinServerModal';
 import { ServerList } from '@/ui/components/servers/ServerList';
-import { SettingsModal } from '@/ui/components/settings/SettingsModal';
 import { cn } from '@/utils/cn';
 
+const CreateServerModal = React.lazy(() =>
+    import('@/ui/components/servers/CreateServerModal').then((m) => ({
+        default: m.CreateServerModal,
+    })),
+);
+
+const JoinServerModal = React.lazy(() =>
+    import('@/ui/components/servers/JoinServerModal').then((m) => ({
+        default: m.JoinServerModal,
+    })),
+);
+
+const PingInbox = React.lazy(() =>
+    import('@/ui/components/pings/PingInbox').then((m) => ({
+        default: m.PingInbox,
+    })),
+);
+
+const SettingsModal = React.lazy(() =>
+    import('@/ui/components/settings/SettingsModal').then((m) => ({
+        default: m.SettingsModal,
+    })),
+);
+
 export const PrimaryNavBar: React.FC = () => {
-    const { navMode, selectedFriendId, selectedChannelId } = useAppSelector(
-        (state) => state.nav,
-    );
+    const { navMode, selectedFriendId, selectedChannelId } =
+        useAppShallowSelector((state) => ({
+            navMode: state.nav.navMode,
+            selectedFriendId: state.nav.selectedFriendId,
+            selectedChannelId: state.nav.selectedChannelId,
+        }));
     const unreadDms = useAppSelector((state) => state.unread.unreadDms);
     const { data: pingsData } = usePings();
     const totalUnreadDms = Object.values(unreadDms).reduce(
@@ -127,7 +154,11 @@ export const PrimaryNavBar: React.FC = () => {
                             initial={{ opacity: 0, x: -10, scale: 0.95 }}
                             transition={{ duration: 0.15, ease: 'easeOut' }}
                         >
-                            <PingInbox onClose={() => setShowInbox(false)} />
+                            <React.Suspense fallback={null}>
+                                <PingInbox
+                                    onClose={() => setShowInbox(false)}
+                                />
+                            </React.Suspense>
                         </motion.div>
                     )}
                 </AnimatePresence>
@@ -139,18 +170,30 @@ export const PrimaryNavBar: React.FC = () => {
                 </Tooltip>
             </Box>
 
-            <SettingsModal
-                isOpen={showSettings}
-                onClose={handleCloseSettings}
-            />
-            <CreateServerModal
-                isOpen={showCreateServer}
-                onClose={() => setShowCreateServer(false)}
-            />
-            <JoinServerModal
-                isOpen={showJoinServer}
-                onClose={() => setShowJoinServer(false)}
-            />
+            {showSettings && (
+                <React.Suspense fallback={null}>
+                    <SettingsModal
+                        isOpen={showSettings}
+                        onClose={handleCloseSettings}
+                    />
+                </React.Suspense>
+            )}
+            {showCreateServer && (
+                <React.Suspense fallback={null}>
+                    <CreateServerModal
+                        isOpen={showCreateServer}
+                        onClose={() => setShowCreateServer(false)}
+                    />
+                </React.Suspense>
+            )}
+            {showJoinServer && (
+                <React.Suspense fallback={null}>
+                    <JoinServerModal
+                        isOpen={showJoinServer}
+                        onClose={() => setShowJoinServer(false)}
+                    />
+                </React.Suspense>
+            )}
         </Box>
     );
 };

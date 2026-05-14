@@ -1,6 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 import { useQueryClient } from '@tanstack/react-query';
+import { useVirtualizer } from '@tanstack/react-virtual';
+import type { VirtualItem } from '@tanstack/react-virtual';
 import { Reorder } from 'framer-motion';
 import {
     ArrowDown,
@@ -37,21 +39,49 @@ import { cn } from '@/utils/cn';
 import { wsMessages } from '@/ws/messages';
 
 import { ChannelItem } from './ChannelItem';
-import { CategorySettingsModal } from './modals/CategorySettingsModal';
-import { ChannelSettingsModal } from './modals/ChannelSettingsModal';
-import { CreateCategoryModal } from './modals/CreateCategoryModal';
-import { CreateChannelModal } from './modals/CreateChannelModal';
-import { LeaveServerModal } from './modals/LeaveServerModal';
+
+const CategorySettingsModal = React.lazy(() =>
+    import('./modals/CategorySettingsModal').then((m) => ({
+        default: m.CategorySettingsModal,
+    })),
+);
+
+const ChannelSettingsModal = React.lazy(() =>
+    import('./modals/ChannelSettingsModal').then((m) => ({
+        default: m.ChannelSettingsModal,
+    })),
+);
+
+const CreateCategoryModal = React.lazy(() =>
+    import('./modals/CreateCategoryModal').then((m) => ({
+        default: m.CreateCategoryModal,
+    })),
+);
+
+const CreateChannelModal = React.lazy(() =>
+    import('./modals/CreateChannelModal').then((m) => ({
+        default: m.CreateChannelModal,
+    })),
+);
+
+const LeaveServerModal = React.lazy(() =>
+    import('./modals/LeaveServerModal').then((m) => ({
+        default: m.LeaveServerModal,
+    })),
+);
 
 interface ChannelListProps {
     channels: Channel[];
     categories: Category[];
     selectedChannelId: string | null;
+    scrollRef: React.RefObject<HTMLDivElement | null>;
 }
 
 type ListItem =
     | { type: 'category'; id: string; data: Category }
     | { type: 'channel'; id: string; data: Channel };
+
+type VirtualListItem = ListItem & { virtualRow: VirtualItem };
 
 interface ChannelRowProps {
     channel: Channel;
@@ -167,6 +197,7 @@ export const ChannelList: React.FC<ChannelListProps> = ({
     channels,
     categories,
     selectedChannelId,
+    scrollRef,
 }) => {
     const selectedServerId = useAppSelector(
         (state) => state.nav.selectedServerId,
@@ -284,6 +315,25 @@ export const ChannelList: React.FC<ChannelListProps> = ({
     };
 
     const [activeItemId, setActiveItemId] = useState<string | null>(null);
+
+    const rowVirtualizer = useVirtualizer({
+        count: items.length,
+        getScrollElement: () => scrollRef.current,
+        estimateSize: useCallback(
+            (index: number) => {
+                const item = items[index];
+                if (item.type === 'category') return 32;
+                if (item.type === 'channel' && item.data.type === 'voice') {
+                    const participants = voiceParticipants[item.id] || [];
+                    return 32 + participants.length * 28;
+                }
+                return 32;
+            },
+            [items, voiceParticipants],
+        ),
+        measureElement: (el) => el.getBoundingClientRect().height,
+        overscan: 10,
+    });
 
     const handleReorder = (newItems: ListItem[]): void => {
         setIsReordering(true);
@@ -532,6 +582,14 @@ export const ChannelList: React.FC<ChannelListProps> = ({
         [selectedServerId, canManageChannels, items],
     );
 
+    const channelsRef = React.useRef(channels);
+    const categoriesRef = React.useRef(categories);
+
+    React.useEffect(() => {
+        channelsRef.current = channels;
+        categoriesRef.current = categories;
+    }, [channels, categories]);
+
     const getChannelMenuItems = React.useCallback(
         (channel: Channel): ContextMenuItem[] => {
             const items: ContextMenuItem[] = [
@@ -563,7 +621,7 @@ export const ChannelList: React.FC<ChannelListProps> = ({
 
                 if (isMobile) {
                     // Check if it can move up/down
-                    const siblings = channels
+                    const siblings = channelsRef.current
                         .filter((c) => c.categoryId === channel.categoryId)
                         .sort((a, b) => a.position - b.position);
                     const index = siblings.findIndex(
@@ -612,7 +670,7 @@ export const ChannelList: React.FC<ChannelListProps> = ({
                         onClick: () =>
                             void handleMoveToCategory(channel._id, null),
                     },
-                    ...[...categories]
+                    ...[...categoriesRef.current]
                         .sort((a, b) => a.position - b.position)
                         .map((cat) => ({
                             label: cat.name,
@@ -628,7 +686,7 @@ export const ChannelList: React.FC<ChannelListProps> = ({
                     if ('label' in opt && typeof opt.label === 'string') {
                         if (opt.label === 'Uncategorized')
                             return currentCatId !== null;
-                        const targetCat = categories.find(
+                        const targetCat = categoriesRef.current.find(
                             (c) => c.name === opt.label,
                         );
                         return targetCat?._id !== currentCatId;
@@ -648,8 +706,6 @@ export const ChannelList: React.FC<ChannelListProps> = ({
         [
             canManageChannels,
             isMobile,
-            channels,
-            categories,
             handleMoveItemMobile,
             handleMoveToCategory,
         ],
@@ -677,7 +733,7 @@ export const ChannelList: React.FC<ChannelListProps> = ({
                 });
 
                 if (isMobile) {
-                    const siblings = [...categories].sort(
+                    const siblings = [...categoriesRef.current].sort(
                         (a, b) => a.position - b.position,
                     );
                     const index = siblings.findIndex(
@@ -724,7 +780,7 @@ export const ChannelList: React.FC<ChannelListProps> = ({
 
             return items;
         },
-        [canManageChannels, isMobile, categories, handleMoveItemMobile],
+        [canManageChannels, isMobile, handleMoveItemMobile],
     );
 
     const getGlobalMenuItems = React.useCallback((): ContextMenuItem[] => {
@@ -808,7 +864,9 @@ export const ChannelList: React.FC<ChannelListProps> = ({
                         parsed.hostname.endsWith('.catfla.re')
                     ) {
                         if (parsed.pathname.startsWith('/chat/@setting')) {
-                            void navigate(parsed.pathname);
+                            React.startTransition(() => {
+                                void navigate(parsed.pathname);
+                            });
                             return;
                         }
                         window.open(url, '_blank', 'noopener,noreferrer');
@@ -822,9 +880,11 @@ export const ChannelList: React.FC<ChannelListProps> = ({
             }
 
             if (selectedServerId) {
-                void navigate(
-                    `/chat/@server/${selectedServerId}/channel/${channel._id}`,
-                );
+                React.startTransition(() => {
+                    void navigate(
+                        `/chat/@server/${selectedServerId}/channel/${channel._id}`,
+                    );
+                });
             }
         },
         [
@@ -840,186 +900,272 @@ export const ChannelList: React.FC<ChannelListProps> = ({
 
     return (
         <ContextMenu className="flex-1" items={getGlobalMenuItems()}>
-            <div className="flex min-h-full flex-col space-y-0.5 px-2 py-4">
+            <div className="flex min-h-full flex-col space-y-0.5 px-2">
                 <Reorder.Group
                     axis="y"
-                    className="space-y-0.5"
+                    className="relative space-y-0.5"
+                    style={{
+                        height: isReordering
+                            ? 'auto'
+                            : `${rowVirtualizer.getTotalSize()}px`,
+                    }}
                     values={items}
                     onReorder={handleReorder}
                 >
-                    {items.map((item) => {
-                        if (item.type === 'category') {
-                            const category = item.data;
-                            const isCollapsed =
-                                collapsedCategories[category._id];
+                    {(isReordering
+                        ? items
+                        : rowVirtualizer
+                              .getVirtualItems()
+                              .map(
+                                  (v) =>
+                                      ({
+                                          ...items[v.index],
+                                          virtualRow: v,
+                                      }) as VirtualListItem,
+                              )
+                    ).map((itemOrVirtual) => {
+                        const item: ListItem =
+                            'virtualRow' in itemOrVirtual
+                                ? (itemOrVirtual as VirtualListItem)
+                                : itemOrVirtual;
+                        const virtualRow: VirtualItem | null =
+                            'virtualRow' in itemOrVirtual
+                                ? (itemOrVirtual as VirtualListItem).virtualRow
+                                : null;
 
-                            return (
-                                <Reorder.Item
-                                    className="pt-4 first:pt-0"
-                                    dragListener={
-                                        canManageChannels && !isMobile
-                                    }
-                                    key={item.id}
-                                    layout="position"
-                                    value={item}
-                                    onDragEnd={() => {
-                                        void handleDragEnd();
-                                    }}
-                                    onDragStart={() =>
-                                        handleDragStartItem(item.id)
-                                    }
-                                >
-                                    <ContextMenu
-                                        className="pt-4 first:pt-0"
-                                        items={getCategoryMenuItems(category)}
+                        const renderContent = (): React.ReactNode => {
+                            if (item.type === 'category') {
+                                const category = item.data;
+                                const isCollapsed =
+                                    collapsedCategories[category._id];
+
+                                return (
+                                    <Reorder.Item
+                                        className="m-0 w-full p-0"
+                                        dragListener={
+                                            canManageChannels && !isMobile
+                                        }
+                                        key={item.id}
+                                        layout={
+                                            virtualRow ? undefined : 'position'
+                                        }
+                                        ref={
+                                            virtualRow
+                                                ? rowVirtualizer.measureElement
+                                                : undefined
+                                        }
+                                        style={
+                                            virtualRow
+                                                ? {
+                                                      position: 'absolute',
+                                                      top: `${virtualRow.start}px`,
+                                                      left: 0,
+                                                      width: '100%',
+                                                  }
+                                                : {}
+                                        }
+                                        value={item}
+                                        onDragEnd={() => {
+                                            void handleDragEnd();
+                                        }}
+                                        onDragStart={() =>
+                                            handleDragStartItem(item.id)
+                                        }
                                     >
-                                        <div
-                                            className="group flex cursor-pointer items-center px-1"
-                                            role="button"
-                                            tabIndex={0}
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                toggleCategory(category._id);
-                                            }}
-                                            onKeyDown={(e) => {
-                                                if (
-                                                    e.key === 'Enter' ||
-                                                    e.key === ' '
-                                                ) {
+                                        <ContextMenu
+                                            className="m-0 w-full p-0 pt-3"
+                                            items={getCategoryMenuItems(
+                                                category,
+                                            )}
+                                        >
+                                            <div
+                                                className="group flex cursor-pointer items-center px-1"
+                                                role="button"
+                                                tabIndex={0}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
                                                     toggleCategory(
                                                         category._id,
                                                     );
-                                                }
-                                            }}
-                                        >
-                                            <ChevronDown
-                                                className={cn(
-                                                    'mr-0.5 h-3 w-3 text-muted-foreground transition-transform duration-200',
-                                                    isCollapsed
-                                                        ? '-rotate-90'
-                                                        : '',
+                                                }}
+                                                onKeyDown={(e) => {
+                                                    if (
+                                                        e.key === 'Enter' ||
+                                                        e.key === ' '
+                                                    ) {
+                                                        toggleCategory(
+                                                            category._id,
+                                                        );
+                                                    }
+                                                }}
+                                            >
+                                                <ChevronDown
+                                                    className={cn(
+                                                        'mr-0.5 h-3 w-3 text-muted-foreground transition-transform duration-200',
+                                                        isCollapsed
+                                                            ? '-rotate-90'
+                                                            : '',
+                                                    )}
+                                                />
+                                                <span className="flex-1 text-[12px] font-bold tracking-wider text-muted-foreground uppercase transition-colors group-hover:text-foreground/80">
+                                                    {category.name}
+                                                </span>
+                                                {canManageChannels && (
+                                                    <div className="flex opacity-0 transition-opacity group-hover:opacity-100">
+                                                        <IconButton
+                                                            className="p-0.5"
+                                                            icon={Settings}
+                                                            iconSize={14}
+                                                            title="Edit Category"
+                                                            variant="ghost"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                setSettingsCategory(
+                                                                    category,
+                                                                );
+                                                            }}
+                                                        />
+                                                        <IconButton
+                                                            className="p-0.5"
+                                                            icon={Plus}
+                                                            iconSize={14}
+                                                            title="Create Channel"
+                                                            variant="ghost"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                setCreateCategoryId(
+                                                                    category._id,
+                                                                );
+                                                                setCreateModalOpen(
+                                                                    true,
+                                                                );
+                                                            }}
+                                                        />
+                                                    </div>
                                                 )}
-                                            />
-                                            <span className="flex-1 text-[12px] font-bold tracking-wider text-muted-foreground uppercase transition-colors group-hover:text-foreground/80">
-                                                {category.name}
-                                            </span>
-                                            {canManageChannels && (
-                                                <div className="flex opacity-0 transition-opacity group-hover:opacity-100">
-                                                    <IconButton
-                                                        className="p-0.5"
-                                                        icon={Settings}
-                                                        iconSize={14}
-                                                        title="Edit Category"
-                                                        variant="ghost"
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            setSettingsCategory(
-                                                                category,
-                                                            );
-                                                        }}
-                                                    />
-                                                    <IconButton
-                                                        className="p-0.5"
-                                                        icon={Plus}
-                                                        iconSize={14}
-                                                        title="Create Channel"
-                                                        variant="ghost"
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            setCreateCategoryId(
-                                                                category._id,
-                                                            );
-                                                            setCreateModalOpen(
-                                                                true,
-                                                            );
-                                                        }}
-                                                    />
-                                                </div>
-                                            )}
-                                        </div>
-                                    </ContextMenu>
-                                </Reorder.Item>
-                            );
-                        } else {
-                            const channel = item.data;
-                            const isCollapsed = channel.categoryId
-                                ? collapsedCategories[channel.categoryId]
-                                : false;
+                                            </div>
+                                        </ContextMenu>
+                                    </Reorder.Item>
+                                );
+                            } else {
+                                const channel = item.data;
+                                const isCollapsed = channel.categoryId
+                                    ? collapsedCategories[channel.categoryId]
+                                    : false;
 
-                            if (isCollapsed) return null;
+                                if (isCollapsed && !isReordering) return null;
 
-                            return (
-                                <Reorder.Item
-                                    dragListener={
-                                        canManageChannels && !isMobile
-                                    }
-                                    key={item.id}
-                                    layout="position"
-                                    value={item}
-                                    onDragEnd={() => {
-                                        void handleDragEnd();
-                                    }}
-                                    onDragStart={() =>
-                                        handleDragStartItem(item.id)
-                                    }
-                                >
-                                    <ChannelRow
-                                        canManageChannels={canManageChannels}
-                                        channel={channel}
-                                        channelPings={channelPings}
-                                        connectedUserIds={
-                                            channel.type === 'voice'
-                                                ? voiceParticipants[channel._id]
+                                return (
+                                    <Reorder.Item
+                                        className="m-0 w-full p-0"
+                                        dragListener={
+                                            canManageChannels && !isMobile
+                                        }
+                                        key={item.id}
+                                        layout={
+                                            virtualRow ? undefined : 'position'
+                                        }
+                                        ref={
+                                            virtualRow
+                                                ? rowVirtualizer.measureElement
                                                 : undefined
                                         }
-                                        getChannelMenuItems={
-                                            getChannelMenuItems
+                                        style={
+                                            virtualRow
+                                                ? {
+                                                      position: 'absolute',
+                                                      top: `${virtualRow.start}px`,
+                                                      left: 0,
+                                                      width: '100%',
+                                                  }
+                                                : {}
                                         }
-                                        handleChannelClick={handleChannelClick}
-                                        selectedChannelId={selectedChannelId}
-                                        selectedServerId={selectedServerId}
-                                        setSettingsChannel={setSettingsChannel}
-                                    />
-                                </Reorder.Item>
-                            );
-                        }
+                                        value={item}
+                                        onDragEnd={() => {
+                                            void handleDragEnd();
+                                        }}
+                                        onDragStart={() =>
+                                            handleDragStartItem(item.id)
+                                        }
+                                    >
+                                        <ChannelRow
+                                            canManageChannels={
+                                                canManageChannels
+                                            }
+                                            channel={channel}
+                                            channelPings={channelPings}
+                                            connectedUserIds={
+                                                channel.type === 'voice'
+                                                    ? voiceParticipants[
+                                                          channel._id
+                                                      ]
+                                                    : undefined
+                                            }
+                                            getChannelMenuItems={
+                                                getChannelMenuItems
+                                            }
+                                            handleChannelClick={
+                                                handleChannelClick
+                                            }
+                                            selectedChannelId={
+                                                selectedChannelId
+                                            }
+                                            selectedServerId={selectedServerId}
+                                            setSettingsChannel={
+                                                setSettingsChannel
+                                            }
+                                        />
+                                    </Reorder.Item>
+                                );
+                            }
+                        };
+
+                        return renderContent();
                     })}
                 </Reorder.Group>
 
                 {settingsCategory && (
-                    <CategorySettingsModal
-                        category={settingsCategory}
-                        isOpen={!!settingsCategory}
-                        onClose={() => setSettingsCategory(null)}
-                    />
+                    <React.Suspense fallback={null}>
+                        <CategorySettingsModal
+                            category={settingsCategory}
+                            isOpen={!!settingsCategory}
+                            onClose={() => setSettingsCategory(null)}
+                        />
+                    </React.Suspense>
                 )}
 
                 {settingsChannel && (
-                    <ChannelSettingsModal
-                        channel={settingsChannel}
-                        isOpen={!!settingsChannel}
-                        onClose={() => setSettingsChannel(null)}
-                    />
+                    <React.Suspense fallback={null}>
+                        <ChannelSettingsModal
+                            channel={settingsChannel}
+                            isOpen={!!settingsChannel}
+                            onClose={() => setSettingsChannel(null)}
+                        />
+                    </React.Suspense>
                 )}
 
-                {selectedServerId && (
-                    <CreateChannelModal
-                        categoryId={createCategoryId}
-                        isOpen={createModalOpen}
-                        serverId={selectedServerId}
-                        onClose={() => {
-                            setCreateModalOpen(false);
-                            setCreateCategoryId(null);
-                        }}
-                    />
+                {selectedServerId && createModalOpen && (
+                    <React.Suspense fallback={null}>
+                        <CreateChannelModal
+                            categoryId={createCategoryId}
+                            isOpen={createModalOpen}
+                            serverId={selectedServerId}
+                            onClose={() => {
+                                setCreateModalOpen(false);
+                                setCreateCategoryId(null);
+                            }}
+                        />
+                    </React.Suspense>
                 )}
 
-                {selectedServerId && (
-                    <CreateCategoryModal
-                        isOpen={createCategoryModalOpen}
-                        serverId={selectedServerId}
-                        onClose={() => setCreateCategoryModalOpen(false)}
-                    />
+                {selectedServerId && createCategoryModalOpen && (
+                    <React.Suspense fallback={null}>
+                        <CreateCategoryModal
+                            isOpen={createCategoryModalOpen}
+                            serverId={selectedServerId}
+                            onClose={() => setCreateCategoryModalOpen(false)}
+                        />
+                    </React.Suspense>
                 )}
 
                 {selectedLinkChannel && (
@@ -1039,12 +1185,14 @@ export const ChannelList: React.FC<ChannelListProps> = ({
                 )}
 
                 {isLeaveModalOpen && (
-                    <LeaveServerModal
-                        isOpen={isLeaveModalOpen}
-                        serverId={selectedServerId || ''}
-                        serverName={server?.name || ''}
-                        onClose={() => setIsLeaveModalOpen(false)}
-                    />
+                    <React.Suspense fallback={null}>
+                        <LeaveServerModal
+                            isOpen={isLeaveModalOpen}
+                            serverId={selectedServerId || ''}
+                            serverName={server?.name || ''}
+                            onClose={() => setIsLeaveModalOpen(false)}
+                        />
+                    </React.Suspense>
                 )}
             </div>
         </ContextMenu>

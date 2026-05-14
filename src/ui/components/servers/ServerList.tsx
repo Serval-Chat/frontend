@@ -56,7 +56,7 @@ export const ServerList: React.FC = () => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedServerId, me?.serverSettings?.order, dispatch]);
 
-    const items = React.useMemo(() => {
+    const orderedItems = React.useMemo(() => {
         if (!me || !servers) return [];
 
         const serverIds = servers.map((s) => s._id);
@@ -82,20 +82,36 @@ export const ServerList: React.FC = () => {
 
         return [...filteredOrder, ...newServers];
     }, [me, servers]);
+    const [items, setItems] = React.useState<(string | IServerFolder)[]>([]);
 
-    const handleReorder = (newItems: (string | IServerFolder)[]): void => {
-        updateSettings({ order: newItems });
-    };
+    React.useEffect(() => {
+        setItems(orderedItems);
+    }, [orderedItems]);
+
+    const handleReorder = React.useCallback(
+        (newItems: (string | IServerFolder)[]): void => {
+            setItems(newItems);
+        },
+        [],
+    );
+
+    const handleDragEnd = React.useCallback((): void => {
+        updateSettings({ order: items });
+    }, [items, updateSettings]);
 
     const handleServerClick = (serverId: string): void => {
         const lastChannelId = lastOpenedChannelByServer[serverId];
         const isMobile = window.innerWidth < 768;
 
-        if (!isMobile && lastChannelId) {
-            void navigate(`/chat/@server/${serverId}/channel/${lastChannelId}`);
-        } else {
-            void navigate(`/chat/@server/${serverId}`);
-        }
+        React.startTransition(() => {
+            if (!isMobile && lastChannelId) {
+                void navigate(
+                    `/chat/@server/${serverId}/channel/${lastChannelId}`,
+                );
+            } else {
+                void navigate(`/chat/@server/${serverId}`);
+            }
+        });
     };
 
     if (isLoading || !servers) {
@@ -127,6 +143,7 @@ export const ServerList: React.FC = () => {
                             key={key}
                             servers={servers}
                             unreadServers={unreadServers}
+                            onDragEnd={handleDragEnd}
                             onServerClick={handleServerClick}
                         />
                     );
@@ -145,6 +162,7 @@ export const ServerList: React.FC = () => {
                         pingCount={unreadStatus?.pingCount}
                         server={server}
                         onClick={() => handleServerClick(server._id)}
+                        onDragEnd={handleDragEnd}
                     />
                 );
             })}
@@ -152,62 +170,77 @@ export const ServerList: React.FC = () => {
     );
 };
 
-const ServerFolderWrapper: React.FC<{
-    folder: IServerFolder;
-    servers: Server[];
-    activeServerId?: string;
-    unreadServers: Record<string, { hasUnread: boolean; pingCount: number }>;
-    onServerClick: (serverId: string) => void;
-}> = (props) => {
-    const dragControls = useDragControls();
+const ServerFolderWrapper = React.memo(
+    (props: {
+        folder: IServerFolder;
+        servers: Server[];
+        activeServerId?: string;
+        unreadServers: Record<
+            string,
+            { hasUnread: boolean; pingCount: number }
+        >;
+        onDragEnd: () => void;
+        onServerClick: (serverId: string) => void;
+    }) => {
+        const dragControls = useDragControls();
 
-    return (
-        <Reorder.Item
-            className="w-full"
-            dragControls={dragControls}
-            dragListener={false}
-            value={props.folder}
-        >
-            <ServerFolder
-                activeServerId={props.activeServerId}
-                dragControls={dragControls}
-                folder={props.folder}
-                servers={props.servers}
-                unreadServers={props.unreadServers}
-                onServerClick={props.onServerClick}
-            />
-        </Reorder.Item>
-    );
-};
-
-const ServerItemWrapper: React.FC<{
-    server: Server;
-    isActive: boolean;
-    isUnread: boolean;
-    pingCount?: number;
-    onClick: () => void;
-}> = (props) => {
-    const dragControls = useDragControls();
-
-    return (
-        <Reorder.Item
-            className="w-full"
-            dragControls={dragControls}
-            dragListener={false}
-            value={props.server._id}
-        >
-            <div
+        return (
+            <Reorder.Item
                 className="w-full"
-                onPointerDown={(e) => dragControls.start(e)}
+                dragControls={dragControls}
+                dragListener={false}
+                value={props.folder}
+                onDragEnd={props.onDragEnd}
             >
-                <ServerItem
-                    isActive={props.isActive}
-                    isUnread={props.isUnread}
-                    pingCount={props.pingCount}
-                    server={props.server}
-                    onClick={props.onClick}
+                <ServerFolder
+                    activeServerId={props.activeServerId}
+                    dragControls={dragControls}
+                    folder={props.folder}
+                    servers={props.servers}
+                    unreadServers={props.unreadServers}
+                    onServerClick={props.onServerClick}
                 />
-            </div>
-        </Reorder.Item>
-    );
-};
+            </Reorder.Item>
+        );
+    },
+);
+
+ServerFolderWrapper.displayName = 'ServerFolderWrapper';
+
+const ServerItemWrapper = React.memo(
+    (props: {
+        server: Server;
+        isActive: boolean;
+        isUnread: boolean;
+        pingCount?: number;
+        onDragEnd: () => void;
+        onClick: () => void;
+    }) => {
+        const dragControls = useDragControls();
+
+        return (
+            <Reorder.Item
+                className="w-full"
+                dragControls={dragControls}
+                dragListener={false}
+                value={props.server._id}
+                onDragEnd={props.onDragEnd}
+            >
+                <div
+                    className="w-full"
+                    onPointerDown={(e) => dragControls.start(e)}
+                >
+                    <ServerItem
+                        isActive={props.isActive}
+                        isUnread={props.isUnread}
+                        pingCount={props.pingCount}
+                        server={props.server}
+                        onClick={props.onClick}
+                    />
+                </div>
+            </Reorder.Item>
+        );
+    },
+);
+
+ServerItemWrapper.displayName = 'ServerItemWrapper';

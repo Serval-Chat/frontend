@@ -4,14 +4,20 @@ import { Plus, X } from 'lucide-react';
 import { HexColorPicker } from 'react-colorful';
 import { createPortal } from 'react-dom';
 
-import { useMe, useUpdateStyle } from '@/api/users/users.queries';
+import {
+    useMe,
+    useUpdateSettings,
+    useUpdateStyle,
+} from '@/api/users/users.queries';
 import type { User, UsernameFont } from '@/api/users/users.types';
 import { useSmartPosition } from '@/hooks/useSmartPosition';
+import { useTheme } from '@/providers/ThemeProvider';
 import { Button } from '@/ui/components/common/Button';
 import { DropdownWithSearch } from '@/ui/components/common/DropdownWithSearch';
 import { Heading } from '@/ui/components/common/Heading';
 import { SettingsFloatingBar } from '@/ui/components/common/SettingsFloatingBar';
 import { StyledUserName } from '@/ui/components/common/StyledUserName';
+import { useToast } from '@/ui/components/common/Toast';
 import { Toggle } from '@/ui/components/common/Toggle';
 
 import { ThemeSwitcher } from './ThemeSwitcher';
@@ -61,7 +67,14 @@ interface AppearanceSettingsFormProps {
 const AppearanceSettingsForm: React.FC<AppearanceSettingsFormProps> = ({
     user,
 }) => {
-    const { mutate: updateStyle, isPending } = useUpdateStyle();
+    const { showToast } = useToast();
+    const { mutate: updateStyle, isPending: isUpdatingStyle } =
+        useUpdateStyle();
+    const { mutate: updateSettings, isPending: isUpdatingSettings } =
+        useUpdateSettings();
+    const isPending = isUpdatingStyle || isUpdatingSettings;
+
+    const { setCustomFontUrl, setCustomFontFamily } = useTheme();
 
     // Local state
     const [usernameFont, setUsernameFont] = useState<UsernameFont>(
@@ -85,6 +98,13 @@ const AppearanceSettingsForm: React.FC<AppearanceSettingsFormProps> = ({
         user.usernameGradient?.angle ?? 90,
     );
 
+    const [localCustomFontUrl, setLocalCustomFontUrl] = useState(
+        user.settings?.customFontUrl ?? '',
+    );
+    const [localCustomFontFamily, setLocalCustomFontFamily] = useState(
+        user.settings?.customFontFamily ?? '',
+    );
+
     // Track changes
     const hasChanges =
         usernameFont !== (user.usernameFont ?? 'default') ||
@@ -92,9 +112,20 @@ const AppearanceSettingsForm: React.FC<AppearanceSettingsFormProps> = ({
         gradientEnabled !== (user.usernameGradient?.enabled ?? false) ||
         JSON.stringify(gradientColors.map((c) => c.value)) !==
             JSON.stringify(user.usernameGradient?.colors || []) ||
-        gradientAngle !== (user.usernameGradient?.angle ?? 90);
+        gradientAngle !== (user.usernameGradient?.angle ?? 90) ||
+        localCustomFontUrl !== (user.settings?.customFontUrl ?? '') ||
+        localCustomFontFamily !== (user.settings?.customFontFamily ?? '');
 
     const handleSave = (): void => {
+        if (localCustomFontUrl) {
+            const googleFontRegex =
+                /^https:\/\/fonts\.googleapis\.com\/css2\?family=[^<>\s]+$/;
+            if (!googleFontRegex.test(localCustomFontUrl)) {
+                showToast('Please enter a valid Google Fonts URL', 'error');
+                return;
+            }
+        }
+
         updateStyle({
             usernameFont: usernameFont,
             usernameGlow: {
@@ -108,6 +139,14 @@ const AppearanceSettingsForm: React.FC<AppearanceSettingsFormProps> = ({
                 angle: gradientAngle,
             },
         });
+
+        updateSettings({
+            customFontUrl: localCustomFontUrl,
+            customFontFamily: localCustomFontFamily,
+        });
+
+        setCustomFontUrl(localCustomFontUrl);
+        setCustomFontFamily(localCustomFontFamily);
     };
 
     const handleReset = (): void => {
@@ -121,6 +160,8 @@ const AppearanceSettingsForm: React.FC<AppearanceSettingsFormProps> = ({
             })),
         );
         setGradientAngle(user.usernameGradient?.angle ?? 90);
+        setLocalCustomFontUrl(user.settings?.customFontUrl ?? '');
+        setLocalCustomFontFamily(user.settings?.customFontFamily ?? '');
     };
 
     // Color picker helpers
@@ -145,6 +186,8 @@ const AppearanceSettingsForm: React.FC<AppearanceSettingsFormProps> = ({
         setGradientEnabled(false);
         setGradientColors([]);
         setGradientAngle(90);
+        setLocalCustomFontUrl('');
+        setLocalCustomFontFamily('');
     };
 
     const previewUser = {
@@ -221,6 +264,70 @@ const AppearanceSettingsForm: React.FC<AppearanceSettingsFormProps> = ({
                     <div className="space-y-4">
                         <Heading level={4}>Theme</Heading>
                         <ThemeSwitcher />
+                    </div>
+
+                    <div className="space-y-4">
+                        <div className="flex flex-col gap-2">
+                            <div className="flex items-center justify-between">
+                                <Heading level={4}>Global Font</Heading>
+                                <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    onClick={() => {
+                                        setLocalCustomFontUrl('');
+                                        setLocalCustomFontFamily('');
+                                    }}
+                                >
+                                    Reset to Default
+                                </Button>
+                            </div>
+                            <span className="text-sm text-muted-foreground">
+                                Apply a custom font by providing a Google APIs
+                                link to the font.
+                            </span>
+                            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                                <div className="space-y-2">
+                                    <label
+                                        className="text-xs font-bold text-muted-foreground uppercase"
+                                        htmlFor="custom-font-url"
+                                    >
+                                        Google Font CDN URL
+                                    </label>
+                                    <input
+                                        className="w-full rounded-md border border-border-subtle bg-bg-secondary px-3 py-2 text-sm focus:border-primary focus:outline-none"
+                                        id="custom-font-url"
+                                        placeholder="https://fonts.googleapis.com/css2?family=..."
+                                        type="text"
+                                        value={localCustomFontUrl}
+                                        onChange={(e) =>
+                                            setLocalCustomFontUrl(
+                                                e.target.value,
+                                            )
+                                        }
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label
+                                        className="text-xs font-bold text-muted-foreground uppercase"
+                                        htmlFor="custom-font-family"
+                                    >
+                                        Font Family Name
+                                    </label>
+                                    <input
+                                        className="w-full rounded-md border border-border-subtle bg-bg-secondary px-3 py-2 text-sm focus:border-primary focus:outline-none"
+                                        id="custom-font-family"
+                                        placeholder="e.g. Open Sans"
+                                        type="text"
+                                        value={localCustomFontFamily}
+                                        onChange={(e) =>
+                                            setLocalCustomFontFamily(
+                                                e.target.value,
+                                            )
+                                        }
+                                    />
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     {/* Font Settings */}

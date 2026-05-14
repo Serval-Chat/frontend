@@ -57,13 +57,15 @@ export const TertiarySidebar: React.FC = () => {
         side: 'right',
     });
 
+    const scrollContainerRef = useRef<HTMLDivElement>(null);
+
     return (
         <Box
             as="aside"
             className={cn(
                 'relative flex h-full shrink-0 flex-col bg-[var(--tertiary-bg)]',
                 'pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]',
-                'md:block',
+                'md:flex',
                 'max-md:fixed max-md:inset-y-0 max-md:right-0 max-md:z-50 max-md:w-64 max-md:shadow-2xl',
                 'max-md:transition-transform max-md:duration-300 max-md:[transition-timing-function:cubic-bezier(0.25,0.46,0.45,0.94)]',
                 showMobileMemberList
@@ -83,7 +85,10 @@ export const TertiarySidebar: React.FC = () => {
                 onMouseDown={handleMouseDown}
             />
 
-            <Box className="custom-scrollbar flex min-h-0 flex-1 flex-col overflow-x-hidden overflow-y-auto">
+            <Box
+                className="custom-scrollbar flex min-h-0 flex-1 flex-col overflow-x-hidden overflow-y-auto"
+                ref={scrollContainerRef}
+            >
                 {(selectedServerId || showMobileMemberList) && (
                     <div
                         className={cn(
@@ -162,6 +167,7 @@ export const TertiarySidebar: React.FC = () => {
                             memberRoleMap={memberRoleMap}
                             members={members}
                             roles={roles}
+                            scrollRef={scrollContainerRef}
                             searchQuery={searchQuery}
                             serverDetails={serverDetails}
                         />

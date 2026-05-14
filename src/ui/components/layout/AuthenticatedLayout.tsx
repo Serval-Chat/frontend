@@ -20,8 +20,13 @@ import { LoadingScreen } from '@/ui/components/common/LoadingScreen';
 import { PushPrompt } from '@/ui/components/common/PushPrompt';
 import { FurTweaker } from '@/ui/components/nt/FurTweaker';
 import { ThemeTweaker } from '@/ui/components/nt/ThemeTweaker';
-import { WsDebugger } from '@/ui/components/nt/WsDebugger';
 import { useWsDebugWindowOpen } from '@/ws/debug';
+
+const WsDebugger = React.lazy(() =>
+    import('@/ui/components/nt/WsDebugger').then((m) => ({
+        default: m.WsDebugger,
+    })),
+);
 
 export const AuthenticatedLayout = (): ReactNode => {
     const { isAuthenticated } = useAuth();
@@ -109,7 +114,11 @@ export const AuthenticatedLayout = (): ReactNode => {
             )}
             <BlockSyncProvider />
             <PushPrompt />
-            {isDebugWindowOpen && <WsDebugger />}
+            {isDebugWindowOpen && (
+                <React.Suspense fallback={null}>
+                    <WsDebugger />
+                </React.Suspense>
+            )}
             <FurTweaker />
             <ThemeTweaker />
             <Outlet />

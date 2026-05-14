@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import type { Role } from '@/api/servers/servers.types';
 import type { User } from '@/api/users/users.types';
@@ -37,6 +37,52 @@ export const SUPPORTED_USERNAME_FONTS = [
     'Workbench',
 ] as const;
 
+const FONT_IMPORTS: Partial<
+    Record<(typeof SUPPORTED_USERNAME_FONTS)[number], string>
+> = {
+    Audiowide:
+        'https://fonts.googleapis.com/css2?family=Audiowide&display=swap',
+    'Bebas Neue':
+        'https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap',
+    'Betania Patmos':
+        'https://fonts.googleapis.com/css2?family=Betania+Patmos&display=swap',
+    'Google Sans Code':
+        'https://fonts.googleapis.com/css2?family=Google+Sans+Code&display=swap',
+    'Noto Sans':
+        'https://fonts.googleapis.com/css2?family=Noto+Sans&display=swap',
+    Pacifico: 'https://fonts.googleapis.com/css2?family=Pacifico&display=swap',
+    'Playpen Sans Deva':
+        'https://fonts.googleapis.com/css2?family=Playpen+Sans+Deva&display=swap',
+    'Rampart One':
+        'https://fonts.googleapis.com/css2?family=Rampart+One&display=swap',
+    Roboto: 'https://fonts.googleapis.com/css2?family=Roboto&display=swap',
+    Workbench:
+        'https://fonts.googleapis.com/css2?family=Workbench&display=swap',
+};
+
+const loadedUsernameFonts = new Set<string>();
+
+const loadUsernameFont = (font: string): void => {
+    const href =
+        FONT_IMPORTS[font as keyof typeof FONT_IMPORTS] ||
+        `https://fonts.googleapis.com/css2?family=${encodeURIComponent(font).replace(/%20/g, '+')}&display=swap`;
+
+    if (loadedUsernameFonts.has(href)) return;
+
+    loadedUsernameFonts.add(href);
+
+    if (typeof document === 'undefined') return;
+    if (document.querySelector(`link[data-username-font][href="${href}"]`)) {
+        return;
+    }
+
+    const link = document.createElement('link');
+    link.dataset.usernameFont = 'true';
+    link.rel = 'stylesheet';
+    link.href = href;
+    document.head.appendChild(link);
+};
+
 export const StyledUserName: React.FC<StyledUserNameProps> = React.memo(
     ({
         user,
@@ -52,15 +98,6 @@ export const StyledUserName: React.FC<StyledUserNameProps> = React.memo(
     }) => {
         const effectiveDisableColors = disableGlowAndColors || disableColors;
         const effectiveDisableGlow = disableGlowAndColors || disableGlow;
-        if (!user && !role) {
-            return (
-                <Text className={cn('truncate text-sm font-medium', className)}>
-                    {children}
-                </Text>
-            );
-        }
-
-        // Determine basic styling from user or role
         let usernameFont = disableCustomFonts ? undefined : user?.usernameFont;
 
         if (
@@ -70,6 +107,20 @@ export const StyledUserName: React.FC<StyledUserNameProps> = React.memo(
             )
         ) {
             usernameFont = undefined;
+        }
+
+        useEffect(() => {
+            if (usernameFont && usernameFont !== 'default') {
+                loadUsernameFont(usernameFont);
+            }
+        }, [usernameFont]);
+
+        if (!user && !role) {
+            return (
+                <Text className={cn('truncate text-sm font-medium', className)}>
+                    {children}
+                </Text>
+            );
         }
 
         const usernameGlow = user?.usernameGlow;
@@ -187,28 +238,44 @@ export const StyledUserName: React.FC<StyledUserNameProps> = React.memo(
             const chars = text.split('');
             const totalChars = chars.length;
 
+            const baseStyle: React.CSSProperties = hasGradient
+                ? {
+                      display: 'inline-block',
+                      whiteSpace: 'pre',
+                      padding: '0 0.125px',
+                      backgroundImage: `${gradientFunction}(${gradientArgs})`,
+                      backgroundSize: `${totalChars * 100}% 100%`,
+                      backgroundClip: 'text',
+                      WebkitBackgroundClip: 'text',
+                      color: 'transparent',
+                      WebkitTextFillColor: 'transparent',
+                  }
+                : {
+                      display: 'inline-block',
+                      whiteSpace: 'pre',
+                      padding: '0 0.125px',
+                      color: solidColor || undefined,
+                  };
+
+            const glowColorStyle = hasGradient
+                ? {
+                      backgroundImage: `${gradientFunction}(${gradientArgs})`,
+                      WebkitTextFillColor: 'transparent' as const,
+                  }
+                : {
+                      color: usernameGlow?.color || solidColor || undefined,
+                  };
+
             return chars.map((char, i) => {
-                const charStyle: React.CSSProperties = {
-                    display: 'inline-block',
-                    whiteSpace: 'pre',
-                    padding: '0 0.125px',
-                    ...(hasGradient
-                        ? {
-                              backgroundImage: `${gradientFunction}(${gradientArgs})`,
-                              backgroundSize: `${totalChars * 100}% 100%`,
-                              backgroundPosition:
-                                  totalChars > 1
-                                      ? `${(i / (totalChars - 1)) * 100}% 0%`
-                                      : 'center',
-                              backgroundClip: 'text',
-                              WebkitBackgroundClip: 'text',
-                              color: 'transparent',
-                              WebkitTextFillColor: 'transparent',
-                          }
-                        : {
-                              color: solidColor || undefined,
-                          }),
-                };
+                const charStyle: React.CSSProperties = hasGradient
+                    ? {
+                          ...baseStyle,
+                          backgroundPosition:
+                              totalChars > 1
+                                  ? `${(i / (totalChars - 1)) * 100}% 0%`
+                                  : 'center',
+                      }
+                    : baseStyle;
 
                 return (
                     <span
@@ -231,17 +298,7 @@ export const StyledUserName: React.FC<StyledUserNameProps> = React.memo(
                                             0.8 + glowIntensity * 0.2,
                                         ),
                                         zIndex: 'var(--z-index-effect-sm)',
-                                        color: hasGradient
-                                            ? undefined
-                                            : usernameGlow?.color ||
-                                              solidColor ||
-                                              undefined,
-                                        backgroundImage: hasGradient
-                                            ? `${gradientFunction}(${gradientArgs})`
-                                            : undefined,
-                                        WebkitTextFillColor: hasGradient
-                                            ? 'transparent'
-                                            : undefined,
+                                        ...glowColorStyle,
                                     }}
                                 >
                                     {char}
@@ -258,17 +315,7 @@ export const StyledUserName: React.FC<StyledUserNameProps> = React.memo(
                                             0.6 + glowIntensity * 0.2,
                                         ),
                                         zIndex: 'var(--z-index-effect-md)',
-                                        color: hasGradient
-                                            ? undefined
-                                            : usernameGlow?.color ||
-                                              solidColor ||
-                                              undefined,
-                                        backgroundImage: hasGradient
-                                            ? `${gradientFunction}(${gradientArgs})`
-                                            : undefined,
-                                        WebkitTextFillColor: hasGradient
-                                            ? 'transparent'
-                                            : undefined,
+                                        ...glowColorStyle,
                                     }}
                                 >
                                     {char}
@@ -285,17 +332,7 @@ export const StyledUserName: React.FC<StyledUserNameProps> = React.memo(
                                             0.4 + glowIntensity * 0.2,
                                         ),
                                         zIndex: 'var(--z-index-effect-lg)',
-                                        color: hasGradient
-                                            ? undefined
-                                            : usernameGlow?.color ||
-                                              solidColor ||
-                                              undefined,
-                                        backgroundImage: hasGradient
-                                            ? `${gradientFunction}(${gradientArgs})`
-                                            : undefined,
-                                        WebkitTextFillColor: hasGradient
-                                            ? 'transparent'
-                                            : undefined,
+                                        ...glowColorStyle,
                                     }}
                                 >
                                     {char}

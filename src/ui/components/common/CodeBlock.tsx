@@ -1,9 +1,6 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 
 import { Check, Copy, Maximize } from 'lucide-react';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-
-import { customSyntaxTheme } from '@/styles/syntax-theme';
 
 import { Button } from './Button';
 import { CodeModal } from './CodeModal';
@@ -24,6 +21,7 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({
 }) => {
     const [isCopied, setIsCopied] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const lines = useMemo(() => content.split('\n'), [content]);
 
     const handleCopy = (e: React.MouseEvent): void => {
         e.stopPropagation();
@@ -102,45 +100,22 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({
                     </div>
                 </div>
                 <div className="custom-scrollbar overflow-hidden bg-bg-secondary/50 p-0 font-mono text-sm">
-                    <SyntaxHighlighter
-                        showLineNumbers
-                        wrapLines
-                        wrapLongLines
-                        customStyle={{
-                            margin: 0,
-                            padding: '1rem',
-                            fontSize: '0.875rem',
-                            lineHeight: '1.5rem',
-                            backgroundColor: 'transparent',
-                            whiteSpace: 'pre-wrap',
-                            wordBreak: 'break-all',
-                        }}
-                        language={(language || 'text').toLowerCase()}
-                        lineNumberStyle={{
-                            minWidth: '3.5em',
-                            paddingRight: '1em',
-                            textAlign: 'right',
-                            userSelect: 'none',
-                            opacity: 0.5,
-                            borderRight: '1px solid var(--color-border-subtle)',
-                            marginRight: '1em',
-                            height: 'auto',
-                            display: 'inline-block',
-                        }}
-                        lineProps={{
-                            style: {
-                                whiteSpace: 'pre-wrap',
-                                wordBreak: 'break-all',
-                                display: 'flex',
-                                width: '100%',
-                            },
-                        }}
-                        linenumberclassname="code-block-line-number"
-                        linetagname="div"
-                        style={customSyntaxTheme}
-                    >
-                        {content}
-                    </SyntaxHighlighter>
+                    <pre className="m-0 overflow-x-auto bg-transparent p-4 text-sm leading-6 whitespace-pre-wrap">
+                        {lines.map((line, index) => (
+                            <div
+                                className="flex"
+                                // eslint-disable-next-line react/no-array-index-key
+                                key={`${index}-${line.length}`}
+                            >
+                                <span className="code-block-line-number mr-4 min-w-12 border-r border-border-subtle pr-3 text-right text-muted-foreground/50 select-none">
+                                    {index + 1}
+                                </span>
+                                <code className="min-w-0 flex-1 break-all text-foreground">
+                                    {line || '\u200b'}
+                                </code>
+                            </div>
+                        ))}
+                    </pre>
                 </div>
             </div>
 

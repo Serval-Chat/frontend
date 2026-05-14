@@ -9,7 +9,7 @@ import type { ChatMessage } from '@/api/chat/chat.types';
 import type { Channel } from '@/api/servers/servers.types';
 import { useMe } from '@/api/users/users.queries';
 import type { User } from '@/api/users/users.types';
-import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { useAppDispatch, useAppShallowSelector } from '@/store/hooks';
 import {
     setSelectedChannelId,
     setSelectedFriendId,
@@ -43,7 +43,11 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
     const { selectedServerId, selectedChannelId, showMobileMemberList } =
-        useAppSelector((state) => state.nav);
+        useAppShallowSelector((state) => ({
+            selectedServerId: state.nav.selectedServerId,
+            selectedChannelId: state.nav.selectedChannelId,
+            showMobileMemberList: state.nav.showMobileMemberList,
+        }));
 
     const [descExpanded, setDescExpanded] = useState(false);
     const pinButtonRef = useRef<HTMLButtonElement>(null);

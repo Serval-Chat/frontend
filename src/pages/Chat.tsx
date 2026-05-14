@@ -6,7 +6,7 @@ import { Outlet, useNavigate } from 'react-router-dom';
 
 import { useMe } from '@/api/users/users.queries';
 import { useSwipeGesture } from '@/hooks/useSwipeGesture';
-import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { useAppDispatch, useAppShallowSelector } from '@/store/hooks';
 import {
     setSelectedChannelId,
     setSelectedFriendId,
@@ -43,7 +43,16 @@ export const Chat: React.FC = () => {
         mobileHomeTab,
         lastSelectedFriendId,
         lastOpenedChannelByServer,
-    } = useAppSelector((state) => state.nav);
+    } = useAppShallowSelector((state) => ({
+        selectedFriendId: state.nav.selectedFriendId,
+        selectedServerId: state.nav.selectedServerId,
+        selectedChannelId: state.nav.selectedChannelId,
+        showMobileMemberList: state.nav.showMobileMemberList,
+        navMode: state.nav.navMode,
+        mobileHomeTab: state.nav.mobileHomeTab,
+        lastSelectedFriendId: state.nav.lastSelectedFriendId,
+        lastOpenedChannelByServer: state.nav.lastOpenedChannelByServer,
+    }));
 
     const [isMobile, setIsMobile] = useState(isMobileViewport);
     useEffect(() => {

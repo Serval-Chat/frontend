@@ -20,14 +20,53 @@ import { Modal } from '@/ui/components/common/Modal';
 import { SettingsSidebarLayout } from '@/ui/components/common/settings/SettingsSidebarLayout';
 import { cn } from '@/utils/cn';
 
-import { ServerBansSettings } from './ServerBansSettings';
-import { ServerBehaviourSettings } from './ServerBehaviourSettings';
-import { ServerEmojiSettings } from './ServerEmojiSettings';
-import { ServerInviteSettings } from './ServerInviteSettings';
-import { ServerOverviewSettings } from './ServerOverviewSettings';
-import { ServerRoleSettings } from './ServerRoleSettings';
-import { ServerStickerSettings } from './ServerStickerSettings';
-import { AuditLogSettings } from './auditLog/AuditLogSettings';
+const AuditLogSettings = React.lazy(() =>
+    import('./auditLog/AuditLogSettings').then((m) => ({
+        default: m.AuditLogSettings,
+    })),
+);
+
+const ServerBansSettings = React.lazy(() =>
+    import('./ServerBansSettings').then((m) => ({
+        default: m.ServerBansSettings,
+    })),
+);
+
+const ServerBehaviourSettings = React.lazy(() =>
+    import('./ServerBehaviourSettings').then((m) => ({
+        default: m.ServerBehaviourSettings,
+    })),
+);
+
+const ServerEmojiSettings = React.lazy(() =>
+    import('./ServerEmojiSettings').then((m) => ({
+        default: m.ServerEmojiSettings,
+    })),
+);
+
+const ServerInviteSettings = React.lazy(() =>
+    import('./ServerInviteSettings').then((m) => ({
+        default: m.ServerInviteSettings,
+    })),
+);
+
+const ServerOverviewSettings = React.lazy(() =>
+    import('./ServerOverviewSettings').then((m) => ({
+        default: m.ServerOverviewSettings,
+    })),
+);
+
+const ServerRoleSettings = React.lazy(() =>
+    import('./ServerRoleSettings').then((m) => ({
+        default: m.ServerRoleSettings,
+    })),
+);
+
+const ServerStickerSettings = React.lazy(() =>
+    import('./ServerStickerSettings').then((m) => ({
+        default: m.ServerStickerSettings,
+    })),
+);
 
 interface ServerSettingsModalProps {
     isOpen: boolean;
@@ -85,10 +124,14 @@ export const ServerSettingsModal: React.FC<ServerSettingsModalProps> = ({
     const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(true);
     const { hasPermission, isOwner } = usePermissions(serverId);
 
-    const sections = ALL_SECTIONS.map((s) => ({
-        ...s,
-        hidden: !isOwner && !hasPermission(s.permission),
-    }));
+    const sections = React.useMemo(
+        () =>
+            ALL_SECTIONS.map((s) => ({
+                ...s,
+                hidden: !isOwner && !hasPermission(s.permission),
+            })),
+        [hasPermission, isOwner],
+    );
 
     const handleSetSection = (sectionId: string): void => {
         setIsMobileSidebarOpen(false);
@@ -176,30 +219,38 @@ export const ServerSettingsModal: React.FC<ServerSettingsModalProps> = ({
                                     : 'max-w-4xl',
                             )}
                         >
-                            {activeSection === 'overview' && (
-                                <ServerOverviewSettings serverId={serverId} />
-                            )}
-                            {activeSection === 'roles' && (
-                                <ServerRoleSettings serverId={serverId} />
-                            )}
-                            {activeSection === 'emojis' && (
-                                <ServerEmojiSettings serverId={serverId} />
-                            )}
-                            {activeSection === 'stickers' && (
-                                <ServerStickerSettings serverId={serverId} />
-                            )}
-                            {activeSection === 'invites' && (
-                                <ServerInviteSettings serverId={serverId} />
-                            )}
-                            {activeSection === 'behaviour' && (
-                                <ServerBehaviourSettings serverId={serverId} />
-                            )}
-                            {activeSection === 'bans' && (
-                                <ServerBansSettings serverId={serverId} />
-                            )}
-                            {activeSection === 'audit-log' && (
-                                <AuditLogSettings serverId={serverId} />
-                            )}
+                            <React.Suspense fallback={null}>
+                                {activeSection === 'overview' && (
+                                    <ServerOverviewSettings
+                                        serverId={serverId}
+                                    />
+                                )}
+                                {activeSection === 'roles' && (
+                                    <ServerRoleSettings serverId={serverId} />
+                                )}
+                                {activeSection === 'emojis' && (
+                                    <ServerEmojiSettings serverId={serverId} />
+                                )}
+                                {activeSection === 'stickers' && (
+                                    <ServerStickerSettings
+                                        serverId={serverId}
+                                    />
+                                )}
+                                {activeSection === 'invites' && (
+                                    <ServerInviteSettings serverId={serverId} />
+                                )}
+                                {activeSection === 'behaviour' && (
+                                    <ServerBehaviourSettings
+                                        serverId={serverId}
+                                    />
+                                )}
+                                {activeSection === 'bans' && (
+                                    <ServerBansSettings serverId={serverId} />
+                                )}
+                                {activeSection === 'audit-log' && (
+                                    <AuditLogSettings serverId={serverId} />
+                                )}
+                            </React.Suspense>
                         </div>
                     </div>
                 </div>

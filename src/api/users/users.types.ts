@@ -41,6 +41,8 @@ export interface UserSettings {
     disableCustomUsernameFonts?: boolean;
     disableCustomUsernameColors?: boolean;
     disableCustomUsernameGlow?: boolean;
+    customFontUrl?: string;
+    customFontFamily?: string;
 }
 
 export interface ServerFolder {

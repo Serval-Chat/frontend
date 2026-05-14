@@ -36,6 +36,10 @@ export const useProcessedMessages = (
                       ? 1
                       : 0,
             );
+        const messageById = new Map<string, ChatMessage>();
+        allMessages.forEach((message) => {
+            messageById.set(message._id.toString(), message);
+        });
 
         const result = allMessages.map((msg) => {
             let user: User | undefined = undefined;
@@ -78,6 +82,7 @@ export const useProcessedMessages = (
                 serverMemberMap,
                 highestRoleMap,
                 iconRoleMap,
+                messageById,
             );
 
             const next = {

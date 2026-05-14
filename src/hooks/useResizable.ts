@@ -42,9 +42,12 @@ export const useResizable = ({
     const startXRef = useRef(0);
     const startWidthRef = useRef(0);
     const currentWidthRef = useRef(width);
+    const pendingWidthRef = useRef(width);
+    const frameRef = useRef<number | null>(null);
 
     useEffect(() => {
         currentWidthRef.current = width;
+        pendingWidthRef.current = width;
     }, [width]);
 
     const handleMouseDown = useCallback(
@@ -72,12 +75,24 @@ export const useResizable = ({
             }
 
             newWidth = Math.max(minWidth, Math.min(maxWidth, newWidth));
-            setWidth(newWidth);
+            pendingWidthRef.current = newWidth;
+            currentWidthRef.current = newWidth;
+
+            if (frameRef.current !== null) return;
+            frameRef.current = window.requestAnimationFrame(() => {
+                frameRef.current = null;
+                setWidth(pendingWidthRef.current);
+            });
         },
         [side, minWidth, maxWidth],
     );
 
     const handleMouseUp = useCallback(() => {
+        if (frameRef.current !== null) {
+            window.cancelAnimationFrame(frameRef.current);
+            frameRef.current = null;
+            setWidth(pendingWidthRef.current);
+        }
         setIsResizing(false);
         localStorage.setItem(storageKey, currentWidthRef.current.toString());
 
@@ -95,6 +110,10 @@ export const useResizable = ({
         }
 
         return () => {
+            if (frameRef.current !== null) {
+                window.cancelAnimationFrame(frameRef.current);
+                frameRef.current = null;
+            }
             window.removeEventListener('mousemove', handleMouseMove);
             window.removeEventListener('mouseup', handleMouseUp);
         };

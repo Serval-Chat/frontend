@@ -1,4 +1,4 @@
-import { useMemo, useSyncExternalStore } from 'react';
+import { useCallback, useMemo, useSyncExternalStore } from 'react';
 
 import { useLocation, useParams } from 'react-router-dom';
 
@@ -76,10 +76,34 @@ export const usePermissions = (
         enabled: isEnabled && !!channelId,
     });
 
+    const memberByUserId = useMemo(() => {
+        const map = new Map<string, NonNullable<typeof members>[number]>();
+        members?.forEach((serverMember) => {
+            map.set(serverMember.userId, serverMember);
+        });
+        return map;
+    }, [members]);
+
+    const channelById = useMemo(() => {
+        const map = new Map<string, NonNullable<typeof channels>[number]>();
+        channels?.forEach((channel) => {
+            map.set(channel._id, channel);
+        });
+        return map;
+    }, [channels]);
+
+    const categoryById = useMemo(() => {
+        const map = new Map<string, NonNullable<typeof categories>[number]>();
+        categories?.forEach((category) => {
+            map.set(category._id, category);
+        });
+        return map;
+    }, [categories]);
+
     const member = useMemo(() => {
         if (!members || !currentUser || !serverId) return null;
-        return members.find((m) => m.userId === currentUser._id);
-    }, [members, currentUser, serverId]);
+        return memberByUserId.get(currentUser._id) ?? null;
+    }, [members, currentUser, serverId, memberByUserId]);
 
     const isOwner = !!(
         server?.ownerId &&
@@ -148,14 +172,16 @@ export const usePermissions = (
         }
 
         if (!member) {
-            console.warn(
-                '[usePermissions] No member record found for current user - all permissions default to false.',
-                {
-                    serverId,
-                    currentUserId: currentUser?._id,
-                    memberUserIds: members?.map((m) => m.userId),
-                },
-            );
+            if (import.meta.env.DEV) {
+                console.warn(
+                    '[usePermissions] No member record found for current user - all permissions default to false.',
+                    {
+                        serverId,
+                        currentUserId: currentUser?._id,
+                        memberUserIds: members?.map((m) => m.userId),
+                    },
+                );
+            }
             return perms;
         }
 
@@ -198,7 +224,7 @@ export const usePermissions = (
             };
 
             if (channelId && channels) {
-                const channel = channels.find((c) => c._id === channelId);
+                const channel = channelById.get(channelId);
 
                 // 1. Channel Overrides
                 const channelOverride = getOverride(channel?.permissions);
@@ -207,7 +233,7 @@ export const usePermissions = (
                 // 2. Category Overrides
                 const category =
                     channel?.categoryId && categories
-                        ? categories.find((c) => c._id === channel.categoryId)
+                        ? categoryById.get(channel.categoryId)
                         : null;
                 const categoryOverride = getOverride(category?.permissions);
                 if (categoryOverride !== undefined) return categoryOverride;
@@ -229,23 +255,22 @@ export const usePermissions = (
         });
 
         if (!perms.viewChannels && channelId) {
-            console.warn(
-                `[usePermissions] viewChannels=false for channel ${channelId} (server ${serverId})`,
-                {
-                    channelPermissions:
-                        channelId && channels
-                            ? channels.find((c) => c._id === channelId)
-                                  ?.permissions
-                            : undefined,
-                    userRoles: userRoles.map((r) => ({
-                        id: r._id,
-                        name: r.name,
-                        position: r.position,
-                    })),
-                    everyonePermissions: everyoneRole?.permissions,
-                    computedPerms: perms,
-                },
-            );
+            if (import.meta.env.DEV) {
+                console.warn(
+                    `[usePermissions] viewChannels=false for channel ${channelId} (server ${serverId})`,
+                    {
+                        channelPermissions:
+                            channelById.get(channelId)?.permissions,
+                        userRoles: userRoles.map((r) => ({
+                            id: r._id,
+                            name: r.name,
+                            position: r.position,
+                        })),
+                        everyonePermissions: everyoneRole?.permissions,
+                        computedPerms: perms,
+                    },
+                );
+            }
         }
         return perms;
     }, [
@@ -259,6 +284,8 @@ export const usePermissions = (
         channels,
         categories,
         members,
+        channelById,
+        categoryById,
     ]);
 
     const isTimedOut =
@@ -274,20 +301,39 @@ export const usePermissions = (
                   new Date(member.communicationDisabledUntil).getTime() - now,
               );
 
-    const hasPermission = (permission: keyof RolePermissions): boolean =>
-        permissions[permission] || false;
+    const hasPermission = useCallback(
+        (permission: keyof RolePermissions): boolean =>
+            permissions[permission] || false,
+        [permissions],
+    );
 
-    return {
-        permissions,
-        hasPermission,
-        isOwner,
-        isTimedOut,
-        remainingTimeoutMs,
-        isLoading:
-            !currentUser ||
-            !members ||
-            !roles ||
-            !server ||
-            (!!channelId && (!channels || !categories)),
-    };
+    return useMemo(
+        () => ({
+            permissions,
+            hasPermission,
+            isOwner,
+            isTimedOut,
+            remainingTimeoutMs,
+            isLoading:
+                !currentUser ||
+                !members ||
+                !roles ||
+                !server ||
+                (!!channelId && (!channels || !categories)),
+        }),
+        [
+            permissions,
+            hasPermission,
+            isOwner,
+            isTimedOut,
+            remainingTimeoutMs,
+            currentUser,
+            members,
+            roles,
+            server,
+            channelId,
+            channels,
+            categories,
+        ],
+    );
 };

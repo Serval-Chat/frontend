@@ -99,6 +99,8 @@ export const FileEmbed: React.FC<FileEmbedProps> = ({ url }) => {
                                 ? 'opacity-0'
                                 : 'opacity-100',
                         )}
+                        decoding="async"
+                        loading="lazy"
                         src={displayUrl!}
                     />
                     {isSpoiler && !isRevealed && (

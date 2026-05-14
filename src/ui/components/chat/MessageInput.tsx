@@ -36,7 +36,7 @@ import { useLocation, useParams } from 'react-router-dom';
 import { useClickAway } from 'react-use';
 
 import { useChannelMessages, useUserMessages } from '@/api/chat/chat.queries';
-import { type ChatMessage, type OutgoingPoll } from '@/api/chat/chat.types';
+import type { OutgoingPoll } from '@/api/chat/chat.types';
 import { filesApi } from '@/api/files/files.api';
 import { useFriends } from '@/api/friends/friends.queries';
 import { interactionsApi } from '@/api/interactions/interactions.api';
@@ -55,7 +55,6 @@ import { useMe, useUserById } from '@/api/users/users.queries';
 import type { User } from '@/api/users/users.types';
 import type { QueuedFile } from '@/hooks/chat/useFileQueue';
 import { useCustomEmojis } from '@/hooks/useCustomEmojis';
-import { useChatWS } from '@/hooks/ws/useChatWS';
 import { useWebSocket } from '@/hooks/ws/useWebSocket';
 import { useAppSelector } from '@/store/hooks';
 import type { ProcessedChatMessage } from '@/types/chat.ui';
@@ -72,10 +71,7 @@ import { ParsedText } from '@/ui/components/common/ParsedText';
 import { StyledUserName } from '@/ui/components/common/StyledUserName';
 import { Text } from '@/ui/components/common/Text';
 import { useToast } from '@/ui/components/common/Toast';
-import {
-    type StickerCategory,
-    StickerPicker,
-} from '@/ui/components/emoji/StickerPicker';
+import type { StickerCategory } from '@/ui/components/emoji/StickerPicker';
 import { Box } from '@/ui/components/layout/Box';
 import { cn } from '@/utils/cn';
 import { clearDraft, getDraft, saveDraft } from '@/utils/drafts';
@@ -84,7 +80,6 @@ import { WsEvents } from '@/ws';
 
 import { CreatePollModal } from './CreatePollModal';
 import { FileQueue } from './FileQueue';
-import { GifPicker } from './GifPicker';
 import { LexicalAutocompletePlugin } from './lexical/LexicalAutocompletePlugin';
 import { LexicalEmojiPlugin } from './lexical/LexicalEmojiPlugin';
 import { LexicalPastePlugin } from './lexical/LexicalPastePlugin';
@@ -98,6 +93,14 @@ const EmojiPicker = React.lazy(() =>
     import('@/ui/components/emoji/EmojiPicker').then((m) => ({
         default: m.EmojiPicker,
     })),
+);
+const StickerPicker = React.lazy(() =>
+    import('@/ui/components/emoji/StickerPicker').then((m) => ({
+        default: m.StickerPicker,
+    })),
+);
+const GifPicker = React.lazy(() =>
+    import('./GifPicker').then((m) => ({ default: m.GifPicker })),
 );
 
 const EditorBridge = ({
@@ -131,6 +134,13 @@ interface MessageInputProps {
     cooldown: number;
     setCooldown: (c: number) => void;
     canBypassSlowMode: boolean;
+    sendMessage: (
+        text: string,
+        replyToId?: string,
+        stickerId?: string,
+        poll?: OutgoingPoll,
+    ) => void;
+    sendTyping: () => void;
 }
 
 const theme = {
@@ -141,6 +151,17 @@ const theme = {
         underline: 'underline',
         strikethrough: 'line-through',
     },
+};
+
+const isSameSlashChipState = (
+    a: { commandName: string; argValues: string[] } | null,
+    b: { commandName: string; argValues: string[] } | null,
+): boolean => {
+    if (a === b) return true;
+    if (!a || !b) return false;
+    if (a.commandName !== b.commandName) return false;
+    if (a.argValues.length !== b.argValues.length) return false;
+    return a.argValues.every((value, index) => value === b.argValues[index]);
 };
 
 export const MessageInput: React.FC<MessageInputProps> = ({
@@ -154,13 +175,17 @@ export const MessageInput: React.FC<MessageInputProps> = ({
     cooldown,
     setCooldown,
     canBypassSlowMode,
+    sendMessage,
+    sendTyping,
 }) => {
     const [isUploading, setIsUploading] = useState(false);
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
     const [showStickerPicker, setShowStickerPicker] = useState(false);
     const [showGifPicker, setShowGifPicker] = useState(false);
     const [showPollModal, setShowPollModal] = useState(false);
-    const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+    const [isMobile, setIsMobile] = useState(
+        () => window.matchMedia('(max-width: 768px)').matches,
+    );
     const [hasText, setHasText] = useState(false);
     const [currentInputText, setCurrentInputText] = useState('');
     const [editor, setEditor] = useState<LexicalEditor | null>(null);
@@ -172,6 +197,10 @@ export const MessageInput: React.FC<MessageInputProps> = ({
         commandName: string;
         argValues: string[];
     } | null>(null);
+    const currentInputTextRef = useRef('');
+    const hasTextRef = useRef(false);
+    const slashChipStateRef = useRef<typeof slashChipState>(null);
+    const lastDraftJsonRef = useRef<string | null>(null);
     const queryClient = useQueryClient();
     const location = useLocation();
     const params = useParams();
@@ -192,8 +221,10 @@ export const MessageInput: React.FC<MessageInputProps> = ({
     });
 
     useEffect(() => {
-        const handleResize = (): void => setIsMobile(window.innerWidth <= 768);
-        window.addEventListener('resize', handleResize);
+        const mobileQuery = window.matchMedia('(max-width: 768px)');
+        const handleResize = (event: MediaQueryListEvent): void =>
+            setIsMobile(event.matches);
+        mobileQuery.addEventListener('change', handleResize);
 
         const handleGlobalKeyDown = (e: KeyboardEvent): void => {
             if (
@@ -215,7 +246,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
         window.addEventListener('keydown', handleGlobalKeyDown);
 
         return () => {
-            window.removeEventListener('resize', handleResize);
+            mobileQuery.removeEventListener('change', handleResize);
             window.removeEventListener('keydown', handleGlobalKeyDown);
         };
     }, [editor]);
@@ -253,12 +284,6 @@ export const MessageInput: React.FC<MessageInputProps> = ({
     );
     const selectedChannelId = useAppSelector(
         (state) => state.nav.selectedChannelId,
-    );
-
-    const { sendMessage, sendTyping } = useChatWS(
-        selectedFriendId ?? undefined,
-        selectedServerId ?? undefined,
-        selectedChannelId ?? undefined,
     );
 
     const { customCategories } = useCustomEmojis({ enabled: showEmojiPicker });
@@ -466,13 +491,20 @@ export const MessageInput: React.FC<MessageInputProps> = ({
             });
         }
 
-        const otherServerIds = new Set(allStickers.map((s) => s.serverId));
-        if (selectedServerId) otherServerIds.delete(selectedServerId);
+        const stickersByServer = new Map<string, typeof allStickers>();
+        allStickers.forEach((sticker) => {
+            if (selectedServerId && sticker.serverId === selectedServerId) {
+                return;
+            }
+            const group = stickersByServer.get(sticker.serverId);
+            if (group) {
+                group.push(sticker);
+            } else {
+                stickersByServer.set(sticker.serverId, [sticker]);
+            }
+        });
 
-        otherServerIds.forEach((sid) => {
-            const serverStickers = allStickers.filter(
-                (s) => s.serverId === sid,
-            );
+        stickersByServer.forEach((serverStickers, sid) => {
             if (serverStickers.length > 0) {
                 const serverInfo = serverList.find((s) => s._id === sid);
                 cats.push({
@@ -497,20 +529,30 @@ export const MessageInput: React.FC<MessageInputProps> = ({
     const findLastMyMessage = useMemo(() => {
         if (!me?._id) return null;
 
-        let messages: ChatMessage[] = [];
+        const pages =
+            selectedServerId && selectedChannelId
+                ? channelMessages?.pages
+                : selectedFriendId
+                  ? userMessages?.pages
+                  : undefined;
 
-        if (selectedServerId && selectedChannelId && channelMessages?.pages) {
-            messages = channelMessages.pages.flat();
-        } else if (selectedFriendId && userMessages?.pages) {
-            messages = userMessages.pages.flat();
+        if (!pages) return null;
+
+        for (let pageIndex = pages.length - 1; pageIndex >= 0; pageIndex--) {
+            const page = pages[pageIndex];
+            for (let i = page.length - 1; i >= 0; i--) {
+                const msg = page[i];
+                if (
+                    msg.senderId === me._id &&
+                    msg.text &&
+                    msg.text.trim() !== ''
+                ) {
+                    return msg;
+                }
+            }
         }
 
-        const myMessages = messages.filter(
-            (msg) =>
-                msg.senderId === me._id && msg.text && msg.text.trim() !== '',
-        );
-
-        return myMessages.length > 0 ? myMessages[myMessages.length - 1] : null;
+        return null;
     }, [
         me?._id,
         selectedServerId,
@@ -939,21 +981,43 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                                     const chipState = $getSlashChipState();
                                     currentText = text;
                                     currentChip = chipState;
-                                    setCurrentInputText(text);
-                                    setSlashChipState(chipState);
-                                    const nonEmpty =
-                                        text.trim().length > 0 ||
-                                        chipState !== null;
-                                    setHasText(nonEmpty);
-                                    if (nonEmpty) {
-                                        sendTyping();
-                                    }
                                 });
+
+                                const nonEmpty =
+                                    currentText.trim().length > 0 ||
+                                    currentChip !== null;
+
+                                if (
+                                    currentInputTextRef.current !== currentText
+                                ) {
+                                    currentInputTextRef.current = currentText;
+                                    setCurrentInputText(currentText);
+                                }
+
+                                if (
+                                    !isSameSlashChipState(
+                                        slashChipStateRef.current,
+                                        currentChip,
+                                    )
+                                ) {
+                                    slashChipStateRef.current = currentChip;
+                                    setSlashChipState(currentChip);
+                                }
+
+                                if (hasTextRef.current !== nonEmpty) {
+                                    hasTextRef.current = nonEmpty;
+                                    setHasText(nonEmpty);
+                                }
+
+                                if (nonEmpty) {
+                                    sendTyping();
+                                }
 
                                 if (
                                     currentText.trim().length === 0 &&
                                     currentChip === null
                                 ) {
+                                    lastDraftJsonRef.current = null;
                                     clearDraft(
                                         selectedFriendId,
                                         selectedServerId,
@@ -963,12 +1027,15 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                                     const json = JSON.stringify(
                                         editorState.toJSON(),
                                     );
-                                    saveDraft(
-                                        json,
-                                        selectedFriendId,
-                                        selectedServerId,
-                                        selectedChannelId,
-                                    );
+                                    if (lastDraftJsonRef.current !== json) {
+                                        lastDraftJsonRef.current = json;
+                                        saveDraft(
+                                            json,
+                                            selectedFriendId,
+                                            selectedServerId,
+                                            selectedChannelId,
+                                        );
+                                    }
                                 }
                             }}
                         />
@@ -1040,24 +1107,34 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                     </Button>
                     {showGifPicker && (
                         <Box className="absolute right-0 bottom-full z-50 mb-2">
-                            <GifPicker
-                                onClose={() => setShowGifPicker(false)}
-                                onSelect={(url) => {
-                                    if (editor) {
-                                        void (async () => {
-                                            const result =
-                                                await handleSendMessage(url);
-                                            if (result) {
-                                                editor.dispatchCommand(
-                                                    CLEAR_EDITOR_COMMAND,
-                                                    undefined,
-                                                );
-                                            }
-                                        })();
-                                    }
-                                    setShowGifPicker(false);
-                                }}
-                            />
+                            <React.Suspense
+                                fallback={
+                                    <div className="flex h-[420px] w-[350px] items-center justify-center rounded-lg border border-border-subtle bg-bg-primary text-muted-foreground shadow-xl">
+                                        Loading GIFs...
+                                    </div>
+                                }
+                            >
+                                <GifPicker
+                                    onClose={() => setShowGifPicker(false)}
+                                    onSelect={(url) => {
+                                        if (editor) {
+                                            void (async () => {
+                                                const result =
+                                                    await handleSendMessage(
+                                                        url,
+                                                    );
+                                                if (result) {
+                                                    editor.dispatchCommand(
+                                                        CLEAR_EDITOR_COMMAND,
+                                                        undefined,
+                                                    );
+                                                }
+                                            })();
+                                        }
+                                        setShowGifPicker(false);
+                                    }}
+                                />
+                            </React.Suspense>
                         </Box>
                     )}
                 </Box>
@@ -1159,13 +1236,21 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                     className="absolute right-0 bottom-full z-[var(--z-index-popover)] mb-2"
                     ref={emojiPickerRef}
                 >
-                    <StickerPicker
-                        categories={stickerCategories}
-                        onStickerSelect={(sticker) => {
-                            sendMessage('', undefined, sticker.id);
-                            setShowStickerPicker(false);
-                        }}
-                    />
+                    <React.Suspense
+                        fallback={
+                            <div className="flex h-[420px] w-[350px] items-center justify-center rounded-lg border border-border-subtle bg-bg-primary text-muted-foreground shadow-xl">
+                                Loading stickers...
+                            </div>
+                        }
+                    >
+                        <StickerPicker
+                            categories={stickerCategories}
+                            onStickerSelect={(sticker) => {
+                                sendMessage('', undefined, sticker.id);
+                                setShowStickerPicker(false);
+                            }}
+                        />
+                    </React.Suspense>
                 </div>
             )}
 

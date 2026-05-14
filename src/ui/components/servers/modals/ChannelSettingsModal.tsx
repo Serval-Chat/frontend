@@ -3,10 +3,25 @@ import React, { useState } from 'react';
 import { type Channel } from '@/api/servers/servers.types';
 import { SettingsContentPane } from '@/ui/components/common/settings/SettingsContentPane';
 import { SettingsModalLayout } from '@/ui/components/common/settings/SettingsModalLayout';
-import { ChannelOverviewSettings } from '@/ui/components/servers/settings/ChannelOverviewSettings';
 import { ChannelSettingsSidebar } from '@/ui/components/servers/settings/ChannelSettingsSidebar';
-import { ChannelWebhookSettings } from '@/ui/components/servers/settings/ChannelWebhookSettings';
-import { PermissionsEditorTab } from '@/ui/components/servers/settings/permissions/PermissionsEditorTab';
+
+const ChannelOverviewSettings = React.lazy(() =>
+    import('@/ui/components/servers/settings/ChannelOverviewSettings').then(
+        (m) => ({ default: m.ChannelOverviewSettings }),
+    ),
+);
+
+const ChannelWebhookSettings = React.lazy(() =>
+    import('@/ui/components/servers/settings/ChannelWebhookSettings').then(
+        (m) => ({ default: m.ChannelWebhookSettings }),
+    ),
+);
+
+const PermissionsEditorTab = React.lazy(() =>
+    import('@/ui/components/servers/settings/permissions/PermissionsEditorTab').then(
+        (m) => ({ default: m.PermissionsEditorTab }),
+    ),
+);
 
 interface ChannelSettingsModalProps {
     isOpen: boolean;
@@ -44,29 +59,31 @@ export const ChannelSettingsModal: React.FC<ChannelSettingsModalProps> = ({
             onClose={onClose}
             onMobileBackClick={() => setIsMobileSidebarOpen(true)}
         >
-            {activeSection === 'overview' ? (
-                <SettingsContentPane>
-                    <ChannelOverviewSettings
-                        channel={channel}
-                        onDeleted={onClose}
-                    />
-                </SettingsContentPane>
-            ) : activeSection === 'webhooks' ? (
-                <SettingsContentPane>
-                    <ChannelWebhookSettings
-                        channelId={channel._id}
-                        serverId={channel.serverId}
-                    />
-                </SettingsContentPane>
-            ) : (
-                <div className="flex h-full flex-1 flex-col overflow-hidden">
-                    <PermissionsEditorTab
-                        serverId={channel.serverId}
-                        targetId={channel._id}
-                        targetType="channel"
-                    />
-                </div>
-            )}
+            <React.Suspense fallback={null}>
+                {activeSection === 'overview' ? (
+                    <SettingsContentPane>
+                        <ChannelOverviewSettings
+                            channel={channel}
+                            onDeleted={onClose}
+                        />
+                    </SettingsContentPane>
+                ) : activeSection === 'webhooks' ? (
+                    <SettingsContentPane>
+                        <ChannelWebhookSettings
+                            channelId={channel._id}
+                            serverId={channel.serverId}
+                        />
+                    </SettingsContentPane>
+                ) : (
+                    <div className="flex h-full flex-1 flex-col overflow-hidden">
+                        <PermissionsEditorTab
+                            serverId={channel.serverId}
+                            targetId={channel._id}
+                            targetType="channel"
+                        />
+                    </div>
+                )}
+            </React.Suspense>
         </SettingsModalLayout>
     );
 };

@@ -28,8 +28,10 @@ class WsClient {
     private maxReconnectAttempts = 10;
     private reconnectDelay = 1000;
     private pingInterval: number | null = null;
+    private reconnectTimeout: number | null = null;
     private token: string | null = null;
     private messageQueue: string[] = [];
+    private maxQueuedMessages = 100;
     private isAuthenticated = false;
     private intentionallyClosed = false;
     private state:
@@ -60,7 +62,17 @@ class WsClient {
      */
     public connect(token?: string): void {
         this.intentionallyClosed = false;
-        this.token = token || null;
+        const nextToken = token || null;
+        if (
+            this.socket &&
+            (this.socket.readyState === WebSocket.OPEN ||
+                this.socket.readyState === WebSocket.CONNECTING)
+        ) {
+            if (this.token === nextToken) return;
+            this.disconnect();
+            this.intentionallyClosed = false;
+        }
+        this.token = nextToken;
         if (this.socket?.readyState === WebSocket.OPEN) return;
 
         console.log('[WS] Connecting to:', this.url);
@@ -78,6 +90,10 @@ class WsClient {
      */
     public disconnect(): void {
         this.intentionallyClosed = true;
+        if (this.reconnectTimeout !== null) {
+            window.clearTimeout(this.reconnectTimeout);
+            this.reconnectTimeout = null;
+        }
         this.stopPing();
         this.isAuthenticated = false;
         if (this.socket) {
@@ -109,6 +125,9 @@ class WsClient {
                 !this.isAuthenticated &&
                 type !== WsEvents.AUTHENTICATE)
         ) {
+            if (this.messageQueue.length >= this.maxQueuedMessages) {
+                this.messageQueue.shift();
+            }
             this.messageQueue.push(message);
             return;
         }
@@ -142,6 +161,9 @@ class WsClient {
         const typeHandlers = this.handlers.get(type);
         if (typeHandlers) {
             typeHandlers.delete(handler as EventHandler<unknown>);
+            if (typeHandlers.size === 0) {
+                this.handlers.delete(type);
+            }
         }
     }
 
@@ -222,7 +244,7 @@ class WsClient {
         const typeHandlers = this.handlers.get(type);
 
         if (typeHandlers) {
-            typeHandlers.forEach((handler) => {
+            [...typeHandlers].forEach((handler) => {
                 try {
                     handler(payload, meta);
                 } catch (error) {
@@ -261,7 +283,8 @@ class WsClient {
             console.log(
                 `[WS] Reconnecting in ${delay}ms... (Attempt ${this.reconnectAttempts + 1})`,
             );
-            setTimeout(() => {
+            this.reconnectTimeout = window.setTimeout(() => {
+                this.reconnectTimeout = null;
                 this.reconnectAttempts++;
                 this.connect(this.token ?? undefined);
             }, delay);

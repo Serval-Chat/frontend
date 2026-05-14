@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 
 import { useChannels, useServerDetails } from '@/api/servers/servers.queries';
-import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { useAppDispatch, useAppShallowSelector } from '@/store/hooks';
 import {
     leaveVoiceRoom,
     toggleDeafen,
@@ -29,7 +29,13 @@ export const ActiveVoicePanel: React.FC = () => {
         isMuted,
         isDeafened,
         connectionQuality,
-    } = useAppSelector((state) => state.voice);
+    } = useAppShallowSelector((state) => ({
+        activeVoiceServerId: state.voice.activeVoiceServerId,
+        activeVoiceChannelId: state.voice.activeVoiceChannelId,
+        isMuted: state.voice.isMuted,
+        isDeafened: state.voice.isDeafened,
+        connectionQuality: state.voice.connectionQuality,
+    }));
     const dispatch = useAppDispatch();
 
     const { data: server } = useServerDetails(activeVoiceServerId);

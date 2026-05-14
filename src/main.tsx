@@ -1,10 +1,8 @@
 import { StrictMode } from 'react';
 import { Suspense, lazy } from 'react';
 
-import 'katex/dist/katex.min.css';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
-import { scan } from 'react-scan';
 
 import { teardownWebPush } from '@/lib/pushClient';
 import { QueryProvider } from '@/providers/QueryProvider';
@@ -18,8 +16,10 @@ import { NavigationSync } from '@/ui/components/layout/NavigationSync';
 import { hasAuthToken } from '@/utils/authToken';
 
 if (typeof window !== 'undefined' && import.meta.env.DEV) {
-    scan({
-        enabled: true,
+    void import('react-scan').then(({ scan }) => {
+        scan({
+            enabled: true,
+        });
     });
 }
 
@@ -93,8 +93,8 @@ export const WebOnly = ({
 createRoot(document.getElementById('root')!).render(
     <StrictMode>
         <StoreProvider>
-            <ThemeProvider>
-                <QueryProvider>
+            <QueryProvider>
+                <ThemeProvider>
                     <ToastProvider>
                         <BrowserRouter>
                             <Suspense
@@ -242,8 +242,8 @@ createRoot(document.getElementById('root')!).render(
                             </Suspense>
                         </BrowserRouter>
                     </ToastProvider>
-                </QueryProvider>
-            </ThemeProvider>
+                </ThemeProvider>
+            </QueryProvider>
         </StoreProvider>
     </StrictMode>,
 );

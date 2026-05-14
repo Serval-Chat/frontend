@@ -3,9 +3,19 @@ import React, { useState } from 'react';
 import { type Category } from '@/api/servers/servers.types';
 import { SettingsContentPane } from '@/ui/components/common/settings/SettingsContentPane';
 import { SettingsModalLayout } from '@/ui/components/common/settings/SettingsModalLayout';
-import { CategoryOverviewSettings } from '@/ui/components/servers/settings/CategoryOverviewSettings';
 import { CategorySettingsSidebar } from '@/ui/components/servers/settings/CategorySettingsSidebar';
-import { PermissionsEditorTab } from '@/ui/components/servers/settings/permissions/PermissionsEditorTab';
+
+const CategoryOverviewSettings = React.lazy(() =>
+    import('@/ui/components/servers/settings/CategoryOverviewSettings').then(
+        (m) => ({ default: m.CategoryOverviewSettings }),
+    ),
+);
+
+const PermissionsEditorTab = React.lazy(() =>
+    import('@/ui/components/servers/settings/permissions/PermissionsEditorTab').then(
+        (m) => ({ default: m.PermissionsEditorTab }),
+    ),
+);
 
 interface CategorySettingsModalProps {
     isOpen: boolean;
@@ -43,22 +53,24 @@ export const CategorySettingsModal: React.FC<CategorySettingsModalProps> = ({
             onClose={onClose}
             onMobileBackClick={() => setIsMobileSidebarOpen(true)}
         >
-            {activeSection === 'overview' ? (
-                <SettingsContentPane>
-                    <CategoryOverviewSettings
-                        category={category}
-                        onDeleted={onClose}
-                    />
-                </SettingsContentPane>
-            ) : (
-                <div className="flex h-full flex-1 flex-col overflow-hidden">
-                    <PermissionsEditorTab
-                        serverId={category.serverId}
-                        targetId={category._id}
-                        targetType="category"
-                    />
-                </div>
-            )}
+            <React.Suspense fallback={null}>
+                {activeSection === 'overview' ? (
+                    <SettingsContentPane>
+                        <CategoryOverviewSettings
+                            category={category}
+                            onDeleted={onClose}
+                        />
+                    </SettingsContentPane>
+                ) : (
+                    <div className="flex h-full flex-1 flex-col overflow-hidden">
+                        <PermissionsEditorTab
+                            serverId={category.serverId}
+                            targetId={category._id}
+                            targetType="category"
+                        />
+                    </div>
+                )}
+            </React.Suspense>
         </SettingsModalLayout>
     );
 };

@@ -18,28 +18,22 @@ vi.mock('@/store/slices/navSlice', () => ({
     })),
 }));
 
-vi.mock('@/ui/components/chat/MessageItem', async () => {
-    const { useHighlightId } = await import('./HighlightContext');
-
-    return {
-        MessageItem: ({
-            message,
-        }: {
-            message: { _id: string; text: string };
-        }) => {
-            const highlightId = useHighlightId();
-            const isHighlighted = highlightId === message._id;
-            return (
-                <div
-                    data-highlighted={isHighlighted}
-                    data-testid={`msg-${message._id}`}
-                >
-                    {message.text}
-                </div>
-            );
-        },
-    };
-});
+vi.mock('@/ui/components/chat/MessageItem', () => ({
+    MessageItem: ({
+        message,
+        isHighlighted,
+    }: {
+        message: { _id: string; text: string };
+        isHighlighted?: boolean;
+    }) => (
+        <div
+            data-highlighted={!!isHighlighted}
+            data-testid={`msg-${message._id}`}
+        >
+            {message.text}
+        </div>
+    ),
+}));
 
 vi.mock('@/ui/components/common/Button', () => ({
     Button: ({

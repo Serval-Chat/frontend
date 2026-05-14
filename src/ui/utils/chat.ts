@@ -90,6 +90,7 @@ export const resolveReplyTo = (
     serverMemberMap: Map<string, User>,
     highestRoleMap: Map<string, Role>,
     iconRoleMap: Map<string, Role>,
+    messageById?: Map<string, ChatMessage>,
 ): ProcessedChatMessage['replyTo'] => {
     let replyTo: ProcessedChatMessage['replyTo'] = undefined;
 
@@ -133,9 +134,9 @@ export const resolveReplyTo = (
         const repliedId = (msg.repliedToMessageId || msg.replyToId)?.toString();
 
         if (repliedId) {
-            const repliedMsg = allMessages.find(
-                (m) => m._id.toString() === repliedId,
-            );
+            const repliedMsg =
+                messageById?.get(repliedId) ??
+                allMessages.find((m) => m._id.toString() === repliedId);
 
             if (repliedMsg) {
                 replyTo = {

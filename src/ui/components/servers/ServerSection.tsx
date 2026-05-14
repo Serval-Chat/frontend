@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 
 import { useNavigate, useParams } from 'react-router-dom';
 
@@ -49,6 +49,8 @@ export const ServerSection: React.FC = () => {
         useCategories(selectedServerId);
 
     useServerWS(selectedServerId ?? undefined);
+
+    const scrollRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         if (!selectedServerId) return;
@@ -112,7 +114,10 @@ export const ServerSection: React.FC = () => {
     if (!selectedServerId) return null;
 
     return (
-        <div className="no-scrollbar custom-scrollbar flex h-full w-full flex-col overflow-y-auto">
+        <div
+            className="no-scrollbar custom-scrollbar flex h-full w-full flex-col overflow-y-auto"
+            ref={scrollRef}
+        >
             <ServerBanner
                 banner={server?.banner}
                 loading={isLoadingServer}
@@ -127,6 +132,7 @@ export const ServerSection: React.FC = () => {
                 <ChannelList
                     categories={categories || []}
                     channels={channels || []}
+                    scrollRef={scrollRef}
                     selectedChannelId={selectedChannelId}
                 />
             )}

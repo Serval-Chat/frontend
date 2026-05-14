@@ -30,12 +30,13 @@ import { Text } from '@/ui/components/common/Text';
 import { Box } from '@/ui/components/layout/Box';
 import { VerticalSpacer } from '@/ui/components/layout/VerticalSpacer';
 
-import { HighlightProvider } from './HighlightContext';
+import { ChatSkeleton } from './ChatSkeleton';
 
 interface MessagesListProps {
     messages: ProcessedChatMessage[];
     onLoadMore?: () => void;
     hasMore?: boolean;
+    isLoading?: boolean;
     isLoadingMore?: boolean;
     onLoadMoreNewer?: () => void;
     hasMoreNewer?: boolean;
@@ -61,6 +62,7 @@ export const MessagesList: React.FC<MessagesListProps> = React.memo(
         messages,
         onLoadMore,
         hasMore,
+        isLoading,
         isLoadingMore,
         onLoadMoreNewer,
         hasMoreNewer,
@@ -88,22 +90,19 @@ export const MessagesList: React.FC<MessagesListProps> = React.memo(
         const [highlightId, setInternalHighlightId] = useState<string | null>(
             null,
         );
-        const [prevActiveHighlightId, setPrevActiveHighlightId] = useState<
-            string | null
-        >(null);
 
         const [, startTransitionHighlight] = useTransition();
 
-        const normalizedHighlightId = activeHighlightId ?? null;
-        if (normalizedHighlightId !== prevActiveHighlightId) {
-            setPrevActiveHighlightId(normalizedHighlightId);
+        useEffect(() => {
             startTransitionHighlight(() => {
-                setInternalHighlightId(normalizedHighlightId);
+                setInternalHighlightId(activeHighlightId ?? null);
             });
-        }
+        }, [activeHighlightId]);
+
         const [expandedGroups, setExpandedGroups] = useState<Set<string>>(
             new Set(),
         );
+        const isAtBottomRef = useRef(isAtBottom);
 
         type VirtualItemData =
             | { type: 'message'; message: ProcessedChatMessage }
@@ -186,6 +185,16 @@ export const MessagesList: React.FC<MessagesListProps> = React.memo(
                 },
                 [virtualItems],
             ),
+            getItemKey: useCallback(
+                (index: number) => {
+                    const item = virtualItems[index];
+                    if (!item) return index;
+                    if (item.type === 'message') return item.message._id;
+                    if (item.type === 'blocked-group') return item.id;
+                    return item.type;
+                },
+                [virtualItems],
+            ),
             overscan: 10,
         });
         const toggleGroup = useCallback((groupId: string): void => {
@@ -202,6 +211,11 @@ export const MessagesList: React.FC<MessagesListProps> = React.memo(
             });
         }, []);
 
+        const virtualItemsRef = useRef(virtualItems);
+        useLayoutEffect(() => {
+            virtualItemsRef.current = virtualItems;
+        }, [virtualItems]);
+
         const onReplyClickRef = useRef(onReplyClick);
         useLayoutEffect(() => {
             onReplyClickRef.current = onReplyClick;
@@ -209,7 +223,7 @@ export const MessagesList: React.FC<MessagesListProps> = React.memo(
 
         const handleReplyClick = useCallback(
             (messageId: string): void => {
-                const index = virtualItems.findIndex(
+                const index = virtualItemsRef.current.findIndex(
                     (item) =>
                         item.type === 'message' &&
                         item.message._id === messageId,
@@ -226,7 +240,7 @@ export const MessagesList: React.FC<MessagesListProps> = React.memo(
 
                 onReplyClickRef.current?.(messageId);
             },
-            [virtualItems, rowVirtualizer],
+            [rowVirtualizer],
         );
 
         const handleScroll = useCallback((): void => {
@@ -234,7 +248,11 @@ export const MessagesList: React.FC<MessagesListProps> = React.memo(
             if (!container) return;
 
             const { scrollTop, scrollHeight, clientHeight } = container;
-            setIsAtBottom(scrollHeight - scrollTop - clientHeight < 5);
+            const nextIsAtBottom = scrollHeight - scrollTop - clientHeight < 5;
+            if (isAtBottomRef.current !== nextIsAtBottom) {
+                isAtBottomRef.current = nextIsAtBottom;
+                setIsAtBottom(nextIsAtBottom);
+            }
 
             // Trigger load more when reaching top
             if (scrollTop === 0 && hasMore && !isLoadingMore) {
@@ -249,6 +267,7 @@ export const MessagesList: React.FC<MessagesListProps> = React.memo(
                 rowVirtualizer.scrollToIndex(virtualItems.length - 1, {
                     align: 'end',
                 });
+                isAtBottomRef.current = true;
                 lastScrollHeightRef.current = container.scrollHeight;
                 return;
             }
@@ -326,7 +345,9 @@ export const MessagesList: React.FC<MessagesListProps> = React.memo(
                 style={{ overflowAnchor: 'auto' }}
                 onScroll={handleScroll}
             >
-                <HighlightProvider highlightId={highlightId}>
+                {isLoading ? (
+                    <ChatSkeleton />
+                ) : (
                     <Box
                         className="relative w-full"
                         style={{ height: `${rowVirtualizer.getTotalSize()}px` }}
@@ -376,6 +397,9 @@ export const MessagesList: React.FC<MessagesListProps> = React.memo(
                                             fullMemberMap={fullMemberMap}
                                             hasPermission={hasPermission}
                                             iconRole={item.message.iconRole}
+                                            isHighlighted={
+                                                highlightId === item.message._id
+                                            }
                                             isOwner={isOwner}
                                             me={me}
                                             message={item.message}
@@ -453,6 +477,10 @@ export const MessagesList: React.FC<MessagesListProps> = React.memo(
                                                                 iconRole={
                                                                     msg.iconRole
                                                                 }
+                                                                isHighlighted={
+                                                                    highlightId ===
+                                                                    msg._id
+                                                                }
                                                                 isOwner={
                                                                     isOwner
                                                                 }
@@ -519,7 +547,7 @@ export const MessagesList: React.FC<MessagesListProps> = React.memo(
                             );
                         })}
                     </Box>
-                </HighlightProvider>
+                )}
             </Box>
         );
     },

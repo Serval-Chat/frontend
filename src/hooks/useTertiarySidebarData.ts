@@ -99,16 +99,30 @@ export const useTertiarySidebarData = (): TertiarySidebarDataResult => {
         return { memberRoleMap: mrMap, memberIconRoleMap: mirMap };
     }, [members, roles]);
 
-    return {
-        selectedFriendId,
-        selectedServerId,
-        me,
-        friend,
-        serverDetails,
-        members,
-        isLoadingMembers,
-        memberRoleMap,
-        memberIconRoleMap,
-        roles,
-    };
+    return React.useMemo(
+        () => ({
+            selectedFriendId,
+            selectedServerId,
+            me,
+            friend,
+            serverDetails,
+            members,
+            isLoadingMembers,
+            memberRoleMap,
+            memberIconRoleMap,
+            roles,
+        }),
+        [
+            selectedFriendId,
+            selectedServerId,
+            me,
+            friend,
+            serverDetails,
+            members,
+            isLoadingMembers,
+            memberRoleMap,
+            memberIconRoleMap,
+            roles,
+        ],
+    );
 };

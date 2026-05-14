@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { useResizable } from '@/hooks/useResizable';
-import { useAppSelector } from '@/store/hooks';
+import { useAppShallowSelector } from '@/store/hooks';
 import { useMobileSwipeContext } from '@/ui/MobileSwipeContext';
 import { ActiveVoicePanel } from '@/ui/components/chat/ActiveVoicePanel';
 import { Resizer } from '@/ui/components/common/Resizer';
@@ -16,7 +16,12 @@ import { cn } from '@/utils/cn';
  */
 export const SecondaryNavBar: React.FC = () => {
     const { navMode, mobileHomeTab, selectedFriendId, selectedChannelId } =
-        useAppSelector((state) => state.nav);
+        useAppShallowSelector((state) => ({
+            navMode: state.nav.navMode,
+            mobileHomeTab: state.nav.mobileHomeTab,
+            selectedFriendId: state.nav.selectedFriendId,
+            selectedChannelId: state.nav.selectedChannelId,
+        }));
     const { width, isResizing, handleMouseDown } = useResizable({
         initialWidth: 240,
         minWidth: 200,

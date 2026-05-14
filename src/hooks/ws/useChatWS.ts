@@ -13,7 +13,6 @@ import type {
 import { SERVERS_QUERY_KEYS } from '@/api/servers/servers.queries';
 import type { Channel } from '@/api/servers/servers.types';
 import { useMe } from '@/api/users/users.queries';
-import { usePermissions } from '@/hooks/usePermissions';
 import type { InteractionValue } from '@/types/interactions';
 import {
     type IMessageDm,
@@ -49,8 +48,6 @@ export function useChatWS(
         useTypingIndicator();
     const lastTypingSentRef = useRef<number>(0);
     const prevChannelRef = useRef<string | null>(null);
-
-    usePermissions(selectedServerId || null, selectedChannelId || null);
 
     const convertDmToChatMessage = useCallback(
         (message: IMessageDm): ChatMessage => ({

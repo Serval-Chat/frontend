@@ -8,13 +8,37 @@ import { IconButton } from '@/ui/components/common/IconButton';
 import { Modal } from '@/ui/components/common/Modal';
 import { cn } from '@/utils/cn';
 
-import { AccessibilitySettings } from './AccessibilitySettings';
-import { AccountSettings } from './AccountSettings';
-import { AppearanceSettings } from './AppearanceSettings';
-import { BlockingSettings } from './BlockingSettings';
-import { DeveloperSettings } from './DeveloperSettings';
 import { SettingsSidebar } from './SettingsSidebar';
-import { StandingSettings } from './StandingSettings';
+
+const AccessibilitySettings = React.lazy(() =>
+    import('./AccessibilitySettings').then((m) => ({
+        default: m.AccessibilitySettings,
+    })),
+);
+
+const AccountSettings = React.lazy(() =>
+    import('./AccountSettings').then((m) => ({ default: m.AccountSettings })),
+);
+
+const AppearanceSettings = React.lazy(() =>
+    import('./AppearanceSettings').then((m) => ({
+        default: m.AppearanceSettings,
+    })),
+);
+
+const BlockingSettings = React.lazy(() =>
+    import('./BlockingSettings').then((m) => ({ default: m.BlockingSettings })),
+);
+
+const DeveloperSettings = React.lazy(() =>
+    import('./DeveloperSettings').then((m) => ({
+        default: m.DeveloperSettings,
+    })),
+);
+
+const StandingSettings = React.lazy(() =>
+    import('./StandingSettings').then((m) => ({ default: m.StandingSettings })),
+);
 
 interface SettingsModalProps {
     isOpen: boolean;
@@ -113,16 +137,24 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     </div>
 
                     <div className="scrollbar-thin scrollbar-thumb-bg-secondary scrollbar-track-transparent flex-1 overflow-y-auto p-6">
-                        {activeSection === 'account' && <AccountSettings />}
-                        {activeSection === 'appearance' && (
-                            <AppearanceSettings />
-                        )}
-                        {activeSection === 'accessibility' && (
-                            <AccessibilitySettings />
-                        )}
-                        {activeSection === 'blocking' && <BlockingSettings />}
-                        {activeSection === 'standing' && <StandingSettings />}
-                        {activeSection === 'developer' && <DeveloperSettings />}
+                        <React.Suspense fallback={null}>
+                            {activeSection === 'account' && <AccountSettings />}
+                            {activeSection === 'appearance' && (
+                                <AppearanceSettings />
+                            )}
+                            {activeSection === 'accessibility' && (
+                                <AccessibilitySettings />
+                            )}
+                            {activeSection === 'blocking' && (
+                                <BlockingSettings />
+                            )}
+                            {activeSection === 'standing' && (
+                                <StandingSettings />
+                            )}
+                            {activeSection === 'developer' && (
+                                <DeveloperSettings />
+                            )}
+                        </React.Suspense>
                     </div>
                 </div>
             </div>

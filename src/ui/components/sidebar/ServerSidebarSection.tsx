@@ -1,4 +1,6 @@
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
+
+import { useVirtualizer } from '@tanstack/react-virtual';
 
 import type { Role, Server, ServerMember } from '@/api/servers/servers.types';
 import { useMe } from '@/api/users/users.queries';
@@ -15,6 +17,7 @@ interface ServerSidebarSectionProps {
     serverDetails?: Server;
     roles?: Role[];
     searchQuery?: string;
+    scrollRef: React.RefObject<HTMLDivElement | null>;
 }
 
 interface MemberGroup {
@@ -23,6 +26,10 @@ interface MemberGroup {
     members: ServerMember[];
     position: number; // For sorting
 }
+
+type VirtualItemData =
+    | { type: 'header'; id: string; name: string; count: number }
+    | { type: 'member'; member: ServerMember; groupId: string };
 
 /**
  * @description Renders the member list for a server, categorized by roles.
@@ -35,6 +42,7 @@ export const ServerSidebarSection: React.FC<ServerSidebarSectionProps> = ({
     serverDetails,
     roles,
     searchQuery,
+    scrollRef,
 }) => {
     const presenceMap = useAppSelector((state) => state.presence.users);
     const blocks = useAppSelector((state) => state.blocking.blocks);
@@ -43,12 +51,40 @@ export const ServerSidebarSection: React.FC<ServerSidebarSectionProps> = ({
     const groups = useMemo(() => {
         if (!members) return [];
 
-        let filteredMembers = members.filter((m) => m && m.user);
+        const processedMembers = members
+            .filter((m) => m && m.user)
+            .map((m) => {
+                const userBlocks = blocks[m.userId] || 0;
+                const presence = presenceMap[m.userId];
+                const isMeMember = me && m.userId === me._id;
+                const forceOffline = !!(
+                    userBlocks & BlockFlags.HIDE_THEIR_PRESENCE
+                );
 
-        filteredMembers = filteredMembers.filter((m) => {
-            const userBlocks = blocks[m.userId] || 0;
-            return !(userBlocks & BlockFlags.HIDE_FROM_MEMBER_LIST);
-        });
+                const onlineFromPresence =
+                    presence?.status !== undefined
+                        ? presence.status === 'online'
+                        : undefined;
+                const onlineFromMemberSnapshot = m.online ?? false;
+                const effectiveOnline =
+                    onlineFromPresence ?? onlineFromMemberSnapshot;
+                const isOnline =
+                    !forceOffline && (effectiveOnline || isMeMember);
+
+                return {
+                    member: m,
+                    isOnline,
+                    isHidden: !!(userBlocks & BlockFlags.HIDE_FROM_MEMBER_LIST),
+                    sortName: (
+                        m.user.displayName ||
+                        m.user.username ||
+                        ''
+                    ).toLowerCase(),
+                };
+            })
+            .filter((pm) => !pm.isHidden);
+
+        let finalFiltered = processedMembers;
 
         if (searchQuery) {
             const query = searchQuery.trim();
@@ -59,39 +95,34 @@ export const ServerSidebarSection: React.FC<ServerSidebarSectionProps> = ({
                     const flags = query.slice(lastSlashIndex + 1);
                     const regex = new RegExp(pattern, flags);
 
-                    filteredMembers = filteredMembers.filter(
-                        (m) =>
-                            regex.test(m.user.displayName || '') ||
-                            regex.test(m.user.username || ''),
+                    finalFiltered = finalFiltered.filter(
+                        (pm) =>
+                            regex.test(pm.member.user.displayName || '') ||
+                            regex.test(pm.member.user.username || ''),
                     );
                 } catch {
-                    filteredMembers = [];
+                    finalFiltered = [];
                 }
             } else {
                 const lowercaseQuery = query.toLowerCase();
-                filteredMembers = filteredMembers.filter(
-                    (m) =>
-                        (m.user.displayName || '')
-                            .toLowerCase()
-                            .includes(lowercaseQuery) ||
-                        (m.user.username || '')
-                            .toLowerCase()
-                            .includes(lowercaseQuery),
+                finalFiltered = finalFiltered.filter((pm) =>
+                    pm.sortName.includes(lowercaseQuery),
                 );
             }
         }
 
         const groupsMap = new Map<string, MemberGroup>();
-
         const getGroup = (
             id: string,
             name: string,
             position: number,
         ): MemberGroup => {
-            if (!groupsMap.has(id)) {
-                groupsMap.set(id, { id, name, members: [], position });
+            let g = groupsMap.get(id);
+            if (!g) {
+                g = { id, name, members: [], position };
+                groupsMap.set(id, g);
             }
-            return groupsMap.get(id)!;
+            return g;
         };
 
         const roleLookup = new Map<string, Role>();
@@ -102,23 +133,8 @@ export const ServerSidebarSection: React.FC<ServerSidebarSectionProps> = ({
         const offlineGroup = getGroup('offline', 'Offline', -9999);
         const onlineGroup = getGroup('online', 'Online', -1);
 
-        filteredMembers.forEach((member) => {
-            const presence = presenceMap[member.userId];
-            const isMe = me && member.userId === me._id;
-
-            const userBlocks = blocks[member.userId] || 0;
-            const forceOffline = !!(
-                userBlocks & BlockFlags.HIDE_THEIR_PRESENCE
-            );
-
-            const onlineFromPresence =
-                presence?.status !== undefined
-                    ? presence.status === 'online'
-                    : undefined;
-            const onlineFromMemberSnapshot = member.online ?? false;
-            const effectiveOnline =
-                onlineFromPresence ?? onlineFromMemberSnapshot;
-            const isOnline = !forceOffline && (effectiveOnline || isMe);
+        finalFiltered.forEach((pm) => {
+            const { member, isOnline } = pm;
 
             if (!isOnline) {
                 offlineGroup.members.push(member);
@@ -153,21 +169,18 @@ export const ServerSidebarSection: React.FC<ServerSidebarSectionProps> = ({
             }
         });
 
+        const sortMap = new Map<string, string>();
+        processedMembers.forEach((pm) =>
+            sortMap.set(pm.member.userId, pm.sortName),
+        );
+
         const result: MemberGroup[] = Array.from(groupsMap.values())
             .filter((g) => g.members.length > 0)
             .map((g) => ({
                 ...g,
                 members: [...g.members].sort((a, b) => {
-                    const nameA = (
-                        a.user.displayName ||
-                        a.user.username ||
-                        ''
-                    ).toLowerCase();
-                    const nameB = (
-                        b.user.displayName ||
-                        b.user.username ||
-                        ''
-                    ).toLowerCase();
+                    const nameA = sortMap.get(a.userId) || '';
+                    const nameB = sortMap.get(b.userId) || '';
                     return nameA.localeCompare(nameB);
                 }),
             }));
@@ -177,74 +190,145 @@ export const ServerSidebarSection: React.FC<ServerSidebarSectionProps> = ({
         return result;
     }, [members, searchQuery, roles, presenceMap, me, blocks]);
 
+    const virtualItems = useMemo((): VirtualItemData[] => {
+        const items: VirtualItemData[] = [];
+        groups.forEach((group) => {
+            items.push({
+                type: 'header',
+                id: group.id,
+                name: group.name,
+                count: group.members.length,
+            });
+            group.members.forEach((member) => {
+                items.push({
+                    type: 'member',
+                    member,
+                    groupId: group.id,
+                });
+            });
+        });
+        return items;
+    }, [groups]);
+
+    // eslint-disable-next-line react-hooks/incompatible-library
+    const rowVirtualizer = useVirtualizer({
+        count: virtualItems.length,
+        getScrollElement: () => scrollRef.current,
+        estimateSize: useCallback(
+            (index: number) => {
+                const item = virtualItems[index];
+                if (item.type === 'header') return 36;
+                return 46;
+            },
+            [virtualItems],
+        ),
+        overscan: 15,
+    });
+
+    const roleListCache = React.useRef<Map<string, Role[]>>(new Map());
+
     const allRolesMap = useMemo(() => {
         const map = new Map<string, Role[]>();
         if (!members || !roles) return map;
+
         members.forEach((m) => {
-            if (m && m.roles) {
-                map.set(
-                    m.userId,
-                    roles.filter((r) =>
-                        m.roles.map(String).includes(String(r._id)),
-                    ),
+            if (m?.roles) {
+                const memberRoleSet = new Set(m.roles.map(String));
+                const filteredRoles = roles.filter((r) =>
+                    memberRoleSet.has(String(r._id)),
                 );
+
+                const cached = roleListCache.current.get(m.userId);
+                if (
+                    cached &&
+                    cached.length === filteredRoles.length &&
+                    cached.every((r, i) => r._id === filteredRoles[i]._id)
+                ) {
+                    map.set(m.userId, cached);
+                } else {
+                    map.set(m.userId, filteredRoles);
+                    roleListCache.current.set(m.userId, filteredRoles);
+                }
             }
         });
         return map;
     }, [members, roles]);
 
+    if (isLoading) {
+        return (
+            <div className="flex justify-center py-4">
+                <LoadingSpinner />
+            </div>
+        );
+    }
+
     return (
-        <div className="space-y-4 pb-4">
-            {isLoading ? (
-                <div className="flex justify-center py-4">
-                    <LoadingSpinner />
-                </div>
-            ) : (
-                <>
-                    {groups.map((group) => (
-                        <div className="min-w-0 space-y-1" key={group.id}>
-                            <div className="mb-1 flex min-w-0 items-center justify-between px-3">
+        <div
+            className="relative w-full"
+            style={{
+                height: `${rowVirtualizer.getTotalSize()}px`,
+            }}
+        >
+            {rowVirtualizer.getVirtualItems().map((virtualRow) => {
+                const item = virtualItems[virtualRow.index];
+
+                return (
+                    <div
+                        data-index={virtualRow.index}
+                        key={virtualRow.key}
+                        ref={rowVirtualizer.measureElement}
+                        style={{
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            width: '100%',
+                            transform: `translateY(${virtualRow.start}px)`,
+                            paddingBottom:
+                                item.type === 'header' ? '4px' : '2px',
+                            paddingTop:
+                                virtualRow.index > 0 &&
+                                virtualItems[virtualRow.index - 1].type ===
+                                    'member' &&
+                                item.type === 'header'
+                                    ? '12px'
+                                    : '0px',
+                        }}
+                    >
+                        {item.type === 'header' ? (
+                            <div className="flex min-w-0 items-center justify-between px-3">
                                 <div className="text-foreground-muted truncate text-xs font-semibold tracking-wider uppercase">
-                                    {group.name} - {group.members.length}
+                                    {item.name} - {item.count}
                                 </div>
                             </div>
-                            <div className="min-w-0 space-y-[2px]">
-                                {group.members.map((member) => (
-                                    <UserItem
-                                        noFetch
-                                        allRoles={allRolesMap.get(
-                                            member.userId,
-                                        )}
-                                        disableCustomFonts={
-                                            serverDetails?.disableCustomFonts
-                                        }
-                                        disableGlowAndColors={
-                                            serverDetails?.disableUsernameGlowAndCustomColor
-                                        }
-                                        iconRole={memberIconRoleMap.get(
-                                            member.userId,
-                                        )}
-                                        initialPresenceStatus={
-                                            group.id === 'offline'
-                                                ? 'offline'
-                                                : 'online'
-                                        }
-                                        joinedAt={member.joinedAt}
-                                        key={String(member._id)}
-                                        role={memberRoleMap.get(member.userId)}
-                                        serverId={String(
-                                            serverDetails?._id || '',
-                                        )}
-                                        serverRoles={roles}
-                                        user={member.user}
-                                        userId={String(member.userId)}
-                                    />
-                                ))}
-                            </div>
-                        </div>
-                    ))}
-                </>
-            )}
+                        ) : (
+                            <UserItem
+                                noFetch
+                                allRoles={allRolesMap.get(item.member.userId)}
+                                disableCustomFonts={
+                                    serverDetails?.disableCustomFonts
+                                }
+                                disableGlowAndColors={
+                                    serverDetails?.disableUsernameGlowAndCustomColor
+                                }
+                                iconRole={memberIconRoleMap.get(
+                                    item.member.userId,
+                                )}
+                                initialPresenceStatus={
+                                    item.groupId === 'offline'
+                                        ? 'offline'
+                                        : 'online'
+                                }
+                                joinedAt={item.member.joinedAt}
+                                role={memberRoleMap.get(item.member.userId)}
+                                serverId={String(serverDetails?._id || '')}
+                                serverRoles={roles}
+                                user={item.member.user}
+                                userId={String(item.member.userId)}
+                            />
+                        )}
+                    </div>
+                );
+            })}
         </div>
     );
 };

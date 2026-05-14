@@ -3,12 +3,34 @@ import React from 'react';
 import { Provider, useStore } from 'react-redux';
 
 import type { RootState } from '@/store';
-import { useAppSelector } from '@/store/hooks';
+import { useAppSelector, useAppShallowSelector } from '@/store/hooks';
 import { useMobileSwipeContext } from '@/ui/MobileSwipeContext';
-import { ActiveVoiceRoom } from '@/ui/components/chat/ActiveVoiceRoom';
 import { MainChat } from '@/ui/components/chat/MainChat';
 import { FriendRequestList } from '@/ui/components/friends/FriendRequestList';
 import { cn } from '@/utils/cn';
+
+const ActiveVoiceRoom = React.lazy(() =>
+    import('@/ui/components/chat/ActiveVoiceRoom').then((m) => ({
+        default: m.ActiveVoiceRoom,
+    })),
+);
+
+const ActiveVoiceRoomMount: React.FC = React.memo(() => {
+    const hasActiveVoiceRoom = useAppSelector(
+        (state) =>
+            !!state.voice.activeVoiceServerId &&
+            !!state.voice.activeVoiceChannelId,
+    );
+
+    if (!hasActiveVoiceRoom) return null;
+
+    return (
+        <React.Suspense fallback={null}>
+            <ActiveVoiceRoom />
+        </React.Suspense>
+    );
+});
+ActiveVoiceRoomMount.displayName = 'ActiveVoiceRoomMount';
 
 /**
  * @description A wrapper that intercepts Redux state to trick child components into
@@ -97,7 +119,14 @@ export const MainContent: React.FC = () => {
         navMode,
         mobileHomeTab,
         lastOpenedChannelByServer,
-    } = useAppSelector((state) => state.nav);
+    } = useAppShallowSelector((state) => ({
+        selectedFriendId: state.nav.selectedFriendId,
+        selectedServerId: state.nav.selectedServerId,
+        selectedChannelId: state.nav.selectedChannelId,
+        navMode: state.nav.navMode,
+        mobileHomeTab: state.nav.mobileHomeTab,
+        lastOpenedChannelByServer: state.nav.lastOpenedChannelByServer,
+    }));
     const inSwipePanel = useMobileSwipeContext();
 
     const isNothingSelected = !selectedFriendId && !selectedChannelId;
@@ -148,7 +177,7 @@ export const MainContent: React.FC = () => {
             ) : (
                 <MainChat key={conversationKey} />
             )}
-            <ActiveVoiceRoom />
+            <ActiveVoiceRoomMount />
         </main>
     );
 };

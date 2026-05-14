@@ -121,7 +121,8 @@ const TOTAL_ROWS = 62;
 export const getSpriteStyle = (emoji?: EmojiData): React.CSSProperties => {
     if (!emoji) return {};
     return {
-        backgroundImage: 'url(/emoji-sheet.png)',
+        backgroundImage:
+            'image-set(url(/emoji-sheet.webp) type("image/webp"), url(/emoji-sheet.png) type("image/png"))',
         backgroundPosition: `${(emoji.sheet_x / (TOTAL_COLS - 1)) * 100}% ${(emoji.sheet_y / (TOTAL_ROWS - 1)) * 100}%`,
         backgroundSize: `${TOTAL_COLS * 100}% ${TOTAL_ROWS * 100}%`,
         width: '100%',

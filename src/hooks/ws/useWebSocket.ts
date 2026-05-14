@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useLayoutEffect, useRef } from 'react';
 
 import { wsClient } from '@/ws/client';
 
@@ -12,10 +12,18 @@ export function useWebSocket<T = unknown>(
     event: string,
     callback: (payload: T) => void,
 ): void {
+    const callbackRef = useRef(callback);
+
+    useLayoutEffect(() => {
+        callbackRef.current = callback;
+    }, [callback]);
+
     useEffect(() => {
-        const unsubscribe = wsClient.on<T>(event, callback);
+        const unsubscribe = wsClient.on<T>(event, (payload) => {
+            callbackRef.current(payload);
+        });
         return () => {
             unsubscribe();
         };
-    }, [event, callback]);
+    }, [event]);
 }

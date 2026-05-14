@@ -6,7 +6,6 @@ import { Button } from '@/ui/components/common/Button';
 import { Modal } from '@/ui/components/common/Modal';
 import { Text } from '@/ui/components/common/Text';
 import type { CropSelection } from '@/utils/imageProcessor';
-import { processProfileImage } from '@/utils/imageProcessor';
 
 import { ImageCropper } from './ImageCropper';
 
@@ -50,6 +49,8 @@ export const ImageCropModal: React.FC<ImageCropModalProps> = ({
 
         setIsProcessing(true);
         try {
+            const { processProfileImage } =
+                await import('@/utils/imageProcessor');
             const processed = await processProfileImage(imageFile, type, crop);
             onConfirm(processed);
             onClose();

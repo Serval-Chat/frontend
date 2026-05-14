@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useMemo } from 'react';
 
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Loader2 } from 'lucide-react';
 
 import { klipyApi } from '@/api/klipy/klipy.api';
@@ -14,41 +15,38 @@ interface GifPlayerProps {
 }
 
 export const GifPlayer: React.FC<GifPlayerProps> = ({ klipyId, url }) => {
-    const [metadata, setMetadata] = useState<KlipyFavorite | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [isFavorited, setIsFavorited] = useState(false);
-    const [error, setError] = useState(false);
+    const queryClient = useQueryClient();
 
-    useEffect(() => {
-        const fetchMetadata = async (): Promise<void> => {
-            try {
-                const data = await klipyApi.resolveGif(klipyId, 'gif');
-                setMetadata(data);
+    const {
+        data: metadata,
+        isLoading,
+        isError,
+    } = useQuery({
+        queryKey: ['klipy', 'resolve', klipyId, 'gif'],
+        queryFn: () => klipyApi.resolveGif(klipyId, 'gif'),
+        staleTime: Infinity,
+        gcTime: 30 * 60 * 1000,
+    });
 
-                // Check if favorited
-                const favorites = await klipyApi.getFavorites();
-                setIsFavorited(
-                    favorites.some((f) => String(f.klipyId) === klipyId),
-                );
-            } catch (err) {
-                console.error('Failed to resolve Klipy content:', err);
-                setError(true);
-            } finally {
-                setLoading(false);
+    const { data: favorites = [] } = useQuery({
+        queryKey: ['klipy', 'favorites'],
+        queryFn: klipyApi.getFavorites,
+        enabled: !!metadata,
+        staleTime: 60 * 1000,
+    });
+
+    const isFavorited = useMemo(
+        () => favorites.some((f) => String(f.klipyId) === klipyId),
+        [favorites, klipyId],
+    );
+
+    const toggleFavoriteMutation = useMutation({
+        mutationFn: () => {
+            if (!metadata) {
+                throw new Error('Klipy metadata is not loaded yet.');
             }
-        };
 
-        void fetchMetadata();
-    }, [klipyId]);
-
-    const toggleFavorite = async (e: React.MouseEvent): Promise<void> => {
-        e.preventDefault();
-        e.stopPropagation();
-
-        if (!metadata) return;
-
-        try {
-            const { favorited } = await klipyApi.toggleFavorite({
+            return klipyApi.toggleFavorite({
                 klipyId,
                 url,
                 previewUrl: metadata.previewUrl,
@@ -56,13 +54,43 @@ export const GifPlayer: React.FC<GifPlayerProps> = ({ klipyId, url }) => {
                 height: metadata.height,
                 contentType: metadata.contentType,
             });
-            setIsFavorited(favorited);
-        } catch (err) {
+        },
+        onSuccess: ({ favorited }) => {
+            if (!metadata) return;
+
+            queryClient.setQueryData<KlipyFavorite[]>(
+                ['klipy', 'favorites'],
+                (old = []) => {
+                    const existing = old.some(
+                        (f) => String(f.klipyId) === klipyId,
+                    );
+
+                    if (favorited && !existing) {
+                        return [...old, { ...metadata, klipyId }];
+                    }
+
+                    if (!favorited && existing) {
+                        return old.filter((f) => String(f.klipyId) !== klipyId);
+                    }
+
+                    return old;
+                },
+            );
+        },
+        onError: (err) => {
             console.error('Failed to toggle favorite:', err);
-        }
+        },
+    });
+
+    const toggleFavorite = async (e: React.MouseEvent): Promise<void> => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        if (!metadata) return;
+        toggleFavoriteMutation.mutate();
     };
 
-    if (error) {
+    if (isError) {
         return (
             <Box className="my-2 max-w-[400px]">
                 <a
@@ -77,7 +105,7 @@ export const GifPlayer: React.FC<GifPlayerProps> = ({ klipyId, url }) => {
         );
     }
 
-    if (loading) {
+    if (isLoading) {
         return (
             <Box className="my-2 flex h-48 w-full max-w-[400px] items-center justify-center rounded-lg bg-bg-secondary">
                 <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -97,6 +125,8 @@ export const GifPlayer: React.FC<GifPlayerProps> = ({ klipyId, url }) => {
             <img
                 alt="Klipy Content"
                 className="block"
+                decoding="async"
+                loading="lazy"
                 src={metadata.url}
                 style={{
                     width: '100%',

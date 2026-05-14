@@ -5,11 +5,20 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 const queryClient = new QueryClient({
     defaultOptions: {
         queries: {
-            retry: 3,
+            retry: (failureCount, error) => {
+                const status = (error as { response?: { status?: number } })
+                    .response?.status;
+                if (status && status >= 400 && status < 500) return false;
+                return failureCount < 2;
+            },
             retryDelay: (attemptIndex) =>
                 Math.min(1000 * 2 ** attemptIndex, 30000),
+            refetchOnWindowFocus: false,
             gcTime: 30 * 60 * 1000,
             staleTime: 10 * 60 * 1000,
+        },
+        mutations: {
+            retry: false,
         },
     },
 });

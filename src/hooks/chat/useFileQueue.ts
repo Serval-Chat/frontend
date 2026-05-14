@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
 export interface QueuedFile {
     id: string;
@@ -64,13 +64,24 @@ export function useFileQueue(): {
         setFiles([]);
     }, []);
 
-    return {
-        files,
-        addFiles,
-        removeFile,
-        toggleSpoiler,
-        updateFileProgress,
-        updateFileStatus,
-        clearQueue,
-    };
+    return useMemo(
+        () => ({
+            files,
+            addFiles,
+            removeFile,
+            toggleSpoiler,
+            updateFileProgress,
+            updateFileStatus,
+            clearQueue,
+        }),
+        [
+            files,
+            addFiles,
+            removeFile,
+            toggleSpoiler,
+            updateFileProgress,
+            updateFileStatus,
+            clearQueue,
+        ],
+    );
 }

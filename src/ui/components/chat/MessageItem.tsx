@@ -11,13 +11,12 @@ import type { ProcessedChatMessage } from '@/types/chat.ui';
 import { Message } from '@/ui/components/chat/Message';
 import { shouldGroupMessages } from '@/utils/timestamp';
 
-import { useHighlightId } from './HighlightContext';
-
 interface MessageItemProps {
     message: ProcessedChatMessage;
     role?: Role;
     iconRole?: Role;
     prevMessage?: ProcessedChatMessage;
+    isHighlighted?: boolean;
     onReplyClick?: (messageId: string) => void;
     onReplyToMessage?: (message: ProcessedChatMessage) => void;
     disableCustomFonts?: boolean;
@@ -40,6 +39,7 @@ export const MessageItem = React.memo(
         role,
         iconRole,
         prevMessage,
+        isHighlighted = false,
         onReplyClick,
         onReplyToMessage,
         disableCustomFonts,
@@ -55,9 +55,6 @@ export const MessageItem = React.memo(
         fullMemberMap,
         roleMap,
     }: MessageItemProps) => {
-        const highlightId = useHighlightId();
-        const isHighlighted = highlightId === message._id;
-
         const isGroupStart =
             !prevMessage ||
             !!message.replyTo ||

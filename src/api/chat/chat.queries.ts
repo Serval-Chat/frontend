@@ -2,7 +2,6 @@ import {
     type InfiniteData,
     type UseInfiniteQueryResult,
     type UseQueryResult,
-    keepPreviousData,
     useInfiniteQuery,
     useMutation,
     useQuery,
@@ -57,7 +56,6 @@ export const useUserMessages = (
             return lastPage[0]._id;
         },
         enabled: !!userId,
-        placeholderData: keepPreviousData,
     });
 
 /**
@@ -97,7 +95,6 @@ export const useChannelMessages = (
             return lastPage[0]._id;
         },
         enabled: !!serverId && !!channelId,
-        placeholderData: keepPreviousData,
         staleTime: Infinity,
         gcTime: 30 * 60 * 1000,
     });

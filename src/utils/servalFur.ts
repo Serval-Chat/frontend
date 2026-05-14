@@ -13,6 +13,7 @@ function drawSpot(
     ctx: CanvasRenderingContext2D,
     s: Spot,
     spotColor: string,
+    random: () => number,
 ): void {
     ctx.save();
     ctx.translate(s.x, s.y);
@@ -20,7 +21,7 @@ function drawSpot(
     const pts = [];
     for (let i = 0; i < s.nPts; i++) {
         const angle = (i / s.nPts) * Math.PI * 2;
-        const jitter = 1 + (Math.random() - 0.5) * s.rough;
+        const jitter = 1 + (random() - 0.5) * s.rough;
         pts.push({
             x: Math.cos(angle) * s.rx * jitter,
             y: Math.sin(angle) * s.ry * jitter,
@@ -45,6 +46,14 @@ function drawSpot(
     ctx.fill();
     ctx.globalAlpha = 1;
     ctx.restore();
+}
+
+function createRandom(seed = 1): () => number {
+    let state = seed >>> 0;
+    return () => {
+        state = (state * 1664525 + 1013904223) >>> 0;
+        return state / 0x100000000;
+    };
 }
 
 function relaxSpots(
@@ -100,38 +109,48 @@ export function applyServalBackground(
         base = '#e8d5b0',
         opacity = 0.1,
         spotColor = 'rgb(40,22,5)',
+        seed = 1,
     } = opts;
+    const random = createRandom(seed);
 
-    const virtualW = 3840;
-    const virtualH = 2160;
+    const bounds = element.getBoundingClientRect();
+    const virtualW = Math.min(
+        1920,
+        Math.max(640, Math.ceil(bounds.width || window.innerWidth || 640)),
+    );
+    const virtualH = Math.min(
+        1440,
+        Math.max(480, Math.ceil(bounds.height || window.innerHeight || 480)),
+    );
 
     const n =
         opts.spotCount ??
-        Math.max(20, Math.round((virtualW * virtualH) / 12000));
+        Math.min(260, Math.max(24, Math.round((virtualW * virtualH) / 16000)));
 
     const spots: Spot[] = Array.from({ length: n }, () => {
-        const rx = 7 + Math.random() * 14;
+        const rx = 7 + random() * 14;
         return {
-            x: Math.random() * virtualW,
-            y: Math.random() * virtualH,
+            x: random() * virtualW,
+            y: random() * virtualH,
             rx,
-            ry: rx * (0.45 + Math.random() * 0.65),
-            rot: Math.random() * Math.PI,
-            rough: 0.35 + Math.random() * 0.45,
-            alpha: (0.65 + Math.random() * 0.7) * opacity,
-            nPts: 6 + Math.floor(Math.random() * 5),
+            ry: rx * (0.45 + random() * 0.65),
+            rot: random() * Math.PI,
+            rough: 0.35 + random() * 0.45,
+            alpha: (0.65 + random() * 0.7) * opacity,
+            nPts: 6 + Math.floor(random() * 5),
         };
     });
 
-    relaxSpots(spots, virtualW, virtualH);
+    relaxSpots(spots, virtualW, virtualH, 36);
 
     const canvas = document.createElement('canvas');
 
     const canvasW = virtualW;
     const canvasH = virtualH;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
 
-    canvas.width = canvasW;
-    canvas.height = canvasH;
+    canvas.width = Math.round(canvasW * dpr);
+    canvas.height = Math.round(canvasH * dpr);
     Object.assign(canvas.style, {
         position: 'absolute',
         top: '0',
@@ -143,11 +162,12 @@ export function applyServalBackground(
     });
 
     const ctx = canvas.getContext('2d')!;
+    ctx.scale(dpr, dpr);
     ctx.fillStyle = base;
     ctx.fillRect(0, 0, canvasW, canvasH);
 
     for (const s of spots) {
-        drawSpot(ctx, s, spotColor);
+        drawSpot(ctx, s, spotColor, random);
     }
 
     const prevPosition = element.style.position;

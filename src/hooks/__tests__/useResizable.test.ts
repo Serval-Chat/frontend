@@ -1,6 +1,6 @@
 import type React from 'react';
 
-import { act, renderHook } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
 import { useResizable } from '@/hooks/useResizable';
@@ -31,7 +31,7 @@ describe('useResizable', () => {
         expect(result.current.width).toBe(300);
     });
 
-    it('should update width on mouse move when resizing (side: left)', () => {
+    it('should update width on mouse move when resizing (side: left)', async () => {
         const { result } = renderHook(() =>
             useResizable({ ...defaultOptions, side: 'left' }),
         );
@@ -51,10 +51,10 @@ describe('useResizable', () => {
         });
 
         // 240 + 50 = 290
-        expect(result.current.width).toBe(290);
+        await waitFor(() => expect(result.current.width).toBe(290));
     });
 
-    it('should update width on mouse move when resizing (side: right)', () => {
+    it('should update width on mouse move when resizing (side: right)', async () => {
         const { result } = renderHook(() =>
             useResizable({ ...defaultOptions, side: 'right' }),
         );
@@ -74,10 +74,10 @@ describe('useResizable', () => {
             window.dispatchEvent(moveEvent);
         });
 
-        expect(result.current.width).toBe(290);
+        await waitFor(() => expect(result.current.width).toBe(290));
     });
 
-    it('should respect minWidth and maxWidth during resizing', () => {
+    it('should respect minWidth and maxWidth during resizing', async () => {
         const { result } = renderHook(() => useResizable(defaultOptions));
 
         act(() => {
@@ -92,17 +92,17 @@ describe('useResizable', () => {
             const moveEvent = new MouseEvent('mousemove', { clientX: 50 });
             window.dispatchEvent(moveEvent);
         });
-        expect(result.current.width).toBe(200);
+        await waitFor(() => expect(result.current.width).toBe(200));
 
         // Test maxWidth (400)
         act(() => {
             const moveEvent = new MouseEvent('mousemove', { clientX: 500 });
             window.dispatchEvent(moveEvent);
         });
-        expect(result.current.width).toBe(400);
+        await waitFor(() => expect(result.current.width).toBe(400));
     });
 
-    it('should save to localStorage ONLY on mouseup', () => {
+    it('should save to localStorage ONLY on mouseup', async () => {
         const { result } = renderHook(() => useResizable(defaultOptions));
 
         act(() => {
@@ -124,6 +124,8 @@ describe('useResizable', () => {
             window.dispatchEvent(upEvent);
         });
 
-        expect(localStorage.getItem('test-resizable')).toBe('290');
+        await waitFor(() =>
+            expect(localStorage.getItem('test-resizable')).toBe('290'),
+        );
     });
 });

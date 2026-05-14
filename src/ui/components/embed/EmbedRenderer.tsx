@@ -1,4 +1,4 @@
-import { type ReactNode } from 'react';
+import { type ReactNode, memo, useMemo } from 'react';
 
 import type { Embed, MessagePayload } from '@/types/embed';
 import { Link } from '@/ui/components/common/Link';
@@ -6,7 +6,16 @@ import { ParsedText } from '@/ui/components/common/ParsedText';
 import { cn } from '@/utils/cn';
 import { APP_LOCALE } from '@/utils/locale';
 import { getSafeUrl } from '@/utils/proxy';
-import { ParserPresets, parseText } from '@/utils/textParser/parser';
+import {
+    type ParserOptions,
+    ParserPresets,
+    parseText,
+} from '@/utils/textParser/parser';
+
+const timestampFormatter = new Intl.DateTimeFormat(APP_LOCALE, {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+});
 
 const colorToCss = (color: number | undefined): string | undefined => {
     if (color === undefined) return undefined;
@@ -16,14 +25,44 @@ const colorToCss = (color: number | undefined): string | undefined => {
 const formatTimestamp = (iso: string | undefined): string | undefined => {
     if (!iso) return undefined;
     try {
-        return new Intl.DateTimeFormat(APP_LOCALE, {
-            dateStyle: 'medium',
-            timeStyle: 'short',
-        }).format(new Date(iso));
+        return timestampFormatter.format(new Date(iso));
     } catch {
         return iso;
     }
 };
+
+interface ParsedEmbedTextProps {
+    text: string;
+    preset: ParserOptions;
+    serverId?: string;
+    size?: 'xs' | 'sm' | 'base';
+    variant?: 'danger' | 'muted';
+    wrap?: 'preWrap';
+}
+
+const ParsedEmbedText = memo(
+    ({
+        text,
+        preset,
+        serverId,
+        size,
+        variant,
+        wrap,
+    }: ParsedEmbedTextProps): ReactNode => {
+        const nodes = useMemo(() => parseText(text, preset), [text, preset]);
+
+        return (
+            <ParsedText
+                nodes={nodes}
+                serverId={serverId}
+                size={size}
+                variant={variant}
+                wrap={wrap}
+            />
+        );
+    },
+);
+ParsedEmbedText.displayName = 'ParsedEmbedText';
 
 interface EmbedCardProps {
     embed: Embed;
@@ -33,389 +72,420 @@ interface EmbedCardProps {
     isDeleted?: boolean;
 }
 
-const EmbedCard = ({
-    embed,
-    index,
-    variant,
-    serverId,
-    isDeleted,
-}: EmbedCardProps): ReactNode => {
-    const barColor = colorToCss(embed.color);
-    const hasContent =
-        embed.title ??
-        embed.description ??
-        embed.author ??
-        embed.footer ??
-        embed.thumbnail ??
-        embed.image ??
-        embed.video ??
-        (embed.fields && embed.fields.length > 0);
+const EmbedCard = memo(
+    ({
+        embed,
+        index,
+        variant,
+        serverId,
+        isDeleted,
+    }: EmbedCardProps): ReactNode => {
+        const barColor = colorToCss(embed.color);
+        const hasContent =
+            embed.title ??
+            embed.description ??
+            embed.author ??
+            embed.footer ??
+            embed.thumbnail ??
+            embed.image ??
+            embed.video ??
+            (embed.fields && embed.fields.length > 0);
 
-    if (!hasContent) return null;
+        const imageUrl = embed.image?.url
+            ? getSafeUrl(embed.image.url)
+            : undefined;
+        const thumbnailUrl = embed.thumbnail?.url
+            ? getSafeUrl(embed.thumbnail.url)
+            : undefined;
+        const authorIconUrl = embed.author?.icon_url
+            ? getSafeUrl(embed.author.icon_url)
+            : undefined;
+        const footerIconUrl = embed.footer?.icon_url
+            ? getSafeUrl(embed.footer.icon_url)
+            : undefined;
 
-    if (embed.type === 'video' && embed.video?.url) {
-        return (
-            <div className="mt-1 flex" key={index}>
-                {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
-                <video
-                    controls
-                    playsInline
-                    className={cn(
-                        'max-h-96 max-w-[520px] rounded-md object-contain',
-                        isDeleted && 'opacity-50 grayscale',
-                    )}
-                    preload="metadata"
-                    src={embed.video.url}
-                />
-            </div>
-        );
-    }
-
-    if (embed.type === 'image' && embed.image?.url) {
-        return (
-            <div className="mt-1 flex" key={index}>
-                <img
-                    alt={embed.title || 'Image'}
-                    className={cn(
-                        'max-h-96 max-w-[520px] rounded-md object-contain',
-                        isDeleted && 'opacity-50 grayscale',
-                    )}
-                    src={getSafeUrl(embed.image.url)}
-                />
-            </div>
-        );
-    }
-
-    type FieldRow = { fields: typeof embed.fields; inline: boolean };
-    const fieldRows: FieldRow[] = [];
-    if (embed.fields) {
-        let currentRow: NonNullable<typeof embed.fields> = [];
-        for (const field of embed.fields) {
-            if (field.inline) {
-                currentRow.push(field);
-                if (currentRow.length === 3) {
-                    fieldRows.push({ fields: currentRow, inline: true });
-                    currentRow = [];
+        const fieldRows = useMemo(() => {
+            type FieldRow = { fields: typeof embed.fields; inline: boolean };
+            const rows: FieldRow[] = [];
+            if (embed.fields) {
+                let currentRow: NonNullable<typeof embed.fields> = [];
+                for (const field of embed.fields) {
+                    if (field.inline) {
+                        currentRow.push(field);
+                        if (currentRow.length === 3) {
+                            rows.push({ fields: currentRow, inline: true });
+                            currentRow = [];
+                        }
+                    } else {
+                        if (currentRow.length > 0) {
+                            rows.push({ fields: currentRow, inline: true });
+                            currentRow = [];
+                        }
+                        rows.push({ fields: [field], inline: false });
+                    }
                 }
-            } else {
                 if (currentRow.length > 0) {
-                    fieldRows.push({ fields: currentRow, inline: true });
-                    currentRow = [];
+                    rows.push({ fields: currentRow, inline: true });
                 }
-                fieldRows.push({ fields: [field], inline: false });
             }
-        }
-        if (currentRow.length > 0) {
-            fieldRows.push({ fields: currentRow, inline: true });
-        }
-    }
+            return rows;
+        }, [embed]);
 
-    return (
-        <div
-            className="mt-1 flex max-w-[520px] overflow-hidden rounded-r-sm"
-            key={index}
-            style={{
-                borderLeft: `4px solid ${barColor ?? 'var(--color-embed-border)'}`,
-            }}
-        >
-            <div
-                className={cn(
-                    'flex w-full flex-col rounded-r-sm px-4 py-3',
-                    variant === 'preview' ? 'bg-embed-bg' : 'bg-embed-bg/70',
-                )}
-            >
-                {/* Provider */}
-                {embed.provider?.name && (
-                    <p
+        const footerText = useMemo(() => {
+            if (!embed.footer?.text && !embed.timestamp) return '';
+            return [embed.footer?.text, formatTimestamp(embed.timestamp)]
+                .filter(Boolean)
+                .join(' • ');
+        }, [embed.footer?.text, embed.timestamp]);
+
+        if (!hasContent) return null;
+
+        if (embed.type === 'video' && embed.video?.url) {
+            return (
+                <div className="mt-1 flex" key={index}>
+                    {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
+                    <video
+                        controls
+                        playsInline
                         className={cn(
-                            'mb-0.5 text-xs',
-                            isDeleted
-                                ? 'text-danger/80'
-                                : 'text-muted-foreground',
+                            'max-h-96 max-w-[520px] rounded-md object-contain',
+                            isDeleted && 'opacity-50 grayscale',
                         )}
-                    >
-                        {embed.provider.url ? (
-                            <Link
-                                className="hover:underline"
-                                href={embed.provider.url}
-                            >
-                                <ParsedText
-                                    nodes={parseText(
-                                        embed.provider.name,
-                                        ParserPresets.EMBED_INLINE,
-                                    )}
-                                    serverId={serverId}
-                                    size="xs"
-                                    variant={isDeleted ? 'danger' : undefined}
-                                />
-                            </Link>
-                        ) : (
-                            <ParsedText
-                                nodes={parseText(
-                                    embed.provider.name,
-                                    ParserPresets.EMBED_INLINE,
-                                )}
-                                serverId={serverId}
-                                size="xs"
-                                variant={isDeleted ? 'danger' : undefined}
-                            />
-                        )}
-                    </p>
-                )}
+                        preload="metadata"
+                        src={embed.video.url}
+                    />
+                </div>
+            );
+        }
 
-                {/* Author */}
-                {embed.author?.name && (
-                    <div className="mb-2 flex items-center gap-2">
-                        {embed.author.icon_url && (
-                            <img
-                                alt=""
-                                className="h-6 w-6 rounded-full object-cover"
-                                src={getSafeUrl(embed.author.icon_url)}
-                            />
+        if (embed.type === 'image' && embed.image?.url) {
+            return (
+                <div className="mt-1 flex" key={index}>
+                    <img
+                        alt={embed.title || 'Image'}
+                        className={cn(
+                            'max-h-96 max-w-[520px] rounded-md object-contain',
+                            isDeleted && 'opacity-50 grayscale',
                         )}
-                        <span
+                        decoding="async"
+                        loading="lazy"
+                        src={imageUrl}
+                    />
+                </div>
+            );
+        }
+
+        return (
+            <div
+                className="mt-1 flex max-w-[520px] overflow-hidden rounded-r-sm"
+                key={index}
+                style={{
+                    borderLeft: `4px solid ${barColor ?? 'var(--color-embed-border)'}`,
+                }}
+            >
+                <div
+                    className={cn(
+                        'flex w-full flex-col rounded-r-sm px-4 py-3',
+                        variant === 'preview'
+                            ? 'bg-embed-bg'
+                            : 'bg-embed-bg/70',
+                    )}
+                >
+                    {/* Provider */}
+                    {embed.provider?.name && (
+                        <p
                             className={cn(
-                                'text-sm font-semibold',
-                                isDeleted ? 'text-danger' : 'text-foreground',
+                                'mb-0.5 text-xs',
+                                isDeleted
+                                    ? 'text-danger/80'
+                                    : 'text-muted-foreground',
                             )}
                         >
-                            {embed.author.url ? (
+                            {embed.provider.url ? (
                                 <Link
                                     className="hover:underline"
-                                    href={embed.author.url}
+                                    href={embed.provider.url}
                                 >
-                                    <ParsedText
-                                        nodes={parseText(
-                                            embed.author.name,
-                                            ParserPresets.EMBED_INLINE,
-                                        )}
+                                    <ParsedEmbedText
+                                        preset={ParserPresets.EMBED_INLINE}
                                         serverId={serverId}
-                                        size="sm"
+                                        size="xs"
+                                        text={embed.provider.name}
                                         variant={
                                             isDeleted ? 'danger' : undefined
                                         }
                                     />
                                 </Link>
                             ) : (
-                                <ParsedText
-                                    nodes={parseText(
-                                        embed.author.name,
-                                        ParserPresets.EMBED_INLINE,
-                                    )}
+                                <ParsedEmbedText
+                                    preset={ParserPresets.EMBED_INLINE}
                                     serverId={serverId}
-                                    size="sm"
+                                    size="xs"
+                                    text={embed.provider.name}
                                     variant={isDeleted ? 'danger' : undefined}
                                 />
                             )}
-                        </span>
-                    </div>
-                )}
+                        </p>
+                    )}
 
-                {/* Title + thumbnail side-by-side */}
-                <div className="flex items-start gap-4">
-                    <div className="flex-1">
-                        {/* Title */}
-                        {embed.title && (
-                            <p
+                    {/* Author */}
+                    {embed.author?.name && (
+                        <div className="mb-2 flex items-center gap-2">
+                            {embed.author.icon_url && (
+                                <img
+                                    alt=""
+                                    className="h-6 w-6 rounded-full object-cover"
+                                    decoding="async"
+                                    loading="lazy"
+                                    src={authorIconUrl}
+                                />
+                            )}
+                            <span
                                 className={cn(
-                                    'mb-1 text-base font-semibold',
+                                    'text-sm font-semibold',
                                     isDeleted
                                         ? 'text-danger'
                                         : 'text-foreground',
                                 )}
                             >
-                                {embed.url ? (
+                                {embed.author.url ? (
                                     <Link
-                                        className="text-primary hover:underline"
-                                        href={embed.url}
+                                        className="hover:underline"
+                                        href={embed.author.url}
                                     >
-                                        <ParsedText
-                                            nodes={parseText(
-                                                embed.title,
-                                                ParserPresets.EMBED_INLINE,
-                                            )}
+                                        <ParsedEmbedText
+                                            preset={ParserPresets.EMBED_INLINE}
                                             serverId={serverId}
-                                            size="base"
+                                            size="sm"
+                                            text={embed.author.name}
                                             variant={
                                                 isDeleted ? 'danger' : undefined
                                             }
                                         />
                                     </Link>
                                 ) : (
-                                    <ParsedText
-                                        nodes={parseText(
-                                            embed.title,
-                                            ParserPresets.EMBED_INLINE,
-                                        )}
+                                    <ParsedEmbedText
+                                        preset={ParserPresets.EMBED_INLINE}
                                         serverId={serverId}
-                                        size="base"
+                                        size="sm"
+                                        text={embed.author.name}
                                         variant={
                                             isDeleted ? 'danger' : undefined
                                         }
                                     />
                                 )}
-                            </p>
-                        )}
-
-                        {/* Description */}
-                        {embed.description && (
-                            <div
-                                className="mb-2 text-sm leading-relaxed"
-                                style={{ display: 'flow-root' }}
-                            >
-                                <ParsedText
-                                    nodes={parseText(
-                                        embed.description,
-                                        ParserPresets.EMBED,
-                                    )}
-                                    serverId={serverId}
-                                    size="sm"
-                                    variant={isDeleted ? 'danger' : undefined}
-                                    wrap="preWrap"
-                                />
-                            </div>
-                        )}
-
-                        {/* Fields */}
-                        {fieldRows.length > 0 && (
-                            <div className="mt-2 flex flex-col gap-2">
-                                {fieldRows.map((row) => (
-                                    <div
-                                        className={cn(
-                                            'grid gap-x-4',
-                                            row.inline
-                                                ? `grid-cols-${Math.min(row.fields?.length ?? 1, 3)}`
-                                                : 'grid-cols-1',
-                                        )}
-                                        key={`row-${row.fields?.map((f) => f.name).join(',')}`}
-                                    >
-                                        {row.fields?.map((field) => (
-                                            <div
-                                                key={`${field.name}-${field.value}`}
-                                            >
-                                                <div
-                                                    className={cn(
-                                                        'text-xs font-semibold',
-                                                        isDeleted
-                                                            ? 'text-danger'
-                                                            : 'text-foreground',
-                                                    )}
-                                                    style={{
-                                                        display: 'flow-root',
-                                                    }}
-                                                >
-                                                    <ParsedText
-                                                        nodes={parseText(
-                                                            field.name,
-                                                            ParserPresets.EMBED_INLINE,
-                                                        )}
-                                                        serverId={serverId}
-                                                        size="xs"
-                                                        variant={
-                                                            isDeleted
-                                                                ? 'danger'
-                                                                : undefined
-                                                        }
-                                                    />
-                                                </div>
-                                                <div
-                                                    className="text-sm text-muted-foreground"
-                                                    style={{
-                                                        display: 'flow-root',
-                                                    }}
-                                                >
-                                                    <ParsedText
-                                                        nodes={parseText(
-                                                            field.value,
-                                                            ParserPresets.EMBED,
-                                                        )}
-                                                        serverId={serverId}
-                                                        size="sm"
-                                                        variant={
-                                                            isDeleted
-                                                                ? 'danger'
-                                                                : undefined
-                                                        }
-                                                        wrap="preWrap"
-                                                    />
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Thumbnail */}
-                    {embed.thumbnail?.url && (
-                        <img
-                            alt=""
-                            className={cn(
-                                'ml-auto h-20 w-20 shrink-0 rounded object-cover',
-                                isDeleted && 'opacity-50 grayscale',
-                            )}
-                            src={getSafeUrl(embed.thumbnail.url)}
-                        />
+                            </span>
+                        </div>
                     )}
-                </div>
 
-                {/* Large image */}
-                {embed.image?.url && (
-                    <img
-                        alt=""
-                        className={cn(
-                            'mt-3 max-h-72 w-full rounded object-contain',
-                            isDeleted && 'opacity-50 grayscale',
-                        )}
-                        src={getSafeUrl(embed.image.url)}
-                    />
-                )}
+                    {/* Title + thumbnail side-by-side */}
+                    <div className="flex items-start gap-4">
+                        <div className="flex-1">
+                            {/* Title */}
+                            {embed.title && (
+                                <p
+                                    className={cn(
+                                        'mb-1 text-base font-semibold',
+                                        isDeleted
+                                            ? 'text-danger'
+                                            : 'text-foreground',
+                                    )}
+                                >
+                                    {embed.url ? (
+                                        <Link
+                                            className="text-primary hover:underline"
+                                            href={embed.url}
+                                        >
+                                            <ParsedEmbedText
+                                                preset={
+                                                    ParserPresets.EMBED_INLINE
+                                                }
+                                                serverId={serverId}
+                                                size="base"
+                                                text={embed.title}
+                                                variant={
+                                                    isDeleted
+                                                        ? 'danger'
+                                                        : undefined
+                                                }
+                                            />
+                                        </Link>
+                                    ) : (
+                                        <ParsedEmbedText
+                                            preset={ParserPresets.EMBED_INLINE}
+                                            serverId={serverId}
+                                            size="base"
+                                            text={embed.title}
+                                            variant={
+                                                isDeleted ? 'danger' : undefined
+                                            }
+                                        />
+                                    )}
+                                </p>
+                            )}
 
-                {/* Footer */}
-                {(embed.footer?.text ?? embed.timestamp) && (
-                    <div className="mt-3 flex items-center gap-2">
-                        {embed.footer?.icon_url && (
+                            {/* Description */}
+                            {embed.description && (
+                                <div
+                                    className="mb-2 text-sm leading-relaxed"
+                                    style={{ display: 'flow-root' }}
+                                >
+                                    <ParsedEmbedText
+                                        preset={ParserPresets.EMBED}
+                                        serverId={serverId}
+                                        size="sm"
+                                        text={embed.description}
+                                        variant={
+                                            isDeleted ? 'danger' : undefined
+                                        }
+                                        wrap="preWrap"
+                                    />
+                                </div>
+                            )}
+
+                            {/* Fields */}
+                            {fieldRows.length > 0 && (
+                                <div className="mt-2 flex flex-col gap-2">
+                                    {fieldRows.map((row) => (
+                                        <div
+                                            className={cn(
+                                                'grid gap-x-4',
+                                                row.inline
+                                                    ? `grid-cols-${Math.min(row.fields?.length ?? 1, 3)}`
+                                                    : 'grid-cols-1',
+                                            )}
+                                            key={`row-${row.fields?.map((f) => f.name).join(',')}`}
+                                        >
+                                            {row.fields?.map((field) => (
+                                                <div
+                                                    key={`${field.name}-${field.value}`}
+                                                >
+                                                    <div
+                                                        className={cn(
+                                                            'text-xs font-semibold',
+                                                            isDeleted
+                                                                ? 'text-danger'
+                                                                : 'text-foreground',
+                                                        )}
+                                                        style={{
+                                                            display:
+                                                                'flow-root',
+                                                        }}
+                                                    >
+                                                        <ParsedEmbedText
+                                                            preset={
+                                                                ParserPresets.EMBED_INLINE
+                                                            }
+                                                            serverId={serverId}
+                                                            size="xs"
+                                                            text={field.name}
+                                                            variant={
+                                                                isDeleted
+                                                                    ? 'danger'
+                                                                    : undefined
+                                                            }
+                                                        />
+                                                    </div>
+                                                    <div
+                                                        className="text-sm text-muted-foreground"
+                                                        style={{
+                                                            display:
+                                                                'flow-root',
+                                                        }}
+                                                    >
+                                                        <ParsedEmbedText
+                                                            preset={
+                                                                ParserPresets.EMBED
+                                                            }
+                                                            serverId={serverId}
+                                                            size="sm"
+                                                            text={field.value}
+                                                            variant={
+                                                                isDeleted
+                                                                    ? 'danger'
+                                                                    : undefined
+                                                            }
+                                                            wrap="preWrap"
+                                                        />
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Thumbnail */}
+                        {embed.thumbnail?.url && (
                             <img
                                 alt=""
                                 className={cn(
-                                    'h-5 w-5 rounded-full object-cover',
+                                    'ml-auto h-20 w-20 shrink-0 rounded object-cover',
                                     isDeleted && 'opacity-50 grayscale',
                                 )}
-                                src={getSafeUrl(embed.footer.icon_url)}
+                                decoding="async"
+                                loading="lazy"
+                                src={thumbnailUrl}
                             />
                         )}
-                        <div
-                            className={cn(
-                                'text-xs',
-                                isDeleted
-                                    ? 'text-danger/80'
-                                    : 'text-muted-foreground',
-                            )}
-                            style={{ display: 'flow-root' }}
-                        >
-                            <ParsedText
-                                nodes={parseText(
-                                    [
-                                        embed.footer?.text,
-                                        formatTimestamp(embed.timestamp),
-                                    ]
-                                        .filter(Boolean)
-                                        .join(' • '),
-                                    ParserPresets.EMBED,
-                                )}
-                                serverId={serverId}
-                                size="xs"
-                                variant={isDeleted ? 'danger' : 'muted'}
-                                wrap="preWrap"
-                            />
-                        </div>
                     </div>
-                )}
+
+                    {/* Large image */}
+                    {embed.image?.url && (
+                        <img
+                            alt=""
+                            className={cn(
+                                'mt-3 max-h-72 w-full rounded object-contain',
+                                isDeleted && 'opacity-50 grayscale',
+                            )}
+                            decoding="async"
+                            loading="lazy"
+                            src={imageUrl}
+                        />
+                    )}
+
+                    {/* Footer */}
+                    {(embed.footer?.text ?? embed.timestamp) && (
+                        <div className="mt-3 flex items-center gap-2">
+                            {embed.footer?.icon_url && (
+                                <img
+                                    alt=""
+                                    className={cn(
+                                        'h-5 w-5 rounded-full object-cover',
+                                        isDeleted && 'opacity-50 grayscale',
+                                    )}
+                                    decoding="async"
+                                    loading="lazy"
+                                    src={footerIconUrl}
+                                />
+                            )}
+                            <div
+                                className={cn(
+                                    'text-xs',
+                                    isDeleted
+                                        ? 'text-danger/80'
+                                        : 'text-muted-foreground',
+                                )}
+                                style={{ display: 'flow-root' }}
+                            >
+                                <ParsedEmbedText
+                                    preset={ParserPresets.EMBED}
+                                    serverId={serverId}
+                                    size="xs"
+                                    text={footerText}
+                                    variant={isDeleted ? 'danger' : 'muted'}
+                                    wrap="preWrap"
+                                />
+                            </div>
+                        </div>
+                    )}
+                </div>
             </div>
-        </div>
-    );
-};
+        );
+    },
+);
+EmbedCard.displayName = 'EmbedCard';
 
 // ─── main component ──────────────────────────────────────────────────────────
 
@@ -434,10 +504,9 @@ export const EmbedRenderer = ({
     serverId,
     isDeleted,
 }: EmbedRendererProps): ReactNode => {
-    const hasAnything =
-        payload.content ??
-        (payload.embeds && payload.embeds.length > 0) ??
-        payload.poll;
+    const hasAnything = Boolean(
+        payload.content?.trim() || payload.embeds?.length || payload.poll,
+    );
 
     if (!hasAnything && variant === 'preview') {
         return (
@@ -474,10 +543,11 @@ export const EmbedRenderer = ({
                     className="mb-1 text-sm leading-relaxed"
                     style={{ display: 'flow-root' }}
                 >
-                    <ParsedText
-                        nodes={parseText(payload.content, ParserPresets.EMBED)}
+                    <ParsedEmbedText
+                        preset={ParserPresets.EMBED}
                         serverId={serverId}
                         size="sm"
+                        text={payload.content}
                         wrap="preWrap"
                     />
                 </div>

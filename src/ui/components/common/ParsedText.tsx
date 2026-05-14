@@ -199,7 +199,6 @@ export const ParsedText = React.memo<ParsedTextProps>(
                         case 'text':
                             return (
                                 <Text
-                                    data-source={JSON.stringify(node.content)}
                                     key={idx}
                                     size={size}
                                     variant={variant}
@@ -615,14 +614,12 @@ export const ParsedText = React.memo<ParsedTextProps>(
 
                         case 'inline_code':
                             return (
-                                <React.Suspense
-                                    fallback={
-                                        <span className="opacity-50">...</span>
-                                    }
+                                <code
+                                    className="rounded bg-bg-secondary px-1 py-0.5 font-mono text-sm"
                                     key={idx}
                                 >
-                                    <CodeBlock inline content={node.content} />
-                                </React.Suspense>
+                                    {node.content}
+                                </code>
                             );
 
                         case 'code_block':

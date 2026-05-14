@@ -53,12 +53,20 @@ export const useMemberMaps = (
         const map = new Map<string, Role[]>();
         if (!members || !roles) return map;
 
+        const everyoneRole = roles.find((r) => r.name === '@everyone');
+
         members.forEach((m) => {
-            const memberRoles = roles.filter((r) => m.roles.includes(r._id));
+            const memberRoleIds = m.roles ? [...m.roles] : [];
+            if (everyoneRole && !memberRoleIds.includes(everyoneRole._id)) {
+                memberRoleIds.push(everyoneRole._id);
+            }
+            const memberRoles = memberRoleIds
+                .map((roleId) => roleMap.get(roleId))
+                .filter((role): role is Role => !!role);
             map.set(m.userId, memberRoles);
         });
         return map;
-    }, [members, roles]);
+    }, [members, roles, roleMap]);
 
     // Lookup for highest Role by userId
     const highestRoleMap = React.useMemo(() => {
@@ -102,12 +110,22 @@ export const useMemberMaps = (
         return map;
     }, [members, roles, roleMap]);
 
-    return {
-        serverMemberMap,
-        fullMemberMap,
-        roleMap,
-        userRolesMap,
-        highestRoleMap,
-        iconRoleMap,
-    };
+    return React.useMemo(
+        () => ({
+            serverMemberMap,
+            fullMemberMap,
+            roleMap,
+            userRolesMap,
+            highestRoleMap,
+            iconRoleMap,
+        }),
+        [
+            serverMemberMap,
+            fullMemberMap,
+            roleMap,
+            userRolesMap,
+            highestRoleMap,
+            iconRoleMap,
+        ],
+    );
 };

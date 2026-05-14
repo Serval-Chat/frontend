@@ -28,7 +28,6 @@ import { setTargetMessageId } from '@/store/slices/navSlice';
 import type { ProcessedChatMessage } from '@/types/chat.ui';
 import { ChatEmptyState } from '@/ui/components/chat/ChatEmptyState';
 import { ChatHeader } from '@/ui/components/chat/ChatHeader';
-import { ChatLoadingState } from '@/ui/components/chat/ChatLoadingState';
 import { MessageInput } from '@/ui/components/chat/MessageInput';
 import { MessagesList } from '@/ui/components/chat/MessagesList';
 import { TypingIndicator } from '@/ui/components/chat/TypingIndicator';
@@ -207,10 +206,21 @@ export const MainChat: React.FC = () => {
         iconRoleMap,
     );
 
-    const { typingUsers } = useChatWS(
+    const { sendMessage, sendTyping, typingUsers } = useChatWS(
         selectedFriendId ?? undefined,
         selectedServerId ?? undefined,
         selectedChannelId ?? undefined,
+    );
+
+    const typingUsersWithDebug = React.useMemo(
+        () => [
+            ...typingUsers,
+            ...Array.from({ length: debugTypingCount }, (_, i) => ({
+                userId: `__debug_${i}__`,
+                username: `TestUser${i > 0 ? i + 1 : ''}`,
+            })),
+        ],
+        [typingUsers, debugTypingCount],
     );
 
     const canBypassSlowMode =
@@ -394,44 +404,40 @@ export const MainChat: React.FC = () => {
                         className="relative flex min-h-0 flex-1 flex-col"
                         ref={chatContainerRef}
                     >
-                        {isLoading ? (
-                            <ChatLoadingState />
-                        ) : (
-                            <MessagesList
-                                activeHighlightId={targetMessageId}
-                                disableColors={
-                                    currentUser?.settings
-                                        ?.disableCustomUsernameColors
-                                }
-                                disableCustomFonts={
-                                    serverDetails?.disableCustomFonts ||
-                                    currentUser?.settings
-                                        ?.disableCustomUsernameFonts
-                                }
-                                disableGlow={
-                                    currentUser?.settings
-                                        ?.disableCustomUsernameGlow
-                                }
-                                disableGlowAndColors={
-                                    serverDetails?.disableUsernameGlowAndCustomColor
-                                }
-                                fullMemberMap={fullMemberMap}
-                                hasMore={hasNextPage}
-                                hasMoreNewer={isViewingOlderMessages}
-                                hasPermission={hasPermission}
-                                isLoadingMore={isFetchingNextPage}
-                                isOwner={isOwner}
-                                me={currentUser}
-                                messages={messages}
-                                roleMap={roleMap}
-                                serverDetails={serverDetails}
-                                userRolesMap={userRolesMap}
-                                onLoadMore={handleLoadMore}
-                                onLoadMoreNewer={handleJumpToLatest}
-                                onReplyClick={handleReplyClick}
-                                onReplyToMessage={handleReplyToMessage}
-                            />
-                        )}
+                        <MessagesList
+                            activeHighlightId={targetMessageId}
+                            disableColors={
+                                currentUser?.settings
+                                    ?.disableCustomUsernameColors
+                            }
+                            disableCustomFonts={
+                                serverDetails?.disableCustomFonts ||
+                                currentUser?.settings
+                                    ?.disableCustomUsernameFonts
+                            }
+                            disableGlow={
+                                currentUser?.settings?.disableCustomUsernameGlow
+                            }
+                            disableGlowAndColors={
+                                serverDetails?.disableUsernameGlowAndCustomColor
+                            }
+                            fullMemberMap={fullMemberMap}
+                            hasMore={hasNextPage}
+                            hasMoreNewer={isViewingOlderMessages}
+                            hasPermission={hasPermission}
+                            isLoading={isLoading}
+                            isLoadingMore={isFetchingNextPage}
+                            isOwner={isOwner}
+                            me={currentUser}
+                            messages={messages}
+                            roleMap={roleMap}
+                            serverDetails={serverDetails}
+                            userRolesMap={userRolesMap}
+                            onLoadMore={handleLoadMore}
+                            onLoadMoreNewer={handleJumpToLatest}
+                            onReplyClick={handleReplyClick}
+                            onReplyToMessage={handleReplyToMessage}
+                        />
                         <TypingIndicator
                             canBypassSlowMode={canBypassSlowMode}
                             cooldown={cooldown}
@@ -439,17 +445,7 @@ export const MainChat: React.FC = () => {
                                 !!selectedChannel?.slowMode &&
                                 selectedChannel.slowMode > 0
                             }
-                            typingUsers={[
-                                ...typingUsers,
-                                ...Array.from({ length: debugTypingCount }).map(
-                                    (_, i) => ({
-                                        userId: `__debug_${i}__`,
-                                        username: `TestUser${
-                                            i > 0 ? i + 1 : ''
-                                        }`,
-                                    }),
-                                ),
-                            ]}
+                            typingUsers={typingUsersWithDebug}
                         />
                     </Box>
 
@@ -474,6 +470,8 @@ export const MainChat: React.FC = () => {
                             }
                             fileQueueResult={fileQueueResult}
                             replyingTo={replyingTo}
+                            sendMessage={sendMessage}
+                            sendTyping={sendTyping}
                             setCooldown={setCooldown}
                             onCancelReply={() => setReplyingTo(null)}
                         />
