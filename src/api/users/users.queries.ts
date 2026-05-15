@@ -10,6 +10,7 @@ import { hasAuthToken } from '@/utils/authToken';
 
 import { usersApi } from './users.api';
 import type {
+    CreateWebsiteConnectionResponse,
     User,
     UserSettings,
     UsernameFont,
@@ -234,6 +235,51 @@ export const useUpdateBanner = (): UseMutationResult<
             queryClient.setQueryData<User>(['me'], (old) =>
                 old ? { ...old, banner: data.banner } : old,
             );
+            void queryClient.invalidateQueries({ queryKey: ['me'] });
+        },
+    });
+};
+
+export const useCreateWebsiteConnection = (): UseMutationResult<
+    CreateWebsiteConnectionResponse,
+    Error,
+    string
+> => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: usersApi.createWebsiteConnection,
+        onSuccess: () => {
+            void queryClient.invalidateQueries({ queryKey: ['me'] });
+        },
+    });
+};
+
+export const useVerifyConnection = (): UseMutationResult<
+    {
+        message: string;
+        connection: { id: string; type: 'Website'; value: string };
+    },
+    Error,
+    string
+> => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: usersApi.verifyConnection,
+        onSuccess: () => {
+            void queryClient.invalidateQueries({ queryKey: ['me'] });
+        },
+    });
+};
+
+export const useRemoveConnection = (): UseMutationResult<
+    { message: string },
+    Error,
+    string
+> => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: usersApi.removeConnection,
+        onSuccess: () => {
             void queryClient.invalidateQueries({ queryKey: ['me'] });
         },
     });

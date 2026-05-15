@@ -32,7 +32,7 @@ import {
     Sticker,
     X,
 } from 'lucide-react';
-import { useLocation, useParams } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { useClickAway } from 'react-use';
 
 import { useChannelMessages, useUserMessages } from '@/api/chat/chat.queries';
@@ -203,7 +203,6 @@ export const MessageInput: React.FC<MessageInputProps> = ({
     const lastDraftJsonRef = useRef<string | null>(null);
     const queryClient = useQueryClient();
     const location = useLocation();
-    const params = useParams();
     const [isSlowModeError, setIsSlowModeError] = useState(false);
     const MAX_LENGTH = Number(import.meta.env.VITE_MAX_MESSAGE_LENGTH || 2000);
     const remainingChars = MAX_LENGTH - currentInputText.length;
@@ -286,13 +285,16 @@ export const MessageInput: React.FC<MessageInputProps> = ({
         (state) => state.nav.selectedChannelId,
     );
 
-    const { customCategories } = useCustomEmojis({ enabled: showEmojiPicker });
+    const { customCategories } = useCustomEmojis({ enabled: true });
 
     const isServerRoute = location.pathname.includes('/@server/');
+    const serverIdFromUrl = location.pathname
+        .split('/@server/')[1]
+        ?.split('/')[0];
     const isServerContextReady =
         !!selectedServerId &&
         isServerRoute &&
-        selectedServerId === params.serverId;
+        selectedServerId === serverIdFromUrl;
 
     const { data: me } = useMe();
     const { data: friendsList = [] } = useFriends();

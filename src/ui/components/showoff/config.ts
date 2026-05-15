@@ -16,6 +16,7 @@ export const SHOWOFF_SECTIONS = {
     contextMenu: 'context-menu',
     userProfilePopup: 'user-profile-popup',
     pushPrompt: 'push-prompt',
+    toast: 'toast-notifications',
 } as const;
 
 export const BUTTON_VARIANTS = [

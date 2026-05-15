@@ -3,6 +3,7 @@ import React, { useMemo } from 'react';
 import {
     Calendar,
     Camera,
+    Globe,
     MessageSquare,
     Server,
     UserMinus,
@@ -23,6 +24,7 @@ import type { AdminExtendedUser } from '@/types/admin';
 import { BotTag } from '@/ui/components/common/BotTag';
 import { Button } from '@/ui/components/common/Button';
 import { Heading } from '@/ui/components/common/Heading';
+import { Link } from '@/ui/components/common/Link';
 import { ParsedEmoji } from '@/ui/components/common/ParsedEmoji';
 import { ParsedText } from '@/ui/components/common/ParsedText';
 import { ParsedUnicodeEmoji } from '@/ui/components/common/ParsedUnicodeEmoji';
@@ -102,6 +104,15 @@ export const UserProfileCard: React.FC<UserProfileCardProps> = ({
     const bioNodes = useMemo(
         () => (userBio ? parseText(userBio, ParserPresets.BIO) : []),
         [userBio],
+    );
+    const visibleConnections = useMemo(
+        () =>
+            (user?.connections ?? []).filter(
+                (connection) =>
+                    connection.type === 'Website' &&
+                    connection.status !== 'pending',
+            ),
+        [user?.connections],
     );
 
     return (
@@ -226,6 +237,33 @@ export const UserProfileCard: React.FC<UserProfileCardProps> = ({
                                 size="xs"
                                 wrap="preWrap"
                             />
+                        </Box>
+                    </Box>
+                )}
+
+                {visibleConnections.length > 0 && (
+                    <Box className="mb-4">
+                        <Heading
+                            className="mb-2 text-xs font-bold text-muted-foreground uppercase"
+                            level={3}
+                        >
+                            Connections
+                        </Heading>
+                        <Box className="flex flex-col gap-1.5">
+                            {visibleConnections.map((connection) => (
+                                <Link
+                                    external
+                                    className="flex min-w-0 items-center gap-2 text-xs"
+                                    href={`https://${connection.value}`}
+                                    key={connection.id}
+                                    size="xs"
+                                >
+                                    <Globe className="shrink-0" size={13} />
+                                    <span className="truncate">
+                                        {connection.value}
+                                    </span>
+                                </Link>
+                            ))}
                         </Box>
                     </Box>
                 )}

@@ -39,6 +39,7 @@ import { UserProfileCard } from '@/ui/components/profile/UserProfileCard';
 import { ChangeLoginModal } from './ChangeLoginModal';
 import { ChangePasswordModal } from './ChangePasswordModal';
 import { ImageCropModal } from './ImageCropModal';
+import { WebsiteConnectionsSettings } from './WebsiteConnectionsSettings';
 
 export const AccountSettings: React.FC = () => {
     const { data: user } = useMe();
@@ -473,6 +474,8 @@ export const AccountSettings: React.FC = () => {
                             {bio.length}/190
                         </Text>
                     </div>
+
+                    <WebsiteConnectionsSettings />
 
                     {/* Password Section */}
                     <div className="border-t border-border-subtle pt-6">

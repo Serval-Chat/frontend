@@ -82,16 +82,16 @@ const ToastItem: React.FC<{ toast: Toast; onClose: () => void }> = ({
     };
 
     const bgColors = {
-        success: 'bg-green-500/10 border-green-500/20',
-        error: 'bg-red-500/10 border-red-500/20',
-        info: 'bg-blue-500/10 border-blue-500/20',
+        success: 'bg-success-muted border-success/30',
+        error: 'bg-danger-muted border-danger/30',
+        info: 'bg-primary-muted border-primary/30',
     };
 
     return (
         <motion.div
             layout
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            className={`pointer-events-auto flex max-w-md min-w-[300px] items-center gap-3 rounded-lg border px-4 py-3 shadow-lg backdrop-blur-md ${bgColors[toast.type]}`}
+            className={`pointer-events-auto flex max-w-md min-w-[300px] items-center gap-3 rounded-lg border px-4 py-3 shadow-lg ${bgColors[toast.type]}`}
             exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.2 } }}
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
         >

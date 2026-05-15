@@ -135,6 +135,7 @@ export const FriendListMain: React.FC = () => {
                             key={String(friend._id)}
                         >
                             <UserItem
+                                hideUnread
                                 className="flex-1"
                                 user={friend}
                                 userId={String(friend._id)}

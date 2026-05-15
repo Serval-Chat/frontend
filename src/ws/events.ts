@@ -607,6 +607,11 @@ export interface IUserUpdatedEvent {
         disableCustomUsernameColors?: boolean;
         disableCustomUsernameGlow?: boolean;
     };
+    connections?: Array<{
+        id: string;
+        type: 'Website';
+        value: string;
+    }>;
     senderId?: string;
 }
 

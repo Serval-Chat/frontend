@@ -170,6 +170,10 @@ createRoot(document.getElementById('root')!).render(
                                             />
                                             <Route
                                                 element={<NavigationSync />}
+                                                path="@user/:userId/message/:messageId"
+                                            />
+                                            <Route
+                                                element={<NavigationSync />}
                                                 path="@setting"
                                             >
                                                 <Route

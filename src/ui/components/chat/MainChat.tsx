@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
 import { Upload, X } from 'lucide-react';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 import {
     useClearChannelPings,
@@ -53,7 +53,6 @@ export const MainChat: React.FC = () => {
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
     const location = useLocation();
-    const params = useParams();
     const selectedFriendId = useAppSelector(
         (state) => state.nav.selectedFriendId,
     );
@@ -137,11 +136,13 @@ export const MainChat: React.FC = () => {
             enabled: !!selectedFriendId,
         },
     );
-    const isServerRoute = location.pathname.includes('/@server/');
+    const serverIdFromUrl = location.pathname
+        .split('/@server/')[1]
+        ?.split('/')[0];
     const isServerContextReady =
         !!selectedServerId &&
-        isServerRoute &&
-        selectedServerId === params.serverId;
+        !!serverIdFromUrl &&
+        selectedServerId === serverIdFromUrl;
 
     const { data: serverDetails } = useServerDetails(selectedServerId, {
         enabled: isServerContextReady,

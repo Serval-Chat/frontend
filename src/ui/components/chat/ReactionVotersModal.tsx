@@ -1,7 +1,11 @@
 import React, { useMemo, useState } from 'react';
 
 import type { MessageReaction } from '@/api/chat/chat.types';
-import { useMembers, useRoles } from '@/api/servers/servers.queries';
+import {
+    useMembers,
+    useRoles,
+    useServerDetails,
+} from '@/api/servers/servers.queries';
 import { useUsers } from '@/hooks/useUsers';
 import { LoadingSpinner } from '@/ui/components/common/LoadingSpinner';
 import { Modal } from '@/ui/components/common/Modal';
@@ -58,6 +62,9 @@ export const ReactionVotersModal: React.FC<ReactionVotersModalProps> = ({
         enabled: isOpen && !!serverId,
     });
     const { data: roles } = useRoles(serverId || null, {
+        enabled: isOpen && !!serverId,
+    });
+    const { data: serverDetails } = useServerDetails(serverId || null, {
         enabled: isOpen && !!serverId,
     });
 
@@ -168,6 +175,12 @@ export const ReactionVotersModal: React.FC<ReactionVotersModalProps> = ({
                                     <UserItem
                                         noFetch
                                         allRoles={userRoles}
+                                        disableCustomFonts={
+                                            serverDetails?.disableCustomFonts
+                                        }
+                                        disableGlowAndColors={
+                                            serverDetails?.disableUsernameGlowAndCustomColor
+                                        }
                                         iconRole={iconRole}
                                         key={user._id}
                                         role={role}

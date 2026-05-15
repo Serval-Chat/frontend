@@ -82,7 +82,7 @@ export const MessageEdit: React.FC<MessageEditProps> = ({
 
     const editChannelMessage = useEditChannelMessage();
     const editUserMessage = useEditUserMessage();
-    const { customCategories } = useCustomEmojis({ enabled: showEmojiPicker });
+    const { customCategories } = useCustomEmojis({ enabled: true });
 
     const { data: friends } = useFriends();
     const { data: channels } = useChannels(serverId || '', {

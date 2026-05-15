@@ -1,6 +1,7 @@
 import { apiClient } from '@/api/client';
 
 import type {
+    CreateWebsiteConnectionResponse,
     User,
     UserSettings,
     UsernameFont,
@@ -115,4 +116,27 @@ export const usersApi = {
             }>('/api/v1/profile/banner', formData)
             .then((r) => r.data);
     },
+
+    createWebsiteConnection: (website: string) =>
+        apiClient
+            .post<CreateWebsiteConnectionResponse>(
+                '/api/v1/profile/connections/website',
+                { website },
+            )
+            .then((r) => r.data),
+
+    verifyConnection: (connectionId: string) =>
+        apiClient
+            .post<{
+                message: string;
+                connection: { id: string; type: 'Website'; value: string };
+            }>(`/api/v1/profile/connections/${connectionId}/verify`)
+            .then((r) => r.data),
+
+    removeConnection: (connectionId: string) =>
+        apiClient
+            .delete<{
+                message: string;
+            }>(`/api/v1/profile/connections/${connectionId}`)
+            .then((r) => r.data),
 };

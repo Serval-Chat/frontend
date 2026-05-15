@@ -19,6 +19,7 @@ import {
     type TOCProps,
     TableOfContents,
 } from '@/ui/components/showoff/TableOfContents';
+import { ToastDemo } from '@/ui/components/showoff/ToastDemo';
 import { TogglesDemo } from '@/ui/components/showoff/TogglesDemo';
 import { TypographyDemo } from '@/ui/components/showoff/TypographyDemo';
 import { UserIdentitiesDemo } from '@/ui/components/showoff/UserIdentitiesDemo';
@@ -135,6 +136,10 @@ export const Showoff = (): ReactNode => {
             title: 'Push Notifications Prompt',
         },
         {
+            id: SHOWOFF_SECTIONS.toast,
+            title: 'Toast Notifications',
+        },
+        {
             id: SHOWOFF_SECTIONS.colorPalette,
             title: 'Leptailurus Serval Color Palette',
         },
@@ -164,6 +169,7 @@ export const Showoff = (): ReactNode => {
             <ContextMenuDemo />
             <UserProfilePopupDemo />
             <PushPromptDemo />
+            <ToastDemo />
 
             <InputsDemo />
             <TogglesDemo />

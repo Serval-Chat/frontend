@@ -89,6 +89,7 @@ interface UserItemProps {
     disableColors?: boolean;
     disableGlow?: boolean;
     initialPresenceStatus?: UserStatus;
+    hideUnread?: boolean;
 }
 
 interface ServerData {
@@ -176,6 +177,7 @@ const UserItemInner: React.FC<
         disableColors,
         disableGlow,
         initialPresenceStatus,
+        hideUnread,
     }) => {
         const dispatch = useAppDispatch();
 
@@ -289,7 +291,7 @@ const UserItemInner: React.FC<
             userVoiceChannelId === activeVoiceChannelId &&
             !isMe,
         );
-        const hasUnread = unreadCount > 0;
+        const hasUnread = unreadCount > 0 && !hideUnread && !providedServerId;
 
         const myMember = useMemo(
             () => members?.find((m) => m.userId === currentUser?._id),
@@ -906,6 +908,7 @@ export const UserItem = React.memo((props: UserItemProps) => {
                         disableCustomFonts={props.disableCustomFonts}
                         disableGlow={props.disableGlow}
                         disableGlowAndColors={props.disableGlowAndColors}
+                        hideUnread={props.hideUnread}
                         iconRole={props.iconRole}
                         initialData={props.initialData}
                         initialPresenceStatus={props.initialPresenceStatus}
@@ -933,6 +936,7 @@ export const UserItem = React.memo((props: UserItemProps) => {
             disableCustomFonts={props.disableCustomFonts}
             disableGlow={props.disableGlow}
             disableGlowAndColors={props.disableGlowAndColors}
+            hideUnread={props.hideUnread}
             iconRole={props.iconRole}
             initialData={props.initialData}
             initialPresenceStatus={props.initialPresenceStatus}

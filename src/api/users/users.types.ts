@@ -79,6 +79,26 @@ export interface Badge {
     createdAt: string;
 }
 
+export interface UserConnection {
+    id: string;
+    type: 'Website';
+    value: string;
+    status?: 'pending' | 'verified';
+    recordType?: 'TXT';
+    recordName?: string;
+    recordValue?: string;
+    expiresAt?: string;
+}
+
+export interface CreateWebsiteConnectionResponse {
+    message: string;
+    connectionId: string;
+    recordType: 'TXT';
+    recordName: string;
+    recordValue: string;
+    expiresAt: string;
+}
+
 export interface User {
     _id: string;
     login: string;
@@ -106,4 +126,5 @@ export interface User {
     bannerColor?: string;
     serverSettings?: ServerSettings;
     totpEnabled?: boolean;
+    connections?: UserConnection[];
 }
