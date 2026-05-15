@@ -5,7 +5,8 @@ import {
     LexicalTypeaheadMenuPlugin,
     MenuOption,
 } from '@lexical/react/LexicalTypeaheadMenuPlugin';
-import { $getSelection, $isRangeSelection, TextNode } from 'lexical';
+import { $getSelection, $isRangeSelection, $isTextNode } from 'lexical';
+import type { TextNode } from 'lexical';
 
 import type { Emoji } from '@/api/emojis/emojis.types';
 import type { Channel, Role, ServerMember } from '@/api/servers/servers.types';
@@ -88,6 +89,7 @@ export const LexicalAutocompletePlugin: React.FC<
     const [editor] = useLexicalComposerContext();
     const blocks = useAppSelector((state) => state.blocking.blocks);
     const [queryString, setQueryString] = useState<string | null>(null);
+    const [triggerChar, setTriggerChar] = useState<string>('@');
 
     const allEmojis = useMemo(() => {
         const emojis: EmojiData[] = [];
@@ -101,23 +103,6 @@ export const LexicalAutocompletePlugin: React.FC<
         if (queryString === null) return [];
 
         const query = queryString.toLowerCase();
-
-        let triggerChar = '@';
-        editor.getEditorState().read(() => {
-            const selection = $getSelection();
-            if ($isRangeSelection(selection) && selection.isCollapsed()) {
-                const node = selection.anchor.getNode();
-                if (node instanceof TextNode) {
-                    const text = node.getTextContent();
-                    const offset = selection.anchor.offset;
-                    const textBefore = text.slice(0, offset);
-                    const match = textBefore.match(/([@:#])[^@:#]*$/);
-                    if (match) {
-                        triggerChar = match[1];
-                    }
-                }
-            }
-        });
 
         if (triggerChar === '@') {
             const userSuggestions: Suggestion[] = [];
@@ -214,8 +199,8 @@ export const LexicalAutocompletePlugin: React.FC<
         allEmojis,
         serverEmojis,
         channels,
-        editor,
         blocks,
+        triggerChar,
     ]);
 
     const isOpen = queryString !== null && options.length > 0;
@@ -250,7 +235,7 @@ export const LexicalAutocompletePlugin: React.FC<
                         const selection = $getSelection();
                         if ($isRangeSelection(selection)) {
                             const node = selection.anchor.getNode();
-                            if (node instanceof TextNode) {
+                            if ($isTextNode(node)) {
                                 const textContent = node.getTextContent();
                                 const offset = selection.anchor.offset;
 
@@ -311,17 +296,19 @@ export const LexicalAutocompletePlugin: React.FC<
 
             const match = text.match(/(^|\s)([@:#])([^@#\s]{0,20})$/);
             if (match !== null) {
-                const triggerChar = match[2];
+                const trigger = match[2];
                 const matchingString = match[3];
 
-                if (triggerChar === ':' && matchingString.length < 2) {
+                if (trigger === ':' && matchingString.length < 2) {
                     return null;
                 }
+
+                setTriggerChar(trigger);
 
                 return {
                     leadOffset: match.index! + match[1].length,
                     matchingString: matchingString,
-                    replaceableString: triggerChar + matchingString,
+                    replaceableString: trigger + matchingString,
                 };
             }
             return null;
@@ -402,11 +389,10 @@ export const LexicalAutocompletePlugin: React.FC<
     return (
         <LexicalTypeaheadMenuPlugin<AutocompleteOption>
             menuRenderFn={(
-                anchorElementRef,
+                _anchorElementRef,
                 { selectedIndex, selectOptionAndCleanUp, setHighlightedIndex },
             ) => {
-                const isOpen =
-                    anchorElementRef.current != null && options.length > 0;
+                const isOpen = options.length > 0;
 
                 if (!isOpen) {
                     return null;

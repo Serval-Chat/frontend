@@ -224,11 +224,10 @@ export const LexicalSlashCommandPlugin: React.FC<
     return (
         <LexicalTypeaheadMenuPlugin<SlashCommandOption>
             menuRenderFn={(
-                anchorElementRef,
+                _anchorElementRef,
                 { selectedIndex, selectOptionAndCleanUp, setHighlightedIndex },
             ) => {
-                const menuOpen =
-                    anchorElementRef.current !== null && options.length > 0;
+                const menuOpen = options.length > 0;
                 if (!menuOpen) return null;
 
                 return (
