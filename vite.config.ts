@@ -72,7 +72,8 @@ export default defineConfig(({ mode }) => {
                 hasPackage(id, 'react') ||
                 hasPackage(id, 'react-dom') ||
                 hasPackage(id, 'react-router') ||
-                hasPackage(id, 'react-router-dom')
+                hasPackage(id, 'react-router-dom') ||
+                hasPackage(id, '@lexical/react')
               ) {
                 return 'vendor';
               }
