@@ -176,5 +176,5 @@ export function $createChipNode(
 export function $isChipNode(
     node: LexicalNode | null | undefined,
 ): node is ChipNode {
-    return node?.getType() === 'chip';
+    return node instanceof ChipNode;
 }

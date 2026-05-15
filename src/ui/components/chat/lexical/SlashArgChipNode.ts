@@ -156,5 +156,5 @@ export function $createSlashArgChipNode(
 export function $isSlashArgChipNode(
     node: LexicalNode | null | undefined,
 ): node is SlashArgChipNode {
-    return node?.getType() === 'slash-arg-chip';
+    return node instanceof SlashArgChipNode;
 }

@@ -70,7 +70,7 @@ export const CreatePollModal: React.FC<CreatePollModalProps> = ({
     const emojiPickerRef = useRef<HTMLDivElement>(null);
     const triggerRefs = useRef<Record<string, HTMLButtonElement | null>>({});
 
-    const updatePickerPosition = (id: string) => {
+    const updatePickerPosition = (id: string): void => {
         const trigger = triggerRefs.current[id];
         const picker = emojiPickerRef.current;
         if (trigger) {
@@ -93,7 +93,7 @@ export const CreatePollModal: React.FC<CreatePollModalProps> = ({
         if (activeEmojiOption) {
             updatePickerPosition(activeEmojiOption);
 
-            const handleScroll = (e: Event) => {
+            const handleScroll = (e: Event): void => {
                 if (emojiPickerRef.current?.contains(e.target as Node)) {
                     return;
                 }
@@ -114,7 +114,7 @@ export const CreatePollModal: React.FC<CreatePollModalProps> = ({
         }
     }, [activeEmojiOption]);
 
-    const getDurationMs = () => {
+    const getDurationMs = React.useCallback((): number => {
         const multipliers = {
             minutes: 60 * 1000,
             hours: 60 * 60 * 1000,
@@ -126,7 +126,7 @@ export const CreatePollModal: React.FC<CreatePollModalProps> = ({
         if (ms < minMs) ms = minMs;
         if (ms > maxMs) ms = maxMs;
         return ms;
-    };
+    }, [durationValue, durationUnit]);
 
     const PRESETS = [
         { label: '5 min', val: 5, unit: 'minutes' },
@@ -164,7 +164,7 @@ export const CreatePollModal: React.FC<CreatePollModalProps> = ({
                 ),
             );
         }
-    }, [isOpen, durationValue, durationUnit]);
+    }, [isOpen, durationValue, durationUnit, getDurationMs]);
 
     const { customCategories } = useCustomEmojis({
         enabled: activeEmojiOption !== null,

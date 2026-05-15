@@ -289,7 +289,7 @@ export const ServerEmojiSettings: React.FC<ServerEmojiSettingsProps> = ({
                     className="hidden"
                     ref={bulkFileInputRef}
                     type="file"
-                    onChange={handleBulkFileSelect}
+                    onChange={(e) => void handleBulkFileSelect(e)}
                 />
 
                 {isLoading ? (
@@ -415,7 +415,7 @@ export const ServerEmojiSettings: React.FC<ServerEmojiSettingsProps> = ({
                 title="Bulk Upload Emojis"
                 total={bulkStatus.total}
                 uploaded={bulkStatus.uploaded}
-                onCancel={handleCancelBulk}
+                onCancel={() => void handleCancelBulk()}
                 onClose={() =>
                     setBulkStatus((prev) => ({ ...prev, isOpen: false }))
                 }

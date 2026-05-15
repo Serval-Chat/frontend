@@ -37,6 +37,7 @@ export default defineConfig(({ mode }) => {
           __dirname,
           'node_modules/decode-named-character-reference/index.js',
         ),
+        lexical: path.resolve(__dirname, 'node_modules/lexical'),
       },
     },
     build: {

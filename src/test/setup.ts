@@ -1,7 +1,13 @@
 import '@testing-library/jest-dom';
 import { beforeEach, vi } from 'vitest';
 
-const createStorageMock = () => {
+const createStorageMock = (): Partial<Storage> & {
+    getItem: ReturnType<typeof vi.fn>;
+    setItem: ReturnType<typeof vi.fn>;
+    removeItem: ReturnType<typeof vi.fn>;
+    clear: ReturnType<typeof vi.fn>;
+    key: ReturnType<typeof vi.fn>;
+} => {
     let store: Record<string, string> = {};
     return {
         getItem: vi.fn((key: string) => store[key] || null),

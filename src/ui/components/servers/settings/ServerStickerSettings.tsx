@@ -303,7 +303,7 @@ export const ServerStickerSettings: React.FC<ServerStickerSettingsProps> = ({
                     className="hidden"
                     ref={bulkFileInputRef}
                     type="file"
-                    onChange={handleBulkFileSelect}
+                    onChange={(e) => void handleBulkFileSelect(e)}
                 />
 
                 {isLoading ? (
@@ -430,7 +430,7 @@ export const ServerStickerSettings: React.FC<ServerStickerSettingsProps> = ({
                 title="Bulk Upload Stickers"
                 total={bulkStatus.total}
                 uploaded={bulkStatus.uploaded}
-                onCancel={handleCancelBulk}
+                onCancel={() => void handleCancelBulk()}
                 onClose={() =>
                     setBulkStatus((prev) => ({ ...prev, isOpen: false }))
                 }

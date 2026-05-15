@@ -92,5 +92,5 @@ export function $createSlashCommandChipNode(
 export function $isSlashCommandChipNode(
     node: LexicalNode | null | undefined,
 ): node is SlashCommandChipNode {
-    return node?.getType() === 'slash-command-chip';
+    return node instanceof SlashCommandChipNode;
 }

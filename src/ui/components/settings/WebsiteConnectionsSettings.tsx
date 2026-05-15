@@ -30,18 +30,19 @@ export const WebsiteConnectionsSettings: React.FC = () => {
     const { mutate: removeConnection, isPending: isRemoving } =
         useRemoveConnection();
 
-    const connections = user?.connections ?? [];
     const pendingConnections = useMemo(
         () =>
-            connections.filter((connection) => connection.status === 'pending'),
-        [connections],
+            (user?.connections ?? []).filter(
+                (connection) => connection.status === 'pending',
+            ),
+        [user?.connections],
     );
     const verifiedConnections = useMemo(
         () =>
-            connections.filter(
+            (user?.connections ?? []).filter(
                 (connection) => connection.status === 'verified',
             ),
-        [connections],
+        [user?.connections],
     );
 
     const handleCreate = (): void => {

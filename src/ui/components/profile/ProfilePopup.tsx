@@ -45,7 +45,27 @@ interface ProfilePopupProps {
 export const ProfilePopup: React.FC<ProfilePopupProps> = (props) =>
     createPortal(
         <AnimatePresence>
-            {props.isOpen && <ProfilePopupContent {...props} />}
+            {props.isOpen && (
+                <ProfilePopupContent
+                    adminView={props.adminView}
+                    disableColors={props.disableColors}
+                    disableCustomFonts={props.disableCustomFonts}
+                    disableFetch={props.disableFetch}
+                    disableGlow={props.disableGlow}
+                    disableGlowAndColors={props.disableGlowAndColors}
+                    iconRole={props.iconRole}
+                    isOpen={props.isOpen}
+                    joinedAt={props.joinedAt}
+                    position={props.position}
+                    role={props.role}
+                    roles={props.roles}
+                    serverId={props.serverId}
+                    triggerRef={props.triggerRef}
+                    user={props.user}
+                    userId={props.userId}
+                    onClose={props.onClose}
+                />
+            )}
         </AnimatePresence>,
         document.body,
     );
