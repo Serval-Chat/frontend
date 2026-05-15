@@ -2,6 +2,17 @@ import { apiClient } from '@/api/client';
 
 import type { ChatMessage } from './chat.types';
 
+const unwrapMessages = (data: unknown): ChatMessage[] => {
+    if (Array.isArray(data)) return data as ChatMessage[];
+    if (data && typeof data === 'object') {
+        for (const key of ['messages', 'data']) {
+            const value = (data as Record<string, unknown>)[key];
+            if (Array.isArray(value)) return value as ChatMessage[];
+        }
+    }
+    return [];
+};
+
 export const chatApi = {
     /**
      * @description Fetch messages for a specific user
@@ -12,13 +23,10 @@ export const chatApi = {
         before?: string,
         after?: string,
     ): Promise<ChatMessage[]> => {
-        const response = await apiClient.get<ChatMessage[]>(
-            '/api/v1/messages',
-            {
-                params: { userId, limit, before, after },
-            },
-        );
-        return response.data;
+        const response = await apiClient.get<unknown>('/api/v1/messages', {
+            params: { userId, limit, before, after },
+        });
+        return unwrapMessages(response.data);
     },
 
     /**
@@ -32,13 +40,13 @@ export const chatApi = {
         around?: string,
         after?: string,
     ): Promise<ChatMessage[]> => {
-        const response = await apiClient.get<ChatMessage[]>(
+        const response = await apiClient.get<unknown>(
             `/api/v1/servers/${serverId}/channels/${channelId}/messages`,
             {
                 params: { limit, before, around, after },
             },
         );
-        return response.data;
+        return unwrapMessages(response.data);
     },
     /**
      * @description Delete a message from a channel
@@ -118,10 +126,10 @@ export const chatApi = {
         serverId: string,
         channelId: string,
     ): Promise<ChatMessage[]> => {
-        const response = await apiClient.get<ChatMessage[]>(
+        const response = await apiClient.get<unknown>(
             `/api/v1/servers/${serverId}/channels/${channelId}/messages/pins`,
         );
-        return response.data;
+        return unwrapMessages(response.data);
     },
 
     /**

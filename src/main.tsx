@@ -15,14 +15,6 @@ import { AuthenticatedLayout } from '@/ui/components/layout/AuthenticatedLayout'
 import { NavigationSync } from '@/ui/components/layout/NavigationSync';
 import { hasAuthToken } from '@/utils/authToken';
 
-if (typeof window !== 'undefined' && import.meta.env.DEV) {
-    void import('react-scan').then(({ scan }) => {
-        scan({
-            enabled: true,
-        });
-    });
-}
-
 const Admin = lazy(() =>
     import('@/pages/Admin').then((m) => ({ default: m.Admin })),
 );

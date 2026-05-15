@@ -3,24 +3,43 @@ import type { User } from '@/api/users/users.types';
 
 import type { Friend, FriendRequest } from './friends.types';
 
+const unwrapArray = <T>(data: unknown, keys: string[]): T[] => {
+    if (Array.isArray(data)) return data as T[];
+    if (data && typeof data === 'object') {
+        for (const key of keys) {
+            const value = (data as Record<string, unknown>)[key];
+            if (Array.isArray(value)) return value as T[];
+        }
+    }
+    return [];
+};
+
 export const friendsApi = {
     getFriends: async (): Promise<Friend[]> => {
-        const response = await apiClient.get<Friend[]>('/api/v1/friends');
-        return response.data;
+        const response = await apiClient.get<unknown>('/api/v1/friends');
+        return unwrapArray<Friend>(response.data, ['friends', 'data']);
     },
 
     getFriendProfiles: async (): Promise<User[]> => {
-        const response = await apiClient.get<User[]>(
+        const response = await apiClient.get<unknown>(
             '/api/v1/friends/profiles',
         );
-        return response.data;
+        return unwrapArray<User>(response.data, [
+            'friends',
+            'profiles',
+            'data',
+        ]);
     },
 
     getIncomingRequests: async (): Promise<FriendRequest[]> => {
-        const response = await apiClient.get<FriendRequest[]>(
+        const response = await apiClient.get<unknown>(
             '/api/v1/friends/incoming',
         );
-        return response.data;
+        return unwrapArray<FriendRequest>(response.data, [
+            'requests',
+            'incoming',
+            'data',
+        ]);
     },
 
     sendFriendRequest: async (username: string): Promise<void> => {
