@@ -43,6 +43,17 @@ const getBaseUrlPattern = (): string => {
         'https?://localhost:(?:5173|8001)',
     ];
 
+    if (typeof window !== 'undefined' && window.location.hostname) {
+        const escapedHostname = window.location.hostname.replace(
+            /[.*+?^${}()|[\]\\]/g,
+            '\\$&',
+        );
+        const pattern = `https?://${escapedHostname}(?::\\d+)?`;
+        if (!defaultDomains.includes(pattern)) {
+            defaultDomains.push(pattern);
+        }
+    }
+
     const escapedAlts = alternativeUrls.map((url) =>
         url.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\/$/, ''),
     );

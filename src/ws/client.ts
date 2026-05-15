@@ -41,9 +41,17 @@ class WsClient {
         | 'authenticated' = 'disconnected';
 
     constructor() {
-        const baseUrl =
-            import.meta.env.VITE_WS_BASE_URL || 'ws://localhost:8001';
-        this.url = baseUrl.replace(/^http/, 'ws').replace(/\/$/, '') + '/ws';
+        let baseUrl = import.meta.env.VITE_WS_BASE_URL;
+
+        if (!baseUrl && typeof window !== 'undefined') {
+            baseUrl = window.location.origin.replace(/^http/, 'ws');
+        }
+
+        if (!baseUrl) {
+            baseUrl = 'ws://localhost:8001';
+        }
+
+        this.url = baseUrl.replace(/\/$/, '') + '/ws';
     }
 
     /**

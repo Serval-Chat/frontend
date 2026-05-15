@@ -29,7 +29,7 @@ export const isInternalUrl = (url: string | undefined): boolean => {
             if (url.startsWith(apiBaseUrl)) return true;
         }
 
-        if (url.includes('catfla.re/api/v1/files/download/')) return true;
+        if (url.includes('/api/v1/files/download/')) return true;
     } catch {
         return true;
     }

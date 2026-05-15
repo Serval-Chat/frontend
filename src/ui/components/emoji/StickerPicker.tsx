@@ -168,26 +168,7 @@ export const StickerPicker: React.FC<StickerPickerProps> = ({
                     position={infoBoxPosition}
                     server={server}
                     sticker={selectedSticker}
-                />
-            )}
-
-            {selectedSticker && (
-                <div
-                    aria-label="Close sticker info"
-                    className="fixed inset-0 z-[1060]"
-                    role="button"
-                    tabIndex={0}
-                    onClick={closeInfoBox}
-                    onContextMenu={closeInfoBox}
-                    onKeyDown={(e) => {
-                        if (
-                            e.key === 'Escape' ||
-                            e.key === 'Enter' ||
-                            e.key === ' '
-                        ) {
-                            closeInfoBox();
-                        }
-                    }}
+                    onClose={closeInfoBox}
                 />
             )}
         </div>

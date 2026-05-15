@@ -76,7 +76,15 @@ export const Link: React.FC<LinkProps> = ({
 
             try {
                 const parsed = new URL(targetUrl);
+                const currentHostname =
+                    typeof window !== 'undefined'
+                        ? window.location.hostname
+                        : '';
+
                 if (
+                    (currentHostname && parsed.hostname === currentHostname) ||
+                    (currentHostname &&
+                        parsed.hostname.endsWith(`.${currentHostname}`)) ||
                     parsed.hostname === 'catfla.re' ||
                     parsed.hostname.endsWith('.catfla.re')
                 ) {
