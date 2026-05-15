@@ -494,10 +494,11 @@ export const serversApi = {
         serverId: string,
         channelId: string,
     ): Promise<{ token: string; url: string }> => {
-        const response = await apiClient.get<{ token: string; url: string }>(
-            `/api/v1/servers/${serverId}/channels/${channelId}/voice-token`,
+        console.error(
+            '[serversApi] getVoiceToken called but LiveKit is removed',
+            { serverId, channelId },
         );
-        return response.data;
+        return { token: '', url: '' };
     },
 
     leaveServer: async (serverId: string): Promise<void> => {

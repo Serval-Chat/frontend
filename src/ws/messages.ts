@@ -65,14 +65,20 @@ export const wsMessages = {
      * Join a voice channel room.
      */
     joinVoice: (serverId: string, channelId: string) => {
-        wsClient.send(WsEvents.JOIN_VOICE, { serverId, channelId });
+        console.error('[wsMessages] joinVoice called but LiveKit is removed', {
+            serverId,
+            channelId,
+        });
     },
 
     /**
      * Leave a voice channel room.
      */
     leaveVoice: (serverId: string, channelId: string) => {
-        wsClient.send(WsEvents.LEAVE_VOICE, { serverId, channelId });
+        console.error('[wsMessages] leaveVoice called but LiveKit is removed', {
+            serverId,
+            channelId,
+        });
     },
 
     /**
@@ -84,12 +90,15 @@ export const wsMessages = {
         isMuted: boolean,
         isDeafened: boolean,
     ) => {
-        wsClient.send(WsEvents.UPDATE_VOICE_STATE, {
-            serverId,
-            channelId,
-            isMuted,
-            isDeafened,
-        });
+        console.error(
+            '[wsMessages] updateVoiceState called but LiveKit is removed',
+            {
+                serverId,
+                channelId,
+                isMuted,
+                isDeafened,
+            },
+        );
     },
 
     /**

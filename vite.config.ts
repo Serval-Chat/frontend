@@ -45,14 +45,6 @@ export default defineConfig(({ mode }) => {
           manualChunks(id) {
             if (id.includes('node_modules')) {
               if (
-                hasPackage(id, '@livekit/components-react') ||
-                hasPackage(id, '@livekit/components-styles') ||
-                hasPackage(id, 'livekit-client') ||
-                hasPackage(id, 'deepfilternet3-noise-filter')
-              ) {
-                return 'voice';
-              }
-              if (
                 id.includes('react-syntax-highlighter') ||
                 id.includes('refractor') ||
                 id.includes('highlight.js')
