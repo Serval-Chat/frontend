@@ -8,6 +8,7 @@ import {
     Maximize2,
 } from 'lucide-react';
 
+import type { MessageAttachment } from '@/api/chat/chat.types';
 import {
     useFileContent,
     useFileMetadata,
@@ -26,27 +27,40 @@ import { cn } from '@/utils/cn';
 import { getSafeUrl, isInternalUrl } from '@/utils/proxy';
 
 interface FileEmbedProps {
-    url: string;
+    url?: string;
+    attachment?: MessageAttachment;
 }
 
-export const FileEmbed: React.FC<FileEmbedProps> = ({ url }) => {
-    const baseUrl = url.split('#')[0];
-    const isLocal = isInternalUrl(baseUrl);
-    const filename = isLocal ? baseUrl.split('/').pop() : null;
+export const FileEmbed: React.FC<FileEmbedProps> = ({ url, attachment }) => {
+    const attachmentUrl =
+        attachment !== undefined
+            ? `/api/v1/files/download/${encodeURIComponent(attachment.attachmentId)}${attachment.spoiler === true ? '#spoiler' : ''}`
+            : undefined;
+    const resolvedUrl = attachmentUrl ?? url;
+    const baseUrl = (resolvedUrl ?? '').split('#')[0];
+    const isLocal =
+        attachment !== undefined || (baseUrl !== '' && isInternalUrl(baseUrl));
+    const filename =
+        attachment === undefined && isLocal ? baseUrl.split('/').pop() : null;
 
     const { data: localMeta, isLoading: loadingLocal } = useFileMetadata(
-        filename ?? null,
+        attachment === undefined ? (filename ?? null) : null,
     );
     const { data: remoteMeta, isLoading: loadingRemote } = useProxyMetadata(
-        isLocal ? null : baseUrl,
+        attachment === undefined && !isLocal ? baseUrl : null,
     );
 
-    const isLoading = loadingLocal || loadingRemote;
-    const meta = isLocal ? localMeta : remoteMeta;
+    const isLoading =
+        attachment === undefined && (loadingLocal || loadingRemote);
+    const meta = attachment ?? (isLocal ? localMeta : remoteMeta);
 
-    const isSpoiler = url.endsWith('#spoiler');
+    const isSpoiler =
+        attachment?.spoiler === true ||
+        resolvedUrl?.endsWith('#spoiler') === true;
     const [isRevealed, setIsRevealed] = React.useState(false);
     const [isLightboxOpen, setIsLightboxOpen] = React.useState(false);
+
+    if (resolvedUrl === undefined) return null;
 
     if (isLoading) {
         return (
@@ -61,23 +75,27 @@ export const FileEmbed: React.FC<FileEmbedProps> = ({ url }) => {
 
     if (!meta) {
         return (
-            <Link href={url} target="_blank">
-                {url}
+            <Link href={resolvedUrl} target="_blank">
+                {resolvedUrl}
             </Link>
         );
     }
 
-    const mimeType = isLocal
-        ? (meta as FileMetadata).mimeType
-        : (meta as ProxyMetadata).headers['content-type'];
+    const mimeType =
+        attachment?.mimeType ??
+        (isLocal
+            ? (meta as FileMetadata).mimeType
+            : (meta as ProxyMetadata).headers['content-type']);
     const size = meta.size ?? 0;
-    const displayName = isLocal
-        ? (meta as FileMetadata).filename
-        : url.split('/').pop()?.split('?')[0] || 'file';
+    const displayName =
+        attachment?.name ??
+        (isLocal
+            ? (meta as FileMetadata).filename
+            : resolvedUrl.split('/').pop()?.split('?')[0] || 'file');
 
     // Image rendering
     if (mimeType?.startsWith('image/')) {
-        const displayUrl = getSafeUrl(url);
+        const displayUrl = getSafeUrl(resolvedUrl);
 
         return (
             <>
@@ -100,8 +118,10 @@ export const FileEmbed: React.FC<FileEmbedProps> = ({ url }) => {
                                 : 'opacity-100',
                         )}
                         decoding="async"
+                        height={attachment?.height}
                         loading="lazy"
                         src={displayUrl!}
+                        width={attachment?.width}
                     />
                     {isSpoiler && !isRevealed && (
                         <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-background">
@@ -146,7 +166,7 @@ export const FileEmbed: React.FC<FileEmbedProps> = ({ url }) => {
 
     // Video rendering
     if (mimeType?.startsWith('video/')) {
-        const displayUrl = url;
+        const displayUrl = resolvedUrl;
 
         return (
             <Box
@@ -177,6 +197,13 @@ export const FileEmbed: React.FC<FileEmbedProps> = ({ url }) => {
                             className="max-h-inherit h-auto w-auto max-w-full"
                             preload="metadata"
                             src={displayUrl!}
+                            style={
+                                attachment?.width && attachment.height
+                                    ? {
+                                          aspectRatio: `${attachment.width} / ${attachment.height}`,
+                                      }
+                                    : undefined
+                            }
                         >
                             <track kind="captions" />
                         </video>
@@ -229,7 +256,7 @@ export const FileEmbed: React.FC<FileEmbedProps> = ({ url }) => {
                 filename={displayName || 'file'}
                 isLocal={isLocal}
                 size={size}
-                url={url}
+                url={resolvedUrl}
             />
         );
     }
@@ -252,7 +279,7 @@ export const FileEmbed: React.FC<FileEmbedProps> = ({ url }) => {
             <Button
                 size="sm"
                 variant="ghost"
-                onClick={() => window.open(url, '_blank')}
+                onClick={() => window.open(resolvedUrl, '_blank')}
             >
                 <Download size={16} />
             </Button>

@@ -6,6 +6,7 @@ import { chatApi } from '@/api/chat/chat.api';
 import { CHAT_QUERY_KEYS, PREFETCH_LIMIT } from '@/api/chat/chat.queries';
 import type {
     ChatMessage,
+    MessageAttachment,
     MessagePoll,
     MessageReaction,
     OutgoingPoll,
@@ -32,6 +33,7 @@ interface ChatWSResult {
         replyToId?: string,
         stickerId?: string,
         poll?: OutgoingPoll,
+        attachments?: MessageAttachment[],
     ) => void;
     sendTyping: () => void;
     typingUsers: TypingUser[];
@@ -61,6 +63,7 @@ export function useChatWS(
             isEdited: message.isEdited,
             stickerId: message.stickerId,
             poll: message.poll,
+            attachments: message.attachments,
         }),
         [],
     );
@@ -87,6 +90,8 @@ export function useChatWS(
                     ? message.webhookAvatarUrl
                     : undefined,
             embeds: 'embeds' in message ? message.embeds : undefined,
+            attachments:
+                'attachments' in message ? message.attachments : undefined,
             interaction:
                 'interaction' in message && message.interaction
                     ? {
@@ -472,6 +477,7 @@ export function useChatWS(
                 editedAt: string;
                 isEdited: boolean;
                 embeds?: ChatMessage['embeds'];
+                attachments?: ChatMessage['attachments'];
             }): void => {
                 queryClient.setQueriesData<InfiniteData<ChatMessage[]>>(
                     {
@@ -493,6 +499,10 @@ export function useChatWS(
                                               ...msg,
                                               text: payload.text,
                                               isEdited: payload.isEdited,
+                                              editedAt: payload.editedAt,
+                                              attachments:
+                                                  payload.attachments ??
+                                                  msg.attachments,
                                           }
                                         : msg,
                                 ),
@@ -514,6 +524,7 @@ export function useChatWS(
                 editedAt: string;
                 isEdited: boolean;
                 embeds?: ChatMessage['embeds'];
+                attachments?: ChatMessage['attachments'];
             }): void => {
                 if (!selectedFriendId) return;
                 queryClient.setQueriesData<InfiniteData<ChatMessage[]>>(
@@ -535,6 +546,10 @@ export function useChatWS(
                                               ...msg,
                                               text: payload.text,
                                               isEdited: payload.isEdited,
+                                              editedAt: payload.editedAt,
+                                              attachments:
+                                                  payload.attachments ??
+                                                  msg.attachments,
                                           }
                                         : msg,
                                 ),
@@ -778,6 +793,7 @@ export function useChatWS(
             replyToId?: string,
             stickerId?: string,
             poll?: OutgoingPoll,
+            attachments?: MessageAttachment[],
         ): void => {
             if (selectedFriendId) {
                 wsMessages.sendMessageDm(
@@ -786,6 +802,7 @@ export function useChatWS(
                     replyToId,
                     stickerId,
                     poll,
+                    attachments,
                 );
             } else if (selectedServerId && selectedChannelId) {
                 wsMessages.sendMessageServer(
@@ -795,6 +812,7 @@ export function useChatWS(
                     replyToId,
                     stickerId,
                     poll,
+                    attachments,
                 );
             }
         },

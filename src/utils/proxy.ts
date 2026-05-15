@@ -1,3 +1,8 @@
+import {
+    getBrowserApiBaseUrl,
+    getConfiguredApiBaseUrl,
+} from '@/utils/apiBaseUrl';
+
 export const isInternalUrl = (url: string | undefined): boolean => {
     if (!url) return false;
 
@@ -15,18 +20,23 @@ export const isInternalUrl = (url: string | undefined): boolean => {
         const parsedUrl = new URL(url);
         const currentOrigin =
             typeof window !== 'undefined' ? window.location.origin : '';
-        const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || '';
+        const configuredApiBaseUrl = getConfiguredApiBaseUrl();
+        const browserApiBaseUrl = getBrowserApiBaseUrl();
 
         if (currentOrigin && parsedUrl.origin === currentOrigin) return true;
 
-        if (apiBaseUrl) {
+        if (configuredApiBaseUrl) {
             try {
-                if (parsedUrl.origin === new URL(apiBaseUrl).origin)
+                if (parsedUrl.origin === new URL(configuredApiBaseUrl).origin)
                     return true;
             } catch {
                 /* relative apiBaseUrl */
             }
-            if (url.startsWith(apiBaseUrl)) return true;
+            if (url.startsWith(configuredApiBaseUrl)) return true;
+        }
+
+        if (browserApiBaseUrl && url.startsWith(browserApiBaseUrl)) {
+            return true;
         }
 
         if (url.includes('/api/v1/files/download/')) return true;

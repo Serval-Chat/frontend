@@ -1,5 +1,6 @@
 import axios from 'axios';
 
+import { getBrowserApiBaseUrl } from '@/utils/apiBaseUrl';
 import { getAuthToken, removeAuthToken } from '@/utils/authToken';
 
 import { tauriAdapter } from './tauriAdapter';
@@ -8,7 +9,7 @@ const isTauri = (): boolean =>
     typeof window !== 'undefined' && '__TAURI__' in window;
 
 export const apiClient = axios.create({
-    baseURL: import.meta.env.VITE_API_BASE_URL || '',
+    baseURL: getBrowserApiBaseUrl(),
     timeout: 30000,
     withCredentials: true,
     adapter: isTauri() ? tauriAdapter : undefined,

@@ -20,6 +20,24 @@ export interface CustomReactionData {
 
 export type MessageReaction = UnicodeReactionData | CustomReactionData;
 
+export type MessageAttachmentType =
+    | 'image'
+    | 'video'
+    | 'audio'
+    | 'text'
+    | 'file';
+
+export interface MessageAttachment {
+    attachmentId: string;
+    type: MessageAttachmentType;
+    mimeType: string;
+    name: string;
+    size: number;
+    width?: number;
+    height?: number;
+    spoiler?: boolean;
+}
+
 export interface MessagePollOption {
     id: string;
     text: string;
@@ -76,6 +94,7 @@ export interface ChatMessage {
     webhookUsername?: string;
     webhookAvatarUrl?: string;
     embeds?: Embed[];
+    attachments?: MessageAttachment[];
     reactions?: MessageReaction[];
     interaction?: {
         command: string;

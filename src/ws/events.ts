@@ -1,4 +1,8 @@
-import type { MessagePoll, OutgoingPoll } from '@/api/chat/chat.types';
+import type {
+    MessageAttachment,
+    MessagePoll,
+    OutgoingPoll,
+} from '@/api/chat/chat.types';
 import type {
     Category,
     Channel,
@@ -77,6 +81,7 @@ export interface IMessageDm {
     stickerId?: string;
     poll?: MessagePoll;
     embeds?: Embed[];
+    attachments?: MessageAttachment[];
 }
 
 /**
@@ -96,6 +101,7 @@ export interface IMessageServer {
     webhookUsername?: string;
     webhookAvatarUrl?: string;
     embeds?: Embed[];
+    attachments?: MessageAttachment[];
     interaction?: {
         command: string;
         options: { name: string; value: JsonValue }[];
@@ -128,6 +134,7 @@ export interface IMessageServerSent {
     replyToId?: string;
     slowModeNextMessageAllowedAt?: string | null;
     embeds?: Embed[];
+    attachments?: MessageAttachment[];
     interaction?: {
         command: string;
         options: { name: string; value: JsonValue }[];
@@ -552,6 +559,7 @@ export interface ISendMessageServerEventPayload {
     replyToId?: string;
     stickerId?: string;
     poll?: OutgoingPoll;
+    attachments?: MessageAttachment[];
 }
 
 export interface IPollVoteUpdatedDmPayload {

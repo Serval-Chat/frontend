@@ -1,3 +1,8 @@
+import {
+    getBrowserApiBaseUrl,
+    getConfiguredApiBaseUrl,
+} from '@/utils/apiBaseUrl';
+
 /**
  * @description Resolves an API-relative path to a full URL
  */
@@ -5,10 +10,7 @@ export const resolveApiUrl = (path: string | undefined): string | null => {
     if (!path) return null;
 
     if (path.startsWith('http')) {
-        const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL || '').replace(
-            /\/$/,
-            '',
-        );
+        const apiBaseUrl = getConfiguredApiBaseUrl();
 
         if (apiBaseUrl && path.startsWith(apiBaseUrl)) {
             return path;
@@ -17,10 +19,7 @@ export const resolveApiUrl = (path: string | undefined): string | null => {
         return `${apiBaseUrl}/api/v1/file-proxy?url=${encodeURIComponent(path)}`;
     }
 
-    const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL || '').replace(
-        /\/$/,
-        '',
-    );
+    const apiBaseUrl = getBrowserApiBaseUrl();
     const normalizedPath = path.startsWith('/') ? path : `/${path}`;
 
     return `${apiBaseUrl}${normalizedPath}`;

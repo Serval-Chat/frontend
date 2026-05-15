@@ -36,7 +36,7 @@ import { useLocation } from 'react-router-dom';
 import { useClickAway } from 'react-use';
 
 import { useChannelMessages, useUserMessages } from '@/api/chat/chat.queries';
-import type { OutgoingPoll } from '@/api/chat/chat.types';
+import type { MessageAttachment, OutgoingPoll } from '@/api/chat/chat.types';
 import { filesApi } from '@/api/files/files.api';
 import { useFriends } from '@/api/friends/friends.queries';
 import { interactionsApi } from '@/api/interactions/interactions.api';
@@ -139,6 +139,7 @@ interface MessageInputProps {
         replyToId?: string,
         stickerId?: string,
         poll?: OutgoingPoll,
+        attachments?: MessageAttachment[],
     ) => void;
     sendTyping: () => void;
 }
@@ -564,24 +565,31 @@ export const MessageInput: React.FC<MessageInputProps> = ({
         userMessages,
     ]);
 
-    const handleUploadFiles = useCallback(async (): Promise<string[]> => {
+    const handleUploadFiles = useCallback(async (): Promise<
+        MessageAttachment[]
+    > => {
         if (files.length === 0) return [];
 
         setIsUploading(true);
 
         try {
-            const uploadedUrls = await Promise.all(
+            const uploadedAttachments = await Promise.all(
                 files.map(async (queuedFile) => {
                     updateFileStatus(queuedFile.id, 'uploading');
                     try {
-                        const url = await filesApi.uploadFile(
+                        const upload = await filesApi.uploadFile(
                             queuedFile.file,
                             (progress) => {
                                 updateFileProgress(queuedFile.id, progress);
                             },
                         );
                         updateFileStatus(queuedFile.id, 'completed');
-                        return queuedFile.isSpoiler ? `${url}#spoiler` : url;
+                        return {
+                            ...upload.attachment,
+                            spoiler:
+                                upload.attachment.spoiler ||
+                                queuedFile.isSpoiler,
+                        };
                     } catch (error) {
                         updateFileStatus(queuedFile.id, 'error');
                         throw error;
@@ -589,7 +597,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                 }),
             );
 
-            return uploadedUrls;
+            return uploadedAttachments;
         } catch (error) {
             console.error('Failed to upload files:', error);
             showToast(
@@ -642,19 +650,22 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                 return slashResult.success;
             }
 
-            const uploadedUrls = await handleUploadFiles();
+            const attachments = await handleUploadFiles();
 
-            if (uploadedUrls.length === 0 && !trimmedText && files.length > 0) {
+            if (attachments.length === 0 && !trimmedText && files.length > 0) {
                 return false;
             }
 
-            const formattedUrls = uploadedUrls.map((url) => `[%file%](${url})`);
-            const finalMessage = [trimmedText, ...formattedUrls]
-                .filter(Boolean)
-                .join('\n');
+            const finalMessage = trimmedText;
 
-            if (finalMessage) {
-                sendMessage(finalMessage, replyingTo?._id);
+            if (finalMessage || attachments.length > 0) {
+                sendMessage(
+                    finalMessage,
+                    replyingTo?._id,
+                    undefined,
+                    undefined,
+                    attachments,
+                );
                 if (currentChannel?.slowMode && currentChannel.slowMode > 0) {
                     setCooldown(currentChannel.slowMode);
                 }

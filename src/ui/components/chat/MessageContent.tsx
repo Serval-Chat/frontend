@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 
-import type { MessagePoll } from '@/api/chat/chat.types';
+import type { MessageAttachment, MessagePoll } from '@/api/chat/chat.types';
 import { useSticker } from '@/api/servers/servers.queries';
 import { useStickerInfoBox } from '@/hooks/useStickerInfoBox';
 import type { Embed } from '@/types/embed';
@@ -13,6 +13,7 @@ import { resolveApiUrl } from '@/utils/apiUrl';
 import { cn } from '@/utils/cn';
 import { ParserPresets, parseText } from '@/utils/textParser/parser';
 
+import { FileEmbed } from './FileEmbed';
 import { Poll } from './Poll';
 
 interface MessageContentProps {
@@ -20,6 +21,7 @@ interface MessageContentProps {
     serverId?: string;
     stickerId?: string;
     embeds?: Embed[];
+    attachments?: MessageAttachment[];
     poll?: MessagePoll;
     isDeleted?: boolean;
     messageId?: string;
@@ -32,6 +34,7 @@ export const MessageContent = React.memo(
         serverId,
         stickerId,
         embeds,
+        attachments,
         poll,
         isDeleted,
         messageId,
@@ -89,6 +92,13 @@ export const MessageContent = React.memo(
                         variant="chat"
                     />
                 )}
+
+                {attachments?.map((attachment) => (
+                    <FileEmbed
+                        attachment={attachment}
+                        key={attachment.attachmentId}
+                    />
+                ))}
 
                 {poll && (
                     <Poll

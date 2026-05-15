@@ -1,3 +1,5 @@
+import type { MessageAttachment } from '@/api/chat/chat.types';
+
 export interface FileMetadata {
     filename: string;
     size: number;
@@ -14,4 +16,5 @@ export interface ProxyMetadata {
 }
 export interface FileUploadResponse {
     url: string;
+    attachment: MessageAttachment;
 }

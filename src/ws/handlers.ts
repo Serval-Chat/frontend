@@ -855,6 +855,7 @@ export const setupGlobalWsHandlers = (
             text: string;
             editedAt: string;
             isEdited: boolean;
+            attachments?: ChatMessage['attachments'];
         }>(WsEvents.MESSAGE_SERVER_EDITED, (payload) => {
             // Update the message in the cache
             const queryKey = CHAT_QUERY_KEYS.channelMessages(
@@ -876,6 +877,9 @@ export const setupGlobalWsHandlers = (
                                       text: payload.text,
                                       isEdited: payload.isEdited,
                                       editedAt: payload.editedAt,
+                                      attachments:
+                                          payload.attachments ??
+                                          msg.attachments,
                                   }
                                 : msg,
                         ),
@@ -893,6 +897,7 @@ export const setupGlobalWsHandlers = (
             text: string;
             editedAt: string;
             isEdited: boolean;
+            attachments?: ChatMessage['attachments'];
         }>(WsEvents.MESSAGE_DM_EDITED, (payload) => {
             // Update DM message in cache for both users
             const queryKey1 = CHAT_QUERY_KEYS.userMessages(payload.senderId);
@@ -913,6 +918,9 @@ export const setupGlobalWsHandlers = (
                                           text: payload.text,
                                           isEdited: payload.isEdited,
                                           editedAt: payload.editedAt,
+                                          attachments:
+                                              payload.attachments ??
+                                              msg.attachments,
                                       }
                                     : msg,
                             ),

@@ -1,6 +1,10 @@
 import { apiClient } from '@/api/client';
 
-import type { FileMetadata, ProxyMetadata } from './files.types';
+import type {
+    FileMetadata,
+    FileUploadResponse,
+    ProxyMetadata,
+} from './files.types';
 
 export const filesApi = {
     getFileMetadata: async (filename: string): Promise<FileMetadata> => {
@@ -38,11 +42,11 @@ export const filesApi = {
     uploadFile: async (
         file: File,
         onProgress?: (progress: number) => void,
-    ): Promise<string> => {
+    ): Promise<FileUploadResponse> => {
         const formData = new FormData();
         formData.append('file', file);
 
-        const response = await apiClient.post<{ url: string }>(
+        const response = await apiClient.post<FileUploadResponse>(
             '/api/v1/files/upload',
             formData,
             {
@@ -60,6 +64,6 @@ export const filesApi = {
                 },
             },
         );
-        return response.data.url;
+        return response.data;
     },
 };

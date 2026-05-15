@@ -1,4 +1,4 @@
-import type { OutgoingPoll } from '@/api/chat/chat.types';
+import type { MessageAttachment, OutgoingPoll } from '@/api/chat/chat.types';
 
 import { wsClient } from './client';
 import { WsEvents } from './events';
@@ -16,6 +16,7 @@ export const wsMessages = {
         replyToId?: string,
         stickerId?: string,
         poll?: OutgoingPoll,
+        attachments?: MessageAttachment[],
     ) => {
         wsClient.send(WsEvents.SEND_MESSAGE_DM, {
             receiverId,
@@ -23,6 +24,7 @@ export const wsMessages = {
             replyToId,
             stickerId,
             poll,
+            attachments,
         });
     },
 
@@ -36,6 +38,7 @@ export const wsMessages = {
         replyToId?: string,
         stickerId?: string,
         poll?: OutgoingPoll,
+        attachments?: MessageAttachment[],
     ) => {
         wsClient.send(WsEvents.SEND_MESSAGE_SERVER, {
             serverId,
@@ -44,6 +47,7 @@ export const wsMessages = {
             replyToId,
             stickerId,
             poll,
+            attachments,
         });
     },
 

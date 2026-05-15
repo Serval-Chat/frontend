@@ -345,6 +345,7 @@ export const Message: React.FC<MessageProps> = React.memo(
                             />
                         ) : (
                             <MessageContent
+                                attachments={message.attachments}
                                 channelId={message.channelId}
                                 embeds={message.embeds}
                                 isDeleted={!!message.deletedAt}
