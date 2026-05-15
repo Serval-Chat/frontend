@@ -25,6 +25,17 @@ export default defineConfig(({ mode }) => {
       },
     },
     resolve: {
+      dedupe: [
+        'lexical',
+        '@lexical/react',
+        '@lexical/utils',
+        '@lexical/selection',
+        '@lexical/text',
+        '@lexical/link',
+        '@lexical/list',
+        '@lexical/rich-text',
+        '@lexical/clipboard',
+      ],
       alias: {
         '@': path.resolve(__dirname, './src'),
         '@/ui': path.resolve(__dirname, './src/ui'),
@@ -37,7 +48,6 @@ export default defineConfig(({ mode }) => {
           __dirname,
           'node_modules/decode-named-character-reference/index.js',
         ),
-        lexical: path.resolve(__dirname, 'node_modules/lexical'),
       },
     },
     build: {

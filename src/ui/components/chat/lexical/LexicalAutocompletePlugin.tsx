@@ -98,26 +98,10 @@ export const LexicalAutocompletePlugin: React.FC<
     }, []);
 
     const options = useMemo(() => {
-        if (queryString === null) return [];
+        if (queryString === null || queryString.length === 0) return [];
 
-        const query = queryString.toLowerCase();
-
-        let triggerChar = '@';
-        editor.getEditorState().read(() => {
-            const selection = $getSelection();
-            if ($isRangeSelection(selection) && selection.isCollapsed()) {
-                const node = selection.anchor.getNode();
-                if (node instanceof TextNode) {
-                    const text = node.getTextContent();
-                    const offset = selection.anchor.offset;
-                    const textBefore = text.slice(0, offset);
-                    const match = textBefore.match(/([@:#])[^@:#]*$/);
-                    if (match) {
-                        triggerChar = match[1];
-                    }
-                }
-            }
-        });
+        const triggerChar = queryString[0];
+        const query = queryString.slice(1).toLowerCase();
 
         if (triggerChar === '@') {
             const userSuggestions: Suggestion[] = [];
@@ -215,7 +199,6 @@ export const LexicalAutocompletePlugin: React.FC<
         serverEmojis,
         channels,
         blocks,
-        editor,
     ]);
 
     const isOpen = queryString !== null && options.length > 0;
@@ -320,7 +303,7 @@ export const LexicalAutocompletePlugin: React.FC<
 
                 return {
                     leadOffset: match.index! + match[1].length,
-                    matchingString: matchingString,
+                    matchingString: trigger + matchingString,
                     replaceableString: trigger + matchingString,
                 };
             }
