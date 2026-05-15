@@ -441,23 +441,7 @@ const EmojiPickerContent: React.FC<{
                         emoji={selectedEmoji}
                         position={infoBoxPosition}
                         server={server}
-                    />
-                )}
-
-                {selectedEmoji && (
-                    <div
-                        aria-label="Close emoji info"
-                        className="fixed inset-0 z-[1060]"
-                        role="button"
-                        tabIndex={0}
-                        onClick={closeInfoBox}
-                        onContextMenu={closeInfoBox}
-                        onKeyDown={(e) =>
-                            (e.key === 'Escape' ||
-                                e.key === 'Enter' ||
-                                e.key === ' ') &&
-                            closeInfoBox()
-                        }
+                        onClose={closeInfoBox}
                     />
                 )}
             </Box>
