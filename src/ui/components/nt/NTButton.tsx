@@ -9,23 +9,20 @@ interface NTButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 export const NTButton: React.FC<NTButtonProps> = ({
     children,
     className,
+    style,
     ...props
 }) => (
     <button
         className={cn(
-            'bg-[#c0c0c0] px-4 py-1 font-nt text-[11px] font-bold text-black active:pt-[2px] active:pl-[2px]',
+            'nt-button group bg-[#c0c0c0] px-4 py-1 font-nt text-[11px] leading-[13px] font-bold text-black',
             className,
         )}
-        style={{
-            borderTop: '1px solid #dfdfdf',
-            borderLeft: '1px solid #dfdfdf',
-            borderRight: '1px solid #000000',
-            borderBottom: '1px solid #000000',
-            boxShadow: 'inset 1px 1px #ffffff, inset -1px -1px #808080',
-        }}
+        style={style}
         type="button"
         {...props}
     >
-        {children}
+        <span className="block group-active:translate-x-px group-active:translate-y-px">
+            {children}
+        </span>
     </button>
 );

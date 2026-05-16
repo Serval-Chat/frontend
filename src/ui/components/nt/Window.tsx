@@ -189,9 +189,8 @@ export const Window: React.FC<WindowProps> = ({
 
     return (
         <div
-            className="fixed z-top flex flex-col text-black"
+            className="nt-window fixed z-top flex flex-col text-black"
             style={{
-                fontFamily: "'MS Sans Serif', Tahoma, sans-serif",
                 left: position.x,
                 top: position.y,
                 width: size.width,
@@ -235,7 +234,7 @@ export const Window: React.FC<WindowProps> = ({
                 onPointerMove={handlePointerMove}
                 onPointerUp={handlePointerUp}
             >
-                <span className="flex items-center gap-1 truncate text-[11px] leading-tight tracking-wide">
+                <span className="flex items-center gap-1 truncate text-[11px] leading-[13px]">
                     {icon && (
                         <img
                             alt=""
@@ -247,15 +246,7 @@ export const Window: React.FC<WindowProps> = ({
                 </span>
 
                 <button
-                    className="flex h-[14px] w-[16px] items-center justify-center bg-[#c0c0c0] font-bold text-black active:pt-[1px] active:pl-[1px]"
-                    style={{
-                        borderTop: '1px solid #dfdfdf',
-                        borderLeft: '1px solid #dfdfdf',
-                        borderRight: '1px solid #000000',
-                        borderBottom: '1px solid #000000',
-                        boxShadow:
-                            'inset 1px 1px #ffffff, inset -1px -1px #808080',
-                    }}
+                    className="nt-button group flex h-[14px] w-[16px] items-center justify-center bg-[#c0c0c0] font-bold text-black"
                     type="button"
                     onClick={(e) => {
                         e.stopPropagation();
@@ -263,11 +254,13 @@ export const Window: React.FC<WindowProps> = ({
                     }}
                     onPointerDown={(e) => e.stopPropagation()}
                 >
-                    <img
-                        alt="X"
-                        className="h-[11px] w-[10px]"
-                        src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAALCAYAAABGbhwYAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA2ZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMy1jMDExIDY2LjE0NTY2MSwgMjAxMi8wMi8wNi0xNDo1NjoyNyAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDoyNUYxQUZDNTZDMzlFODExOTVEN0VBQjVBRkRGRjgwNSIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDowRjM1MzA3QTM5NkUxMUU4QkI2ODk1NUE4MzQwMTEyQyIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDowRjM1MzA3OTM5NkUxMUU4QkI2ODk1NUE4MzQwMTEyQyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M2IChXaW5kb3dzKSI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOjI1RjFBRkM1NkMzOUU4MTE5NUQ3RUFCNUFGREZGODA1IiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjI1RjFBRkM1NkMzOUU4MTE5NUQ3RUFCNUFGREZGODA1Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+SHg7twAAAFFJREFUeNpi/P//PwMxgImBSABWyMjI+B+E0SWRxcEKgdYzwiSQFSHLwa1GVgxV9BkmBhZH9wy6SVg9g81qDIXIJmFzMxMu69AVM1I9wAECDAAQQDQKXD6G0wAAAABJRU5ErkJggg=="
-                    />
+                    <span className="block group-active:translate-x-px group-active:translate-y-px">
+                        <img
+                            alt="X"
+                            className="h-[11px] w-[10px]"
+                            src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAALCAYAAABGbhwYAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA2ZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMy1jMDExIDY2LjE0NTY2MSwgMjAxMi8wMi8wNi0xNDo1NjoyNyAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDoyNUYxQUZDNTZDMzlFODExOTVEN0VBQjVBRkRGRjgwNSIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDowRjM1MzA3QTM5NkUxMUU4QkI2ODk1NUE4MzQwMTEyQyIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDowRjM1MzA3OTM5NkUxMUU4QkI2ODk1NUE4MzQwMTEyQyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M2IChXaW5kb3dzKSI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOjI1RjFBRkM1NkMzOUU4MTE5NUQ3RUFCNUFGREZGODA1IiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjI1RjFBRkM1NkMzOUU4MTE5NUQ3RUFCNUFGREZGODA1Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+SHg7twAAAFFJREFUeNpi/P//PwMxgImBSABWyMjI+B+E0SWRxcEKgdYzwiSQFSHLwa1GVgxV9BkmBhZH9wy6SVg9g81qDIXIJmFzMxMu69AVM1I9wAECDAAQQDQKXD6G0wAAAABJRU5ErkJggg=="
+                        />
+                    </span>
                 </button>
             </div>
 

@@ -1,5 +1,6 @@
 import React from 'react';
 
+import { NTScrollArea } from '@/ui/components/nt/NTScrollArea';
 import { cn } from '@/utils/cn';
 
 interface NTTableProps extends React.TableHTMLAttributes<HTMLTableElement> {
@@ -13,7 +14,7 @@ export const NTTable: React.FC<NTTableProps> = ({
     className,
     ...props
 }) => (
-    <div className="nt-scrollbar w-full overflow-x-auto border border-[#dfdfdf] border-r-[#808080] border-b-[#808080] bg-white shadow-[inset_1px_1px_#808080,inset_-1px_-1px_#ffffff]">
+    <NTScrollArea className="h-full w-full border border-[#dfdfdf] border-r-[#808080] border-b-[#808080] bg-white shadow-[inset_1px_1px_#808080,inset_-1px_-1px_#ffffff]">
         <table
             className={cn(
                 'w-full table-fixed border-collapse text-left',
@@ -35,5 +36,5 @@ export const NTTable: React.FC<NTTableProps> = ({
             </thead>
             <tbody>{children}</tbody>
         </table>
-    </div>
+    </NTScrollArea>
 );

@@ -3,6 +3,7 @@ import React, { useMemo } from 'react';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vs } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
+import { NTScrollArea } from '@/ui/components/nt/NTScrollArea';
 import { NTTable } from '@/ui/components/nt/NTTable';
 import { Window } from '@/ui/components/nt/Window';
 import { APP_LOCALE } from '@/utils/locale';
@@ -36,7 +37,10 @@ export const WsDebugger: React.FC = () => {
             title={`WebSocket Logger (${filteredEvents.length} events)`}
             onClose={toggleWsDebugWindow}
         >
-            <div className="nt-scrollbar min-h-0 flex-1 overflow-y-auto bg-white p-1 font-nt">
+            <NTScrollArea
+                className="min-h-0 flex-1 bg-white font-nt"
+                viewportClassName="p-1"
+            >
                 {filteredEvents.length === 0 ? (
                     <div className="py-8 text-center text-sm font-bold text-gray-500">
                         Waiting for events...
@@ -70,7 +74,7 @@ export const WsDebugger: React.FC = () => {
                                     </td>
                                     <td className="p-1 align-top text-gray-700">
                                         {!!event.payload && (
-                                            <div className="nt-scrollbar max-h-64 w-full overflow-y-auto border border-[#dfdfdf] border-r-[#808080] border-b-[#808080] bg-white shadow-[inset_1px_1px_#808080,inset_-1px_-1px_#ffffff]">
+                                            <NTScrollArea className="h-64 max-h-64 w-full border border-[#dfdfdf] border-r-[#808080] border-b-[#808080] bg-white shadow-[inset_1px_1px_#808080,inset_-1px_-1px_#ffffff]">
                                                 <SyntaxHighlighter
                                                     wrapLines
                                                     wrapLongLines
@@ -84,7 +88,7 @@ export const WsDebugger: React.FC = () => {
                                                         2,
                                                     )}
                                                 </SyntaxHighlighter>
-                                            </div>
+                                            </NTScrollArea>
                                         )}
                                     </td>
                                 </tr>
@@ -92,7 +96,7 @@ export const WsDebugger: React.FC = () => {
                         })}
                     </NTTable>
                 )}
-            </div>
+            </NTScrollArea>
         </Window>
     );
 };

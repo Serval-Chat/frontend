@@ -57,12 +57,7 @@ export const ThemeTweaker: React.FC = () => {
                     className="flex min-h-0 flex-1 flex-col items-center justify-center gap-4 p-3"
                     variant="inset"
                 >
-                    <div
-                        className="text-center font-bold text-black"
-                        style={{
-                            fontFamily: "'MS Sans Serif', Tahoma, sans-serif",
-                        }}
-                    >
+                    <div className="text-center font-bold text-black">
                         Current Theme:
                         <br />
                         {currentThemeLabel}

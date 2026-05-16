@@ -1,6 +1,14 @@
 @import 'tailwindcss';
 @import './design-tokens.css';
 
+@font-face {
+    font-family: 'W95FA';
+    src: url('/fonts/w95fa.woff') format('woff');
+    font-weight: 400;
+    font-style: normal;
+    font-display: block;
+}
+
 @layer base {
     * {
         scrollbar-width: thin;
@@ -69,7 +77,211 @@
 
 .nt-scrollbar {
     scrollbar-width: auto;
-    scrollbar-color: initial;
+    scrollbar-color: #c0c0c0 #ffffff;
+}
+
+.nt-window {
+    font-family: var(--font-nt);
+    font-size: 11px;
+    font-smooth: never;
+    font-synthesis: none;
+    font-kerning: none;
+    line-height: 13px;
+    letter-spacing: 0;
+    text-rendering: optimizeSpeed;
+    -webkit-font-smoothing: none;
+    -moz-osx-font-smoothing: auto;
+    zoom: 1.3;
+    image-rendering: pixelated;
+}
+
+.nt-button {
+    border-top: 1px solid #dfdfdf;
+    border-right: 1px solid #000000;
+    border-bottom: 1px solid #000000;
+    border-left: 1px solid #dfdfdf;
+    box-shadow:
+        inset 1px 1px #ffffff,
+        inset -1px -1px #808080;
+}
+
+.nt-button:active {
+    border-top-color: #000000;
+    border-right-color: #dfdfdf;
+    border-bottom-color: #dfdfdf;
+    border-left-color: #000000;
+    box-shadow:
+        inset 1px 1px #808080,
+        inset -1px -1px #ffffff;
+}
+
+.nt-scroll-area {
+    min-height: 0;
+}
+
+.nt-scroll-area__viewport {
+    min-height: 0;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.nt-scroll-area__viewport::-webkit-scrollbar {
+    display: none;
+}
+
+.nt-scroll-area__bar {
+    position: absolute;
+    background-color: #c0c0c0;
+    user-select: none;
+}
+
+.nt-scroll-area__bar--vertical {
+    top: 0;
+    right: 0;
+    width: 16px;
+}
+
+.nt-scroll-area__bar--horizontal {
+    right: 0;
+    bottom: 0;
+    left: 0;
+    height: 16px;
+}
+
+.nt-scroll-area__button,
+.nt-scroll-area__thumb,
+.nt-scroll-area__corner {
+    position: absolute;
+    background-color: #c0c0c0;
+    border: 0;
+    box-shadow:
+        inset 1px 1px #ffffff,
+        inset -1px -1px #808080,
+        inset -2px -2px #000000,
+        inset 2px 2px #dfdfdf;
+}
+
+.nt-scroll-area__button {
+    width: 16px;
+    height: 16px;
+    padding: 0;
+}
+
+.nt-scroll-area__button:active {
+    box-shadow:
+        inset 1px 1px #000000,
+        inset -1px -1px #ffffff,
+        inset -2px -2px #dfdfdf,
+        inset 2px 2px #808080;
+}
+
+.nt-scroll-area__button::after {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    content: '';
+    transform: translate(-50%, -50%);
+}
+
+.nt-scroll-area__button--up {
+    top: 0;
+    left: 0;
+}
+
+.nt-scroll-area__button--up::after {
+    border-right: 4px solid transparent;
+    border-bottom: 4px solid #000000;
+    border-left: 4px solid transparent;
+}
+
+.nt-scroll-area__button--down {
+    bottom: 0;
+    left: 0;
+}
+
+.nt-scroll-area__button--down::after {
+    border-top: 4px solid #000000;
+    border-right: 4px solid transparent;
+    border-left: 4px solid transparent;
+}
+
+.nt-scroll-area__button--left {
+    top: 0;
+    left: 0;
+}
+
+.nt-scroll-area__button--left::after {
+    border-top: 4px solid transparent;
+    border-right: 4px solid #000000;
+    border-bottom: 4px solid transparent;
+}
+
+.nt-scroll-area__button--right {
+    top: 0;
+    right: 0;
+}
+
+.nt-scroll-area__button--right::after {
+    border-top: 4px solid transparent;
+    border-bottom: 4px solid transparent;
+    border-left: 4px solid #000000;
+}
+
+.nt-scroll-area__track {
+    position: absolute;
+    background-color: #ffffff;
+    background-image:
+        linear-gradient(45deg, #dfdfdf 25%, transparent 25%),
+        linear-gradient(-45deg, #dfdfdf 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, #dfdfdf 75%),
+        linear-gradient(-45deg, transparent 75%, #dfdfdf 75%);
+    background-position:
+        0 0,
+        0 1px,
+        1px 1px,
+        1px 0;
+    background-size: 2px 2px;
+}
+
+.nt-scroll-area__bar--vertical .nt-scroll-area__track {
+    top: 16px;
+    right: 0;
+    bottom: 16px;
+    left: 0;
+}
+
+.nt-scroll-area__bar--horizontal .nt-scroll-area__track {
+    top: 0;
+    right: 16px;
+    bottom: 0;
+    left: 16px;
+}
+
+.nt-scroll-area__thumb {
+    z-index: 1;
+    min-width: 16px;
+    min-height: 16px;
+    cursor: default;
+    touch-action: none;
+}
+
+.nt-scroll-area__thumb--vertical {
+    right: 0;
+    left: 0;
+}
+
+.nt-scroll-area__thumb--horizontal {
+    top: 0;
+    bottom: 0;
+}
+
+.nt-scroll-area__corner {
+    right: 0;
+    bottom: 0;
+    width: 16px;
+    height: 16px;
 }
 
 .nt-scrollbar::-webkit-scrollbar {
