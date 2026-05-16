@@ -118,6 +118,7 @@ export const ParsedEmoji: React.FC<ParsedEmojiProps> = ({
                     <img
                         alt={emoji.name || 'emoji'}
                         className="h-full w-full object-contain"
+                        draggable="false"
                         ref={containerRef as React.RefObject<HTMLImageElement>}
                         src={emojiUrl || ''}
                         style={style}

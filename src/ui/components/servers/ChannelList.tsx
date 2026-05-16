@@ -11,6 +11,7 @@ import {
     Copy,
     Folder,
     FolderPlus,
+    GripVertical,
     Link as LinkIcon,
     LogOut,
     PanelLeftOpen,
@@ -1040,6 +1041,12 @@ export const ChannelList: React.FC<ChannelListProps> = ({
                                                 : {}
                                         }
                                         value={item}
+                                        whileDrag={{
+                                            scale: 1.02,
+                                            backgroundColor:
+                                                'rgba(255, 255, 255, 0.05)',
+                                            borderRadius: '4px',
+                                        }}
                                         onDragEnd={() => {
                                             void handleDragEnd();
                                         }}
@@ -1054,7 +1061,7 @@ export const ChannelList: React.FC<ChannelListProps> = ({
                                             )}
                                         >
                                             <div
-                                                className="group flex cursor-pointer items-center px-1"
+                                                className="group flex cursor-pointer items-center px-1 select-none"
                                                 role="button"
                                                 tabIndex={0}
                                                 onClick={(e) => {
@@ -1074,17 +1081,22 @@ export const ChannelList: React.FC<ChannelListProps> = ({
                                                     }
                                                 }}
                                             >
-                                                <ChevronDown
-                                                    className={cn(
-                                                        'mr-0.5 h-3 w-3 text-muted-foreground transition-transform duration-200',
-                                                        isCollapsed
-                                                            ? '-rotate-90'
-                                                            : '',
+                                                <div className="flex flex-1 items-center overflow-hidden">
+                                                    {canManageChannels && (
+                                                        <GripVertical className="mr-0.5 h-3 w-3 shrink-0 text-muted-foreground/30 opacity-0 transition-opacity group-hover:opacity-100" />
                                                     )}
-                                                />
-                                                <span className="flex-1 text-[12px] font-bold tracking-wider text-muted-foreground uppercase transition-colors group-hover:text-foreground/80">
-                                                    {category.name}
-                                                </span>
+                                                    <ChevronDown
+                                                        className={cn(
+                                                            'mr-0.5 h-3 w-3 shrink-0 text-muted-foreground transition-transform duration-200',
+                                                            isCollapsed
+                                                                ? '-rotate-90'
+                                                                : '',
+                                                        )}
+                                                    />
+                                                    <span className="truncate text-[12px] font-bold tracking-wider text-muted-foreground uppercase transition-colors group-hover:text-foreground/80">
+                                                        {category.name}
+                                                    </span>
+                                                </div>
                                                 {canManageChannels && (
                                                     <div className="flex opacity-0 transition-opacity group-hover:opacity-100">
                                                         <IconButton
@@ -1156,6 +1168,12 @@ export const ChannelList: React.FC<ChannelListProps> = ({
                                                 : {}
                                         }
                                         value={item}
+                                        whileDrag={{
+                                            scale: 1.02,
+                                            backgroundColor:
+                                                'rgba(255, 255, 255, 0.05)',
+                                            borderRadius: '4px',
+                                        }}
                                         onDragEnd={() => {
                                             void handleDragEnd();
                                         }}

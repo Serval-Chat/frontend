@@ -1,5 +1,7 @@
 import React from 'react';
 
+import { motion } from 'framer-motion';
+
 import type { Server } from '@/api/servers/servers.types';
 import { Badge } from '@/ui/components/common/Badge';
 import { resolveApiUrl } from '@/utils/apiUrl';
@@ -60,9 +62,9 @@ export const ServerIcon = React.memo(
         };
 
         return (
-            <div
+            <motion.div
                 className={cn(
-                    'group relative flex cursor-pointer items-center justify-center transition-all duration-200',
+                    'group relative flex cursor-pointer items-center justify-center transition-all duration-200 select-none',
                     isActive
                         ? `bg-[--color-primary] text-foreground-inverse`
                         : `text-foreground-muted bg-[--color-bg-subtle] hover:bg-[--color-primary] hover:text-foreground-inverse`,
@@ -73,12 +75,12 @@ export const ServerIcon = React.memo(
                 role="button"
                 tabIndex={0}
                 title={server.name}
-                onClick={onClick}
                 onKeyDown={(e) => {
                     if (onClick && (e.key === 'Enter' || e.key === ' ')) {
                         onClick();
                     }
                 }}
+                onTap={onClick}
             >
                 <div
                     className={cn(
@@ -103,6 +105,7 @@ export const ServerIcon = React.memo(
                             alt={server.name}
                             className="h-full w-full object-cover"
                             decoding="async"
+                            draggable="false"
                             loading="lazy"
                             src={iconUrl}
                         />
@@ -113,7 +116,7 @@ export const ServerIcon = React.memo(
                 {badgeCount !== undefined && badgeCount > 0 && (
                     <Badge count={badgeCount} />
                 )}
-            </div>
+            </motion.div>
         );
     },
 );

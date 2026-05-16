@@ -186,10 +186,21 @@ const ServerFolderWrapper = React.memo(
 
         return (
             <Reorder.Item
-                className="w-full"
+                layout
+                className="relative z-[1] w-full"
                 dragControls={dragControls}
                 dragListener={false}
+                transition={{
+                    type: 'spring',
+                    stiffness: 300,
+                    damping: 30,
+                    mass: 0.8,
+                }}
                 value={props.folder}
+                whileDrag={{
+                    scale: 1.05,
+                    zIndex: 10,
+                }}
                 onDragEnd={props.onDragEnd}
             >
                 <ServerFolder
@@ -220,14 +231,25 @@ const ServerItemWrapper = React.memo(
 
         return (
             <Reorder.Item
-                className="w-full"
+                layout
+                className="relative z-[1] w-full"
                 dragControls={dragControls}
                 dragListener={false}
+                transition={{
+                    type: 'spring',
+                    stiffness: 300,
+                    damping: 30,
+                    mass: 0.8,
+                }}
                 value={props.server._id}
+                whileDrag={{
+                    scale: 1.05,
+                    zIndex: 10,
+                }}
                 onDragEnd={props.onDragEnd}
             >
                 <div
-                    className="w-full"
+                    className="w-full select-none"
                     onPointerDown={(e) => dragControls.start(e)}
                 >
                     <ServerItem

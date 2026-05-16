@@ -1,5 +1,6 @@
 import React from 'react';
 
+import { motion } from 'framer-motion';
 import {
     Copy,
     Hash,
@@ -85,15 +86,14 @@ export const ChannelItem: React.FC<ChannelItemProps> = React.memo(
 
         return (
             <div className="mb-[1px] flex flex-col">
-                <div
+                <motion.div
                     className={cn(
-                        'relative',
+                        'relative select-none',
                         buttonVariants({ variant: 'ghost' }),
                         channelClasses,
                     )}
                     role="button"
                     tabIndex={disabled ? -1 : 0}
-                    onClick={disabled ? undefined : onClick}
                     onKeyDown={(e) => {
                         if (disabled) return;
                         if (e.key === 'Enter' || e.key === ' ') {
@@ -102,6 +102,7 @@ export const ChannelItem: React.FC<ChannelItemProps> = React.memo(
                         }
                     }}
                     onMouseEnter={disabled ? undefined : onMouseEnter}
+                    onTap={disabled ? undefined : onClick}
                 >
                     <div className="flex w-full items-center justify-between">
                         <div className="flex min-w-0 flex-1 items-center">
@@ -162,7 +163,7 @@ export const ChannelItem: React.FC<ChannelItemProps> = React.memo(
                             />
                         )}
                     </div>
-                </div>
+                </motion.div>
                 {type === 'voice' &&
                     connectedUserIds &&
                     connectedUserIds.length > 0 && (

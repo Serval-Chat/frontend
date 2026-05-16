@@ -188,7 +188,7 @@ export const ServerFolder: React.FC<ServerFolderProps> = ({
                     <Tooltip content={folder.name}>
                         <motion.button
                             className={cn(
-                                'relative flex h-12 w-12 items-center justify-center bg-[--color-bg-subtle] transition-all duration-200 hover:rounded-[0.75rem]',
+                                'relative flex h-12 w-12 items-center justify-center bg-[--color-bg-subtle] transition-all duration-200 select-none hover:rounded-[0.75rem]',
                                 isOpen
                                     ? 'rounded-[0.75rem]'
                                     : 'rounded-[1.2rem]',
