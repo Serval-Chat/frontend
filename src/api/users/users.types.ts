@@ -95,9 +95,12 @@ export interface UserConnection {
     type: 'Website';
     value: string;
     status?: 'pending' | 'verified';
-    recordType?: 'TXT';
+    recordType?: 'TXT' | 'HTTPS';
     recordName?: string;
     recordValue?: string;
+    filePath?: string;
+    fileUrl?: string;
+    fileContent?: string;
     expiresAt?: string;
 }
 
@@ -107,6 +110,9 @@ export interface CreateWebsiteConnectionResponse {
     recordType: 'TXT';
     recordName: string;
     recordValue: string;
+    filePath: string;
+    fileUrl: string;
+    fileContent: string;
     expiresAt: string;
 }
 

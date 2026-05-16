@@ -148,23 +148,48 @@ export const WebsiteConnectionsSettings: React.FC = () => {
             {instructions && (
                 <div className="space-y-3 rounded-md border border-border-subtle bg-bg-subtle p-4">
                     <Text size="sm" weight="bold">
-                        Add this TXT record to your DNS records.
+                        Verify ownership with either DNS or HTTPS.
                     </Text>
-                    <DnsRecordRow
-                        label="Type"
-                        value={instructions.recordType}
-                        onCopy={copyValue}
-                    />
-                    <DnsRecordRow
-                        label="Name"
-                        value={instructions.recordName}
-                        onCopy={copyValue}
-                    />
-                    <DnsRecordRow
-                        label="Value"
-                        value={instructions.recordValue}
-                        onCopy={copyValue}
-                    />
+                    <div className="space-y-2">
+                        <Text size="xs" weight="bold">
+                            DNS TXT
+                        </Text>
+                        <VerificationRow
+                            label="Type"
+                            value={instructions.recordType}
+                            onCopy={copyValue}
+                        />
+                        <VerificationRow
+                            label="Name"
+                            value={instructions.recordName}
+                            onCopy={copyValue}
+                        />
+                        <VerificationRow
+                            label="Value"
+                            value={instructions.recordValue}
+                            onCopy={copyValue}
+                        />
+                    </div>
+                    <div className="space-y-2 border-t border-border-subtle pt-3">
+                        <Text size="xs" weight="bold">
+                            HTTPS File
+                        </Text>
+                        <VerificationRow
+                            label="Path"
+                            value={instructions.filePath}
+                            onCopy={copyValue}
+                        />
+                        <VerificationRow
+                            label="URL"
+                            value={instructions.fileUrl}
+                            onCopy={copyValue}
+                        />
+                        <VerificationRow
+                            label="Content"
+                            value={instructions.fileContent}
+                            onCopy={copyValue}
+                        />
+                    </div>
                     <div className="flex justify-end">
                         <Button
                             icon={Check}
@@ -206,13 +231,13 @@ export const WebsiteConnectionsSettings: React.FC = () => {
     );
 };
 
-interface DnsRecordRowProps {
+interface VerificationRowProps {
     label: string;
     value: string;
     onCopy: (value: string) => Promise<void>;
 }
 
-const DnsRecordRow: React.FC<DnsRecordRowProps> = ({
+const VerificationRow: React.FC<VerificationRowProps> = ({
     label,
     value,
     onCopy,
