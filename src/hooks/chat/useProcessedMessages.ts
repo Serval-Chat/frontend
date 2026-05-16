@@ -48,11 +48,18 @@ export const useProcessedMessages = (
 
             // Handle webhooks
             if (msg.isWebhook && msg.webhookUsername) {
+                const rawAvatar = msg.webhookAvatarUrl || undefined;
+                const avatarUrl =
+                    rawAvatar &&
+                    (rawAvatar.startsWith('https://') ||
+                        rawAvatar.startsWith('http://'))
+                        ? `/api/v1/embed/proxy?url=${encodeURIComponent(rawAvatar)}`
+                        : rawAvatar;
                 user = {
                     _id: `webhook-${msg._id}`,
                     username: msg.webhookUsername,
                     displayName: msg.webhookUsername,
-                    profilePicture: msg.webhookAvatarUrl || undefined,
+                    profilePicture: avatarUrl,
                     createdAt: new Date(msg.createdAt),
                 } as User;
             }
