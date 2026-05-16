@@ -15,6 +15,7 @@ import { BlockFlags } from '@/types/blocks';
 import { Button } from '@/ui/components/common/Button';
 import { ContextMenu } from '@/ui/components/common/ContextMenu';
 import type { ContextMenuItem } from '@/ui/components/common/ContextMenu';
+import { ParsedEmoji } from '@/ui/components/common/ParsedEmoji';
 import { ParsedUnicodeEmoji } from '@/ui/components/common/ParsedUnicodeEmoji';
 import { Text } from '@/ui/components/common/Text';
 import { EmojiPicker } from '@/ui/components/emoji/EmojiPicker';
@@ -187,19 +188,27 @@ export const Reactions: React.FC<ReactionsProps> = React.memo(
                             onClick={() => handleReactionClick(reaction)}
                         >
                             <Text className="text-base leading-none">
-                                {reaction.emojiType === 'custom' &&
-                                reaction.emojiUrl ? (
-                                    <img
-                                        alt={reaction.emoji}
-                                        className="inline-block h-5 w-5 cursor-pointer object-contain align-middle"
-                                        src={
-                                            resolveApiUrl(reaction.emojiUrl) ||
-                                            ''
-                                        }
-                                        title={
-                                            reaction.emojiName || reaction.emoji
-                                        }
-                                    />
+                                {reaction.emojiType === 'custom' ? (
+                                    reaction.emojiUrl ? (
+                                        <img
+                                            alt={reaction.emoji}
+                                            className="inline-block h-5 w-5 cursor-pointer object-contain align-middle"
+                                            src={
+                                                resolveApiUrl(
+                                                    reaction.emojiUrl,
+                                                ) || ''
+                                            }
+                                            title={
+                                                reaction.emojiName ||
+                                                reaction.emoji
+                                            }
+                                        />
+                                    ) : (
+                                        <ParsedEmoji
+                                            className="inline-block h-5 w-5 align-middle"
+                                            emojiId={reaction.emojiId}
+                                        />
+                                    )
                                 ) : (
                                     <ParsedUnicodeEmoji
                                         className="!top-0 h-5 w-5"

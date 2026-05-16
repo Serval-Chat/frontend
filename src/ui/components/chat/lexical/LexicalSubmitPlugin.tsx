@@ -3,6 +3,9 @@ import { useEffect } from 'react';
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import {
+    $getSelection,
+    $isRangeSelection,
+    $isTextNode,
     CLEAR_EDITOR_COMMAND,
     COMMAND_PRIORITY_LOW,
     KEY_ENTER_COMMAND,
@@ -15,6 +18,44 @@ interface LexicalSubmitPluginProps {
     onSendMessage: (text: string) => boolean | Promise<boolean>;
     isAutocompleteOpenRef?: React.MutableRefObject<boolean>;
 }
+
+export const shouldAutocompleteHandleEnter = (
+    textBeforeCursor: string | null,
+): boolean => {
+    if (textBeforeCursor === null) {
+        return false;
+    }
+
+    const autocompleteMatch = textBeforeCursor.match(
+        /(^|\s)([@:#])([^@#\s]{0,20})$/,
+    );
+    if (autocompleteMatch) {
+        const trigger = autocompleteMatch[2];
+        const matchingString = autocompleteMatch[3];
+        return trigger !== ':' || matchingString.length >= 2;
+    }
+
+    return /^\/[a-zA-Z0-9_-]{0,50}$/.test(textBeforeCursor);
+};
+
+const $getTextBeforeCursor = (): string | null => {
+    const selection = $getSelection();
+    if (!$isRangeSelection(selection) || !selection.isCollapsed()) {
+        return null;
+    }
+
+    const anchor = selection.anchor;
+    if (anchor.type !== 'text') {
+        return null;
+    }
+
+    const anchorNode = anchor.getNode();
+    if (!$isTextNode(anchorNode)) {
+        return null;
+    }
+
+    return anchorNode.getTextContent().slice(0, anchor.offset);
+};
 
 export const LexicalSubmitPlugin: React.FC<LexicalSubmitPluginProps> = ({
     onSendMessage,
@@ -40,7 +81,16 @@ export const LexicalSubmitPlugin: React.FC<LexicalSubmitPluginProps> = ({
                             editor.getEditorState().read($getSlashChipState) !==
                             null;
                         if (!isChipMode) {
-                            return false;
+                            const shouldYieldToAutocomplete = editor
+                                .getEditorState()
+                                .read(() =>
+                                    shouldAutocompleteHandleEnter(
+                                        $getTextBeforeCursor(),
+                                    ),
+                                );
+                            if (shouldYieldToAutocomplete) {
+                                return false;
+                            }
                         }
                     }
 

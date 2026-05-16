@@ -130,7 +130,7 @@ export const UserProfileCard: React.FC<UserProfileCardProps> = ({
 
             <Box className="relative z-content -mt-[50px] px-4">
                 <Box
-                    className={`relative inline-block rounded-full bg-background p-1.5 ${onAvatarClick ? 'group/avatar cursor-pointer' : ''}`}
+                    className={`relative flex h-[92px] w-[92px] items-center justify-center rounded-full bg-background p-1.5 ${onAvatarClick ? 'group/avatar cursor-pointer' : ''}`}
                     onClick={onAvatarClick}
                 >
                     <UserProfilePicture

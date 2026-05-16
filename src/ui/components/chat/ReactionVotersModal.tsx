@@ -9,6 +9,7 @@ import {
 import { useUsers } from '@/hooks/useUsers';
 import { LoadingSpinner } from '@/ui/components/common/LoadingSpinner';
 import { Modal } from '@/ui/components/common/Modal';
+import { ParsedEmoji } from '@/ui/components/common/ParsedEmoji';
 import { ParsedUnicodeEmoji } from '@/ui/components/common/ParsedUnicodeEmoji';
 import { Text } from '@/ui/components/common/Text';
 import { UserItem } from '@/ui/components/common/UserItem';
@@ -100,21 +101,27 @@ export const ReactionVotersModal: React.FC<ReactionVotersModalProps> = ({
                         >
                             <Box className="flex min-w-0 items-center gap-2">
                                 <Box className="flex shrink-0 items-center justify-center">
-                                    {reaction.emojiType === 'custom' &&
-                                    reaction.emojiUrl ? (
-                                        <img
-                                            alt={reaction.emoji}
-                                            className="inline-block h-5 w-5 cursor-pointer object-contain align-middle"
-                                            src={
-                                                resolveApiUrl(
-                                                    reaction.emojiUrl,
-                                                ) || ''
-                                            }
-                                            title={
-                                                reaction.emojiName ||
-                                                reaction.emoji
-                                            }
-                                        />
+                                    {reaction.emojiType === 'custom' ? (
+                                        reaction.emojiUrl ? (
+                                            <img
+                                                alt={reaction.emoji}
+                                                className="inline-block h-5 w-5 cursor-pointer object-contain align-middle"
+                                                src={
+                                                    resolveApiUrl(
+                                                        reaction.emojiUrl,
+                                                    ) || ''
+                                                }
+                                                title={
+                                                    reaction.emojiName ||
+                                                    reaction.emoji
+                                                }
+                                            />
+                                        ) : (
+                                            <ParsedEmoji
+                                                className="inline-block h-5 w-5 align-middle"
+                                                emojiId={reaction.emojiId}
+                                            />
+                                        )
                                     ) : (
                                         <ParsedUnicodeEmoji
                                             className="text-base"

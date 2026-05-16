@@ -16,6 +16,29 @@ vi.mock('@/store/hooks', () => ({
     useAppSelector: vi.fn(),
 }));
 
+vi.mock('@/api/reactions/reactions.queries', () => ({
+    useAddReaction: () => ({ mutate: vi.fn() }),
+    useRemoveReaction: () => ({ mutate: vi.fn() }),
+}));
+
+vi.mock('@/api/users/users.queries', () => ({
+    useMe: () => ({ data: { _id: 'me' } }),
+}));
+
+vi.mock('@/hooks/useCustomEmojis', () => ({
+    useCustomEmojis: () => ({ customCategories: [] }),
+}));
+
+vi.mock('@/hooks/usePermissions', () => ({
+    usePermissions: () => ({ hasPermission: () => false }),
+}));
+
+vi.mock('@/ui/components/common/ParsedEmoji', () => ({
+    ParsedEmoji: ({ emojiId }: { emojiId: string }) => (
+        <img alt="custom emoji" data-emoji-id={emojiId} />
+    ),
+}));
+
 vi.mock('@tanstack/react-virtual', () => ({
     useVirtualizer: vi.fn().mockImplementation((options: any) => ({
         getVirtualItems: () =>
@@ -223,6 +246,32 @@ describe('Frontend Blocking Content Filters', () => {
 
             expect(container.textContent).toMatch(/1/);
             expect(container.textContent).not.toMatch(/👍/);
+        });
+
+        it('renders custom reactions by emoji id when the reaction has no URL', () => {
+            mockUseAppSelector.mockReturnValue({});
+
+            const reactions: MessageReaction[] = [
+                {
+                    emoji: 'party_serch',
+                    emojiType: 'custom',
+                    emojiId: 'emoji-123',
+                    users: ['u-ok'],
+                    count: 1,
+                },
+            ];
+
+            render(
+                <TestWrapper>
+                    <Reactions messageId="m1" reactions={reactions} />
+                </TestWrapper>,
+            );
+
+            expect(screen.getByAltText('custom emoji')).toHaveAttribute(
+                'data-emoji-id',
+                'emoji-123',
+            );
+            expect(screen.queryByText('party_serch')).not.toBeInTheDocument();
         });
     });
 });
