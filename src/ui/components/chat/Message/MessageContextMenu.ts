@@ -1,11 +1,13 @@
 import React from 'react';
 
 import {
+    Check,
     Copy,
     CornerUpLeft,
     Edit,
     ListTree,
     Pin,
+    Shield,
     SmilePlus,
     StickyNote,
     Trash2,
@@ -14,6 +16,7 @@ import {
 } from 'lucide-react';
 
 import type { Friend } from '@/api/friends/friends.types';
+import type { Role } from '@/api/servers/servers.types';
 import type { User } from '@/api/users/users.types';
 import type { ProcessedChatMessage } from '@/types/chat.ui';
 import type { ContextMenuItem } from '@/ui/components/common/ContextMenu';
@@ -36,6 +39,13 @@ interface ContextMenuParams {
     onShowPicker: () => void;
     showColorResolverDebug?: boolean;
     onShowColorResolverOrder?: () => void;
+    allServerRoles?: Role[];
+    userRoles?: Role[];
+    canManageRoles?: boolean;
+    isOwner?: boolean;
+    myHighestRolePosition?: number;
+    onAddRole?: (roleId: string) => void;
+    onRemoveRole?: (roleId: string) => void;
 }
 
 export function buildContextMenuItems({
@@ -56,6 +66,13 @@ export function buildContextMenuItems({
     onShowPicker,
     showColorResolverDebug,
     onShowColorResolverOrder,
+    allServerRoles,
+    userRoles,
+    canManageRoles,
+    isOwner,
+    myHighestRolePosition,
+    onAddRole,
+    onRemoveRole,
 }: ContextMenuParams): ContextMenuItem[] {
     const items: ContextMenuItem[] = [];
 
@@ -166,6 +183,63 @@ export function buildContextMenuItems({
         });
     }
 
+    if (
+        allServerRoles &&
+        canManageRoles &&
+        onAddRole &&
+        onRemoveRole &&
+        message.serverId
+    ) {
+        items.push({ type: 'divider' });
+
+        const sortedRoles = [...allServerRoles].sort(
+            (a, b) => b.position - a.position,
+        );
+        const rolesToDisplay = sortedRoles.filter(
+            (r) => r.name !== '@everyone',
+        );
+
+        items.push({
+            label: 'Roles',
+            icon: Shield,
+            type: 'submenu',
+            items:
+                rolesToDisplay.length > 0
+                    ? rolesToDisplay.map((r) => {
+                          const hasRole = userRoles?.some(
+                              (ur) => String(ur._id) === String(r._id),
+                          );
+
+                          const canManageThisRole =
+                              isOwner ||
+                              (myHighestRolePosition !== undefined &&
+                                  myHighestRolePosition > r.position);
+
+                          return {
+                              label: r.name,
+                              onClick: () => {
+                                  if (!canManageThisRole) return;
+                                  if (hasRole) {
+                                      onRemoveRole(r._id);
+                                  } else {
+                                      onAddRole(r._id);
+                                  }
+                              },
+                              rightIcon: hasRole ? Check : undefined,
+                              variant: !canManageThisRole ? 'ghost' : 'normal',
+                              preventClose: true,
+                          };
+                      })
+                    : [
+                          {
+                              label: 'No roles',
+                              onClick: () => {},
+                              variant: 'ghost',
+                          },
+                      ],
+        });
+    }
+
     return items;
 }
 
@@ -190,6 +264,13 @@ export function useMessageContextMenu(
         onShowPicker,
         showColorResolverDebug,
         onShowColorResolverOrder,
+        allServerRoles,
+        userRoles,
+        canManageRoles,
+        isOwner,
+        myHighestRolePosition,
+        onAddRole,
+        onRemoveRole,
     } = params;
 
     return React.useMemo(
@@ -212,6 +293,13 @@ export function useMessageContextMenu(
                 onShowPicker,
                 showColorResolverDebug,
                 onShowColorResolverOrder,
+                allServerRoles,
+                userRoles,
+                canManageRoles,
+                isOwner,
+                myHighestRolePosition,
+                onAddRole,
+                onRemoveRole,
             }),
 
         [
@@ -232,6 +320,13 @@ export function useMessageContextMenu(
             onShowPicker,
             showColorResolverDebug,
             onShowColorResolverOrder,
+            allServerRoles,
+            userRoles,
+            canManageRoles,
+            isOwner,
+            myHighestRolePosition,
+            onAddRole,
+            onRemoveRole,
         ],
     );
 }

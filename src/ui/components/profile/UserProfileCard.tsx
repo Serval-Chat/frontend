@@ -3,11 +3,14 @@ import React, { useMemo } from 'react';
 import {
     Calendar,
     Camera,
+    Check,
     Globe,
     MessageSquare,
+    Plus,
     Server,
     UserMinus,
     UserPlus,
+    X,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -16,6 +19,10 @@ import {
     useRemoveFriend,
     useSendFriendRequest,
 } from '@/api/friends/friends.queries';
+import {
+    useAddRoleToMember,
+    useRemoveRoleFromMember,
+} from '@/api/servers/servers.queries';
 import type { Role } from '@/api/servers/servers.types';
 import { useMe } from '@/api/users/users.queries';
 import type { User } from '@/api/users/users.types';
@@ -28,6 +35,7 @@ import { Link } from '@/ui/components/common/Link';
 import { ParsedEmoji } from '@/ui/components/common/ParsedEmoji';
 import { ParsedText } from '@/ui/components/common/ParsedText';
 import { ParsedUnicodeEmoji } from '@/ui/components/common/ParsedUnicodeEmoji';
+import { Popover } from '@/ui/components/common/Popover';
 import { RoleDot } from '@/ui/components/common/RoleDot';
 import { StyledUserName } from '@/ui/components/common/StyledUserName';
 import { Text } from '@/ui/components/common/Text';
@@ -58,7 +66,108 @@ interface UserProfileCardProps {
     disableColors?: boolean;
     disableGlow?: boolean;
     adminData?: AdminExtendedUser;
+
+    allServerRoles?: Role[];
+    canManageRoles?: boolean;
+    isOwner?: boolean;
+    myHighestRolePosition?: number;
+    serverId?: string;
+    userId?: string;
 }
+
+const RoleSelector: React.FC<{
+    allRoles: Role[];
+    userRoles?: Role[];
+    isOwner: boolean;
+    myHighestRolePosition?: number;
+    onAddRole: (roleId: string) => void;
+    onRemoveRole: (roleId: string) => void;
+}> = ({
+    allRoles,
+    userRoles,
+    isOwner,
+    myHighestRolePosition,
+    onAddRole,
+    onRemoveRole,
+}) => {
+    const [isOpen, setIsOpen] = React.useState(false);
+    const triggerRef = React.useRef<HTMLButtonElement>(null);
+
+    const rolesToDisplay = allRoles
+        .filter((r) => r.name !== '@everyone')
+        .sort((a, b) => b.position - a.position);
+
+    return (
+        <>
+            <button
+                className="hover:bg-bg-tertiary flex h-5 w-5 items-center justify-center rounded-md border border-border-subtle bg-bg-secondary text-muted-foreground transition-colors hover:text-foreground"
+                ref={triggerRef}
+                title="Add Role"
+                onClick={() => setIsOpen(true)}
+            >
+                <Plus size={14} />
+            </button>
+
+            <Popover
+                className="w-48 p-1"
+                isOpen={isOpen}
+                triggerRef={triggerRef}
+                onClose={() => setIsOpen(false)}
+            >
+                <Box className="flex flex-col gap-0.5">
+                    {rolesToDisplay.length > 0 ? (
+                        rolesToDisplay.map((role) => {
+                            const hasRole = userRoles?.some(
+                                (ur) => ur._id === role._id,
+                            );
+                            const canManageThisRole =
+                                isOwner ||
+                                (myHighestRolePosition !== undefined &&
+                                    myHighestRolePosition > role.position);
+
+                            return (
+                                <button
+                                    className={cn(
+                                        'flex items-center justify-between rounded-md px-2 py-1.5 text-xs transition-colors',
+                                        canManageThisRole
+                                            ? 'hover:bg-bg-tertiary cursor-pointer'
+                                            : 'cursor-not-allowed opacity-50',
+                                    )}
+                                    disabled={!canManageThisRole}
+                                    key={role._id}
+                                    onClick={() => {
+                                        if (hasRole) {
+                                            onRemoveRole(role._id);
+                                        } else {
+                                            onAddRole(role._id);
+                                        }
+                                    }}
+                                >
+                                    <Box className="flex items-center gap-2 truncate">
+                                        <RoleDot role={role} size={8} />
+                                        <span className="truncate">
+                                            {role.name}
+                                        </span>
+                                    </Box>
+                                    {hasRole && (
+                                        <Check
+                                            className="text-primary"
+                                            size={14}
+                                        />
+                                    )}
+                                </button>
+                            );
+                        })
+                    ) : (
+                        <Box className="px-2 py-1.5 text-xs text-muted-foreground">
+                            No roles available
+                        </Box>
+                    )}
+                </Box>
+            </Popover>
+        </>
+    );
+};
 
 export const UserProfileCard: React.FC<UserProfileCardProps> = ({
     user,
@@ -77,6 +186,12 @@ export const UserProfileCard: React.FC<UserProfileCardProps> = ({
     disableColors,
     disableGlow,
     adminData,
+    allServerRoles,
+    canManageRoles,
+    isOwner,
+    myHighestRolePosition,
+    serverId,
+    userId: propUserId,
 }) => {
     const { data: currentUser } = useMe();
     const navigate = useNavigate();
@@ -84,7 +199,10 @@ export const UserProfileCard: React.FC<UserProfileCardProps> = ({
     const { mutate: sendFriendRequest } = useSendFriendRequest();
     const { mutate: removeFriend } = useRemoveFriend();
 
-    const userId = user?._id;
+    const { mutate: addRole } = useAddRoleToMember(serverId || '');
+    const { mutate: removeRole } = useRemoveRoleFromMember(serverId || '');
+
+    const userId = propUserId || user?._id;
     const presence = useAppSelector((state) =>
         userId ? state.presence.users[userId] : undefined,
     );
@@ -322,31 +440,86 @@ export const UserProfileCard: React.FC<UserProfileCardProps> = ({
                     )}
                 </Box>
 
-                {roles && roles.length > 0 && (
+                {((roles && roles.length > 0) ||
+                    (canManageRoles && allServerRoles)) && (
                     <Box className="mb-4">
-                        <Heading
-                            className="mb-2 text-xs font-bold text-muted-foreground uppercase"
-                            level={3}
-                        >
-                            Roles
-                        </Heading>
-                        <Box className="flex flex-wrap gap-2">
-                            {[...roles]
-                                .sort((a, b) => b.position - a.position)
-                                .map((r) => (
-                                    <Box
-                                        className="flex items-center gap-1.5 rounded-md border border-border-subtle bg-bg-secondary px-2 py-1"
-                                        key={r._id}
-                                    >
-                                        <RoleDot role={r} />
-                                        <Text
-                                            as="span"
-                                            className="text-xs font-medium text-foreground/90"
-                                        >
-                                            {r.name}
-                                        </Text>
+                        <Box className="mb-2 flex items-center justify-between">
+                            <Heading
+                                className="text-xs font-bold text-muted-foreground uppercase"
+                                level={3}
+                            >
+                                Roles
+                            </Heading>
+                            {canManageRoles &&
+                                allServerRoles &&
+                                serverId &&
+                                userId && (
+                                    <Box className="relative">
+                                        <RoleSelector
+                                            allRoles={allServerRoles}
+                                            isOwner={!!isOwner}
+                                            myHighestRolePosition={
+                                                myHighestRolePosition
+                                            }
+                                            userRoles={roles}
+                                            onAddRole={(roleId) =>
+                                                addRole({ userId, roleId })
+                                            }
+                                            onRemoveRole={(roleId) =>
+                                                removeRole({ userId, roleId })
+                                            }
+                                        />
                                     </Box>
-                                ))}
+                                )}
+                        </Box>
+                        <Box className="flex flex-wrap gap-2">
+                            {roles &&
+                                [...roles]
+                                    .sort((a, b) => b.position - a.position)
+                                    .map((r) => {
+                                        const canManageThisRole =
+                                            isOwner ||
+                                            (myHighestRolePosition !==
+                                                undefined &&
+                                                myHighestRolePosition >
+                                                    r.position);
+
+                                        return (
+                                            <Box
+                                                className={cn(
+                                                    'group flex items-center gap-1.5 rounded-md border border-border-subtle bg-bg-secondary px-2 py-1 transition-all',
+                                                    canManageRoles &&
+                                                        canManageThisRole &&
+                                                        'hover:border-danger/30 hover:bg-danger/5',
+                                                )}
+                                                key={r._id}
+                                            >
+                                                <RoleDot role={r} />
+                                                <Text
+                                                    as="span"
+                                                    className="text-xs font-medium text-foreground/90"
+                                                >
+                                                    {r.name}
+                                                </Text>
+                                                {canManageRoles &&
+                                                    canManageThisRole &&
+                                                    userId && (
+                                                        <button
+                                                            className="ml-0.5 hidden text-muted-foreground group-hover:block hover:text-danger"
+                                                            title="Remove Role"
+                                                            onClick={() =>
+                                                                removeRole({
+                                                                    userId,
+                                                                    roleId: r._id,
+                                                                })
+                                                            }
+                                                        >
+                                                            <X size={12} />
+                                                        </button>
+                                                    )}
+                                            </Box>
+                                        );
+                                    })}
                         </Box>
                     </Box>
                 )}

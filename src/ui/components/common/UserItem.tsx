@@ -990,7 +990,7 @@ const UserItemInner: React.FC<
 UserItemInner.displayName = 'UserItemInner';
 
 export const UserItem = React.memo((props: UserItemProps) => {
-    const isServerContext = !!props.serverId && !props.noFetch;
+    const isServerContext = !!props.serverId;
     const serverId =
         props.serverId ||
         props.role?.serverId ||

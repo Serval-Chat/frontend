@@ -7,6 +7,8 @@ import type {
 import type { User } from '@/api/users/users.types';
 import type { ProcessedChatMessage } from '@/types/chat.ui';
 
+export type { Role, RolePermissions, Server, ServerMember };
+
 export interface MessageProps {
     message: ProcessedChatMessage;
     user: User;

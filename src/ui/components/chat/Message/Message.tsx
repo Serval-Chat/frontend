@@ -13,6 +13,10 @@ import {
     useSendFriendRequest,
 } from '@/api/friends/friends.queries';
 import { useAddReaction } from '@/api/reactions/reactions.queries';
+import {
+    useAddRoleToMember,
+    useRemoveRoleFromMember,
+} from '@/api/servers/servers.queries';
 import { useCustomEmojis } from '@/hooks/useCustomEmojis';
 import { useSmartPosition } from '@/hooks/useSmartPosition';
 import { useAppSelector } from '@/store/hooks';
@@ -33,7 +37,7 @@ import { APP_LOCALE } from '@/utils/locale';
 import { buildUsernameColorResolverReport } from '@/utils/usernameColorResolver';
 
 import { useMessageData, useMessagePermissions } from './Message.hooks';
-import type { MessageProps } from './Message.types';
+import type { MessageProps, Role } from './Message.types';
 import { MessageActions } from './MessageActions';
 import { useMessageContextMenu } from './MessageContextMenu';
 import { MessageEmojiPicker } from './MessageEmojiPicker';
@@ -70,7 +74,7 @@ export const Message: React.FC<MessageProps> = React.memo(
             serverDetails,
             senderMember,
             senderRoles,
-            hasPermission,
+            hasPermission: checkPermission,
             isOwner,
             mentionsMe,
             interactionUser,
@@ -110,12 +114,17 @@ export const Message: React.FC<MessageProps> = React.memo(
         const { mutate: removeFriend } = useRemoveFriend();
         const { customCategories } = useCustomEmojis({ enabled: showPicker });
 
+        const { mutate: addRole } = useAddRoleToMember(message.serverId || '');
+        const { mutate: removeRole } = useRemoveRoleFromMember(
+            message.serverId || '',
+        );
+
         const isMessageSender = me?._id === message.senderId;
         const { canEdit, canDelete, canPin } = useMessagePermissions(
             message,
             isMessageSender,
             isOwner,
-            hasPermission,
+            checkPermission,
         );
 
         const handleEmojiSelect = React.useCallback(
@@ -265,6 +274,34 @@ export const Message: React.FC<MessageProps> = React.memo(
             serverDetails?.disableUsernameGlowAndCustomColor,
         ]);
 
+        const allServerRoles = React.useMemo(
+            () => (roleMap ? Array.from(roleMap.values()) : undefined),
+            [roleMap],
+        );
+
+        const canManageRoles = React.useMemo(() => {
+            if (!me || !senderRoles || !serverDetails) return false;
+            if (isOwner) return true;
+
+            return (
+                checkPermission('administrator') ||
+                checkPermission('manageRoles')
+            );
+        }, [me, senderRoles, serverDetails, isOwner, checkPermission]);
+
+        const myHighestRolePosition = React.useMemo(() => {
+            if (!me || !roleMap || !fullMemberMap) return -1;
+            const myMember = fullMemberMap.get(me._id);
+            if (!myMember) return -1;
+
+            const myRoles = myMember.roles
+                .map((id) => roleMap.get(id))
+                .filter((r): r is Role => !!r);
+
+            if (myRoles.length === 0) return -1;
+            return Math.max(...myRoles.map((r) => r.position));
+        }, [me, roleMap, fullMemberMap]);
+
         const contextMenuItems = useMessageContextMenu({
             message,
             user,
@@ -283,6 +320,15 @@ export const Message: React.FC<MessageProps> = React.memo(
             onShowPicker: handleShowPicker,
             showColorResolverDebug,
             onShowColorResolverOrder: handleShowColorResolverOrder,
+            allServerRoles,
+            userRoles: senderRoles,
+            canManageRoles,
+            isOwner,
+            myHighestRolePosition,
+            onAddRole: (roleId) =>
+                addRole({ userId: message.senderId, roleId }),
+            onRemoveRole: (roleId) =>
+                removeRole({ userId: message.senderId, roleId }),
         });
 
         const isMobile = React.useMemo(

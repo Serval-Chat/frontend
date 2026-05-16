@@ -319,12 +319,24 @@ export const ChannelList: React.FC<ChannelListProps> = ({
 
     const [activeItemId, setActiveItemId] = useState<string | null>(null);
 
+    const visibleItems = React.useMemo(
+        () =>
+            items.filter((item) => {
+                if (item.type === 'channel' && item.data.categoryId) {
+                    return !collapsedCategories[item.data.categoryId];
+                }
+                return true;
+            }),
+        [items, collapsedCategories],
+    );
+
     const rowVirtualizer = useVirtualizer({
-        count: items.length,
+        count: visibleItems.length,
         getScrollElement: () => scrollRef.current,
         estimateSize: useCallback(
             (index: number) => {
-                const item = items[index];
+                const item = visibleItems[index];
+                if (!item) return 0;
                 if (item.type === 'category') return 32;
                 if (item.type === 'channel' && item.data.type === 'voice') {
                     const participants = voiceParticipants[item.id] || [];
@@ -332,41 +344,59 @@ export const ChannelList: React.FC<ChannelListProps> = ({
                 }
                 return 32;
             },
-            [items, voiceParticipants],
+            [visibleItems, voiceParticipants],
         ),
         measureElement: (el) => el.getBoundingClientRect().height,
         overscan: 10,
     });
 
-    const handleReorder = (newItems: ListItem[]): void => {
+    const handleReorder = (newVisibleItems: ListItem[]): void => {
         setIsReordering(true);
 
-        // If a category is being dragged, move its children with it
         const activeItem = items.find((i) => i.id === activeItemId);
+        let updatedVisible = [...newVisibleItems];
+
         if (activeItem?.type === 'category') {
             const categoryId = activeItem.id;
-
-            const childrenItems = items.filter(
-                (i) => i.type === 'channel' && i.data.categoryId === categoryId,
+            const visibleChildren = items.filter(
+                (i) =>
+                    i.type === 'channel' &&
+                    i.data.categoryId === categoryId &&
+                    !collapsedCategories[categoryId],
             );
 
-            if (childrenItems.length > 0) {
-                const childrenIds = new Set(childrenItems.map((i) => i.id));
-                const newCategoryIndex = newItems.findIndex(
+            if (visibleChildren.length > 0) {
+                const childIds = new Set(visibleChildren.map((c) => c.id));
+                const newCategoryIndex = updatedVisible.findIndex(
                     (i) => i.id === categoryId,
                 );
 
-                const updatedItems = newItems.filter(
-                    (i) => !childrenIds.has(i.id),
+                updatedVisible = updatedVisible.filter(
+                    (i) => !childIds.has(i.id),
                 );
-                updatedItems.splice(newCategoryIndex + 1, 0, ...childrenItems);
-
-                setItems(updatedItems);
-                return;
+                updatedVisible.splice(
+                    newCategoryIndex + 1,
+                    0,
+                    ...visibleChildren,
+                );
             }
         }
 
-        setItems(newItems);
+        const fullNewList: ListItem[] = [];
+        updatedVisible.forEach((item) => {
+            fullNewList.push(item);
+            if (item.type === 'category') {
+                const hiddenChildren = items.filter(
+                    (i) =>
+                        i.type === 'channel' &&
+                        i.data.categoryId === item.id &&
+                        collapsedCategories[item.id],
+                );
+                fullNewList.push(...hiddenChildren);
+            }
+        });
+
+        setItems(fullNewList);
     };
 
     const handleDragEnd = React.useCallback(async (): Promise<void> => {
@@ -461,6 +491,7 @@ export const ChannelList: React.FC<ChannelListProps> = ({
 
     const handleDragStartItem = React.useCallback((id: string) => {
         setActiveItemId(id);
+        setIsReordering(true);
     }, []);
 
     const handleMoveToCategory = React.useCallback(
@@ -955,15 +986,15 @@ export const ChannelList: React.FC<ChannelListProps> = ({
                             ? 'auto'
                             : `${rowVirtualizer.getTotalSize()}px`,
                     }}
-                    values={items}
+                    values={visibleItems}
                     onReorder={handleReorder}
                 >
                     {(isReordering
-                        ? items
+                        ? visibleItems
                         : rowVirtualizer.getVirtualItems().map(
                               (v) =>
                                   ({
-                                      ...items[v.index],
+                                      ...visibleItems[v.index],
                                       virtualRow: v,
                                   }) as VirtualListItem,
                           )

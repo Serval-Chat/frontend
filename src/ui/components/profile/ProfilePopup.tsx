@@ -9,7 +9,7 @@ import {
     useServerDetails,
 } from '@/api/servers/servers.queries';
 import type { Role } from '@/api/servers/servers.types';
-import { useUserById } from '@/api/users/users.queries';
+import { useMe, useUserById } from '@/api/users/users.queries';
 import type { User } from '@/api/users/users.types';
 import { useAdminUserDetail } from '@/hooks/admin/useAdminUsers';
 import { useSmartPosition } from '@/hooks/useSmartPosition';
@@ -157,6 +157,24 @@ const ProfilePopupContent: React.FC<ProfilePopupProps> = ({
         presence?.customStatus?.emoji ??
         (user && 'customStatus' in user ? user.customStatus?.emoji : undefined);
 
+    const { data: currentUser } = useMe();
+    const isOwner = serverDetails?.ownerId === currentUser?._id;
+    const myMember = members?.find((m) => m.userId === currentUser?._id);
+    const myRoles = serverRoles?.filter(
+        (r) => myMember?.roles.includes(r._id) || r.name === '@everyone',
+    );
+    const canManageRoles =
+        isOwner ||
+        (myRoles?.some(
+            (r) => r.permissions?.administrator || r.permissions?.manageRoles,
+        ) ??
+            false);
+
+    const myHighestRolePosition = React.useMemo(() => {
+        if (!myRoles || myRoles.length === 0) return -1;
+        return Math.max(...myRoles.map((r) => r.position));
+    }, [myRoles]);
+
     const coords = useSmartPosition({
         isOpen: true,
         elementRef: popupRef,
@@ -209,6 +227,8 @@ const ProfilePopupContent: React.FC<ProfilePopupProps> = ({
             >
                 <UserProfileCard
                     adminData={adminData}
+                    allServerRoles={serverRoles}
+                    canManageRoles={canManageRoles}
                     className="custom-scrollbar max-h-[calc(100vh-32px)] overflow-x-hidden overflow-y-auto"
                     customStatus={{
                         text: presenceCustomText,
@@ -230,11 +250,15 @@ const ProfilePopupContent: React.FC<ProfilePopupProps> = ({
                         serverDetails?.disableUsernameGlowAndCustomColor
                     }
                     iconRole={resolvedIconRole}
+                    isOwner={isOwner}
                     joinedAt={finalJoinedAt}
+                    myHighestRolePosition={myHighestRolePosition}
                     presenceStatus={presenceStatus}
                     role={resolvedRole}
                     roles={finalRoles}
+                    serverId={serverId}
                     user={user as User}
+                    userId={userId}
                 />
             </motion.div>
         </Box>
