@@ -64,6 +64,8 @@ interface Message {
         username?: string;
     };
     createdAt: string | Date;
+    isWebhook?: boolean;
+    webhookUsername?: string;
 }
 
 /**
@@ -80,6 +82,12 @@ export function shouldGroupMessages(
     const id2 = getSenderId(currentMsg);
 
     if (!id1 || !id2 || id1 !== id2) return false;
+
+    if (prevMsg.isWebhook || currentMsg.isWebhook) {
+        if (prevMsg.isWebhook !== currentMsg.isWebhook) return false;
+        if (prevMsg.webhookUsername !== currentMsg.webhookUsername)
+            return false;
+    }
 
     const date1 = new Date(prevMsg.createdAt);
     const date2 = new Date(currentMsg.createdAt);
