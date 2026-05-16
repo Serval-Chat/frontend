@@ -82,6 +82,28 @@ import {
     WsEvents,
 } from './events';
 
+let soundQueue: number[] = [];
+
+const playNotificationSound = () => {
+    if (typeof Audio === 'undefined' || typeof document === 'undefined') return;
+    if (typeof document.hasFocus === 'function' && document.hasFocus()) return;
+
+    if (soundQueue.length === 0) {
+        soundQueue = Array.from({ length: 12 }, (_, i) => i + 1);
+        for (let i = soundQueue.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [soundQueue[i], soundQueue[j]] = [soundQueue[j], soundQueue[i]];
+        }
+    }
+
+    const soundIndex = soundQueue.pop()!;
+    const audio = new Audio(`/sounds/${soundIndex}.wav`);
+    const playPromise = audio.play();
+    if (playPromise !== undefined) {
+        playPromise.catch(() => {});
+    }
+};
+
 /**
  * @description Global WS handlers
  */
@@ -180,7 +202,22 @@ export const setupGlobalWsHandlers = (
     );
 
     cleanups.push(
+        wsClient.on<IMessageDm>(WsEvents.MESSAGE_DM, (payload) => {
+            if (payload.senderId !== currentUser?.id) {
+                playNotificationSound();
+            }
+        }),
+    );
+
+    cleanups.push(
         wsClient.on<IMentionEvent>(WsEvents.MENTION, (payload) => {
+            if (
+                payload.type === 'mention' &&
+                payload.senderId !== currentUser?.id
+            ) {
+                playNotificationSound();
+            }
+
             if (payload.serverId) {
                 dispatch(incrementServerPing({ serverId: payload.serverId }));
             }
