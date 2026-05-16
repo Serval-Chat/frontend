@@ -49,10 +49,17 @@ export const useSendFriendRequest = (): UseMutationResult<
     void,
     Error,
     string
-> =>
-    useMutation({
+> => {
+    const queryClient = useQueryClient();
+    return useMutation({
         mutationFn: friendsApi.sendFriendRequest,
+        onSuccess: () => {
+            void queryClient.invalidateQueries({
+                queryKey: [...FRIEND_REQUESTS_QUERY_KEY, 'outgoing'],
+            });
+        },
     });
+};
 
 export const useIncomingRequests = (): UseQueryResult<FriendRequest[], Error> =>
     useQuery({
@@ -61,23 +68,61 @@ export const useIncomingRequests = (): UseQueryResult<FriendRequest[], Error> =>
         enabled: hasAuthToken(),
     });
 
+export const useOutgoingRequests = (): UseQueryResult<FriendRequest[], Error> =>
+    useQuery({
+        queryKey: [...FRIEND_REQUESTS_QUERY_KEY, 'outgoing'],
+        queryFn: friendsApi.getOutgoingRequests,
+        enabled: hasAuthToken(),
+    });
+
 export const useAcceptFriendRequest = (): UseMutationResult<
     void,
     Error,
     string
-> =>
-    useMutation({
+> => {
+    const queryClient = useQueryClient();
+    return useMutation({
         mutationFn: friendsApi.acceptFriendRequest,
+        onSuccess: () => {
+            void queryClient.invalidateQueries({
+                queryKey: FRIEND_REQUESTS_QUERY_KEY,
+            });
+            void queryClient.invalidateQueries({ queryKey: FRIENDS_QUERY_KEY });
+        },
     });
+};
 
 export const useRejectFriendRequest = (): UseMutationResult<
     void,
     Error,
     string
-> =>
-    useMutation({
+> => {
+    const queryClient = useQueryClient();
+    return useMutation({
         mutationFn: friendsApi.rejectFriendRequest,
+        onSuccess: () => {
+            void queryClient.invalidateQueries({
+                queryKey: FRIEND_REQUESTS_QUERY_KEY,
+            });
+        },
     });
+};
+
+export const useCancelFriendRequest = (): UseMutationResult<
+    void,
+    Error,
+    string
+> => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: friendsApi.cancelFriendRequest,
+        onSuccess: () => {
+            void queryClient.invalidateQueries({
+                queryKey: FRIEND_REQUESTS_QUERY_KEY,
+            });
+        },
+    });
+};
 
 export const useRemoveFriend = (): UseMutationResult<void, Error, string> =>
     useMutation({

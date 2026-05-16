@@ -200,6 +200,10 @@ createRoot(document.getElementById('root')!).render(
                                                     element={<NavigationSync />}
                                                     path="blocking"
                                                 />
+                                                <Route
+                                                    element={<NavigationSync />}
+                                                    path="notifications"
+                                                />
                                             </Route>
                                         </Route>
                                         <Route

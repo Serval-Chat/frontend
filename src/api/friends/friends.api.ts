@@ -42,6 +42,17 @@ export const friendsApi = {
         ]);
     },
 
+    getOutgoingRequests: async (): Promise<FriendRequest[]> => {
+        const response = await apiClient.get<unknown>(
+            '/api/v1/friends/outgoing',
+        );
+        return unwrapArray<FriendRequest>(response.data, [
+            'requests',
+            'outgoing',
+            'data',
+        ]);
+    },
+
     sendFriendRequest: async (username: string): Promise<void> => {
         await apiClient.post('/api/v1/friends', { username });
     },
@@ -52,6 +63,10 @@ export const friendsApi = {
 
     rejectFriendRequest: async (requestId: string): Promise<void> => {
         await apiClient.post(`/api/v1/friends/${requestId}/reject`);
+    },
+
+    cancelFriendRequest: async (requestId: string): Promise<void> => {
+        await apiClient.post(`/api/v1/friends/${requestId}/cancel`);
     },
 
     removeFriend: async (friendId: string): Promise<void> => {

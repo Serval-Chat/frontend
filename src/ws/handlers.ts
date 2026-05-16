@@ -19,7 +19,7 @@ import type {
 import { serversApi } from '@/api/servers/servers.api';
 import { SERVERS_QUERY_KEYS } from '@/api/servers/servers.queries';
 import type { ServerMember } from '@/api/servers/servers.types';
-import type { User } from '@/api/users/users.types';
+import type { User, UserSettings } from '@/api/users/users.types';
 import {
     setBackendInstanceId,
     setOnlineUsers,
@@ -41,6 +41,7 @@ import {
     setVoiceParticipants,
     setVoiceUserState,
 } from '@/store/slices/voiceSlice';
+import { cacheSound, pruneSoundCache } from '@/utils/soundCache';
 
 import { wsClient } from './client';
 import {
@@ -84,29 +85,76 @@ import {
 
 let soundQueue: number[] = [];
 
-const playNotificationSound = () => {
+const playNotificationSound = (queryClient: QueryClient): void => {
     // Run asynchronously to allow for better stacking and prevent blocking WS handlers
-    setTimeout(() => {
+    setTimeout((): void => {
         if (typeof Audio === 'undefined' || typeof document === 'undefined')
             return;
         if (typeof document.hasFocus === 'function' && document.hasFocus())
             return;
 
-        if (soundQueue.length === 0) {
-            soundQueue = Array.from({ length: 12 }, (_, i) => i + 1);
-            for (let i = soundQueue.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [soundQueue[i], soundQueue[j]] = [soundQueue[j], soundQueue[i]];
+        const me = queryClient.getQueryData<User>(['me']);
+        const settings = me?.settings;
+        const customSounds = settings?.notificationSounds || [];
+        const enabledCustomSounds = customSounds.filter((s) => s.enabled);
+        const useDefault = settings?.useDefaultSounds !== false;
+
+        let soundUrl = '';
+
+        if (enabledCustomSounds.length > 0) {
+            const randomIndex = Math.floor(
+                Math.random() *
+                    (enabledCustomSounds.length + (useDefault ? 1 : 0)),
+            );
+            if (randomIndex < enabledCustomSounds.length) {
+                soundUrl = enabledCustomSounds[randomIndex].url;
+            } else {
+                if (soundQueue.length === 0) {
+                    soundQueue = Array.from({ length: 12 }, (_, i) => i + 1);
+                    for (let i = soundQueue.length - 1; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+                        [soundQueue[i], soundQueue[j]] = [
+                            soundQueue[j],
+                            soundQueue[i],
+                        ];
+                    }
+                }
+                const soundIndex = soundQueue.pop()!;
+                soundUrl = `/sounds/${soundIndex}.wav`;
             }
+        } else if (useDefault) {
+            if (soundQueue.length === 0) {
+                soundQueue = Array.from({ length: 12 }, (_, i) => i + 1);
+                for (let i = soundQueue.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [soundQueue[i], soundQueue[j]] = [
+                        soundQueue[j],
+                        soundQueue[i],
+                    ];
+                }
+            }
+            const soundIndex = soundQueue.pop()!;
+            soundUrl = `/sounds/${soundIndex}.wav`;
+        } else {
+            return;
         }
 
-        const soundIndex = soundQueue.pop()!;
-        const audio = new Audio(`/sounds/${soundIndex}.wav`);
+        const audio = new Audio(soundUrl);
         const playPromise = audio.play();
         if (playPromise !== undefined) {
             playPromise.catch(() => {});
         }
     }, 0);
+};
+
+const syncSoundCache = (user: User | undefined): void => {
+    const sounds = user?.settings?.notificationSounds;
+    if (!sounds) return;
+    const urls = sounds.map((s) => s.url);
+    void pruneSoundCache(urls);
+    for (const url of urls) {
+        void cacheSound(url);
+    }
 };
 
 /**
@@ -117,6 +165,7 @@ export const setupGlobalWsHandlers = (
     dispatch: Dispatch,
 ): (() => void) => {
     const me = queryClient.getQueryData<User>(['me']);
+    syncSoundCache(me);
     let currentUser: { id: string; username: string } | null = me
         ? { id: me._id, username: me.username }
         : null;
@@ -209,7 +258,7 @@ export const setupGlobalWsHandlers = (
     cleanups.push(
         wsClient.on<IMessageDm>(WsEvents.MESSAGE_DM, (payload) => {
             if (payload.senderId !== currentUser?.id) {
-                playNotificationSound();
+                playNotificationSound(queryClient);
             }
         }),
     );
@@ -220,7 +269,7 @@ export const setupGlobalWsHandlers = (
                 payload.type === 'mention' &&
                 payload.senderId !== currentUser?.id
             ) {
-                playNotificationSound();
+                playNotificationSound(queryClient);
             }
 
             if (payload.serverId) {
@@ -256,6 +305,48 @@ export const setupGlobalWsHandlers = (
                 },
             );
         }),
+    );
+
+    cleanups.push(
+        wsClient.on<{ sounds: UserSettings['notificationSounds'] }>(
+            'notification_sounds_updated',
+            (payload) => {
+                queryClient.setQueryData<User>(['me'], (old) => {
+                    if (!old) return old;
+                    return {
+                        ...old,
+                        settings: {
+                            ...old.settings,
+                            notificationSounds: payload.sounds,
+                        },
+                    };
+                });
+                const updatedMe = queryClient.getQueryData<User>(['me']);
+                syncSoundCache(updatedMe);
+            },
+        ),
+    );
+
+    cleanups.push(
+        wsClient.on<{ userId: string; settings: UserSettings }>(
+            WsEvents.USER_UPDATED,
+            (payload) => {
+                if (payload.userId === currentUser?.id) {
+                    queryClient.setQueryData<User>(['me'], (old) => {
+                        if (!old) return old;
+                        return {
+                            ...old,
+                            settings: {
+                                ...old.settings,
+                                ...payload.settings,
+                            },
+                        };
+                    });
+                    const updatedMe = queryClient.getQueryData<User>(['me']);
+                    syncSoundCache(updatedMe);
+                }
+            },
+        ),
     );
 
     cleanups.push(

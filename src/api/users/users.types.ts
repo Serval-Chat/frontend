@@ -11,6 +11,8 @@ export type UsernameFont =
     | 'Roboto'
     | 'Workbench';
 
+export type MessageAlignment = 'left' | 'right';
+
 export interface UsernameGradient {
     enabled: boolean;
     colors: string[];
@@ -31,10 +33,17 @@ export interface CustomStatus {
     updatedAt: Date;
 }
 
+export interface NotificationSound {
+    id: string;
+    name: string;
+    url: string;
+    enabled: boolean;
+}
+
 export interface UserSettings {
     muteNotifications?: boolean;
-    ownMessagesAlign?: 'left' | 'right';
-    otherMessagesAlign?: 'left' | 'right';
+    ownMessagesAlign?: MessageAlignment;
+    otherMessagesAlign?: MessageAlignment;
     showYouLabel?: boolean;
     ownMessageColor?: string;
     otherMessageColor?: string;
@@ -43,6 +52,8 @@ export interface UserSettings {
     disableCustomUsernameGlow?: boolean;
     customFontUrl?: string;
     customFontFamily?: string;
+    notificationSounds?: NotificationSound[];
+    useDefaultSounds?: boolean;
 }
 
 export interface ServerFolder {

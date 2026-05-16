@@ -15,5 +15,7 @@ export interface FriendRequest {
     _id: string;
     from?: string;
     fromId?: string;
+    to?: string;
+    toId?: string;
     createdAt: string;
 }

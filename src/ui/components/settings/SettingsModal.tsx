@@ -40,6 +40,12 @@ const StandingSettings = React.lazy(() =>
     import('./StandingSettings').then((m) => ({ default: m.StandingSettings })),
 );
 
+const NotificationSettings = React.lazy(() =>
+    import('./NotificationSettings').then((m) => ({
+        default: m.NotificationSettings,
+    })),
+);
+
 interface SettingsModalProps {
     isOpen: boolean;
     onClose: () => void;
@@ -51,6 +57,7 @@ const SECTION_URL_MAP: Record<string, string> = {
     accessibility: 'accessibility',
     blocking: 'blocking',
     standing: 'standing',
+    notifications: 'notifications',
     developer: 'developer',
 };
 
@@ -60,6 +67,7 @@ const SECTION_ID_TO_URL: Record<string, string> = {
     accessibility: 'accessibility',
     blocking: 'blocking',
     standing: 'standing',
+    notifications: 'notifications',
     developer: 'developer',
 };
 
@@ -150,6 +158,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                             )}
                             {activeSection === 'standing' && (
                                 <StandingSettings />
+                            )}
+                            {activeSection === 'notifications' && (
+                                <NotificationSettings />
                             )}
                             {activeSection === 'developer' && (
                                 <DeveloperSettings />
