@@ -9,6 +9,8 @@ import {
     ListTree,
     MessageSquare,
     MicOff,
+    PanelLeftOpen,
+    PanelRightOpen,
     Shield,
     User as UserIcon,
     UserMinus,
@@ -44,7 +46,7 @@ import { useMe, useUserById } from '@/api/users/users.queries';
 import type { User } from '@/api/users/users.types';
 import type { RootState } from '@/store';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { setSelectedFriendId } from '@/store/slices/navSlice';
+import { setSelectedFriendId, setSplitViewPane } from '@/store/slices/navSlice';
 import { setUserVolume } from '@/store/slices/voiceSlice';
 import { Box } from '@/ui/components/layout/Box';
 import { ProfilePopup } from '@/ui/components/profile/ProfilePopup';
@@ -402,6 +404,42 @@ const UserItemInner: React.FC<
                     label: 'Open DMs',
                     icon: MessageSquare,
                     onClick: () => dispatch(setSelectedFriendId(userId)),
+                });
+                items.push({
+                    label: 'Add to Split View',
+                    type: 'submenu',
+                    items: [
+                        {
+                            label: 'Left Side',
+                            icon: PanelLeftOpen,
+                            onClick: () => {
+                                dispatch(
+                                    setSplitViewPane({
+                                        side: 'left',
+                                        conversation: {
+                                            type: 'dm',
+                                            friendId: userId,
+                                        },
+                                    }),
+                                );
+                            },
+                        },
+                        {
+                            label: 'Right Side',
+                            icon: PanelRightOpen,
+                            onClick: () => {
+                                dispatch(
+                                    setSplitViewPane({
+                                        side: 'right',
+                                        conversation: {
+                                            type: 'dm',
+                                            friendId: userId,
+                                        },
+                                    }),
+                                );
+                            },
+                        },
+                    ],
                 });
 
                 if (hasUnread) {

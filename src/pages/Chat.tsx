@@ -43,6 +43,7 @@ export const Chat: React.FC = () => {
         mobileHomeTab,
         lastSelectedFriendId,
         lastOpenedChannelByServer,
+        isSplitViewActive,
     } = useAppShallowSelector((state) => ({
         selectedFriendId: state.nav.selectedFriendId,
         selectedServerId: state.nav.selectedServerId,
@@ -52,6 +53,9 @@ export const Chat: React.FC = () => {
         mobileHomeTab: state.nav.mobileHomeTab,
         lastSelectedFriendId: state.nav.lastSelectedFriendId,
         lastOpenedChannelByServer: state.nav.lastOpenedChannelByServer,
+        isSplitViewActive: !!(
+            state.nav.splitView.left || state.nav.splitView.right
+        ),
     }));
 
     const [isMobile, setIsMobile] = useState(isMobileViewport);
@@ -222,7 +226,7 @@ export const Chat: React.FC = () => {
                 <PrimaryNavBar />
                 <SecondaryNavBar />
                 <MainContent />
-                <TertiarySidebar />
+                {!isSplitViewActive && <TertiarySidebar />}
             </Box>
         );
     }
@@ -258,7 +262,7 @@ export const Chat: React.FC = () => {
             </MobileSwipeContext.Provider>
 
             {/* TertiarySidebar: fixed overlay, slides in from right independently */}
-            <TertiarySidebar />
+            {!isSplitViewActive && <TertiarySidebar />}
         </Box>
     );
 };

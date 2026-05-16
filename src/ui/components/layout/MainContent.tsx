@@ -1,12 +1,25 @@
 import React from 'react';
 
+import { X } from 'lucide-react';
 import { Provider, useStore } from 'react-redux';
 
 import type { RootState } from '@/store';
-import { useAppSelector, useAppShallowSelector } from '@/store/hooks';
+import {
+    useAppDispatch,
+    useAppSelector,
+    useAppShallowSelector,
+} from '@/store/hooks';
+import {
+    type SplitViewConversation,
+    type SplitViewSide,
+    clearSplitViewPane,
+} from '@/store/slices/navSlice';
 import { useMobileSwipeContext } from '@/ui/MobileSwipeContext';
 import { MainChat } from '@/ui/components/chat/MainChat';
+import { IconButton } from '@/ui/components/common/IconButton';
+import { Text } from '@/ui/components/common/Text';
 import { FriendRequestList } from '@/ui/components/friends/FriendRequestList';
+import { Box } from '@/ui/components/layout/Box';
 import { cn } from '@/utils/cn';
 
 const ActiveVoiceRoom = React.lazy(() =>
@@ -41,8 +54,15 @@ const ProxyProvider: React.FC<{
     overrideServerId?: string | null;
     overrideChannelId?: string | null;
     overrideFriendId?: string | null;
+    overrideTargetMessageId?: string | null;
     children: React.ReactNode;
-}> = ({ overrideServerId, overrideChannelId, overrideFriendId, children }) => {
+}> = ({
+    overrideServerId,
+    overrideChannelId,
+    overrideFriendId,
+    overrideTargetMessageId,
+    children,
+}) => {
     const store = useStore<RootState>();
 
     const proxiedStore = React.useMemo(() => {
@@ -84,6 +104,10 @@ const ProxyProvider: React.FC<{
                     navOverrides.selectedFriendId = overrideFriendId;
                     hasOverrides = true;
                 }
+                if (overrideTargetMessageId !== undefined) {
+                    navOverrides.targetMessageId = overrideTargetMessageId;
+                    hasOverrides = true;
+                }
 
                 cache.lastOriginalState = state;
 
@@ -103,9 +127,70 @@ const ProxyProvider: React.FC<{
                 return cache.lastProxiedState;
             },
         };
-    }, [store, overrideServerId, overrideChannelId, overrideFriendId]);
+    }, [
+        store,
+        overrideServerId,
+        overrideChannelId,
+        overrideFriendId,
+        overrideTargetMessageId,
+    ]);
 
     return <Provider store={proxiedStore}>{children}</Provider>;
+};
+
+const getConversationKey = (
+    conversation: SplitViewConversation | null,
+): string => {
+    if (!conversation) return 'none';
+    if (conversation.type === 'dm') return `dm-${conversation.friendId}`;
+    return `channel-${conversation.serverId}-${conversation.channelId}`;
+};
+
+const SplitViewPane: React.FC<{
+    side: SplitViewSide;
+    conversation: SplitViewConversation | null;
+}> = ({ side, conversation }) => {
+    const dispatch = useAppDispatch();
+
+    if (!conversation) {
+        return (
+            <Box className="flex min-w-0 flex-1 items-center justify-center bg-[var(--chat-bg)] px-6 text-center">
+                <Text className="max-w-64 text-muted-foreground" size="sm">
+                    Use a channel or DM context menu to add a chat here.
+                </Text>
+            </Box>
+        );
+    }
+
+    const isDm = conversation.type === 'dm';
+
+    return (
+        <Box className="flex min-w-0 flex-1 flex-col overflow-hidden bg-[var(--chat-bg)]">
+            <ProxyProvider
+                overrideChannelId={isDm ? null : conversation.channelId}
+                overrideFriendId={isDm ? conversation.friendId : null}
+                overrideServerId={isDm ? null : conversation.serverId}
+                overrideTargetMessageId={null}
+            >
+                <MainChat
+                    headerActions={
+                        <IconButton
+                            className="h-8 w-8"
+                            icon={X}
+                            iconSize={15}
+                            title={`Close ${side} split pane`}
+                            variant="ghost"
+                            onClick={() => {
+                                dispatch(clearSplitViewPane(side));
+                            }}
+                        />
+                    }
+                    key={getConversationKey(conversation)}
+                    requireUrlMatch={false}
+                />
+            </ProxyProvider>
+        </Box>
+    );
 };
 
 /**
@@ -119,6 +204,7 @@ export const MainContent: React.FC = () => {
         navMode,
         mobileHomeTab,
         lastOpenedChannelByServer,
+        splitView,
     } = useAppShallowSelector((state) => ({
         selectedFriendId: state.nav.selectedFriendId,
         selectedServerId: state.nav.selectedServerId,
@@ -126,10 +212,12 @@ export const MainContent: React.FC = () => {
         navMode: state.nav.navMode,
         mobileHomeTab: state.nav.mobileHomeTab,
         lastOpenedChannelByServer: state.nav.lastOpenedChannelByServer,
+        splitView: state.nav.splitView,
     }));
     const inSwipePanel = useMobileSwipeContext();
 
     const isNothingSelected = !selectedFriendId && !selectedChannelId;
+    const isSplitViewActive = !!(splitView.left || splitView.right);
 
     const conversationKey = selectedFriendId
         ? `dm-${selectedFriendId}`
@@ -153,7 +241,16 @@ export const MainContent: React.FC = () => {
                     'max-md:hidden',
             )}
         >
-            {isNothingSelected ? (
+            {isSplitViewActive ? (
+                <Box className="flex min-h-0 flex-1 flex-col overflow-hidden bg-[var(--chat-bg)] md:flex-row">
+                    <SplitViewPane conversation={splitView.left} side="left" />
+                    <Box className="h-px shrink-0 bg-border-subtle md:h-full md:w-px" />
+                    <SplitViewPane
+                        conversation={splitView.right}
+                        side="right"
+                    />
+                </Box>
+            ) : isNothingSelected ? (
                 navMode === 'friends' ? (
                     <FriendRequestList />
                 ) : (
@@ -167,6 +264,7 @@ export const MainContent: React.FC = () => {
                                 ]
                             }
                             overrideServerId={selectedServerId}
+                            overrideTargetMessageId={null}
                         >
                             <MainChat
                                 key={`channel-${selectedServerId}-${lastOpenedChannelByServer[selectedServerId || '']}`}

@@ -28,6 +28,7 @@ interface ChatHeaderProps {
     selectedChannel?: Channel;
     onTogglePins?: () => void;
     showPins?: boolean;
+    actions?: React.ReactNode;
 }
 
 /**
@@ -39,6 +40,7 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
     selectedChannel,
     onTogglePins,
     showPins,
+    actions,
 }) => {
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
@@ -180,6 +182,7 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
 
             {/* Icons Area */}
             <Box className="ml-2 flex shrink-0 items-center gap-1 pt-2">
+                {actions}
                 {selectedChannel && !selectedFriendId && (
                     <>
                         <button

@@ -49,7 +49,15 @@ const THEMES: Theme[] = [
     'forest-green',
 ];
 
-export const MainChat: React.FC = () => {
+interface MainChatProps {
+    requireUrlMatch?: boolean;
+    headerActions?: React.ReactNode;
+}
+
+export const MainChat: React.FC<MainChatProps> = ({
+    requireUrlMatch = true,
+    headerActions,
+}) => {
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
     const location = useLocation();
@@ -141,8 +149,8 @@ export const MainChat: React.FC = () => {
         ?.split('/')[0];
     const isServerContextReady =
         !!selectedServerId &&
-        !!serverIdFromUrl &&
-        selectedServerId === serverIdFromUrl;
+        (!requireUrlMatch ||
+            (!!serverIdFromUrl && selectedServerId === serverIdFromUrl));
 
     const { data: serverDetails } = useServerDetails(selectedServerId, {
         enabled: isServerContextReady,
@@ -342,6 +350,7 @@ export const MainChat: React.FC = () => {
         return (
             <Box>
                 <ChatHeader
+                    actions={headerActions}
                     friendUser={undefined}
                     selectedChannel={undefined}
                     selectedFriendId=""
@@ -361,6 +370,7 @@ export const MainChat: React.FC = () => {
             onDrop={handleDrop}
         >
             <ChatHeader
+                actions={headerActions}
                 friendUser={friendUser}
                 selectedChannel={selectedChannel}
                 selectedFriendId={selectedFriendId}

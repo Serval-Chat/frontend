@@ -22,6 +22,11 @@ export const saveLastChannels = (data: Record<string, string>): void => {
 };
 
 export type NavMode = 'friends' | 'servers';
+export type SplitViewSide = 'left' | 'right';
+
+export type SplitViewConversation =
+    | { type: 'channel'; serverId: string; channelId: string }
+    | { type: 'dm'; friendId: string };
 
 interface NavState {
     navMode: NavMode;
@@ -29,6 +34,7 @@ interface NavState {
     selectedFriendId: string | null;
     selectedChannelId: string | null;
     targetMessageId: string | null;
+    splitView: Record<SplitViewSide, SplitViewConversation | null>;
     lastOpenedChannelByServer: Record<string, string>;
     lastSelectedFriendId: string | null;
     mobileHomeTab: 'friends' | 'requests';
@@ -36,12 +42,90 @@ interface NavState {
     openedFolders: string[];
 }
 
+const getSelectedConversation = (
+    state: NavState,
+): SplitViewConversation | null => {
+    if (state.selectedFriendId) {
+        return { type: 'dm', friendId: state.selectedFriendId };
+    }
+
+    if (state.selectedServerId && state.selectedChannelId) {
+        return {
+            type: 'channel',
+            serverId: state.selectedServerId,
+            channelId: state.selectedChannelId,
+        };
+    }
+
+    return null;
+};
+
+const conversationsEqual = (
+    a: SplitViewConversation | null,
+    b: SplitViewConversation | null,
+): boolean => {
+    if (!a || !b) return a === b;
+    if (a.type !== b.type) return false;
+
+    if (a.type === 'dm' && b.type === 'dm') {
+        return a.friendId === b.friendId;
+    }
+
+    if (a.type === 'channel' && b.type === 'channel') {
+        return a.serverId === b.serverId && a.channelId === b.channelId;
+    }
+
+    return false;
+};
+
+const clearSplitView = (state: NavState): void => {
+    state.splitView.left = null;
+    state.splitView.right = null;
+};
+
+const isSplitViewActive = (state: NavState): boolean =>
+    !!(state.splitView.left || state.splitView.right);
+
+const placeConversationInSplitView = (
+    state: NavState,
+    conversation: SplitViewConversation,
+    preferredSide: SplitViewSide,
+): void => {
+    if (!isSplitViewActive(state)) return;
+
+    if (
+        conversationsEqual(state.splitView.left, conversation) ||
+        conversationsEqual(state.splitView.right, conversation)
+    ) {
+        return;
+    }
+
+    const otherSide: SplitViewSide =
+        preferredSide === 'left' ? 'right' : 'left';
+
+    if (!state.splitView[preferredSide]) {
+        state.splitView[preferredSide] = conversation;
+        return;
+    }
+
+    if (!state.splitView[otherSide]) {
+        state.splitView[otherSide] = conversation;
+        return;
+    }
+
+    state.splitView[preferredSide] = conversation;
+};
+
 const initialState: NavState = {
     navMode: 'friends', // Default to friends
     selectedServerId: null,
     selectedFriendId: null,
     selectedChannelId: null,
     targetMessageId: null,
+    splitView: {
+        left: null,
+        right: null,
+    },
     lastOpenedChannelByServer: loadLastChannels(),
     lastSelectedFriendId: null,
     mobileHomeTab: 'friends',
@@ -81,6 +165,11 @@ const navSlice = createSlice({
 
             if (action.payload) {
                 state.lastSelectedFriendId = action.payload;
+                placeConversationInSplitView(
+                    state,
+                    { type: 'dm', friendId: action.payload },
+                    'right',
+                );
             }
         },
         setSelectedChannelId: (state, action: PayloadAction<string | null>) => {
@@ -92,10 +181,47 @@ const navSlice = createSlice({
             if (state.selectedServerId && action.payload) {
                 state.lastOpenedChannelByServer[state.selectedServerId] =
                     action.payload;
+                placeConversationInSplitView(
+                    state,
+                    {
+                        type: 'channel',
+                        serverId: state.selectedServerId,
+                        channelId: action.payload,
+                    },
+                    'left',
+                );
             }
         },
         setTargetMessageId: (state, action: PayloadAction<string | null>) => {
             state.targetMessageId = action.payload;
+        },
+        setSplitViewPane: (
+            state,
+            action: PayloadAction<{
+                side: SplitViewSide;
+                conversation: SplitViewConversation;
+            }>,
+        ) => {
+            const { side, conversation } = action.payload;
+            const otherSide: SplitViewSide = side === 'left' ? 'right' : 'left';
+            const selectedConversation = getSelectedConversation(state);
+
+            if (
+                !state.splitView[otherSide] &&
+                selectedConversation &&
+                !conversationsEqual(selectedConversation, conversation)
+            ) {
+                state.splitView[otherSide] = selectedConversation;
+            }
+
+            state.splitView[side] = conversation;
+            state.targetMessageId = null;
+        },
+        clearSplitViewPane: (state, action: PayloadAction<SplitViewSide>) => {
+            state.splitView[action.payload] = null;
+        },
+        closeSplitView: (state) => {
+            clearSplitView(state);
         },
         toggleMobileHomeTab: (state) => {
             state.mobileHomeTab =
@@ -126,6 +252,9 @@ export const {
     setSelectedFriendId,
     setSelectedChannelId,
     setTargetMessageId,
+    setSplitViewPane,
+    clearSplitViewPane,
+    closeSplitView,
     toggleMobileHomeTab,
     toggleMobileMemberList,
     toggleFolder,

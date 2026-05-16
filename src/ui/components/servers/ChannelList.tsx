@@ -13,6 +13,8 @@ import {
     FolderPlus,
     Link as LinkIcon,
     LogOut,
+    PanelLeftOpen,
+    PanelRightOpen,
     Plus,
     Settings,
 } from 'lucide-react';
@@ -30,6 +32,7 @@ import type { Category, Channel } from '@/api/servers/servers.types';
 import { useMe } from '@/api/users/users.queries';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { setSplitViewPane } from '@/store/slices/navSlice';
 import { addVoiceParticipant, joinVoiceRoom } from '@/store/slices/voiceSlice';
 import { ConfirmLinkModal } from '@/ui/components/common/ConfirmLinkModal';
 import { ContextMenu } from '@/ui/components/common/ContextMenu';
@@ -610,6 +613,48 @@ export const ChannelList: React.FC<ChannelListProps> = ({
                 },
             ];
 
+            if (channel.type === 'text') {
+                items.push({ type: 'divider' });
+                items.push({
+                    label: 'Add to Split View',
+                    type: 'submenu',
+                    items: [
+                        {
+                            label: 'Left Side',
+                            icon: PanelLeftOpen,
+                            onClick: () => {
+                                dispatch(
+                                    setSplitViewPane({
+                                        side: 'left',
+                                        conversation: {
+                                            type: 'channel',
+                                            serverId: channel.serverId,
+                                            channelId: channel._id,
+                                        },
+                                    }),
+                                );
+                            },
+                        },
+                        {
+                            label: 'Right Side',
+                            icon: PanelRightOpen,
+                            onClick: () => {
+                                dispatch(
+                                    setSplitViewPane({
+                                        side: 'right',
+                                        conversation: {
+                                            type: 'channel',
+                                            serverId: channel.serverId,
+                                            channelId: channel._id,
+                                        },
+                                    }),
+                                );
+                            },
+                        },
+                    ],
+                });
+            }
+
             if (canManageChannels) {
                 items.push({
                     label: 'Edit Channel',
@@ -705,6 +750,7 @@ export const ChannelList: React.FC<ChannelListProps> = ({
         },
         [
             canManageChannels,
+            dispatch,
             isMobile,
             handleMoveItemMobile,
             handleMoveToCategory,
@@ -914,15 +960,13 @@ export const ChannelList: React.FC<ChannelListProps> = ({
                 >
                     {(isReordering
                         ? items
-                        : rowVirtualizer
-                              .getVirtualItems()
-                              .map(
-                                  (v) =>
-                                      ({
-                                          ...items[v.index],
-                                          virtualRow: v,
-                                      }) as VirtualListItem,
-                              )
+                        : rowVirtualizer.getVirtualItems().map(
+                              (v) =>
+                                  ({
+                                      ...items[v.index],
+                                      virtualRow: v,
+                                  }) as VirtualListItem,
+                          )
                     ).map((itemOrVirtual) => {
                         const item: ListItem =
                             'virtualRow' in itemOrVirtual
