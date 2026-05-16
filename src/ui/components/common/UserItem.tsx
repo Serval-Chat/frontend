@@ -6,6 +6,7 @@ import {
     Check,
     Copy,
     HeadphoneOff,
+    ListTree,
     MessageSquare,
     MicOff,
     Shield,
@@ -52,9 +53,11 @@ import { BanUserModal } from '@/ui/components/servers/modals/BanUserModal';
 import { KickUserModal } from '@/ui/components/servers/modals/KickUserModal';
 import { TimeoutUserModal } from '@/ui/components/servers/modals/TimeoutUserModal';
 import { cn } from '@/utils/cn';
+import { buildUsernameColorResolverReport } from '@/utils/usernameColorResolver';
 import { wsMessages } from '@/ws/messages';
 
 import { BotTag } from './BotTag';
+import { CodeModal } from './CodeModal';
 import { ContextMenu, type ContextMenuItem } from './ContextMenu';
 import { MarqueeText } from './MarqueeText';
 import { ParsedEmoji } from './ParsedEmoji';
@@ -208,6 +211,9 @@ const UserItemInner: React.FC<
         const [isTimeoutModalOpen, setIsTimeoutModalOpen] =
             React.useState(false);
         const [isBlockModalOpen, setIsBlockModalOpen] = React.useState(false);
+        const [colorResolverReport, setColorResolverReport] = React.useState<
+            string | null
+        >(null);
 
         const { data: fetchedUser } = useUserById(userId, {
             enabled: !noFetch && !providedUser,
@@ -284,6 +290,10 @@ const UserItemInner: React.FC<
         );
         const storePresenceCustomEmoji = useAppSelector(
             (state) => state.presence.users[userId]?.customStatus?.emoji,
+        );
+        const showColorResolverDebug = useAppSelector(
+            (state) =>
+                state.debugOptions?.usernameColorResolverContextMenu ?? false,
         );
 
         const isInSameVoiceChannel = Boolean(
@@ -369,6 +379,14 @@ const UserItemInner: React.FC<
 
         const contextMenuItems = useMemo(() => {
             const items: ContextMenuItem[] = [];
+            const resolvedDisableColors =
+                disableColors ||
+                currentUser?.settings?.disableCustomUsernameColors ||
+                serverDetails?.disableUsernameGlowAndCustomColor;
+            const resolvedDisableGlow =
+                disableGlow ||
+                currentUser?.settings?.disableCustomUsernameGlow ||
+                serverDetails?.disableUsernameGlowAndCustomColor;
 
             // Group 0: Profile
             items.push({
@@ -581,6 +599,35 @@ const UserItemInner: React.FC<
 
             items.push({ type: 'divider' });
 
+            if (showColorResolverDebug) {
+                items.push({
+                    label: 'Show color resolver order',
+                    icon: ListTree,
+                    onClick: () => {
+                        setColorResolverReport(
+                            buildUsernameColorResolverReport({
+                                label: 'User item username',
+                                renderedName: displayName || username,
+                                user: userProfile,
+                                role,
+                                disableColors: resolvedDisableColors,
+                                disableGlow: resolvedDisableGlow,
+                                disableGlowAndColors,
+                                extraData: {
+                                    userId,
+                                    initialData,
+                                    allRoles,
+                                    iconRole,
+                                    currentUserSettings: currentUser?.settings,
+                                    serverDisableUsernameGlowAndCustomColor:
+                                        serverDetails?.disableUsernameGlowAndCustomColor,
+                                },
+                            }),
+                        );
+                    },
+                });
+            }
+
             if (
                 !isMe &&
                 sid &&
@@ -639,7 +686,6 @@ const UserItemInner: React.FC<
             userVolume,
             isMe,
             removeFriend,
-            userProfile?.isBot,
             sendFriendRequest,
             username,
             blocks,
@@ -665,6 +711,17 @@ const UserItemInner: React.FC<
             setIsTimeoutModalOpen,
             setIsKickModalOpen,
             setIsBanModalOpen,
+            showColorResolverDebug,
+            disableColors,
+            currentUser?.settings,
+            serverDetails?.disableUsernameGlowAndCustomColor,
+            disableGlow,
+            displayName,
+            userProfile,
+            role,
+            disableGlowAndColors,
+            initialData,
+            iconRole,
         ]);
 
         const presenceStatus =
@@ -881,6 +938,12 @@ const UserItemInner: React.FC<
                         }
                     />
                 )}
+                <CodeModal
+                    content={colorResolverReport ?? ''}
+                    isOpen={!!colorResolverReport}
+                    language="json"
+                    onClose={() => setColorResolverReport(null)}
+                />
             </>
         );
     },

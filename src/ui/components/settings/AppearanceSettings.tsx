@@ -140,10 +140,15 @@ const AppearanceSettingsForm: React.FC<AppearanceSettingsFormProps> = ({
             },
         });
 
-        updateSettings({
-            customFontUrl: localCustomFontUrl,
-            customFontFamily: localCustomFontFamily,
-        });
+        if (
+            localCustomFontUrl !== (user.settings?.customFontUrl ?? '') ||
+            localCustomFontFamily !== (user.settings?.customFontFamily ?? '')
+        ) {
+            updateSettings({
+                customFontUrl: localCustomFontUrl,
+                customFontFamily: localCustomFontFamily,
+            });
+        }
 
         setCustomFontUrl(localCustomFontUrl);
         setCustomFontFamily(localCustomFontFamily);

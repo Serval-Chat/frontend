@@ -1,16 +1,18 @@
 import React from 'react';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { renderHook, waitFor } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { usersApi } from '@/api/users/users.api';
+import type { User } from '@/api/users/users.types';
 
-import { useUserById } from './users.queries';
+import { useUpdateStyle, useUserById } from './users.queries';
 
 vi.mock('@/api/users/users.api', () => ({
     usersApi: {
         getById: vi.fn(),
+        updateStyle: vi.fn(),
     },
 }));
 
@@ -19,6 +21,14 @@ vi.mock('@/utils/authToken', () => ({
 }));
 
 const makeWrapper = (): React.FC<{ children: React.ReactNode }> => {
+    const { wrapper } = makeHarness();
+    return wrapper;
+};
+
+const makeHarness = (): {
+    queryClient: QueryClient;
+    wrapper: React.FC<{ children: React.ReactNode }>;
+} => {
     const queryClient = new QueryClient({
         defaultOptions: {
             queries: { retry: false },
@@ -36,7 +46,7 @@ const makeWrapper = (): React.FC<{ children: React.ReactNode }> => {
             children,
         );
     Wrapper.displayName = 'QueryClientWrapper';
-    return Wrapper;
+    return { queryClient, wrapper: Wrapper };
 };
 
 describe('useUserById', () => {
@@ -77,6 +87,59 @@ describe('useUserById', () => {
         await waitFor(() => expect(result.current.isSuccess).toBe(true));
         expect(usersApi.getById).toHaveBeenCalledWith(
             '507f1f77bcf86cd799439011',
+        );
+    });
+});
+
+describe('useUpdateStyle', () => {
+    beforeEach(() => {
+        vi.clearAllMocks();
+    });
+
+    it('updates cached style from submitted values when the response omits disabled fields', async () => {
+        const { queryClient, wrapper } = makeHarness();
+        queryClient.setQueryData<User>(['me'], {
+            _id: 'user-1',
+            login: 'alice',
+            username: 'Alice',
+            createdAt: new Date(),
+            usernameGlow: {
+                enabled: true,
+                color: '#ffffff',
+                intensity: 5,
+            },
+            usernameGradient: {
+                enabled: true,
+                colors: ['#ff0000', '#00ff00'],
+                angle: 90,
+            },
+        });
+
+        vi.mocked(usersApi.updateStyle).mockResolvedValue({
+            message: 'updated',
+        });
+
+        const { result } = renderHook(() => useUpdateStyle(), { wrapper });
+
+        act(() => {
+            result.current.mutate({
+                usernameGlow: {
+                    enabled: false,
+                    color: '#ffffff',
+                    intensity: 5,
+                },
+                usernameGradient: {
+                    enabled: true,
+                    colors: ['#ff0000', '#00ff00'],
+                    angle: 90,
+                },
+            });
+        });
+
+        await waitFor(() =>
+            expect(
+                queryClient.getQueryData<User>(['me'])?.usernameGlow?.enabled,
+            ).toBe(false),
         );
     });
 });

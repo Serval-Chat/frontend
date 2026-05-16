@@ -122,15 +122,23 @@ export const useUpdateStyle = (): UseMutationResult<
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: usersApi.updateStyle,
-        onSuccess: (data) => {
+        onSuccess: (data, variables) => {
             queryClient.setQueryData<User>(['me'], (old) =>
                 old
                     ? {
                           ...old,
-                          usernameFont: data.usernameFont ?? old.usernameFont,
+                          usernameFont:
+                              data.usernameFont ??
+                              variables.usernameFont ??
+                              old.usernameFont,
                           usernameGradient:
-                              data.usernameGradient ?? old.usernameGradient,
-                          usernameGlow: data.usernameGlow ?? old.usernameGlow,
+                              data.usernameGradient ??
+                              variables.usernameGradient ??
+                              old.usernameGradient,
+                          usernameGlow:
+                              data.usernameGlow ??
+                              variables.usernameGlow ??
+                              old.usernameGlow,
                       }
                     : old,
             );

@@ -138,4 +138,120 @@ describe('StyledUserName Bot Coloring', () => {
         expect(firstCharSpan?.style.backgroundImage).toBe('');
         expect(firstCharSpan?.style.color).toBe('');
     });
+
+    it('keeps role color and removes glow when custom colors and glow are disabled', () => {
+        const user: User = {
+            _id: 'user-5',
+            username: 'RoleWins',
+            usernameGradient: {
+                enabled: true,
+                colors: ['#00ff00', '#0000ff'],
+                angle: 90,
+            },
+            usernameGlow: {
+                enabled: true,
+                color: '#00ff00',
+                intensity: 5,
+            },
+        } as User;
+        const role: Role = {
+            _id: 'role-2',
+            serverId: 'server-1',
+            name: 'Member',
+            color: '#ff0000',
+            position: 10,
+        } as Role;
+
+        const { container } = render(
+            <StyledUserName disableColors disableGlow role={role} user={user}>
+                {user.username}
+            </StyledUserName>,
+        );
+
+        const firstCharSpan =
+            container.querySelector<HTMLSpanElement>('span.relative');
+        expect(firstCharSpan?.style.color).toBe('rgb(255, 0, 0)');
+        expect(firstCharSpan?.style.backgroundImage).toBe('');
+        expect(
+            container.querySelectorAll('span[aria-hidden="true"]'),
+        ).toHaveLength(0);
+    });
+
+    it('does not use a disabled user glow color over role color', () => {
+        const user: User = {
+            _id: 'user-6',
+            username: 'RoleGlow',
+            usernameGradient: {
+                enabled: true,
+                colors: ['#00ff00', '#0000ff'],
+                angle: 90,
+            },
+            usernameGlow: {
+                enabled: false,
+                color: '#2c7ead',
+                intensity: 8,
+            },
+        } as User;
+        const role: Role = {
+            _id: 'role-3',
+            serverId: 'server-1',
+            name: 'Administrator',
+            color: '#e67e22',
+            position: 10,
+        } as Role;
+
+        const { container } = render(
+            <StyledUserName role={role} user={user}>
+                {user.username}
+            </StyledUserName>,
+        );
+
+        const firstCharSpan =
+            container.querySelector<HTMLSpanElement>('span.relative');
+        const firstGlowSpan = container.querySelector<HTMLSpanElement>(
+            'span[aria-hidden="true"]',
+        );
+
+        expect(firstCharSpan?.style.color).toBe('rgb(230, 126, 34)');
+        expect(firstGlowSpan?.style.color).toBe('rgb(230, 126, 34)');
+    });
+
+    it('does not use an enabled user glow color over role color', () => {
+        const user: User = {
+            _id: 'user-7',
+            username: 'RoleGlowWins',
+            usernameGradient: {
+                enabled: true,
+                colors: ['#ff45ec', '#2f98ff'],
+                angle: 90,
+            },
+            usernameGlow: {
+                enabled: true,
+                color: '#da45ff',
+                intensity: 8,
+            },
+        } as User;
+        const role: Role = {
+            _id: 'role-4',
+            serverId: 'server-1',
+            name: 'Administrator',
+            color: '#e67e22',
+            position: 10,
+        } as Role;
+
+        const { container } = render(
+            <StyledUserName role={role} user={user}>
+                {user.username}
+            </StyledUserName>,
+        );
+
+        const firstCharSpan =
+            container.querySelector<HTMLSpanElement>('span.relative');
+        const firstGlowSpan = container.querySelector<HTMLSpanElement>(
+            'span[aria-hidden="true"]',
+        );
+
+        expect(firstCharSpan?.style.color).toBe('rgb(230, 126, 34)');
+        expect(firstGlowSpan?.style.color).toBe('rgb(230, 126, 34)');
+    });
 });

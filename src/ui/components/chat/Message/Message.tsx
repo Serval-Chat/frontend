@@ -15,12 +15,14 @@ import {
 import { useAddReaction } from '@/api/reactions/reactions.queries';
 import { useCustomEmojis } from '@/hooks/useCustomEmojis';
 import { useSmartPosition } from '@/hooks/useSmartPosition';
+import { useAppSelector } from '@/store/hooks';
 import { InteractionHeader } from '@/ui/components/chat/InteractionHeader';
 import { MessageContent } from '@/ui/components/chat/MessageContent';
 import { MessageEdit } from '@/ui/components/chat/MessageEdit';
 import { MessageHeader } from '@/ui/components/chat/MessageHeader';
 import { Reactions } from '@/ui/components/chat/Reactions';
 import { ReplyPreview } from '@/ui/components/chat/ReplyPreview';
+import { CodeModal } from '@/ui/components/common/CodeModal';
 import { ContextMenu } from '@/ui/components/common/ContextMenu';
 import { Text } from '@/ui/components/common/Text';
 import { UserProfilePicture } from '@/ui/components/common/UserProfilePicture';
@@ -28,6 +30,7 @@ import { Box } from '@/ui/components/layout/Box';
 import { ProfilePopup } from '@/ui/components/profile/ProfilePopup';
 import { cn } from '@/utils/cn';
 import { APP_LOCALE } from '@/utils/locale';
+import { buildUsernameColorResolverReport } from '@/utils/usernameColorResolver';
 
 import { useMessageData, useMessagePermissions } from './Message.hooks';
 import type { MessageProps } from './Message.types';
@@ -87,9 +90,16 @@ export const Message: React.FC<MessageProps> = React.memo(
         const [showPicker, setShowPicker] = React.useState(false);
         const [isEditing, setIsEditing] = React.useState(false);
         const [isContextMenuOpen, setIsContextMenuOpen] = React.useState(false);
+        const [colorResolverReport, setColorResolverReport] = React.useState<
+            string | null
+        >(null);
         const avatarRef = React.useRef<HTMLDivElement>(null);
         const pickerRef = React.useRef<HTMLDivElement>(null);
         const reactRef = React.useRef<HTMLButtonElement>(null);
+        const showColorResolverDebug = useAppSelector(
+            (state) =>
+                state.debugOptions?.usernameColorResolverContextMenu ?? false,
+        );
 
         const { mutate: addReaction } = useAddReaction();
         const { mutate: deleteMessage } = useDeleteMessage();
@@ -208,6 +218,53 @@ export const Message: React.FC<MessageProps> = React.memo(
             setShowProfile(false);
         }, []);
 
+        const isColorsDisabled =
+            disableColors ||
+            me?.settings?.disableCustomUsernameColors ||
+            serverDetails?.disableUsernameGlowAndCustomColor;
+        const isFontsDisabled =
+            disableCustomFonts ||
+            me?.settings?.disableCustomUsernameFonts ||
+            serverDetails?.disableCustomFonts;
+        const isGlowDisabled =
+            disableGlow ||
+            me?.settings?.disableCustomUsernameGlow ||
+            serverDetails?.disableUsernameGlowAndCustomColor;
+        const resolvedRole = role || message.role;
+
+        const handleShowColorResolverOrder = React.useCallback((): void => {
+            setColorResolverReport(
+                buildUsernameColorResolverReport({
+                    label: 'Message username',
+                    renderedName: user.displayName || user.username,
+                    user,
+                    role: resolvedRole,
+                    disableColors: isColorsDisabled,
+                    disableGlow: isGlowDisabled,
+                    disableGlowAndColors,
+                    extraData: {
+                        messageId: message._id,
+                        messageRole: message.role,
+                        propRole: role,
+                        currentUserSettings: me?.settings,
+                        serverDisableUsernameGlowAndCustomColor:
+                            serverDetails?.disableUsernameGlowAndCustomColor,
+                    },
+                }),
+            );
+        }, [
+            user,
+            resolvedRole,
+            isColorsDisabled,
+            isGlowDisabled,
+            disableGlowAndColors,
+            message._id,
+            message.role,
+            role,
+            me?.settings,
+            serverDetails?.disableUsernameGlowAndCustomColor,
+        ]);
+
         const contextMenuItems = useMessageContextMenu({
             message,
             user,
@@ -224,6 +281,8 @@ export const Message: React.FC<MessageProps> = React.memo(
             onRemoveFriend: removeFriend,
             onAddFriend: sendFriendRequest,
             onShowPicker: handleShowPicker,
+            showColorResolverDebug,
+            onShowColorResolverOrder: handleShowColorResolverOrder,
         });
 
         const isMobile = React.useMemo(
@@ -251,19 +310,6 @@ export const Message: React.FC<MessageProps> = React.memo(
             padding: 16,
             offset: 8,
         });
-
-        const isColorsDisabled =
-            disableColors ||
-            me?.settings?.disableCustomUsernameColors ||
-            serverDetails?.disableUsernameGlowAndCustomColor;
-        const isFontsDisabled =
-            disableCustomFonts ||
-            me?.settings?.disableCustomUsernameFonts ||
-            serverDetails?.disableCustomFonts;
-        const isGlowDisabled =
-            disableGlow ||
-            me?.settings?.disableCustomUsernameGlow ||
-            serverDetails?.disableUsernameGlowAndCustomColor;
 
         const messageContent = (
             <>
@@ -329,7 +375,7 @@ export const Message: React.FC<MessageProps> = React.memo(
                             isEdited={message.isEdited}
                             isGroupStart={isGroupStart}
                             isWebhook={message.isWebhook}
-                            role={role || message.role}
+                            role={resolvedRole}
                             timestamp={message.createdAt}
                             user={user}
                             onClickName={handleProfileClick}
@@ -442,6 +488,12 @@ export const Message: React.FC<MessageProps> = React.memo(
                     user={user}
                     userId={user._id}
                     onClose={handleCloseProfile}
+                />
+                <CodeModal
+                    content={colorResolverReport ?? ''}
+                    isOpen={!!colorResolverReport}
+                    language="json"
+                    onClose={() => setColorResolverReport(null)}
                 />
             </Box>
         );

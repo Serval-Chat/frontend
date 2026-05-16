@@ -4,6 +4,7 @@ import {
     Copy,
     CornerUpLeft,
     Edit,
+    ListTree,
     Pin,
     SmilePlus,
     StickyNote,
@@ -33,6 +34,8 @@ interface ContextMenuParams {
     onRemoveFriend: (id: string) => void;
     onAddFriend: (username: string) => void;
     onShowPicker: () => void;
+    showColorResolverDebug?: boolean;
+    onShowColorResolverOrder?: () => void;
 }
 
 export function buildContextMenuItems({
@@ -51,6 +54,8 @@ export function buildContextMenuItems({
     onRemoveFriend,
     onAddFriend,
     onShowPicker,
+    showColorResolverDebug,
+    onShowColorResolverOrder,
 }: ContextMenuParams): ContextMenuItem[] {
     const items: ContextMenuItem[] = [];
 
@@ -120,6 +125,15 @@ export function buildContextMenuItems({
         onClick: onShowPicker,
     });
 
+    if (showColorResolverDebug && onShowColorResolverOrder) {
+        items.push({ type: 'divider' });
+        items.push({
+            label: 'Show color resolver order',
+            icon: ListTree,
+            onClick: onShowColorResolverOrder,
+        });
+    }
+
     if (canEdit) {
         items.push({
             label: 'Edit Message',
@@ -174,6 +188,8 @@ export function useMessageContextMenu(
         onRemoveFriend,
         onAddFriend,
         onShowPicker,
+        showColorResolverDebug,
+        onShowColorResolverOrder,
     } = params;
 
     return React.useMemo(
@@ -194,6 +210,8 @@ export function useMessageContextMenu(
                 onRemoveFriend,
                 onAddFriend,
                 onShowPicker,
+                showColorResolverDebug,
+                onShowColorResolverOrder,
             }),
 
         [
@@ -212,6 +230,8 @@ export function useMessageContextMenu(
             onRemoveFriend,
             onAddFriend,
             onShowPicker,
+            showColorResolverDebug,
+            onShowColorResolverOrder,
         ],
     );
 }

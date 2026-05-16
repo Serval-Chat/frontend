@@ -4,6 +4,7 @@ import type { Role } from '@/api/servers/servers.types';
 import type { User } from '@/api/users/users.types';
 import { resolveApiUrl } from '@/utils/apiUrl';
 import { cn } from '@/utils/cn';
+import { resolveUsernameColor } from '@/utils/usernameColorResolver';
 
 import { Text } from './Text';
 
@@ -96,8 +97,6 @@ export const StyledUserName: React.FC<StyledUserNameProps> = React.memo(
         showIcon = false,
         iconRole,
     }) => {
-        const effectiveDisableColors = disableGlowAndColors || disableColors;
-        const effectiveDisableGlow = disableGlowAndColors || disableGlow;
         let usernameFont = disableCustomFonts ? undefined : user?.usernameFont;
 
         if (
@@ -123,95 +122,20 @@ export const StyledUserName: React.FC<StyledUserNameProps> = React.memo(
             );
         }
 
-        const usernameGlow = user?.usernameGlow;
-
-        // Gradients
-        let gradientFunction = 'linear-gradient';
-        let gradientArgs = '90deg, transparent, transparent';
-        let hasGradient = false;
-        let fallbackColor = '';
-        let solidColor = '';
-
-        // If role is provided and has colors, use it
-        if (role) {
-            const isDefaultColor = (c: string): boolean =>
-                c.toLowerCase() === '#99aab5';
-
-            if (role.colors && role.colors.length > 0) {
-                const uniqueColors = new Set(role.colors);
-                if (uniqueColors.size === 1) {
-                    const color = role.colors[0];
-                    if (!isDefaultColor(color)) {
-                        solidColor = color;
-                    } else {
-                        fallbackColor = color;
-                    }
-                } else {
-                    hasGradient = true;
-                    const repeat =
-                        role.gradientRepeat && role.gradientRepeat > 1
-                            ? role.gradientRepeat
-                            : 1;
-                    if (repeat > 1) {
-                        gradientFunction = 'repeating-linear-gradient';
-                        const stop = (100 / repeat).toFixed(2);
-                        gradientArgs = `90deg, ${role.colors.join(', ')} ${stop}%`;
-                    } else {
-                        gradientArgs = `90deg, ${role.colors.join(', ')}`;
-                    }
-                }
-            } else if (role.startColor && role.endColor) {
-                if (role.startColor === role.endColor) {
-                    if (!isDefaultColor(role.startColor)) {
-                        solidColor = role.startColor;
-                    } else {
-                        fallbackColor = role.startColor;
-                    }
-                } else {
-                    hasGradient = true;
-                    gradientArgs = `90deg, ${role.startColor}, ${role.endColor}`;
-                }
-            } else if (role.color) {
-                if (!isDefaultColor(role.color)) {
-                    solidColor = role.color;
-                } else {
-                    fallbackColor = role.color;
-                }
-            }
-        }
-
-        // If user has custom gradient and no role gradient was set, use user's
-        if (
-            !hasGradient &&
-            !solidColor &&
-            user?.usernameGradient?.enabled &&
-            !effectiveDisableColors
-        ) {
-            const { colors, angle, repeating } = user.usernameGradient;
-            if (colors.length > 0) {
-                if (colors.length === 1) {
-                    solidColor = colors[0];
-                } else {
-                    hasGradient = true;
-                    gradientFunction = repeating
-                        ? 'repeating-linear-gradient'
-                        : 'linear-gradient';
-                    const colorStr = colors.join(', ');
-                    gradientArgs = `${angle}deg, ${colorStr}`;
-                }
-            }
-        }
-
-        if (!hasGradient && !solidColor && fallbackColor) {
-            solidColor = fallbackColor;
-        }
-
-        const hasGlow =
-            !effectiveDisableGlow &&
-            (usernameGlow?.enabled ||
-                (!!role &&
-                    role.glowEnabled !== false &&
-                    (!!solidColor || hasGradient)));
+        const {
+            gradientFunction,
+            gradientArgs,
+            hasGradient,
+            solidColor,
+            hasGlow,
+            glowColor,
+        } = resolveUsernameColor({
+            user,
+            role,
+            disableGlowAndColors,
+            disableColors,
+            disableGlow,
+        });
 
         const containerStyle: React.CSSProperties = {
             fontFamily:
@@ -263,7 +187,7 @@ export const StyledUserName: React.FC<StyledUserNameProps> = React.memo(
                       WebkitTextFillColor: 'transparent' as const,
                   }
                 : {
-                      color: usernameGlow?.color || solidColor || undefined,
+                      color: glowColor || undefined,
                   };
 
             return chars.map((char, i) => {
