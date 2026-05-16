@@ -1,6 +1,7 @@
 export interface KlipyGif {
     klipyId?: string | number;
     id?: string | number;
+    slug?: string;
     url?: string;
     previewUrl?: string;
     width?: number;
@@ -14,6 +15,7 @@ export interface KlipyGif {
 
 export interface KlipyFavorite {
     klipyId: string;
+    slug?: string;
     url: string;
     previewUrl: string;
     width: number;

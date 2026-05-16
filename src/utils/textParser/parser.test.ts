@@ -72,6 +72,32 @@ describe('TextParser', () => {
         ]);
     });
 
+    it('should parse standard Klipy GIF links', () => {
+        const text =
+            'Check out https://klipy.com/gifs/floppa-michael--k01KRS7EZ3ZN5K93KWB5G0QSA5Z';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            { type: 'text', content: 'Check out ' },
+            {
+                type: 'klipy',
+                klipyId: 'floppa-michael--k01KRS7EZ3ZN5K93KWB5G0QSA5Z',
+                url: 'https://klipy.com/gifs/floppa-michael--k01KRS7EZ3ZN5K93KWB5G0QSA5Z',
+            },
+        ]);
+    });
+
+    it('should parse standard Klipy sticker links', () => {
+        const text = 'https://klipy.com/stickers/happy-cat-123';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            {
+                type: 'klipy',
+                klipyId: 'happy-cat-123',
+                url: 'https://klipy.com/stickers/happy-cat-123',
+            },
+        ]);
+    });
+
     it('should handle complex mixed text', () => {
         const text =
             '***Bold Italic*** and **Bold** with <emoji:test> and https://link.com';

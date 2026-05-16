@@ -1168,9 +1168,9 @@ export class TextParser {
             this.index++;
         }
 
-        if (url) {
+        if (url !== '') {
             const klipyRegex =
-                /^https?:\/\/(?:www\.)?klipy\.com\/g\/([a-zA-Z0-9_-]+)/;
+                /^https?:\/\/(?:www\.)?klipy\.com\/(?:g|gifs|stickers)\/([a-zA-Z0-9_-]+)/;
             const klipyMatch = url.match(klipyRegex);
 
             if (klipyMatch && this.has(ParserFeature.KLIPY)) {

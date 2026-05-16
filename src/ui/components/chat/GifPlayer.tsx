@@ -48,6 +48,7 @@ export const GifPlayer: React.FC<GifPlayerProps> = ({ klipyId, url }) => {
 
             return klipyApi.toggleFavorite({
                 klipyId,
+                slug: metadata.slug,
                 url,
                 previewUrl: metadata.previewUrl,
                 width: metadata.width,

@@ -132,13 +132,13 @@ export const GifPicker: React.FC<GifPickerProps> = ({ onSelect, onClose }) => {
                 setFavoritedIds(favIds);
                 setFavoritedIds(favIds);
             } else if (tab === 'stickers') {
-                if (debouncedSearch) {
+                if (debouncedSearch !== '') {
                     fetchedGifs =
                         await klipyApi.searchStickers(debouncedSearch);
                 } else {
                     fetchedGifs = await klipyApi.getTrendingStickers();
                 }
-            } else if (debouncedSearch) {
+            } else if (debouncedSearch !== '') {
                 fetchedGifs = await klipyApi.searchGifs(debouncedSearch);
             } else {
                 fetchedGifs = await klipyApi.getTrendingGifs();
@@ -169,9 +169,14 @@ export const GifPicker: React.FC<GifPickerProps> = ({ onSelect, onClose }) => {
         e.stopPropagation();
 
         const klipyId = String(gif.klipyId || gif.id);
-        if (!klipyId || klipyId === 'undefined') return;
+        if (klipyId === '' || klipyId === 'undefined') return;
 
-        const url = gif.url || `https://klipy.com/g/${klipyId}`;
+        const slug = gif.slug;
+        const contentType = gif.contentType || 'gif';
+        const url = slug
+            ? `https://klipy.com/${contentType === 'sticker' ? 'stickers' : 'gifs'}/${slug}`
+            : gif.url || `https://klipy.com/g/${klipyId}`;
+
         const previewUrl =
             gif.previewUrl ||
             gif.file?.sm?.gif?.url ||
@@ -184,10 +189,12 @@ export const GifPicker: React.FC<GifPickerProps> = ({ onSelect, onClose }) => {
             const { favorited: isNowFavorited } = await klipyApi.toggleFavorite(
                 {
                     klipyId,
+                    slug,
                     url,
                     previewUrl,
                     width,
                     height,
+                    contentType,
                 },
             );
 
@@ -298,8 +305,11 @@ export const GifPicker: React.FC<GifPickerProps> = ({ onSelect, onClose }) => {
                     >
                         {gifs.map((gif) => {
                             const klipyId = String(gif.klipyId || gif.id);
-                            const url =
-                                gif.url || `https://klipy.com/g/${klipyId}`;
+                            const slug = gif.slug;
+                            const contentType = gif.contentType || 'gif';
+                            const url = slug
+                                ? `https://klipy.com/${contentType === 'sticker' ? 'stickers' : 'gifs'}/${slug}`
+                                : gif.url || `https://klipy.com/g/${klipyId}`;
                             const previewUrl =
                                 gif.previewUrl ||
                                 gif.file?.sm?.gif?.url ||

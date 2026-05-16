@@ -66,6 +66,7 @@ export const klipyApi = {
 
     toggleFavorite: async (params: {
         klipyId: string;
+        slug?: string;
         url: string;
         previewUrl: string;
         width: number;
