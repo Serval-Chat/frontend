@@ -11,10 +11,17 @@
  * React tree.
  */
 import type { Dispatch, UnknownAction } from '@reduxjs/toolkit';
+import type { InfiniteData } from '@tanstack/react-query';
 import { QueryClient } from '@tanstack/react-query';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { chatApi } from '@/api/chat/chat.api';
+import { CHAT_QUERY_KEYS } from '@/api/chat/chat.queries';
+import type { ChatMessage } from '@/api/chat/chat.types';
 import type { PingNotification } from '@/api/pings/pings.types';
+import { serversApi } from '@/api/servers/servers.api';
+import { SERVERS_QUERY_KEYS } from '@/api/servers/servers.queries';
+import type { Channel } from '@/api/servers/servers.types';
 import {
     decrementServerPing,
     incrementServerPing,
@@ -100,6 +107,7 @@ describe('setupGlobalWsHandlers - ping behaviour', () => {
     afterEach(() => {
         cleanup();
         queryClient.clear();
+        vi.restoreAllMocks();
     });
 
     describe('MENTION event (server channel)', () => {
@@ -244,6 +252,195 @@ describe('setupGlobalWsHandlers - ping behaviour', () => {
 
             expect(dispatch).toHaveBeenLastCalledWith(
                 setDmUnread({ userId: 'user-42', count: 0 }),
+            );
+        });
+    });
+
+    describe('message cache freshness', () => {
+        it('adds server messages to an already cached live channel query', () => {
+            const queryKey = CHAT_QUERY_KEYS.channelMessages(
+                'server-1',
+                'channel-1',
+                null,
+            );
+            queryClient.setQueryData<InfiniteData<ChatMessage[]>>(queryKey, {
+                pages: [[]],
+                pageParams: [undefined],
+            });
+
+            emitWsEvent(mockWs, WsEvents.MESSAGE_SERVER, {
+                messageId: 'message-1',
+                serverId: 'server-1',
+                channelId: 'channel-1',
+                senderId: 'user-1',
+                senderUsername: 'alice',
+                text: 'new message',
+                createdAt: '2026-05-16T10:00:00.000Z',
+                isEdited: false,
+                isWebhook: false,
+            });
+
+            const cached =
+                queryClient.getQueryData<InfiniteData<ChatMessage[]>>(queryKey);
+
+            expect(cached?.pages[0]).toMatchObject([
+                {
+                    _id: 'message-1',
+                    text: 'new message',
+                    serverId: 'server-1',
+                    channelId: 'channel-1',
+                    senderId: 'user-1',
+                },
+            ]);
+        });
+
+        it('does not duplicate server messages when the same event arrives twice', () => {
+            const queryKey = CHAT_QUERY_KEYS.channelMessages(
+                'server-1',
+                'channel-1',
+                null,
+            );
+            queryClient.setQueryData<InfiniteData<ChatMessage[]>>(queryKey, {
+                pages: [[]],
+                pageParams: [undefined],
+            });
+
+            const payload = {
+                messageId: 'message-1',
+                serverId: 'server-1',
+                channelId: 'channel-1',
+                senderId: 'user-1',
+                senderUsername: 'alice',
+                text: 'new message',
+                createdAt: '2026-05-16T10:00:00.000Z',
+                isEdited: false,
+                isWebhook: false,
+            };
+
+            emitWsEvent(mockWs, WsEvents.MESSAGE_SERVER, payload);
+            emitWsEvent(mockWs, WsEvents.MESSAGE_SERVER, payload);
+
+            const cached =
+                queryClient.getQueryData<InfiniteData<ChatMessage[]>>(queryKey);
+
+            expect(cached?.pages[0]).toHaveLength(1);
+        });
+
+        it('adds DM messages to the cached peer conversation', () => {
+            const peerQueryKey = CHAT_QUERY_KEYS.userMessages('user-2');
+            queryClient.setQueryData<InfiniteData<ChatMessage[]>>(
+                peerQueryKey,
+                {
+                    pages: [[]],
+                    pageParams: [undefined],
+                },
+            );
+
+            emitWsEvent(mockWs, WsEvents.MESSAGE_DM, {
+                messageId: 'dm-1',
+                senderId: 'user-1',
+                senderUsername: 'alice',
+                receiverId: 'user-2',
+                receiverUsername: 'bob',
+                text: 'hello',
+                createdAt: '2026-05-16T10:00:00.000Z',
+                isEdited: false,
+            });
+
+            const cached =
+                queryClient.getQueryData<InfiniteData<ChatMessage[]>>(
+                    peerQueryKey,
+                );
+
+            expect(cached?.pages[0]).toMatchObject([
+                {
+                    _id: 'dm-1',
+                    senderId: 'user-1',
+                    receiverId: 'user-2',
+                    text: 'hello',
+                },
+            ]);
+        });
+
+        it('updates cached channel unread metadata and invalidates the live message query', () => {
+            const messagesQueryKey = CHAT_QUERY_KEYS.channelMessages(
+                'server-1',
+                'channel-1',
+                null,
+            );
+            queryClient.setQueryData<InfiniteData<ChatMessage[]>>(
+                messagesQueryKey,
+                {
+                    pages: [[]],
+                    pageParams: [undefined],
+                },
+            );
+            queryClient.setQueryData<Channel[]>(
+                SERVERS_QUERY_KEYS.channels('server-1'),
+                [
+                    {
+                        _id: 'channel-1',
+                        name: 'general',
+                        serverId: 'server-1',
+                        type: 'text',
+                        position: 0,
+                        lastMessageAt: null,
+                        lastReadAt: null,
+                    },
+                ],
+            );
+
+            emitWsEvent(mockWs, WsEvents.CHANNEL_UNREAD_UPDATED, {
+                serverId: 'server-1',
+                channelId: 'channel-1',
+                lastMessageAt: '2026-05-16T10:00:00.000Z',
+                senderId: 'user-1',
+            });
+
+            const cachedChannels = queryClient.getQueryData<Channel[]>(
+                SERVERS_QUERY_KEYS.channels('server-1'),
+            );
+
+            expect(cachedChannels?.[0].lastMessageAt).toBe(
+                '2026-05-16T10:00:00.000Z',
+            );
+            expect(
+                queryClient.getQueryState(messagesQueryKey)?.isInvalidated,
+            ).toBe(true);
+        });
+
+        it('invalidates chat message queries after authentication', () => {
+            vi.spyOn(serversApi, 'getUnreadStatus').mockResolvedValue({});
+            vi.spyOn(chatApi, 'getUnreadCounts').mockResolvedValue({});
+
+            const channelQueryKey = CHAT_QUERY_KEYS.channelMessages(
+                'server-1',
+                'channel-1',
+                null,
+            );
+            const dmQueryKey = CHAT_QUERY_KEYS.userMessages('user-2');
+            queryClient.setQueryData<InfiniteData<ChatMessage[]>>(
+                channelQueryKey,
+                {
+                    pages: [[]],
+                    pageParams: [undefined],
+                },
+            );
+            queryClient.setQueryData<InfiniteData<ChatMessage[]>>(dmQueryKey, {
+                pages: [[]],
+                pageParams: [undefined],
+            });
+
+            emitWsEvent(mockWs, WsEvents.AUTHENTICATED, {
+                user: { id: 'me', username: 'me' },
+                instanceId: 'instance-1',
+            });
+
+            expect(
+                queryClient.getQueryState(channelQueryKey)?.isInvalidated,
+            ).toBe(true);
+            expect(queryClient.getQueryState(dmQueryKey)?.isInvalidated).toBe(
+                true,
             );
         });
     });

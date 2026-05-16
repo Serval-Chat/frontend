@@ -18,7 +18,7 @@ import type {
 } from '@/api/pings/pings.types';
 import { serversApi } from '@/api/servers/servers.api';
 import { SERVERS_QUERY_KEYS } from '@/api/servers/servers.queries';
-import type { ServerMember } from '@/api/servers/servers.types';
+import type { Channel, ServerMember } from '@/api/servers/servers.types';
 import type { User, UserSettings } from '@/api/users/users.types';
 import {
     setBackendInstanceId,
@@ -84,6 +84,84 @@ import {
 } from './events';
 
 let soundQueue: number[] = [];
+
+interface IChannelUnreadUpdatedEvent {
+    serverId: string;
+    channelId: string;
+    lastMessageAt?: string | null;
+    lastReadAt?: string;
+    senderId?: string;
+}
+
+const addMessageToInfiniteCache = (
+    queryClient: QueryClient,
+    queryKey: readonly unknown[],
+    newMessage: ChatMessage,
+): void => {
+    queryClient.setQueryData<InfiniteData<ChatMessage[]>>(
+        queryKey,
+        (oldData) => {
+            if (!oldData) return oldData;
+
+            const firstPage = oldData.pages[0] || [];
+            if (firstPage.some((msg) => msg._id === newMessage._id)) {
+                return oldData;
+            }
+
+            return {
+                ...oldData,
+                pages: [[...firstPage, newMessage], ...oldData.pages.slice(1)],
+            };
+        },
+    );
+};
+
+const convertDmToChatMessage = (message: IMessageDm): ChatMessage => ({
+    _id: message.messageId,
+    text: message.text,
+    createdAt: message.createdAt,
+    senderId: message.senderId,
+    receiverId: message.receiverId,
+    replyToId: message.replyToId,
+    repliedTo: message.repliedTo,
+    isEdited: message.isEdited,
+    stickerId: message.stickerId,
+    poll: message.poll,
+    embeds: message.embeds,
+    attachments: message.attachments,
+});
+
+const convertServerMessageToChatMessage = (
+    message: IMessageServer,
+): ChatMessage => ({
+    _id: message.messageId,
+    text: message.text,
+    createdAt: message.createdAt,
+    senderId: message.senderId,
+    serverId: message.serverId,
+    channelId: message.channelId,
+    replyToId: message.replyToId,
+    isEdited: message.isEdited,
+    isWebhook: message.isWebhook,
+    webhookUsername: message.webhookUsername,
+    webhookAvatarUrl: message.webhookAvatarUrl,
+    embeds: message.embeds,
+    attachments: message.attachments,
+    interaction: message.interaction
+        ? {
+              command: message.interaction.command,
+              options: message.interaction.options as NonNullable<
+                  ChatMessage['interaction']
+              >['options'],
+              user: message.interaction.user || {
+                  id: message.senderId,
+                  username: message.senderUsername,
+              },
+          }
+        : undefined,
+    stickerId: message.stickerId,
+    poll: message.poll,
+});
 
 const playNotificationSound = (queryClient: QueryClient): void => {
     // Run asynchronously to allow for better stacking and prevent blocking WS handlers
@@ -222,6 +300,9 @@ export const setupGlobalWsHandlers = (
                     void queryClient.invalidateQueries({
                         queryKey: FRIEND_REQUESTS_QUERY_KEY,
                     });
+                    void queryClient.invalidateQueries({
+                        queryKey: ['chat', 'messages'],
+                    });
                 }
             },
         ),
@@ -256,10 +337,71 @@ export const setupGlobalWsHandlers = (
     );
 
     cleanups.push(
+        wsClient.on<IChannelUnreadUpdatedEvent>(
+            WsEvents.CHANNEL_UNREAD_UPDATED,
+            (payload) => {
+                queryClient.setQueryData<Channel[]>(
+                    SERVERS_QUERY_KEYS.channels(payload.serverId),
+                    (oldChannels) => {
+                        if (!oldChannels) return oldChannels;
+                        return oldChannels.map((channel) =>
+                            channel._id === payload.channelId
+                                ? {
+                                      ...channel,
+                                      lastMessageAt:
+                                          payload.lastMessageAt !== undefined
+                                              ? payload.lastMessageAt
+                                              : channel.lastMessageAt,
+                                      lastReadAt:
+                                          payload.lastReadAt ??
+                                          channel.lastReadAt,
+                                  }
+                                : channel,
+                        );
+                    },
+                );
+
+                void queryClient.invalidateQueries({
+                    queryKey: CHAT_QUERY_KEYS.channelMessages(
+                        payload.serverId,
+                        payload.channelId,
+                        null,
+                    ),
+                });
+            },
+        ),
+    );
+
+    cleanups.push(
         wsClient.on<IMessageDm>(WsEvents.MESSAGE_DM, (payload) => {
+            addMessageToInfiniteCache(
+                queryClient,
+                CHAT_QUERY_KEYS.userMessages(payload.senderId),
+                convertDmToChatMessage(payload),
+            );
+            addMessageToInfiniteCache(
+                queryClient,
+                CHAT_QUERY_KEYS.userMessages(payload.receiverId),
+                convertDmToChatMessage(payload),
+            );
+
             if (payload.senderId !== currentUser?.id) {
                 playNotificationSound(queryClient);
             }
+        }),
+    );
+
+    cleanups.push(
+        wsClient.on<IMessageServer>(WsEvents.MESSAGE_SERVER, (payload) => {
+            addMessageToInfiniteCache(
+                queryClient,
+                CHAT_QUERY_KEYS.channelMessages(
+                    payload.serverId,
+                    payload.channelId,
+                    null,
+                ),
+                convertServerMessageToChatMessage(payload),
+            );
         }),
     );
 
