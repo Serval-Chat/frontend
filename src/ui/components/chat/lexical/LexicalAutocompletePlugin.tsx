@@ -5,7 +5,12 @@ import {
     LexicalTypeaheadMenuPlugin,
     MenuOption,
 } from '@lexical/react/LexicalTypeaheadMenuPlugin';
-import { $getSelection, $isRangeSelection, TextNode } from 'lexical';
+import {
+    $createTextNode,
+    $getSelection,
+    $isRangeSelection,
+    TextNode,
+} from 'lexical';
 
 import type { Emoji } from '@/api/emojis/emojis.types';
 import type { Channel, Role, ServerMember } from '@/api/servers/servers.types';
@@ -33,11 +38,17 @@ class AutocompleteOption extends MenuOption {
     suggestion: Suggestion;
 
     constructor(suggestion: Suggestion) {
-        super(
-            suggestion.type === 'everyone'
-                ? 'everyone'
-                : suggestion.type + Math.random().toString(),
-        );
+        let key = suggestion.type;
+        if (suggestion.type === 'everyone') key += 'everyone';
+        else if (suggestion.type === 'user') key += suggestion.user._id;
+        else if (suggestion.type === 'role') key += suggestion.role._id;
+        else if (suggestion.type === 'emoji')
+            key += suggestion.emoji.short_name;
+        else if (suggestion.type === 'server-emoji')
+            key += suggestion.emoji._id;
+        else if (suggestion.type === 'channel') key += suggestion.channel._id;
+
+        super(key);
         this.suggestion = suggestion;
     }
 }
@@ -319,13 +330,12 @@ export const LexicalAutocompletePlugin: React.FC<
             closeMenu: () => void,
         ) => {
             editor.update(() => {
-                if (nodeToRemove) {
-                    nodeToRemove.remove();
-                }
-
                 const suggestion = selectedOption.suggestion;
 
                 if (suggestion.type === 'emoji') {
+                    if (nodeToRemove) {
+                        nodeToRemove.remove();
+                    }
                     const unicode = getUnicode(suggestion.emoji);
                     const selection = $getSelection();
                     if ($isRangeSelection(selection)) {
@@ -334,6 +344,7 @@ export const LexicalAutocompletePlugin: React.FC<
                                 id: unicode,
                             }),
                         ]);
+                        selection.insertText(' ');
                     }
                     closeMenu();
                     return;
@@ -370,11 +381,15 @@ export const LexicalAutocompletePlugin: React.FC<
                 }
 
                 if (chipNode) {
-                    const selection = $getSelection();
-                    if ($isRangeSelection(selection)) {
-                        selection.insertNodes([chipNode]);
-                        selection.insertText(' ');
+                    if (nodeToRemove) {
+                        nodeToRemove.replace(chipNode);
+                    } else {
+                        const selection = $getSelection();
+                        if ($isRangeSelection(selection)) {
+                            selection.insertNodes([chipNode]);
+                        }
                     }
+                    chipNode.insertAfter($createTextNode(' '));
                 }
                 closeMenu();
             });

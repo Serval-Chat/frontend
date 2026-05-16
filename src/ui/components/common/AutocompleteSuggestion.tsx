@@ -82,7 +82,10 @@ export const AutocompleteSuggestion: React.FC<AutocompleteSuggestionProps> = ({
                             ${index === selectedIndex ? 'text-primary-foreground bg-primary/15' : 'hover:bg-white/5'}
                         `}
                         key={getSuggestionKey(suggestion)}
-                        onClick={() => onSelect(suggestion)}
+                        onMouseDown={(e: React.MouseEvent) => {
+                            e.preventDefault();
+                            onSelect(suggestion);
+                        }}
                     >
                         {suggestion.type === 'user' && (
                             <>
