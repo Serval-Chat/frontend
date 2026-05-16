@@ -85,24 +85,28 @@ import {
 let soundQueue: number[] = [];
 
 const playNotificationSound = () => {
-    // testing environ
-    if (typeof Audio === 'undefined' || typeof document === 'undefined') return;
-    if (typeof document.hasFocus === 'function' && document.hasFocus()) return;
+    // Run asynchronously to allow for better stacking and prevent blocking WS handlers
+    setTimeout(() => {
+        if (typeof Audio === 'undefined' || typeof document === 'undefined')
+            return;
+        if (typeof document.hasFocus === 'function' && document.hasFocus())
+            return;
 
-    if (soundQueue.length === 0) {
-        soundQueue = Array.from({ length: 12 }, (_, i) => i + 1);
-        for (let i = soundQueue.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [soundQueue[i], soundQueue[j]] = [soundQueue[j], soundQueue[i]];
+        if (soundQueue.length === 0) {
+            soundQueue = Array.from({ length: 12 }, (_, i) => i + 1);
+            for (let i = soundQueue.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [soundQueue[i], soundQueue[j]] = [soundQueue[j], soundQueue[i]];
+            }
         }
-    }
 
-    const soundIndex = soundQueue.pop()!;
-    const audio = new Audio(`/sounds/${soundIndex}.wav`);
-    const playPromise = audio.play();
-    if (playPromise !== undefined) {
-        playPromise.catch(() => {});
-    }
+        const soundIndex = soundQueue.pop()!;
+        const audio = new Audio(`/sounds/${soundIndex}.wav`);
+        const playPromise = audio.play();
+        if (playPromise !== undefined) {
+            playPromise.catch(() => {});
+        }
+    }, 0);
 };
 
 /**

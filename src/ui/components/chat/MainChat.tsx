@@ -318,6 +318,7 @@ export const MainChat: React.FC<MainChatProps> = ({
         selectedFriendId,
         clearChannelPings,
         deletePing,
+        messages,
     ]);
 
     const handleReplyClick = React.useCallback(
