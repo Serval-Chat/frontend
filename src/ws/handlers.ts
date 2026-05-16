@@ -85,6 +85,7 @@ import {
 let soundQueue: number[] = [];
 
 const playNotificationSound = () => {
+    // testing environ
     if (typeof Audio === 'undefined' || typeof document === 'undefined') return;
     if (typeof document.hasFocus === 'function' && document.hasFocus()) return;
 
