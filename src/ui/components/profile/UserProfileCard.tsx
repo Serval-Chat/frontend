@@ -199,7 +199,7 @@ export const UserProfileCard: React.FC<UserProfileCardProps> = ({
                 </Box>
 
                 {(finalCustomText || finalCustomEmoji) && (
-                    <Box className="mb-4 flex items-center gap-2 text-xs text-muted-foreground">
+                    <Box className="mb-4 flex min-w-0 items-start gap-2 text-xs text-muted-foreground">
                         {finalCustomEmoji && (
                             <Box className="flex shrink-0 items-center">
                                 {/^[0-9a-fA-F]{24}$/.test(finalCustomEmoji) ? (
@@ -215,7 +215,12 @@ export const UserProfileCard: React.FC<UserProfileCardProps> = ({
                                 )}
                             </Box>
                         )}
-                        <Text as="span" size="xs" variant="muted">
+                        <Text
+                            as="span"
+                            className="min-w-0 flex-1 break-words whitespace-normal"
+                            size="xs"
+                            variant="muted"
+                        >
                             {finalCustomText}
                         </Text>
                     </Box>
