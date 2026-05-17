@@ -215,7 +215,6 @@ export const useChannels = (
             isValidId(serverId) &&
             hasAuthToken(),
         placeholderData: keepPreviousData,
-        staleTime: Infinity,
     });
 
 export const useCategories = (
@@ -231,7 +230,6 @@ export const useCategories = (
             isValidId(serverId) &&
             hasAuthToken(),
         placeholderData: keepPreviousData,
-        staleTime: Infinity,
     });
 
 export const useMembers = (
