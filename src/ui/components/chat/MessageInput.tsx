@@ -253,6 +253,12 @@ export const MessageInput: React.FC<MessageInputProps> = ({
         };
     }, [editor]);
 
+    useEffect(() => {
+        if (replyingTo && editor) {
+            editor.focus();
+        }
+    }, [replyingTo, editor]);
+
     useWebSocket(
         WsEvents.STICKER_UPDATED,
         useCallback(
