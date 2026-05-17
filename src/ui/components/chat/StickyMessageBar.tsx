@@ -15,6 +15,7 @@ import type { ProcessedChatMessage } from '@/types/chat.ui';
 import { Message } from '@/ui/components/chat/Message';
 import { Button } from '@/ui/components/common/Button';
 import { Box } from '@/ui/components/layout/Box';
+import { resolveWebhookUser } from '@/ui/utils/chat';
 import { cn } from '@/utils/cn';
 
 interface StickyMessageBarProps {
@@ -50,7 +51,10 @@ export const StickyMessageBar: React.FC<StickyMessageBarProps> = ({
                 new Date(a.createdAt).getTime(),
         )[0];
 
-        const member = members?.find((m) => m.userId === raw.senderId);
+        const webhookUser = resolveWebhookUser(raw);
+        const member = webhookUser
+            ? undefined
+            : members?.find((m) => m.userId === raw.senderId);
         const roles =
             serverRoles?.filter((r) => member?.roles.includes(r._id)) || [];
         const highestRole = [...roles].sort(
@@ -64,7 +68,8 @@ export const StickyMessageBar: React.FC<StickyMessageBarProps> = ({
             ...raw,
             serverId,
             channelId,
-            user: member?.user || { _id: raw.senderId, username: 'Unknown' },
+            user: webhookUser ||
+                member?.user || { _id: raw.senderId, username: 'Unknown' },
             role: highestRole,
             iconRole: iconRole,
         } as ProcessedChatMessage;

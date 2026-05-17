@@ -1,17 +1,25 @@
 import { type ReactNode, useState } from 'react';
 
-import { BadgeCheck, Eye, MessageSquare, Users, XCircle } from 'lucide-react';
+import {
+    BadgeCheck,
+    Eye,
+    Play,
+    ShieldCheck,
+    ShieldOff,
+    Users,
+    XCircle,
+} from 'lucide-react';
 
 import type { Server } from '@/api/servers/servers.types';
 import { ADMIN_CONSTANTS } from '@/constants/admin';
 import {
     useAdminAwaitingReviewServers,
-    useDeclineVerification,
-    useVerifyServer,
+    useAdminServerVerificationStats,
+    useRunServerVerificationNow,
+    useSetServerVerificationOverride,
 } from '@/hooks/admin/useAdminServers';
 import { Button } from '@/ui/components/common/Button';
 import { Heading } from '@/ui/components/common/Heading';
-import { LatexRenderer } from '@/ui/components/common/LatexRenderer';
 import { LoadingSpinner } from '@/ui/components/common/LoadingSpinner';
 import {
     Table,
@@ -24,6 +32,7 @@ import {
 import { Text } from '@/ui/components/common/Text';
 import { UserProfilePicture } from '@/ui/components/common/UserProfilePicture';
 import { ServerIcon } from '@/ui/components/servers/ServerIcon';
+import { cn } from '@/utils/cn';
 
 export const AdminAwaitingReview = ({
     onViewServer,
@@ -34,22 +43,18 @@ export const AdminAwaitingReview = ({
     const LIMIT = ADMIN_CONSTANTS.DEFAULT_PAGE_SIZE;
 
     const { data, isLoading } = useAdminAwaitingReviewServers(page, LIMIT);
-    const { mutate: verifyServer, isPending: isVerifying } = useVerifyServer();
-    const { mutate: declineVerification, isPending: isDeclining } =
-        useDeclineVerification();
+    const { data: verificationStats } = useAdminServerVerificationStats();
+    const { mutate: runVerificationNow, isPending: isRunningVerification } =
+        useRunServerVerificationNow();
+    const { mutate: setVerificationOverride, isPending: isSettingOverride } =
+        useSetServerVerificationOverride();
 
-    const handleDecline = (serverId: string, serverName: string): void => {
-        if (
-            confirm(
-                `Are you sure you want to decline the verification request for "${serverName}"?`,
-            )
-        ) {
-            declineVerification(serverId);
-        }
-    };
+    const formatScore = (score?: number): string =>
+        score === undefined ? '0.00' : score.toFixed(2);
 
-    const handleVerify = (serverId: string): void => {
-        verifyServer(serverId);
+    const formatDate = (value?: string | Date | null): string => {
+        if (value === undefined || value === null) return 'Never';
+        return new Date(value).toLocaleString();
     };
 
     return (
@@ -61,33 +66,113 @@ export const AdminAwaitingReview = ({
                     variant="admin-page"
                 >
                     <BadgeCheck className="text-warning" />
-                    Awaiting Review
+                    Eligibility Requests
                 </Heading>
                 <Text as="p" variant="muted">
-                    Review and weigh server verification requests based on
-                    organic community activity.
+                    Review servers that applied for verification eligibility
+                    using the latest scoring run.
                 </Text>
             </div>
 
-            <div className="border-warning/20 bg-warning/5 text-warning/80 rounded-lg border p-3 text-xs">
-                <strong>Weighting Logic:</strong> Servers are ranked by{' '}
-                <LatexRenderer content="(\text{Members} \times 10) + \text{Real Messages}" />
-                . High-weight communities appear first.
+            <div className="flex items-center justify-between gap-3 rounded-lg border border-border-subtle bg-bg-subtle p-3">
+                <div className="min-w-0">
+                    <Text as="p" size="sm" weight="medium">
+                        Server-side scoring
+                    </Text>
+                    <Text as="p" className="truncate" size="xs" variant="muted">
+                        Last run: {formatDate(verificationStats?.lastRunAt)}
+                    </Text>
+                </div>
+                <Button
+                    retainSize
+                    disabled={isRunningVerification}
+                    icon={Play}
+                    loading={isRunningVerification}
+                    size="sm"
+                    onClick={() => runVerificationNow()}
+                >
+                    Run now
+                </Button>
+            </div>
+
+            <div className="grid gap-3 rounded-lg border border-border-subtle bg-bg-subtle p-3 text-sm sm:grid-cols-2 xl:grid-cols-5">
+                <div>
+                    <Text
+                        as="p"
+                        className="text-[10px] uppercase"
+                        variant="muted"
+                    >
+                        P80 threshold
+                    </Text>
+                    <span className="font-mono font-bold">
+                        {formatScore(verificationStats?.p80Threshold)}
+                    </span>
+                </div>
+                <div>
+                    <Text
+                        as="p"
+                        className="text-[10px] uppercase"
+                        variant="muted"
+                    >
+                        P65 threshold
+                    </Text>
+                    <span className="font-mono font-bold">
+                        {formatScore(verificationStats?.p65Threshold)}
+                    </span>
+                </div>
+                <div>
+                    <Text
+                        as="p"
+                        className="text-[10px] uppercase"
+                        variant="muted"
+                    >
+                        Eligible
+                    </Text>
+                    <span className="font-bold">
+                        {verificationStats?.eligibleServerCount ?? 0}
+                    </span>
+                </div>
+                <div>
+                    <Text
+                        as="p"
+                        className="text-[10px] uppercase"
+                        variant="muted"
+                    >
+                        Verified
+                    </Text>
+                    <span className="font-bold">
+                        {verificationStats?.verifiedServerCount ?? 0}
+                    </span>
+                </div>
+                <div>
+                    <Text
+                        as="p"
+                        className="text-[10px] uppercase"
+                        variant="muted"
+                    >
+                        Schedule
+                    </Text>
+                    <span className="text-xs font-medium">Daily default</span>
+                </div>
             </div>
 
             <Table>
                 <TableHeader>
                     <TableRow className="border-b border-border-subtle bg-bg-secondary/50">
                         <TableHead>Server</TableHead>
+                        <TableHead>Score</TableHead>
+                        <TableHead>Eligible</TableHead>
+                        <TableHead>Verified</TableHead>
+                        <TableHead>Failure reasons</TableHead>
                         <TableHead>Owner</TableHead>
-                        <TableHead>Metrics (Score)</TableHead>
+                        <TableHead>Members</TableHead>
                         <TableHead align="right">Actions</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
                     {isLoading ? (
                         <TableRow>
-                            <TableCell align="center" colSpan={4}>
+                            <TableCell align="center" colSpan={8}>
                                 <div className="py-12">
                                     <LoadingSpinner size="lg" />
                                 </div>
@@ -111,6 +196,59 @@ export const AdminAwaitingReview = ({
                                             </span>
                                         </div>
                                     </div>
+                                </TableCell>
+
+                                <TableCell monospace>
+                                    {formatScore(server.verificationScore)}
+                                </TableCell>
+
+                                <TableCell>
+                                    <div
+                                        className={cn(
+                                            'inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-bold tracking-wider uppercase',
+                                            server.verificationEligible
+                                                ? 'bg-primary/10 text-primary'
+                                                : 'bg-danger/10 text-danger',
+                                        )}
+                                    >
+                                        {server.verificationEligible
+                                            ? 'Yes'
+                                            : 'No'}
+                                    </div>
+                                </TableCell>
+
+                                <TableCell>
+                                    <div className="flex flex-wrap items-center gap-1.5">
+                                        <div
+                                            className={cn(
+                                                'inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-bold tracking-wider uppercase',
+                                                server.verified
+                                                    ? 'bg-primary/10 text-primary'
+                                                    : 'bg-bg-tertiary text-muted-foreground',
+                                            )}
+                                        >
+                                            {server.verified ? 'Yes' : 'No'}
+                                        </div>
+                                        {server.verificationOverride && (
+                                            <div className="bg-warning/10 text-warning inline-flex rounded-full px-2.5 py-0.5 text-[10px] font-bold tracking-wider uppercase">
+                                                Override
+                                            </div>
+                                        )}
+                                    </div>
+                                </TableCell>
+
+                                <TableCell className="max-w-[220px]">
+                                    {server.verificationEligible ? (
+                                        <Text size="xs" variant="muted">
+                                            -
+                                        </Text>
+                                    ) : (
+                                        <span className="line-clamp-2 text-xs text-muted-foreground">
+                                            {server.verificationFailureReasons?.join(
+                                                ', ',
+                                            ) || 'Not computed'}
+                                        </span>
+                                    )}
                                 </TableCell>
 
                                 <TableCell className="min-w-0">
@@ -145,36 +283,14 @@ export const AdminAwaitingReview = ({
                                 </TableCell>
 
                                 <TableCell>
-                                    <div className="flex flex-col gap-1.5">
-                                        <div className="flex items-center gap-4 text-xs">
-                                            <div className="flex items-center gap-1.5 text-muted-foreground">
-                                                <Users size={12} />
-                                                <span className="font-mono font-bold text-foreground">
-                                                    {server.memberCount}
-                                                </span>{' '}
-                                                members
-                                            </div>
-                                            <div className="flex items-center gap-1.5 text-muted-foreground">
-                                                <MessageSquare size={12} />
-                                                <span className="font-mono font-bold text-foreground">
-                                                    {server.realMessageCount}
-                                                </span>{' '}
-                                                msgs
-                                            </div>
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                            <div className="h-1 flex-1 overflow-hidden rounded-full bg-border-subtle">
-                                                <div
-                                                    className="h-full bg-primary"
-                                                    style={{
-                                                        width: `${Math.min(100, (server.weightScore || 0) / 10)}%`,
-                                                    }}
-                                                />
-                                            </div>
-                                            <span className="font-mono text-[10px] font-bold text-primary">
-                                                {server.weightScore} pts
-                                            </span>
-                                        </div>
+                                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                        <Users
+                                            className="opacity-40"
+                                            size={14}
+                                        />
+                                        <span className="font-bold">
+                                            {server.memberCount}
+                                        </span>
                                     </div>
                                 </TableCell>
 
@@ -192,56 +308,72 @@ export const AdminAwaitingReview = ({
                                         </Button>
                                         <Button
                                             className="text-primary hover:bg-primary/10"
-                                            disabled={isVerifying}
+                                            disabled={isSettingOverride}
                                             size="sm"
-                                            title="Verify Server"
+                                            title="Force Verified"
                                             variant="ghost"
                                             onClick={() =>
-                                                handleVerify(server._id)
+                                                setVerificationOverride({
+                                                    serverId: server._id,
+                                                    override: 'verified',
+                                                })
                                             }
                                         >
-                                            <BadgeCheck
-                                                size={18}
-                                                strokeWidth={2.5}
-                                            />
+                                            <ShieldCheck size={16} />
                                         </Button>
                                         <Button
                                             className="text-danger hover:bg-danger/10"
-                                            disabled={isDeclining}
+                                            disabled={isSettingOverride}
                                             size="sm"
-                                            title="Decline Request"
+                                            title="Force Unverified"
                                             variant="ghost"
                                             onClick={() =>
-                                                handleDecline(
-                                                    server._id,
-                                                    server.name,
-                                                )
+                                                setVerificationOverride({
+                                                    serverId: server._id,
+                                                    override: 'unverified',
+                                                })
                                             }
                                         >
-                                            <XCircle size={18} />
+                                            <ShieldOff size={16} />
                                         </Button>
+                                        {server.verificationOverride && (
+                                            <Button
+                                                disabled={isSettingOverride}
+                                                size="sm"
+                                                title="Clear Verification Override"
+                                                variant="ghost"
+                                                onClick={() =>
+                                                    setVerificationOverride({
+                                                        serverId: server._id,
+                                                        override: null,
+                                                    })
+                                                }
+                                            >
+                                                <XCircle size={16} />
+                                            </Button>
+                                        )}
                                     </div>
                                 </TableCell>
                             </TableRow>
                         ))
                     ) : (
                         <TableRow>
-                            <TableCell align="center" colSpan={4}>
+                            <TableCell align="center" colSpan={8}>
                                 <div className="flex flex-col items-center justify-center py-16 text-center text-muted-foreground">
                                     <BadgeCheck
                                         className="mb-4 opacity-20"
                                         size={48}
                                     />
                                     <Text as="p" weight="medium">
-                                        Queue is clear!
+                                        Queue is clear
                                     </Text>
                                     <Text
                                         as="p"
                                         className="opacity-60"
                                         size="sm"
                                     >
-                                        No new verification requests at this
-                                        time.
+                                        No servers have applied for an
+                                        eligibility check.
                                     </Text>
                                 </div>
                             </TableCell>

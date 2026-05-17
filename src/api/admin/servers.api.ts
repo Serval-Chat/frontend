@@ -1,10 +1,28 @@
 import { apiClient } from '@/api/client';
-import type { AdminServerDetails, AdminServerListItem } from '@/types/admin';
+import type {
+    AdminServerDetails,
+    AdminServerListItem,
+    AdminServerVerificationStats,
+} from '@/types/admin';
 
 export const adminServersApi = {
     listServers: (params: { limit: number; offset: number; search?: string }) =>
         apiClient
             .get<AdminServerListItem[]>('/api/v1/admin/servers', { params })
+            .then((r) => r.data),
+
+    getVerificationStats: () =>
+        apiClient
+            .get<AdminServerVerificationStats>(
+                '/api/v1/admin/servers/verification',
+            )
+            .then((r) => r.data),
+
+    runVerificationNow: () =>
+        apiClient
+            .post<AdminServerVerificationStats>(
+                '/api/v1/admin/servers/verification/run',
+            )
             .then((r) => r.data),
 
     deleteServer: (serverId: string) =>
@@ -50,6 +68,19 @@ export const adminServersApi = {
             .delete<{
                 verified: boolean;
             }>(`/api/v1/admin/servers/${serverId}/verify`)
+            .then((r) => r.data),
+
+    setVerificationOverride: (
+        serverId: string,
+        override: 'verified' | 'unverified' | null,
+    ) =>
+        apiClient
+            .put<{
+                verified: boolean;
+                override: 'verified' | 'unverified' | null;
+            }>(`/api/v1/admin/servers/${serverId}/verification-override`, {
+                override,
+            })
             .then((r) => r.data),
 
     getAwaitingReviewServers: (params: { limit: number; offset: number }) =>

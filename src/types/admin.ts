@@ -88,9 +88,25 @@ export interface AdminServerListItem {
     deletedAt?: string | Date;
     owner: AdminServerOwner | null;
     verified: boolean;
+    verificationScore?: number;
+    verificationEligible?: boolean;
+    verificationLastComputedAt?: string | Date;
+    verificationFailureReasons?: string[];
+    verificationOverride?: 'verified' | 'unverified' | null;
     verificationRequested: boolean;
     realMessageCount?: number;
     weightScore?: number;
+}
+
+export interface AdminServerVerificationStats {
+    p80Threshold: number;
+    p65Threshold: number;
+    p95T: number;
+    p95M: number;
+    p95B: number;
+    eligibleServerCount: number;
+    verifiedServerCount: number;
+    lastRunAt: string | Date | null;
 }
 
 export interface AdminChannelShort {

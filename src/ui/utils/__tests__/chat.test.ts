@@ -1,9 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
+import type { ChatMessage } from '@/api/chat/chat.types';
 import type { Role } from '@/api/servers/servers.types';
 import {
     getHighestColorRoleForMember,
     getHighestRoleForMember,
+    resolveWebhookUser,
 } from '@/ui/utils/chat';
 
 describe('chat utils', () => {
@@ -138,6 +140,36 @@ describe('chat utils', () => {
             const localMap = new Map<string, Role>([['7', gradientRole]]);
             expect(getHighestColorRoleForMember(['7'], localMap)).toBe(
                 gradientRole,
+            );
+        });
+    });
+
+    describe('resolveWebhookUser', () => {
+        it('returns undefined if message is not a webhook', () => {
+            const msg = {
+                _id: 'msg1',
+                isWebhook: false,
+                text: 'hello',
+            } as ChatMessage;
+            expect(resolveWebhookUser(msg)).toBeUndefined();
+        });
+
+        it('resolves webhook user details correctly', () => {
+            const msg = {
+                _id: 'msg2',
+                isWebhook: true,
+                webhookUsername: 'Bridge Bot',
+                webhookAvatarUrl: 'https://example.com/avatar.png',
+                createdAt: '2026-05-17T12:00:00Z',
+            } as ChatMessage;
+
+            const user = resolveWebhookUser(msg);
+            expect(user).toBeDefined();
+            expect(user?._id).toBe('webhook-msg2');
+            expect(user?.username).toBe('Bridge Bot');
+            expect(user?.displayName).toBe('Bridge Bot');
+            expect(user?.profilePicture).toBe(
+                '/api/v1/embed/proxy?url=https%3A%2F%2Fexample.com%2Favatar.png',
             );
         });
     });

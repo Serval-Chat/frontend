@@ -4,6 +4,29 @@ import type { User } from '@/api/users/users.types';
 import type { ProcessedChatMessage } from '@/types/chat.ui';
 
 /**
+ * Resolves the user object for a webhook message.
+ */
+export const resolveWebhookUser = (msg: ChatMessage): User | undefined => {
+    if (msg.isWebhook && msg.webhookUsername) {
+        const rawAvatar = msg.webhookAvatarUrl || undefined;
+        const avatarUrl =
+            rawAvatar &&
+            (rawAvatar.startsWith('https://') ||
+                rawAvatar.startsWith('http://'))
+                ? `/api/v1/embed/proxy?url=${encodeURIComponent(rawAvatar)}`
+                : rawAvatar;
+        return {
+            _id: `webhook-${msg._id}`,
+            username: msg.webhookUsername,
+            displayName: msg.webhookUsername,
+            profilePicture: avatarUrl,
+            createdAt: new Date(msg.createdAt),
+        } as User;
+    }
+    return undefined;
+};
+
+/**
  * Finds the highest role for a member based on position.
  */
 export const getHighestRoleForMember = (
@@ -97,27 +120,10 @@ export const resolveReplyTo = (
     if (msg.referenced_message) {
         let referencedUser: User | undefined = undefined;
         let isWebhook = false;
-        if (
-            msg.referenced_message.isWebhook &&
-            msg.referenced_message.webhookUsername
-        ) {
+        referencedUser = resolveWebhookUser(msg.referenced_message);
+        if (referencedUser) {
             isWebhook = true;
-            const rawAvatar =
-                msg.referenced_message.webhookAvatarUrl || undefined;
-            const avatarUrl =
-                rawAvatar &&
-                (rawAvatar.startsWith('https://') ||
-                    rawAvatar.startsWith('http://'))
-                    ? `/api/v1/embed/proxy?url=${encodeURIComponent(rawAvatar)}`
-                    : rawAvatar;
-            referencedUser = {
-                _id: `webhook-${msg.referenced_message._id}`,
-                username: msg.referenced_message.webhookUsername,
-                displayName: msg.referenced_message.webhookUsername,
-                profilePicture: avatarUrl,
-                isBot: false,
-                createdAt: new Date(msg.referenced_message.createdAt),
-            } as User;
+            referencedUser.isBot = false;
         }
 
         replyTo = {
@@ -146,23 +152,10 @@ export const resolveReplyTo = (
         let referencedUser: User | undefined = undefined;
         let isWebhook = false;
         const parent = msg.repliedToMessageId as unknown as ChatMessage;
-        if (parent.isWebhook && parent.webhookUsername) {
+        referencedUser = resolveWebhookUser(parent);
+        if (referencedUser) {
             isWebhook = true;
-            const rawAvatar = parent.webhookAvatarUrl || undefined;
-            const avatarUrl =
-                rawAvatar &&
-                (rawAvatar.startsWith('https://') ||
-                    rawAvatar.startsWith('http://'))
-                    ? `/api/v1/embed/proxy?url=${encodeURIComponent(rawAvatar)}`
-                    : rawAvatar;
-            referencedUser = {
-                _id: `webhook-${parent._id}`,
-                username: parent.webhookUsername,
-                displayName: parent.webhookUsername,
-                profilePicture: avatarUrl,
-                isBot: false,
-                createdAt: new Date(parent.createdAt),
-            } as User;
+            referencedUser.isBot = false;
         }
 
         replyTo = {
@@ -194,23 +187,10 @@ export const resolveReplyTo = (
             if (repliedMsg) {
                 let referencedUser: User | undefined = undefined;
                 let isWebhook = false;
-                if (repliedMsg.isWebhook && repliedMsg.webhookUsername) {
+                referencedUser = resolveWebhookUser(repliedMsg);
+                if (referencedUser) {
                     isWebhook = true;
-                    const rawAvatar = repliedMsg.webhookAvatarUrl || undefined;
-                    const avatarUrl =
-                        rawAvatar &&
-                        (rawAvatar.startsWith('https://') ||
-                            rawAvatar.startsWith('http://'))
-                            ? `/api/v1/embed/proxy?url=${encodeURIComponent(rawAvatar)}`
-                            : rawAvatar;
-                    referencedUser = {
-                        _id: `webhook-${repliedMsg._id}`,
-                        username: repliedMsg.webhookUsername,
-                        displayName: repliedMsg.webhookUsername,
-                        profilePicture: avatarUrl,
-                        isBot: false,
-                        createdAt: new Date(repliedMsg.createdAt),
-                    } as User;
+                    referencedUser.isBot = false;
                 }
 
                 replyTo = {

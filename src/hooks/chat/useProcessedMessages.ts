@@ -4,7 +4,7 @@ import type { ChatMessage } from '@/api/chat/chat.types';
 import type { Role } from '@/api/servers/servers.types';
 import type { User } from '@/api/users/users.types';
 import type { ProcessedChatMessage } from '@/types/chat.ui';
-import { resolveReplyTo } from '@/ui/utils/chat';
+import { resolveReplyTo, resolveWebhookUser } from '@/ui/utils/chat';
 
 /**
  * @description Hook to process raw message data into a flattened, resolved list.
@@ -47,22 +47,7 @@ export const useProcessedMessages = (
             let iconRole: Role | undefined = undefined;
 
             // Handle webhooks
-            if (msg.isWebhook && msg.webhookUsername) {
-                const rawAvatar = msg.webhookAvatarUrl || undefined;
-                const avatarUrl =
-                    rawAvatar &&
-                    (rawAvatar.startsWith('https://') ||
-                        rawAvatar.startsWith('http://'))
-                        ? `/api/v1/embed/proxy?url=${encodeURIComponent(rawAvatar)}`
-                        : rawAvatar;
-                user = {
-                    _id: `webhook-${msg._id}`,
-                    username: msg.webhookUsername,
-                    displayName: msg.webhookUsername,
-                    profilePicture: avatarUrl,
-                    createdAt: new Date(msg.createdAt),
-                } as User;
-            }
+            user = resolveWebhookUser(msg);
 
             // Resolve developer/character info if missing
             if (!user) {

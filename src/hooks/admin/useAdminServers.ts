@@ -9,7 +9,11 @@ import {
 import { adminServersApi } from '@/api/admin/servers.api';
 import type { ServerInvite } from '@/api/invites/invites.types';
 import { ADMIN_CONSTANTS } from '@/constants/admin';
-import type { AdminServerDetails, AdminServerListItem } from '@/types/admin';
+import type {
+    AdminServerDetails,
+    AdminServerListItem,
+    AdminServerVerificationStats,
+} from '@/types/admin';
 
 export const useAdminServers = (
     search: string = '',
@@ -25,6 +29,57 @@ export const useAdminServers = (
                 offset: page * limit,
             }),
     });
+
+export const useAdminServerVerificationStats =
+    (): UseQueryResult<AdminServerVerificationStats> =>
+        useQuery({
+            queryKey: ['admin-server-verification-stats'],
+            queryFn: () => adminServersApi.getVerificationStats(),
+        });
+
+export const useRunServerVerificationNow = (): UseMutationResult<
+    AdminServerVerificationStats,
+    Error,
+    void
+> => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: () => adminServersApi.runVerificationNow(),
+        onSuccess: () => {
+            void queryClient.invalidateQueries({ queryKey: ['admin-servers'] });
+            void queryClient.invalidateQueries({
+                queryKey: ['admin-server-verification-stats'],
+            });
+            void queryClient.invalidateQueries({
+                queryKey: ['admin-servers-awaiting-review'],
+            });
+        },
+    });
+};
+
+export const useSetServerVerificationOverride = (): UseMutationResult<
+    { verified: boolean; override: 'verified' | 'unverified' | null },
+    Error,
+    { serverId: string; override: 'verified' | 'unverified' | null }
+> => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: ({ serverId, override }) =>
+            adminServersApi.setVerificationOverride(serverId, override),
+        onSuccess: (_data, variables) => {
+            void queryClient.invalidateQueries({ queryKey: ['admin-servers'] });
+            void queryClient.invalidateQueries({
+                queryKey: ['admin-server-detail', variables.serverId],
+            });
+            void queryClient.invalidateQueries({
+                queryKey: ['admin-server-verification-stats'],
+            });
+            void queryClient.invalidateQueries({
+                queryKey: ['admin-servers-awaiting-review'],
+            });
+        },
+    });
+};
 
 export const useDeleteServer = (): UseMutationResult<
     { message: string },

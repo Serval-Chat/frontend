@@ -21,6 +21,7 @@ import { Message } from '@/ui/components/chat/Message';
 import { Button } from '@/ui/components/common/Button';
 import { Text } from '@/ui/components/common/Text';
 import { Box } from '@/ui/components/layout/Box';
+import { resolveWebhookUser } from '@/ui/utils/chat';
 
 interface PinsDrawerProps {
     serverId: string;
@@ -41,7 +42,10 @@ const PinnedMessageItem: React.FC<{
     const { data: serverRoles } = useRoles(serverId, { enabled: !!serverId });
 
     const processedPin = React.useMemo(() => {
-        const member = members?.find((m) => m.userId === pin.senderId);
+        const webhookUser = resolveWebhookUser(pin);
+        const member = webhookUser
+            ? undefined
+            : members?.find((m) => m.userId === pin.senderId);
         const roles =
             serverRoles?.filter((r) => member?.roles.includes(r._id)) || [];
         const highestRole = [...roles].sort(
@@ -55,7 +59,8 @@ const PinnedMessageItem: React.FC<{
             ...pin,
             serverId,
             channelId,
-            user: member?.user || { _id: pin.senderId, username: 'Unknown' },
+            user: webhookUser ||
+                member?.user || { _id: pin.senderId, username: 'Unknown' },
             role: highestRole,
             iconRole: iconRole,
         } as ProcessedChatMessage;
