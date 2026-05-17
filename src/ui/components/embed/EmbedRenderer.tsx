@@ -168,8 +168,15 @@ const EmbedCard = memo(
                             isDeleted && 'opacity-50 grayscale',
                         )}
                         decoding="async"
-                        loading="lazy"
+                        loading="eager"
                         src={imageUrl}
+                        style={
+                            embed.image?.width && embed.image.height
+                                ? {
+                                      aspectRatio: `${embed.image.width} / ${embed.image.height}`,
+                                  }
+                                : { minHeight: '100px' }
+                        }
                     />
                 </div>
             );
@@ -236,7 +243,7 @@ const EmbedCard = memo(
                                     alt=""
                                     className="h-6 w-6 rounded-full object-cover"
                                     decoding="async"
-                                    loading="lazy"
+                                    loading="eager"
                                     src={authorIconUrl}
                                 />
                             )}
@@ -425,7 +432,7 @@ const EmbedCard = memo(
                                     isDeleted && 'opacity-50 grayscale',
                                 )}
                                 decoding="async"
-                                loading="lazy"
+                                loading="eager"
                                 src={thumbnailUrl}
                             />
                         )}
@@ -440,8 +447,15 @@ const EmbedCard = memo(
                                 isDeleted && 'opacity-50 grayscale',
                             )}
                             decoding="async"
-                            loading="lazy"
+                            loading="eager"
                             src={imageUrl}
+                            style={
+                                embed.image?.width && embed.image.height
+                                    ? {
+                                          aspectRatio: `${embed.image.width} / ${embed.image.height}`,
+                                      }
+                                    : { minHeight: '80px' }
+                            }
                         />
                     )}
 
@@ -456,7 +470,7 @@ const EmbedCard = memo(
                                         isDeleted && 'opacity-50 grayscale',
                                     )}
                                     decoding="async"
-                                    loading="lazy"
+                                    loading="eager"
                                     src={footerIconUrl}
                                 />
                             )}

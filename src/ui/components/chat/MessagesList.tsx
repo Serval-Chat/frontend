@@ -87,6 +87,8 @@ export const MessagesList: React.FC<MessagesListProps> = React.memo(
         const scrollContainerRef = useRef<HTMLDivElement>(null);
         const [isAtBottom, setIsAtBottom] = useState(true);
         const lastScrollHeightRef = useRef<number>(0);
+        const isPrependingScrollRef = useRef(false);
+        const loadMoreCooldownRef = useRef(false);
         const [highlightId, setInternalHighlightId] = useState<string | null>(
             null,
         );
@@ -167,24 +169,49 @@ export const MessagesList: React.FC<MessagesListProps> = React.memo(
         }, [messages, blocks, hasMore, hasMoreNewer]);
 
         const [, startTransitionGroup] = useTransition();
+        const virtualItemsRef = useRef(virtualItems);
+        useLayoutEffect(() => {
+            virtualItemsRef.current = virtualItems;
+        }, [virtualItems]);
+
+        const scrollToFn = useCallback(
+            (
+                offset: number,
+                options: { behavior?: ScrollBehavior; adjustments?: number },
+            ): void => {
+                const container = scrollContainerRef.current;
+                if (!container) return;
+                const toOffset = offset + (options.adjustments ?? 0);
+                if (options.adjustments !== undefined) {
+                    isPrependingScrollRef.current = true;
+                    container.scrollTop = toOffset;
+                    requestAnimationFrame(() => {
+                        isPrependingScrollRef.current = false;
+                    });
+                } else if (options.behavior === 'smooth') {
+                    container.scrollTo({ top: toOffset, behavior: 'smooth' });
+                } else {
+                    container.scrollTop = toOffset;
+                }
+            },
+            [],
+        );
 
         const rowVirtualizer = useVirtualizer({
             count: virtualItems.length,
             getScrollElement: () => scrollContainerRef.current,
-            estimateSize: useCallback(
-                (index: number) => {
-                    const item = virtualItems[index];
-                    if (
-                        item?.type === 'loader-older' ||
-                        item?.type === 'loader-newer'
-                    )
-                        return 60;
-                    if (item?.type === 'spacer') return 22;
-                    if (item?.type === 'blocked-group') return 40;
-                    return 100;
-                },
-                [virtualItems],
-            ),
+            scrollToFn,
+            estimateSize: useCallback((index: number) => {
+                const item = virtualItemsRef.current[index];
+                if (
+                    item?.type === 'loader-older' ||
+                    item?.type === 'loader-newer'
+                )
+                    return 60;
+                if (item?.type === 'spacer') return 22;
+                if (item?.type === 'blocked-group') return 40;
+                return 100;
+            }, []),
             getItemKey: useCallback(
                 (index: number) => {
                     const item = virtualItems[index];
@@ -210,11 +237,6 @@ export const MessagesList: React.FC<MessagesListProps> = React.memo(
                 });
             });
         }, []);
-
-        const virtualItemsRef = useRef(virtualItems);
-        useLayoutEffect(() => {
-            virtualItemsRef.current = virtualItems;
-        }, [virtualItems]);
 
         const onReplyClickRef = useRef(onReplyClick);
         useLayoutEffect(() => {
@@ -245,7 +267,7 @@ export const MessagesList: React.FC<MessagesListProps> = React.memo(
 
         const handleScroll = useCallback((): void => {
             const container = scrollContainerRef.current;
-            if (!container) return;
+            if (!container || isPrependingScrollRef.current) return;
 
             const { scrollTop, scrollHeight, clientHeight } = container;
             const nextIsAtBottom = scrollHeight - scrollTop - clientHeight < 5;
@@ -254,8 +276,17 @@ export const MessagesList: React.FC<MessagesListProps> = React.memo(
                 setIsAtBottom(nextIsAtBottom);
             }
 
-            // Trigger load more when reaching top
-            if (scrollTop === 0 && hasMore && !isLoadingMore) {
+            if (scrollTop > 500) {
+                loadMoreCooldownRef.current = false;
+            }
+
+            if (
+                scrollTop < 200 &&
+                hasMore &&
+                !isLoadingMore &&
+                !loadMoreCooldownRef.current
+            ) {
+                loadMoreCooldownRef.current = true;
                 onLoadMore?.();
             }
         }, [hasMore, isLoadingMore, onLoadMore]);
@@ -277,21 +308,16 @@ export const MessagesList: React.FC<MessagesListProps> = React.memo(
                 const heightDiff =
                     newScrollHeight - lastScrollHeightRef.current;
                 if (heightDiff > 0) {
+                    isPrependingScrollRef.current = true;
                     container.scrollTop += heightDiff;
+                    requestAnimationFrame(() => {
+                        isPrependingScrollRef.current = false;
+                    });
                 }
             }
 
             lastScrollHeightRef.current = newScrollHeight;
         }, [virtualItems, isAtBottom, rowVirtualizer]);
-
-        const totalSize = rowVirtualizer.getTotalSize();
-        useLayoutEffect(() => {
-            if (!isAtBottom || virtualItems.length === 0) return;
-            rowVirtualizer.scrollToIndex(virtualItems.length - 1, {
-                align: 'end',
-            });
-            // eslint-disable-next-line react-hooks/exhaustive-deps -- totalSize is the reactive trigger
-        }, [totalSize, isAtBottom]);
 
         const lastScrolledIdRef = useRef<string | null>(null);
 

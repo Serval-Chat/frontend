@@ -119,8 +119,15 @@ export const FileEmbed: React.FC<FileEmbedProps> = ({ url, attachment }) => {
                         )}
                         decoding="async"
                         height={attachment?.height}
-                        loading="lazy"
+                        loading="eager"
                         src={displayUrl!}
+                        style={
+                            attachment?.width && attachment.height
+                                ? {
+                                      aspectRatio: `${attachment.width} / ${attachment.height}`,
+                                  }
+                                : undefined
+                        }
                         width={attachment?.width}
                     />
                     {isSpoiler && !isRevealed && (
