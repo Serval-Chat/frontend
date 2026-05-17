@@ -22,6 +22,10 @@ const EmojiPicker = React.lazy(() =>
     })),
 );
 
+const MIN_POLL_DURATION_MS = 5 * 60 * 1000;
+const MAX_POLL_DURATION_DAYS = 90;
+const MAX_POLL_DURATION_MS = MAX_POLL_DURATION_DAYS * 24 * 60 * 60 * 1000;
+
 interface PollOptionInput {
     id: string;
     text: string;
@@ -121,12 +125,17 @@ export const CreatePollModal: React.FC<CreatePollModalProps> = ({
             days: 24 * 60 * 60 * 1000,
         };
         let ms = durationValue * multipliers[durationUnit];
-        const minMs = 5 * 60 * 1000;
-        const maxMs = 7 * 24 * 60 * 60 * 1000;
-        if (ms < minMs) ms = minMs;
-        if (ms > maxMs) ms = maxMs;
+        if (ms < MIN_POLL_DURATION_MS) ms = MIN_POLL_DURATION_MS;
+        if (ms > MAX_POLL_DURATION_MS) ms = MAX_POLL_DURATION_MS;
         return ms;
     }, [durationValue, durationUnit]);
+
+    const maxDurationValue =
+        durationUnit === 'minutes'
+            ? MAX_POLL_DURATION_DAYS * 24 * 60
+            : durationUnit === 'hours'
+              ? MAX_POLL_DURATION_DAYS * 24
+              : MAX_POLL_DURATION_DAYS;
 
     const PRESETS = [
         { label: '5 min', val: 5, unit: 'minutes' },
@@ -134,6 +143,7 @@ export const CreatePollModal: React.FC<CreatePollModalProps> = ({
         { label: '1 hr', val: 1, unit: 'hours' },
         { label: '1 day', val: 1, unit: 'days' },
         { label: '7 days', val: 7, unit: 'days' },
+        { label: '90 days', val: 90, unit: 'days' },
     ] as const;
 
     React.useEffect(() => {
@@ -421,13 +431,7 @@ export const CreatePollModal: React.FC<CreatePollModalProps> = ({
                     <Box className="flex items-center gap-2">
                         <Input
                             className="w-24"
-                            max={
-                                durationUnit === 'minutes'
-                                    ? 10080
-                                    : durationUnit === 'hours'
-                                      ? 168
-                                      : 7
-                            }
+                            max={maxDurationValue}
                             min={1}
                             type="number"
                             value={durationValue}
@@ -454,13 +458,7 @@ export const CreatePollModal: React.FC<CreatePollModalProps> = ({
                     </Box>
                     <Box className="mt-2">
                         <Slider
-                            max={
-                                durationUnit === 'minutes'
-                                    ? 10080
-                                    : durationUnit === 'hours'
-                                      ? 168
-                                      : 7
-                            }
+                            max={maxDurationValue}
                             min={durationUnit === 'minutes' ? 5 : 1}
                             value={durationValue}
                             onValueChange={setDurationValue}
