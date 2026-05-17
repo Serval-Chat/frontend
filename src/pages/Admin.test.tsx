@@ -122,6 +122,10 @@ vi.mock('@/ui/components/admin/AdminInvites', () => ({
     AdminInvites: () => <div data-testid="admin-invites" />,
 }));
 
+vi.mock('@/ui/components/admin/AdminBansAndMutes', () => ({
+    AdminBansAndMutes: () => <div data-testid="admin-bans-and-mutes" />,
+}));
+
 vi.mock('@/ui/components/common/Text', () => ({
     Text: ({ children }: { children: React.ReactNode }) => (
         <span>{children}</span>
@@ -242,7 +246,7 @@ describe('Admin page', () => {
         );
     });
 
-    it('shows "Coming Soon" content for "bans" section (no component implemented yet)', () => {
+    it('shows AdminBansAndMutes component for "bans" section', () => {
         render(
             <MemoryRouter initialEntries={['/admin/overview']}>
                 <Routes>
@@ -251,7 +255,7 @@ describe('Admin page', () => {
             </MemoryRouter>,
         );
         fireEvent.click(screen.getByTestId('nav-bans'));
-        expect(screen.getByText('Coming Soon')).toBeInTheDocument();
+        expect(screen.getByTestId('admin-bans-and-mutes')).toBeInTheDocument();
         expect(screen.getByTestId('admin-title')).toHaveTextContent(
             'Bans & Mutes',
         );

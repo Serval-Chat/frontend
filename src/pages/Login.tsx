@@ -7,6 +7,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useLoginForm } from '@/hooks/useLoginForm';
 import { FormContent } from '@/ui/components/auth/FormContent';
 import { Admonition } from '@/ui/components/common/Admonition';
+import { BannedScreen } from '@/ui/components/common/BannedScreen';
 import { Button } from '@/ui/components/common/Button';
 import { Heading } from '@/ui/components/common/Heading';
 import { Input } from '@/ui/components/common/Input';
@@ -39,10 +40,22 @@ export const Login: React.FC = () => {
         handleSubmit,
         isLoading,
         isFormValid,
+        banInfo,
+        resetBan,
     } = useLoginForm();
     const [showPassword, setShowPassword] = useState(false);
 
     if (isAuthenticated) return <Navigate replace to="/chat/@me" />;
+
+    if (banInfo !== null) {
+        return (
+            <BannedScreen
+                expirationTimestamp={banInfo.expirationTimestamp}
+                reason={banInfo.reason}
+                onLogout={resetBan}
+            />
+        );
+    }
 
     return (
         <Box className="relative flex min-h-screen w-full flex-col items-center justify-center overflow-hidden bg-background p-md">

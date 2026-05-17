@@ -144,4 +144,8 @@ export interface User {
     serverSettings?: ServerSettings;
     totpEnabled?: boolean;
     connections?: UserConnection[];
+    activeMute?: {
+        reason: string;
+        expirationTimestamp?: string | Date | null;
+    } | null;
 }

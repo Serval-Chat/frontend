@@ -470,25 +470,43 @@ export const setupGlobalWsHandlers = (
     );
 
     cleanups.push(
-        wsClient.on<{ userId: string; settings: UserSettings }>(
-            WsEvents.USER_UPDATED,
-            (payload) => {
-                if (payload.userId === currentUser?.id) {
-                    queryClient.setQueryData<User>(['me'], (old) => {
-                        if (!old) return old;
-                        return {
-                            ...old,
-                            settings: {
-                                ...old.settings,
-                                ...payload.settings,
-                            },
-                        };
+        wsClient.on<{
+            userId: string;
+            settings?: UserSettings;
+            activeMute?: User['activeMute'];
+        }>(WsEvents.USER_UPDATED, (payload) => {
+            if (payload.userId === currentUser?.id) {
+                queryClient.setQueryData<User>(['me'], (old) => {
+                    if (!old) return old;
+                    return {
+                        ...old,
+                        ...(payload.settings !== undefined
+                            ? {
+                                  settings: {
+                                      ...old.settings,
+                                      ...payload.settings,
+                                  },
+                              }
+                            : {}),
+                        ...(Object.prototype.hasOwnProperty.call(
+                            payload,
+                            'activeMute',
+                        )
+                            ? { activeMute: payload.activeMute ?? null }
+                            : {}),
+                    };
+                });
+                if (
+                    Object.prototype.hasOwnProperty.call(payload, 'activeMute')
+                ) {
+                    void queryClient.invalidateQueries({
+                        queryKey: ['me'],
                     });
-                    const updatedMe = queryClient.getQueryData<User>(['me']);
-                    syncSoundCache(updatedMe);
                 }
-            },
-        ),
+                const updatedMe = queryClient.getQueryData<User>(['me']);
+                syncSoundCache(updatedMe);
+            }
+        }),
     );
 
     cleanups.push(

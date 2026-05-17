@@ -30,6 +30,7 @@ import {
     Send,
     Smile,
     Sticker,
+    VolumeX,
     X,
 } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
@@ -75,6 +76,7 @@ import type { StickerCategory } from '@/ui/components/emoji/StickerPicker';
 import { Box } from '@/ui/components/layout/Box';
 import { cn } from '@/utils/cn';
 import { clearDraft, getDraft, saveDraft } from '@/utils/drafts';
+import { APP_LOCALE } from '@/utils/locale';
 import { ParserPresets, parseText } from '@/utils/textParser/parser';
 import { WsEvents } from '@/ws';
 
@@ -350,6 +352,14 @@ export const MessageInput: React.FC<MessageInputProps> = ({
     }, [myMember?.communicationDisabledUntil, isOwner]);
 
     const isTimedOut = remainingTimeoutMs > 0;
+    const activeMute = me?.activeMute ?? null;
+    const activeMuteExpiresAt = activeMute?.expirationTimestamp
+        ? new Date(activeMute.expirationTimestamp)
+        : null;
+    const isGloballyMuted =
+        activeMute !== null &&
+        (activeMuteExpiresAt === null ||
+            activeMuteExpiresAt.getTime() > Date.now());
 
     const formatTimeout = (ms: number): string => {
         const seconds = Math.floor(ms / 1000);
@@ -361,6 +371,11 @@ export const MessageInput: React.FC<MessageInputProps> = ({
         if (hours > 0) return `${hours}h ${minutes % 60}m`;
         if (minutes > 0) return `${minutes}m ${seconds % 60}s`;
         return `${seconds}s`;
+    };
+
+    const formatMuteExpiry = (): string => {
+        if (!activeMuteExpiresAt) return 'Permanent';
+        return activeMuteExpiresAt.toLocaleString(APP_LOCALE);
     };
     const slashPreview = useMemo(() => {
         if (slashChipState) {
@@ -612,6 +627,14 @@ export const MessageInput: React.FC<MessageInputProps> = ({
 
     const handleSendMessage = useCallback(
         async (text: string): Promise<boolean> => {
+            if (isGloballyMuted) {
+                showToast(
+                    'You are currently muted and cannot send messages.',
+                    'error',
+                );
+                return false;
+            }
+
             const trimmedText = text.trim();
             const hasSlashChips = editor
                 ? editor.getEditorState().read($getSlashChipState) !== null
@@ -699,15 +722,29 @@ export const MessageInput: React.FC<MessageInputProps> = ({
             showToast,
             serverCommands,
             editor,
+            isGloballyMuted,
         ],
     );
 
     const handleSendPoll = useCallback(
         (poll: OutgoingPoll): void => {
+            if (isGloballyMuted) {
+                showToast(
+                    'You are currently muted and cannot create polls.',
+                    'error',
+                );
+                return;
+            }
             sendMessage('', replyingTo?._id, undefined, poll);
             onCancelReply?.();
         },
-        [sendMessage, replyingTo?._id, onCancelReply],
+        [
+            sendMessage,
+            replyingTo?._id,
+            onCancelReply,
+            isGloballyMuted,
+            showToast,
+        ],
     );
 
     useEffect(() => {
@@ -823,6 +860,31 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                         variant="danger"
                     >
                         Remaining time: {formatTimeout(remainingTimeoutMs)}
+                    </Text>
+                </div>
+            </Box>
+        );
+    }
+
+    if (isGloballyMuted) {
+        return (
+            <Box className="relative mx-4 mb-4 flex items-start gap-3 overflow-hidden rounded-lg border border-caution/30 bg-caution/10 px-4 py-3 text-black">
+                <VolumeX className="mt-0.5 shrink-0" size={20} />
+                <div className="min-w-0 flex-1">
+                    <Text as="div" className="font-bold text-black">
+                        You are muted.
+                    </Text>
+                    <Text
+                        as="div"
+                        className="mt-1 truncate text-sm text-black/80"
+                    >
+                        {activeMute?.reason || 'No reason provided'}
+                    </Text>
+                    <Text
+                        as="div"
+                        className="mt-0.5 text-xs font-medium text-black/65"
+                    >
+                        Until: {formatMuteExpiry()}
                     </Text>
                 </div>
             </Box>

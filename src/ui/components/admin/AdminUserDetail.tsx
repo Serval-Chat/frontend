@@ -3,13 +3,18 @@ import { type ReactNode, useMemo, useState } from 'react';
 import {
     AlertTriangle,
     ArrowLeft,
+    Ban,
     Calendar,
     CheckCircle,
     Clock,
+    Hammer,
     Plus,
     Server as ServerIconLucide,
     Shield,
+    ShieldAlert,
     Users,
+    Volume2,
+    VolumeX,
     XCircle,
 } from 'lucide-react';
 
@@ -21,12 +26,21 @@ import {
     useAssignBadgeToUser,
     useRemoveBadgeFromUser,
 } from '@/hooks/admin/useAdminBadges';
+import {
+    useAdminBanUser,
+    useAdminMuteUser,
+    useAdminUnbanUser,
+    useAdminUnmuteUser,
+} from '@/hooks/admin/useAdminBans';
 import { useAdminUserDetail } from '@/hooks/admin/useAdminUsers';
 import { Button } from '@/ui/components/common/Button';
 import { DropdownWithSearch } from '@/ui/components/common/DropdownWithSearch';
 import { Heading } from '@/ui/components/common/Heading';
+import { Input } from '@/ui/components/common/Input';
+import { InputWrapper } from '@/ui/components/common/InputWrapper';
 import { StyledUserName } from '@/ui/components/common/StyledUserName';
 import { Text } from '@/ui/components/common/Text';
+import { TextArea } from '@/ui/components/common/TextArea';
 import { useToast } from '@/ui/components/common/Toast';
 import { UserBadge } from '@/ui/components/common/UserBadge';
 import { UserProfilePicture } from '@/ui/components/common/UserProfilePicture';
@@ -58,6 +72,36 @@ export const AdminUserDetail = ({
     const { showToast } = useToast();
 
     const [isAddingBadge, setIsAddingBadge] = useState(false);
+
+    const { mutate: banUser, isPending: isBanning } = useAdminBanUser();
+    const { mutate: unbanUser, isPending: isUnbanning } = useAdminUnbanUser();
+    const { mutate: muteUser, isPending: isMuting } = useAdminMuteUser();
+    const { mutate: unmuteUser, isPending: isUnmuting } = useAdminUnmuteUser();
+
+    const [showBanForm, setShowBanForm] = useState(false);
+    const [banReason, setBanReason] = useState('');
+    const [banDuration, setBanDuration] = useState('1440'); // default 1 day (1440 mins)
+
+    const [showMuteForm, setShowMuteForm] = useState(false);
+    const [muteReason, setMuteReason] = useState('');
+    const [muteDuration, setMuteDuration] = useState('60'); // default 1 hour (60 mins)
+
+    const [now] = useState(() => Date.now());
+
+    const isCurrentlyBanned = adminData?.banExpiry
+        ? new Date(adminData.banExpiry).getTime() > now
+        : false;
+
+    const isCurrentlyMuted =
+        adminData?.muteActive === true ||
+        (adminData?.muteExpiry
+            ? new Date(adminData.muteExpiry).getTime() > now
+            : false);
+
+    const formatMuteUntil = (): string => {
+        if (!adminData?.muteExpiry) return 'Permanent';
+        return new Date(adminData.muteExpiry).toLocaleString(APP_LOCALE);
+    };
 
     const availableBadges = useMemo(() => {
         if (!allBadges || !adminData) return [];
@@ -146,6 +190,62 @@ export const AdminUserDetail = ({
                 },
             },
         );
+    };
+
+    const handleBanUser = (): void => {
+        if (!banReason.trim()) {
+            showToast('Ban reason is required', 'error');
+            return;
+        }
+        const durationMin = parseInt(banDuration, 10);
+        if (isNaN(durationMin) || durationMin <= 0) {
+            showToast('Duration must be a positive number', 'error');
+            return;
+        }
+
+        banUser(
+            { userId, reason: banReason, duration: durationMin },
+            {
+                onSuccess: () => {
+                    setShowBanForm(false);
+                    setBanReason('');
+                },
+            },
+        );
+    };
+
+    const handleUnbanUser = (): void => {
+        if (!window.confirm('Are you sure you want to unban this user?'))
+            return;
+        unbanUser(userId);
+    };
+
+    const handleMuteUser = (): void => {
+        if (!muteReason.trim()) {
+            showToast('Mute reason is required', 'error');
+            return;
+        }
+        const durationMin = parseInt(muteDuration, 10);
+        if (isNaN(durationMin) || durationMin <= 0) {
+            showToast('Duration must be a positive number', 'error');
+            return;
+        }
+
+        muteUser(
+            { userId, reason: muteReason, duration: durationMin },
+            {
+                onSuccess: () => {
+                    setShowMuteForm(false);
+                    setMuteReason('');
+                },
+            },
+        );
+    };
+
+    const handleUnmuteUser = (): void => {
+        if (!window.confirm('Are you sure you want to unmute this user?'))
+            return;
+        unmuteUser(userId);
     };
 
     return (
@@ -281,15 +381,25 @@ export const AdminUserDetail = ({
                                     </Text>
                                     <Text
                                         as="span"
-                                        className="text-lg text-success"
-                                        weight="black"
+                                        className={cn(
+                                            'text-lg font-black',
+                                            isCurrentlyBanned
+                                                ? 'text-danger'
+                                                : isCurrentlyMuted
+                                                  ? 'text-caution'
+                                                  : 'text-success',
+                                        )}
                                     >
-                                        Active
+                                        {isCurrentlyBanned
+                                            ? 'Banned'
+                                            : isCurrentlyMuted
+                                              ? 'Muted'
+                                              : 'Active'}
                                     </Text>
                                 </div>
                             </div>
 
-                            {adminData.banExpiry && (
+                            {isCurrentlyBanned && (
                                 <div className="mt-3 rounded-lg border border-danger/20 bg-danger/10 p-4">
                                     <div className="mb-2 flex items-center gap-2 text-danger">
                                         <AlertTriangle size={16} />
@@ -308,12 +418,323 @@ export const AdminUserDetail = ({
                                         </Text>{' '}
                                         <Text as="span" weight="black">
                                             {new Date(
-                                                adminData.banExpiry,
+                                                adminData.banExpiry!,
                                             ).toLocaleString(APP_LOCALE)}
                                         </Text>
                                     </Text>
                                 </div>
                             )}
+
+                            {isCurrentlyMuted && !isCurrentlyBanned && (
+                                <div className="mt-3 rounded-lg border border-caution/20 bg-caution/10 p-4">
+                                    <div className="mb-2 flex items-center gap-2 text-caution">
+                                        <VolumeX size={16} />
+                                        <Text
+                                            as="span"
+                                            className="tracking-tight uppercase"
+                                            size="xs"
+                                            weight="bold"
+                                        >
+                                            Muted Account
+                                        </Text>
+                                    </div>
+                                    <Text as="p" size="sm">
+                                        <Text as="span" variant="muted">
+                                            Until:
+                                        </Text>{' '}
+                                        <Text as="span" weight="black">
+                                            {formatMuteUntil()}
+                                        </Text>
+                                    </Text>
+                                    {adminData.muteReason && (
+                                        <Text className="mt-2" size="sm">
+                                            <Text as="span" variant="muted">
+                                                Reason:
+                                            </Text>{' '}
+                                            <Text as="span" weight="semibold">
+                                                {adminData.muteReason}
+                                            </Text>
+                                        </Text>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Moderation Controls */}
+                        <div className="rounded-2xl border border-border-subtle bg-bg-subtle p-6">
+                            <Heading
+                                className="mb-4"
+                                level={3}
+                                variant="admin-sub"
+                            >
+                                Moderation Controls
+                            </Heading>
+
+                            <div className="space-y-4">
+                                {/* Mute Status / Action */}
+                                <div className="rounded-xl border border-border-subtle bg-bg-secondary/30 p-4">
+                                    <div className="mb-3 flex items-center justify-between">
+                                        <div className="flex items-center gap-2">
+                                            <VolumeX
+                                                className="text-caution"
+                                                size={18}
+                                            />
+                                            <div>
+                                                <Text size="sm" weight="bold">
+                                                    Mute Penalty
+                                                </Text>
+                                                {isCurrentlyMuted ? (
+                                                    <Text
+                                                        className="block text-caution"
+                                                        size="xs"
+                                                    >
+                                                        Muted until{' '}
+                                                        {formatMuteUntil()}
+                                                    </Text>
+                                                ) : (
+                                                    <Text
+                                                        className="block"
+                                                        size="xs"
+                                                        variant="muted"
+                                                    >
+                                                        No active mute
+                                                    </Text>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        {isCurrentlyMuted ? (
+                                            <Button
+                                                disabled={isUnmuting}
+                                                size="sm"
+                                                variant="normal"
+                                                onClick={handleUnmuteUser}
+                                            >
+                                                <Volume2
+                                                    className="mr-1.5"
+                                                    size={14}
+                                                />
+                                                Unmute
+                                            </Button>
+                                        ) : (
+                                            <Button
+                                                size="sm"
+                                                variant="caution"
+                                                onClick={() => {
+                                                    setShowMuteForm(
+                                                        !showMuteForm,
+                                                    );
+                                                    setShowBanForm(false);
+                                                }}
+                                            >
+                                                <VolumeX
+                                                    className="mr-1.5"
+                                                    size={14}
+                                                />
+                                                Mute User
+                                            </Button>
+                                        )}
+                                    </div>
+
+                                    {showMuteForm && !isCurrentlyMuted && (
+                                        <div className="mt-4 space-y-3 border-t border-border-subtle/50 pt-4">
+                                            <InputWrapper>
+                                                <Text
+                                                    className="mb-1 block"
+                                                    size="xs"
+                                                    weight="bold"
+                                                >
+                                                    Mute Duration (Minutes)
+                                                </Text>
+                                                <Input
+                                                    placeholder="60 (1 hour)"
+                                                    type="number"
+                                                    value={muteDuration}
+                                                    onChange={(e) =>
+                                                        setMuteDuration(
+                                                            e.target.value,
+                                                        )
+                                                    }
+                                                />
+                                            </InputWrapper>
+                                            <InputWrapper>
+                                                <Text
+                                                    className="mb-1 block"
+                                                    size="xs"
+                                                    weight="bold"
+                                                >
+                                                    Reason for Mute
+                                                </Text>
+                                                <TextArea
+                                                    placeholder="Spamming, harassment, etc."
+                                                    rows={2}
+                                                    value={muteReason}
+                                                    onChange={(e) =>
+                                                        setMuteReason(
+                                                            e.target.value,
+                                                        )
+                                                    }
+                                                />
+                                            </InputWrapper>
+                                            <div className="flex justify-end gap-2 pt-1">
+                                                <Button
+                                                    size="sm"
+                                                    variant="ghost"
+                                                    onClick={() =>
+                                                        setShowMuteForm(false)
+                                                    }
+                                                >
+                                                    Cancel
+                                                </Button>
+                                                <Button
+                                                    disabled={isMuting}
+                                                    size="sm"
+                                                    variant="caution"
+                                                    onClick={handleMuteUser}
+                                                >
+                                                    {isMuting
+                                                        ? 'Muting...'
+                                                        : 'Confirm Mute'}
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Ban Status / Action */}
+                                <div className="rounded-xl border border-border-subtle bg-bg-secondary/30 p-4">
+                                    <div className="mb-3 flex items-center justify-between">
+                                        <div className="flex items-center gap-2">
+                                            <Ban
+                                                className="text-danger"
+                                                size={18}
+                                            />
+                                            <div>
+                                                <Text size="sm" weight="bold">
+                                                    Ban Penalty
+                                                </Text>
+                                                {isCurrentlyBanned ? (
+                                                    <Text
+                                                        className="block text-danger"
+                                                        size="xs"
+                                                    >
+                                                        Banned until{' '}
+                                                        {new Date(
+                                                            adminData.banExpiry!,
+                                                        ).toLocaleString(
+                                                            APP_LOCALE,
+                                                        )}
+                                                    </Text>
+                                                ) : (
+                                                    <Text
+                                                        className="block"
+                                                        size="xs"
+                                                        variant="muted"
+                                                    >
+                                                        No active ban
+                                                    </Text>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        {isCurrentlyBanned ? (
+                                            <Button
+                                                disabled={isUnbanning}
+                                                size="sm"
+                                                variant="normal"
+                                                onClick={handleUnbanUser}
+                                            >
+                                                <ShieldAlert
+                                                    className="mr-1.5"
+                                                    size={14}
+                                                />
+                                                Unban
+                                            </Button>
+                                        ) : (
+                                            <Button
+                                                size="sm"
+                                                variant="danger"
+                                                onClick={() => {
+                                                    setShowBanForm(
+                                                        !showBanForm,
+                                                    );
+                                                    setShowMuteForm(false);
+                                                }}
+                                            >
+                                                <Hammer
+                                                    className="mr-1.5"
+                                                    size={14}
+                                                />
+                                                Ban User
+                                            </Button>
+                                        )}
+                                    </div>
+
+                                    {showBanForm && !isCurrentlyBanned && (
+                                        <div className="mt-4 space-y-3 border-t border-border-subtle/50 pt-4">
+                                            <InputWrapper>
+                                                <Text
+                                                    className="mb-1 block"
+                                                    size="xs"
+                                                    weight="bold"
+                                                >
+                                                    Ban Duration (Minutes)
+                                                </Text>
+                                                <Input
+                                                    placeholder="1440 (1 day)"
+                                                    type="number"
+                                                    value={banDuration}
+                                                    onChange={(e) =>
+                                                        setBanDuration(
+                                                            e.target.value,
+                                                        )
+                                                    }
+                                                />
+                                            </InputWrapper>
+                                            <InputWrapper>
+                                                <Text
+                                                    className="mb-1 block"
+                                                    size="xs"
+                                                    weight="bold"
+                                                >
+                                                    Reason for Ban
+                                                </Text>
+                                                <TextArea
+                                                    placeholder="TOS violations, hate speech, etc."
+                                                    rows={2}
+                                                    value={banReason}
+                                                    onChange={(e) =>
+                                                        setBanReason(
+                                                            e.target.value,
+                                                        )
+                                                    }
+                                                />
+                                            </InputWrapper>
+                                            <div className="flex justify-end gap-2 pt-1">
+                                                <Button
+                                                    size="sm"
+                                                    variant="ghost"
+                                                    onClick={() =>
+                                                        setShowBanForm(false)
+                                                    }
+                                                >
+                                                    Cancel
+                                                </Button>
+                                                <Button
+                                                    disabled={isBanning}
+                                                    size="sm"
+                                                    variant="danger"
+                                                    onClick={handleBanUser}
+                                                >
+                                                    {isBanning
+                                                        ? 'Banning...'
+                                                        : 'Confirm Ban'}
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
                         </div>
 
                         {/* Badges Management */}

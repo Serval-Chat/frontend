@@ -631,6 +631,10 @@ export interface IUserUpdatedEvent {
         type: 'Website';
         value: string;
     }>;
+    activeMute?: {
+        reason: string;
+        expirationTimestamp?: string | Date | null;
+    } | null;
     senderId?: string;
 }
 

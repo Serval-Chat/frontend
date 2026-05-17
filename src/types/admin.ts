@@ -44,6 +44,9 @@ export interface AdminUser {
     permissions: AdminPermissions;
     createdAt: string | Date;
     banExpiry?: string | Date;
+    muteExpiry?: string | Date;
+    muteActive?: boolean;
+    muteReason?: string;
     warningCount: number;
     badges: (string | Badge)[];
 }

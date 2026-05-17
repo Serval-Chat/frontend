@@ -2,6 +2,7 @@ import { useState } from 'react';
 
 import { useQueryClient } from '@tanstack/react-query';
 import { isAxiosError } from 'axios';
+import type { AxiosError } from 'axios';
 import { useNavigate } from 'react-router-dom';
 
 import { authApi } from '@/api/auth/auth.api';
@@ -12,6 +13,11 @@ import {
 } from '@/lib/pushClient';
 import type { StatusState } from '@/ui/types';
 import { setAuthToken } from '@/utils/authToken';
+
+interface BanInfo {
+    reason?: string;
+    expirationTimestamp?: string;
+}
 
 interface LoginFormResult {
     loginInput: string;
@@ -31,6 +37,8 @@ interface LoginFormResult {
     handleSubmit: (e: React.FormEvent) => Promise<void>;
     isLoading: boolean;
     isFormValid: boolean;
+    banInfo: BanInfo | null;
+    resetBan: () => void;
 }
 
 export const useLoginForm = (): LoginFormResult => {
@@ -46,6 +54,8 @@ export const useLoginForm = (): LoginFormResult => {
     const [twoFactorCode, setTwoFactorCode] = useState('');
     const [useBackupCode, setUseBackupCode] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const [banInfo, setBanInfo] = useState<BanInfo | null>(null);
+    const resetBan = (): void => setBanInfo(null);
     const navigate = useNavigate();
     const queryClient = useQueryClient();
 
@@ -125,7 +135,22 @@ export const useLoginForm = (): LoginFormResult => {
         } catch (error: unknown) {
             let errorMessage = 'Login failed';
             if (isAxiosError(error)) {
-                errorMessage = error.response?.data?.message || errorMessage;
+                const axiosErr = error as AxiosError<{
+                    error?: string;
+                    message?: string;
+                    ban?: { reason?: string; expirationTimestamp?: string };
+                }>;
+                if (
+                    axiosErr.response?.status === 403 &&
+                    axiosErr.response.data?.ban
+                ) {
+                    setBanInfo(axiosErr.response.data.ban);
+                    return;
+                }
+                errorMessage =
+                    axiosErr.response?.data?.message ??
+                    axiosErr.response?.data?.error ??
+                    errorMessage;
             }
             setStatus({
                 message: errorMessage,
@@ -154,5 +179,7 @@ export const useLoginForm = (): LoginFormResult => {
         handleSubmit,
         isLoading,
         isFormValid,
+        banInfo,
+        resetBan,
     };
 };

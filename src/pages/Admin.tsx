@@ -12,6 +12,7 @@ import {
 import { AdminAuditLogs } from '@/ui/components/admin/AdminAuditLogs';
 import { AdminAwaitingReview } from '@/ui/components/admin/AdminAwaitingReview';
 import { AdminBadges } from '@/ui/components/admin/AdminBadges';
+import { AdminBansAndMutes } from '@/ui/components/admin/AdminBansAndMutes';
 import { AdminIAM } from '@/ui/components/admin/AdminIAM';
 import { AdminInvites } from '@/ui/components/admin/AdminInvites';
 import { AdminLayout } from '@/ui/components/admin/AdminLayout';
@@ -96,6 +97,8 @@ export const Admin = (): ReactNode => {
             <Route element={<AdminBadges />} path="badges" />
             <Route element={<AdminInvites />} path="invites" />
             <Route element={<AdminSettings />} path="settings" />
+
+            <Route element={<AdminBansAndMutes />} path="bans" />
 
             <Route
                 element={

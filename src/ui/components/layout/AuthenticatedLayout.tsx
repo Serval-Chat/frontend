@@ -1,5 +1,6 @@
 import React, { type ReactNode } from 'react';
 
+import type { AxiosError } from 'axios';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 
 import { useBlockProfiles, useBlocks } from '@/api/blocks/blocks.queries';
@@ -16,6 +17,7 @@ import { useConnectivity } from '@/hooks/useConnectivity';
 import { syncWebPush } from '@/lib/pushClient';
 import { BlockSyncProvider } from '@/providers/BlockSyncProvider';
 import { WebSocketProvider } from '@/providers/WebSocketProvider';
+import { BannedScreen } from '@/ui/components/common/BannedScreen';
 import { LoadingScreen } from '@/ui/components/common/LoadingScreen';
 import { PushPrompt } from '@/ui/components/common/PushPrompt';
 import { FurTweaker } from '@/ui/components/nt/FurTweaker';
@@ -31,7 +33,7 @@ const WsDebugger = React.lazy(() =>
 export const AuthenticatedLayout = (): ReactNode => {
     const { isAuthenticated } = useAuth();
     const location = useLocation();
-    const { data: user, isLoading: isUserLoading } = useMe();
+    const { data: user, isLoading: isUserLoading, error: meError } = useMe();
     const { isLoading: isServersLoading } = useServers();
     const { isLoading: isUnreadLoading } = useUnreadStatus();
     const { isLoading: isPingsLoading } = usePings();
@@ -89,6 +91,29 @@ export const AuthenticatedLayout = (): ReactNode => {
 
     if (!isAuthenticated) {
         return <Navigate replace to="/login" />;
+    }
+
+    const meBanError = (() => {
+        const err = meError as AxiosError<{
+            error?: string;
+            ban?: { reason?: string; expirationTimestamp?: string };
+        }> | null;
+        if (
+            err?.response?.status === 403 &&
+            err.response.data?.error === 'Account banned'
+        ) {
+            return err.response.data.ban ?? null;
+        }
+        return null;
+    })();
+
+    if (meBanError !== null) {
+        return (
+            <BannedScreen
+                expirationTimestamp={meBanError?.expirationTimestamp}
+                reason={meBanError?.reason}
+            />
+        );
     }
 
     if (isInitialDataLoading || !user) {

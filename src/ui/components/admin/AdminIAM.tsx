@@ -11,6 +11,7 @@ import {
     ShieldAlert,
     ShieldCheck,
     User as UserIcon,
+    VolumeX,
 } from 'lucide-react';
 
 import { useMe } from '@/api/users/users.queries';
@@ -382,6 +383,19 @@ export const AdminIAM = ({
                                                 className="ml-1 shrink-0 text-danger"
                                                 size={14}
                                             />
+                                        )}
+                                        {user.muteActive && (
+                                            <span
+                                                className="ml-1 inline-flex shrink-0 items-center gap-1 rounded-full bg-caution/10 px-2 py-0.5 text-[10px] font-bold text-caution uppercase"
+                                                title={
+                                                    user.muteReason
+                                                        ? `Muted: ${user.muteReason}`
+                                                        : 'Muted'
+                                                }
+                                            >
+                                                <VolumeX size={12} />
+                                                Muted
+                                            </span>
                                         )}
                                     </div>
                                 </TableCell>
