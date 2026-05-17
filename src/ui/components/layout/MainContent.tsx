@@ -2,6 +2,7 @@ import React from 'react';
 
 import { X } from 'lucide-react';
 import { Provider, useStore } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 
 import type { RootState } from '@/store';
 import {
@@ -12,7 +13,7 @@ import {
 import {
     type SplitViewConversation,
     type SplitViewSide,
-    clearSplitViewPane,
+    closeSplitView,
 } from '@/store/slices/navSlice';
 import { useMobileSwipeContext } from '@/ui/MobileSwipeContext';
 import { MainChat } from '@/ui/components/chat/MainChat';
@@ -151,6 +152,8 @@ const SplitViewPane: React.FC<{
     conversation: SplitViewConversation | null;
 }> = ({ side, conversation }) => {
     const dispatch = useAppDispatch();
+    const navigate = useNavigate();
+    const splitView = useAppSelector((state) => state.nav.splitView);
 
     if (!conversation) {
         return (
@@ -181,7 +184,24 @@ const SplitViewPane: React.FC<{
                             title={`Close ${side} split pane`}
                             variant="ghost"
                             onClick={() => {
-                                dispatch(clearSplitViewPane(side));
+                                const otherSide: SplitViewSide =
+                                    side === 'left' ? 'right' : 'left';
+                                const remaining = splitView[otherSide];
+
+                                if (remaining) {
+                                    if (remaining.type === 'channel') {
+                                        void navigate(
+                                            `/chat/@server/${remaining.serverId}/channel/${remaining.channelId}`,
+                                        );
+                                    } else if (remaining.type === 'dm') {
+                                        void navigate(
+                                            `/chat/@user/${remaining.friendId}`,
+                                        );
+                                    }
+                                    dispatch(closeSplitView());
+                                } else {
+                                    dispatch(closeSplitView());
+                                }
                             }}
                         />
                     }
