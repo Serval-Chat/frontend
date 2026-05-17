@@ -73,6 +73,9 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
         role.gradientRepeat || 1,
     );
     const [glowEnabled, setGlowEnabled] = useState(role.glowEnabled !== false);
+    const [separateFromOtherRoles, setSeparateFromOtherRoles] = useState(
+        role.separateFromOtherRoles || false,
+    );
 
     const [permissions, setPermissions] = useState<Partial<RolePermissions>>(
         role.permissions || {},
@@ -142,6 +145,7 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
         );
         setGradientRepeat(role.gradientRepeat || 1);
         setGlowEnabled(role.glowEnabled !== false);
+        setSeparateFromOtherRoles(role.separateFromOtherRoles || false);
         setPermissions(role.permissions || {});
         setHasChanges(false);
     };
@@ -168,7 +172,7 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
             updates.gradientRepeat = gradientRepeat;
         }
 
-        onSave({ ...updates, glowEnabled });
+        onSave({ ...updates, glowEnabled, separateFromOtherRoles });
         setHasChanges(false);
     };
 
@@ -202,6 +206,7 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
             preview.gradientRepeat = gradientRepeat;
         }
         preview.glowEnabled = glowEnabled;
+        preview.separateFromOtherRoles = separateFromOtherRoles;
         return preview;
     };
 
@@ -320,6 +325,28 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
                                     checked={glowEnabled}
                                     onCheckedChange={(val) => {
                                         setGlowEnabled(val);
+                                        setHasChanges(true);
+                                    }}
+                                />
+                            </div>
+                        </div>
+
+                        <div className="space-y-4 pt-4">
+                            <div className="flex items-center justify-between">
+                                <div className="space-y-0.5">
+                                    <Text weight="semibold">
+                                        Separate Role from Group
+                                    </Text>
+                                    <br />
+                                    <Text size="xs" variant="muted">
+                                        Display role members separately from
+                                        online members.
+                                    </Text>
+                                </div>
+                                <Toggle
+                                    checked={separateFromOtherRoles}
+                                    onCheckedChange={(val) => {
+                                        setSeparateFromOtherRoles(val);
                                         setHasChanges(true);
                                     }}
                                 />
