@@ -5,15 +5,11 @@ import { Plus } from 'lucide-react';
 import type { Role } from '@/api/servers/servers.types';
 import { Button } from '@/ui/components/common/Button';
 import { IconButton } from '@/ui/components/common/IconButton';
+import { RoleDot } from '@/ui/components/common/RoleDot';
 import { cn } from '@/utils/cn';
 
-export const RoleColorDot: React.FC<{ color?: string | null }> = ({
-    color,
-}) => (
-    <div
-        className="h-3 w-3 shrink-0 rounded-full"
-        style={{ backgroundColor: color || '#99aab5' }}
-    />
+export const RoleColorDot: React.FC<{ role?: Role }> = ({ role }) => (
+    <RoleDot className="h-3 w-3" role={role} size={12} />
 );
 
 interface RoleListItemProps {
@@ -39,7 +35,7 @@ export const RoleListItem: React.FC<RoleListItemProps> = ({
         onClick={onClick}
     >
         <div className="flex items-center gap-2 truncate">
-            <RoleColorDot color={role.color} />
+            <RoleColorDot role={role} />
             <span className="truncate">{role.name}</span>
         </div>
     </Button>
@@ -78,28 +74,30 @@ export const AddRoleDropdown: React.FC<AddRoleDropdownProps> = ({
                                 setIsOpen(false);
                         }}
                     />
-                    <div className="bg-bg-tertiary absolute top-full right-0 z-50 mt-1 max-h-60 w-48 overflow-y-auto rounded border border-border-subtle shadow-lg">
-                        {availableRoles.length > 0 ? (
-                            availableRoles.map((role) => (
-                                <button
-                                    className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-foreground hover:bg-bg-subtle"
-                                    key={role._id}
-                                    onClick={() => {
-                                        onAdd(role);
-                                        setIsOpen(false);
-                                    }}
-                                >
-                                    <RoleColorDot color={role.color} />
-                                    <span className="truncate">
-                                        {role.name}
-                                    </span>
-                                </button>
-                            ))
-                        ) : (
-                            <p className="px-3 py-2 text-sm text-muted-foreground">
-                                No roles left to add
-                            </p>
-                        )}
+                    <div className="absolute top-full right-0 z-50 mt-1 max-h-60 w-48 overflow-hidden rounded-md border border-border-subtle bg-background shadow-xl backdrop-blur-md">
+                        <div className="h-full max-h-60 w-full overflow-y-auto bg-bg-secondary">
+                            {availableRoles.length > 0 ? (
+                                availableRoles.map((role) => (
+                                    <button
+                                        className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-foreground hover:bg-bg-subtle"
+                                        key={role._id}
+                                        onClick={() => {
+                                            onAdd(role);
+                                            setIsOpen(false);
+                                        }}
+                                    >
+                                        <RoleColorDot role={role} />
+                                        <span className="truncate">
+                                            {role.name}
+                                        </span>
+                                    </button>
+                                ))
+                            ) : (
+                                <p className="px-3 py-2 text-sm text-muted-foreground">
+                                    No roles left to add
+                                </p>
+                            )}
+                        </div>
                     </div>
                 </>
             )}
