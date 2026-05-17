@@ -650,6 +650,9 @@ export const useDeleteCategory = (
             void queryClient.invalidateQueries({
                 queryKey: SERVERS_QUERY_KEYS.categories(serverId),
             });
+            void queryClient.invalidateQueries({
+                queryKey: SERVERS_QUERY_KEYS.channels(serverId),
+            });
             showToast('Category deleted successfully', 'success');
         },
         onError: (error) => {

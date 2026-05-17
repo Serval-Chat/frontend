@@ -255,6 +255,11 @@ export const ChannelList: React.FC<ChannelListProps> = ({
 
     useVoiceStates(selectedServerId);
 
+    const existingCategoryIds = React.useMemo(
+        () => new Set(categories.map((cat) => cat._id)),
+        [categories],
+    );
+
     useEffect(() => {
         const handleResize = (): void => setIsMobile(window.innerWidth < 768);
         window.addEventListener('resize', handleResize);
@@ -274,8 +279,9 @@ export const ChannelList: React.FC<ChannelListProps> = ({
 
         const newList: ListItem[] = [];
 
-        // Add uncategorized channels
-        const uncategorized = sortedChannels.filter((c) => !c.categoryId);
+        const uncategorized = sortedChannels.filter(
+            (c) => !c.categoryId || !existingCategoryIds.has(c.categoryId),
+        );
         uncategorized.forEach((c) =>
             newList.push({ type: 'channel', id: c._id, data: c }),
         );
@@ -292,7 +298,7 @@ export const ChannelList: React.FC<ChannelListProps> = ({
         });
 
         setItems(newList);
-    }, [categories, channels, isReordering, syncLock]);
+    }, [categories, channels, isReordering, syncLock, existingCategoryIds]);
 
     // Mark channel as read when opened
     useEffect(() => {
@@ -323,12 +329,16 @@ export const ChannelList: React.FC<ChannelListProps> = ({
     const visibleItems = React.useMemo(
         () =>
             items.filter((item) => {
-                if (item.type === 'channel' && item.data.categoryId) {
+                if (
+                    item.type === 'channel' &&
+                    item.data.categoryId &&
+                    existingCategoryIds.has(item.data.categoryId)
+                ) {
                     return !collapsedCategories[item.data.categoryId];
                 }
                 return true;
             }),
-        [items, collapsedCategories],
+        [items, collapsedCategories, existingCategoryIds],
     );
 
     const rowVirtualizer = useVirtualizer({
@@ -1136,9 +1146,13 @@ export const ChannelList: React.FC<ChannelListProps> = ({
                                 );
                             } else {
                                 const channel = item.data;
-                                const isCollapsed = channel.categoryId
-                                    ? collapsedCategories[channel.categoryId]
-                                    : false;
+                                const isCollapsed =
+                                    channel.categoryId &&
+                                    existingCategoryIds.has(channel.categoryId)
+                                        ? collapsedCategories[
+                                              channel.categoryId
+                                          ]
+                                        : false;
 
                                 if (isCollapsed && !isReordering) return null;
 
