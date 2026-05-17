@@ -183,6 +183,10 @@ export const PrimaryNavBar: React.FC = () => {
                     <CreateServerModal
                         isOpen={showCreateServer}
                         onClose={() => setShowCreateServer(false)}
+                        onSwitchToJoin={() => {
+                            setShowCreateServer(false);
+                            setShowJoinServer(true);
+                        }}
                     />
                 </React.Suspense>
             )}
