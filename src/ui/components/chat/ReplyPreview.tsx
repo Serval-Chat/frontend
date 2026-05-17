@@ -22,6 +22,7 @@ interface ReplyPreviewProps {
         user: { id: string; username: string };
     };
     replyToId?: string;
+    isWebhook?: boolean;
     onClick?: (messageId: string) => void;
     disableCustomFonts?: boolean;
     disableGlowAndColors?: boolean;
@@ -36,6 +37,7 @@ export const ReplyPreview: React.FC<ReplyPreviewProps> = React.memo(
         text,
         interaction,
         replyToId,
+        isWebhook,
         onClick,
         disableCustomFonts,
         disableGlowAndColors,
@@ -80,6 +82,12 @@ export const ReplyPreview: React.FC<ReplyPreviewProps> = React.memo(
                         {user.displayName || user.username}
                     </StyledUserName>
                     {user.isBot && <BotTag className="h-3.5 px-1 text-[8px]" />}
+                    {isWebhook && (
+                        <BotTag
+                            className="h-3.5 px-1 text-[8px]"
+                            label="WEBHOOK"
+                        />
+                    )}
                     <Text
                         as="span"
                         className="truncate text-xs font-medium text-text-muted"

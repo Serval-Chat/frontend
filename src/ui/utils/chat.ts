@@ -95,18 +95,46 @@ export const resolveReplyTo = (
     let replyTo: ProcessedChatMessage['replyTo'] = undefined;
 
     if (msg.referenced_message) {
+        let referencedUser: User | undefined = undefined;
+        let isWebhook = false;
+        if (
+            msg.referenced_message.isWebhook &&
+            msg.referenced_message.webhookUsername
+        ) {
+            isWebhook = true;
+            const rawAvatar =
+                msg.referenced_message.webhookAvatarUrl || undefined;
+            const avatarUrl =
+                rawAvatar &&
+                (rawAvatar.startsWith('https://') ||
+                    rawAvatar.startsWith('http://'))
+                    ? `/api/v1/embed/proxy?url=${encodeURIComponent(rawAvatar)}`
+                    : rawAvatar;
+            referencedUser = {
+                _id: `webhook-${msg.referenced_message._id}`,
+                username: msg.referenced_message.webhookUsername,
+                displayName: msg.referenced_message.webhookUsername,
+                profilePicture: avatarUrl,
+                isBot: false,
+                createdAt: new Date(msg.referenced_message.createdAt),
+            } as User;
+        }
+
         replyTo = {
             _id: msg.referenced_message._id,
             text: msg.referenced_message.text,
-            user: {
-                _id: msg.referenced_message.senderId,
-                username: 'Unknown',
-            } as User,
+            user:
+                referencedUser ||
+                ({
+                    _id: msg.referenced_message.senderId,
+                    username: 'Unknown',
+                } as User),
             role: undefined,
             iconRole: undefined,
             interaction: msg.referenced_message.interaction,
             isEdited: msg.referenced_message.isEdited,
             deletedAt: msg.referenced_message.deletedAt,
+            isWebhook,
         };
     }
 
@@ -115,18 +143,43 @@ export const resolveReplyTo = (
         msg.repliedToMessageId &&
         typeof msg.repliedToMessageId === 'object'
     ) {
+        let referencedUser: User | undefined = undefined;
+        let isWebhook = false;
+        const parent = msg.repliedToMessageId as unknown as ChatMessage;
+        if (parent.isWebhook && parent.webhookUsername) {
+            isWebhook = true;
+            const rawAvatar = parent.webhookAvatarUrl || undefined;
+            const avatarUrl =
+                rawAvatar &&
+                (rawAvatar.startsWith('https://') ||
+                    rawAvatar.startsWith('http://'))
+                    ? `/api/v1/embed/proxy?url=${encodeURIComponent(rawAvatar)}`
+                    : rawAvatar;
+            referencedUser = {
+                _id: `webhook-${parent._id}`,
+                username: parent.webhookUsername,
+                displayName: parent.webhookUsername,
+                profilePicture: avatarUrl,
+                isBot: false,
+                createdAt: new Date(parent.createdAt),
+            } as User;
+        }
+
         replyTo = {
-            _id: msg.repliedToMessageId._id,
-            text: msg.repliedToMessageId.text,
-            user: {
-                _id: msg.repliedToMessageId.senderId,
-                username: 'Unknown',
-            } as User,
+            _id: parent._id,
+            text: parent.text,
+            user:
+                referencedUser ||
+                ({
+                    _id: parent.senderId,
+                    username: 'Unknown',
+                } as User),
             role: undefined,
             iconRole: undefined,
-            interaction: msg.repliedToMessageId.interaction,
-            isEdited: msg.repliedToMessageId.isEdited,
-            deletedAt: msg.repliedToMessageId.deletedAt,
+            interaction: parent.interaction,
+            isEdited: parent.isEdited,
+            deletedAt: parent.deletedAt,
+            isWebhook,
         };
     }
 
@@ -139,18 +192,42 @@ export const resolveReplyTo = (
                 allMessages.find((m) => m._id.toString() === repliedId);
 
             if (repliedMsg) {
+                let referencedUser: User | undefined = undefined;
+                let isWebhook = false;
+                if (repliedMsg.isWebhook && repliedMsg.webhookUsername) {
+                    isWebhook = true;
+                    const rawAvatar = repliedMsg.webhookAvatarUrl || undefined;
+                    const avatarUrl =
+                        rawAvatar &&
+                        (rawAvatar.startsWith('https://') ||
+                            rawAvatar.startsWith('http://'))
+                            ? `/api/v1/embed/proxy?url=${encodeURIComponent(rawAvatar)}`
+                            : rawAvatar;
+                    referencedUser = {
+                        _id: `webhook-${repliedMsg._id}`,
+                        username: repliedMsg.webhookUsername,
+                        displayName: repliedMsg.webhookUsername,
+                        profilePicture: avatarUrl,
+                        isBot: false,
+                        createdAt: new Date(repliedMsg.createdAt),
+                    } as User;
+                }
+
                 replyTo = {
                     _id: repliedMsg._id,
                     text: repliedMsg.text,
-                    user: {
-                        _id: repliedMsg.senderId,
-                        username: 'Unknown',
-                    } as User,
+                    user:
+                        referencedUser ||
+                        ({
+                            _id: repliedMsg.senderId,
+                            username: 'Unknown',
+                        } as User),
                     role: undefined,
                     iconRole: undefined,
                     interaction: repliedMsg.interaction,
                     isEdited: repliedMsg.isEdited,
                     deletedAt: repliedMsg.deletedAt,
+                    isWebhook,
                 };
             }
         }
@@ -163,9 +240,12 @@ export const resolveReplyTo = (
             user: {
                 _id: msg.repliedTo.senderId,
                 username: msg.repliedTo.senderUsername || 'Unknown',
+                displayName: msg.repliedTo.senderUsername || 'Unknown',
+                isBot: false,
             } as User,
             role: undefined,
             iconRole: undefined,
+            isWebhook: false,
         };
     }
 

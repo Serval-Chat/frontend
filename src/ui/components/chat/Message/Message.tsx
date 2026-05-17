@@ -366,6 +366,7 @@ export const Message: React.FC<MessageProps> = React.memo(
                         disableGlow={isGlowDisabled}
                         disableGlowAndColors={disableGlowAndColors}
                         interaction={message.replyTo.interaction}
+                        isWebhook={message.replyTo.isWebhook}
                         replyToId={message.replyTo._id}
                         role={message.replyTo.role}
                         text={message.replyTo.text}

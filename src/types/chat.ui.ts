@@ -22,6 +22,7 @@ export interface ProcessedChatMessage extends Omit<
         interaction?: ChatMessage['interaction'];
         isEdited?: boolean;
         deletedAt?: string;
+        isWebhook?: boolean;
     };
     repliedToMessageId?: ChatMessage['repliedToMessageId'];
 }
