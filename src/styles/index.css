@@ -42,12 +42,14 @@
 
 @layer utilities {
     @keyframes marquee {
-        0% {
+        0%,
+        15% {
             transform: translateX(0);
         }
 
+        50%,
         100% {
-            transform: translateX(-50%);
+            transform: translateX(calc(var(--marquee-shift, 0) * -1px));
         }
     }
 

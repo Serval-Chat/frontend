@@ -9,9 +9,6 @@ interface MarqueeTextProps {
     speed?: number;
 }
 
-/**
- * @description Renders text that scrolls horizontally when it overflows its container.
- */
 export const MarqueeText: React.FC<MarqueeTextProps> = ({
     children,
     className,
@@ -21,6 +18,7 @@ export const MarqueeText: React.FC<MarqueeTextProps> = ({
     const textRef = useRef<HTMLSpanElement>(null);
     const [overflow, setOverflow] = useState(false);
     const [duration, setDuration] = useState(5);
+    const [shift, setShift] = useState(0);
 
     useLayoutEffect(() => {
         const measure = (): void => {
@@ -28,10 +26,15 @@ export const MarqueeText: React.FC<MarqueeTextProps> = ({
             const cw = containerRef.current.offsetWidth;
             const tw = textRef.current.scrollWidth;
             if (tw > cw) {
+                const overflowPx = tw - cw;
                 setOverflow(true);
-                setDuration(tw / speed);
+                setShift(overflowPx);
+                const scrollTime = overflowPx / speed;
+                const totalDuration = scrollTime / 0.35;
+                setDuration(totalDuration);
             } else {
                 setOverflow(false);
+                setShift(0);
             }
         };
 
@@ -66,13 +69,11 @@ export const MarqueeText: React.FC<MarqueeTextProps> = ({
                 style={
                     {
                         '--marquee-duration': `${duration}s`,
+                        '--marquee-shift': shift,
                     } as React.CSSProperties
                 }
             >
                 {children}
-                {overflow && (
-                    <span className="inline-block w-12">{children}</span>
-                )}
             </span>
         </div>
     );
