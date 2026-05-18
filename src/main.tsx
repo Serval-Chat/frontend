@@ -13,6 +13,7 @@ import { ToastProvider } from '@/ui/components/common/Toast';
 import { AdminRoute } from '@/ui/components/layout/AdminRoute';
 import { AuthenticatedLayout } from '@/ui/components/layout/AuthenticatedLayout';
 import { NavigationSync } from '@/ui/components/layout/NavigationSync';
+import { Seo } from '@/ui/components/seo/Seo';
 import { hasAuthToken } from '@/utils/authToken';
 
 const Admin = lazy(() =>
@@ -89,6 +90,7 @@ createRoot(document.getElementById('root')!).render(
                 <ThemeProvider>
                     <ToastProvider>
                         <BrowserRouter>
+                            <Seo />
                             <Suspense
                                 fallback={
                                     <div className="flex h-screen items-center justify-center">

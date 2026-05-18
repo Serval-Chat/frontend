@@ -1,0 +1,15 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /authorize
+Disallow: /chat/
+Disallow: /developer/
+Disallow: /embed-builder
+Disallow: /forgot-password
+Disallow: /gateway
+Disallow: /invite/
+Disallow: /login
+Disallow: /reset-password
+Disallow: /showoff
+
+Sitemap: https://ser.chat/sitemap.xml

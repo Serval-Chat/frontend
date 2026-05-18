@@ -1,0 +1,18 @@
+{
+  "name": "Serchat",
+  "short_name": "Serchat",
+  "description": "Serchat is a modern chat app for communities and your servals.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0f1117",
+  "theme_color": "#7c3aed",
+  "icons": [
+    {
+      "src": "/serchat.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
