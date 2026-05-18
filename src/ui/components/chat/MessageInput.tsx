@@ -142,6 +142,7 @@ interface MessageInputProps {
         stickerId?: string,
         poll?: OutgoingPoll,
         attachments?: MessageAttachment[],
+        noEmbedsUrls?: string[],
     ) => void;
     sendTyping: () => void;
 }

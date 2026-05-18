@@ -34,6 +34,7 @@ interface ChatWSResult {
         stickerId?: string,
         poll?: OutgoingPoll,
         attachments?: MessageAttachment[],
+        noEmbedsUrls?: string[],
     ) => void;
     sendTyping: () => void;
     typingUsers: TypingUser[];
@@ -794,6 +795,7 @@ export function useChatWS(
             stickerId?: string,
             poll?: OutgoingPoll,
             attachments?: MessageAttachment[],
+            noEmbedsUrls?: string[],
         ): void => {
             if (selectedFriendId) {
                 wsMessages.sendMessageDm(
@@ -803,6 +805,7 @@ export function useChatWS(
                     stickerId,
                     poll,
                     attachments,
+                    noEmbedsUrls,
                 );
             } else if (selectedServerId && selectedChannelId) {
                 wsMessages.sendMessageServer(
@@ -813,6 +816,7 @@ export function useChatWS(
                     stickerId,
                     poll,
                     attachments,
+                    noEmbedsUrls,
                 );
             }
         },

@@ -3,6 +3,9 @@ import type { MessageAttachment, OutgoingPoll } from '@/api/chat/chat.types';
 import { wsClient } from './client';
 import { WsEvents } from './events';
 
+const limitNoEmbedsUrls = (urls?: string[]): string[] | undefined =>
+    urls?.slice(0, 25);
+
 /**
  * @description Outgoing message creators.
  */
@@ -17,6 +20,7 @@ export const wsMessages = {
         stickerId?: string,
         poll?: OutgoingPoll,
         attachments?: MessageAttachment[],
+        noEmbedsUrls?: string[],
     ) => {
         wsClient.send(WsEvents.SEND_MESSAGE_DM, {
             receiverId,
@@ -25,6 +29,7 @@ export const wsMessages = {
             stickerId,
             poll,
             attachments,
+            noEmbedsUrls: limitNoEmbedsUrls(noEmbedsUrls),
         });
     },
 
@@ -39,6 +44,7 @@ export const wsMessages = {
         stickerId?: string,
         poll?: OutgoingPoll,
         attachments?: MessageAttachment[],
+        noEmbedsUrls?: string[],
     ) => {
         wsClient.send(WsEvents.SEND_MESSAGE_SERVER, {
             serverId,
@@ -48,6 +54,7 @@ export const wsMessages = {
             stickerId,
             poll,
             attachments,
+            noEmbedsUrls: limitNoEmbedsUrls(noEmbedsUrls),
         });
     },
 

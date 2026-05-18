@@ -16,6 +16,12 @@ const PAYLOAD_STYLE = {
     fontSize: '10px',
 } as const;
 
+const getPayloadText = (payload: unknown): string =>
+    JSON.stringify(payload, null, 2) ?? String(payload);
+
+const getPayloadPreview = (payload: unknown): string =>
+    JSON.stringify(payload) ?? String(payload);
+
 export const WsDebugger: React.FC = () => {
     const events = useWsDebugEvents();
 
@@ -46,13 +52,23 @@ export const WsDebugger: React.FC = () => {
                         Waiting for events...
                     </div>
                 ) : (
-                    <NTTable headers={['Time', 'Dir', 'Event', 'Payload']}>
+                    <NTTable
+                        className="[&_th:nth-child(1)]:w-16 [&_th:nth-child(2)]:w-10 [&_th:nth-child(3)]:w-28"
+                        headers={['Time', 'Dir', 'Event', 'Payload']}
+                    >
                         {filteredEvents.map((event) => {
                             const date = new Date(event.timestamp);
                             const ms = String(date.getMilliseconds()).padStart(
                                 3,
                                 '0',
                             );
+                            const hasPayload = event.payload != null;
+                            const payloadText = hasPayload
+                                ? getPayloadText(event.payload)
+                                : '';
+                            const payloadPreview = hasPayload
+                                ? getPayloadPreview(event.payload)
+                                : '';
 
                             return (
                                 <tr
@@ -69,26 +85,37 @@ export const WsDebugger: React.FC = () => {
                                     <td className="w-12 p-1 text-center align-top font-bold text-[#0000aa]">
                                         {event.direction.toUpperCase()}
                                     </td>
-                                    <td className="min-w-[120px] p-1 align-top font-bold break-words text-black">
-                                        {event.type}
+                                    <td
+                                        className="w-28 p-1 align-top font-bold text-black"
+                                        title={event.type}
+                                    >
+                                        <div className="[overflow-wrap:anywhere] whitespace-normal">
+                                            {event.type}
+                                        </div>
                                     </td>
-                                    <td className="p-1 align-top text-gray-700">
-                                        {!!event.payload && (
-                                            <NTScrollArea className="h-64 max-h-64 w-full border border-[#dfdfdf] border-r-[#808080] border-b-[#808080] bg-white shadow-[inset_1px_1px_#808080,inset_-1px_-1px_#ffffff]">
-                                                <SyntaxHighlighter
-                                                    wrapLines
-                                                    wrapLongLines
-                                                    customStyle={PAYLOAD_STYLE}
-                                                    language="json"
-                                                    style={vs}
+                                    <td className="min-w-0 p-1 align-top text-gray-700">
+                                        {hasPayload && (
+                                            <details className="min-w-0">
+                                                <summary
+                                                    className="block max-h-12 cursor-pointer overflow-hidden text-[10px] [overflow-wrap:anywhere] whitespace-normal text-gray-700"
+                                                    title={payloadPreview}
                                                 >
-                                                    {JSON.stringify(
-                                                        event.payload,
-                                                        null,
-                                                        2,
-                                                    )}
-                                                </SyntaxHighlighter>
-                                            </NTScrollArea>
+                                                    {payloadPreview}
+                                                </summary>
+                                                <NTScrollArea className="h-32 w-full border border-[#dfdfdf] border-r-[#808080] border-b-[#808080] bg-white shadow-[inset_1px_1px_#808080,inset_-1px_-1px_#ffffff]">
+                                                    <SyntaxHighlighter
+                                                        wrapLines
+                                                        wrapLongLines
+                                                        customStyle={
+                                                            PAYLOAD_STYLE
+                                                        }
+                                                        language="json"
+                                                        style={vs}
+                                                    >
+                                                        {payloadText}
+                                                    </SyntaxHighlighter>
+                                                </NTScrollArea>
+                                            </details>
                                         )}
                                     </td>
                                 </tr>

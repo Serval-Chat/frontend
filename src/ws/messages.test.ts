@@ -11,6 +11,31 @@ vi.mock('./client', () => ({
 }));
 
 describe('wsMessages', () => {
+    it('sendMessageServer should cap noEmbedsUrls at 25', () => {
+        const noEmbedsUrls = Array.from(
+            { length: 26 },
+            (_, index) => `https://example.com/${index}`,
+        );
+
+        wsMessages.sendMessageServer(
+            'server-1',
+            'channel-1',
+            'hello',
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            noEmbedsUrls,
+        );
+
+        expect(wsClient.send).toHaveBeenCalledWith(
+            WsEvents.SEND_MESSAGE_SERVER,
+            expect.objectContaining({
+                noEmbedsUrls: noEmbedsUrls.slice(0, 25),
+            }),
+        );
+    });
+
     it('markDmRead should send peerId instead of userId', () => {
         const peerId = '12345';
         wsMessages.markDmRead(peerId);

@@ -560,6 +560,7 @@ export interface ISendMessageServerEventPayload {
     stickerId?: string;
     poll?: OutgoingPoll;
     attachments?: MessageAttachment[];
+    noEmbedsUrls?: string[];
 }
 
 export interface IPollVoteUpdatedDmPayload {
