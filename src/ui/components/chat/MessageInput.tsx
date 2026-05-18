@@ -158,12 +158,13 @@ const theme = {
 };
 
 const isSameSlashChipState = (
-    a: { commandName: string; argValues: string[] } | null,
-    b: { commandName: string; argValues: string[] } | null,
+    a: { commandName: string; commandId?: string; argValues: string[] } | null,
+    b: { commandName: string; commandId?: string; argValues: string[] } | null,
 ): boolean => {
     if (a === b) return true;
     if (!a || !b) return false;
     if (a.commandName !== b.commandName) return false;
+    if (a.commandId !== b.commandId) return false;
     if (a.argValues.length !== b.argValues.length) return false;
     return a.argValues.every((value, index) => value === b.argValues[index]);
 };
@@ -199,6 +200,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
         useState(false);
     const [slashChipState, setSlashChipState] = useState<{
         commandName: string;
+        commandId?: string;
         argValues: string[];
     } | null>(null);
     const currentInputTextRef = useRef('');
@@ -386,9 +388,14 @@ export const MessageInput: React.FC<MessageInputProps> = ({
     };
     const slashPreview = useMemo(() => {
         if (slashChipState) {
-            const command = serverCommands.find(
-                (c) => c.name === slashChipState.commandName,
-            );
+            let command = slashChipState.commandId
+                ? serverCommands.find((c) => c.id === slashChipState.commandId)
+                : undefined;
+            if (!command) {
+                command = serverCommands.find(
+                    (c) => c.name === slashChipState.commandName,
+                );
+            }
             if (!command) return null;
 
             const options = command.options ?? [];

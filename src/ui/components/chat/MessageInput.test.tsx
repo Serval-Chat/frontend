@@ -39,6 +39,7 @@ describe('tryExecuteSlashCommand', () => {
         expect(result).toEqual({ handled: true, success: true });
         expect(createInteraction).toHaveBeenCalledWith({
             command: 'poke',
+            commandId: 'cmd-1',
             options: [{ name: 'target', value: 'alice' }],
             serverId: 'server-1',
             channelId: 'channel-1',

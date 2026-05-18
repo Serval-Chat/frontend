@@ -54,6 +54,7 @@ describe('slashCommands validator', () => {
             ok: true,
             value: {
                 command: 'poke',
+                commandId: 'cmd1',
                 options: [
                     { name: 'target', value: 'alice' },
                     { name: 'silent', value: false },
@@ -75,6 +76,7 @@ describe('slashCommands validator', () => {
             ok: true,
             value: {
                 command: 'poke',
+                commandId: 'cmd1',
                 options: [
                     { name: 'target', value: 'bob' },
                     { name: 'silent', value: true },
@@ -96,6 +98,7 @@ describe('slashCommands validator', () => {
             ok: true,
             value: {
                 command: 'poke',
+                commandId: 'cmd1',
                 options: [
                     { name: 'target', value: 'alice' },
                     { name: 'silent', value: false },
@@ -153,6 +156,7 @@ describe('slashCommands validator', () => {
             ok: true,
             value: {
                 command: 'inspect',
+                commandId: 'cmd2',
                 options: [
                     { name: 'target', value: '507f1f77bcf86cd799439011' },
                 ],
@@ -184,7 +188,37 @@ describe('slashCommands validator', () => {
             ok: true,
             value: {
                 command: 'inspect',
+                commandId: 'cmd2',
                 options: [{ name: 'target', value: '123456789' }],
+            },
+        });
+    });
+
+    it('prefers matching command by commandId when multiple have the same name', () => {
+        const multipleCommands = [
+            {
+                id: 'cmdA',
+                name: 'about',
+                description: 'First Bot About',
+                options: [],
+            },
+            {
+                id: 'cmdB',
+                name: 'about',
+                description: 'Second Bot About',
+                options: [],
+            },
+        ];
+        const result = validateSlashCommand(
+            { commandName: 'about', commandId: 'cmdB', args: [] },
+            multipleCommands,
+        );
+        expect(result).toEqual({
+            ok: true,
+            value: {
+                command: 'about',
+                commandId: 'cmdB',
+                options: [],
             },
         });
     });

@@ -28,10 +28,12 @@ export function clearSlashChips(): void {
  */
 export function $getSlashChipState(): {
     commandName: string;
+    commandId?: string;
     argValues: string[];
 } | null {
     const root = $getRoot();
     let commandName: string | null = null;
+    let commandId: string | undefined = undefined;
     const argValues: string[] = [];
 
     for (const child of root.getChildren()) {
@@ -39,6 +41,7 @@ export function $getSlashChipState(): {
         for (const node of child.getChildren()) {
             if ($isSlashCommandChipNode(node)) {
                 commandName = node.getCommandName();
+                commandId = node.getCommandId();
             } else if ($isSlashArgChipNode(node)) {
                 argValues[node.getArgIndex()] = node.getValue();
             }
@@ -46,7 +49,7 @@ export function $getSlashChipState(): {
     }
 
     if (commandName === null) return null;
-    return { commandName, argValues };
+    return { commandName, commandId, argValues };
 }
 
 /**
@@ -61,7 +64,11 @@ export function getSlashChipPayload(
     if (!chipState) return null;
 
     return validateSlashCommand(
-        { commandName: chipState.commandName, args: chipState.argValues },
+        {
+            commandName: chipState.commandName,
+            commandId: chipState.commandId,
+            args: chipState.argValues,
+        },
         commands,
     );
 }

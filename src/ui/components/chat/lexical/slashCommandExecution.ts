@@ -18,6 +18,7 @@ interface TryExecuteSlashCommandParams {
     showToast: (message: string, type?: ToastType) => void;
     createInteraction: (data: {
         command: string;
+        commandId?: string;
         options?: { name: string; value: InteractionValue }[];
         serverId: string;
         channelId: string;
@@ -72,6 +73,7 @@ export const tryExecuteSlashCommand = async ({
         try {
             await createInteraction({
                 command: chipPayload.value.command,
+                commandId: chipPayload.value.commandId,
                 options: chipPayload.value.options,
                 serverId: selectedServerId,
                 channelId: selectedChannelId,
@@ -103,6 +105,7 @@ export const tryExecuteSlashCommand = async ({
     try {
         await createInteraction({
             command: validated.value.command,
+            commandId: validated.value.commandId,
             options: validated.value.options,
             serverId: selectedServerId,
             channelId: selectedChannelId,

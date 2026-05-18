@@ -3,11 +3,13 @@ import type { InteractionValue } from '@/types/interactions';
 
 export interface ParsedSlashInput {
     commandName: string;
+    commandId?: string;
     args: string[];
 }
 
 export interface ValidatedSlashCommand {
     command: string;
+    commandId?: string;
     options: { name: string; value: InteractionValue }[];
 }
 
@@ -36,7 +38,13 @@ export function validateSlashCommand(
     parsed: ParsedSlashInput,
     commands: SlashCommand[],
 ): { ok: true; value: ValidatedSlashCommand } | { ok: false; error: string } {
-    const command = commands.find((c) => c.name === parsed.commandName);
+    let command: SlashCommand | undefined;
+    if (parsed.commandId) {
+        command = commands.find((c) => c.id === parsed.commandId);
+    }
+    if (!command) {
+        command = commands.find((c) => c.name === parsed.commandName);
+    }
     if (!command) {
         return {
             ok: false,
@@ -105,7 +113,10 @@ export function validateSlashCommand(
         options.push({ name: definition.name, value: coerced });
     }
 
-    return { ok: true, value: { command: command.name, options } };
+    return {
+        ok: true,
+        value: { command: command.name, commandId: command.id, options },
+    };
 }
 
 function coerceOptionValue(

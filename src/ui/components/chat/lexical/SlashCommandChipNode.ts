@@ -19,26 +19,37 @@ export const CANCEL_SLASH_COMMAND = createCommand<void>('CANCEL_SLASH_COMMAND');
 
 export type SerializedSlashCommandChipNode = SerializedLexicalNode & {
     commandName: string;
+    commandId?: string;
 };
 
 export class SlashCommandChipNode extends DecoratorNode<React.ReactNode> {
     __commandName: string;
+    __commandId?: string;
 
     static getType(): string {
         return 'slash-command-chip';
     }
 
     static clone(node: SlashCommandChipNode): SlashCommandChipNode {
-        return new SlashCommandChipNode(node.__commandName, node.__key);
+        return new SlashCommandChipNode(
+            node.__commandName,
+            node.__commandId,
+            node.__key,
+        );
     }
 
-    constructor(commandName: string, key?: NodeKey) {
+    constructor(commandName: string, commandId?: string, key?: NodeKey) {
         super(key);
         this.__commandName = commandName;
+        this.__commandId = commandId;
     }
 
     getCommandName(): string {
         return this.__commandName;
+    }
+
+    getCommandId(): string | undefined {
+        return this.__commandId;
     }
 
     createDOM(): HTMLElement {
@@ -66,13 +77,14 @@ export class SlashCommandChipNode extends DecoratorNode<React.ReactNode> {
             type: 'slash-command-chip',
             version: 1,
             commandName: this.__commandName,
+            commandId: this.__commandId,
         };
     }
 
     static importJSON(
         node: SerializedSlashCommandChipNode,
     ): SlashCommandChipNode {
-        return new SlashCommandChipNode(node.commandName);
+        return new SlashCommandChipNode(node.commandName, node.commandId);
     }
 
     decorate(editor: LexicalEditor): React.ReactNode {
@@ -85,8 +97,9 @@ export class SlashCommandChipNode extends DecoratorNode<React.ReactNode> {
 
 export function $createSlashCommandChipNode(
     commandName: string,
+    commandId?: string,
 ): SlashCommandChipNode {
-    return new SlashCommandChipNode(commandName);
+    return new SlashCommandChipNode(commandName, commandId);
 }
 
 export function $isSlashCommandChipNode(

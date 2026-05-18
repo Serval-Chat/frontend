@@ -198,7 +198,10 @@ export const LexicalSlashCommandPlugin: React.FC<
 
                 const cmdOptions = selectedOption.command.options ?? [];
                 const nodes = [
-                    $createSlashCommandChipNode(selectedOption.command.name),
+                    $createSlashCommandChipNode(
+                        selectedOption.command.name,
+                        selectedOption.command.id,
+                    ),
                     ...cmdOptions.map((opt, i) =>
                         $createSlashArgChipNode(
                             opt.name,

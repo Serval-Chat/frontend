@@ -23,6 +23,7 @@ export const interactionsApi = {
 
     createInteraction: async (data: {
         command: string;
+        commandId?: string;
         options?: { name: string; value: InteractionValue }[];
         serverId: string;
         channelId: string;
