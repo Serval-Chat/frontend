@@ -1,15 +1,36 @@
-export interface BotPermissions {
-    readMessages: boolean;
-    sendMessages: boolean;
-    manageMessages: boolean;
-    readUsers: boolean;
-    joinServers: boolean;
-    manageServer: boolean;
-    manageChannels: boolean;
-    manageMembers: boolean;
-    readReactions: boolean;
-    addReactions: boolean;
-}
+export const BOT_PERMISSION_KEYS = [
+    'readMessages',
+    'sendMessages',
+    'manageMessages',
+    'readUsers',
+    'joinServers',
+    'manageServer',
+    'manageChannels',
+    'manageMembers',
+    'readReactions',
+    'addReactions',
+    'viewChannels',
+    'connect',
+    'deleteMessagesOfOthers',
+    'manageRoles',
+    'banMembers',
+    'kickMembers',
+    'manageInvites',
+    'administrator',
+    'manageWebhooks',
+    'pingRolesAndEveryone',
+    'manageReactions',
+    'exportChannelMessages',
+    'bypassSlowmode',
+    'pinMessages',
+    'seeDeletedMessages',
+    'moderateMembers',
+    'manageStickers',
+] as const;
+
+export type BotPermissionKey = (typeof BOT_PERMISSION_KEYS)[number];
+
+export type BotPermissions = Partial<Record<BotPermissionKey, boolean>>;
 
 export interface BotUser {
     _id: string;

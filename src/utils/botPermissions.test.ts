@@ -1,3 +1,4 @@
+import { BOT_PERMISSION_KEYS } from '@/types/bot';
 import type { BotPermissions } from '@/types/bot';
 
 import {
@@ -7,37 +8,22 @@ import {
 } from './botPermissions';
 
 describe('botPermissions utility', () => {
-    const allOn: BotPermissions = {
-        readMessages: true,
-        sendMessages: true,
-        manageMessages: true,
-        readUsers: true,
-        joinServers: true,
-        manageServer: true,
-        manageChannels: true,
-        manageMembers: true,
-        readReactions: true,
-        addReactions: true,
-    };
+    const makePermissions = (value: boolean): BotPermissions =>
+        Object.fromEntries(
+            BOT_PERMISSION_KEYS.map((key) => [key, value]),
+        ) as BotPermissions;
 
-    const allOff: BotPermissions = {
-        readMessages: false,
-        sendMessages: false,
-        manageMessages: false,
-        readUsers: false,
-        joinServers: false,
-        manageServer: false,
-        manageChannels: false,
-        manageMembers: false,
-        readReactions: false,
-        addReactions: false,
-    };
+    const allOn = makePermissions(true);
+
+    const allOff = makePermissions(false);
 
     const partial: BotPermissions = {
         ...allOff,
         readMessages: true,
         sendMessages: true,
         manageServer: true,
+        manageRoles: true,
+        exportChannelMessages: true,
     };
 
     test('permissionsToBitmask should convert all true to correct bitmask', () => {
@@ -56,7 +42,9 @@ describe('botPermissions utility', () => {
         const expected =
             BOT_PERMISSION_BITS.readMessages |
             BOT_PERMISSION_BITS.sendMessages |
-            BOT_PERMISSION_BITS.manageServer;
+            BOT_PERMISSION_BITS.manageServer |
+            BOT_PERMISSION_BITS.manageRoles |
+            BOT_PERMISSION_BITS.exportChannelMessages;
         expect(permissionsToBitmask(partial)).toBe(expected);
     });
 
@@ -68,7 +56,9 @@ describe('botPermissions utility', () => {
         const mask =
             BOT_PERMISSION_BITS.readMessages |
             BOT_PERMISSION_BITS.sendMessages |
-            BOT_PERMISSION_BITS.manageServer;
+            BOT_PERMISSION_BITS.manageServer |
+            BOT_PERMISSION_BITS.manageRoles |
+            BOT_PERMISSION_BITS.exportChannelMessages;
         expect(bitmaskToPermissions(mask)).toEqual(partial);
     });
 

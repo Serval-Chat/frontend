@@ -14,7 +14,8 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useServers } from '@/api/servers/servers.queries';
 import { useMe } from '@/api/users/users.queries';
 import { useAuthorizeBot, usePublicBotInfo } from '@/hooks/developer/useBots';
-import type { BotPermissions } from '@/types/bot';
+import { BOT_PERMISSION_KEYS } from '@/types/bot';
+import type { BotPermissionKey } from '@/types/bot';
 import { Button } from '@/ui/components/common/Button';
 import { Divider } from '@/ui/components/common/Divider';
 import { Heading } from '@/ui/components/common/Heading';
@@ -26,22 +27,12 @@ import { UserProfilePictureIcon } from '@/ui/components/common/UserProfilePictur
 import { Box } from '@/ui/components/layout/Box';
 import { DefaultBackground } from '@/ui/components/layout/DefaultBackground';
 import { ProfileBanner } from '@/ui/components/profile/ProfileBanner';
-import { bitmaskToPermissions } from '@/utils/botPermissions';
+import {
+    BOT_PERMISSION_LABELS,
+    bitmaskToPermissions,
+} from '@/utils/botPermissions';
 import { cn } from '@/utils/cn';
 import { APP_LOCALE } from '@/utils/locale';
-
-const PERMISSION_LABELS: Partial<Record<keyof BotPermissions, string>> = {
-    readMessages: 'Read messages',
-    sendMessages: 'Send messages',
-    manageMessages: 'Manage messages',
-    readUsers: 'Access user profiles',
-    manageServer: 'Manage server settings',
-    manageChannels: 'Manage channels',
-    manageMembers: 'Kick & ban members',
-    addReactions: 'Add reactions',
-    readReactions: 'View reactions',
-    joinServers: 'Join servers',
-};
 
 const BotBannerHeader = ({
     username,
@@ -172,9 +163,7 @@ export const BotAuthorize = (): ReactNode => {
     const botName = botInfo?.displayName ?? botInfo?.username ?? '';
     const activePermissions = urlPermissions ?? botInfo?.botPermissions;
     const requestedPerms = activePermissions
-        ? (Object.keys(activePermissions) as (keyof BotPermissions)[]).filter(
-              (k) => activePermissions[k] && PERMISSION_LABELS[k],
-          )
+        ? BOT_PERMISSION_KEYS.filter((k) => activePermissions[k])
         : [];
 
     const manageableServers = servers?.filter((s) => s.canManage) ?? [];
@@ -292,18 +281,20 @@ export const BotAuthorize = (): ReactNode => {
                                         </Text>
                                     </div>
                                     <div className="grid grid-cols-2 gap-1.5">
-                                        {requestedPerms.map((key) => (
-                                            <span
-                                                className="flex items-center gap-1.5 rounded-md border border-border-subtle bg-bg-secondary/50 px-2.5 py-2 text-xs font-medium"
-                                                key={key}
-                                            >
-                                                <Check
-                                                    className="shrink-0 text-primary"
-                                                    size={11}
-                                                />
-                                                {PERMISSION_LABELS[key]}
-                                            </span>
-                                        ))}
+                                        {requestedPerms.map(
+                                            (key: BotPermissionKey) => (
+                                                <span
+                                                    className="flex items-center gap-1.5 rounded-md border border-border-subtle bg-bg-secondary/50 px-2.5 py-2 text-xs font-medium"
+                                                    key={key}
+                                                >
+                                                    <Check
+                                                        className="shrink-0 text-primary"
+                                                        size={11}
+                                                    />
+                                                    {BOT_PERMISSION_LABELS[key]}
+                                                </span>
+                                            ),
+                                        )}
                                     </div>
                                 </div>
                             </>

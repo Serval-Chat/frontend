@@ -21,32 +21,23 @@ import {
     useUploadBotBanner,
     useUploadBotPicture,
 } from '@/hooks/developer/useBots';
-import type { BotPermissions } from '@/types/bot';
+import type { BotPermissionKey, BotPermissions } from '@/types/bot';
 import { Button } from '@/ui/components/common/Button';
 import { Input } from '@/ui/components/common/Input';
 import { Modal } from '@/ui/components/common/Modal';
 import { Text } from '@/ui/components/common/Text';
 import { UserProfileCard } from '@/ui/components/profile/UserProfileCard';
 import { ImageCropModal } from '@/ui/components/settings/ImageCropModal';
-import { permissionsToBitmask } from '@/utils/botPermissions';
+import {
+    BOT_PERMISSION_GROUPS,
+    BOT_PERMISSION_LABELS,
+    permissionsToBitmask,
+} from '@/utils/botPermissions';
 
 interface DevBotDetailProps {
     clientId: string;
     onBack: () => void;
 }
-
-const PERMISSION_LABELS: Record<keyof BotPermissions, string> = {
-    readMessages: 'Read Messages',
-    sendMessages: 'Send Messages',
-    manageMessages: 'Manage Messages',
-    readUsers: 'Read Users',
-    joinServers: 'Join Servers',
-    manageServer: 'Manage Server',
-    manageChannels: 'Manage Channels',
-    manageMembers: 'Manage Members',
-    readReactions: 'Read Reactions',
-    addReactions: 'Add Reactions',
-};
 
 const PermissionRow = ({
     label,
@@ -421,22 +412,34 @@ export const DevBotDetail = ({
                 </Section>
 
                 <Section title="Permissions">
-                    <div className="grid grid-cols-2 gap-1">
-                        {(
-                            Object.keys(
-                                PERMISSION_LABELS,
-                            ) as (keyof BotPermissions)[]
-                        ).map((key) => (
-                            <PermissionRow
-                                key={key}
-                                label={PERMISSION_LABELS[key]}
-                                value={permissions[key]}
-                                onChange={(v) =>
-                                    setPermissions(
-                                        (prev) => prev && { ...prev, [key]: v },
-                                    )
-                                }
-                            />
+                    <div className="flex flex-col gap-5">
+                        {BOT_PERMISSION_GROUPS.map((group) => (
+                            <div
+                                className="flex flex-col gap-2"
+                                key={group.title}
+                            >
+                                <p className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">
+                                    {group.title}
+                                </p>
+                                <div className="grid grid-cols-1 gap-1 sm:grid-cols-2">
+                                    {group.keys.map((key: BotPermissionKey) => (
+                                        <PermissionRow
+                                            key={key}
+                                            label={BOT_PERMISSION_LABELS[key]}
+                                            value={permissions[key] ?? false}
+                                            onChange={(v) =>
+                                                setPermissions(
+                                                    (prev) =>
+                                                        prev && {
+                                                            ...prev,
+                                                            [key]: v,
+                                                        },
+                                                )
+                                            }
+                                        />
+                                    ))}
+                                </div>
+                            </div>
                         ))}
                     </div>
                 </Section>
