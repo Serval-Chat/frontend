@@ -48,6 +48,7 @@ interface ParsedTextProps {
     size?: 'xs' | 'sm' | 'base' | 'lg' | 'xl' | '2xl';
     condenseFiles?: boolean;
     condenseInvites?: boolean;
+    condenseCodeBlocks?: boolean;
     largeEmojis?: boolean;
     wrap?: TextProps['wrap'];
     isNested?: boolean;
@@ -98,6 +99,7 @@ export const ParsedText = React.memo<ParsedTextProps>(
         size,
         condenseFiles,
         condenseInvites,
+        condenseCodeBlocks,
         largeEmojis,
         wrap,
         isNested,
@@ -151,6 +153,7 @@ export const ParsedText = React.memo<ParsedTextProps>(
             () => ({
                 condenseFiles,
                 condenseInvites,
+                condenseCodeBlocks,
                 largeEmojis,
                 isNested: true,
                 size,
@@ -161,6 +164,7 @@ export const ParsedText = React.memo<ParsedTextProps>(
             [
                 condenseFiles,
                 condenseInvites,
+                condenseCodeBlocks,
                 largeEmojis,
                 size,
                 wrap,
@@ -623,6 +627,19 @@ export const ParsedText = React.memo<ParsedTextProps>(
                             );
 
                         case 'code_block':
+                            if (condenseCodeBlocks) {
+                                return (
+                                    <Text
+                                        fontStyle="italic"
+                                        key={idx}
+                                        size={size}
+                                        variant="muted"
+                                        wrap={wrap}
+                                    >
+                                        Code block
+                                    </Text>
+                                );
+                            }
                             return (
                                 <React.Suspense
                                     fallback={
@@ -640,6 +657,19 @@ export const ParsedText = React.memo<ParsedTextProps>(
                             );
 
                         case 'mermaid':
+                            if (condenseCodeBlocks) {
+                                return (
+                                    <Text
+                                        fontStyle="italic"
+                                        key={idx}
+                                        size={size}
+                                        variant="muted"
+                                        wrap={wrap}
+                                    >
+                                        Code block
+                                    </Text>
+                                );
+                            }
                             return (
                                 <React.Suspense
                                     fallback={

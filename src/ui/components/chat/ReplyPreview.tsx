@@ -101,6 +101,7 @@ export const ReplyPreview: React.FC<ReplyPreviewProps> = React.memo(
                             </span>
                         )}
                         <ParsedText
+                            condenseCodeBlocks
                             condenseFiles
                             condenseInvites
                             nodes={nodes}
