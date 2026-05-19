@@ -79,7 +79,7 @@ export interface RolePermissions {
     viewChannels: boolean;
     pinMessages: boolean;
     connect: boolean;
-    export_channel_messages: boolean;
+    exportChannelMessages: boolean;
     bypassSlowmode: boolean;
     seeDeletedMessages: boolean;
     moderateMembers: boolean;

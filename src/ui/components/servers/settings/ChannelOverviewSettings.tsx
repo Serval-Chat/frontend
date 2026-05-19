@@ -72,7 +72,7 @@ export const ChannelOverviewSettings: React.FC<
     );
 
     const { hasPermission } = usePermissions(channel.serverId, channel._id);
-    const canExport = hasPermission('export_channel_messages');
+    const canExport = hasPermission('exportChannelMessages');
 
     const { data: exportState, isLoading: isLoadingExportState } =
         useExportChannelState(channel.serverId, channel._id);

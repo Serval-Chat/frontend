@@ -149,7 +149,7 @@ export const usePermissions = (
             addReactions: false,
             viewChannels: false,
             connect: false,
-            export_channel_messages: false,
+            exportChannelMessages: false,
             bypassSlowmode: false,
             pinMessages: false,
             seeDeletedMessages: false,

@@ -128,13 +128,14 @@ const VALID_PERMISSION_KEYS = new Set([
     'pingRolesAndEveryone',
     'addReactions',
     'manageReactions',
-    'export_channel_messages',
+    'exportChannelMessages',
     'viewChannels',
     'pinMessages',
     'bypassSlowmode',
     'connect',
     'seeDeletedMessages',
     'moderateMembers',
+    'manageStickers',
 ]);
 
 const stripUnknownKeys = (
