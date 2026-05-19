@@ -51,6 +51,6 @@ export const getSafeUrl = (url: string | undefined): string | undefined => {
     if (!url) return undefined;
     if (isInternalUrl(url)) return url;
 
-    console.warn(`Blocked cross-origin request to: ${url}`);
-    return undefined;
+    const baseUrl = getBrowserApiBaseUrl() || getConfiguredApiBaseUrl() || '';
+    return `${baseUrl}/api/v1/embed/proxy?url=${encodeURIComponent(url)}`;
 };
