@@ -564,6 +564,36 @@ export function useChatWS(
     );
 
     useWebSocket(
+        WsEvents.MESSAGE_DM_DELETED,
+        useCallback(
+            (payload: { messageId: string }): void => {
+                if (!selectedFriendId) return;
+                queryClient.setQueriesData<InfiniteData<ChatMessage[]>>(
+                    {
+                        predicate: (query) =>
+                            query.queryKey[0] === 'chat' &&
+                            query.queryKey[1] === 'messages' &&
+                            query.queryKey[2] === 'user' &&
+                            query.queryKey[3] === selectedFriendId,
+                    },
+                    (oldData) => {
+                        if (!oldData) return oldData;
+                        return {
+                            ...oldData,
+                            pages: oldData.pages.map((page) =>
+                                page.filter(
+                                    (msg) => msg._id !== payload.messageId,
+                                ),
+                            ),
+                        };
+                    },
+                );
+            },
+            [queryClient, selectedFriendId],
+        ),
+    );
+
+    useWebSocket(
         WsEvents.MESSAGE_SERVER_EMBEDS_UPDATED,
         useCallback(
             (payload: {

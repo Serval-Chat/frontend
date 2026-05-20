@@ -167,13 +167,20 @@ export const Message: React.FC<MessageProps> = React.memo(
         });
 
         const handleDelete = React.useCallback((): void => {
-            if (!message.serverId || !message.channelId) return;
             deleteMessage({
                 serverId: message.serverId,
                 channelId: message.channelId,
                 messageId: message._id,
+                userId: message.receiverId ?? message.senderId,
             });
-        }, [message.serverId, message.channelId, message._id, deleteMessage]);
+        }, [
+            message.serverId,
+            message.channelId,
+            message._id,
+            message.receiverId,
+            message.senderId,
+            deleteMessage,
+        ]);
 
         const handleEdit = React.useCallback((): void => {
             setIsEditing(true);
