@@ -9,6 +9,8 @@ import { useTertiarySidebarData } from '@/hooks/useTertiarySidebarData';
 import { useAppSelector } from '@/store/hooks';
 
 vi.mock('@/api/servers/servers.queries', () => ({
+    useCategories: vi.fn(),
+    useChannels: vi.fn(),
     useMembers: vi.fn(),
     useRoles: vi.fn(),
     useServerDetails: vi.fn(),
@@ -40,6 +42,7 @@ describe('useTertiarySidebarData', () => {
         _id: 'role-1',
         name: 'Member',
         position: 1,
+        permissions: { viewChannels: true },
     } as Role;
 
     beforeEach(() => {
@@ -49,6 +52,7 @@ describe('useTertiarySidebarData', () => {
             selector({
                 nav: {
                     selectedFriendId: null,
+                    selectedChannelId: null,
                     selectedServerId: null,
                     splitView: { left: null, right: null },
                 },
@@ -70,6 +74,12 @@ describe('useTertiarySidebarData', () => {
         vi.mocked(ServerQueries.useRoles).mockReturnValue({
             data: [mockRole],
         } as never);
+        vi.mocked(ServerQueries.useChannels).mockReturnValue({
+            data: [],
+        } as never);
+        vi.mocked(ServerQueries.useCategories).mockReturnValue({
+            data: [],
+        } as never);
     });
 
     it('enables server member queries for explicit split-view sidebar context', () => {
@@ -87,6 +97,9 @@ describe('useTertiarySidebarData', () => {
         expect(ServerQueries.useRoles).toHaveBeenCalledWith('pane-server', {
             enabled: true,
         });
+        expect(ServerQueries.useChannels).toHaveBeenCalledWith('pane-server', {
+            enabled: false,
+        });
         expect(result.current.selectedServerId).toBe('pane-server');
         expect(result.current.members).toEqual([mockMember]);
     });
@@ -102,5 +115,69 @@ describe('useTertiarySidebarData', () => {
         expect(ServerQueries.useMembers).toHaveBeenCalledWith('pane-server', {
             enabled: false,
         });
+    });
+
+    it('filters server members that cannot view the selected channel', () => {
+        const visibleMember = {
+            userId: 'visible-user',
+            roles: ['visible-role'],
+            user: { _id: 'visible-user', username: 'Visible' },
+        } as ServerMember;
+        const hiddenMember = {
+            userId: 'hidden-user',
+            roles: ['hidden-role'],
+            user: { _id: 'hidden-user', username: 'Hidden' },
+        } as ServerMember;
+
+        vi.mocked(ServerQueries.useServerDetails).mockReturnValue({
+            data: {
+                _id: 'pane-server',
+                ownerId: 'owner-user',
+                name: 'Pane Server',
+            } as Server,
+        } as never);
+        vi.mocked(ServerQueries.useMembers).mockReturnValue({
+            data: [visibleMember, hiddenMember],
+            isLoading: false,
+        } as never);
+        vi.mocked(ServerQueries.useRoles).mockReturnValue({
+            data: [
+                {
+                    _id: 'visible-role',
+                    name: 'Visible',
+                    position: 2,
+                    permissions: { viewChannels: true },
+                },
+                {
+                    _id: 'hidden-role',
+                    name: 'Hidden',
+                    position: 1,
+                    permissions: { viewChannels: true },
+                },
+            ] as Role[],
+        } as never);
+        vi.mocked(ServerQueries.useChannels).mockReturnValue({
+            data: [
+                {
+                    _id: 'channel-1',
+                    name: 'Secret',
+                    permissions: {
+                        'visible-role': { viewChannels: true },
+                        'hidden-role': { viewChannels: false },
+                    },
+                },
+            ],
+        } as never);
+
+        const { result } = renderHook(() =>
+            useTertiarySidebarData({
+                selectedChannelId: 'channel-1',
+                selectedServerId: 'pane-server',
+                selectedFriendId: null,
+                ignoreUrlMatch: true,
+            }),
+        );
+
+        expect(result.current.members).toEqual([visibleMember]);
     });
 });

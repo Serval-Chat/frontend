@@ -3,11 +3,20 @@ import React from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 
 import {
+    useCategories,
+    useChannels,
     useMembers,
     useRoles,
     useServerDetails,
 } from '@/api/servers/servers.queries';
-import type { Role, Server, ServerMember } from '@/api/servers/servers.types';
+import type {
+    Category,
+    Channel,
+    Role,
+    RolePermissions,
+    Server,
+    ServerMember,
+} from '@/api/servers/servers.types';
 import { useMe, useUserById } from '@/api/users/users.queries';
 import type { User } from '@/api/users/users.types';
 import { useAppSelector } from '@/store/hooks';
@@ -31,9 +40,82 @@ interface TertiarySidebarDataResult {
 
 interface TertiarySidebarDataOptions {
     selectedFriendId?: null | string;
+    selectedChannelId?: null | string;
     selectedServerId?: null | string;
     ignoreUrlMatch?: boolean;
 }
+
+const canMemberViewChannel = ({
+    categories,
+    channel,
+    member,
+    roles,
+    serverDetails,
+}: {
+    categories: Category[] | undefined;
+    channel: Channel | undefined;
+    member: ServerMember;
+    roles: Role[] | undefined;
+    serverDetails: Server | undefined;
+}): boolean => {
+    if (!channel || !roles || !serverDetails) return true;
+    if (serverDetails.ownerId === member.userId) return true;
+
+    const roleMap = new Map<string, Role>();
+    roles.forEach((role) => roleMap.set(role._id, role));
+
+    const userRoles = member.roles
+        .map((roleId) => roleMap.get(roleId))
+        .filter((role): role is Role => !!role)
+        .sort((a, b) => b.position - a.position);
+
+    if (userRoles.some((role) => role.permissions?.administrator)) {
+        return true;
+    }
+
+    const everyoneRole = roles.find((role) => role.name === '@everyone');
+    const permissionKey: keyof RolePermissions = 'viewChannels';
+
+    const getOverride = (
+        overrides?: Record<string, Record<string, boolean>>,
+    ): boolean | undefined => {
+        if (!overrides) return undefined;
+        let hasDeny = false;
+
+        for (const role of userRoles) {
+            const roleOverride = overrides[role._id];
+            if (roleOverride?.[permissionKey] !== undefined) {
+                if (roleOverride[permissionKey]) return true;
+                hasDeny = true;
+            }
+        }
+
+        const everyoneOverride =
+            (everyoneRole ? overrides[everyoneRole._id] : undefined) ??
+            overrides.everyone;
+
+        if (everyoneOverride?.[permissionKey] !== undefined) {
+            if (everyoneOverride[permissionKey]) return true;
+            hasDeny = true;
+        }
+
+        return hasDeny ? false : undefined;
+    };
+
+    const channelOverride = getOverride(channel.permissions);
+    if (channelOverride !== undefined) return channelOverride;
+
+    const category = channel.categoryId
+        ? categories?.find((item) => item._id === channel.categoryId)
+        : undefined;
+    const categoryOverride = getOverride(category?.permissions);
+    if (categoryOverride !== undefined) return categoryOverride;
+
+    if (userRoles.some((role) => role.permissions?.viewChannels)) return true;
+    if (everyoneRole?.permissions?.viewChannels) return true;
+
+    return true;
+};
 
 /**
  * @description Hook to manage data fetching and role computation for the TertiarySidebar.
@@ -49,6 +131,9 @@ export const useTertiarySidebarData = (
     const storeSelectedServerId = useAppSelector(
         (state) => state.nav.selectedServerId,
     );
+    const storeSelectedChannelId = useAppSelector(
+        (state) => state.nav.selectedChannelId,
+    );
     const isSplitViewActive = useAppSelector(
         (state) => !!(state.nav.splitView.left || state.nav.splitView.right),
     );
@@ -60,6 +145,10 @@ export const useTertiarySidebarData = (
         options.selectedServerId !== undefined
             ? options.selectedServerId
             : storeSelectedServerId;
+    const selectedChannelId =
+        options.selectedChannelId !== undefined
+            ? options.selectedChannelId
+            : storeSelectedChannelId;
     const isServerContextReady =
         !!selectedServerId &&
         (options.ignoreUrlMatch ||
@@ -82,12 +171,52 @@ export const useTertiarySidebarData = (
     const { data: roles } = useRoles(selectedServerId, {
         enabled: isServerContextReady,
     });
+    const { data: channels } = useChannels(selectedServerId, {
+        enabled: isServerContextReady && !!selectedChannelId,
+    });
+    const { data: categories } = useCategories(selectedServerId, {
+        enabled: isServerContextReady && !!selectedChannelId,
+    });
+
+    const visibleMembers = React.useMemo(() => {
+        if (!members || !selectedChannelId) return members;
+        if (!channels || !categories || !roles || !serverDetails) {
+            return undefined;
+        }
+
+        const channel = channels?.find(
+            (item) => item._id === selectedChannelId,
+        );
+        if (!channel) return [];
+
+        return members.filter((member) =>
+            canMemberViewChannel({
+                categories,
+                channel,
+                member,
+                roles,
+                serverDetails,
+            }),
+        );
+    }, [
+        categories,
+        channels,
+        members,
+        roles,
+        selectedChannelId,
+        serverDetails,
+    ]);
+
+    const isLoadingVisibleMembers =
+        isLoadingMembers ||
+        (!!selectedChannelId &&
+            (!channels || !categories || !roles || !serverDetails));
 
     // Build role lookup maps
     const { memberRoleMap, memberIconRoleMap } = React.useMemo(() => {
         const mrMap = new Map<string, Role>();
         const mirMap = new Map<string, Role>();
-        if (!members || !roles)
+        if (!visibleMembers || !roles)
             return { memberRoleMap: mrMap, memberIconRoleMap: mirMap };
 
         const roleMap = new Map<string, Role>();
@@ -95,7 +224,7 @@ export const useTertiarySidebarData = (
 
         const everyoneRole = roles.find((r) => r.name === '@everyone');
 
-        members.forEach((m) => {
+        visibleMembers.forEach((m) => {
             const memberRoleIds = m.roles ? [...m.roles] : [];
             if (everyoneRole && !memberRoleIds.includes(everyoneRole._id)) {
                 memberRoleIds.push(everyoneRole._id);
@@ -119,7 +248,7 @@ export const useTertiarySidebarData = (
         });
 
         return { memberRoleMap: mrMap, memberIconRoleMap: mirMap };
-    }, [members, roles]);
+    }, [visibleMembers, roles]);
 
     return React.useMemo(
         () => ({
@@ -128,8 +257,8 @@ export const useTertiarySidebarData = (
             me,
             friend,
             serverDetails,
-            members,
-            isLoadingMembers,
+            members: visibleMembers,
+            isLoadingMembers: isLoadingVisibleMembers,
             memberRoleMap,
             memberIconRoleMap,
             roles,
@@ -140,8 +269,8 @@ export const useTertiarySidebarData = (
             me,
             friend,
             serverDetails,
-            members,
-            isLoadingMembers,
+            visibleMembers,
+            isLoadingVisibleMembers,
             memberRoleMap,
             memberIconRoleMap,
             roles,
