@@ -52,11 +52,17 @@ const THEMES: Theme[] = [
 interface MainChatProps {
     requireUrlMatch?: boolean;
     headerActions?: React.ReactNode;
+    onToggleMemberList?: () => void;
+    isMemberListOpen?: boolean;
+    hideMemberListButton?: boolean;
 }
 
 export const MainChat: React.FC<MainChatProps> = ({
     requireUrlMatch = true,
     headerActions,
+    onToggleMemberList,
+    isMemberListOpen,
+    hideMemberListButton,
 }) => {
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
@@ -353,8 +359,11 @@ export const MainChat: React.FC<MainChatProps> = ({
                 <ChatHeader
                     actions={headerActions}
                     friendUser={undefined}
+                    hideMemberListButton={hideMemberListButton}
+                    isMemberListOpen={isMemberListOpen}
                     selectedChannel={undefined}
                     selectedFriendId=""
+                    onToggleMemberList={onToggleMemberList}
                 />
                 <ChatEmptyState />
             </Box>
@@ -373,9 +382,12 @@ export const MainChat: React.FC<MainChatProps> = ({
             <ChatHeader
                 actions={headerActions}
                 friendUser={friendUser}
+                hideMemberListButton={hideMemberListButton}
+                isMemberListOpen={isMemberListOpen}
                 selectedChannel={selectedChannel}
                 selectedFriendId={selectedFriendId}
                 showPins={showPins}
+                onToggleMemberList={onToggleMemberList}
                 onTogglePins={() => setShowPins((v) => !v)}
             />
 

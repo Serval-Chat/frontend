@@ -224,6 +224,7 @@ export const ServerSidebarSection: React.FC<ServerSidebarSectionProps> = ({
         ),
         overscan: 15,
     });
+    const virtualRows = rowVirtualizer.getVirtualItems();
 
     const roleListCache = React.useRef<Map<string, Role[]>>(new Map());
 
@@ -262,6 +263,55 @@ export const ServerSidebarSection: React.FC<ServerSidebarSectionProps> = ({
         );
     }
 
+    if (virtualItems.length > 0 && virtualRows.length === 0) {
+        return (
+            <div className="relative w-full">
+                {virtualItems.map((item) =>
+                    item.type === 'header' ? (
+                        <div
+                            className="flex min-w-0 items-center justify-between px-3 pt-3 pb-2 first:pt-0"
+                            key={`header-${item.id}`}
+                        >
+                            <div className="text-foreground-muted truncate text-xs font-semibold tracking-wider uppercase">
+                                {item.name} - {item.count}
+                            </div>
+                        </div>
+                    ) : (
+                        <div
+                            className="pb-0.5"
+                            key={`member-${item.member.userId}`}
+                        >
+                            <UserItem
+                                noFetch
+                                allRoles={allRolesMap.get(item.member.userId)}
+                                disableCustomFonts={
+                                    serverDetails?.disableCustomFonts
+                                }
+                                disableGlowAndColors={
+                                    serverDetails?.disableUsernameGlowAndCustomColor
+                                }
+                                iconRole={memberIconRoleMap.get(
+                                    item.member.userId,
+                                )}
+                                initialPresenceStatus={
+                                    item.groupId === 'offline'
+                                        ? 'offline'
+                                        : 'online'
+                                }
+                                joinedAt={item.member.joinedAt}
+                                role={memberRoleMap.get(item.member.userId)}
+                                serverId={String(serverDetails?._id || '')}
+                                serverRoles={roles}
+                                user={item.member.user}
+                                userId={String(item.member.userId)}
+                            />
+                        </div>
+                    ),
+                )}
+            </div>
+        );
+    }
+
     return (
         <div
             className="relative w-full"
@@ -269,7 +319,7 @@ export const ServerSidebarSection: React.FC<ServerSidebarSectionProps> = ({
                 height: `${rowVirtualizer.getTotalSize()}px`,
             }}
         >
-            {rowVirtualizer.getVirtualItems().map((virtualRow) => {
+            {virtualRows.map((virtualRow) => {
                 const item = virtualItems[virtualRow.index];
 
                 return (

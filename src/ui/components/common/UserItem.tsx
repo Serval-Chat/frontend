@@ -9,8 +9,10 @@ import {
     ListTree,
     MessageSquare,
     MicOff,
+    PanelBottomOpen,
     PanelLeftOpen,
     PanelRightOpen,
+    PanelTopOpen,
     Shield,
     User as UserIcon,
     UserMinus,
@@ -216,6 +218,16 @@ const UserItemInner: React.FC<
         const [colorResolverReport, setColorResolverReport] = React.useState<
             string | null
         >(null);
+        const [isMobile, setIsMobile] = React.useState(
+            () => window.innerWidth < 768,
+        );
+
+        React.useEffect(() => {
+            const handleResize = (): void =>
+                setIsMobile(window.innerWidth < 768);
+            window.addEventListener('resize', handleResize);
+            return () => window.removeEventListener('resize', handleResize);
+        }, []);
 
         const { data: fetchedUser } = useUserById(userId, {
             enabled: !noFetch && !providedUser,
@@ -410,8 +422,8 @@ const UserItemInner: React.FC<
                     type: 'submenu',
                     items: [
                         {
-                            label: 'Left Side',
-                            icon: PanelLeftOpen,
+                            label: isMobile ? 'Top Pane' : 'Left Side',
+                            icon: isMobile ? PanelTopOpen : PanelLeftOpen,
                             onClick: () => {
                                 dispatch(
                                     setSplitViewPane({
@@ -425,8 +437,8 @@ const UserItemInner: React.FC<
                             },
                         },
                         {
-                            label: 'Right Side',
-                            icon: PanelRightOpen,
+                            label: isMobile ? 'Bottom Pane' : 'Right Side',
+                            icon: isMobile ? PanelBottomOpen : PanelRightOpen,
                             onClick: () => {
                                 dispatch(
                                     setSplitViewPane({
@@ -717,6 +729,7 @@ const UserItemInner: React.FC<
         }, [
             setShowProfile,
             isFriend,
+            isMobile,
             dispatch,
             userId,
             hasUnread,

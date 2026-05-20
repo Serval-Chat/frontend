@@ -27,6 +27,9 @@ interface ChatHeaderProps {
     friendUser?: User;
     selectedChannel?: Channel;
     onTogglePins?: () => void;
+    onToggleMemberList?: () => void;
+    isMemberListOpen?: boolean;
+    hideMemberListButton?: boolean;
     showPins?: boolean;
     actions?: React.ReactNode;
 }
@@ -39,6 +42,9 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
     friendUser,
     selectedChannel,
     onTogglePins,
+    onToggleMemberList,
+    isMemberListOpen,
+    hideMemberListButton,
     showPins,
     actions,
 }) => {
@@ -86,6 +92,7 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
     const hasDescription = !selectedFriendId && !!selectedChannel?.description;
     const hasStatus = !!selectedFriendId && !!friendUser?.customStatus?.text;
     const showSecondary = hasDescription || hasStatus;
+    const memberListOpen = isMemberListOpen ?? showMobileMemberList;
 
     const handleBackClick = (): void => {
         if (selectedFriendId) {
@@ -215,18 +222,23 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
                                 )}
                         </AnimatePresence>
 
-                        <button
-                            aria-label="Toggle member list"
-                            className={cn(
-                                'p-2 transition-colors md:hidden',
-                                showMobileMemberList
-                                    ? 'text-foreground'
-                                    : 'text-foreground-muted hover:text-foreground',
-                            )}
-                            onClick={() => dispatch(toggleMobileMemberList())}
-                        >
-                            <Users className="h-5 w-5" />
-                        </button>
+                        {!hideMemberListButton && (
+                            <button
+                                aria-label="Toggle member list"
+                                className={cn(
+                                    'p-2 transition-colors md:hidden',
+                                    memberListOpen
+                                        ? 'text-foreground'
+                                        : 'text-foreground-muted hover:text-foreground',
+                                )}
+                                onClick={
+                                    onToggleMemberList ??
+                                    (() => dispatch(toggleMobileMemberList()))
+                                }
+                            >
+                                <Users className="h-5 w-5" />
+                            </button>
+                        )}
                     </>
                 )}
                 <button

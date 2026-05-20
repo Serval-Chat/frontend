@@ -14,8 +14,10 @@ import {
     GripVertical,
     Link as LinkIcon,
     LogOut,
+    PanelBottomOpen,
     PanelLeftOpen,
     PanelRightOpen,
+    PanelTopOpen,
     Plus,
     Settings,
 } from 'lucide-react';
@@ -662,8 +664,8 @@ export const ChannelList: React.FC<ChannelListProps> = ({
                     type: 'submenu',
                     items: [
                         {
-                            label: 'Left Side',
-                            icon: PanelLeftOpen,
+                            label: isMobile ? 'Top Pane' : 'Left Side',
+                            icon: isMobile ? PanelTopOpen : PanelLeftOpen,
                             onClick: () => {
                                 dispatch(
                                     setSplitViewPane({
@@ -678,8 +680,8 @@ export const ChannelList: React.FC<ChannelListProps> = ({
                             },
                         },
                         {
-                            label: 'Right Side',
-                            icon: PanelRightOpen,
+                            label: isMobile ? 'Bottom Pane' : 'Right Side',
+                            icon: isMobile ? PanelBottomOpen : PanelRightOpen,
                             onClick: () => {
                                 dispatch(
                                     setSplitViewPane({

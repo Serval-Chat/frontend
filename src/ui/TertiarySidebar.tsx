@@ -17,7 +17,19 @@ import { cn } from '@/utils/cn';
 /**
  * @description Tertiary sidebar displaying DM participants or Server members.
  */
-export const TertiarySidebar: React.FC = () => {
+interface TertiarySidebarProps {
+    selectedFriendId?: null | string;
+    selectedServerId?: null | string;
+    ignoreUrlMatch?: boolean;
+    onMobileClose?: () => void;
+}
+
+export const TertiarySidebar: React.FC<TertiarySidebarProps> = ({
+    selectedFriendId: selectedFriendIdOverride,
+    selectedServerId: selectedServerIdOverride,
+    ignoreUrlMatch,
+    onMobileClose,
+}) => {
     const {
         selectedFriendId,
         selectedServerId,
@@ -29,7 +41,11 @@ export const TertiarySidebar: React.FC = () => {
         memberRoleMap,
         memberIconRoleMap,
         roles,
-    } = useTertiarySidebarData();
+    } = useTertiarySidebarData({
+        selectedFriendId: selectedFriendIdOverride,
+        selectedServerId: selectedServerIdOverride,
+        ignoreUrlMatch,
+    });
 
     const dispatch = useAppDispatch();
     const showMobileMemberList = useAppSelector(
@@ -66,7 +82,7 @@ export const TertiarySidebar: React.FC = () => {
                 'relative flex h-full shrink-0 flex-col bg-[var(--tertiary-bg)]',
                 'pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]',
                 'md:flex',
-                'max-md:fixed max-md:inset-y-0 max-md:right-0 max-md:z-50 max-md:w-64 max-md:shadow-2xl',
+                'max-md:fixed max-md:inset-y-0 max-md:right-0 max-md:z-[var(--z-index-top)] max-md:w-64 max-md:shadow-2xl',
                 'max-md:transition-transform max-md:duration-300 max-md:[transition-timing-function:cubic-bezier(0.25,0.46,0.45,0.94)]',
                 showMobileMemberList
                     ? 'max-md:translate-x-0'
@@ -76,7 +92,6 @@ export const TertiarySidebar: React.FC = () => {
                 width: `${width}px`,
                 minWidth: '200px',
                 maxWidth: '480px',
-                zIndex: 40,
             }}
         >
             <Resizer
@@ -120,7 +135,9 @@ export const TertiarySidebar: React.FC = () => {
                                     aria-label="Close member list"
                                     className="p-1 text-muted-foreground transition-colors hover:text-foreground md:hidden"
                                     onClick={() =>
-                                        dispatch(toggleMobileMemberList())
+                                        onMobileClose
+                                            ? onMobileClose()
+                                            : dispatch(toggleMobileMemberList())
                                     }
                                 >
                                     <X className="h-4 w-4" />

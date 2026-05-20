@@ -1,3 +1,4 @@
+import { useVirtualizer } from '@tanstack/react-virtual';
 import { render, screen } from '@testing-library/react';
 import { type Mock, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -452,5 +453,28 @@ describe('ServerSidebarSection', () => {
             expect(screen.getByText(/Offline - 1/)).toBeDefined();
             expect(screen.queryByText(/Online - 1/)).toBeNull();
         }
+    });
+
+    it('renders a static member list fallback when the virtualizer has not measured rows yet', () => {
+        vi.mocked(useVirtualizer).mockReturnValueOnce({
+            getVirtualItems: () => [],
+            getTotalSize: () => 0,
+            scrollToIndex: vi.fn(),
+            measureElement: vi.fn(),
+        } as never);
+
+        render(
+            <ServerSidebarSection
+                isLoading={false}
+                memberIconRoleMap={new Map()}
+                memberRoleMap={new Map()}
+                members={[mockMembers[0]]}
+                roles={mockRoles}
+                scrollRef={{ current: null }}
+            />,
+        );
+
+        expect(screen.getByText(/Offline - 1/)).toBeInTheDocument();
+        expect(screen.getByTestId('user-item-u1')).toBeInTheDocument();
     });
 });

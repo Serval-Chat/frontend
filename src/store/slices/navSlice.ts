@@ -39,6 +39,7 @@ interface NavState {
     lastSelectedFriendId: string | null;
     mobileHomeTab: 'friends' | 'requests';
     showMobileMemberList: boolean;
+    mobileMemberListSplitViewSide: SplitViewSide | null;
     openedFolders: string[];
 }
 
@@ -130,6 +131,7 @@ const initialState: NavState = {
     lastSelectedFriendId: null,
     mobileHomeTab: 'friends',
     showMobileMemberList: false,
+    mobileMemberListSplitViewSide: null,
     openedFolders: [],
 };
 
@@ -229,6 +231,8 @@ const navSlice = createSlice({
         },
         closeSplitView: (state) => {
             clearSplitView(state);
+            state.showMobileMemberList = false;
+            state.mobileMemberListSplitViewSide = null;
         },
         toggleMobileHomeTab: (state) => {
             state.mobileHomeTab =
@@ -236,6 +240,23 @@ const navSlice = createSlice({
         },
         toggleMobileMemberList: (state) => {
             state.showMobileMemberList = !state.showMobileMemberList;
+            state.mobileMemberListSplitViewSide = null;
+        },
+        toggleMobileMemberListForSplitView: (
+            state,
+            action: PayloadAction<SplitViewSide>,
+        ) => {
+            if (
+                state.showMobileMemberList &&
+                state.mobileMemberListSplitViewSide === action.payload
+            ) {
+                state.showMobileMemberList = false;
+                state.mobileMemberListSplitViewSide = null;
+                return;
+            }
+
+            state.showMobileMemberList = true;
+            state.mobileMemberListSplitViewSide = action.payload;
         },
         toggleFolder: (state, action: PayloadAction<string>) => {
             const index = state.openedFolders.indexOf(action.payload);
@@ -265,6 +286,7 @@ export const {
     closeSplitView,
     toggleMobileHomeTab,
     toggleMobileMemberList,
+    toggleMobileMemberListForSplitView,
     toggleFolder,
     openFolder,
 } = navSlice.actions;

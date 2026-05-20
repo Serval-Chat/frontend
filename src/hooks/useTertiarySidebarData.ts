@@ -29,21 +29,43 @@ interface TertiarySidebarDataResult {
     roles: Role[] | undefined;
 }
 
+interface TertiarySidebarDataOptions {
+    selectedFriendId?: null | string;
+    selectedServerId?: null | string;
+    ignoreUrlMatch?: boolean;
+}
+
 /**
  * @description Hook to manage data fetching and role computation for the TertiarySidebar.
  */
-export const useTertiarySidebarData = (): TertiarySidebarDataResult => {
+export const useTertiarySidebarData = (
+    options: TertiarySidebarDataOptions = {},
+): TertiarySidebarDataResult => {
     const location = useLocation();
     const params = useParams();
-    const selectedFriendId = useAppSelector(
+    const storeSelectedFriendId = useAppSelector(
         (state) => state.nav.selectedFriendId,
     );
-    const selectedServerId = useAppSelector(
+    const storeSelectedServerId = useAppSelector(
         (state) => state.nav.selectedServerId,
     );
+    const isSplitViewActive = useAppSelector(
+        (state) => !!(state.nav.splitView.left || state.nav.splitView.right),
+    );
+    const selectedFriendId =
+        options.selectedFriendId !== undefined
+            ? options.selectedFriendId
+            : storeSelectedFriendId;
+    const selectedServerId =
+        options.selectedServerId !== undefined
+            ? options.selectedServerId
+            : storeSelectedServerId;
     const isServerContextReady =
-        location.pathname.includes('/@server/') &&
-        selectedServerId === params.serverId;
+        !!selectedServerId &&
+        (options.ignoreUrlMatch ||
+            isSplitViewActive ||
+            (location.pathname.includes('/@server/') &&
+                selectedServerId === params.serverId));
 
     const { data: me } = useMe();
     const { data: friend } = useUserById(selectedFriendId ?? '', {

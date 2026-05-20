@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { X } from 'lucide-react';
+import { createPortal } from 'react-dom';
 import { Provider, useStore } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 
@@ -14,8 +15,10 @@ import {
     type SplitViewConversation,
     type SplitViewSide,
     closeSplitView,
+    toggleMobileMemberListForSplitView,
 } from '@/store/slices/navSlice';
 import { useMobileSwipeContext } from '@/ui/MobileSwipeContext';
+import { TertiarySidebar } from '@/ui/TertiarySidebar';
 import { MainChat } from '@/ui/components/chat/MainChat';
 import { IconButton } from '@/ui/components/common/IconButton';
 import { Text } from '@/ui/components/common/Text';
@@ -153,7 +156,14 @@ const SplitViewPane: React.FC<{
 }> = ({ side, conversation }) => {
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
-    const splitView = useAppSelector((state) => state.nav.splitView);
+    const { splitView, activeMobileMemberListSide } = useAppShallowSelector(
+        (state) => ({
+            splitView: state.nav.splitView,
+            activeMobileMemberListSide: state.nav.mobileMemberListSplitViewSide,
+        }),
+    );
+    const isMobileMemberListOpen = activeMobileMemberListSide === side;
+    const isAnySplitMemberListOpen = activeMobileMemberListSide !== null;
 
     if (!conversation) {
         return (
@@ -205,9 +215,36 @@ const SplitViewPane: React.FC<{
                             }}
                         />
                     }
+                    hideMemberListButton={isAnySplitMemberListOpen}
+                    isMemberListOpen={isMobileMemberListOpen}
                     key={getConversationKey(conversation)}
                     requireUrlMatch={false}
+                    onToggleMemberList={() =>
+                        dispatch(toggleMobileMemberListForSplitView(side))
+                    }
                 />
+                {isMobileMemberListOpen &&
+                    createPortal(
+                        <div className="fixed inset-0 z-[var(--z-index-top)] md:hidden">
+                            <TertiarySidebar
+                                ignoreUrlMatch
+                                selectedFriendId={null}
+                                selectedServerId={
+                                    conversation.type === 'channel'
+                                        ? conversation.serverId
+                                        : null
+                                }
+                                onMobileClose={() =>
+                                    dispatch(
+                                        toggleMobileMemberListForSplitView(
+                                            side,
+                                        ),
+                                    )
+                                }
+                            />
+                        </div>,
+                        document.body,
+                    )}
             </ProxyProvider>
         </Box>
     );
