@@ -18,6 +18,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { chatApi } from '@/api/chat/chat.api';
 import { CHAT_QUERY_KEYS } from '@/api/chat/chat.queries';
 import type { ChatMessage } from '@/api/chat/chat.types';
+import { FRIENDS_QUERY_KEY } from '@/api/friends/friends.queries';
+import type { Friend } from '@/api/friends/friends.types';
 import type { PingNotification } from '@/api/pings/pings.types';
 import { serversApi } from '@/api/servers/servers.api';
 import { SERVERS_QUERY_KEYS } from '@/api/servers/servers.queries';
@@ -496,6 +498,39 @@ describe('setupGlobalWsHandlers - ping behaviour', () => {
             expect(dispatch).toHaveBeenCalledWith(
                 setServerPingCount({ serverId, count: 0 }),
             );
+        });
+    });
+
+    describe('FRIEND_ADDED event', () => {
+        it('places the accepted friend at the top of the cached friends list', () => {
+            const existingFriend: Friend = {
+                _id: 'friend-old',
+                username: 'oldfriend',
+                createdAt: '2026-01-01T00:00:00.000Z',
+                profilePicture: null,
+                customStatus: null,
+            };
+            const acceptedFriend: Friend = {
+                _id: 'friend-new',
+                username: 'newfriend',
+                createdAt: '2026-02-01T00:00:00.000Z',
+                profilePicture: null,
+                customStatus: null,
+            };
+
+            queryClient.setQueryData<Friend[]>(FRIENDS_QUERY_KEY, [
+                existingFriend,
+            ]);
+
+            emitWsEvent(mockWs, WsEvents.FRIEND_ADDED, {
+                friend: acceptedFriend,
+            });
+
+            expect(
+                queryClient
+                    .getQueryData<Friend[]>(FRIENDS_QUERY_KEY)
+                    ?.map((friend) => friend._id),
+            ).toEqual(['friend-new', 'friend-old']);
         });
     });
 });

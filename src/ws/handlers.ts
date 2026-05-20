@@ -510,7 +510,21 @@ export const setupGlobalWsHandlers = (
     );
 
     cleanups.push(
-        wsClient.on(WsEvents.FRIEND_ADDED, () => {
+        wsClient.on<{ friend?: Friend }>(WsEvents.FRIEND_ADDED, (payload) => {
+            if (payload.friend) {
+                queryClient.setQueriesData<Friend[]>(
+                    { queryKey: FRIENDS_QUERY_KEY },
+                    (old) => {
+                        if (!old) return old;
+                        return [
+                            payload.friend as Friend,
+                            ...old.filter(
+                                (friend) => friend._id !== payload.friend?._id,
+                            ),
+                        ];
+                    },
+                );
+            }
             void queryClient.invalidateQueries({ queryKey: FRIENDS_QUERY_KEY });
             void queryClient.invalidateQueries({
                 queryKey: FRIEND_REQUESTS_QUERY_KEY,
