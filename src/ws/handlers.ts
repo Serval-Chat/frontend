@@ -509,23 +509,38 @@ export const setupGlobalWsHandlers = (
         }),
     );
 
+    const upsertFriendAtTop = (friend: Friend): void => {
+        [FRIENDS_QUERY_KEY, FRIEND_PROFILES_QUERY_KEY].forEach((queryKey) => {
+            queryClient.setQueriesData<Friend[]>({ queryKey }, (old) => {
+                if (!old) return old;
+                return [
+                    friend,
+                    ...old.filter(
+                        (cachedFriend) => cachedFriend._id !== friend._id,
+                    ),
+                ];
+            });
+        });
+    };
+
+    const removeFriendFromCaches = (friendId: string): void => {
+        [FRIENDS_QUERY_KEY, FRIEND_PROFILES_QUERY_KEY].forEach((queryKey) => {
+            queryClient.setQueriesData<Friend[]>({ queryKey }, (old) => {
+                if (!old) return old;
+                return old.filter((friend) => friend._id !== friendId);
+            });
+        });
+    };
+
     cleanups.push(
         wsClient.on<{ friend?: Friend }>(WsEvents.FRIEND_ADDED, (payload) => {
             if (payload.friend) {
-                queryClient.setQueriesData<Friend[]>(
-                    { queryKey: FRIENDS_QUERY_KEY },
-                    (old) => {
-                        if (!old) return old;
-                        return [
-                            payload.friend as Friend,
-                            ...old.filter(
-                                (friend) => friend._id !== payload.friend?._id,
-                            ),
-                        ];
-                    },
-                );
+                upsertFriendAtTop(payload.friend);
             }
             void queryClient.invalidateQueries({ queryKey: FRIENDS_QUERY_KEY });
+            void queryClient.invalidateQueries({
+                queryKey: FRIEND_PROFILES_QUERY_KEY,
+            });
             void queryClient.invalidateQueries({
                 queryKey: FRIEND_REQUESTS_QUERY_KEY,
             });
@@ -533,8 +548,14 @@ export const setupGlobalWsHandlers = (
     );
 
     cleanups.push(
-        wsClient.on(WsEvents.FRIEND_REMOVED, () => {
+        wsClient.on<{ userId?: string }>(WsEvents.FRIEND_REMOVED, (payload) => {
+            if (payload.userId) {
+                removeFriendFromCaches(payload.userId);
+            }
             void queryClient.invalidateQueries({ queryKey: FRIENDS_QUERY_KEY });
+            void queryClient.invalidateQueries({
+                queryKey: FRIEND_PROFILES_QUERY_KEY,
+            });
             void queryClient.invalidateQueries({
                 queryKey: FRIEND_REQUESTS_QUERY_KEY,
             });
