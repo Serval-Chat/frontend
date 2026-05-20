@@ -10,6 +10,7 @@ import {
 import { useServerWS } from '@/hooks/ws/useServerWS';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import {
+    clearLastOpenedChannelForServer,
     setSelectedChannelId,
     setTargetMessageId,
 } from '@/store/slices/navSlice';
@@ -68,6 +69,7 @@ export const ServerSection: React.FC = () => {
                 if (!channelExists) {
                     dispatch(setSelectedChannelId(null));
                     dispatch(setTargetMessageId(null));
+                    dispatch(clearLastOpenedChannelForServer(selectedServerId));
                     void navigate(`/chat/@server/${selectedServerId}`, {
                         replace: true,
                     });
@@ -87,8 +89,16 @@ export const ServerSection: React.FC = () => {
                 const firstChannel = sortedChannels.find(
                     (c) => c.type !== 'link',
                 );
+                const lastChannelExists =
+                    lastChannelId !== undefined &&
+                    sortedChannels.some((c) => c._id === lastChannelId);
+                if (lastChannelId !== undefined && !lastChannelExists) {
+                    dispatch(clearLastOpenedChannelForServer(selectedServerId));
+                }
 
-                const targetChannelId = lastChannelId || firstChannel?._id;
+                const targetChannelId = lastChannelExists
+                    ? lastChannelId
+                    : firstChannel?._id;
 
                 if (targetChannelId) {
                     void navigate(

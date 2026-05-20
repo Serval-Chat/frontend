@@ -195,6 +195,13 @@ const navSlice = createSlice({
         setTargetMessageId: (state, action: PayloadAction<string | null>) => {
             state.targetMessageId = action.payload;
         },
+        clearLastOpenedChannelForServer: (
+            state,
+            action: PayloadAction<string>,
+        ) => {
+            delete state.lastOpenedChannelByServer[action.payload];
+            saveLastChannels(state.lastOpenedChannelByServer);
+        },
         setSplitViewPane: (
             state,
             action: PayloadAction<{
@@ -252,6 +259,7 @@ export const {
     setSelectedFriendId,
     setSelectedChannelId,
     setTargetMessageId,
+    clearLastOpenedChannelForServer,
     setSplitViewPane,
     clearSplitViewPane,
     closeSplitView,

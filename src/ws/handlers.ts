@@ -361,13 +361,15 @@ export const setupGlobalWsHandlers = (
                     },
                 );
 
-                void queryClient.invalidateQueries({
-                    queryKey: CHAT_QUERY_KEYS.channelMessages(
-                        payload.serverId,
-                        payload.channelId,
-                        null,
-                    ),
-                });
+                if (payload.lastMessageAt) {
+                    void queryClient.invalidateQueries({
+                        queryKey: CHAT_QUERY_KEYS.channelMessages(
+                            payload.serverId,
+                            payload.channelId,
+                            null,
+                        ),
+                    });
+                }
             },
         ),
     );

@@ -262,6 +262,28 @@ describe('setupGlobalWsHandlers - ping behaviour', () => {
         });
     });
 
+    describe('CHANNEL_UNREAD_UPDATED event', () => {
+        it('does not invalidate channel messages for a mark-read/open-channel update', () => {
+            const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries');
+
+            emitWsEvent(mockWs, WsEvents.CHANNEL_UNREAD_UPDATED, {
+                serverId: 'server-1',
+                channelId: 'channel-1',
+                lastMessageAt: null,
+                lastReadAt: '2026-05-20T10:00:00.000Z',
+                senderId: 'current-user',
+            });
+
+            expect(invalidateSpy).not.toHaveBeenCalledWith({
+                queryKey: CHAT_QUERY_KEYS.channelMessages(
+                    'server-1',
+                    'channel-1',
+                    null,
+                ),
+            });
+        });
+    });
+
     describe('message cache freshness', () => {
         it('adds server messages to an already cached live channel query', () => {
             const queryKey = CHAT_QUERY_KEYS.channelMessages(

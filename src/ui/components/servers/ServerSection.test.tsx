@@ -5,6 +5,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import * as ServerQueries from '@/api/servers/servers.queries';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import {
+    clearLastOpenedChannelForServer,
     setSelectedChannelId,
     setTargetMessageId,
 } from '@/store/slices/navSlice';
@@ -22,6 +23,9 @@ vi.mock('@/store/hooks', () => ({
 }));
 
 vi.mock('@/store/slices/navSlice', () => ({
+    clearLastOpenedChannelForServer: vi
+        .fn()
+        .mockReturnValue('mockClearLastOpenedChannelForServer'),
     setSelectedChannelId: vi.fn().mockReturnValue('mockSetSelectedChannelId'),
     setTargetMessageId: vi.fn().mockReturnValue('mockSetTargetMessageId'),
 }));
@@ -70,6 +74,7 @@ describe('ServerSection fallback logic', () => {
                 nav: {
                     selectedServerId: 'fakeServer123',
                     selectedChannelId: null,
+                    lastOpenedChannelByServer: {},
                 },
             };
             return selector(state as never);
@@ -100,6 +105,7 @@ describe('ServerSection fallback logic', () => {
                 nav: {
                     selectedServerId: 'validServer123',
                     selectedChannelId: 'fakeChannel456',
+                    lastOpenedChannelByServer: {},
                 },
             };
             return selector(state as never);
@@ -121,9 +127,59 @@ describe('ServerSection fallback logic', () => {
 
         expect(mockDispatch).toHaveBeenCalledWith(setSelectedChannelId(null));
         expect(mockDispatch).toHaveBeenCalledWith(setTargetMessageId(null));
+        expect(mockDispatch).toHaveBeenCalledWith(
+            clearLastOpenedChannelForServer('validServer123'),
+        );
         expect(mockNavigate).toHaveBeenCalledWith(
             '/chat/@server/validServer123',
             { replace: true },
+        );
+    });
+
+    it('does not navigate from server root back to a deleted last-opened channel', () => {
+        vi.mocked(useAppSelector).mockImplementation((selector) => {
+            const state = {
+                nav: {
+                    selectedServerId: 'validServer123',
+                    selectedChannelId: null,
+                    lastOpenedChannelByServer: {
+                        validServer123: 'deletedChannel456',
+                    },
+                },
+            };
+            return selector(state as never);
+        });
+
+        vi.mocked(ServerQueries.useServerDetails).mockReturnValue({
+            data: { id: 'validServer123', name: 'Valid Server' },
+            isLoading: false,
+            isError: false,
+        } as never);
+
+        vi.mocked(ServerQueries.useChannels).mockReturnValue({
+            data: [
+                {
+                    _id: 'realChannel1',
+                    type: 'text',
+                    position: 0,
+                },
+            ],
+            isPlaceholderData: false,
+            isError: false,
+        } as never);
+
+        render(<ServerSection />);
+
+        expect(mockNavigate).toHaveBeenCalledWith(
+            '/chat/@server/validServer123/channel/realChannel1',
+            { replace: true },
+        );
+        expect(mockNavigate).not.toHaveBeenCalledWith(
+            '/chat/@server/validServer123/channel/deletedChannel456',
+            { replace: true },
+        );
+        expect(mockDispatch).toHaveBeenCalledWith(
+            clearLastOpenedChannelForServer('validServer123'),
         );
     });
 });
