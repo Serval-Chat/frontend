@@ -20,6 +20,8 @@ import type { Role } from '@/api/servers/servers.types';
 import type { User } from '@/api/users/users.types';
 import type { ProcessedChatMessage } from '@/types/chat.ui';
 import type { ContextMenuItem } from '@/ui/components/common/ContextMenu';
+import { RoleDot } from '@/ui/components/common/RoleDot';
+import { Box } from '@/ui/components/layout/Box';
 
 interface ContextMenuParams {
     message: ProcessedChatMessage;
@@ -216,7 +218,20 @@ export function buildContextMenuItems({
                                   myHighestRolePosition > r.position);
 
                           return {
-                              label: r.name,
+                              indent: false,
+                              label: React.createElement(
+                                  Box,
+                                  { className: 'flex items-center gap-2' },
+                                  React.createElement(RoleDot, {
+                                      role: r,
+                                      size: 8,
+                                  }),
+                                  React.createElement(
+                                      'span',
+                                      { className: 'truncate' },
+                                      r.name,
+                                  ),
+                              ),
                               onClick: () => {
                                   if (!canManageThisRole) return;
                                   if (hasRole) {
