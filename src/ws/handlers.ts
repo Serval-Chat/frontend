@@ -532,6 +532,21 @@ export const setupGlobalWsHandlers = (
         });
     };
 
+    const upsertChannel = (channel: Channel): void => {
+        queryClient.setQueriesData<Channel[]>(
+            { queryKey: SERVERS_QUERY_KEYS.channels(channel.serverId) },
+            (old) => {
+                if (!old) return old;
+                return [
+                    ...old.filter(
+                        (cachedChannel) => cachedChannel._id !== channel._id,
+                    ),
+                    channel,
+                ].sort((a, b) => a.position - b.position);
+            },
+        );
+    };
+
     cleanups.push(
         wsClient.on<{ friend?: Friend }>(WsEvents.FRIEND_ADDED, (payload) => {
             if (payload.friend) {
@@ -955,7 +970,7 @@ export const setupGlobalWsHandlers = (
 
     cleanups.push(
         wsClient.on<IChannelEvent>(WsEvents.CHANNEL_CREATED, (payload) => {
-            if (payload.senderId === currentUser?.id) return;
+            upsertChannel(payload.channel);
             void queryClient.invalidateQueries({
                 queryKey: SERVERS_QUERY_KEYS.channels(payload.serverId),
             });

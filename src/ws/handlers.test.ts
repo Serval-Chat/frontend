@@ -27,6 +27,7 @@ import type { PingNotification } from '@/api/pings/pings.types';
 import { serversApi } from '@/api/servers/servers.api';
 import { SERVERS_QUERY_KEYS } from '@/api/servers/servers.queries';
 import type { Channel } from '@/api/servers/servers.types';
+import type { User } from '@/api/users/users.types';
 import {
     decrementServerPing,
     incrementServerPing,
@@ -609,6 +610,110 @@ describe('setupGlobalWsHandlers - ping behaviour', () => {
                     .getQueryData<Friend[]>(FRIEND_PROFILES_QUERY_KEY)
                     ?.map((friend) => friend._id),
             ).toEqual(['friend-kept']);
+        });
+    });
+
+    describe('CHANNEL_CREATED event', () => {
+        const serverId = 'server-1';
+
+        const existingChannel: Channel = {
+            _id: 'channel-old',
+            name: 'general',
+            serverId,
+            type: 'text',
+            position: 0,
+            categoryId: null,
+        };
+
+        const createdChannel: Channel = {
+            _id: 'channel-new',
+            name: 'new-channel',
+            serverId,
+            type: 'text',
+            position: 1,
+            categoryId: null,
+        };
+
+        it('adds a channel created by another user to the cached channel list without a reload', () => {
+            queryClient.setQueryData<Channel[]>(
+                SERVERS_QUERY_KEYS.channels(serverId),
+                [existingChannel],
+            );
+
+            emitWsEvent(mockWs, WsEvents.CHANNEL_CREATED, {
+                serverId,
+                channel: createdChannel,
+                senderId: 'other-user',
+            });
+
+            expect(
+                queryClient
+                    .getQueryData<
+                        Channel[]
+                    >(SERVERS_QUERY_KEYS.channels(serverId))
+                    ?.map((channel) => channel._id),
+            ).toEqual(['channel-old', 'channel-new']);
+        });
+
+        it('adds a channel created by the current user to the cached channel list without a reload', () => {
+            queryClient.setQueryData<User>(['me'], {
+                _id: 'current-user',
+                username: 'alice',
+            } as User);
+            cleanup();
+            cleanup = setupGlobalWsHandlers(queryClient, dispatch);
+            queryClient.setQueryData<Channel[]>(
+                SERVERS_QUERY_KEYS.channels(serverId),
+                [existingChannel],
+            );
+
+            emitWsEvent(mockWs, WsEvents.CHANNEL_CREATED, {
+                serverId,
+                channel: createdChannel,
+                senderId: 'current-user',
+            });
+
+            expect(
+                queryClient
+                    .getQueryData<
+                        Channel[]
+                    >(SERVERS_QUERY_KEYS.channels(serverId))
+                    ?.map((channel) => channel._id),
+            ).toEqual(['channel-old', 'channel-new']);
+        });
+
+        it('keeps the cached channel list ordered by position when the created channel belongs in the middle', () => {
+            queryClient.setQueryData<Channel[]>(
+                SERVERS_QUERY_KEYS.channels(serverId),
+                [
+                    existingChannel,
+                    {
+                        _id: 'channel-late',
+                        name: 'later',
+                        serverId,
+                        type: 'text',
+                        position: 3,
+                        categoryId: null,
+                    },
+                ],
+            );
+
+            emitWsEvent(mockWs, WsEvents.CHANNEL_CREATED, {
+                serverId,
+                channel: {
+                    ...createdChannel,
+                    position: 2,
+                },
+                senderId: 'other-user',
+            });
+
+            expect(
+                queryClient
+                    .getQueryData<
+                        Channel[]
+                    >(SERVERS_QUERY_KEYS.channels(serverId))
+                    ?.map((channel) => channel._id),
+            ).toEqual(['channel-old', 'channel-new', 'channel-late']);
         });
     });
 });
