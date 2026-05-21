@@ -179,6 +179,7 @@ export const Chat: React.FC = () => {
         if (!selectedChannelId && navMode === 'servers' && selectedServerId) {
             const lastChannel = lastOpenedChannelByServer[selectedServerId];
             if (lastChannel) {
+                dispatch(setSelectedChannelId(lastChannel));
                 void navigate(
                     `/chat/@server/${selectedServerId}/channel/${lastChannel}`,
                 );
