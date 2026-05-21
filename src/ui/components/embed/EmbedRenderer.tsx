@@ -1,6 +1,13 @@
-import { type ReactNode, memo, useMemo } from 'react';
+import {
+    type CSSProperties,
+    type ReactNode,
+    memo,
+    useMemo,
+    useState,
+} from 'react';
 
 import type { Embed, MessagePayload } from '@/types/embed';
+import { ImageLightbox } from '@/ui/components/common/ImageLightbox';
 import { Link } from '@/ui/components/common/Link';
 import { ParsedText } from '@/ui/components/common/ParsedText';
 import { cn } from '@/utils/cn';
@@ -63,6 +70,58 @@ const ParsedEmbedText = memo(
     },
 );
 ParsedEmbedText.displayName = 'ParsedEmbedText';
+
+interface EmbedImageProps {
+    src: string | undefined;
+    alt: string;
+    className?: string;
+    imageClassName: string;
+    style?: CSSProperties;
+}
+
+const EmbedImage = memo(
+    ({
+        src,
+        alt,
+        className,
+        imageClassName,
+        style,
+    }: EmbedImageProps): ReactNode => {
+        const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+
+        if (!src) return null;
+
+        return (
+            <>
+                <button
+                    aria-label={`View ${alt}`}
+                    className={cn(
+                        'cursor-pointer border-0 bg-transparent p-0 text-left',
+                        className,
+                    )}
+                    type="button"
+                    onClick={() => setIsLightboxOpen(true)}
+                >
+                    <img
+                        alt={alt}
+                        className={imageClassName}
+                        decoding="async"
+                        loading="eager"
+                        src={src}
+                        style={style}
+                    />
+                </button>
+                <ImageLightbox
+                    alt={alt}
+                    isOpen={isLightboxOpen}
+                    src={src}
+                    onClose={() => setIsLightboxOpen(false)}
+                />
+            </>
+        );
+    },
+);
+EmbedImage.displayName = 'EmbedImage';
 
 interface EmbedCardProps {
     embed: Embed;
@@ -161,14 +220,13 @@ const EmbedCard = memo(
         if (embed.type === 'image' && embed.image?.url) {
             return (
                 <div className="mt-1 flex" key={index}>
-                    <img
+                    <EmbedImage
                         alt={embed.title || 'Image'}
-                        className={cn(
+                        className="block"
+                        imageClassName={cn(
                             'max-h-96 max-w-[520px] rounded-md object-contain',
                             isDeleted && 'opacity-50 grayscale',
                         )}
-                        decoding="async"
-                        loading="eager"
                         src={imageUrl}
                         style={
                             embed.image?.width && embed.image.height
@@ -425,14 +483,13 @@ const EmbedCard = memo(
 
                         {/* Thumbnail */}
                         {embed.thumbnail?.url && (
-                            <img
-                                alt=""
-                                className={cn(
-                                    'ml-auto h-20 w-20 shrink-0 rounded object-cover',
+                            <EmbedImage
+                                alt={embed.title || 'Thumbnail'}
+                                className="ml-auto block shrink-0"
+                                imageClassName={cn(
+                                    'h-20 w-20 rounded object-cover',
                                     isDeleted && 'opacity-50 grayscale',
                                 )}
-                                decoding="async"
-                                loading="eager"
                                 src={thumbnailUrl}
                             />
                         )}
@@ -440,14 +497,13 @@ const EmbedCard = memo(
 
                     {/* Large image */}
                     {embed.image?.url && (
-                        <img
-                            alt=""
-                            className={cn(
-                                'mt-3 max-h-72 w-full rounded object-contain',
+                        <EmbedImage
+                            alt={embed.title || 'Image'}
+                            className="mt-3 block w-full"
+                            imageClassName={cn(
+                                'max-h-72 w-full rounded object-contain',
                                 isDeleted && 'opacity-50 grayscale',
                             )}
-                            decoding="async"
-                            loading="eager"
                             src={imageUrl}
                             style={
                                 embed.image?.width && embed.image.height
