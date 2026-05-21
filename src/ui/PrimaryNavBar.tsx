@@ -92,6 +92,7 @@ export const PrimaryNavBar: React.FC = () => {
             as="nav"
             className={cn(
                 'relative z-50 flex h-full flex-col items-center gap-3',
+                showInbox && 'z-[var(--z-index-popover)]',
                 'pt-[calc(0.75rem+env(safe-area-inset-top))] pb-[calc(0.75rem+env(safe-area-inset-bottom))]',
                 'bg-[--color-background]',
                 'w-[72px] shrink-0',
@@ -149,7 +150,7 @@ export const PrimaryNavBar: React.FC = () => {
                     {showInbox && (
                         <motion.div
                             animate={{ opacity: 1, x: 0, scale: 1 }}
-                            className="absolute bottom-0 left-[calc(100%+12px)] z-50 origin-bottom-left"
+                            className="absolute bottom-0 left-[calc(100%+12px)] z-[var(--z-index-popover)] origin-bottom-left"
                             exit={{ opacity: 0, x: -10, scale: 0.95 }}
                             initial={{ opacity: 0, x: -10, scale: 0.95 }}
                             transition={{ duration: 0.15, ease: 'easeOut' }}

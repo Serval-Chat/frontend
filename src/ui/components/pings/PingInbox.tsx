@@ -138,18 +138,6 @@ export const PingInbox: React.FC<PingInboxProps> = ({ onClose }) => {
                 )}
             </div>
 
-            <div className="flex h-10 items-center justify-center border-t border-border-subtle bg-bg-subtle px-3">
-                <Text
-                    size="2xs"
-                    tracking="wider"
-                    transform="uppercase"
-                    variant="muted"
-                    weight="bold"
-                >
-                    Notifications
-                </Text>
-            </div>
-
             <ClearPingsModal
                 isOpen={isClearModalOpen}
                 onClose={() => setIsClearModalOpen(false)}
