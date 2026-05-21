@@ -21,6 +21,7 @@ import { BannedScreen } from '@/ui/components/common/BannedScreen';
 import { LoadingScreen } from '@/ui/components/common/LoadingScreen';
 import { PushPrompt } from '@/ui/components/common/PushPrompt';
 import { FurTweaker } from '@/ui/components/nt/FurTweaker';
+import { NTConsole } from '@/ui/components/nt/NTConsole';
 import { ThemeTweaker } from '@/ui/components/nt/ThemeTweaker';
 import { useWsDebugWindowOpen } from '@/ws/debug';
 
@@ -146,6 +147,7 @@ export const AuthenticatedLayout = (): ReactNode => {
             )}
             <FurTweaker />
             <ThemeTweaker />
+            <NTConsole />
             <Outlet />
         </WebSocketProvider>
     );

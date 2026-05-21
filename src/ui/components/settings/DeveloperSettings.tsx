@@ -3,7 +3,10 @@ import React from 'react';
 import { Bug } from 'lucide-react';
 
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { toggleUsernameColorResolverContextMenu } from '@/store/slices/debugOptionsSlice';
+import {
+    toggleConsole,
+    toggleUsernameColorResolverContextMenu,
+} from '@/store/slices/debugOptionsSlice';
 import { toggleFurTweaker } from '@/store/slices/furTweakerSlice';
 import { toggleThemeTweaker } from '@/store/slices/themeTweakerSlice';
 import { Button } from '@/ui/components/common/Button';
@@ -21,6 +24,9 @@ export const DeveloperSettings: React.FC = () => {
     const usernameColorResolverContextMenu = useAppSelector(
         (state) =>
             state.debugOptions?.usernameColorResolverContextMenu ?? false,
+    );
+    const isConsoleOpen = useAppSelector(
+        (state) => state.debugOptions?.isConsoleOpen ?? false,
     );
 
     return (
@@ -87,6 +93,24 @@ export const DeveloperSettings: React.FC = () => {
                         onClick={() => dispatch(toggleThemeTweaker())}
                     >
                         {isThemeTweakerOpen ? 'Close Window' : 'Launch Window'}
+                    </Button>
+                </div>
+
+                <div className="flex items-center justify-between rounded-md border border-border-subtle bg-bg-subtle p-4">
+                    <div className="flex flex-col gap-1">
+                        <div className="flex items-center gap-2 font-semibold text-foreground">
+                            <Bug size={18} />
+                            Console
+                        </div>
+                        <span className="text-sm text-muted-foreground">
+                            Open a Windows NT styled console window.
+                        </span>
+                    </div>
+                    <Button
+                        variant={isConsoleOpen ? 'danger' : 'primary'}
+                        onClick={() => dispatch(toggleConsole())}
+                    >
+                        {isConsoleOpen ? 'Close Console' : 'Open Console'}
                     </Button>
                 </div>
 

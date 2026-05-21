@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 
 export interface WindowProps {
     title: string;
@@ -52,15 +52,38 @@ export const Window: React.FC<WindowProps> = ({
         e.currentTarget.setPointerCapture(e.pointerId);
     };
 
+    const clampPosition = useCallback(
+        (x: number, y: number) => {
+            const vw = window.innerWidth;
+            const vh = window.innerHeight;
+            const minVisible = 40;
+
+            const minX = minVisible - size.width;
+            const maxX = vw - minVisible;
+            const minY = 0;
+            const maxY = vh - minVisible;
+
+            return {
+                x: Math.min(maxX, Math.max(minX, x)),
+                y: Math.min(maxY, Math.max(minY, y)),
+            };
+        },
+        [size.width],
+    );
+
     const handlePointerMove = (e: React.PointerEvent): void => {
         if (!isDragging.current) return;
-        setPosition({
+        const raw = {
             x: e.clientX - dragStart.current.x,
             y: e.clientY - dragStart.current.y,
-        });
+        };
+        setPosition(clampPosition(raw.x, raw.y));
     };
 
     const handlePointerUp = (e: React.PointerEvent): void => {
+        if (isDragging.current) {
+            setPosition((prev) => clampPosition(prev.x, prev.y));
+        }
         isDragging.current = false;
         isResizing.current = null;
         e.currentTarget.releasePointerCapture(e.pointerId);
