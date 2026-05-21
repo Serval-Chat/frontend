@@ -54,6 +54,7 @@ class AutocompleteOption extends MenuOption {
 }
 
 interface AutocompleteMenuWrapperProps {
+    anchorElementRef: React.RefObject<HTMLElement | null>;
     selectedIndex: number | null;
     setHighlightedIndex: (index: number) => void;
     options: AutocompleteOption[];
@@ -61,6 +62,7 @@ interface AutocompleteMenuWrapperProps {
 }
 
 const AutocompleteMenuWrapper = ({
+    anchorElementRef,
     selectedIndex,
     setHighlightedIndex,
     options,
@@ -74,6 +76,7 @@ const AutocompleteMenuWrapper = ({
 
     return (
         <AutocompleteSuggestion
+            anchorElementRef={anchorElementRef}
             selectedIndex={selectedIndex ?? 0}
             suggestions={options.map((o) => o.suggestion)}
             onSelect={(suggestion) => {
@@ -400,7 +403,7 @@ export const LexicalAutocompletePlugin: React.FC<
     return (
         <LexicalTypeaheadMenuPlugin<AutocompleteOption>
             menuRenderFn={(
-                _anchorElementRef,
+                anchorElementRef,
                 { selectedIndex, selectOptionAndCleanUp, setHighlightedIndex },
             ) => {
                 const isOpen = options.length > 0;
@@ -411,6 +414,7 @@ export const LexicalAutocompletePlugin: React.FC<
 
                 return (
                     <AutocompleteMenuWrapper
+                        anchorElementRef={anchorElementRef}
                         options={options}
                         selectOptionAndCleanUp={selectOptionAndCleanUp}
                         selectedIndex={selectedIndex}

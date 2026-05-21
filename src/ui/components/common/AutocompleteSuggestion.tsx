@@ -63,22 +63,83 @@ interface AutocompleteSuggestionProps {
     suggestions: Suggestion[];
     selectedIndex: number;
     onSelect: (suggestion: Suggestion) => void;
+    anchorElementRef?: React.RefObject<HTMLElement | null>;
 }
 
 export const AutocompleteSuggestion: React.FC<AutocompleteSuggestionProps> = ({
     suggestions,
     selectedIndex,
     onSelect,
+    anchorElementRef,
 }) => {
+    const mobileMenuEdgeGap = 16;
+    const [mobileMenuStyle, setMobileMenuStyle] =
+        React.useState<React.CSSProperties>();
+
+    React.useLayoutEffect(() => {
+        if (suggestions.length === 0) {
+            setMobileMenuStyle(undefined);
+            return;
+        }
+
+        const updateMobileMenuStyle = (): void => {
+            const anchorElement = anchorElementRef?.current;
+            if (
+                !anchorElement ||
+                !window.matchMedia('(max-width: 768px)').matches
+            ) {
+                setMobileMenuStyle(undefined);
+                return;
+            }
+
+            const anchorRect = anchorElement.getBoundingClientRect();
+            const visualViewport = window.visualViewport;
+            const viewportLeft = visualViewport?.offsetLeft ?? 0;
+            const viewportWidth = visualViewport?.width ?? window.innerWidth;
+
+            setMobileMenuStyle({
+                left: viewportLeft - anchorRect.left + mobileMenuEdgeGap,
+                right: 'auto',
+                width: viewportWidth - mobileMenuEdgeGap * 2,
+            });
+        };
+
+        updateMobileMenuStyle();
+        window.addEventListener('resize', updateMobileMenuStyle);
+        window.visualViewport?.addEventListener(
+            'resize',
+            updateMobileMenuStyle,
+        );
+        window.visualViewport?.addEventListener(
+            'scroll',
+            updateMobileMenuStyle,
+        );
+
+        return () => {
+            window.removeEventListener('resize', updateMobileMenuStyle);
+            window.visualViewport?.removeEventListener(
+                'resize',
+                updateMobileMenuStyle,
+            );
+            window.visualViewport?.removeEventListener(
+                'scroll',
+                updateMobileMenuStyle,
+            );
+        };
+    }, [anchorElementRef, suggestions.length]);
+
     if (suggestions.length === 0) return null;
 
     return (
-        <Box className="absolute right-0 bottom-full left-0 z-[var(--z-index-popover)] mx-4 mb-2 overflow-hidden rounded-lg border border-border-subtle bg-background shadow-lg backdrop-blur-md">
+        <Box
+            className="absolute right-0 bottom-full left-0 z-[var(--z-index-popover)] mx-4 mb-2 overflow-hidden rounded-lg border border-border-subtle bg-background shadow-lg backdrop-blur-md max-md:mx-0 max-md:rounded-none"
+            style={mobileMenuStyle}
+        >
             <Box className="scrollbar-thin max-h-72 overflow-y-auto p-1">
                 {suggestions.map((suggestion, index) => (
                     <Box
                         className={`
-                            flex cursor-pointer items-center gap-3 rounded-md px-3 py-1.5 transition-colors
+                            flex cursor-pointer items-center gap-3 rounded-md px-3 py-1.5 transition-colors max-md:py-2.5
                             ${index === selectedIndex ? 'text-primary-foreground bg-primary/15' : 'hover:bg-white/5'}
                         `}
                         key={getSuggestionKey(suggestion)}

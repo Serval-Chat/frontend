@@ -55,6 +55,7 @@ class SlashCommandOption extends MenuOption {
 }
 
 interface MenuWrapperProps {
+    anchorElementRef: React.RefObject<HTMLElement | null>;
     selectedIndex: number | null;
     setHighlightedIndex: (index: number) => void;
     options: SlashCommandOption[];
@@ -62,24 +63,84 @@ interface MenuWrapperProps {
 }
 
 const MenuWrapper = ({
+    anchorElementRef,
     selectedIndex,
     setHighlightedIndex,
     options,
     selectOptionAndCleanUp,
 }: MenuWrapperProps): React.ReactNode => {
+    const mobileMenuEdgeGap = 16;
+    const [mobileMenuStyle, setMobileMenuStyle] =
+        React.useState<React.CSSProperties>();
+
     React.useEffect(() => {
         if (selectedIndex === null && options.length > 0) {
             setHighlightedIndex(0);
         }
     }, [options.length, selectedIndex, setHighlightedIndex]);
 
+    React.useLayoutEffect(() => {
+        if (options.length === 0) {
+            setMobileMenuStyle(undefined);
+            return;
+        }
+
+        const updateMobileMenuStyle = (): void => {
+            const anchorElement = anchorElementRef.current;
+            if (
+                !anchorElement ||
+                !window.matchMedia('(max-width: 768px)').matches
+            ) {
+                setMobileMenuStyle(undefined);
+                return;
+            }
+
+            const anchorRect = anchorElement.getBoundingClientRect();
+            const visualViewport = window.visualViewport;
+            const viewportLeft = visualViewport?.offsetLeft ?? 0;
+            const viewportWidth = visualViewport?.width ?? window.innerWidth;
+
+            setMobileMenuStyle({
+                left: viewportLeft - anchorRect.left + mobileMenuEdgeGap,
+                right: 'auto',
+                width: viewportWidth - mobileMenuEdgeGap * 2,
+            });
+        };
+
+        updateMobileMenuStyle();
+        window.addEventListener('resize', updateMobileMenuStyle);
+        window.visualViewport?.addEventListener(
+            'resize',
+            updateMobileMenuStyle,
+        );
+        window.visualViewport?.addEventListener(
+            'scroll',
+            updateMobileMenuStyle,
+        );
+
+        return () => {
+            window.removeEventListener('resize', updateMobileMenuStyle);
+            window.visualViewport?.removeEventListener(
+                'resize',
+                updateMobileMenuStyle,
+            );
+            window.visualViewport?.removeEventListener(
+                'scroll',
+                updateMobileMenuStyle,
+            );
+        };
+    }, [anchorElementRef, options.length]);
+
     return (
-        <Box className="absolute right-0 bottom-full left-0 z-[var(--z-index-popover)] mx-4 mb-2 overflow-hidden rounded-lg border border-border-subtle bg-background shadow-lg backdrop-blur-md">
+        <Box
+            className="absolute right-0 bottom-full left-0 z-[var(--z-index-popover)] mx-4 mb-2 overflow-hidden rounded-lg border border-border-subtle bg-background shadow-lg backdrop-blur-md max-md:mx-0 max-md:rounded-none"
+            style={mobileMenuStyle}
+        >
             <Box className="scrollbar-thin max-h-72 overflow-y-auto p-1">
                 {options.map((option, index) => (
                     <Box
                         className={cn(
-                            'flex cursor-pointer items-center gap-3 rounded-md px-3 py-1.5 transition-colors',
+                            'flex cursor-pointer items-center gap-3 rounded-md px-3 py-1.5 transition-colors max-md:py-2.5',
                             index === (selectedIndex ?? 0)
                                 ? 'text-primary-foreground bg-primary/15'
                                 : 'hover:bg-white/5',
@@ -227,7 +288,7 @@ export const LexicalSlashCommandPlugin: React.FC<
     return (
         <LexicalTypeaheadMenuPlugin<SlashCommandOption>
             menuRenderFn={(
-                _anchorElementRef,
+                anchorElementRef,
                 { selectedIndex, selectOptionAndCleanUp, setHighlightedIndex },
             ) => {
                 const menuOpen = options.length > 0;
@@ -235,6 +296,7 @@ export const LexicalSlashCommandPlugin: React.FC<
 
                 return (
                     <MenuWrapper
+                        anchorElementRef={anchorElementRef}
                         options={options}
                         selectOptionAndCleanUp={selectOptionAndCleanUp}
                         selectedIndex={selectedIndex}
