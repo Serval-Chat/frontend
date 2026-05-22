@@ -52,6 +52,12 @@ export const useCreateInvite = (
             void queryClient.invalidateQueries({
                 queryKey: inviteKeys.serverInvites(serverId),
             });
+            void queryClient.invalidateQueries({
+                queryKey: ['servers', 'discovery-status', serverId],
+            });
+            void queryClient.invalidateQueries({
+                queryKey: ['servers', 'discovery'],
+            });
         },
     });
 };
@@ -67,6 +73,12 @@ export const useDeleteInvite = (
         onSuccess: () => {
             void queryClient.invalidateQueries({
                 queryKey: inviteKeys.serverInvites(serverId),
+            });
+            void queryClient.invalidateQueries({
+                queryKey: ['servers', 'discovery-status', serverId],
+            });
+            void queryClient.invalidateQueries({
+                queryKey: ['servers', 'discovery'],
             });
         },
     });

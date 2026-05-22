@@ -4,7 +4,7 @@ import { BadgeCheck } from 'lucide-react';
 
 import type { ServerBanner as ServerBannerData } from '@/api/servers/servers.types';
 import { Text } from '@/ui/components/common/Text';
-import { resolveApiUrl } from '@/utils/apiUrl';
+import { ServerBannerMedia } from '@/ui/components/servers/ServerBannerMedia';
 import { cn } from '@/utils/cn';
 
 interface ServerBannerProps {
@@ -22,64 +22,53 @@ export const ServerBanner: React.FC<ServerBannerProps> = ({
     banner,
     loading,
     verified,
-}) => {
-    const bannerUrl = resolveApiUrl(banner?.value);
+}) => (
+    <div className="group relative z-content w-full shrink-0 overflow-hidden bg-bg-secondary shadow-[0_2px_10px_0_rgba(0,0,0,0.4)]">
+        {/* Banner (Image or Color) */}
+        {banner && !loading && (
+            <div className="relative h-[135px] w-full shrink-0 overflow-hidden">
+                <ServerBannerMedia
+                    alt={name}
+                    banner={banner}
+                    imageClassName="transition-transform duration-500"
+                />
+                <div className="absolute inset-0 bg-black/30" />
+            </div>
+        )}
 
-    return (
-        <div className="group relative z-content w-full shrink-0 overflow-hidden bg-bg-secondary shadow-[0_2px_10px_0_rgba(0,0,0,0.4)]">
-            {/* Banner (Image or Color) */}
-            {banner && !loading && (
-                <div className="relative h-[135px] w-full shrink-0 overflow-hidden">
-                    {banner.type === 'image' || banner.type === 'gif' ? (
-                        <img
-                            alt={name}
-                            className="h-full w-full object-cover transition-transform duration-500"
-                            src={bannerUrl || ''}
-                        />
-                    ) : (
-                        <div
-                            className="h-full w-full"
-                            style={{ backgroundColor: banner.value }}
-                        />
-                    )}
-                    <div className="absolute inset-0 bg-linear-to-b from-black/0 via-black/10 to-black/60" />
-                </div>
+        <div
+            className={cn(
+                'relative z-content flex h-12 items-center gap-1.5 px-4',
+                banner && 'absolute bottom-0',
             )}
-
-            <div
-                className={cn(
-                    'relative z-content flex h-12 items-center gap-1.5 px-4',
-                    banner && 'absolute bottom-0',
-                )}
-            >
-                {verified && (
-                    <BadgeCheck
-                        className={cn(
-                            'shrink-0',
-                            loading
-                                ? 'text-muted-foreground'
-                                : banner
-                                  ? 'text-white'
-                                  : 'text-primary',
-                        )}
-                        size={18}
-                        strokeWidth={2.5}
-                    />
-                )}
-                <Text
+        >
+            {verified && (
+                <BadgeCheck
                     className={cn(
-                        'truncate text-[15px] drop-shadow-lg transition-colors',
+                        'shrink-0',
                         loading
                             ? 'text-muted-foreground'
                             : banner
                               ? 'text-white'
-                              : 'text-foreground',
+                              : 'text-primary',
                     )}
-                    weight="bold"
-                >
-                    {loading ? 'Loading...' : name}
-                </Text>
-            </div>
+                    size={18}
+                    strokeWidth={2.5}
+                />
+            )}
+            <Text
+                className={cn(
+                    'truncate text-[15px] drop-shadow-lg transition-colors',
+                    loading
+                        ? 'text-muted-foreground'
+                        : banner
+                          ? 'text-white'
+                          : 'text-foreground',
+                )}
+                weight="bold"
+            >
+                {loading ? 'Loading...' : name}
+            </Text>
         </div>
-    );
-};
+    </div>
+);

@@ -22,6 +22,7 @@ vi.mock('@/api/servers/servers.queries', () => ({
     useDeleteServer: vi.fn(),
     useMembers: vi.fn(),
     useRequestServerVerification: vi.fn(),
+    useServerDiscoveryStatus: vi.fn(),
     useServerDetails: vi.fn(),
     useTransferOwnership: vi.fn(),
     useUpdateServer: vi.fn(),
@@ -67,6 +68,10 @@ describe('ServerOverviewSettings', () => {
             isPending: false,
             mutate: vi.fn(),
         } as never);
+        vi.mocked(ServerQueries.useDeleteServer).mockReturnValue({
+            isPending: false,
+            mutate: vi.fn(),
+        } as never);
         vi.mocked(ServerQueries.useUpdateServerIcon).mockReturnValue({
             isPending: false,
             mutate: vi.fn(),
@@ -82,6 +87,14 @@ describe('ServerOverviewSettings', () => {
         vi.mocked(ServerQueries.useRequestServerVerification).mockReturnValue({
             isPending: false,
             mutate: vi.fn(),
+        } as never);
+        vi.mocked(ServerQueries.useServerDiscoveryStatus).mockReturnValue({
+            data: {
+                eligible: true,
+                blockers: [],
+                hasValidVanityInvite: true,
+                vanityInviteCode: 'test-server',
+            },
         } as never);
     });
 
@@ -116,5 +129,104 @@ describe('ServerOverviewSettings', () => {
             expect.any(Object),
         );
         expect(mockNavigate).toHaveBeenCalledWith('/chat/@me');
+    });
+
+    it('shows discovery blockers when opt-in is enabled before eligibility is met', () => {
+        vi.mocked(ServerQueries.useServerDetails).mockReturnValue({
+            data: {
+                _id: 'server123',
+                icon: 'icon.png',
+                name: 'Test Server',
+                ownerId: 'user123',
+                description: '',
+                discoveryEnabled: false,
+                tags: [],
+            },
+            isLoading: false,
+        } as never);
+        vi.mocked(ServerQueries.useServerDiscoveryStatus).mockReturnValue({
+            data: {
+                eligible: false,
+                blockers: [
+                    'Server must be verified.',
+                    'Server needs a vanity invite with unlimited uses and no expiry.',
+                ],
+                hasValidVanityInvite: false,
+            },
+        } as never);
+
+        render(<ServerOverviewSettings serverId="server123" />);
+
+        fireEvent.click(
+            screen.getByRole('checkbox', {
+                name: /Show in Server Discovery/i,
+            }),
+        );
+
+        expect(screen.getByText('Discovery blockers')).toBeInTheDocument();
+        expect(
+            screen.getByText('Server must be verified.'),
+        ).toBeInTheDocument();
+        expect(
+            screen.getByText(
+                'Server needs a vanity invite with unlimited uses and no expiry.',
+            ),
+        ).toBeInTheDocument();
+    });
+
+    it('uses unsaved description and tags when showing discovery blockers', () => {
+        vi.mocked(ServerQueries.useServerDetails).mockReturnValue({
+            data: {
+                _id: 'server123',
+                icon: 'icon.png',
+                name: 'Test Server',
+                ownerId: 'user123',
+                description: '',
+                discoveryEnabled: false,
+                tags: [],
+            },
+            isLoading: false,
+        } as never);
+        vi.mocked(ServerQueries.useServerDiscoveryStatus).mockReturnValue({
+            data: {
+                eligible: false,
+                blockers: [
+                    'Server must opt in to discovery.',
+                    'Server must have a description.',
+                    'Server must have at least one tag.',
+                    'Server must be verified.',
+                ],
+                hasValidVanityInvite: true,
+            },
+        } as never);
+
+        render(<ServerOverviewSettings serverId="server123" />);
+
+        fireEvent.change(screen.getByLabelText(/Server Description/i), {
+            target: { value: 'A freshly typed description.' },
+        });
+        const tagInput = screen.getByLabelText(/Server Tags/i);
+        fireEvent.change(tagInput, {
+            target: { value: 'Gaming' },
+        });
+        fireEvent.keyDown(tagInput, { key: 'Enter' });
+        fireEvent.click(
+            screen.getByRole('checkbox', {
+                name: /Show in Server Discovery/i,
+            }),
+        );
+
+        expect(
+            screen.queryByText('Server must opt in to discovery.'),
+        ).not.toBeInTheDocument();
+        expect(
+            screen.queryByText('Server must have a description.'),
+        ).not.toBeInTheDocument();
+        expect(
+            screen.queryByText('Server must have at least one tag.'),
+        ).not.toBeInTheDocument();
+        expect(
+            screen.getByText('Server must be verified.'),
+        ).toBeInTheDocument();
     });
 });

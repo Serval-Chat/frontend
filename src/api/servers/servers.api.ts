@@ -5,10 +5,12 @@ import type { ServerSettings } from '@/api/users/users.types';
 import type {
     Category,
     Channel,
+    DiscoveryServersResponse,
     Role,
     RolePermissions,
     Server,
     ServerBan,
+    ServerDiscoveryStatus,
     ServerMember,
 } from './servers.types';
 
@@ -33,6 +35,24 @@ export const serversApi = {
         const response = await apiClient.get<
             Record<string, { hasUnread: boolean; pingCount: number }>
         >('/api/v1/servers/unread');
+        return response.data;
+    },
+
+    searchDiscoveryServers: async (params: {
+        q?: string;
+        tags?: string[];
+        limit?: number;
+        cursor?: string;
+    }): Promise<DiscoveryServersResponse> => {
+        const response = await apiClient.get<DiscoveryServersResponse>(
+            '/api/v1/discovery/servers',
+            {
+                params,
+                paramsSerializer: {
+                    indexes: null,
+                },
+            },
+        );
         return response.data;
     },
 
@@ -62,6 +82,15 @@ export const serversApi = {
     getServerDetails: async (serverId: string): Promise<Server> => {
         const response = await apiClient.get<Server>(
             `/api/v1/servers/${serverId}`,
+        );
+        return response.data;
+    },
+
+    getDiscoveryStatus: async (
+        serverId: string,
+    ): Promise<ServerDiscoveryStatus> => {
+        const response = await apiClient.get<ServerDiscoveryStatus>(
+            `/api/v1/servers/${serverId}/discovery-status`,
         );
         return response.data;
     },

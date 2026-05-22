@@ -25,10 +25,12 @@ import type { Sticker } from './servers.api';
 import type {
     Category,
     Channel,
+    DiscoveryServersResponse,
     Role,
     RolePermissions,
     Server,
     ServerBan,
+    ServerDiscoveryStatus,
     ServerMember,
 } from './servers.types';
 
@@ -36,6 +38,36 @@ const isValidId = (id: string | null | undefined): boolean => {
     if (!id) return false;
     if (id === 'preview') return true;
     return /^[a-f\d]{24}$/i.test(id);
+};
+
+const discoveryRecentCache = new Map<string, DiscoveryServersResponse>();
+const DISCOVERY_RECENT_CACHE_LIMIT = 10;
+
+const getDiscoveryCacheKey = (params: {
+    q?: string;
+    tags?: string[];
+    limit?: number;
+    cursor?: string;
+}): string =>
+    JSON.stringify({
+        q: params.q?.trim().toLowerCase() ?? '',
+        tags: [...(params.tags ?? [])].map((tag) => tag.toLowerCase()).sort(),
+        limit: params.limit ?? 20,
+        cursor: params.cursor ?? '',
+    });
+
+const rememberDiscoveryResult = (
+    key: string,
+    result: DiscoveryServersResponse,
+): DiscoveryServersResponse => {
+    discoveryRecentCache.delete(key);
+    discoveryRecentCache.set(key, result);
+    while (discoveryRecentCache.size > DISCOVERY_RECENT_CACHE_LIMIT) {
+        const oldest = discoveryRecentCache.keys().next().value;
+        if (oldest === undefined) break;
+        discoveryRecentCache.delete(oldest);
+    }
+    return result;
 };
 
 export const SERVERS_QUERY_KEYS = {
@@ -54,10 +86,49 @@ export const SERVERS_QUERY_KEYS = {
         ['servers', 'emojis', serverId] as const,
     stickers: (serverId: string | null) =>
         ['servers', 'stickers', serverId] as const,
+    discovery: (
+        cacheKey: string,
+        params: {
+            q?: string;
+            tags?: string[];
+            limit?: number;
+            cursor?: string;
+        },
+    ) => ['servers', 'discovery', cacheKey, params] as const,
+    discoveryStatus: (serverId: string | null) =>
+        ['servers', 'discovery-status', serverId] as const,
     bans: (serverId: string | null) => ['servers', 'bans', serverId] as const,
     voiceStates: (serverId: string | null) =>
         ['servers', 'voice-states', serverId] as const,
 };
+
+export const useDiscoveryServers = (params: {
+    q?: string;
+    tags?: string[];
+    limit?: number;
+    cursor?: string;
+}): UseQueryResult<DiscoveryServersResponse, Error> => {
+    const cacheKey = getDiscoveryCacheKey(params);
+    return useQuery({
+        queryKey: SERVERS_QUERY_KEYS.discovery(cacheKey, params),
+        queryFn: async () => {
+            const result = await serversApi.searchDiscoveryServers(params);
+            return rememberDiscoveryResult(cacheKey, result);
+        },
+        enabled: hasAuthToken(),
+        placeholderData: discoveryRecentCache.get(cacheKey),
+        staleTime: 30_000,
+    });
+};
+
+export const useServerDiscoveryStatus = (
+    serverId: string | null,
+): UseQueryResult<ServerDiscoveryStatus, Error> =>
+    useQuery({
+        queryKey: SERVERS_QUERY_KEYS.discoveryStatus(serverId),
+        queryFn: () => serversApi.getDiscoveryStatus(serverId!),
+        enabled: !!serverId && isValidId(serverId) && hasAuthToken(),
+    });
 
 export const useServers = (): UseQueryResult<Server[], Error> => {
     const queryClient = useQueryClient();
@@ -422,6 +493,12 @@ export const useUpdateServer = (
             });
             void queryClient.invalidateQueries({
                 queryKey: SERVERS_QUERY_KEYS.list,
+            });
+            void queryClient.invalidateQueries({
+                queryKey: SERVERS_QUERY_KEYS.discoveryStatus(serverId),
+            });
+            void queryClient.invalidateQueries({
+                queryKey: ['servers', 'discovery'],
             });
         },
     });
@@ -1141,6 +1218,9 @@ export const useRequestServerVerification = (
             });
             void queryClient.invalidateQueries({
                 queryKey: SERVERS_QUERY_KEYS.list,
+            });
+            void queryClient.invalidateQueries({
+                queryKey: SERVERS_QUERY_KEYS.discoveryStatus(serverId),
             });
             showToast('Verification requested successfully!', 'success');
         },

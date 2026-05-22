@@ -6,8 +6,8 @@ import type { Server } from '@/api/servers/servers.types';
 import { Heading } from '@/ui/components/common/Heading';
 import { Text } from '@/ui/components/common/Text';
 import { Box } from '@/ui/components/layout/Box';
+import { ServerBannerMedia } from '@/ui/components/servers/ServerBannerMedia';
 import { ServerIcon } from '@/ui/components/servers/ServerIcon';
-import { resolveApiUrl } from '@/utils/apiUrl';
 import { APP_LOCALE } from '@/utils/locale';
 
 interface AdminServerPreviewProps {
@@ -24,11 +24,7 @@ export const AdminServerPreview = ({
     >
         <Box className="relative h-[120px] w-full shrink-0 overflow-hidden bg-bg-secondary/30">
             {server.banner?.value && (
-                <img
-                    alt="Server Banner"
-                    className="h-full w-full object-cover"
-                    src={resolveApiUrl(server.banner.value) || ''}
-                />
+                <ServerBannerMedia alt="Server Banner" banner={server.banner} />
             )}
         </Box>
 

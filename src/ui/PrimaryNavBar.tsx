@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
 import { AnimatePresence, motion } from 'framer-motion';
-import { Bell, Compass, Home, Plus, Settings } from 'lucide-react';
+import { Bell, Compass, Home, Plus, Settings, Telescope } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 import { usePings } from '@/api/pings/pings.queries';
@@ -28,6 +28,12 @@ const CreateServerModal = React.lazy(() =>
 const JoinServerModal = React.lazy(() =>
     import('@/ui/components/servers/JoinServerModal').then((m) => ({
         default: m.JoinServerModal,
+    })),
+);
+
+const ServerDiscoveryModal = React.lazy(() =>
+    import('@/ui/components/servers/ServerDiscoveryModal').then((m) => ({
+        default: m.ServerDiscoveryModal,
     })),
 );
 
@@ -63,6 +69,7 @@ export const PrimaryNavBar: React.FC = () => {
     const location = useLocation();
     const [showCreateServer, setShowCreateServer] = useState(false);
     const [showJoinServer, setShowJoinServer] = useState(false);
+    const [showDiscovery, setShowDiscovery] = useState(false);
     const [showInbox, setShowInbox] = useState(false);
 
     const showSettings = location.pathname.startsWith('/chat/@setting');
@@ -134,6 +141,17 @@ export const PrimaryNavBar: React.FC = () => {
                 </Tooltip>
             </Box>
 
+            <Box>
+                <Tooltip content="Server Discovery">
+                    <IconButton
+                        className="bg-bg-subtle text-text-subtle hover:bg-bg-subtle-hover hover:text-text-normal"
+                        icon={Telescope}
+                        isActive={showDiscovery}
+                        onClick={() => setShowDiscovery(true)}
+                    />
+                </Tooltip>
+            </Box>
+
             <Divider />
 
             <Box className="relative">
@@ -196,6 +214,14 @@ export const PrimaryNavBar: React.FC = () => {
                     <JoinServerModal
                         isOpen={showJoinServer}
                         onClose={() => setShowJoinServer(false)}
+                    />
+                </React.Suspense>
+            )}
+            {showDiscovery && (
+                <React.Suspense fallback={null}>
+                    <ServerDiscoveryModal
+                        isOpen={showDiscovery}
+                        onClose={() => setShowDiscovery(false)}
                     />
                 </React.Suspense>
             )}

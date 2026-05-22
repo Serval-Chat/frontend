@@ -1,5 +1,5 @@
 export interface InviteServerBanner {
-    type: 'image' | 'gradient' | 'color' | 'gif';
+    type: 'image' | 'color' | 'gif';
     value: string;
 }
 

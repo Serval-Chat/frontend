@@ -16,6 +16,7 @@ import {
     useMembers,
     useRequestServerVerification,
     useServerDetails,
+    useServerDiscoveryStatus,
     useTransferOwnership,
     useUpdateServer,
     useUpdateServerBanner,
@@ -29,12 +30,19 @@ import { LoadingSpinner } from '@/ui/components/common/LoadingSpinner';
 import { Modal } from '@/ui/components/common/Modal';
 import { SettingsFloatingBar } from '@/ui/components/common/SettingsFloatingBar';
 import { Text } from '@/ui/components/common/Text';
+import { TextArea } from '@/ui/components/common/TextArea';
+import { Toggle } from '@/ui/components/common/Toggle';
+import { ServerBannerMedia } from '@/ui/components/servers/ServerBannerMedia';
 import { ImageCropModal } from '@/ui/components/settings/ImageCropModal';
 import { resolveApiUrl } from '@/utils/apiUrl';
 
 interface ServerOverviewSettingsProps {
     serverId: string;
 }
+
+const DESCRIPTION_BLOCKER = 'Server must have a description.';
+const TAGS_BLOCKER = 'Server must have at least one tag.';
+const OPT_IN_BLOCKER = 'Server must opt in to discovery.';
 
 export const ServerOverviewSettings: React.FC<ServerOverviewSettingsProps> = ({
     serverId,
@@ -53,6 +61,16 @@ export const ServerOverviewSettings: React.FC<ServerOverviewSettingsProps> = ({
 
     const [name, setName] = useState(server?.name || '');
     const [originalName, setOriginalName] = useState(server?.name || '');
+    const [description, setDescription] = useState(server?.description || '');
+    const [originalDescription, setOriginalDescription] = useState(
+        server?.description || '',
+    );
+    const [discoveryEnabled, setDiscoveryEnabled] = useState(
+        server?.discoveryEnabled || false,
+    );
+    const [originalDiscoveryEnabled, setOriginalDiscoveryEnabled] = useState(
+        server?.discoveryEnabled || false,
+    );
     const [tags, setTags] = useState<string[]>(server?.tags || []);
     const [originalTags, setOriginalTags] = useState<string[]>(
         server?.tags || [],
@@ -69,6 +87,10 @@ export const ServerOverviewSettings: React.FC<ServerOverviewSettingsProps> = ({
         if (server) {
             setName(server.name);
             setOriginalName(server.name);
+            setDescription(server.description || '');
+            setOriginalDescription(server.description || '');
+            setDiscoveryEnabled(server.discoveryEnabled || false);
+            setOriginalDiscoveryEnabled(server.discoveryEnabled || false);
             setTags(server.tags || []);
             setOriginalTags(server.tags || []);
         }
@@ -76,16 +98,20 @@ export const ServerOverviewSettings: React.FC<ServerOverviewSettingsProps> = ({
 
     const hasChanges =
         name !== originalName ||
+        description !== originalDescription ||
+        discoveryEnabled !== originalDiscoveryEnabled ||
         JSON.stringify(tags) !== JSON.stringify(originalTags);
     const isPending = isUpdatingServer || isUpdatingIcon || isUpdatingBanner;
 
     const handleSave = (): void => {
         if (!hasChanges) return;
         updateServer(
-            { name, tags },
+            { name, description, discoveryEnabled, tags },
             {
                 onSuccess: () => {
                     setOriginalName(name);
+                    setOriginalDescription(description);
+                    setOriginalDiscoveryEnabled(discoveryEnabled);
                     setOriginalTags(tags);
                 },
             },
@@ -140,6 +166,41 @@ export const ServerOverviewSettings: React.FC<ServerOverviewSettingsProps> = ({
         useTransferOwnership(serverId);
     const { mutate: requestVerification, isPending: isRequestingVerification } =
         useRequestServerVerification(serverId);
+    const { data: discoveryStatus } = useServerDiscoveryStatus(serverId);
+    const effectiveDiscoveryBlockers = React.useMemo(() => {
+        if (!discoveryStatus) return [];
+
+        const blockers = discoveryStatus.blockers.filter((blocker) => {
+            if (blocker === DESCRIPTION_BLOCKER) {
+                return description.trim() === '';
+            }
+            if (blocker === TAGS_BLOCKER) {
+                return tags.length === 0;
+            }
+            if (blocker === OPT_IN_BLOCKER) {
+                return !discoveryEnabled;
+            }
+            return true;
+        });
+
+        if (
+            discoveryEnabled &&
+            description.trim() === '' &&
+            !blockers.includes(DESCRIPTION_BLOCKER)
+        ) {
+            blockers.push(DESCRIPTION_BLOCKER);
+        }
+
+        if (
+            discoveryEnabled &&
+            tags.length === 0 &&
+            !blockers.includes(TAGS_BLOCKER)
+        ) {
+            blockers.push(TAGS_BLOCKER);
+        }
+
+        return blockers;
+    }, [description, discoveryEnabled, discoveryStatus, tags]);
 
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
@@ -272,12 +333,10 @@ export const ServerOverviewSettings: React.FC<ServerOverviewSettingsProps> = ({
                             }}
                         >
                             {server.banner?.value ? (
-                                <img
+                                <ServerBannerMedia
                                     alt="Banner"
-                                    className="h-full w-full object-cover transition-opacity group-hover:opacity-40"
-                                    src={
-                                        resolveApiUrl(server.banner.value) || ''
-                                    }
+                                    banner={server.banner}
+                                    className="transition-opacity group-hover:opacity-40"
                                 />
                             ) : (
                                 <div className="p-4 text-center">
@@ -315,6 +374,30 @@ export const ServerOverviewSettings: React.FC<ServerOverviewSettingsProps> = ({
                             placeholder="Enter server name"
                             value={name}
                             onChange={(e) => setName(e.target.value)}
+                        />
+                    </div>
+
+                    <div className="space-y-2">
+                        <div className="flex items-center justify-between gap-3">
+                            <label
+                                className="text-xs font-bold tracking-wider text-muted-foreground uppercase"
+                                htmlFor="serverDescription"
+                            >
+                                Server Description
+                            </label>
+                            <Text size="2xs" variant="muted" weight="bold">
+                                {description.length}/500
+                            </Text>
+                        </div>
+                        <TextArea
+                            autoResize
+                            id="serverDescription"
+                            maxLength={500}
+                            placeholder="Tell people what your server is about..."
+                            value={description}
+                            onChange={(e) =>
+                                setDescription(e.target.value.slice(0, 500))
+                            }
                         />
                     </div>
 
@@ -389,6 +472,45 @@ export const ServerOverviewSettings: React.FC<ServerOverviewSettingsProps> = ({
                                 )}
                             </div>
                         </div>
+                    </div>
+
+                    <div className="space-y-3 rounded-lg border border-border-subtle bg-bg-subtle p-4">
+                        <div className="flex items-start justify-between gap-4">
+                            <div className="space-y-1">
+                                <Text as="p" weight="bold">
+                                    Show in Server Discovery
+                                </Text>
+                                <Text as="p" size="xs" variant="muted">
+                                    Discovery requires a description, at least
+                                    one tag, verification, and a vanity invite
+                                    with unlimited uses and no expiry.
+                                </Text>
+                            </div>
+                            <Toggle
+                                aria-label="Show in Server Discovery"
+                                checked={discoveryEnabled}
+                                onCheckedChange={setDiscoveryEnabled}
+                            />
+                        </div>
+                        {discoveryEnabled &&
+                            effectiveDiscoveryBlockers.length > 0 && (
+                                <div className="rounded-md border border-caution/30 bg-caution/10 p-3">
+                                    <Text
+                                        className="mb-2 text-caution"
+                                        size="xs"
+                                        weight="bold"
+                                    >
+                                        Discovery blockers
+                                    </Text>
+                                    <ul className="space-y-1 text-xs text-muted-foreground">
+                                        {effectiveDiscoveryBlockers.map(
+                                            (blocker) => (
+                                                <li key={blocker}>{blocker}</li>
+                                            ),
+                                        )}
+                                    </ul>
+                                </div>
+                            )}
                     </div>
                 </div>
             </div>
@@ -506,6 +628,8 @@ export const ServerOverviewSettings: React.FC<ServerOverviewSettingsProps> = ({
                 isVisible={hasChanges}
                 onReset={() => {
                     setName(originalName);
+                    setDescription(originalDescription);
+                    setDiscoveryEnabled(originalDiscoveryEnabled);
                     setTags(originalTags);
                     setTagInput('');
                 }}

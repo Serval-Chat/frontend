@@ -54,6 +54,7 @@ export interface AdminUser {
 export interface AdminUserServer {
     _id: string;
     name: string;
+    description?: string;
     icon: string | null;
     banner: string | null;
     ownerId: string;
@@ -82,7 +83,7 @@ export interface AdminServerListItem {
     name: string;
     icon: string | null;
     banner?: {
-        type: 'color' | 'image' | 'gif' | 'gradient';
+        type: 'color' | 'image' | 'gif';
         value: string;
     };
     ownerId: string;
@@ -97,6 +98,7 @@ export interface AdminServerListItem {
     verificationFailureReasons?: string[];
     verificationOverride?: 'verified' | 'unverified' | null;
     verificationRequested: boolean;
+    discoveryEnabled: boolean;
     realMessageCount?: number;
     weightScore?: number;
 }

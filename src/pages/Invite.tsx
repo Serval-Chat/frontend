@@ -19,8 +19,8 @@ import { Skeleton } from '@/ui/components/common/Skeleton';
 import { Text } from '@/ui/components/common/Text';
 import { Box } from '@/ui/components/layout/Box';
 import { DefaultBackground } from '@/ui/components/layout/DefaultBackground';
+import { ServerBannerMedia } from '@/ui/components/servers/ServerBannerMedia';
 import { ServerIcon } from '@/ui/components/servers/ServerIcon';
-import { resolveApiUrl } from '@/utils/apiUrl';
 import { cn } from '@/utils/cn';
 import { APP_LOCALE } from '@/utils/locale';
 
@@ -37,7 +37,6 @@ const InviteBannerHeader: React.FC<InviteBannerHeaderProps> = ({
     icon,
     loading,
 }) => {
-    const bannerUrl = resolveApiUrl(banner?.value);
     const hasBanner = !!banner && !loading;
 
     return (
@@ -51,24 +50,8 @@ const InviteBannerHeader: React.FC<InviteBannerHeaderProps> = ({
             >
                 {hasBanner && (
                     <>
-                        {banner.type === 'image' || banner.type === 'gif' ? (
-                            <img
-                                alt={name}
-                                className="h-full w-full object-cover"
-                                src={bannerUrl ?? ''}
-                            />
-                        ) : (
-                            <div
-                                className="h-full w-full"
-                                style={
-                                    banner.type === 'gradient'
-                                        ? { background: banner.value }
-                                        : { backgroundColor: banner.value }
-                                }
-                            />
-                        )}
-                        {/* Gradient overlay */}
-                        <div className="absolute inset-0 bg-linear-to-b from-transparent via-black/10 to-black/50" />
+                        <ServerBannerMedia alt={name} banner={banner} />
+                        <div className="absolute inset-0 bg-black/30" />
                     </>
                 )}
 

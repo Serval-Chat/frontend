@@ -10,6 +10,7 @@ import { LoadingSpinner } from '@/ui/components/common/LoadingSpinner';
 import { Text } from '@/ui/components/common/Text';
 import { useToast } from '@/ui/components/common/Toast';
 import { Box } from '@/ui/components/layout/Box';
+import { resolveServerBannerUrl } from '@/ui/components/servers/ServerBannerMedia';
 import { resolveApiUrl } from '@/utils/apiUrl';
 
 interface InviteLinkProps {
@@ -111,8 +112,9 @@ export const InviteLink: React.FC<InviteLinkProps> = ({ code, url }) => {
 
     const iconUrl = resolveApiUrl(invite.server.icon);
     const bannerUrl =
-        invite.server.banner?.type === 'image'
-            ? resolveApiUrl(invite.server.banner.value)
+        invite.server.banner?.type === 'image' ||
+        invite.server.banner?.type === 'gif'
+            ? resolveServerBannerUrl(invite.server.banner.value)
             : null;
 
     return (

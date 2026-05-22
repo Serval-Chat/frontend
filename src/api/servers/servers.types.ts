@@ -18,6 +18,7 @@ export interface Server {
     name: string;
     ownerId: string;
     icon?: string;
+    description?: string;
     banner?: ServerBanner;
     defaultRoleId?: string;
     memberCount?: number;
@@ -26,10 +27,41 @@ export interface Server {
     disableUsernameGlowAndCustomColor?: boolean;
     verified?: boolean;
     verificationRequested?: boolean;
+    discoveryEnabled?: boolean;
     tags?: string[];
     createdAt?: string;
     updatedAt?: string;
     canManage?: boolean;
+}
+
+export interface DiscoveryTagFacet {
+    tag: string;
+    count: number;
+}
+
+export interface DiscoveryServer {
+    id: string;
+    name: string;
+    description: string;
+    icon?: string;
+    banner?: ServerBanner;
+    verified: boolean;
+    tags: string[];
+    memberCount: number;
+    inviteCode: string;
+}
+
+export interface DiscoveryServersResponse {
+    items: DiscoveryServer[];
+    tagFacets: DiscoveryTagFacet[];
+    nextCursor?: string;
+}
+
+export interface ServerDiscoveryStatus {
+    eligible: boolean;
+    blockers: string[];
+    hasValidVanityInvite: boolean;
+    vanityInviteCode?: string;
 }
 
 export type ChannelType = 'text' | 'voice' | 'link';
