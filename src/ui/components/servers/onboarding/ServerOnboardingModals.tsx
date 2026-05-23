@@ -46,7 +46,7 @@ const channelIcon = (channel: Channel): React.ReactNode => (
 
 const CORNER_R = 6;
 
-function drawChannelSplines(
+export function drawChannelSplines(
     svg: SVGSVGElement,
     stage: HTMLElement,
     categoryEl: HTMLElement | null,
@@ -94,7 +94,7 @@ function drawChannelSplines(
     svg.replaceChildren(...paths);
 }
 
-const RolePicker: React.FC<{
+export const RolePicker: React.FC<{
     roles: Role[];
     allowedRoleIds: string[];
     selectedRoleIds: string[];
@@ -238,7 +238,7 @@ export const ServerSelfRolesModal: React.FC<ServerSelfRolesModalProps> = ({
     );
 };
 
-const ChannelPreferenceGroup: React.FC<{
+export const ChannelPreferenceGroup: React.FC<{
     category: Category | null;
     channels: Channel[];
     hiddenCategories: Set<string>;

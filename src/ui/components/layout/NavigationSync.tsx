@@ -42,9 +42,18 @@ export const NavigationSync: React.FC = () => {
                 return;
             }
 
-            let contextChanged = false;
+            const isSpecialView =
+                path.endsWith('/self-roles') ||
+                path.endsWith('/channels-and-categories');
+
             if (selectedServerId !== params.serverId) {
                 dispatch(setSelectedServerId(params.serverId));
+            }
+
+            if (isSpecialView) return;
+
+            let contextChanged = false;
+            if (selectedServerId !== params.serverId) {
                 contextChanged = true;
             }
 

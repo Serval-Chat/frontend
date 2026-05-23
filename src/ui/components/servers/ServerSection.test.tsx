@@ -15,6 +15,7 @@ import { ServerSection } from './ServerSection';
 vi.mock('react-router-dom', () => ({
     useNavigate: vi.fn(),
     useParams: vi.fn().mockReturnValue({}),
+    useLocation: vi.fn().mockReturnValue({ pathname: '/' }),
 }));
 
 vi.mock('@/store/hooks', () => ({

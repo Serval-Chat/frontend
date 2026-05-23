@@ -164,6 +164,14 @@ createRoot(document.getElementById('root')!).render(
                                             />
                                             <Route
                                                 element={<NavigationSync />}
+                                                path="@server/:serverId/self-roles"
+                                            />
+                                            <Route
+                                                element={<NavigationSync />}
+                                                path="@server/:serverId/channels-and-categories"
+                                            />
+                                            <Route
+                                                element={<NavigationSync />}
                                                 path="@server/:serverId/channel/:channelId/message/:messageId"
                                             />
                                             <Route

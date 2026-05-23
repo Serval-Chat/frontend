@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 
 import { Hash, Shield } from 'lucide-react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 
 import {
     useCategories,
@@ -25,18 +25,6 @@ import { SidebarSkeleton } from './SidebarSkeleton';
 const ServerOnboardingModal = React.lazy(() =>
     import('./onboarding/ServerOnboardingModals').then((m) => ({
         default: m.ServerOnboardingModal,
-    })),
-);
-
-const ServerSelfRolesModal = React.lazy(() =>
-    import('./onboarding/ServerOnboardingModals').then((m) => ({
-        default: m.ServerSelfRolesModal,
-    })),
-);
-
-const ChannelPreferencesModal = React.lazy(() =>
-    import('./onboarding/ServerOnboardingModals').then((m) => ({
-        default: m.ChannelPreferencesModal,
     })),
 );
 
@@ -70,15 +58,18 @@ export const ServerSection: React.FC = () => {
     const { data: categories, isPlaceholderData: isPlaceholderCategories } =
         useCategories(selectedServerId);
     const { data: onboarding } = useOnboarding(selectedServerId);
-    const [isRolesOpen, setIsRolesOpen] = React.useState(false);
-    const [isChannelPrefsOpen, setIsChannelPrefsOpen] = React.useState(false);
 
     useServerWS(selectedServerId ?? undefined);
 
     const scrollRef = useRef<HTMLDivElement>(null);
+    const location = useLocation();
+    const isSpecialView =
+        location.pathname.endsWith('/self-roles') ||
+        location.pathname.endsWith('/channels-and-categories');
 
     useEffect(() => {
         if (!selectedServerId) return;
+        if (isSpecialView) return;
 
         if (isServerError || isChannelsError) {
             void navigate('/chat/@me', { replace: true });
@@ -143,6 +134,7 @@ export const ServerSection: React.FC = () => {
         dispatch,
         navigate,
         channelId,
+        isSpecialView,
     ]);
 
     if (!selectedServerId) return null;
@@ -172,14 +164,22 @@ export const ServerSection: React.FC = () => {
                                     iconComponent={Shield}
                                     name="Roles"
                                     type="text"
-                                    onClick={() => setIsRolesOpen(true)}
+                                    onClick={() => {
+                                        void navigate(
+                                            `/chat/@server/${selectedServerId}/self-roles`,
+                                        );
+                                    }}
                                 />
                             )}
                             <ChannelItem
                                 iconComponent={Hash}
                                 name="Channels & Categories"
                                 type="text"
-                                onClick={() => setIsChannelPrefsOpen(true)}
+                                onClick={() => {
+                                    void navigate(
+                                        `/chat/@server/${selectedServerId}/channels-and-categories`,
+                                    );
+                                }}
                             />
                         </div>
                     </div>
@@ -200,16 +200,6 @@ export const ServerSection: React.FC = () => {
 
             <React.Suspense fallback={null}>
                 <ServerOnboardingModal serverId={selectedServerId} />
-                <ServerSelfRolesModal
-                    isOpen={isRolesOpen}
-                    serverId={selectedServerId}
-                    onClose={() => setIsRolesOpen(false)}
-                />
-                <ChannelPreferencesModal
-                    isOpen={isChannelPrefsOpen}
-                    serverId={selectedServerId}
-                    onClose={() => setIsChannelPrefsOpen(false)}
-                />
             </React.Suspense>
         </div>
     );

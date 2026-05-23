@@ -3,7 +3,7 @@ import React from 'react';
 import { X } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import { Provider, useStore } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 import type { RootState } from '@/store';
 import {
@@ -30,6 +30,20 @@ const ActiveVoiceRoom = React.lazy(() =>
     import('@/ui/components/chat/ActiveVoiceRoom').then((m) => ({
         default: m.ActiveVoiceRoom,
     })),
+);
+
+const ServerRolesPage = React.lazy(() =>
+    import('@/ui/components/servers/onboarding/ServerRolesPage').then((m) => ({
+        default: m.ServerRolesPage,
+    })),
+);
+
+const ServerChannelsPage = React.lazy(() =>
+    import('@/ui/components/servers/onboarding/ServerChannelsPage').then(
+        (m) => ({
+            default: m.ServerChannelsPage,
+        }),
+    ),
 );
 
 const ActiveVoiceRoomMount: React.FC = React.memo(() => {
@@ -272,6 +286,12 @@ export const MainContent: React.FC = () => {
         splitView: state.nav.splitView,
     }));
     const inSwipePanel = useMobileSwipeContext();
+    const location = useLocation();
+
+    const isRolesView = location.pathname.endsWith('/self-roles');
+    const isChannelsView = location.pathname.endsWith(
+        '/channels-and-categories',
+    );
 
     const isNothingSelected = !selectedFriendId && !selectedChannelId;
     const isSplitViewActive = !!(splitView.left || splitView.right);
@@ -295,10 +315,20 @@ export const MainContent: React.FC = () => {
                 !inSwipePanel &&
                     navMode === 'servers' &&
                     isNothingSelected &&
+                    !isRolesView &&
+                    !isChannelsView &&
                     'max-md:hidden',
             )}
         >
-            {isSplitViewActive ? (
+            {isRolesView ? (
+                <React.Suspense fallback={null}>
+                    <ServerRolesPage />
+                </React.Suspense>
+            ) : isChannelsView ? (
+                <React.Suspense fallback={null}>
+                    <ServerChannelsPage />
+                </React.Suspense>
+            ) : isSplitViewActive ? (
                 <Box className="flex min-h-0 flex-1 flex-col overflow-hidden bg-[var(--chat-bg)] md:flex-row">
                     <SplitViewPane conversation={splitView.left} side="left" />
                     <Box className="h-px shrink-0 bg-border-subtle md:h-full md:w-px" />
