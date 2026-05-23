@@ -132,7 +132,7 @@ export const PrimaryNavBar: React.FC = () => {
             </Box>
 
             <Box>
-                <Tooltip content="Explore Servers">
+                <Tooltip content="Join Server">
                     <IconButton
                         className="bg-bg-subtle text-text-subtle hover:bg-bg-subtle-hover hover:text-text-normal"
                         icon={Compass}
