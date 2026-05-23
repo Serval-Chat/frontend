@@ -145,7 +145,7 @@ export const ServerChannelsPage: React.FC = () => {
                 <div className="absolute bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-xl border border-border-subtle bg-bg-secondary/90 px-6 py-4 whitespace-nowrap shadow-xl backdrop-blur-md">
                     <div className="flex items-center gap-6">
                         <Text className="text-sm font-medium">
-                            Careful — you have unsaved changes!
+                            Careful - you have unsaved changes!
                         </Text>
                         <div className="flex gap-2">
                             <Button
