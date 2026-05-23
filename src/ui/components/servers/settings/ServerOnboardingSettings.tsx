@@ -3,12 +3,13 @@ import React, { useMemo, useState } from 'react';
 import { Plus, Trash2 } from 'lucide-react';
 
 import {
+    useCategories,
     useChannels,
     useOnboardingSettings,
     useRoles,
     useUpdateOnboardingSettings,
 } from '@/api/servers/servers.queries';
-import type { Channel, Role } from '@/api/servers/servers.types';
+import type { Category, Channel, Role } from '@/api/servers/servers.types';
 import { Button } from '@/ui/components/common/Button';
 import { DropdownWithSearch } from '@/ui/components/common/DropdownWithSearch';
 import { Heading } from '@/ui/components/common/Heading';
@@ -106,9 +107,10 @@ const RoleSelectGrid: React.FC<{
 
 const WelcomeChannelGrid: React.FC<{
     channels: Channel[];
+    categories?: Category[];
     selectedIds: string[];
     onChange: (channelIds: string[]) => void;
-}> = ({ channels, selectedIds, onChange }) => {
+}> = ({ channels, categories, selectedIds, onChange }) => {
     const selected = new Set(selectedIds);
     const selectableChannels = sortByPosition(
         channels.filter((channel) => channel.type !== 'link'),
@@ -124,30 +126,67 @@ const WelcomeChannelGrid: React.FC<{
         onChange([...next]);
     };
 
+    const groupedChannels = useMemo(() => {
+        const sortedChannels = selectableChannels;
+        const sortedCategories = sortByPosition(categories ?? []);
+        return [
+            {
+                category: null,
+                channels: sortedChannels.filter(
+                    (channel) =>
+                        !channel.categoryId ||
+                        !categories?.find((c) => c._id === channel.categoryId),
+                ),
+            },
+            ...sortedCategories.map((category) => ({
+                category,
+                channels: sortedChannels.filter(
+                    (channel) => channel.categoryId === category._id,
+                ),
+            })),
+        ].filter((group) => group.channels.length > 0);
+    }, [selectableChannels, categories]);
+
     return (
-        <div className="grid gap-2 sm:grid-cols-2">
-            {selectableChannels.map((channel) => {
-                const isSelected = selected.has(channel._id);
-                return (
-                    <Button
-                        className={cn(
-                            'justify-start rounded-md border-border-subtle px-3 py-2 text-left shadow-none',
-                            isSelected
-                                ? 'border-primary bg-primary/10 text-primary'
-                                : 'bg-bg-subtle text-muted-foreground hover:text-foreground',
-                        )}
-                        disabled={!isSelected && selected.size >= 8}
-                        innerClassName="justify-start"
-                        key={channel._id}
-                        type="button"
-                        variant="normal"
-                        onClick={() => toggleChannel(channel._id)}
-                    >
-                        {channelIcon(channel)}
-                        <span className="truncate">{channel.name}</span>
-                    </Button>
-                );
-            })}
+        <div className="flex flex-col gap-4">
+            {groupedChannels.map((group) => (
+                <div
+                    className="space-y-2"
+                    key={group.category?._id ?? 'uncategorized'}
+                >
+                    {group.category && (
+                        <Text className="px-1 text-xs font-bold tracking-wider text-muted-foreground/70 uppercase">
+                            {group.category.name}
+                        </Text>
+                    )}
+                    <div className="grid gap-2 sm:grid-cols-2">
+                        {group.channels.map((channel) => {
+                            const isSelected = selected.has(channel._id);
+                            return (
+                                <Button
+                                    className={cn(
+                                        'justify-start rounded-md border-border-subtle px-3 py-2 text-left shadow-none',
+                                        isSelected
+                                            ? 'border-primary bg-primary/10 text-primary'
+                                            : 'bg-bg-subtle text-muted-foreground hover:text-foreground',
+                                    )}
+                                    disabled={!isSelected && selected.size >= 8}
+                                    innerClassName="justify-start"
+                                    key={channel._id}
+                                    type="button"
+                                    variant="normal"
+                                    onClick={() => toggleChannel(channel._id)}
+                                >
+                                    {channelIcon(channel)}
+                                    <span className="truncate">
+                                        {channel.name}
+                                    </span>
+                                </Button>
+                            );
+                        })}
+                    </div>
+                </div>
+            ))}
         </div>
     );
 };
@@ -160,6 +199,7 @@ export const ServerOnboardingSettings: React.FC<
     const { data: roles, isLoading: isRolesLoading } = useRoles(serverId);
     const { data: channels, isLoading: isChannelsLoading } =
         useChannels(serverId);
+    const { data: categories } = useCategories(serverId);
     const updateSettings = useUpdateOnboardingSettings(serverId);
 
     const [enabled, setEnabled] = useState(false);
@@ -308,12 +348,31 @@ export const ServerOnboardingSettings: React.FC<
                                 <div className="flex-1">
                                     <TextArea
                                         autoResize
+                                        id={`rule-input-${idx}`}
                                         placeholder={`Rule #${idx + 1} description...`}
                                         value={rule}
                                         onChange={(e) => {
                                             const next = [...rules];
                                             next[idx] = e.target.value;
                                             setRules(next);
+                                        }}
+                                        onKeyDown={(e) => {
+                                            if (
+                                                e.key === 'Enter' &&
+                                                !e.shiftKey
+                                            ) {
+                                                e.preventDefault();
+                                                const next = [...rules];
+                                                next.splice(idx + 1, 0, '');
+                                                setRules(next);
+                                                setTimeout(() => {
+                                                    document
+                                                        .getElementById(
+                                                            `rule-input-${idx + 1}`,
+                                                        )
+                                                        ?.focus();
+                                                }, 0);
+                                            }
                                         }}
                                     />
                                 </div>
@@ -338,7 +397,14 @@ export const ServerOnboardingSettings: React.FC<
                 <Button
                     className="flex w-full items-center justify-center rounded-lg border border-dashed border-border-subtle py-2.5 text-muted-foreground transition-all hover:border-primary/50 hover:bg-primary/5 hover:text-foreground"
                     variant="ghost"
-                    onClick={() => setRules([...rules, ''])}
+                    onClick={() => {
+                        setRules([...rules, '']);
+                        setTimeout(() => {
+                            document
+                                .getElementById(`rule-input-${rules.length}`)
+                                ?.focus();
+                        }, 0);
+                    }}
                 >
                     <Plus className="mr-2" size={16} /> Add Rule
                 </Button>
@@ -380,7 +446,8 @@ export const ServerOnboardingSettings: React.FC<
                     </Text>
                 </div>
                 <WelcomeChannelGrid
-                    channels={channels}
+                    categories={categories ?? []}
+                    channels={channels ?? []}
                     selectedIds={welcomeChannelIds}
                     onChange={setWelcomeChannelIds}
                 />
