@@ -9,6 +9,7 @@ import {
     Shield,
     Smile,
     Sticker,
+    UserPlus,
     X,
     Zap,
 } from 'lucide-react';
@@ -56,6 +57,12 @@ const ServerOverviewSettings = React.lazy(() =>
     })),
 );
 
+const ServerOnboardingSettings = React.lazy(() =>
+    import('./ServerOnboardingSettings').then((m) => ({
+        default: m.ServerOnboardingSettings,
+    })),
+);
+
 const ServerRoleSettings = React.lazy(() =>
     import('./ServerRoleSettings').then((m) => ({
         default: m.ServerRoleSettings,
@@ -87,6 +94,12 @@ const ALL_SECTIONS: {
         permission: 'manageServer',
     },
     { id: 'roles', label: 'Roles', icon: Shield, permission: 'manageRoles' },
+    {
+        id: 'onboarding',
+        label: 'Onboarding',
+        icon: UserPlus,
+        permission: 'manageServer',
+    },
     { id: 'emojis', label: 'Emojis', icon: Smile, permission: 'manageServer' },
     {
         id: 'stickers',
@@ -227,6 +240,11 @@ export const ServerSettingsModal: React.FC<ServerSettingsModalProps> = ({
                                 )}
                                 {activeSection === 'roles' && (
                                     <ServerRoleSettings serverId={serverId} />
+                                )}
+                                {activeSection === 'onboarding' && (
+                                    <ServerOnboardingSettings
+                                        serverId={serverId}
+                                    />
                                 )}
                                 {activeSection === 'emojis' && (
                                     <ServerEmojiSettings serverId={serverId} />

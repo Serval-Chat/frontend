@@ -13,6 +13,7 @@ import { IconButton } from '@/ui/components/common/IconButton';
 import { Input } from '@/ui/components/common/Input';
 import { SettingsFloatingBar } from '@/ui/components/common/SettingsFloatingBar';
 import { Text } from '@/ui/components/common/Text';
+import { TextArea } from '@/ui/components/common/TextArea';
 import { Toggle } from '@/ui/components/common/Toggle';
 import { UserItem } from '@/ui/components/common/UserItem';
 import { ImageCropModal } from '@/ui/components/settings/ImageCropModal';
@@ -40,6 +41,7 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
 }) => {
     const { data: me } = useMe();
     const [name, setName] = useState(role.name);
+    const [description, setDescription] = useState(role.description ?? '');
 
     // Color states
     const [colorType, setColorType] = useState<ColorType>(
@@ -123,6 +125,7 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
 
     const resetState = (): void => {
         setName(role.name);
+        setDescription(role.description ?? '');
         const type =
             role.colors && role.colors.length > 0
                 ? 'custom'
@@ -156,6 +159,7 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
             gradientRepeat?: number;
         } = {
             name,
+            description: description.trim() || undefined,
             permissions: permissions as RolePermissions,
         };
 
@@ -244,6 +248,35 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
                                     setHasChanges(true);
                                 }}
                             />
+                        </div>
+
+                        <div className="space-y-2">
+                            <div className="flex items-center justify-between">
+                                <label
+                                    className="text-xs font-bold text-muted-foreground uppercase"
+                                    htmlFor="roleDescription"
+                                >
+                                    Onboarding Description
+                                </label>
+                                <span className="text-xs text-muted-foreground">
+                                    {description.length} / 200
+                                </span>
+                            </div>
+                            <TextArea
+                                id="roleDescription"
+                                maxLength={200}
+                                placeholder="Briefly describe what this role is for (shown during onboarding)"
+                                value={description}
+                                onChange={(e) => {
+                                    setDescription(e.target.value);
+                                    setHasChanges(true);
+                                }}
+                            />
+                            <Text size="xs" variant="muted">
+                                This description appears on the role card when
+                                members pick their roles during server
+                                onboarding.
+                            </Text>
                         </div>
                     </section>
 

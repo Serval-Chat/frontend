@@ -39,6 +39,7 @@ import { Popover } from '@/ui/components/common/Popover';
 import { RoleDot } from '@/ui/components/common/RoleDot';
 import { StyledUserName } from '@/ui/components/common/StyledUserName';
 import { Text } from '@/ui/components/common/Text';
+import { Tooltip } from '@/ui/components/common/Tooltip';
 import { UserBadge } from '@/ui/components/common/UserBadge';
 import { UserProfilePicture } from '@/ui/components/common/UserProfilePicture';
 import { type UserStatus } from '@/ui/components/common/UserProfileStatusIndicator';
@@ -484,7 +485,7 @@ export const UserProfileCard: React.FC<UserProfileCardProps> = ({
                                                 myHighestRolePosition >
                                                     r.position);
 
-                                        return (
+                                        const pill = (
                                             <Box
                                                 className={cn(
                                                     'group flex items-center gap-1.5 rounded-md border border-border-subtle bg-bg-secondary px-2 py-1 transition-all',
@@ -518,6 +519,21 @@ export const UserProfileCard: React.FC<UserProfileCardProps> = ({
                                                         </button>
                                                     )}
                                             </Box>
+                                        );
+
+                                        return r.description ? (
+                                            <Tooltip
+                                                className="z-[10000] max-w-[200px] font-normal whitespace-normal"
+                                                content={r.description}
+                                                key={r._id}
+                                                position="top"
+                                            >
+                                                {pill}
+                                            </Tooltip>
+                                        ) : (
+                                            <React.Fragment key={r._id}>
+                                                {pill}
+                                            </React.Fragment>
                                         );
                                     })}
                         </Box>

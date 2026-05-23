@@ -69,7 +69,11 @@ export const Modal: React.FC<ModalProps> = ({
                         onClick={onClose}
                     />
                     <motion.div
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        animate={
+                            fullScreen
+                                ? { opacity: 1 }
+                                : { opacity: 1, scale: 1, y: 0 }
+                        }
                         className={cn(
                             'relative flex w-full flex-col overflow-hidden rounded-xl border border-border-subtle bg-background shadow-2xl',
                             fullScreen
@@ -77,8 +81,16 @@ export const Modal: React.FC<ModalProps> = ({
                                 : 'max-h-[90vh] max-w-2xl',
                             className,
                         )}
-                        exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                        exit={
+                            fullScreen
+                                ? { opacity: 0 }
+                                : { opacity: 0, scale: 0.95, y: 20 }
+                        }
+                        initial={
+                            fullScreen
+                                ? { opacity: 0 }
+                                : { opacity: 0, scale: 0.95, y: 20 }
+                        }
                         style={
                             fullScreen
                                 ? {

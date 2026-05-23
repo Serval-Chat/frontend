@@ -37,6 +37,7 @@ vi.mock('@/hooks/ws/useServerWS', () => ({
 vi.mock('@/api/servers/servers.queries', () => ({
     useCategories: vi.fn(),
     useChannels: vi.fn(),
+    useOnboarding: vi.fn(),
     useServerDetails: vi.fn(),
 }));
 
@@ -65,6 +66,22 @@ describe('ServerSection fallback logic', () => {
         vi.mocked(ServerQueries.useCategories).mockReturnValue({
             data: [],
             isLoading: false,
+        } as never);
+        vi.mocked(ServerQueries.useOnboarding).mockReturnValue({
+            data: {
+                onboarding: {
+                    enabled: false,
+                    guidelines: '',
+                    selfAssignableRoleIds: [],
+                    landingChannelId: null,
+                    welcomeChannelIds: [],
+                },
+                member: {
+                    hiddenChannelIds: [],
+                    hiddenCategoryIds: [],
+                    roles: [],
+                },
+            },
         } as never);
     });
 

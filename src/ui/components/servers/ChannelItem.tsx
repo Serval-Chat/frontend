@@ -3,9 +3,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import {
     Copy,
-    Hash,
     HeadphoneOff,
-    Link,
     MessageSquare,
     MicOff,
     Settings,
@@ -24,17 +22,17 @@ import {
     type ContextMenuItem,
 } from '@/ui/components/common/ContextMenu';
 import { IconButton } from '@/ui/components/common/IconButton';
-import { ParsedEmoji } from '@/ui/components/common/ParsedEmoji';
-import { ParsedUnicodeEmoji } from '@/ui/components/common/ParsedUnicodeEmoji';
 import { UserProfilePicture } from '@/ui/components/common/UserProfilePicture';
 import { buttonVariants } from '@/ui/components/common/buttonVariants';
-import { ICON_MAP } from '@/ui/utils/iconMap';
 import { cn } from '@/utils/cn';
+
+import { ChannelIcon } from './ChannelIcon';
 
 interface ChannelItemProps {
     name: string;
     type: ChannelType;
     icon?: string;
+    iconComponent?: React.ComponentType<{ className?: string }>;
     emoji?: string;
     emojiType?: 'custom' | 'unicode';
     isActive?: boolean;
@@ -55,6 +53,7 @@ export const ChannelItem: React.FC<ChannelItemProps> = React.memo(
         name,
         type,
         icon,
+        iconComponent: IconComponent,
         emoji,
         emojiType,
         isActive,
@@ -66,12 +65,6 @@ export const ChannelItem: React.FC<ChannelItemProps> = React.memo(
         onSettingsClick,
         onMouseEnter,
     }) => {
-        // custom icons don't apply to pseudochannels
-        const CustomIcon = type !== 'link' && icon ? ICON_MAP[icon] : null;
-        const Icon =
-            CustomIcon ||
-            (type === 'text' ? Hash : type === 'link' ? Link : Volume2);
-
         const channelClasses = cn(
             'group flex w-full items-center justify-between rounded-md border-none px-2 py-1.5 shadow-none transition-all',
             disabled
@@ -106,30 +99,19 @@ export const ChannelItem: React.FC<ChannelItemProps> = React.memo(
                 >
                     <div className="flex w-full items-center justify-between">
                         <div className="flex min-w-0 flex-1 items-center">
-                            {emoji && emojiType ? (
-                                <div className="mr-1.5 flex h-[18px] w-[18px] shrink-0 items-center justify-center transition-colors">
-                                    {emojiType === 'custom' ? (
-                                        <ParsedEmoji
-                                            className="h-full w-full"
-                                            emojiId={emoji}
-                                        />
-                                    ) : (
-                                        <ParsedUnicodeEmoji
-                                            className="h-full w-full"
-                                            content={emoji}
-                                        />
-                                    )}
-                                </div>
-                            ) : (
-                                <Icon
-                                    className={cn(
-                                        'mr-1.5 h-[18px] w-[18px] shrink-0 transition-colors',
-                                        isActive || isUnread
-                                            ? 'text-foreground'
-                                            : 'text-muted-foreground group-hover:text-foreground/80',
-                                    )}
-                                />
-                            )}
+                            <ChannelIcon
+                                className={cn(
+                                    'mr-1.5 h-[18px] w-[18px] transition-colors',
+                                    isActive || isUnread
+                                        ? 'text-foreground'
+                                        : 'text-muted-foreground group-hover:text-foreground/80',
+                                )}
+                                emoji={emoji}
+                                emojiType={emojiType}
+                                icon={icon}
+                                iconComponent={IconComponent}
+                                type={type}
+                            />
                             <span
                                 className={cn(
                                     'truncate text-left text-[15px] font-medium',

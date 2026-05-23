@@ -35,6 +35,17 @@ export const useServerWS = (serverId?: string): void => {
         }
     }, [queryClient, serverId]);
 
+    const invalidateOnboarding = useCallback(() => {
+        if (serverId) {
+            void queryClient.invalidateQueries({
+                queryKey: SERVERS_QUERY_KEYS.onboarding(serverId),
+            });
+            void queryClient.invalidateQueries({
+                queryKey: SERVERS_QUERY_KEYS.onboardingSettings(serverId),
+            });
+        }
+    }, [queryClient, serverId]);
+
     const invalidateCategories = useCallback(() => {
         if (serverId) {
             void queryClient.invalidateQueries({
@@ -50,9 +61,10 @@ export const useServerWS = (serverId?: string): void => {
             (payload: { serverId: string }): void => {
                 if (payload.serverId === serverId) {
                     invalidateServer();
+                    invalidateOnboarding();
                 }
             },
-            [serverId, invalidateServer],
+            [serverId, invalidateServer, invalidateOnboarding],
         ),
     );
 
@@ -216,9 +228,10 @@ export const useServerWS = (serverId?: string): void => {
                     void queryClient.invalidateQueries({
                         queryKey: SERVERS_QUERY_KEYS.members(payload.serverId),
                     });
+                    invalidateOnboarding();
                 }
             },
-            [serverId, queryClient],
+            [serverId, queryClient, invalidateOnboarding],
         ),
     );
 

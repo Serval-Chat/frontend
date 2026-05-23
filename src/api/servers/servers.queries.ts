@@ -32,6 +32,8 @@ import type {
     ServerBan,
     ServerDiscoveryStatus,
     ServerMember,
+    ServerOnboardingSettings,
+    ServerOnboardingState,
 } from './servers.types';
 
 const isValidId = (id: string | null | undefined): boolean => {
@@ -82,6 +84,10 @@ export const SERVERS_QUERY_KEYS = {
     members: (serverId: string | null) =>
         ['servers', 'members', serverId] as const,
     roles: (serverId: string | null) => ['servers', 'roles', serverId] as const,
+    onboardingSettings: (serverId: string | null) =>
+        ['servers', 'onboarding-settings', serverId] as const,
+    onboarding: (serverId: string | null) =>
+        ['servers', 'onboarding', serverId] as const,
     emojis: (serverId: string | null) =>
         ['servers', 'emojis', serverId] as const,
     stickers: (serverId: string | null) =>
@@ -332,6 +338,132 @@ export const useRoles = (
             hasAuthToken(),
         placeholderData: keepPreviousData,
     });
+
+export const useOnboardingSettings = (
+    serverId: string | null,
+    options: { enabled?: boolean } = {},
+): UseQueryResult<ServerOnboardingSettings, Error> =>
+    useQuery({
+        queryKey: SERVERS_QUERY_KEYS.onboardingSettings(serverId),
+        queryFn: () => serversApi.getOnboardingSettings(serverId!),
+        enabled:
+            (options.enabled ?? true) &&
+            !!serverId &&
+            isValidId(serverId) &&
+            hasAuthToken(),
+        placeholderData: keepPreviousData,
+    });
+
+export const useUpdateOnboardingSettings = (
+    serverId: string,
+): UseMutationResult<
+    ServerOnboardingSettings,
+    Error,
+    Partial<ServerOnboardingSettings>
+> => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (updates: Partial<ServerOnboardingSettings>) =>
+            serversApi.updateOnboardingSettings(serverId, updates),
+        onSuccess: () => {
+            void queryClient.invalidateQueries({
+                queryKey: SERVERS_QUERY_KEYS.onboardingSettings(serverId),
+            });
+            void queryClient.invalidateQueries({
+                queryKey: SERVERS_QUERY_KEYS.details(serverId),
+            });
+            void queryClient.invalidateQueries({
+                queryKey: SERVERS_QUERY_KEYS.onboarding(serverId),
+            });
+        },
+    });
+};
+
+export const useOnboarding = (
+    serverId: string | null,
+    options: { enabled?: boolean } = {},
+): UseQueryResult<ServerOnboardingState, Error> =>
+    useQuery({
+        queryKey: SERVERS_QUERY_KEYS.onboarding(serverId),
+        queryFn: () => serversApi.getOnboarding(serverId!),
+        enabled:
+            (options.enabled ?? true) &&
+            !!serverId &&
+            isValidId(serverId) &&
+            hasAuthToken(),
+        placeholderData: keepPreviousData,
+    });
+
+export const useAcceptOnboardingRules = (
+    serverId: string,
+): UseMutationResult<ServerMember, Error, void> => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: () => serversApi.acceptOnboardingRules(serverId),
+        onSuccess: () => {
+            void queryClient.invalidateQueries({
+                queryKey: SERVERS_QUERY_KEYS.onboarding(serverId),
+            });
+            void queryClient.invalidateQueries({
+                queryKey: SERVERS_QUERY_KEYS.members(serverId),
+            });
+        },
+    });
+};
+
+export const useUpdateSelfRoles = (
+    serverId: string,
+): UseMutationResult<ServerMember, Error, string[]> => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (roleIds: string[]) =>
+            serversApi.updateSelfRoles(serverId, roleIds),
+        onSuccess: () => {
+            void queryClient.invalidateQueries({
+                queryKey: SERVERS_QUERY_KEYS.onboarding(serverId),
+            });
+            void queryClient.invalidateQueries({
+                queryKey: SERVERS_QUERY_KEYS.members(serverId),
+            });
+        },
+    });
+};
+
+export const useUpdateChannelPreferences = (
+    serverId: string,
+): UseMutationResult<
+    ServerMember,
+    Error,
+    { hiddenChannelIds: string[]; hiddenCategoryIds: string[] }
+> => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (preferences) =>
+            serversApi.updateChannelPreferences(serverId, preferences),
+        onSuccess: () => {
+            void queryClient.invalidateQueries({
+                queryKey: SERVERS_QUERY_KEYS.onboarding(serverId),
+            });
+        },
+    });
+};
+
+export const useCompleteOnboarding = (
+    serverId: string,
+): UseMutationResult<ServerMember, Error, void> => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: () => serversApi.completeOnboarding(serverId),
+        onSuccess: () => {
+            void queryClient.invalidateQueries({
+                queryKey: SERVERS_QUERY_KEYS.onboarding(serverId),
+            });
+            void queryClient.invalidateQueries({
+                queryKey: SERVERS_QUERY_KEYS.members(serverId),
+            });
+        },
+    });
+};
 
 export const useServerEmojis = (
     serverId: string | null,

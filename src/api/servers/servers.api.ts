@@ -12,6 +12,8 @@ import type {
     ServerBan,
     ServerDiscoveryStatus,
     ServerMember,
+    ServerOnboardingSettings,
+    ServerOnboardingState,
 } from './servers.types';
 
 export interface Sticker {
@@ -112,6 +114,72 @@ export const serversApi = {
     getRoles: async (serverId: string): Promise<Role[]> => {
         const response = await apiClient.get<Role[]>(
             `/api/v1/servers/${serverId}/roles`,
+        );
+        return response.data;
+    },
+
+    getOnboardingSettings: async (
+        serverId: string,
+    ): Promise<ServerOnboardingSettings> => {
+        const response = await apiClient.get<ServerOnboardingSettings>(
+            `/api/v1/servers/${serverId}/onboarding-settings`,
+        );
+        return response.data;
+    },
+
+    updateOnboardingSettings: async (
+        serverId: string,
+        updates: Partial<ServerOnboardingSettings>,
+    ): Promise<ServerOnboardingSettings> => {
+        const response = await apiClient.patch<ServerOnboardingSettings>(
+            `/api/v1/servers/${serverId}/onboarding-settings`,
+            updates,
+        );
+        return response.data;
+    },
+
+    getOnboarding: async (serverId: string): Promise<ServerOnboardingState> => {
+        const response = await apiClient.get<ServerOnboardingState>(
+            `/api/v1/servers/${serverId}/onboarding`,
+        );
+        return response.data;
+    },
+
+    acceptOnboardingRules: async (serverId: string): Promise<ServerMember> => {
+        const response = await apiClient.post<ServerMember>(
+            `/api/v1/servers/${serverId}/onboarding/accept-rules`,
+        );
+        return response.data;
+    },
+
+    updateSelfRoles: async (
+        serverId: string,
+        roleIds: string[],
+    ): Promise<ServerMember> => {
+        const response = await apiClient.patch<ServerMember>(
+            `/api/v1/servers/${serverId}/self-roles`,
+            { roleIds },
+        );
+        return response.data;
+    },
+
+    updateChannelPreferences: async (
+        serverId: string,
+        preferences: {
+            hiddenChannelIds: string[];
+            hiddenCategoryIds: string[];
+        },
+    ): Promise<ServerMember> => {
+        const response = await apiClient.patch<ServerMember>(
+            `/api/v1/servers/${serverId}/channel-preferences`,
+            preferences,
+        );
+        return response.data;
+    },
+
+    completeOnboarding: async (serverId: string): Promise<ServerMember> => {
+        const response = await apiClient.post<ServerMember>(
+            `/api/v1/servers/${serverId}/onboarding/complete`,
         );
         return response.data;
     },

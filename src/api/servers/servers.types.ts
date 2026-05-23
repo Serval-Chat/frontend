@@ -32,6 +32,15 @@ export interface Server {
     createdAt?: string;
     updatedAt?: string;
     canManage?: boolean;
+    onboarding?: ServerOnboardingSettings;
+}
+
+export interface ServerOnboardingSettings {
+    enabled: boolean;
+    guidelines: string[];
+    selfAssignableRoleIds: string[];
+    landingChannelId?: string | null;
+    welcomeChannelIds: string[];
 }
 
 export interface DiscoveryTagFacet {
@@ -129,6 +138,7 @@ export interface Role {
     gradientRepeat?: number;
     position: number;
     separateFromOtherRoles?: boolean;
+    description?: string;
     icon?: string;
     glowEnabled?: boolean;
     permissions?: RolePermissions;
@@ -143,6 +153,16 @@ export interface ServerMember {
     user: User;
     online?: boolean;
     communicationDisabledUntil?: string;
+    onboardingRequired?: boolean;
+    rulesAcceptedAt?: string | null;
+    onboardingCompletedAt?: string | null;
+    hiddenChannelIds?: string[];
+    hiddenCategoryIds?: string[];
+}
+
+export interface ServerOnboardingState {
+    onboarding: ServerOnboardingSettings;
+    member: ServerMember;
 }
 
 export interface ServerBan {

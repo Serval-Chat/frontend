@@ -253,6 +253,11 @@ export interface IMemberUpdatedEvent {
         serverId: string;
         roles: string[];
         nickname?: string;
+        onboardingRequired?: boolean;
+        rulesAcceptedAt?: string | null;
+        onboardingCompletedAt?: string | null;
+        hiddenChannelIds?: string[];
+        hiddenCategoryIds?: string[];
     };
     senderId?: string;
 }

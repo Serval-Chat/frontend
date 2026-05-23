@@ -1,10 +1,12 @@
 import React, { useEffect, useRef } from 'react';
 
+import { Hash, Shield } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import {
     useCategories,
     useChannels,
+    useOnboarding,
     useServerDetails,
 } from '@/api/servers/servers.queries';
 import { useServerWS } from '@/hooks/ws/useServerWS';
@@ -15,9 +17,28 @@ import {
     setTargetMessageId,
 } from '@/store/slices/navSlice';
 
+import { ChannelItem } from './ChannelItem';
 import { ChannelList } from './ChannelList';
 import { ServerBanner } from './ServerBanner';
 import { SidebarSkeleton } from './SidebarSkeleton';
+
+const ServerOnboardingModal = React.lazy(() =>
+    import('./onboarding/ServerOnboardingModals').then((m) => ({
+        default: m.ServerOnboardingModal,
+    })),
+);
+
+const ServerSelfRolesModal = React.lazy(() =>
+    import('./onboarding/ServerOnboardingModals').then((m) => ({
+        default: m.ServerSelfRolesModal,
+    })),
+);
+
+const ChannelPreferencesModal = React.lazy(() =>
+    import('./onboarding/ServerOnboardingModals').then((m) => ({
+        default: m.ChannelPreferencesModal,
+    })),
+);
 
 /**
  * @description Orchestrates server-specific navigation (banner, channels, categories).
@@ -48,6 +69,9 @@ export const ServerSection: React.FC = () => {
     } = useChannels(selectedServerId);
     const { data: categories, isPlaceholderData: isPlaceholderCategories } =
         useCategories(selectedServerId);
+    const { data: onboarding } = useOnboarding(selectedServerId);
+    const [isRolesOpen, setIsRolesOpen] = React.useState(false);
+    const [isChannelPrefsOpen, setIsChannelPrefsOpen] = React.useState(false);
 
     useServerWS(selectedServerId ?? undefined);
 
@@ -139,13 +163,54 @@ export const ServerSection: React.FC = () => {
             (!categories && !isPlaceholderCategories) ? (
                 <SidebarSkeleton />
             ) : (
-                <ChannelList
-                    categories={categories || []}
-                    channels={channels || []}
-                    scrollRef={scrollRef}
-                    selectedChannelId={selectedChannelId}
-                />
+                <>
+                    <div className="shrink-0 border-b border-border-subtle px-2 py-2">
+                        <div className="ml-3">
+                            {(onboarding?.onboarding.selfAssignableRoleIds
+                                .length ?? 0) > 0 && (
+                                <ChannelItem
+                                    iconComponent={Shield}
+                                    name="Roles"
+                                    type="text"
+                                    onClick={() => setIsRolesOpen(true)}
+                                />
+                            )}
+                            <ChannelItem
+                                iconComponent={Hash}
+                                name="Channels & Categories"
+                                type="text"
+                                onClick={() => setIsChannelPrefsOpen(true)}
+                            />
+                        </div>
+                    </div>
+                    <ChannelList
+                        categories={categories || []}
+                        channels={channels || []}
+                        hiddenCategoryIds={
+                            onboarding?.member.hiddenCategoryIds ?? []
+                        }
+                        hiddenChannelIds={
+                            onboarding?.member.hiddenChannelIds ?? []
+                        }
+                        scrollRef={scrollRef}
+                        selectedChannelId={selectedChannelId}
+                    />
+                </>
             )}
+
+            <React.Suspense fallback={null}>
+                <ServerOnboardingModal serverId={selectedServerId} />
+                <ServerSelfRolesModal
+                    isOpen={isRolesOpen}
+                    serverId={selectedServerId}
+                    onClose={() => setIsRolesOpen(false)}
+                />
+                <ChannelPreferencesModal
+                    isOpen={isChannelPrefsOpen}
+                    serverId={selectedServerId}
+                    onClose={() => setIsChannelPrefsOpen(false)}
+                />
+            </React.Suspense>
         </div>
     );
 };

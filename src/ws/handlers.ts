@@ -914,6 +914,9 @@ export const setupGlobalWsHandlers = (
             });
             if (currentUser && payload.userId === currentUser.id) {
                 void queryClient.invalidateQueries({ queryKey: ['me'] });
+                void queryClient.invalidateQueries({
+                    queryKey: SERVERS_QUERY_KEYS.onboarding(payload.serverId),
+                });
             }
         }),
     );
@@ -1114,6 +1117,14 @@ export const setupGlobalWsHandlers = (
             });
             void queryClient.invalidateQueries({
                 queryKey: SERVERS_QUERY_KEYS.list,
+            });
+            void queryClient.invalidateQueries({
+                queryKey: SERVERS_QUERY_KEYS.onboarding(payload.serverId),
+            });
+            void queryClient.invalidateQueries({
+                queryKey: SERVERS_QUERY_KEYS.onboardingSettings(
+                    payload.serverId,
+                ),
             });
         }),
     );

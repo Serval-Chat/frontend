@@ -81,6 +81,8 @@ interface ChannelListProps {
     categories: Category[];
     selectedChannelId: string | null;
     scrollRef: React.RefObject<HTMLDivElement | null>;
+    hiddenChannelIds?: string[];
+    hiddenCategoryIds?: string[];
 }
 
 type ListItem =
@@ -204,6 +206,8 @@ export const ChannelList: React.FC<ChannelListProps> = ({
     categories,
     selectedChannelId,
     scrollRef,
+    hiddenChannelIds = [],
+    hiddenCategoryIds = [],
 }) => {
     const selectedServerId = useAppSelector(
         (state) => state.nav.selectedServerId,
@@ -261,6 +265,14 @@ export const ChannelList: React.FC<ChannelListProps> = ({
         () => new Set(categories.map((cat) => cat._id)),
         [categories],
     );
+    const hiddenChannels = React.useMemo(
+        () => new Set(hiddenChannelIds),
+        [hiddenChannelIds],
+    );
+    const hiddenCategories = React.useMemo(
+        () => new Set(hiddenCategoryIds),
+        [hiddenCategoryIds],
+    );
 
     useEffect(() => {
         const handleResize = (): void => setIsMobile(window.innerWidth < 768);
@@ -272,10 +284,24 @@ export const ChannelList: React.FC<ChannelListProps> = ({
     useEffect(() => {
         if (isReordering || syncLock) return;
 
-        const sortedCategories = [...categories].sort(
+        const visibleCategories = categories.filter(
+            (category) => !hiddenCategories.has(category._id),
+        );
+        const visibleChannels = channels.filter((channel) => {
+            if (hiddenChannels.has(channel._id)) return false;
+            if (
+                channel.categoryId &&
+                hiddenCategories.has(channel.categoryId)
+            ) {
+                return false;
+            }
+            return true;
+        });
+
+        const sortedCategories = [...visibleCategories].sort(
             (a, b) => a.position - b.position,
         );
-        const sortedChannels = [...channels].sort(
+        const sortedChannels = [...visibleChannels].sort(
             (a, b) => a.position - b.position,
         );
 
@@ -300,7 +326,15 @@ export const ChannelList: React.FC<ChannelListProps> = ({
         });
 
         setItems(newList);
-    }, [categories, channels, isReordering, syncLock, existingCategoryIds]);
+    }, [
+        categories,
+        channels,
+        isReordering,
+        syncLock,
+        existingCategoryIds,
+        hiddenChannels,
+        hiddenCategories,
+    ]);
 
     // Mark channel as read when opened
     useEffect(() => {
