@@ -60,7 +60,8 @@ export const MessageItem = React.memo(
             !!message.replyTo ||
             !!message.replyToId ||
             !!message.repliedToMessageId ||
-            !!message.interaction?.user ||
+            (!!message.interaction?.command?.trim() &&
+                !!message.interaction.user) ||
             !shouldGroupMessages(prevMessage, message);
 
         return (

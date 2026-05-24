@@ -41,6 +41,7 @@ import {
     setVoiceParticipants,
     setVoiceUserState,
 } from '@/store/slices/voiceSlice';
+import { getValidMessageInteraction } from '@/ui/utils/chat';
 import { cacheSound, pruneSoundCache } from '@/utils/soundCache';
 
 import { wsClient } from './client';
@@ -147,18 +148,20 @@ const convertServerMessageToChatMessage = (
     webhookAvatarUrl: message.webhookAvatarUrl,
     embeds: message.embeds,
     attachments: message.attachments,
-    interaction: message.interaction
-        ? {
-              command: message.interaction.command,
-              options: message.interaction.options as NonNullable<
-                  ChatMessage['interaction']
-              >['options'],
-              user: message.interaction.user || {
-                  id: message.senderId,
-                  username: message.senderUsername,
-              },
-          }
-        : undefined,
+    interaction: getValidMessageInteraction(
+        message.interaction
+            ? {
+                  command: message.interaction.command,
+                  options: message.interaction.options as NonNullable<
+                      ChatMessage['interaction']
+                  >['options'],
+                  user: message.interaction.user || {
+                      id: message.senderId,
+                      username: message.senderUsername,
+                  },
+              }
+            : undefined,
+    ),
     stickerId: message.stickerId,
     poll: message.poll,
 });

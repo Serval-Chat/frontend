@@ -368,6 +368,7 @@ export const Message: React.FC<MessageProps> = React.memo(
             <>
                 {isGroupStart && message.replyTo && (
                     <ReplyPreview
+                        attachments={message.replyTo.attachments}
                         disableColors={isColorsDisabled}
                         disableCustomFonts={isFontsDisabled}
                         disableGlow={isGlowDisabled}
@@ -383,7 +384,7 @@ export const Message: React.FC<MessageProps> = React.memo(
                 )}
 
                 {isGroupStart &&
-                    message.interaction &&
+                    message.interaction?.command?.trim() &&
                     message.interaction.user && (
                         <InteractionHeader
                             command={message.interaction.command}

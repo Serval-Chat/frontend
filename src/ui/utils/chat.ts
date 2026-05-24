@@ -3,6 +3,13 @@ import type { Role } from '@/api/servers/servers.types';
 import type { User } from '@/api/users/users.types';
 import type { ProcessedChatMessage } from '@/types/chat.ui';
 
+export const getValidMessageInteraction = (
+    interaction: ChatMessage['interaction'],
+): ChatMessage['interaction'] | undefined => {
+    if (!interaction?.command?.trim()) return undefined;
+    return interaction;
+};
+
 /**
  * Resolves the user object for a webhook message.
  */
@@ -129,6 +136,7 @@ export const resolveReplyTo = (
         replyTo = {
             _id: msg.referenced_message._id,
             text: msg.referenced_message.text,
+            attachments: msg.referenced_message.attachments,
             user:
                 referencedUser ||
                 ({
@@ -137,7 +145,9 @@ export const resolveReplyTo = (
                 } as User),
             role: undefined,
             iconRole: undefined,
-            interaction: msg.referenced_message.interaction,
+            interaction: getValidMessageInteraction(
+                msg.referenced_message.interaction,
+            ),
             isEdited: msg.referenced_message.isEdited,
             deletedAt: msg.referenced_message.deletedAt,
             isWebhook,
@@ -161,6 +171,7 @@ export const resolveReplyTo = (
         replyTo = {
             _id: parent._id,
             text: parent.text,
+            attachments: parent.attachments,
             user:
                 referencedUser ||
                 ({
@@ -169,7 +180,7 @@ export const resolveReplyTo = (
                 } as User),
             role: undefined,
             iconRole: undefined,
-            interaction: parent.interaction,
+            interaction: getValidMessageInteraction(parent.interaction),
             isEdited: parent.isEdited,
             deletedAt: parent.deletedAt,
             isWebhook,
@@ -196,6 +207,7 @@ export const resolveReplyTo = (
                 replyTo = {
                     _id: repliedMsg._id,
                     text: repliedMsg.text,
+                    attachments: repliedMsg.attachments,
                     user:
                         referencedUser ||
                         ({
@@ -204,7 +216,9 @@ export const resolveReplyTo = (
                         } as User),
                     role: undefined,
                     iconRole: undefined,
-                    interaction: repliedMsg.interaction,
+                    interaction: getValidMessageInteraction(
+                        repliedMsg.interaction,
+                    ),
                     isEdited: repliedMsg.isEdited,
                     deletedAt: repliedMsg.deletedAt,
                     isWebhook,

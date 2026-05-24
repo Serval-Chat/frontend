@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 
+import type { MessageAttachment } from '@/api/chat/chat.types';
 import type { Role } from '@/api/servers/servers.types';
 import { useUserById } from '@/api/users/users.queries';
 import type { User } from '@/api/users/users.types';
@@ -16,6 +17,7 @@ interface ReplyPreviewProps {
     user: User;
     role?: Role;
     text: string;
+    attachments?: MessageAttachment[];
     interaction?: {
         command: string;
         options?: { name: string; value: InteractionValue }[];
@@ -35,6 +37,7 @@ export const ReplyPreview: React.FC<ReplyPreviewProps> = React.memo(
         user: initialUser,
         role,
         text,
+        attachments,
         interaction,
         replyToId,
         isWebhook,
@@ -54,6 +57,8 @@ export const ReplyPreview: React.FC<ReplyPreviewProps> = React.memo(
             () => parseText(text, ParserPresets.MESSAGE),
             [text],
         );
+        const command = interaction?.command?.trim();
+        const hasAttachments = (attachments?.length ?? 0) > 0;
         return (
             <Box
                 className="group/reply ml-[24px] flex cursor-pointer items-center gap-2 opacity-60 transition-opacity select-none hover:opacity-100"
@@ -92,13 +97,14 @@ export const ReplyPreview: React.FC<ReplyPreviewProps> = React.memo(
                         as="span"
                         className="truncate text-xs font-medium text-text-muted"
                     >
-                        {interaction && !text && (
+                        {command && !text && (
                             <span className="mr-1 opacity-70">
                                 used{' '}
-                                <span className="text-primary">
-                                    /{interaction.command}
-                                </span>
+                                <span className="text-primary">/{command}</span>
                             </span>
+                        )}
+                        {!command && !text && hasAttachments && (
+                            <span className="opacity-70">Attachment(-s)</span>
                         )}
                         <ParsedText
                             condenseCodeBlocks
