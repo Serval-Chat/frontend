@@ -10,7 +10,7 @@ import { LoadingSpinner } from '@/ui/components/common/LoadingSpinner';
 import { Text } from '@/ui/components/common/Text';
 import { useToast } from '@/ui/components/common/Toast';
 import { Box } from '@/ui/components/layout/Box';
-import { resolveServerBannerUrl } from '@/ui/components/servers/ServerBannerMedia';
+import { resolveServerBannerUrl } from '@/ui/components/servers/bannerUtils';
 import { resolveApiUrl } from '@/utils/apiUrl';
 
 interface InviteLinkProps {

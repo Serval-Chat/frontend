@@ -46,7 +46,7 @@ const channelIcon = (channel: Channel): React.ReactNode => (
 
 const CORNER_R = 6;
 
-export function drawChannelSplines(
+function drawChannelSplines(
     svg: SVGSVGElement,
     stage: HTMLElement,
     categoryEl: HTMLElement | null,
@@ -726,7 +726,7 @@ export const ServerOnboardingModal: React.FC<ServerOnboardingModalProps> = ({
                                     {rulesList.map((rule, idx) => (
                                         <div
                                             className="hover:border-border flex gap-4 rounded-xl border border-border-subtle bg-bg-secondary/40 p-4 transition-colors duration-200"
-                                            key={idx}
+                                            key={`rule-${rule}`}
                                         >
                                             <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary">
                                                 {idx + 1}

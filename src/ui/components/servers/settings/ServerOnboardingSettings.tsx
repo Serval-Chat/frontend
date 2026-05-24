@@ -340,7 +340,7 @@ export const ServerOnboardingSettings: React.FC<
                         {rules.map((rule, idx) => (
                             <div
                                 className="hover:border-border flex items-center gap-3 rounded-lg border border-border-subtle bg-bg-secondary/40 p-3 transition-colors"
-                                key={idx}
+                                key={`rule-${rule}`}
                             >
                                 <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
                                     {idx + 1}

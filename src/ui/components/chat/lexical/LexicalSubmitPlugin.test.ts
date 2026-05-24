@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { shouldAutocompleteHandleEnter } from './LexicalSubmitPlugin';
+import { shouldAutocompleteHandleEnter } from './autocompleteUtils';
 
 describe('shouldAutocompleteHandleEnter', () => {
     it('does not block submit when there is no text trigger at the cursor', () => {

@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { resolveServerBannerUrl } from './ServerBannerMedia';
+import { resolveServerBannerUrl } from './bannerUtils';
 
 describe('resolveServerBannerUrl', () => {
     beforeEach(() => {

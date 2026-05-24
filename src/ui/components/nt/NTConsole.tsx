@@ -24,6 +24,7 @@ export const NTConsole: React.FC = () => {
     const [currentInput, setCurrentInput] = useState<string>('');
     const [commandHistory, setCommandHistory] = useState<string[]>([]);
     const [historyIndex, setHistoryIndex] = useState<number>(-1);
+    const [isCommandRunning, setIsCommandRunning] = useState<boolean>(false);
 
     const consoleRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
@@ -56,6 +57,11 @@ export const NTConsole: React.FC = () => {
     const generateId = (): string => Math.random().toString(36).substring(2, 9);
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>): void => {
+        if (isCommandRunning) {
+            e.preventDefault();
+            return;
+        }
+
         if (e.key === 'Enter') {
             const command = currentInput.trim();
             const fullPromptLine = `C:\\WINNT\\System32>${currentInput}`;
@@ -69,31 +75,93 @@ export const NTConsole: React.FC = () => {
                 const newCmdHistory = [...commandHistory, currentInput];
                 setCommandHistory(newCmdHistory);
                 setHistoryIndex(-1);
+                setIsCommandRunning(true);
 
                 void (async () => {
+                    const commandLineId = generateId();
+                    setHistory((prev) => [
+                        ...prev,
+                        { id: commandLineId, text: fullPromptLine },
+                    ]);
+                    await new Promise((resolve) => setTimeout(resolve, 100));
+
+                    let updateLineId: string | null = null;
+
                     const result = await registry.execute(currentInput, {
                         dispatch,
                         writeLine: (line: string) => {
-                            setHistory((prev) => [
-                                ...prev,
-                                { id: generateId(), text: line },
-                            ]);
+                            setHistory((prev) => {
+                                if (line.startsWith('\r')) {
+                                    const newPrev = [...prev];
+                                    if (updateLineId) {
+                                        const updateIndex = newPrev.findIndex(
+                                            (entry) =>
+                                                entry.id === updateLineId,
+                                        );
+                                        if (updateIndex !== -1) {
+                                            newPrev[updateIndex] = {
+                                                ...newPrev[updateIndex],
+                                                text: line.replace(/^\r/, ''),
+                                            };
+                                            return newPrev;
+                                        }
+                                    }
+                                    if (newPrev.length > 0) {
+                                        const lastEntry =
+                                            newPrev[newPrev.length - 1];
+                                        if (lastEntry.id === commandLineId) {
+                                            const newId = generateId();
+                                            updateLineId = newId;
+                                            return [
+                                                ...newPrev,
+                                                {
+                                                    id: newId,
+                                                    text: line.replace(
+                                                        /^\r/,
+                                                        '',
+                                                    ),
+                                                },
+                                            ];
+                                        }
+                                        updateLineId = lastEntry.id;
+                                        newPrev[newPrev.length - 1] = {
+                                            ...lastEntry,
+                                            text: line.replace(/^\r/, ''),
+                                        };
+                                        return newPrev;
+                                    }
+                                    const newId = generateId();
+                                    updateLineId = newId;
+                                    return [
+                                        ...newPrev,
+                                        {
+                                            id: newId,
+                                            text: line.replace(/^\r/, ''),
+                                        },
+                                    ];
+                                }
+                                updateLineId = null;
+                                return [
+                                    ...prev,
+                                    { id: generateId(), text: line },
+                                ];
+                            });
                         },
                     });
 
-                    let newHist = [...newHistory];
                     if (result.clear) {
-                        newHist = [];
+                        setHistory([]);
                     } else if (result.output) {
-                        newHist = [
-                            ...newHist,
-                            ...result.output.map((line) => ({
+                        setHistory((prev) => [
+                            ...prev,
+                            ...(result.output ?? []).map((line) => ({
                                 id: generateId(),
                                 text: line,
                             })),
-                        ];
+                        ]);
                     }
-                    setHistory(newHist);
+
+                    setIsCommandRunning(false);
                 })();
             } else {
                 newHistory.push({ id: generateId(), text: '' });
@@ -176,16 +244,19 @@ export const NTConsole: React.FC = () => {
                         </div>
                     ))}
 
-                    <div className="flex flex-wrap items-center select-none">
-                        <span>C:\WINNT\System32&gt;</span>
-                        <span className="whitespace-pre select-text">
-                            {currentInput}
-                        </span>
-                        <span className="nt-cursor" />
-                    </div>
+                    {!isCommandRunning && (
+                        <div className="flex flex-wrap items-center select-none">
+                            <span>C:\WINNT\System32&gt;</span>
+                            <span className="whitespace-pre select-text">
+                                {currentInput}
+                            </span>
+                            <span className="nt-cursor" />
+                        </div>
+                    )}
 
                     <input
                         className="pointer-events-none absolute h-0 w-0 opacity-0"
+                        disabled={isCommandRunning}
                         ref={inputRef}
                         type="text"
                         value={currentInput}

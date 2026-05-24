@@ -82,7 +82,9 @@ const BansList = (): ReactNode => {
                                     className="cursor-pointer text-primary hover:underline"
                                     weight="semibold"
                                     onClick={() =>
-                                        navigate(`/admin/users/${ban.userId}`)
+                                        void navigate(
+                                            `/admin/users/${ban.userId}`,
+                                        )
                                     }
                                 >
                                     User ID:{' '}
@@ -166,7 +168,9 @@ const MutesList = (): ReactNode => {
                                     className="cursor-pointer text-primary hover:underline"
                                     weight="semibold"
                                     onClick={() =>
-                                        navigate(`/admin/users/${mute.userId}`)
+                                        void navigate(
+                                            `/admin/users/${mute.userId}`,
+                                        )
                                     }
                                 >
                                     User ID:{' '}

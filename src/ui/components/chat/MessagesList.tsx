@@ -197,6 +197,7 @@ export const MessagesList: React.FC<MessagesListProps> = React.memo(
             [],
         );
 
+        // eslint-disable-next-line react-hooks/incompatible-library
         const rowVirtualizer = useVirtualizer({
             count: virtualItems.length,
             getScrollElement: () => scrollContainerRef.current,

@@ -115,7 +115,10 @@ export const ServerDiscoveryModal: React.FC<ServerDiscoveryModalProps> = ({
     );
     const activeCursor =
         pagination.resetKey === resetKey ? pagination.cursor : undefined;
-    const items = pagination.resetKey === resetKey ? pagination.items : [];
+    const items = useMemo(
+        () => (pagination.resetKey === resetKey ? pagination.items : []),
+        [pagination.resetKey, pagination.items, resetKey],
+    );
 
     const { data, isFetching } = useDiscoveryServers({
         q: debouncedSearch,
