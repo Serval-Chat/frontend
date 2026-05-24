@@ -20,10 +20,9 @@ export const adminBadgesApi = {
             .put<Badge>(`/api/v1/admin/badges/${badgeId}`, patch)
             .then((r) => r.data),
 
-    deleteBadge: (badgeId: string) =>
-        apiClient
-            .delete<{ message: string }>(`/api/v1/admin/badges/${badgeId}`)
-            .then((r) => r.data),
+    deleteBadge: async (badgeId: string): Promise<void> => {
+        await apiClient.delete(`/api/v1/admin/badges/${badgeId}`);
+    },
 
     assignBadgeToUser: (userId: string, badgeId: string) =>
         apiClient
@@ -32,10 +31,12 @@ export const adminBadgesApi = {
             })
             .then((r) => r.data),
 
-    removeBadgeFromUser: (userId: string, badgeId: string) =>
-        apiClient
-            .delete<{
-                message: string;
-            }>(`/api/v1/admin/users/${userId}/badges/${badgeId}`)
-            .then((r) => r.data),
+    removeBadgeFromUser: async (
+        userId: string,
+        badgeId: string,
+    ): Promise<void> => {
+        await apiClient.delete(
+            `/api/v1/admin/users/${userId}/badges/${badgeId}`,
+        );
+    },
 };

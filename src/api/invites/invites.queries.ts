@@ -64,7 +64,7 @@ export const useCreateInvite = (
 
 export const useDeleteInvite = (
     serverId: string,
-): UseMutationResult<{ message: string }, Error, string> => {
+): UseMutationResult<void, Error, string> => {
     const queryClient = useQueryClient();
 
     return useMutation({

@@ -1,4 +1,5 @@
 import { apiClient } from '@/api/client';
+import type { ServerInvite } from '@/api/invites/invites.types';
 import type {
     AdminServerDetails,
     AdminServerListItem,
@@ -25,17 +26,13 @@ export const adminServersApi = {
             )
             .then((r) => r.data),
 
-    deleteServer: (serverId: string) =>
-        apiClient
-            .delete<{ message: string }>(`/api/v1/admin/servers/${serverId}`)
-            .then((r) => r.data),
+    deleteServer: async (serverId: string): Promise<void> => {
+        await apiClient.delete(`/api/v1/admin/servers/${serverId}`);
+    },
 
-    restoreServer: (serverId: string) =>
-        apiClient
-            .post<{
-                message: string;
-            }>(`/api/v1/admin/servers/${serverId}/restore`)
-            .then((r) => r.data),
+    restoreServer: async (serverId: string): Promise<void> => {
+        await apiClient.post(`/api/v1/admin/servers/${serverId}/restore`);
+    },
 
     getServerDetails: (serverId: string) =>
         apiClient
@@ -44,17 +41,17 @@ export const adminServersApi = {
 
     getServerInvites: (serverId: string) =>
         apiClient
-            .get<
-                Record<string, unknown>[]
-            >(`/api/v1/admin/servers/${serverId}/invites`)
+            .get<ServerInvite[]>(`/api/v1/admin/servers/${serverId}/invites`)
             .then((r) => r.data),
 
-    deleteServerInvite: (serverId: string, inviteId: string) =>
-        apiClient
-            .delete<{
-                message: string;
-            }>(`/api/v1/admin/servers/${serverId}/invites/${inviteId}`)
-            .then((r) => r.data),
+    deleteServerInvite: async (
+        serverId: string,
+        inviteId: string,
+    ): Promise<void> => {
+        await apiClient.delete(
+            `/api/v1/admin/servers/${serverId}/invites/${inviteId}`,
+        );
+    },
 
     verifyServer: (serverId: string) =>
         apiClient

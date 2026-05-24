@@ -19,7 +19,7 @@ export interface ProcessedChatMessage extends Omit<
         iconRole?: Role;
         text: string;
         attachments?: ChatMessage['attachments'];
-        stickerId?: string;
+        stickerId?: string | null;
         interaction?: ChatMessage['interaction'];
         isEdited?: boolean;
         deletedAt?: string;

@@ -219,7 +219,7 @@ describe('useDeleteBot', () => {
     beforeEach(() => vi.clearAllMocks());
 
     it('calls delete api with clientId', async () => {
-        vi.mocked(botsApi.delete).mockResolvedValue({ message: 'Bot deleted' });
+        vi.mocked(botsApi.delete).mockResolvedValue(undefined);
         const { result } = renderHook(() => useDeleteBot(), {
             wrapper: makeWrapper(),
         });

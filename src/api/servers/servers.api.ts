@@ -188,20 +188,22 @@ export const serversApi = {
         serverId: string,
         userId: string,
         roleId: string,
-    ): Promise<void> => {
-        await apiClient.post(
+    ): Promise<ServerMember> => {
+        const response = await apiClient.post<ServerMember>(
             `/api/v1/servers/${serverId}/members/${userId}/roles/${roleId}`,
         );
+        return response.data;
     },
 
     removeRoleFromMember: async (
         serverId: string,
         userId: string,
         roleId: string,
-    ): Promise<void> => {
-        await apiClient.delete(
+    ): Promise<ServerMember> => {
+        const response = await apiClient.delete<ServerMember>(
             `/api/v1/servers/${serverId}/members/${userId}/roles/${roleId}`,
         );
+        return response.data;
     },
 
     getMembers: async (serverId: string): Promise<ServerMember[]> => {
@@ -560,13 +562,10 @@ export const serversApi = {
         }>(`/api/v1/servers/${serverId}/channels/${channelId}/export`);
         return response.data;
     },
-    requestServerVerification: async (
-        serverId: string,
-    ): Promise<{ message: string }> => {
-        const response = await apiClient.post<{ message: string }>(
+    requestServerVerification: async (serverId: string): Promise<void> => {
+        await apiClient.post(
             `/api/v1/servers/${serverId}/verification-request`,
         );
-        return response.data;
     },
     updateServerSettings: async (
         settings: ServerSettings,

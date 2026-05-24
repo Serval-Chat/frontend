@@ -47,10 +47,9 @@ export const botsApi = {
             .patch<Bot>(`/api/v1/bots/${clientId}/permissions`, permissions)
             .then((r) => r.data),
 
-    delete: (clientId: string) =>
-        apiClient
-            .delete<{ message: string }>(`/api/v1/bots/${clientId}`)
-            .then((r) => r.data),
+    delete: async (clientId: string): Promise<void> => {
+        await apiClient.delete(`/api/v1/bots/${clientId}`);
+    },
 
     resetSecret: (clientId: string) =>
         apiClient

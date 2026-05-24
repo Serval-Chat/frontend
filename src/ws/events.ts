@@ -1,6 +1,7 @@
 import type {
     MessageAttachment,
     MessagePoll,
+    MessageReaction,
     OutgoingPoll,
 } from '@/api/chat/chat.types';
 import type {
@@ -64,6 +65,7 @@ export interface IWsErrorEvent {
  */
 export interface IMessageDm {
     messageId: string;
+    _id: string;
     senderId: string;
     senderUsername: string;
     receiverId: string;
@@ -78,10 +80,16 @@ export interface IMessageDm {
         text: string;
     };
     isEdited: boolean;
-    stickerId?: string;
-    poll?: MessagePoll;
-    embeds?: Embed[];
-    attachments?: MessageAttachment[];
+    isPinned: false;
+    isSticky: false;
+    isWebhook: false;
+    stickerId: string | null;
+    poll: MessagePoll | null;
+    embeds: Embed[];
+    attachments: MessageAttachment[];
+    reactions: [];
+    interaction: null;
+    senderIsBot: boolean;
 }
 
 /**
@@ -89,6 +97,7 @@ export interface IMessageDm {
  */
 export interface IMessageServer {
     messageId: string;
+    _id: string;
     serverId: string;
     channelId: string;
     senderId: string;
@@ -97,18 +106,22 @@ export interface IMessageServer {
     createdAt: string;
     replyToId?: string;
     isEdited: boolean;
+    isPinned: boolean;
+    isSticky: boolean;
     isWebhook: boolean;
     webhookUsername?: string;
     webhookAvatarUrl?: string;
-    embeds?: Embed[];
-    attachments?: MessageAttachment[];
-    interaction?: {
+    embeds: Embed[];
+    attachments: MessageAttachment[];
+    reactions: MessageReaction[];
+    interaction: {
         command: string;
         options: { name: string; value: JsonValue }[];
-        user?: { id: string; username: string };
-    };
-    stickerId?: string;
-    poll?: MessagePoll;
+        user: { id: string; username: string };
+    } | null;
+    stickerId: string | null;
+    poll: MessagePoll | null;
+    senderIsBot: boolean;
 }
 
 /**
@@ -126,22 +139,30 @@ export interface IMessagesServerBulkDeleted {
  */
 export interface IMessageServerSent {
     messageId: string;
+    _id: string;
     serverId: string;
     channelId: string;
     senderId: string;
+    senderUsername: string;
     text: string;
     createdAt: string;
     replyToId?: string;
     slowModeNextMessageAllowedAt?: string | null;
-    embeds?: Embed[];
-    attachments?: MessageAttachment[];
-    interaction?: {
+    isEdited: false;
+    isPinned: false;
+    isSticky: false;
+    isWebhook: false;
+    embeds: Embed[];
+    attachments: MessageAttachment[];
+    reactions: [];
+    interaction: {
         command: string;
         options: { name: string; value: JsonValue }[];
-        user?: { id: string; username: string };
-    };
-    stickerId?: string;
-    poll?: MessagePoll;
+        user: { id: string; username: string };
+    } | null;
+    stickerId: string | null;
+    poll: MessagePoll | null;
+    senderIsBot: boolean;
 }
 
 /**

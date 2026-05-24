@@ -88,7 +88,7 @@ export const useUpdateBlockProfile = (): UseMutationResult<
 };
 
 export const useDeleteBlockProfile = (): UseMutationResult<
-    Record<string, unknown>,
+    void,
     Error,
     string
 > => {
@@ -155,11 +155,7 @@ export const useUpsertBlock = (): UseMutationResult<
     });
 };
 
-export const useRemoveBlock = (): UseMutationResult<
-    Record<string, unknown>,
-    Error,
-    string
-> => {
+export const useRemoveBlock = (): UseMutationResult<void, Error, string> => {
     const queryClient = useQueryClient();
     const { showToast } = useToast();
 

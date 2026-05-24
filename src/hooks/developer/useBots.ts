@@ -125,7 +125,7 @@ export const useUpdateBotPermissions = (): UseMutationResult<
 };
 
 export const useDeleteBot = (): UseMutationResult<
-    { message: string },
+    void,
     Error,
     { clientId: string }
 > => {

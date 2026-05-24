@@ -10,7 +10,12 @@ import type { User } from '@/api/users/users.types';
 import { hasAuthToken } from '@/utils/authToken';
 
 import { friendsApi } from './friends.api';
-import type { Friend, FriendRequest } from './friends.types';
+import type {
+    AcceptFriendRequestResponse,
+    Friend,
+    FriendRequest,
+    SendFriendRequestResponse,
+} from './friends.types';
 
 export const FRIENDS_QUERY_KEY = ['friends'] as const;
 export const FRIEND_REQUESTS_QUERY_KEY = ['friend-requests'] as const;
@@ -46,7 +51,7 @@ export const useFriendProfiles = (
 };
 
 export const useSendFriendRequest = (): UseMutationResult<
-    void,
+    SendFriendRequestResponse,
     Error,
     string
 > => {
@@ -76,14 +81,23 @@ export const useOutgoingRequests = (): UseQueryResult<FriendRequest[], Error> =>
     });
 
 export const useAcceptFriendRequest = (): UseMutationResult<
-    void,
+    AcceptFriendRequestResponse,
     Error,
     string
 > => {
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: friendsApi.acceptFriendRequest,
-        onSuccess: () => {
+        onSuccess: ({ friend }) => {
+            if (friend) {
+                queryClient.setQueryData<Friend[]>(
+                    FRIENDS_QUERY_KEY,
+                    (friends) =>
+                        friends?.some((existing) => existing._id === friend._id)
+                            ? friends
+                            : [...(friends ?? []), friend],
+                );
+            }
             void queryClient.invalidateQueries({
                 queryKey: FRIEND_REQUESTS_QUERY_KEY,
             });

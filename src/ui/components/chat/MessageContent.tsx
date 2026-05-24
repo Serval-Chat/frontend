@@ -19,10 +19,10 @@ import { Poll } from './Poll';
 interface MessageContentProps {
     text: string;
     serverId?: string;
-    stickerId?: string;
+    stickerId?: string | null;
     embeds?: Embed[];
     attachments?: MessageAttachment[];
-    poll?: MessagePoll;
+    poll?: MessagePoll | null;
     isDeleted?: boolean;
     messageId?: string;
     channelId?: string;

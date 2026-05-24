@@ -1014,7 +1014,11 @@ export const useReorderRoles = (
 
 export const useAddRoleToMember = (
     serverId: string,
-): UseMutationResult<void, Error, { userId: string; roleId: string }> => {
+): UseMutationResult<
+    ServerMember,
+    Error,
+    { userId: string; roleId: string }
+> => {
     const queryClient = useQueryClient();
     const { showToast } = useToast();
     return useMutation({
@@ -1042,7 +1046,16 @@ export const useAddRoleToMember = (
 
             return { previousMembers };
         },
-        onSuccess: () => {
+        onSuccess: (updatedMember) => {
+            queryClient.setQueryData<ServerMember[]>(
+                SERVERS_QUERY_KEYS.members(serverId),
+                (members) =>
+                    members?.map((member) =>
+                        member.userId === updatedMember.userId
+                            ? updatedMember
+                            : member,
+                    ) ?? members,
+            );
             void queryClient.invalidateQueries({
                 queryKey: SERVERS_QUERY_KEYS.members(serverId),
             });
@@ -1064,7 +1077,11 @@ export const useAddRoleToMember = (
 
 export const useRemoveRoleFromMember = (
     serverId: string,
-): UseMutationResult<void, Error, { userId: string; roleId: string }> => {
+): UseMutationResult<
+    ServerMember,
+    Error,
+    { userId: string; roleId: string }
+> => {
     const queryClient = useQueryClient();
     const { showToast } = useToast();
     return useMutation({
@@ -1097,7 +1114,16 @@ export const useRemoveRoleFromMember = (
 
             return { previousMembers };
         },
-        onSuccess: () => {
+        onSuccess: (updatedMember) => {
+            queryClient.setQueryData<ServerMember[]>(
+                SERVERS_QUERY_KEYS.members(serverId),
+                (members) =>
+                    members?.map((member) =>
+                        member.userId === updatedMember.userId
+                            ? updatedMember
+                            : member,
+                    ) ?? members,
+            );
             void queryClient.invalidateQueries({
                 queryKey: SERVERS_QUERY_KEYS.members(serverId),
             });
@@ -1339,7 +1365,7 @@ export const useUpdateServerSettings = (): UseMutationResult<
 
 export const useRequestServerVerification = (
     serverId: string,
-): UseMutationResult<{ message: string }, Error, void> => {
+): UseMutationResult<void, Error, void> => {
     const queryClient = useQueryClient();
     const { showToast } = useToast();
     return useMutation({

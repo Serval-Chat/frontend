@@ -62,7 +62,7 @@ describe('BlockingSettings', () => {
         >);
         vi.mocked(blocksQueries.useRemoveBlock).mockReturnValue({
             mutate: mockRemoveBlock,
-        } as any as UseMutationResult<Record<string, any>, Error, string>);
+        } as any as UseMutationResult<void, Error, string>);
         vi.mocked(blocksQueries.useCreateBlockProfile).mockReturnValue({
             mutate: mockCreateProfile,
         } as any as UseMutationResult<
@@ -79,7 +79,7 @@ describe('BlockingSettings', () => {
         >);
         vi.mocked(blocksQueries.useDeleteBlockProfile).mockReturnValue({
             mutate: mockDeleteProfile,
-        } as any as UseMutationResult<Record<string, any>, Error, string>);
+        } as any as UseMutationResult<void, Error, string>);
     });
 
     describe('Users Tab', () => {

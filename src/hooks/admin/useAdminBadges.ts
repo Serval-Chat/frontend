@@ -47,7 +47,7 @@ export const useUpdateAdminBadge = (): UseMutationResult<
 };
 
 export const useDeleteAdminBadge = (): UseMutationResult<
-    { message: string },
+    void,
     Error,
     { badgeId: string },
     unknown
@@ -85,7 +85,7 @@ export const useAssignBadgeToUser = (): UseMutationResult<
 };
 
 export const useRemoveBadgeFromUser = (): UseMutationResult<
-    { message: string },
+    void,
     Error,
     { userId: string; badgeId: string },
     unknown

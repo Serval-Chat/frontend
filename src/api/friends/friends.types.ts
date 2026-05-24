@@ -17,5 +17,14 @@ export interface FriendRequest {
     fromId?: string;
     to?: string;
     toId?: string;
+    status?: string;
     createdAt: string;
+}
+
+export interface SendFriendRequestResponse {
+    request: FriendRequest;
+}
+
+export interface AcceptFriendRequestResponse {
+    friend: Friend | null;
 }

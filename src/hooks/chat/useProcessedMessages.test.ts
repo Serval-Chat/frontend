@@ -15,6 +15,16 @@ describe('useProcessedMessages', () => {
             serverId: 's1',
             channelId: 'c1',
             embeds: [{ title: 'Server status', description: 'All green' }],
+            attachments: [],
+            interaction: null,
+            isEdited: false,
+            isPinned: false,
+            isSticky: false,
+            isWebhook: false,
+            poll: null,
+            reactions: [],
+            stickerId: null,
+            senderIsBot: false,
         };
         const user: User = { _id: 'u1', username: 'bot' } as User;
 

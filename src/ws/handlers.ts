@@ -118,7 +118,7 @@ const addMessageToInfiniteCache = (
 };
 
 const convertDmToChatMessage = (message: IMessageDm): ChatMessage => ({
-    _id: message.messageId,
+    _id: message._id ?? message.messageId,
     text: message.text,
     createdAt: message.createdAt,
     senderId: message.senderId,
@@ -126,16 +126,22 @@ const convertDmToChatMessage = (message: IMessageDm): ChatMessage => ({
     replyToId: message.replyToId,
     repliedTo: message.repliedTo,
     isEdited: message.isEdited,
+    isPinned: message.isPinned,
+    isSticky: message.isSticky,
+    isWebhook: message.isWebhook,
     stickerId: message.stickerId,
     poll: message.poll,
     embeds: message.embeds,
     attachments: message.attachments,
+    reactions: message.reactions,
+    interaction: null,
+    senderIsBot: message.senderIsBot,
 });
 
 const convertServerMessageToChatMessage = (
     message: IMessageServer,
 ): ChatMessage => ({
-    _id: message.messageId,
+    _id: message._id ?? message.messageId,
     text: message.text,
     createdAt: message.createdAt,
     senderId: message.senderId,
@@ -143,11 +149,14 @@ const convertServerMessageToChatMessage = (
     channelId: message.channelId,
     replyToId: message.replyToId,
     isEdited: message.isEdited,
+    isPinned: message.isPinned,
+    isSticky: message.isSticky,
     isWebhook: message.isWebhook,
     webhookUsername: message.webhookUsername,
     webhookAvatarUrl: message.webhookAvatarUrl,
     embeds: message.embeds,
     attachments: message.attachments,
+    reactions: message.reactions,
     interaction: getValidMessageInteraction(
         message.interaction
             ? {
@@ -155,15 +164,13 @@ const convertServerMessageToChatMessage = (
                   options: message.interaction.options as NonNullable<
                       ChatMessage['interaction']
                   >['options'],
-                  user: message.interaction.user || {
-                      id: message.senderId,
-                      username: message.senderUsername,
-                  },
+                  user: message.interaction.user,
               }
-            : undefined,
+            : null,
     ),
     stickerId: message.stickerId,
     poll: message.poll,
+    senderIsBot: message.senderIsBot,
 });
 
 const playNotificationSound = (queryClient: QueryClient): void => {

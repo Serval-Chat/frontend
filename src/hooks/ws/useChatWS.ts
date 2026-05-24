@@ -54,7 +54,7 @@ export function useChatWS(
 
     const convertDmToChatMessage = useCallback(
         (message: IMessageDm): ChatMessage => ({
-            _id: message.messageId,
+            _id: message._id,
             text: message.text,
             createdAt: message.createdAt,
             senderId: message.senderId,
@@ -62,16 +62,23 @@ export function useChatWS(
             replyToId: message.replyToId,
             repliedTo: message.repliedTo,
             isEdited: message.isEdited,
+            isPinned: message.isPinned,
+            isSticky: message.isSticky,
+            isWebhook: message.isWebhook,
             stickerId: message.stickerId,
             poll: message.poll,
+            embeds: message.embeds,
             attachments: message.attachments,
+            reactions: message.reactions,
+            interaction: null,
+            senderIsBot: message.senderIsBot,
         }),
         [],
     );
 
     const convertServerMessageToChatMessage = useCallback(
         (message: IMessageServer | IMessageServerSent): ChatMessage => ({
-            _id: message.messageId,
+            _id: message._id,
             text: message.text,
             createdAt: message.createdAt,
             senderId: message.senderId,
@@ -79,9 +86,11 @@ export function useChatWS(
             channelId: message.channelId,
             replyToId: message.replyToId,
             stickerId: message.stickerId,
-            poll: 'poll' in message ? message.poll : undefined,
-            isEdited: 'isEdited' in message ? message.isEdited : false,
-            isWebhook: 'isWebhook' in message ? message.isWebhook : false,
+            poll: message.poll,
+            isEdited: message.isEdited,
+            isPinned: message.isPinned,
+            isSticky: message.isSticky,
+            isWebhook: message.isWebhook,
             webhookUsername:
                 'webhookUsername' in message
                     ? message.webhookUsername
@@ -90,9 +99,9 @@ export function useChatWS(
                 'webhookAvatarUrl' in message
                     ? message.webhookAvatarUrl
                     : undefined,
-            embeds: 'embeds' in message ? message.embeds : undefined,
-            attachments:
-                'attachments' in message ? message.attachments : undefined,
+            embeds: message.embeds,
+            attachments: message.attachments,
+            reactions: message.reactions,
             interaction:
                 'interaction' in message && message.interaction
                     ? {
@@ -102,15 +111,10 @@ export function useChatWS(
                               name: string;
                               value: InteractionValue;
                           }[],
-                          user: message.interaction.user || {
-                              id: message.senderId,
-                              username:
-                                  'senderUsername' in message
-                                      ? message.senderUsername
-                                      : 'Unknown',
-                          },
+                          user: message.interaction.user,
                       }
-                    : undefined,
+                    : null,
+            senderIsBot: message.senderIsBot,
         }),
         [],
     );

@@ -5,8 +5,8 @@ import type { ProcessedChatMessage } from '@/types/chat.ui';
 
 export const getValidMessageInteraction = (
     interaction: ChatMessage['interaction'],
-): ChatMessage['interaction'] | undefined => {
-    if (!interaction?.command?.trim()) return undefined;
+): ChatMessage['interaction'] => {
+    if (!interaction?.command?.trim()) return null;
     return interaction;
 };
 

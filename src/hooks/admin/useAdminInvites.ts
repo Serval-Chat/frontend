@@ -26,7 +26,7 @@ export const useCreateAdminInvite = (): UseMutationResult<
 };
 
 export const useDeleteAdminInvite = (): UseMutationResult<
-    { message: string },
+    void,
     Error,
     { token: string },
     unknown

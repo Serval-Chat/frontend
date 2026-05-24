@@ -81,11 +81,7 @@ export const useSetServerVerificationOverride = (): UseMutationResult<
     });
 };
 
-export const useDeleteServer = (): UseMutationResult<
-    { message: string },
-    Error,
-    string
-> => {
+export const useDeleteServer = (): UseMutationResult<void, Error, string> => {
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: (serverId: string) =>
@@ -96,11 +92,7 @@ export const useDeleteServer = (): UseMutationResult<
     });
 };
 
-export const useRestoreServer = (): UseMutationResult<
-    { message: string },
-    Error,
-    string
-> => {
+export const useRestoreServer = (): UseMutationResult<void, Error, string> => {
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: (serverId: string) =>
@@ -125,16 +117,13 @@ export const useAdminServerInvites = (
 ): UseQueryResult<ServerInvite[]> =>
     useQuery({
         queryKey: ['admin-server-invites', serverId],
-        queryFn: () =>
-            adminServersApi.getServerInvites(serverId!) as unknown as Promise<
-                ServerInvite[]
-            >,
+        queryFn: () => adminServersApi.getServerInvites(serverId!),
         enabled: !!serverId,
     });
 
 export const useDeleteAdminServerInvite = (
     serverId: string,
-): UseMutationResult<{ message: string }, Error, string> => {
+): UseMutationResult<void, Error, string> => {
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: (inviteId: string) =>

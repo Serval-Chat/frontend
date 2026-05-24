@@ -77,7 +77,7 @@ export interface ChatMessage {
     channelId?: string;
     receiverId?: string; // For DMs
     replyToId?: string;
-    stickerId?: string;
+    stickerId: string | null;
     repliedToMessageId?: string | ChatMessage;
     repliedTo?: {
         messageId: string;
@@ -86,21 +86,22 @@ export interface ChatMessage {
         text: string;
     };
     referenced_message?: ChatMessage;
-    isEdited?: boolean;
+    isEdited: boolean;
     editedAt?: string;
-    isPinned?: boolean;
-    isSticky?: boolean;
-    isWebhook?: boolean;
+    isPinned: boolean;
+    isSticky: boolean;
+    isWebhook: boolean;
     webhookUsername?: string;
     webhookAvatarUrl?: string;
-    embeds?: Embed[];
-    attachments?: MessageAttachment[];
-    reactions?: MessageReaction[];
-    interaction?: {
+    embeds: Embed[];
+    attachments: MessageAttachment[];
+    reactions: MessageReaction[];
+    interaction: {
         command: string;
         options: { name: string; value: InteractionValue }[];
         user: { id: string; username: string };
-    };
-    poll?: MessagePoll;
+    } | null;
+    poll: MessagePoll | null;
+    senderIsBot: boolean;
     deletedAt?: string;
 }

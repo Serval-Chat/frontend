@@ -2,12 +2,29 @@ import { apiClient } from '@/api/client';
 
 import type { ChatMessage } from './chat.types';
 
+const normalizeMessage = (message: ChatMessage): ChatMessage => ({
+    ...message,
+    stickerId: message.stickerId ?? null,
+    poll: message.poll ?? null,
+    embeds: message.embeds ?? [],
+    attachments: message.attachments ?? [],
+    reactions: message.reactions ?? [],
+    interaction: message.interaction ?? null,
+    isEdited: message.isEdited ?? false,
+    isPinned: message.isPinned ?? false,
+    isSticky: message.isSticky ?? false,
+    isWebhook: message.isWebhook ?? false,
+    senderIsBot: message.senderIsBot ?? false,
+});
+
 const unwrapMessages = (data: unknown): ChatMessage[] => {
-    if (Array.isArray(data)) return data as ChatMessage[];
+    if (Array.isArray(data))
+        return (data as ChatMessage[]).map(normalizeMessage);
     if (data && typeof data === 'object') {
         for (const key of ['messages', 'data']) {
             const value = (data as Record<string, unknown>)[key];
-            if (Array.isArray(value)) return value as ChatMessage[];
+            if (Array.isArray(value))
+                return (value as ChatMessage[]).map(normalizeMessage);
         }
     }
     return [];
@@ -81,7 +98,7 @@ export const chatApi = {
             `/api/v1/servers/${serverId}/channels/${channelId}/messages/${messageId}`,
             { content },
         );
-        return response.data;
+        return normalizeMessage(response.data);
     },
 
     /**
@@ -95,7 +112,7 @@ export const chatApi = {
             `/api/v1/messages/${messageId}`,
             { content },
         );
-        return response.data;
+        return normalizeMessage(response.data);
     },
 
     /**
@@ -109,7 +126,7 @@ export const chatApi = {
         const response = await apiClient.post<ChatMessage>(
             `/api/v1/servers/${serverId}/channels/${channelId}/messages/${messageId}/pin`,
         );
-        return response.data;
+        return normalizeMessage(response.data);
     },
 
     /**
@@ -123,7 +140,7 @@ export const chatApi = {
         const response = await apiClient.post<ChatMessage>(
             `/api/v1/servers/${serverId}/channels/${channelId}/messages/${messageId}/sticky`,
         );
-        return response.data;
+        return normalizeMessage(response.data);
     },
 
     /**
@@ -160,7 +177,7 @@ export const chatApi = {
             `/api/v1/messages/${messageId}/poll/vote`,
             { optionIds },
         );
-        return response.data;
+        return normalizeMessage(response.data);
     },
 
     /**
@@ -176,6 +193,6 @@ export const chatApi = {
             `/api/v1/servers/${serverId}/channels/${channelId}/messages/${messageId}/poll/vote`,
             { optionIds },
         );
-        return response.data;
+        return normalizeMessage(response.data);
     },
 };

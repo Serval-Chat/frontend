@@ -9,10 +9,9 @@ export const adminInvitesApi = {
             .post<{ message: string; token: string }>('/api/v1/admin/invites')
             .then((r) => r.data),
 
-    deleteInvite: (token: string) =>
-        apiClient
-            .delete<{ message: string }>(`/api/v1/admin/invites/${token}`)
-            .then((r) => r.data),
+    deleteInvite: async (token: string): Promise<void> => {
+        await apiClient.delete(`/api/v1/admin/invites/${token}`);
+    },
 
     createBatchInvites: (count: number) =>
         apiClient

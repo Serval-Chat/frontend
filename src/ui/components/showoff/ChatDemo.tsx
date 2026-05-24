@@ -83,15 +83,61 @@ const MOCK_USERS: Record<string, User> = {
     },
 };
 
+const demoMessage = (
+    message: Omit<
+        ProcessedChatMessage,
+        | 'attachments'
+        | 'embeds'
+        | 'interaction'
+        | 'poll'
+        | 'reactions'
+        | 'isEdited'
+        | 'isPinned'
+        | 'isSticky'
+        | 'isWebhook'
+        | 'senderIsBot'
+        | 'stickerId'
+    > &
+        Partial<
+            Pick<
+                ProcessedChatMessage,
+                | 'attachments'
+                | 'embeds'
+                | 'interaction'
+                | 'poll'
+                | 'reactions'
+                | 'isEdited'
+                | 'isPinned'
+                | 'isSticky'
+                | 'isWebhook'
+                | 'senderIsBot'
+                | 'stickerId'
+            >
+        >,
+): ProcessedChatMessage => ({
+    attachments: [],
+    embeds: [],
+    interaction: null,
+    isEdited: false,
+    isPinned: false,
+    isSticky: false,
+    isWebhook: false,
+    poll: null,
+    reactions: [],
+    senderIsBot: false,
+    stickerId: null,
+    ...message,
+});
+
 const MOCK_MESSAGES: ProcessedChatMessage[] = [
-    {
+    demoMessage({
         _id: '0',
         text: 'Hello everyone! I hope you guys like Serchat uwu',
         createdAt: new Date(Date.now() - 3600000).toISOString(),
         user: MOCK_USERS.catflare,
         senderId: MOCK_USERS.catflare._id,
-    },
-    {
+    }),
+    demoMessage({
         _id: '1',
         text: 'Yas! I love this place',
         createdAt: new Date(Date.now() - 3550000).toISOString(),
@@ -102,8 +148,8 @@ const MOCK_MESSAGES: ProcessedChatMessage[] = [
             user: MOCK_USERS.catflare,
             text: 'Hello everyone! I hope you guys like Serchat uwu',
         },
-    },
-    {
+    }),
+    demoMessage({
         _id: '2',
         text: "Please fix this bug. I can't change default role for my members!",
         createdAt: new Date(Date.now() - 3500000).toISOString(),
@@ -117,15 +163,15 @@ const MOCK_MESSAGES: ProcessedChatMessage[] = [
                 users: [MOCK_USERS.mintsuki._id],
             },
         ],
-    },
-    {
+    }),
+    demoMessage({
         _id: '3',
         text: 'I forgot my password. Could you plz reset it thx',
         createdAt: new Date(Date.now() - 3450000).toISOString(),
         user: MOCK_USERS.mintsuki,
         senderId: MOCK_USERS.mintsuki._id,
-    },
-    {
+    }),
+    demoMessage({
         _id: '4',
         text: 'Eh fine but I got no reset password feature :sob:',
         createdAt: new Date(Date.now() - 3400000).toISOString(),
@@ -136,15 +182,15 @@ const MOCK_MESSAGES: ProcessedChatMessage[] = [
             user: MOCK_USERS.mintsuki,
             text: 'I forgot my password. Could you plz reset it thx',
         },
-    },
-    {
+    }),
+    demoMessage({
         _id: '5',
         text: 'Anyways @everyone I have to reload the server. New update incoming :333',
         createdAt: new Date(Date.now() - 3350000).toISOString(),
         user: MOCK_USERS.catflare,
         senderId: MOCK_USERS.catflare._id,
-    },
-    {
+    }),
+    demoMessage({
         _id: '7',
         text:
             'Some code idk```c\n' +
@@ -159,7 +205,7 @@ const MOCK_MESSAGES: ProcessedChatMessage[] = [
         createdAt: new Date(Date.now() - 3250000).toISOString(),
         user: MOCK_USERS.evalyn,
         senderId: MOCK_USERS.evalyn._id,
-    },
+    }),
 ];
 
 export const ChatDemo: React.FC = () => (

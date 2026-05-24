@@ -39,13 +39,9 @@ export const invitesApi = {
         return response.data;
     },
 
-    deleteInvite: async (
-        serverId: string,
-        inviteId: string,
-    ): Promise<{ message: string }> => {
-        const response = await apiClient.delete<{ message: string }>(
+    deleteInvite: async (serverId: string, inviteId: string): Promise<void> => {
+        await apiClient.delete(
             `/api/v1/servers/${serverId}/invites/${inviteId}`,
         );
-        return response.data;
     },
 };

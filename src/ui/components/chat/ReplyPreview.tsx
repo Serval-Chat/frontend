@@ -22,7 +22,7 @@ interface ReplyPreviewProps {
         command: string;
         options?: { name: string; value: InteractionValue }[];
         user: { id: string; username: string };
-    };
+    } | null;
     replyToId?: string;
     isWebhook?: boolean;
     onClick?: (messageId: string) => void;
