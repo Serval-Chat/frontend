@@ -154,8 +154,14 @@ export const useDeleteMessage = (): {
                         return {
                             ...oldData,
                             pages: oldData.pages.map((page) =>
-                                page.filter(
-                                    (msg) => msg._id !== variables.messageId,
+                                page.map((msg) =>
+                                    msg._id === variables.messageId
+                                        ? {
+                                              ...msg,
+                                              deletedAt:
+                                                  new Date().toISOString(),
+                                          }
+                                        : msg,
                                 ),
                             ),
                         };
@@ -173,8 +179,14 @@ export const useDeleteMessage = (): {
                         return {
                             ...oldData,
                             pages: oldData.pages.map((page) =>
-                                page.filter(
-                                    (msg) => msg._id !== variables.messageId,
+                                page.map((msg) =>
+                                    msg._id === variables.messageId
+                                        ? {
+                                              ...msg,
+                                              deletedAt:
+                                                  new Date().toISOString(),
+                                          }
+                                        : msg,
                                 ),
                             ),
                         };
