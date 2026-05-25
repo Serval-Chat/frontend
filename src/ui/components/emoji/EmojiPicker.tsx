@@ -1,12 +1,14 @@
 import React, { useCallback, useMemo, useState } from 'react';
 
 import { motion } from 'framer-motion';
+import { Search } from 'lucide-react';
 import { useLockBodyScroll, useMeasure } from 'react-use';
 import { List } from 'react-window';
 import type { ListImperativeAPI, RowComponentProps } from 'react-window';
 
 import { useEmojiInfoBox } from '@/hooks/useEmojiInfoBox';
 import { Button } from '@/ui/components/common/Button';
+import { Input } from '@/ui/components/common/Input';
 import { ParsedUnicodeEmoji } from '@/ui/components/common/ParsedUnicodeEmoji';
 import { Text } from '@/ui/components/common/Text';
 import { Tooltip } from '@/ui/components/common/Tooltip';
@@ -82,6 +84,7 @@ const EmojiPickerContent: React.FC<{
     const scrollOffsetRef = React.useRef<number>(0);
     const [activeCategoryId, setActiveCategoryId] = useState<string>('');
     const [isScrollingTo, setIsScrollingTo] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
 
     const {
         selectedEmoji,
@@ -101,7 +104,17 @@ const EmojiPickerContent: React.FC<{
         const rows: RowItem[] = [];
         if (columnCount <= 0 || width <= 0 || height <= 0) return rows;
 
+        const normalizedQuery = searchQuery.trim().toLowerCase();
+
         customCategories.forEach((cat) => {
+            const emojis = normalizedQuery
+                ? cat.emojis.filter((e) =>
+                      e.name.toLowerCase().includes(normalizedQuery),
+                  )
+                : cat.emojis;
+
+            if (emojis.length === 0) return;
+
             rows.push({
                 type: 'header',
                 id: cat.id,
@@ -109,11 +122,11 @@ const EmojiPickerContent: React.FC<{
                 icon: cat.icon,
                 isCustom: true,
             });
-            const count = cat.emojis.length;
+            const count = emojis.length;
             for (let i = 0; i < count; i += columnCount) {
                 rows.push({
                     type: 'row',
-                    emojis: cat.emojis.slice(i, i + columnCount),
+                    emojis: emojis.slice(i, i + columnCount),
                     isCustom: true,
                     id: cat.id,
                 });
@@ -121,6 +134,24 @@ const EmojiPickerContent: React.FC<{
         });
 
         categories.forEach((catId) => {
+            const emojis = groupedEmojis[catId] || [];
+            const filteredEmojis = normalizedQuery
+                ? emojis.filter((e) => {
+                      const matchName = e.name
+                          ?.toLowerCase()
+                          .includes(normalizedQuery);
+                      const matchShortName = e.short_name
+                          ?.toLowerCase()
+                          .includes(normalizedQuery);
+                      const matchShortNames = e.short_names?.some((sn) =>
+                          sn.toLowerCase().includes(normalizedQuery),
+                      );
+                      return matchName || matchShortName || matchShortNames;
+                  })
+                : emojis;
+
+            if (filteredEmojis.length === 0) return;
+
             rows.push({
                 type: 'header',
                 id: catId,
@@ -128,19 +159,18 @@ const EmojiPickerContent: React.FC<{
                 isCustom: false,
                 standardIcon: categoryIconMap[catId],
             });
-            const emojis = groupedEmojis[catId] || [];
-            const count = emojis.length;
+            const count = filteredEmojis.length;
             for (let i = 0; i < count; i += columnCount) {
                 rows.push({
                     type: 'row',
-                    emojis: emojis.slice(i, i + columnCount),
+                    emojis: filteredEmojis.slice(i, i + columnCount),
                     isCustom: false,
                     id: catId,
                 });
             }
         });
         return rows;
-    }, [customCategories, columnCount, width, height]);
+    }, [customCategories, columnCount, width, height, searchQuery]);
 
     const categoryOffsets = useMemo(() => {
         const offsets: Record<string, number> = {};
@@ -406,16 +436,35 @@ const EmojiPickerContent: React.FC<{
             </Box>
 
             <Box className="relative flex min-w-0 flex-1 flex-col bg-background">
-                <Box className="sticky top-0 z-[var(--z-index-content)] flex h-[32px] items-center justify-between border-b border-divider/30 bg-background/80 px-3 py-1.5 backdrop-blur-md">
-                    <Text className="text-[9px] font-bold tracking-[0.2em] text-muted-foreground/70 uppercase">
-                        {(
-                            flatRows.find(
-                                (r): r is RowItem & { type: 'header' } =>
-                                    r.type === 'header' &&
-                                    r.id === activeCategoryId,
-                            ) as (RowItem & { type: 'header' }) | undefined
-                        )?.name || 'Emojis'}
-                    </Text>
+                <Box className="sticky top-0 z-[var(--z-index-content)] flex flex-col border-b border-divider/30 bg-background/80 px-3 py-1.5 backdrop-blur-md">
+                    <Box className="mb-2 w-full">
+                        <Input
+                            className="h-8 text-sm"
+                            icon={<Search size={14} />}
+                            placeholder="Search emojis..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                        />
+                    </Box>
+                    <Box className="flex h-[20px] items-center justify-between">
+                        <Text className="text-[9px] font-bold tracking-[0.2em] text-muted-foreground/70 uppercase">
+                            {searchQuery
+                                ? 'Search Results'
+                                : (
+                                      flatRows.find(
+                                          (
+                                              r,
+                                          ): r is RowItem & {
+                                              type: 'header';
+                                          } =>
+                                              r.type === 'header' &&
+                                              r.id === activeCategoryId,
+                                      ) as
+                                          | (RowItem & { type: 'header' })
+                                          | undefined
+                                  )?.name || 'Emojis'}
+                        </Text>
+                    </Box>
                 </Box>
 
                 <List
@@ -425,7 +474,7 @@ const EmojiPickerContent: React.FC<{
                     rowCount={flatRows.length}
                     rowHeight={getRowHeight}
                     rowProps={{}}
-                    style={{ height: height - 32, width: listAreaWidth }}
+                    style={{ height: height - 72, width: listAreaWidth }}
                     onRowsRendered={({ startIndex }: { startIndex: number }) =>
                         handleItemsRendered({ visibleStartIndex: startIndex })
                     }

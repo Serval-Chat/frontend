@@ -38,6 +38,7 @@ export interface InputProps
     minWidth?: number | string;
     maxWidth?: number | string;
     disabled?: boolean;
+    icon?: React.ReactNode;
 }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
@@ -50,6 +51,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             minWidth,
             maxWidth,
             disabled,
+            icon,
             ...props
         },
         ref,
@@ -81,10 +83,16 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
                 className="group relative flex w-full items-center"
                 style={{ minWidth, maxWidth, ...props.style }}
             >
+                {icon && (
+                    <div className="pointer-events-none absolute left-3 flex items-center text-muted-foreground">
+                        {icon}
+                    </div>
+                )}
                 <input
                     className={cn(
                         inputVariants({ variant, size, className }),
                         isNumber && '[appearance:textfield] pr-9',
+                        icon && 'pl-9',
                     )}
                     disabled={disabled || undefined}
                     ref={internalRef}

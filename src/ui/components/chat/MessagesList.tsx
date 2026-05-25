@@ -101,6 +101,15 @@ export const MessagesList: React.FC<MessagesListProps> = React.memo(
             });
         }, [activeHighlightId]);
 
+        useEffect(() => {
+            if (!isLoadingMore) {
+                const t = setTimeout(() => {
+                    loadMoreCooldownRef.current = false;
+                }, 100);
+                return () => clearTimeout(t);
+            }
+        }, [isLoadingMore]);
+
         const [expandedGroups, setExpandedGroups] = useState<Set<string>>(
             new Set(),
         );
@@ -362,15 +371,6 @@ export const MessagesList: React.FC<MessagesListProps> = React.memo(
 
             const newScrollHeight = container.scrollHeight;
 
-            if (isAtBottom) {
-                rowVirtualizer.scrollToIndex(virtualItems.length - 1, {
-                    align: 'end',
-                });
-                isAtBottomRef.current = true;
-                lastScrollHeightRef.current = container.scrollHeight;
-                return;
-            }
-
             if (isPrepending && lastScrollHeightRef.current !== 0) {
                 const heightDiff =
                     newScrollHeight - lastScrollHeightRef.current;
@@ -381,6 +381,17 @@ export const MessagesList: React.FC<MessagesListProps> = React.memo(
                         isPrependingScrollRef.current = false;
                     });
                 }
+                lastScrollHeightRef.current = newScrollHeight;
+                return;
+            }
+
+            if (isAtBottom) {
+                rowVirtualizer.scrollToIndex(virtualItems.length - 1, {
+                    align: 'end',
+                });
+                isAtBottomRef.current = true;
+                lastScrollHeightRef.current = newScrollHeight;
+                return;
             }
 
             lastScrollHeightRef.current = newScrollHeight;

@@ -77,13 +77,24 @@ export const useSmartPosition = ({
             window.addEventListener('resize', updatePosition);
             window.addEventListener('scroll', updatePosition, true);
 
+            let resizeObserver: ResizeObserver | null = null;
+            if (elementRef.current) {
+                resizeObserver = new ResizeObserver(() => {
+                    updatePosition();
+                });
+                resizeObserver.observe(elementRef.current);
+            }
+
             return () => {
                 window.removeEventListener('resize', updatePosition);
                 window.removeEventListener('scroll', updatePosition, true);
+                if (resizeObserver) {
+                    resizeObserver.disconnect();
+                }
             };
         }
         return undefined;
-    }, [isOpen, updatePosition]);
+    }, [isOpen, updatePosition, elementRef]);
 
     return coords;
 };

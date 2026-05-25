@@ -452,6 +452,7 @@ export const MainChat: React.FC<MainChatProps> = ({
                             isLoading={isLoading}
                             isLoadingMore={isFetchingNextPage}
                             isOwner={isOwner}
+                            key={selectedChannelId || selectedFriendId}
                             me={currentUser}
                             messages={messages}
                             roleMap={roleMap}
