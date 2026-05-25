@@ -31,4 +31,5 @@ export interface MessageProps {
     disableColors?: boolean;
     disableGlow?: boolean;
     disableActions?: boolean;
+    onResize?: () => void;
 }

@@ -59,6 +59,7 @@ export const Message: React.FC<MessageProps> = React.memo(
         disableColors,
         disableGlow,
         disableActions = false,
+        onResize,
         me: passedMe,
         serverDetails: passedServerDetails,
         senderMember: passedSenderMember,
@@ -393,6 +394,7 @@ export const Message: React.FC<MessageProps> = React.memo(
                             disableGlow={isGlowDisabled}
                             disableGlowAndColors={disableGlowAndColors}
                             isDeleted={!!message.deletedAt}
+                            options={message.interaction.options}
                             resolvedUser={interactionUser}
                             role={interactionRole}
                             user={message.interaction.user}
@@ -455,6 +457,7 @@ export const Message: React.FC<MessageProps> = React.memo(
                                 serverId={message.serverId}
                                 stickerId={message.stickerId}
                                 text={message.text}
+                                onResize={onResize}
                             />
                         )}
                         <Reactions

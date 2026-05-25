@@ -2,6 +2,10 @@ import React from 'react';
 
 import type { User } from '@/api/users/users.types';
 import type { ProcessedChatMessage } from '@/types/chat.ui';
+import {
+    InviteLink,
+    InviteLinkSkeleton,
+} from '@/ui/components/chat/InviteLink';
 import { MessagesList } from '@/ui/components/chat/MessagesList';
 import { Text } from '@/ui/components/common/Text';
 
@@ -224,6 +228,53 @@ export const ChatDemo: React.FC = () => (
                     </Text>
                 </div>
                 <MessagesList messages={MOCK_MESSAGES} />
+            </div>
+
+            <div>
+                <Text as="p" className="mt-8 mb-4" size="sm" weight="semibold">
+                    Invite Link Previews
+                </Text>
+                <div className="flex flex-col gap-6 rounded-xl border border-border-subtle bg-background p-4">
+                    <div className="flex flex-wrap items-start gap-6">
+                        <div>
+                            <Text
+                                as="p"
+                                className="mb-2 pl-1"
+                                size="xs"
+                                variant="muted"
+                            >
+                                Skeleton State
+                            </Text>
+                            <InviteLinkSkeleton hasBanner tagCount={3} />
+                        </div>
+                        <div>
+                            <Text
+                                as="p"
+                                className="mb-2 pl-1"
+                                size="xs"
+                                variant="muted"
+                            >
+                                Loaded State
+                            </Text>
+                            <InviteLink
+                                code="cats"
+                                url="https://serchat.app/invite/cats"
+                            />
+                        </div>
+                    </div>
+
+                    <div className="border-t border-border-subtle/50 pt-4">
+                        <Text
+                            as="p"
+                            className="mb-2 pl-1"
+                            size="xs"
+                            variant="muted"
+                        >
+                            Skeleton (Maxxed Tags Preview)
+                        </Text>
+                        <InviteLinkSkeleton hasBanner tagCount={15} />
+                    </div>
+                </div>
             </div>
         </div>
     </DemoSection>

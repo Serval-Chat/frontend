@@ -12,9 +12,14 @@ import { cn } from '@/utils/cn';
 interface GifPlayerProps {
     klipyId: string;
     url: string;
+    onResize?: () => void;
 }
 
-export const GifPlayer: React.FC<GifPlayerProps> = ({ klipyId, url }) => {
+export const GifPlayer: React.FC<GifPlayerProps> = ({
+    klipyId,
+    url,
+    onResize,
+}) => {
     const queryClient = useQueryClient();
 
     const {
@@ -91,6 +96,10 @@ export const GifPlayer: React.FC<GifPlayerProps> = ({ klipyId, url }) => {
         toggleFavoriteMutation.mutate();
     };
 
+    React.useEffect(() => {
+        if (metadata) onResize?.();
+    }, [metadata, onResize]);
+
     if (isError) {
         return (
             <Box className="my-2 max-w-[400px]">
@@ -134,9 +143,11 @@ export const GifPlayer: React.FC<GifPlayerProps> = ({ klipyId, url }) => {
                     height: 'auto',
                     maxWidth: metadata.width,
                     maxHeight: 400,
+                    aspectRatio: `${metadata.width} / ${metadata.height}`,
                     objectFit: 'contain',
                     padding: metadata.contentType === 'sticker' ? '4px' : '0',
                 }}
+                onLoad={onResize}
             />
 
             <Box className="absolute top-2 right-2 opacity-0 transition-opacity group-hover:opacity-100">

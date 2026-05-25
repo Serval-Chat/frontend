@@ -2,6 +2,7 @@ import React from 'react';
 
 import type { Role } from '@/api/servers/servers.types';
 import type { User } from '@/api/users/users.types';
+import type { InteractionValue } from '@/types/interactions';
 import { StyledUserName } from '@/ui/components/common/StyledUserName';
 import { Text } from '@/ui/components/common/Text';
 import { UserProfilePicture } from '@/ui/components/common/UserProfilePicture';
@@ -11,6 +12,7 @@ import { cn } from '@/utils/cn';
 interface InteractionHeaderProps {
     user: { id: string; username: string };
     command: string;
+    options?: { name: string; value: InteractionValue }[];
     resolvedUser?: User;
     role?: Role;
     disableColors?: boolean;
@@ -24,6 +26,7 @@ export const InteractionHeader: React.FC<InteractionHeaderProps> = React.memo(
     ({
         user,
         command,
+        options,
         resolvedUser,
         role,
         disableColors,
@@ -33,6 +36,34 @@ export const InteractionHeader: React.FC<InteractionHeaderProps> = React.memo(
         isDeleted,
     }) => {
         if (!command) return null;
+
+        const invocationString = `/${command}${
+            options?.length
+                ? ' ' +
+                  options
+                      .map((opt) => {
+                          let valStr = String(opt.value);
+                          if (
+                              typeof opt.value === 'object' &&
+                              opt.value !== null
+                          ) {
+                              if ('username' in opt.value) {
+                                  valStr = `@${
+                                      opt.value.displayName ||
+                                      opt.value.username
+                                  }`;
+                              } else if ('name' in opt.value) {
+                                  valStr =
+                                      'type' in opt.value
+                                          ? `#${opt.value.name}`
+                                          : `@${opt.value.name}`;
+                              }
+                          }
+                          return `${opt.name}:${valStr}`;
+                      })
+                      .join(' ')
+                : ''
+        }`;
 
         return (
             <Box className="ml-[24px] flex items-center gap-2 opacity-60 select-none">
@@ -61,11 +92,12 @@ export const InteractionHeader: React.FC<InteractionHeaderProps> = React.memo(
                     <Text
                         as="span"
                         className="text-xs whitespace-nowrap text-text-muted"
+                        title={invocationString}
                     >
                         used{' '}
                         <span
                             className={cn(
-                                'font-bold',
+                                'cursor-help font-bold',
                                 isDeleted ? 'text-danger' : 'text-primary',
                             )}
                         >

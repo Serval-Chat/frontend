@@ -26,6 +26,7 @@ interface MessageContentProps {
     isDeleted?: boolean;
     messageId?: string;
     channelId?: string;
+    onResize?: () => void;
 }
 
 export const MessageContent = React.memo(
@@ -39,6 +40,7 @@ export const MessageContent = React.memo(
         isDeleted,
         messageId,
         channelId,
+        onResize,
     }: MessageContentProps) => {
         const { data: sticker } = useSticker(stickerId || null);
         const nodes = useMemo(
@@ -82,6 +84,7 @@ export const MessageContent = React.memo(
                         serverId={serverId}
                         variant={isDeleted ? 'danger' : 'default'}
                         wrap="preWrap"
+                        onResize={onResize}
                     />
                 )}
                 {embeds && embeds.length > 0 && (
@@ -90,6 +93,7 @@ export const MessageContent = React.memo(
                         payload={{ embeds, content: undefined }}
                         serverId={serverId}
                         variant="chat"
+                        onResize={onResize}
                     />
                 )}
 
@@ -97,6 +101,7 @@ export const MessageContent = React.memo(
                     <FileEmbed
                         attachment={attachment}
                         key={attachment.attachmentId}
+                        onResize={onResize}
                     />
                 ))}
 
@@ -130,6 +135,7 @@ export const MessageContent = React.memo(
                                     alt={sticker.name}
                                     className="h-auto max-w-full select-none"
                                     src={resolveApiUrl(sticker.imageUrl) || ''}
+                                    onLoad={onResize}
                                 />
                             </button>
                         </Tooltip>

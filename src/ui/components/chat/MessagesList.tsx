@@ -204,13 +204,36 @@ export const MessagesList: React.FC<MessagesListProps> = React.memo(
             scrollToFn,
             estimateSize: useCallback((index: number) => {
                 const item = virtualItemsRef.current[index];
+                if (!item) return 100;
                 if (
-                    item?.type === 'loader-older' ||
-                    item?.type === 'loader-newer'
+                    item.type === 'loader-older' ||
+                    item.type === 'loader-newer'
                 )
                     return 60;
-                if (item?.type === 'spacer') return 22;
-                if (item?.type === 'blocked-group') return 40;
+                if (item.type === 'spacer') return 22;
+                if (item.type === 'blocked-group') return 40;
+
+                if (item.type === 'message') {
+                    let estimated = 100;
+
+                    if (item.message.text) {
+                        estimated +=
+                            Math.floor(item.message.text.length / 50) * 20;
+                    }
+                    if (item.message.embeds?.length) {
+                        estimated += item.message.embeds.length * 350;
+                    }
+                    if (item.message.attachments?.length) {
+                        estimated += item.message.attachments.length * 400;
+                    }
+                    if (item.message.poll) {
+                        estimated +=
+                            150 + item.message.poll.options.length * 40;
+                    }
+
+                    return Math.min(estimated, 2000);
+                }
+
                 return 100;
             }, []),
             getItemKey: useCallback(
@@ -225,6 +248,33 @@ export const MessagesList: React.FC<MessagesListProps> = React.memo(
             ),
             overscan: 10,
         });
+        const measureFrameRef = useRef<number | null>(null);
+        const requestMeasure = useCallback((): void => {
+            if (measureFrameRef.current !== null) return;
+
+            measureFrameRef.current = requestAnimationFrame(() => {
+                measureFrameRef.current = null;
+
+                const container = scrollContainerRef.current;
+                if (container && isAtBottomRef.current) {
+                    rowVirtualizer.scrollToIndex(
+                        virtualItemsRef.current.length - 1,
+                        {
+                            align: 'end',
+                        },
+                    );
+                }
+            });
+        }, [rowVirtualizer]);
+
+        useEffect(
+            () => () => {
+                if (measureFrameRef.current !== null) {
+                    cancelAnimationFrame(measureFrameRef.current);
+                }
+            },
+            [],
+        );
         const toggleGroup = useCallback((groupId: string): void => {
             startTransitionGroup(() => {
                 setExpandedGroups((prev) => {
@@ -291,9 +341,26 @@ export const MessagesList: React.FC<MessagesListProps> = React.memo(
                 onLoadMore?.();
             }
         }, [hasMore, isLoadingMore, onLoadMore]);
+        const totalSize = rowVirtualizer.getTotalSize();
+
+        const prevFirstMessageIdRef = useRef<string | null>(null);
+
         useLayoutEffect(() => {
             const container = scrollContainerRef.current;
             if (!container || virtualItems.length === 0) return;
+
+            const firstMessage = virtualItems.find(
+                (item) => item.type === 'message',
+            ) as { message: { _id: string } } | undefined;
+            const firstMessageId = firstMessage?.message._id ?? null;
+            const isPrepending =
+                prevFirstMessageIdRef.current !== null &&
+                firstMessageId !== null &&
+                firstMessageId !== prevFirstMessageIdRef.current;
+
+            prevFirstMessageIdRef.current = firstMessageId;
+
+            const newScrollHeight = container.scrollHeight;
 
             if (isAtBottom) {
                 rowVirtualizer.scrollToIndex(virtualItems.length - 1, {
@@ -304,8 +371,7 @@ export const MessagesList: React.FC<MessagesListProps> = React.memo(
                 return;
             }
 
-            const newScrollHeight = container.scrollHeight;
-            if (lastScrollHeightRef.current !== 0) {
+            if (isPrepending && lastScrollHeightRef.current !== 0) {
                 const heightDiff =
                     newScrollHeight - lastScrollHeightRef.current;
                 if (heightDiff > 0) {
@@ -318,7 +384,7 @@ export const MessagesList: React.FC<MessagesListProps> = React.memo(
             }
 
             lastScrollHeightRef.current = newScrollHeight;
-        }, [virtualItems, isAtBottom, rowVirtualizer]);
+        }, [virtualItems, totalSize, isAtBottom, rowVirtualizer]);
 
         const lastScrolledIdRef = useRef<string | null>(null);
 
@@ -369,7 +435,7 @@ export const MessagesList: React.FC<MessagesListProps> = React.memo(
             <Box
                 className="custom-scrollbar relative flex min-h-0 flex-1 flex-col overflow-y-auto pt-4"
                 ref={scrollContainerRef}
-                style={{ overflowAnchor: 'auto' }}
+                style={{ overflowAnchor: 'none' }}
                 onScroll={handleScroll}
             >
                 {isLoading ? (
@@ -456,6 +522,7 @@ export const MessagesList: React.FC<MessagesListProps> = React.memo(
                                             serverDetails={serverDetails}
                                             onReplyClick={handleReplyClick}
                                             onReplyToMessage={onReplyToMessage}
+                                            onResize={requestMeasure}
                                         />
                                     )}
 
@@ -541,6 +608,9 @@ export const MessagesList: React.FC<MessagesListProps> = React.memo(
                                                                 }
                                                                 onReplyToMessage={
                                                                     onReplyToMessage
+                                                                }
+                                                                onResize={
+                                                                    requestMeasure
                                                                 }
                                                             />
                                                         ),

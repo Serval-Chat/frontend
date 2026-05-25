@@ -6,7 +6,7 @@ import { BadgeCheck, Check, Copy, Tag } from 'lucide-react';
 import { useInviteDetails, useJoinServer } from '@/api/invites/invites.queries';
 import { useServers } from '@/api/servers/servers.queries';
 import { Button } from '@/ui/components/common/Button';
-import { LoadingSpinner } from '@/ui/components/common/LoadingSpinner';
+import { Skeleton } from '@/ui/components/common/Skeleton';
 import { Text } from '@/ui/components/common/Text';
 import { useToast } from '@/ui/components/common/Toast';
 import { Box } from '@/ui/components/layout/Box';
@@ -17,6 +17,68 @@ interface InviteLinkProps {
     code: string;
     url: string;
 }
+
+export const InviteLinkSkeleton: React.FC<{
+    containerRef?: React.Ref<HTMLDivElement>;
+    hasBanner?: boolean;
+    tagCount?: number;
+}> = ({ containerRef, hasBanner, tagCount = 0 }) => {
+    const tagWidths = [
+        'w-16',
+        'w-12',
+        'w-20',
+        'w-14',
+        'w-24',
+        'w-10',
+        'w-18',
+        'w-16',
+        'w-20',
+        'w-12',
+    ];
+
+    return (
+        <Box
+            className="my-2 flex w-80 flex-col overflow-hidden rounded-lg bg-bg-secondary transition-all"
+            ref={containerRef}
+        >
+            {hasBanner && (
+                <Skeleton
+                    className="h-20 w-full rounded-none"
+                    variant="rectangular"
+                />
+            )}
+
+            <div className="flex flex-col gap-4 p-4">
+                <Skeleton className="h-3 w-40" variant="text" />
+
+                <div className="flex items-center gap-3">
+                    <Skeleton
+                        className="h-12 w-12 shrink-0 rounded-xl"
+                        variant="rectangular"
+                    />
+                    <div className="flex min-w-0 flex-1 flex-col gap-2">
+                        <Skeleton className="h-5 w-3/4" variant="text" />
+                        <Skeleton className="h-3 w-1/2" variant="text" />
+                    </div>
+                </div>
+
+                {tagCount > 0 && (
+                    <div className="flex flex-wrap gap-1.5">
+                        {Array.from({ length: tagCount }).map((_, i) => (
+                            <Skeleton
+                                className={`h-5 ${tagWidths[i % tagWidths.length]}`}
+                                key={`tag-skel-${i}`}
+                                variant="rectangular"
+                            />
+                        ))}
+                    </div>
+                )}
+
+                <Skeleton className="h-8 w-full" variant="rectangular" />
+            </div>
+        </Box>
+    );
+};
 
 export const InviteLink: React.FC<InviteLinkProps> = ({ code, url }) => {
     const [inView, setInView] = React.useState(false);
@@ -69,17 +131,7 @@ export const InviteLink: React.FC<InviteLinkProps> = ({ code, url }) => {
     };
 
     if (isLoading || (!isCached && !inView)) {
-        return (
-            <Box
-                className="my-2 flex w-fit min-w-75 items-center gap-2 rounded-lg border border-border-subtle bg-bg-secondary p-4"
-                ref={containerRef}
-            >
-                <LoadingSpinner size="sm" />
-                <Text size="sm" variant="muted">
-                    Fetching invite details...
-                </Text>
-            </Box>
-        );
+        return <InviteLinkSkeleton containerRef={containerRef} />;
     }
 
     if (error || !invite) {

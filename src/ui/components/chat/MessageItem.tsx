@@ -31,6 +31,7 @@ interface MessageItemProps {
     isOwner?: boolean;
     fullMemberMap?: Map<string, ServerMember>;
     roleMap?: Map<string, Role>;
+    onResize?: () => void;
 }
 
 export const MessageItem = React.memo(
@@ -54,6 +55,7 @@ export const MessageItem = React.memo(
         isOwner,
         fullMemberMap,
         roleMap,
+        onResize,
     }: MessageItemProps) => {
         const isGroupStart =
             !prevMessage ||
@@ -86,6 +88,7 @@ export const MessageItem = React.memo(
                 user={message.user}
                 onReplyClick={onReplyClick}
                 onReplyToMessage={onReplyToMessage}
+                onResize={onResize}
             />
         );
     },

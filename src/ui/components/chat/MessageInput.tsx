@@ -76,6 +76,10 @@ import type { StickerCategory } from '@/ui/components/emoji/StickerPicker';
 import { Box } from '@/ui/components/layout/Box';
 import { cn } from '@/utils/cn';
 import { clearDraft, getDraft, saveDraft } from '@/utils/drafts';
+import {
+    applyMediaDimensions,
+    readMediaDimensions,
+} from '@/utils/fileDimensions';
 import { APP_LOCALE } from '@/utils/locale';
 import { ParserPresets, parseText } from '@/utils/textParser/parser';
 import { WsEvents } from '@/ws';
@@ -606,15 +610,18 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                 files.map(async (queuedFile) => {
                     updateFileStatus(queuedFile.id, 'uploading');
                     try {
-                        const upload = await filesApi.uploadFile(
-                            queuedFile.file,
-                            (progress) => {
+                        const [upload, dimensions] = await Promise.all([
+                            filesApi.uploadFile(queuedFile.file, (progress) => {
                                 updateFileProgress(queuedFile.id, progress);
-                            },
-                        );
+                            }),
+                            readMediaDimensions(queuedFile.file),
+                        ]);
                         updateFileStatus(queuedFile.id, 'completed');
                         return {
-                            ...upload.attachment,
+                            ...applyMediaDimensions(
+                                upload.attachment,
+                                dimensions,
+                            ),
                             spoiler:
                                 upload.attachment.spoiler ||
                                 queuedFile.isSpoiler,

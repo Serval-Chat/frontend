@@ -29,9 +29,47 @@ import { getSafeUrl, isInternalUrl } from '@/utils/proxy';
 interface FileEmbedProps {
     url?: string;
     attachment?: MessageAttachment;
+    onResize?: () => void;
 }
 
-export const FileEmbed: React.FC<FileEmbedProps> = ({ url, attachment }) => {
+const FALLBACK_MEDIA_WIDTH = 320;
+const FALLBACK_MEDIA_HEIGHT = 180;
+const MAX_MEDIA_WIDTH = 550;
+
+const getMediaDimensions = (
+    attachment: MessageAttachment | undefined,
+): { width: number; height: number; hasMetadata: boolean } => {
+    if (attachment?.width && attachment.height) {
+        return {
+            width: attachment.width,
+            height: attachment.height,
+            hasMetadata: true,
+        };
+    }
+
+    return {
+        width: FALLBACK_MEDIA_WIDTH,
+        height: FALLBACK_MEDIA_HEIGHT,
+        hasMetadata: false,
+    };
+};
+
+const getMediaBoxStyle = (
+    attachment: MessageAttachment | undefined,
+): React.CSSProperties => {
+    const { width, height } = getMediaDimensions(attachment);
+    return {
+        aspectRatio: `${width} / ${height}`,
+        width: `min(${width}px, 100%)`,
+        maxWidth: `${Math.min(width, MAX_MEDIA_WIDTH)}px`,
+    };
+};
+
+export const FileEmbed: React.FC<FileEmbedProps> = ({
+    url,
+    attachment,
+    onResize,
+}) => {
     const attachmentUrl =
         attachment !== undefined
             ? `/api/v1/files/download/${encodeURIComponent(attachment.attachmentId)}${attachment.spoiler === true ? '#spoiler' : ''}`
@@ -96,11 +134,14 @@ export const FileEmbed: React.FC<FileEmbedProps> = ({ url, attachment }) => {
     // Image rendering
     if (mimeType?.startsWith('image/')) {
         const displayUrl = getSafeUrl(resolvedUrl);
+        const mediaDimensions = getMediaDimensions(attachment);
+        const mediaBoxStyle = getMediaBoxStyle(attachment);
 
         return (
             <>
                 <Box
-                    className="group relative my-2 w-fit cursor-pointer rounded-lg"
+                    className="group relative my-2 max-h-[min(450px,70vh)] cursor-pointer rounded-lg"
+                    style={mediaBoxStyle}
                     onClick={() => {
                         if (isSpoiler && !isRevealed) {
                             setIsRevealed(true);
@@ -112,23 +153,18 @@ export const FileEmbed: React.FC<FileEmbedProps> = ({ url, attachment }) => {
                     <img
                         alt={displayName || 'File content'}
                         className={cn(
-                            'block h-auto max-h-[min(450px,70vh)] w-auto max-w-full rounded-lg transition-opacity duration-300',
+                            'block h-full max-h-[min(450px,70vh)] w-full rounded-lg object-contain transition-opacity duration-300',
                             isSpoiler && !isRevealed
                                 ? 'opacity-0'
                                 : 'opacity-100',
                         )}
                         decoding="async"
-                        height={attachment?.height}
+                        height={mediaDimensions.height}
                         loading="eager"
                         src={displayUrl!}
-                        style={
-                            attachment?.width && attachment.height
-                                ? {
-                                      aspectRatio: `${attachment.width} / ${attachment.height}`,
-                                  }
-                                : undefined
-                        }
-                        width={attachment?.width}
+                        style={{ aspectRatio: mediaBoxStyle.aspectRatio }}
+                        width={mediaDimensions.width}
+                        onLoad={onResize}
                     />
                     {isSpoiler && !isRevealed && (
                         <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-background">
@@ -174,14 +210,20 @@ export const FileEmbed: React.FC<FileEmbedProps> = ({ url, attachment }) => {
     // Video rendering
     if (mimeType?.startsWith('video/')) {
         const displayUrl = resolvedUrl;
+        const mediaDimensions = getMediaDimensions(attachment);
+        const mediaBoxStyle = getMediaBoxStyle(attachment);
 
         return (
             <Box
-                className="group relative my-2 max-h-[min(450px,70vh)] w-fit max-w-[min(550px,100%)] overflow-hidden rounded-lg"
+                className="group relative my-2 max-h-[min(450px,70vh)] overflow-hidden rounded-lg"
+                style={mediaBoxStyle}
                 onClick={() => isSpoiler && !isRevealed && setIsRevealed(true)}
             >
                 {isSpoiler && !isRevealed ? (
-                    <div className="relative flex h-48 w-80 cursor-pointer items-center justify-center bg-background">
+                    <div
+                        className="relative flex h-full w-full cursor-pointer items-center justify-center bg-background"
+                        style={{ aspectRatio: mediaBoxStyle.aspectRatio }}
+                    >
                         <div className="flex items-center gap-2 rounded-full border border-border-subtle bg-bg-secondary px-3 py-1.5">
                             <EyeOff
                                 className="text-muted-foreground"
@@ -201,16 +243,14 @@ export const FileEmbed: React.FC<FileEmbedProps> = ({ url, attachment }) => {
                         <video
                             controls
                             playsInline
-                            className="max-h-inherit h-auto w-auto max-w-full"
+                            className="h-full max-h-[min(450px,70vh)] w-full object-contain"
+                            height={mediaDimensions.height}
                             preload="metadata"
                             src={displayUrl!}
-                            style={
-                                attachment?.width && attachment.height
-                                    ? {
-                                          aspectRatio: `${attachment.width} / ${attachment.height}`,
-                                      }
-                                    : undefined
-                            }
+                            style={{ aspectRatio: mediaBoxStyle.aspectRatio }}
+                            width={mediaDimensions.width}
+                            onLoadedData={onResize}
+                            onLoadedMetadata={onResize}
                         >
                             <track kind="captions" />
                         </video>
@@ -264,6 +304,7 @@ export const FileEmbed: React.FC<FileEmbedProps> = ({ url, attachment }) => {
                 isLocal={isLocal}
                 size={size}
                 url={resolvedUrl}
+                onResize={onResize}
             />
         );
     }
@@ -299,7 +340,8 @@ const CodeEmbed: React.FC<{
     isLocal: boolean;
     filename: string;
     size: number;
-}> = ({ url, isLocal, filename, size }) => {
+    onResize?: () => void;
+}> = ({ url, isLocal, filename, size, onResize }) => {
     const [showFull, setShowFull] = React.useState(false);
     const isTooLarge = size > 1024 * 1024;
 
@@ -312,6 +354,10 @@ const CodeEmbed: React.FC<{
 
     const isLoading = isLocal ? loadingLocal : loadingRemote;
     const content = isLocal ? localContent : remoteContent;
+
+    React.useEffect(() => {
+        onResize?.();
+    }, [content, isLoading, onResize]);
 
     // If it's too large, don't try to render it as code
     if (isTooLarge) {
@@ -403,7 +449,10 @@ const CodeEmbed: React.FC<{
                 </div>
 
                 <div className="relative">
-                    <pre className="scrollbar-none overflow-x-auto bg-bg-secondary/30 p-4 font-mono text-xs">
+                    <pre
+                        className="scrollbar-none overflow-x-auto bg-bg-secondary/30 p-4 font-mono text-xs"
+                        style={{ minHeight: '1.6em' }}
+                    >
                         <code className="text-foreground/90">
                             {previewContent || 'No content'}
                         </code>

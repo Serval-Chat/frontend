@@ -54,6 +54,7 @@ interface ParsedTextProps {
     isNested?: boolean;
     variant?: TextProps['variant'];
     serverId?: string;
+    onResize?: () => void;
 }
 
 const countAttachments = (n: ASTNode): number => {
@@ -105,6 +106,7 @@ export const ParsedText = React.memo<ParsedTextProps>(
         isNested,
         variant,
         serverId,
+        onResize,
     }) => {
         const fileNodesCount = React.useMemo(
             () => nodes.reduce((acc, curr) => acc + countAttachments(curr), 0),
@@ -160,6 +162,7 @@ export const ParsedText = React.memo<ParsedTextProps>(
                 wrap,
                 variant,
                 serverId,
+                onResize,
             }),
             [
                 condenseFiles,
@@ -170,6 +173,7 @@ export const ParsedText = React.memo<ParsedTextProps>(
                 wrap,
                 variant,
                 serverId,
+                onResize,
             ],
         );
 
@@ -700,7 +704,13 @@ export const ParsedText = React.memo<ParsedTextProps>(
                             );
 
                         case 'file':
-                            return <FileEmbed key={idx} url={node.url} />;
+                            return (
+                                <FileEmbed
+                                    key={idx}
+                                    url={node.url}
+                                    onResize={onResize}
+                                />
+                            );
 
                         case 'mention':
                             return (
@@ -955,6 +965,7 @@ export const ParsedText = React.memo<ParsedTextProps>(
                                     key={idx}
                                     klipyId={node.klipyId}
                                     url={node.url}
+                                    onResize={onResize}
                                 />
                             );
 

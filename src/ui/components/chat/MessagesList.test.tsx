@@ -15,9 +15,11 @@ vi.mock('@/ui/components/chat/MessageItem', () => ({
     MessageItem: ({
         message,
         isHighlighted,
+        onResize,
     }: {
         message: ProcessedChatMessage;
         isHighlighted: boolean;
+        onResize?: () => void;
     }) => (
         <div
             data-highlighted={isHighlighted}
@@ -25,11 +27,15 @@ vi.mock('@/ui/components/chat/MessageItem', () => ({
             id={`message-${message._id}`}
         >
             {message.text}
+            <button type="button" onClick={onResize}>
+                resize
+            </button>
         </div>
     ),
 }));
 
 const mockScrollToIndex = vi.fn();
+const mockMeasure = vi.fn();
 
 vi.mock('@tanstack/react-virtual', () => ({
     useVirtualizer: vi.fn().mockImplementation((options: any) => ({
@@ -41,6 +47,7 @@ vi.mock('@tanstack/react-virtual', () => ({
             })),
         getTotalSize: () => options.count * 100,
         scrollToIndex: mockScrollToIndex,
+        measure: mockMeasure,
         measureElement: vi.fn(),
     })),
 }));
@@ -53,6 +60,7 @@ describe('MessagesList Scroll Behavior', () => {
     beforeEach(() => {
         vi.clearAllMocks();
         mockScrollToIndex.mockClear();
+        mockMeasure.mockClear();
         vi.mocked(useAppDispatch).mockReturnValue(mockDispatch);
         vi.mocked(useAppSelector).mockReturnValue({}); // default blocks
 
@@ -150,5 +158,15 @@ describe('MessagesList Scroll Behavior', () => {
         expect(mockScrollToIndex).not.toHaveBeenCalledWith(1, {
             align: 'center',
         });
+    });
+
+    it('remeasures virtual rows when a message reports an async resize', () => {
+        const { getAllByText } = render(
+            <MessagesList hasMore={false} messages={mockMessages} />,
+        );
+
+        getAllByText('resize')[0].click();
+
+        expect(requestAnimationFrameMock).toHaveBeenCalled();
     });
 });

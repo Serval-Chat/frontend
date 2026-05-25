@@ -45,6 +45,7 @@ interface ParsedEmbedTextProps {
     size?: 'xs' | 'sm' | 'base';
     variant?: 'danger' | 'muted';
     wrap?: 'preWrap';
+    onResize?: () => void;
 }
 
 const ParsedEmbedText = memo(
@@ -55,6 +56,7 @@ const ParsedEmbedText = memo(
         size,
         variant,
         wrap,
+        onResize,
     }: ParsedEmbedTextProps): ReactNode => {
         const nodes = useMemo(() => parseText(text, preset), [text, preset]);
 
@@ -65,6 +67,7 @@ const ParsedEmbedText = memo(
                 size={size}
                 variant={variant}
                 wrap={wrap}
+                onResize={onResize}
             />
         );
     },
@@ -77,6 +80,7 @@ interface EmbedImageProps {
     className?: string;
     imageClassName: string;
     style?: CSSProperties;
+    onResize?: () => void;
 }
 
 const EmbedImage = memo(
@@ -86,6 +90,7 @@ const EmbedImage = memo(
         className,
         imageClassName,
         style,
+        onResize,
     }: EmbedImageProps): ReactNode => {
         const [isLightboxOpen, setIsLightboxOpen] = useState(false);
 
@@ -109,6 +114,7 @@ const EmbedImage = memo(
                         loading="eager"
                         src={src}
                         style={style}
+                        onLoad={onResize}
                     />
                 </button>
                 <ImageLightbox
@@ -129,6 +135,7 @@ interface EmbedCardProps {
     variant: 'preview' | 'chat';
     serverId?: string;
     isDeleted?: boolean;
+    onResize?: () => void;
 }
 
 const EmbedCard = memo(
@@ -138,6 +145,7 @@ const EmbedCard = memo(
         variant,
         serverId,
         isDeleted,
+        onResize,
     }: EmbedCardProps): ReactNode => {
         const barColor = colorToCss(embed.color);
         const hasContent =
@@ -212,6 +220,8 @@ const EmbedCard = memo(
                         )}
                         preload="metadata"
                         src={embed.video.url}
+                        onLoadedData={onResize}
+                        onLoadedMetadata={onResize}
                     />
                 </div>
             );
@@ -235,6 +245,7 @@ const EmbedCard = memo(
                                   }
                                 : { minHeight: '100px' }
                         }
+                        onResize={onResize}
                     />
                 </div>
             );
@@ -279,6 +290,7 @@ const EmbedCard = memo(
                                         variant={
                                             isDeleted ? 'danger' : undefined
                                         }
+                                        onResize={onResize}
                                     />
                                 </Link>
                             ) : (
@@ -288,6 +300,7 @@ const EmbedCard = memo(
                                     size="xs"
                                     text={embed.provider.name}
                                     variant={isDeleted ? 'danger' : undefined}
+                                    onResize={onResize}
                                 />
                             )}
                         </p>
@@ -326,6 +339,7 @@ const EmbedCard = memo(
                                             variant={
                                                 isDeleted ? 'danger' : undefined
                                             }
+                                            onResize={onResize}
                                         />
                                     </Link>
                                 ) : (
@@ -337,6 +351,7 @@ const EmbedCard = memo(
                                         variant={
                                             isDeleted ? 'danger' : undefined
                                         }
+                                        onResize={onResize}
                                     />
                                 )}
                             </span>
@@ -373,6 +388,7 @@ const EmbedCard = memo(
                                                         ? 'danger'
                                                         : undefined
                                                 }
+                                                onResize={onResize}
                                             />
                                         </Link>
                                     ) : (
@@ -384,6 +400,7 @@ const EmbedCard = memo(
                                             variant={
                                                 isDeleted ? 'danger' : undefined
                                             }
+                                            onResize={onResize}
                                         />
                                     )}
                                 </p>
@@ -404,6 +421,7 @@ const EmbedCard = memo(
                                             isDeleted ? 'danger' : undefined
                                         }
                                         wrap="preWrap"
+                                        onResize={onResize}
                                     />
                                 </div>
                             )}
@@ -449,6 +467,7 @@ const EmbedCard = memo(
                                                                     ? 'danger'
                                                                     : undefined
                                                             }
+                                                            onResize={onResize}
                                                         />
                                                     </div>
                                                     <div
@@ -471,6 +490,7 @@ const EmbedCard = memo(
                                                                     : undefined
                                                             }
                                                             wrap="preWrap"
+                                                            onResize={onResize}
                                                         />
                                                     </div>
                                                 </div>
@@ -491,6 +511,7 @@ const EmbedCard = memo(
                                     isDeleted && 'opacity-50 grayscale',
                                 )}
                                 src={thumbnailUrl}
+                                onResize={onResize}
                             />
                         )}
                     </div>
@@ -512,6 +533,7 @@ const EmbedCard = memo(
                                       }
                                     : { minHeight: '80px' }
                             }
+                            onResize={onResize}
                         />
                     )}
 
@@ -546,6 +568,7 @@ const EmbedCard = memo(
                                     text={footerText}
                                     variant={isDeleted ? 'danger' : 'muted'}
                                     wrap="preWrap"
+                                    onResize={onResize}
                                 />
                             </div>
                         </div>
@@ -565,6 +588,7 @@ export interface EmbedRendererProps {
     variant?: 'preview' | 'chat';
     serverId?: string;
     isDeleted?: boolean;
+    onResize?: () => void;
 }
 
 export const EmbedRenderer = ({
@@ -573,6 +597,7 @@ export const EmbedRenderer = ({
     variant = 'preview',
     serverId,
     isDeleted,
+    onResize,
 }: EmbedRendererProps): ReactNode => {
     const hasAnything = Boolean(
         payload.content?.trim() || payload.embeds?.length || payload.poll,
@@ -619,6 +644,7 @@ export const EmbedRenderer = ({
                         size="sm"
                         text={payload.content}
                         wrap="preWrap"
+                        onResize={onResize}
                     />
                 </div>
             )}
@@ -632,6 +658,7 @@ export const EmbedRenderer = ({
                     key={`embed-${embed.title ?? ''}-${embed.color ?? i}`}
                     serverId={serverId}
                     variant={variant}
+                    onResize={onResize}
                 />
             ))}
 
