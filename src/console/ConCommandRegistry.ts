@@ -1,8 +1,27 @@
+import type { DosFileSystem } from '@/console/DosFileSystem';
+import type { Terminal } from '@/console/Terminal';
 import type { AppDispatch } from '@/store';
+
+export interface ConsoleKeyEvent {
+    altKey: boolean;
+    ctrlKey: boolean;
+    key: string;
+    preventDefault: () => void;
+}
+
+export interface ConsoleProgram {
+    handleKeyDown: (event: ConsoleKeyEvent) => void;
+    start: () => void;
+}
 
 export interface CommandContext {
     dispatch: AppDispatch;
+    endProgram?: () => void;
+    filesystem?: DosFileSystem;
+    startProgram?: (program: ConsoleProgram) => void;
+    terminal?: Terminal;
     writeLine?: (text: string) => void;
+    clearScreen?: () => void;
 }
 
 export interface CommandResult {

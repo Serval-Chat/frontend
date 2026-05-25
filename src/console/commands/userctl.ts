@@ -133,27 +133,28 @@ export const userctlCommand: ConCommandReactor = {
             }
             const baseProfiles = await friendsApi.getFriendProfiles();
             const profileIds = baseProfiles.map((p) => p._id);
+            const needsBadgeData = selectedFields.includes('badges');
 
-            if (context.writeLine) {
+            if (needsBadgeData && context.writeLine) {
                 context.writeLine(
-                    `userctl: Fetching individual profiles for ${profileIds.length} friends...`,
+                    `userctl: Fetching badge data for ${profileIds.length} friends...`,
                 );
             }
 
-            const profiles =
-                profileIds.length > 0
-                    ? await Promise.all(
-                          profileIds.map(async (id) => {
-                              const fullProfile = await usersApi.getById(id);
-                              if (context.writeLine) {
-                                  context.writeLine(
-                                      `userctl: Parsing user ${fullProfile.username}... Found ${fullProfile.badges?.length || 0} badges.`,
-                                  );
-                              }
-                              return fullProfile;
-                          }),
-                      )
-                    : [];
+            const profiles = needsBadgeData
+                ? await Promise.all(
+                      profileIds.map(async (id) => {
+                          const fullProfile = await usersApi.getById(id);
+                          if (context.writeLine) {
+                              context.writeLine(
+                                  `userctl: Parsing user ${fullProfile.username}... Found ${fullProfile.badges?.length || 0} badges.`,
+                              );
+                          }
+                          return fullProfile;
+                      }),
+                  )
+                : baseProfiles;
+
             if (profiles.length === 0) {
                 return {
                     output: [

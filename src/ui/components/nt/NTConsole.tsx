@@ -1,33 +1,57 @@
 import React, { useEffect, useRef, useState } from 'react';
 
-import { registry } from '@/console';
+import {
+    type ConsoleProgram,
+    DosFileSystem,
+    Terminal,
+    registry,
+} from '@/console';
 import { parseAnsi } from '@/console/utils/ansiParser';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { toggleConsole } from '@/store/slices/debugOptionsSlice';
 import { NTScrollArea } from '@/ui/components/nt/NTScrollArea';
 import { Window } from '@/ui/components/nt/Window';
 
-interface ConsoleLine {
-    id: string;
-    text: string;
-}
+const MEASURE_COLUMNS = 80;
+const SIZE_GUARD_PX = 1;
 
 export const NTConsole: React.FC = () => {
     const dispatch = useAppDispatch();
     const isOpen = useAppSelector((state) => state.debugOptions.isConsoleOpen);
+    const [terminal] = useState(
+        () =>
+            new Terminal({
+                initialLines: [
+                    'Serchat(R) Console NT(TM)',
+                    '(C) Copyright 1985-1996 Serchat Corp.',
+                    '',
+                ],
+            }),
+    );
+    const [filesystem] = useState(() => new DosFileSystem());
 
-    const [history, setHistory] = useState<ConsoleLine[]>([
-        { id: '1', text: 'Serchat(R) Console NT(TM)' },
-        { id: '2', text: '(C) Copyright 1985-1996 Serchat Corp.' },
-        { id: '3', text: '' },
-    ]);
+    const [history, setHistory] = useState(() => terminal.snapshot());
     const [currentInput, setCurrentInput] = useState<string>('');
     const [commandHistory, setCommandHistory] = useState<string[]>([]);
     const [historyIndex, setHistoryIndex] = useState<number>(-1);
     const [isCommandRunning, setIsCommandRunning] = useState<boolean>(false);
+    const [activeProgram, setActiveProgram] = useState<ConsoleProgram | null>(
+        null,
+    );
+    const [cwd, setCwd] = useState(() => filesystem.getCwd());
+    const activeProgramRef = useRef<ConsoleProgram | null>(null);
 
     const consoleRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
+    const measureRef = useRef<HTMLSpanElement>(null);
+
+    useEffect(() => {
+        terminal.attach(setHistory);
+    }, [terminal]);
+
+    useEffect(() => {
+        activeProgramRef.current = activeProgram;
+    }, [activeProgram]);
 
     useEffect(() => {
         if (isOpen) {
@@ -37,6 +61,78 @@ export const NTConsole: React.FC = () => {
             return () => clearTimeout(timer);
         }
     }, [isOpen]);
+
+    useEffect(() => {
+        if (!isOpen) return;
+
+        const handleFocus = (): void => {
+            if (
+                document.activeElement !== inputRef.current &&
+                (!isCommandRunning || activeProgramRef.current)
+            ) {
+                inputRef.current?.focus();
+            }
+        };
+
+        const interval = setInterval(handleFocus, 100);
+        return () => clearInterval(interval);
+    }, [isOpen, isCommandRunning]);
+
+    useEffect(() => {
+        if (!isOpen || !consoleRef.current) return;
+
+        const updateTerminalSize = (): void => {
+            const viewport = consoleRef.current?.querySelector(
+                '.nt-scroll-area__viewport',
+            );
+            const element =
+                viewport instanceof HTMLElement ? viewport : consoleRef.current;
+            const measure = measureRef.current;
+            if (!element || !measure) return;
+
+            const style = window.getComputedStyle(element);
+            const horizontalPadding =
+                parseFloat(style.paddingLeft) + parseFloat(style.paddingRight);
+            const verticalPadding =
+                parseFloat(style.paddingTop) + parseFloat(style.paddingBottom);
+            const measureRect = measure.getBoundingClientRect();
+            const charWidth = measureRect.width / MEASURE_COLUMNS;
+            const lineHeight = measureRect.height;
+            if (charWidth <= 0 || lineHeight <= 0) return;
+
+            const columns = Math.max(
+                1,
+                Math.floor(
+                    (element.clientWidth - horizontalPadding - SIZE_GUARD_PX) /
+                        charWidth,
+                ),
+            );
+            const rows = Math.max(
+                1,
+                Math.floor(
+                    (element.clientHeight - verticalPadding - SIZE_GUARD_PX) /
+                        lineHeight,
+                ),
+            );
+
+            const previous = terminal.getSize();
+            terminal.setSize({ columns, rows });
+            if (
+                activeProgramRef.current &&
+                (previous.columns !== columns || previous.rows !== rows)
+            ) {
+                activeProgramRef.current.start();
+            }
+        };
+
+        updateTerminalSize();
+        const resizeObserver = new ResizeObserver(updateTerminalSize);
+        resizeObserver.observe(consoleRef.current);
+        if (measureRef.current) {
+            resizeObserver.observe(measureRef.current);
+        }
+        return () => resizeObserver.disconnect();
+    }, [isOpen, terminal]);
 
     useEffect(() => {
         const viewport = consoleRef.current?.querySelector(
@@ -54,131 +150,79 @@ export const NTConsole: React.FC = () => {
         }
     };
 
-    const generateId = (): string => Math.random().toString(36).substring(2, 9);
+    const executeCommand = (input: string): void => {
+        const command = input.trim();
+        const fullPromptLine = `${filesystem.getCwd()}>${input}`;
+
+        if (!command) {
+            terminal.puts(fullPromptLine);
+            terminal.puts();
+            return;
+        }
+
+        setCommandHistory((prev) => [...prev, input]);
+        setHistoryIndex(-1);
+        setIsCommandRunning(true);
+
+        void (async () => {
+            terminal.puts(fullPromptLine);
+            await new Promise((resolve) => setTimeout(resolve, 100));
+
+            const result = await registry.execute(input, {
+                dispatch,
+                endProgram: () => {
+                    activeProgramRef.current = null;
+                    setActiveProgram(null);
+                },
+                filesystem,
+                startProgram: (program) => {
+                    activeProgramRef.current = program;
+                    setActiveProgram(program);
+                    program.start();
+                },
+                terminal,
+                writeLine: (line: string) => terminal.puts(line),
+                clearScreen: () => terminal.clear(),
+            });
+
+            if (result.clear) {
+                terminal.clear();
+            } else if (result.output) {
+                terminal.writeLines(result.output);
+            }
+
+            setCwd(filesystem.getCwd());
+            setIsCommandRunning(false);
+        })();
+    };
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>): void => {
+        if (activeProgramRef.current) {
+            activeProgramRef.current.handleKeyDown({
+                altKey: e.altKey,
+                ctrlKey: e.ctrlKey,
+                key: e.key,
+                preventDefault: () => e.preventDefault(),
+            });
+            return;
+        }
+
         if (isCommandRunning) {
             e.preventDefault();
             return;
         }
 
         if (e.key === 'Enter') {
-            const command = currentInput.trim();
-            const fullPromptLine = `C:\\WINNT\\System32>${currentInput}`;
-
-            const newHistory = [
-                ...history,
-                { id: generateId(), text: fullPromptLine },
-            ];
-
-            if (command) {
-                const newCmdHistory = [...commandHistory, currentInput];
-                setCommandHistory(newCmdHistory);
-                setHistoryIndex(-1);
-                setIsCommandRunning(true);
-
-                void (async () => {
-                    const commandLineId = generateId();
-                    setHistory((prev) => [
-                        ...prev,
-                        { id: commandLineId, text: fullPromptLine },
-                    ]);
-                    await new Promise((resolve) => setTimeout(resolve, 100));
-
-                    let updateLineId: string | null = null;
-
-                    const result = await registry.execute(currentInput, {
-                        dispatch,
-                        writeLine: (line: string) => {
-                            setHistory((prev) => {
-                                if (line.startsWith('\r')) {
-                                    const newPrev = [...prev];
-                                    if (updateLineId) {
-                                        const updateIndex = newPrev.findIndex(
-                                            (entry) =>
-                                                entry.id === updateLineId,
-                                        );
-                                        if (updateIndex !== -1) {
-                                            newPrev[updateIndex] = {
-                                                ...newPrev[updateIndex],
-                                                text: line.replace(/^\r/, ''),
-                                            };
-                                            return newPrev;
-                                        }
-                                    }
-                                    if (newPrev.length > 0) {
-                                        const lastEntry =
-                                            newPrev[newPrev.length - 1];
-                                        if (lastEntry.id === commandLineId) {
-                                            const newId = generateId();
-                                            updateLineId = newId;
-                                            return [
-                                                ...newPrev,
-                                                {
-                                                    id: newId,
-                                                    text: line.replace(
-                                                        /^\r/,
-                                                        '',
-                                                    ),
-                                                },
-                                            ];
-                                        }
-                                        updateLineId = lastEntry.id;
-                                        newPrev[newPrev.length - 1] = {
-                                            ...lastEntry,
-                                            text: line.replace(/^\r/, ''),
-                                        };
-                                        return newPrev;
-                                    }
-                                    const newId = generateId();
-                                    updateLineId = newId;
-                                    return [
-                                        ...newPrev,
-                                        {
-                                            id: newId,
-                                            text: line.replace(/^\r/, ''),
-                                        },
-                                    ];
-                                }
-                                updateLineId = null;
-                                return [
-                                    ...prev,
-                                    { id: generateId(), text: line },
-                                ];
-                            });
-                        },
-                    });
-
-                    if (result.clear) {
-                        setHistory([]);
-                    } else if (result.output) {
-                        setHistory((prev) => [
-                            ...prev,
-                            ...(result.output ?? []).map((line) => ({
-                                id: generateId(),
-                                text: line,
-                            })),
-                        ]);
-                    }
-
-                    setIsCommandRunning(false);
-                })();
-            } else {
-                newHistory.push({ id: generateId(), text: '' });
-                setHistory(newHistory);
-            }
-
+            executeCommand(currentInput);
             setCurrentInput('');
         } else if (e.key === 'ArrowUp') {
             e.preventDefault();
             if (commandHistory.length === 0) return;
 
-            let newIndex = historyIndex;
-            if (historyIndex === -1) {
-                newIndex = commandHistory.length - 1;
-            } else if (historyIndex > 0) {
-                newIndex = historyIndex - 1;
-            }
+            const newIndex =
+                historyIndex === -1
+                    ? commandHistory.length - 1
+                    : Math.max(0, historyIndex - 1);
 
             setHistoryIndex(newIndex);
             setCurrentInput(commandHistory[newIndex]);
@@ -186,14 +230,14 @@ export const NTConsole: React.FC = () => {
             e.preventDefault();
             if (historyIndex === -1) return;
 
-            let newIndex = historyIndex + 1;
+            const newIndex = historyIndex + 1;
             if (newIndex >= commandHistory.length) {
-                newIndex = -1;
+                setHistoryIndex(-1);
                 setCurrentInput('');
             } else {
+                setHistoryIndex(newIndex);
                 setCurrentInput(commandHistory[newIndex]);
             }
-            setHistoryIndex(newIndex);
         }
     };
 
@@ -215,6 +259,13 @@ export const NTConsole: React.FC = () => {
                 ref={consoleRef}
                 onClick={handleConsoleClick}
             >
+                <span
+                    aria-hidden="true"
+                    className="pointer-events-none invisible absolute whitespace-pre"
+                    ref={measureRef}
+                >
+                    {'M'.repeat(MEASURE_COLUMNS)}
+                </span>
                 <NTScrollArea
                     className="min-h-0 w-full flex-1"
                     viewportClassName="p-2"
@@ -244,9 +295,9 @@ export const NTConsole: React.FC = () => {
                         </div>
                     ))}
 
-                    {!isCommandRunning && (
+                    {!isCommandRunning && !activeProgram && (
                         <div className="flex flex-wrap items-center select-none">
-                            <span>C:\WINNT\System32&gt;</span>
+                            <span>{cwd}&gt;</span>
                             <span className="whitespace-pre select-text">
                                 {currentInput}
                             </span>

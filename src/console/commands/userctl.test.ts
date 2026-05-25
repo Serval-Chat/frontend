@@ -57,9 +57,9 @@ describe('userctl command', () => {
         };
 
         vi.mocked(friendsApi.getFriendProfiles).mockResolvedValue([
-            { _id: '1' } as User,
-            { _id: '2' } as User,
-            { _id: '3' } as User,
+            mockUsers['1'] as User,
+            mockUsers['2'] as User,
+            mockUsers['3'] as User,
         ]);
 
         vi.mocked(usersApi.getById).mockImplementation(
@@ -120,6 +120,7 @@ describe('userctl command', () => {
         expect(outputStr).toContain('bob');
         expect(outputStr).toContain('charlie');
         expect(outputStr).toContain('Total friends: 3');
+        expect(usersApi.getById).not.toHaveBeenCalled();
     });
 
     it('queries friends with /hide-empty', async () => {
@@ -134,6 +135,7 @@ describe('userctl command', () => {
         expect(outputStr).toContain('bob');
         expect(outputStr).toContain('charlie');
         expect(outputStr).toContain('Total friends: 3');
+        expect(usersApi.getById).not.toHaveBeenCalled();
     });
 
     it('queries friends with /require-all (default columns: uname, dname)', async () => {
@@ -148,6 +150,7 @@ describe('userctl command', () => {
         expect(outputStr).toContain('bob');
         expect(outputStr).not.toContain('charlie');
         expect(outputStr).toContain('Total friends: 2');
+        expect(usersApi.getById).not.toHaveBeenCalled();
     });
 
     it('queries friends with /filter and /require-all', async () => {
@@ -168,6 +171,7 @@ describe('userctl command', () => {
         expect(outputStr).not.toContain('bob');
         expect(outputStr).not.toContain('charlie');
         expect(outputStr).toContain('Total friends: 1');
+        expect(usersApi.getById).not.toHaveBeenCalled();
     });
 
     it('returns error on invalid filters', async () => {
@@ -215,5 +219,6 @@ describe('userctl command', () => {
         expect(outputStr).toContain(
             '\u001b[38;2;255;85;85mEarly Supporter\u001b[0m',
         );
+        expect(usersApi.getById).toHaveBeenCalledTimes(3);
     });
 });

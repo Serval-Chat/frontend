@@ -6,9 +6,9 @@ import type {
 export const progressCommand: ConCommandReactor = {
     match: (_argc, argv) => argv[0]?.toLowerCase() === 'progress',
     execute: async (_argc, _argv, context): Promise<CommandResult> => {
-        const { writeLine } = context;
-        if (!writeLine) {
-            return { output: ['Error: writeLine not available'] };
+        const { terminal } = context;
+        if (!terminal) {
+            return { output: ['Error: terminal not available'] };
         }
 
         const reset = '\u001b[0m';
@@ -18,7 +18,10 @@ export const progressCommand: ConCommandReactor = {
         const bold = '\u001b[1m';
 
         for (let i = 0; i <= 100; i += 2) {
-            const width = 50;
+            const width = Math.max(
+                10,
+                Math.min(50, terminal.getColumns() - 10),
+            );
             const filled = Math.floor((i / 100) * width);
             const empty = width - filled;
 
@@ -28,11 +31,12 @@ export const progressCommand: ConCommandReactor = {
 
             const bar = `[${color}${bold}${'█'.repeat(filled)}${reset}${'░'.repeat(empty)}] ${bold}${i}%${reset}`;
 
-            writeLine(`\r\u001b[0K${bar}`);
+            terminal.write(`\r\u001b[0K${bar}`);
 
             await new Promise((resolve) => setTimeout(resolve, 50));
         }
 
+        terminal.puts();
         return { output: [] };
     },
 };

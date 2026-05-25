@@ -561,22 +561,63 @@ export const ServerOnboardingModal: React.FC<ServerOnboardingModalProps> = ({
         setSelectedRoleIds(
             onboarding.member.roles.filter((roleId) => allowed.has(roleId)),
         );
-        if (onboarding.member.rulesAcceptedAt) {
-            setStep('roles');
-            setAccepted(true);
-        }
     }, [onboarding]);
 
     const rulesList = useMemo(
         () => onboarding?.onboarding.guidelines ?? [],
         [onboarding?.onboarding.guidelines],
     );
+    const hasGuidelines = rulesList.length > 0;
+    const hasSelfRoles =
+        (onboarding?.onboarding.selfAssignableRoleIds.length ?? 0) > 0;
+    const steps = useMemo(
+        () =>
+            [
+                hasGuidelines
+                    ? ({ id: 'rules', label: 'Server Rules' } as const)
+                    : null,
+                hasSelfRoles
+                    ? ({ id: 'roles', label: 'Customize' } as const)
+                    : null,
+                { id: 'welcome', label: 'Welcome' } as const,
+            ].filter(Boolean) as {
+                id: 'rules' | 'roles' | 'welcome';
+                label: string;
+            }[],
+        [hasGuidelines, hasSelfRoles],
+    );
+    const firstStep = steps[0]?.id ?? 'welcome';
+    const roleStepOrWelcome = hasSelfRoles ? 'roles' : 'welcome';
+
+    React.useEffect(() => {
+        if (!onboarding) return;
+
+        if (!hasGuidelines) {
+            setAccepted(false);
+            setStep(firstStep);
+            return;
+        }
+
+        if (onboarding.member.rulesAcceptedAt) {
+            setAccepted(true);
+            setStep(roleStepOrWelcome);
+            return;
+        }
+
+        setStep('rules');
+    }, [
+        firstStep,
+        hasGuidelines,
+        onboarding,
+        onboarding?.member.rulesAcceptedAt,
+        roleStepOrWelcome,
+    ]);
 
     if (!isRequired) return null;
 
     const handleAcceptRules = (): void => {
         acceptRules.mutate(undefined, {
-            onSuccess: () => setStep('roles'),
+            onSuccess: () => setStep(roleStepOrWelcome),
         });
     };
 
@@ -608,12 +649,10 @@ export const ServerOnboardingModal: React.FC<ServerOnboardingModalProps> = ({
         onboarding?.onboarding.welcomeChannelIds.includes(channel._id),
     );
 
-    const steps: { id: 'rules' | 'roles' | 'welcome'; label: string }[] = [
-        { id: 'rules', label: 'Server Rules' },
-        { id: 'roles', label: 'Customize' },
-        { id: 'welcome', label: 'Welcome' },
-    ];
-    const stepIndex = step === 'rules' ? 0 : step === 'roles' ? 1 : 2;
+    const stepIndex = Math.max(
+        0,
+        steps.findIndex((s) => s.id === step),
+    );
 
     return (
         <Modal

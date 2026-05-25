@@ -61,6 +61,7 @@ export function parseAnsi(text: string): React.ReactNode[] {
     let lastIndex = 0;
     let currentColor: string | undefined = undefined;
     let currentBgColor: string | undefined = undefined;
+    let inverse = false;
     let match;
 
     while ((match = ansiRegex.exec(text)) !== null) {
@@ -77,8 +78,8 @@ export function parseAnsi(text: string): React.ReactNode[] {
             if (segmentText.length > 0) {
                 segments.push({
                     text: segmentText,
-                    color: currentColor,
-                    backgroundColor: currentBgColor,
+                    color: inverse ? '#000000' : currentColor,
+                    backgroundColor: inverse ? '#c0c0c0' : currentBgColor,
                 });
             }
         }
@@ -91,6 +92,7 @@ export function parseAnsi(text: string): React.ReactNode[] {
             if (!paramStr || paramStr === '0') {
                 currentColor = undefined;
                 currentBgColor = undefined;
+                inverse = false;
             } else {
                 const parts = paramStr.split(';').map(Number);
                 let idx = 0;
@@ -99,6 +101,13 @@ export function parseAnsi(text: string): React.ReactNode[] {
                     if (code === 0) {
                         currentColor = undefined;
                         currentBgColor = undefined;
+                        inverse = false;
+                        idx++;
+                    } else if (code === 7) {
+                        inverse = true;
+                        idx++;
+                    } else if (code === 27) {
+                        inverse = false;
                         idx++;
                     } else if (
                         code === 38 &&
@@ -148,8 +157,8 @@ export function parseAnsi(text: string): React.ReactNode[] {
         if (segmentText.length > 0) {
             segments.push({
                 text: segmentText,
-                color: currentColor,
-                backgroundColor: currentBgColor,
+                color: inverse ? '#000000' : currentColor,
+                backgroundColor: inverse ? '#c0c0c0' : currentBgColor,
             });
         }
     }
