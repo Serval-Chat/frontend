@@ -104,4 +104,5 @@ export interface ChatMessage {
     poll: MessagePoll | null;
     senderIsBot: boolean;
     deletedAt?: string;
+    isEphemeral?: boolean;
 }

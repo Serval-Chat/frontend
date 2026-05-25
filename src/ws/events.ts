@@ -31,6 +31,14 @@ export interface IWsEnvelope<T = JsonValue> {
     };
 }
 
+export interface IInteractionResponseServerEvent {
+    serverId: string;
+    channelId: string;
+    text: string;
+    invocationId?: string;
+    ephemeral?: boolean;
+}
+
 /**
  * @description Authentication event.
  */
@@ -573,6 +581,7 @@ export const WsEvents = {
     AUDIT_LOG_ENTRY_CREATED: 'audit_log_entry_created',
     MESSAGE_SERVER_PIN_UPDATED: 'message_server_pin_updated',
     INTERACTION_CREATE_SERVER: 'interaction_create_server',
+    INTERACTION_RESPONSE_SERVER: 'interaction_response_server',
     ADMIN_STATS_UPDATED: 'admin_stats_updated',
     POLL_VOTE_UPDATED_DM: 'poll_vote_updated_dm',
     POLL_VOTE_UPDATED_SERVER: 'poll_vote_updated_server',

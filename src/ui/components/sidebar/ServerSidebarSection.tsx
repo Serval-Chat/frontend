@@ -76,6 +76,7 @@ export const ServerSidebarSection: React.FC<ServerSidebarSectionProps> = ({
                     isOnline,
                     isHidden: !!(userBlocks & BlockFlags.HIDE_FROM_MEMBER_LIST),
                     sortName: (
+                        m.nickname ||
                         m.user.displayName ||
                         m.user.username ||
                         ''
@@ -299,6 +300,7 @@ export const ServerSidebarSection: React.FC<ServerSidebarSectionProps> = ({
                                         : 'online'
                                 }
                                 joinedAt={item.member.joinedAt}
+                                nickname={item.member.nickname}
                                 role={memberRoleMap.get(item.member.userId)}
                                 serverId={String(serverDetails?._id || '')}
                                 serverRoles={roles}
@@ -369,6 +371,7 @@ export const ServerSidebarSection: React.FC<ServerSidebarSectionProps> = ({
                                         : 'online'
                                 }
                                 joinedAt={item.member.joinedAt}
+                                nickname={item.member.nickname}
                                 role={memberRoleMap.get(item.member.userId)}
                                 serverId={String(serverDetails?._id || '')}
                                 serverRoles={roles}

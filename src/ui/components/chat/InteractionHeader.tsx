@@ -85,7 +85,8 @@ export const InteractionHeader: React.FC<InteractionHeaderProps> = React.memo(
                         role={role}
                         user={resolvedUser || (user as unknown as User)}
                     >
-                        {resolvedUser?.displayName ||
+                        {resolvedUser?.nickname ||
+                            resolvedUser?.displayName ||
                             resolvedUser?.username ||
                             user.username}
                     </StyledUserName>

@@ -62,7 +62,7 @@ export const MessageHeader: React.FC<MessageHeaderProps> = React.memo(
                         role={role}
                         user={user}
                     >
-                        {user.displayName || user.username}
+                        {user.nickname || user.displayName || user.username}
                     </StyledUserName>
                 </Box>
                 {user.isBot && <BotTag className="h-4" />}

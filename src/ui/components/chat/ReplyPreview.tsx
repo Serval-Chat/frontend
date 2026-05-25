@@ -84,7 +84,7 @@ export const ReplyPreview: React.FC<ReplyPreviewProps> = React.memo(
                         role={role}
                         user={user}
                     >
-                        {user.displayName || user.username}
+                        {user.nickname || user.displayName || user.username}
                     </StyledUserName>
                     {user.isBot && <BotTag className="h-3.5 px-1 text-[8px]" />}
                     {isWebhook && (

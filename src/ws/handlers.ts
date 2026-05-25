@@ -54,6 +54,7 @@ import {
     type IChannelsReorderedEvent,
     type IDisplayNameUpdatedEvent,
     type IEmojiUpdatedEvent,
+    type IInteractionResponseServerEvent,
     type IMemberAddedEvent,
     type IMemberRemovedEvent,
     type IMemberUpdatedEvent,
@@ -415,6 +416,46 @@ export const setupGlobalWsHandlers = (
                 convertServerMessageToChatMessage(payload),
             );
         }),
+    );
+
+    cleanups.push(
+        wsClient.on<IInteractionResponseServerEvent>(
+            WsEvents.INTERACTION_RESPONSE_SERVER,
+            (payload) => {
+                if (!currentUser) return;
+
+                const dummyMessage: ChatMessage = {
+                    _id: `ephemeral-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+                    serverId: payload.serverId,
+                    channelId: payload.channelId,
+                    text: payload.text,
+                    createdAt: new Date().toISOString(),
+                    senderId: currentUser.id,
+                    senderIsBot: false,
+                    isEdited: false,
+                    isPinned: false,
+                    isSticky: false,
+                    isWebhook: false,
+                    embeds: [],
+                    attachments: [],
+                    reactions: [],
+                    interaction: null,
+                    poll: null,
+                    stickerId: null,
+                    isEphemeral: true,
+                };
+
+                addMessageToInfiniteCache(
+                    queryClient,
+                    CHAT_QUERY_KEYS.channelMessages(
+                        payload.serverId,
+                        payload.channelId,
+                        null,
+                    ),
+                    dummyMessage,
+                );
+            },
+        ),
     );
 
     cleanups.push(

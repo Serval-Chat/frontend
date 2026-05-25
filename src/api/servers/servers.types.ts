@@ -148,6 +148,7 @@ export interface ServerMember {
     _id: string;
     serverId: string;
     userId: string;
+    nickname?: string;
     roles: string[];
     joinedAt: string;
     user: User;

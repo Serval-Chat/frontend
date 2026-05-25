@@ -58,7 +58,7 @@ export const Message: React.FC<MessageProps> = React.memo(
         disableGlowAndColors,
         disableColors,
         disableGlow,
-        disableActions = false,
+        disableActions: disableActionsProp = false,
         onResize,
         me: passedMe,
         serverDetails: passedServerDetails,
@@ -90,6 +90,8 @@ export const Message: React.FC<MessageProps> = React.memo(
             fullMemberMap,
             roleMap,
         });
+
+        const disableActions = disableActionsProp || message.isEphemeral;
 
         const [showProfile, setShowProfile] = React.useState(false);
         const [showPicker, setShowPicker] = React.useState(false);
@@ -253,7 +255,8 @@ export const Message: React.FC<MessageProps> = React.memo(
             setColorResolverReport(
                 buildUsernameColorResolverReport({
                     label: 'Message username',
-                    renderedName: user.displayName || user.username,
+                    renderedName:
+                        user.nickname || user.displayName || user.username,
                     user,
                     role: resolvedRole,
                     disableColors: isColorsDisabled,
@@ -467,6 +470,11 @@ export const Message: React.FC<MessageProps> = React.memo(
                             serverId={message.serverId}
                             onAddClick={handleAddReactionClick}
                         />
+                        {message.isEphemeral && (
+                            <Text className="mt-1 flex items-center gap-1 text-[11px] text-text-muted italic">
+                                Only you can see this
+                            </Text>
+                        )}
                     </Box>
                 </Box>
 
@@ -512,6 +520,7 @@ export const Message: React.FC<MessageProps> = React.memo(
                 className={cn(
                     'group relative flex flex-col px-4 py-0.5 transition-all duration-500 hover:bg-white/2',
                     isGroupStart ? 'mt-1' : 'mt-0',
+                    message.isEphemeral && 'bg-[var(--primary-muted)]/30',
                     isHighlighted &&
                         'border-l-2 border-[var(--primary)] bg-[var(--primary-muted)]',
                     mentionsMe && 'border-l-2 border-[var(--caution)]',

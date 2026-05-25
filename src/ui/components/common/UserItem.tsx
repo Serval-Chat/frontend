@@ -82,6 +82,7 @@ interface UserItemProps {
         profilePicture?: string | null;
         customStatus?: { text?: string; emoji?: string } | null;
     };
+    nickname?: string;
     isActive?: boolean;
     onClick?: () => void;
     className?: string;
@@ -179,6 +180,7 @@ const UserItemInner: React.FC<
         allRoles,
         serverRoles,
         joinedAt,
+        nickname,
         disableCustomFonts,
         disableGlowAndColors,
         disableColors,
@@ -251,7 +253,10 @@ const UserItemInner: React.FC<
             () => ({
                 username: userProfile?.username || initialData?.username || '',
                 displayName:
-                    userProfile?.displayName || initialData?.displayName,
+                    nickname ||
+                    userProfile?.nickname ||
+                    userProfile?.displayName ||
+                    initialData?.displayName,
                 profilePicture:
                     userProfile?.profilePicture ||
                     initialData?.profilePicture ||
@@ -1028,6 +1033,7 @@ export const UserItem = React.memo((props: UserItemProps) => {
                         initialPresenceStatus={props.initialPresenceStatus}
                         isActive={props.isActive}
                         joinedAt={props.joinedAt}
+                        nickname={props.nickname}
                         noFetch={props.noFetch}
                         role={props.role}
                         serverData={serverData}
@@ -1056,6 +1062,7 @@ export const UserItem = React.memo((props: UserItemProps) => {
             initialPresenceStatus={props.initialPresenceStatus}
             isActive={props.isActive}
             joinedAt={props.joinedAt}
+            nickname={props.nickname}
             noFetch={props.noFetch}
             role={props.role}
             serverData={null}

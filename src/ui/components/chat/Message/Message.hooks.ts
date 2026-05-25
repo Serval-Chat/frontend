@@ -39,7 +39,16 @@ export function useMessageData(
     const { data: fetchedUser } = useUserById(initialUser._id, {
         enabled: isUnknownUser,
     });
-    const user = isUnknownUser && fetchedUser ? fetchedUser : initialUser;
+    let user = isUnknownUser && fetchedUser ? fetchedUser : initialUser;
+
+    if (data?.senderMember?.nickname) {
+        user = { ...user, nickname: data.senderMember.nickname };
+    } else if (data?.fullMemberMap?.has(user._id)) {
+        const member = data.fullMemberMap.get(user._id);
+        if (member?.nickname) {
+            user = { ...user, nickname: member.nickname };
+        }
+    }
 
     const me = data?.me;
     const serverDetails = data?.serverDetails;
@@ -86,6 +95,7 @@ export function useMessageData(
             username:
                 member.user.username || message.interaction!.user.username,
             displayName: member.user.displayName,
+            nickname: member.nickname,
             profilePicture: member.user.profilePicture,
             bannerColor: member.user.bannerColor,
             usernameGradient: member.user.usernameGradient,

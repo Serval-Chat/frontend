@@ -134,8 +134,8 @@ export const ChannelOverviewSettings: React.FC<
                     ? { link: linkUrl || undefined }
                     : {}),
                 slowMode,
-                emoji: emoji || undefined,
-                emojiType,
+                emoji: emoji,
+                emojiType: emoji ? emojiType : undefined,
             },
             {
                 onSuccess: () => {

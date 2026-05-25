@@ -120,6 +120,7 @@ export interface User {
     _id: string;
     login: string;
     username: string;
+    nickname?: string | null;
     isBot?: boolean;
     displayName?: string | null;
     profilePicture?: string;
