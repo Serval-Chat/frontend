@@ -293,6 +293,7 @@ export const MessageEdit: React.FC<MessageEditProps> = ({
                         members={members}
                         roles={roles}
                         serverEmojis={allServerEmojis}
+                        serverId={serverId}
                         onOpenChange={(isOpen) => {
                             isAutocompleteOpenRef.current = isOpen;
                         }}

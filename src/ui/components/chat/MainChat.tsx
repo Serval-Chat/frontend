@@ -238,6 +238,17 @@ export const MainChat: React.FC<MainChatProps> = ({
         [typingUsers, debugTypingCount],
     );
 
+    const resolvedTypingUsers = React.useMemo(
+        () =>
+            typingUsersWithDebug.map((u) => {
+                const member = fullMemberMap.get(u.userId);
+                const resolvedName =
+                    member?.nickname || member?.user?.displayName || u.username;
+                return { ...u, username: resolvedName };
+            }),
+        [typingUsersWithDebug, fullMemberMap],
+    );
+
     const canBypassSlowMode =
         !selectedServerId || hasPermission('bypassSlowmode');
     const { cooldown, setCooldown } = useSlowMode(
@@ -470,7 +481,7 @@ export const MainChat: React.FC<MainChatProps> = ({
                                 !!selectedChannel?.slowMode &&
                                 selectedChannel.slowMode > 0
                             }
-                            typingUsers={typingUsersWithDebug}
+                            typingUsers={resolvedTypingUsers}
                         />
                     </Box>
 

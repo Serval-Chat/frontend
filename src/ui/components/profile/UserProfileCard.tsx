@@ -67,6 +67,7 @@ interface UserProfileCardProps {
     disableColors?: boolean;
     disableGlow?: boolean;
     adminData?: AdminExtendedUser;
+    nickname?: string;
 
     allServerRoles?: Role[];
     canManageRoles?: boolean;
@@ -193,6 +194,7 @@ export const UserProfileCard: React.FC<UserProfileCardProps> = ({
     myHighestRolePosition,
     serverId,
     userId: propUserId,
+    nickname,
 }) => {
     const { data: currentUser } = useMe();
     const navigate = useNavigate();
@@ -291,7 +293,7 @@ export const UserProfileCard: React.FC<UserProfileCardProps> = ({
                             role={role}
                             user={user as User}
                         >
-                            {user?.displayName || user?.username}
+                            {nickname || user?.displayName || user?.username}
                         </StyledUserName>
                         {user?.isBot && <BotTag className="ml-0" />}
                     </Box>

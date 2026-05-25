@@ -1058,6 +1058,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                             members={members}
                             roles={roles}
                             serverEmojis={allServerEmojis}
+                            serverId={selectedServerId || undefined}
                             onOpenChange={(isOpen) => {
                                 setIsMentionAutocompleteOpen(isOpen);
                             }}

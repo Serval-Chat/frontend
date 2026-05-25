@@ -25,6 +25,7 @@ export type SuggestionType =
 export interface UserSuggestion {
     type: 'user';
     user: User;
+    nickname?: string;
 }
 
 export interface RoleSuggestion {
@@ -164,10 +165,12 @@ export const AutocompleteSuggestion: React.FC<AutocompleteSuggestionProps> = ({
                                                 : 'text-foreground',
                                         )}
                                     >
-                                        {suggestion.user.displayName ||
+                                        {suggestion.nickname ||
+                                            suggestion.user.displayName ||
                                             suggestion.user.username}
                                     </span>
-                                    {suggestion.user.displayName && (
+                                    {(suggestion.nickname ||
+                                        suggestion.user.displayName) && (
                                         <span className="truncate text-xs text-muted-foreground">
                                             {suggestion.user.username.startsWith(
                                                 '@',

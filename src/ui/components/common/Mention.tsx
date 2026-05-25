@@ -1,5 +1,6 @@
 import React, { useRef, useState } from 'react';
 
+import { useMembers } from '@/api/servers/servers.queries';
 import { useUserById } from '@/api/users/users.queries';
 import { Text } from '@/ui/components/common/Text';
 import { Box } from '@/ui/components/layout/Box';
@@ -18,7 +19,10 @@ const isValidUserId = (id: string): boolean => /^[a-f\d]{24}$/i.test(id);
 export const Mention: React.FC<MentionProps> = ({ userId, serverId }) => {
     const [isPopupOpen, setIsPopupOpen] = useState(false);
     const triggerRef = useRef<HTMLSpanElement>(null);
-    const { data: user, isLoading } = useUserById(userId);
+    const { data: user, isLoading: isUserLoading } = useUserById(userId);
+    const { data: members } = useMembers(serverId || null, {
+        enabled: !!serverId,
+    });
 
     if (!isValidUserId(userId)) {
         return (
@@ -33,11 +37,15 @@ export const Mention: React.FC<MentionProps> = ({ userId, serverId }) => {
         );
     }
 
-    const displayName = user
-        ? user.displayName || user.username
-        : isLoading
-          ? '...'
-          : 'unknown user';
+    const member = members?.find((m) => m.userId === userId);
+
+    const displayName = member?.nickname
+        ? member.nickname
+        : user
+          ? user.displayName || user.username
+          : isUserLoading
+            ? '...'
+            : 'unknown user';
 
     return (
         <>

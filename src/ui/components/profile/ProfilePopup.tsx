@@ -253,6 +253,7 @@ const ProfilePopupContent: React.FC<ProfilePopupProps> = ({
                     isOwner={isOwner}
                     joinedAt={finalJoinedAt}
                     myHighestRolePosition={myHighestRolePosition}
+                    nickname={member?.nickname}
                     presenceStatus={presenceStatus}
                     role={resolvedRole}
                     roles={finalRoles}

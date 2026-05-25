@@ -120,7 +120,12 @@ export class ChipNode extends DecoratorNode<React.ReactNode> {
     private renderContent(): React.ReactNode {
         switch (this.__chipType) {
             case 'user':
-                return <Mention userId={this.__payload.id} />;
+                return (
+                    <Mention
+                        serverId={this.__payload.serverId}
+                        userId={this.__payload.id}
+                    />
+                );
 
             case 'role':
                 return <RoleMention roleId={this.__payload.id} />;

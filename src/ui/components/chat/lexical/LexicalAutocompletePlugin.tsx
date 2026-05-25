@@ -31,6 +31,7 @@ interface LexicalAutocompletePluginProps {
     friends?: User[];
     serverEmojis?: Emoji[];
     channels?: Channel[];
+    serverId?: string;
     onOpenChange?: (isOpen: boolean) => void;
 }
 
@@ -97,6 +98,7 @@ export const LexicalAutocompletePlugin: React.FC<
     friends = [],
     serverEmojis = [],
     channels = [],
+    serverId,
     onOpenChange,
 }) => {
     const [editor] = useLexicalComposerContext();
@@ -118,7 +120,9 @@ export const LexicalAutocompletePlugin: React.FC<
         const query = queryString.slice(1).toLowerCase();
 
         if (triggerChar === '@') {
+            const memberPriority = new Map<string, number>();
             const userSuggestions: Suggestion[] = [];
+
             members.forEach((member) => {
                 const userBlocks = blocks[member.userId] || 0;
                 if (userBlocks & BlockFlags.HIDE_FROM_MENTIONS) return;
@@ -126,28 +130,63 @@ export const LexicalAutocompletePlugin: React.FC<
                 const username = member.user.username.toLowerCase();
                 const displayName =
                     member.user.displayName?.toLowerCase() || '';
-                if (username.includes(query) || displayName.includes(query)) {
-                    userSuggestions.push({ type: 'user', user: member.user });
+                const nickname = member.nickname?.toLowerCase() || '';
+
+                const matchesUsername = username.includes(query);
+                const matchesDisplayName =
+                    displayName !== '' && displayName.includes(query);
+                const matchesNickname =
+                    nickname !== '' && nickname.includes(query);
+
+                if (matchesUsername || matchesDisplayName || matchesNickname) {
+                    const priority = matchesNickname
+                        ? 0
+                        : matchesDisplayName
+                          ? 1
+                          : 2;
+                    memberPriority.set(member.user._id, priority);
+                    userSuggestions.push({
+                        type: 'user',
+                        user: member.user,
+                        nickname: member.nickname,
+                    });
                 }
             });
 
-            friends.forEach((friend) => {
-                if (!friend) return;
+            if (members.length === 0) {
+                friends.forEach((friend) => {
+                    if (!friend) return;
 
-                const userBlocks = blocks[friend._id] || 0;
-                if (userBlocks & BlockFlags.HIDE_FROM_MENTIONS) return;
+                    const userBlocks = blocks[friend._id] || 0;
+                    if (userBlocks & BlockFlags.HIDE_FROM_MENTIONS) return;
 
-                const username = friend.username.toLowerCase();
-                const displayName = friend.displayName?.toLowerCase() || '';
-                const alreadyAdded = userSuggestions.some(
-                    (s) => s.type === 'user' && s.user._id === friend._id,
-                );
-                if (
-                    !alreadyAdded &&
-                    (username.includes(query) || displayName.includes(query))
-                ) {
-                    userSuggestions.push({ type: 'user', user: friend });
-                }
+                    const username = friend.username.toLowerCase();
+                    const displayName = friend.displayName?.toLowerCase() || '';
+                    const alreadyAdded = userSuggestions.some(
+                        (s) => s.type === 'user' && s.user._id === friend._id,
+                    );
+                    if (
+                        !alreadyAdded &&
+                        (username.includes(query) ||
+                            displayName.includes(query))
+                    ) {
+                        const priority = displayName.includes(query) ? 0 : 1;
+                        memberPriority.set(friend._id, priority);
+                        userSuggestions.push({ type: 'user', user: friend });
+                    }
+                });
+            }
+
+            userSuggestions.sort((a, b) => {
+                const pa =
+                    a.type === 'user'
+                        ? (memberPriority.get(a.user._id) ?? 99)
+                        : 99;
+                const pb =
+                    b.type === 'user'
+                        ? (memberPriority.get(b.user._id) ?? 99)
+                        : 99;
+                return pa - pb;
             });
 
             const roleSuggestions: Suggestion[] = roles
@@ -358,8 +397,10 @@ export const LexicalAutocompletePlugin: React.FC<
                     chipNode = $createChipNode('user', {
                         id: suggestion.user._id,
                         label:
+                            suggestion.nickname ||
                             suggestion.user.displayName ||
                             suggestion.user.username,
+                        serverId,
                     });
                 } else if (suggestion.type === 'role') {
                     chipNode = $createChipNode('role', {
@@ -397,7 +438,7 @@ export const LexicalAutocompletePlugin: React.FC<
                 closeMenu();
             });
         },
-        [editor],
+        [editor, serverId],
     );
 
     return (
