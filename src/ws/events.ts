@@ -354,6 +354,11 @@ export interface IServerUpdatedEvent {
     senderId?: string;
 }
 
+export interface ICommandsUpdatedEvent {
+    serverId: string;
+    botId: string;
+}
+
 /**
  * @description Channel created/updated.
  */
@@ -559,6 +564,7 @@ export const WsEvents = {
 
     // Server Management
     SERVER_UPDATED: 'server_updated',
+    COMMANDS_UPDATED: 'commands_updated',
     SERVER_DELETED: 'server_deleted',
     CHANNEL_CREATED: 'channel_created',
     CHANNEL_UPDATED: 'channel_updated',

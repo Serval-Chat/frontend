@@ -11,6 +11,7 @@ import {
     FRIEND_REQUESTS_QUERY_KEY,
 } from '@/api/friends/friends.queries';
 import type { Friend } from '@/api/friends/friends.types';
+import { COMMANDS_QUERY_KEYS } from '@/api/interactions/interactions.queries';
 import type {
     PingExportMessage,
     PingMentionMessage,
@@ -52,6 +53,7 @@ import {
     type IChannelDeletedEvent,
     type IChannelEvent,
     type IChannelsReorderedEvent,
+    type ICommandsUpdatedEvent,
     type IDisplayNameUpdatedEvent,
     type IEmojiUpdatedEvent,
     type IInteractionResponseServerEvent,
@@ -1203,6 +1205,19 @@ export const setupGlobalWsHandlers = (
                 ),
             });
         }),
+    );
+
+    cleanups.push(
+        wsClient.on<ICommandsUpdatedEvent>(
+            WsEvents.COMMANDS_UPDATED,
+            (payload) => {
+                void queryClient.invalidateQueries({
+                    queryKey: COMMANDS_QUERY_KEYS.serverCommands(
+                        payload.serverId,
+                    ),
+                });
+            },
+        ),
     );
 
     cleanups.push(
