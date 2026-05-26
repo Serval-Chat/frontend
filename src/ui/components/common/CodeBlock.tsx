@@ -1,9 +1,11 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
 import { Check, Copy, Maximize } from 'lucide-react';
 
+import SyntaxWorker from '@/workers/syntax.worker?worker';
+
 import { Button } from './Button';
-import { CodeModal } from './CodeModal';
+import { type AstNode, AstRenderer, CodeModal } from './CodeModal';
 
 interface CodeBlockProps {
     content: string;
@@ -21,7 +23,43 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({
 }) => {
     const [isCopied, setIsCopied] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [highlightedResult, setHighlightedResult] = useState<{
+        content: string;
+        language: string;
+        lines: AstNode[][];
+    } | null>(null);
     const lines = useMemo(() => content.split('\n'), [content]);
+    const languageKey = (language || 'text').toLowerCase();
+
+    useEffect(() => {
+        if (inline) return;
+
+        const worker = new SyntaxWorker();
+
+        worker.onmessage = (e) => {
+            setHighlightedResult({
+                content,
+                language: languageKey,
+                lines: e.data,
+            });
+            worker.terminate();
+        };
+
+        worker.postMessage({
+            content,
+            language: languageKey,
+        });
+
+        return () => {
+            worker.terminate();
+        };
+    }, [content, inline, languageKey]);
+
+    const highlightedLines =
+        highlightedResult?.content === content &&
+        highlightedResult.language === languageKey
+            ? highlightedResult.lines
+            : null;
 
     const handleCopy = (e: React.MouseEvent): void => {
         e.stopPropagation();
@@ -101,7 +139,7 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({
                 </div>
                 <div className="custom-scrollbar overflow-hidden bg-bg-secondary/50 p-0 font-mono text-sm">
                     <pre className="m-0 overflow-x-auto bg-transparent p-4 text-sm leading-6 whitespace-pre-wrap">
-                        {lines.map((line, index) => (
+                        {(highlightedLines || lines).map((line, index) => (
                             <div
                                 className="flex"
                                 // eslint-disable-next-line react/no-array-index-key
@@ -111,7 +149,14 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({
                                     {index + 1}
                                 </span>
                                 <code className="min-w-0 flex-1 break-all text-foreground">
-                                    {line || '\u200b'}
+                                    {Array.isArray(line) ? (
+                                        <>
+                                            <AstRenderer nodes={line} />
+                                            {line.length === 0 && '\u200b'}
+                                        </>
+                                    ) : (
+                                        line || '\u200b'
+                                    )}
                                 </code>
                             </div>
                         ))}

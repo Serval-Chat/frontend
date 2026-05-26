@@ -1060,6 +1060,12 @@ export const useAddRoleToMember = (
                 queryKey: SERVERS_QUERY_KEYS.members(serverId),
             });
             void queryClient.invalidateQueries({
+                queryKey: SERVERS_QUERY_KEYS.channels(serverId),
+            });
+            void queryClient.invalidateQueries({
+                queryKey: SERVERS_QUERY_KEYS.categories(serverId),
+            });
+            void queryClient.invalidateQueries({
                 queryKey: ['tertiary-sidebar-data'],
             });
         },
@@ -1126,6 +1132,12 @@ export const useRemoveRoleFromMember = (
             );
             void queryClient.invalidateQueries({
                 queryKey: SERVERS_QUERY_KEYS.members(serverId),
+            });
+            void queryClient.invalidateQueries({
+                queryKey: SERVERS_QUERY_KEYS.channels(serverId),
+            });
+            void queryClient.invalidateQueries({
+                queryKey: SERVERS_QUERY_KEYS.categories(serverId),
             });
             void queryClient.invalidateQueries({
                 queryKey: ['tertiary-sidebar-data'],

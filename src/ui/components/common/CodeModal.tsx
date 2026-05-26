@@ -12,7 +12,7 @@ interface CodeModalProps {
     language?: string;
 }
 
-interface AstNode {
+export interface AstNode {
     type: string;
     value?: string;
     tagName?: string;
@@ -20,7 +20,7 @@ interface AstNode {
     children?: AstNode[];
 }
 
-const AstRenderer: React.FC<{ nodes: AstNode[] }> = memo(({ nodes }) => (
+export const AstRenderer: React.FC<{ nodes: AstNode[] }> = memo(({ nodes }) => (
     <>
         {nodes.map((node, i) => {
             if (node.type === 'text') {

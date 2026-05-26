@@ -2,7 +2,12 @@ import type React from 'react';
 import { useEffect } from 'react';
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
-import { COMMAND_PRIORITY_CRITICAL, PASTE_COMMAND } from 'lexical';
+import {
+    $getSelection,
+    $isRangeSelection,
+    COMMAND_PRIORITY_CRITICAL,
+    PASTE_COMMAND,
+} from 'lexical';
 
 interface LexicalPastePluginProps {
     onPasteFiles: (files: FileList | File[]) => void;
@@ -47,6 +52,20 @@ export const LexicalPastePlugin: React.FC<LexicalPastePluginProps> = ({
 
                     if (files.length > 0) {
                         onPasteFiles(files);
+                        return true;
+                    }
+
+                    const plainText = clipboardData.getData('text/plain');
+                    const html = clipboardData.getData('text/html');
+
+                    if (plainText && html) {
+                        event.preventDefault();
+                        editor.update(() => {
+                            const selection = $getSelection();
+                            if ($isRangeSelection(selection)) {
+                                selection.insertText(plainText);
+                            }
+                        });
                         return true;
                     }
 
