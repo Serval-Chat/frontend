@@ -32,15 +32,28 @@ interface PermissionsEditorTabProps {
 
 type Overrides = Record<string, Record<string, boolean>>;
 
-const PERMISSION_GROUPS = [
+const getPermissionGroups = (
+    targetType: PermissionsEditorTabProps['targetType'],
+) => [
     {
-        label: 'General Channel Permissions',
+        label:
+            targetType === 'category'
+                ? 'General Category Permissions'
+                : 'General Channel Permissions',
         permissions: [
             {
-                key: 'viewChannels',
-                label: 'View Channel',
+                key:
+                    targetType === 'category'
+                        ? 'viewCategories'
+                        : 'viewChannels',
+                label:
+                    targetType === 'category'
+                        ? 'View Category'
+                        : 'View Channel',
                 description:
-                    'Allows members to view this channel and read past messages.',
+                    targetType === 'category'
+                        ? 'Allows members to view this category.'
+                        : 'Allows members to view this channel and read past messages.',
             },
             {
                 key: 'manageChannels',
@@ -129,6 +142,7 @@ const VALID_PERMISSION_KEYS = new Set([
     'addReactions',
     'manageReactions',
     'exportChannelMessages',
+    'viewCategories',
     'viewChannels',
     'pinMessages',
     'bypassSlowmode',
@@ -166,6 +180,7 @@ export const PermissionsEditorTab: React.FC<PermissionsEditorTabProps> = ({
     targetId,
     targetType,
 }) => {
+    const permissionGroups = getPermissionGroups(targetType);
     const { data: roles = [] } = useRoles(serverId);
 
     const { data: channelPerms } = useChannelPermissions(serverId, targetId, {
@@ -311,7 +326,7 @@ export const PermissionsEditorTab: React.FC<PermissionsEditorTabProps> = ({
                         </div>
 
                         <div className="space-y-6">
-                            {PERMISSION_GROUPS.map((group) => (
+                            {permissionGroups.map((group) => (
                                 <section key={group.label}>
                                     <SectionLabel>{group.label}</SectionLabel>
                                     <div className="overflow-hidden rounded-md border border-border-subtle bg-bg-secondary px-4">

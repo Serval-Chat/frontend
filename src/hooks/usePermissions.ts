@@ -147,6 +147,7 @@ export const usePermissions = (
             pingRolesAndEveryone: false,
             manageReactions: false,
             addReactions: false,
+            viewCategories: false,
             viewChannels: false,
             connect: false,
             exportChannelMessages: false,
@@ -243,7 +244,11 @@ export const usePermissions = (
             if (userRoles.some((r) => r.permissions?.[permKey])) return true;
             if (everyoneRole?.permissions?.[permKey]) return true;
 
-            if (permKey === 'viewChannels' || permKey === 'connect')
+            if (
+                permKey === 'viewCategories' ||
+                permKey === 'viewChannels' ||
+                permKey === 'connect'
+            )
                 return true;
             return false;
         };

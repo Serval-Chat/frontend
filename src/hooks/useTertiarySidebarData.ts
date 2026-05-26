@@ -74,10 +74,10 @@ const canMemberViewChannel = ({
     }
 
     const everyoneRole = roles.find((role) => role.name === '@everyone');
-    const permissionKey: keyof RolePermissions = 'viewChannels';
 
     const getOverride = (
         overrides?: Record<string, Record<string, boolean>>,
+        permissionKey: keyof RolePermissions = 'viewChannels',
     ): boolean | undefined => {
         if (!overrides) return undefined;
         let hasDeny = false;
@@ -108,8 +108,14 @@ const canMemberViewChannel = ({
     const category = channel.categoryId
         ? categories?.find((item) => item._id === channel.categoryId)
         : undefined;
-    const categoryOverride = getOverride(category?.permissions);
+    const categoryOverride = getOverride(
+        category?.permissions,
+        'viewCategories',
+    );
     if (categoryOverride !== undefined) return categoryOverride;
+
+    if (userRoles.some((role) => role.permissions?.viewCategories)) return true;
+    if (everyoneRole?.permissions?.viewCategories) return true;
 
     if (userRoles.some((role) => role.permissions?.viewChannels)) return true;
     if (everyoneRole?.permissions?.viewChannels) return true;

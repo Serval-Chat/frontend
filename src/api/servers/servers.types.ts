@@ -117,6 +117,7 @@ export interface RolePermissions {
     pingRolesAndEveryone?: boolean;
     manageReactions: boolean;
     addReactions: boolean;
+    viewCategories: boolean;
     viewChannels: boolean;
     pinMessages: boolean;
     connect: boolean;
