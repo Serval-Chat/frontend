@@ -1050,6 +1050,9 @@ export const setupGlobalWsHandlers = (
                 void queryClient.invalidateQueries({
                     queryKey: SERVERS_QUERY_KEYS.channels(payload.serverId),
                 });
+                void queryClient.invalidateQueries({
+                    queryKey: SERVERS_QUERY_KEYS.categories(payload.serverId),
+                });
             },
         ),
     );
@@ -1143,6 +1146,26 @@ export const setupGlobalWsHandlers = (
                         payload.serverId,
                         payload.categoryId,
                     ],
+                });
+                void queryClient.invalidateQueries({
+                    queryKey: [
+                        'servers',
+                        'category_permissions',
+                        payload.serverId,
+                    ],
+                });
+                void queryClient.invalidateQueries({
+                    queryKey: [
+                        'servers',
+                        'channel_permissions',
+                        payload.serverId,
+                    ],
+                });
+                void queryClient.invalidateQueries({
+                    queryKey: SERVERS_QUERY_KEYS.categories(payload.serverId),
+                });
+                void queryClient.invalidateQueries({
+                    queryKey: SERVERS_QUERY_KEYS.channels(payload.serverId),
                 });
             },
         ),

@@ -730,6 +730,9 @@ export const useUpdateChannelPermissions = (
                     channelId,
                 ],
             });
+            void queryClient.invalidateQueries({
+                queryKey: SERVERS_QUERY_KEYS.channels(serverId),
+            });
             showToast('Channel permissions updated', 'success');
         },
         onError: (error) => {
@@ -778,6 +781,18 @@ export const useUpdateCategoryPermissions = (
                     serverId,
                     categoryId,
                 ],
+            });
+            void queryClient.invalidateQueries({
+                queryKey: ['servers', 'category_permissions', serverId],
+            });
+            void queryClient.invalidateQueries({
+                queryKey: ['servers', 'channel_permissions', serverId],
+            });
+            void queryClient.invalidateQueries({
+                queryKey: SERVERS_QUERY_KEYS.categories(serverId),
+            });
+            void queryClient.invalidateQueries({
+                queryKey: SERVERS_QUERY_KEYS.channels(serverId),
             });
             showToast('Category permissions updated', 'success');
         },

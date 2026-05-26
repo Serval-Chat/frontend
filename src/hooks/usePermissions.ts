@@ -228,8 +228,10 @@ export const usePermissions = (
                 const channel = channelById.get(channelId);
 
                 // 1. Channel Overrides
-                const channelOverride = getOverride(channel?.permissions);
-                if (channelOverride !== undefined) return channelOverride;
+                if (permKey !== 'viewCategories') {
+                    const channelOverride = getOverride(channel?.permissions);
+                    if (channelOverride !== undefined) return channelOverride;
+                }
 
                 // 2. Category Overrides
                 const category =
@@ -258,6 +260,10 @@ export const usePermissions = (
                 key as keyof RolePermissions,
             );
         });
+
+        if (!perms.viewChannels || !perms.viewCategories) {
+            perms.sendMessages = false;
+        }
 
         if (!perms.viewChannels && channelId) {
             if (import.meta.env.DEV) {
