@@ -826,7 +826,7 @@ export class TextParser {
 
         const start = this.index;
 
-        if (this.peek('### ')) {
+        if (this.peek('### ') && this.has(ParserFeature.H3)) {
             this.index += 4;
             let content = '';
             while (
@@ -848,7 +848,7 @@ export class TextParser {
                     content: this.parseContent(content.trim()),
                 } as ASTNode;
             }
-        } else if (this.peek('## ')) {
+        } else if (this.peek('## ') && this.has(ParserFeature.H2)) {
             this.index += 3;
             let content = '';
             while (
@@ -870,7 +870,7 @@ export class TextParser {
                     content: this.parseContent(content.trim()),
                 } as ASTNode;
             }
-        } else if (this.peek('# ')) {
+        } else if (this.peek('# ') && this.has(ParserFeature.H1)) {
             this.index += 2;
             let content = '';
             while (
@@ -892,7 +892,7 @@ export class TextParser {
                     content: this.parseContent(content.trim()),
                 } as ASTNode;
             }
-        } else if (this.peek('-# ')) {
+        } else if (this.peek('-# ') && this.has(ParserFeature.SUBTEXT)) {
             this.index += 3;
             let content = '';
             while (

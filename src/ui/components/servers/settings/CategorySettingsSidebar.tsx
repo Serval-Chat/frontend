@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Settings, Shield } from 'lucide-react';
+import { Settings, Shield, SlidersHorizontal } from 'lucide-react';
 
 import {
     SettingsSidebarLayout,
@@ -26,6 +26,11 @@ export const CategorySettingsSidebar: React.FC<
             id: 'permissions',
             label: 'Permissions',
             icon: Shield,
+        },
+        {
+            id: 'behaviour',
+            label: 'Behaviour',
+            icon: SlidersHorizontal,
         },
     ];
 

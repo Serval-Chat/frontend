@@ -152,6 +152,7 @@ export const usePermissions = (
             connect: false,
             exportChannelMessages: false,
             bypassSlowmode: false,
+            bypassMarkdownRestrictions: false,
             pinMessages: false,
             seeDeletedMessages: false,
             moderateMembers: false,

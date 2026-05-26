@@ -17,6 +17,12 @@ const PermissionsEditorTab = React.lazy(() =>
     ),
 );
 
+const CategoryBehaviourSettings = React.lazy(() =>
+    import('@/ui/components/servers/settings/CategoryBehaviourSettings').then(
+        (m) => ({ default: m.CategoryBehaviourSettings }),
+    ),
+);
+
 interface CategorySettingsModalProps {
     isOpen: boolean;
     onClose: () => void;
@@ -60,6 +66,10 @@ export const CategorySettingsModal: React.FC<CategorySettingsModalProps> = ({
                             category={category}
                             onDeleted={onClose}
                         />
+                    </SettingsContentPane>
+                ) : activeSection === 'behaviour' ? (
+                    <SettingsContentPane>
+                        <CategoryBehaviourSettings category={category} />
                     </SettingsContentPane>
                 ) : (
                     <div className="flex h-full flex-1 flex-col overflow-hidden">

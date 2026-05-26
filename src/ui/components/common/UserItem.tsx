@@ -264,7 +264,7 @@ const UserItemInner: React.FC<
                 customStatus:
                     userProfile?.customStatus || initialData?.customStatus,
             }),
-            [userProfile, initialData],
+            [initialData, nickname, userProfile],
         );
 
         const isFriend = useMemo(

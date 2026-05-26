@@ -14,6 +14,8 @@ import { SettingsFloatingBar } from '@/ui/components/common/SettingsFloatingBar'
 import { Text } from '@/ui/components/common/Text';
 import { Toggle } from '@/ui/components/common/Toggle';
 
+import { MarkdownBlockadeSettings } from './MarkdownBlockadeSettings';
+
 interface ServerBehaviourSettingsProps {
     serverId: string;
 }
@@ -183,6 +185,15 @@ const ServerBehaviourSettingsForm: React.FC<
                         />
                     </div>
                 </div>
+
+                <MarkdownBlockadeSettings
+                    isPending={isUpdating}
+                    rules={server.markdownBlockadeRules}
+                    serverId={serverId}
+                    onSave={(markdownBlockadeRules) =>
+                        updateServer({ markdownBlockadeRules })
+                    }
+                />
             </div>
 
             <SettingsFloatingBar

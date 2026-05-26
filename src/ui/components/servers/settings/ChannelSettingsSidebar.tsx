@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Settings, Shield, Webhook } from 'lucide-react';
+import { Settings, Shield, SlidersHorizontal, Webhook } from 'lucide-react';
 
 import {
     SettingsSidebarLayout,
@@ -28,6 +28,11 @@ export const ChannelSettingsSidebar: React.FC<ChannelSettingsSidebarProps> = ({
             id: 'permissions',
             label: 'Permissions',
             icon: Shield,
+        },
+        {
+            id: 'behaviour',
+            label: 'Behaviour',
+            icon: SlidersHorizontal,
         },
         {
             id: 'webhooks',

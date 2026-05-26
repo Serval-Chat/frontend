@@ -94,7 +94,7 @@ export default defineConfig(({ mode }) => {
         },
       },
       sourcemap: true,
-      chunkSizeWarningLimit: 1000,
+      chunkSizeWarningLimit: 1500,
     },
   };
 });

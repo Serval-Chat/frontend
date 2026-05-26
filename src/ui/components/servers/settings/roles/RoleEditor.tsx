@@ -824,6 +824,20 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
                                     updatePermission('seeDeletedMessages', val)
                                 }
                             />
+                            <PermissionToggle
+                                description="Allows member to render markdown even when disallowed markdown features are configured."
+                                label="Bypass Markdown Restrictions"
+                                value={
+                                    permissions.bypassMarkdownRestrictions ||
+                                    false
+                                }
+                                onChange={(val) =>
+                                    updatePermission(
+                                        'bypassMarkdownRestrictions',
+                                        val,
+                                    )
+                                }
+                            />
                         </div>
                     </section>
                 </div>

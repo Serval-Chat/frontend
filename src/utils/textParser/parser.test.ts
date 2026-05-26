@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 
 import { ParserPresets, parseText } from './parser';
-import type { AdmonitionNode } from './types';
+import { type AdmonitionNode, ParserFeature } from './types';
 
 describe('TextParser', () => {
     it('should parse bold text', () => {
@@ -1839,6 +1839,19 @@ describe('TextParser', () => {
                 admonitionType: t,
             });
         }
+    });
+
+    it('does not parse heading levels when that specific heading feature is disabled', () => {
+        const options = {
+            ...ParserPresets.MESSAGE,
+            features: ParserPresets.MESSAGE.features.filter(
+                (feature) => feature !== ParserFeature.H1,
+            ),
+        };
+
+        expect(parseText('# test', options)).toEqual([
+            { type: 'text', content: '# test' },
+        ]);
     });
 
     describe('Alternative URLs', () => {

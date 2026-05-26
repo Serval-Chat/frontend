@@ -23,17 +23,17 @@ export const InviteLinkSkeleton: React.FC<{
     hasBanner?: boolean;
     tagCount?: number;
 }> = ({ containerRef, hasBanner, tagCount = 0 }) => {
-    const tagWidths = [
-        'w-16',
-        'w-12',
-        'w-20',
-        'w-14',
-        'w-24',
-        'w-10',
-        'w-18',
-        'w-16',
-        'w-20',
-        'w-12',
+    const tagSkeletons = [
+        { id: 'tag-skel-name', widthClassName: 'w-16' },
+        { id: 'tag-skel-count', widthClassName: 'w-12' },
+        { id: 'tag-skel-server', widthClassName: 'w-20' },
+        { id: 'tag-skel-status', widthClassName: 'w-14' },
+        { id: 'tag-skel-owner', widthClassName: 'w-24' },
+        { id: 'tag-skel-kind', widthClassName: 'w-10' },
+        { id: 'tag-skel-region', widthClassName: 'w-18' },
+        { id: 'tag-skel-members', widthClassName: 'w-16' },
+        { id: 'tag-skel-activity', widthClassName: 'w-20' },
+        { id: 'tag-skel-age', widthClassName: 'w-12' },
     ];
 
     return (
@@ -64,10 +64,10 @@ export const InviteLinkSkeleton: React.FC<{
 
                 {tagCount > 0 && (
                     <div className="flex flex-wrap gap-1.5">
-                        {Array.from({ length: tagCount }).map((_, i) => (
+                        {tagSkeletons.slice(0, tagCount).map((tag) => (
                             <Skeleton
-                                className={`h-5 ${tagWidths[i % tagWidths.length]}`}
-                                key={`tag-skel-${i}`}
+                                className={`h-5 ${tag.widthClassName}`}
+                                key={tag.id}
                                 variant="rectangular"
                             />
                         ))}

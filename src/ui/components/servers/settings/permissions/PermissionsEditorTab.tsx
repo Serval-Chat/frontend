@@ -31,10 +31,18 @@ interface PermissionsEditorTabProps {
 }
 
 type Overrides = Record<string, Record<string, boolean>>;
+type PermissionGroup = {
+    label: string;
+    permissions: {
+        key: string;
+        label: string;
+        description: string;
+    }[];
+};
 
 const getPermissionGroups = (
     targetType: PermissionsEditorTabProps['targetType'],
-) => [
+): PermissionGroup[] => [
     {
         label:
             targetType === 'category'
@@ -112,6 +120,12 @@ const getPermissionGroups = (
                 description:
                     'Allows members to see messages that have been deleted (rendered in red).',
             },
+            {
+                key: 'bypassMarkdownRestrictions',
+                label: 'Bypass Markdown Restrictions',
+                description:
+                    'Allows members to render markdown even when disallowed markdown features are configured.',
+            },
         ],
     },
     {
@@ -146,6 +160,7 @@ const VALID_PERMISSION_KEYS = new Set([
     'viewChannels',
     'pinMessages',
     'bypassSlowmode',
+    'bypassMarkdownRestrictions',
     'connect',
     'seeDeletedMessages',
     'moderateMembers',

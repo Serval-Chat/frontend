@@ -1,4 +1,5 @@
 import type { User } from '@/api/users/users.types';
+import type { ParserFeature } from '@/utils/textParser/types';
 
 export type ServerBannerType = 'color' | 'image' | 'gif';
 
@@ -13,6 +14,12 @@ export interface ServerBanner {
     value: string;
 }
 
+export interface MarkdownBlockadeRule {
+    targetType: 'everyone' | 'role' | 'user';
+    targetId: string;
+    features: ParserFeature[];
+}
+
 export interface Server {
     _id: string;
     name: string;
@@ -25,6 +32,7 @@ export interface Server {
     allTimeHigh?: number;
     disableCustomFonts?: boolean;
     disableUsernameGlowAndCustomColor?: boolean;
+    markdownBlockadeRules?: MarkdownBlockadeRule[];
     verified?: boolean;
     verificationRequested?: boolean;
     discoveryEnabled?: boolean;
@@ -90,6 +98,7 @@ export interface Channel {
     lastReadAt?: string | null;
     link?: string;
     permissions?: Record<string, Record<string, boolean>>;
+    markdownBlockadeRules?: MarkdownBlockadeRule[];
     slowMode?: number;
     slowModeNextMessageAllowedAt?: string | null;
 }
@@ -100,6 +109,7 @@ export interface Category {
     serverId: string;
     position: number;
     permissions?: Record<string, Record<string, boolean>>;
+    markdownBlockadeRules?: MarkdownBlockadeRule[];
 }
 
 export interface RolePermissions {
@@ -123,6 +133,7 @@ export interface RolePermissions {
     connect: boolean;
     exportChannelMessages: boolean;
     bypassSlowmode: boolean;
+    bypassMarkdownRestrictions: boolean;
     seeDeletedMessages: boolean;
     moderateMembers: boolean;
     manageStickers: boolean;

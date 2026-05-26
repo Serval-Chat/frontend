@@ -1,7 +1,12 @@
 import React, { useMemo } from 'react';
 
 import type { MessageAttachment, MessagePoll } from '@/api/chat/chat.types';
-import { useSticker } from '@/api/servers/servers.queries';
+import {
+    useCategories,
+    useChannels,
+    useSticker,
+} from '@/api/servers/servers.queries';
+import type { Role, Server, ServerMember } from '@/api/servers/servers.types';
 import { useStickerInfoBox } from '@/hooks/useStickerInfoBox';
 import type { Embed } from '@/types/embed';
 import { ParsedText } from '@/ui/components/common/ParsedText';
@@ -11,6 +16,10 @@ import { StickerInfoBox } from '@/ui/components/emoji/StickerInfoBox';
 import { Box } from '@/ui/components/layout/Box';
 import { resolveApiUrl } from '@/utils/apiUrl';
 import { cn } from '@/utils/cn';
+import {
+    getAllowedMessageFeatures,
+    getBlockedMarkdownFeatures,
+} from '@/utils/markdownBlockade';
 import { ParserPresets, parseText } from '@/utils/textParser/parser';
 
 import { FileEmbed } from './FileEmbed';
@@ -26,6 +35,10 @@ interface MessageContentProps {
     isDeleted?: boolean;
     messageId?: string;
     channelId?: string;
+    serverDetails?: Server;
+    senderId?: string;
+    senderMember?: ServerMember;
+    senderRoles?: Role[];
     onResize?: () => void;
 }
 
@@ -40,12 +53,59 @@ export const MessageContent = React.memo(
         isDeleted,
         messageId,
         channelId,
+        serverDetails,
+        senderId,
+        senderMember,
+        senderRoles,
         onResize,
     }: MessageContentProps) => {
         const { data: sticker } = useSticker(stickerId || null);
+        const { data: channels = [] } = useChannels(serverId || null, {
+            enabled: !!serverId,
+        });
+        const { data: categories = [] } = useCategories(serverId || null, {
+            enabled: !!serverId,
+        });
+        const channel = useMemo(
+            () => channels.find((item) => item._id === channelId),
+            [channelId, channels],
+        );
+        const category = useMemo(
+            () =>
+                channel?.categoryId
+                    ? categories.find((item) => item._id === channel.categoryId)
+                    : undefined,
+            [categories, channel],
+        );
+        const blockedMarkdownFeatures = useMemo(
+            () =>
+                getBlockedMarkdownFeatures({
+                    server: serverDetails,
+                    category,
+                    channel,
+                    senderId,
+                    senderMember,
+                    senderRoles,
+                }),
+            [
+                category,
+                channel,
+                senderId,
+                senderMember,
+                senderRoles,
+                serverDetails,
+            ],
+        );
+        const parserOptions = useMemo(
+            () => ({
+                ...ParserPresets.MESSAGE,
+                features: getAllowedMessageFeatures(blockedMarkdownFeatures),
+            }),
+            [blockedMarkdownFeatures],
+        );
         const nodes = useMemo(
-            () => parseText(text, ParserPresets.MESSAGE),
-            [text],
+            () => parseText(text, parserOptions),
+            [parserOptions, text],
         );
 
         const {

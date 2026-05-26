@@ -17,6 +17,12 @@ const ChannelWebhookSettings = React.lazy(() =>
     ),
 );
 
+const ChannelBehaviourSettings = React.lazy(() =>
+    import('@/ui/components/servers/settings/ChannelBehaviourSettings').then(
+        (m) => ({ default: m.ChannelBehaviourSettings }),
+    ),
+);
+
 const PermissionsEditorTab = React.lazy(() =>
     import('@/ui/components/servers/settings/permissions/PermissionsEditorTab').then(
         (m) => ({ default: m.PermissionsEditorTab }),
@@ -73,6 +79,10 @@ export const ChannelSettingsModal: React.FC<ChannelSettingsModalProps> = ({
                             channelId={channel._id}
                             serverId={channel.serverId}
                         />
+                    </SettingsContentPane>
+                ) : activeSection === 'behaviour' ? (
+                    <SettingsContentPane>
+                        <ChannelBehaviourSettings channel={channel} />
                     </SettingsContentPane>
                 ) : (
                     <div className="flex h-full flex-1 flex-col overflow-hidden">
