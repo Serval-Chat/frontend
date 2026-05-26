@@ -270,7 +270,7 @@ export const ChannelOverviewSettings: React.FC<
                                     className={cn(
                                         'h-auto border p-2 text-muted-foreground transition-all hover:text-foreground',
                                         selectedIcon === key
-                                            ? 'border-primary bg-primary/20 text-primary shadow-[0_0_8px_var(--color-primary)]'
+                                            ? 'border-primary bg-primary/20 text-primary'
                                             : 'border-transparent',
                                     )}
                                     key={key}

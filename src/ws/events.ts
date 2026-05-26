@@ -282,6 +282,7 @@ export interface IMemberUpdatedEvent {
         serverId: string;
         roles: string[];
         nickname?: string;
+        communicationDisabledUntil?: string | null;
         onboardingRequired?: boolean;
         rulesAcceptedAt?: string | null;
         onboardingCompletedAt?: string | null;
