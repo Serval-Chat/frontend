@@ -35,6 +35,10 @@ export interface IInteractionResponseServerEvent {
     serverId: string;
     channelId: string;
     text: string;
+    senderId?: string;
+    senderUsername?: string;
+    senderIsBot?: boolean;
+    senderProfilePicture?: string | null;
     invocationId?: string;
     ephemeral?: boolean;
 }

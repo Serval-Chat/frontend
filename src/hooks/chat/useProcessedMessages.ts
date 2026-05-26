@@ -63,6 +63,16 @@ export const useProcessedMessages = (
                 }
             }
 
+            if (!user && msg.isEphemeral && msg.senderUsername) {
+                user = {
+                    _id: msg.senderId,
+                    username: msg.senderUsername,
+                    displayName: msg.senderUsername,
+                    profilePicture: msg.senderProfilePicture ?? undefined,
+                    isBot: msg.senderIsBot,
+                } as User;
+            }
+
             // Resolve reply
             const resolvedReplyTo = resolveReplyTo(
                 msg,

@@ -73,6 +73,8 @@ export interface ChatMessage {
     text: string;
     createdAt: string;
     senderId: string;
+    senderUsername?: string;
+    senderProfilePicture?: string | null;
     serverId?: string;
     channelId?: string;
     receiverId?: string; // For DMs
