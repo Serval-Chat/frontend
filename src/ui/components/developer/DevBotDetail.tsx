@@ -140,6 +140,7 @@ export const DevBotDetail = ({
     const avatarInputRef = useRef<HTMLInputElement>(null);
     const bannerInputRef = useRef<HTMLInputElement>(null);
 
+    const [name, setName] = useState('');
     const [description, setDescription] = useState('');
     const [permissions, setPermissions] = useState<BotPermissions | null>(null);
     const [bannerColor, setBannerColor] = useState('');
@@ -154,12 +155,15 @@ export const DevBotDetail = ({
 
     React.useEffect(() => {
         if (bot && user) {
+            setName(user.displayName ?? user.username ?? '');
             setDescription(user.bio ?? '');
             setPermissions(bot.botPermissions);
             setBannerColor(user.bannerColor ?? '');
         }
     }, [bot, user]);
 
+    const currentName = user?.displayName ?? user?.username ?? '';
+    const hasNameChanged = name.trim() !== currentName.trim();
     const hasDescriptionChanged =
         description.trim() !== (user?.bio ?? '').trim();
     const hasBannerColorChanged =
@@ -169,13 +173,23 @@ export const DevBotDetail = ({
         permissions &&
         JSON.stringify(permissions) !== JSON.stringify(bot.botPermissions);
     const hasChanges =
-        hasDescriptionChanged || hasPermissionsChanged || hasBannerColorChanged;
+        hasNameChanged ||
+        hasDescriptionChanged ||
+        hasPermissionsChanged ||
+        hasBannerColorChanged;
 
     const updatePermissions = useUpdateBotPermissions();
 
     const handleSaveProfile = (): void => {
-        if (hasDescriptionChanged || hasBannerColorChanged) {
-            updateBot.mutate({ clientId, patch: { description, bannerColor } });
+        if (hasNameChanged || hasDescriptionChanged || hasBannerColorChanged) {
+            updateBot.mutate({
+                clientId,
+                patch: {
+                    ...(hasNameChanged ? { name: name.trim() } : {}),
+                    ...(hasDescriptionChanged ? { description } : {}),
+                    ...(hasBannerColorChanged ? { bannerColor } : {}),
+                },
+            });
         }
         if (hasPermissionsChanged && permissions) {
             updatePermissions.mutate({ clientId, permissions });
@@ -247,6 +261,21 @@ export const DevBotDetail = ({
 
                 <Section title="About Bot">
                     <div className="flex flex-col gap-4">
+                        <div className="flex flex-col gap-1">
+                            <label
+                                className="text-sm font-medium text-foreground"
+                                htmlFor="bot-name"
+                            >
+                                Name
+                            </label>
+                            <Input
+                                id="bot-name"
+                                maxLength={32}
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
+                            />
+                        </div>
+
                         <div className="flex flex-col gap-1">
                             <label
                                 className="text-sm font-medium text-foreground"
