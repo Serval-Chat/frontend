@@ -998,7 +998,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
 
                 <div
                     className={cn(
-                        'relative flex min-h-[40px] flex-1 cursor-text items-center rounded-md border border-border-subtle bg-bg-subtle transition-all duration-200 focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-1 focus-within:outline-none',
+                        'relative flex min-h-[40px] flex-1 cursor-text items-center rounded-md transition-all duration-200',
                         isSlowModeError &&
                             '!border-danger ring-2 !ring-danger ring-offset-1',
                     )}
