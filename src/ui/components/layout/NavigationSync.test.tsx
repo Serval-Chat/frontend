@@ -3,6 +3,11 @@ import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import {
+    setSelectedChannelId,
+    setSelectedServerId,
+    setTargetMessageId,
+} from '@/store/slices/navSlice';
 
 import { NavigationSync } from './NavigationSync';
 
@@ -96,5 +101,46 @@ describe('NavigationSync', () => {
         expect(mockNavigate).toHaveBeenCalledWith('/chat/@me', {
             replace: true,
         });
+    });
+
+    it('clears channel context on server self-roles pages', () => {
+        const validServerId = '507f1f77bcf86cd799439011';
+        vi.mocked(useLocation).mockReturnValue({
+            pathname: `/chat/@server/${validServerId}/self-roles`,
+        } as never);
+        vi.mocked(useParams).mockReturnValue({
+            serverId: validServerId,
+        });
+        vi.mocked(useAppSelector).mockReturnValue({
+            selectedChannelId: '507f1f77bcf86cd799439012',
+            selectedServerId: validServerId,
+        } as never);
+
+        render(<NavigationSync />);
+
+        expect(mockDispatch).toHaveBeenCalledWith(setSelectedChannelId(null));
+        expect(mockDispatch).toHaveBeenCalledWith(setTargetMessageId(null));
+    });
+
+    it('does not leave the restored last channel active when entering self-roles from another server', () => {
+        const validServerId = '507f1f77bcf86cd799439011';
+        vi.mocked(useLocation).mockReturnValue({
+            pathname: `/chat/@server/${validServerId}/self-roles`,
+        } as never);
+        vi.mocked(useParams).mockReturnValue({
+            serverId: validServerId,
+        });
+        vi.mocked(useAppSelector).mockReturnValue({
+            selectedChannelId: '507f1f77bcf86cd799439012',
+            selectedServerId: '507f1f77bcf86cd799439013',
+        } as never);
+
+        render(<NavigationSync />);
+
+        expect(mockDispatch).toHaveBeenCalledWith(
+            setSelectedServerId(validServerId),
+        );
+        expect(mockDispatch).toHaveBeenCalledWith(setSelectedChannelId(null));
+        expect(mockDispatch).toHaveBeenCalledWith(setTargetMessageId(null));
     });
 });

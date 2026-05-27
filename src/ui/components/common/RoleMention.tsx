@@ -4,11 +4,14 @@ import { AtSign } from 'lucide-react';
 
 import { useRoles } from '@/api/servers/servers.queries';
 import { useAppSelector } from '@/store/hooks';
+import type { TextProps } from '@/ui/components/common/Text';
 import { Box } from '@/ui/components/layout/Box';
+import { cn } from '@/utils/cn';
 import { getReadableRoleTextStyleAt, getRoleStyle } from '@/utils/roleColor';
 
 interface RoleMentionProps {
     roleId: string;
+    size?: TextProps['size'];
 }
 
 interface SegmenterLike {
@@ -71,10 +74,37 @@ const getGlyphSegments = (value: string): GlyphSegment[] => {
     });
 };
 
+const roleMentionTextSize: Partial<
+    Record<NonNullable<TextProps['size']>, string>
+> = {
+    '2xs': 'text-[10px]',
+    xs: 'text-xs',
+    sm: 'text-sm',
+    base: 'text-base',
+    lg: 'text-lg',
+    xl: 'text-xl',
+    '2xl': 'text-2xl',
+};
+
+const roleMentionIconSize: Partial<
+    Record<NonNullable<TextProps['size']>, number>
+> = {
+    '2xs': 10,
+    xs: 12,
+    sm: 14,
+    base: 16,
+    lg: 18,
+    xl: 20,
+    '2xl': 24,
+};
+
 /**
  * @description Renders a role mention with per-glyph contrast over role colors.
  */
-export const RoleMention: React.FC<RoleMentionProps> = ({ roleId }) => {
+export const RoleMention: React.FC<RoleMentionProps> = ({
+    roleId,
+    size = 'sm',
+}) => {
     const rootRef = React.useRef<HTMLElement | null>(null);
     const iconRef = React.useRef<SVGSVGElement | null>(null);
     const textRef = React.useRef<HTMLElement | null>(null);
@@ -179,6 +209,7 @@ export const RoleMention: React.FC<RoleMentionProps> = ({ roleId }) => {
         () => getReadableRoleTextStyleAt(role, iconPosition),
         [iconPosition, role],
     );
+    const normalizedSize = size ?? 'sm';
 
     return (
         <Box
@@ -190,11 +221,18 @@ export const RoleMention: React.FC<RoleMentionProps> = ({ roleId }) => {
             <AtSign
                 className="shrink-0"
                 ref={iconRef}
-                size={14}
+                size={
+                    roleMentionIconSize[normalizedSize] ??
+                    roleMentionIconSize.sm
+                }
                 style={iconTextStyle}
             />
             <span
-                className="flex items-center text-sm leading-normal"
+                className={cn(
+                    'flex items-center leading-normal',
+                    roleMentionTextSize[normalizedSize] ??
+                        roleMentionTextSize.sm,
+                )}
                 ref={textRef}
             >
                 {glyphSegments.map(({ glyph, key, order }) => (

@@ -12,10 +12,13 @@ import { useUserById } from '@/api/users/users.queries';
 import type { User } from '@/api/users/users.types';
 import type { InteractionValue } from '@/types/interactions';
 import { BotTag } from '@/ui/components/common/BotTag';
+import { ParsedText } from '@/ui/components/common/ParsedText';
 import { StyledUserName } from '@/ui/components/common/StyledUserName';
 import { Text } from '@/ui/components/common/Text';
 import { UserProfilePicture } from '@/ui/components/common/UserProfilePicture';
 import { Box } from '@/ui/components/layout/Box';
+import { parseText } from '@/utils/textParser/parser';
+import { ParserFeature } from '@/utils/textParser/types';
 
 interface ReplyPreviewProps {
     user: User;
@@ -39,6 +42,14 @@ interface ReplyPreviewProps {
 interface MeasuredReplyTextProps {
     text: string;
 }
+
+const REPLY_PREVIEW_FEATURES = [
+    ParserFeature.MENTION,
+    ParserFeature.ROLE_MENTION,
+    ParserFeature.EVERYONE_MENTION,
+    ParserFeature.EMOJI,
+    ParserFeature.UNICODE_EMOJI,
+] as const;
 
 const truncateText = (text: string, length: number): string => {
     const next = text.slice(0, length).trimEnd();
@@ -74,9 +85,23 @@ const flattenReplyText = (text: string): string =>
 const MeasuredReplyText: React.FC<MeasuredReplyTextProps> = React.memo(
     ({ text }) => {
         const flattenedText = useMemo(() => flattenReplyText(text), [text]);
+        const nodes = useMemo(
+            () =>
+                parseText(flattenedText, {
+                    features: REPLY_PREVIEW_FEATURES,
+                }),
+            [flattenedText],
+        );
         const containerRef = useRef<HTMLSpanElement | null>(null);
         const observedWidthRef = useRef<number | null>(null);
         const [visibleText, setVisibleText] = useState(flattenedText);
+        const visibleNodes = useMemo(
+            () =>
+                parseText(visibleText, {
+                    features: REPLY_PREVIEW_FEATURES,
+                }),
+            [visibleText],
+        );
 
         const measure = useCallback(() => {
             const container = containerRef.current;
@@ -128,7 +153,13 @@ const MeasuredReplyText: React.FC<MeasuredReplyTextProps> = React.memo(
                 className="block min-w-0 overflow-hidden leading-normal"
                 ref={containerRef}
             >
-                {visibleText}
+                <ParsedText
+                    condenseFiles
+                    condenseInvites
+                    nodes={visibleText === flattenedText ? nodes : visibleNodes}
+                    size="xs"
+                    wrap="nowrap"
+                />
             </span>
         );
     },

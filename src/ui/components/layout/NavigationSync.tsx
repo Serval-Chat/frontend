@@ -50,7 +50,13 @@ export const NavigationSync: React.FC = () => {
                 dispatch(setSelectedServerId(params.serverId));
             }
 
-            if (isSpecialView) return;
+            if (isSpecialView) {
+                if (selectedChannelId !== null) {
+                    dispatch(setSelectedChannelId(null));
+                }
+                dispatch(setTargetMessageId(null));
+                return;
+            }
 
             let contextChanged = false;
             if (selectedServerId !== params.serverId) {

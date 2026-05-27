@@ -100,7 +100,7 @@ export const ParsedEmoji: React.FC<ParsedEmojiProps> = ({
                     as="button"
                     className={cn(
                         'inline-block cursor-pointer rounded-sm border-none bg-transparent p-0 align-text-bottom outline-none focus-visible:ring-1 focus-visible:ring-primary',
-                        isLarge ? 'h-16 w-16' : 'h-5 w-5',
+                        isLarge ? 'h-16 w-16' : 'h-[1.5em] w-[1.5em]',
                         className,
                     )}
                     onClick={(e: React.MouseEvent) =>

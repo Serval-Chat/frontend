@@ -2,13 +2,14 @@ import React, { useRef, useState } from 'react';
 
 import { useMembers } from '@/api/servers/servers.queries';
 import { useUserById } from '@/api/users/users.queries';
-import { Text } from '@/ui/components/common/Text';
+import { Text, type TextProps } from '@/ui/components/common/Text';
 import { Box } from '@/ui/components/layout/Box';
 import { ProfilePopup } from '@/ui/components/profile/ProfilePopup';
 
 interface MentionProps {
     userId: string;
     serverId?: string;
+    size?: TextProps['size'];
 }
 
 const isValidUserId = (id: string): boolean => /^[a-f\d]{24}$/i.test(id);
@@ -16,7 +17,11 @@ const isValidUserId = (id: string): boolean => /^[a-f\d]{24}$/i.test(id);
 /**
  * @description Beautifully renders a user mention.
  */
-export const Mention: React.FC<MentionProps> = ({ userId, serverId }) => {
+export const Mention: React.FC<MentionProps> = ({
+    userId,
+    serverId,
+    size = 'sm',
+}) => {
     const [isPopupOpen, setIsPopupOpen] = useState(false);
     const triggerRef = useRef<HTMLSpanElement>(null);
     const { data: user, isLoading: isUserLoading } = useUserById(userId);
@@ -30,7 +35,7 @@ export const Mention: React.FC<MentionProps> = ({ userId, serverId }) => {
                 as="span"
                 className="inline-flex cursor-default items-baseline rounded bg-primary/10 px-1.5 py-[4px] font-medium text-primary transition-colors select-none"
             >
-                <Text as="span" className="leading-none" size="sm">
+                <Text as="span" className="leading-none" size={size}>
                     @unknown user
                 </Text>
             </Box>
@@ -55,7 +60,7 @@ export const Mention: React.FC<MentionProps> = ({ userId, serverId }) => {
                 ref={triggerRef}
                 onClick={() => setIsPopupOpen(true)}
             >
-                <Text as="span" className="leading-none" size="sm">
+                <Text as="span" className="leading-none" size={size}>
                     @{displayName}
                 </Text>
             </Box>

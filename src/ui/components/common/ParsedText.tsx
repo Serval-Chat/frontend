@@ -717,13 +717,18 @@ export const ParsedText = React.memo<ParsedTextProps>(
                                 <Mention
                                     key={idx}
                                     serverId={serverId}
+                                    size={size}
                                     userId={node.userId}
                                 />
                             );
 
                         case 'role_mention':
                             return (
-                                <RoleMention key={idx} roleId={node.roleId} />
+                                <RoleMention
+                                    key={idx}
+                                    roleId={node.roleId}
+                                    size={size}
+                                />
                             );
 
                         case 'channel_link':
@@ -746,7 +751,7 @@ export const ParsedText = React.memo<ParsedTextProps>(
                                     <Text
                                         as="span"
                                         className="leading-none drop-shadow-md"
-                                        size="sm"
+                                        size={size}
                                         variant="inverse"
                                     >
                                         @everyone
