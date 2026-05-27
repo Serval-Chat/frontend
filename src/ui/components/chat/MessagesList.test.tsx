@@ -169,4 +169,29 @@ describe('MessagesList Scroll Behavior', () => {
 
         expect(requestAnimationFrameMock).toHaveBeenCalled();
     });
+
+    it('loads older messages if scroll is near top and someone sends a message', () => {
+        const handleLoadMore = vi.fn();
+        const { rerender } = render(
+            <MessagesList
+                hasMore
+                messages={mockMessages}
+                onLoadMore={handleLoadMore}
+            />,
+        );
+        const newMessages = [
+            ...mockMessages,
+            { ...mockMessages[0], _id: 'msg-3', text: 'New Message' },
+        ];
+
+        rerender(
+            <MessagesList
+                hasMore
+                messages={newMessages}
+                onLoadMore={handleLoadMore}
+            />,
+        );
+
+        expect(handleLoadMore).toHaveBeenCalled();
+    });
 });

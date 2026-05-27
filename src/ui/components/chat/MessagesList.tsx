@@ -350,6 +350,22 @@ export const MessagesList: React.FC<MessagesListProps> = React.memo(
                 onLoadMore?.();
             }
         }, [hasMore, isLoadingMore, onLoadMore]);
+
+        useEffect(() => {
+            const container = scrollContainerRef.current;
+            if (!container) return;
+
+            if (
+                container.scrollTop < 200 &&
+                hasMore &&
+                !isLoadingMore &&
+                !loadMoreCooldownRef.current
+            ) {
+                loadMoreCooldownRef.current = true;
+                onLoadMore?.();
+            }
+        }, [messages, hasMore, isLoadingMore, onLoadMore]);
+
         const totalSize = rowVirtualizer.getTotalSize();
 
         const prevFirstMessageIdRef = useRef<string | null>(null);
