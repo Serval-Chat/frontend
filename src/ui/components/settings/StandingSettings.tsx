@@ -2,6 +2,7 @@ import React from 'react';
 
 import { AlertTriangle, CheckCircle, ShieldAlert } from 'lucide-react';
 
+import { useMe } from '@/api/users/users.queries';
 import {
     useAcknowledgeWarning,
     useMyWarnings,
@@ -14,6 +15,7 @@ import { formatTimestamp } from '@/utils/timestamp';
 export const StandingSettings: React.FC = () => {
     const { data: warnings, isLoading } = useMyWarnings();
     const { mutate: acknowledge, isPending } = useAcknowledgeWarning();
+    const { data: me } = useMe();
 
     if (isLoading) {
         return (
@@ -79,7 +81,10 @@ export const StandingSettings: React.FC = () => {
                                         </Text>
                                     </div>
                                     <Text size="xs" variant="muted">
-                                        {formatTimestamp(warning.timestamp)}
+                                        {formatTimestamp(
+                                            warning.timestamp,
+                                            me?.settings?.use24HourTime,
+                                        )}
                                     </Text>
                                 </div>
                                 <div className="mb-4 rounded border border-border-subtle bg-background p-3">
@@ -94,6 +99,8 @@ export const StandingSettings: React.FC = () => {
                                                 {warning.acknowledgedAt
                                                     ? formatTimestamp(
                                                           warning.acknowledgedAt,
+                                                          me?.settings
+                                                              ?.use24HourTime,
                                                       )
                                                     : 'unknown'}
                                             </Text>

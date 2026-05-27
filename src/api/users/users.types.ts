@@ -54,6 +54,7 @@ export interface UserSettings {
     customFontFamily?: string;
     notificationSounds?: NotificationSound[];
     useDefaultSounds?: boolean;
+    use24HourTime?: boolean;
 }
 
 export interface ServerFolder {

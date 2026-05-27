@@ -104,6 +104,9 @@ const AppearanceSettingsForm: React.FC<AppearanceSettingsFormProps> = ({
     const [localCustomFontFamily, setLocalCustomFontFamily] = useState(
         user.settings?.customFontFamily ?? '',
     );
+    const [use24HourTime, setUse24HourTime] = useState(
+        user.settings?.use24HourTime ?? false,
+    );
 
     // Track changes
     const hasChanges =
@@ -114,7 +117,8 @@ const AppearanceSettingsForm: React.FC<AppearanceSettingsFormProps> = ({
             JSON.stringify(user.usernameGradient?.colors || []) ||
         gradientAngle !== (user.usernameGradient?.angle ?? 90) ||
         localCustomFontUrl !== (user.settings?.customFontUrl ?? '') ||
-        localCustomFontFamily !== (user.settings?.customFontFamily ?? '');
+        localCustomFontFamily !== (user.settings?.customFontFamily ?? '') ||
+        use24HourTime !== (user.settings?.use24HourTime ?? false);
 
     const handleSave = (): void => {
         if (localCustomFontUrl) {
@@ -142,11 +146,13 @@ const AppearanceSettingsForm: React.FC<AppearanceSettingsFormProps> = ({
 
         if (
             localCustomFontUrl !== (user.settings?.customFontUrl ?? '') ||
-            localCustomFontFamily !== (user.settings?.customFontFamily ?? '')
+            localCustomFontFamily !== (user.settings?.customFontFamily ?? '') ||
+            use24HourTime !== (user.settings?.use24HourTime ?? false)
         ) {
             updateSettings({
                 customFontUrl: localCustomFontUrl,
                 customFontFamily: localCustomFontFamily,
+                use24HourTime,
             });
         }
 
@@ -167,6 +173,7 @@ const AppearanceSettingsForm: React.FC<AppearanceSettingsFormProps> = ({
         setGradientAngle(user.usernameGradient?.angle ?? 90);
         setLocalCustomFontUrl(user.settings?.customFontUrl ?? '');
         setLocalCustomFontFamily(user.settings?.customFontFamily ?? '');
+        setUse24HourTime(user.settings?.use24HourTime ?? false);
     };
 
     // Color picker helpers
@@ -193,6 +200,7 @@ const AppearanceSettingsForm: React.FC<AppearanceSettingsFormProps> = ({
         setGradientAngle(90);
         setLocalCustomFontUrl('');
         setLocalCustomFontFamily('');
+        setUse24HourTime(false);
     };
 
     const previewUser = {
@@ -269,6 +277,22 @@ const AppearanceSettingsForm: React.FC<AppearanceSettingsFormProps> = ({
                     <div className="space-y-4">
                         <Heading level={4}>Theme</Heading>
                         <ThemeSwitcher />
+                    </div>
+
+                    {/* Message Display Settings */}
+                    <div className="space-y-4">
+                        <div className="flex flex-col gap-2">
+                            <div className="flex items-center justify-between">
+                                <Heading level={4}>24-Hour Time</Heading>
+                                <Toggle
+                                    checked={use24HourTime}
+                                    onCheckedChange={setUse24HourTime}
+                                />
+                            </div>
+                            <span className="text-sm text-muted-foreground">
+                                Show message timestamps in 24-hour format.
+                            </span>
+                        </div>
                     </div>
 
                     <div className="space-y-4">

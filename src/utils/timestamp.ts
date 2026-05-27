@@ -3,7 +3,10 @@ import { APP_LOCALE } from './locale';
 /**
  * Format a message timestamp
  */
-export function formatTimestamp(isoString: string): string {
+export function formatTimestamp(
+    isoString: string,
+    use24HourTime: boolean = false,
+): string {
     const messageDate = new Date(isoString);
     const now = new Date();
 
@@ -18,6 +21,7 @@ export function formatTimestamp(isoString: string): string {
     const timeString = messageDate.toLocaleTimeString(APP_LOCALE, {
         hour: '2-digit',
         minute: '2-digit',
+        hour12: !use24HourTime,
     });
 
     if (diffDays === 0) {

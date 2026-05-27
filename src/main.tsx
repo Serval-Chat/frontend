@@ -61,6 +61,7 @@ const Showoff = lazy(() =>
 const TauriGateway = lazy(() =>
     import('@/pages/TauriGateway').then((m) => ({ default: m.TauriGateway })),
 );
+const Tos = lazy(() => import('@/pages/Tos').then((m) => ({ default: m.Tos })));
 
 const isTauri = (): boolean => '__TAURI__' in window;
 window.addEventListener('auth-change', () => {
@@ -144,6 +145,7 @@ createRoot(document.getElementById('root')!).render(
                                         element={<Downloads />}
                                         path="/downloads"
                                     />
+                                    <Route element={<Tos />} path="/tos" />
                                     <Route element={<AuthenticatedLayout />}>
                                         <Route element={<Chat />} path="/chat">
                                             <Route

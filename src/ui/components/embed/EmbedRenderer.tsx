@@ -6,6 +6,7 @@ import {
     useState,
 } from 'react';
 
+import { useMe } from '@/api/users/users.queries';
 import type { Embed, MessagePayload } from '@/types/embed';
 import { ImageLightbox } from '@/ui/components/common/ImageLightbox';
 import { Link } from '@/ui/components/common/Link';
@@ -19,20 +20,25 @@ import {
     parseText,
 } from '@/utils/textParser/parser';
 
-const timestampFormatter = new Intl.DateTimeFormat(APP_LOCALE, {
-    dateStyle: 'medium',
-    timeStyle: 'short',
-});
+// Remove static timestampFormatter
 
 const colorToCss = (color: number | undefined): string | undefined => {
     if (color === undefined) return undefined;
     return `#${color.toString(16).padStart(6, '0')}`;
 };
 
-const formatTimestamp = (iso: string | undefined): string | undefined => {
+const formatTimestamp = (
+    iso: string | undefined,
+    use24HourTime: boolean,
+): string | undefined => {
     if (!iso) return undefined;
     try {
-        return timestampFormatter.format(new Date(iso));
+        const formatter = new Intl.DateTimeFormat(APP_LOCALE, {
+            dateStyle: 'medium',
+            timeStyle: 'short',
+            hour12: !use24HourTime,
+        });
+        return formatter.format(new Date(iso));
     } catch {
         return iso;
     }
@@ -147,6 +153,8 @@ const EmbedCard = memo(
         isDeleted,
         onResize,
     }: EmbedCardProps): ReactNode => {
+        const { data: me } = useMe();
+        const use24HourTime = me?.settings?.use24HourTime ?? false;
         const barColor = colorToCss(embed.color);
         const hasContent =
             embed.title ??
@@ -200,10 +208,13 @@ const EmbedCard = memo(
 
         const footerText = useMemo(() => {
             if (!embed.footer?.text && !embed.timestamp) return '';
-            return [embed.footer?.text, formatTimestamp(embed.timestamp)]
+            return [
+                embed.footer?.text,
+                formatTimestamp(embed.timestamp, use24HourTime),
+            ]
                 .filter(Boolean)
                 .join(' • ');
-        }, [embed.footer?.text, embed.timestamp]);
+        }, [embed.footer?.text, embed.timestamp, use24HourTime]);
 
         if (!hasContent) return null;
 

@@ -20,6 +20,7 @@ interface MessageHeaderProps {
     disableGlowAndColors?: boolean;
     disableColors?: boolean;
     disableGlow?: boolean;
+    use24HourTime?: boolean;
     onClickName?: () => void;
     isEdited?: boolean;
     editedAt?: string;
@@ -37,6 +38,7 @@ export const MessageHeader: React.FC<MessageHeaderProps> = React.memo(
         disableGlowAndColors,
         disableColors,
         disableGlow,
+        use24HourTime,
         onClickName,
         isEdited,
         editedAt,
@@ -71,12 +73,15 @@ export const MessageHeader: React.FC<MessageHeaderProps> = React.memo(
                 )}
 
                 <Text className="text-[10px] font-medium tracking-wider text-text-muted uppercase">
-                    {formatTimestamp(timestamp)}
+                    {formatTimestamp(timestamp, use24HourTime)}
                 </Text>
 
                 {isEdited && (
                     <Text className="text-[10px] font-medium text-text-muted italic">
-                        (edited{editedAt ? ` ${formatTimestamp(editedAt)}` : ''}
+                        (edited
+                        {editedAt
+                            ? ` ${formatTimestamp(editedAt, use24HourTime)}`
+                            : ''}
                         )
                     </Text>
                 )}

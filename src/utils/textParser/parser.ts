@@ -845,7 +845,10 @@ export class TextParser {
                 }
                 return {
                     type: 'h3',
-                    content: this.parseContent(content.trim()),
+                    content: this.parseContent(content.trim(), [
+                        ParserFeature.ORDERED_LIST,
+                        ParserFeature.UNORDERED_LIST,
+                    ]),
                 } as ASTNode;
             }
         } else if (this.peek('## ') && this.has(ParserFeature.H2)) {
@@ -867,7 +870,10 @@ export class TextParser {
                 }
                 return {
                     type: 'h2',
-                    content: this.parseContent(content.trim()),
+                    content: this.parseContent(content.trim(), [
+                        ParserFeature.ORDERED_LIST,
+                        ParserFeature.UNORDERED_LIST,
+                    ]),
                 } as ASTNode;
             }
         } else if (this.peek('# ') && this.has(ParserFeature.H1)) {
@@ -889,7 +895,10 @@ export class TextParser {
                 }
                 return {
                     type: 'h1',
-                    content: this.parseContent(content.trim()),
+                    content: this.parseContent(content.trim(), [
+                        ParserFeature.ORDERED_LIST,
+                        ParserFeature.UNORDERED_LIST,
+                    ]),
                 } as ASTNode;
             }
         } else if (this.peek('-# ') && this.has(ParserFeature.SUBTEXT)) {
@@ -911,7 +920,10 @@ export class TextParser {
                 }
                 return {
                     type: 'subtext',
-                    content: this.parseContent(content.trim()),
+                    content: this.parseContent(content.trim(), [
+                        ParserFeature.ORDERED_LIST,
+                        ParserFeature.UNORDERED_LIST,
+                    ]),
                 } as ASTNode;
             }
         }
@@ -1505,8 +1517,20 @@ export class TextParser {
         return null;
     }
 
-    private parseContent(content: string): string | ASTNode[] {
-        const nodes = parseText(content, this.options);
+    private parseContent(
+        content: string,
+        excludedFeatures?: ParserFeatureType[],
+    ): string | ASTNode[] {
+        let options = this.options;
+        if (excludedFeatures && excludedFeatures.length > 0) {
+            options = {
+                ...this.options,
+                features: this.options.features.filter(
+                    (f) => !excludedFeatures.includes(f),
+                ),
+            };
+        }
+        const nodes = parseText(content, options);
         if (nodes.length === 1 && nodes[0].type === 'text') {
             return nodes[0].content;
         }

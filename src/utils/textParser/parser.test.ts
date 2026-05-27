@@ -123,6 +123,12 @@ describe('TextParser', () => {
         ]);
     });
 
+    it('should parse ## heading with a leading number as h2, not ordered_list', () => {
+        const text = '## 2. Your Account';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([{ type: 'h2', content: '2. Your Account' }]);
+    });
+
     it('should parse subtext', () => {
         const text = '-# This is subtext';
         const nodes = parseText(text, ParserPresets.MESSAGE);

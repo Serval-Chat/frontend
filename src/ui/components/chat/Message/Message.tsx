@@ -355,10 +355,10 @@ export const Message: React.FC<MessageProps> = React.memo(
                     .toLocaleTimeString(APP_LOCALE, {
                         hour: '2-digit',
                         minute: '2-digit',
-                        hour12: false,
+                        hour12: !(me?.settings?.use24HourTime ?? false),
                     })
                     .split(' ')[0],
-            [message.createdAt],
+            [message.createdAt, me?.settings?.use24HourTime],
         );
         const pickerCoords = useSmartPosition({
             isOpen: showPicker && !isMobile,
@@ -437,6 +437,7 @@ export const Message: React.FC<MessageProps> = React.memo(
                             isWebhook={message.isWebhook}
                             role={resolvedRole}
                             timestamp={message.createdAt}
+                            use24HourTime={me?.settings?.use24HourTime}
                             user={user}
                             onClickName={handleProfileClick}
                         />
