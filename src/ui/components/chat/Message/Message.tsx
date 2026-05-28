@@ -237,6 +237,23 @@ export const Message: React.FC<MessageProps> = React.memo(
             setShowProfile(false);
         }, []);
 
+        const handleDoubleClick = React.useCallback(
+            (event: React.MouseEvent<HTMLElement>): void => {
+                if (!onReplyToMessage || disableActions) return;
+
+                const target = event.target;
+                if (!(target instanceof Element)) return;
+
+                const interactiveTarget = target.closest(
+                    'a, button, input, textarea, select, [role="button"], [contenteditable="true"]',
+                );
+                if (interactiveTarget) return;
+
+                onReplyToMessage(message);
+            },
+            [disableActions, message, onReplyToMessage],
+        );
+
         const isColorsDisabled =
             disableColors ||
             me?.settings?.disableCustomUsernameColors ||
@@ -531,6 +548,7 @@ export const Message: React.FC<MessageProps> = React.memo(
                     mentionsMe && 'border-l-2 border-[var(--caution)]',
                 )}
                 id={`message-${message._id}`}
+                onDoubleClick={handleDoubleClick}
                 onMouseLeave={handleClosePicker}
             >
                 {disableActions ? (
