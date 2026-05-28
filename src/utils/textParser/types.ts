@@ -45,6 +45,7 @@ export const ParserFeature = {
     SUPERSCRIPT: 'SUPERSCRIPT',
     SUBSCRIPT: 'SUBSCRIPT',
     STACKED_SCRIPT: 'STACKED_SCRIPT',
+    TIMESTAMP: 'TIMESTAMP',
 } as const;
 
 export type ParserFeature = (typeof ParserFeature)[keyof typeof ParserFeature];
@@ -92,7 +93,8 @@ export type ASTNodeType =
     | 'rhythm_underline'
     | 'superscript'
     | 'subscript'
-    | 'stacked_script';
+    | 'stacked_script'
+    | 'timestamp';
 
 export interface TextNode {
     type: 'text';
@@ -291,6 +293,14 @@ export interface StackedScriptNode {
     sub: string | ASTNode[];
 }
 
+export type TimestampFlag = 't' | 'T' | 'd' | 'D' | 'f' | 'F' | 'R';
+
+export interface TimestampNode {
+    type: 'timestamp';
+    timestamp: number;
+    flag?: TimestampFlag;
+}
+
 export interface TableNode {
     type: 'table';
     headers: (string | ASTNode[])[];
@@ -376,4 +386,5 @@ export type ASTNode =
     | RhythmUnderlineNode
     | SuperscriptNode
     | SubscriptNode
-    | StackedScriptNode;
+    | StackedScriptNode
+    | TimestampNode;

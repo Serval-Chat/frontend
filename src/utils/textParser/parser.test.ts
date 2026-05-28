@@ -44,6 +44,29 @@ describe('TextParser', () => {
         ]);
     });
 
+    it('should parse timestamps with format flags', () => {
+        const text = 'Meet at <t:1543424460:F> or <t:1543424460:R>';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            { type: 'text', content: 'Meet at ' },
+            { type: 'timestamp', timestamp: 1543424460, flag: 'F' },
+            { type: 'text', content: ' or ' },
+            { type: 'timestamp', timestamp: 1543424460, flag: 'R' },
+        ]);
+    });
+
+    it('should parse timestamps without a format flag', () => {
+        const nodes = parseText('<t:-123456789>', ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            { type: 'timestamp', timestamp: -123456789, flag: undefined },
+        ]);
+    });
+
+    it('should leave invalid timestamp flags as text', () => {
+        const nodes = parseText('<t:1543424460:x>', ParserPresets.MESSAGE);
+        expect(nodes).toEqual([{ type: 'text', content: '<t:1543424460:x>' }]);
+    });
+
     it('should parse links', () => {
         const text = 'Check out https://rolling.catfla.re for more';
         const nodes = parseText(text, ParserPresets.MESSAGE);

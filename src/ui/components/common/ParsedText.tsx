@@ -29,6 +29,7 @@ import {
     TableRow,
 } from './Table';
 import { Text, type TextProps } from './Text';
+import { Timestamp } from './Timestamp';
 
 const CodeBlock = React.lazy(() =>
     import('./CodeBlock').then((m) => ({ default: m.CodeBlock })),
@@ -757,6 +758,15 @@ export const ParsedText = React.memo<ParsedTextProps>(
                                         @everyone
                                     </Text>
                                 </Box>
+                            );
+
+                        case 'timestamp':
+                            return (
+                                <Timestamp
+                                    flag={node.flag}
+                                    key={idx}
+                                    timestamp={node.timestamp}
+                                />
                             );
 
                         case 'checklist':

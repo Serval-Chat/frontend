@@ -113,6 +113,7 @@ export const ParserPresets = {
             ParserFeature.SUPERSCRIPT,
             ParserFeature.SUBSCRIPT,
             ParserFeature.STACKED_SCRIPT,
+            ParserFeature.TIMESTAMP,
         ],
     },
     BIO: {
@@ -146,6 +147,7 @@ export const ParserPresets = {
             ParserFeature.SUPERSCRIPT,
             ParserFeature.SUBSCRIPT,
             ParserFeature.STACKED_SCRIPT,
+            ParserFeature.TIMESTAMP,
         ],
     },
     EMBED: {
@@ -175,6 +177,7 @@ export const ParserPresets = {
             ParserFeature.SUPERSCRIPT,
             ParserFeature.SUBSCRIPT,
             ParserFeature.STACKED_SCRIPT,
+            ParserFeature.TIMESTAMP,
         ],
     },
     EMBED_INLINE: {
@@ -204,6 +207,7 @@ export const ParserPresets = {
             ParserFeature.SUPERSCRIPT,
             ParserFeature.SUBSCRIPT,
             ParserFeature.STACKED_SCRIPT,
+            ParserFeature.TIMESTAMP,
         ],
     },
 } as const;
@@ -279,6 +283,19 @@ export class TextParser {
                 if (emojiNode) {
                     currentText = this.flushText(nodes, currentText);
                     nodes.push(emojiNode);
+                    continue;
+                }
+            }
+
+            if (
+                char === '<' &&
+                this.has(ParserFeature.TIMESTAMP) &&
+                this.peek('<t:')
+            ) {
+                const timestampNode = this.tryParseTimestamp();
+                if (timestampNode) {
+                    currentText = this.flushText(nodes, currentText);
+                    nodes.push(timestampNode);
                     continue;
                 }
             }
@@ -748,6 +765,64 @@ export class TextParser {
 
         this.index = start;
         return null;
+    }
+
+    private tryParseTimestamp(): ASTNode | null {
+        const start = this.index;
+        this.index += 3; // skip '<t:'
+
+        let rawTimestamp = '';
+        if (this.text[this.index] === '-') {
+            rawTimestamp += '-';
+            this.index++;
+        }
+
+        while (this.index < this.text.length) {
+            const c = this.text[this.index];
+            if (c >= '0' && c <= '9') {
+                rawTimestamp += c;
+                this.index++;
+                continue;
+            }
+            break;
+        }
+
+        if (rawTimestamp === '' || rawTimestamp === '-') {
+            this.index = start;
+            return null;
+        }
+
+        let flag: 't' | 'T' | 'd' | 'D' | 'f' | 'F' | 'R' | undefined;
+        if (this.text[this.index] === ':') {
+            const rawFlag = this.text[this.index + 1];
+            if (
+                rawFlag === 't' ||
+                rawFlag === 'T' ||
+                rawFlag === 'd' ||
+                rawFlag === 'D' ||
+                rawFlag === 'f' ||
+                rawFlag === 'F' ||
+                rawFlag === 'R'
+            ) {
+                flag = rawFlag;
+                this.index += 2;
+            } else {
+                this.index = start;
+                return null;
+            }
+        }
+
+        if (this.text[this.index] !== '>') {
+            this.index = start;
+            return null;
+        }
+
+        this.index++;
+        return {
+            type: 'timestamp',
+            timestamp: Number(rawTimestamp),
+            flag,
+        };
     }
 
     private tryParseFormatting(): ASTNode | null {
