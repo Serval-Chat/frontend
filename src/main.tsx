@@ -216,6 +216,10 @@ createRoot(document.getElementById('root')!).render(
                                                     element={<NavigationSync />}
                                                     path="notifications"
                                                 />
+                                                <Route
+                                                    element={<NavigationSync />}
+                                                    path="keybinds"
+                                                />
                                             </Route>
                                         </Route>
                                         <Route

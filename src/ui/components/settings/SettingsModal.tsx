@@ -46,6 +46,12 @@ const NotificationSettings = React.lazy(() =>
     })),
 );
 
+const KeybindSettings = React.lazy(() =>
+    import('./KeybindSettings').then((m) => ({
+        default: m.KeybindSettings,
+    })),
+);
+
 interface SettingsModalProps {
     isOpen: boolean;
     onClose: () => void;
@@ -58,6 +64,7 @@ const SECTION_URL_MAP: Record<string, string> = {
     blocking: 'blocking',
     standing: 'standing',
     notifications: 'notifications',
+    keybinds: 'keybinds',
     developer: 'developer',
 };
 
@@ -68,6 +75,7 @@ const SECTION_ID_TO_URL: Record<string, string> = {
     blocking: 'blocking',
     standing: 'standing',
     notifications: 'notifications',
+    keybinds: 'keybinds',
     developer: 'developer',
 };
 
@@ -161,6 +169,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                             )}
                             {activeSection === 'notifications' && (
                                 <NotificationSettings />
+                            )}
+                            {activeSection === 'keybinds' && (
+                                <KeybindSettings />
                             )}
                             {activeSection === 'developer' && (
                                 <DeveloperSettings />

@@ -22,8 +22,10 @@ import {
     useMembers,
     useRoles,
 } from '@/api/servers/servers.queries';
+import { useMe } from '@/api/users/users.queries';
 import type { User } from '@/api/users/users.types';
 import { useCustomEmojis } from '@/hooks/useCustomEmojis';
+import { useKeybindManager } from '@/keybinds/useKeybindManager';
 import {
     $createChipNode,
     ChipNode,
@@ -83,6 +85,8 @@ export const MessageEdit: React.FC<MessageEditProps> = ({
     const editChannelMessage = useEditChannelMessage();
     const editUserMessage = useEditUserMessage();
     const { customCategories } = useCustomEmojis({ enabled: true });
+    const { data: me } = useMe();
+    const keybindManager = useKeybindManager(me?.settings?.keybinds);
 
     const { data: friends } = useFriends();
     const { data: channels } = useChannels(serverId || '', {
@@ -131,7 +135,8 @@ export const MessageEdit: React.FC<MessageEditProps> = ({
                 return;
             }
 
-            if (e.key.length === 1 && !e.ctrlKey && !e.altKey && !e.metaKey) {
+            if (keybindManager.matches('composer.focus', e)) {
+                e.preventDefault();
                 if (editorInstance) {
                     editorInstance.focus();
                     setShowEmojiPicker(false);
@@ -151,7 +156,7 @@ export const MessageEdit: React.FC<MessageEditProps> = ({
             window.removeEventListener('resize', handleResize);
             window.removeEventListener('keydown', handleGlobalKeyDown);
         };
-    }, [editorInstance]);
+    }, [editorInstance, keybindManager]);
 
     // Close emoji picker when clicking outside
     useClickAway(emojiPickerRef, () => {

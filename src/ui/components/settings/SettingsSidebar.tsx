@@ -1,6 +1,14 @@
 import React from 'react';
 
-import { Bell, Eye, Palette, Shield, ShieldAlert, User } from 'lucide-react';
+import {
+    Bell,
+    Eye,
+    Keyboard,
+    Palette,
+    Shield,
+    ShieldAlert,
+    User,
+} from 'lucide-react';
 
 import { Button } from '@/ui/components/common/Button';
 
@@ -20,6 +28,7 @@ export const SettingsSidebar: React.FC<SettingsSidebarProps> = ({
         { id: 'blocking', label: 'Blocking', icon: Shield },
         { id: 'standing', label: 'Standing', icon: ShieldAlert },
         { id: 'notifications', label: 'Notifications', icon: Bell },
+        { id: 'keybinds', label: 'Keybinds', icon: Keyboard },
         { id: 'developer', label: 'Developer', icon: ShieldAlert },
     ];
 

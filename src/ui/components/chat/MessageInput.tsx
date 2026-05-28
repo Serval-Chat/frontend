@@ -57,6 +57,7 @@ import type { User } from '@/api/users/users.types';
 import type { QueuedFile } from '@/hooks/chat/useFileQueue';
 import { useCustomEmojis } from '@/hooks/useCustomEmojis';
 import { useWebSocket } from '@/hooks/ws/useWebSocket';
+import { useKeybindManager } from '@/keybinds/useKeybindManager';
 import { useAppSelector } from '@/store/hooks';
 import type { ProcessedChatMessage } from '@/types/chat.ui';
 import {
@@ -223,6 +224,8 @@ export const MessageInput: React.FC<MessageInputProps> = ({
     const fileInputRef = useRef<HTMLInputElement>(null);
     const emojiPickerRef = useRef<HTMLDivElement>(null);
     const { showToast } = useToast();
+    const { data: me } = useMe();
+    const keybindManager = useKeybindManager(me?.settings?.keybinds);
 
     useClickAway(emojiPickerRef, () => {
         setShowEmojiPicker(false);
@@ -244,7 +247,8 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                 return;
             }
 
-            if (e.key.length === 1 && !e.ctrlKey && !e.altKey && !e.metaKey) {
+            if (keybindManager.matches('composer.focus', e)) {
+                e.preventDefault();
                 editor?.focus();
 
                 setShowEmojiPicker(false);
@@ -258,7 +262,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
             mobileQuery.removeEventListener('change', handleResize);
             window.removeEventListener('keydown', handleGlobalKeyDown);
         };
-    }, [editor]);
+    }, [editor, keybindManager]);
 
     useEffect(() => {
         if (replyingTo && editor) {
@@ -312,7 +316,6 @@ export const MessageInput: React.FC<MessageInputProps> = ({
         isServerRoute &&
         selectedServerId === serverIdFromUrl;
 
-    const { data: me } = useMe();
     const { data: friendsList = [] } = useFriends();
     const { data: members = [] } = useMembers(selectedServerId, {
         enabled: isServerContextReady,

@@ -40,6 +40,16 @@ export interface NotificationSound {
     enabled: boolean;
 }
 
+export interface KeybindBinding {
+    code: string;
+    ctrl?: boolean;
+    alt?: boolean;
+    shift?: boolean;
+    meta?: boolean;
+}
+
+export type UserKeybinds = Record<string, KeybindBinding | null>;
+
 export interface UserSettings {
     muteNotifications?: boolean;
     ownMessagesAlign?: MessageAlignment;
@@ -55,6 +65,7 @@ export interface UserSettings {
     notificationSounds?: NotificationSound[];
     useDefaultSounds?: boolean;
     use24HourTime?: boolean;
+    keybinds?: UserKeybinds;
 }
 
 export interface ServerFolder {

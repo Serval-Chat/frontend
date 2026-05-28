@@ -22,6 +22,7 @@ import { useProcessedMessages } from '@/hooks/chat/useProcessedMessages';
 import { useSlowMode } from '@/hooks/chat/useSlowMode';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useChatWS } from '@/hooks/ws/useChatWS';
+import { useKeybindManager } from '@/keybinds/useKeybindManager';
 import { type Theme, useTheme } from '@/providers/ThemeProvider';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { setTargetMessageId } from '@/store/slices/navSlice';
@@ -111,19 +112,22 @@ export const MainChat: React.FC<MainChatProps> = ({
         };
     }, [theme, opacity, seed, base, spotColor, spotCount]);
 
+    const { data: currentUser } = useMe();
+    const keybindManager = useKeybindManager(currentUser?.settings?.keybinds);
+
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent): void => {
-            if (e.altKey && e.code === 'Digit1') {
+            if (keybindManager.matches('debug.typing.more', e)) {
                 e.preventDefault();
                 e.stopPropagation();
                 setDebugTypingCount((prev) => (prev + 1) % 5);
             }
-            if (e.altKey && e.code === 'Digit2') {
+            if (keybindManager.matches('debug.typing.less', e)) {
                 e.preventDefault();
                 e.stopPropagation();
                 setDebugTypingCount((prev) => (prev - 1 + 5) % 5);
             }
-            if (e.altKey && e.code === 'Digit3') {
+            if (keybindManager.matches('debug.theme.previous', e)) {
                 e.preventDefault();
                 e.stopPropagation();
                 const currentIndex = THEMES.indexOf(theme);
@@ -131,7 +135,7 @@ export const MainChat: React.FC<MainChatProps> = ({
                     (currentIndex - 1 + THEMES.length) % THEMES.length;
                 setTheme(THEMES[nextIndex]);
             }
-            if (e.altKey && e.code === 'Digit4') {
+            if (keybindManager.matches('debug.theme.next', e)) {
                 e.preventDefault();
                 e.stopPropagation();
                 const currentIndex = THEMES.indexOf(theme);
@@ -141,9 +145,8 @@ export const MainChat: React.FC<MainChatProps> = ({
         };
         window.addEventListener('keydown', handleKeyDown, true);
         return () => window.removeEventListener('keydown', handleKeyDown, true);
-    }, [theme, setTheme]);
+    }, [keybindManager, theme, setTheme]);
 
-    const { data: currentUser } = useMe();
     const { data: friendUser, isError: isFriendError } = useUserById(
         selectedFriendId ?? '',
         {
