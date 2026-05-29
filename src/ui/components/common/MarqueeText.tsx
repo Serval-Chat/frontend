@@ -9,18 +9,18 @@ interface MarqueeTextProps {
     speed?: number;
 }
 
-export const MarqueeText: React.FC<MarqueeTextProps> = ({
+export const MarqueeText = ({
     children,
     className,
     speed = 30,
-}) => {
+}: MarqueeTextProps) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const textRef = useRef<HTMLSpanElement>(null);
     const [overflow, setOverflow] = useState(false);
     const [duration, setDuration] = useState(5);
     const [shift, setShift] = useState(0);
 
-    useLayoutEffect(() => {
+    useLayoutEffect((): (() => void) => {
         const measure = (): void => {
             if (!containerRef.current || !textRef.current) return;
             const cw = containerRef.current.offsetWidth;
@@ -42,7 +42,7 @@ export const MarqueeText: React.FC<MarqueeTextProps> = ({
 
         const ro = new ResizeObserver(measure);
         if (containerRef.current) ro.observe(containerRef.current);
-        return () => ro.disconnect();
+        return (): void => ro.disconnect();
     }, [children, speed]);
 
     return (

@@ -55,17 +55,17 @@ const renderComponent = (
     );
 };
 
-describe('BlockUserModal', () => {
-    beforeEach(() => {
+describe('BlockUserModal', (): void => {
+    beforeEach((): void => {
         vi.clearAllMocks();
     });
 
-    it('should not render when isOpen is false', () => {
+    it('should not render when isOpen is false', (): void => {
         renderComponent({ isOpen: false });
         expect(screen.queryByText('Block User')).not.toBeInTheDocument();
     });
 
-    it('renders the modal with provided username and profiles', () => {
+    it('renders the modal with provided username and profiles', (): void => {
         renderComponent();
         expect(
             screen.getByRole('heading', { name: /Block TestUser/i }),
@@ -87,13 +87,13 @@ describe('BlockUserModal', () => {
         ).toBeInTheDocument();
     });
 
-    it('selects the first profile by default if none is selected', () => {
+    it('selects the first profile by default if none is selected', (): void => {
         renderComponent();
         const select = screen.getByRole('combobox') as HTMLSelectElement;
         expect(select.value).toBe('profile-1');
     });
 
-    it('invokes onClose when Cancel is clicked', () => {
+    it('invokes onClose when Cancel is clicked', (): void => {
         const onCloseMock = vi.fn();
         renderComponent({ onClose: onCloseMock });
 
@@ -101,7 +101,7 @@ describe('BlockUserModal', () => {
         expect(onCloseMock).toHaveBeenCalledOnce();
     });
 
-    it('invokes onConfirm with the selected profileId and closes modal', () => {
+    it('invokes onConfirm with the selected profileId and closes modal', (): void => {
         const onConfirmMock = vi.fn();
         const onCloseMock = vi.fn();
         renderComponent({ onConfirm: onConfirmMock, onClose: onCloseMock });
@@ -115,7 +115,7 @@ describe('BlockUserModal', () => {
         expect(onCloseMock).toHaveBeenCalledOnce();
     });
 
-    it('disables the confirmation button if no profiles are provided/valid', () => {
+    it('disables the confirmation button if no profiles are provided/valid', (): void => {
         renderComponent({ profiles: [] });
         const blockButton = screen.getByRole('button', {
             name: /Block User/i,

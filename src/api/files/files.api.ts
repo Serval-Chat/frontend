@@ -54,7 +54,7 @@ export const filesApi = {
                     'Content-Type': 'multipart/form-data',
                 },
                 timeout: 0,
-                onUploadProgress: (progressEvent) => {
+                onUploadProgress: (progressEvent): void => {
                     if (onProgress && progressEvent.total) {
                         const progress = Math.round(
                             (progressEvent.loaded * 100) / progressEvent.total,

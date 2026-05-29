@@ -45,27 +45,35 @@ export const Button = React.memo(
                 height: number | string;
             }>({ width: 'auto', height: 'auto' });
 
-            useLayoutEffect(() => {
+            useLayoutEffect((): (() => void) | undefined => {
                 if (!retainSize && !loading) return;
 
                 const updateDimensions = (): void => {
                     if (!buttonRef.current) return;
                     const { width, height } =
                         buttonRef.current.getBoundingClientRect();
-                    setDimensions((prev) => {
-                        if (retainSize && prev.width !== 'auto') return prev;
-                        if (loading && prev.width !== 'auto') return prev;
+                    setDimensions(
+                        (
+                            prev,
+                        ): {
+                            width: number | string;
+                            height: number | string;
+                        } => {
+                            if (retainSize && prev.width !== 'auto')
+                                return prev;
+                            if (loading && prev.width !== 'auto') return prev;
 
-                        if (prev.width === width && prev.height === height)
-                            return prev;
-                        return { width, height };
-                    });
+                            if (prev.width === width && prev.height === height)
+                                return prev;
+                            return { width, height };
+                        },
+                    );
                 };
 
                 updateDimensions();
 
                 window.addEventListener('resize', updateDimensions);
-                return () =>
+                return (): void =>
                     window.removeEventListener('resize', updateDimensions);
             }, [loading, retainSize, children]);
 
@@ -74,7 +82,10 @@ export const Button = React.memo(
                     ? { width: dimensions.width, height: dimensions.height }
                     : undefined;
 
-            React.useImperativeHandle(ref, () => buttonRef.current!);
+            React.useImperativeHandle(
+                ref,
+                (): HTMLButtonElement => buttonRef.current!,
+            );
 
             return (
                 <button

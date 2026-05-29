@@ -12,15 +12,29 @@ import { WsEvents } from '@/ws';
 
 const webSocketHandlers = new Map<string, (payload: unknown) => void>();
 
-vi.mock('@/hooks/ws/useWebSocket', () => ({
-    useWebSocket: (event: string, callback: (payload: unknown) => void) => {
-        webSocketHandlers.set(event, callback);
-    },
-}));
+vi.mock(
+    '@/hooks/ws/useWebSocket',
+    (): {
+        useWebSocket: (
+            event: string,
+            callback: (payload: unknown) => void,
+        ) => void;
+    } => ({
+        useWebSocket: (
+            event: string,
+            callback: (payload: unknown) => void,
+        ): void => {
+            webSocketHandlers.set(event, callback);
+        },
+    }),
+);
 
-vi.mock('@/api/users/users.queries', () => ({
-    useMe: () => ({ data: { _id: 'me' } }),
-}));
+vi.mock(
+    '@/api/users/users.queries',
+    (): { useMe: () => { data: { _id: string } } } => ({
+        useMe: (): { data: { _id: string } } => ({ data: { _id: 'me' } }),
+    }),
+);
 
 vi.mock('@/hooks/ws/useTypingIndicator', () => ({
     useTypingIndicator: () => ({
@@ -55,12 +69,12 @@ vi.mock('@/ws', () => ({
     },
 }));
 
-describe('useChatWS embeds mapping', () => {
-    beforeEach(() => {
+describe('useChatWS embeds mapping', (): void => {
+    beforeEach((): void => {
         webSocketHandlers.clear();
     });
 
-    it('keeps embeds when mapping server websocket events to chat messages', () => {
+    it('keeps embeds when mapping server websocket events to chat messages', (): void => {
         const queryClient = new QueryClient();
         const queryKey = CHAT_QUERY_KEYS.channelMessages('s1', 'c1', null);
         queryClient.setQueryData(queryKey, {
@@ -85,7 +99,7 @@ describe('useChatWS embeds mapping', () => {
         const handler = webSocketHandlers.get(WsEvents.MESSAGE_SERVER);
         expect(handler).toBeDefined();
 
-        act(() => {
+        act((): void => {
             handler?.({
                 messageId: 'm1',
                 serverId: 's1',

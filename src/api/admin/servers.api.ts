@@ -7,24 +7,28 @@ import type {
 } from '@/types/admin';
 
 export const adminServersApi = {
-    listServers: (params: { limit: number; offset: number; search?: string }) =>
+    listServers: (params: {
+        limit: number;
+        offset: number;
+        search?: string;
+    }): Promise<AdminServerListItem[]> =>
         apiClient
             .get<AdminServerListItem[]>('/api/v1/admin/servers', { params })
-            .then((r) => r.data),
+            .then((r): AdminServerListItem[] => r.data),
 
-    getVerificationStats: () =>
+    getVerificationStats: (): Promise<AdminServerVerificationStats> =>
         apiClient
             .get<AdminServerVerificationStats>(
                 '/api/v1/admin/servers/verification',
             )
-            .then((r) => r.data),
+            .then((r): AdminServerVerificationStats => r.data),
 
-    runVerificationNow: () =>
+    runVerificationNow: (): Promise<AdminServerVerificationStats> =>
         apiClient
             .post<AdminServerVerificationStats>(
                 '/api/v1/admin/servers/verification/run',
             )
-            .then((r) => r.data),
+            .then((r): AdminServerVerificationStats => r.data),
 
     deleteServer: async (serverId: string): Promise<void> => {
         await apiClient.delete(`/api/v1/admin/servers/${serverId}`);
@@ -34,15 +38,15 @@ export const adminServersApi = {
         await apiClient.post(`/api/v1/admin/servers/${serverId}/restore`);
     },
 
-    getServerDetails: (serverId: string) =>
+    getServerDetails: (serverId: string): Promise<AdminServerDetails> =>
         apiClient
             .get<AdminServerDetails>(`/api/v1/admin/servers/${serverId}`)
-            .then((r) => r.data),
+            .then((r): AdminServerDetails => r.data),
 
-    getServerInvites: (serverId: string) =>
+    getServerInvites: (serverId: string): Promise<ServerInvite[]> =>
         apiClient
             .get<ServerInvite[]>(`/api/v1/admin/servers/${serverId}/invites`)
-            .then((r) => r.data),
+            .then((r): ServerInvite[] => r.data),
 
     deleteServerInvite: async (
         serverId: string,
@@ -53,24 +57,27 @@ export const adminServersApi = {
         );
     },
 
-    verifyServer: (serverId: string) =>
+    verifyServer: (serverId: string): Promise<{ verified: boolean }> =>
         apiClient
             .post<{
                 verified: boolean;
             }>(`/api/v1/admin/servers/${serverId}/verify`)
-            .then((r) => r.data),
+            .then((r): { verified: boolean } => r.data),
 
-    unverifyServer: (serverId: string) =>
+    unverifyServer: (serverId: string): Promise<{ verified: boolean }> =>
         apiClient
             .delete<{
                 verified: boolean;
             }>(`/api/v1/admin/servers/${serverId}/verify`)
-            .then((r) => r.data),
+            .then((r): { verified: boolean } => r.data),
 
     setVerificationOverride: (
         serverId: string,
         override: 'verified' | 'unverified' | null,
-    ) =>
+    ): Promise<{
+        verified: boolean;
+        override: 'verified' | 'unverified' | null;
+    }> =>
         apiClient
             .put<{
                 verified: boolean;
@@ -78,20 +85,32 @@ export const adminServersApi = {
             }>(`/api/v1/admin/servers/${serverId}/verification-override`, {
                 override,
             })
-            .then((r) => r.data),
+            .then(
+                (
+                    r,
+                ): {
+                    verified: boolean;
+                    override: 'verified' | 'unverified' | null;
+                } => r.data,
+            ),
 
-    getAwaitingReviewServers: (params: { limit: number; offset: number }) =>
+    getAwaitingReviewServers: (params: {
+        limit: number;
+        offset: number;
+    }): Promise<{ items: AdminServerListItem[]; total: number }> =>
         apiClient
             .get<{
                 items: AdminServerListItem[];
                 total: number;
             }>('/api/v1/admin/servers/awaiting-review', { params })
-            .then((r) => r.data),
+            .then(
+                (r): { items: AdminServerListItem[]; total: number } => r.data,
+            ),
 
-    declineVerification: (serverId: string) =>
+    declineVerification: (serverId: string): Promise<{ message: string }> =>
         apiClient
             .delete<{
                 message: string;
             }>(`/api/v1/admin/servers/${serverId}/verification`)
-            .then((r) => r.data),
+            .then((r): { message: string } => r.data),
 };

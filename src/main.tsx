@@ -58,13 +58,18 @@ const ResetPassword = lazy(() =>
 const Showoff = lazy(() =>
     import('@/pages/Showoff').then((m) => ({ default: m.Showoff })),
 );
-const TauriGateway = lazy(() =>
-    import('@/pages/TauriGateway').then((m) => ({ default: m.TauriGateway })),
+const TauriGateway = lazy(
+    (): Promise<{ default: never } | { default: () => React.ReactElement }> =>
+        import('@/pages/TauriGateway').then(
+            (m): { default: () => React.ReactElement } => ({
+                default: m.TauriGateway,
+            }),
+        ),
 );
 const Tos = lazy(() => import('@/pages/Tos').then((m) => ({ default: m.Tos })));
 
 const isTauri = (): boolean => '__TAURI__' in window;
-window.addEventListener('auth-change', () => {
+window.addEventListener('auth-change', (): void => {
     if (!hasAuthToken()) {
         teardownWebPush().catch(console.error);
     }

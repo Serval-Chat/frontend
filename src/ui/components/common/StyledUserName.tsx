@@ -84,7 +84,7 @@ const loadUsernameFont = (font: string): void => {
     document.head.appendChild(link);
 };
 
-export const StyledUserName: React.FC<StyledUserNameProps> = React.memo(
+export const StyledUserName = React.memo(
     ({
         user,
         role,
@@ -96,7 +96,7 @@ export const StyledUserName: React.FC<StyledUserNameProps> = React.memo(
         disableGlow,
         showIcon = false,
         iconRole,
-    }) => {
+    }: StyledUserNameProps) => {
         let usernameFont = disableCustomFonts ? undefined : user?.usernameFont;
 
         if (
@@ -108,7 +108,7 @@ export const StyledUserName: React.FC<StyledUserNameProps> = React.memo(
             usernameFont = undefined;
         }
 
-        useEffect(() => {
+        useEffect((): void => {
             if (usernameFont && usernameFont !== 'default') {
                 loadUsernameFont(usernameFont);
             }

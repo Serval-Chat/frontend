@@ -14,14 +14,16 @@ interface TypingIndicatorProps {
 /**
  * @description Component to display typing indicators and slow mode cooldown
  */
-export const TypingIndicator: React.FC<TypingIndicatorProps> = ({
+export const TypingIndicator = ({
     typingUsers: rawTypingUsers,
     cooldown = 0,
     isSlowModeEnabled = false,
     canBypassSlowMode = false,
-}) => {
-    const blocks = useAppSelector((state) => state.blocking.blocks);
-    const typingUsers = rawTypingUsers.filter((u) => {
+}: TypingIndicatorProps) => {
+    const blocks = useAppSelector(
+        (state): Record<string, number> => state.blocking.blocks,
+    );
+    const typingUsers = rawTypingUsers.filter((u): boolean => {
         const userBlocks = blocks[u.userId] || 0;
         return !(userBlocks & BlockFlags.HIDE_FROM_TYPING_INDICATORS);
     });

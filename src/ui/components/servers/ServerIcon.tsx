@@ -29,7 +29,7 @@ export const ServerIcon = React.memo(
 
         const initials = server.name
             .split(' ')
-            .map((word: string) => word[0])
+            .map((word: string): string => word[0])
             .join('')
             .slice(0, 3)
             .toUpperCase();
@@ -75,7 +75,7 @@ export const ServerIcon = React.memo(
                 role="button"
                 tabIndex={0}
                 title={server.name}
-                onKeyDown={(e) => {
+                onKeyDown={(e): void => {
                     if (onClick && (e.key === 'Enter' || e.key === ' ')) {
                         onClick();
                     }

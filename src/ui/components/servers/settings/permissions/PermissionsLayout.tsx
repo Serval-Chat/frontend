@@ -3,9 +3,7 @@ import React from 'react';
 import { Text } from '@/ui/components/common/Text';
 import { cn } from '@/utils/cn';
 
-export const SectionLabel: React.FC<{ children: React.ReactNode }> = ({
-    children,
-}) => (
+export const SectionLabel = ({ children }: { children: React.ReactNode }) => (
     <Text
         className="mb-2"
         size="xs"
@@ -18,24 +16,25 @@ export const SectionLabel: React.FC<{ children: React.ReactNode }> = ({
     </Text>
 );
 
-export const EmptyState: React.FC<{ message: string }> = ({ message }) => (
+export const EmptyState = ({ message }: { message: string }) => (
     <div className="flex h-full items-center justify-center text-muted-foreground">
         {message}
     </div>
 );
 
-export const EditorLayout: React.FC<{ children: React.ReactNode }> = ({
-    children,
-}) => (
+export const EditorLayout = ({ children }: { children: React.ReactNode }) => (
     <div className="flex h-full flex-1 flex-col overflow-hidden bg-background md:flex-row">
         {children}
     </div>
 );
 
-export const EditorPanel: React.FC<{
+export const EditorPanel = ({
+    children,
+    isMobileListOpen = false,
+}: {
     children: React.ReactNode;
     isMobileListOpen?: boolean;
-}> = ({ children, isMobileListOpen = false }) => (
+}) => (
     <div
         className={cn(
             'relative flex-1 overflow-y-auto p-8',
@@ -46,10 +45,13 @@ export const EditorPanel: React.FC<{
     </div>
 );
 
-export const RolesSidebar: React.FC<{
+export const RolesSidebar = ({
+    children,
+    isMobileListOpen = true,
+}: {
     children: React.ReactNode;
     isMobileListOpen?: boolean;
-}> = ({ children, isMobileListOpen = true }) => (
+}) => (
     <aside
         className={cn(
             'order-first flex-shrink-0 overflow-y-auto border-l border-border-subtle bg-bg-secondary md:order-last',

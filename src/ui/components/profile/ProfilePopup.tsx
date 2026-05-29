@@ -42,7 +42,7 @@ interface ProfilePopupProps {
     serverId?: string;
 }
 
-export const ProfilePopup: React.FC<ProfilePopupProps> = (props) =>
+export const ProfilePopup = (props: ProfilePopupProps): React.ReactPortal =>
     createPortal(
         <AnimatePresence>
             {props.isOpen && (
@@ -70,7 +70,7 @@ export const ProfilePopup: React.FC<ProfilePopupProps> = (props) =>
         document.body,
     );
 
-const ProfilePopupContent: React.FC<ProfilePopupProps> = ({
+const ProfilePopupContent = ({
     userId,
     onClose,
     position,
@@ -87,7 +87,7 @@ const ProfilePopupContent: React.FC<ProfilePopupProps> = ({
     disableGlow,
     adminView = false,
     serverId,
-}) => {
+}: ProfilePopupProps) => {
     const popupRef = useRef<HTMLDivElement>(null);
 
     const { data: fetchedUser } = useUserById(userId, {
@@ -105,38 +105,42 @@ const ProfilePopupContent: React.FC<ProfilePopupProps> = ({
     });
 
     const member = React.useMemo(
-        () => members?.find((m) => m.userId === userId),
+        () => members?.find((m): boolean => m.userId === userId),
         [members, userId],
     );
 
-    const finalRoles = React.useMemo(() => {
+    const finalRoles = React.useMemo((): Role[] | undefined => {
         if (roles) return roles;
         if (!member || !serverRoles) return undefined;
         return serverRoles.filter((r) => member.roles.includes(r._id));
     }, [roles, member, serverRoles]);
 
-    const roleMap = React.useMemo(() => {
+    const roleMap = React.useMemo((): Map<string, Role> => {
         const map = new Map<string, Role>();
-        serverRoles?.forEach((r) => map.set(r._id, r));
+        serverRoles?.forEach((r): Map<string, Role> => map.set(r._id, r));
         return map;
     }, [serverRoles]);
 
-    const resolvedRole = React.useMemo(() => {
+    const resolvedRole = React.useMemo((): Role | undefined => {
         if (role) return role;
         if (!member || !roleMap.size || !serverRoles) return undefined;
         const memberRoleIds = [...member.roles];
-        const everyoneRole = serverRoles.find((r) => r.name === '@everyone');
+        const everyoneRole = serverRoles.find(
+            (r): boolean => r.name === '@everyone',
+        );
         if (everyoneRole && !memberRoleIds.includes(everyoneRole._id)) {
             memberRoleIds.push(everyoneRole._id);
         }
         return getHighestColorRoleForMember(memberRoleIds, roleMap);
     }, [role, member, roleMap, serverRoles]);
 
-    const resolvedIconRole = React.useMemo(() => {
+    const resolvedIconRole = React.useMemo((): Role | undefined => {
         if (iconRole) return iconRole;
         if (!member || !roleMap.size || !serverRoles) return undefined;
         const memberRoleIds = [...member.roles];
-        const everyoneRole = serverRoles.find((r) => r.name === '@everyone');
+        const everyoneRole = serverRoles.find(
+            (r): boolean => r.name === '@everyone',
+        );
         if (everyoneRole && !memberRoleIds.includes(everyoneRole._id)) {
             memberRoleIds.push(everyoneRole._id);
         }
@@ -159,20 +163,24 @@ const ProfilePopupContent: React.FC<ProfilePopupProps> = ({
 
     const { data: currentUser } = useMe();
     const isOwner = serverDetails?.ownerId === currentUser?._id;
-    const myMember = members?.find((m) => m.userId === currentUser?._id);
+    const myMember = members?.find(
+        (m): boolean => m.userId === currentUser?._id,
+    );
     const myRoles = serverRoles?.filter(
-        (r) => myMember?.roles.includes(r._id) || r.name === '@everyone',
+        (r): boolean =>
+            myMember?.roles.includes(r._id) || r.name === '@everyone',
     );
     const canManageRoles =
         isOwner ||
         (myRoles?.some(
-            (r) => r.permissions?.administrator || r.permissions?.manageRoles,
+            (r): boolean | undefined =>
+                r.permissions?.administrator || r.permissions?.manageRoles,
         ) ??
             false);
 
-    const myHighestRolePosition = React.useMemo(() => {
+    const myHighestRolePosition = React.useMemo((): number => {
         if (!myRoles || myRoles.length === 0) return -1;
-        return Math.max(...myRoles.map((r) => r.position));
+        return Math.max(...myRoles.map((r): number => r.position));
     }, [myRoles]);
 
     const coords = useSmartPosition({
@@ -183,7 +191,7 @@ const ProfilePopupContent: React.FC<ProfilePopupProps> = ({
     });
 
     // Close on click outside
-    useEffect(() => {
+    useEffect((): (() => void) => {
         const handleClickOutside = (event: MouseEvent): void => {
             if (
                 popupRef.current &&
@@ -194,18 +202,18 @@ const ProfilePopupContent: React.FC<ProfilePopupProps> = ({
         };
 
         document.addEventListener('mousedown', handleClickOutside);
-        return () => {
+        return (): void => {
             document.removeEventListener('mousedown', handleClickOutside);
         };
     }, [onClose]);
 
     // Close on escape
-    useEffect(() => {
+    useEffect((): (() => void) => {
         const handleKeyDown = (event: KeyboardEvent): void => {
             if (event.key === 'Escape') onClose();
         };
         window.addEventListener('keydown', handleKeyDown);
-        return () => window.removeEventListener('keydown', handleKeyDown);
+        return (): void => window.removeEventListener('keydown', handleKeyDown);
     }, [onClose]);
 
     if (!user && !userId) return null;

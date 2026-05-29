@@ -12,12 +12,12 @@ interface RenameFolderModalProps {
     onRename: (newName: string) => void;
 }
 
-export const RenameFolderModal: React.FC<RenameFolderModalProps> = ({
+export const RenameFolderModal = ({
     isOpen,
     onClose,
     currentName,
     onRename,
-}) => {
+}: RenameFolderModalProps) => {
     const [name, setName] = useState(currentName);
 
     const handleSubmit = (e: React.FormEvent): void => {
@@ -49,7 +49,7 @@ export const RenameFolderModal: React.FC<RenameFolderModalProps> = ({
                             id="folder-name"
                             placeholder="Enter folder name"
                             value={name}
-                            onChange={(e) => setName(e.target.value)}
+                            onChange={(e): void => setName(e.target.value)}
                         />
                     </Box>
 

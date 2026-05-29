@@ -16,7 +16,7 @@ interface PopoverProps {
     padding?: number;
 }
 
-export const Popover: React.FC<PopoverProps> = ({
+export const Popover = ({
     isOpen,
     onClose,
     triggerRef,
@@ -24,7 +24,7 @@ export const Popover: React.FC<PopoverProps> = ({
     className,
     offset = 12,
     padding = 16,
-}) => {
+}: PopoverProps): React.ReactPortal => {
     const popoverRef = useRef<HTMLDivElement>(null);
     const coords = useSmartPosition({
         isOpen,
@@ -34,7 +34,7 @@ export const Popover: React.FC<PopoverProps> = ({
         padding,
     });
 
-    useEffect(() => {
+    useEffect((): (() => void) => {
         const handleClickOutside = (event: MouseEvent): void => {
             if (
                 isOpen &&
@@ -58,7 +58,7 @@ export const Popover: React.FC<PopoverProps> = ({
             document.addEventListener('keydown', handleKeyDown);
         }
 
-        return () => {
+        return (): void => {
             document.removeEventListener('mousedown', handleClickOutside);
             document.removeEventListener('keydown', handleKeyDown);
         };

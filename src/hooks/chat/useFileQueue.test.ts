@@ -3,19 +3,19 @@ import { describe, expect, it } from 'vitest';
 
 import { useFileQueue } from './useFileQueue';
 
-describe('useFileQueue', () => {
-    it('should start with an empty queue', () => {
+describe('useFileQueue', (): void => {
+    it('should start with an empty queue', (): void => {
         const { result } = renderHook(() => useFileQueue());
         expect(result.current.files).toEqual([]);
     });
 
-    it('should add files with initial status and progress', () => {
+    it('should add files with initial status and progress', (): void => {
         const { result } = renderHook(() => useFileQueue());
         const file1 = new File(['content1'], 'file1.txt', {
             type: 'text/plain',
         });
 
-        act(() => {
+        act((): void => {
             result.current.addFiles([file1]);
         });
 
@@ -25,77 +25,77 @@ describe('useFileQueue', () => {
         expect(result.current.files[0].progress).toBe(0);
     });
 
-    it('should update file status', () => {
+    it('should update file status', (): void => {
         const { result } = renderHook(() => useFileQueue());
         const file = new File(['content'], 'file.txt', { type: 'text/plain' });
 
-        act(() => {
+        act((): void => {
             result.current.addFiles([file]);
         });
 
         const id = result.current.files[0].id;
 
-        act(() => {
+        act((): void => {
             result.current.updateFileStatus(id, 'uploading');
         });
 
         expect(result.current.files[0].status).toBe('uploading');
     });
 
-    it('should update file progress', () => {
+    it('should update file progress', (): void => {
         const { result } = renderHook(() => useFileQueue());
         const file = new File(['content'], 'file.txt', { type: 'text/plain' });
 
-        act(() => {
+        act((): void => {
             result.current.addFiles([file]);
         });
 
         const id = result.current.files[0].id;
 
-        act(() => {
+        act((): void => {
             result.current.updateFileProgress(id, 50);
         });
 
         expect(result.current.files[0].progress).toBe(50);
     });
 
-    it('should toggle spoiler status', () => {
+    it('should toggle spoiler status', (): void => {
         const { result } = renderHook(() => useFileQueue());
         const file = new File(['content'], 'file.txt', { type: 'text/plain' });
 
-        act(() => {
+        act((): void => {
             result.current.addFiles([file]);
         });
 
         const id = result.current.files[0].id;
 
-        act(() => {
+        act((): void => {
             result.current.toggleSpoiler(id);
         });
 
         expect(result.current.files[0].isSpoiler).toBe(true);
     });
 
-    it('should remove a file from the queue', () => {
+    it('should remove a file from the queue', (): void => {
         const { result } = renderHook(() => useFileQueue());
         const file = new File(['content'], 'file.txt', { type: 'text/plain' });
 
-        act(() => {
+        act((): void => {
             result.current.addFiles([file]);
         });
 
         const id = result.current.files[0].id;
 
-        act(() => {
+        act((): void => {
             result.current.removeFile(id);
         });
 
         expect(result.current.files).toHaveLength(0);
     });
 
-    it('should clear the queue', () => {
+    it('should clear the queue', (): void => {
         const { result } = renderHook(() => useFileQueue());
-        act(() => {
+        act((): void => {
             result.current.addFiles([new File([''], '1.txt')]);
             result.current.clearQueue();
         });

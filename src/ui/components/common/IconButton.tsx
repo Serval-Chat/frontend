@@ -11,7 +11,7 @@ export interface IconButtonProps extends Omit<ButtonProps, 'children'> {
     badgeCount?: number;
 }
 
-export const IconButton: React.FC<IconButtonProps> = ({
+export const IconButton = ({
     icon: Icon,
     iconSize = 23,
     isActive,
@@ -19,7 +19,7 @@ export const IconButton: React.FC<IconButtonProps> = ({
     className,
     variant,
     ...props
-}) => (
+}: IconButtonProps) => (
     <Button
         className={cn(
             'relative transition-all duration-200',

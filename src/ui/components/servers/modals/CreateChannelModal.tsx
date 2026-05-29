@@ -48,12 +48,12 @@ const CHANNEL_TYPES: {
     },
 ];
 
-export const CreateChannelModal: React.FC<CreateChannelModalProps> = ({
+export const CreateChannelModal = ({
     isOpen,
     onClose,
     serverId,
     categoryId,
-}) => {
+}: CreateChannelModalProps) => {
     const [name, setName] = useState('');
     const [channelType, setChannelType] = useState<ChannelType>('text');
     const [linkUrl, setLinkUrl] = useState('');
@@ -142,7 +142,7 @@ export const CreateChannelModal: React.FC<CreateChannelModalProps> = ({
                                     )}
                                     key={type}
                                     type="button"
-                                    onClick={() => setChannelType(type)}
+                                    onClick={(): void => setChannelType(type)}
                                 >
                                     <Icon
                                         className={cn(
@@ -186,8 +186,8 @@ export const CreateChannelModal: React.FC<CreateChannelModalProps> = ({
                     <Input
                         placeholder="new-channel"
                         value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        onKeyDown={(e) => {
+                        onChange={(e): void => setName(e.target.value)}
+                        onKeyDown={(e): void => {
                             if (e.key === 'Enter' && name.trim()) {
                                 void handleCreate();
                             }
@@ -208,8 +208,8 @@ export const CreateChannelModal: React.FC<CreateChannelModalProps> = ({
                         <Input
                             placeholder="https://example.com"
                             value={linkUrl}
-                            onChange={(e) => setLinkUrl(e.target.value)}
-                            onKeyDown={(e) => {
+                            onChange={(e): void => setLinkUrl(e.target.value)}
+                            onKeyDown={(e): void => {
                                 if (
                                     e.key === 'Enter' &&
                                     name.trim() &&
@@ -237,7 +237,7 @@ export const CreateChannelModal: React.FC<CreateChannelModalProps> = ({
                             ref={emojiTriggerRef}
                             type="button"
                             variant="ghost"
-                            onClick={() =>
+                            onClick={(): void =>
                                 setIsEmojiPickerOpen(!isEmojiPickerOpen)
                             }
                         >
@@ -266,7 +266,7 @@ export const CreateChannelModal: React.FC<CreateChannelModalProps> = ({
                                 size="sm"
                                 type="button"
                                 variant="ghost"
-                                onClick={() => {
+                                onClick={(): void => {
                                     setEmoji('');
                                     setEmojiType(undefined);
                                 }}
@@ -279,16 +279,16 @@ export const CreateChannelModal: React.FC<CreateChannelModalProps> = ({
                     <Popover
                         isOpen={isEmojiPickerOpen}
                         triggerRef={emojiTriggerRef}
-                        onClose={() => setIsEmojiPickerOpen(false)}
+                        onClose={(): void => setIsEmojiPickerOpen(false)}
                     >
                         <EmojiPicker
                             customCategories={customCategories}
-                            onCustomEmojiSelect={(e) => {
+                            onCustomEmojiSelect={(e): void => {
                                 setEmoji(e.id);
                                 setEmojiType('custom');
                                 setIsEmojiPickerOpen(false);
                             }}
-                            onEmojiSelect={(e) => {
+                            onEmojiSelect={(e): void => {
                                 setEmoji(e);
                                 setEmojiType('unicode');
                                 setIsEmojiPickerOpen(false);
@@ -319,7 +319,7 @@ export const CreateChannelModal: React.FC<CreateChannelModalProps> = ({
                         }
                         loading={isLoading}
                         variant="primary"
-                        onClick={() => void handleCreate()}
+                        onClick={(): undefined => void handleCreate()}
                     >
                         Create Channel
                     </Button>

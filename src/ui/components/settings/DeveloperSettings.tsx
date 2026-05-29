@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { Bug } from 'lucide-react';
 
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
@@ -14,19 +12,21 @@ import { Heading } from '@/ui/components/common/Heading';
 import { Toggle } from '@/ui/components/common/Toggle';
 import { toggleWsDebugWindow, useWsDebugWindowOpen } from '@/ws/debug';
 
-export const DeveloperSettings: React.FC = () => {
+export const DeveloperSettings = () => {
     const dispatch = useAppDispatch();
     const isWsWindowOpen = useWsDebugWindowOpen();
-    const isFurTweakerOpen = useAppSelector((state) => state.furTweaker.isOpen);
+    const isFurTweakerOpen = useAppSelector(
+        (state): boolean => state.furTweaker.isOpen,
+    );
     const isThemeTweakerOpen = useAppSelector(
-        (state) => state.themeTweaker.isOpen,
+        (state): boolean => state.themeTweaker.isOpen,
     );
     const usernameColorResolverContextMenu = useAppSelector(
-        (state) =>
+        (state): boolean =>
             state.debugOptions?.usernameColorResolverContextMenu ?? false,
     );
     const isConsoleOpen = useAppSelector(
-        (state) => state.debugOptions?.isConsoleOpen ?? false,
+        (state): boolean => state.debugOptions?.isConsoleOpen ?? false,
     );
 
     return (
@@ -53,7 +53,7 @@ export const DeveloperSettings: React.FC = () => {
                     </div>
                     <Button
                         variant={isWsWindowOpen ? 'danger' : 'primary'}
-                        onClick={() => toggleWsDebugWindow()}
+                        onClick={(): void => toggleWsDebugWindow()}
                     >
                         {isWsWindowOpen ? 'Close Window' : 'Launch Window'}
                     </Button>
@@ -72,7 +72,10 @@ export const DeveloperSettings: React.FC = () => {
                     </div>
                     <Button
                         variant={isFurTweakerOpen ? 'danger' : 'primary'}
-                        onClick={() => dispatch(toggleFurTweaker())}
+                        onClick={(): {
+                            payload: undefined;
+                            type: 'furTweaker/toggleFurTweaker';
+                        } => dispatch(toggleFurTweaker())}
                     >
                         {isFurTweakerOpen ? 'Close Window' : 'Launch Window'}
                     </Button>
@@ -90,7 +93,10 @@ export const DeveloperSettings: React.FC = () => {
                     </div>
                     <Button
                         variant={isThemeTweakerOpen ? 'danger' : 'primary'}
-                        onClick={() => dispatch(toggleThemeTweaker())}
+                        onClick={(): {
+                            payload: undefined;
+                            type: 'themeTweaker/toggleThemeTweaker';
+                        } => dispatch(toggleThemeTweaker())}
                     >
                         {isThemeTweakerOpen ? 'Close Window' : 'Launch Window'}
                     </Button>
@@ -108,7 +114,10 @@ export const DeveloperSettings: React.FC = () => {
                     </div>
                     <Button
                         variant={isConsoleOpen ? 'danger' : 'primary'}
-                        onClick={() => dispatch(toggleConsole())}
+                        onClick={(): {
+                            payload: undefined;
+                            type: 'debugOptions/toggleConsole';
+                        } => dispatch(toggleConsole())}
                     >
                         {isConsoleOpen ? 'Close Console' : 'Open Console'}
                     </Button>
@@ -127,9 +136,10 @@ export const DeveloperSettings: React.FC = () => {
                     </div>
                     <Toggle
                         checked={usernameColorResolverContextMenu}
-                        onCheckedChange={() =>
-                            dispatch(toggleUsernameColorResolverContextMenu())
-                        }
+                        onCheckedChange={(): {
+                            payload: undefined;
+                            type: 'debugOptions/toggleUsernameColorResolverContextMenu';
+                        } => dispatch(toggleUsernameColorResolverContextMenu())}
                     />
                 </div>
             </div>

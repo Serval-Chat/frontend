@@ -7,10 +7,45 @@ import {
     permissionsToBitmask,
 } from './botPermissions';
 
-describe('botPermissions utility', () => {
+describe('botPermissions utility', (): void => {
     const makePermissions = (value: boolean): BotPermissions =>
         Object.fromEntries(
-            BOT_PERMISSION_KEYS.map((key) => [key, value]),
+            BOT_PERMISSION_KEYS.map(
+                (
+                    key,
+                ): [
+                    (
+                        | 'readMessages'
+                        | 'sendMessages'
+                        | 'manageMessages'
+                        | 'readUsers'
+                        | 'joinServers'
+                        | 'manageServer'
+                        | 'manageChannels'
+                        | 'manageMembers'
+                        | 'readReactions'
+                        | 'addReactions'
+                        | 'viewChannels'
+                        | 'connect'
+                        | 'deleteMessagesOfOthers'
+                        | 'manageRoles'
+                        | 'banMembers'
+                        | 'kickMembers'
+                        | 'manageInvites'
+                        | 'administrator'
+                        | 'manageWebhooks'
+                        | 'pingRolesAndEveryone'
+                        | 'manageReactions'
+                        | 'exportChannelMessages'
+                        | 'bypassSlowmode'
+                        | 'pinMessages'
+                        | 'seeDeletedMessages'
+                        | 'moderateMembers'
+                        | 'manageStickers'
+                    ),
+                    boolean,
+                ] => [key, value],
+            ),
         ) as BotPermissions;
 
     const allOn = makePermissions(true);
@@ -26,19 +61,19 @@ describe('botPermissions utility', () => {
         exportChannelMessages: true,
     };
 
-    test('permissionsToBitmask should convert all true to correct bitmask', () => {
+    test('permissionsToBitmask should convert all true to correct bitmask', (): void => {
         const expected = Object.values(BOT_PERMISSION_BITS).reduce(
-            (a, b) => a | b,
+            (a, b): number => a | b,
             0,
         );
         expect(permissionsToBitmask(allOn)).toBe(expected);
     });
 
-    test('permissionsToBitmask should convert all false to 0', () => {
+    test('permissionsToBitmask should convert all false to 0', (): void => {
         expect(permissionsToBitmask(allOff)).toBe(0);
     });
 
-    test('permissionsToBitmask should convert partial permissions correctly', () => {
+    test('permissionsToBitmask should convert partial permissions correctly', (): void => {
         const expected =
             BOT_PERMISSION_BITS.readMessages |
             BOT_PERMISSION_BITS.sendMessages |
@@ -48,11 +83,11 @@ describe('botPermissions utility', () => {
         expect(permissionsToBitmask(partial)).toBe(expected);
     });
 
-    test('bitmaskToPermissions should convert 0 to all false', () => {
+    test('bitmaskToPermissions should convert 0 to all false', (): void => {
         expect(bitmaskToPermissions(0)).toEqual(allOff);
     });
 
-    test('bitmaskToPermissions should convert partial bitmask correctly', () => {
+    test('bitmaskToPermissions should convert partial bitmask correctly', (): void => {
         const mask =
             BOT_PERMISSION_BITS.readMessages |
             BOT_PERMISSION_BITS.sendMessages |
@@ -62,7 +97,7 @@ describe('botPermissions utility', () => {
         expect(bitmaskToPermissions(mask)).toEqual(partial);
     });
 
-    test('should be reversible', () => {
+    test('should be reversible', (): void => {
         const mask = permissionsToBitmask(partial);
         expect(bitmaskToPermissions(mask)).toEqual(partial);
 

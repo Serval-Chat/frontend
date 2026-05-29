@@ -51,12 +51,12 @@ export const AdminServers = ({
     const [page, setPage] = useState(0);
     const LIMIT = ADMIN_CONSTANTS.DEFAULT_PAGE_SIZE;
 
-    useEffect(() => {
-        const timer = setTimeout(() => {
+    useEffect((): (() => void) => {
+        const timer = setTimeout((): void => {
             setDebouncedSearch(searchTerm);
             setPage(0);
         }, ADMIN_CONSTANTS.SEARCH_DEBOUNCE_MS);
-        return () => clearTimeout(timer);
+        return (): void => clearTimeout(timer);
     }, [searchTerm]);
 
     const { data: servers, isLoading } = useAdminServers(
@@ -126,7 +126,7 @@ export const AdminServers = ({
                         type="text"
                         value={searchTerm}
                         variant="admin"
-                        onChange={(e) => setSearchTerm(e.target.value)}
+                        onChange={(e): void => setSearchTerm(e.target.value)}
                     />
                 </div>
                 <Button
@@ -135,7 +135,7 @@ export const AdminServers = ({
                     icon={Play}
                     loading={isRunningVerification}
                     size="sm"
-                    onClick={() => runVerificationNow()}
+                    onClick={(): void => runVerificationNow()}
                 >
                     Run now
                 </Button>
@@ -360,7 +360,7 @@ export const AdminServers = ({
                                             size="sm"
                                             title="View Server Details"
                                             variant="ghost"
-                                            onClick={() =>
+                                            onClick={(): void =>
                                                 onViewServer(server._id)
                                             }
                                         >
@@ -371,7 +371,7 @@ export const AdminServers = ({
                                             size="sm"
                                             title="Force Verified"
                                             variant="ghost"
-                                            onClick={() =>
+                                            onClick={(): void =>
                                                 setVerificationOverride({
                                                     serverId: server._id,
                                                     override: 'verified',
@@ -385,7 +385,7 @@ export const AdminServers = ({
                                             size="sm"
                                             title="Force Unverified"
                                             variant="ghost"
-                                            onClick={() =>
+                                            onClick={(): void =>
                                                 setVerificationOverride({
                                                     serverId: server._id,
                                                     override: 'unverified',
@@ -400,7 +400,7 @@ export const AdminServers = ({
                                                 size="sm"
                                                 title="Clear Verification Override"
                                                 variant="ghost"
-                                                onClick={() =>
+                                                onClick={(): void =>
                                                     setVerificationOverride({
                                                         serverId: server._id,
                                                         override: null,
@@ -417,7 +417,7 @@ export const AdminServers = ({
                                                 size="sm"
                                                 title="Restore Server"
                                                 variant="ghost"
-                                                onClick={() =>
+                                                onClick={(): void =>
                                                     handleRestore(server._id)
                                                 }
                                             >
@@ -430,7 +430,7 @@ export const AdminServers = ({
                                                 size="sm"
                                                 title="Delete Server"
                                                 variant="ghost"
-                                                onClick={() =>
+                                                onClick={(): void =>
                                                     handleDelete(
                                                         server._id,
                                                         server.name,
@@ -476,7 +476,9 @@ export const AdminServers = ({
                     <Button
                         disabled={page === 0}
                         variant="ghost"
-                        onClick={() => setPage((p) => Math.max(0, p - 1))}
+                        onClick={(): void =>
+                            setPage((p): number => Math.max(0, p - 1))
+                        }
                     >
                         Previous
                     </Button>
@@ -486,7 +488,7 @@ export const AdminServers = ({
                     <Button
                         disabled={servers.length < LIMIT}
                         variant="ghost"
-                        onClick={() => setPage((p) => p + 1)}
+                        onClick={(): void => setPage((p): number => p + 1)}
                     >
                         Next
                     </Button>

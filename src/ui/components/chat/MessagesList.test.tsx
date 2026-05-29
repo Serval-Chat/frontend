@@ -39,25 +39,27 @@ const mockMeasure = vi.fn();
 
 vi.mock('@tanstack/react-virtual', () => ({
     useVirtualizer: vi.fn().mockImplementation((options: any) => ({
-        getVirtualItems: () =>
-            Array.from({ length: options.count }).map((_, i) => ({
-                index: i,
-                start: 0,
-                key: i,
-            })),
-        getTotalSize: () => options.count * 100,
+        getVirtualItems: (): { index: number; start: number; key: number }[] =>
+            Array.from({ length: options.count }).map(
+                (_, i): { index: number; start: number; key: number } => ({
+                    index: i,
+                    start: 0,
+                    key: i,
+                }),
+            ),
+        getTotalSize: (): number => options.count * 100,
         scrollToIndex: mockScrollToIndex,
         measure: mockMeasure,
         measureElement: vi.fn(),
     })),
 }));
 
-describe('MessagesList Scroll Behavior', () => {
+describe('MessagesList Scroll Behavior', (): void => {
     let requestAnimationFrameMock: ReturnType<typeof vi.fn>;
 
     const mockDispatch = vi.fn();
 
-    beforeEach(() => {
+    beforeEach((): void => {
         vi.clearAllMocks();
         mockScrollToIndex.mockClear();
         mockMeasure.mockClear();
@@ -106,7 +108,7 @@ describe('MessagesList Scroll Behavior', () => {
         } as any as ProcessedChatMessage,
     ];
 
-    it('scrolls to message immediately if element is in the DOM', () => {
+    it('scrolls to message immediately if element is in the DOM', (): void => {
         render(
             <MessagesList
                 activeHighlightId="msg-2"
@@ -118,7 +120,7 @@ describe('MessagesList Scroll Behavior', () => {
         expect(mockScrollToIndex).toHaveBeenCalledWith(1, { align: 'center' });
     });
 
-    it('waits for the message to render before scrolling and only scrolls once', () => {
+    it('waits for the message to render before scrolling and only scrolls once', (): void => {
         const { rerender } = render(
             <MessagesList
                 activeHighlightId="msg-2"
@@ -160,7 +162,7 @@ describe('MessagesList Scroll Behavior', () => {
         });
     });
 
-    it('remeasures virtual rows when a message reports an async resize', () => {
+    it('remeasures virtual rows when a message reports an async resize', (): void => {
         const { getAllByText } = render(
             <MessagesList hasMore={false} messages={mockMessages} />,
         );
@@ -170,7 +172,7 @@ describe('MessagesList Scroll Behavior', () => {
         expect(requestAnimationFrameMock).toHaveBeenCalled();
     });
 
-    it('loads older messages if scroll is near top and someone sends a message', () => {
+    it('loads older messages if scroll is near top and someone sends a message', (): void => {
         const handleLoadMore = vi.fn();
         const { rerender } = render(
             <MessagesList

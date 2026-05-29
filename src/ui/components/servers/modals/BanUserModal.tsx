@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 import { Button } from '@/ui/components/common/Button';
 import { Heading } from '@/ui/components/common/Heading';
@@ -16,13 +16,13 @@ interface BanUserModalProps {
     userAvatar?: string | null;
 }
 
-export const BanUserModal: React.FC<BanUserModalProps> = ({
+export const BanUserModal = ({
     isOpen,
     onClose,
     onConfirm,
     username,
     userAvatar,
-}) => {
+}: BanUserModalProps) => {
     const [reason, setReason] = useState('');
 
     const handleConfirm = (): void => {
@@ -63,7 +63,7 @@ export const BanUserModal: React.FC<BanUserModalProps> = ({
                         id="ban-reason"
                         placeholder="e.g. Breaking server rules, spamming..."
                         value={reason}
-                        onChange={(e) => setReason(e.target.value)}
+                        onChange={(e): void => setReason(e.target.value)}
                     />
                 </Box>
 

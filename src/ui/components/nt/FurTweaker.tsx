@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import {
     setFurOpacity,
@@ -13,7 +11,7 @@ import { NTScrollArea } from '@/ui/components/nt/NTScrollArea';
 import { NTSlider } from '@/ui/components/nt/NTSlider';
 import { Window } from '@/ui/components/nt/Window';
 
-export const FurTweaker: React.FC = () => {
+export const FurTweaker = () => {
     const dispatch = useAppDispatch();
     const { isOpen, spotCount, opacity, seed } = useAppSelector(
         (state) => state.furTweaker,
@@ -29,7 +27,10 @@ export const FurTweaker: React.FC = () => {
             defaultY={200}
             icon="/icons/retro/chip.png"
             title="Serval Fur Tweaker"
-            onClose={() => dispatch(toggleFurTweaker())}
+            onClose={(): {
+                payload: undefined;
+                type: 'furTweaker/toggleFurTweaker';
+            } => dispatch(toggleFurTweaker())}
         >
             <div className="flex min-h-0 flex-1 flex-col bg-[#c0c0c0] p-2">
                 <NTPanel className="flex min-h-0 flex-1 p-0" variant="inset">
@@ -43,7 +44,12 @@ export const FurTweaker: React.FC = () => {
                             min={0}
                             step={1}
                             value={spotCount}
-                            onValueChange={(v) => dispatch(setFurSpotCount(v))}
+                            onValueChange={(
+                                v,
+                            ): {
+                                payload: number;
+                                type: 'furTweaker/setFurSpotCount';
+                            } => dispatch(setFurSpotCount(v))}
                         />
 
                         <NTSlider
@@ -52,7 +58,12 @@ export const FurTweaker: React.FC = () => {
                             min={0}
                             step={0.01}
                             value={opacity}
-                            onValueChange={(v) => dispatch(setFurOpacity(v))}
+                            onValueChange={(
+                                v,
+                            ): {
+                                payload: number;
+                                type: 'furTweaker/setFurOpacity';
+                            } => dispatch(setFurOpacity(v))}
                         />
 
                         <NTSlider
@@ -61,12 +72,20 @@ export const FurTweaker: React.FC = () => {
                             min={0}
                             step={1}
                             value={seed}
-                            onValueChange={(v) => dispatch(setFurSeed(v))}
+                            onValueChange={(
+                                v,
+                            ): {
+                                payload: number;
+                                type: 'furTweaker/setFurSeed';
+                            } => dispatch(setFurSeed(v))}
                         />
 
                         <div className="mt-auto flex justify-center pt-4">
                             <NTButton
-                                onClick={() => dispatch(setFurSeed(Date.now()))}
+                                onClick={(): {
+                                    payload: number;
+                                    type: 'furTweaker/setFurSeed';
+                                } => dispatch(setFurSeed(Date.now()))}
                             >
                                 Randomize Seed
                             </NTButton>

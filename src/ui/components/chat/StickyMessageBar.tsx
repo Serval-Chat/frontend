@@ -25,10 +25,10 @@ interface StickyMessageBarProps {
 
 type ViewState = 'expanded' | 'compact' | 'hidden';
 
-export const StickyMessageBar: React.FC<StickyMessageBarProps> = ({
+export const StickyMessageBar = ({
     serverId,
     channelId,
-}) => {
+}: StickyMessageBarProps) => {
     const dispatch = useAppDispatch();
     const [viewState, setViewState] = useState<ViewState>('expanded');
     const contentRef = React.useRef<HTMLDivElement>(null);
@@ -41,12 +41,12 @@ export const StickyMessageBar: React.FC<StickyMessageBarProps> = ({
         enabled: !!serverId,
     });
 
-    const latestSticky = React.useMemo(() => {
+    const latestSticky = React.useMemo((): ProcessedChatMessage | null => {
         if (!pins) return null;
-        const stickies = pins.filter((p: ChatMessage) => p.isSticky);
+        const stickies = pins.filter((p: ChatMessage): boolean => p.isSticky);
         if (stickies.length === 0) return null;
         const raw = [...stickies].sort(
-            (a, b) =>
+            (a, b): number =>
                 new Date(b.createdAt).getTime() -
                 new Date(a.createdAt).getTime(),
         )[0];
@@ -54,15 +54,17 @@ export const StickyMessageBar: React.FC<StickyMessageBarProps> = ({
         const webhookUser = resolveWebhookUser(raw);
         const member = webhookUser
             ? undefined
-            : members?.find((m) => m.userId === raw.senderId);
+            : members?.find((m): boolean => m.userId === raw.senderId);
         const roles =
-            serverRoles?.filter((r) => member?.roles.includes(r._id)) || [];
+            serverRoles?.filter((r): boolean | undefined =>
+                member?.roles.includes(r._id),
+            ) || [];
         const highestRole = [...roles].sort(
-            (a, b) => (b.position || 0) - (a.position || 0),
+            (a, b): number => (b.position || 0) - (a.position || 0),
         )[0];
         const iconRole = [...roles]
-            .filter((r) => r.icon)
-            .sort((a, b) => (b.position || 0) - (a.position || 0))[0];
+            .filter((r): string | undefined => r.icon)
+            .sort((a, b): number => (b.position || 0) - (a.position || 0))[0];
 
         return {
             ...raw,
@@ -75,7 +77,7 @@ export const StickyMessageBar: React.FC<StickyMessageBarProps> = ({
         } as ProcessedChatMessage;
     }, [pins, members, serverRoles, serverId, channelId]);
 
-    React.useLayoutEffect(() => {
+    React.useLayoutEffect((): void => {
         if (!latestSticky) return;
 
         if (lastStickyId.current !== latestSticky._id) {
@@ -137,7 +139,12 @@ export const StickyMessageBar: React.FC<StickyMessageBarProps> = ({
                         message={latestSticky}
                         role={latestSticky.role}
                         user={latestSticky.user}
-                        onReplyClick={(id) => dispatch(setTargetMessageId(id))}
+                        onReplyClick={(
+                            id,
+                        ): {
+                            payload: string | null;
+                            type: 'nav/setTargetMessageId';
+                        } => dispatch(setTargetMessageId(id))}
                     />
                 </Box>
 
@@ -147,9 +154,10 @@ export const StickyMessageBar: React.FC<StickyMessageBarProps> = ({
                             className="h-7 border border-[var(--divider)] px-3 text-[10px] font-bold tracking-widest text-[var(--primary)] uppercase"
                             size="sm"
                             variant="ghost"
-                            onClick={() =>
-                                dispatch(setTargetMessageId(latestSticky._id))
-                            }
+                            onClick={(): {
+                                payload: string | null;
+                                type: 'nav/setTargetMessageId';
+                            } => dispatch(setTargetMessageId(latestSticky._id))}
                         >
                             Jump
                         </Button>

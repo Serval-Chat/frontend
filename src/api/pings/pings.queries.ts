@@ -44,19 +44,25 @@ export function useDeletePing(): UseMutationResult<
 
     return useMutation({
         mutationFn: pingsApi.deletePing,
-        onSuccess: (_, deletedId) => {
+        onSuccess: (_, deletedId): void => {
             const oldData = queryClient.getQueryData<{
                 pings: PingNotification[];
             }>(PINGS_KEYS.all);
-            const pingToDelete = oldData?.pings.find((p) => p.id === deletedId);
+            const pingToDelete = oldData?.pings.find(
+                (p): boolean => p.id === deletedId,
+            );
 
             queryClient.setQueryData(
                 PINGS_KEYS.all,
-                (oldData: { pings: PingNotification[] } | undefined) => {
+                (
+                    oldData: { pings: PingNotification[] } | undefined,
+                ): { pings: PingNotification[] } | undefined => {
                     if (!oldData) return oldData;
                     return {
                         ...oldData,
-                        pings: oldData.pings.filter((p) => p.id !== deletedId),
+                        pings: oldData.pings.filter(
+                            (p): boolean => p.id !== deletedId,
+                        ),
                     };
                 },
             );
@@ -86,22 +92,26 @@ export function useClearChannelPings(): UseMutationResult<
 
     return useMutation({
         mutationFn: pingsApi.clearChannelPings,
-        onSuccess: (_, channelId) => {
+        onSuccess: (_, channelId): void => {
             const oldData = queryClient.getQueryData<{
                 pings: PingNotification[];
             }>(PINGS_KEYS.all);
             const channelPings =
-                oldData?.pings.filter((p) => p.channelId === channelId) || [];
+                oldData?.pings.filter(
+                    (p): boolean => p.channelId === channelId,
+                ) || [];
             const serverId = channelPings[0]?.serverId;
 
             queryClient.setQueryData(
                 PINGS_KEYS.all,
-                (oldData: { pings: PingNotification[] } | undefined) => {
+                (
+                    oldData: { pings: PingNotification[] } | undefined,
+                ): { pings: PingNotification[] } | undefined => {
                     if (!oldData) return oldData;
                     return {
                         ...oldData,
                         pings: oldData.pings.filter(
-                            (p) => p.channelId !== channelId,
+                            (p): boolean => p.channelId !== channelId,
                         ),
                     };
                 },
@@ -139,7 +149,7 @@ export function useClearAllPings(): UseMutationResult<
 
     return useMutation({
         mutationFn: pingsApi.clearAllPings,
-        onSuccess: () => {
+        onSuccess: (): void => {
             queryClient.setQueryData(PINGS_KEYS.all, { pings: [] });
             dispatch(setUnreadServers({})); // Clear all unread/pings in Redux too
             void queryClient.invalidateQueries({

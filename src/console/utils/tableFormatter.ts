@@ -33,9 +33,9 @@ export function formatTable<T>(
     const paddingVal = options?.padding ?? 2;
     const paddingStr = ' '.repeat(paddingVal);
 
-    const colWidths = columns.map((col) => {
+    const colWidths = columns.map((col): number => {
         const headerLen = getVisualLength(col.header);
-        const maxValLen = data.reduce((max, item) => {
+        const maxValLen = data.reduce((max, item): number => {
             const val =
                 typeof col.key === 'function'
                     ? col.key(item)
@@ -46,20 +46,20 @@ export function formatTable<T>(
     });
 
     const headerRow = columns
-        .map((col, idx) => {
+        .map((col, idx): string => {
             const width = colWidths[idx];
             return padString(col.header, width, col.align);
         })
         .join(paddingStr);
 
     const totalWidth =
-        colWidths.reduce((sum, w) => sum + w, 0) +
+        colWidths.reduce((sum, w): number => sum + w, 0) +
         (columns.length - 1) * paddingVal;
     const separatorLine = separatorChar.repeat(totalWidth);
 
-    const dataRows = data.map((item) =>
+    const dataRows = data.map((item): string =>
         columns
-            .map((col, idx) => {
+            .map((col, idx): string => {
                 const width = colWidths[idx];
                 const val =
                     typeof col.key === 'function'

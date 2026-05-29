@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 
 import { Hash, Volume2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -18,14 +18,14 @@ interface ChannelLinkProps {
 /**
  * @description Renders a channel link.
  */
-export const ChannelLink: React.FC<ChannelLinkProps> = ({
+export const ChannelLink = ({
     serverId,
     channelId,
     messageId,
-}) => {
+}: ChannelLinkProps) => {
     const navigate = useNavigate();
     const selectedServerId = useAppSelector(
-        (state) => state.nav.selectedServerId,
+        (state): string | null => state.nav.selectedServerId,
     );
     const { data: server, isLoading: serverLoading } =
         useServerDetails(serverId);
@@ -35,7 +35,7 @@ export const ChannelLink: React.FC<ChannelLinkProps> = ({
 
     const channel = useMemo(() => {
         if (!channels) return null;
-        return channels.find((ch) => ch._id === channelId) || null;
+        return channels.find((ch): boolean => ch._id === channelId) || null;
     }, [channels, channelId]);
 
     const isLoading = serverLoading || channelsLoading;

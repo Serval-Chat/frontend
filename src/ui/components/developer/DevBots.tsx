@@ -21,7 +21,7 @@ const CreateBotModal = ({ onClose }: { onClose: () => void }): ReactNode => {
         createBot.mutate(
             { name: name.trim() },
             {
-                onSuccess: () => {
+                onSuccess: (): void => {
                     onClose();
                 },
             },
@@ -42,8 +42,8 @@ const CreateBotModal = ({ onClose }: { onClose: () => void }): ReactNode => {
                         id="bot-name"
                         placeholder="My Awesome Bot"
                         value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        onKeyDown={(e) => {
+                        onChange={(e): void => setName(e.target.value)}
+                        onKeyDown={(e): void => {
                             if (e.key === 'Enter') handleSubmit();
                         }}
                     />
@@ -119,7 +119,7 @@ export const DevBots = ({ onViewBot }: DevBotsProps): ReactNode => {
                     icon={Plus}
                     size="sm"
                     variant="primary"
-                    onClick={() => setShowCreate(true)}
+                    onClick={(): void => setShowCreate(true)}
                 >
                     New Bot
                 </Button>
@@ -140,7 +140,7 @@ export const DevBots = ({ onViewBot }: DevBotsProps): ReactNode => {
                         <BotCard
                             bot={bot}
                             key={bot.clientId}
-                            onView={() => onViewBot(bot.clientId)}
+                            onView={(): void => onViewBot(bot.clientId)}
                         />
                     ))}
                 </div>
@@ -154,7 +154,7 @@ export const DevBots = ({ onViewBot }: DevBotsProps): ReactNode => {
             )}
 
             {showCreate && (
-                <CreateBotModal onClose={() => setShowCreate(false)} />
+                <CreateBotModal onClose={(): void => setShowCreate(false)} />
             )}
         </div>
     );

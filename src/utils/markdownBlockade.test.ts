@@ -33,8 +33,8 @@ const makeMember = (roles: string[]): ServerMember =>
         },
     }) as ServerMember;
 
-describe('markdown blockade resolution', () => {
-    it('lets a specific empty role rule override broader everyone disallowed features', () => {
+describe('markdown blockade resolution', (): void => {
+    it('lets a specific empty role rule override broader everyone disallowed features', (): void => {
         const ownerRole: Role = {
             _id: 'owner-role',
             serverId: 'server-1',
@@ -65,7 +65,7 @@ describe('markdown blockade resolution', () => {
         ).toEqual([]);
     });
 
-    it('still applies broader everyone disallowed features when no specific rule matches', () => {
+    it('still applies broader everyone disallowed features when no specific rule matches', (): void => {
         const server = makeServer([
             {
                 targetType: 'everyone',
@@ -84,7 +84,7 @@ describe('markdown blockade resolution', () => {
         ).toEqual([ParserFeature.H1, ParserFeature.BOLD]);
     });
 
-    it('does not block markdown when a sender role can bypass markdown restrictions', () => {
+    it('does not block markdown when a sender role can bypass markdown restrictions', (): void => {
         const trustedRole: Role = {
             _id: 'trusted-role',
             serverId: 'server-1',
@@ -113,7 +113,7 @@ describe('markdown blockade resolution', () => {
         ).toEqual([]);
     });
 
-    it('does not block markdown when a channel override grants bypass markdown restrictions', () => {
+    it('does not block markdown when a channel override grants bypass markdown restrictions', (): void => {
         const memberRole: Role = {
             _id: 'member-role',
             serverId: 'server-1',

@@ -27,7 +27,7 @@ export interface EmojiData {
 
 // Group emojis by category
 export const groupedEmojis = (emojiData as EmojiData[]).reduce(
-    (acc, emoji) => {
+    (acc, emoji): Record<string, EmojiData[]> => {
         if (!emoji.has_img_apple) return acc;
 
         if (!acc[emoji.category]) {
@@ -39,7 +39,7 @@ export const groupedEmojis = (emojiData as EmojiData[]).reduce(
     {} as Record<string, EmojiData[]>,
 );
 
-export const categories = Object.keys(groupedEmojis).sort((a, b) => {
+export const categories = Object.keys(groupedEmojis).sort((a, b): number => {
     const order = [
         'Smileys & Emotion',
         'People & Body',
@@ -58,56 +58,56 @@ export const categories = Object.keys(groupedEmojis).sort((a, b) => {
 
 export const categoryIconMap: Record<string, EmojiData | undefined> = {
     'Smileys & Emotion': (emojiData as EmojiData[]).find(
-        (e) =>
+        (e): boolean =>
             e.has_img_apple &&
             (e.short_name === 'grinning' || e.short_name === 'smiley'),
     ),
     'People & Body': (emojiData as EmojiData[]).find(
-        (e) =>
+        (e): boolean =>
             e.has_img_apple &&
             (e.short_name === 'wave' || e.short_name === 'raised_hand'),
     ),
     'Animals & Nature': (emojiData as EmojiData[]).find(
-        (e) =>
+        (e): boolean =>
             e.has_img_apple &&
             (e.short_name === 'bear' || e.short_name === 'dog'),
     ),
     'Food & Drink': (emojiData as EmojiData[]).find(
-        (e) =>
+        (e): boolean =>
             e.has_img_apple &&
             (e.short_name === 'hamburger' || e.short_name === 'pizza'),
     ),
     'Travel & Places': (emojiData as EmojiData[]).find(
-        (e) =>
+        (e): boolean =>
             e.has_img_apple &&
             (e.short_name === 'car' || e.short_name === 'rocket'),
     ),
     Activities: (emojiData as EmojiData[]).find(
-        (e) =>
+        (e): boolean =>
             e.has_img_apple &&
             (e.short_name === 'soccer' || e.short_name === 'basketball'),
     ),
     Objects: (emojiData as EmojiData[]).find(
-        (e) =>
+        (e): boolean =>
             e.has_img_apple &&
             (e.short_name === 'bulb' ||
                 e.short_name === 'flashlight' ||
                 e.short_name === 'computer'),
     ),
     Symbols: (emojiData as EmojiData[]).find(
-        (e) =>
+        (e): boolean =>
             e.has_img_apple &&
             (e.short_name === 'heart' || e.short_name === 'purple_heart'),
     ),
     Flags: (emojiData as EmojiData[]).find(
-        (e) =>
+        (e): boolean =>
             e.has_img_apple &&
             (e.short_name === 'white_flag' ||
                 e.short_name === 'flag-white' ||
                 e.short_name === 'triangular_flag_on_post'),
     ),
     Component: (emojiData as EmojiData[]).find(
-        (e) =>
+        (e): boolean =>
             e.has_img_apple &&
             (e.short_name === 'gear' ||
                 e.short_name === 'wrench' ||
@@ -133,14 +133,14 @@ export const getSpriteStyle = (emoji?: EmojiData): React.CSSProperties => {
 
 export const getUnicode = (emoji: EmojiData): string =>
     String.fromCodePoint(
-        ...emoji.unified.split('-').map((u) => parseInt(u, 16)),
+        ...emoji.unified.split('-').map((u): number => parseInt(u, 16)),
     );
 
 // Map of unicode character to EmojiData
 export const emojiMap = new Map<string, EmojiData>();
 const emojiUnicodeList: string[] = [];
 
-(emojiData as EmojiData[]).forEach((emoji) => {
+(emojiData as EmojiData[]).forEach((emoji): void => {
     if (!emoji.has_img_apple) return;
     const unicode = getUnicode(emoji);
     emojiMap.set(unicode, emoji);
@@ -148,7 +148,7 @@ const emojiUnicodeList: string[] = [];
 });
 
 // Sort by length descending
-emojiUnicodeList.sort((a, b) => b.length - a.length);
+emojiUnicodeList.sort((a, b): number => b.length - a.length);
 
 // Escape special regex characters
 const escapeRegex = (string: string): string =>

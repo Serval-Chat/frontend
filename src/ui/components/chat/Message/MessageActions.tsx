@@ -51,7 +51,7 @@ export const MessageActions = React.memo(
                     size="sm"
                     title="Reply"
                     variant="ghost"
-                    onClick={() => onReplyToMessage(message)}
+                    onClick={(): void => onReplyToMessage(message)}
                 >
                     <CornerUpLeft size={18} />
                 </Button>

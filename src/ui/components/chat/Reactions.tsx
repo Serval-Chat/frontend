@@ -33,10 +33,12 @@ interface ReactionsProps {
     onAddClick?: () => void;
 }
 
-export const Reactions: React.FC<ReactionsProps> = React.memo(
-    ({ messageId, reactions, serverId, channelId }) => {
+export const Reactions = React.memo(
+    ({ messageId, reactions, serverId, channelId }: ReactionsProps) => {
         const { data: me } = useMe();
-        const blocks = useAppSelector((state) => state.blocking.blocks);
+        const blocks = useAppSelector(
+            (state): Record<string, number> => state.blocking.blocks,
+        );
         const addReaction = useAddReaction();
         const removeReaction = useRemoveReaction();
         const [showPicker, setShowPicker] = React.useState(false);
@@ -54,7 +56,7 @@ export const Reactions: React.FC<ReactionsProps> = React.memo(
         const canManageReactions = hasPermission('manageReactions');
 
         // Close picker when clicking outside
-        React.useEffect(() => {
+        React.useEffect((): (() => void) | undefined => {
             if (!showPicker) return;
 
             const handleClickOutside = (event: MouseEvent): void => {
@@ -67,7 +69,7 @@ export const Reactions: React.FC<ReactionsProps> = React.memo(
             };
 
             document.addEventListener('mousedown', handleClickOutside);
-            return () => {
+            return (): void => {
                 document.removeEventListener('mousedown', handleClickOutside);
             };
         }, [showPicker]);
@@ -150,7 +152,7 @@ export const Reactions: React.FC<ReactionsProps> = React.memo(
 
         const filteredReactions = reactions
             .map((r) => {
-                const filteredUsers = r.users.filter((uid) => {
+                const filteredUsers = r.users.filter((uid): boolean => {
                     if (uid === me?._id) return true;
                     const userBlocks = blocks[uid] || 0;
                     return !(userBlocks & BlockFlags.HIDE_THEIR_REACTIONS);
@@ -161,7 +163,7 @@ export const Reactions: React.FC<ReactionsProps> = React.memo(
                     count: filteredUsers.length,
                 };
             })
-            .filter((r) => r.count > 0);
+            .filter((r): boolean => r.count > 0);
 
         return (
             <Box className="mt-1 mb-1 flex flex-wrap gap-1">
@@ -185,7 +187,7 @@ export const Reactions: React.FC<ReactionsProps> = React.memo(
                                     ? `${reaction.count} reactions`
                                     : undefined
                             }
-                            onClick={() => handleReactionClick(reaction)}
+                            onClick={(): void => handleReactionClick(reaction)}
                         >
                             <Text className="text-base leading-none">
                                 {reaction.emojiType === 'custom' ? (
@@ -227,7 +229,7 @@ export const Reactions: React.FC<ReactionsProps> = React.memo(
                             id: 'view-reactions',
                             label: 'View Reactions',
                             icon: Users,
-                            onClick: () => {
+                            onClick: (): void => {
                                 setVotersModalEmoji(reaction.emoji);
                                 setIsVotersModalOpen(true);
                             },
@@ -240,7 +242,7 @@ export const Reactions: React.FC<ReactionsProps> = React.memo(
                             label: 'Remove Emoji',
                             icon: Trash2,
                             variant: 'danger',
-                            onClick: () => {
+                            onClick: (): void => {
                                 removeReaction.mutate({
                                     messageId,
                                     serverId,
@@ -271,7 +273,7 @@ export const Reactions: React.FC<ReactionsProps> = React.memo(
                         size="sm"
                         title="Add Reaction"
                         variant="ghost"
-                        onClick={() => setShowPicker(!showPicker)}
+                        onClick={(): void => setShowPicker(!showPicker)}
                     >
                         <SmilePlus size={16} />
                     </Button>
@@ -295,7 +297,7 @@ export const Reactions: React.FC<ReactionsProps> = React.memo(
                     isOpen={isVotersModalOpen}
                     reactions={filteredReactions}
                     serverId={serverId}
-                    onClose={() => setIsVotersModalOpen(false)}
+                    onClose={(): void => setIsVotersModalOpen(false)}
                 />
             </Box>
         );

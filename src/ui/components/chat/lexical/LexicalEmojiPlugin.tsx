@@ -12,7 +12,7 @@ import { emojiRegex } from '@/utils/emoji';
 export const LexicalEmojiPlugin = (): null => {
     const [editor] = useLexicalComposerContext();
 
-    useEffect(() => {
+    useEffect((): (() => void) => {
         const emojiTransform = (node: TextNode): void => {
             const text = node.getTextContent();
             const match = emojiRegex.exec(text);

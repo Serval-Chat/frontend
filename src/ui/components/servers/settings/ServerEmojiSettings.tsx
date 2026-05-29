@@ -24,9 +24,7 @@ interface ServerEmojiSettingsProps {
     serverId: string;
 }
 
-export const ServerEmojiSettings: React.FC<ServerEmojiSettingsProps> = ({
-    serverId,
-}) => {
+export const ServerEmojiSettings = ({ serverId }: ServerEmojiSettingsProps) => {
     const queryClient = useQueryClient();
     const { data: emojis = [], isLoading } = useServerEmojis(serverId);
     const {
@@ -98,7 +96,7 @@ export const ServerEmojiSettings: React.FC<ServerEmojiSettingsProps> = ({
         uploadEmoji(
             { name: emojiName, file: processedFile },
             {
-                onSuccess: () => {
+                onSuccess: (): void => {
                     setEmojiName('');
                     setSelectedFile(null);
                 },
@@ -111,10 +109,10 @@ export const ServerEmojiSettings: React.FC<ServerEmojiSettingsProps> = ({
     };
 
     const convertToWebp = (blob: Blob, fileName: string): Promise<File> =>
-        new Promise((resolve, reject) => {
+        new Promise((resolve, reject): void => {
             const url = URL.createObjectURL(blob);
             const img = new Image();
-            img.onload = () => {
+            img.onload = (): void => {
                 const canvas = document.createElement('canvas');
                 canvas.width = img.width;
                 canvas.height = img.height;
@@ -124,7 +122,7 @@ export const ServerEmojiSettings: React.FC<ServerEmojiSettingsProps> = ({
                     return;
                 }
                 ctx.drawImage(img, 0, 0);
-                canvas.toBlob((convertedBlob) => {
+                canvas.toBlob((convertedBlob): void => {
                     if (convertedBlob) {
                         const newName =
                             fileName.replace(/\.[^/.]+$/, '') + '.webp';
@@ -139,7 +137,7 @@ export const ServerEmojiSettings: React.FC<ServerEmojiSettingsProps> = ({
                     URL.revokeObjectURL(url);
                 }, 'image/webp');
             };
-            img.onerror = () => {
+            img.onerror = (): void => {
                 URL.revokeObjectURL(url);
                 reject(new Error('Failed to load image'));
             };
@@ -161,7 +159,7 @@ export const ServerEmojiSettings: React.FC<ServerEmojiSettingsProps> = ({
             const loadedZip = await zip.loadAsync(file);
 
             const validFiles = Object.entries(loadedZip.files).filter(
-                ([relativePath, zipEntry]) => {
+                ([relativePath, zipEntry]): boolean => {
                     if (zipEntry.dir) return false;
                     const isImage = relativePath.match(
                         /\.(png|jpg|jpeg|webp|gif)$/i,
@@ -209,16 +207,34 @@ export const ServerEmojiSettings: React.FC<ServerEmojiSettingsProps> = ({
                         file: fileToUpload,
                     });
                     uploadedIdsRef.current.push(newEmoji._id);
-                    setBulkStatus((prev) => ({
-                        ...prev,
-                        uploaded: prev.uploaded + 1,
-                    }));
+                    setBulkStatus(
+                        (
+                            prev,
+                        ): {
+                            uploaded: number;
+                            total: number;
+                            errors: number;
+                            isOpen: boolean;
+                        } => ({
+                            ...prev,
+                            uploaded: prev.uploaded + 1,
+                        }),
+                    );
                 } catch (err) {
                     console.error(`Failed to process ${fileName}:`, err);
-                    setBulkStatus((prev) => ({
-                        ...prev,
-                        errors: prev.errors + 1,
-                    }));
+                    setBulkStatus(
+                        (
+                            prev,
+                        ): {
+                            errors: number;
+                            total: number;
+                            uploaded: number;
+                            isOpen: boolean;
+                        } => ({
+                            ...prev,
+                            errors: prev.errors + 1,
+                        }),
+                    );
                 }
             }
         } catch (err) {
@@ -243,7 +259,16 @@ export const ServerEmojiSettings: React.FC<ServerEmojiSettingsProps> = ({
 
         uploadedIdsRef.current = [];
         setIsCancelling(false);
-        setBulkStatus((prev) => ({ ...prev, isOpen: false }));
+        setBulkStatus(
+            (
+                prev,
+            ): {
+                isOpen: false;
+                total: number;
+                uploaded: number;
+                errors: number;
+            } => ({ ...prev, isOpen: false }),
+        );
     };
 
     return (
@@ -270,7 +295,7 @@ export const ServerEmojiSettings: React.FC<ServerEmojiSettingsProps> = ({
                         maxLength={32}
                         placeholder="cool_doge"
                         value={emojiName}
-                        onChange={(e) => setEmojiName(e.target.value)}
+                        onChange={(e): void => setEmojiName(e.target.value)}
                     />
                     <Text size="xs" variant="muted">
                         Only alphanumeric characters, underscores, and dashes.
@@ -289,7 +314,7 @@ export const ServerEmojiSettings: React.FC<ServerEmojiSettingsProps> = ({
                     className="hidden"
                     ref={bulkFileInputRef}
                     type="file"
-                    onChange={(e) => void handleBulkFileSelect(e)}
+                    onChange={(e): undefined => void handleBulkFileSelect(e)}
                 />
 
                 {isLoading ? (
@@ -329,7 +354,9 @@ export const ServerEmojiSettings: React.FC<ServerEmojiSettingsProps> = ({
                             className="flex aspect-square flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border-subtle p-3 transition-all hover:border-primary hover:bg-bg-subtle disabled:cursor-not-allowed disabled:opacity-50"
                             disabled={isUploading || isBulkUploading}
                             type="button"
-                            onClick={() => bulkFileInputRef.current?.click()}
+                            onClick={(): void | undefined =>
+                                bulkFileInputRef.current?.click()
+                            }
                         >
                             {isBulkUploading ? (
                                 <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
@@ -353,10 +380,12 @@ export const ServerEmojiSettings: React.FC<ServerEmojiSettingsProps> = ({
                             <div
                                 className="group relative aspect-square overflow-hidden rounded-lg border border-border-subtle bg-bg-subtle transition-all hover:border-primary"
                                 key={emoji._id}
-                                onMouseEnter={() =>
+                                onMouseEnter={(): void =>
                                     setHoveredEmojiId(emoji._id)
                                 }
-                                onMouseLeave={() => setHoveredEmojiId(null)}
+                                onMouseLeave={(): void =>
+                                    setHoveredEmojiId(null)
+                                }
                             >
                                 <div className="flex h-full w-full items-center justify-center p-2">
                                     <img
@@ -383,7 +412,7 @@ export const ServerEmojiSettings: React.FC<ServerEmojiSettingsProps> = ({
                                             aria-label="Delete emoji"
                                             size="sm"
                                             variant="danger"
-                                            onClick={() =>
+                                            onClick={(): void =>
                                                 deleteEmoji(emoji._id)
                                             }
                                         >
@@ -401,7 +430,7 @@ export const ServerEmojiSettings: React.FC<ServerEmojiSettingsProps> = ({
                 imageFile={selectedFile}
                 isOpen={isCropModalOpen}
                 type="emoji"
-                onClose={() => {
+                onClose={(): void => {
                     setIsCropModalOpen(false);
                     setSelectedFile(null);
                 }}
@@ -415,9 +444,18 @@ export const ServerEmojiSettings: React.FC<ServerEmojiSettingsProps> = ({
                 title="Bulk Upload Emojis"
                 total={bulkStatus.total}
                 uploaded={bulkStatus.uploaded}
-                onCancel={() => void handleCancelBulk()}
-                onClose={() =>
-                    setBulkStatus((prev) => ({ ...prev, isOpen: false }))
+                onCancel={(): undefined => void handleCancelBulk()}
+                onClose={(): void =>
+                    setBulkStatus(
+                        (
+                            prev,
+                        ): {
+                            isOpen: false;
+                            total: number;
+                            uploaded: number;
+                            errors: number;
+                        } => ({ ...prev, isOpen: false }),
+                    )
                 }
             />
         </div>

@@ -34,7 +34,7 @@ export const useStickerInfoBox = (): UseStickerInfoBoxReturn => {
     });
 
     const showStickerInfo = useCallback(
-        (sticker: StickerData, event: React.MouseEvent) => {
+        (sticker: StickerData, event: React.MouseEvent): void => {
             event.preventDefault();
             event.stopPropagation();
 
@@ -55,7 +55,7 @@ export const useStickerInfoBox = (): UseStickerInfoBoxReturn => {
         [],
     );
 
-    const closeInfoBox = useCallback(() => {
+    const closeInfoBox = useCallback((): void => {
         setSelectedSticker(null);
         setInfoBoxPosition(null);
     }, []);

@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { Heading } from '@/ui/components/common/Heading';
 import { Link } from '@/ui/components/common/Link';
 import { Text } from '@/ui/components/common/Text';
@@ -11,7 +9,7 @@ import { VerticalSpacer } from '@/ui/components/layout/VerticalSpacer';
 /**
  * @description 404 Not Found page
  */
-export const NotFound: React.FC = () => (
+export const NotFound = () => (
     <Box className="relative flex min-h-screen w-full flex-col items-center justify-center overflow-hidden bg-background p-md">
         <DefaultBackground />
 

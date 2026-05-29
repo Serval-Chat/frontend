@@ -1,5 +1,3 @@
-import React from 'react';
-
 import {
     Infinity as InfinityIcon /* This is to prevent name shadowing, thx javascript */,
     BadgeCheck,
@@ -31,12 +29,12 @@ interface InviteBannerHeaderProps {
     loading?: boolean;
 }
 
-const InviteBannerHeader: React.FC<InviteBannerHeaderProps> = ({
+const InviteBannerHeader = ({
     name,
     banner,
     icon,
     loading,
-}) => {
+}: InviteBannerHeaderProps) => {
     const hasBanner = !!banner && !loading;
 
     return (
@@ -75,7 +73,7 @@ const InviteBannerHeader: React.FC<InviteBannerHeaderProps> = ({
     );
 };
 
-const InvalidInvite: React.FC = () => (
+const InvalidInvite = () => (
     <div className="relative z-content space-y-md text-center">
         <div className="flex justify-center text-muted-foreground/50">
             <CircleOff size={64} strokeWidth={1.5} />
@@ -94,7 +92,7 @@ const InvalidInvite: React.FC = () => (
 /**
  * @description Server invite landing page /invite/:inviteId
  */
-export const Invite: React.FC = () => {
+export const Invite = () => {
     const { inviteId = '' } = useParams<{ inviteId: string }>();
     const navigate = useNavigate();
 
@@ -107,7 +105,7 @@ export const Invite: React.FC = () => {
 
     const handleJoin = (): void => {
         joinServer(inviteId, {
-            onSuccess: ({ serverId }) => {
+            onSuccess: ({ serverId }): void => {
                 void navigate(`/chat/@server/${serverId}`);
             },
         });

@@ -20,30 +20,32 @@ import { ServerItem } from './ServerItem';
 /**
  * @description A component that fetches servers and renders them + folders :3
  */
-export const ServerList: React.FC = () => {
+export const ServerList = () => {
     const { data: servers, isLoading } = useServers();
     const { data: me } = useMe();
     const { mutate: updateSettings } = useUpdateServerSettings();
     useUnreadStatus();
 
     const selectedServerId = useAppSelector(
-        (state) => state.nav.selectedServerId,
+        (state): string | null => state.nav.selectedServerId,
     );
     const unreadServers = useAppSelector((state) => state.unread.unreadServers);
     const lastOpenedChannelByServer = useAppSelector(
-        (state) => state.nav.lastOpenedChannelByServer,
+        (state): Record<string, string> => state.nav.lastOpenedChannelByServer,
     );
-    const openedFolders = useAppSelector((state) => state.nav.openedFolders);
+    const openedFolders = useAppSelector(
+        (state): string[] => state.nav.openedFolders,
+    );
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
 
     // Auto-open folder if navigating to a server inside it
-    React.useEffect(() => {
+    React.useEffect((): void => {
         if (!selectedServerId || !me?.serverSettings?.order) return;
 
         // Find which folder contains this server
         const folderWithServer = me.serverSettings.order.find(
-            (item) =>
+            (item): boolean =>
                 typeof item !== 'string' &&
                 item.serverIds.includes(selectedServerId),
         );
@@ -56,13 +58,13 @@ export const ServerList: React.FC = () => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedServerId, me?.serverSettings?.order, dispatch]);
 
-    const orderedItems = React.useMemo(() => {
+    const orderedItems = React.useMemo((): (string | IServerFolder)[] => {
         if (!me || !servers) return [];
 
-        const serverIds = servers.map((s) => s._id);
+        const serverIds = servers.map((s): string => s._id);
         const savedOrder = me.serverSettings?.order || [];
 
-        const filteredOrder = savedOrder.filter((item) => {
+        const filteredOrder = savedOrder.filter((item): boolean => {
             if (typeof item === 'string') {
                 return serverIds.includes(item);
             }
@@ -70,21 +72,25 @@ export const ServerList: React.FC = () => {
         });
 
         const orderedServerIds = new Set<string>();
-        filteredOrder.forEach((item) => {
+        filteredOrder.forEach((item): void => {
             if (typeof item === 'string') {
                 orderedServerIds.add(item);
             } else {
-                item.serverIds.forEach((id) => orderedServerIds.add(id));
+                item.serverIds.forEach(
+                    (id): Set<string> => orderedServerIds.add(id),
+                );
             }
         });
 
-        const newServers = serverIds.filter((id) => !orderedServerIds.has(id));
+        const newServers = serverIds.filter(
+            (id): boolean => !orderedServerIds.has(id),
+        );
 
         return [...filteredOrder, ...newServers];
     }, [me, servers]);
     const [items, setItems] = React.useState<(string | IServerFolder)[]>([]);
 
-    React.useEffect(() => {
+    React.useEffect((): void => {
         setItems(orderedItems);
     }, [orderedItems]);
 
@@ -103,7 +109,7 @@ export const ServerList: React.FC = () => {
         const lastChannelId = lastOpenedChannelByServer[serverId];
         const isMobile = window.innerWidth < 768;
 
-        React.startTransition(() => {
+        React.startTransition((): void => {
             if (!isMobile && lastChannelId) {
                 void navigate(
                     `/chat/@server/${serverId}/channel/${lastChannelId}`,
@@ -149,7 +155,7 @@ export const ServerList: React.FC = () => {
                     );
                 }
 
-                const server = servers.find((s) => s._id === item);
+                const server = servers.find((s): boolean => s._id === item);
                 if (!server) return null;
 
                 const unreadStatus = unreadServers[server._id];
@@ -161,7 +167,7 @@ export const ServerList: React.FC = () => {
                         key={key}
                         pingCount={unreadStatus?.pingCount}
                         server={server}
-                        onClick={() => handleServerClick(server._id)}
+                        onClick={(): void => handleServerClick(server._id)}
                         onDragEnd={handleDragEnd}
                     />
                 );
@@ -250,7 +256,7 @@ const ServerItemWrapper = React.memo(
             >
                 <div
                     className="w-full select-none"
-                    onPointerDown={(e) => dragControls.start(e)}
+                    onPointerDown={(e): void => dragControls.start(e)}
                 >
                     <ServerItem
                         isActive={props.isActive}

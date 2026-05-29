@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { useUpdateChannel } from '@/api/servers/servers.queries';
 import type { Channel } from '@/api/servers/servers.types';
 import { Heading } from '@/ui/components/common/Heading';
@@ -11,9 +9,9 @@ interface ChannelBehaviourSettingsProps {
     channel: Channel;
 }
 
-export const ChannelBehaviourSettings: React.FC<
-    ChannelBehaviourSettingsProps
-> = ({ channel }) => {
+export const ChannelBehaviourSettings = ({
+    channel,
+}: ChannelBehaviourSettingsProps) => {
     const { mutate: updateChannel, isPending } = useUpdateChannel(
         channel.serverId,
         channel._id,
@@ -33,7 +31,7 @@ export const ChannelBehaviourSettings: React.FC<
                 isPending={isPending}
                 rules={channel.markdownBlockadeRules}
                 serverId={channel.serverId}
-                onSave={(markdownBlockadeRules) =>
+                onSave={(markdownBlockadeRules): void =>
                     updateChannel({ markdownBlockadeRules })
                 }
             />

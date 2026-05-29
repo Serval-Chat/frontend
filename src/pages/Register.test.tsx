@@ -42,12 +42,12 @@ const renderWithProviders = (): ReturnType<typeof render> => {
     );
 };
 
-describe('Register Page Integration', () => {
-    beforeEach(() => {
+describe('Register Page Integration', (): void => {
+    beforeEach((): void => {
         vi.clearAllMocks();
     });
 
-    it('disables submit until all fields are filled, validating dynamically', async () => {
+    it('disables submit until all fields are filled, validating dynamically', async (): Promise<void> => {
         renderWithProviders();
         const button = screen.getByRole('button', { name: /Register/i });
         expect(button).toBeDisabled();
@@ -82,12 +82,12 @@ describe('Register Page Integration', () => {
             target: { value: 'password123' },
         });
 
-        await waitFor(() => {
+        await waitFor((): void => {
             expect(button).not.toBeDisabled();
         });
     });
 
-    it('can toggle password visibility for both password inputs', () => {
+    it('can toggle password visibility for both password inputs', (): void => {
         renderWithProviders();
         const passwordInput = screen.getByPlaceholderText('Password');
         const confirmPasswordInput =
@@ -108,7 +108,7 @@ describe('Register Page Integration', () => {
         expect(confirmPasswordInput).toHaveAttribute('type', 'text');
     });
 
-    it('handles successful registration, clears data, and redirects to /chat/@me', async () => {
+    it('handles successful registration, clears data, and redirects to /chat/@me', async (): Promise<void> => {
         const setAuthTokenSpy = vi.spyOn(authTokenModule, 'setAuthToken');
         vi.mocked(authApi.register).mockResolvedValueOnce({
             token: 'mock-token',
@@ -137,7 +137,7 @@ describe('Register Page Integration', () => {
 
         expect(button).toBeDisabled();
 
-        await waitFor(() => {
+        await waitFor((): void => {
             expect(authApi.register).toHaveBeenCalledWith({
                 login: 'test@example.com',
                 username: 'cat123',

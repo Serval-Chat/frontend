@@ -12,7 +12,7 @@ export const useAdminStats = (
 ): UseQueryResult<AdminStats, Error> =>
     useQuery<AdminStats>({
         queryKey: ['admin-stats', range],
-        queryFn: async () => {
+        queryFn: async (): Promise<AdminStats> => {
             const { data } = await apiClient.get<AdminStats>(
                 `/api/v1/admin/stats?range=${range}`,
             );

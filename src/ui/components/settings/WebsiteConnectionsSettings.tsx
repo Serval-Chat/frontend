@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 
 import { Check, Copy, Globe, Trash2 } from 'lucide-react';
 
@@ -16,7 +16,7 @@ import { Text } from '@/ui/components/common/Text';
 import { useToast } from '@/ui/components/common/Toast';
 import { extractApiError } from '@/utils/extractApiError';
 
-export const WebsiteConnectionsSettings: React.FC = () => {
+export const WebsiteConnectionsSettings = () => {
     const { data: user } = useMe();
     const { showToast } = useToast();
     const [website, setWebsite] = useState('');
@@ -33,14 +33,14 @@ export const WebsiteConnectionsSettings: React.FC = () => {
     const pendingConnections = useMemo(
         () =>
             (user?.connections ?? []).filter(
-                (connection) => connection.status === 'pending',
+                (connection): boolean => connection.status === 'pending',
             ),
         [user?.connections],
     );
     const verifiedConnections = useMemo(
         () =>
             (user?.connections ?? []).filter(
-                (connection) => connection.status === 'verified',
+                (connection): boolean => connection.status === 'verified',
             ),
         [user?.connections],
     );
@@ -52,12 +52,12 @@ export const WebsiteConnectionsSettings: React.FC = () => {
         }
 
         createWebsiteConnection(website, {
-            onSuccess: (data) => {
+            onSuccess: (data): void => {
                 setInstructions(data);
                 setWebsite('');
                 showToast('DNS record generated.', 'success');
             },
-            onError: (error) => {
+            onError: (error): void => {
                 showToast(
                     extractApiError(
                         error,
@@ -71,11 +71,11 @@ export const WebsiteConnectionsSettings: React.FC = () => {
 
     const handleVerify = (connectionId: string): void => {
         verifyConnection(connectionId, {
-            onSuccess: () => {
+            onSuccess: (): void => {
                 setInstructions(null);
                 showToast('Website verified.', 'success');
             },
-            onError: (error) => {
+            onError: (error): void => {
                 showToast(
                     extractApiError(
                         error,
@@ -89,13 +89,14 @@ export const WebsiteConnectionsSettings: React.FC = () => {
 
     const handleRemove = (connectionId: string): void => {
         removeConnection(connectionId, {
-            onSuccess: () => {
-                setInstructions((current) =>
-                    current?.connectionId === connectionId ? null : current,
+            onSuccess: (): void => {
+                setInstructions(
+                    (current): CreateWebsiteConnectionResponse | null =>
+                        current?.connectionId === connectionId ? null : current,
                 );
                 showToast('Connection removed.', 'success');
             },
-            onError: (error) => {
+            onError: (error): void => {
                 showToast(
                     extractApiError(error, 'Failed to remove connection'),
                     'error',
@@ -128,8 +129,8 @@ export const WebsiteConnectionsSettings: React.FC = () => {
                     placeholder="ser.chat"
                     type="text"
                     value={website}
-                    onChange={(event) => setWebsite(event.target.value)}
-                    onKeyDown={(event) => {
+                    onChange={(event): void => setWebsite(event.target.value)}
+                    onKeyDown={(event): void => {
                         if (event.key === 'Enter') handleCreate();
                     }}
                 />
@@ -197,7 +198,7 @@ export const WebsiteConnectionsSettings: React.FC = () => {
                             size="sm"
                             type="button"
                             variant="normal"
-                            onClick={() =>
+                            onClick={(): void =>
                                 handleVerify(instructions.connectionId)
                             }
                         >
@@ -237,11 +238,7 @@ interface VerificationRowProps {
     onCopy: (value: string) => Promise<void>;
 }
 
-const VerificationRow: React.FC<VerificationRowProps> = ({
-    label,
-    value,
-    onCopy,
-}) => (
+const VerificationRow = ({ label, value, onCopy }: VerificationRowProps) => (
     <div className="grid gap-2 sm:grid-cols-[80px_1fr_auto] sm:items-center">
         <Text size="xs" variant="muted">
             {label}
@@ -254,7 +251,7 @@ const VerificationRow: React.FC<VerificationRowProps> = ({
             size="sm"
             type="button"
             variant="ghost"
-            onClick={() => void onCopy(value)}
+            onClick={(): undefined => void onCopy(value)}
         >
             Copy
         </Button>
@@ -275,14 +272,14 @@ interface ConnectionListProps {
     onVerify?: (connectionId: string) => void;
 }
 
-const ConnectionList: React.FC<ConnectionListProps> = ({
+const ConnectionList = ({
     connections,
     statusLabel,
     isRemoving,
     isVerifying,
     onRemove,
     onVerify,
-}) => (
+}: ConnectionListProps) => (
     <div className="space-y-2">
         <Text size="xs" variant="muted">
             {statusLabel}
@@ -314,7 +311,7 @@ const ConnectionList: React.FC<ConnectionListProps> = ({
                             size="sm"
                             type="button"
                             variant="normal"
-                            onClick={() => onVerify(connection.id)}
+                            onClick={(): void => onVerify(connection.id)}
                         >
                             Verify
                         </Button>
@@ -325,7 +322,7 @@ const ConnectionList: React.FC<ConnectionListProps> = ({
                         size="sm"
                         type="button"
                         variant="ghost"
-                        onClick={() => onRemove(connection.id)}
+                        onClick={(): void => onRemove(connection.id)}
                     >
                         Remove
                     </Button>

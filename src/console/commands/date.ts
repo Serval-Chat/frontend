@@ -1,8 +1,8 @@
 import type { ConCommandReactor } from '@/console/ConCommandRegistry';
 
 export const dateCommand: ConCommandReactor = {
-    match: (_argc, argv) => argv[0]?.toLowerCase() === 'date',
-    execute: () => {
+    match: (_argc, argv): boolean => argv[0]?.toLowerCase() === 'date',
+    execute: (): { output: string[] } => {
         const today = new Date();
         const options: Intl.DateTimeFormatOptions = {
             weekday: 'short',

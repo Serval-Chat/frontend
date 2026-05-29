@@ -44,7 +44,7 @@ import { MessageEmojiPicker } from './MessageEmojiPicker';
 
 const EMPTY_REACTIONS: never[] = [];
 
-export const Message: React.FC<MessageProps> = React.memo(
+export const Message = React.memo(
     ({
         message,
         user: initialUser,
@@ -68,7 +68,7 @@ export const Message: React.FC<MessageProps> = React.memo(
         isOwner: passedIsOwner,
         fullMemberMap,
         roleMap,
-    }) => {
+    }: MessageProps) => {
         const {
             user,
             me,
@@ -104,7 +104,7 @@ export const Message: React.FC<MessageProps> = React.memo(
         const pickerRef = React.useRef<HTMLDivElement>(null);
         const reactRef = React.useRef<HTMLButtonElement>(null);
         const showColorResolverDebug = useAppSelector(
-            (state) =>
+            (state): boolean =>
                 state.debugOptions?.usernameColorResolverContextMenu ?? false,
         );
 
@@ -160,9 +160,9 @@ export const Message: React.FC<MessageProps> = React.memo(
             [addReaction, message._id, message.serverId, message.channelId],
         );
 
-        useClickAway(pickerRef, () => setShowPicker(false));
+        useClickAway(pickerRef, (): void => setShowPicker(false));
 
-        useEvent('editLastMessage', (event: CustomEvent) => {
+        useEvent('editLastMessage', (event: CustomEvent): void => {
             const { messageId } = event.detail;
             if (messageId === message._id && canEdit) {
                 setIsEditing(true);
@@ -193,11 +193,11 @@ export const Message: React.FC<MessageProps> = React.memo(
             setIsEditing(false);
         }, []);
 
-        const handleAddReactionClick = React.useCallback(() => {
+        const handleAddReactionClick = React.useCallback((): void => {
             setShowPicker(true);
         }, []);
 
-        const handleProfileClick = React.useCallback(() => {
+        const handleProfileClick = React.useCallback((): void => {
             setShowProfile(true);
         }, []);
 
@@ -226,7 +226,7 @@ export const Message: React.FC<MessageProps> = React.memo(
         }, []);
 
         const handleTogglePicker = React.useCallback((): void => {
-            setShowPicker((prev) => !prev);
+            setShowPicker((prev): boolean => !prev);
         }, []);
 
         const handleClosePicker = React.useCallback((): void => {
@@ -303,11 +303,12 @@ export const Message: React.FC<MessageProps> = React.memo(
         ]);
 
         const allServerRoles = React.useMemo(
-            () => (roleMap ? Array.from(roleMap.values()) : undefined),
+            (): Role[] | undefined =>
+                roleMap ? Array.from(roleMap.values()) : undefined,
             [roleMap],
         );
 
-        const canManageRoles = React.useMemo(() => {
+        const canManageRoles = React.useMemo((): boolean => {
             if (!me || !senderRoles || !serverDetails) return false;
             if (isOwner) return true;
 
@@ -317,17 +318,17 @@ export const Message: React.FC<MessageProps> = React.memo(
             );
         }, [me, senderRoles, serverDetails, isOwner, checkPermission]);
 
-        const myHighestRolePosition = React.useMemo(() => {
+        const myHighestRolePosition = React.useMemo((): number => {
             if (!me || !roleMap || !fullMemberMap) return -1;
             const myMember = fullMemberMap.get(me._id);
             if (!myMember) return -1;
 
             const myRoles = myMember.roles
-                .map((id) => roleMap.get(id))
+                .map((id): Role | undefined => roleMap.get(id))
                 .filter((r): r is Role => !!r);
 
             if (myRoles.length === 0) return -1;
-            return Math.max(...myRoles.map((r) => r.position));
+            return Math.max(...myRoles.map((r): number => r.position));
         }, [me, roleMap, fullMemberMap]);
 
         const contextMenuItems = useMessageContextMenu({
@@ -353,21 +354,21 @@ export const Message: React.FC<MessageProps> = React.memo(
             canManageRoles,
             isOwner,
             myHighestRolePosition,
-            onAddRole: (roleId) =>
+            onAddRole: (roleId): void =>
                 addRole({ userId: message.senderId, roleId }),
-            onRemoveRole: (roleId) =>
+            onRemoveRole: (roleId): void =>
                 removeRole({ userId: message.senderId, roleId }),
         });
 
         const isMobile = React.useMemo(
-            () =>
+            (): boolean =>
                 typeof window !== 'undefined' &&
                 window.matchMedia('(pointer: coarse)').matches,
             [],
         );
 
         const timeLabel = React.useMemo(
-            () =>
+            (): string =>
                 new Date(message.createdAt)
                     .toLocaleTimeString(APP_LOCALE, {
                         hour: '2-digit',
@@ -583,7 +584,7 @@ export const Message: React.FC<MessageProps> = React.memo(
                     content={colorResolverReport ?? ''}
                     isOpen={!!colorResolverReport}
                     language="json"
-                    onClose={() => setColorResolverReport(null)}
+                    onClose={(): void => setColorResolverReport(null)}
                 />
             </Box>
         );

@@ -53,7 +53,9 @@ const getDiscoveryCacheKey = (params: {
 }): string =>
     JSON.stringify({
         q: params.q?.trim().toLowerCase() ?? '',
-        tags: [...(params.tags ?? [])].map((tag) => tag.toLowerCase()).sort(),
+        tags: [...(params.tags ?? [])]
+            .map((tag): string => tag.toLowerCase())
+            .sort(),
         limit: params.limit ?? 20,
         cursor: params.cursor ?? '',
     });
@@ -74,23 +76,43 @@ const rememberDiscoveryResult = (
 
 export const SERVERS_QUERY_KEYS = {
     list: ['servers', 'list'] as const,
-    unread: () => ['servers', 'unread'] as const,
-    details: (serverId: string | null) =>
+    unread: (): readonly ['servers', 'unread'] =>
+        ['servers', 'unread'] as const,
+    details: (
+        serverId: string | null,
+    ): readonly ['servers', 'details', string | null] =>
         ['servers', 'details', serverId] as const,
-    channels: (serverId: string | null) =>
+    channels: (
+        serverId: string | null,
+    ): readonly ['servers', 'channels', string | null] =>
         ['servers', 'channels', serverId] as const,
-    categories: (serverId: string | null) =>
+    categories: (
+        serverId: string | null,
+    ): readonly ['servers', 'categories', string | null] =>
         ['servers', 'categories', serverId] as const,
-    members: (serverId: string | null) =>
+    members: (
+        serverId: string | null,
+    ): readonly ['servers', 'members', string | null] =>
         ['servers', 'members', serverId] as const,
-    roles: (serverId: string | null) => ['servers', 'roles', serverId] as const,
-    onboardingSettings: (serverId: string | null) =>
+    roles: (
+        serverId: string | null,
+    ): readonly ['servers', 'roles', string | null] =>
+        ['servers', 'roles', serverId] as const,
+    onboardingSettings: (
+        serverId: string | null,
+    ): readonly ['servers', 'onboarding-settings', string | null] =>
         ['servers', 'onboarding-settings', serverId] as const,
-    onboarding: (serverId: string | null) =>
+    onboarding: (
+        serverId: string | null,
+    ): readonly ['servers', 'onboarding', string | null] =>
         ['servers', 'onboarding', serverId] as const,
-    emojis: (serverId: string | null) =>
+    emojis: (
+        serverId: string | null,
+    ): readonly ['servers', 'emojis', string | null] =>
         ['servers', 'emojis', serverId] as const,
-    stickers: (serverId: string | null) =>
+    stickers: (
+        serverId: string | null,
+    ): readonly ['servers', 'stickers', string | null] =>
         ['servers', 'stickers', serverId] as const,
     discovery: (
         cacheKey: string,
@@ -101,10 +123,17 @@ export const SERVERS_QUERY_KEYS = {
             cursor?: string;
         },
     ) => ['servers', 'discovery', cacheKey, params] as const,
-    discoveryStatus: (serverId: string | null) =>
+    discoveryStatus: (
+        serverId: string | null,
+    ): readonly ['servers', 'discovery-status', string | null] =>
         ['servers', 'discovery-status', serverId] as const,
-    bans: (serverId: string | null) => ['servers', 'bans', serverId] as const,
-    voiceStates: (serverId: string | null) =>
+    bans: (
+        serverId: string | null,
+    ): readonly ['servers', 'bans', string | null] =>
+        ['servers', 'bans', serverId] as const,
+    voiceStates: (
+        serverId: string | null,
+    ): readonly ['servers', 'voice-states', string | null] =>
         ['servers', 'voice-states', serverId] as const,
 };
 
@@ -117,7 +146,7 @@ export const useDiscoveryServers = (params: {
     const cacheKey = getDiscoveryCacheKey(params);
     return useQuery({
         queryKey: SERVERS_QUERY_KEYS.discovery(cacheKey, params),
-        queryFn: async () => {
+        queryFn: async (): Promise<DiscoveryServersResponse> => {
             const result = await serversApi.searchDiscoveryServers(params);
             return rememberDiscoveryResult(cacheKey, result);
         },
@@ -132,7 +161,8 @@ export const useServerDiscoveryStatus = (
 ): UseQueryResult<ServerDiscoveryStatus, Error> =>
     useQuery({
         queryKey: SERVERS_QUERY_KEYS.discoveryStatus(serverId),
-        queryFn: () => serversApi.getDiscoveryStatus(serverId!),
+        queryFn: (): Promise<ServerDiscoveryStatus> =>
+            serversApi.getDiscoveryStatus(serverId!),
         enabled: !!serverId && isValidId(serverId) && hasAuthToken(),
     });
 
@@ -140,7 +170,7 @@ export const useServers = (): UseQueryResult<Server[], Error> => {
     const queryClient = useQueryClient();
     return useQuery({
         queryKey: SERVERS_QUERY_KEYS.list,
-        queryFn: async () => {
+        queryFn: async (): Promise<Server[]> => {
             const servers = await serversApi.getServers();
             for (const server of servers) {
                 queryClient.setQueryData(
@@ -161,11 +191,13 @@ export const useUnreadStatus = (): UseQueryResult<
     const dispatch = useDispatch();
     const query = useQuery({
         queryKey: SERVERS_QUERY_KEYS.unread(),
-        queryFn: () => serversApi.getUnreadStatus(),
+        queryFn: (): Promise<
+            Record<string, { hasUnread: boolean; pingCount: number }>
+        > => serversApi.getUnreadStatus(),
         enabled: hasAuthToken(),
     });
 
-    useEffect(() => {
+    useEffect((): void => {
         if (query.data) {
             dispatch(setUnreadServers(query.data));
         }
@@ -189,7 +221,7 @@ export const useExportChannelState = (
         queryKey: ['servers', 'export_state', serverId, channelId],
         queryFn: () => serversApi.getExportState(serverId, channelId),
         enabled: !!serverId && !!channelId,
-        refetchInterval: (query) =>
+        refetchInterval: (query): false | 10000 =>
             query.state.data?.state === 'in_progress' ? 10000 : false,
     });
 
@@ -201,14 +233,15 @@ export const useRequestExportChannel = (
     const { showToast } = useToast();
 
     return useMutation({
-        mutationFn: () => serversApi.requestExport(serverId, channelId),
-        onSuccess: () => {
+        mutationFn: (): Promise<{ message: string; jobId: string }> =>
+            serversApi.requestExport(serverId, channelId),
+        onSuccess: (): void => {
             void queryClient.invalidateQueries({
                 queryKey: ['servers', 'export_state', serverId, channelId],
             });
             showToast('Export requested successfully', 'success');
         },
-        onError: (error) => {
+        onError: (error): void => {
             showToast(
                 extractApiError(error, 'Failed to request export'),
                 'error',
@@ -226,14 +259,18 @@ export const useCreateServer = (): UseMutationResult<
     const { showToast } = useToast();
 
     return useMutation({
-        mutationFn: ({ name, icon }) => serversApi.createServer(name, icon),
-        onSuccess: () => {
+        mutationFn: ({
+            name,
+            icon,
+        }): Promise<{ server: Server; channel: Channel }> =>
+            serversApi.createServer(name, icon),
+        onSuccess: (): void => {
             void queryClient.invalidateQueries({
                 queryKey: SERVERS_QUERY_KEYS.list,
             });
             showToast('Server created successfully', 'success');
         },
-        onError: (error) => {
+        onError: (error): void => {
             showToast(
                 extractApiError(error, 'Failed to create server'),
                 'error',
@@ -251,14 +288,15 @@ export const useJoinServer = (): UseMutationResult<
     const { showToast } = useToast();
 
     return useMutation({
-        mutationFn: (inviteCode) => serversApi.joinServer(inviteCode),
-        onSuccess: () => {
+        mutationFn: (inviteCode): Promise<{ serverId: string }> =>
+            serversApi.joinServer(inviteCode),
+        onSuccess: (): void => {
             void queryClient.invalidateQueries({
                 queryKey: SERVERS_QUERY_KEYS.list,
             });
             showToast('Joined server successfully', 'success');
         },
-        onError: (error) => {
+        onError: (error): void => {
             showToast(extractApiError(error, 'Failed to join server'), 'error');
         },
     });
@@ -270,7 +308,7 @@ export const useServerDetails = (
 ): UseQueryResult<Server, Error> =>
     useQuery({
         queryKey: SERVERS_QUERY_KEYS.details(serverId),
-        queryFn: () => serversApi.getServerDetails(serverId!),
+        queryFn: (): Promise<Server> => serversApi.getServerDetails(serverId!),
         enabled:
             (options.enabled ?? true) &&
             !!serverId &&
@@ -285,7 +323,7 @@ export const useChannels = (
 ): UseQueryResult<Channel[], Error> =>
     useQuery({
         queryKey: SERVERS_QUERY_KEYS.channels(serverId),
-        queryFn: () => serversApi.getChannels(serverId!),
+        queryFn: (): Promise<Channel[]> => serversApi.getChannels(serverId!),
         enabled:
             (options.enabled ?? true) &&
             !!serverId &&
@@ -300,7 +338,7 @@ export const useCategories = (
 ): UseQueryResult<Category[], Error> =>
     useQuery({
         queryKey: SERVERS_QUERY_KEYS.categories(serverId),
-        queryFn: () => serversApi.getCategories(serverId!),
+        queryFn: (): Promise<Category[]> => serversApi.getCategories(serverId!),
         enabled:
             (options.enabled ?? true) &&
             !!serverId &&
@@ -315,7 +353,8 @@ export const useMembers = (
 ): UseQueryResult<ServerMember[], Error> =>
     useQuery({
         queryKey: SERVERS_QUERY_KEYS.members(serverId),
-        queryFn: () => serversApi.getMembers(serverId!),
+        queryFn: (): Promise<ServerMember[]> =>
+            serversApi.getMembers(serverId!),
         enabled:
             (options.enabled ?? true) &&
             !!serverId &&
@@ -330,7 +369,7 @@ export const useRoles = (
 ): UseQueryResult<Role[], Error> =>
     useQuery({
         queryKey: SERVERS_QUERY_KEYS.roles(serverId),
-        queryFn: () => serversApi.getRoles(serverId!),
+        queryFn: (): Promise<Role[]> => serversApi.getRoles(serverId!),
         enabled:
             (options.enabled ?? true) &&
             !!serverId &&
@@ -345,7 +384,8 @@ export const useOnboardingSettings = (
 ): UseQueryResult<ServerOnboardingSettings, Error> =>
     useQuery({
         queryKey: SERVERS_QUERY_KEYS.onboardingSettings(serverId),
-        queryFn: () => serversApi.getOnboardingSettings(serverId!),
+        queryFn: (): Promise<ServerOnboardingSettings> =>
+            serversApi.getOnboardingSettings(serverId!),
         enabled:
             (options.enabled ?? true) &&
             !!serverId &&
@@ -363,9 +403,11 @@ export const useUpdateOnboardingSettings = (
 > => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: (updates: Partial<ServerOnboardingSettings>) =>
+        mutationFn: (
+            updates: Partial<ServerOnboardingSettings>,
+        ): Promise<ServerOnboardingSettings> =>
             serversApi.updateOnboardingSettings(serverId, updates),
-        onSuccess: () => {
+        onSuccess: (): void => {
             void queryClient.invalidateQueries({
                 queryKey: SERVERS_QUERY_KEYS.onboardingSettings(serverId),
             });
@@ -385,7 +427,8 @@ export const useOnboarding = (
 ): UseQueryResult<ServerOnboardingState, Error> =>
     useQuery({
         queryKey: SERVERS_QUERY_KEYS.onboarding(serverId),
-        queryFn: () => serversApi.getOnboarding(serverId!),
+        queryFn: (): Promise<ServerOnboardingState> =>
+            serversApi.getOnboarding(serverId!),
         enabled:
             (options.enabled ?? true) &&
             !!serverId &&
@@ -399,8 +442,9 @@ export const useAcceptOnboardingRules = (
 ): UseMutationResult<ServerMember, Error, void> => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: () => serversApi.acceptOnboardingRules(serverId),
-        onSuccess: () => {
+        mutationFn: (): Promise<ServerMember> =>
+            serversApi.acceptOnboardingRules(serverId),
+        onSuccess: (): void => {
             void queryClient.invalidateQueries({
                 queryKey: SERVERS_QUERY_KEYS.onboarding(serverId),
             });
@@ -416,9 +460,9 @@ export const useUpdateSelfRoles = (
 ): UseMutationResult<ServerMember, Error, string[]> => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: (roleIds: string[]) =>
+        mutationFn: (roleIds: string[]): Promise<ServerMember> =>
             serversApi.updateSelfRoles(serverId, roleIds),
-        onSuccess: () => {
+        onSuccess: (): void => {
             void queryClient.invalidateQueries({
                 queryKey: SERVERS_QUERY_KEYS.onboarding(serverId),
             });
@@ -438,9 +482,9 @@ export const useUpdateChannelPreferences = (
 > => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: (preferences) =>
+        mutationFn: (preferences): Promise<ServerMember> =>
             serversApi.updateChannelPreferences(serverId, preferences),
-        onSuccess: () => {
+        onSuccess: (): void => {
             void queryClient.invalidateQueries({
                 queryKey: SERVERS_QUERY_KEYS.onboarding(serverId),
             });
@@ -453,8 +497,9 @@ export const useCompleteOnboarding = (
 ): UseMutationResult<ServerMember, Error, void> => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: () => serversApi.completeOnboarding(serverId),
-        onSuccess: () => {
+        mutationFn: (): Promise<ServerMember> =>
+            serversApi.completeOnboarding(serverId),
+        onSuccess: (): void => {
             void queryClient.invalidateQueries({
                 queryKey: SERVERS_QUERY_KEYS.onboarding(serverId),
             });
@@ -470,7 +515,7 @@ export const useServerEmojis = (
 ): UseQueryResult<Emoji[], Error> =>
     useQuery({
         queryKey: SERVERS_QUERY_KEYS.emojis(serverId),
-        queryFn: () => serversApi.getEmojis(serverId!),
+        queryFn: (): Promise<Emoji[]> => serversApi.getEmojis(serverId!),
         enabled: !!serverId && hasAuthToken(),
     });
 
@@ -479,7 +524,7 @@ export const useAllServerEmojis = (options?: {
 }): UseQueryResult<Emoji[], Error> =>
     useQuery({
         queryKey: ['servers', 'emojis', 'all'],
-        queryFn: () => serversApi.getAllServerEmojis(),
+        queryFn: (): Promise<Emoji[]> => serversApi.getAllServerEmojis(),
         enabled: options?.enabled ?? true,
         staleTime: Infinity, // Emojis are static
     });
@@ -491,15 +536,15 @@ export const useUploadEmoji = (
     const { showToast } = useToast();
 
     return useMutation({
-        mutationFn: ({ name, file }) =>
+        mutationFn: ({ name, file }): Promise<Emoji> =>
             serversApi.uploadEmoji(serverId, name, file),
-        onSuccess: () => {
+        onSuccess: (): void => {
             void queryClient.invalidateQueries({
                 queryKey: SERVERS_QUERY_KEYS.emojis(serverId),
             });
             showToast('Emoji uploaded successfully', 'success');
         },
-        onError: (error) => {
+        onError: (error): void => {
             showToast(
                 extractApiError(error, 'Failed to upload emoji'),
                 'error',
@@ -515,15 +560,15 @@ export const useDeleteEmoji = (
     const { showToast } = useToast();
 
     return useMutation({
-        mutationFn: (emojiId: string) =>
+        mutationFn: (emojiId: string): Promise<void> =>
             serversApi.deleteEmoji(serverId, emojiId),
-        onSuccess: () => {
+        onSuccess: (): void => {
             void queryClient.invalidateQueries({
                 queryKey: SERVERS_QUERY_KEYS.emojis(serverId),
             });
             showToast('Emoji deleted successfully', 'success');
         },
-        onError: (error) => {
+        onError: (error): void => {
             showToast(
                 extractApiError(error, 'Failed to delete emoji'),
                 'error',
@@ -537,7 +582,7 @@ export const useServerStickers = (
 ): UseQueryResult<Sticker[], Error> =>
     useQuery({
         queryKey: SERVERS_QUERY_KEYS.stickers(serverId),
-        queryFn: () => serversApi.getStickers(serverId!),
+        queryFn: (): Promise<Sticker[]> => serversApi.getStickers(serverId!),
         enabled: !!serverId && hasAuthToken(),
     });
 
@@ -546,7 +591,7 @@ export const useAllStickers = (options?: {
 }): UseQueryResult<Sticker[], Error> =>
     useQuery({
         queryKey: ['stickers', 'all'],
-        queryFn: () => serversApi.getAllStickers(),
+        queryFn: (): Promise<Sticker[]> => serversApi.getAllStickers(),
         enabled: options?.enabled ?? true,
     });
 
@@ -557,15 +602,15 @@ export const useUploadSticker = (
     const { showToast } = useToast();
 
     return useMutation({
-        mutationFn: ({ name, file }) =>
+        mutationFn: ({ name, file }): Promise<Sticker> =>
             serversApi.uploadSticker(serverId, name, file),
-        onSuccess: () => {
+        onSuccess: (): void => {
             void queryClient.invalidateQueries({
                 queryKey: SERVERS_QUERY_KEYS.stickers(serverId),
             });
             showToast('Sticker uploaded successfully', 'success');
         },
-        onError: (error) => {
+        onError: (error): void => {
             showToast(
                 extractApiError(error, 'Failed to upload sticker'),
                 'error',
@@ -581,15 +626,15 @@ export const useDeleteSticker = (
     const { showToast } = useToast();
 
     return useMutation({
-        mutationFn: (stickerId: string) =>
+        mutationFn: (stickerId: string): Promise<void> =>
             serversApi.deleteSticker(serverId, stickerId),
-        onSuccess: () => {
+        onSuccess: (): void => {
             void queryClient.invalidateQueries({
                 queryKey: SERVERS_QUERY_KEYS.stickers(serverId),
             });
             showToast('Sticker deleted successfully', 'success');
         },
-        onError: (error) => {
+        onError: (error): void => {
             showToast(
                 extractApiError(error, 'Failed to delete sticker'),
                 'error',
@@ -603,7 +648,7 @@ export const useSticker = (
 ): UseQueryResult<Sticker, Error> =>
     useQuery({
         queryKey: ['stickers', stickerId],
-        queryFn: async () => {
+        queryFn: async (): Promise<Sticker> => {
             const response = await apiClient.get<Sticker>(
                 `/api/v1/stickers/${stickerId}`,
             );
@@ -617,9 +662,9 @@ export const useUpdateServer = (
 ): UseMutationResult<Server, Error, Partial<Server>> => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: (updates: Partial<Server>) =>
+        mutationFn: (updates: Partial<Server>): Promise<Server> =>
             serversApi.updateServer(serverId, updates),
-        onSuccess: () => {
+        onSuccess: (): void => {
             void queryClient.invalidateQueries({
                 queryKey: SERVERS_QUERY_KEYS.details(serverId),
             });
@@ -641,8 +686,9 @@ export const useUpdateServerIcon = (
 ): UseMutationResult<string, Error, File> => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: (icon: File) => serversApi.uploadServerIcon(serverId, icon),
-        onSuccess: () => {
+        mutationFn: (icon: File): Promise<string> =>
+            serversApi.uploadServerIcon(serverId, icon),
+        onSuccess: (): void => {
             void queryClient.invalidateQueries({
                 queryKey: SERVERS_QUERY_KEYS.details(serverId),
             });
@@ -658,9 +704,9 @@ export const useUpdateServerBanner = (
 ): UseMutationResult<string, Error, File> => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: (banner: File) =>
+        mutationFn: (banner: File): Promise<string> =>
             serversApi.uploadServerBanner(serverId, banner),
-        onSuccess: () => {
+        onSuccess: (): void => {
             void queryClient.invalidateQueries({
                 queryKey: SERVERS_QUERY_KEYS.details(serverId),
             });
@@ -677,13 +723,14 @@ export const useVoiceStates = (
     const dispatch = useDispatch();
     const query = useQuery({
         queryKey: SERVERS_QUERY_KEYS.voiceStates(serverId),
-        queryFn: () => serversApi.getVoiceStates(serverId!),
+        queryFn: (): Promise<Record<string, string[]>> =>
+            serversApi.getVoiceStates(serverId!),
         enabled: !!serverId && isValidId(serverId) && hasAuthToken(),
     });
 
-    useEffect(() => {
+    useEffect((): void => {
         if (query.data) {
-            Object.entries(query.data).forEach(([channelId, userIds]) => {
+            Object.entries(query.data).forEach(([channelId, userIds]): void => {
                 dispatch(setVoiceParticipants({ channelId, userIds }));
             });
         }
@@ -699,9 +746,12 @@ export const useChannelPermissions = (
 ): UseQueryResult<Record<string, Record<string, boolean>>, Error> =>
     useQuery({
         queryKey: ['servers', 'channel_permissions', serverId, channelId],
-        queryFn: () => serversApi.getChannelPermissions(serverId, channelId),
+        queryFn: (): Promise<{
+            permissions: Record<string, Record<string, boolean>>;
+        }> => serversApi.getChannelPermissions(serverId, channelId),
         enabled: !!serverId && !!channelId && (options?.enabled ?? true),
-        select: (data) => data.permissions,
+        select: (data): Record<string, Record<string, boolean>> =>
+            data.permissions,
     });
 
 export const useUpdateChannelPermissions = (
@@ -715,13 +765,15 @@ export const useUpdateChannelPermissions = (
     const queryClient = useQueryClient();
     const { showToast } = useToast();
     return useMutation({
-        mutationFn: (permissions: Record<string, Record<string, boolean>>) =>
+        mutationFn: (
+            permissions: Record<string, Record<string, boolean>>,
+        ): Promise<{ permissions: Record<string, Record<string, boolean>> }> =>
             serversApi.updateChannelPermissions(
                 serverId,
                 channelId,
                 permissions,
             ),
-        onSuccess: () => {
+        onSuccess: (): void => {
             void queryClient.invalidateQueries({
                 queryKey: [
                     'servers',
@@ -735,7 +787,7 @@ export const useUpdateChannelPermissions = (
             });
             showToast('Channel permissions updated', 'success');
         },
-        onError: (error) => {
+        onError: (error): void => {
             showToast(
                 extractApiError(error, 'Failed to update channel permissions'),
                 'error',
@@ -751,9 +803,12 @@ export const useCategoryPermissions = (
 ): UseQueryResult<Record<string, Record<string, boolean>>, Error> =>
     useQuery({
         queryKey: ['servers', 'category_permissions', serverId, categoryId],
-        queryFn: () => serversApi.getCategoryPermissions(serverId, categoryId),
+        queryFn: (): Promise<{
+            permissions: Record<string, Record<string, boolean>>;
+        }> => serversApi.getCategoryPermissions(serverId, categoryId),
         enabled: !!serverId && !!categoryId && (options?.enabled ?? true),
-        select: (data) => data.permissions,
+        select: (data): Record<string, Record<string, boolean>> =>
+            data.permissions,
     });
 
 export const useUpdateCategoryPermissions = (
@@ -767,13 +822,15 @@ export const useUpdateCategoryPermissions = (
     const queryClient = useQueryClient();
     const { showToast } = useToast();
     return useMutation({
-        mutationFn: (permissions: Record<string, Record<string, boolean>>) =>
+        mutationFn: (
+            permissions: Record<string, Record<string, boolean>>,
+        ): Promise<{ permissions: Record<string, Record<string, boolean>> }> =>
             serversApi.updateCategoryPermissions(
                 serverId,
                 categoryId,
                 permissions,
             ),
-        onSuccess: () => {
+        onSuccess: (): void => {
             void queryClient.invalidateQueries({
                 queryKey: [
                     'servers',
@@ -796,7 +853,7 @@ export const useUpdateCategoryPermissions = (
             });
             showToast('Category permissions updated', 'success');
         },
-        onError: (error) => {
+        onError: (error): void => {
             showToast(
                 extractApiError(error, 'Failed to update category permissions'),
                 'error',
@@ -811,9 +868,9 @@ export const useUpdateChannel = (
 ): UseMutationResult<Channel, Error, Partial<Channel>> => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: (updates: Partial<Channel>) =>
+        mutationFn: (updates: Partial<Channel>): Promise<Channel> =>
             serversApi.updateChannel(serverId, channelId, updates),
-        onSuccess: () => {
+        onSuccess: (): void => {
             void queryClient.invalidateQueries({
                 queryKey: SERVERS_QUERY_KEYS.channels(serverId),
             });
@@ -827,15 +884,15 @@ export const useDeleteChannel = (
     const queryClient = useQueryClient();
     const { showToast } = useToast();
     return useMutation({
-        mutationFn: (channelId: string) =>
+        mutationFn: (channelId: string): Promise<void> =>
             serversApi.deleteChannel(serverId, channelId),
-        onSuccess: () => {
+        onSuccess: (): void => {
             void queryClient.invalidateQueries({
                 queryKey: SERVERS_QUERY_KEYS.channels(serverId),
             });
             showToast('Channel deleted successfully', 'success');
         },
-        onError: (error) => {
+        onError: (error): void => {
             showToast(
                 extractApiError(error, 'Failed to delete channel'),
                 'error',
@@ -850,9 +907,9 @@ export const useUpdateCategory = (
 ): UseMutationResult<Category, Error, Partial<Category>> => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: (updates: Partial<Category>) =>
+        mutationFn: (updates: Partial<Category>): Promise<Category> =>
             serversApi.updateCategory(serverId, categoryId, updates),
-        onSuccess: () => {
+        onSuccess: (): void => {
             void queryClient.invalidateQueries({
                 queryKey: SERVERS_QUERY_KEYS.categories(serverId),
             });
@@ -866,9 +923,9 @@ export const useDeleteCategory = (
     const queryClient = useQueryClient();
     const { showToast } = useToast();
     return useMutation({
-        mutationFn: (categoryId: string) =>
+        mutationFn: (categoryId: string): Promise<void> =>
             serversApi.deleteCategory(serverId, categoryId),
-        onSuccess: () => {
+        onSuccess: (): void => {
             void queryClient.invalidateQueries({
                 queryKey: SERVERS_QUERY_KEYS.categories(serverId),
             });
@@ -877,7 +934,7 @@ export const useDeleteCategory = (
             });
             showToast('Category deleted successfully', 'success');
         },
-        onError: (error) => {
+        onError: (error): void => {
             showToast(
                 extractApiError(error, 'Failed to delete category'),
                 'error',
@@ -889,8 +946,9 @@ export const useDeleteCategory = (
 export const useDeleteServer = (): UseMutationResult<void, Error, string> => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: (serverId: string) => serversApi.deleteServer(serverId),
-        onSuccess: () => {
+        mutationFn: (serverId: string): Promise<void> =>
+            serversApi.deleteServer(serverId),
+        onSuccess: (): void => {
             void queryClient.invalidateQueries({
                 queryKey: SERVERS_QUERY_KEYS.list,
             });
@@ -903,9 +961,9 @@ export const useTransferOwnership = (
 ): UseMutationResult<void, Error, string> => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: (newOwnerId: string) =>
+        mutationFn: (newOwnerId: string): Promise<void> =>
             serversApi.transferOwnership(serverId, newOwnerId),
-        onSuccess: () => {
+        onSuccess: (): void => {
             void queryClient.invalidateQueries({
                 queryKey: SERVERS_QUERY_KEYS.details(serverId),
             });
@@ -919,15 +977,16 @@ export const useLeaveServer = (): UseMutationResult<void, Error, string> => {
     const { showToast } = useToast();
 
     return useMutation({
-        mutationFn: (serverId: string) => serversApi.leaveServer(serverId),
-        onSuccess: () => {
+        mutationFn: (serverId: string): Promise<void> =>
+            serversApi.leaveServer(serverId),
+        onSuccess: (): void => {
             void queryClient.invalidateQueries({
                 queryKey: SERVERS_QUERY_KEYS.list,
             });
             showToast('Left server successfully', 'success');
             void navigate('/chat/@me');
         },
-        onError: (error) => {
+        onError: (error): void => {
             showToast(
                 extractApiError(error, 'Failed to leave server'),
                 'error',
@@ -946,14 +1005,15 @@ export const useCreateRole = (
     const queryClient = useQueryClient();
     const { showToast } = useToast();
     return useMutation({
-        mutationFn: (data) => serversApi.createRole(serverId, data),
-        onSuccess: () => {
+        mutationFn: (data): Promise<Role> =>
+            serversApi.createRole(serverId, data),
+        onSuccess: (): void => {
             void queryClient.invalidateQueries({
                 queryKey: SERVERS_QUERY_KEYS.roles(serverId),
             });
             showToast('Role created successfully', 'success');
         },
-        onError: (error) => {
+        onError: (error): void => {
             showToast(extractApiError(error, 'Failed to create role'), 'error');
         },
     });
@@ -972,15 +1032,15 @@ export const useUpdateRole = (
     const queryClient = useQueryClient();
     const { showToast } = useToast();
     return useMutation({
-        mutationFn: ({ roleId, updates }) =>
+        mutationFn: ({ roleId, updates }): Promise<Role> =>
             serversApi.updateRole(serverId, roleId, updates),
-        onSuccess: () => {
+        onSuccess: (): void => {
             void queryClient.invalidateQueries({
                 queryKey: SERVERS_QUERY_KEYS.roles(serverId),
             });
             showToast('Role updated successfully', 'success');
         },
-        onError: (error) => {
+        onError: (error): void => {
             showToast(extractApiError(error, 'Failed to update role'), 'error');
         },
     });
@@ -992,14 +1052,15 @@ export const useDeleteRole = (
     const queryClient = useQueryClient();
     const { showToast } = useToast();
     return useMutation({
-        mutationFn: (roleId) => serversApi.deleteRole(serverId, roleId),
-        onSuccess: () => {
+        mutationFn: (roleId): Promise<void> =>
+            serversApi.deleteRole(serverId, roleId),
+        onSuccess: (): void => {
             void queryClient.invalidateQueries({
                 queryKey: SERVERS_QUERY_KEYS.roles(serverId),
             });
             showToast('Role deleted successfully', 'success');
         },
-        onError: (error) => {
+        onError: (error): void => {
             showToast(extractApiError(error, 'Failed to delete role'), 'error');
         },
     });
@@ -1011,14 +1072,14 @@ export const useReorderRoles = (
     const queryClient = useQueryClient();
     const { showToast } = useToast();
     return useMutation({
-        mutationFn: (rolePositions) =>
+        mutationFn: (rolePositions): Promise<Role[]> =>
             serversApi.reorderRoles(serverId, rolePositions),
-        onSuccess: () => {
+        onSuccess: (): void => {
             void queryClient.invalidateQueries({
                 queryKey: SERVERS_QUERY_KEYS.roles(serverId),
             });
         },
-        onError: (error) => {
+        onError: (error): void => {
             showToast(
                 extractApiError(error, 'Failed to reorder roles'),
                 'error',
@@ -1037,9 +1098,12 @@ export const useAddRoleToMember = (
     const queryClient = useQueryClient();
     const { showToast } = useToast();
     return useMutation({
-        mutationFn: ({ userId, roleId }) =>
+        mutationFn: ({ userId, roleId }): Promise<ServerMember> =>
             serversApi.addRoleToMember(serverId, userId, roleId),
-        onMutate: async ({ userId, roleId }) => {
+        onMutate: async ({
+            userId,
+            roleId,
+        }): Promise<{ previousMembers: ServerMember[] | undefined }> => {
             await queryClient.cancelQueries({
                 queryKey: SERVERS_QUERY_KEYS.members(serverId),
             });
@@ -1051,24 +1115,29 @@ export const useAddRoleToMember = (
             if (previousMembers) {
                 queryClient.setQueryData<ServerMember[]>(
                     SERVERS_QUERY_KEYS.members(serverId),
-                    previousMembers.map((member) =>
-                        member.userId === userId
-                            ? { ...member, roles: [...member.roles, roleId] }
-                            : member,
+                    previousMembers.map(
+                        (member): ServerMember =>
+                            member.userId === userId
+                                ? {
+                                      ...member,
+                                      roles: [...member.roles, roleId],
+                                  }
+                                : member,
                     ),
                 );
             }
 
             return { previousMembers };
         },
-        onSuccess: (updatedMember) => {
+        onSuccess: (updatedMember): void => {
             queryClient.setQueryData<ServerMember[]>(
                 SERVERS_QUERY_KEYS.members(serverId),
-                (members) =>
-                    members?.map((member) =>
-                        member.userId === updatedMember.userId
-                            ? updatedMember
-                            : member,
+                (members): ServerMember[] | undefined =>
+                    members?.map(
+                        (member): ServerMember =>
+                            member.userId === updatedMember.userId
+                                ? updatedMember
+                                : member,
                     ) ?? members,
             );
             void queryClient.invalidateQueries({
@@ -1084,7 +1153,7 @@ export const useAddRoleToMember = (
                 queryKey: ['tertiary-sidebar-data'],
             });
         },
-        onError: (error, _variables, context) => {
+        onError: (error, _variables, context): void => {
             if (context?.previousMembers) {
                 queryClient.setQueryData(
                     SERVERS_QUERY_KEYS.members(serverId),
@@ -1106,9 +1175,12 @@ export const useRemoveRoleFromMember = (
     const queryClient = useQueryClient();
     const { showToast } = useToast();
     return useMutation({
-        mutationFn: ({ userId, roleId }) =>
+        mutationFn: ({ userId, roleId }): Promise<ServerMember> =>
             serversApi.removeRoleFromMember(serverId, userId, roleId),
-        onMutate: async ({ userId, roleId }) => {
+        onMutate: async ({
+            userId,
+            roleId,
+        }): Promise<{ previousMembers: ServerMember[] | undefined }> => {
             await queryClient.cancelQueries({
                 queryKey: SERVERS_QUERY_KEYS.members(serverId),
             });
@@ -1120,29 +1192,31 @@ export const useRemoveRoleFromMember = (
             if (previousMembers) {
                 queryClient.setQueryData<ServerMember[]>(
                     SERVERS_QUERY_KEYS.members(serverId),
-                    previousMembers.map((member) =>
-                        member.userId === userId
-                            ? {
-                                  ...member,
-                                  roles: member.roles.filter(
-                                      (id) => id !== roleId,
-                                  ),
-                              }
-                            : member,
+                    previousMembers.map(
+                        (member): ServerMember =>
+                            member.userId === userId
+                                ? {
+                                      ...member,
+                                      roles: member.roles.filter(
+                                          (id): boolean => id !== roleId,
+                                      ),
+                                  }
+                                : member,
                     ),
                 );
             }
 
             return { previousMembers };
         },
-        onSuccess: (updatedMember) => {
+        onSuccess: (updatedMember): void => {
             queryClient.setQueryData<ServerMember[]>(
                 SERVERS_QUERY_KEYS.members(serverId),
-                (members) =>
-                    members?.map((member) =>
-                        member.userId === updatedMember.userId
-                            ? updatedMember
-                            : member,
+                (members): ServerMember[] | undefined =>
+                    members?.map(
+                        (member): ServerMember =>
+                            member.userId === updatedMember.userId
+                                ? updatedMember
+                                : member,
                     ) ?? members,
             );
             void queryClient.invalidateQueries({
@@ -1158,7 +1232,7 @@ export const useRemoveRoleFromMember = (
                 queryKey: ['tertiary-sidebar-data'],
             });
         },
-        onError: (error, _variables, context) => {
+        onError: (error, _variables, context): void => {
             if (context?.previousMembers) {
                 queryClient.setQueryData(
                     SERVERS_QUERY_KEYS.members(serverId),
@@ -1175,7 +1249,7 @@ export const useServerBans = (
 ): UseQueryResult<ServerBan[], Error> =>
     useQuery({
         queryKey: SERVERS_QUERY_KEYS.bans(serverId),
-        queryFn: () => serversApi.getBans(serverId!),
+        queryFn: (): Promise<ServerBan[]> => serversApi.getBans(serverId!),
         enabled: !!serverId,
     });
 
@@ -1186,14 +1260,15 @@ export const useKickMember = (
     const { showToast } = useToast();
 
     return useMutation({
-        mutationFn: (userId: string) => serversApi.kickMember(serverId, userId),
-        onSuccess: () => {
+        mutationFn: (userId: string): Promise<void> =>
+            serversApi.kickMember(serverId, userId),
+        onSuccess: (): void => {
             void queryClient.invalidateQueries({
                 queryKey: SERVERS_QUERY_KEYS.members(serverId),
             });
             showToast('Member kicked successfully', 'success');
         },
-        onError: (error) => {
+        onError: (error): void => {
             showToast(extractApiError(error, 'Failed to kick member'), 'error');
         },
     });
@@ -1206,9 +1281,9 @@ export const useBanMember = (
     const { showToast } = useToast();
 
     return useMutation({
-        mutationFn: ({ userId, reason }) =>
+        mutationFn: ({ userId, reason }): Promise<void> =>
             serversApi.banUser(serverId, userId, reason),
-        onSuccess: () => {
+        onSuccess: (): void => {
             void queryClient.invalidateQueries({
                 queryKey: SERVERS_QUERY_KEYS.members(serverId),
             });
@@ -1217,7 +1292,7 @@ export const useBanMember = (
             });
             showToast('User banned successfully', 'success');
         },
-        onError: (error) => {
+        onError: (error): void => {
             showToast(extractApiError(error, 'Failed to ban user'), 'error');
         },
     });
@@ -1234,15 +1309,15 @@ export const useTimeoutMember = (
     const { showToast } = useToast();
 
     return useMutation({
-        mutationFn: ({ userId, duration, reason }) =>
+        mutationFn: ({ userId, duration, reason }): Promise<void> =>
             serversApi.timeoutMember(serverId, userId, duration, reason),
-        onSuccess: () => {
+        onSuccess: (): void => {
             void queryClient.invalidateQueries({
                 queryKey: SERVERS_QUERY_KEYS.members(serverId),
             });
             showToast('Member timed out successfully', 'success');
         },
-        onError: (error) => {
+        onError: (error): void => {
             showToast(
                 extractApiError(error, 'Failed to timeout member'),
                 'error',
@@ -1258,14 +1333,15 @@ export const useUnbanMember = (
     const { showToast } = useToast();
 
     return useMutation({
-        mutationFn: (userId: string) => serversApi.unbanUser(serverId, userId),
-        onSuccess: () => {
+        mutationFn: (userId: string): Promise<void> =>
+            serversApi.unbanUser(serverId, userId),
+        onSuccess: (): void => {
             void queryClient.invalidateQueries({
                 queryKey: SERVERS_QUERY_KEYS.bans(serverId),
             });
             showToast('User unbanned successfully', 'success');
         },
-        onError: (error) => {
+        onError: (error): void => {
             showToast(extractApiError(error, 'Failed to unban user'), 'error');
         },
     });
@@ -1276,7 +1352,8 @@ export const useMarkServerRead = (): UseMutationResult<void, Error, string> => {
     const dispatch = useDispatch();
 
     return useMutation({
-        mutationFn: (serverId: string) => serversApi.markServerRead(serverId),
+        mutationFn: (serverId: string): Promise<void> =>
+            serversApi.markServerRead(serverId),
         onMutate: async (serverId) => {
             await queryClient.cancelQueries({
                 queryKey: SERVERS_QUERY_KEYS.unread(),
@@ -1318,7 +1395,7 @@ export const useMarkServerRead = (): UseMutationResult<void, Error, string> => {
                 queryClient.setQueryData(['pings'], {
                     ...previousPings,
                     pings: previousPings.pings.filter(
-                        (p) => p.serverId !== serverId,
+                        (p): boolean => p.serverId !== serverId,
                     ),
                 });
             }
@@ -1333,7 +1410,7 @@ export const useMarkServerRead = (): UseMutationResult<void, Error, string> => {
 
             return { previousUnread, previousPings, previousChannels };
         },
-        onError: (_err, serverId, context) => {
+        onError: (_err, serverId, context): void => {
             if (context?.previousUnread) {
                 queryClient.setQueryData(
                     SERVERS_QUERY_KEYS.unread(),
@@ -1358,7 +1435,7 @@ export const useMarkServerRead = (): UseMutationResult<void, Error, string> => {
                 );
             }
         },
-        onSuccess: (_data, serverId) => {
+        onSuccess: (_data, serverId): void => {
             void queryClient.invalidateQueries({
                 queryKey: SERVERS_QUERY_KEYS.unread(),
             });
@@ -1372,16 +1449,12 @@ export const useMarkServerRead = (): UseMutationResult<void, Error, string> => {
     });
 };
 
-export const useUpdateServerSettings = (): UseMutationResult<
-    { message: string; serverSettings: ServerSettings },
-    Error,
-    ServerSettings
-> => {
+export const useUpdateServerSettings = () => {
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: (settings: ServerSettings) =>
             serversApi.updateServerSettings(settings),
-        onSuccess: (data) => {
+        onSuccess: (data): void => {
             queryClient.setQueryData<User>(['me'], (old) =>
                 old ? { ...old, serverSettings: data.serverSettings } : old,
             );
@@ -1396,8 +1469,9 @@ export const useRequestServerVerification = (
     const queryClient = useQueryClient();
     const { showToast } = useToast();
     return useMutation({
-        mutationFn: () => serversApi.requestServerVerification(serverId),
-        onSuccess: () => {
+        mutationFn: (): Promise<void> =>
+            serversApi.requestServerVerification(serverId),
+        onSuccess: (): void => {
             void queryClient.invalidateQueries({
                 queryKey: SERVERS_QUERY_KEYS.details(serverId),
             });
@@ -1409,7 +1483,7 @@ export const useRequestServerVerification = (
             });
             showToast('Verification requested successfully!', 'success');
         },
-        onError: (error) => {
+        onError: (error): void => {
             showToast(
                 extractApiError(error, 'Failed to request verification'),
                 'error',

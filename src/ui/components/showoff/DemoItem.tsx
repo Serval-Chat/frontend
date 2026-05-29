@@ -11,7 +11,7 @@ interface DemoItemProps {
 /**
  * @description Container for demo elements
  */
-export const DemoItem: React.FC<DemoItemProps> = ({ id, title, children }) => (
+export const DemoItem = ({ id, title, children }: DemoItemProps) => (
     <div className="p-xs" id={id}>
         <Heading className="text-md mb-sm font-medium" level={3}>
             {title}

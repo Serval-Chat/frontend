@@ -32,7 +32,7 @@ const MIN_HEIGHT = 400;
 const MAX_WIDTH = 600;
 const MAX_HEIGHT = 800;
 
-export const GifPicker: React.FC<GifPickerProps> = ({ onSelect, onClose }) => {
+export const GifPicker = ({ onSelect, onClose }: GifPickerProps) => {
     const [search, setSearch] = useState('');
     const [tab, setTab] = useState<'trending' | 'stickers' | 'favorites'>(
         'trending',
@@ -70,7 +70,7 @@ export const GifPicker: React.FC<GifPickerProps> = ({ onSelect, onClose }) => {
         e.preventDefault();
     };
 
-    useEffect(() => {
+    useEffect((): (() => void) => {
         const handleMouseMove = (e: MouseEvent): void => {
             if (!isResizing.current) return;
 
@@ -101,17 +101,17 @@ export const GifPicker: React.FC<GifPickerProps> = ({ onSelect, onClose }) => {
         window.addEventListener('mousemove', handleMouseMove);
         window.addEventListener('mouseup', handleMouseUp);
 
-        return () => {
+        return (): void => {
             window.removeEventListener('mousemove', handleMouseMove);
             window.removeEventListener('mouseup', handleMouseUp);
         };
     }, [size]);
 
-    const fetchFavorites = useCallback(async () => {
+    const fetchFavorites = useCallback(async (): Promise<void> => {
         try {
             const favorites = await klipyApi.getFavorites();
             const favIds = new Set<string>(
-                favorites.map((f) => String(f.klipyId)),
+                favorites.map((f): string => String(f.klipyId)),
             );
             setFavoritedIds(favIds);
         } catch (err) {
@@ -119,7 +119,7 @@ export const GifPicker: React.FC<GifPickerProps> = ({ onSelect, onClose }) => {
         }
     }, []);
 
-    const fetchGifs = useCallback(async () => {
+    const fetchGifs = useCallback(async (): Promise<void> => {
         setLoading(true);
         try {
             let fetchedGifs: KlipyGif[];
@@ -127,7 +127,7 @@ export const GifPicker: React.FC<GifPickerProps> = ({ onSelect, onClose }) => {
                 const favorites = await klipyApi.getFavorites();
                 fetchedGifs = favorites;
                 const favIds = new Set<string>(
-                    favorites.map((f) => String(f.klipyId)),
+                    favorites.map((f): string => String(f.klipyId)),
                 );
                 setFavoritedIds(favIds);
                 setFavoritedIds(favIds);
@@ -151,11 +151,11 @@ export const GifPicker: React.FC<GifPickerProps> = ({ onSelect, onClose }) => {
         }
     }, [tab, debouncedSearch]);
 
-    useEffect(() => {
+    useEffect((): void => {
         void fetchGifs();
     }, [fetchGifs]);
 
-    useEffect(() => {
+    useEffect((): void => {
         if (tab !== 'favorites') {
             void fetchFavorites();
         }
@@ -198,7 +198,7 @@ export const GifPicker: React.FC<GifPickerProps> = ({ onSelect, onClose }) => {
                 },
             );
 
-            setFavoritedIds((prev) => {
+            setFavoritedIds((prev): Set<string> => {
                 const next = new Set(prev);
                 if (isNowFavorited) {
                     next.add(klipyId);
@@ -209,8 +209,10 @@ export const GifPicker: React.FC<GifPickerProps> = ({ onSelect, onClose }) => {
             });
 
             if (tab === 'favorites' && !isNowFavorited) {
-                setGifs((prev) =>
-                    prev.filter((g) => String(g.klipyId || g.id) !== klipyId),
+                setGifs((prev): KlipyGif[] =>
+                    prev.filter(
+                        (g): boolean => String(g.klipyId || g.id) !== klipyId,
+                    ),
                 );
             }
         } catch (err) {
@@ -229,7 +231,7 @@ export const GifPicker: React.FC<GifPickerProps> = ({ onSelect, onClose }) => {
                 role="button"
                 tabIndex={0}
                 title="Resize"
-                onKeyDown={(e) => {
+                onKeyDown={(e): void => {
                     if (e.key === 'Enter' || e.key === ' ') e.preventDefault();
                 }}
                 onMouseDown={handleMouseDown}
@@ -244,7 +246,7 @@ export const GifPicker: React.FC<GifPickerProps> = ({ onSelect, onClose }) => {
                     <Button
                         className="flex h-auto min-w-[80px] flex-col gap-1 py-2"
                         variant={tab === 'trending' ? 'primary' : 'ghost'}
-                        onClick={() => setTab('trending')}
+                        onClick={(): void => setTab('trending')}
                     >
                         <TrendingUp className="h-4 w-4" />
                         <span className="text-[10px]">Trending</span>
@@ -252,7 +254,7 @@ export const GifPicker: React.FC<GifPickerProps> = ({ onSelect, onClose }) => {
                     <Button
                         className="flex h-auto min-w-[80px] flex-col gap-1 py-2"
                         variant={tab === 'favorites' ? 'primary' : 'ghost'}
-                        onClick={() => setTab('favorites')}
+                        onClick={(): void => setTab('favorites')}
                     >
                         <Star className="h-4 w-4" />
                         <span className="text-[10px]">Favorites</span>
@@ -260,7 +262,7 @@ export const GifPicker: React.FC<GifPickerProps> = ({ onSelect, onClose }) => {
                     <Button
                         className="flex h-auto min-w-[80px] flex-col gap-1 py-2"
                         variant={tab === 'stickers' ? 'primary' : 'ghost'}
-                        onClick={() => setTab('stickers')}
+                        onClick={(): void => setTab('stickers')}
                     >
                         <Sticker className="h-4 w-4" />
                         <span className="text-[10px]">Stickers</span>
@@ -278,7 +280,7 @@ export const GifPicker: React.FC<GifPickerProps> = ({ onSelect, onClose }) => {
                         className="pl-9"
                         placeholder="Search Klipy..."
                         value={search}
-                        onChange={(e) => {
+                        onChange={(e): void => {
                             setSearch(e.target.value);
                             if (tab === 'favorites') setTab('trending');
                         }}
@@ -326,7 +328,7 @@ export const GifPicker: React.FC<GifPickerProps> = ({ onSelect, onClose }) => {
                                     style={{
                                         aspectRatio: `${width}/${height}`,
                                     }}
-                                    onClick={() => onSelect(url)}
+                                    onClick={(): void => onSelect(url)}
                                 >
                                     <img
                                         alt="Klipy Content"
@@ -345,7 +347,7 @@ export const GifPicker: React.FC<GifPickerProps> = ({ onSelect, onClose }) => {
                                             isFavorited={favoritedIds.has(
                                                 klipyId!,
                                             )}
-                                            onClick={(e) =>
+                                            onClick={(e): undefined =>
                                                 void handleToggleFavorite(
                                                     e,
                                                     gif,

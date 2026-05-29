@@ -18,17 +18,17 @@ const debugOptionsSlice = createSlice({
         setUsernameColorResolverContextMenu: (
             state,
             action: PayloadAction<boolean>,
-        ) => {
+        ): void => {
             state.usernameColorResolverContextMenu = action.payload;
         },
-        toggleUsernameColorResolverContextMenu: (state) => {
+        toggleUsernameColorResolverContextMenu: (state): void => {
             state.usernameColorResolverContextMenu =
                 !state.usernameColorResolverContextMenu;
         },
-        setConsoleOpen: (state, action: PayloadAction<boolean>) => {
+        setConsoleOpen: (state, action: PayloadAction<boolean>): void => {
             state.isConsoleOpen = action.payload;
         },
-        toggleConsole: (state) => {
+        toggleConsole: (state): void => {
             state.isConsoleOpen = !state.isConsoleOpen;
         },
     },

@@ -16,8 +16,8 @@ vi.mock('@/api/users/users.api', () => ({
     },
 }));
 
-vi.mock('@/utils/authToken', () => ({
-    hasAuthToken: () => true,
+vi.mock('@/utils/authToken', (): { hasAuthToken: () => boolean } => ({
+    hasAuthToken: (): true => true,
 }));
 
 const makeWrapper = (): React.FC<{ children: React.ReactNode }> => {
@@ -49,12 +49,12 @@ const makeHarness = (): {
     return { queryClient, wrapper: Wrapper };
 };
 
-describe('useUserById', () => {
-    beforeEach(() => {
+describe('useUserById', (): void => {
+    beforeEach((): void => {
         vi.clearAllMocks();
     });
 
-    it('does not fetch for IDs starting with @ (malformed mentions)', async () => {
+    it('does not fetch for IDs starting with @ (malformed mentions)', async (): Promise<void> => {
         vi.mocked(usersApi.getById).mockResolvedValue({
             _id: 'bad',
             username: 'bad',
@@ -62,18 +62,18 @@ describe('useUserById', () => {
 
         const consoleSpy = vi
             .spyOn(console, 'error')
-            .mockImplementation(() => {});
+            .mockImplementation((): void => {});
 
         const { result } = renderHook(() => useUserById('@catflare'), {
             wrapper: makeWrapper(),
         });
 
-        await waitFor(() => expect(result.current.isLoading).toBe(false));
+        await waitFor((): void => expect(result.current.isLoading).toBe(false));
         expect(usersApi.getById).not.toHaveBeenCalled();
         consoleSpy.mockRestore();
     });
 
-    it('fetches normally for valid ObjectId-style IDs', async () => {
+    it('fetches normally for valid ObjectId-style IDs', async (): Promise<void> => {
         vi.mocked(usersApi.getById).mockResolvedValue({
             _id: '507f1f77bcf86cd799439011',
             username: 'alice',
@@ -84,19 +84,19 @@ describe('useUserById', () => {
             { wrapper: makeWrapper() },
         );
 
-        await waitFor(() => expect(result.current.isSuccess).toBe(true));
+        await waitFor((): void => expect(result.current.isSuccess).toBe(true));
         expect(usersApi.getById).toHaveBeenCalledWith(
             '507f1f77bcf86cd799439011',
         );
     });
 });
 
-describe('useUpdateStyle', () => {
-    beforeEach(() => {
+describe('useUpdateStyle', (): void => {
+    beforeEach((): void => {
         vi.clearAllMocks();
     });
 
-    it('updates cached style from submitted values when the response omits disabled fields', async () => {
+    it('updates cached style from submitted values when the response omits disabled fields', async (): Promise<void> => {
         const { queryClient, wrapper } = makeHarness();
         queryClient.setQueryData<User>(['me'], {
             _id: 'user-1',
@@ -121,7 +121,7 @@ describe('useUpdateStyle', () => {
 
         const { result } = renderHook(() => useUpdateStyle(), { wrapper });
 
-        act(() => {
+        act((): void => {
             result.current.mutate({
                 usernameGlow: {
                     enabled: false,
@@ -136,7 +136,7 @@ describe('useUpdateStyle', () => {
             });
         });
 
-        await waitFor(() =>
+        await waitFor((): void =>
             expect(
                 queryClient.getQueryData<User>(['me'])?.usernameGlow?.enabled,
             ).toBe(false),

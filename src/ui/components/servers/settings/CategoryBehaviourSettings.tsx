@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { useUpdateCategory } from '@/api/servers/servers.queries';
 import type { Category } from '@/api/servers/servers.types';
 import { Heading } from '@/ui/components/common/Heading';
@@ -11,9 +9,9 @@ interface CategoryBehaviourSettingsProps {
     category: Category;
 }
 
-export const CategoryBehaviourSettings: React.FC<
-    CategoryBehaviourSettingsProps
-> = ({ category }) => {
+export const CategoryBehaviourSettings = ({
+    category,
+}: CategoryBehaviourSettingsProps) => {
     const { mutate: updateCategory, isPending } = useUpdateCategory(
         category.serverId,
         category._id,
@@ -34,7 +32,7 @@ export const CategoryBehaviourSettings: React.FC<
                 isPending={isPending}
                 rules={category.markdownBlockadeRules}
                 serverId={category.serverId}
-                onSave={(markdownBlockadeRules) =>
+                onSave={(markdownBlockadeRules): void =>
                     updateCategory({ markdownBlockadeRules })
                 }
             />

@@ -37,7 +37,7 @@ interface ChatHeaderProps {
 /**
  * @description Header for the main chat area, displaying the current conversation info.
  */
-export const ChatHeader: React.FC<ChatHeaderProps> = ({
+export const ChatHeader = ({
     selectedFriendId,
     friendUser,
     selectedChannel,
@@ -47,7 +47,7 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
     hideMemberListButton,
     showPins,
     actions,
-}) => {
+}: ChatHeaderProps) => {
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
     const { selectedServerId, selectedChannelId, showMobileMemberList } =
@@ -68,7 +68,7 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
     const [lastViewedAt, setLastViewedAt] = useState<number>(0);
 
     // Sync lastViewedAt from localStorage
-    useEffect(() => {
+    useEffect((): (() => void) | undefined => {
         if (!me?._id || !selectedChannelId) return;
 
         const key = `serchat_pins_last_viewed_${me._id}_${selectedChannelId}`;
@@ -79,13 +79,14 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
 
         update();
         window.addEventListener('storage', update);
-        return () => window.removeEventListener('storage', update);
+        return (): void => window.removeEventListener('storage', update);
     }, [me?._id, selectedChannelId]);
 
-    const hasUnreadPins = React.useMemo(() => {
+    const hasUnreadPins = React.useMemo((): boolean => {
         if (!pins || pins.length === 0 || showPins) return false;
         return pins.some(
-            (p: ChatMessage) => new Date(p.createdAt).getTime() > lastViewedAt,
+            (p: ChatMessage): boolean =>
+                new Date(p.createdAt).getTime() > lastViewedAt,
         );
     }, [pins, lastViewedAt, showPins]);
 
@@ -150,7 +151,9 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
                         <motion.button
                             className="w-full text-left focus:outline-none"
                             type="button"
-                            onClick={() => setDescExpanded((v) => !v)}
+                            onClick={(): void =>
+                                setDescExpanded((v): boolean => !v)
+                            }
                         >
                             <motion.div
                                 animate={
@@ -233,7 +236,10 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
                                 )}
                                 onClick={
                                     onToggleMemberList ??
-                                    (() => dispatch(toggleMobileMemberList()))
+                                    ((): {
+                                        payload: undefined;
+                                        type: 'nav/toggleMobileMemberList';
+                                    } => dispatch(toggleMobileMemberList()))
                                 }
                             >
                                 <Users className="h-5 w-5" />

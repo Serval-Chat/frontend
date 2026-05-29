@@ -16,21 +16,21 @@ interface WebSocketProviderProps {
 /**
  * @description Provider for managing the WebSocket lifecycle.
  */
-export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
+export const WebSocketProvider = ({
     children,
-}) => {
+}: WebSocketProviderProps): React.ReactNode => {
     const { isAuthenticated } = useAuth();
     const queryClient = useQueryClient();
     const dispatch = useAppDispatch();
 
-    useEffect(() => {
+    useEffect((): (() => void) => {
         if (isAuthenticated) {
             initTauriNotifications(queryClient).catch(console.error);
         }
         return setupGlobalWsHandlers(queryClient, dispatch);
     }, [queryClient, dispatch, isAuthenticated]);
 
-    useEffect(() => {
+    useEffect((): (() => void) => {
         if (isAuthenticated) {
             const token = getAuthToken();
             wsClient.connect(token || undefined);
@@ -38,7 +38,7 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
             wsClient.disconnect();
         }
 
-        return () => {
+        return (): void => {
             wsClient.disconnect();
         };
     }, [isAuthenticated]);

@@ -34,7 +34,7 @@ export const useEmojiInfo = ({
 
     const serverQuery = useQuery<Server, Error>({
         queryKey: SERVERS_QUERY_KEYS.details(serverId!),
-        queryFn: async () => {
+        queryFn: async (): Promise<Server> => {
             try {
                 const result = await serversApi.getServerDetails(serverId!);
                 return result;
@@ -44,11 +44,11 @@ export const useEmojiInfo = ({
             }
         },
         enabled: enabled && !!serverId,
-        initialData: () => {
+        initialData: (): Server | undefined => {
             const servers = queryClient.getQueryData<Server[]>(
                 SERVERS_QUERY_KEYS.list,
             );
-            return servers?.find((s) => s._id === serverId);
+            return servers?.find((s): boolean => s._id === serverId);
         },
         retry: false,
     });

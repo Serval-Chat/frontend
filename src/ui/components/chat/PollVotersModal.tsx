@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 
 import type { MessagePoll } from '@/api/chat/chat.types';
 import {
@@ -23,19 +23,21 @@ interface PollVotersModalProps {
     serverId?: string;
 }
 
-export const PollVotersModal: React.FC<PollVotersModalProps> = ({
+export const PollVotersModal = ({
     isOpen,
     onClose,
     poll,
     serverId,
-}) => {
+}: PollVotersModalProps) => {
     const [selectedOptionId, setSelectedOptionId] = useState<string | null>(
         poll.options?.[0]?.id || null,
     );
 
-    const allVoterIds = useMemo(() => {
+    const allVoterIds = useMemo((): string[] => {
         const ids = new Set<string>();
-        poll.options?.forEach((opt) => opt.votes?.forEach((id) => ids.add(id)));
+        poll.options?.forEach((opt): void =>
+            opt.votes?.forEach((id): Set<string> => ids.add(id)),
+        );
         return Array.from(ids);
     }, [poll.options]);
 
@@ -51,16 +53,16 @@ export const PollVotersModal: React.FC<PollVotersModalProps> = ({
     });
 
     const selectedOption = poll.options?.find(
-        (opt) => opt.id === selectedOptionId,
+        (opt): boolean => opt.id === selectedOptionId,
     );
 
     const votersForSelected = useMemo(() => {
         if (!users) return [];
         const selectedOption = poll.options?.find(
-            (opt) => opt.id === selectedOptionId,
+            (opt): boolean => opt.id === selectedOptionId,
         );
         const voterIds = selectedOption?.votes || [];
-        return users.filter((u) => voterIds.includes(u._id));
+        return users.filter((u): boolean => voterIds.includes(u._id));
     }, [users, poll.options, selectedOptionId]);
 
     return (
@@ -82,7 +84,7 @@ export const PollVotersModal: React.FC<PollVotersModalProps> = ({
                                     : 'hover:bg-white/5',
                             )}
                             key={option.id}
-                            onClick={() => setSelectedOptionId(option.id)}
+                            onClick={(): void => setSelectedOptionId(option.id)}
                         >
                             <Box className="flex min-w-0 items-center gap-2">
                                 {option.emoji && (
@@ -131,18 +133,18 @@ export const PollVotersModal: React.FC<PollVotersModalProps> = ({
                             </Text>
                             {votersForSelected.map((user) => {
                                 const member = members?.find(
-                                    (m) => m.userId === user._id,
+                                    (m): boolean => m.userId === user._id,
                                 );
                                 const userRoles =
-                                    roles?.filter((r) =>
+                                    roles?.filter((r): boolean | undefined =>
                                         member?.roles.includes(r._id),
                                     ) || [];
                                 const sortedRoles = [...userRoles].sort(
-                                    (a, b) => b.position - a.position,
+                                    (a, b): number => b.position - a.position,
                                 );
                                 const role = sortedRoles[0];
                                 const iconRole = sortedRoles.find(
-                                    (r) => r.icon,
+                                    (r): string | undefined => r.icon,
                                 );
 
                                 return (

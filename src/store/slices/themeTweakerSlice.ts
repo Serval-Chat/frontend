@@ -13,10 +13,10 @@ const themeTweakerSlice = createSlice({
     name: 'themeTweaker',
     initialState,
     reducers: {
-        setThemeTweakerOpen: (state, action: PayloadAction<boolean>) => {
+        setThemeTweakerOpen: (state, action: PayloadAction<boolean>): void => {
             state.isOpen = action.payload;
         },
-        toggleThemeTweaker: (state) => {
+        toggleThemeTweaker: (state): void => {
             state.isOpen = !state.isOpen;
         },
     },

@@ -16,20 +16,20 @@ export const usePublicBotInfo = (
 ): UseQueryResult<PublicBotInfo, Error> =>
     useQuery<PublicBotInfo>({
         queryKey: ['bot-public', clientId],
-        queryFn: () => botsApi.getPublicInfo(clientId),
+        queryFn: (): Promise<PublicBotInfo> => botsApi.getPublicInfo(clientId),
         enabled: !!clientId,
     });
 
 export const useBots = (): UseQueryResult<Bot[], Error> =>
     useQuery<Bot[]>({
         queryKey: ['dev-bots'],
-        queryFn: () => botsApi.list(),
+        queryFn: (): Promise<Bot[]> => botsApi.list(),
     });
 
 export const useBot = (clientId: string): UseQueryResult<Bot, Error> =>
     useQuery<Bot>({
         queryKey: ['dev-bot', clientId],
-        queryFn: () => botsApi.get(clientId),
+        queryFn: (): Promise<Bot> => botsApi.get(clientId),
         enabled: !!clientId,
     });
 
@@ -40,8 +40,9 @@ export const useCreateBot = (): UseMutationResult<
 > => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: (payload) => botsApi.create(payload),
-        onSuccess: () => {
+        mutationFn: (payload): Promise<CreateBotResponse> =>
+            botsApi.create(payload),
+        onSuccess: (): void => {
             void queryClient.invalidateQueries({ queryKey: ['dev-bots'] });
         },
     });
@@ -62,8 +63,9 @@ export const useUpdateBot = (): UseMutationResult<
 > => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: ({ clientId, patch }) => botsApi.update(clientId, patch),
-        onSuccess: (_, { clientId }) => {
+        mutationFn: ({ clientId, patch }): Promise<Bot> =>
+            botsApi.update(clientId, patch),
+        onSuccess: (_, { clientId }): void => {
             void queryClient.invalidateQueries({ queryKey: ['dev-bots'] });
             void queryClient.invalidateQueries({
                 queryKey: ['dev-bot', clientId],
@@ -79,9 +81,12 @@ export const useUploadBotPicture = (): UseMutationResult<
 > => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: ({ clientId, file }) =>
+        mutationFn: ({
+            clientId,
+            file,
+        }): Promise<{ message: string; profilePicture: string }> =>
             botsApi.uploadPicture(clientId, file),
-        onSuccess: (_, { clientId }) => {
+        onSuccess: (_, { clientId }): void => {
             void queryClient.invalidateQueries({
                 queryKey: ['dev-bot', clientId],
             });
@@ -96,9 +101,12 @@ export const useUploadBotBanner = (): UseMutationResult<
 > => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: ({ clientId, file }) =>
+        mutationFn: ({
+            clientId,
+            file,
+        }): Promise<{ message: string; banner: string }> =>
             botsApi.uploadBanner(clientId, file),
-        onSuccess: (_, { clientId }) => {
+        onSuccess: (_, { clientId }): void => {
             void queryClient.invalidateQueries({
                 queryKey: ['dev-bot', clientId],
             });
@@ -113,9 +121,9 @@ export const useUpdateBotPermissions = (): UseMutationResult<
 > => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: ({ clientId, permissions }) =>
+        mutationFn: ({ clientId, permissions }): Promise<Bot> =>
             botsApi.updatePermissions(clientId, permissions),
-        onSuccess: (_, { clientId }) => {
+        onSuccess: (_, { clientId }): void => {
             void queryClient.invalidateQueries({ queryKey: ['dev-bots'] });
             void queryClient.invalidateQueries({
                 queryKey: ['dev-bot', clientId],
@@ -131,8 +139,8 @@ export const useDeleteBot = (): UseMutationResult<
 > => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: ({ clientId }) => botsApi.delete(clientId),
-        onSuccess: () => {
+        mutationFn: ({ clientId }): Promise<void> => botsApi.delete(clientId),
+        onSuccess: (): void => {
             void queryClient.invalidateQueries({ queryKey: ['dev-bots'] });
         },
     });
@@ -144,7 +152,8 @@ export const useResetBotSecret = (): UseMutationResult<
     { clientId: string }
 > =>
     useMutation({
-        mutationFn: ({ clientId }) => botsApi.resetSecret(clientId),
+        mutationFn: ({ clientId }): Promise<ResetSecretResponse> =>
+            botsApi.resetSecret(clientId),
     });
 
 export const useResetBotToken = (): UseMutationResult<
@@ -153,7 +162,8 @@ export const useResetBotToken = (): UseMutationResult<
     { clientId: string }
 > =>
     useMutation({
-        mutationFn: ({ clientId }) => botsApi.resetToken(clientId),
+        mutationFn: ({ clientId }): Promise<{ token: string }> =>
+            botsApi.resetToken(clientId),
     });
 
 export const useBotServers = (
@@ -161,7 +171,7 @@ export const useBotServers = (
 ): UseQueryResult<{ count: number }, Error> =>
     useQuery<{ count: number }>({
         queryKey: ['dev-bot-servers', clientId],
-        queryFn: () => botsApi.getServers(clientId),
+        queryFn: (): Promise<{ count: number }> => botsApi.getServers(clientId),
         enabled: !!clientId,
     });
 
@@ -172,9 +182,13 @@ export const useAuthorizeBot = (): UseMutationResult<
 > => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: ({ clientId, serverId, permissions }) =>
+        mutationFn: ({
+            clientId,
+            serverId,
+            permissions,
+        }): Promise<{ serverId: string; serverName: string }> =>
             botsApi.authorize(clientId, serverId, permissions),
-        onSuccess: (_, { clientId }) => {
+        onSuccess: (_, { clientId }): void => {
             void queryClient.invalidateQueries({
                 queryKey: ['dev-bot-servers', clientId],
             });

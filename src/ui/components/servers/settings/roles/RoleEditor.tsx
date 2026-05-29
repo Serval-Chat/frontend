@@ -32,13 +32,13 @@ interface RoleEditorProps {
 
 type ColorType = 'solid' | 'custom';
 
-export const RoleEditor: React.FC<RoleEditorProps> = ({
+export const RoleEditor = ({
     role,
     onSave,
     onReset,
     disableCustomFonts,
     disableGlowAndColors,
-}) => {
+}: RoleEditorProps) => {
     const { data: me } = useMe();
     const [name, setName] = useState(role.name);
     const [description, setDescription] = useState(role.description ?? '');
@@ -54,9 +54,9 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
     const [solidColor, setSolidColor] = useState(role.color || '#99aab5');
     const [customColorItems, setCustomColorItems] = useState<
         { id: string; color: string }[]
-    >(() => {
+    >((): { id: string; color: string }[] => {
         if (role.colors && role.colors.length > 0) {
-            return role.colors.map((c, i) => ({
+            return role.colors.map((c, i): { id: string; color: string } => ({
                 id: `color-${role._id}-${i}`,
                 color: c,
             }));
@@ -104,7 +104,7 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
     const handleIconCrop = async (croppedFile: File): Promise<void> => {
         // Optimistically show the cropped image
         const reader = new FileReader();
-        reader.onload = (e) => {
+        reader.onload = (e): void => {
             if (e.target?.result) {
                 setPreviewIcon(e.target.result as string);
             }
@@ -141,7 +141,7 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
                   ? [role.startColor, role.endColor]
                   : ['#99aab5', '#2c2f33'];
         setCustomColorItems(
-            colors.map((c, i) => ({
+            colors.map((c, i): { id: string; color: string } => ({
                 id: `color-${role._id}-${i}`,
                 color: c,
             })),
@@ -172,7 +172,7 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
             updates.color = undefined;
             updates.startColor = undefined;
             updates.endColor = undefined;
-            updates.colors = customColorItems.map((item) => item.color);
+            updates.colors = customColorItems.map((item): string => item.color);
             updates.gradientRepeat = gradientRepeat;
         }
 
@@ -206,7 +206,7 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
             preview.color = null;
             preview.startColor = undefined;
             preview.endColor = undefined;
-            preview.colors = customColorItems.map((item) => item.color);
+            preview.colors = customColorItems.map((item): string => item.color);
             preview.gradientRepeat = gradientRepeat;
         }
         preview.glowEnabled = glowEnabled;
@@ -243,7 +243,7 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
                                 type="text"
                                 value={name}
                                 variant="secondary"
-                                onChange={(e) => {
+                                onChange={(e): void => {
                                     setName(e.target.value);
                                     setHasChanges(true);
                                 }}
@@ -267,7 +267,7 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
                                 maxLength={200}
                                 placeholder="Briefly describe what this role is for (shown during onboarding)"
                                 value={description}
-                                onChange={(e) => {
+                                onChange={(e): void => {
                                     setDescription(e.target.value);
                                     setHasChanges(true);
                                 }}
@@ -314,7 +314,7 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
                                     <button
                                         className="absolute inset-0 flex h-full w-full cursor-pointer items-center justify-center border-none bg-black/50 p-0 opacity-0 transition-opacity group-hover:opacity-100"
                                         type="button"
-                                        onClick={() =>
+                                        onClick={(): void | undefined =>
                                             document
                                                 .getElementById(
                                                     'role-icon-upload',
@@ -356,7 +356,7 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
                                 </div>
                                 <Toggle
                                     checked={glowEnabled}
-                                    onCheckedChange={(val) => {
+                                    onCheckedChange={(val): void => {
                                         setGlowEnabled(val);
                                         setHasChanges(true);
                                     }}
@@ -378,7 +378,7 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
                                 </div>
                                 <Toggle
                                     checked={separateFromOtherRoles}
-                                    onCheckedChange={(val) => {
+                                    onCheckedChange={(val): void => {
                                         setSeparateFromOtherRoles(val);
                                         setHasChanges(true);
                                     }}
@@ -404,7 +404,7 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
                                                 key={type}
                                                 size="sm"
                                                 variant="ghost"
-                                                onClick={() => {
+                                                onClick={(): void => {
                                                     setColorType(type);
                                                     setHasChanges(true);
                                                 }}
@@ -422,7 +422,7 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
                                         <div className="space-y-4">
                                             <HexColorPicker
                                                 color={solidColor}
-                                                onChange={(newColor) => {
+                                                onChange={(newColor): void => {
                                                     setSolidColor(newColor);
                                                     setHasChanges(true);
                                                 }}
@@ -431,7 +431,7 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
                                                 type="text"
                                                 value={solidColor}
                                                 variant="secondary"
-                                                onChange={(e) => {
+                                                onChange={(e): void => {
                                                     setSolidColor(
                                                         e.target.value,
                                                     );
@@ -466,7 +466,7 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
                                                             : 'Add Color'
                                                     }
                                                     variant="ghost"
-                                                    onClick={() => {
+                                                    onClick={(): void => {
                                                         if (
                                                             customColorItems.length >=
                                                             15
@@ -506,7 +506,7 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
                                                                 variant="secondary"
                                                                 onChange={(
                                                                     e,
-                                                                ) => {
+                                                                ): void => {
                                                                     const newItems =
                                                                         [
                                                                             ...customColorItems,
@@ -538,13 +538,13 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
                                                                         18
                                                                     }
                                                                     variant="ghost"
-                                                                    onClick={() => {
+                                                                    onClick={(): void => {
                                                                         setCustomColorItems(
                                                                             customColorItems.filter(
                                                                                 (
                                                                                     _,
                                                                                     idx,
-                                                                                ) =>
+                                                                                ): boolean =>
                                                                                     idx !==
                                                                                     i,
                                                                             ),
@@ -581,7 +581,9 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
                                                             value={
                                                                 gradientRepeat
                                                             }
-                                                            onChange={(e) => {
+                                                            onChange={(
+                                                                e,
+                                                            ): void => {
                                                                 setGradientRepeat(
                                                                     parseInt(
                                                                         e.target
@@ -684,7 +686,7 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
                                 description="Gives all permissions. This is a dangerous permission to grant."
                                 label="Administrator"
                                 value={permissions.administrator || false}
-                                onChange={(val) =>
+                                onChange={(val): void =>
                                     updatePermission('administrator', val)
                                 }
                             />
@@ -692,7 +694,7 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
                                 description="Allows member to change server name, region, or icon."
                                 label="Manage Server"
                                 value={permissions.manageServer || false}
-                                onChange={(val) =>
+                                onChange={(val): void =>
                                     updatePermission('manageServer', val)
                                 }
                             />
@@ -700,7 +702,7 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
                                 description="Allows member to create, edit, or delete roles below them."
                                 label="Manage Roles"
                                 value={permissions.manageRoles || false}
-                                onChange={(val) =>
+                                onChange={(val): void =>
                                     updatePermission('manageRoles', val)
                                 }
                             />
@@ -708,7 +710,7 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
                                 description="Allows member to create, edit, or delete channels."
                                 label="Manage Channels"
                                 value={permissions.manageChannels || false}
-                                onChange={(val) =>
+                                onChange={(val): void =>
                                     updatePermission('manageChannels', val)
                                 }
                             />
@@ -717,7 +719,7 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
                                 description="Allows member to kick other members."
                                 label="Kick Members"
                                 value={permissions.kickMembers || false}
-                                onChange={(val) =>
+                                onChange={(val): void =>
                                     updatePermission('kickMembers', val)
                                 }
                             />
@@ -726,7 +728,7 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
                                 description="Allows member to ban other members."
                                 label="Ban Members"
                                 value={permissions.banMembers || false}
-                                onChange={(val) =>
+                                onChange={(val): void =>
                                     updatePermission('banMembers', val)
                                 }
                             />
@@ -735,7 +737,7 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
                                 description="Allows member to timeout other members."
                                 label="Moderate Members"
                                 value={permissions.moderateMembers || false}
-                                onChange={(val) =>
+                                onChange={(val): void =>
                                     updatePermission('moderateMembers', val)
                                 }
                             />
@@ -743,7 +745,7 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
                                 description="Allows member to view channels."
                                 label="View Channels"
                                 value={permissions.viewChannels !== false}
-                                onChange={(val) =>
+                                onChange={(val): void =>
                                     updatePermission('viewChannels', val)
                                 }
                             />
@@ -751,7 +753,7 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
                                 description="Allows member to connect to voice channels."
                                 label="Connect"
                                 value={permissions.connect !== false}
-                                onChange={(val) =>
+                                onChange={(val): void =>
                                     updatePermission('connect', val)
                                 }
                             />
@@ -759,7 +761,7 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
                                 description="Allows member to send messages in text channels."
                                 label="Send Messages"
                                 value={permissions.sendMessages !== false}
-                                onChange={(val) =>
+                                onChange={(val): void =>
                                     updatePermission('sendMessages', val)
                                 }
                             />
@@ -767,7 +769,7 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
                                 description="Allows member to delete messages by other members."
                                 label="Manage Messages"
                                 value={permissions.manageMessages || false}
-                                onChange={(val) =>
+                                onChange={(val): void =>
                                     updatePermission('manageMessages', val)
                                 }
                             />
@@ -775,7 +777,7 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
                                 description="Allows member to pin or unpin messages."
                                 label="Pin Messages"
                                 value={permissions.pinMessages || false}
-                                onChange={(val) =>
+                                onChange={(val): void =>
                                     updatePermission('pinMessages', val)
                                 }
                             />
@@ -783,7 +785,7 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
                                 description="Allows member to add new reactions to messages."
                                 label="Add Reactions"
                                 value={permissions.addReactions !== false}
-                                onChange={(val) =>
+                                onChange={(val): void =>
                                     updatePermission('addReactions', val)
                                 }
                             />
@@ -791,7 +793,7 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
                                 description="Allows member to remove reactions added by other members."
                                 label="Manage Reactions"
                                 value={permissions.manageReactions || false}
-                                onChange={(val) =>
+                                onChange={(val): void =>
                                     updatePermission('manageReactions', val)
                                 }
                             />
@@ -799,7 +801,7 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
                                 description="Allows member to upload, edit, and delete server stickers."
                                 label="Manage Stickers"
                                 value={permissions.manageStickers || false}
-                                onChange={(val) =>
+                                onChange={(val): void =>
                                     updatePermission('manageStickers', val)
                                 }
                             />
@@ -809,7 +811,7 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
                                 value={
                                     permissions.pingRolesAndEveryone || false
                                 }
-                                onChange={(val) =>
+                                onChange={(val): void =>
                                     updatePermission(
                                         'pingRolesAndEveryone',
                                         val,
@@ -820,7 +822,7 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
                                 description="Allows member to see messages that have been deleted (rendered in red)."
                                 label="See Deleted Messages"
                                 value={permissions.seeDeletedMessages || false}
-                                onChange={(val) =>
+                                onChange={(val): void =>
                                     updatePermission('seeDeletedMessages', val)
                                 }
                             />
@@ -831,7 +833,7 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
                                     permissions.bypassMarkdownRestrictions ||
                                     false
                                 }
-                                onChange={(val) =>
+                                onChange={(val): void =>
                                     updatePermission(
                                         'bypassMarkdownRestrictions',
                                         val,
@@ -854,8 +856,8 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
                 imageFile={selectedIcon}
                 isOpen={isCropModalOpen}
                 type="role-icon"
-                onClose={() => setIsCropModalOpen(false)}
-                onConfirm={(file) => {
+                onClose={(): void => setIsCropModalOpen(false)}
+                onConfirm={(file): void => {
                     void handleIconCrop(file);
                 }}
             />
@@ -871,13 +873,13 @@ interface PermissionToggleProps {
     danger?: boolean;
 }
 
-const PermissionToggle: React.FC<PermissionToggleProps> = ({
+const PermissionToggle = ({
     label,
     description,
     value,
     onChange,
     danger,
-}) => (
+}: PermissionToggleProps) => (
     <div className="flex items-center justify-between py-2">
         <div className="flex-1 pr-4">
             <Text

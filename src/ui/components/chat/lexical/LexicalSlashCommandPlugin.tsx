@@ -73,13 +73,13 @@ const MenuWrapper = ({
     const [mobileMenuStyle, setMobileMenuStyle] =
         React.useState<React.CSSProperties>();
 
-    React.useEffect(() => {
+    React.useEffect((): void => {
         if (selectedIndex === null && options.length > 0) {
             setHighlightedIndex(0);
         }
     }, [options.length, selectedIndex, setHighlightedIndex]);
 
-    React.useLayoutEffect(() => {
+    React.useLayoutEffect((): (() => void) | undefined => {
         if (options.length === 0) {
             setMobileMenuStyle(undefined);
             return;
@@ -118,7 +118,7 @@ const MenuWrapper = ({
             updateMobileMenuStyle,
         );
 
-        return () => {
+        return (): void => {
             window.removeEventListener('resize', updateMobileMenuStyle);
             window.visualViewport?.removeEventListener(
                 'resize',
@@ -146,7 +146,7 @@ const MenuWrapper = ({
                                 : 'hover:bg-white/5',
                         )}
                         key={option.key}
-                        onClick={() => selectOptionAndCleanUp(option)}
+                        onClick={(): void => selectOptionAndCleanUp(option)}
                     >
                         <span
                             className={cn(
@@ -180,18 +180,20 @@ interface LexicalSlashCommandPluginProps {
     onOpenChange?: (isOpen: boolean) => void;
 }
 
-export const LexicalSlashCommandPlugin: React.FC<
-    LexicalSlashCommandPluginProps
-> = ({ commands, enabled, onOpenChange }) => {
+export const LexicalSlashCommandPlugin = ({
+    commands,
+    enabled,
+    onOpenChange,
+}: LexicalSlashCommandPluginProps) => {
     const [editor] = useLexicalComposerContext();
     const [queryString, setQueryString] = useState<string | null>(null);
 
     useEffect(
-        () =>
+        (): (() => void) =>
             editor.registerCommand(
                 CANCEL_SLASH_COMMAND,
-                () => {
-                    editor.update(() => clearSlashChips());
+                (): true => {
+                    editor.update((): void => clearSlashChips());
                     return true;
                 },
                 COMMAND_PRIORITY_EDITOR,
@@ -199,23 +201,25 @@ export const LexicalSlashCommandPlugin: React.FC<
         [editor],
     );
 
-    const options = useMemo(() => {
+    const options = useMemo((): SlashCommandOption[] => {
         if (!enabled || queryString === null) return [];
         if (!queryString.startsWith('cmd:')) return [];
 
         const query = queryString.slice(4).toLowerCase();
         return commands
-            .filter((command) => command.name.toLowerCase().includes(query))
+            .filter((command): boolean =>
+                command.name.toLowerCase().includes(query),
+            )
             .slice(0, 10)
             .map(
-                (command) =>
+                (command): SlashCommandOption =>
                     new SlashCommandOption({ type: 'command', command }),
             );
     }, [commands, enabled, queryString]);
 
     const isOpen = enabled && queryString !== null && options.length > 0;
 
-    React.useEffect(() => {
+    React.useEffect((): void => {
         onOpenChange?.(isOpen);
     }, [isOpen, onOpenChange]);
 
@@ -242,8 +246,8 @@ export const LexicalSlashCommandPlugin: React.FC<
             selectedOption: SlashCommandOption,
             nodeToRemove: TextNode | null,
             closeMenu: () => void,
-        ) => {
-            editor.update(() => {
+        ): void => {
+            editor.update((): void => {
                 if (nodeToRemove) {
                     nodeToRemove.remove();
                 }
@@ -276,7 +280,7 @@ export const LexicalSlashCommandPlugin: React.FC<
                 selection.insertNodes(nodes);
 
                 if (cmdOptions.length > 0) {
-                    setTimeout(() => focusSlashArgInput(editor, 0), 60);
+                    setTimeout((): void => focusSlashArgInput(editor, 0), 60);
                 }
 
                 closeMenu();

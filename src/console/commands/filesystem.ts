@@ -41,7 +41,7 @@ const formatDirLine = (entry: DosEntry): string => {
 
 const formatAttrib = (entry: DosEntry): string => {
     const attrs = ['A', 'S', 'H', 'R']
-        .map((attribute) =>
+        .map((attribute): string =>
             entry.attributes.includes(
                 attribute as DosEntry['attributes'][number],
             )
@@ -65,9 +65,10 @@ const withError = (
 };
 
 export const cdCommand: ConCommandReactor = {
-    match: (_argc, argv) => ['CD', 'CHDIR'].includes(commandName(argv)),
-    execute: (_argc, argv, context) =>
-        withError(() => {
+    match: (_argc, argv): boolean =>
+        ['CD', 'CHDIR'].includes(commandName(argv)),
+    execute: (_argc, argv, context): { output?: string[]; clear?: boolean } =>
+        withError((): { output: string[] } | { output?: undefined } => {
             const fs = requireFilesystem(context);
             if (argv.length === 1) return { output: [fs.getCwd()] };
             fs.changeDirectory(argv.slice(1).join(' '));
@@ -76,17 +77,19 @@ export const cdCommand: ConCommandReactor = {
 };
 
 export const dirCommand: ConCommandReactor = {
-    match: (_argc, argv) => commandName(argv) === 'DIR',
-    execute: (_argc, argv, context) =>
-        withError(() => {
+    match: (_argc, argv): boolean => commandName(argv) === 'DIR',
+    execute: (_argc, argv, context): { output?: string[]; clear?: boolean } =>
+        withError((): { output: string[] } => {
             const fs = requireFilesystem(context);
             const entries = fs.list(argv.slice(1).join(' ') || '*');
-            const files = entries.filter((entry) => entry.type === 'file');
+            const files = entries.filter(
+                (entry): boolean => entry.type === 'file',
+            );
             const directories = entries.filter(
-                (entry) => entry.type === 'directory',
+                (entry): boolean => entry.type === 'directory',
             );
             const bytes = files.reduce(
-                (total, entry) => total + fileSize(entry),
+                (total, entry): number => total + fileSize(entry),
                 0,
             );
             return {
@@ -108,9 +111,10 @@ export const dirCommand: ConCommandReactor = {
 };
 
 export const mkdirCommand: ConCommandReactor = {
-    match: (_argc, argv) => ['MD', 'MKDIR'].includes(commandName(argv)),
-    execute: (_argc, argv, context) =>
-        withError(() => {
+    match: (_argc, argv): boolean =>
+        ['MD', 'MKDIR'].includes(commandName(argv)),
+    execute: (_argc, argv, context): { output?: string[]; clear?: boolean } =>
+        withError((): Record<string, never> => {
             const fs = requireFilesystem(context);
             fs.makeDirectory(
                 oneOrMore(argv, 'The syntax of the command is incorrect.'),
@@ -120,9 +124,10 @@ export const mkdirCommand: ConCommandReactor = {
 };
 
 export const rmdirCommand: ConCommandReactor = {
-    match: (_argc, argv) => ['RD', 'RMDIR'].includes(commandName(argv)),
-    execute: (_argc, argv, context) =>
-        withError(() => {
+    match: (_argc, argv): boolean =>
+        ['RD', 'RMDIR'].includes(commandName(argv)),
+    execute: (_argc, argv, context): { output?: string[]; clear?: boolean } =>
+        withError((): Record<string, never> => {
             const fs = requireFilesystem(context);
             fs.removeDirectory(
                 oneOrMore(argv, 'The syntax of the command is incorrect.'),
@@ -132,9 +137,9 @@ export const rmdirCommand: ConCommandReactor = {
 };
 
 export const copyCommand: ConCommandReactor = {
-    match: (_argc, argv) => commandName(argv) === 'COPY',
-    execute: (_argc, argv, context) =>
-        withError(() => {
+    match: (_argc, argv): boolean => commandName(argv) === 'COPY',
+    execute: (_argc, argv, context): { output?: string[]; clear?: boolean } =>
+        withError((): { output: string[] } => {
             if (argv.length < 3)
                 throw new Error('The syntax of the command is incorrect.');
             const fs = requireFilesystem(context);
@@ -144,9 +149,9 @@ export const copyCommand: ConCommandReactor = {
 };
 
 export const moveCommand: ConCommandReactor = {
-    match: (_argc, argv) => commandName(argv) === 'MOVE',
-    execute: (_argc, argv, context) =>
-        withError(() => {
+    match: (_argc, argv): boolean => commandName(argv) === 'MOVE',
+    execute: (_argc, argv, context): { output?: string[]; clear?: boolean } =>
+        withError((): { output: string[] } => {
             if (argv.length < 3)
                 throw new Error('The syntax of the command is incorrect.');
             const fs = requireFilesystem(context);
@@ -156,9 +161,10 @@ export const moveCommand: ConCommandReactor = {
 };
 
 export const renameCommand: ConCommandReactor = {
-    match: (_argc, argv) => ['REN', 'RENAME'].includes(commandName(argv)),
-    execute: (_argc, argv, context) =>
-        withError(() => {
+    match: (_argc, argv): boolean =>
+        ['REN', 'RENAME'].includes(commandName(argv)),
+    execute: (_argc, argv, context): { output?: string[]; clear?: boolean } =>
+        withError((): Record<string, never> => {
             if (argv.length < 3)
                 throw new Error('The syntax of the command is incorrect.');
             const fs = requireFilesystem(context);
@@ -168,9 +174,10 @@ export const renameCommand: ConCommandReactor = {
 };
 
 export const deleteCommand: ConCommandReactor = {
-    match: (_argc, argv) => ['DEL', 'ERASE'].includes(commandName(argv)),
-    execute: (_argc, argv, context) =>
-        withError(() => {
+    match: (_argc, argv): boolean =>
+        ['DEL', 'ERASE'].includes(commandName(argv)),
+    execute: (_argc, argv, context): { output?: string[]; clear?: boolean } =>
+        withError((): Record<string, never> => {
             const fs = requireFilesystem(context);
             fs.delete(
                 oneOrMore(argv, 'The syntax of the command is incorrect.'),
@@ -180,9 +187,9 @@ export const deleteCommand: ConCommandReactor = {
 };
 
 export const typeCommand: ConCommandReactor = {
-    match: (_argc, argv) => commandName(argv) === 'TYPE',
-    execute: (_argc, argv, context) =>
-        withError(() => {
+    match: (_argc, argv): boolean => commandName(argv) === 'TYPE',
+    execute: (_argc, argv, context): { output?: string[]; clear?: boolean } =>
+        withError((): { output: string[] } => {
             const fs = requireFilesystem(context);
             return {
                 output: fs
@@ -198,18 +205,22 @@ export const typeCommand: ConCommandReactor = {
 };
 
 export const moreCommand: ConCommandReactor = {
-    match: (_argc, argv) => commandName(argv) === 'MORE',
+    match: (_argc, argv): boolean => commandName(argv) === 'MORE',
     execute: typeCommand.execute,
 };
 
 export const attribCommand: ConCommandReactor = {
-    match: (_argc, argv) => commandName(argv) === 'ATTRIB',
-    execute: (_argc, argv, context) =>
-        withError(() => {
+    match: (_argc, argv): boolean => commandName(argv) === 'ATTRIB',
+    execute: (_argc, argv, context): { output?: string[]; clear?: boolean } =>
+        withError((): { output: string[] } => {
             const fs = requireFilesystem(context);
             const args = argv.slice(1);
-            const changes = args.filter((arg) => /^[+-][ASHRashr]$/.test(arg));
-            const targets = args.filter((arg) => !/^[+-][ASHRashr]$/.test(arg));
+            const changes = args.filter((arg): boolean =>
+                /^[+-][ASHRashr]$/.test(arg),
+            );
+            const targets = args.filter(
+                (arg): boolean => !/^[+-][ASHRashr]$/.test(arg),
+            );
             const entries = fs.setAttributes(targets.join(' ') || '*', changes);
             return { output: entries.map(formatAttrib) };
         }),

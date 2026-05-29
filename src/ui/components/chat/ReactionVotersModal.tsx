@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 
 import type { MessageReaction } from '@/api/chat/chat.types';
 import {
@@ -26,13 +26,13 @@ interface ReactionVotersModalProps {
     initialEmoji?: string;
 }
 
-export const ReactionVotersModal: React.FC<ReactionVotersModalProps> = ({
+export const ReactionVotersModal = ({
     isOpen,
     onClose,
     reactions,
     serverId,
     initialEmoji,
-}) => {
+}: ReactionVotersModalProps) => {
     const [selectedEmoji, setSelectedEmoji] = useState<string | null>(null);
     const [prevInitialEmoji, setPrevInitialEmoji] = useState<string | null>(
         null,
@@ -50,10 +50,10 @@ export const ReactionVotersModal: React.FC<ReactionVotersModalProps> = ({
         }
     }
 
-    const allVoterIds = useMemo(() => {
+    const allVoterIds = useMemo((): string[] => {
         const ids = new Set<string>();
-        reactions.forEach((reaction) =>
-            reaction.users.forEach((id) => ids.add(id)),
+        reactions.forEach((reaction): void =>
+            reaction.users.forEach((id): Set<string> => ids.add(id)),
         );
         return Array.from(ids);
     }, [reactions]);
@@ -72,10 +72,10 @@ export const ReactionVotersModal: React.FC<ReactionVotersModalProps> = ({
     const votersForSelected = useMemo(() => {
         if (!users) return [];
         const selectedReaction = reactions.find(
-            (r) => r.emoji === selectedEmoji,
+            (r): boolean => r.emoji === selectedEmoji,
         );
         const voterIds = selectedReaction?.users || [];
-        return users.filter((u) => voterIds.includes(u._id));
+        return users.filter((u): boolean => voterIds.includes(u._id));
     }, [users, reactions, selectedEmoji]);
 
     return (
@@ -97,7 +97,9 @@ export const ReactionVotersModal: React.FC<ReactionVotersModalProps> = ({
                                     : 'hover:bg-white/5',
                             )}
                             key={reaction.emoji}
-                            onClick={() => setSelectedEmoji(reaction.emoji)}
+                            onClick={(): void =>
+                                setSelectedEmoji(reaction.emoji)
+                            }
                         >
                             <Box className="flex min-w-0 items-center gap-2">
                                 <Box className="flex shrink-0 items-center justify-center">
@@ -164,18 +166,18 @@ export const ReactionVotersModal: React.FC<ReactionVotersModalProps> = ({
                             </Text>
                             {votersForSelected.map((user) => {
                                 const member = members?.find(
-                                    (m) => m.userId === user._id,
+                                    (m): boolean => m.userId === user._id,
                                 );
                                 const userRoles =
-                                    roles?.filter((r) =>
+                                    roles?.filter((r): boolean | undefined =>
                                         member?.roles.includes(r._id),
                                     ) || [];
                                 const sortedRoles = [...userRoles].sort(
-                                    (a, b) => b.position - a.position,
+                                    (a, b): number => b.position - a.position,
                                 );
                                 const role = sortedRoles[0];
                                 const iconRole = sortedRoles.find(
-                                    (r) => r.icon,
+                                    (r): string | undefined => r.icon,
                                 );
 
                                 return (

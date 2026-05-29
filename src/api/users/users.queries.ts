@@ -13,9 +13,6 @@ import type {
     CreateWebsiteConnectionResponse,
     User,
     UserSettings,
-    UsernameFont,
-    UsernameGlow,
-    UsernameGradient,
 } from './users.types';
 
 export const useMe = (): UseQueryResult<User, Error> =>
@@ -33,7 +30,7 @@ export const useUserById = (
 ): UseQueryResult<User, Error> =>
     useQuery({
         queryKey: ['user', id],
-        queryFn: () => usersApi.getById(id),
+        queryFn: (): Promise<User> => usersApi.getById(id),
         enabled: (options.enabled ?? true) && isValidUserId(id),
     });
 
@@ -45,7 +42,7 @@ export const useUpdateBio = (): UseMutationResult<
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: usersApi.updateBio,
-        onSuccess: (data) => {
+        onSuccess: (data): void => {
             queryClient.setQueryData<User>(['me'], (old) =>
                 old ? { ...old, bio: data.bio } : old,
             );
@@ -62,7 +59,7 @@ export const useUpdatePronouns = (): UseMutationResult<
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: usersApi.updatePronouns,
-        onSuccess: (data) => {
+        onSuccess: (data): void => {
             queryClient.setQueryData<User>(['me'], (old) =>
                 old ? { ...old, pronouns: data.pronouns } : old,
             );
@@ -79,7 +76,7 @@ export const useUpdateDisplayName = (): UseMutationResult<
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: usersApi.updateDisplayName,
-        onSuccess: (data) => {
+        onSuccess: (data): void => {
             queryClient.setQueryData<User>(['me'], (old) =>
                 old ? { ...old, displayName: data.displayName } : old,
             );
@@ -96,7 +93,7 @@ export const useUpdateUsername = (): UseMutationResult<
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: usersApi.updateUsername,
-        onSuccess: (data) => {
+        onSuccess: (data): void => {
             queryClient.setQueryData<User>(['me'], (old) =>
                 old ? { ...old, username: data.username } : old,
             );
@@ -105,24 +102,11 @@ export const useUpdateUsername = (): UseMutationResult<
     });
 };
 
-export const useUpdateStyle = (): UseMutationResult<
-    {
-        message: string;
-        usernameFont?: UsernameFont;
-        usernameGradient?: UsernameGradient;
-        usernameGlow?: UsernameGlow;
-    },
-    Error,
-    {
-        usernameFont?: UsernameFont;
-        usernameGradient?: UsernameGradient;
-        usernameGlow?: UsernameGlow;
-    }
-> => {
+export const useUpdateStyle = () => {
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: usersApi.updateStyle,
-        onSuccess: (data, variables) => {
+        onSuccess: (data, variables): void => {
             queryClient.setQueryData<User>(['me'], (old) =>
                 old
                     ? {
@@ -155,7 +139,7 @@ export const useUpdateSettings = (): UseMutationResult<
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: usersApi.updateSettings,
-        onSuccess: (data) => {
+        onSuccess: (data): void => {
             queryClient.setQueryData<User>(['me'], (old) =>
                 old
                     ? {
@@ -180,7 +164,7 @@ export const useUpdateLanguage = (): UseMutationResult<
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: usersApi.updateLanguage,
-        onSuccess: (data) => {
+        onSuccess: (data): void => {
             queryClient.setQueryData<User>(['me'], (old) =>
                 old ? { ...old, language: data.language } : old,
             );
@@ -204,7 +188,7 @@ export const useUpdateStatus = (): UseMutationResult<
 
     return useMutation({
         mutationFn: usersApi.updateStatus,
-        onSuccess: (data) => {
+        onSuccess: (data): void => {
             queryClient.setQueryData<User>(['me'], (old) => {
                 if (!old) return old;
                 return { ...old, customStatus: data.customStatus };
@@ -222,7 +206,7 @@ export const useUpdateProfilePicture = (): UseMutationResult<
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: usersApi.updateProfilePicture,
-        onSuccess: (data) => {
+        onSuccess: (data): void => {
             queryClient.setQueryData<User>(['me'], (old) =>
                 old ? { ...old, profilePicture: data.profilePicture } : old,
             );
@@ -239,7 +223,7 @@ export const useUpdateBanner = (): UseMutationResult<
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: usersApi.updateBanner,
-        onSuccess: (data) => {
+        onSuccess: (data): void => {
             queryClient.setQueryData<User>(['me'], (old) =>
                 old ? { ...old, banner: data.banner } : old,
             );
@@ -256,7 +240,7 @@ export const useCreateWebsiteConnection = (): UseMutationResult<
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: usersApi.createWebsiteConnection,
-        onSuccess: () => {
+        onSuccess: (): void => {
             void queryClient.invalidateQueries({ queryKey: ['me'] });
         },
     });
@@ -273,7 +257,7 @@ export const useVerifyConnection = (): UseMutationResult<
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: usersApi.verifyConnection,
-        onSuccess: () => {
+        onSuccess: (): void => {
             void queryClient.invalidateQueries({ queryKey: ['me'] });
         },
     });
@@ -287,7 +271,7 @@ export const useRemoveConnection = (): UseMutationResult<
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: usersApi.removeConnection,
-        onSuccess: () => {
+        onSuccess: (): void => {
             void queryClient.invalidateQueries({ queryKey: ['me'] });
         },
     });

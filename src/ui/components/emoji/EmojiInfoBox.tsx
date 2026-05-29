@@ -24,13 +24,13 @@ interface EmojiInfoBoxProps {
     onClose?: () => void;
 }
 
-export const EmojiInfoBox: React.FC<EmojiInfoBoxProps> = ({
+export const EmojiInfoBox = ({
     emoji,
     server,
     className,
     position,
     onClose,
-}) => {
+}: EmojiInfoBoxProps): React.ReactPortal => {
     const isUnknownServer = !server;
     const infoBoxRef = useRef<HTMLDivElement>(null);
 
@@ -51,7 +51,7 @@ export const EmojiInfoBox: React.FC<EmojiInfoBoxProps> = ({
                     tabIndex={0}
                     onClick={onClose}
                     onContextMenu={onClose}
-                    onKeyDown={(e) => {
+                    onKeyDown={(e): void => {
                         if (
                             e.key === 'Escape' ||
                             e.key === 'Enter' ||

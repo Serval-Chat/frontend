@@ -14,15 +14,15 @@ interface ImageLightboxProps {
     onClose: () => void;
 }
 
-export const ImageLightbox: React.FC<ImageLightboxProps> = ({
+export const ImageLightbox = ({
     src,
     alt = 'Image',
     isOpen,
     onClose,
-}) => {
+}: ImageLightboxProps): React.ReactPortal | null => {
     const [scale, setScale] = React.useState(1);
 
-    React.useEffect(() => {
+    React.useEffect((): (() => void) | undefined => {
         if (!isOpen) {
             setScale(1);
             return;
@@ -32,7 +32,7 @@ export const ImageLightbox: React.FC<ImageLightboxProps> = ({
         };
         window.addEventListener('keydown', handleKey);
         document.body.style.overflow = 'hidden';
-        return () => {
+        return (): void => {
             window.removeEventListener('keydown', handleKey);
             document.body.style.overflow = '';
         };
@@ -40,11 +40,11 @@ export const ImageLightbox: React.FC<ImageLightboxProps> = ({
 
     const zoomIn = (e: React.MouseEvent): void => {
         e.stopPropagation();
-        setScale((s) => Math.min(s + 0.5, 4));
+        setScale((s): number => Math.min(s + 0.5, 4));
     };
     const zoomOut = (e: React.MouseEvent): void => {
         e.stopPropagation();
-        setScale((s) => Math.max(s - 0.5, 0.5));
+        setScale((s): number => Math.max(s - 0.5, 0.5));
     };
 
     const handleDownload = async (): Promise<void> => {
@@ -107,7 +107,7 @@ export const ImageLightbox: React.FC<ImageLightboxProps> = ({
                             <button
                                 aria-label="Download"
                                 className="rounded-md p-2 text-white/70 transition-colors hover:bg-white/10 hover:text-white active:bg-white/20"
-                                onClick={(e) => {
+                                onClick={(e): void => {
                                     e.stopPropagation();
                                     void handleDownload();
                                 }}
@@ -130,16 +130,16 @@ export const ImageLightbox: React.FC<ImageLightboxProps> = ({
                         role="button"
                         tabIndex={0}
                         onClick={onClose}
-                        onKeyDown={(e) => {
+                        onKeyDown={(e): void => {
                             if (e.key === 'Enter' || e.key === ' ') {
                                 onClose();
                             }
                         }}
-                        onWheel={(e) => {
+                        onWheel={(e): void => {
                             if (e.deltaY < 0) {
-                                setScale((s) => Math.min(s + 0.2, 4));
+                                setScale((s): number => Math.min(s + 0.2, 4));
                             } else {
-                                setScale((s) => Math.max(s - 0.2, 0.5));
+                                setScale((s): number => Math.max(s - 0.2, 0.5));
                             }
                         }}
                     >
@@ -161,7 +161,7 @@ export const ImageLightbox: React.FC<ImageLightboxProps> = ({
                                 damping: 25,
                                 stiffness: 300,
                             }}
-                            onClick={(e) => {
+                            onClick={(e): void => {
                                 e.stopPropagation();
                                 if (scale > 1) setScale(1);
                             }}

@@ -1,5 +1,3 @@
-import React from 'react';
-
 import {
     Bell,
     Eye,
@@ -17,10 +15,10 @@ interface SettingsSidebarProps {
     setActiveSection: (section: string) => void;
 }
 
-export const SettingsSidebar: React.FC<SettingsSidebarProps> = ({
+export const SettingsSidebar = ({
     activeSection,
     setActiveSection,
-}) => {
+}: SettingsSidebarProps) => {
     const sections = [
         { id: 'account', label: 'My Account', icon: User },
         { id: 'appearance', label: 'Appearance', icon: Palette },
@@ -48,7 +46,7 @@ export const SettingsSidebar: React.FC<SettingsSidebarProps> = ({
                             }`}
                         key={section.id}
                         variant={isActive ? 'normal' : 'ghost'}
-                        onClick={() => setActiveSection(section.id)}
+                        onClick={(): void => setActiveSection(section.id)}
                     >
                         <span className="flex items-center gap-2.5">
                             <Icon size={18} />

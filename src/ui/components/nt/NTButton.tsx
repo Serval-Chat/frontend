@@ -6,12 +6,12 @@ interface NTButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
     children: React.ReactNode;
 }
 
-export const NTButton: React.FC<NTButtonProps> = ({
+export const NTButton = ({
     children,
     className,
     style,
     ...props
-}) => (
+}: NTButtonProps) => (
     <button
         className={cn(
             'nt-button group bg-[#c0c0c0] px-4 py-1 font-nt text-[11px] leading-[13px] font-bold text-black',

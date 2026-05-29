@@ -28,7 +28,7 @@ const normalizeHex = (value: string): string | null => {
         return hex
             .slice(0, 3)
             .split('')
-            .map((char) => char + char)
+            .map((char): string => char + char)
             .join('');
     }
 

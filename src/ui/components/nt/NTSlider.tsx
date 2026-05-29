@@ -73,7 +73,7 @@ const NT_SLIDER_STYLES = `
     }
 `;
 
-export const NTSlider: React.FC<NTSliderProps> = ({
+export const NTSlider = ({
     label,
     value,
     min = 0,
@@ -82,7 +82,7 @@ export const NTSlider: React.FC<NTSliderProps> = ({
     onValueChange,
     className,
     ...props
-}) => (
+}: NTSliderProps) => (
     <div className={cn('flex flex-col gap-1', className)}>
         <style>{NT_SLIDER_STYLES}</style>
         {label && (
@@ -102,7 +102,9 @@ export const NTSlider: React.FC<NTSliderProps> = ({
             step={step}
             type="range"
             value={value}
-            onChange={(e) => onValueChange?.(Number(e.target.value))}
+            onChange={(e): void | undefined =>
+                onValueChange?.(Number(e.target.value))
+            }
             {...props}
         />
     </div>

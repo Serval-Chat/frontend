@@ -101,6 +101,10 @@ export default tseslint.config(
             'Use Tailwind utility classes instead of inline var(--color-*). ' +
             'These tokens are registered in @theme and available as direct utilities ' +
             '(e.g., text-muted-foreground, bg-bg-subtle, border-border-subtle).',
+        },
+        {
+          selector: 'TSTypeReference[typeName.name="FC"], TSTypeReference[typeName.left.name="React"][typeName.right.name="FC"], TSTypeReference[typeName.name="FunctionComponent"], TSTypeReference[typeName.left.name="React"][typeName.right.name="FunctionComponent"]',
+          message: 'Do not use React.FC or React.FunctionComponent. Define props directly and type the function instead.',
         }
       ],
       'tailwindcss/classnames-order': 'warn',

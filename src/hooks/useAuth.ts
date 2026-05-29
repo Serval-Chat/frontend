@@ -8,7 +8,7 @@ import { hasAuthToken } from '@/utils/authToken';
 export const useAuth = (): { isAuthenticated: boolean } => {
     const [isAuthenticated, setIsAuthenticated] = useState(hasAuthToken());
 
-    useEffect(() => {
+    useEffect((): (() => void) => {
         const handleAuthChange = (): void => {
             setIsAuthenticated(hasAuthToken());
         };
@@ -16,7 +16,7 @@ export const useAuth = (): { isAuthenticated: boolean } => {
         window.addEventListener('auth-change', handleAuthChange);
         window.addEventListener('storage', handleAuthChange);
 
-        return () => {
+        return (): void => {
             window.removeEventListener('auth-change', handleAuthChange);
             window.removeEventListener('storage', handleAuthChange);
         };

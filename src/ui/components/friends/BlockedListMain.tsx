@@ -10,7 +10,7 @@ import { Text } from '@/ui/components/common/Text';
 import { UserItem } from '@/ui/components/common/UserItem';
 import { Box } from '@/ui/components/layout/Box';
 
-export const BlockedListMain: React.FC = () => {
+export const BlockedListMain = () => {
     const { data: blocks, isLoading } = useBlocks();
     const { mutate: unblock } = useRemoveBlock();
     const [search, setSearch] = React.useState('');
@@ -18,7 +18,7 @@ export const BlockedListMain: React.FC = () => {
     const filteredBlocks = React.useMemo(() => {
         if (!blocks) return [];
         const query = search.toLowerCase();
-        return blocks.filter((b) => {
+        return blocks.filter((b): boolean => {
             const name = b.targetUsername.toLowerCase();
             return name.includes(query);
         });
@@ -76,7 +76,7 @@ export const BlockedListMain: React.FC = () => {
                         placeholder="Search username"
                         type="text"
                         value={search}
-                        onChange={(e) => setSearch(e.target.value)}
+                        onChange={(e): void => setSearch(e.target.value)}
                     />
                 </Box>
             </Box>
@@ -98,7 +98,7 @@ export const BlockedListMain: React.FC = () => {
                         <Box
                             className="flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-md bg-bg-secondary text-danger transition-colors hover:bg-danger hover:text-white"
                             title="Unblock"
-                            onClick={() => unblock(block.targetUserId)}
+                            onClick={(): void => unblock(block.targetUserId)}
                         >
                             <UserX size={18} />
                         </Box>

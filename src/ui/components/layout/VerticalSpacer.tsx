@@ -7,6 +7,6 @@ interface VerticalSpacerProps {
 /**
  * @description Vertical spacer. Adds pixels between components
  */
-export const VerticalSpacer: React.FC<VerticalSpacerProps> = ({
-    verticalSpace,
-}) => <Box className="shrink-0" style={{ height: `${verticalSpace}px` }} />;
+export const VerticalSpacer = ({ verticalSpace }: VerticalSpacerProps) => (
+    <Box className="shrink-0" style={{ height: `${verticalSpace}px` }} />
+);

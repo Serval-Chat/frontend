@@ -25,14 +25,14 @@ vi.mock('@/ui/components/common/ParsedUnicodeEmoji', () => ({
     ),
 }));
 
-describe('ChannelIcon', () => {
-    it('renders configured custom channel icons', () => {
+describe('ChannelIcon', (): void => {
+    it('renders configured custom channel icons', (): void => {
         render(<ChannelIcon icon="megaphone" type="text" />);
 
         expect(screen.getByTestId('configured-channel-icon')).toBeTruthy();
     });
 
-    it('renders channel emoji ahead of configured icons', () => {
+    it('renders channel emoji ahead of configured icons', (): void => {
         render(
             <ChannelIcon
                 emoji="wave"
@@ -48,7 +48,7 @@ describe('ChannelIcon', () => {
         expect(screen.queryByTestId('configured-channel-icon')).toBeNull();
     });
 
-    it('ignores configured icons for link channels', () => {
+    it('ignores configured icons for link channels', (): void => {
         const { container } = render(
             <ChannelIcon icon="megaphone" type="link" />,
         );

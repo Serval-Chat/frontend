@@ -20,7 +20,7 @@ export interface SlashArgChipProps {
     editor: LexicalEditor;
 }
 
-export const SlashArgChipComponent: React.FC<SlashArgChipProps> = ({
+export const SlashArgChipComponent = ({
     argName,
     argIndex,
     required,
@@ -28,19 +28,22 @@ export const SlashArgChipComponent: React.FC<SlashArgChipProps> = ({
     isLast,
     nodeKey,
     editor,
-}) => {
+}: SlashArgChipProps) => {
     const inputRef = useRef<HTMLInputElement>(null);
 
-    useEffect(() => {
+    useEffect((): (() => void) | undefined => {
         if (argIndex === 0) {
-            const id = setTimeout(() => inputRef.current?.focus(), 30);
-            return () => clearTimeout(id);
+            const id = setTimeout(
+                (): void | undefined => inputRef.current?.focus(),
+                30,
+            );
+            return (): void => clearTimeout(id);
         }
     }, [argIndex]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
         const newValue = e.target.value;
-        editor.update(() => {
+        editor.update((): void => {
             const node = $getNodeByKey(nodeKey);
             if ($isSlashArgChipNode(node)) {
                 node.setValue(newValue);

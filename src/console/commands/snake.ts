@@ -81,7 +81,9 @@ const renderGame = (state: GameState): string => {
 
     for (let y = 0; y < BOARD_HEIGHT; y++) {
         for (let x = 0; x < BOARD_WIDTH; x++) {
-            const isSnake = state.snake.some((s) => s.x === x && s.y === y);
+            const isSnake = state.snake.some(
+                (s): boolean => s.x === x && s.y === y,
+            );
             const isFood = state.food.x === x && state.food.y === y;
             const isHead = state.snake[0]?.x === x && state.snake[0]?.y === y;
 
@@ -153,7 +155,7 @@ const moveSnake = (state: GameState): GameState => {
         };
     }
 
-    if (state.snake.some((s) => s.x === head.x && s.y === head.y)) {
+    if (state.snake.some((s): boolean => s.x === head.x && s.y === head.y)) {
         return {
             ...state,
             direction: currentDirection,
@@ -171,7 +173,11 @@ const moveSnake = (state: GameState): GameState => {
                 x: Math.floor(Math.random() * BOARD_WIDTH),
                 y: Math.floor(Math.random() * BOARD_HEIGHT),
             };
-        } while (newSnake.some((s) => s.x === newFood.x && s.y === newFood.y));
+        } while (
+            newSnake.some(
+                (s): boolean => s.x === newFood.x && s.y === newFood.y,
+            )
+        );
 
         return {
             ...state,
@@ -203,8 +209,8 @@ const stopGame = (): void => {
 };
 
 export const snakeCommand: ConCommandReactor = {
-    match: (_argc, argv) => argv[0]?.toLowerCase() === 'snake',
-    execute: async (_argc, _argv, context) => {
+    match: (_argc, argv): boolean => argv[0]?.toLowerCase() === 'snake',
+    execute: async (_argc, _argv, context): Promise<{ output: string[] }> => {
         if (!context.writeLine) {
             return {
                 output: [
@@ -221,7 +227,7 @@ export const snakeCommand: ConCommandReactor = {
         context.writeLine(renderGame(gameState));
 
         // Set up key listener
-        keyListener = (e: KeyboardEvent) => {
+        keyListener = (e: KeyboardEvent): void => {
             if (!gameState || gameState.gameOver) return;
 
             switch (e.key) {
@@ -294,7 +300,7 @@ export const snakeCommand: ConCommandReactor = {
         window.addEventListener('keydown', keyListener);
 
         // Game loop
-        gameInterval = setInterval(() => {
+        gameInterval = setInterval((): void => {
             if (!gameState) {
                 stopGame();
                 return;

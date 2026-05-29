@@ -29,21 +29,19 @@ interface ThemeContextType {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
-    children,
-}) => {
+export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
     const { data: user } = useMe();
 
-    const [theme, setTheme] = useState<Theme>(() => {
+    const [theme, setTheme] = useState<Theme>((): Theme => {
         const saved = localStorage.getItem('theme');
         return (saved as Theme) || 'serval';
     });
 
     const [localFontUrl, setLocalFontUrl] = useState(
-        () => localStorage.getItem('custom-font-url') || '',
+        (): string => localStorage.getItem('custom-font-url') || '',
     );
     const [localFontFamily, setLocalFontFamily] = useState(
-        () => localStorage.getItem('custom-font-family') || '',
+        (): string => localStorage.getItem('custom-font-family') || '',
     );
 
     const remoteUrl = user?.settings?.customFontUrl;
@@ -58,7 +56,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
     const setCustomFontFamily = (family: string): void =>
         setLocalFontFamily(family);
 
-    useEffect(() => {
+    useEffect((): void => {
         const root = document.documentElement;
         root.classList.remove(
             'theme-serval',
@@ -74,7 +72,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
         localStorage.setItem('theme', theme);
     }, [theme]);
 
-    useEffect(() => {
+    useEffect((): void => {
         const linkId = 'custom-google-font';
         let link = document.getElementById(linkId) as HTMLLinkElement | null;
 
@@ -84,7 +82,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
                 link.id = linkId;
                 link.rel = 'stylesheet';
                 link.media = 'print';
-                link.onload = () => {
+                link.onload = (): void => {
                     if (link) link.media = 'all';
                 };
                 document.head.appendChild(link);

@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 
 import { Plus, Trash2 } from 'lucide-react';
 
@@ -73,15 +73,18 @@ const parseTargetValue = (
     return { targetType: 'everyone', targetId: 'everyone' };
 };
 
-export const MarkdownBlockadeSettings: React.FC<
-    MarkdownBlockadeSettingsProps
-> = ({ rules = [], serverId, isPending, onSave }) => {
+export const MarkdownBlockadeSettings = ({
+    rules = [],
+    serverId,
+    isPending,
+    onSave,
+}: MarkdownBlockadeSettingsProps) => {
     const [draftRules, setDraftRules] = useState<DraftMarkdownBlockadeRule[]>(
-        () => rules.map(makeDraftRule),
+        (): DraftMarkdownBlockadeRule[] => rules.map(makeDraftRule),
     );
     const [originalRules, setOriginalRules] = useState<
         DraftMarkdownBlockadeRule[]
-    >(() => rules.map(makeDraftRule));
+    >((): DraftMarkdownBlockadeRule[] => rules.map(makeDraftRule));
     const { data: roles = [] } = useRoles(serverId);
     const { data: members = [] } = useMembers(serverId);
 
@@ -124,8 +127,11 @@ export const MarkdownBlockadeSettings: React.FC<
         index: number,
         updater: (rule: DraftMarkdownBlockadeRule) => DraftMarkdownBlockadeRule,
     ): void => {
-        setDraftRules((current) =>
-            current.map((rule, i) => (i === index ? updater(rule) : rule)),
+        setDraftRules((current): DraftMarkdownBlockadeRule[] =>
+            current.map(
+                (rule, i): DraftMarkdownBlockadeRule =>
+                    i === index ? updater(rule) : rule,
+            ),
         );
     };
 
@@ -159,7 +165,7 @@ export const MarkdownBlockadeSettings: React.FC<
                                 placeholder="Select target"
                                 searchPlaceholder="Search targets..."
                                 value={ruleTargetValue(rule)}
-                                onChange={(value) =>
+                                onChange={(value): void =>
                                     updateRule(index, (current) => ({
                                         ...current,
                                         ...parseTargetValue(value),
@@ -170,9 +176,14 @@ export const MarkdownBlockadeSettings: React.FC<
                                 aria-label="Remove disallowed markdown feature rule"
                                 type="button"
                                 variant="ghost"
-                                onClick={() =>
-                                    setDraftRules((current) =>
-                                        current.filter((_, i) => i !== index),
+                                onClick={(): void =>
+                                    setDraftRules(
+                                        (
+                                            current,
+                                        ): DraftMarkdownBlockadeRule[] =>
+                                            current.filter(
+                                                (_, i): boolean => i !== index,
+                                            ),
                                     )
                                 }
                             >
@@ -191,7 +202,7 @@ export const MarkdownBlockadeSettings: React.FC<
                                         checked={rule.features.includes(
                                             feature.id,
                                         )}
-                                        onCheckedChange={(checked) =>
+                                        onCheckedChange={(checked): void =>
                                             updateRule(index, (current) => ({
                                                 ...current,
                                                 features: checked
@@ -200,7 +211,7 @@ export const MarkdownBlockadeSettings: React.FC<
                                                           feature.id,
                                                       ]
                                                     : current.features.filter(
-                                                          (item) =>
+                                                          (item): boolean =>
                                                               item !==
                                                               feature.id,
                                                       ),
@@ -227,8 +238,11 @@ export const MarkdownBlockadeSettings: React.FC<
                 icon={Plus}
                 type="button"
                 variant="normal"
-                onClick={() =>
-                    setDraftRules((current) => [...current, makeDraftRule()])
+                onClick={(): void =>
+                    setDraftRules((current): DraftMarkdownBlockadeRule[] => [
+                        ...current,
+                        makeDraftRule(),
+                    ])
                 }
             >
                 Add disallowed features
@@ -237,7 +251,7 @@ export const MarkdownBlockadeSettings: React.FC<
             <SettingsFloatingBar
                 isPending={isPending}
                 isVisible={hasChanges}
-                onReset={() => setDraftRules(originalRules)}
+                onReset={(): void => setDraftRules(originalRules)}
                 onSave={handleSave}
             />
         </div>

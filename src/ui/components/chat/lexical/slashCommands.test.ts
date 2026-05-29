@@ -2,8 +2,8 @@ import { describe, expect, it } from 'vitest';
 
 import { parseSlashInput, validateSlashCommand } from './slashCommands';
 
-describe('slashCommands parser', () => {
-    it('parses command and quoted arguments', () => {
+describe('slashCommands parser', (): void => {
+    it('parses command and quoted arguments', (): void => {
         const parsed = parseSlashInput('/poke "hello world" true');
         expect(parsed).toEqual({
             commandName: 'poke',
@@ -11,12 +11,12 @@ describe('slashCommands parser', () => {
         });
     });
 
-    it('returns null for non-slash text', () => {
+    it('returns null for non-slash text', (): void => {
         expect(parseSlashInput('hello world')).toBeNull();
     });
 });
 
-describe('slashCommands validator', () => {
+describe('slashCommands validator', (): void => {
     const commands = [
         {
             id: 'cmd1',
@@ -45,7 +45,7 @@ describe('slashCommands validator', () => {
         },
     ];
 
-    it('validates and coerces values', () => {
+    it('validates and coerces values', (): void => {
         const result = validateSlashCommand(
             { commandName: 'poke', args: ['alice', 'false', '2'] },
             commands,
@@ -64,7 +64,7 @@ describe('slashCommands validator', () => {
         });
     });
 
-    it('supports named option assignment with equals', () => {
+    it('supports named option assignment with equals', (): void => {
         const result = validateSlashCommand(
             {
                 commandName: 'poke',
@@ -86,7 +86,7 @@ describe('slashCommands validator', () => {
         });
     });
 
-    it('supports named option assignment with colon', () => {
+    it('supports named option assignment with colon', (): void => {
         const result = validateSlashCommand(
             {
                 commandName: 'poke',
@@ -107,7 +107,7 @@ describe('slashCommands validator', () => {
         });
     });
 
-    it('rejects missing required options', () => {
+    it('rejects missing required options', (): void => {
         const result = validateSlashCommand(
             { commandName: 'poke', args: [] },
             commands,
@@ -118,7 +118,7 @@ describe('slashCommands validator', () => {
         });
     });
 
-    it('rejects invalid boolean coercion', () => {
+    it('rejects invalid boolean coercion', (): void => {
         const result = validateSlashCommand(
             { commandName: 'poke', args: ['alice', 'maybe'] },
             commands,
@@ -129,7 +129,7 @@ describe('slashCommands validator', () => {
         });
     });
 
-    it('normalizes lexical mention to user id for user options', () => {
+    it('normalizes lexical mention to user id for user options', (): void => {
         const userCommand = [
             {
                 id: 'cmd2',
@@ -164,7 +164,7 @@ describe('slashCommands validator', () => {
         });
     });
 
-    it('normalizes discord mention to user id for user options', () => {
+    it('normalizes discord mention to user id for user options', (): void => {
         const userCommand = [
             {
                 id: 'cmd2',
@@ -194,7 +194,7 @@ describe('slashCommands validator', () => {
         });
     });
 
-    it('prefers matching command by commandId when multiple have the same name', () => {
+    it('prefers matching command by commandId when multiple have the same name', (): void => {
         const multipleCommands = [
             {
                 id: 'cmdA',

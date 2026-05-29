@@ -50,7 +50,7 @@ const makeHarness = (): {
     return { queryClient, wrapper: Wrapper };
 };
 
-describe('server role member mutations', () => {
+describe('server role member mutations', (): void => {
     const serverId = 'server-1';
     const userId = 'user-1';
     const roleId = 'role-can-see-private';
@@ -72,11 +72,11 @@ describe('server role member mutations', () => {
         roles: [roleId],
     };
 
-    beforeEach(() => {
+    beforeEach((): void => {
         vi.clearAllMocks();
     });
 
-    it('refreshes channel and category visibility after adding a role', async () => {
+    it('refreshes channel and category visibility after adding a role', async (): Promise<void> => {
         const { queryClient, wrapper } = makeHarness();
         const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries');
 
@@ -90,11 +90,11 @@ describe('server role member mutations', () => {
             wrapper,
         });
 
-        act(() => {
+        act((): void => {
             result.current.mutate({ userId, roleId });
         });
 
-        await waitFor(() => expect(result.current.isSuccess).toBe(true));
+        await waitFor((): void => expect(result.current.isSuccess).toBe(true));
 
         expect(invalidateSpy).toHaveBeenCalledWith({
             queryKey: SERVERS_QUERY_KEYS.channels(serverId),
@@ -104,7 +104,7 @@ describe('server role member mutations', () => {
         });
     });
 
-    it('refreshes channel and category visibility after removing a role', async () => {
+    it('refreshes channel and category visibility after removing a role', async (): Promise<void> => {
         const { queryClient, wrapper } = makeHarness();
         const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries');
 
@@ -120,11 +120,11 @@ describe('server role member mutations', () => {
             wrapper,
         });
 
-        act(() => {
+        act((): void => {
             result.current.mutate({ userId, roleId });
         });
 
-        await waitFor(() => expect(result.current.isSuccess).toBe(true));
+        await waitFor((): void => expect(result.current.isSuccess).toBe(true));
 
         expect(invalidateSpy).toHaveBeenCalledWith({
             queryKey: SERVERS_QUERY_KEYS.channels(serverId),

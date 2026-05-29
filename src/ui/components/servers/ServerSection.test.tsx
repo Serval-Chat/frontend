@@ -52,14 +52,16 @@ vi.mock('@/ui/components/common/LoadingSpinner', () => ({
     LoadingSpinner: () => <div data-testid="loading-spinner" />,
 }));
 
-describe('ServerSection fallback logic', () => {
+describe('ServerSection fallback logic', (): void => {
     const mockNavigate = vi.fn();
     const mockDispatch = vi.fn();
 
-    beforeEach(() => {
+    beforeEach((): void => {
         vi.clearAllMocks();
         vi.mocked(useNavigate).mockReturnValue(mockNavigate);
-        vi.mocked(useAppSelector).mockImplementation(() => vi.fn() as never);
+        vi.mocked(useAppSelector).mockImplementation(
+            (): never => vi.fn() as never,
+        );
 
         // Setup default dispatch mock
         vi.mocked(useAppDispatch).mockReturnValue(mockDispatch);
@@ -86,7 +88,7 @@ describe('ServerSection fallback logic', () => {
         } as never);
     });
 
-    it('navigates to @me if server queries error out (fake server ID)', () => {
+    it('navigates to @me if server queries error out (fake server ID)', (): void => {
         vi.mocked(useAppSelector).mockImplementation((selector) => {
             const state = {
                 nav: {
@@ -117,7 +119,7 @@ describe('ServerSection fallback logic', () => {
         });
     });
 
-    it('navigates to server root if chosen channel is not in the channel list (fake channel ID)', () => {
+    it('navigates to server root if chosen channel is not in the channel list (fake channel ID)', (): void => {
         vi.mocked(useAppSelector).mockImplementation((selector) => {
             const state = {
                 nav: {
@@ -154,7 +156,7 @@ describe('ServerSection fallback logic', () => {
         );
     });
 
-    it('does not navigate from server root back to a deleted last-opened channel', () => {
+    it('does not navigate from server root back to a deleted last-opened channel', (): void => {
         vi.mocked(useAppSelector).mockImplementation((selector) => {
             const state = {
                 nav: {

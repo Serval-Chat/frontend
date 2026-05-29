@@ -32,8 +32,8 @@ const USAGE = [
 ];
 
 export const userctlCommand: ConCommandReactor = {
-    match: (_argc, argv) => argv[0]?.toLowerCase() === 'userctl',
-    execute: async (argc, argv, context) => {
+    match: (_argc, argv): boolean => argv[0]?.toLowerCase() === 'userctl',
+    execute: async (argc, argv, context): Promise<{ output: string[] }> => {
         const showHelp =
             argc === 1 ||
             argv.includes('/?') ||
@@ -72,7 +72,9 @@ export const userctlCommand: ConCommandReactor = {
         const hideEmpty = argv.includes('/hide-empty');
         const requireAll = argv.includes('/require-all');
         let selectedFields = ['uname', 'dname'];
-        const filterArg = argv.find((arg) => arg.startsWith('/filter:'));
+        const filterArg = argv.find((arg): boolean =>
+            arg.startsWith('/filter:'),
+        );
 
         if (filterArg) {
             const fieldsStr = filterArg.substring('/filter:'.length);
@@ -112,7 +114,7 @@ export const userctlCommand: ConCommandReactor = {
         const extraArgs = argv
             .slice(3)
             .filter(
-                (arg) =>
+                (arg): boolean =>
                     !arg.startsWith('/filter:') &&
                     arg !== '/hide-empty' &&
                     arg !== '/require-all',
@@ -132,7 +134,7 @@ export const userctlCommand: ConCommandReactor = {
                 context.writeLine('userctl: Querying friend records...');
             }
             const baseProfiles = await friendsApi.getFriendProfiles();
-            const profileIds = baseProfiles.map((p) => p._id);
+            const profileIds = baseProfiles.map((p): string => p._id);
             const needsBadgeData = selectedFields.includes('badges');
 
             if (needsBadgeData && context.writeLine) {
@@ -143,7 +145,7 @@ export const userctlCommand: ConCommandReactor = {
 
             const profiles = needsBadgeData
                 ? await Promise.all(
-                      profileIds.map(async (id) => {
+                      profileIds.map(async (id): Promise<User> => {
                           const fullProfile = await usersApi.getById(id);
                           if (context.writeLine) {
                               context.writeLine(
@@ -165,68 +167,71 @@ export const userctlCommand: ConCommandReactor = {
                 };
             }
 
-            const columns = selectedFields.map((field) => {
-                switch (field) {
-                    case 'uname':
-                        return {
-                            header: '\u001b[96mUsername\u001b[0m',
-                            key: (u: User) => getAnsiUsername(u),
-                        };
-                    case 'pronouns':
-                        return {
-                            header: '\u001b[96mPronouns\u001b[0m',
-                            key: (u: User) => u.pronouns || '',
-                        };
-                    case 'badges':
-                        return {
-                            header: '\u001b[96mBadges\u001b[0m',
-                            key: (u: User) =>
-                                u.badges && u.badges.length > 0
-                                    ? u.badges
-                                          .map((b) =>
-                                              getAnsiColoredBadge(
-                                                  b.name,
-                                                  b.color,
-                                              ),
-                                          )
-                                          .join(', ')
-                                    : '',
-                        };
-                    case 'dname':
-                        return {
-                            header: '\u001b[96mDisplay Name\u001b[0m',
-                            key: (u: User) => getAnsiDisplayName(u),
-                        };
-                    case 'bio':
-                        return {
-                            header: '\u001b[96mBio\u001b[0m',
-                            key: (u: User) => u.bio || '',
-                        };
-                    case 'unamefnt':
-                        return {
-                            header: '\u001b[96mFont\u001b[0m',
-                            key: (u: User) => u.usernameFont || '',
-                        };
-                    case 'webconn':
-                        return {
-                            header: '\u001b[96mConnections\u001b[0m',
-                            key: (u: User) =>
-                                u.connections?.map((c) => c.value).join(', ') ||
-                                '',
-                        };
+            const columns = selectedFields.map(
+                (field): { header: string; key: (u: User) => string } => {
+                    switch (field) {
+                        case 'uname':
+                            return {
+                                header: '\u001b[96mUsername\u001b[0m',
+                                key: (u: User): string => getAnsiUsername(u),
+                            };
+                        case 'pronouns':
+                            return {
+                                header: '\u001b[96mPronouns\u001b[0m',
+                                key: (u: User): string => u.pronouns || '',
+                            };
+                        case 'badges':
+                            return {
+                                header: '\u001b[96mBadges\u001b[0m',
+                                key: (u: User): string =>
+                                    u.badges && u.badges.length > 0
+                                        ? u.badges
+                                              .map((b): string =>
+                                                  getAnsiColoredBadge(
+                                                      b.name,
+                                                      b.color,
+                                                  ),
+                                              )
+                                              .join(', ')
+                                        : '',
+                            };
+                        case 'dname':
+                            return {
+                                header: '\u001b[96mDisplay Name\u001b[0m',
+                                key: (u: User): string => getAnsiDisplayName(u),
+                            };
+                        case 'bio':
+                            return {
+                                header: '\u001b[96mBio\u001b[0m',
+                                key: (u: User): string => u.bio || '',
+                            };
+                        case 'unamefnt':
+                            return {
+                                header: '\u001b[96mFont\u001b[0m',
+                                key: (u: User) => u.usernameFont || '',
+                            };
+                        case 'webconn':
+                            return {
+                                header: '\u001b[96mConnections\u001b[0m',
+                                key: (u: User): string =>
+                                    u.connections
+                                        ?.map((c): string => c.value)
+                                        .join(', ') || '',
+                            };
 
-                    default:
-                        return {
-                            header: '',
-                            key: () => '',
-                        };
-                }
-            });
+                        default:
+                            return {
+                                header: '',
+                                key: (): string => '',
+                            };
+                    }
+                },
+            );
 
             let filteredProfiles = profiles;
             if (requireAll) {
-                filteredProfiles = profiles.filter((p) =>
-                    columns.every((col) => {
+                filteredProfiles = profiles.filter((p): boolean =>
+                    columns.every((col): boolean => {
                         const val = col.key(p);
                         const visualVal = val
                             ? String(val)
@@ -238,8 +243,8 @@ export const userctlCommand: ConCommandReactor = {
                     }),
                 );
             } else if (hideEmpty) {
-                filteredProfiles = profiles.filter((p) =>
-                    columns.some((col) => {
+                filteredProfiles = profiles.filter((p): boolean =>
+                    columns.some((col): boolean => {
                         const val = col.key(p);
                         const visualVal = val
                             ? String(val)

@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { Button } from '@/ui/components/common/Button';
 import { Modal } from '@/ui/components/common/Modal';
 import { Text } from '@/ui/components/common/Text';
@@ -11,11 +9,11 @@ interface ClearPingsModalProps {
     onConfirm: () => void;
 }
 
-export const ClearPingsModal: React.FC<ClearPingsModalProps> = ({
+export const ClearPingsModal = ({
     isOpen,
     onClose,
     onConfirm,
-}) => (
+}: ClearPingsModalProps) => (
     <Modal
         noPadding
         className="max-w-md"
@@ -35,7 +33,7 @@ export const ClearPingsModal: React.FC<ClearPingsModalProps> = ({
             </Button>
             <Button
                 variant="danger"
-                onClick={() => {
+                onClick={(): void => {
                     onConfirm();
                     onClose();
                 }}

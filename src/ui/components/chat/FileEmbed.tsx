@@ -65,11 +65,7 @@ const getMediaBoxStyle = (
     };
 };
 
-export const FileEmbed: React.FC<FileEmbedProps> = ({
-    url,
-    attachment,
-    onResize,
-}) => {
+export const FileEmbed = ({ url, attachment, onResize }: FileEmbedProps) => {
     const attachmentUrl =
         attachment !== undefined
             ? `/api/v1/files/download/${encodeURIComponent(attachment.attachmentId)}${attachment.spoiler === true ? '#spoiler' : ''}`
@@ -142,7 +138,7 @@ export const FileEmbed: React.FC<FileEmbedProps> = ({
                 <Box
                     className="group relative my-2 max-h-[min(450px,70vh)] cursor-pointer rounded-lg"
                     style={mediaBoxStyle}
-                    onClick={() => {
+                    onClick={(): void => {
                         if (isSpoiler && !isRevealed) {
                             setIsRevealed(true);
                         } else {
@@ -188,7 +184,7 @@ export const FileEmbed: React.FC<FileEmbedProps> = ({
                             className="absolute top-2 right-2 h-7 w-7 rounded-full bg-black/40 p-0 text-white opacity-0 backdrop-blur-md transition-opacity group-hover:opacity-100"
                             size="sm"
                             variant="ghost"
-                            onClick={(e) => {
+                            onClick={(e): void => {
                                 e.stopPropagation();
                                 setIsRevealed(false);
                             }}
@@ -201,7 +197,7 @@ export const FileEmbed: React.FC<FileEmbedProps> = ({
                     alt={displayName || 'Image'}
                     isOpen={isLightboxOpen}
                     src={displayUrl!}
-                    onClose={() => setIsLightboxOpen(false)}
+                    onClose={(): void => setIsLightboxOpen(false)}
                 />
             </>
         );
@@ -217,7 +213,9 @@ export const FileEmbed: React.FC<FileEmbedProps> = ({
             <Box
                 className="group relative my-2 max-h-[min(450px,70vh)] overflow-hidden rounded-lg"
                 style={mediaBoxStyle}
-                onClick={() => isSpoiler && !isRevealed && setIsRevealed(true)}
+                onClick={(): false | void =>
+                    isSpoiler && !isRevealed && setIsRevealed(true)
+                }
             >
                 {isSpoiler && !isRevealed ? (
                     <div
@@ -259,7 +257,7 @@ export const FileEmbed: React.FC<FileEmbedProps> = ({
                                 className="absolute top-2 right-2 h-7 w-7 rounded-full bg-black/40 p-0 text-white opacity-0 backdrop-blur-md transition-opacity group-hover:opacity-100"
                                 size="sm"
                                 variant="ghost"
-                                onClick={(e) => {
+                                onClick={(e): void => {
                                     e.stopPropagation();
                                     setIsRevealed(false);
                                 }}
@@ -296,7 +294,7 @@ export const FileEmbed: React.FC<FileEmbedProps> = ({
             'sh',
             'yaml',
             'json',
-        ].some((ext) => displayName?.endsWith(`.${ext}`));
+        ].some((ext): boolean => displayName?.endsWith(`.${ext}`));
     if (isText) {
         return (
             <CodeEmbed
@@ -327,7 +325,9 @@ export const FileEmbed: React.FC<FileEmbedProps> = ({
             <Button
                 size="sm"
                 variant="ghost"
-                onClick={() => window.open(resolvedUrl, '_blank')}
+                onClick={(): Window | null =>
+                    window.open(resolvedUrl, '_blank')
+                }
             >
                 <Download size={16} />
             </Button>
@@ -335,13 +335,19 @@ export const FileEmbed: React.FC<FileEmbedProps> = ({
     );
 };
 
-const CodeEmbed: React.FC<{
+const CodeEmbed = ({
+    url,
+    isLocal,
+    filename,
+    size,
+    onResize,
+}: {
     url: string;
     isLocal: boolean;
     filename: string;
     size: number;
     onResize?: () => void;
-}> = ({ url, isLocal, filename, size, onResize }) => {
+}) => {
     const [showFull, setShowFull] = React.useState(false);
     const isTooLarge = size > 1024 * 1024;
 
@@ -355,7 +361,7 @@ const CodeEmbed: React.FC<{
     const isLoading = isLocal ? loadingLocal : loadingRemote;
     const content = isLocal ? localContent : remoteContent;
 
-    React.useEffect(() => {
+    React.useEffect((): void => {
         onResize?.();
     }, [content, isLoading, onResize]);
 
@@ -378,7 +384,7 @@ const CodeEmbed: React.FC<{
                 <Button
                     size="sm"
                     variant="ghost"
-                    onClick={() => window.open(url, '_blank')}
+                    onClick={(): Window | null => window.open(url, '_blank')}
                 >
                     <Download size={16} />
                 </Button>
@@ -427,7 +433,7 @@ const CodeEmbed: React.FC<{
                             className="h-7 w-7 p-0 hover:bg-white/5"
                             size="sm"
                             variant="ghost"
-                            onClick={() => setShowFull(true)}
+                            onClick={(): void => setShowFull(true)}
                         >
                             <Maximize2
                                 className="text-muted-foreground"
@@ -438,7 +444,9 @@ const CodeEmbed: React.FC<{
                             className="h-7 w-7 p-0 hover:bg-white/5"
                             size="sm"
                             variant="ghost"
-                            onClick={() => window.open(url, '_blank')}
+                            onClick={(): Window | null =>
+                                window.open(url, '_blank')
+                            }
                         >
                             <Download
                                 className="text-muted-foreground"
@@ -469,7 +477,7 @@ const CodeEmbed: React.FC<{
                             className="flex items-center gap-1.5 border-none bg-transparent text-[11px] font-bold text-primary shadow-none transition-colors hover:text-primary-hover"
                             size="sm"
                             variant="ghost"
-                            onClick={() => setShowFull(true)}
+                            onClick={(): void => setShowFull(true)}
                         >
                             <Maximize2 size={12} />
                             Show whole
@@ -482,7 +490,7 @@ const CodeEmbed: React.FC<{
                 content={content || ''}
                 isOpen={showFull}
                 language={extension}
-                onClose={() => setShowFull(false)}
+                onClose={(): void => setShowFull(false)}
             />
         </>
     );

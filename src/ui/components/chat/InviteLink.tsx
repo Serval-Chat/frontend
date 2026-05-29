@@ -18,11 +18,15 @@ interface InviteLinkProps {
     url: string;
 }
 
-export const InviteLinkSkeleton: React.FC<{
+export const InviteLinkSkeleton = ({
+    containerRef,
+    hasBanner,
+    tagCount = 0,
+}: {
     containerRef?: React.Ref<HTMLDivElement>;
     hasBanner?: boolean;
     tagCount?: number;
-}> = ({ containerRef, hasBanner, tagCount = 0 }) => {
+}) => {
     const tagSkeletons = [
         { id: 'tag-skel-name', widthClassName: 'w-16' },
         { id: 'tag-skel-count', widthClassName: 'w-12' },
@@ -80,18 +84,18 @@ export const InviteLinkSkeleton: React.FC<{
     );
 };
 
-export const InviteLink: React.FC<InviteLinkProps> = ({ code, url }) => {
+export const InviteLink = ({ code, url }: InviteLinkProps) => {
     const [inView, setInView] = React.useState(false);
     const containerRef = React.useRef<HTMLDivElement>(null);
     const queryClient = useQueryClient();
 
     const isCached = !!queryClient.getQueryData(['invites', 'details', code]);
 
-    React.useEffect(() => {
+    React.useEffect((): (() => void) | undefined => {
         if (isCached || inView) return;
 
         const observer = new IntersectionObserver(
-            ([entry]) => {
+            ([entry]): void => {
                 if (entry.isIntersecting) {
                     setInView(true);
                     observer.disconnect();
@@ -104,7 +108,7 @@ export const InviteLink: React.FC<InviteLinkProps> = ({ code, url }) => {
             observer.observe(containerRef.current);
         }
 
-        return () => observer.disconnect();
+        return (): void => observer.disconnect();
     }, [isCached, inView]);
 
     const {
@@ -121,12 +125,12 @@ export const InviteLink: React.FC<InviteLinkProps> = ({ code, url }) => {
     const [copied, setCopied] = React.useState(false);
     const { showToast } = useToast();
 
-    const isJoined = servers?.some((s) => s._id === invite?.server.id);
+    const isJoined = servers?.some((s): boolean => s._id === invite?.server.id);
 
     const handleCopy = (): void => {
         void navigator.clipboard.writeText(url);
         setCopied(true);
-        setTimeout(() => setCopied(false), 1500);
+        setTimeout((): void => setCopied(false), 1500);
         showToast('Copied the invite URL in to the clipboard!', 'success');
     };
 

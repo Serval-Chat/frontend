@@ -26,7 +26,7 @@ interface MessageHeaderProps {
     editedAt?: string;
 }
 
-export const MessageHeader: React.FC<MessageHeaderProps> = React.memo(
+export const MessageHeader = React.memo(
     ({
         user,
         isWebhook,
@@ -42,7 +42,7 @@ export const MessageHeader: React.FC<MessageHeaderProps> = React.memo(
         onClickName,
         isEdited,
         editedAt,
-    }) => {
+    }: MessageHeaderProps) => {
         if (!isGroupStart) return null;
 
         return (

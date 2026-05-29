@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 import { Eye } from 'lucide-react';
 
@@ -8,7 +8,7 @@ import { SettingsFloatingBar } from '@/ui/components/common/SettingsFloatingBar'
 import { Text } from '@/ui/components/common/Text';
 import { Toggle } from '@/ui/components/common/Toggle';
 
-export const AccessibilitySettings: React.FC = () => {
+export const AccessibilitySettings = () => {
     const { data: user, isLoading } = useMe();
     const { mutate: updateSettings, isPending: isSaving } = useUpdateSettings();
 
@@ -56,7 +56,7 @@ export const AccessibilitySettings: React.FC = () => {
                 disableCustomUsernameGlow: disableCustomGlow,
             },
             {
-                onSuccess: () => {
+                onSuccess: (): void => {
                     setLocalDisableFonts(null);
                     setLocalDisableColors(null);
                     setLocalDisableGlow(null);

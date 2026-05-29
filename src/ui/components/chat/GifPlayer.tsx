@@ -15,11 +15,7 @@ interface GifPlayerProps {
     onResize?: () => void;
 }
 
-export const GifPlayer: React.FC<GifPlayerProps> = ({
-    klipyId,
-    url,
-    onResize,
-}) => {
+export const GifPlayer = ({ klipyId, url, onResize }: GifPlayerProps) => {
     const queryClient = useQueryClient();
 
     const {
@@ -28,7 +24,8 @@ export const GifPlayer: React.FC<GifPlayerProps> = ({
         isError,
     } = useQuery({
         queryKey: ['klipy', 'resolve', klipyId, 'gif'],
-        queryFn: () => klipyApi.resolveGif(klipyId, 'gif'),
+        queryFn: (): Promise<KlipyFavorite> =>
+            klipyApi.resolveGif(klipyId, 'gif'),
         staleTime: Infinity,
         gcTime: 30 * 60 * 1000,
     });
@@ -41,12 +38,13 @@ export const GifPlayer: React.FC<GifPlayerProps> = ({
     });
 
     const isFavorited = useMemo(
-        () => favorites.some((f) => String(f.klipyId) === klipyId),
+        (): boolean =>
+            favorites.some((f): boolean => String(f.klipyId) === klipyId),
         [favorites, klipyId],
     );
 
     const toggleFavoriteMutation = useMutation({
-        mutationFn: () => {
+        mutationFn: (): Promise<{ favorited: boolean }> => {
             if (!metadata) {
                 throw new Error('Klipy metadata is not loaded yet.');
             }
@@ -61,14 +59,14 @@ export const GifPlayer: React.FC<GifPlayerProps> = ({
                 contentType: metadata.contentType,
             });
         },
-        onSuccess: ({ favorited }) => {
+        onSuccess: ({ favorited }): void => {
             if (!metadata) return;
 
             queryClient.setQueryData<KlipyFavorite[]>(
                 ['klipy', 'favorites'],
-                (old = []) => {
+                (old = []): KlipyFavorite[] => {
                     const existing = old.some(
-                        (f) => String(f.klipyId) === klipyId,
+                        (f): boolean => String(f.klipyId) === klipyId,
                     );
 
                     if (favorited && !existing) {
@@ -76,14 +74,16 @@ export const GifPlayer: React.FC<GifPlayerProps> = ({
                     }
 
                     if (!favorited && existing) {
-                        return old.filter((f) => String(f.klipyId) !== klipyId);
+                        return old.filter(
+                            (f): boolean => String(f.klipyId) !== klipyId,
+                        );
                     }
 
                     return old;
                 },
             );
         },
-        onError: (err) => {
+        onError: (err): void => {
             console.error('Failed to toggle favorite:', err);
         },
     });
@@ -96,7 +96,7 @@ export const GifPlayer: React.FC<GifPlayerProps> = ({
         toggleFavoriteMutation.mutate();
     };
 
-    React.useEffect(() => {
+    React.useEffect((): void => {
         if (metadata) onResize?.();
     }, [metadata, onResize]);
 
@@ -153,7 +153,7 @@ export const GifPlayer: React.FC<GifPlayerProps> = ({
             <Box className="absolute top-2 right-2 opacity-0 transition-opacity group-hover:opacity-100">
                 <GifStarButton
                     isFavorited={isFavorited}
-                    onClick={(e) => void toggleFavorite(e)}
+                    onClick={(e): undefined => void toggleFavorite(e)}
                 />
             </Box>
 

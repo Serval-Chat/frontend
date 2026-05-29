@@ -23,15 +23,15 @@ vi.mock('@/ui/components/common/LoadingSpinner', () => ({
     ),
 }));
 
-describe('AdminRoute', () => {
-    beforeEach(() => {
+describe('AdminRoute', (): void => {
+    beforeEach((): void => {
         vi.clearAllMocks();
         vi.mocked(Outlet).mockReturnValue(
             <div data-testid="outlet">Admin Content</div>,
         );
     });
 
-    it('shows a loading spinner while the user query is in flight', () => {
+    it('shows a loading spinner while the user query is in flight', (): void => {
         vi.mocked(UsersQueries.useMe).mockReturnValue({
             data: undefined,
             isLoading: true,
@@ -46,7 +46,7 @@ describe('AdminRoute', () => {
         );
     });
 
-    it('redirects to /login when there is no authenticated user', () => {
+    it('redirects to /login when there is no authenticated user', (): void => {
         vi.mocked(UsersQueries.useMe).mockReturnValue({
             data: undefined,
             isLoading: false,
@@ -59,7 +59,7 @@ describe('AdminRoute', () => {
         expect(nav).toHaveAttribute('data-to', '/login');
     });
 
-    it('redirects to / when the user has no admin permissions at all', () => {
+    it('redirects to / when the user has no admin permissions at all', (): void => {
         vi.mocked(UsersQueries.useMe).mockReturnValue({
             data: {
                 _id: 'user-1',
@@ -86,7 +86,7 @@ describe('AdminRoute', () => {
         expect(nav).toHaveAttribute('data-to', '/');
     });
 
-    it('redirects to / when the user has no permissions object', () => {
+    it('redirects to / when the user has no permissions object', (): void => {
         vi.mocked(UsersQueries.useMe).mockReturnValue({
             data: {
                 _id: 'user-2',
@@ -102,7 +102,7 @@ describe('AdminRoute', () => {
         expect(nav).toHaveAttribute('data-to', '/');
     });
 
-    it('renders the outlet when the user has adminAccess=true', () => {
+    it('renders the outlet when the user has adminAccess=true', (): void => {
         vi.mocked(UsersQueries.useMe).mockReturnValue({
             data: {
                 _id: 'admin-1',
@@ -129,7 +129,7 @@ describe('AdminRoute', () => {
         expect(screen.queryByTestId('navigate')).not.toBeInTheDocument();
     });
 
-    it('renders the outlet when the user has any single permission (e.g. viewUsers)', () => {
+    it('renders the outlet when the user has any single permission (e.g. viewUsers)', (): void => {
         vi.mocked(UsersQueries.useMe).mockReturnValue({
             data: {
                 _id: 'mod-1',
@@ -155,7 +155,7 @@ describe('AdminRoute', () => {
         expect(screen.getByTestId('outlet')).toBeInTheDocument();
     });
 
-    it('renders the outlet for a moderator with multiple (but non-super) permissions', () => {
+    it('renders the outlet for a moderator with multiple (but non-super) permissions', (): void => {
         vi.mocked(UsersQueries.useMe).mockReturnValue({
             data: {
                 _id: 'mod-2',

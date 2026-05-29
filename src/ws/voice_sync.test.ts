@@ -37,14 +37,14 @@ function emitWsEvent(
     } as MessageEvent);
 }
 
-describe('Voice Synchronization WS Handlers', () => {
+describe('Voice Synchronization WS Handlers', (): void => {
     let mockWs: MockWebSocket;
     let queryClient: QueryClient;
     let mockDispatch: ReturnType<typeof vi.fn>;
     let dispatch: Dispatch<UnknownAction>;
     let cleanup: () => void;
 
-    beforeEach(() => {
+    beforeEach((): void => {
         vi.clearAllMocks();
         wsClient.disconnect();
 
@@ -81,12 +81,12 @@ describe('Voice Synchronization WS Handlers', () => {
         cleanup = setupGlobalWsHandlers(queryClient, dispatch);
     });
 
-    afterEach(() => {
+    afterEach((): void => {
         cleanup();
         queryClient.clear();
     });
 
-    it('handles VOICE_JOINED properly by atomically setting all participants and states', () => {
+    it('handles VOICE_JOINED properly by atomically setting all participants and states', (): void => {
         const payload = {
             success: true,
             serverId: 'server-1',
@@ -124,7 +124,7 @@ describe('Voice Synchronization WS Handlers', () => {
         );
     });
 
-    it('handles USER_JOINED_VOICE properly', () => {
+    it('handles USER_JOINED_VOICE properly', (): void => {
         const payload = {
             serverId: 'server-1',
             channelId: 'channel-1',
@@ -138,7 +138,7 @@ describe('Voice Synchronization WS Handlers', () => {
         );
     });
 
-    it('handles USER_LEFT_VOICE properly', () => {
+    it('handles USER_LEFT_VOICE properly', (): void => {
         const payload = {
             serverId: 'server-1',
             channelId: 'channel-1',
@@ -155,7 +155,7 @@ describe('Voice Synchronization WS Handlers', () => {
         );
     });
 
-    it('handles VOICE_STATE_UPDATED properly', () => {
+    it('handles VOICE_STATE_UPDATED properly', (): void => {
         const payload = {
             userId: 'user-1',
             isMuted: false,

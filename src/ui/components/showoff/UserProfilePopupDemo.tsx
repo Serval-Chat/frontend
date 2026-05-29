@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 
 import type { User } from '@/api/users/users.types';
 import { Button } from '@/ui/components/common/Button';
@@ -11,7 +11,7 @@ import { DemoItem } from './DemoItem';
 import { DemoSection } from './DemoSection';
 import { SHOWOFF_SECTIONS } from './config';
 
-export const UserProfilePopupDemo: React.FC = () => {
+export const UserProfilePopupDemo = () => {
     const [isPopupOpen, setIsPopupOpen] = useState(false);
     const triggerRef = useRef<HTMLDivElement>(null);
 
@@ -84,7 +84,7 @@ export const UserProfilePopupDemo: React.FC = () => {
                         <Button
                             className="w-fit rounded-md bg-primary px-4 py-2 font-semibold text-black transition-opacity hover:opacity-90"
                             variant="primary"
-                            onClick={() => setIsPopupOpen(true)}
+                            onClick={(): void => setIsPopupOpen(true)}
                         >
                             Show Mock Profile
                         </Button>
@@ -97,7 +97,7 @@ export const UserProfilePopupDemo: React.FC = () => {
                         triggerRef={triggerRef}
                         user={mockUser}
                         userId={mockUser._id}
-                        onClose={() => setIsPopupOpen(false)}
+                        onClose={(): void => setIsPopupOpen(false)}
                     />
                 </div>
             </DemoItem>

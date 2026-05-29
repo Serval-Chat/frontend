@@ -12,10 +12,10 @@ interface MockWebSocket {
     onclose: ((ev: CloseEvent) => void) | null;
 }
 
-describe('WsClient', () => {
+describe('WsClient', (): void => {
     let mockWebSocket: MockWebSocket;
 
-    beforeEach(() => {
+    beforeEach((): void => {
         vi.clearAllMocks();
 
         // Use public API to reset state
@@ -47,7 +47,7 @@ describe('WsClient', () => {
         wsClient.connect('test-token');
     });
 
-    it('should subscribe to events', () => {
+    it('should subscribe to events', (): void => {
         const handler = vi.fn();
         wsClient.on('test-event', handler);
 
@@ -66,7 +66,7 @@ describe('WsClient', () => {
         expect(handler).toHaveBeenCalledWith({ data: 'hello' }, envelope.meta);
     });
 
-    it('should unsubscribe from events', () => {
+    it('should unsubscribe from events', (): void => {
         const handler = vi.fn();
         const off = wsClient.on('test-event-2', handler);
         off();

@@ -13,32 +13,37 @@ interface ConnectivityState {
 }
 
 export function useConnectivity(): ConnectivityState {
-    const [status, setStatus] = useState<ConnectivityState['status']>(() => {
-        if (!navigator.onLine) return 'offline';
-        const wsStatus = wsClient.getStatus();
-        if (wsStatus === 'authenticated') return 'online';
-        if (wsStatus === 'connecting') return 'connecting';
-        return 'connecting';
-    });
+    const [status, setStatus] = useState<ConnectivityState['status']>(
+        (): 'offline' | 'online' | 'connecting' => {
+            if (!navigator.onLine) return 'offline';
+            const wsStatus = wsClient.getStatus();
+            if (wsStatus === 'authenticated') return 'online';
+            if (wsStatus === 'connecting') return 'connecting';
+            return 'connecting';
+        },
+    );
 
-    useEffect(() => {
+    useEffect((): (() => void) => {
         const handleOnline = (): void => setStatus('connecting');
         const handleOffline = (): void => setStatus('offline');
 
         window.addEventListener('online', handleOnline);
         window.addEventListener('offline', handleOffline);
 
-        const unsubscribeAuth = wsClient.on(WsEvents.AUTHENTICATED, () => {
-            setStatus('online');
-        });
+        const unsubscribeAuth = wsClient.on(
+            WsEvents.AUTHENTICATED,
+            (): void => {
+                setStatus('online');
+            },
+        );
 
-        const unsubscribeDisc = wsClient.on(WsEvents.DISCONNECTED, () => {
-            setStatus((prev) =>
+        const unsubscribeDisc = wsClient.on(WsEvents.DISCONNECTED, (): void => {
+            setStatus((prev): 'offline' | 'reconnecting' =>
                 prev === 'offline' ? 'offline' : 'reconnecting',
             );
         });
 
-        return () => {
+        return (): void => {
             window.removeEventListener('online', handleOnline);
             window.removeEventListener('offline', handleOffline);
             unsubscribeAuth();

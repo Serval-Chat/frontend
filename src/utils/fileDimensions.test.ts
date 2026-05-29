@@ -5,13 +5,13 @@ import {
     readMediaDimensions,
 } from '@/utils/fileDimensions';
 
-describe('readMediaDimensions', () => {
-    afterEach(() => {
+describe('readMediaDimensions', (): void => {
+    afterEach((): void => {
         vi.restoreAllMocks();
         vi.unstubAllGlobals();
     });
 
-    it('reads image dimensions with createImageBitmap', async () => {
+    it('reads image dimensions with createImageBitmap', async (): Promise<void> => {
         const close = vi.fn();
         vi.stubGlobal(
             'createImageBitmap',
@@ -27,29 +27,36 @@ describe('readMediaDimensions', () => {
         expect(close).toHaveBeenCalled();
     });
 
-    it('reads video dimensions from metadata', async () => {
+    it('reads video dimensions from metadata', async (): Promise<void> => {
         vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:video');
-        vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => undefined);
+        vi.spyOn(URL, 'revokeObjectURL').mockImplementation(
+            (): undefined => undefined,
+        );
 
         const originalCreateElement = document.createElement.bind(document);
-        vi.spyOn(document, 'createElement').mockImplementation((tagName) => {
-            if (tagName !== 'video') return originalCreateElement(tagName);
+        vi.spyOn(document, 'createElement').mockImplementation(
+            (tagName): HTMLElement => {
+                if (tagName !== 'video') return originalCreateElement(tagName);
 
-            const video = {
-                load: vi.fn(),
-                removeAttribute: vi.fn(),
-                videoWidth: 1280,
-                videoHeight: 720,
-                onerror: null as (() => void) | null,
-                onloadedmetadata: null as (() => void) | null,
-                preload: '',
-                set src(_value: string) {
-                    setTimeout(() => this.onloadedmetadata?.(), 0);
-                },
-            };
+                const video = {
+                    load: vi.fn(),
+                    removeAttribute: vi.fn(),
+                    videoWidth: 1280,
+                    videoHeight: 720,
+                    onerror: null as (() => void) | null,
+                    onloadedmetadata: null as (() => void) | null,
+                    preload: '',
+                    set src(_value: string) {
+                        setTimeout(
+                            (): void | undefined => this.onloadedmetadata?.(),
+                            0,
+                        );
+                    },
+                };
 
-            return video as unknown as HTMLVideoElement;
-        });
+                return video as unknown as HTMLVideoElement;
+            },
+        );
 
         const file = new File(['video'], 'video.mp4', { type: 'video/mp4' });
 
@@ -59,15 +66,15 @@ describe('readMediaDimensions', () => {
         });
     });
 
-    it('does not read dimensions for generic files', async () => {
+    it('does not read dimensions for generic files', async (): Promise<void> => {
         const file = new File(['text'], 'note.txt', { type: 'text/plain' });
 
         await expect(readMediaDimensions(file)).resolves.toBeUndefined();
     });
 });
 
-describe('applyMediaDimensions', () => {
-    it('keeps server-provided dimensions over local dimensions', () => {
+describe('applyMediaDimensions', (): void => {
+    it('keeps server-provided dimensions over local dimensions', (): void => {
         expect(
             applyMediaDimensions(
                 { attachmentId: 'a', width: 100, height: 50 },
@@ -76,7 +83,7 @@ describe('applyMediaDimensions', () => {
         ).toMatchObject({ width: 100, height: 50 });
     });
 
-    it('fills missing dimensions from local metadata', () => {
+    it('fills missing dimensions from local metadata', (): void => {
         expect(
             applyMediaDimensions(
                 { attachmentId: 'a' },

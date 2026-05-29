@@ -15,11 +15,13 @@ import { Window } from '@/ui/components/nt/Window';
 const MEASURE_COLUMNS = 80;
 const SIZE_GUARD_PX = 1;
 
-export const NTConsole: React.FC = () => {
+export const NTConsole = () => {
     const dispatch = useAppDispatch();
-    const isOpen = useAppSelector((state) => state.debugOptions.isConsoleOpen);
+    const isOpen = useAppSelector(
+        (state): boolean => state.debugOptions.isConsoleOpen,
+    );
     const [terminal] = useState(
-        () =>
+        (): Terminal =>
             new Terminal({
                 initialLines: [
                     'Serchat(R) Console NT(TM)',
@@ -28,7 +30,7 @@ export const NTConsole: React.FC = () => {
                 ],
             }),
     );
-    const [filesystem] = useState(() => new DosFileSystem());
+    const [filesystem] = useState((): DosFileSystem => new DosFileSystem());
 
     const [history, setHistory] = useState(() => terminal.snapshot());
     const [currentInput, setCurrentInput] = useState<string>('');
@@ -38,31 +40,31 @@ export const NTConsole: React.FC = () => {
     const [activeProgram, setActiveProgram] = useState<ConsoleProgram | null>(
         null,
     );
-    const [cwd, setCwd] = useState(() => filesystem.getCwd());
+    const [cwd, setCwd] = useState((): string => filesystem.getCwd());
     const activeProgramRef = useRef<ConsoleProgram | null>(null);
 
     const consoleRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
     const measureRef = useRef<HTMLSpanElement>(null);
 
-    useEffect(() => {
+    useEffect((): void => {
         terminal.attach(setHistory);
     }, [terminal]);
 
-    useEffect(() => {
+    useEffect((): void => {
         activeProgramRef.current = activeProgram;
     }, [activeProgram]);
 
-    useEffect(() => {
+    useEffect((): (() => void) | undefined => {
         if (isOpen) {
-            const timer = setTimeout(() => {
+            const timer = setTimeout((): void => {
                 inputRef.current?.focus();
             }, 50);
-            return () => clearTimeout(timer);
+            return (): void => clearTimeout(timer);
         }
     }, [isOpen]);
 
-    useEffect(() => {
+    useEffect((): (() => void) | undefined => {
         if (!isOpen) return;
 
         const handleFocus = (): void => {
@@ -75,10 +77,10 @@ export const NTConsole: React.FC = () => {
         };
 
         const interval = setInterval(handleFocus, 100);
-        return () => clearInterval(interval);
+        return (): void => clearInterval(interval);
     }, [isOpen, isCommandRunning]);
 
-    useEffect(() => {
+    useEffect((): (() => void) | undefined => {
         if (!isOpen || !consoleRef.current) return;
 
         const updateTerminalSize = (): void => {
@@ -131,10 +133,10 @@ export const NTConsole: React.FC = () => {
         if (measureRef.current) {
             resizeObserver.observe(measureRef.current);
         }
-        return () => resizeObserver.disconnect();
+        return (): void => resizeObserver.disconnect();
     }, [isOpen, terminal]);
 
-    useEffect(() => {
+    useEffect((): void => {
         const viewport = consoleRef.current?.querySelector(
             '.nt-scroll-area__viewport',
         );
@@ -160,29 +162,31 @@ export const NTConsole: React.FC = () => {
             return;
         }
 
-        setCommandHistory((prev) => [...prev, input]);
+        setCommandHistory((prev): string[] => [...prev, input]);
         setHistoryIndex(-1);
         setIsCommandRunning(true);
 
-        void (async () => {
+        void (async (): Promise<void> => {
             terminal.puts(fullPromptLine);
-            await new Promise((resolve) => setTimeout(resolve, 100));
+            await new Promise(
+                (resolve): NodeJS.Timeout => setTimeout(resolve, 100),
+            );
 
             const result = await registry.execute(input, {
                 dispatch,
-                endProgram: () => {
+                endProgram: (): void => {
                     activeProgramRef.current = null;
                     setActiveProgram(null);
                 },
                 filesystem,
-                startProgram: (program) => {
+                startProgram: (program): void => {
                     activeProgramRef.current = program;
                     setActiveProgram(program);
                     program.start();
                 },
                 terminal,
-                writeLine: (line: string) => terminal.puts(line),
-                clearScreen: () => terminal.clear(),
+                writeLine: (line: string): void => terminal.puts(line),
+                clearScreen: (): void => terminal.clear(),
             });
 
             if (result.clear) {
@@ -202,7 +206,7 @@ export const NTConsole: React.FC = () => {
                 altKey: e.altKey,
                 ctrlKey: e.ctrlKey,
                 key: e.key,
-                preventDefault: () => e.preventDefault(),
+                preventDefault: (): void => e.preventDefault(),
             });
             return;
         }
@@ -251,7 +255,10 @@ export const NTConsole: React.FC = () => {
             defaultY={120}
             icon="/icons/retro/chip.png"
             title="Command Prompt"
-            onClose={() => dispatch(toggleConsole())}
+            onClose={(): {
+                payload: undefined;
+                type: 'debugOptions/toggleConsole';
+            } => dispatch(toggleConsole())}
         >
             {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
             <div
@@ -311,7 +318,7 @@ export const NTConsole: React.FC = () => {
                         ref={inputRef}
                         type="text"
                         value={currentInput}
-                        onChange={(e) => setCurrentInput(e.target.value)}
+                        onChange={(e): void => setCurrentInput(e.target.value)}
                         onKeyDown={handleKeyDown}
                     />
                 </NTScrollArea>

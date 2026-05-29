@@ -10,11 +10,11 @@ vi.mock('./client', () => ({
     },
 }));
 
-describe('wsMessages', () => {
-    it('sendMessageServer should cap noEmbedsUrls at 25', () => {
+describe('wsMessages', (): void => {
+    it('sendMessageServer should cap noEmbedsUrls at 25', (): void => {
         const noEmbedsUrls = Array.from(
             { length: 26 },
-            (_, index) => `https://example.com/${index}`,
+            (_, index): string => `https://example.com/${index}`,
         );
 
         wsMessages.sendMessageServer(
@@ -36,7 +36,7 @@ describe('wsMessages', () => {
         );
     });
 
-    it('markDmRead should send peerId instead of userId', () => {
+    it('markDmRead should send peerId instead of userId', (): void => {
         const peerId = '12345';
         wsMessages.markDmRead(peerId);
 

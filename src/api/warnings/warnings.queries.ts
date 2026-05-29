@@ -14,7 +14,8 @@ export const useMyWarnings = (
 ): UseQueryResult<Warning[], Error> =>
     useQuery({
         queryKey: ['warnings', { acknowledged }],
-        queryFn: () => warningsApi.getMyWarnings(acknowledged),
+        queryFn: (): Promise<Warning[]> =>
+            warningsApi.getMyWarnings(acknowledged),
     });
 
 export const useAcknowledgeWarning = (): UseMutationResult<
@@ -26,7 +27,7 @@ export const useAcknowledgeWarning = (): UseMutationResult<
 
     return useMutation({
         mutationFn: warningsApi.acknowledgeWarning,
-        onSuccess: () => {
+        onSuccess: (): void => {
             void queryClient.invalidateQueries({ queryKey: ['warnings'] });
         },
     });
@@ -37,6 +38,6 @@ export const useAdminUserWarnings = (
 ): UseQueryResult<Warning[], Error> =>
     useQuery({
         queryKey: ['admin-user-warnings', userId],
-        queryFn: () => warningsApi.getUserWarnings(userId),
+        queryFn: (): Promise<Warning[]> => warningsApi.getUserWarnings(userId),
         enabled: !!userId,
     });

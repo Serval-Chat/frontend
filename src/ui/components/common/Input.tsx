@@ -58,7 +58,10 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
     ) => {
         const internalRef = React.useRef<HTMLInputElement>(null);
 
-        React.useImperativeHandle(ref, () => internalRef.current!);
+        React.useImperativeHandle(
+            ref,
+            (): HTMLInputElement => internalRef.current!,
+        );
 
         const isNumber = type === 'number';
 

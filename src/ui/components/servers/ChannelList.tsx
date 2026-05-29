@@ -103,7 +103,7 @@ interface ChannelRowProps {
     getChannelMenuItems: (channel: Channel) => ContextMenuItem[];
 }
 
-const ChannelRow: React.FC<ChannelRowProps> = React.memo(
+const ChannelRow = React.memo(
     ({
         channel,
         selectedServerId,
@@ -114,7 +114,7 @@ const ChannelRow: React.FC<ChannelRowProps> = React.memo(
         handleChannelClick,
         setSettingsChannel,
         getChannelMenuItems,
-    }) => {
+    }: ChannelRowProps) => {
         const queryClient = useQueryClient();
         const { hasPermission, isLoading, permissions } = usePermissions(
             selectedServerId,
@@ -123,7 +123,7 @@ const ChannelRow: React.FC<ChannelRowProps> = React.memo(
         const canView = hasPermission('viewChannels');
         const canConnect = hasPermission('connect');
 
-        const handleMouseEnter = React.useCallback(() => {
+        const handleMouseEnter = React.useCallback((): void => {
             if (channel.type !== 'text' || !selectedServerId) return;
 
             void queryClient.prefetchInfiniteQuery({
@@ -180,11 +180,11 @@ const ChannelRow: React.FC<ChannelRowProps> = React.memo(
                     name={channel.name}
                     pingCount={channelPings[channel._id]}
                     type={channel.type}
-                    onClick={() => handleChannelClick(channel)}
+                    onClick={(): void => handleChannelClick(channel)}
                     onMouseEnter={handleMouseEnter}
                     onSettingsClick={
                         canManageChannels
-                            ? (e) => {
+                            ? (e): void => {
                                   e.stopPropagation();
                                   setSettingsChannel(channel);
                               }
@@ -201,27 +201,27 @@ ChannelRow.displayName = 'ChannelRow';
 /**
  * @description Renders the list of channels grouped by categories.
  */
-export const ChannelList: React.FC<ChannelListProps> = ({
+export const ChannelList = ({
     channels,
     categories,
     selectedChannelId,
     scrollRef,
     hiddenChannelIds = [],
     hiddenCategoryIds = [],
-}) => {
+}: ChannelListProps) => {
     const selectedServerId = useAppSelector(
-        (state) => state.nav.selectedServerId,
+        (state): string | null => state.nav.selectedServerId,
     );
     const dispatch = useAppDispatch();
     const voiceParticipants = useAppSelector(
-        (state) => state.voice.voiceParticipants,
+        (state): Record<string, string[]> => state.voice.voiceParticipants,
     );
     const { data: me } = useMe();
     const { data: pingsData } = usePings();
 
-    const channelPings = React.useMemo(() => {
+    const channelPings = React.useMemo((): Record<string, number> => {
         const counts: Record<string, number> = {};
-        pingsData?.pings.forEach((p) => {
+        pingsData?.pings.forEach((p): void => {
             if (p.channelId) {
                 counts[p.channelId] = (counts[p.channelId] || 0) + 1;
             }
@@ -262,32 +262,32 @@ export const ChannelList: React.FC<ChannelListProps> = ({
     useVoiceStates(selectedServerId);
 
     const existingCategoryIds = React.useMemo(
-        () => new Set(categories.map((cat) => cat._id)),
+        (): Set<string> => new Set(categories.map((cat): string => cat._id)),
         [categories],
     );
     const hiddenChannels = React.useMemo(
-        () => new Set(hiddenChannelIds),
+        (): Set<string> => new Set(hiddenChannelIds),
         [hiddenChannelIds],
     );
     const hiddenCategories = React.useMemo(
-        () => new Set(hiddenCategoryIds),
+        (): Set<string> => new Set(hiddenCategoryIds),
         [hiddenCategoryIds],
     );
 
-    useEffect(() => {
+    useEffect((): (() => void) => {
         const handleResize = (): void => setIsMobile(window.innerWidth < 768);
         window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
+        return (): void => window.removeEventListener('resize', handleResize);
     }, []);
 
     // Sync items when props change
-    useEffect(() => {
+    useEffect((): void => {
         if (isReordering || syncLock) return;
 
         const visibleCategories = categories.filter(
-            (category) => !hiddenCategories.has(category._id),
+            (category): boolean => !hiddenCategories.has(category._id),
         );
-        const visibleChannels = channels.filter((channel) => {
+        const visibleChannels = channels.filter((channel): boolean => {
             if (hiddenChannels.has(channel._id)) return false;
             if (
                 channel.categoryId &&
@@ -299,28 +299,29 @@ export const ChannelList: React.FC<ChannelListProps> = ({
         });
 
         const sortedCategories = [...visibleCategories].sort(
-            (a, b) => a.position - b.position,
+            (a, b): number => a.position - b.position,
         );
         const sortedChannels = [...visibleChannels].sort(
-            (a, b) => a.position - b.position,
+            (a, b): number => a.position - b.position,
         );
 
         const newList: ListItem[] = [];
 
         const uncategorized = sortedChannels.filter(
-            (c) => !c.categoryId || !existingCategoryIds.has(c.categoryId),
+            (c): boolean =>
+                !c.categoryId || !existingCategoryIds.has(c.categoryId),
         );
-        uncategorized.forEach((c) =>
+        uncategorized.forEach((c): number =>
             newList.push({ type: 'channel', id: c._id, data: c }),
         );
 
         // Add categories and their channels
-        sortedCategories.forEach((cat) => {
+        sortedCategories.forEach((cat): void => {
             newList.push({ type: 'category', id: cat._id, data: cat });
             const catChannels = sortedChannels.filter(
-                (c) => c.categoryId === cat._id,
+                (c): boolean => c.categoryId === cat._id,
             );
-            catChannels.forEach((c) =>
+            catChannels.forEach((c): number =>
                 newList.push({ type: 'channel', id: c._id, data: c }),
             );
         });
@@ -337,10 +338,12 @@ export const ChannelList: React.FC<ChannelListProps> = ({
     ]);
 
     // Mark channel as read when opened
-    useEffect(() => {
+    useEffect((): void => {
         if (!selectedChannelId || !selectedServerId) return;
 
-        const channel = channels.find((c) => c._id === selectedChannelId);
+        const channel = channels.find(
+            (c): boolean => c._id === selectedChannelId,
+        );
         if (!channel) return;
 
         const isUnread =
@@ -354,7 +357,7 @@ export const ChannelList: React.FC<ChannelListProps> = ({
     }, [selectedChannelId, selectedServerId, channels]);
 
     const toggleCategory = (categoryId: string): void => {
-        setCollapsedCategories((prev) => ({
+        setCollapsedCategories((prev): { [x: string]: boolean } => ({
             ...prev,
             [categoryId]: !prev[categoryId],
         }));
@@ -363,8 +366,8 @@ export const ChannelList: React.FC<ChannelListProps> = ({
     const [activeItemId, setActiveItemId] = useState<string | null>(null);
 
     const visibleItems = React.useMemo(
-        () =>
-            items.filter((item) => {
+        (): ListItem[] =>
+            items.filter((item): boolean => {
                 if (
                     item.type === 'channel' &&
                     item.data.categoryId &&
@@ -379,9 +382,9 @@ export const ChannelList: React.FC<ChannelListProps> = ({
 
     const rowVirtualizer = useVirtualizer({
         count: visibleItems.length,
-        getScrollElement: () => scrollRef.current,
+        getScrollElement: (): HTMLDivElement | null => scrollRef.current,
         estimateSize: useCallback(
-            (index: number) => {
+            (index: number): number => {
                 const item = visibleItems[index];
                 if (!item) return 0;
                 if (item.type === 'category') return 32;
@@ -393,33 +396,35 @@ export const ChannelList: React.FC<ChannelListProps> = ({
             },
             [visibleItems, voiceParticipants],
         ),
-        measureElement: (el) => el.getBoundingClientRect().height,
+        measureElement: (el): number => el.getBoundingClientRect().height,
         overscan: 10,
     });
 
     const handleReorder = (newVisibleItems: ListItem[]): void => {
         setIsReordering(true);
 
-        const activeItem = items.find((i) => i.id === activeItemId);
+        const activeItem = items.find((i): boolean => i.id === activeItemId);
         let updatedVisible = [...newVisibleItems];
 
         if (activeItem?.type === 'category') {
             const categoryId = activeItem.id;
             const visibleChildren = items.filter(
-                (i) =>
+                (i): boolean =>
                     i.type === 'channel' &&
                     i.data.categoryId === categoryId &&
                     !collapsedCategories[categoryId],
             );
 
             if (visibleChildren.length > 0) {
-                const childIds = new Set(visibleChildren.map((c) => c.id));
+                const childIds = new Set(
+                    visibleChildren.map((c): string => c.id),
+                );
                 const newCategoryIndex = updatedVisible.findIndex(
-                    (i) => i.id === categoryId,
+                    (i): boolean => i.id === categoryId,
                 );
 
                 updatedVisible = updatedVisible.filter(
-                    (i) => !childIds.has(i.id),
+                    (i): boolean => !childIds.has(i.id),
                 );
                 updatedVisible.splice(
                     newCategoryIndex + 1,
@@ -430,11 +435,11 @@ export const ChannelList: React.FC<ChannelListProps> = ({
         }
 
         const fullNewList: ListItem[] = [];
-        updatedVisible.forEach((item) => {
+        updatedVisible.forEach((item): void => {
             fullNewList.push(item);
             if (item.type === 'category') {
                 const hiddenChildren = items.filter(
-                    (i) =>
+                    (i): boolean =>
                         i.type === 'channel' &&
                         i.data.categoryId === item.id &&
                         collapsedCategories[item.id],
@@ -468,7 +473,7 @@ export const ChannelList: React.FC<ChannelListProps> = ({
             let channelPos = 0;
             let categoryPos = 0;
 
-            items.forEach((item) => {
+            items.forEach((item): void => {
                 if (item.type === 'category') {
                     currentCategoryId = item.id;
                     categoryPositions.push({
@@ -494,7 +499,7 @@ export const ChannelList: React.FC<ChannelListProps> = ({
             const promises: Promise<unknown>[] = [];
 
             // Update category IDs if changed
-            channelUpdates.forEach((update) => {
+            channelUpdates.forEach((update): void => {
                 promises.push(
                     serversApi.updateChannel(
                         selectedServerId,
@@ -532,11 +537,11 @@ export const ChannelList: React.FC<ChannelListProps> = ({
             setIsReordering(false);
             setActiveItemId(null);
             setSyncLock(true);
-            setTimeout(() => setSyncLock(false), 500);
+            setTimeout((): void => setSyncLock(false), 500);
         }
     }, [selectedServerId, canManageChannels, items]);
 
-    const handleDragStartItem = React.useCallback((id: string) => {
+    const handleDragStartItem = React.useCallback((id: string): void => {
         setActiveItemId(id);
         setIsReordering(true);
     }, []);
@@ -566,18 +571,18 @@ export const ChannelList: React.FC<ChannelListProps> = ({
             // Find items of the same type and scope to determine who to swap with
             let siblings: ListItem[] = [];
             if (itemToMove.type === 'category') {
-                siblings = items.filter((i) => i.type === 'category');
+                siblings = items.filter((i): boolean => i.type === 'category');
             } else {
                 const channel = itemToMove.data as Channel;
                 siblings = items.filter(
-                    (i) =>
+                    (i): boolean =>
                         i.type === 'channel' &&
                         i.data.categoryId === channel.categoryId,
                 );
             }
 
             const currentIndex = siblings.findIndex(
-                (i) => i.id === itemToMove.id,
+                (i): boolean => i.id === itemToMove.id,
             );
             const targetIndex =
                 direction === 'up' ? currentIndex - 1 : currentIndex + 1;
@@ -589,12 +594,16 @@ export const ChannelList: React.FC<ChannelListProps> = ({
             // Optimistic UI update
             const newItems = [...items];
             if (itemToMove.type === 'category') {
-                const idxA = newItems.findIndex((i) => i.id === itemToMove.id);
-                const idxB = newItems.findIndex((i) => i.id === targetItem.id);
+                const idxA = newItems.findIndex(
+                    (i): boolean => i.id === itemToMove.id,
+                );
+                const idxB = newItems.findIndex(
+                    (i): boolean => i.id === targetItem.id,
+                );
                 const blockA = [
                     newItems[idxA],
                     ...newItems.filter(
-                        (i) =>
+                        (i): boolean =>
                             i.type === 'channel' &&
                             i.data.categoryId === itemToMove.id,
                     ),
@@ -602,7 +611,7 @@ export const ChannelList: React.FC<ChannelListProps> = ({
                 const blockB = [
                     newItems[idxB],
                     ...newItems.filter(
-                        (i) =>
+                        (i): boolean =>
                             i.type === 'channel' &&
                             i.data.categoryId === targetItem.id,
                     ),
@@ -610,7 +619,7 @@ export const ChannelList: React.FC<ChannelListProps> = ({
                 const minIdx = Math.min(idxA, idxB);
 
                 const filtered = newItems.filter(
-                    (i) =>
+                    (i): boolean =>
                         !(
                             i.id === itemToMove.id ||
                             i.id === targetItem.id ||
@@ -627,8 +636,12 @@ export const ChannelList: React.FC<ChannelListProps> = ({
                 }
                 setItems(filtered);
             } else {
-                const idxA = newItems.findIndex((i) => i.id === itemToMove.id);
-                const idxB = newItems.findIndex((i) => i.id === targetItem.id);
+                const idxA = newItems.findIndex(
+                    (i): boolean => i.id === itemToMove.id,
+                );
+                const idxB = newItems.findIndex(
+                    (i): boolean => i.id === targetItem.id,
+                );
 
                 newItems[idxA] = items[idxB];
                 newItems[idxB] = items[idxA];
@@ -657,7 +670,7 @@ export const ChannelList: React.FC<ChannelListProps> = ({
             } catch (error) {
                 console.error('Failed to reorder items:', error);
             } finally {
-                setTimeout(() => setSyncLock(false), 500);
+                setTimeout((): void => setSyncLock(false), 500);
             }
         },
         [selectedServerId, canManageChannels, items],
@@ -666,7 +679,7 @@ export const ChannelList: React.FC<ChannelListProps> = ({
     const channelsRef = React.useRef(channels);
     const categoriesRef = React.useRef(categories);
 
-    React.useEffect(() => {
+    React.useEffect((): void => {
         channelsRef.current = channels;
         categoriesRef.current = categories;
     }, [channels, categories]);
@@ -677,7 +690,7 @@ export const ChannelList: React.FC<ChannelListProps> = ({
                 {
                     label: 'Copy Channel Link',
                     icon: LinkIcon,
-                    onClick: () => {
+                    onClick: (): void => {
                         const url = `${window.location.origin}/chat/@server/${channel.serverId}/channel/${channel._id}`;
                         void navigator.clipboard.writeText(url);
                     },
@@ -685,7 +698,7 @@ export const ChannelList: React.FC<ChannelListProps> = ({
                 {
                     label: 'Copy Channel ID',
                     icon: Copy,
-                    onClick: () => {
+                    onClick: (): void => {
                         void navigator.clipboard.writeText(channel._id);
                     },
                 },
@@ -700,7 +713,7 @@ export const ChannelList: React.FC<ChannelListProps> = ({
                         {
                             label: isMobile ? 'Top Pane' : 'Left Side',
                             icon: isMobile ? PanelTopOpen : PanelLeftOpen,
-                            onClick: () => {
+                            onClick: (): void => {
                                 dispatch(
                                     setSplitViewPane({
                                         side: 'left',
@@ -716,7 +729,7 @@ export const ChannelList: React.FC<ChannelListProps> = ({
                         {
                             label: isMobile ? 'Bottom Pane' : 'Right Side',
                             icon: isMobile ? PanelBottomOpen : PanelRightOpen,
-                            onClick: () => {
+                            onClick: (): void => {
                                 dispatch(
                                     setSplitViewPane({
                                         side: 'right',
@@ -737,7 +750,7 @@ export const ChannelList: React.FC<ChannelListProps> = ({
                 items.push({
                     label: 'Edit Channel',
                     icon: Settings,
-                    onClick: () => {
+                    onClick: (): void => {
                         setSettingsChannel(channel);
                     },
                 });
@@ -745,10 +758,12 @@ export const ChannelList: React.FC<ChannelListProps> = ({
                 if (isMobile) {
                     // Check if it can move up/down
                     const siblings = channelsRef.current
-                        .filter((c) => c.categoryId === channel.categoryId)
-                        .sort((a, b) => a.position - b.position);
+                        .filter(
+                            (c): boolean => c.categoryId === channel.categoryId,
+                        )
+                        .sort((a, b): number => a.position - b.position);
                     const index = siblings.findIndex(
-                        (c) => c._id === channel._id,
+                        (c): boolean => c._id === channel._id,
                     );
 
                     items.push({ type: 'divider' });
@@ -757,7 +772,7 @@ export const ChannelList: React.FC<ChannelListProps> = ({
                         items.push({
                             label: 'Move Up',
                             icon: ArrowUp,
-                            onClick: () =>
+                            onClick: (): undefined =>
                                 void handleMoveItemMobile(
                                     {
                                         type: 'channel',
@@ -772,7 +787,7 @@ export const ChannelList: React.FC<ChannelListProps> = ({
                         items.push({
                             label: 'Move Down',
                             icon: ArrowDown,
-                            onClick: () =>
+                            onClick: (): undefined =>
                                 void handleMoveItemMobile(
                                     {
                                         type: 'channel',
@@ -790,27 +805,27 @@ export const ChannelList: React.FC<ChannelListProps> = ({
                     {
                         label: 'Uncategorized',
                         icon: Folder,
-                        onClick: () =>
+                        onClick: (): undefined =>
                             void handleMoveToCategory(channel._id, null),
                     },
                     ...[...categoriesRef.current]
-                        .sort((a, b) => a.position - b.position)
+                        .sort((a, b): number => a.position - b.position)
                         .map((cat) => ({
                             label: cat.name,
                             icon: Folder,
-                            onClick: () =>
+                            onClick: (): undefined =>
                                 void handleMoveToCategory(channel._id, cat._id),
                         })),
                 ];
 
                 // Filter out current category
                 const currentCatId = channel.categoryId || null;
-                const availableOptions = moveOptions.filter((opt) => {
+                const availableOptions = moveOptions.filter((opt): boolean => {
                     if ('label' in opt && typeof opt.label === 'string') {
                         if (opt.label === 'Uncategorized')
                             return currentCatId !== null;
                         const targetCat = categoriesRef.current.find(
-                            (c) => c.name === opt.label,
+                            (c): boolean => c.name === opt.label,
                         );
                         return targetCat?._id !== currentCatId;
                     }
@@ -841,7 +856,7 @@ export const ChannelList: React.FC<ChannelListProps> = ({
                 {
                     label: 'Copy Category ID',
                     icon: Copy,
-                    onClick: () => {
+                    onClick: (): void => {
                         void navigator.clipboard.writeText(category._id);
                     },
                 },
@@ -851,17 +866,17 @@ export const ChannelList: React.FC<ChannelListProps> = ({
                 items.unshift({
                     label: 'Edit Category',
                     icon: Settings,
-                    onClick: () => {
+                    onClick: (): void => {
                         setSettingsCategory(category);
                     },
                 });
 
                 if (isMobile) {
                     const siblings = [...categoriesRef.current].sort(
-                        (a, b) => a.position - b.position,
+                        (a, b): number => a.position - b.position,
                     );
                     const index = siblings.findIndex(
-                        (c) => c._id === category._id,
+                        (c): boolean => c._id === category._id,
                     );
 
                     const moveItems: ContextMenuItem[] = [];
@@ -869,7 +884,7 @@ export const ChannelList: React.FC<ChannelListProps> = ({
                         moveItems.push({
                             label: 'Move Up',
                             icon: ArrowUp,
-                            onClick: () =>
+                            onClick: (): undefined =>
                                 void handleMoveItemMobile(
                                     {
                                         type: 'category',
@@ -884,7 +899,7 @@ export const ChannelList: React.FC<ChannelListProps> = ({
                         moveItems.push({
                             label: 'Move Down',
                             icon: ArrowDown,
-                            onClick: () =>
+                            onClick: (): undefined =>
                                 void handleMoveItemMobile(
                                     {
                                         type: 'category',
@@ -914,7 +929,7 @@ export const ChannelList: React.FC<ChannelListProps> = ({
             items.push({
                 label: 'Create Channel',
                 icon: Plus,
-                onClick: () => {
+                onClick: (): void => {
                     setCreateCategoryId(null);
                     setCreateModalOpen(true);
                 },
@@ -922,7 +937,7 @@ export const ChannelList: React.FC<ChannelListProps> = ({
             items.push({
                 label: 'Create Category',
                 icon: FolderPlus,
-                onClick: () => {
+                onClick: (): void => {
                     setCreateCategoryModalOpen(true);
                 },
             });
@@ -933,7 +948,7 @@ export const ChannelList: React.FC<ChannelListProps> = ({
             items.push({
                 label: 'Copy Server ID',
                 icon: Copy,
-                onClick: () => {
+                onClick: (): void => {
                     void navigator.clipboard.writeText(selectedServerId);
                 },
             });
@@ -945,7 +960,7 @@ export const ChannelList: React.FC<ChannelListProps> = ({
                 label: 'Leave Server',
                 icon: LogOut,
                 variant: 'danger',
-                onClick: () => setIsLeaveModalOpen(true),
+                onClick: (): void => setIsLeaveModalOpen(true),
             });
         }
 
@@ -988,7 +1003,7 @@ export const ChannelList: React.FC<ChannelListProps> = ({
                         parsed.hostname.endsWith('.catfla.re')
                     ) {
                         if (parsed.pathname.startsWith('/chat/@setting')) {
-                            React.startTransition(() => {
+                            React.startTransition((): void => {
                                 void navigate(parsed.pathname);
                             });
                             return;
@@ -1004,7 +1019,7 @@ export const ChannelList: React.FC<ChannelListProps> = ({
             }
 
             if (selectedServerId) {
-                React.startTransition(() => {
+                React.startTransition((): void => {
                     void navigate(
                         `/chat/@server/${selectedServerId}/channel/${channel._id}`,
                     );
@@ -1039,13 +1054,13 @@ export const ChannelList: React.FC<ChannelListProps> = ({
                     {(isReordering
                         ? visibleItems
                         : rowVirtualizer.getVirtualItems().map(
-                              (v) =>
+                              (v): VirtualListItem =>
                                   ({
                                       ...visibleItems[v.index],
                                       virtualRow: v,
                                   }) as VirtualListItem,
                           )
-                    ).map((itemOrVirtual) => {
+                    ).map((itemOrVirtual): React.ReactNode => {
                         const item: ListItem =
                             'virtualRow' in itemOrVirtual
                                 ? (itemOrVirtual as VirtualListItem)
@@ -1093,10 +1108,10 @@ export const ChannelList: React.FC<ChannelListProps> = ({
                                                 'rgba(255, 255, 255, 0.05)',
                                             borderRadius: '4px',
                                         }}
-                                        onDragEnd={() => {
+                                        onDragEnd={(): void => {
                                             void handleDragEnd();
                                         }}
-                                        onDragStart={() =>
+                                        onDragStart={(): void =>
                                             handleDragStartItem(item.id)
                                         }
                                     >
@@ -1110,13 +1125,13 @@ export const ChannelList: React.FC<ChannelListProps> = ({
                                                 className="group flex cursor-pointer items-center px-1 select-none"
                                                 role="button"
                                                 tabIndex={0}
-                                                onClick={(e) => {
+                                                onClick={(e): void => {
                                                     e.stopPropagation();
                                                     toggleCategory(
                                                         category._id,
                                                     );
                                                 }}
-                                                onKeyDown={(e) => {
+                                                onKeyDown={(e): void => {
                                                     if (
                                                         e.key === 'Enter' ||
                                                         e.key === ' '
@@ -1151,7 +1166,9 @@ export const ChannelList: React.FC<ChannelListProps> = ({
                                                             iconSize={14}
                                                             title="Edit Category"
                                                             variant="ghost"
-                                                            onClick={(e) => {
+                                                            onClick={(
+                                                                e,
+                                                            ): void => {
                                                                 e.stopPropagation();
                                                                 setSettingsCategory(
                                                                     category,
@@ -1164,7 +1181,9 @@ export const ChannelList: React.FC<ChannelListProps> = ({
                                                             iconSize={14}
                                                             title="Create Channel"
                                                             variant="ghost"
-                                                            onClick={(e) => {
+                                                            onClick={(
+                                                                e,
+                                                            ): void => {
                                                                 e.stopPropagation();
                                                                 setCreateCategoryId(
                                                                     category._id,
@@ -1224,10 +1243,10 @@ export const ChannelList: React.FC<ChannelListProps> = ({
                                                 'rgba(255, 255, 255, 0.05)',
                                             borderRadius: '4px',
                                         }}
-                                        onDragEnd={() => {
+                                        onDragEnd={(): void => {
                                             void handleDragEnd();
                                         }}
-                                        onDragStart={() =>
+                                        onDragStart={(): void =>
                                             handleDragStartItem(item.id)
                                         }
                                     >
@@ -1272,7 +1291,7 @@ export const ChannelList: React.FC<ChannelListProps> = ({
                         <CategorySettingsModal
                             category={settingsCategory}
                             isOpen={!!settingsCategory}
-                            onClose={() => setSettingsCategory(null)}
+                            onClose={(): void => setSettingsCategory(null)}
                         />
                     </React.Suspense>
                 )}
@@ -1282,7 +1301,7 @@ export const ChannelList: React.FC<ChannelListProps> = ({
                         <ChannelSettingsModal
                             channel={settingsChannel}
                             isOpen={!!settingsChannel}
-                            onClose={() => setSettingsChannel(null)}
+                            onClose={(): void => setSettingsChannel(null)}
                         />
                     </React.Suspense>
                 )}
@@ -1293,7 +1312,7 @@ export const ChannelList: React.FC<ChannelListProps> = ({
                             categoryId={createCategoryId}
                             isOpen={createModalOpen}
                             serverId={selectedServerId}
-                            onClose={() => {
+                            onClose={(): void => {
                                 setCreateModalOpen(false);
                                 setCreateCategoryId(null);
                             }}
@@ -1306,7 +1325,9 @@ export const ChannelList: React.FC<ChannelListProps> = ({
                         <CreateCategoryModal
                             isOpen={createCategoryModalOpen}
                             serverId={selectedServerId}
-                            onClose={() => setCreateCategoryModalOpen(false)}
+                            onClose={(): void =>
+                                setCreateCategoryModalOpen(false)
+                            }
                         />
                     </React.Suspense>
                 )}
@@ -1315,8 +1336,8 @@ export const ChannelList: React.FC<ChannelListProps> = ({
                     <ConfirmLinkModal
                         isOpen={!!selectedLinkChannel}
                         url={selectedLinkChannel.link || '#'}
-                        onClose={() => setSelectedLinkChannel(null)}
-                        onConfirm={() => {
+                        onClose={(): void => setSelectedLinkChannel(null)}
+                        onConfirm={(): void => {
                             window.open(
                                 selectedLinkChannel.link || '#',
                                 '_blank',
@@ -1333,7 +1354,7 @@ export const ChannelList: React.FC<ChannelListProps> = ({
                             isOpen={isLeaveModalOpen}
                             serverId={selectedServerId || ''}
                             serverName={server?.name || ''}
-                            onClose={() => setIsLeaveModalOpen(false)}
+                            onClose={(): void => setIsLeaveModalOpen(false)}
                         />
                     </React.Suspense>
                 )}

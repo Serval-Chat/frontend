@@ -123,12 +123,16 @@ export function useChatWS(
         (queryKey: readonly unknown[], newMessage: ChatMessage): void => {
             queryClient.setQueryData<InfiniteData<ChatMessage[]>>(
                 queryKey,
-                (oldData) => {
+                (oldData): InfiniteData<ChatMessage[], unknown> | undefined => {
                     if (!oldData) return oldData;
 
                     const firstPage = oldData.pages[0] || [];
 
-                    if (firstPage.some((msg) => msg._id === newMessage._id)) {
+                    if (
+                        firstPage.some(
+                            (msg): boolean => msg._id === newMessage._id,
+                        )
+                    ) {
                         return oldData;
                     }
 
@@ -157,20 +161,25 @@ export function useChatWS(
 
             queryClient.setQueriesData<InfiniteData<ChatMessage[]>>(
                 { queryKey },
-                (oldData) => {
+                (
+                    oldData,
+                ):
+                    | { pages: ChatMessage[][]; pageParams: unknown[] }
+                    | undefined => {
                     if (!oldData) return oldData;
 
                     return {
                         ...oldData,
-                        pages: oldData.pages.map((page) =>
-                            page.map((msg) =>
-                                msg._id === payload.messageId
-                                    ? updateMessageReactions(
-                                          msg,
-                                          payload,
-                                          isRemoval,
-                                      )
-                                    : msg,
+                        pages: oldData.pages.map((page): ChatMessage[] =>
+                            page.map(
+                                (msg): ChatMessage =>
+                                    msg._id === payload.messageId
+                                        ? updateMessageReactions(
+                                              msg,
+                                              payload,
+                                              isRemoval,
+                                          )
+                                        : msg,
                             ),
                         ),
                     };
@@ -266,16 +275,17 @@ export function useChatWS(
 
                     queryClient.setQueryData<Channel[]>(
                         SERVERS_QUERY_KEYS.channels(selectedServerId),
-                        (oldChannels) => {
+                        (oldChannels): Channel[] | undefined => {
                             if (!oldChannels) return oldChannels;
-                            return oldChannels.map((ch) =>
-                                ch._id === selectedChannelId
-                                    ? {
-                                          ...ch,
-                                          slowModeNextMessageAllowedAt:
-                                              message.slowModeNextMessageAllowedAt,
-                                      }
-                                    : ch,
+                            return oldChannels.map(
+                                (ch): Channel =>
+                                    ch._id === selectedChannelId
+                                        ? {
+                                              ...ch,
+                                              slowModeNextMessageAllowedAt:
+                                                  message.slowModeNextMessageAllowedAt,
+                                          }
+                                        : ch,
                             );
                         },
                     );
@@ -291,19 +301,19 @@ export function useChatWS(
         ),
     );
 
-    useEffect(() => {
+    useEffect((): void => {
         if (selectedServerId) {
             wsMessages.joinServer(selectedServerId);
         }
     }, [selectedServerId]);
 
-    useEffect(() => {
+    useEffect((): void => {
         if (selectedServerId && selectedChannelId) {
             wsMessages.joinChannel(selectedServerId, selectedChannelId);
         }
     }, [selectedServerId, selectedChannelId]);
 
-    useEffect(() => {
+    useEffect((): void => {
         if (!selectedServerId || !selectedChannelId) {
             prevChannelRef.current = null;
             return;
@@ -324,7 +334,7 @@ export function useChatWS(
                         selectedServerId,
                         selectedChannelId,
                     ),
-                    queryFn: ({ pageParam }) =>
+                    queryFn: ({ pageParam }): Promise<ChatMessage[]> =>
                         chatApi.getChannelMessages(
                             selectedServerId,
                             selectedChannelId,
@@ -384,30 +394,36 @@ export function useChatWS(
             }): void => {
                 queryClient.setQueriesData<InfiniteData<ChatMessage[]>>(
                     {
-                        predicate: (query) =>
+                        predicate: (query): boolean =>
                             query.queryKey[0] === 'chat' &&
                             query.queryKey[1] === 'messages' &&
                             query.queryKey[2] === 'channel' &&
                             query.queryKey[4] === payload.channelId,
                     },
-                    (oldData) => {
+                    (
+                        oldData,
+                    ):
+                        | { pages: ChatMessage[][]; pageParams: unknown[] }
+                        | undefined => {
                         if (!oldData) return oldData;
                         return {
                             ...oldData,
-                            pages: oldData.pages.map((page) => {
+                            pages: oldData.pages.map((page): ChatMessage[] => {
                                 if (payload.hard === false) {
-                                    return page.map((msg) =>
-                                        msg._id === payload.messageId
-                                            ? {
-                                                  ...msg,
-                                                  deletedAt:
-                                                      new Date().toISOString(),
-                                              }
-                                            : msg,
+                                    return page.map(
+                                        (msg): ChatMessage =>
+                                            msg._id === payload.messageId
+                                                ? {
+                                                      ...msg,
+                                                      deletedAt:
+                                                          new Date().toISOString(),
+                                                  }
+                                                : msg,
                                     );
                                 }
                                 return page.filter(
-                                    (msg) => msg._id !== payload.messageId,
+                                    (msg): boolean =>
+                                        msg._id !== payload.messageId,
                                 );
                             }),
                         };
@@ -432,30 +448,35 @@ export function useChatWS(
             }): void => {
                 queryClient.setQueriesData<InfiniteData<ChatMessage[]>>(
                     {
-                        predicate: (query) =>
+                        predicate: (query): boolean =>
                             query.queryKey[0] === 'chat' &&
                             query.queryKey[1] === 'messages' &&
                             query.queryKey[2] === 'channel' &&
                             query.queryKey[4] === payload.channelId,
                     },
-                    (oldData) => {
+                    (
+                        oldData,
+                    ):
+                        | { pages: ChatMessage[][]; pageParams: unknown[] }
+                        | undefined => {
                         if (!oldData) return oldData;
                         return {
                             ...oldData,
-                            pages: oldData.pages.map((page) => {
+                            pages: oldData.pages.map((page): ChatMessage[] => {
                                 if (payload.hard === false) {
-                                    return page.map((msg) =>
-                                        payload.messageIds.includes(msg._id)
-                                            ? {
-                                                  ...msg,
-                                                  deletedAt:
-                                                      new Date().toISOString(),
-                                              }
-                                            : msg,
+                                    return page.map(
+                                        (msg): ChatMessage =>
+                                            payload.messageIds.includes(msg._id)
+                                                ? {
+                                                      ...msg,
+                                                      deletedAt:
+                                                          new Date().toISOString(),
+                                                  }
+                                                : msg,
                                     );
                                 }
                                 return page.filter(
-                                    (msg) =>
+                                    (msg): boolean =>
                                         !payload.messageIds.includes(msg._id),
                                 );
                             }),
@@ -486,30 +507,35 @@ export function useChatWS(
             }): void => {
                 queryClient.setQueriesData<InfiniteData<ChatMessage[]>>(
                     {
-                        predicate: (query) =>
+                        predicate: (query): boolean =>
                             query.queryKey[0] === 'chat' &&
                             query.queryKey[1] === 'messages' &&
                             query.queryKey[2] === 'channel' &&
                             query.queryKey[3] === payload.serverId &&
                             query.queryKey[4] === payload.channelId,
                     },
-                    (oldData) => {
+                    (
+                        oldData,
+                    ):
+                        | { pages: ChatMessage[][]; pageParams: unknown[] }
+                        | undefined => {
                         if (!oldData) return oldData;
                         return {
                             ...oldData,
-                            pages: oldData.pages.map((page) =>
-                                page.map((msg) =>
-                                    msg._id === payload.messageId
-                                        ? {
-                                              ...msg,
-                                              text: payload.text,
-                                              isEdited: payload.isEdited,
-                                              editedAt: payload.editedAt,
-                                              attachments:
-                                                  payload.attachments ??
-                                                  msg.attachments,
-                                          }
-                                        : msg,
+                            pages: oldData.pages.map((page): ChatMessage[] =>
+                                page.map(
+                                    (msg): ChatMessage =>
+                                        msg._id === payload.messageId
+                                            ? {
+                                                  ...msg,
+                                                  text: payload.text,
+                                                  isEdited: payload.isEdited,
+                                                  editedAt: payload.editedAt,
+                                                  attachments:
+                                                      payload.attachments ??
+                                                      msg.attachments,
+                                              }
+                                            : msg,
                                 ),
                             ),
                         };
@@ -534,29 +560,34 @@ export function useChatWS(
                 if (!selectedFriendId) return;
                 queryClient.setQueriesData<InfiniteData<ChatMessage[]>>(
                     {
-                        predicate: (query) =>
+                        predicate: (query): boolean =>
                             query.queryKey[0] === 'chat' &&
                             query.queryKey[1] === 'messages' &&
                             query.queryKey[2] === 'user' &&
                             query.queryKey[3] === selectedFriendId,
                     },
-                    (oldData) => {
+                    (
+                        oldData,
+                    ):
+                        | { pages: ChatMessage[][]; pageParams: unknown[] }
+                        | undefined => {
                         if (!oldData) return oldData;
                         return {
                             ...oldData,
-                            pages: oldData.pages.map((page) =>
-                                page.map((msg) =>
-                                    msg._id === payload.messageId
-                                        ? {
-                                              ...msg,
-                                              text: payload.text,
-                                              isEdited: payload.isEdited,
-                                              editedAt: payload.editedAt,
-                                              attachments:
-                                                  payload.attachments ??
-                                                  msg.attachments,
-                                          }
-                                        : msg,
+                            pages: oldData.pages.map((page): ChatMessage[] =>
+                                page.map(
+                                    (msg): ChatMessage =>
+                                        msg._id === payload.messageId
+                                            ? {
+                                                  ...msg,
+                                                  text: payload.text,
+                                                  isEdited: payload.isEdited,
+                                                  editedAt: payload.editedAt,
+                                                  attachments:
+                                                      payload.attachments ??
+                                                      msg.attachments,
+                                              }
+                                            : msg,
                                 ),
                             ),
                         };
@@ -574,19 +605,24 @@ export function useChatWS(
                 if (!selectedFriendId) return;
                 queryClient.setQueriesData<InfiniteData<ChatMessage[]>>(
                     {
-                        predicate: (query) =>
+                        predicate: (query): boolean =>
                             query.queryKey[0] === 'chat' &&
                             query.queryKey[1] === 'messages' &&
                             query.queryKey[2] === 'user' &&
                             query.queryKey[3] === selectedFriendId,
                     },
-                    (oldData) => {
+                    (
+                        oldData,
+                    ):
+                        | { pages: ChatMessage[][]; pageParams: unknown[] }
+                        | undefined => {
                         if (!oldData) return oldData;
                         return {
                             ...oldData,
-                            pages: oldData.pages.map((page) =>
+                            pages: oldData.pages.map((page): ChatMessage[] =>
                                 page.filter(
-                                    (msg) => msg._id !== payload.messageId,
+                                    (msg): boolean =>
+                                        msg._id !== payload.messageId,
                                 ),
                             ),
                         };
@@ -608,25 +644,30 @@ export function useChatWS(
             }): void => {
                 queryClient.setQueriesData<InfiniteData<ChatMessage[]>>(
                     {
-                        predicate: (query) =>
+                        predicate: (query): boolean =>
                             query.queryKey[0] === 'chat' &&
                             query.queryKey[1] === 'messages' &&
                             query.queryKey[2] === 'channel' &&
                             query.queryKey[3] === payload.serverId &&
                             query.queryKey[4] === payload.channelId,
                     },
-                    (oldData) => {
+                    (
+                        oldData,
+                    ):
+                        | { pages: ChatMessage[][]; pageParams: unknown[] }
+                        | undefined => {
                         if (!oldData) return oldData;
                         return {
                             ...oldData,
-                            pages: oldData.pages.map((page) =>
-                                page.map((msg) =>
-                                    msg._id === payload.messageId
-                                        ? {
-                                              ...msg,
-                                              embeds: payload.embeds,
-                                          }
-                                        : msg,
+                            pages: oldData.pages.map((page): ChatMessage[] =>
+                                page.map(
+                                    (msg): ChatMessage =>
+                                        msg._id === payload.messageId
+                                            ? {
+                                                  ...msg,
+                                                  embeds: payload.embeds,
+                                              }
+                                            : msg,
                                 ),
                             ),
                         };
@@ -647,24 +688,29 @@ export function useChatWS(
                 if (!selectedFriendId) return;
                 queryClient.setQueriesData<InfiniteData<ChatMessage[]>>(
                     {
-                        predicate: (query) =>
+                        predicate: (query): boolean =>
                             query.queryKey[0] === 'chat' &&
                             query.queryKey[1] === 'messages' &&
                             query.queryKey[2] === 'user' &&
                             query.queryKey[3] === selectedFriendId,
                     },
-                    (oldData) => {
+                    (
+                        oldData,
+                    ):
+                        | { pages: ChatMessage[][]; pageParams: unknown[] }
+                        | undefined => {
                         if (!oldData) return oldData;
                         return {
                             ...oldData,
-                            pages: oldData.pages.map((page) =>
-                                page.map((msg) =>
-                                    msg._id === payload.messageId
-                                        ? {
-                                              ...msg,
-                                              embeds: payload.embeds,
-                                          }
-                                        : msg,
+                            pages: oldData.pages.map((page): ChatMessage[] =>
+                                page.map(
+                                    (msg): ChatMessage =>
+                                        msg._id === payload.messageId
+                                            ? {
+                                                  ...msg,
+                                                  embeds: payload.embeds,
+                                              }
+                                            : msg,
                                 ),
                             ),
                         };
@@ -687,26 +733,31 @@ export function useChatWS(
             }): void => {
                 queryClient.setQueriesData<InfiniteData<ChatMessage[]>>(
                     {
-                        predicate: (query) =>
+                        predicate: (query): boolean =>
                             query.queryKey[0] === 'chat' &&
                             query.queryKey[1] === 'messages' &&
                             query.queryKey[2] === 'channel' &&
                             query.queryKey[3] === payload.serverId &&
                             query.queryKey[4] === payload.channelId,
                     },
-                    (oldData) => {
+                    (
+                        oldData,
+                    ):
+                        | { pages: ChatMessage[][]; pageParams: unknown[] }
+                        | undefined => {
                         if (!oldData) return oldData;
                         return {
                             ...oldData,
-                            pages: oldData.pages.map((page) =>
-                                page.map((msg) =>
-                                    msg._id === payload.messageId
-                                        ? {
-                                              ...msg,
-                                              isPinned: payload.isPinned,
-                                              isSticky: payload.isSticky,
-                                          }
-                                        : msg,
+                            pages: oldData.pages.map((page): ChatMessage[] =>
+                                page.map(
+                                    (msg): ChatMessage =>
+                                        msg._id === payload.messageId
+                                            ? {
+                                                  ...msg,
+                                                  isPinned: payload.isPinned,
+                                                  isSticky: payload.isSticky,
+                                              }
+                                            : msg,
                                 ),
                             ),
                         };
@@ -728,22 +779,31 @@ export function useChatWS(
                 if (selectedFriendId) {
                     queryClient.setQueriesData<InfiniteData<ChatMessage[]>>(
                         {
-                            predicate: (query) =>
+                            predicate: (query): boolean =>
                                 query.queryKey[0] === 'chat' &&
                                 query.queryKey[1] === 'messages' &&
                                 query.queryKey[2] === 'user' &&
                                 query.queryKey[3] === selectedFriendId,
                         },
-                        (oldData) => {
+                        (
+                            oldData,
+                        ):
+                            | { pages: ChatMessage[][]; pageParams: unknown[] }
+                            | undefined => {
                             if (!oldData) return oldData;
                             return {
                                 ...oldData,
-                                pages: oldData.pages.map((page) =>
-                                    page.map((msg) =>
-                                        msg._id === payload.messageId
-                                            ? { ...msg, poll: payload.poll }
-                                            : msg,
-                                    ),
+                                pages: oldData.pages.map(
+                                    (page): ChatMessage[] =>
+                                        page.map(
+                                            (msg): ChatMessage =>
+                                                msg._id === payload.messageId
+                                                    ? {
+                                                          ...msg,
+                                                          poll: payload.poll,
+                                                      }
+                                                    : msg,
+                                        ),
                                 ),
                             };
                         },
@@ -765,22 +825,27 @@ export function useChatWS(
             }): void => {
                 queryClient.setQueriesData<InfiniteData<ChatMessage[]>>(
                     {
-                        predicate: (query) =>
+                        predicate: (query): boolean =>
                             query.queryKey[0] === 'chat' &&
                             query.queryKey[1] === 'messages' &&
                             query.queryKey[2] === 'channel' &&
                             query.queryKey[3] === payload.serverId &&
                             query.queryKey[4] === payload.channelId,
                     },
-                    (oldData) => {
+                    (
+                        oldData,
+                    ):
+                        | { pages: ChatMessage[][]; pageParams: unknown[] }
+                        | undefined => {
                         if (!oldData) return oldData;
                         return {
                             ...oldData,
-                            pages: oldData.pages.map((page) =>
-                                page.map((msg) =>
-                                    msg._id === payload.messageId
-                                        ? { ...msg, poll: payload.poll }
-                                        : msg,
+                            pages: oldData.pages.map((page): ChatMessage[] =>
+                                page.map(
+                                    (msg): ChatMessage =>
+                                        msg._id === payload.messageId
+                                            ? { ...msg, poll: payload.poll }
+                                            : msg,
                                 ),
                             ),
                         };
@@ -818,7 +883,7 @@ export function useChatWS(
         }, [queryClient]),
     );
 
-    useEffect(() => {
+    useEffect((): void => {
         clearTypingUsers();
     }, [selectedFriendId, selectedChannelId, clearTypingUsers]);
 
@@ -898,7 +963,8 @@ function updateMessageReactions(
 ): ChatMessage {
     const reactions = [...(msg.reactions || [])];
     const existingIdx = reactions.findIndex(
-        (r) => r.emoji === payload.emoji && r.emojiType === payload.emojiType,
+        (r): boolean =>
+            r.emoji === payload.emoji && r.emojiType === payload.emojiType,
     );
 
     if (isRemoval) {
@@ -920,7 +986,7 @@ function removeReaction(
     const userIndex = reaction.users.indexOf(userId);
     if (userIndex === -1) return msg;
 
-    const newUsers = reaction.users.filter((id) => id !== userId);
+    const newUsers = reaction.users.filter((id): boolean => id !== userId);
 
     if (newUsers.length === 0) {
         reactions.splice(existingIdx, 1);

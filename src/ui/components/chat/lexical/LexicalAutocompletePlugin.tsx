@@ -69,7 +69,7 @@ const AutocompleteMenuWrapper = ({
     options,
     selectOptionAndCleanUp,
 }: AutocompleteMenuWrapperProps): React.ReactNode => {
-    React.useEffect(() => {
+    React.useEffect((): void => {
         if (selectedIndex === null && options.length > 0) {
             setHighlightedIndex(0);
         }
@@ -79,9 +79,11 @@ const AutocompleteMenuWrapper = ({
         <AutocompleteSuggestion
             anchorElementRef={anchorElementRef}
             selectedIndex={selectedIndex ?? 0}
-            suggestions={options.map((o) => o.suggestion)}
-            onSelect={(suggestion) => {
-                const option = options.find((o) => o.suggestion === suggestion);
+            suggestions={options.map((o): Suggestion => o.suggestion)}
+            onSelect={(suggestion): void => {
+                const option = options.find(
+                    (o): boolean => o.suggestion === suggestion,
+                );
                 if (option) {
                     selectOptionAndCleanUp(option);
                 }
@@ -90,9 +92,7 @@ const AutocompleteMenuWrapper = ({
     );
 };
 
-export const LexicalAutocompletePlugin: React.FC<
-    LexicalAutocompletePluginProps
-> = ({
+export const LexicalAutocompletePlugin = ({
     members = [],
     roles = [],
     friends = [],
@@ -100,20 +100,22 @@ export const LexicalAutocompletePlugin: React.FC<
     channels = [],
     serverId,
     onOpenChange,
-}) => {
+}: LexicalAutocompletePluginProps) => {
     const [editor] = useLexicalComposerContext();
-    const blocks = useAppSelector((state) => state.blocking.blocks);
+    const blocks = useAppSelector(
+        (state): Record<string, number> => state.blocking.blocks,
+    );
     const [queryString, setQueryString] = useState<string | null>(null);
 
-    const allEmojis = useMemo(() => {
+    const allEmojis = useMemo((): EmojiData[] => {
         const emojis: EmojiData[] = [];
-        Object.values(groupedEmojis).forEach((categoryEmojis) => {
+        Object.values(groupedEmojis).forEach((categoryEmojis): void => {
             emojis.push(...categoryEmojis);
         });
         return emojis;
     }, []);
 
-    const options = useMemo(() => {
+    const options = useMemo((): AutocompleteOption[] => {
         if (queryString === null || queryString.length === 0) return [];
 
         const triggerChar = queryString[0];
@@ -123,7 +125,7 @@ export const LexicalAutocompletePlugin: React.FC<
             const memberPriority = new Map<string, number>();
             const userSuggestions: Suggestion[] = [];
 
-            members.forEach((member) => {
+            members.forEach((member): void => {
                 const userBlocks = blocks[member.userId] || 0;
                 if (userBlocks & BlockFlags.HIDE_FROM_MENTIONS) return;
 
@@ -154,7 +156,7 @@ export const LexicalAutocompletePlugin: React.FC<
             });
 
             if (members.length === 0) {
-                friends.forEach((friend) => {
+                friends.forEach((friend): void => {
                     if (!friend) return;
 
                     const userBlocks = blocks[friend._id] || 0;
@@ -163,7 +165,8 @@ export const LexicalAutocompletePlugin: React.FC<
                     const username = friend.username.toLowerCase();
                     const displayName = friend.displayName?.toLowerCase() || '';
                     const alreadyAdded = userSuggestions.some(
-                        (s) => s.type === 'user' && s.user._id === friend._id,
+                        (s): boolean =>
+                            s.type === 'user' && s.user._id === friend._id,
                     );
                     if (
                         !alreadyAdded &&
@@ -177,7 +180,7 @@ export const LexicalAutocompletePlugin: React.FC<
                 });
             }
 
-            userSuggestions.sort((a, b) => {
+            userSuggestions.sort((a, b): number => {
                 const pa =
                     a.type === 'user'
                         ? (memberPriority.get(a.user._id) ?? 99)
@@ -190,7 +193,7 @@ export const LexicalAutocompletePlugin: React.FC<
             });
 
             const roleSuggestions: Suggestion[] = roles
-                .filter((role) => {
+                .filter((role): boolean => {
                     const lowerName = role.name.toLowerCase();
                     return (
                         lowerName.includes(query) &&
@@ -198,7 +201,10 @@ export const LexicalAutocompletePlugin: React.FC<
                         lowerName !== '@everyone'
                     );
                 })
-                .map((role) => ({ type: 'role', role }));
+                .map((role): { type: 'role'; role: Role } => ({
+                    type: 'role',
+                    role,
+                }));
 
             const allSuggestions: Suggestion[] = [
                 ...userSuggestions,
@@ -211,35 +217,50 @@ export const LexicalAutocompletePlugin: React.FC<
 
             return allSuggestions
                 .slice(0, 10)
-                .map((s) => new AutocompleteOption(s));
+                .map((s): AutocompleteOption => new AutocompleteOption(s));
         }
 
         if (triggerChar === ':') {
             const emojiSuggestions: Suggestion[] = allEmojis
                 .filter(
-                    (emoji) =>
+                    (emoji): boolean =>
                         emoji.short_name.includes(query) ||
-                        emoji.short_names.some((name) => name.includes(query)),
+                        emoji.short_names.some((name): boolean =>
+                            name.includes(query),
+                        ),
                 )
-                .map((emoji) => ({ type: 'emoji' as const, emoji }));
+                .map((emoji): { type: 'emoji'; emoji: EmojiData } => ({
+                    type: 'emoji' as const,
+                    emoji,
+                }));
 
             const serverEmojiSuggestions: Suggestion[] = serverEmojis
-                .filter((emoji) => emoji.name.toLowerCase().includes(query))
-                .map((emoji) => ({ type: 'server-emoji' as const, emoji }));
+                .filter((emoji): boolean =>
+                    emoji.name.toLowerCase().includes(query),
+                )
+                .map((emoji): { type: 'server-emoji'; emoji: Emoji } => ({
+                    type: 'server-emoji' as const,
+                    emoji,
+                }));
 
             return [...serverEmojiSuggestions, ...emojiSuggestions]
                 .slice(0, 10)
-                .map((s) => new AutocompleteOption(s));
+                .map((s): AutocompleteOption => new AutocompleteOption(s));
         }
 
         if (triggerChar === '#') {
             const channelSuggestions: Suggestion[] = channels
-                .filter((channel) => channel.name.toLowerCase().includes(query))
-                .map((channel) => ({ type: 'channel' as const, channel }));
+                .filter((channel): boolean =>
+                    channel.name.toLowerCase().includes(query),
+                )
+                .map((channel): { type: 'channel'; channel: Channel } => ({
+                    type: 'channel' as const,
+                    channel,
+                }));
 
             return channelSuggestions
                 .slice(0, 10)
-                .map((s) => new AutocompleteOption(s));
+                .map((s): AutocompleteOption => new AutocompleteOption(s));
         }
 
         return [];
@@ -256,7 +277,7 @@ export const LexicalAutocompletePlugin: React.FC<
 
     const isOpen = queryString !== null && options.length > 0;
 
-    React.useEffect(() => {
+    React.useEffect((): void => {
         if (onOpenChange) {
             onOpenChange(isOpen);
         }
@@ -269,20 +290,22 @@ export const LexicalAutocompletePlugin: React.FC<
                 const emojiName = completeEmojiMatch[2].toLowerCase();
 
                 const matchingUnicodeEmojis = allEmojis.filter(
-                    (emoji) =>
+                    (emoji): boolean =>
                         emoji.short_name === emojiName ||
-                        emoji.short_names.some((name) => name === emojiName),
+                        emoji.short_names.some(
+                            (name): boolean => name === emojiName,
+                        ),
                 );
 
                 const matchingCustomEmojis = serverEmojis.filter(
-                    (emoji) => emoji.name.toLowerCase() === emojiName,
+                    (emoji): boolean => emoji.name.toLowerCase() === emojiName,
                 );
 
                 const totalMatches =
                     matchingUnicodeEmojis.length + matchingCustomEmojis.length;
 
                 if (totalMatches === 1) {
-                    editor.update(() => {
+                    editor.update((): void => {
                         const selection = $getSelection();
                         if ($isRangeSelection(selection)) {
                             const node = selection.anchor.getNode();
@@ -370,8 +393,8 @@ export const LexicalAutocompletePlugin: React.FC<
             selectedOption: AutocompleteOption,
             nodeToRemove: TextNode | null,
             closeMenu: () => void,
-        ) => {
-            editor.update(() => {
+        ): void => {
+            editor.update((): void => {
                 const suggestion = selectedOption.suggestion;
 
                 if (suggestion.type === 'emoji') {

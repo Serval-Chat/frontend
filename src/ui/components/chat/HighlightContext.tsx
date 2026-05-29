@@ -2,10 +2,13 @@ import React, { createContext, useContext } from 'react';
 
 const HighlightContext = createContext<string | null>(null);
 
-export const HighlightProvider: React.FC<{
+export const HighlightProvider = ({
+    highlightId,
+    children,
+}: {
     highlightId: string | null;
     children: React.ReactNode;
-}> = ({ highlightId, children }) => (
+}) => (
     <HighlightContext.Provider value={highlightId}>
         {children}
     </HighlightContext.Provider>

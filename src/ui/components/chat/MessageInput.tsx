@@ -116,7 +116,7 @@ const EditorBridge = ({
     onReady: (e: LexicalEditor) => void;
 }): React.ReactNode => {
     const [editor] = useLexicalComposerContext();
-    useEffect(() => {
+    useEffect((): void => {
         onReady(editor);
     }, [editor, onReady]);
     return null;
@@ -171,10 +171,12 @@ const isSameSlashChipState = (
     if (a.commandName !== b.commandName) return false;
     if (a.commandId !== b.commandId) return false;
     if (a.argValues.length !== b.argValues.length) return false;
-    return a.argValues.every((value, index) => value === b.argValues[index]);
+    return a.argValues.every(
+        (value, index): boolean => value === b.argValues[index],
+    );
 };
 
-export const MessageInput: React.FC<MessageInputProps> = ({
+export const MessageInput = ({
     fileQueueResult,
     replyingTo,
     onCancelReply,
@@ -187,14 +189,14 @@ export const MessageInput: React.FC<MessageInputProps> = ({
     canBypassSlowMode,
     sendMessage,
     sendTyping,
-}) => {
+}: MessageInputProps) => {
     const [isUploading, setIsUploading] = useState(false);
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
     const [showStickerPicker, setShowStickerPicker] = useState(false);
     const [showGifPicker, setShowGifPicker] = useState(false);
     const [showPollModal, setShowPollModal] = useState(false);
     const [isMobile, setIsMobile] = useState(
-        () => window.matchMedia('(max-width: 768px)').matches,
+        (): boolean => window.matchMedia('(max-width: 768px)').matches,
     );
     const [hasText, setHasText] = useState(false);
     const [currentInputText, setCurrentInputText] = useState('');
@@ -227,12 +229,12 @@ export const MessageInput: React.FC<MessageInputProps> = ({
     const { data: me } = useMe();
     const keybindManager = useKeybindManager(me?.settings?.keybinds);
 
-    useClickAway(emojiPickerRef, () => {
+    useClickAway(emojiPickerRef, (): void => {
         setShowEmojiPicker(false);
         setShowStickerPicker(false);
     });
 
-    useEffect(() => {
+    useEffect((): (() => void) => {
         const mobileQuery = window.matchMedia('(max-width: 768px)');
         const handleResize = (event: MediaQueryListEvent): void =>
             setIsMobile(event.matches);
@@ -258,13 +260,13 @@ export const MessageInput: React.FC<MessageInputProps> = ({
 
         window.addEventListener('keydown', handleGlobalKeyDown);
 
-        return () => {
+        return (): void => {
             mobileQuery.removeEventListener('change', handleResize);
             window.removeEventListener('keydown', handleGlobalKeyDown);
         };
     }, [editor, keybindManager]);
 
-    useEffect(() => {
+    useEffect((): void => {
         if (replyingTo && editor) {
             editor.focus();
         }
@@ -296,13 +298,13 @@ export const MessageInput: React.FC<MessageInputProps> = ({
     } = fileQueueResult;
 
     const selectedFriendId = useAppSelector(
-        (state) => state.nav.selectedFriendId,
+        (state): string | null => state.nav.selectedFriendId,
     );
     const selectedServerId = useAppSelector(
-        (state) => state.nav.selectedServerId,
+        (state): string | null => state.nav.selectedServerId,
     );
     const selectedChannelId = useAppSelector(
-        (state) => state.nav.selectedChannelId,
+        (state): string | null => state.nav.selectedChannelId,
     );
 
     const { customCategories } = useCustomEmojis({ enabled: true });
@@ -340,14 +342,14 @@ export const MessageInput: React.FC<MessageInputProps> = ({
         enabled: showStickerPicker,
     });
     const myMember = useMemo(
-        () => members.find((m) => m.userId === me?._id),
+        () => members.find((m): boolean => m.userId === me?._id),
         [members, me?._id],
     );
 
     const isOwner = serverDetails?.ownerId === me?._id;
     const [remainingTimeoutMs, setRemainingTimeoutMs] = useState<number>(0);
 
-    useEffect(() => {
+    useEffect((): (() => void) | undefined => {
         if (!myMember?.communicationDisabledUntil || isOwner) {
             setRemainingTimeoutMs(0);
             return;
@@ -364,7 +366,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
 
         update();
         const interval = setInterval(update, 1000);
-        return () => clearInterval(interval);
+        return (): void => clearInterval(interval);
     }, [myMember?.communicationDisabledUntil, isOwner]);
 
     const isTimedOut = remainingTimeoutMs > 0;
@@ -396,25 +398,29 @@ export const MessageInput: React.FC<MessageInputProps> = ({
     const slashPreview = useMemo(() => {
         if (slashChipState) {
             let command = slashChipState.commandId
-                ? serverCommands.find((c) => c.id === slashChipState.commandId)
+                ? serverCommands.find(
+                      (c): boolean => c.id === slashChipState.commandId,
+                  )
                 : undefined;
             if (!command) {
                 command = serverCommands.find(
-                    (c) => c.name === slashChipState.commandName,
+                    (c): boolean => c.name === slashChipState.commandName,
                 );
             }
             if (!command) return null;
 
             const options = command.options ?? [];
-            const requiredCount = options.filter((o) => o.required).length;
+            const requiredCount = options.filter(
+                (o): boolean | undefined => o.required,
+            ).length;
             const providedCount = slashChipState.argValues.filter(
-                (v) => (v ?? '').trim() !== '',
+                (v): boolean => (v ?? '').trim() !== '',
             ).length;
             const nextOption = options[providedCount];
             const usage =
                 options.length > 0
                     ? options
-                          .map((option) =>
+                          .map((option): string =>
                               option.required
                                   ? `<${option.name}>`
                                   : `[${option.name}]`,
@@ -442,7 +448,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
         const parsed = parseSlashInput(currentInputText);
         if (!parsed) return null;
         const command = serverCommands.find(
-            (c) => c.name === parsed.commandName,
+            (c): boolean => c.name === parsed.commandName,
         );
         if (!command) {
             return {
@@ -453,16 +459,16 @@ export const MessageInput: React.FC<MessageInputProps> = ({
 
         const options = command.options ?? [];
         const requiredCount = options.filter(
-            (option) => option.required,
+            (option): boolean | undefined => option.required,
         ).length;
         const providedCount = parsed.args.filter(
-            (arg) => arg.trim() !== '',
+            (arg): boolean => arg.trim() !== '',
         ).length;
         const nextOption = options[Math.min(providedCount, options.length - 1)];
         const usage =
             options.length > 0
                 ? options
-                      .map((option) =>
+                      .map((option): string =>
                           option.required
                               ? `<${option.name}>`
                               : `[${option.name}]`,
@@ -494,12 +500,12 @@ export const MessageInput: React.FC<MessageInputProps> = ({
     const { data: userMessages } = useUserMessages(selectedFriendId);
 
     const friendUsers = useMemo(
-        () => friendsList as unknown as User[],
+        (): User[] => friendsList as unknown as User[],
         [friendsList],
     );
 
     const currentChannel = useMemo(
-        () => channels.find((c) => c._id === selectedChannelId),
+        () => channels.find((c): boolean => c._id === selectedChannelId),
         [channels, selectedChannelId],
     );
 
@@ -518,7 +524,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
         [customCategories],
     );
 
-    const stickerCategories = useMemo(() => {
+    const stickerCategories = useMemo((): StickerCategory[] => {
         const cats: StickerCategory[] = [];
 
         if (isServerContextReady && serverDetails) {
@@ -531,7 +537,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
         }
 
         const stickersByServer = new Map<string, typeof allStickers>();
-        allStickers.forEach((sticker) => {
+        allStickers.forEach((sticker): void => {
             if (selectedServerId && sticker.serverId === selectedServerId) {
                 return;
             }
@@ -543,9 +549,11 @@ export const MessageInput: React.FC<MessageInputProps> = ({
             }
         });
 
-        stickersByServer.forEach((serverStickers, sid) => {
+        stickersByServer.forEach((serverStickers, sid): void => {
             if (serverStickers.length > 0) {
-                const serverInfo = serverList.find((s) => s._id === sid);
+                const serverInfo = serverList.find(
+                    (s): boolean => s._id === sid,
+                );
                 cats.push({
                     id: sid,
                     name: serverInfo?.name || 'Other Server',
@@ -614,9 +622,12 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                     updateFileStatus(queuedFile.id, 'uploading');
                     try {
                         const [upload, dimensions] = await Promise.all([
-                            filesApi.uploadFile(queuedFile.file, (progress) => {
-                                updateFileProgress(queuedFile.id, progress);
-                            }),
+                            filesApi.uploadFile(
+                                queuedFile.file,
+                                (progress): void => {
+                                    updateFileProgress(queuedFile.id, progress);
+                                },
+                            ),
                             readMediaDimensions(queuedFile.file),
                         ]);
                         updateFileStatus(queuedFile.id, 'completed');
@@ -667,7 +678,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                 return false;
             if (cooldown > 0 && !canBypassSlowMode) {
                 setIsSlowModeError(true);
-                setTimeout(() => setIsSlowModeError(false), 500);
+                setTimeout((): void => setIsSlowModeError(false), 500);
                 return false;
             }
 
@@ -681,7 +692,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                 editor,
                 showToast,
                 createInteraction: interactionsApi.createInteraction,
-                onSuccess: () => {
+                onSuccess: (): void => {
                     clearQueue();
                     onCancelReply?.();
                 },
@@ -771,7 +782,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
         ],
     );
 
-    useEffect(() => {
+    useEffect((): void => {
         isAutocompleteOpenRef.current =
             isMentionAutocompleteOpen || isSlashAutocompleteOpen;
     }, [isMentionAutocompleteOpen, isSlashAutocompleteOpen]);
@@ -786,7 +797,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
     const initialConfigRef = React.useRef({
         namespace: 'MessageInput',
         nodes: [ChipNode, SlashCommandChipNode, SlashArgChipNode],
-        onError: (error: Error) => console.error(error),
+        onError: (error: Error): void => console.error(error),
         theme,
     });
     const initialConfig = initialConfigRef.current;
@@ -830,7 +841,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
         );
     };
 
-    useEffect(() => {
+    useEffect((): void => {
         if (!editor) return;
 
         const draftJson = getDraft(
@@ -994,7 +1005,9 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                     disabled={cooldown > 0 && !canBypassSlowMode}
                     size="sm"
                     variant="ghost"
-                    onClick={() => fileInputRef.current?.click()}
+                    onClick={(): void | undefined =>
+                        fileInputRef.current?.click()
+                    }
                 >
                     <Plus size={20} />
                 </Button>
@@ -1013,7 +1026,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                             contentEditable={
                                 <ContentEditable
                                     className="custom-scrollbar h-full max-h-[200px] w-full resize-none overflow-y-auto px-3 py-2 text-sm text-foreground outline-none"
-                                    onKeyDown={(e) => {
+                                    onKeyDown={(e): void => {
                                         if (e.key === 'ArrowUp' && !hasText) {
                                             const lastMessage =
                                                 findLastMyMessage;
@@ -1062,7 +1075,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                             roles={roles}
                             serverEmojis={allServerEmojis}
                             serverId={selectedServerId || undefined}
-                            onOpenChange={(isOpen) => {
+                            onOpenChange={(isOpen): void => {
                                 setIsMentionAutocompleteOpen(isOpen);
                             }}
                         />
@@ -1073,10 +1086,10 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                             onOpenChange={setIsSlashAutocompleteOpen}
                         />
                         <OnChangePlugin
-                            onChange={(editorState) => {
+                            onChange={(editorState): void => {
                                 let currentText = '';
                                 let currentChip = null;
-                                editorState.read(() => {
+                                editorState.read((): void => {
                                     const text = $getRawMessageText();
                                     const chipState = $getSlashChipState();
                                     currentText = text;
@@ -1164,7 +1177,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                     )}
                     size="sm"
                     variant="ghost"
-                    onClick={() => {
+                    onClick={(): void => {
                         setShowEmojiPicker(!showEmojiPicker);
                         setShowStickerPicker(false);
                         setShowGifPicker(false);
@@ -1180,7 +1193,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                     )}
                     size="sm"
                     variant="ghost"
-                    onClick={() => {
+                    onClick={(): void => {
                         setShowStickerPicker(!showStickerPicker);
                         setShowEmojiPicker(false);
                         setShowGifPicker(false);
@@ -1197,7 +1210,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                         )}
                         size="sm"
                         variant="ghost"
-                        onClick={() => {
+                        onClick={(): void => {
                             setShowGifPicker(!showGifPicker);
                             setShowEmojiPicker(false);
                             setShowStickerPicker(false);
@@ -1215,10 +1228,12 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                                 }
                             >
                                 <GifPicker
-                                    onClose={() => setShowGifPicker(false)}
-                                    onSelect={(url) => {
+                                    onClose={(): void =>
+                                        setShowGifPicker(false)
+                                    }
+                                    onSelect={(url): void => {
                                         if (editor) {
-                                            void (async () => {
+                                            void (async (): Promise<void> => {
                                                 const result =
                                                     await handleSendMessage(
                                                         url,
@@ -1246,7 +1261,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                     )}
                     size="sm"
                     variant="ghost"
-                    onClick={() => {
+                    onClick={(): void => {
                         setShowPollModal(true);
                         setShowEmojiPicker(false);
                         setShowStickerPicker(false);
@@ -1262,11 +1277,11 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                         disabled={isUploading}
                         size="sm"
                         variant="ghost"
-                        onClick={() => {
+                        onClick={(): void => {
                             if (editor) {
-                                editor.getEditorState().read(() => {
+                                editor.getEditorState().read((): void => {
                                     const text = $getRawMessageText();
-                                    void (async () => {
+                                    void (async (): Promise<void> => {
                                         const result =
                                             await handleSendMessage(text);
                                         if (result) {
@@ -1299,8 +1314,8 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                     >
                         <EmojiPicker
                             customCategories={customCategories}
-                            onCustomEmojiSelect={(emoji) => {
-                                editor?.update(() => {
+                            onCustomEmojiSelect={(emoji): void => {
+                                editor?.update((): void => {
                                     const selection = $getSelection();
                                     if ($isRangeSelection(selection)) {
                                         const chip = $createChipNode('emoji', {
@@ -1314,7 +1329,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                                 editor?.focus();
                             }}
                             onEmojiSelect={(emoji: string): void => {
-                                editor?.update(() => {
+                                editor?.update((): void => {
                                     const selection = $getSelection();
                                     if ($isRangeSelection(selection)) {
                                         selection.insertNodes([
@@ -1345,7 +1360,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                     >
                         <StickerPicker
                             categories={stickerCategories}
-                            onStickerSelect={(sticker) => {
+                            onStickerSelect={(sticker): void => {
                                 sendMessage('', undefined, sticker.id);
                                 setShowStickerPicker(false);
                             }}
@@ -1370,7 +1385,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
 
             <CreatePollModal
                 isOpen={showPollModal}
-                onClose={() => setShowPollModal(false)}
+                onClose={(): void => setShowPollModal(false)}
                 onSubmit={handleSendPoll}
             />
         </Box>

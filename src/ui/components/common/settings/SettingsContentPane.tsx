@@ -7,10 +7,10 @@ interface SettingsContentPaneProps {
     maxWidthClass?: string;
 }
 
-export const SettingsContentPane: React.FC<SettingsContentPaneProps> = ({
+export const SettingsContentPane = ({
     children,
     maxWidthClass = 'max-w-4xl',
-}) => (
+}: SettingsContentPaneProps) => (
     <div className="scrollbar-thin scrollbar-thumb-bg-secondary scrollbar-track-transparent flex-1 overflow-y-auto p-12">
         <div className={cn('mx-auto h-full', maxWidthClass)}>{children}</div>
     </div>

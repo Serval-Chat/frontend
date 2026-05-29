@@ -50,11 +50,11 @@ interface CreatePollModalProps {
     }) => void;
 }
 
-export const CreatePollModal: React.FC<CreatePollModalProps> = ({
+export const CreatePollModal = ({
     isOpen,
     onClose,
     onSubmit,
-}) => {
+}: CreatePollModalProps) => {
     const [title, setTitle] = useState('');
     const [options, setOptions] = useState<PollOptionInput[]>([
         { id: '1', text: '' },
@@ -93,7 +93,7 @@ export const CreatePollModal: React.FC<CreatePollModalProps> = ({
         }
     };
 
-    React.useLayoutEffect(() => {
+    React.useLayoutEffect((): (() => void) | undefined => {
         if (activeEmojiOption) {
             updatePickerPosition(activeEmojiOption);
 
@@ -105,13 +105,13 @@ export const CreatePollModal: React.FC<CreatePollModalProps> = ({
             };
 
             window.addEventListener('scroll', handleScroll, true);
-            window.addEventListener('resize', () =>
+            window.addEventListener('resize', (): void =>
                 updatePickerPosition(activeEmojiOption),
             );
 
-            return () => {
+            return (): void => {
                 window.removeEventListener('scroll', handleScroll, true);
-                window.removeEventListener('resize', () =>
+                window.removeEventListener('resize', (): void =>
                     updatePickerPosition(activeEmojiOption),
                 );
             };
@@ -146,7 +146,7 @@ export const CreatePollModal: React.FC<CreatePollModalProps> = ({
         { label: '90 days', val: 90, unit: 'days' },
     ] as const;
 
-    React.useEffect(() => {
+    React.useEffect((): void => {
         if (!isOpen) {
             setTitle('');
             setOptions([
@@ -160,7 +160,7 @@ export const CreatePollModal: React.FC<CreatePollModalProps> = ({
         }
     }, [isOpen]);
 
-    React.useEffect(() => {
+    React.useEffect((): void => {
         if (isOpen) {
             setExpiryPreview(
                 new Date(Date.now() + getDurationMs()).toLocaleString(
@@ -180,7 +180,7 @@ export const CreatePollModal: React.FC<CreatePollModalProps> = ({
         enabled: activeEmojiOption !== null,
     });
 
-    useClickAway(emojiPickerRef, () => {
+    useClickAway(emojiPickerRef, (): void => {
         setActiveEmojiOption(null);
     });
 
@@ -192,13 +192,16 @@ export const CreatePollModal: React.FC<CreatePollModalProps> = ({
 
     const handleRemoveOption = (id: string): void => {
         if (options.length > 2) {
-            setOptions(options.filter((opt) => opt.id !== id));
+            setOptions(options.filter((opt): boolean => opt.id !== id));
         }
     };
 
     const handleOptionChange = (id: string, text: string): void => {
         setOptions(
-            options.map((opt) => (opt.id === id ? { ...opt, text } : opt)),
+            options.map(
+                (opt): PollOptionInput =>
+                    opt.id === id ? { ...opt, text } : opt,
+            ),
         );
     };
 
@@ -209,17 +212,18 @@ export const CreatePollModal: React.FC<CreatePollModalProps> = ({
         emojiId?: string,
     ): void => {
         setOptions(
-            options.map((opt) =>
-                opt.id === id
-                    ? { ...opt, emoji, emojiType: type, emojiId }
-                    : opt,
+            options.map(
+                (opt): PollOptionInput =>
+                    opt.id === id
+                        ? { ...opt, emoji, emojiType: type, emojiId }
+                        : opt,
             ),
         );
     };
 
     const handleSubmit = (): void => {
         const validOptions = options.filter(
-            (opt) => opt.text.trim().length > 0,
+            (opt): boolean => opt.text.trim().length > 0,
         );
         if (title.trim().length === 0 || validOptions.length < 2) {
             return;
@@ -243,7 +247,8 @@ export const CreatePollModal: React.FC<CreatePollModalProps> = ({
 
     const isValid =
         title.trim().length > 0 &&
-        options.filter((opt) => opt.text.trim().length > 0).length >= 2;
+        options.filter((opt): boolean => opt.text.trim().length > 0).length >=
+            2;
 
     return (
         <Modal
@@ -261,7 +266,7 @@ export const CreatePollModal: React.FC<CreatePollModalProps> = ({
                         maxLength={192}
                         placeholder="Ask a question..."
                         value={title}
-                        onChange={(e) => setTitle(e.target.value)}
+                        onChange={(e): void => setTitle(e.target.value)}
                     />
                 </Box>
 
@@ -277,12 +282,12 @@ export const CreatePollModal: React.FC<CreatePollModalProps> = ({
                             >
                                 <Button
                                     className="h-10 w-10 shrink-0 p-0 text-muted-foreground hover:bg-white/5 hover:text-foreground"
-                                    ref={(el) => {
+                                    ref={(el): void => {
                                         triggerRefs.current[opt.id] = el;
                                     }}
                                     size="sm"
                                     variant="ghost"
-                                    onClick={() =>
+                                    onClick={(): void =>
                                         setActiveEmojiOption(
                                             activeEmojiOption === opt.id
                                                 ? null
@@ -313,7 +318,7 @@ export const CreatePollModal: React.FC<CreatePollModalProps> = ({
                                     maxLength={192}
                                     placeholder={`Option ${index + 1}`}
                                     value={opt.text}
-                                    onChange={(e) =>
+                                    onChange={(e): void =>
                                         handleOptionChange(
                                             opt.id,
                                             e.target.value,
@@ -325,7 +330,7 @@ export const CreatePollModal: React.FC<CreatePollModalProps> = ({
                                         className="h-10 w-10 shrink-0 p-0 text-muted-foreground hover:bg-danger/20 hover:text-danger"
                                         size="sm"
                                         variant="ghost"
-                                        onClick={() =>
+                                        onClick={(): void =>
                                             handleRemoveOption(opt.id)
                                         }
                                     >
@@ -352,7 +357,9 @@ export const CreatePollModal: React.FC<CreatePollModalProps> = ({
                                     >
                                         <EmojiPicker
                                             customCategories={customCategories}
-                                            onCustomEmojiSelect={(emoji) => {
+                                            onCustomEmojiSelect={(
+                                                emoji,
+                                            ): void => {
                                                 handleEmojiSelect(
                                                     activeEmojiOption,
                                                     emoji.name,
@@ -361,7 +368,7 @@ export const CreatePollModal: React.FC<CreatePollModalProps> = ({
                                                 );
                                                 setActiveEmojiOption(null);
                                             }}
-                                            onEmojiSelect={(emoji) => {
+                                            onEmojiSelect={(emoji): void => {
                                                 handleEmojiSelect(
                                                     activeEmojiOption,
                                                     emoji,
@@ -419,7 +426,7 @@ export const CreatePollModal: React.FC<CreatePollModalProps> = ({
                                         ? 'primary'
                                         : 'ghost'
                                 }
-                                onClick={() => {
+                                onClick={(): void => {
                                     setDurationValue(p.val);
                                     setDurationUnit(p.unit);
                                 }}
@@ -435,14 +442,14 @@ export const CreatePollModal: React.FC<CreatePollModalProps> = ({
                             min={1}
                             type="number"
                             value={durationValue}
-                            onChange={(e) =>
+                            onChange={(e): void =>
                                 setDurationValue(Number(e.target.value))
                             }
                         />
                         <select
                             className="bg-bg-tertiary h-10 cursor-pointer rounded-md border border-border-subtle px-3 py-2 text-sm text-foreground transition-colors hover:border-primary/30 focus:ring-2 focus:ring-primary/50 focus:outline-none"
                             value={durationUnit}
-                            onChange={(e) =>
+                            onChange={(e): void =>
                                 setDurationUnit(
                                     e.target.value as
                                         | 'minutes'

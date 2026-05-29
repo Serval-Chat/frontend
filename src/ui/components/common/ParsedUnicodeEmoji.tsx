@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { cn } from '@/utils/cn';
 import { emojiMap, getSpriteStyle } from '@/utils/emoji';
 
@@ -9,11 +7,11 @@ interface ParsedUnicodeEmojiProps {
     isLarge?: boolean;
 }
 
-export const ParsedUnicodeEmoji: React.FC<ParsedUnicodeEmojiProps> = ({
+export const ParsedUnicodeEmoji = ({
     content,
     className,
     isLarge,
-}) => {
+}: ParsedUnicodeEmojiProps) => {
     const emojiData = emojiMap.get(content);
 
     if (!emojiData) {

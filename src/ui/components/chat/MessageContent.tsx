@@ -67,13 +67,15 @@ export const MessageContent = React.memo(
             enabled: !!serverId,
         });
         const channel = useMemo(
-            () => channels.find((item) => item._id === channelId),
+            () => channels.find((item): boolean => item._id === channelId),
             [channelId, channels],
         );
         const category = useMemo(
             () =>
                 channel?.categoryId
-                    ? categories.find((item) => item._id === channel.categoryId)
+                    ? categories.find(
+                          (item): boolean => item._id === channel.categoryId,
+                      )
                     : undefined,
             [categories, channel],
         );
@@ -116,13 +118,14 @@ export const MessageContent = React.memo(
             closeInfoBox,
         } = useStickerInfoBox();
 
-        const isEmojiOnly = useMemo(() => {
+        const isEmojiOnly = useMemo((): boolean => {
             if (nodes.length === 0) return false;
             const hasEmoji = nodes.some(
-                (n) => n.type === 'emoji' || n.type === 'unicode_emoji',
+                (n): boolean =>
+                    n.type === 'emoji' || n.type === 'unicode_emoji',
             );
             const hasOther = nodes.some(
-                (n) =>
+                (n): boolean =>
                     n.type !== 'emoji' &&
                     n.type !== 'unicode_emoji' &&
                     (n.type !== 'text' || n.content.trim().length > 0),
@@ -179,7 +182,7 @@ export const MessageContent = React.memo(
                         <Tooltip content={sticker.name} position="top">
                             <button
                                 className="cursor-pointer border-none bg-transparent p-0 transition-opacity outline-none hover:opacity-90 active:opacity-80"
-                                onClick={(e) =>
+                                onClick={(e): void =>
                                     showStickerInfo(
                                         {
                                             id: sticker.id,

@@ -10,7 +10,7 @@ import { Box } from '@/ui/components/layout/Box';
 
 import { StatusModal } from './StatusModal';
 
-export const MiniProfile: React.FC = () => {
+export const MiniProfile = () => {
     const { data: user } = useMe();
     const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
 
@@ -18,7 +18,7 @@ export const MiniProfile: React.FC = () => {
         (state) => state.presence.users[user?._id || ''],
     );
     const backendInstanceId = useAppSelector(
-        (state) => state.presence.backendInstanceId,
+        (state): string | null => state.presence.backendInstanceId,
     );
     const presenceStatus = presence?.status || 'offline';
 
@@ -97,7 +97,7 @@ export const MiniProfile: React.FC = () => {
                 initialEmoji={statusEmoji}
                 initialText={statusText}
                 isOpen={isStatusModalOpen}
-                onClose={() => setIsStatusModalOpen(false)}
+                onClose={(): void => setIsStatusModalOpen(false)}
             />
         </Box>
     );

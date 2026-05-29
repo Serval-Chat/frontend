@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { type JSX, useCallback, useMemo } from 'react';
 
 import { createSelector } from '@reduxjs/toolkit';
 import {
@@ -43,12 +43,13 @@ import {
     useServerDetails,
     useTimeoutMember,
 } from '@/api/servers/servers.queries';
-import type { Role } from '@/api/servers/servers.types';
+import type { Role, ServerMember } from '@/api/servers/servers.types';
 import { useMe, useUserById } from '@/api/users/users.queries';
 import type { User } from '@/api/users/users.types';
 import type { RootState } from '@/store';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { setSelectedFriendId, setSplitViewPane } from '@/store/slices/navSlice';
+import type { UserPresenceStatus } from '@/store/slices/presenceSlice';
 import { setUserVolume } from '@/store/slices/voiceSlice';
 import { Box } from '@/ui/components/layout/Box';
 import { ProfilePopup } from '@/ui/components/profile/ProfilePopup';
@@ -112,58 +113,61 @@ interface ServerData {
     members: ReturnType<typeof useMembers>['data'];
 }
 
-const ServerDataInjector: React.FC<{
-    serverId: string;
-    children: (data: ServerData) => React.ReactNode;
-}> = React.memo(({ serverId, children }) => {
-    const { mutate: addRole, isPending: isAdding } =
-        useAddRoleToMember(serverId);
-    const { mutate: removeRole, isPending: isRemoving } =
-        useRemoveRoleFromMember(serverId);
-    const { mutate: kickMember } = useKickMember(serverId);
-    const { mutate: banMember } = useBanMember(serverId);
-    const { mutate: timeoutMember } = useTimeoutMember(serverId);
-    const { data: serverDetails } = useServerDetails(serverId, {
-        enabled: true,
-    });
-    const { data: members } = useMembers(serverId, { enabled: true });
+const ServerDataInjector = React.memo(
+    ({
+        serverId,
+        children,
+    }: {
+        serverId: string;
+        children: (data: ServerData) => React.ReactNode;
+    }): JSX.Element => {
+        const { mutate: addRole, isPending: isAdding } =
+            useAddRoleToMember(serverId);
+        const { mutate: removeRole, isPending: isRemoving } =
+            useRemoveRoleFromMember(serverId);
+        const { mutate: kickMember } = useKickMember(serverId);
+        const { mutate: banMember } = useBanMember(serverId);
+        const { mutate: timeoutMember } = useTimeoutMember(serverId);
+        const { data: serverDetails } = useServerDetails(serverId, {
+            enabled: true,
+        });
+        const { data: members } = useMembers(serverId, { enabled: true });
 
-    const data = useMemo(
-        () => ({
-            addRole,
-            isAdding,
-            removeRole,
-            isRemoving,
-            kickMember,
-            banMember,
-            timeoutMember,
-            serverDetails,
-            members,
-        }),
-        [
-            addRole,
-            isAdding,
-            removeRole,
-            isRemoving,
-            kickMember,
-            banMember,
-            timeoutMember,
-            serverDetails,
-            members,
-        ],
-    );
+        const data = useMemo(
+            () => ({
+                addRole,
+                isAdding,
+                removeRole,
+                isRemoving,
+                kickMember,
+                banMember,
+                timeoutMember,
+                serverDetails,
+                members,
+            }),
+            [
+                addRole,
+                isAdding,
+                removeRole,
+                isRemoving,
+                kickMember,
+                banMember,
+                timeoutMember,
+                serverDetails,
+                members,
+            ],
+        );
 
-    return <>{children(data)}</>;
-});
+        return <>{children(data)}</>;
+    },
+);
 
 ServerDataInjector.displayName = 'ServerDataInjector';
 
 /**
  * @description Renders a user item with avatar, styled username, and custom status.
  */
-const UserItemInner: React.FC<
-    UserItemProps & { serverData: ServerData | null }
-> = React.memo(
+const UserItemInner = React.memo(
     ({
         serverData,
         userId,
@@ -187,7 +191,7 @@ const UserItemInner: React.FC<
         disableGlow,
         initialPresenceStatus,
         hideUnread,
-    }) => {
+    }: UserItemProps & { serverData: ServerData | null }): JSX.Element => {
         const dispatch = useAppDispatch();
 
         const serverId =
@@ -197,7 +201,7 @@ const UserItemInner: React.FC<
             '';
         const sid = serverId || null;
 
-        const noopMutate = useCallback((..._args: unknown[]) => {}, []);
+        const noopMutate = useCallback((..._args: unknown[]): void => {}, []);
         const {
             addRole = noopMutate,
             isAdding = false,
@@ -221,14 +225,15 @@ const UserItemInner: React.FC<
             string | null
         >(null);
         const [isMobile, setIsMobile] = React.useState(
-            () => window.innerWidth < 768,
+            (): boolean => window.innerWidth < 768,
         );
 
-        React.useEffect(() => {
+        React.useEffect((): (() => void) => {
             const handleResize = (): void =>
                 setIsMobile(window.innerWidth < 768);
             window.addEventListener('resize', handleResize);
-            return () => window.removeEventListener('resize', handleResize);
+            return (): void =>
+                window.removeEventListener('resize', handleResize);
         }, []);
 
         const { data: fetchedUser } = useUserById(userId, {
@@ -268,20 +273,22 @@ const UserItemInner: React.FC<
         );
 
         const isFriend = useMemo(
-            () => friends?.some((f) => f._id === userId) ?? false,
+            (): boolean =>
+                friends?.some((f): boolean => f._id === userId) ?? false,
             [friends, userId],
         );
         const isMe = currentUser?._id === userId;
 
         const activeVoiceChannelId = useAppSelector(
-            (state) => state.voice.activeVoiceChannelId,
+            (state): string | null => state.voice.activeVoiceChannelId,
         );
         const userVoiceChannelId = useAppSelector(
             useMemo(
-                () =>
+                (): ((state: RootState) => string | undefined) =>
                     createSelector(
-                        (state: RootState) => state.voice.voiceParticipants,
-                        (vp) => {
+                        (state: RootState): Record<string, string[]> =>
+                            state.voice.voiceParticipants,
+                        (vp): string | undefined => {
                             for (const [cid, userIds] of Object.entries(vp)) {
                                 if (userIds?.includes(userId)) return cid;
                             }
@@ -292,26 +299,29 @@ const UserItemInner: React.FC<
             ),
         );
         const userVolume = useAppSelector(
-            (state) => state.voice.userVolumes[userId],
+            (state): number => state.voice.userVolumes[userId],
         );
         const userVoiceState = useAppSelector(
-            (state) => state.voice.voiceUserStates[userId],
+            (state): { isMuted: boolean; isDeafened: boolean } =>
+                state.voice.voiceUserStates[userId],
             shallowEqual,
         );
         const unreadCount = useAppSelector(
-            (state) => state.unread.unreadDms[userId] || 0,
+            (state): number => state.unread.unreadDms[userId] || 0,
         );
         const storePresenceStatus = useAppSelector(
-            (state) => state.presence.users[userId]?.status,
+            (state): UserPresenceStatus => state.presence.users[userId]?.status,
         );
         const storePresenceCustomText = useAppSelector(
-            (state) => state.presence.users[userId]?.customStatus?.text,
+            (state): string | undefined =>
+                state.presence.users[userId]?.customStatus?.text,
         );
         const storePresenceCustomEmoji = useAppSelector(
-            (state) => state.presence.users[userId]?.customStatus?.emoji,
+            (state): string | null | undefined =>
+                state.presence.users[userId]?.customStatus?.emoji,
         );
         const showColorResolverDebug = useAppSelector(
-            (state) =>
+            (state): boolean =>
                 state.debugOptions?.usernameColorResolverContextMenu ?? false,
         );
 
@@ -323,11 +333,12 @@ const UserItemInner: React.FC<
         const hasUnread = unreadCount > 0 && !hideUnread && !providedServerId;
 
         const myMember = useMemo(
-            () => members?.find((m) => m.userId === currentUser?._id),
+            (): ServerMember | undefined =>
+                members?.find((m): boolean => m.userId === currentUser?._id),
             [members, currentUser?._id],
         );
         const myRoles = useMemo(
-            () =>
+            (): Role[] | undefined =>
                 serverRoles?.filter(
                     (r) =>
                         myMember?.roles.includes(r._id) ||
@@ -338,14 +349,15 @@ const UserItemInner: React.FC<
         const isOwner = serverDetails?.ownerId === currentUser?._id;
 
         const myHighestRole = useMemo(
-            () => myRoles?.sort((a, b) => b.position - a.position)[0],
+            (): Role | undefined =>
+                myRoles?.sort((a, b): number => b.position - a.position)[0],
             [myRoles],
         );
 
         const canManageRoles =
             isOwner ||
             (myRoles?.some(
-                (r) =>
+                (r): boolean | undefined =>
                     r.permissions?.administrator || r.permissions?.manageRoles,
             ) ??
                 false);
@@ -353,7 +365,7 @@ const UserItemInner: React.FC<
         const canKick =
             isOwner ||
             (myRoles?.some(
-                (r) =>
+                (r): boolean | undefined =>
                     r.permissions?.administrator || r.permissions?.kickMembers,
             ) ??
                 false);
@@ -361,7 +373,7 @@ const UserItemInner: React.FC<
         const canBan =
             isOwner ||
             (myRoles?.some(
-                (r) =>
+                (r): boolean | undefined =>
                     r.permissions?.administrator || r.permissions?.banMembers,
             ) ??
                 false);
@@ -369,23 +381,25 @@ const UserItemInner: React.FC<
         const canTimeout =
             isOwner ||
             (myRoles?.some(
-                (r) =>
+                (r): boolean | undefined =>
                     r.permissions?.administrator ||
                     r.permissions?.moderateMembers,
             ) ??
                 false);
 
         const targetMember = useMemo(
-            () => members?.find((m) => m.userId === userId),
+            (): ServerMember | undefined =>
+                members?.find((m): boolean => m.userId === userId),
             [members, userId],
         );
         const targetRoles = useMemo(
-            () =>
+            (): Role[] | undefined =>
                 serverRoles?.filter((r) => targetMember?.roles.includes(r._id)),
             [serverRoles, targetMember?.roles],
         );
         const targetHighestRole = useMemo(
-            () => targetRoles?.sort((a, b) => b.position - a.position)[0],
+            (): Role | undefined =>
+                targetRoles?.sort((a, b): number => b.position - a.position)[0],
             [targetRoles],
         );
         const targetHighestPosition = targetHighestRole
@@ -396,7 +410,7 @@ const UserItemInner: React.FC<
         const isHigherHierarchy =
             isOwner || myHighestPosition > targetHighestPosition;
 
-        const contextMenuItems = useMemo(() => {
+        const contextMenuItems = useMemo((): ContextMenuItem[] => {
             const items: ContextMenuItem[] = [];
             const resolvedDisableColors =
                 disableColors ||
@@ -411,7 +425,7 @@ const UserItemInner: React.FC<
             items.push({
                 label: 'Show Profile',
                 icon: UserIcon,
-                onClick: () => setShowProfile(true),
+                onClick: (): void => setShowProfile(true),
             });
 
             // Group 1: DM Actions
@@ -420,7 +434,10 @@ const UserItemInner: React.FC<
                 items.push({
                     label: 'Open DMs',
                     icon: MessageSquare,
-                    onClick: () => dispatch(setSelectedFriendId(userId)),
+                    onClick: (): {
+                        payload: string | null;
+                        type: 'nav/setSelectedFriendId';
+                    } => dispatch(setSelectedFriendId(userId)),
                 });
                 items.push({
                     label: 'Add to Split View',
@@ -429,7 +446,7 @@ const UserItemInner: React.FC<
                         {
                             label: isMobile ? 'Top Pane' : 'Left Side',
                             icon: isMobile ? PanelTopOpen : PanelLeftOpen,
-                            onClick: () => {
+                            onClick: (): void => {
                                 dispatch(
                                     setSplitViewPane({
                                         side: 'left',
@@ -444,7 +461,7 @@ const UserItemInner: React.FC<
                         {
                             label: isMobile ? 'Bottom Pane' : 'Right Side',
                             icon: isMobile ? PanelBottomOpen : PanelRightOpen,
-                            onClick: () => {
+                            onClick: (): void => {
                                 dispatch(
                                     setSplitViewPane({
                                         side: 'right',
@@ -463,7 +480,7 @@ const UserItemInner: React.FC<
                     items.push({
                         label: 'Mark as Read',
                         icon: Check,
-                        onClick: () => {
+                        onClick: (): void => {
                             wsMessages.markDmRead(userId);
                         },
                     });
@@ -497,7 +514,7 @@ const UserItemInner: React.FC<
                                 step="0.01"
                                 type="range"
                                 value={volume}
-                                onChange={(e) => {
+                                onChange={(e): void => {
                                     dispatch(
                                         setUserVolume({
                                             userId,
@@ -518,32 +535,32 @@ const UserItemInner: React.FC<
                     items.push({
                         label: 'Remove Friend',
                         icon: UserMinus,
-                        onClick: () => removeFriend(userId),
+                        onClick: (): void => removeFriend(userId),
                         variant: 'danger',
                     });
                 } else if (!userProfile?.isBot) {
                     items.push({
                         label: 'Add Friend',
                         icon: UserPlus,
-                        onClick: () => sendFriendRequest(username),
+                        onClick: (): void => sendFriendRequest(username),
                     });
                 }
 
                 const isUserBlocked = blocks?.some(
-                    (b) => b.targetUserId === userId,
+                    (b): boolean => b.targetUserId === userId,
                 );
                 if (isUserBlocked) {
                     items.push({
                         label: 'Unblock User',
                         icon: Shield,
-                        onClick: () => removeBlock(userId),
+                        onClick: (): void => removeBlock(userId),
                     });
                 } else {
                     items.push({
                         label: 'Block User',
                         icon: Ban,
-                        onClick: () => {
-                            void (async () => {
+                        onClick: (): void => {
+                            void (async (): Promise<void> => {
                                 const profiles = blockProfiles || [];
                                 if (profiles.length === 0) {
                                     try {
@@ -582,10 +599,10 @@ const UserItemInner: React.FC<
 
                 // Sort roles by position (descending)
                 const sortedRoles = [...serverRoles].sort(
-                    (a, b) => b.position - a.position,
+                    (a, b): number => b.position - a.position,
                 );
                 const rolesToDisplay = sortedRoles.filter(
-                    (r) => r.name !== '@everyone',
+                    (r): boolean => r.name !== '@everyone',
                 );
 
                 items.push({
@@ -594,7 +611,8 @@ const UserItemInner: React.FC<
                         rolesToDisplay.length > 0
                             ? rolesToDisplay.map((r) => {
                                   const hasRole = allRoles?.some(
-                                      (ur) => String(ur._id) === String(r._id),
+                                      (ur): boolean =>
+                                          String(ur._id) === String(r._id),
                                   );
 
                                   // Hierarchy check: can only manage roles strictly below your highest role
@@ -614,7 +632,7 @@ const UserItemInner: React.FC<
                                               </span>
                                           </Box>
                                       ),
-                                      onClick: () => {
+                                      onClick: (): void => {
                                           if (isAdding || isRemoving) return;
 
                                           if (hasRole) {
@@ -642,7 +660,7 @@ const UserItemInner: React.FC<
                             : [
                                   {
                                       label: 'No roles',
-                                      onClick: () => {},
+                                      onClick: (): void => {},
                                       type: 'action',
                                       variant: 'ghost',
                                   },
@@ -658,7 +676,7 @@ const UserItemInner: React.FC<
                 items.push({
                     label: 'Show color resolver order',
                     icon: ListTree,
-                    onClick: () => {
+                    onClick: (): void => {
                         setColorResolverReport(
                             buildUsernameColorResolverReport({
                                 label: 'User item username',
@@ -693,7 +711,7 @@ const UserItemInner: React.FC<
                     items.push({
                         label: 'Timeout Member',
                         icon: Shield,
-                        onClick: () => {
+                        onClick: (): void => {
                             setIsTimeoutModalOpen(true);
                         },
                         variant: 'danger',
@@ -703,7 +721,7 @@ const UserItemInner: React.FC<
                     items.push({
                         label: 'Kick Member',
                         icon: UserX,
-                        onClick: () => {
+                        onClick: (): void => {
                             setIsKickModalOpen(true);
                         },
                         variant: 'danger',
@@ -713,7 +731,7 @@ const UserItemInner: React.FC<
                     items.push({
                         label: 'Ban Member',
                         icon: Ban,
-                        onClick: () => {
+                        onClick: (): void => {
                             setIsBanModalOpen(true);
                         },
                         variant: 'danger',
@@ -725,7 +743,7 @@ const UserItemInner: React.FC<
             items.push({
                 label: 'Copy User ID',
                 icon: Copy,
-                onClick: () => {
+                onClick: (): void => {
                     void navigator.clipboard.writeText(userId);
                 },
             });
@@ -787,7 +805,7 @@ const UserItemInner: React.FC<
         const presenceCustomEmoji =
             storePresenceCustomEmoji ?? customStatus?.emoji;
 
-        const handleItemClick = useCallback(() => {
+        const handleItemClick = useCallback((): void => {
             if (onClick) {
                 onClick();
             } else {
@@ -795,7 +813,7 @@ const UserItemInner: React.FC<
             }
         }, [onClick]);
 
-        const handleAvatarClick = useCallback((e: React.MouseEvent) => {
+        const handleAvatarClick = useCallback((e: React.MouseEvent): void => {
             e.stopPropagation();
             setShowProfile(true);
         }, []);
@@ -947,7 +965,7 @@ const UserItemInner: React.FC<
                     triggerRef={itemRef}
                     user={userProfile || undefined}
                     userId={userId}
-                    onClose={() => setShowProfile(false)}
+                    onClose={(): void => setShowProfile(false)}
                 />
 
                 {isKickModalOpen && (
@@ -955,8 +973,8 @@ const UserItemInner: React.FC<
                         isOpen={isKickModalOpen}
                         userAvatar={userProfile?.profilePicture}
                         username={username}
-                        onClose={() => setIsKickModalOpen(false)}
-                        onConfirm={() => kickMember(userId)}
+                        onClose={(): void => setIsKickModalOpen(false)}
+                        onConfirm={(): void => kickMember(userId)}
                     />
                 )}
 
@@ -965,8 +983,10 @@ const UserItemInner: React.FC<
                         isOpen={isBanModalOpen}
                         userAvatar={userProfile?.profilePicture}
                         username={username}
-                        onClose={() => setIsBanModalOpen(false)}
-                        onConfirm={(reason) => banMember({ userId, reason })}
+                        onClose={(): void => setIsBanModalOpen(false)}
+                        onConfirm={(reason): void =>
+                            banMember({ userId, reason })
+                        }
                     />
                 )}
 
@@ -976,8 +996,8 @@ const UserItemInner: React.FC<
                         profiles={blockProfiles || []}
                         userAvatar={userProfile?.profilePicture}
                         username={username}
-                        onClose={() => setIsBlockModalOpen(false)}
-                        onConfirm={(profileId) =>
+                        onClose={(): void => setIsBlockModalOpen(false)}
+                        onConfirm={(profileId): void =>
                             upsertBlock({ targetUserId: userId, profileId })
                         }
                     />
@@ -988,8 +1008,8 @@ const UserItemInner: React.FC<
                         isOpen={isTimeoutModalOpen}
                         userAvatar={userProfile?.profilePicture}
                         username={username}
-                        onClose={() => setIsTimeoutModalOpen(false)}
-                        onConfirm={(duration, reason) =>
+                        onClose={(): void => setIsTimeoutModalOpen(false)}
+                        onConfirm={(duration, reason): void =>
                             timeoutMember({ userId, duration, reason })
                         }
                     />
@@ -998,7 +1018,7 @@ const UserItemInner: React.FC<
                     content={colorResolverReport ?? ''}
                     isOpen={!!colorResolverReport}
                     language="json"
-                    onClose={() => setColorResolverReport(null)}
+                    onClose={(): void => setColorResolverReport(null)}
                 />
             </>
         );
@@ -1007,7 +1027,7 @@ const UserItemInner: React.FC<
 
 UserItemInner.displayName = 'UserItemInner';
 
-export const UserItem = React.memo((props: UserItemProps) => {
+export const UserItem = React.memo((props: UserItemProps): JSX.Element => {
     const isServerContext = !!props.serverId;
     const serverId =
         props.serverId ||
@@ -1019,7 +1039,7 @@ export const UserItem = React.memo((props: UserItemProps) => {
     if (isServerContext && sid) {
         return (
             <ServerDataInjector serverId={sid}>
-                {(serverData) => (
+                {(serverData): JSX.Element => (
                     <UserItemInner
                         allRoles={props.allRoles}
                         className={props.className}

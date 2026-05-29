@@ -32,7 +32,7 @@ export const useEmojiInfoBox = (): UseEmojiInfoBoxReturn => {
     });
 
     const showEmojiInfo = useCallback(
-        (emoji: EmojiData, event: React.MouseEvent) => {
+        (emoji: EmojiData, event: React.MouseEvent): void => {
             event.preventDefault();
             event.stopPropagation();
 
@@ -53,7 +53,7 @@ export const useEmojiInfoBox = (): UseEmojiInfoBoxReturn => {
         [],
     );
 
-    const closeInfoBox = useCallback(() => {
+    const closeInfoBox = useCallback((): void => {
         setSelectedEmoji(null);
         setInfoBoxPosition(null);
     }, []);

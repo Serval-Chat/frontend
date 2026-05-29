@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 import { ChevronLeft, Shield } from 'lucide-react';
 
@@ -22,9 +22,7 @@ interface ServerRoleSettingsProps {
     serverId: string;
 }
 
-export const ServerRoleSettings: React.FC<ServerRoleSettingsProps> = ({
-    serverId,
-}) => {
+export const ServerRoleSettings = ({ serverId }: ServerRoleSettingsProps) => {
     const { data: server } = useServerDetails(serverId);
     const { data: roles, isLoading } = useRoles(serverId);
     const [selectedRoleId, setSelectedRoleId] = useState<string | null>(null);
@@ -37,11 +35,13 @@ export const ServerRoleSettings: React.FC<ServerRoleSettingsProps> = ({
 
     const effectiveSelectedId =
         selectedRoleId ||
-        roles?.find((r) => r.name === '@everyone')?._id ||
+        roles?.find((r): boolean => r.name === '@everyone')?._id ||
         roles?.[0]?._id ||
         null;
 
-    const selectedRole = roles?.find((r) => r._id === effectiveSelectedId);
+    const selectedRole = roles?.find(
+        (r): boolean => r._id === effectiveSelectedId,
+    );
 
     const handleAddRole = (): void => {
         createRoleMutation.mutate(
@@ -50,7 +50,7 @@ export const ServerRoleSettings: React.FC<ServerRoleSettingsProps> = ({
                 color: '#99aab5',
             },
             {
-                onSuccess: (newRole) => {
+                onSuccess: (newRole): void => {
                     setSelectedRoleId(newRole._id);
                     setIsMobileListOpen(false);
                 },
@@ -60,9 +60,11 @@ export const ServerRoleSettings: React.FC<ServerRoleSettingsProps> = ({
 
     const handleDeleteRole = (roleId: string): void => {
         deleteRoleMutation.mutate(roleId, {
-            onSuccess: () => {
+            onSuccess: (): void => {
                 if (effectiveSelectedId === roleId) {
-                    const everyone = roles?.find((r) => r.name === '@everyone');
+                    const everyone = roles?.find(
+                        (r): boolean => r.name === '@everyone',
+                    );
                     setSelectedRoleId(everyone?._id || null);
                 }
             },
@@ -77,10 +79,12 @@ export const ServerRoleSettings: React.FC<ServerRoleSettingsProps> = ({
     };
 
     const handleReorderRoles = (newRoles: Role[]): void => {
-        const positions = newRoles.map((r, i) => ({
-            roleId: r._id,
-            position: newRoles.length - i,
-        }));
+        const positions = newRoles.map(
+            (r, i): { roleId: string; position: number } => ({
+                roleId: r._id,
+                position: newRoles.length - i,
+            }),
+        );
         reorderRolesMutation.mutate(positions);
     };
 
@@ -121,7 +125,7 @@ export const ServerRoleSettings: React.FC<ServerRoleSettingsProps> = ({
                     onAddRole={handleAddRole}
                     onDeleteRole={handleDeleteRole}
                     onReorderRoles={handleReorderRoles}
-                    onSelectRole={(id) => {
+                    onSelectRole={(id): void => {
                         setSelectedRoleId(id);
                         setIsMobileListOpen(false);
                     }}
@@ -140,7 +144,7 @@ export const ServerRoleSettings: React.FC<ServerRoleSettingsProps> = ({
                     <div className="sticky top-0 z-20 mb-4 flex w-full shrink-0 items-center border-b border-border-subtle bg-background px-4 py-3 md:hidden">
                         <button
                             className="flex items-center gap-1 font-medium text-muted-foreground transition-colors hover:text-foreground"
-                            onClick={() => setIsMobileListOpen(true)}
+                            onClick={(): void => setIsMobileListOpen(true)}
                         >
                             <ChevronLeft size={20} />
                             Back
@@ -155,7 +159,7 @@ export const ServerRoleSettings: React.FC<ServerRoleSettingsProps> = ({
                         }
                         key={selectedRole._id}
                         role={selectedRole}
-                        onReset={() => {}}
+                        onReset={(): void => {}}
                         onSave={handleSaveRole}
                     />
                 ) : (

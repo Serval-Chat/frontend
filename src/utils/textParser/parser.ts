@@ -54,7 +54,7 @@ const getBaseUrlPattern = (): string => {
         }
     }
 
-    const escapedAlts = alternativeUrls.map((url) =>
+    const escapedAlts = alternativeUrls.map((url): string =>
         url.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\/$/, ''),
     );
 
@@ -1418,10 +1418,10 @@ export class TextParser {
         const separatorCells = separatorLine
             .split('|')
             .slice(1, -1) // Remove empty first and last elements
-            .map((cell) => cell.trim());
+            .map((cell): string => cell.trim());
 
         // Check if all separator cells are dashes (with optional colons for alignment)
-        const isValidSeparator = separatorCells.every((cell) =>
+        const isValidSeparator = separatorCells.every((cell): boolean =>
             /^:?-+:?$/.test(cell),
         );
 
@@ -1434,7 +1434,9 @@ export class TextParser {
         const headers = headerLine
             .split('|')
             .slice(1, -1) // Remove empty first and last elements
-            .map((header) => this.parseContent(header.trim()));
+            .map((header): string | ASTNode[] =>
+                this.parseContent(header.trim()),
+            );
 
         // If header count doesn't match separator count, it's not a valid table
         if (headers.length !== separatorCells.length) {
@@ -1516,7 +1518,9 @@ export class TextParser {
             // Add the last cell
             cells.push(currentCell.trim());
 
-            const parsedCells = cells.map((cell) => this.parseContent(cell));
+            const parsedCells = cells.map((cell): string | ASTNode[] =>
+                this.parseContent(cell),
+            );
 
             if (parsedCells.length > headers.length) {
                 rows.push(parsedCells.slice(0, headers.length));
@@ -1601,7 +1605,7 @@ export class TextParser {
             options = {
                 ...this.options,
                 features: this.options.features.filter(
-                    (f) => !excludedFeatures.includes(f),
+                    (f): boolean => !excludedFeatures.includes(f),
                 ),
             };
         }

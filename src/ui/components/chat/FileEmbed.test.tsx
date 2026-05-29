@@ -5,15 +5,30 @@ import type { MessageAttachment } from '@/api/chat/chat.types';
 import { FileEmbed } from '@/ui/components/chat/FileEmbed';
 
 vi.mock('@/api/files/files.queries', () => ({
-    useFileContent: () => ({ data: null, isLoading: false }),
-    useFileMetadata: () => ({ data: null, isLoading: false }),
-    useProxyContent: () => ({ data: null, isLoading: false }),
-    useProxyMetadata: () => ({ data: null, isLoading: false }),
+    useFileContent: (): { data: null; isLoading: false } => ({
+        data: null,
+        isLoading: false,
+    }),
+    useFileMetadata: (): { data: null; isLoading: false } => ({
+        data: null,
+        isLoading: false,
+    }),
+    useProxyContent: (): { data: null; isLoading: false } => ({
+        data: null,
+        isLoading: false,
+    }),
+    useProxyMetadata: (): { data: null; isLoading: false } => ({
+        data: null,
+        isLoading: false,
+    }),
 }));
 
-vi.mock('@/ui/components/common/ImageLightbox', () => ({
-    ImageLightbox: () => null,
-}));
+vi.mock(
+    '@/ui/components/common/ImageLightbox',
+    (): { ImageLightbox: () => null } => ({
+        ImageLightbox: (): null => null,
+    }),
+);
 
 const imageAttachment: MessageAttachment = {
     attachmentId: 'image-1',
@@ -35,8 +50,8 @@ const videoAttachment: MessageAttachment = {
     height: 720,
 };
 
-describe('FileEmbed', () => {
-    it('renders image attachments with stable dimensions and reports load resize', () => {
+describe('FileEmbed', (): void => {
+    it('renders image attachments with stable dimensions and reports load resize', (): void => {
         const onResize = vi.fn();
 
         render(<FileEmbed attachment={imageAttachment} onResize={onResize} />);
@@ -51,7 +66,7 @@ describe('FileEmbed', () => {
         expect(onResize).toHaveBeenCalled();
     });
 
-    it('sizes spoiler placeholders from attachment dimensions', () => {
+    it('sizes spoiler placeholders from attachment dimensions', (): void => {
         render(
             <FileEmbed
                 attachment={{ ...videoAttachment, spoiler: true }}
@@ -67,7 +82,7 @@ describe('FileEmbed', () => {
         });
     });
 
-    it('renders video attachments with dimensions and reports metadata resize', () => {
+    it('renders video attachments with dimensions and reports metadata resize', (): void => {
         const onResize = vi.fn();
         const { container } = render(
             <FileEmbed attachment={videoAttachment} onResize={onResize} />,

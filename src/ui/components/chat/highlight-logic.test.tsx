@@ -12,7 +12,7 @@ vi.mock('@/store/hooks', () => ({
 }));
 
 vi.mock('@/store/slices/navSlice', () => ({
-    setTargetMessageId: vi.fn((id) => ({
+    setTargetMessageId: vi.fn((id): { type: string; payload: any } => ({
         type: 'nav/setTargetMessageId',
         payload: id,
     })),
@@ -71,26 +71,28 @@ vi.mock('@/ui/components/layout/VerticalSpacer', () => ({
 
 vi.mock('@tanstack/react-virtual', () => ({
     useVirtualizer: vi.fn().mockImplementation((options: any) => ({
-        getVirtualItems: () =>
-            Array.from({ length: options.count }).map((_, i) => ({
-                index: i,
-                start: 0,
-                key: i,
-            })),
-        getTotalSize: () => options.count * 100,
+        getVirtualItems: (): { index: number; start: number; key: number }[] =>
+            Array.from({ length: options.count }).map(
+                (_, i): { index: number; start: number; key: number } => ({
+                    index: i,
+                    start: 0,
+                    key: i,
+                }),
+            ),
+        getTotalSize: (): number => options.count * 100,
         scrollToIndex: vi.fn(),
         measureElement: vi.fn(),
     })),
 }));
 
-describe('MessagesList Highlight Logic', () => {
+describe('MessagesList Highlight Logic', (): void => {
     const mockDispatch = vi.fn();
     const mockMessages = [
         { _id: '1', text: 'Msg 1' },
         { _id: '2', text: 'Msg 2' },
     ] as any as ProcessedChatMessage[];
 
-    beforeEach(() => {
+    beforeEach((): void => {
         vi.useFakeTimers();
         vi.clearAllMocks();
         vi.mocked(useAppDispatch).mockReturnValue(mockDispatch);
@@ -100,9 +102,9 @@ describe('MessagesList Highlight Logic', () => {
         window.requestAnimationFrame = vi.fn((cb) => cb());
     });
 
-    it('clears highlight and dispatches null after timeout', async () => {
+    it('clears highlight and dispatches null after timeout', async (): Promise<void> => {
         let renderer: ReturnType<typeof render> | undefined;
-        act(() => {
+        act((): void => {
             renderer = render(
                 <MessagesList
                     activeHighlightId="2"
@@ -117,7 +119,7 @@ describe('MessagesList Highlight Logic', () => {
         const msg2 = getByTestId('msg-2');
         expect(msg2.getAttribute('data-highlighted')).toBe('true');
 
-        act(() => {
+        act((): void => {
             vi.advanceTimersByTime(2000);
         });
 
@@ -130,7 +132,7 @@ describe('MessagesList Highlight Logic', () => {
             }),
         );
 
-        act(() => {
+        act((): void => {
             rerender(
                 <MessagesList
                     activeHighlightId={null}
@@ -143,9 +145,9 @@ describe('MessagesList Highlight Logic', () => {
         expect(msg2.getAttribute('data-highlighted')).toBe('false');
     });
 
-    it('does not re-highlight on re-render if messages change but activeHighlightId is the same', async () => {
+    it('does not re-highlight on re-render if messages change but activeHighlightId is the same', async (): Promise<void> => {
         let renderer: ReturnType<typeof render> | undefined;
-        act(() => {
+        act((): void => {
             renderer = render(
                 <MessagesList
                     activeHighlightId="2"
@@ -160,7 +162,7 @@ describe('MessagesList Highlight Logic', () => {
             'true',
         );
 
-        act(() => {
+        act((): void => {
             vi.advanceTimersByTime(1000);
         });
         expect(getByTestId('msg-2').getAttribute('data-highlighted')).toBe(
@@ -170,7 +172,7 @@ describe('MessagesList Highlight Logic', () => {
             ...mockMessages,
             { _id: '3', text: 'Msg 3' } as any as ProcessedChatMessage,
         ];
-        act(() => {
+        act((): void => {
             rerender(
                 <MessagesList
                     activeHighlightId="2"
@@ -184,7 +186,7 @@ describe('MessagesList Highlight Logic', () => {
             'true',
         );
 
-        act(() => {
+        act((): void => {
             vi.advanceTimersByTime(1000);
         });
 
@@ -193,9 +195,9 @@ describe('MessagesList Highlight Logic', () => {
         );
     });
 
-    it('clears highlight and dispatches null on unmount if timer was active', () => {
+    it('clears highlight and dispatches null on unmount if timer was active', (): void => {
         let renderer: ReturnType<typeof render> | undefined;
-        act(() => {
+        act((): void => {
             renderer = render(
                 <MessagesList
                     activeHighlightId="2"
@@ -207,7 +209,7 @@ describe('MessagesList Highlight Logic', () => {
 
         const { unmount } = renderer!;
 
-        act(() => {
+        act((): void => {
             unmount();
         });
         expect(mockDispatch).toHaveBeenCalledWith(

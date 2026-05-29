@@ -32,11 +32,11 @@ const voiceSlice = createSlice({
         joinVoiceRoom: (
             state,
             action: PayloadAction<{ serverId: string; channelId: string }>,
-        ) => {
+        ): void => {
             state.activeVoiceServerId = action.payload.serverId;
             state.activeVoiceChannelId = action.payload.channelId;
         },
-        leaveVoiceRoom: (state) => {
+        leaveVoiceRoom: (state): void => {
             state.activeVoiceServerId = null;
             state.activeVoiceChannelId = null;
             state.speakingUsers = [];
@@ -44,14 +44,14 @@ const voiceSlice = createSlice({
         setVoiceParticipants: (
             state,
             action: PayloadAction<{ channelId: string; userIds: string[] }>,
-        ) => {
+        ): void => {
             state.voiceParticipants[action.payload.channelId] =
                 action.payload.userIds;
         },
         addVoiceParticipant: (
             state,
             action: PayloadAction<{ channelId: string; userId: string }>,
-        ) => {
+        ): void => {
             const { channelId, userId } = action.payload;
             if (!state.voiceParticipants[channelId]) {
                 state.voiceParticipants[channelId] = [];
@@ -63,35 +63,35 @@ const voiceSlice = createSlice({
         removeVoiceParticipant: (
             state,
             action: PayloadAction<{ channelId: string; userId: string }>,
-        ) => {
+        ): void => {
             const { channelId, userId } = action.payload;
             if (state.voiceParticipants[channelId]) {
                 state.voiceParticipants[channelId] = state.voiceParticipants[
                     channelId
-                ].filter((id) => id !== userId);
+                ].filter((id): boolean => id !== userId);
             }
         },
         clearUserFromAllVoiceChannels: (
             state,
             action: PayloadAction<string>,
-        ) => {
+        ): void => {
             const userId = action.payload;
             for (const channelId in state.voiceParticipants) {
                 state.voiceParticipants[channelId] = state.voiceParticipants[
                     channelId
-                ].filter((id) => id !== userId);
+                ].filter((id): boolean => id !== userId);
             }
         },
-        setSpeakingUsers: (state, action: PayloadAction<string[]>) => {
+        setSpeakingUsers: (state, action: PayloadAction<string[]>): void => {
             state.speakingUsers = action.payload;
         },
-        toggleMute: (state) => {
+        toggleMute: (state): void => {
             state.isMuted = !state.isMuted;
             if (!state.isMuted) {
                 state.isDeafened = false;
             }
         },
-        toggleDeafen: (state) => {
+        toggleDeafen: (state): void => {
             state.isDeafened = !state.isDeafened;
             if (state.isDeafened) {
                 state.isMuted = true;
@@ -100,13 +100,13 @@ const voiceSlice = createSlice({
         setConnectionQuality: (
             state,
             action: PayloadAction<VoiceState['connectionQuality']>,
-        ) => {
+        ): void => {
             state.connectionQuality = action.payload;
         },
         setUserVolume: (
             state,
             action: PayloadAction<{ userId: string; volume: number }>,
-        ) => {
+        ): void => {
             state.userVolumes[action.payload.userId] = action.payload.volume;
         },
         setVoiceUserState: (
@@ -116,7 +116,7 @@ const voiceSlice = createSlice({
                 isMuted: boolean;
                 isDeafened: boolean;
             }>,
-        ) => {
+        ): void => {
             state.voiceUserStates[action.payload.userId] = {
                 isMuted: action.payload.isMuted,
                 isDeafened: action.payload.isDeafened,

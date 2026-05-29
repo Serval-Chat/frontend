@@ -12,7 +12,7 @@ import { Text } from '@/ui/components/common/Text';
 import { UserItem } from '@/ui/components/common/UserItem';
 import { Box } from '@/ui/components/layout/Box';
 
-export const FriendListMain: React.FC = () => {
+export const FriendListMain = () => {
     const { data: friends, isLoading } = useFriendProfiles();
     const navigate = useNavigate();
     const [search, setSearch] = React.useState('');
@@ -20,7 +20,7 @@ export const FriendListMain: React.FC = () => {
     const filteredFriends = React.useMemo(() => {
         if (!friends) return [];
         const query = search.toLowerCase();
-        return friends.filter((f) => {
+        return friends.filter((f): boolean => {
             const name = (f.displayName || f.username).toLowerCase();
             return name.includes(query);
         });
@@ -38,7 +38,7 @@ export const FriendListMain: React.FC = () => {
 
     const groupedFriends = React.useMemo(() => {
         const groups: Record<string, typeof friends> = {};
-        sortedFriends.forEach((friend) => {
+        sortedFriends.forEach((friend): void => {
             const name = (friend.displayName || friend.username).toUpperCase();
             let firstChar = name.charAt(0);
             if (!/[A-Z]/.test(firstChar)) {
@@ -52,7 +52,7 @@ export const FriendListMain: React.FC = () => {
         return groups;
     }, [sortedFriends]);
 
-    const groupKeys = Object.keys(groupedFriends).sort((a, b) => {
+    const groupKeys = Object.keys(groupedFriends).sort((a, b): number => {
         if (a === '#') return -1;
         if (b === '#') return 1;
         return a.localeCompare(b);
@@ -112,7 +112,7 @@ export const FriendListMain: React.FC = () => {
                         placeholder="Search username"
                         type="text"
                         value={search}
-                        onChange={(e) => setSearch(e.target.value)}
+                        onChange={(e): void => setSearch(e.target.value)}
                     />
                 </Box>
             </Box>
@@ -139,13 +139,13 @@ export const FriendListMain: React.FC = () => {
                                 className="flex-1"
                                 user={friend}
                                 userId={String(friend._id)}
-                                onClick={() => {
+                                onClick={(): void => {
                                     void navigate(`/chat/@user/${friend._id}`);
                                 }}
                             />
                             <Box
                                 className="text-foreground-muted flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-md bg-bg-secondary transition-colors hover:bg-bg-subtle hover:text-foreground"
-                                onClick={() => {
+                                onClick={(): void => {
                                     void navigate(`/chat/@user/${friend._id}`);
                                 }}
                             >

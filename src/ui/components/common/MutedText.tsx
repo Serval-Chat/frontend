@@ -11,10 +11,7 @@ interface MutedTextProps {
 /**
  * @description muted text component
  */
-export const MutedText: React.FC<MutedTextProps> = ({
-    children,
-    className,
-}) => (
+export const MutedText = ({ children, className }: MutedTextProps) => (
     <Text as="p" className={cn('text-sm text-muted-foreground/80', className)}>
         {children}
     </Text>

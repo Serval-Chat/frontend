@@ -4,7 +4,7 @@ import type {
 } from '@/console/ConCommandRegistry';
 
 export const progressCommand: ConCommandReactor = {
-    match: (_argc, argv) => argv[0]?.toLowerCase() === 'progress',
+    match: (_argc, argv): boolean => argv[0]?.toLowerCase() === 'progress',
     execute: async (_argc, _argv, context): Promise<CommandResult> => {
         const { terminal } = context;
         if (!terminal) {
@@ -33,7 +33,9 @@ export const progressCommand: ConCommandReactor = {
 
             terminal.write(`\r\u001b[0K${bar}`);
 
-            await new Promise((resolve) => setTimeout(resolve, 50));
+            await new Promise(
+                (resolve): NodeJS.Timeout => setTimeout(resolve, 50),
+            );
         }
 
         terminal.puts();

@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { Settings, Shield, SlidersHorizontal } from 'lucide-react';
 
 import {
@@ -13,9 +11,11 @@ interface CategorySettingsSidebarProps {
     categoryName: string;
 }
 
-export const CategorySettingsSidebar: React.FC<
-    CategorySettingsSidebarProps
-> = ({ activeSection, setActiveSection, categoryName }) => {
+export const CategorySettingsSidebar = ({
+    activeSection,
+    setActiveSection,
+    categoryName,
+}: CategorySettingsSidebarProps) => {
     const sections: SettingsSidebarSection[] = [
         {
             id: 'overview',

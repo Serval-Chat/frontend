@@ -82,7 +82,7 @@ export function buildContextMenuItems({
         items.push({
             label: 'Copy Message Link',
             icon: Copy,
-            onClick: () => {
+            onClick: (): void => {
                 const link = `/chat/@server/${message.serverId}/channel/${message.channelId}/message/${message._id}`;
                 void navigator.clipboard.writeText(
                     `${window.location.origin}${link}`,
@@ -96,7 +96,7 @@ export function buildContextMenuItems({
         items.push({
             label: 'Copy Text',
             icon: Copy,
-            onClick: () => {
+            onClick: (): void => {
                 void navigator.clipboard.writeText(message.text);
             },
         });
@@ -105,13 +105,15 @@ export function buildContextMenuItems({
     items.push({
         label: 'Copy Message ID',
         icon: Copy,
-        onClick: () => {
+        onClick: (): void => {
             void navigator.clipboard.writeText(message._id);
         },
     });
 
     if (!isMessageSender) {
-        const isFriend = friends?.some((f) => f._id === message.senderId);
+        const isFriend = friends?.some(
+            (f): boolean => f._id === message.senderId,
+        );
         items.push({ type: 'divider' });
 
         if (isFriend) {
@@ -119,13 +121,13 @@ export function buildContextMenuItems({
                 label: 'Remove Friend',
                 icon: UserMinus,
                 variant: 'danger',
-                onClick: () => onRemoveFriend(message.senderId),
+                onClick: (): void => onRemoveFriend(message.senderId),
             });
         } else if (!user?.isBot) {
             items.push({
                 label: 'Add Friend',
                 icon: UserPlus,
-                onClick: () => onAddFriend(user.username),
+                onClick: (): void => onAddFriend(user.username),
             });
         }
     }
@@ -134,7 +136,7 @@ export function buildContextMenuItems({
         items.unshift({
             label: 'Reply',
             icon: CornerUpLeft,
-            onClick: () => onReplyToMessage(message),
+            onClick: (): void => onReplyToMessage(message),
         });
     }
 
@@ -195,10 +197,10 @@ export function buildContextMenuItems({
         items.push({ type: 'divider' });
 
         const sortedRoles = [...allServerRoles].sort(
-            (a, b) => b.position - a.position,
+            (a, b): number => b.position - a.position,
         );
         const rolesToDisplay = sortedRoles.filter(
-            (r) => r.name !== '@everyone',
+            (r): boolean => r.name !== '@everyone',
         );
 
         items.push({
@@ -209,7 +211,7 @@ export function buildContextMenuItems({
                 rolesToDisplay.length > 0
                     ? rolesToDisplay.map((r) => {
                           const hasRole = userRoles?.some(
-                              (ur) => String(ur._id) === String(r._id),
+                              (ur): boolean => String(ur._id) === String(r._id),
                           );
 
                           const canManageThisRole =
@@ -232,7 +234,7 @@ export function buildContextMenuItems({
                                       r.name,
                                   ),
                               ),
-                              onClick: () => {
+                              onClick: (): void => {
                                   if (!canManageThisRole) return;
                                   if (hasRole) {
                                       onRemoveRole(r._id);
@@ -248,7 +250,7 @@ export function buildContextMenuItems({
                     : [
                           {
                               label: 'No roles',
-                              onClick: () => {},
+                              onClick: (): void => {},
                               variant: 'ghost',
                           },
                       ],
@@ -289,7 +291,7 @@ export function useMessageContextMenu(
     } = params;
 
     return React.useMemo(
-        () =>
+        (): ContextMenuItem[] =>
             buildContextMenuItems({
                 message,
                 user,

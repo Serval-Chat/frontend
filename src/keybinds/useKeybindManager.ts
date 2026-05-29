@@ -7,4 +7,7 @@ import { KeybindManager } from './KeybindManager';
 export const useKeybindManager = (
     keybinds: UserKeybinds | undefined,
 ): KeybindManager =>
-    React.useMemo(() => new KeybindManager(keybinds), [keybinds]);
+    React.useMemo(
+        (): KeybindManager => new KeybindManager(keybinds),
+        [keybinds],
+    );

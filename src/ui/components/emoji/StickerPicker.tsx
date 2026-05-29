@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 
 import { useMeasure } from 'react-use';
 
@@ -27,11 +27,11 @@ interface StickerPickerProps {
     className?: string;
 }
 
-export const StickerPicker: React.FC<StickerPickerProps> = ({
+export const StickerPicker = ({
     onStickerSelect,
     categories,
     className,
-}) => {
+}: StickerPickerProps) => {
     const [containerRef] = useMeasure<HTMLDivElement>();
     const [activeCategoryId, setActiveCategoryId] = useState<string>(
         categories[0]?.id || '',
@@ -46,7 +46,8 @@ export const StickerPicker: React.FC<StickerPickerProps> = ({
     } = useStickerInfoBox();
 
     const activeCategory = useMemo(
-        () => categories.find((c) => c.id === activeCategoryId),
+        (): StickerCategory | undefined =>
+            categories.find((c): boolean => c.id === activeCategoryId),
         [categories, activeCategoryId],
     );
 
@@ -76,7 +77,9 @@ export const StickerPicker: React.FC<StickerPickerProps> = ({
                                         icon: cat.icon,
                                     }}
                                     size="xs"
-                                    onClick={() => setActiveCategoryId(cat.id)}
+                                    onClick={(): void =>
+                                        setActiveCategoryId(cat.id)
+                                    }
                                 />
                                 {isActive && (
                                     <div className="absolute top-1/2 -left-3.5 h-6 w-1.5 -translate-y-1/2 rounded-full bg-primary shadow-[0_0_8px_rgba(var(--primary),0.5)]" />
@@ -112,12 +115,14 @@ export const StickerPicker: React.FC<StickerPickerProps> = ({
                                                     <Button
                                                         className="group relative aspect-square h-auto w-full p-2 hover:bg-bg-subtle"
                                                         variant="ghost"
-                                                        onClick={() =>
+                                                        onClick={(): void =>
                                                             onStickerSelect(
                                                                 sticker,
                                                             )
                                                         }
-                                                        onContextMenu={(e) =>
+                                                        onContextMenu={(
+                                                            e,
+                                                        ): void =>
                                                             showStickerInfo(
                                                                 {
                                                                     id: sticker.id,

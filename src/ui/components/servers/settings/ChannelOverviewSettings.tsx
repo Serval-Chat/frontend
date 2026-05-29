@@ -30,9 +30,10 @@ interface ChannelOverviewSettingsProps {
     onDeleted?: () => void;
 }
 
-export const ChannelOverviewSettings: React.FC<
-    ChannelOverviewSettingsProps
-> = ({ channel, onDeleted }) => {
+export const ChannelOverviewSettings = ({
+    channel,
+    onDeleted,
+}: ChannelOverviewSettingsProps) => {
     const [name, setName] = useState(channel.name);
     const [originalName, setOriginalName] = useState(channel.name);
     const [description, setDescription] = useState(channel.description || '');
@@ -138,7 +139,7 @@ export const ChannelOverviewSettings: React.FC<
                 emojiType: emoji ? emojiType : undefined,
             },
             {
-                onSuccess: () => {
+                onSuccess: (): void => {
                     setOriginalName(name);
                     setOriginalDescription(description);
                     setOriginalIcon(selectedIcon);
@@ -166,7 +167,7 @@ export const ChannelOverviewSettings: React.FC<
 
     const handleDelete = (): void => {
         deleteChannel(channel._id, {
-            onSuccess: () => {
+            onSuccess: (): void => {
                 onDeleted?.();
             },
         });
@@ -195,7 +196,7 @@ export const ChannelOverviewSettings: React.FC<
                         id="channel-name"
                         placeholder="new-channel"
                         value={name}
-                        onChange={(e) => setName(e.target.value)}
+                        onChange={(e): void => setName(e.target.value)}
                     />
                 </div>
 
@@ -210,7 +211,7 @@ export const ChannelOverviewSettings: React.FC<
                         id="channel-description"
                         placeholder="What's this channel about?"
                         value={description}
-                        onChange={(e) => setDescription(e.target.value)}
+                        onChange={(e): void => setDescription(e.target.value)}
                     />
                 </div>
 
@@ -226,7 +227,7 @@ export const ChannelOverviewSettings: React.FC<
                             id="channel-link"
                             placeholder="https://example.com"
                             value={linkUrl}
-                            onChange={(e) => setLinkUrl(e.target.value)}
+                            onChange={(e): void => setLinkUrl(e.target.value)}
                         />
                         {error && (
                             <Text size="xs" variant="danger">
@@ -256,7 +257,7 @@ export const ChannelOverviewSettings: React.FC<
                             )}
                             title="None"
                             variant="ghost"
-                            onClick={() => {
+                            onClick={(): void => {
                                 setSelectedIcon('');
                                 setEmoji('');
                                 setEmojiType(undefined);
@@ -276,7 +277,7 @@ export const ChannelOverviewSettings: React.FC<
                                     key={key}
                                     title={key}
                                     variant="ghost"
-                                    onClick={() => {
+                                    onClick={(): void => {
                                         setSelectedIcon(key);
                                         setEmoji('');
                                         setEmojiType(undefined);
@@ -302,7 +303,7 @@ export const ChannelOverviewSettings: React.FC<
                             id="channel-emoji"
                             ref={emojiTriggerRef}
                             variant="ghost"
-                            onClick={() =>
+                            onClick={(): void =>
                                 setIsEmojiPickerOpen(!isEmojiPickerOpen)
                             }
                         >
@@ -330,7 +331,7 @@ export const ChannelOverviewSettings: React.FC<
                             <Button
                                 size="sm"
                                 variant="ghost"
-                                onClick={() => {
+                                onClick={(): void => {
                                     setEmoji('');
                                     setEmojiType(undefined);
                                 }}
@@ -343,17 +344,17 @@ export const ChannelOverviewSettings: React.FC<
                     <Popover
                         isOpen={isEmojiPickerOpen}
                         triggerRef={emojiTriggerRef}
-                        onClose={() => setIsEmojiPickerOpen(false)}
+                        onClose={(): void => setIsEmojiPickerOpen(false)}
                     >
                         <EmojiPicker
                             customCategories={customCategories}
-                            onCustomEmojiSelect={(e) => {
+                            onCustomEmojiSelect={(e): void => {
                                 setEmoji(e.id);
                                 setEmojiType('custom');
                                 setSelectedIcon('');
                                 setIsEmojiPickerOpen(false);
                             }}
-                            onEmojiSelect={(e) => {
+                            onEmojiSelect={(e): void => {
                                 setEmoji(e);
                                 setEmojiType('unicode');
                                 setSelectedIcon('');
@@ -390,7 +391,7 @@ export const ChannelOverviewSettings: React.FC<
                                         placeholder="0"
                                         type="number"
                                         value={slowMode === 0 ? '' : slowMode}
-                                        onChange={(e) => {
+                                        onChange={(e): void => {
                                             const val = e.target.value;
                                             if (val === '') {
                                                 setSlowMode(0);
@@ -429,7 +430,7 @@ export const ChannelOverviewSettings: React.FC<
                             }
                             type="range"
                             value={slowMode}
-                            onChange={(e) =>
+                            onChange={(e): void =>
                                 setSlowMode(Number(e.target.value))
                             }
                         />
@@ -506,7 +507,7 @@ export const ChannelOverviewSettings: React.FC<
                                 loading={
                                     isRequestingExport || isLoadingExportState
                                 }
-                                onClick={() => requestExport()}
+                                onClick={(): void => requestExport()}
                             >
                                 {exportState?.state === 'in_progress' ? (
                                     <>
@@ -552,7 +553,7 @@ export const ChannelOverviewSettings: React.FC<
                         <Button
                             className="min-w-[120px]"
                             variant="danger"
-                            onClick={() => setIsDeleteConfirmOpen(true)}
+                            onClick={(): void => setIsDeleteConfirmOpen(true)}
                         >
                             <Trash2 className="mr-2 h-4 w-4" />
                             Delete Channel
@@ -573,7 +574,7 @@ export const ChannelOverviewSettings: React.FC<
                 className="max-w-md"
                 isOpen={isDeleteConfirmOpen}
                 title="Delete Channel"
-                onClose={() => setIsDeleteConfirmOpen(false)}
+                onClose={(): void => setIsDeleteConfirmOpen(false)}
             >
                 <div className="space-y-6">
                     <div className="border-status-error bg-status-error-bg text-status-error rounded-md border p-4 text-sm">
@@ -584,7 +585,7 @@ export const ChannelOverviewSettings: React.FC<
                     <div className="-mx-6 -mb-6 flex justify-end gap-3 bg-bg-secondary p-6 pt-4">
                         <Button
                             variant="ghost"
-                            onClick={() => setIsDeleteConfirmOpen(false)}
+                            onClick={(): void => setIsDeleteConfirmOpen(false)}
                         >
                             Cancel
                         </Button>

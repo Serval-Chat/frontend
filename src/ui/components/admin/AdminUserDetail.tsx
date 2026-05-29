@@ -86,7 +86,7 @@ export const AdminUserDetail = ({
     const [muteReason, setMuteReason] = useState('');
     const [muteDuration, setMuteDuration] = useState('60'); // default 1 hour (60 mins)
 
-    const [now] = useState(() => Date.now());
+    const [now] = useState((): number => Date.now());
 
     const isCurrentlyBanned = adminData?.banExpiry
         ? new Date(adminData.banExpiry).getTime() > now
@@ -106,8 +106,8 @@ export const AdminUserDetail = ({
     const availableBadges = useMemo(() => {
         if (!allBadges || !adminData) return [];
         return allBadges.filter(
-            (b) =>
-                !adminData.badges.some((ub: Badge | string) => {
+            (b): boolean =>
+                !adminData.badges.some((ub: Badge | string): boolean => {
                     if (typeof ub === 'string') return ub === b.id;
                     return ub.id === b.id;
                 }),
@@ -165,11 +165,11 @@ export const AdminUserDetail = ({
         assignBadge(
             { userId, badgeId },
             {
-                onSuccess: () => {
+                onSuccess: (): void => {
                     showToast('Badge assigned', 'success');
                     setIsAddingBadge(false);
                 },
-                onError: (e) => {
+                onError: (e): void => {
                     showToast(e.message || 'Failed to assign badge', 'error');
                 },
             },
@@ -182,10 +182,10 @@ export const AdminUserDetail = ({
         removeBadge(
             { userId, badgeId },
             {
-                onSuccess: () => {
+                onSuccess: (): void => {
                     showToast('Badge removed', 'success');
                 },
-                onError: (e) => {
+                onError: (e): void => {
                     showToast(e.message || 'Failed to remove badge', 'error');
                 },
             },
@@ -206,7 +206,7 @@ export const AdminUserDetail = ({
         banUser(
             { userId, reason: banReason, duration: durationMin },
             {
-                onSuccess: () => {
+                onSuccess: (): void => {
                     setShowBanForm(false);
                     setBanReason('');
                 },
@@ -234,7 +234,7 @@ export const AdminUserDetail = ({
         muteUser(
             { userId, reason: muteReason, duration: durationMin },
             {
-                onSuccess: () => {
+                onSuccess: (): void => {
                     setShowMuteForm(false);
                     setMuteReason('');
                 },
@@ -520,7 +520,7 @@ export const AdminUserDetail = ({
                                             <Button
                                                 size="sm"
                                                 variant="caution"
-                                                onClick={() => {
+                                                onClick={(): void => {
                                                     setShowMuteForm(
                                                         !showMuteForm,
                                                     );
@@ -550,7 +550,7 @@ export const AdminUserDetail = ({
                                                     placeholder="60 (1 hour)"
                                                     type="number"
                                                     value={muteDuration}
-                                                    onChange={(e) =>
+                                                    onChange={(e): void =>
                                                         setMuteDuration(
                                                             e.target.value,
                                                         )
@@ -569,7 +569,7 @@ export const AdminUserDetail = ({
                                                     placeholder="Spamming, harassment, etc."
                                                     rows={2}
                                                     value={muteReason}
-                                                    onChange={(e) =>
+                                                    onChange={(e): void =>
                                                         setMuteReason(
                                                             e.target.value,
                                                         )
@@ -580,7 +580,7 @@ export const AdminUserDetail = ({
                                                 <Button
                                                     size="sm"
                                                     variant="ghost"
-                                                    onClick={() =>
+                                                    onClick={(): void =>
                                                         setShowMuteForm(false)
                                                     }
                                                 >
@@ -654,7 +654,7 @@ export const AdminUserDetail = ({
                                             <Button
                                                 size="sm"
                                                 variant="danger"
-                                                onClick={() => {
+                                                onClick={(): void => {
                                                     setShowBanForm(
                                                         !showBanForm,
                                                     );
@@ -684,7 +684,7 @@ export const AdminUserDetail = ({
                                                     placeholder="1440 (1 day)"
                                                     type="number"
                                                     value={banDuration}
-                                                    onChange={(e) =>
+                                                    onChange={(e): void =>
                                                         setBanDuration(
                                                             e.target.value,
                                                         )
@@ -703,7 +703,7 @@ export const AdminUserDetail = ({
                                                     placeholder="TOS violations, hate speech, etc."
                                                     rows={2}
                                                     value={banReason}
-                                                    onChange={(e) =>
+                                                    onChange={(e): void =>
                                                         setBanReason(
                                                             e.target.value,
                                                         )
@@ -714,7 +714,7 @@ export const AdminUserDetail = ({
                                                 <Button
                                                     size="sm"
                                                     variant="ghost"
-                                                    onClick={() =>
+                                                    onClick={(): void =>
                                                         setShowBanForm(false)
                                                     }
                                                 >
@@ -746,7 +746,7 @@ export const AdminUserDetail = ({
                                 <Button
                                     size="sm"
                                     variant="ghost"
-                                    onClick={() =>
+                                    onClick={(): void =>
                                         setIsAddingBadge(!isAddingBadge)
                                     }
                                 >
@@ -772,7 +772,7 @@ export const AdminUserDetail = ({
                                         <Button
                                             size="sm"
                                             variant="ghost"
-                                            onClick={() =>
+                                            onClick={(): void =>
                                                 setIsAddingBadge(false)
                                             }
                                         >
@@ -814,7 +814,7 @@ export const AdminUserDetail = ({
                                                 disabled={isRemoving}
                                                 title="Remove badge"
                                                 type="button"
-                                                onClick={() =>
+                                                onClick={(): void =>
                                                     handleRemoveBadge(badge.id)
                                                 }
                                             >
@@ -896,7 +896,7 @@ export const AdminUserDetail = ({
                                     >
                                         {Object.entries(adminData.permissions)
                                             .filter(([_, v]) => v)
-                                            .map(([k]) => k)
+                                            .map(([k]): string => k)
                                             .join(', ') || 'None'}
                                     </Text>
                                 </div>

@@ -1,46 +1,45 @@
-import type { UseMutationResult, UseQueryResult } from '@tanstack/react-query';
+import type { UseMutationResult } from '@tanstack/react-query';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { adminBadgesApi } from '@/api/admin/badges.api';
 import type { Badge } from '@/api/users/users.types';
 
-export const useAdminBadges = (): UseQueryResult<Badge[], Error> =>
+export const useAdminBadges = () =>
     useQuery<Badge[]>({
         queryKey: ['admin-badges'],
         queryFn: () => adminBadgesApi.getBadges(),
     });
 
-export const useCreateAdminBadge = (): UseMutationResult<
-    Badge,
-    Error,
-    Pick<Badge, 'id' | 'name' | 'description' | 'icon' | 'color'>,
-    unknown
-> => {
+export const useCreateAdminBadge = () => {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: (payload) => adminBadgesApi.createBadge(payload),
-        onSuccess: () => {
+        mutationFn: (
+            payload: Pick<
+                Badge,
+                'id' | 'name' | 'description' | 'icon' | 'color'
+            >,
+        ) => adminBadgesApi.createBadge(payload),
+        onSuccess: (): void => {
             void queryClient.invalidateQueries({ queryKey: ['admin-badges'] });
         },
     });
 };
 
-export const useUpdateAdminBadge = (): UseMutationResult<
-    Badge,
-    Error,
-    {
-        badgeId: string;
-        patch: Partial<Pick<Badge, 'name' | 'description' | 'icon' | 'color'>>;
-    },
-    unknown
-> => {
+export const useUpdateAdminBadge = () => {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: ({ badgeId, patch }) =>
-            adminBadgesApi.updateBadge(badgeId, patch),
-        onSuccess: () => {
+        mutationFn: ({
+            badgeId,
+            patch,
+        }: {
+            badgeId: string;
+            patch: Partial<
+                Pick<Badge, 'name' | 'description' | 'icon' | 'color'>
+            >;
+        }) => adminBadgesApi.updateBadge(badgeId, patch),
+        onSuccess: (): void => {
             void queryClient.invalidateQueries({ queryKey: ['admin-badges'] });
         },
     });
@@ -55,8 +54,9 @@ export const useDeleteAdminBadge = (): UseMutationResult<
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: ({ badgeId }) => adminBadgesApi.deleteBadge(badgeId),
-        onSuccess: () => {
+        mutationFn: ({ badgeId }): Promise<void> =>
+            adminBadgesApi.deleteBadge(badgeId),
+        onSuccess: (): void => {
             void queryClient.invalidateQueries({ queryKey: ['admin-badges'] });
         },
     });
@@ -71,9 +71,9 @@ export const useAssignBadgeToUser = (): UseMutationResult<
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: ({ userId, badgeId }) =>
+        mutationFn: ({ userId, badgeId }): Promise<{ message: string }> =>
             adminBadgesApi.assignBadgeToUser(userId, badgeId),
-        onSuccess: (_, { userId }) => {
+        onSuccess: (_, { userId }): void => {
             void queryClient.invalidateQueries({
                 queryKey: ['admin-user-detail', userId],
             });
@@ -93,9 +93,9 @@ export const useRemoveBadgeFromUser = (): UseMutationResult<
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: ({ userId, badgeId }) =>
+        mutationFn: ({ userId, badgeId }): Promise<void> =>
             adminBadgesApi.removeBadgeFromUser(userId, badgeId),
-        onSuccess: (_, { userId }) => {
+        onSuccess: (_, { userId }): void => {
             void queryClient.invalidateQueries({
                 queryKey: ['admin-user-detail', userId],
             });

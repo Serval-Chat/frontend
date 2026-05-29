@@ -16,11 +16,11 @@ interface CodeBlockProps {
 /**
  * @description Renders a code block in a modal
  */
-export const CodeBlock: React.FC<CodeBlockProps> = ({
+export const CodeBlock = ({
     content,
     language,
     inline = false,
-}) => {
+}: CodeBlockProps) => {
     const [isCopied, setIsCopied] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [highlightedResult, setHighlightedResult] = useState<{
@@ -28,15 +28,15 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({
         language: string;
         lines: AstNode[][];
     } | null>(null);
-    const lines = useMemo(() => content.split('\n'), [content]);
+    const lines = useMemo((): string[] => content.split('\n'), [content]);
     const languageKey = (language || 'text').toLowerCase();
 
-    useEffect(() => {
+    useEffect((): (() => void) | undefined => {
         if (inline) return;
 
         const worker = new SyntaxWorker();
 
-        worker.onmessage = (e) => {
+        worker.onmessage = (e): void => {
             setHighlightedResult({
                 content,
                 language: languageKey,
@@ -50,7 +50,7 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({
             language: languageKey,
         });
 
-        return () => {
+        return (): void => {
             worker.terminate();
         };
     }, [content, inline, languageKey]);
@@ -65,7 +65,7 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({
         e.stopPropagation();
         void navigator.clipboard.writeText(content);
         setIsCopied(true);
-        setTimeout(() => setIsCopied(false), 2000);
+        setTimeout((): void => setIsCopied(false), 2000);
     };
 
     const handleOpenFullScreen = (e: React.MouseEvent): void => {
@@ -96,7 +96,7 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({
                 role="button"
                 tabIndex={0}
                 onClick={handleContainerClick}
-                onKeyDown={(e) => {
+                onKeyDown={(e): void => {
                     if (e.key === 'Enter' || e.key === ' ') {
                         setIsModalOpen(true);
                     }
@@ -168,7 +168,7 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({
                 content={content}
                 isOpen={isModalOpen}
                 language={language}
-                onClose={() => setIsModalOpen(false)}
+                onClose={(): void => setIsModalOpen(false)}
             />
         </>
     );

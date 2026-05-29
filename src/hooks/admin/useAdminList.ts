@@ -12,7 +12,7 @@ export interface AdminUserShort {
 export const useAdminList = (): UseQueryResult<AdminUserShort[], Error> =>
     useQuery<AdminUserShort[]>({
         queryKey: ['admin-list'],
-        queryFn: async () => {
+        queryFn: async (): Promise<AdminUserShort[]> => {
             const { data } = await apiClient.get<AdminUserShort[]>(
                 '/api/v1/admin/users/admins',
             );

@@ -21,7 +21,7 @@ export const wsMessages = {
         poll?: OutgoingPoll,
         attachments?: MessageAttachment[],
         noEmbedsUrls?: string[],
-    ) => {
+    ): void => {
         wsClient.send(WsEvents.SEND_MESSAGE_DM, {
             receiverId,
             text,
@@ -45,7 +45,7 @@ export const wsMessages = {
         poll?: OutgoingPoll,
         attachments?: MessageAttachment[],
         noEmbedsUrls?: string[],
-    ) => {
+    ): void => {
         wsClient.send(WsEvents.SEND_MESSAGE_SERVER, {
             serverId,
             channelId,
@@ -61,21 +61,21 @@ export const wsMessages = {
     /**
      * Join a server room.
      */
-    joinServer: (serverId: string) => {
+    joinServer: (serverId: string): void => {
         wsClient.send(WsEvents.JOIN_SERVER, { serverId });
     },
 
     /**
      * Join a channel room.
      */
-    joinChannel: (serverId: string, channelId: string) => {
+    joinChannel: (serverId: string, channelId: string): void => {
         wsClient.send(WsEvents.JOIN_CHANNEL, { serverId, channelId });
     },
 
     /**
      * Join a voice channel room.
      */
-    joinVoice: (serverId: string, channelId: string) => {
+    joinVoice: (serverId: string, channelId: string): void => {
         console.error('[wsMessages] joinVoice called but LiveKit is removed', {
             serverId,
             channelId,
@@ -85,7 +85,7 @@ export const wsMessages = {
     /**
      * Leave a voice channel room.
      */
-    leaveVoice: (serverId: string, channelId: string) => {
+    leaveVoice: (serverId: string, channelId: string): void => {
         console.error('[wsMessages] leaveVoice called but LiveKit is removed', {
             serverId,
             channelId,
@@ -100,7 +100,7 @@ export const wsMessages = {
         channelId: string,
         isMuted: boolean,
         isDeafened: boolean,
-    ) => {
+    ): void => {
         console.error(
             '[wsMessages] updateVoiceState called but LiveKit is removed',
             {
@@ -115,35 +115,35 @@ export const wsMessages = {
     /**
      * Set user status.
      */
-    setStatus: (status: string) => {
+    setStatus: (status: string): void => {
         wsClient.send(WsEvents.SET_STATUS, { status });
     },
 
     /**
      * Send typing indicator for DM.
      */
-    sendTypingDm: (receiverId: string) => {
+    sendTypingDm: (receiverId: string): void => {
         wsClient.send(WsEvents.TYPING_DM, { receiverId });
     },
 
     /**
      * Send typing indicator for server channel.
      */
-    sendTypingServer: (serverId: string, channelId: string) => {
+    sendTypingServer: (serverId: string, channelId: string): void => {
         wsClient.send(WsEvents.TYPING_SERVER, { serverId, channelId });
     },
 
     /**
      * Mark a channel as read.
      */
-    markChannelRead: (serverId: string, channelId: string) => {
+    markChannelRead: (serverId: string, channelId: string): void => {
         wsClient.send(WsEvents.MARK_CHANNEL_READ, { serverId, channelId });
     },
 
     /**
      * Mark a DM as read.
      */
-    markDmRead: (peerId: string) => {
+    markDmRead: (peerId: string): void => {
         wsClient.send(WsEvents.MARK_DM_READ, { peerId });
     },
 };

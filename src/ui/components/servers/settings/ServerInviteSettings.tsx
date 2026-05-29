@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 import { Copy, Plus, Trash2 } from 'lucide-react';
 
@@ -27,9 +27,9 @@ interface ServerInviteSettingsProps {
     serverId: string;
 }
 
-export const ServerInviteSettings: React.FC<ServerInviteSettingsProps> = ({
+export const ServerInviteSettings = ({
     serverId,
-}) => {
+}: ServerInviteSettingsProps) => {
     const { showToast } = useToast();
     const { data: invites = [], isLoading } = useServerInvites(serverId);
     const { mutate: createInvite, isPending: isCreating } =
@@ -48,13 +48,13 @@ export const ServerInviteSettings: React.FC<ServerInviteSettingsProps> = ({
                 expiresIn: expiresIn > 0 ? expiresIn : undefined,
             },
             {
-                onSuccess: () => {
+                onSuccess: (): void => {
                     setCustomPath('');
                     setMaxUses(0);
                     setExpiresIn(0);
                     showToast('Invite generated successfully!', 'success');
                 },
-                onError: () => {
+                onError: (): void => {
                     showToast('Failed to generate invite.', 'error');
                 },
             },
@@ -69,10 +69,10 @@ export const ServerInviteSettings: React.FC<ServerInviteSettingsProps> = ({
 
     const handleDelete = (inviteId: string): void => {
         deleteInvite(inviteId, {
-            onSuccess: () => {
+            onSuccess: (): void => {
                 showToast('Invite deleted.', 'info');
             },
-            onError: () => {
+            onError: (): void => {
                 showToast('Failed to delete invite.', 'error');
             },
         });
@@ -119,7 +119,9 @@ export const ServerInviteSettings: React.FC<ServerInviteSettingsProps> = ({
                             id="custom-path"
                             placeholder="e.g. awesome-server"
                             value={customPath}
-                            onChange={(e) => setCustomPath(e.target.value)}
+                            onChange={(e): void =>
+                                setCustomPath(e.target.value)
+                            }
                         />
                         <Text size="xs" variant="muted">
                             Optional. Leave empty for random code.
@@ -138,7 +140,7 @@ export const ServerInviteSettings: React.FC<ServerInviteSettingsProps> = ({
                             min={0}
                             type="number"
                             value={maxUses}
-                            onChange={(e) =>
+                            onChange={(e): void =>
                                 setMaxUses(parseInt(e.target.value) || 0)
                             }
                         />
@@ -158,7 +160,7 @@ export const ServerInviteSettings: React.FC<ServerInviteSettingsProps> = ({
                             className="border-input-border bg-input-bg h-10 w-full rounded-md border px-3 text-sm transition-all focus:ring-2 focus:ring-primary focus:outline-none"
                             id="expires-in"
                             value={expiresIn}
-                            onChange={(e) =>
+                            onChange={(e): void =>
                                 setExpiresIn(parseInt(e.target.value))
                             }
                         >
@@ -230,7 +232,7 @@ export const ServerInviteSettings: React.FC<ServerInviteSettingsProps> = ({
                                                 size="sm"
                                                 title="Copy Link"
                                                 variant="ghost"
-                                                onClick={() =>
+                                                onClick={(): void =>
                                                     handleCopy(
                                                         invite.customPath ||
                                                             invite.code,
@@ -243,7 +245,7 @@ export const ServerInviteSettings: React.FC<ServerInviteSettingsProps> = ({
                                                 size="sm"
                                                 title="Delete"
                                                 variant="ghost"
-                                                onClick={() =>
+                                                onClick={(): void =>
                                                     handleDelete(invite._id)
                                                 }
                                             >

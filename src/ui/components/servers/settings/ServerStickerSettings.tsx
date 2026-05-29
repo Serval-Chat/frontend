@@ -29,9 +29,9 @@ interface ServerStickerSettingsProps {
     serverId: string;
 }
 
-export const ServerStickerSettings: React.FC<ServerStickerSettingsProps> = ({
+export const ServerStickerSettings = ({
     serverId,
-}) => {
+}: ServerStickerSettingsProps) => {
     const queryClient = useQueryClient();
     const { data: stickers = [], isLoading } = useServerStickers(serverId);
     const {
@@ -110,7 +110,7 @@ export const ServerStickerSettings: React.FC<ServerStickerSettingsProps> = ({
         uploadSticker(
             { name: stickerName, file: processedFile },
             {
-                onSuccess: () => {
+                onSuccess: (): void => {
                     setStickerName('');
                     setSelectedFile(null);
                 },
@@ -123,10 +123,10 @@ export const ServerStickerSettings: React.FC<ServerStickerSettingsProps> = ({
     };
 
     const convertToWebp = (blob: Blob, fileName: string): Promise<File> =>
-        new Promise((resolve, reject) => {
+        new Promise((resolve, reject): void => {
             const url = URL.createObjectURL(blob);
             const img = new Image();
-            img.onload = () => {
+            img.onload = (): void => {
                 const canvas = document.createElement('canvas');
                 canvas.width = img.width;
                 canvas.height = img.height;
@@ -136,7 +136,7 @@ export const ServerStickerSettings: React.FC<ServerStickerSettingsProps> = ({
                     return;
                 }
                 ctx.drawImage(img, 0, 0);
-                canvas.toBlob((convertedBlob) => {
+                canvas.toBlob((convertedBlob): void => {
                     if (convertedBlob) {
                         const newName =
                             fileName.replace(/\.[^/.]+$/, '') + '.webp';
@@ -151,7 +151,7 @@ export const ServerStickerSettings: React.FC<ServerStickerSettingsProps> = ({
                     URL.revokeObjectURL(url);
                 }, 'image/webp');
             };
-            img.onerror = () => {
+            img.onerror = (): void => {
                 URL.revokeObjectURL(url);
                 reject(new Error('Failed to load image'));
             };
@@ -173,7 +173,7 @@ export const ServerStickerSettings: React.FC<ServerStickerSettingsProps> = ({
             const loadedZip = await zip.loadAsync(file);
 
             const validFiles = Object.entries(loadedZip.files).filter(
-                ([relativePath, zipEntry]) => {
+                ([relativePath, zipEntry]): boolean => {
                     if (zipEntry.dir) return false;
                     const isImage = relativePath.match(
                         /\.(png|jpg|jpeg|webp|gif)$/i,
@@ -222,16 +222,34 @@ export const ServerStickerSettings: React.FC<ServerStickerSettingsProps> = ({
                         file: fileToUpload,
                     });
                     uploadedIdsRef.current.push(newSticker.id);
-                    setBulkStatus((prev) => ({
-                        ...prev,
-                        uploaded: prev.uploaded + 1,
-                    }));
+                    setBulkStatus(
+                        (
+                            prev,
+                        ): {
+                            uploaded: number;
+                            total: number;
+                            errors: number;
+                            isOpen: boolean;
+                        } => ({
+                            ...prev,
+                            uploaded: prev.uploaded + 1,
+                        }),
+                    );
                 } catch (err) {
                     console.error(`Failed to process ${fileName}:`, err);
-                    setBulkStatus((prev) => ({
-                        ...prev,
-                        errors: prev.errors + 1,
-                    }));
+                    setBulkStatus(
+                        (
+                            prev,
+                        ): {
+                            errors: number;
+                            total: number;
+                            uploaded: number;
+                            isOpen: boolean;
+                        } => ({
+                            ...prev,
+                            errors: prev.errors + 1,
+                        }),
+                    );
                 }
             }
         } catch (err) {
@@ -257,7 +275,16 @@ export const ServerStickerSettings: React.FC<ServerStickerSettingsProps> = ({
 
         uploadedIdsRef.current = [];
         setIsCancelling(false);
-        setBulkStatus((prev) => ({ ...prev, isOpen: false }));
+        setBulkStatus(
+            (
+                prev,
+            ): {
+                isOpen: false;
+                total: number;
+                uploaded: number;
+                errors: number;
+            } => ({ ...prev, isOpen: false }),
+        );
     };
 
     return (
@@ -284,7 +311,7 @@ export const ServerStickerSettings: React.FC<ServerStickerSettingsProps> = ({
                         maxLength={STICKER_NAME_MAX_LENGTH}
                         placeholder="My cool sticker"
                         value={stickerName}
-                        onChange={(e) => setStickerName(e.target.value)}
+                        onChange={(e): void => setStickerName(e.target.value)}
                     />
                     <Text size="xs" variant="muted">
                         Up to {STICKER_NAME_MAX_LENGTH} characters.
@@ -303,7 +330,7 @@ export const ServerStickerSettings: React.FC<ServerStickerSettingsProps> = ({
                     className="hidden"
                     ref={bulkFileInputRef}
                     type="file"
-                    onChange={(e) => void handleBulkFileSelect(e)}
+                    onChange={(e): undefined => void handleBulkFileSelect(e)}
                 />
 
                 {isLoading ? (
@@ -343,7 +370,9 @@ export const ServerStickerSettings: React.FC<ServerStickerSettingsProps> = ({
                             className="flex aspect-square flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border-subtle p-3 transition-all hover:border-primary hover:bg-bg-subtle disabled:cursor-not-allowed disabled:opacity-50"
                             disabled={isUploading || isBulkUploading}
                             type="button"
-                            onClick={() => bulkFileInputRef.current?.click()}
+                            onClick={(): void | undefined =>
+                                bulkFileInputRef.current?.click()
+                            }
                         >
                             {isBulkUploading ? (
                                 <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
@@ -367,10 +396,12 @@ export const ServerStickerSettings: React.FC<ServerStickerSettingsProps> = ({
                             <div
                                 className="group relative aspect-square overflow-hidden rounded-lg border border-border-subtle bg-bg-subtle transition-all hover:border-primary"
                                 key={sticker.id}
-                                onMouseEnter={() =>
+                                onMouseEnter={(): void =>
                                     setHoveredStickerId(sticker.id)
                                 }
-                                onMouseLeave={() => setHoveredStickerId(null)}
+                                onMouseLeave={(): void =>
+                                    setHoveredStickerId(null)
+                                }
                             >
                                 <div className="flex h-full w-full items-center justify-center p-2">
                                     <img
@@ -398,7 +429,7 @@ export const ServerStickerSettings: React.FC<ServerStickerSettingsProps> = ({
                                             aria-label="Delete sticker"
                                             size="sm"
                                             variant="danger"
-                                            onClick={() =>
+                                            onClick={(): void =>
                                                 deleteSticker(sticker.id)
                                             }
                                         >
@@ -416,7 +447,7 @@ export const ServerStickerSettings: React.FC<ServerStickerSettingsProps> = ({
                 imageFile={selectedFile}
                 isOpen={isCropModalOpen}
                 type="sticker"
-                onClose={() => {
+                onClose={(): void => {
                     setIsCropModalOpen(false);
                     setSelectedFile(null);
                 }}
@@ -430,9 +461,18 @@ export const ServerStickerSettings: React.FC<ServerStickerSettingsProps> = ({
                 title="Bulk Upload Stickers"
                 total={bulkStatus.total}
                 uploaded={bulkStatus.uploaded}
-                onCancel={() => void handleCancelBulk()}
-                onClose={() =>
-                    setBulkStatus((prev) => ({ ...prev, isOpen: false }))
+                onCancel={(): undefined => void handleCancelBulk()}
+                onClose={(): void =>
+                    setBulkStatus(
+                        (
+                            prev,
+                        ): {
+                            isOpen: false;
+                            total: number;
+                            uploaded: number;
+                            errors: number;
+                        } => ({ ...prev, isOpen: false }),
+                    )
                 }
             />
         </div>

@@ -1,8 +1,6 @@
-import React from 'react';
-
 import { Skeleton } from '@/ui/components/common/Skeleton';
 
-export const CategorySkeleton: React.FC = () => (
+export const CategorySkeleton = () => (
     <div className="mt-4 flex items-center px-1 py-2 first:mt-0">
         <Skeleton
             className="mr-1"

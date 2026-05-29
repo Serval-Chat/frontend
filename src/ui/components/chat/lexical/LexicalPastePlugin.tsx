@@ -1,4 +1,3 @@
-import type React from 'react';
 import { useEffect } from 'react';
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
@@ -13,16 +12,16 @@ interface LexicalPastePluginProps {
     onPasteFiles: (files: FileList | File[]) => void;
 }
 
-export const LexicalPastePlugin: React.FC<LexicalPastePluginProps> = ({
+export const LexicalPastePlugin = ({
     onPasteFiles,
-}) => {
+}: LexicalPastePluginProps): null => {
     const [editor] = useLexicalComposerContext();
 
     useEffect(
-        () =>
+        (): (() => void) =>
             editor.registerCommand(
                 PASTE_COMMAND,
-                (event: ClipboardEvent) => {
+                (event: ClipboardEvent): boolean => {
                     const { clipboardData } = event;
                     if (!clipboardData) return false;
 
@@ -60,7 +59,7 @@ export const LexicalPastePlugin: React.FC<LexicalPastePluginProps> = ({
 
                     if (plainText && html) {
                         event.preventDefault();
-                        editor.update(() => {
+                        editor.update((): void => {
                             const selection = $getSelection();
                             if ($isRangeSelection(selection)) {
                                 selection.insertText(plainText);

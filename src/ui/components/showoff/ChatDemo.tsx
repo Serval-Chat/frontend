@@ -1,5 +1,3 @@
-import React from 'react';
-
 import type { User } from '@/api/users/users.types';
 import type { ProcessedChatMessage } from '@/types/chat.ui';
 import {
@@ -212,7 +210,7 @@ const MOCK_MESSAGES: ProcessedChatMessage[] = [
     }),
 ];
 
-export const ChatDemo: React.FC = () => (
+export const ChatDemo = () => (
     <DemoSection id="chat-messages" title="Chat Messages">
         <div className="space-y-6">
             <div>

@@ -1,5 +1,3 @@
-import React from 'react';
-
 import type { Friend } from '@/api/friends/friends.types';
 import type { Server } from '@/api/servers/servers.types';
 import { UserItem } from '@/ui/components/common/UserItem';
@@ -10,7 +8,7 @@ import { DemoItem } from './DemoItem';
 import { DemoSection } from './DemoSection';
 import { SHOWOFF_SECTIONS } from './config';
 
-export const NavigationDemo: React.FC = () => {
+export const NavigationDemo = () => {
     const mockServer: Server = {
         _id: '1',
         name: "Catflare's Hideout",

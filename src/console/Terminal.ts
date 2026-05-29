@@ -38,7 +38,9 @@ export class Terminal {
         };
         this.onChange = options?.onChange;
         this.lines =
-            options?.initialLines?.map((line) => this.createLine(line)) ?? [];
+            options?.initialLines?.map(
+                (line): TerminalLine => this.createLine(line),
+            ) ?? [];
         this.cursorRow = Math.max(0, this.lines.length - 1);
         this.cursorColumn = this.lines[this.cursorRow]?.text.length ?? 0;
     }
@@ -68,7 +70,9 @@ export class Terminal {
     }
 
     public snapshot(): TerminalLine[] {
-        return this.lines.map((line) => ({ ...line }));
+        return this.lines.map((line): { id: string; text: string } => ({
+            ...line,
+        }));
     }
 
     public clear(): void {
@@ -187,7 +191,7 @@ export class Terminal {
             .replace(/^\?/, '')
             .split(';')
             .filter(Boolean)
-            .map((value) => Number(value));
+            .map((value): number => Number(value));
 
         switch (command) {
             case 'A':

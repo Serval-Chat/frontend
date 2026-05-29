@@ -26,7 +26,7 @@ const presenceSlice = createSlice({
     name: 'presence',
     initialState,
     reducers: {
-        setBackendInstanceId: (state, action: PayloadAction<string>) => {
+        setBackendInstanceId: (state, action: PayloadAction<string>): void => {
             state.backendInstanceId = action.payload;
         },
         setOnlineUsers: (
@@ -38,9 +38,9 @@ const presenceSlice = createSlice({
                     status?: { text: string; emoji?: string | null } | null;
                 }>
             >,
-        ) => {
+        ): void => {
             state.users = {};
-            action.payload.forEach((user) => {
+            action.payload.forEach((user): void => {
                 state.users[user.userId] = {
                     userId: user.userId,
                     username: user.username,
@@ -56,7 +56,7 @@ const presenceSlice = createSlice({
                 username: string;
                 status?: { text: string; emoji?: string | null } | null;
             }>,
-        ) => {
+        ): void => {
             state.users[action.payload.userId] = {
                 userId: action.payload.userId,
                 username: action.payload.username,
@@ -67,7 +67,7 @@ const presenceSlice = createSlice({
         setUserOffline: (
             state,
             action: PayloadAction<{ userId: string; username: string }>,
-        ) => {
+        ): void => {
             if (state.users[action.payload.userId]) {
                 state.users[action.payload.userId].status = 'offline';
                 state.users[action.payload.userId].customStatus = null;
@@ -87,7 +87,7 @@ const presenceSlice = createSlice({
                 username: string;
                 status: { text: string; emoji?: string | null } | null;
             }>,
-        ) => {
+        ): void => {
             if (state.users[action.payload.userId]) {
                 state.users[action.payload.userId].customStatus =
                     action.payload.status;
@@ -105,9 +105,9 @@ const presenceSlice = createSlice({
                 username: string;
                 customStatus: { text: string; emoji?: string | null } | null;
             }>,
-        ) => {
+        ): void => {
             // Find users by username and update their custom status
-            Object.values(state.users).forEach((user) => {
+            Object.values(state.users).forEach((user): void => {
                 if (user.username === action.payload.username) {
                     state.users[user.userId].customStatus =
                         action.payload.customStatus;

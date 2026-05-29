@@ -15,9 +15,12 @@ import * as botsHooks from '@/hooks/developer/useBots';
 
 import { BotAuthorize } from './BotAuthorize';
 
-vi.mock('@/ui/components/layout/DefaultBackground', () => ({
-    DefaultBackground: () => null,
-}));
+vi.mock(
+    '@/ui/components/layout/DefaultBackground',
+    (): { DefaultBackground: () => null } => ({
+        DefaultBackground: (): null => null,
+    }),
+);
 
 vi.mock('@/ui/components/common/Toast', () => ({
     useToast: () => ({ showToast: mockShowToast }),
@@ -87,8 +90,8 @@ function renderPage(search = '?client_id=abc123'): RenderResult {
     );
 }
 
-describe('BotAuthorize', () => {
-    beforeEach(() => {
+describe('BotAuthorize', (): void => {
+    beforeEach((): void => {
         vi.clearAllMocks();
         vi.mocked(usersQueries.useMe).mockReturnValue({
             data: mockUser,
@@ -103,7 +106,7 @@ describe('BotAuthorize', () => {
         } as any as ReturnType<typeof botsHooks.useAuthorizeBot>);
     });
 
-    it('shows InvalidBot when no client_id in URL', () => {
+    it('shows InvalidBot when no client_id in URL', (): void => {
         vi.mocked(botsHooks.usePublicBotInfo).mockReturnValue({
             isLoading: false,
             isError: true,
@@ -113,7 +116,7 @@ describe('BotAuthorize', () => {
         expect(screen.getByText('Bot Not Found')).toBeInTheDocument();
     });
 
-    it('shows InvalidBot when bot fetch returns an error', () => {
+    it('shows InvalidBot when bot fetch returns an error', (): void => {
         vi.mocked(botsHooks.usePublicBotInfo).mockReturnValue({
             isLoading: false,
             isError: true,
@@ -123,7 +126,7 @@ describe('BotAuthorize', () => {
         expect(screen.getByText('Bot Not Found')).toBeInTheDocument();
     });
 
-    it('renders bot name and server count when loaded', () => {
+    it('renders bot name and server count when loaded', (): void => {
         vi.mocked(botsHooks.usePublicBotInfo).mockReturnValue({
             isLoading: false,
             isError: false,
@@ -134,7 +137,7 @@ describe('BotAuthorize', () => {
         expect(screen.getByText(/In 3 servers/)).toBeInTheDocument();
     });
 
-    it('renders requested permissions as chips', () => {
+    it('renders requested permissions as chips', (): void => {
         vi.mocked(botsHooks.usePublicBotInfo).mockReturnValue({
             isLoading: false,
             isError: false,
@@ -145,7 +148,7 @@ describe('BotAuthorize', () => {
         expect(screen.getByText('Send messages')).toBeInTheDocument();
     });
 
-    it('shows bot bio when present', () => {
+    it('shows bot bio when present', (): void => {
         vi.mocked(botsHooks.usePublicBotInfo).mockReturnValue({
             isLoading: false,
             isError: false,
@@ -155,7 +158,7 @@ describe('BotAuthorize', () => {
         expect(screen.getByText('A helpful bot')).toBeInTheDocument();
     });
 
-    it('shows "Authorizing as" with current username', () => {
+    it('shows "Authorizing as" with current username', (): void => {
         vi.mocked(botsHooks.usePublicBotInfo).mockReturnValue({
             isLoading: false,
             isError: false,
@@ -165,7 +168,7 @@ describe('BotAuthorize', () => {
         expect(screen.getByText(/@testuser/)).toBeInTheDocument();
     });
 
-    it('Authorize button is disabled until a server is selected', () => {
+    it('Authorize button is disabled until a server is selected', (): void => {
         vi.mocked(botsHooks.usePublicBotInfo).mockReturnValue({
             isLoading: false,
             isError: false,
@@ -177,7 +180,7 @@ describe('BotAuthorize', () => {
         ).toBeDisabled();
     });
 
-    it('Authorize button enables after selecting a server from dropdown', async () => {
+    it('Authorize button enables after selecting a server from dropdown', async (): Promise<void> => {
         vi.mocked(botsHooks.usePublicBotInfo).mockReturnValue({
             isLoading: false,
             isError: false,
@@ -193,7 +196,7 @@ describe('BotAuthorize', () => {
         ).not.toBeDisabled();
     });
 
-    it('shows SuccessCard with bot and server name after authorization', async () => {
+    it('shows SuccessCard with bot and server name after authorization', async (): Promise<void> => {
         const mockMutate = vi.fn().mockImplementation(
             (
                 _vars: unknown,
@@ -203,7 +206,7 @@ describe('BotAuthorize', () => {
                         serverId: string;
                     }) => void;
                 },
-            ) => {
+            ): void => {
                 callbacks.onSuccess({
                     serverName: 'My Server',
                     serverId: 'srv1',
@@ -225,20 +228,20 @@ describe('BotAuthorize', () => {
         fireEvent.click(screen.getByText('My Server'));
         fireEvent.click(screen.getByRole('button', { name: /Authorize/i }));
 
-        await waitFor(() => {
+        await waitFor((): void => {
             expect(screen.getByText('Test Bot added!')).toBeInTheDocument();
         });
         expect(screen.getByText(/now a member of/)).toBeInTheDocument();
     });
 
-    it('shows error toast when authorization fails', async () => {
+    it('shows error toast when authorization fails', async (): Promise<void> => {
         const mockMutate = vi.fn().mockImplementation(
             (
                 _vars: unknown,
                 callbacks: {
                     onError: (e: Error) => void;
                 },
-            ) => {
+            ): void => {
                 callbacks.onError(new Error('Bot is banned from this server'));
             },
         );
@@ -257,7 +260,7 @@ describe('BotAuthorize', () => {
         fireEvent.click(screen.getByText('My Server'));
         fireEvent.click(screen.getByRole('button', { name: /Authorize/i }));
 
-        await waitFor(() => {
+        await waitFor((): void => {
             expect(mockShowToast).toHaveBeenCalledWith(
                 'Bot is banned from this server',
                 'error',

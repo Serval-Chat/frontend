@@ -53,7 +53,7 @@ const PermissionRow = ({
             checked={value}
             className="h-4 w-4 accent-primary"
             type="checkbox"
-            onChange={(e) => onChange(e.target.checked)}
+            onChange={(e): void => onChange(e.target.checked)}
         />
         <span className="text-sm text-foreground">{label}</span>
     </label>
@@ -84,7 +84,7 @@ const CopyButton = ({
     const handleCopy = (): void => {
         void navigator.clipboard.writeText(value);
         setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
+        setTimeout((): void => setCopied(false), 2000);
     };
 
     return (
@@ -125,7 +125,7 @@ export const DevBotDetail = ({
         [bot],
     );
     const profilePreviewUser = useMemo(
-        () =>
+        (): Partial<User> | undefined =>
             user
                 ? ({
                       ...user,
@@ -153,7 +153,7 @@ export const DevBotDetail = ({
     const [tokenReset, setTokenReset] = useState(false);
     const [showDelete, setShowDelete] = useState(false);
 
-    React.useEffect(() => {
+    React.useEffect((): void => {
         if (bot && user) {
             setName(user.displayName ?? user.username ?? '');
             setDescription(user.bio ?? '');
@@ -200,7 +200,7 @@ export const DevBotDetail = ({
         resetSecret.mutate(
             { clientId },
             {
-                onSuccess: (data) => {
+                onSuccess: (data): void => {
                     setSecret(data.clientSecret);
                     setTokenReset(false);
                 },
@@ -212,7 +212,7 @@ export const DevBotDetail = ({
         resetToken.mutate(
             { clientId },
             {
-                onSuccess: (data) => {
+                onSuccess: (data): void => {
                     setToken(data.token);
                     setTokenReset(true);
                     setSecret(null);
@@ -222,7 +222,7 @@ export const DevBotDetail = ({
     };
 
     const handleDelete = (): void => {
-        deleteBot.mutate({ clientId }, { onSuccess: () => onBack() });
+        deleteBot.mutate({ clientId }, { onSuccess: (): void => onBack() });
     };
 
     const handleCropConfirm = (file: File): void => {
@@ -272,7 +272,7 @@ export const DevBotDetail = ({
                                 id="bot-name"
                                 maxLength={32}
                                 value={name}
-                                onChange={(e) => setName(e.target.value)}
+                                onChange={(e): void => setName(e.target.value)}
                             />
                         </div>
 
@@ -286,7 +286,9 @@ export const DevBotDetail = ({
                             <Input
                                 id="bot-desc"
                                 value={description}
-                                onChange={(e) => setDescription(e.target.value)}
+                                onChange={(e): void =>
+                                    setDescription(e.target.value)
+                                }
                             />
                         </div>
 
@@ -303,7 +305,7 @@ export const DevBotDetail = ({
                                     id="bot-banner-color"
                                     placeholder="#5865F2"
                                     value={bannerColor}
-                                    onChange={(e) =>
+                                    onChange={(e): void =>
                                         setBannerColor(e.target.value)
                                     }
                                 />
@@ -427,7 +429,7 @@ export const DevBotDetail = ({
                                     readOnly
                                     className="flex-1 font-mono text-sm"
                                     value={`${window.location.origin}/authorize?client_id=${clientId}${permissions ? `&permissions=${permissionsToBitmask(permissions)}` : ''}`}
-                                    onClick={(e) => {
+                                    onClick={(e): void => {
                                         (e.target as HTMLInputElement).select();
                                     }}
                                 />
@@ -456,7 +458,7 @@ export const DevBotDetail = ({
                                             key={key}
                                             label={BOT_PERMISSION_LABELS[key]}
                                             value={permissions[key] ?? false}
-                                            onChange={(v) =>
+                                            onChange={(v): void =>
                                                 setPermissions(
                                                     (prev) =>
                                                         prev && {
@@ -477,7 +479,7 @@ export const DevBotDetail = ({
                     <Button
                         icon={Trash2}
                         variant="danger"
-                        onClick={() => setShowDelete(true)}
+                        onClick={(): void => setShowDelete(true)}
                     >
                         Delete Bot
                     </Button>
@@ -499,15 +501,19 @@ export const DevBotDetail = ({
                             bannerColor: bannerColor || undefined,
                         } as Partial<User>
                     }
-                    onAvatarClick={() => avatarInputRef.current?.click()}
-                    onBannerClick={() => bannerInputRef.current?.click()}
+                    onAvatarClick={(): void | undefined =>
+                        avatarInputRef.current?.click()
+                    }
+                    onBannerClick={(): void | undefined =>
+                        bannerInputRef.current?.click()
+                    }
                 />
                 <input
                     hidden
                     accept="image/*"
                     ref={avatarInputRef}
                     type="file"
-                    onChange={(e) => {
+                    onChange={(e): void => {
                         const file = e.target.files?.[0];
                         if (file) {
                             setCropType('avatar');
@@ -521,7 +527,7 @@ export const DevBotDetail = ({
                     accept="image/*"
                     ref={bannerInputRef}
                     type="file"
-                    onChange={(e) => {
+                    onChange={(e): void => {
                         const file = e.target.files?.[0];
                         if (file) {
                             setCropType('banner');
@@ -536,7 +542,7 @@ export const DevBotDetail = ({
                 imageFile={cropFile}
                 isOpen={!!cropFile}
                 type={cropType}
-                onClose={() => setCropFile(null)}
+                onClose={(): void => setCropFile(null)}
                 onConfirm={handleCropConfirm}
             />
 
@@ -544,7 +550,7 @@ export const DevBotDetail = ({
                 <Modal
                     isOpen={showDelete}
                     title="Delete Bot"
-                    onClose={() => setShowDelete(false)}
+                    onClose={(): void => setShowDelete(false)}
                 >
                     <div className="flex flex-col gap-4 p-4">
                         <Text as="p" variant="muted">
@@ -554,7 +560,7 @@ export const DevBotDetail = ({
                         <div className="flex justify-end gap-2">
                             <Button
                                 variant="ghost"
-                                onClick={() => setShowDelete(false)}
+                                onClick={(): void => setShowDelete(false)}
                             >
                                 Cancel
                             </Button>

@@ -24,7 +24,7 @@ export async function initTauriNotifications(
 
         if (!granted) return;
 
-        wsClient.on<IMessageDm>(WsEvents.MESSAGE_DM, (payload) => {
+        wsClient.on<IMessageDm>(WsEvents.MESSAGE_DM, (payload): void => {
             const me = queryClient.getQueryData<{ id: string }>(['me']);
             if (me && payload.senderId === me.id) return;
 
@@ -34,7 +34,7 @@ export async function initTauriNotifications(
             });
         });
 
-        wsClient.on<IMentionEvent>(WsEvents.MENTION, (payload) => {
+        wsClient.on<IMentionEvent>(WsEvents.MENTION, (payload): void => {
             const me = queryClient.getQueryData<{ id: string }>(['me']);
             if (me && payload.senderId === me.id) return;
 

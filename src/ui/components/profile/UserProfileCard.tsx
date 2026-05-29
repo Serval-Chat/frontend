@@ -77,27 +77,27 @@ interface UserProfileCardProps {
     userId?: string;
 }
 
-const RoleSelector: React.FC<{
-    allRoles: Role[];
-    userRoles?: Role[];
-    isOwner: boolean;
-    myHighestRolePosition?: number;
-    onAddRole: (roleId: string) => void;
-    onRemoveRole: (roleId: string) => void;
-}> = ({
+const RoleSelector = ({
     allRoles,
     userRoles,
     isOwner,
     myHighestRolePosition,
     onAddRole,
     onRemoveRole,
+}: {
+    allRoles: Role[];
+    userRoles?: Role[];
+    isOwner: boolean;
+    myHighestRolePosition?: number;
+    onAddRole: (roleId: string) => void;
+    onRemoveRole: (roleId: string) => void;
 }) => {
     const [isOpen, setIsOpen] = React.useState(false);
     const triggerRef = React.useRef<HTMLButtonElement>(null);
 
     const rolesToDisplay = allRoles
-        .filter((r) => r.name !== '@everyone')
-        .sort((a, b) => b.position - a.position);
+        .filter((r): boolean => r.name !== '@everyone')
+        .sort((a, b): number => b.position - a.position);
 
     return (
         <>
@@ -105,7 +105,7 @@ const RoleSelector: React.FC<{
                 className="hover:bg-bg-tertiary flex h-5 w-5 items-center justify-center rounded-md border border-border-subtle bg-bg-secondary text-muted-foreground transition-colors hover:text-foreground"
                 ref={triggerRef}
                 title="Add Role"
-                onClick={() => setIsOpen(true)}
+                onClick={(): void => setIsOpen(true)}
             >
                 <Plus size={14} />
             </button>
@@ -114,13 +114,13 @@ const RoleSelector: React.FC<{
                 className="w-48 p-1"
                 isOpen={isOpen}
                 triggerRef={triggerRef}
-                onClose={() => setIsOpen(false)}
+                onClose={(): void => setIsOpen(false)}
             >
                 <Box className="flex flex-col gap-0.5">
                     {rolesToDisplay.length > 0 ? (
                         rolesToDisplay.map((role) => {
                             const hasRole = userRoles?.some(
-                                (ur) => ur._id === role._id,
+                                (ur): boolean => ur._id === role._id,
                             );
                             const canManageThisRole =
                                 isOwner ||
@@ -137,7 +137,7 @@ const RoleSelector: React.FC<{
                                     )}
                                     disabled={!canManageThisRole}
                                     key={role._id}
-                                    onClick={() => {
+                                    onClick={(): void => {
                                         if (hasRole) {
                                             onRemoveRole(role._id);
                                         } else {
@@ -171,7 +171,7 @@ const RoleSelector: React.FC<{
     );
 };
 
-export const UserProfileCard: React.FC<UserProfileCardProps> = ({
+export const UserProfileCard = ({
     user,
     role,
     iconRole,
@@ -195,7 +195,7 @@ export const UserProfileCard: React.FC<UserProfileCardProps> = ({
     serverId,
     userId: propUserId,
     nickname,
-}) => {
+}: UserProfileCardProps) => {
     const { data: currentUser } = useMe();
     const navigate = useNavigate();
     const { data: friends } = useFriends();
@@ -229,7 +229,7 @@ export const UserProfileCard: React.FC<UserProfileCardProps> = ({
     const visibleConnections = useMemo(
         () =>
             (user?.connections ?? []).filter(
-                (connection) =>
+                (connection): boolean =>
                     connection.type === 'Website' &&
                     connection.status !== 'pending',
             ),
@@ -465,10 +465,10 @@ export const UserProfileCard: React.FC<UserProfileCardProps> = ({
                                                 myHighestRolePosition
                                             }
                                             userRoles={roles}
-                                            onAddRole={(roleId) =>
+                                            onAddRole={(roleId): void =>
                                                 addRole({ userId, roleId })
                                             }
-                                            onRemoveRole={(roleId) =>
+                                            onRemoveRole={(roleId): void =>
                                                 removeRole({ userId, roleId })
                                             }
                                         />
@@ -478,7 +478,10 @@ export const UserProfileCard: React.FC<UserProfileCardProps> = ({
                         <Box className="flex flex-wrap gap-2">
                             {roles &&
                                 [...roles]
-                                    .sort((a, b) => b.position - a.position)
+                                    .sort(
+                                        (a, b): number =>
+                                            b.position - a.position,
+                                    )
                                     .map((r) => {
                                         const canManageThisRole =
                                             isOwner ||
@@ -510,7 +513,7 @@ export const UserProfileCard: React.FC<UserProfileCardProps> = ({
                                                         <button
                                                             className="ml-0.5 hidden text-muted-foreground group-hover:block hover:text-danger"
                                                             title="Remove Role"
-                                                            onClick={() =>
+                                                            onClick={(): void =>
                                                                 removeRole({
                                                                     userId,
                                                                     roleId: r._id,
@@ -547,7 +550,7 @@ export const UserProfileCard: React.FC<UserProfileCardProps> = ({
                         <Button
                             className="flex-1 gap-2"
                             size="sm"
-                            onClick={() => {
+                            onClick={(): void => {
                                 if (user?._id) {
                                     void navigate(`/chat/@user/${user._id}`);
                                 }
@@ -556,12 +559,12 @@ export const UserProfileCard: React.FC<UserProfileCardProps> = ({
                             <MessageSquare size={14} />
                             Message
                         </Button>
-                        {friends?.some((f) => f._id === user?._id) ? (
+                        {friends?.some((f): boolean => f._id === user?._id) ? (
                             <Button
                                 className="gap-2"
                                 size="sm"
                                 variant="danger"
-                                onClick={() => {
+                                onClick={(): void => {
                                     if (user?._id) {
                                         removeFriend(user._id);
                                     }
@@ -574,7 +577,7 @@ export const UserProfileCard: React.FC<UserProfileCardProps> = ({
                                 className="gap-2"
                                 size="sm"
                                 variant="normal"
-                                onClick={() => {
+                                onClick={(): void => {
                                     if (user?.username) {
                                         sendFriendRequest(user.username);
                                     }

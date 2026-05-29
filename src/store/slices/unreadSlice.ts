@@ -22,13 +22,13 @@ export const unreadSlice = createSlice({
         setUnreadServers: (
             state,
             action: PayloadAction<Record<string, UnreadServerStatus>>,
-        ) => {
+        ): void => {
             state.unreadServers = action.payload;
         },
         setServerUnread: (
             state,
             action: PayloadAction<{ serverId: string; unread: boolean }>,
-        ) => {
+        ): void => {
             if (!state.unreadServers[action.payload.serverId]) {
                 state.unreadServers[action.payload.serverId] = {
                     hasUnread: action.payload.unread,
@@ -42,7 +42,7 @@ export const unreadSlice = createSlice({
         setServerPingCount: (
             state,
             action: PayloadAction<{ serverId: string; count: number }>,
-        ) => {
+        ): void => {
             if (!state.unreadServers[action.payload.serverId]) {
                 state.unreadServers[action.payload.serverId] = {
                     hasUnread: false,
@@ -56,7 +56,7 @@ export const unreadSlice = createSlice({
         incrementServerPing: (
             state,
             action: PayloadAction<{ serverId: string }>,
-        ) => {
+        ): void => {
             if (!state.unreadServers[action.payload.serverId]) {
                 state.unreadServers[action.payload.serverId] = {
                     hasUnread: false,
@@ -69,7 +69,7 @@ export const unreadSlice = createSlice({
         decrementServerPing: (
             state,
             action: PayloadAction<{ serverId: string }>,
-        ) => {
+        ): void => {
             const status = state.unreadServers[action.payload.serverId];
             if (status && status.pingCount > 0) {
                 status.pingCount -= 1;
@@ -78,13 +78,13 @@ export const unreadSlice = createSlice({
         setUnreadDms: (
             state,
             action: PayloadAction<Record<string, number>>,
-        ) => {
+        ): void => {
             state.unreadDms = action.payload;
         },
         setDmUnread: (
             state,
             action: PayloadAction<{ userId: string; count: number }>,
-        ) => {
+        ): void => {
             state.unreadDms[action.payload.userId] = action.payload.count;
         },
     },

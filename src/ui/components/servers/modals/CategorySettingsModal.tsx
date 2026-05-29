@@ -29,11 +29,11 @@ interface CategorySettingsModalProps {
     category: Category;
 }
 
-export const CategorySettingsModal: React.FC<CategorySettingsModalProps> = ({
+export const CategorySettingsModal = ({
     isOpen,
     onClose,
     category,
-}) => {
+}: CategorySettingsModalProps) => {
     const [activeSection, setActiveSection] = useState<string>('overview');
     const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(true);
 
@@ -57,7 +57,7 @@ export const CategorySettingsModal: React.FC<CategorySettingsModalProps> = ({
                 />
             }
             onClose={onClose}
-            onMobileBackClick={() => setIsMobileSidebarOpen(true)}
+            onMobileBackClick={(): void => setIsMobileSidebarOpen(true)}
         >
             <React.Suspense fallback={null}>
                 {activeSection === 'overview' ? (

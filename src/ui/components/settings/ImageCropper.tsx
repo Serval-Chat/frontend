@@ -18,12 +18,12 @@ interface ImageCropperProps {
 
 type HandleType = 'nw' | 'n' | 'ne' | 'w' | 'e' | 'sw' | 's' | 'se' | 'move';
 
-export const ImageCropper: React.FC<ImageCropperProps> = ({
+export const ImageCropper = ({
     imageFile,
     aspectRatio,
     onCropChange,
     className,
-}) => {
+}: ImageCropperProps) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -44,10 +44,10 @@ export const ImageCropper: React.FC<ImageCropperProps> = ({
     });
 
     // Load image and initialize selection
-    useEffect(() => {
+    useEffect((): void => {
         const img = new Image();
         const url = URL.createObjectURL(imageFile);
-        img.onload = () => {
+        img.onload = (): void => {
             setImage(img);
             URL.revokeObjectURL(url);
         };
@@ -105,20 +105,20 @@ export const ImageCropper: React.FC<ImageCropperProps> = ({
         });
     }, [image, aspectRatio, onCropChange]);
 
-    useEffect(() => {
+    useEffect((): (() => void) => {
         const handleResize = (): void => {
-            requestAnimationFrame(() => {
+            requestAnimationFrame((): void => {
                 updateDisplaySize();
             });
         };
 
         handleResize();
         window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
+        return (): void => window.removeEventListener('resize', handleResize);
     }, [updateDisplaySize]);
 
     // Draw canvas
-    useEffect(() => {
+    useEffect((): void => {
         if (!canvasRef.current || !image || displaySize.width === 0) return;
 
         const canvas = canvasRef.current;
@@ -184,7 +184,7 @@ export const ImageCropper: React.FC<ImageCropperProps> = ({
             },
         ];
 
-        positions.forEach((p) => {
+        positions.forEach((p): void => {
             ctx.beginPath();
             ctx.arc(p.x, p.y, hs / 2, 0, Math.PI * 2);
             ctx.fill();
@@ -224,7 +224,8 @@ export const ImageCropper: React.FC<ImageCropperProps> = ({
         ];
 
         const hitHandle = handles.find(
-            (h) => Math.abs(mouseX - h.x) < hs && Math.abs(mouseY - h.y) < hs,
+            (h): boolean =>
+                Math.abs(mouseX - h.x) < hs && Math.abs(mouseY - h.y) < hs,
         );
 
         if (hitHandle) {

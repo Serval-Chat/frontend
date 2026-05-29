@@ -18,8 +18,8 @@ const makeMember = (userId: string, roles: string[]): ServerMember =>
         user: makeUser(userId, `user-${userId}`),
     }) as ServerMember;
 
-describe('useMemberMaps', () => {
-    it('uses @everyone color role when member has no explicit roles', () => {
+describe('useMemberMaps', (): void => {
+    it('uses @everyone color role when member has no explicit roles', (): void => {
         const roles: Role[] = [
             {
                 _id: 'everyone',
@@ -35,7 +35,7 @@ describe('useMemberMaps', () => {
         expect(result.current.highestRoleMap.get('u1')?._id).toBe('everyone');
     });
 
-    it('prefers higher explicit role over @everyone for username color', () => {
+    it('prefers higher explicit role over @everyone for username color', (): void => {
         const roles: Role[] = [
             {
                 _id: 'everyone',
@@ -58,7 +58,7 @@ describe('useMemberMaps', () => {
         expect(result.current.highestRoleMap.get('u1')?._id).toBe('vip');
     });
 
-    it('adds @everyone for icon role resolution too', () => {
+    it('adds @everyone for icon role resolution too', (): void => {
         const roles: Role[] = [
             {
                 _id: 'everyone',
@@ -75,7 +75,7 @@ describe('useMemberMaps', () => {
         expect(result.current.iconRoleMap.get('u1')?._id).toBe('everyone');
     });
 
-    it('resolves @everyone when it only has start/end gradient colors', () => {
+    it('resolves @everyone when it only has start/end gradient colors', (): void => {
         const roles: Role[] = [
             {
                 _id: 'everyone',

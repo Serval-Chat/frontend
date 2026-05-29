@@ -45,7 +45,10 @@ export const MARKDOWN_FEATURE_OPTIONS: {
 ];
 
 const featureLabels = new Map(
-    MARKDOWN_FEATURE_OPTIONS.map((feature) => [feature.id, feature.label]),
+    MARKDOWN_FEATURE_OPTIONS.map((feature): [ParserFeature, string] => [
+        feature.id,
+        feature.label,
+    ]),
 );
 
 const ruleMatchesSender = (
@@ -59,7 +62,8 @@ const ruleMatchesSender = (
     if (rule.targetType === 'role') {
         return (
             senderMember?.roles.includes(rule.targetId) === true ||
-            senderRoles?.some((role) => role._id === rule.targetId) === true
+            senderRoles?.some((role): boolean => role._id === rule.targetId) ===
+                true
         );
     }
     return false;
@@ -96,7 +100,7 @@ const hasBypassMarkdownRestrictions = (params: {
 
     if (
         params.senderRoles?.some(
-            (role) =>
+            (role): boolean =>
                 role.permissions?.administrator === true ||
                 role.permissions?.bypassMarkdownRestrictions === true,
         ) === true
@@ -172,7 +176,9 @@ export const getBlockedMarkdownFeatures = (params: {
 
         for (const rule of mostSpecificRules) {
             if (highestSpecificity > 0) {
-                rule.features.forEach((feature) => blocked.add(feature));
+                rule.features.forEach(
+                    (feature): Set<ParserFeature> => blocked.add(feature),
+                );
             }
         }
     }
@@ -185,7 +191,7 @@ export const getAllowedMessageFeatures = (
 ): ParserFeatureType[] => {
     const blocked = new Set(blockedFeatures);
     return ParserPresets.MESSAGE.features.filter(
-        (feature) => !blocked.has(feature),
+        (feature): boolean => !blocked.has(feature),
     );
 };
 
@@ -193,6 +199,6 @@ export const formatBlockedMarkdownFeatures = (
     features: readonly ParserFeatureType[],
 ): string =>
     features
-        .map((feature) => featureLabels.get(feature) ?? feature)
-        .sort((a, b) => a.localeCompare(b))
+        .map((feature): string => featureLabels.get(feature) ?? feature)
+        .sort((a, b): number => a.localeCompare(b))
         .join(', ');

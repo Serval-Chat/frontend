@@ -70,12 +70,12 @@ export const AdminNotesSection = ({
         createNote(
             { targetId, targetType, content: noteContent },
             {
-                onSuccess: () => {
+                onSuccess: (): void => {
                     showToast('Note added', 'success');
                     setIsAddModalOpen(false);
                     setNoteContent('');
                 },
-                onError: (e) => showToast(e.message, 'error'),
+                onError: (e): void => showToast(e.message, 'error'),
             },
         );
     };
@@ -85,13 +85,13 @@ export const AdminNotesSection = ({
         updateNote(
             { noteId: activeNoteId, content: noteContent },
             {
-                onSuccess: () => {
+                onSuccess: (): void => {
                     showToast('Note updated', 'success');
                     setIsEditModalOpen(false);
                     setNoteContent('');
                     setActiveNoteId(null);
                 },
-                onError: (e) => showToast(e.message, 'error'),
+                onError: (e): void => showToast(e.message, 'error'),
             },
         );
     };
@@ -101,13 +101,13 @@ export const AdminNotesSection = ({
         deleteNote(
             { noteId: activeNoteId, reason: deleteReason },
             {
-                onSuccess: () => {
+                onSuccess: (): void => {
                     showToast('Note deleted', 'success');
                     setIsDeleteModalOpen(false);
                     setDeleteReason('');
                     setActiveNoteId(null);
                 },
-                onError: (e) => showToast(e.message, 'error'),
+                onError: (e): void => showToast(e.message, 'error'),
             },
         );
     };
@@ -133,7 +133,7 @@ export const AdminNotesSection = ({
                 <Button
                     size="sm"
                     variant="normal"
-                    onClick={() => setIsAddModalOpen(true)}
+                    onClick={(): void => setIsAddModalOpen(true)}
                 >
                     <Plus className="mr-2" size={14} />
                     Add Note
@@ -185,7 +185,7 @@ export const AdminNotesSection = ({
                                                     !isDeleted && (
                                                         <button
                                                             className="bg-info/10 text-info hover:bg-info/20 flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-bold tracking-tight uppercase transition-colors"
-                                                            onClick={() =>
+                                                            onClick={(): void =>
                                                                 toggleHistory(
                                                                     note._id,
                                                                 )
@@ -221,7 +221,7 @@ export const AdminNotesSection = ({
                                             <Button
                                                 size="sm"
                                                 variant="ghost"
-                                                onClick={() => {
+                                                onClick={(): void => {
                                                     setActiveNoteId(note._id);
                                                     setNoteContent(
                                                         note.content,
@@ -235,7 +235,7 @@ export const AdminNotesSection = ({
                                                 className="text-danger hover:bg-danger/10 hover:text-danger"
                                                 size="sm"
                                                 variant="ghost"
-                                                onClick={() => {
+                                                onClick={(): void => {
                                                     setActiveNoteId(note._id);
                                                     setIsDeleteModalOpen(true);
                                                 }}
@@ -400,7 +400,7 @@ export const AdminNotesSection = ({
             <Modal
                 isOpen={isAddModalOpen}
                 title="Add Administrative Note"
-                onClose={() => {
+                onClose={(): void => {
                     setIsAddModalOpen(false);
                     setNoteContent('');
                 }}
@@ -410,12 +410,12 @@ export const AdminNotesSection = ({
                         placeholder="Write notes here"
                         rows={5}
                         value={noteContent}
-                        onChange={(e) => setNoteContent(e.target.value)}
+                        onChange={(e): void => setNoteContent(e.target.value)}
                     />
                     <div className="flex justify-end gap-3">
                         <Button
                             variant="ghost"
-                            onClick={() => setIsAddModalOpen(false)}
+                            onClick={(): void => setIsAddModalOpen(false)}
                         >
                             Cancel
                         </Button>
@@ -433,7 +433,7 @@ export const AdminNotesSection = ({
             <Modal
                 isOpen={isEditModalOpen}
                 title="Edit Note"
-                onClose={() => {
+                onClose={(): void => {
                     setIsEditModalOpen(false);
                     setNoteContent('');
                     setActiveNoteId(null);
@@ -444,12 +444,12 @@ export const AdminNotesSection = ({
                         placeholder="Update your signalling..."
                         rows={5}
                         value={noteContent}
-                        onChange={(e) => setNoteContent(e.target.value)}
+                        onChange={(e): void => setNoteContent(e.target.value)}
                     />
                     <div className="flex justify-end gap-3">
                         <Button
                             variant="ghost"
-                            onClick={() => setIsEditModalOpen(false)}
+                            onClick={(): void => setIsEditModalOpen(false)}
                         >
                             Cancel
                         </Button>
@@ -467,7 +467,7 @@ export const AdminNotesSection = ({
             <Modal
                 isOpen={isDeleteModalOpen}
                 title="Delete Admin Note"
-                onClose={() => {
+                onClose={(): void => {
                     setIsDeleteModalOpen(false);
                     setDeleteReason('');
                     setActiveNoteId(null);
@@ -488,12 +488,12 @@ export const AdminNotesSection = ({
                         placeholder="Reason for deletion is REQUIRED..."
                         rows={3}
                         value={deleteReason}
-                        onChange={(e) => setDeleteReason(e.target.value)}
+                        onChange={(e): void => setDeleteReason(e.target.value)}
                     />
                     <div className="flex justify-end gap-3">
                         <Button
                             variant="ghost"
-                            onClick={() => setIsDeleteModalOpen(false)}
+                            onClick={(): void => setIsDeleteModalOpen(false)}
                         >
                             Cancel
                         </Button>

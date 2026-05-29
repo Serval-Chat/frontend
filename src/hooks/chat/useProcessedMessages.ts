@@ -20,16 +20,17 @@ export const useProcessedMessages = (
     iconRoleMap: Map<string, Role>,
 ): ProcessedChatMessage[] => {
     const [cache] = useState(
-        () => new WeakMap<ChatMessage, ProcessedChatMessage>(),
+        (): WeakMap<ChatMessage, ProcessedChatMessage> =>
+            new WeakMap<ChatMessage, ProcessedChatMessage>(),
     );
 
-    return useMemo(() => {
+    return useMemo((): ProcessedChatMessage[] => {
         if (!rawMessagesData) return [];
 
         // Flatten all pages and sort chronologically
         const allMessages = rawMessagesData.pages
             .flat()
-            .sort((a, b) =>
+            .sort((a, b): 1 | -1 | 0 =>
                 a.createdAt < b.createdAt
                     ? -1
                     : a.createdAt > b.createdAt
@@ -37,11 +38,11 @@ export const useProcessedMessages = (
                       : 0,
             );
         const messageById = new Map<string, ChatMessage>();
-        allMessages.forEach((message) => {
+        allMessages.forEach((message): void => {
             messageById.set(message._id.toString(), message);
         });
 
-        const result = allMessages.map((msg) => {
+        const result = allMessages.map((msg): ProcessedChatMessage => {
             let user: User | undefined = undefined;
             let role: Role | undefined = undefined;
             let iconRole: Role | undefined = undefined;

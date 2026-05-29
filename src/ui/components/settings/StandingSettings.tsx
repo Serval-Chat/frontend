@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { AlertTriangle, CheckCircle, ShieldAlert } from 'lucide-react';
 
 import { useMe } from '@/api/users/users.queries';
@@ -12,7 +10,7 @@ import { Heading } from '@/ui/components/common/Heading';
 import { Text } from '@/ui/components/common/Text';
 import { formatTimestamp } from '@/utils/timestamp';
 
-export const StandingSettings: React.FC = () => {
+export const StandingSettings = () => {
     const { data: warnings, isLoading } = useMyWarnings();
     const { mutate: acknowledge, isPending } = useAcknowledgeWarning();
     const { data: me } = useMe();
@@ -118,7 +116,7 @@ export const StandingSettings: React.FC = () => {
                                                 loading={isPending}
                                                 size="sm"
                                                 variant="danger"
-                                                onClick={() =>
+                                                onClick={(): void =>
                                                     acknowledge(warning._id)
                                                 }
                                             >

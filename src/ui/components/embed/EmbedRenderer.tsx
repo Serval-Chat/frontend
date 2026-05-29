@@ -111,7 +111,7 @@ const EmbedImage = memo(
                         className,
                     )}
                     type="button"
-                    onClick={() => setIsLightboxOpen(true)}
+                    onClick={(): void => setIsLightboxOpen(true)}
                 >
                     <img
                         alt={alt}
@@ -127,7 +127,7 @@ const EmbedImage = memo(
                     alt={alt}
                     isOpen={isLightboxOpen}
                     src={src}
-                    onClose={() => setIsLightboxOpen(false)}
+                    onClose={(): void => setIsLightboxOpen(false)}
                 />
             </>
         );
@@ -179,7 +179,10 @@ const EmbedCard = memo(
             ? getSafeUrl(embed.footer.icon_url)
             : undefined;
 
-        const fieldRows = useMemo(() => {
+        const fieldRows = useMemo((): {
+            fields: typeof embed.fields;
+            inline: boolean;
+        }[] => {
             type FieldRow = { fields: typeof embed.fields; inline: boolean };
             const rows: FieldRow[] = [];
             if (embed.fields) {
@@ -206,7 +209,7 @@ const EmbedCard = memo(
             return rows;
         }, [embed]);
 
-        const footerText = useMemo(() => {
+        const footerText = useMemo((): string => {
             if (!embed.footer?.text && !embed.timestamp) return '';
             return [
                 embed.footer?.text,
@@ -554,7 +557,7 @@ const EmbedCard = memo(
                                                     ? `grid-cols-${Math.min(row.fields?.length ?? 1, 3)}`
                                                     : 'grid-cols-1',
                                             )}
-                                            key={`row-${row.fields?.map((f) => f.name).join(',')}`}
+                                            key={`row-${row.fields?.map((f): string => f.name).join(',')}`}
                                         >
                                             {row.fields?.map((field) => (
                                                 <div
@@ -776,7 +779,7 @@ export const EmbedRenderer = ({
             {payload.poll &&
                 (() => {
                     const visibleAnswers = payload.poll.answers.filter(
-                        (a) => a.text.trim() !== '',
+                        (a): boolean => a.text.trim() !== '',
                     );
                     if (
                         visibleAnswers.length === 0 &&

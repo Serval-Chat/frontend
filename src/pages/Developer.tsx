@@ -22,7 +22,7 @@ const DevBotDetailWrapper = (): ReactNode => {
     return (
         <DevBotDetail
             clientId={clientId}
-            onBack={() => void navigate('/developer/bots')}
+            onBack={(): undefined => void navigate('/developer/bots')}
         />
     );
 };
@@ -46,7 +46,7 @@ export const Developer = (): ReactNode => {
                 <Route
                     element={
                         <DevBots
-                            onViewBot={(clientId) =>
+                            onViewBot={(clientId): undefined =>
                                 void navigate(`/developer/bots/${clientId}`)
                             }
                         />

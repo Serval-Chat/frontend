@@ -18,14 +18,14 @@ import { FriendListMain } from './FriendListMain';
 import { FriendRequestItem } from './FriendRequestItem';
 import { SentFriendRequestItem } from './SentFriendRequestItem';
 
-export const FriendRequestList: React.FC = () => {
+export const FriendRequestList = () => {
     const { data: requests, isLoading } = useIncomingRequests();
     const { data: sentRequests } = useOutgoingRequests();
     const [view, setView] = React.useState<
         'all' | 'pending' | 'sent' | 'blocked' | 'add'
     >('pending');
 
-    React.useEffect(() => {
+    React.useEffect((): void => {
         if (!isLoading && (!requests || requests.length === 0)) {
             setView('all');
         }
@@ -91,7 +91,7 @@ export const FriendRequestList: React.FC = () => {
                                     ? 'bg-primary text-foreground-inverse hover:bg-primary-hover'
                                     : 'text-foreground-muted hover:bg-bg-tertiary hover:text-foreground',
                             )}
-                            onClick={() => setView('all')}
+                            onClick={(): void => setView('all')}
                         >
                             All
                         </button>
@@ -102,7 +102,7 @@ export const FriendRequestList: React.FC = () => {
                                     ? 'bg-primary text-foreground-inverse hover:bg-primary-hover'
                                     : 'text-foreground-muted hover:bg-bg-tertiary hover:text-foreground',
                             )}
-                            onClick={() => setView('pending')}
+                            onClick={(): void => setView('pending')}
                         >
                             Pending
                             {requests && requests.length > 0 && (
@@ -118,7 +118,7 @@ export const FriendRequestList: React.FC = () => {
                                     ? 'bg-primary text-foreground-inverse hover:bg-primary-hover'
                                     : 'text-foreground-muted hover:bg-bg-tertiary hover:text-foreground',
                             )}
-                            onClick={() => setView('sent')}
+                            onClick={(): void => setView('sent')}
                         >
                             Sent
                             {sentRequests && sentRequests.length > 0 && (
@@ -135,7 +135,7 @@ export const FriendRequestList: React.FC = () => {
                                     ? 'bg-primary text-foreground-inverse hover:bg-primary-hover'
                                     : 'text-foreground-muted hover:bg-bg-tertiary hover:text-foreground',
                             )}
-                            onClick={() => setView('blocked')}
+                            onClick={(): void => setView('blocked')}
                         >
                             Blocked
                         </button>
@@ -147,7 +147,7 @@ export const FriendRequestList: React.FC = () => {
                                     ? 'bg-success text-white'
                                     : 'bg-success/20 text-success hover:bg-success hover:text-white',
                             )}
-                            onClick={() => setView('add')}
+                            onClick={(): void => setView('add')}
                         >
                             Add friend
                         </button>

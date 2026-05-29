@@ -14,10 +14,10 @@ interface ChangePasswordModalProps {
     onClose: () => void;
 }
 
-export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
+export const ChangePasswordModal = ({
     isOpen,
     onClose,
-}) => {
+}: ChangePasswordModalProps) => {
     const { showToast } = useToast();
     const { mutate: changePassword, isPending } = useChangePassword();
 
@@ -65,11 +65,11 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
         changePassword(
             { currentPassword, newPassword },
             {
-                onSuccess: () => {
+                onSuccess: (): void => {
                     showToast('Password updated successfully', 'success');
                     handleClose();
                 },
-                onError: (error) => {
+                onError: (error): void => {
                     showToast(
                         error.message || 'Failed to update password',
                         'error',
@@ -96,7 +96,9 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
                             name="current-password"
                             type="password"
                             value={currentPassword}
-                            onChange={(e) => setCurrentPassword(e.target.value)}
+                            onChange={(e): void =>
+                                setCurrentPassword(e.target.value)
+                            }
                         />
                         {errors.current && (
                             <Text className="text-status-error" size="xs">
@@ -118,7 +120,9 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
                             name="new-password"
                             type="password"
                             value={newPassword}
-                            onChange={(e) => setNewPassword(e.target.value)}
+                            onChange={(e): void =>
+                                setNewPassword(e.target.value)
+                            }
                         />
                         {errors.new && (
                             <Text className="text-status-error" size="xs">
@@ -140,7 +144,9 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
                             name="confirm-password"
                             type="password"
                             value={confirmPassword}
-                            onChange={(e) => setConfirmPassword(e.target.value)}
+                            onChange={(e): void =>
+                                setConfirmPassword(e.target.value)
+                            }
                         />
                         {errors.confirm && (
                             <Text className="text-status-error" size="xs">

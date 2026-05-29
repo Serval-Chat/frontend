@@ -34,7 +34,7 @@ type VirtualItemData =
 /**
  * @description Renders the member list for a server, categorized by roles.
  */
-export const ServerSidebarSection: React.FC<ServerSidebarSectionProps> = ({
+export const ServerSidebarSection = ({
     members,
     isLoading,
     memberRoleMap,
@@ -43,12 +43,14 @@ export const ServerSidebarSection: React.FC<ServerSidebarSectionProps> = ({
     roles,
     searchQuery,
     scrollRef,
-}) => {
+}: ServerSidebarSectionProps) => {
     const presenceMap = useAppSelector((state) => state.presence.users);
-    const blocks = useAppSelector((state) => state.blocking.blocks);
+    const blocks = useAppSelector(
+        (state): Record<string, number> => state.blocking.blocks,
+    );
     const { data: me } = useMe();
 
-    const groups = useMemo(() => {
+    const groups = useMemo((): MemberGroup[] => {
         if (!members) return [];
 
         const processedMembers = members
@@ -83,7 +85,7 @@ export const ServerSidebarSection: React.FC<ServerSidebarSectionProps> = ({
                     ).toLowerCase(),
                 };
             })
-            .filter((pm) => !pm.isHidden);
+            .filter((pm): boolean => !pm.isHidden);
 
         let finalFiltered = processedMembers;
 
@@ -97,7 +99,7 @@ export const ServerSidebarSection: React.FC<ServerSidebarSectionProps> = ({
                     const regex = new RegExp(pattern, flags);
 
                     finalFiltered = finalFiltered.filter(
-                        (pm) =>
+                        (pm): boolean =>
                             regex.test(pm.member.user.displayName || '') ||
                             regex.test(pm.member.user.username || ''),
                     );
@@ -106,7 +108,7 @@ export const ServerSidebarSection: React.FC<ServerSidebarSectionProps> = ({
                 }
             } else {
                 const lowercaseQuery = query.toLowerCase();
-                finalFiltered = finalFiltered.filter((pm) =>
+                finalFiltered = finalFiltered.filter((pm): boolean =>
                     pm.sortName.includes(lowercaseQuery),
                 );
             }
@@ -128,13 +130,13 @@ export const ServerSidebarSection: React.FC<ServerSidebarSectionProps> = ({
 
         const roleLookup = new Map<string, Role>();
         if (roles) {
-            roles.forEach((r) => roleLookup.set(r._id, r));
+            roles.forEach((r): Map<string, Role> => roleLookup.set(r._id, r));
         }
 
         const offlineGroup = getGroup('offline', 'Offline', -9999);
         const onlineGroup = getGroup('online', 'Online', -1);
 
-        finalFiltered.forEach((pm) => {
+        finalFiltered.forEach((pm): void => {
             const { member, isOnline } = pm;
 
             if (!isOnline) {
@@ -171,36 +173,46 @@ export const ServerSidebarSection: React.FC<ServerSidebarSectionProps> = ({
         });
 
         const sortMap = new Map<string, string>();
-        processedMembers.forEach((pm) =>
-            sortMap.set(pm.member.userId, pm.sortName),
+        processedMembers.forEach(
+            (pm): Map<string, string> =>
+                sortMap.set(pm.member.userId, pm.sortName),
         );
 
         const result: MemberGroup[] = Array.from(groupsMap.values())
-            .filter((g) => g.members.length > 0)
-            .map((g) => ({
-                ...g,
-                members: [...g.members].sort((a, b) => {
-                    const nameA = sortMap.get(a.userId) || '';
-                    const nameB = sortMap.get(b.userId) || '';
-                    return nameA.localeCompare(nameB);
+            .filter((g): boolean => g.members.length > 0)
+            .map(
+                (
+                    g,
+                ): {
+                    members: ServerMember[];
+                    id: string;
+                    name: string;
+                    position: number;
+                } => ({
+                    ...g,
+                    members: [...g.members].sort((a, b): number => {
+                        const nameA = sortMap.get(a.userId) || '';
+                        const nameB = sortMap.get(b.userId) || '';
+                        return nameA.localeCompare(nameB);
+                    }),
                 }),
-            }));
+            );
 
-        result.sort((a, b) => b.position - a.position);
+        result.sort((a, b): number => b.position - a.position);
 
         return result;
     }, [members, searchQuery, roles, presenceMap, me, blocks]);
 
     const virtualItems = useMemo((): VirtualItemData[] => {
         const items: VirtualItemData[] = [];
-        groups.forEach((group) => {
+        groups.forEach((group): void => {
             items.push({
                 type: 'header',
                 id: group.id,
                 name: group.name,
                 count: group.members.length,
             });
-            group.members.forEach((member) => {
+            group.members.forEach((member): void => {
                 items.push({
                     type: 'member',
                     member,
@@ -214,9 +226,9 @@ export const ServerSidebarSection: React.FC<ServerSidebarSectionProps> = ({
     // eslint-disable-next-line react-hooks/incompatible-library
     const rowVirtualizer = useVirtualizer({
         count: virtualItems.length,
-        getScrollElement: () => scrollRef.current,
+        getScrollElement: (): HTMLDivElement | null => scrollRef.current,
         estimateSize: useCallback(
-            (index: number) => {
+            (index: number): 36 | 46 => {
                 const item = virtualItems[index];
                 if (item.type === 'header') return 36;
                 return 46;
@@ -229,14 +241,14 @@ export const ServerSidebarSection: React.FC<ServerSidebarSectionProps> = ({
 
     const roleListCache = React.useRef<Map<string, Role[]>>(new Map());
 
-    const allRolesMap = useMemo(() => {
+    const allRolesMap = useMemo((): Map<string, Role[]> => {
         const map = new Map<string, Role[]>();
         if (!members || !roles) return map;
 
-        members.forEach((m) => {
+        members.forEach((m): void => {
             if (m?.roles) {
                 const memberRoleSet = new Set(m.roles.map(String));
-                const filteredRoles = roles.filter((r) =>
+                const filteredRoles = roles.filter((r): boolean =>
                     memberRoleSet.has(String(r._id)),
                 );
 
@@ -244,7 +256,9 @@ export const ServerSidebarSection: React.FC<ServerSidebarSectionProps> = ({
                 if (
                     cached &&
                     cached.length === filteredRoles.length &&
-                    cached.every((r, i) => r._id === filteredRoles[i]._id)
+                    cached.every(
+                        (r, i): boolean => r._id === filteredRoles[i]._id,
+                    )
                 ) {
                     map.set(m.userId, cached);
                 } else {

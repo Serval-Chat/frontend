@@ -34,7 +34,7 @@ export const useStickerInfo = ({
 
     const serverQuery = useQuery<Server, Error>({
         queryKey: SERVERS_QUERY_KEYS.details(serverIdToUse!),
-        queryFn: async () => {
+        queryFn: async (): Promise<Server> => {
             try {
                 const result = await serversApi.getServerDetails(
                     serverIdToUse!,
@@ -46,12 +46,12 @@ export const useStickerInfo = ({
             }
         },
         enabled: enabled && !!serverIdToUse,
-        initialData: () => {
+        initialData: (): Server | undefined => {
             if (!serverIdToUse) return undefined;
             const servers = queryClient.getQueryData<Server[]>(
                 SERVERS_QUERY_KEYS.list,
             );
-            return servers?.find((s) => s._id === serverIdToUse);
+            return servers?.find((s): boolean => s._id === serverIdToUse);
         },
         retry: false,
     });

@@ -2,8 +2,12 @@ import type { ConCommandReactor } from '@/console/ConCommandRegistry';
 import { DosEditorProgram } from '@/console/programs/DosEditorProgram';
 
 export const editCommand: ConCommandReactor = {
-    match: (_argc, argv) => argv[0]?.toLowerCase() === 'edit',
-    execute: (_argc, argv, context) => {
+    match: (_argc, argv): boolean => argv[0]?.toLowerCase() === 'edit',
+    execute: (
+        _argc,
+        argv,
+        context,
+    ): { output: string[] } | { output?: undefined } => {
         const path = argv.slice(1).join(' ');
         if (!path) {
             return { output: ['The syntax of the command is incorrect.'] };

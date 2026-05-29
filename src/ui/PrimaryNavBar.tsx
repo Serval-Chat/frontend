@@ -49,17 +49,19 @@ const SettingsModal = React.lazy(() =>
     })),
 );
 
-export const PrimaryNavBar: React.FC = () => {
+export const PrimaryNavBar = () => {
     const { navMode, selectedFriendId, selectedChannelId } =
         useAppShallowSelector((state) => ({
             navMode: state.nav.navMode,
             selectedFriendId: state.nav.selectedFriendId,
             selectedChannelId: state.nav.selectedChannelId,
         }));
-    const unreadDms = useAppSelector((state) => state.unread.unreadDms);
+    const unreadDms = useAppSelector(
+        (state): Record<string, number> => state.unread.unreadDms,
+    );
     const { data: pingsData } = usePings();
     const totalUnreadDms = Object.values(unreadDms).reduce(
-        (acc, count) => acc + (typeof count === 'number' ? count : 0),
+        (acc, count): number => acc + (typeof count === 'number' ? count : 0),
         0,
     );
     const pingCount = pingsData?.pings?.length || 0;
@@ -126,7 +128,7 @@ export const PrimaryNavBar: React.FC = () => {
                     <IconButton
                         className="bg-bg-subtle text-green-500 hover:bg-bg-subtle-hover hover:text-green-400"
                         icon={Plus}
-                        onClick={() => setShowCreateServer(true)}
+                        onClick={(): void => setShowCreateServer(true)}
                     />
                 </Tooltip>
             </Box>
@@ -136,7 +138,7 @@ export const PrimaryNavBar: React.FC = () => {
                     <IconButton
                         className="bg-bg-subtle text-text-subtle hover:bg-bg-subtle-hover hover:text-text-normal"
                         icon={Compass}
-                        onClick={() => setShowJoinServer(true)}
+                        onClick={(): void => setShowJoinServer(true)}
                     />
                 </Tooltip>
             </Box>
@@ -147,7 +149,7 @@ export const PrimaryNavBar: React.FC = () => {
                         className="bg-bg-subtle text-text-subtle hover:bg-bg-subtle-hover hover:text-text-normal"
                         icon={Telescope}
                         isActive={showDiscovery}
-                        onClick={() => setShowDiscovery(true)}
+                        onClick={(): void => setShowDiscovery(true)}
                     />
                 </Tooltip>
             </Box>
@@ -160,7 +162,7 @@ export const PrimaryNavBar: React.FC = () => {
                         badgeCount={pingCount}
                         icon={Bell}
                         isActive={showInbox}
-                        onClick={() => setShowInbox(!showInbox)}
+                        onClick={(): void => setShowInbox(!showInbox)}
                     />
                 </Tooltip>
 
@@ -175,7 +177,7 @@ export const PrimaryNavBar: React.FC = () => {
                         >
                             <React.Suspense fallback={null}>
                                 <PingInbox
-                                    onClose={() => setShowInbox(false)}
+                                    onClose={(): void => setShowInbox(false)}
                                 />
                             </React.Suspense>
                         </motion.div>
@@ -201,8 +203,8 @@ export const PrimaryNavBar: React.FC = () => {
                 <React.Suspense fallback={null}>
                     <CreateServerModal
                         isOpen={showCreateServer}
-                        onClose={() => setShowCreateServer(false)}
-                        onSwitchToJoin={() => {
+                        onClose={(): void => setShowCreateServer(false)}
+                        onSwitchToJoin={(): void => {
                             setShowCreateServer(false);
                             setShowJoinServer(true);
                         }}
@@ -213,7 +215,7 @@ export const PrimaryNavBar: React.FC = () => {
                 <React.Suspense fallback={null}>
                     <JoinServerModal
                         isOpen={showJoinServer}
-                        onClose={() => setShowJoinServer(false)}
+                        onClose={(): void => setShowJoinServer(false)}
                     />
                 </React.Suspense>
             )}
@@ -221,7 +223,7 @@ export const PrimaryNavBar: React.FC = () => {
                 <React.Suspense fallback={null}>
                     <ServerDiscoveryModal
                         isOpen={showDiscovery}
-                        onClose={() => setShowDiscovery(false)}
+                        onClose={(): void => setShowDiscovery(false)}
                     />
                 </React.Suspense>
             )}

@@ -24,8 +24,8 @@ vi.mock('react-router-dom', () => ({
     useParams: vi.fn().mockReturnValue({ serverId: 'server1' }),
 }));
 
-describe('usePermissions', () => {
-    beforeEach(() => {
+describe('usePermissions', (): void => {
+    beforeEach((): void => {
         vi.clearAllMocks();
     });
 
@@ -65,13 +65,13 @@ describe('usePermissions', () => {
         return overrides;
     };
 
-    it('returns base server permissions when no channelId is provided', () => {
+    it('returns base server permissions when no channelId is provided', (): void => {
         setupMocks();
         const { result } = renderHook(() => usePermissions('server1'));
         expect(result.current.hasPermission('sendMessages')).toBe(true);
     });
 
-    it('applies channel overrides (denying a permission)', () => {
+    it('applies channel overrides (denying a permission)', (): void => {
         setupMocks();
         vi.mocked(ServerQueries.useChannels).mockReturnValue({
             data: [
@@ -92,7 +92,7 @@ describe('usePermissions', () => {
         expect(result.current.hasPermission('sendMessages')).toBe(false);
     });
 
-    it('applies channel overrides (granting a permission)', () => {
+    it('applies channel overrides (granting a permission)', (): void => {
         vi.mocked(UserQueries.useMe).mockReturnValue({ data: mockMe } as never);
         vi.mocked(ServerQueries.useServerDetails).mockReturnValue({
             data: mockServer,
@@ -135,7 +135,7 @@ describe('usePermissions', () => {
         expect(result.current.hasPermission('sendMessages')).toBe(true);
     });
 
-    it('supports "everyone" literal key in overrides', () => {
+    it('supports "everyone" literal key in overrides', (): void => {
         setupMocks();
         vi.mocked(ServerQueries.useChannels).mockReturnValue({
             data: [
@@ -156,7 +156,7 @@ describe('usePermissions', () => {
         expect(result.current.hasPermission('sendMessages')).toBe(false);
     });
 
-    it('category overrides act as fallback', () => {
+    it('category overrides act as fallback', (): void => {
         setupMocks();
         vi.mocked(ServerQueries.useChannels).mockReturnValue({
             data: [
@@ -183,7 +183,7 @@ describe('usePermissions', () => {
         expect(result.current.hasPermission('sendMessages')).toBe(false);
     });
 
-    it('channel overrides win over category overrides', () => {
+    it('channel overrides win over category overrides', (): void => {
         setupMocks();
         vi.mocked(ServerQueries.useChannels).mockReturnValue({
             data: [
@@ -210,7 +210,7 @@ describe('usePermissions', () => {
         expect(result.current.hasPermission('sendMessages')).toBe(true);
     });
 
-    it('owner ignores all overrides', () => {
+    it('owner ignores all overrides', (): void => {
         vi.mocked(UserQueries.useMe).mockReturnValue({
             data: { _id: 'owner1' },
         } as never);
@@ -239,7 +239,7 @@ describe('usePermissions', () => {
         expect(result.current.hasPermission('sendMessages')).toBe(true);
     });
 
-    it('administrator role ignores all overrides', () => {
+    it('administrator role ignores all overrides', (): void => {
         setupMocks();
         vi.mocked(ServerQueries.useRoles).mockReturnValue({
             data: [
@@ -274,7 +274,7 @@ describe('usePermissions', () => {
         expect(result.current.hasPermission('sendMessages')).toBe(true);
     });
 
-    it('does not subscribe to the global time ticker when user has no timeout', () => {
+    it('does not subscribe to the global time ticker when user has no timeout', (): Promise<void> => {
         setupMocks();
         const renderCount = { value: 0 };
 
@@ -287,7 +287,9 @@ describe('usePermissions', () => {
         expect(result.current.isTimedOut).toBe(false);
         expect(result.current.remainingTimeoutMs).toBe(0);
 
-        return new Promise((resolve) => setTimeout(resolve, 1100)).then(() => {
+        return new Promise(
+            (resolve): NodeJS.Timeout => setTimeout(resolve, 1100),
+        ).then((): void => {
             expect(renderCount.value).toBe(initialRenderCount);
         });
     });

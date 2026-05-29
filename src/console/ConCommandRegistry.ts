@@ -50,7 +50,7 @@ export class ConCommandRegistry {
     public register(reactor: ConCommandReactor): void {
         if (reactor.default) {
             const hasDefault = this.reactors.some(
-                (r) => r.default !== undefined,
+                (r): boolean => r.default !== undefined,
             );
             if (hasDefault) {
                 throw new Error(
@@ -90,7 +90,7 @@ export class ConCommandRegistry {
 
             if (!handled) {
                 const defaultReactor = this.reactors.find(
-                    (r) => r.default !== undefined,
+                    (r): boolean => r.default !== undefined,
                 );
                 if (defaultReactor && defaultReactor.default) {
                     result = await defaultReactor.default(argc, argv, context);

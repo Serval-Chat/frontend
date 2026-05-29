@@ -25,12 +25,12 @@ const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
 });
 
-const TestWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+const TestWrapper = ({ children }: { children: React.ReactNode }) => (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
 );
 
-describe('ReplyPreview', () => {
-    it('renders user mention tokens in replied message text', () => {
+describe('ReplyPreview', (): void => {
+    it('renders user mention tokens in replied message text', (): void => {
         render(
             <TestWrapper>
                 <ReplyPreview

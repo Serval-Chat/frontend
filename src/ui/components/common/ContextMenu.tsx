@@ -53,25 +53,25 @@ interface ContextMenuProps {
  */
 const filterItems = (items: ContextMenuItem[]): ContextMenuItem[] =>
     items
-        .filter((item, index) => {
+        .filter((item, index): boolean => {
             if (item.type !== 'divider') return true;
             if (index === 0) return false;
             const prevItem = items[index - 1];
             if (prevItem && prevItem.type === 'divider') return false;
             return true;
         })
-        .filter((item, index, array) => {
+        .filter((item, index, array): boolean => {
             if (item.type === 'divider' && index === array.length - 1)
                 return false;
             return true;
         });
 
-export const ContextMenu: React.FC<ContextMenuProps> = ({
+export const ContextMenu = ({
     items,
     children,
     className,
     onOpenChange,
-}) => {
+}: ContextMenuProps) => {
     const [isOpen, setIsOpen] = useState(false);
     const [clickPosition, setClickPosition] = useState({ x: 0, y: 0 });
     const menuRef = useRef<HTMLDivElement>(null);
@@ -100,7 +100,7 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
         offset: 0,
     });
 
-    useEffect(() => {
+    useEffect((): (() => void) => {
         const handleClickOutside = (event: MouseEvent): void => {
             const target = event.target as Node;
 
@@ -124,7 +124,7 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
             document.addEventListener('mousedown', handleClickOutside);
         }
 
-        return () => {
+        return (): void => {
             document.removeEventListener('mousedown', handleClickOutside);
         };
     }, [isOpen, closeMenu]);
@@ -188,10 +188,7 @@ interface ContextMenuItemProps {
     closeMenu: () => void;
 }
 
-const ContextMenuItemRenderer: React.FC<ContextMenuItemProps> = ({
-    item,
-    closeMenu,
-}) => {
+const ContextMenuItemRenderer = ({ item, closeMenu }: ContextMenuItemProps) => {
     const [isSubmenuOpen, setIsSubmenuOpen] = useState(false);
     const itemRef = useRef<HTMLDivElement>(null);
     const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -205,7 +202,7 @@ const ContextMenuItemRenderer: React.FC<ContextMenuItemProps> = ({
     };
 
     const handleMouseLeave = (): void => {
-        closeTimerRef.current = setTimeout(() => {
+        closeTimerRef.current = setTimeout((): void => {
             setIsSubmenuOpen(false);
         }, 300); // 300ms grace period
     };
@@ -218,7 +215,7 @@ const ContextMenuItemRenderer: React.FC<ContextMenuItemProps> = ({
     };
 
     useEffect(
-        () => () => {
+        (): (() => void) => (): void => {
             if (closeTimerRef.current) {
                 clearTimeout(closeTimerRef.current);
             }
@@ -259,14 +256,14 @@ const ContextMenuItemRenderer: React.FC<ContextMenuItemProps> = ({
                     )}
                     role="button"
                     tabIndex={0}
-                    onClick={(e) => {
+                    onClick={(e): void => {
                         e.stopPropagation();
-                        setIsSubmenuOpen((prev) => !prev);
+                        setIsSubmenuOpen((prev): boolean => !prev);
                     }}
-                    onKeyDown={(e) => {
+                    onKeyDown={(e): void => {
                         if (e.key === 'Enter' || e.key === ' ') {
                             e.preventDefault();
-                            setIsSubmenuOpen((prev) => !prev);
+                            setIsSubmenuOpen((prev): boolean => !prev);
                         }
                     }}
                 >
@@ -339,7 +336,7 @@ const ContextMenuItemRenderer: React.FC<ContextMenuItemProps> = ({
             )}
             role="button"
             tabIndex={item.variant === 'ghost' ? -1 : 0}
-            onClick={(e) => {
+            onClick={(e): void => {
                 if (item.variant === 'ghost') {
                     e.stopPropagation();
                     return;
@@ -349,7 +346,7 @@ const ContextMenuItemRenderer: React.FC<ContextMenuItemProps> = ({
                     closeMenu();
                 }
             }}
-            onKeyDown={(e) => {
+            onKeyDown={(e): void => {
                 if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault();
                     if (item.variant === 'ghost') return;
@@ -377,14 +374,14 @@ interface SubMenuProps {
     onMouseLeave?: () => void;
 }
 
-const SubMenu: React.FC<SubMenuProps> = ({
+const SubMenu = ({
     items,
     parentRef,
     isOpen,
     closeAll,
     onMouseEnter,
     onMouseLeave,
-}) => {
+}: SubMenuProps): React.ReactPortal | null => {
     const menuRef = useRef<HTMLDivElement>(null);
     const position = useSmartPosition({
         isOpen,

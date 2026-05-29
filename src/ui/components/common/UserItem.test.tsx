@@ -11,15 +11,15 @@ const dispatchMock = vi.fn();
 const sendFriendRequestMock = vi.fn();
 
 vi.mock('@/api/blocks/blocks.queries', () => ({
-    useBlocks: () => ({ data: [] }),
-    useBlockProfiles: () => ({ data: [] }),
+    useBlocks: (): { data: never[] } => ({ data: [] }),
+    useBlockProfiles: (): { data: never[] } => ({ data: [] }),
     useUpsertBlock: () => ({ mutate: vi.fn() }),
     useRemoveBlock: () => ({ mutate: vi.fn() }),
     useCreateBlockProfile: () => ({ mutateAsync: vi.fn() }),
 }));
 
 vi.mock('@/api/friends/friends.queries', () => ({
-    useFriends: () => ({ data: [] }),
+    useFriends: (): { data: never[] } => ({ data: [] }),
     useRemoveFriend: () => ({ mutate: vi.fn() }),
     useSendFriendRequest: () => ({ mutate: sendFriendRequestMock }),
 }));
@@ -30,13 +30,13 @@ vi.mock('@/api/servers/servers.queries', () => ({
     useKickMember: () => ({ mutate: vi.fn() }),
     useBanMember: () => ({ mutate: vi.fn() }),
     useTimeoutMember: () => ({ mutate: vi.fn() }),
-    useServerDetails: () => ({ data: null }),
-    useMembers: () => ({ data: [] }),
+    useServerDetails: (): { data: null } => ({ data: null }),
+    useMembers: (): { data: never[] } => ({ data: [] }),
 }));
 
 vi.mock('@/api/users/users.queries', () => ({
-    useMe: () => ({ data: { _id: 'me' } }),
-    useUserById: () => ({ data: null }),
+    useMe: (): { data: { _id: string } } => ({ data: { _id: 'me' } }),
+    useUserById: (): { data: null } => ({ data: null }),
 }));
 
 vi.mock('@/store/hooks', () => ({
@@ -54,18 +54,30 @@ vi.mock('@/store/hooks', () => ({
         }),
 }));
 
-vi.mock('@/ui/components/profile/ProfilePopup', () => ({
-    ProfilePopup: () => null,
-}));
-vi.mock('@/ui/components/profile/modals/BlockUserModal', () => ({
-    BlockUserModal: () => null,
-}));
-vi.mock('@/ui/components/servers/modals/BanUserModal', () => ({
-    BanUserModal: () => null,
-}));
-vi.mock('@/ui/components/servers/modals/KickUserModal', () => ({
-    KickUserModal: () => null,
-}));
+vi.mock(
+    '@/ui/components/profile/ProfilePopup',
+    (): { ProfilePopup: () => null } => ({
+        ProfilePopup: (): null => null,
+    }),
+);
+vi.mock(
+    '@/ui/components/profile/modals/BlockUserModal',
+    (): { BlockUserModal: () => null } => ({
+        BlockUserModal: (): null => null,
+    }),
+);
+vi.mock(
+    '@/ui/components/servers/modals/BanUserModal',
+    (): { BanUserModal: () => null } => ({
+        BanUserModal: (): null => null,
+    }),
+);
+vi.mock(
+    '@/ui/components/servers/modals/KickUserModal',
+    (): { KickUserModal: () => null } => ({
+        KickUserModal: (): null => null,
+    }),
+);
 
 vi.mock('./ContextMenu', () => ({
     ContextMenu: ({
@@ -79,7 +91,10 @@ vi.mock('./ContextMenu', () => ({
             {children}
             <div data-testid="context-items">
                 {items
-                    .filter((i) => i.type !== 'divider' && i.label)
+                    .filter(
+                        (i): string | false | undefined =>
+                            i.type !== 'divider' && i.label,
+                    )
                     .map((i) => (
                         <span key={i.label}>{i.label}</span>
                     ))}
@@ -88,12 +103,12 @@ vi.mock('./ContextMenu', () => ({
     ),
 }));
 
-describe('UserItem', () => {
-    beforeEach(() => {
+describe('UserItem', (): void => {
+    beforeEach((): void => {
         vi.clearAllMocks();
     });
 
-    it('renders a bot tag for bot users', () => {
+    it('renders a bot tag for bot users', (): void => {
         const botUser: User = {
             _id: 'bot-1',
             username: 'helper-bot',
@@ -104,7 +119,7 @@ describe('UserItem', () => {
         expect(screen.getByText('BOT')).toBeInTheDocument();
     });
 
-    it('hides Add Friend action for bots while keeping it for humans', () => {
+    it('hides Add Friend action for bots while keeping it for humans', (): void => {
         const botUser: User = {
             _id: 'bot-1',
             username: 'helper-bot',

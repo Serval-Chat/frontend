@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 
 import {
     useRoles,
@@ -26,9 +26,11 @@ interface ServerBehaviourSettingsFormProps {
     serverId: string;
 }
 
-const ServerBehaviourSettingsForm: React.FC<
-    ServerBehaviourSettingsFormProps
-> = ({ server, roles, serverId }) => {
+const ServerBehaviourSettingsForm = ({
+    server,
+    roles,
+    serverId,
+}: ServerBehaviourSettingsFormProps) => {
     const { mutate: updateServer, isPending: isUpdating } =
         useUpdateServer(serverId);
 
@@ -66,7 +68,7 @@ const ServerBehaviourSettingsForm: React.FC<
                 disableUsernameGlowAndCustomColor,
             },
             {
-                onSuccess: () => {
+                onSuccess: (): void => {
                     setOriginalRoleId(selectedRoleId);
                     setOriginalFonts(disableCustomFonts);
                     setOriginalGlow(disableUsernameGlowAndCustomColor);
@@ -83,7 +85,8 @@ const ServerBehaviourSettingsForm: React.FC<
 
     // Filter out @everyone
     const selectableRoles = useMemo(
-        () => roles.filter((role) => role.name !== '@everyone'),
+        (): Role[] =>
+            roles.filter((role): boolean => role.name !== '@everyone'),
         [roles],
     );
 
@@ -190,7 +193,7 @@ const ServerBehaviourSettingsForm: React.FC<
                     isPending={isUpdating}
                     rules={server.markdownBlockadeRules}
                     serverId={serverId}
-                    onSave={(markdownBlockadeRules) =>
+                    onSave={(markdownBlockadeRules): void =>
                         updateServer({ markdownBlockadeRules })
                     }
                 />
@@ -206,9 +209,9 @@ const ServerBehaviourSettingsForm: React.FC<
     );
 };
 
-export const ServerBehaviourSettings: React.FC<
-    ServerBehaviourSettingsProps
-> = ({ serverId }) => {
+export const ServerBehaviourSettings = ({
+    serverId,
+}: ServerBehaviourSettingsProps) => {
     const { data: server, isLoading: isServerLoading } =
         useServerDetails(serverId);
     const { data: roles, isLoading: isRolesLoading } = useRoles(serverId);

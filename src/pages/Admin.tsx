@@ -31,7 +31,7 @@ const AdminUserDetailWrapper = (): ReactNode => {
     return (
         <AdminUserDetail
             userId={userId}
-            onBack={() => void navigate('/admin/users')}
+            onBack={(): undefined => void navigate('/admin/users')}
         />
     );
 };
@@ -43,8 +43,10 @@ const AdminServerDetailWrapper = (): ReactNode => {
     return (
         <AdminServerDetail
             serverId={serverId}
-            onBack={() => void navigate('/admin/servers')}
-            onViewUser={(uid) => void navigate(`/admin/users/${uid}`)}
+            onBack={(): undefined => void navigate('/admin/servers')}
+            onViewUser={(uid): undefined =>
+                void navigate(`/admin/users/${uid}`)
+            }
         />
     );
 };
@@ -61,7 +63,9 @@ export const Admin = (): ReactNode => {
             <Route
                 element={
                     <AdminIAM
-                        onViewUser={(id) => void navigate(`/admin/users/${id}`)}
+                        onViewUser={(id): undefined =>
+                            void navigate(`/admin/users/${id}`)
+                        }
                     />
                 }
                 path="users"
@@ -71,7 +75,7 @@ export const Admin = (): ReactNode => {
             <Route
                 element={
                     <AdminServers
-                        onViewServer={(id) =>
+                        onViewServer={(id): undefined =>
                             void navigate(`/admin/servers/${id}`)
                         }
                     />
@@ -81,7 +85,7 @@ export const Admin = (): ReactNode => {
             <Route
                 element={
                     <AdminAwaitingReview
-                        onViewServer={(id) =>
+                        onViewServer={(id): undefined =>
                             void navigate(`/admin/servers/${id}`)
                         }
                     />

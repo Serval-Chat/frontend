@@ -1,4 +1,3 @@
-import type React from 'react';
 import { useEffect } from 'react';
 
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
@@ -15,7 +14,7 @@ import { isValidObjectId } from '@/utils/validation';
 /**
  * @description Syncs Redux navigation state from the current URL.
  */
-export const NavigationSync: React.FC = () => {
+export const NavigationSync = (): null => {
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
     const location = useLocation();
@@ -25,7 +24,7 @@ export const NavigationSync: React.FC = () => {
         (state) => state.nav,
     );
 
-    useEffect(() => {
+    useEffect((): void => {
         const path = location.pathname;
 
         if (path === '/chat' || path === '/chat/') {

@@ -16,7 +16,7 @@ export const useServerWS = (serverId?: string): void => {
     const queryClient = useQueryClient();
     const navigate = useNavigate();
 
-    const invalidateServer = useCallback(() => {
+    const invalidateServer = useCallback((): void => {
         if (serverId) {
             void queryClient.invalidateQueries({
                 queryKey: SERVERS_QUERY_KEYS.details(serverId),
@@ -27,7 +27,7 @@ export const useServerWS = (serverId?: string): void => {
         });
     }, [queryClient, serverId]);
 
-    const invalidateChannels = useCallback(() => {
+    const invalidateChannels = useCallback((): void => {
         if (serverId) {
             void queryClient.invalidateQueries({
                 queryKey: SERVERS_QUERY_KEYS.channels(serverId),
@@ -35,7 +35,7 @@ export const useServerWS = (serverId?: string): void => {
         }
     }, [queryClient, serverId]);
 
-    const invalidateOnboarding = useCallback(() => {
+    const invalidateOnboarding = useCallback((): void => {
         if (serverId) {
             void queryClient.invalidateQueries({
                 queryKey: SERVERS_QUERY_KEYS.onboarding(serverId),
@@ -46,7 +46,7 @@ export const useServerWS = (serverId?: string): void => {
         }
     }, [queryClient, serverId]);
 
-    const invalidateCategories = useCallback(() => {
+    const invalidateCategories = useCallback((): void => {
         if (serverId) {
             void queryClient.invalidateQueries({
                 queryKey: SERVERS_QUERY_KEYS.categories(serverId),
@@ -273,14 +273,16 @@ export const useServerWS = (serverId?: string): void => {
                 if (payload.serverId === serverId) {
                     queryClient.setQueryData<Channel[]>(
                         SERVERS_QUERY_KEYS.channels(serverId),
-                        (old) =>
-                            old?.map((c) =>
-                                c._id === payload.channelId
-                                    ? {
-                                          ...c,
-                                          lastReadAt: new Date().toISOString(),
-                                      }
-                                    : c,
+                        (old): Channel[] | undefined =>
+                            old?.map(
+                                (c): Channel =>
+                                    c._id === payload.channelId
+                                        ? {
+                                              ...c,
+                                              lastReadAt:
+                                                  new Date().toISOString(),
+                                          }
+                                        : c,
                             ) ?? old,
                     );
                 }

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useReducer, useState } from 'react';
+import { useEffect, useMemo, useReducer, useState } from 'react';
 
 import { BadgeCheck, Loader2, Search, Tag, Users, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -29,10 +29,10 @@ const mergeServers = (
     current: DiscoveryServer[],
     incoming: DiscoveryServer[],
 ): DiscoveryServer[] => {
-    const seen = new Set(current.map((server) => server.id));
+    const seen = new Set(current.map((server): string => server.id));
     return [
         ...current,
-        ...incoming.filter((server) => {
+        ...incoming.filter((server): boolean => {
             if (seen.has(server.id)) return false;
             seen.add(server.id);
             return true;
@@ -80,10 +80,10 @@ const discoveryPaginationReducer = (
     }
 };
 
-export const ServerDiscoveryModal: React.FC<ServerDiscoveryModalProps> = ({
+export const ServerDiscoveryModal = ({
     isOpen,
     onClose,
-}) => {
+}: ServerDiscoveryModalProps) => {
     const navigate = useNavigate();
     const [search, setSearch] = useState('');
     const debouncedSearch = useDebounce(search, 350);
@@ -91,21 +91,23 @@ export const ServerDiscoveryModal: React.FC<ServerDiscoveryModalProps> = ({
     const [joiningServerId, setJoiningServerId] = useState<string | null>(null);
 
     const normalizedTags = useMemo(
-        () => [...selectedTags].sort((a, b) => a.localeCompare(b)),
+        (): string[] =>
+            [...selectedTags].sort((a, b): number => a.localeCompare(b)),
         [selectedTags],
     );
     const { data: joinedServers = [] } = useServers();
     const joinedServerIds = useMemo(
-        () => new Set(joinedServers.map((server) => server._id)),
+        (): Set<string> =>
+            new Set(joinedServers.map((server): string => server._id)),
         [joinedServers],
     );
     const { mutate: joinServer, isPending: isJoining } = useJoinServer();
 
     const resetKey = useMemo(
-        () =>
+        (): string =>
             JSON.stringify({
                 q: debouncedSearch.trim().toLowerCase(),
-                tags: normalizedTags.map((tag) => tag.toLowerCase()),
+                tags: normalizedTags.map((tag): string => tag.toLowerCase()),
             }),
         [debouncedSearch, normalizedTags],
     );
@@ -116,7 +118,8 @@ export const ServerDiscoveryModal: React.FC<ServerDiscoveryModalProps> = ({
     const activeCursor =
         pagination.resetKey === resetKey ? pagination.cursor : undefined;
     const items = useMemo(
-        () => (pagination.resetKey === resetKey ? pagination.items : []),
+        (): DiscoveryServer[] =>
+            pagination.resetKey === resetKey ? pagination.items : [],
         [pagination.resetKey, pagination.items, resetKey],
     );
 
@@ -127,11 +130,11 @@ export const ServerDiscoveryModal: React.FC<ServerDiscoveryModalProps> = ({
         cursor: activeCursor,
     });
 
-    useEffect(() => {
+    useEffect((): void => {
         dispatchPagination({ type: 'reset', resetKey });
     }, [resetKey]);
 
-    useEffect(() => {
+    useEffect((): void => {
         if (data === undefined) return;
         dispatchPagination({
             type: 'receive',
@@ -141,18 +144,19 @@ export const ServerDiscoveryModal: React.FC<ServerDiscoveryModalProps> = ({
         });
     }, [activeCursor, data, resetKey]);
 
-    const visibleTags = useMemo(() => {
-        const fromFacets = data?.tagFacets.map((facet) => facet.tag) ?? [];
-        const fromItems = items.flatMap((server) => server.tags);
+    const visibleTags = useMemo((): string[] => {
+        const fromFacets =
+            data?.tagFacets.map((facet): string => facet.tag) ?? [];
+        const fromItems = items.flatMap((server): string[] => server.tags);
         return [...new Set([...selectedTags, ...fromFacets, ...fromItems])]
             .filter(Boolean)
             .slice(0, 24);
     }, [data?.tagFacets, items, selectedTags]);
 
     const toggleTag = (tag: string): void => {
-        setSelectedTags((current) =>
+        setSelectedTags((current): string[] =>
             current.includes(tag)
-                ? current.filter((item) => item !== tag)
+                ? current.filter((item): boolean => item !== tag)
                 : [...current, tag],
         );
     };
@@ -166,11 +170,11 @@ export const ServerDiscoveryModal: React.FC<ServerDiscoveryModalProps> = ({
 
         setJoiningServerId(server.id);
         joinServer(server.inviteCode, {
-            onSuccess: () => {
+            onSuccess: (): void => {
                 onClose();
                 void navigate(`/chat/@server/${server.id}`);
             },
-            onSettled: () => {
+            onSettled: (): void => {
                 setJoiningServerId(null);
             },
         });
@@ -196,7 +200,7 @@ export const ServerDiscoveryModal: React.FC<ServerDiscoveryModalProps> = ({
                                 className="h-12 pr-12 pl-10 text-base"
                                 placeholder="Search by server name, description, or tag"
                                 value={search}
-                                onChange={(event) =>
+                                onChange={(event): void =>
                                     setSearch(event.target.value)
                                 }
                             />
@@ -204,7 +208,7 @@ export const ServerDiscoveryModal: React.FC<ServerDiscoveryModalProps> = ({
                                 <button
                                     className="absolute top-1/2 right-3 rounded p-1 text-muted-foreground hover:bg-bg-secondary hover:text-foreground"
                                     type="button"
-                                    onClick={() => setSearch('')}
+                                    onClick={(): void => setSearch('')}
                                 >
                                     <X size={16} />
                                 </button>
@@ -224,7 +228,7 @@ export const ServerDiscoveryModal: React.FC<ServerDiscoveryModalProps> = ({
                                             }`}
                                             key={tag}
                                             type="button"
-                                            onClick={() => toggleTag(tag)}
+                                            onClick={(): void => toggleTag(tag)}
                                         >
                                             <Tag size={12} />
                                             {tag}
@@ -277,7 +281,7 @@ export const ServerDiscoveryModal: React.FC<ServerDiscoveryModalProps> = ({
                                 <Button
                                     loading={isFetching}
                                     variant="normal"
-                                    onClick={() => {
+                                    onClick={(): void => {
                                         if (data.nextCursor !== undefined) {
                                             dispatchPagination({
                                                 type: 'loadMore',
@@ -305,17 +309,17 @@ interface DiscoveryServerCardProps {
     onTagClick: (tag: string) => void;
 }
 
-const DiscoveryServerCard: React.FC<DiscoveryServerCardProps> = ({
+const DiscoveryServerCard = ({
     server,
     isJoined,
     isJoining,
     onJoin,
     onTagClick,
-}) => {
+}: DiscoveryServerCardProps) => {
     const iconUrl = resolveApiUrl(server.icon);
     const initials = server.name
         .split(' ')
-        .map((word) => word[0])
+        .map((word): string => word[0])
         .join('')
         .slice(0, 3)
         .toUpperCase();
@@ -366,7 +370,7 @@ const DiscoveryServerCard: React.FC<DiscoveryServerCardProps> = ({
                             className="inline-flex items-center rounded-md bg-primary/10 px-2 py-0.5 text-[11px] font-bold text-primary hover:bg-primary/20"
                             key={tag}
                             type="button"
-                            onClick={() => onTagClick(tag)}
+                            onClick={(): void => onTagClick(tag)}
                         >
                             {tag}
                         </button>
@@ -378,7 +382,7 @@ const DiscoveryServerCard: React.FC<DiscoveryServerCardProps> = ({
                         className="w-full"
                         loading={!isJoined && isJoining}
                         variant={isJoined ? 'normal' : 'primary'}
-                        onClick={() => onJoin(server)}
+                        onClick={(): void => onJoin(server)}
                     >
                         {isJoined ? 'Open Server' : 'Join Server'}
                     </Button>

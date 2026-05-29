@@ -1,5 +1,3 @@
-import React from 'react';
-
 import {
     HeadphoneOff,
     Headphones,
@@ -22,7 +20,7 @@ import {
 import { IconButton } from '@/ui/components/common/IconButton';
 import { cn } from '@/utils/cn';
 
-export const ActiveVoicePanel: React.FC = () => {
+export const ActiveVoicePanel = () => {
     const {
         activeVoiceServerId,
         activeVoiceChannelId,
@@ -43,7 +41,9 @@ export const ActiveVoicePanel: React.FC = () => {
 
     if (!activeVoiceServerId || !activeVoiceChannelId) return null;
 
-    const channel = channels?.find((c) => c._id === activeVoiceChannelId);
+    const channel = channels?.find(
+        (c): boolean => c._id === activeVoiceChannelId,
+    );
 
     const getSignalIcon = (): { icon: typeof Signal; color: string } => {
         switch (connectionQuality) {
@@ -87,7 +87,10 @@ export const ActiveVoicePanel: React.FC = () => {
                         iconSize={18}
                         title={isMuted ? 'Unmute' : 'Mute'}
                         variant="ghost"
-                        onClick={() => dispatch(toggleMute())}
+                        onClick={(): {
+                            payload: undefined;
+                            type: 'voice/toggleMute';
+                        } => dispatch(toggleMute())}
                     />
                     <IconButton
                         className={cn(
@@ -98,7 +101,10 @@ export const ActiveVoicePanel: React.FC = () => {
                         iconSize={18}
                         title={isDeafened ? 'Undeafen' : 'Deafen'}
                         variant="ghost"
-                        onClick={() => dispatch(toggleDeafen())}
+                        onClick={(): {
+                            payload: undefined;
+                            type: 'voice/toggleDeafen';
+                        } => dispatch(toggleDeafen())}
                     />
                     <IconButton
                         className="text-white hover:bg-white/10"
@@ -106,7 +112,10 @@ export const ActiveVoicePanel: React.FC = () => {
                         iconSize={18}
                         title="Disconnect"
                         variant="ghost"
-                        onClick={() => dispatch(leaveVoiceRoom())}
+                        onClick={(): {
+                            payload: undefined;
+                            type: 'voice/leaveVoiceRoom';
+                        } => dispatch(leaveVoiceRoom())}
                     />
                 </div>
             </div>

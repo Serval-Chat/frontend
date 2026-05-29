@@ -13,7 +13,7 @@ export interface WindowProps {
     minHeight?: number;
 }
 
-export const Window: React.FC<WindowProps> = ({
+export const Window = ({
     title,
     onClose,
     children,
@@ -24,7 +24,7 @@ export const Window: React.FC<WindowProps> = ({
     defaultY = 50,
     minWidth = 300,
     minHeight = 200,
-}) => {
+}: WindowProps) => {
     const [position, setPosition] = useState({ x: defaultX, y: defaultY });
     const [size, setSize] = useState({
         width: defaultWidth,
@@ -53,7 +53,7 @@ export const Window: React.FC<WindowProps> = ({
     };
 
     const clampPosition = useCallback(
-        (x: number, y: number) => {
+        (x: number, y: number): { x: number; y: number } => {
             const vw = window.innerWidth;
             const vh = window.innerHeight;
             const minVisible = 40;
@@ -82,7 +82,9 @@ export const Window: React.FC<WindowProps> = ({
 
     const handlePointerUp = (e: React.PointerEvent): void => {
         if (isDragging.current) {
-            setPosition((prev) => clampPosition(prev.x, prev.y));
+            setPosition((prev): { x: number; y: number } =>
+                clampPosition(prev.x, prev.y),
+            );
         }
         isDragging.current = false;
         isResizing.current = null;
@@ -239,7 +241,7 @@ export const Window: React.FC<WindowProps> = ({
                         ...handle.style,
                     }}
                     onPointerCancel={handlePointerUp}
-                    onPointerDown={(e) => handleResizeDown(e, handle.dir)}
+                    onPointerDown={(e): void => handleResizeDown(e, handle.dir)}
                     onPointerMove={handleResizeMove}
                     onPointerUp={handlePointerUp}
                 />
@@ -271,11 +273,11 @@ export const Window: React.FC<WindowProps> = ({
                 <button
                     className="nt-button group flex h-[14px] w-[16px] items-center justify-center bg-[#c0c0c0] font-bold text-black"
                     type="button"
-                    onClick={(e) => {
+                    onClick={(e): void => {
                         e.stopPropagation();
                         onClose();
                     }}
-                    onPointerDown={(e) => e.stopPropagation()}
+                    onPointerDown={(e): void => e.stopPropagation()}
                 >
                     <span className="block group-active:translate-x-px group-active:translate-y-px">
                         <img

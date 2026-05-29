@@ -3,10 +3,10 @@ import { describe, expect, it } from 'vitest';
 import { Terminal } from '@/console/Terminal';
 
 const text = (terminal: Terminal): string[] =>
-    terminal.snapshot().map((line) => line.text);
+    terminal.snapshot().map((line): string => line.text);
 
-describe('Terminal ANSI screen controls', () => {
-    it('supports clear-screen, cursor positioning, and erase-line', () => {
+describe('Terminal ANSI screen controls', (): void => {
+    it('supports clear-screen, cursor positioning, and erase-line', (): void => {
         const terminal = new Terminal({ size: { columns: 10, rows: 5 } });
 
         terminal.write('hello\nworld');
@@ -19,7 +19,7 @@ describe('Terminal ANSI screen controls', () => {
         expect(text(terminal)).toEqual(['', '', '   d']);
     });
 
-    it('supports relative cursor movement', () => {
+    it('supports relative cursor movement', (): void => {
         const terminal = new Terminal({ size: { columns: 10, rows: 5 } });
 
         terminal.write('\u001b[2;2HA\u001b[2DB');

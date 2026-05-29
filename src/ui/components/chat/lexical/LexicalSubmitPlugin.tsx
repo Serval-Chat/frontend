@@ -39,17 +39,17 @@ const $getTextBeforeCursor = (): string | null => {
     return anchorNode.getTextContent().slice(0, anchor.offset);
 };
 
-export const LexicalSubmitPlugin: React.FC<LexicalSubmitPluginProps> = ({
+export const LexicalSubmitPlugin = ({
     onSendMessage,
     isAutocompleteOpenRef,
-}) => {
+}: LexicalSubmitPluginProps): null => {
     const [editor] = useLexicalComposerContext();
 
     useEffect(
-        () =>
+        (): (() => void) =>
             editor.registerCommand(
                 KEY_ENTER_COMMAND,
-                (event: KeyboardEvent) => {
+                (event: KeyboardEvent): boolean => {
                     if (event.shiftKey) {
                         return false;
                     }
@@ -65,7 +65,7 @@ export const LexicalSubmitPlugin: React.FC<LexicalSubmitPluginProps> = ({
                         if (!isChipMode) {
                             const shouldYieldToAutocomplete = editor
                                 .getEditorState()
-                                .read(() =>
+                                .read((): boolean =>
                                     shouldAutocompleteHandleEnter(
                                         $getTextBeforeCursor(),
                                     ),
@@ -82,9 +82,9 @@ export const LexicalSubmitPlugin: React.FC<LexicalSubmitPluginProps> = ({
 
                     event.preventDefault();
 
-                    editor.getEditorState().read(() => {
+                    editor.getEditorState().read((): void => {
                         const rawText = $getRawMessageText();
-                        void (async () => {
+                        void (async (): Promise<void> => {
                             const result = await onSendMessage(rawText);
                             if (result) {
                                 editor.dispatchCommand(

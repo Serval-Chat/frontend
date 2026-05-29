@@ -50,7 +50,7 @@ function drawSpot(
 
 function createRandom(seed = 1): () => number {
     let state = seed >>> 0;
-    return () => {
+    return (): number => {
         state = (state * 1664525 + 1013904223) >>> 0;
         return state / 0x100000000;
     };
@@ -179,7 +179,7 @@ export function applyServalBackground(
     element.style.overflow = 'hidden';
     element.insertBefore(canvas, element.firstChild);
 
-    return () => {
+    return (): void => {
         canvas.remove();
         element.style.position = prevPosition;
         element.style.overflow = prevOverflow;

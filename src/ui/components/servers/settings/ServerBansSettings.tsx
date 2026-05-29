@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { ShieldAlert, Trash2 } from 'lucide-react';
 
 import { useServerBans, useUnbanMember } from '@/api/servers/servers.queries';
@@ -27,9 +25,7 @@ interface ServerBansSettingsProps {
 /**
  * @description Renders the ban management section for a server.
  */
-export const ServerBansSettings: React.FC<ServerBansSettingsProps> = ({
-    serverId,
-}) => {
+export const ServerBansSettings = ({ serverId }: ServerBansSettingsProps) => {
     const { showToast } = useToast();
     const { data: bans = [], isLoading } = useServerBans(serverId);
     const { mutate: unbanMember, isPending: isUnbanning } =
@@ -38,10 +34,10 @@ export const ServerBansSettings: React.FC<ServerBansSettingsProps> = ({
     const handleUnban = (userId: string, username: string): void => {
         if (window.confirm(`Are you sure you want to unban ${username}?`)) {
             unbanMember(userId, {
-                onSuccess: () => {
+                onSuccess: (): void => {
                     showToast(`${username} has been unbanned.`, 'success');
                 },
-                onError: (error) => {
+                onError: (error): void => {
                     showToast(
                         error.message || 'Failed to unban user.',
                         'error',
@@ -144,7 +140,7 @@ export const ServerBansSettings: React.FC<ServerBansSettingsProps> = ({
                                             size="sm"
                                             title="Unban"
                                             variant="ghost"
-                                            onClick={() =>
+                                            onClick={(): void =>
                                                 handleUnban(
                                                     String(ban.userId),
                                                     ban.user?.username ||

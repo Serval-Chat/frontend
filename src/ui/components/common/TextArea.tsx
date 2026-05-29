@@ -31,9 +31,12 @@ const TextArea = React.forwardRef<HTMLTextAreaElement, TextAreaProps>(
     ({ className, disabled, autoResize = true, ...props }, ref) => {
         const internalRef = useRef<HTMLTextAreaElement>(null);
 
-        React.useImperativeHandle(ref, () => internalRef.current!);
+        React.useImperativeHandle(
+            ref,
+            (): HTMLTextAreaElement => internalRef.current!,
+        );
 
-        useEffect(() => {
+        useEffect((): void => {
             if (autoResize && internalRef.current) {
                 const textarea = internalRef.current;
                 textarea.style.height = 'auto';

@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 
 import { Check, Copy, Plus, Trash2, Webhook } from 'lucide-react';
 
@@ -21,10 +21,10 @@ interface ChannelWebhookSettingsProps {
     channelId: string;
 }
 
-export const ChannelWebhookSettings: React.FC<ChannelWebhookSettingsProps> = ({
+export const ChannelWebhookSettings = ({
     serverId,
     channelId,
-}) => {
+}: ChannelWebhookSettingsProps) => {
     const [name, setName] = useState('');
     const [copiedWebhookId, setCopiedWebhookId] = useState<string | null>(null);
     const [pendingDeleteWebhookId, setPendingDeleteWebhookId] = useState<
@@ -38,7 +38,8 @@ export const ChannelWebhookSettings: React.FC<ChannelWebhookSettingsProps> = ({
     const deleteWebhook = useDeleteWebhook(serverId, channelId);
 
     const canCreate = useMemo(
-        () => !!name.trim() && !createWebhook.isPending && canManageWebhooks,
+        (): boolean =>
+            !!name.trim() && !createWebhook.isPending && canManageWebhooks,
         [name, createWebhook.isPending, canManageWebhooks],
     );
 
@@ -47,7 +48,7 @@ export const ChannelWebhookSettings: React.FC<ChannelWebhookSettingsProps> = ({
         createWebhook.mutate(
             { name: name.trim() },
             {
-                onSuccess: () => setName(''),
+                onSuccess: (): void => setName(''),
             },
         );
     };
@@ -61,8 +62,8 @@ export const ChannelWebhookSettings: React.FC<ChannelWebhookSettingsProps> = ({
     const handleCopy = (webhookId: string, token: string): void => {
         void navigator.clipboard.writeText(buildWebhookUrl(token));
         setCopiedWebhookId(webhookId);
-        window.setTimeout(() => {
-            setCopiedWebhookId((current) =>
+        window.setTimeout((): void => {
+            setCopiedWebhookId((current): string | null =>
                 current === webhookId ? null : current,
             );
         }, 1500);
@@ -71,7 +72,7 @@ export const ChannelWebhookSettings: React.FC<ChannelWebhookSettingsProps> = ({
     const handleConfirmDelete = (): void => {
         if (!pendingDeleteWebhookId) return;
         deleteWebhook.mutate(pendingDeleteWebhookId, {
-            onSuccess: () => setPendingDeleteWebhookId(null),
+            onSuccess: (): void => setPendingDeleteWebhookId(null),
         });
     };
 
@@ -104,7 +105,7 @@ export const ChannelWebhookSettings: React.FC<ChannelWebhookSettingsProps> = ({
                             <Input
                                 placeholder="Webhook name"
                                 value={name}
-                                onChange={(e) => setName(e.target.value)}
+                                onChange={(e): void => setName(e.target.value)}
                             />
                             <Button
                                 disabled={!canCreate}
@@ -184,7 +185,7 @@ export const ChannelWebhookSettings: React.FC<ChannelWebhookSettingsProps> = ({
                                             }
                                             size="sm"
                                             variant="danger"
-                                            onClick={() =>
+                                            onClick={(): void =>
                                                 setPendingDeleteWebhookId(
                                                     webhook._id,
                                                 )
@@ -215,7 +216,7 @@ export const ChannelWebhookSettings: React.FC<ChannelWebhookSettingsProps> = ({
                                             <Button
                                                 size="sm"
                                                 variant="ghost"
-                                                onClick={() =>
+                                                onClick={(): void =>
                                                     handleCopy(
                                                         webhook._id,
                                                         webhook.token,
@@ -241,7 +242,7 @@ export const ChannelWebhookSettings: React.FC<ChannelWebhookSettingsProps> = ({
                 <Modal
                     isOpen
                     title="Delete Webhook"
-                    onClose={() => setPendingDeleteWebhookId(null)}
+                    onClose={(): void => setPendingDeleteWebhookId(null)}
                 >
                     <div className="flex flex-col gap-4 p-4">
                         <Text as="p" variant="muted">
@@ -251,7 +252,9 @@ export const ChannelWebhookSettings: React.FC<ChannelWebhookSettingsProps> = ({
                         <div className="flex justify-end gap-2">
                             <Button
                                 variant="ghost"
-                                onClick={() => setPendingDeleteWebhookId(null)}
+                                onClick={(): void =>
+                                    setPendingDeleteWebhookId(null)
+                                }
                             >
                                 Cancel
                             </Button>

@@ -17,14 +17,14 @@ interface ChannelIconProps {
     className?: string;
 }
 
-export const ChannelIcon: React.FC<ChannelIconProps> = ({
+export const ChannelIcon = ({
     type,
     icon,
     iconComponent: IconComponent,
     emoji,
     emojiType,
     className,
-}) => {
+}: ChannelIconProps) => {
     const resolvedClassName = cn('shrink-0', className ?? 'h-[18px] w-[18px]');
 
     if (emoji && emojiType) {

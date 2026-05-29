@@ -15,10 +15,10 @@ interface ChangeLoginModalProps {
     onClose: () => void;
 }
 
-export const ChangeLoginModal: React.FC<ChangeLoginModalProps> = ({
+export const ChangeLoginModal = ({
     isOpen,
     onClose,
-}) => {
+}: ChangeLoginModalProps) => {
     const { showToast } = useToast();
     const { data: user } = useMe();
     const { mutate: changeLogin, isPending } = useChangeLogin();
@@ -62,11 +62,11 @@ export const ChangeLoginModal: React.FC<ChangeLoginModalProps> = ({
         changeLogin(
             { newLogin, password },
             {
-                onSuccess: () => {
+                onSuccess: (): void => {
                     showToast('Login updated successfully', 'success');
                     handleClose();
                 },
-                onError: (error: unknown) => {
+                onError: (error: unknown): void => {
                     showToast(
                         (error as ApiError).response?.data?.message ||
                             'Failed to update login',
@@ -107,7 +107,7 @@ export const ChangeLoginModal: React.FC<ChangeLoginModalProps> = ({
                             id="new-login"
                             type="text"
                             value={newLogin}
-                            onChange={(e) => setNewLogin(e.target.value)}
+                            onChange={(e): void => setNewLogin(e.target.value)}
                         />
                         {errors.newLogin && (
                             <Text className="text-status-error" size="xs">
@@ -127,7 +127,7 @@ export const ChangeLoginModal: React.FC<ChangeLoginModalProps> = ({
                             id="password"
                             type="password"
                             value={password}
-                            onChange={(e) => setPassword(e.target.value)}
+                            onChange={(e): void => setPassword(e.target.value)}
                         />
                         {errors.password && (
                             <Text className="text-status-error" size="xs">

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
@@ -8,13 +8,13 @@ interface LatexRendererProps {
     displayMode?: boolean;
 }
 
-export const LatexRenderer: React.FC<LatexRendererProps> = ({
+export const LatexRenderer = ({
     content,
     displayMode = false,
-}) => {
+}: LatexRendererProps) => {
     const ref = useRef<HTMLSpanElement>(null);
 
-    useEffect(() => {
+    useEffect((): void => {
         if (!ref.current) return;
         // keep displayMode=false to avoid KaTeX's centering+full-width.
         const source = displayMode ? `\\displaystyle ${content}` : content;

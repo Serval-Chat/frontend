@@ -62,7 +62,10 @@ vi.mock('@/api/servers/servers.queries', () => ({
 vi.mock('@/api/chat/chat.queries', () => ({
     usePinnedMessages: vi.fn().mockReturnValue({ data: [], isLoading: false }),
     CHAT_QUERY_KEYS: {
-        channelPins: (id: string | null) => ['chat', 'pins', id] as const,
+        channelPins: (
+            id: string | null,
+        ): readonly ['chat', 'pins', string | null] =>
+            ['chat', 'pins', id] as const,
     },
 }));
 
@@ -79,7 +82,7 @@ vi.mock('@/api/users/users.queries', () => ({
 
 vi.mock('@/hooks/usePermissions', () => ({
     usePermissions: vi.fn().mockReturnValue({
-        hasPermission: () => true,
+        hasPermission: (): boolean => true,
         permissions: {},
         isOwner: false,
         isLoading: false,
@@ -113,10 +116,10 @@ const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
 });
 
-describe('channel send permission gating', () => {
+describe('channel send permission gating', (): void => {
     const mockNavigate = vi.fn();
 
-    beforeEach(() => {
+    beforeEach((): void => {
         vi.clearAllMocks();
         vi.mocked(useNavigate).mockReturnValue(mockNavigate);
         vi.mocked(useAppSelector).mockImplementation((selector) => {
@@ -142,9 +145,9 @@ describe('channel send permission gating', () => {
         } as never);
     });
 
-    it('shows the disabled notice and hides input when sendMessages is false', () => {
+    it('shows the disabled notice and hides input when sendMessages is false', (): void => {
         vi.mocked(Permissions.usePermissions).mockReturnValue({
-            hasPermission: () => false,
+            hasPermission: (): false => false,
             permissions: {} as never,
             isOwner: false,
             isLoading: false,
@@ -162,9 +165,9 @@ describe('channel send permission gating', () => {
         expect(queryByTestId('message-input')).toBeNull();
     });
 
-    it('shows the message input when sendMessages is true', () => {
+    it('shows the message input when sendMessages is true', (): void => {
         vi.mocked(Permissions.usePermissions).mockReturnValue({
-            hasPermission: () => true,
+            hasPermission: (): true => true,
             permissions: {} as never,
             isOwner: false,
             isLoading: false,
@@ -183,15 +186,15 @@ describe('channel send permission gating', () => {
     });
 });
 
-describe('MainChat fallback logic', () => {
+describe('MainChat fallback logic', (): void => {
     const mockNavigate = vi.fn();
 
-    beforeEach(() => {
+    beforeEach((): void => {
         vi.clearAllMocks();
         vi.mocked(useNavigate).mockReturnValue(mockNavigate);
     });
 
-    it('navigates to @me if the user query errors out (fake friend ID)', () => {
+    it('navigates to @me if the user query errors out (fake friend ID)', (): void => {
         vi.mocked(useAppSelector).mockImplementation((selector) => {
             const state = {
                 nav: { selectedFriendId: 'fakeUserId123' },
@@ -216,7 +219,7 @@ describe('MainChat fallback logic', () => {
         });
     });
 
-    it('stays on the page if friendUser finishes loading successfully', () => {
+    it('stays on the page if friendUser finishes loading successfully', (): void => {
         vi.mocked(useAppSelector).mockImplementation((selector) => {
             const state = {
                 nav: { selectedFriendId: 'validUserId123' },

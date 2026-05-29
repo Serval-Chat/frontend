@@ -56,7 +56,8 @@ export function useMessageData(
     const senderRoles = data?.senderRoles;
 
     const hasPermission = React.useMemo(
-        () => data?.hasPermission ?? (() => false),
+        (): ((permission: keyof RolePermissions) => boolean) =>
+            data?.hasPermission ?? ((): false => false),
         [data?.hasPermission],
     );
     const isOwner = !!data?.isOwner;
@@ -65,7 +66,7 @@ export function useMessageData(
     const roleMap = data?.roleMap;
 
     const myId = me?._id;
-    const mentionsMe = React.useMemo(() => {
+    const mentionsMe = React.useMemo((): boolean => {
         if (!myId) return false;
 
         if (message.text.includes(`<userid:'${myId}'>`)) return true;
@@ -75,7 +76,7 @@ export function useMessageData(
         const myMember = fullMemberMap?.get(myId);
         if (
             myMember &&
-            myMember.roles.some((roleId) =>
+            myMember.roles.some((roleId): boolean =>
                 message.text.includes(`<roleid:'${roleId}'>`),
             )
         ) {
@@ -85,7 +86,7 @@ export function useMessageData(
         return false;
     }, [message.text, myId, fullMemberMap]);
 
-    const interactionUser = React.useMemo(() => {
+    const interactionUser = React.useMemo((): User | undefined => {
         if (!message.interaction?.user?.id || !fullMemberMap) return undefined;
         const member = fullMemberMap.get(message.interaction!.user!.id);
         if (!member) return undefined;
@@ -103,18 +104,18 @@ export function useMessageData(
         } as unknown as User;
     }, [message.interaction, fullMemberMap]);
 
-    const interactionRole = React.useMemo(() => {
+    const interactionRole = React.useMemo((): Role | undefined => {
         if (!message.interaction?.user?.id || !fullMemberMap || !roleMap)
             return undefined;
         const member = fullMemberMap.get(message.interaction!.user!.id);
         if (!member || !member.roles.length) return undefined;
 
         const roles = member.roles
-            .map((id) => roleMap.get(id))
+            .map((id): Role | undefined => roleMap.get(id))
             .filter((r): r is Role => !!r);
         if (!roles.length) return undefined;
 
-        return roles.sort((a, b) => b.position - a.position)[0];
+        return roles.sort((a, b): number => b.position - a.position)[0];
     }, [message.interaction, fullMemberMap, roleMap]);
 
     return {

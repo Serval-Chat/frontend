@@ -3,8 +3,8 @@ import { describe, expect, it, vi } from 'vitest';
 import { ParserPresets, parseText } from './parser';
 import { type AdmonitionNode, ParserFeature } from './types';
 
-describe('TextParser', () => {
-    it('should parse bold text', () => {
+describe('TextParser', (): void => {
+    it('should parse bold text', (): void => {
         const text = 'Hello **bold** world';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -14,7 +14,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should parse italic text', () => {
+    it('should parse italic text', (): void => {
         const text = 'Hello *italic* world';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -24,7 +24,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should parse bold-italic text', () => {
+    it('should parse bold-italic text', (): void => {
         const text = 'Hello ***bold italic*** world';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -34,7 +34,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should parse custom emojis', () => {
+    it('should parse custom emojis', (): void => {
         const text = 'Hello <emoji:happy_cat> world';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -44,7 +44,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should parse timestamps with format flags', () => {
+    it('should parse timestamps with format flags', (): void => {
         const text = 'Meet at <t:1543424460:F> or <t:1543424460:R>';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -55,19 +55,19 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should parse timestamps without a format flag', () => {
+    it('should parse timestamps without a format flag', (): void => {
         const nodes = parseText('<t:-123456789>', ParserPresets.MESSAGE);
         expect(nodes).toEqual([
             { type: 'timestamp', timestamp: -123456789, flag: undefined },
         ]);
     });
 
-    it('should leave invalid timestamp flags as text', () => {
+    it('should leave invalid timestamp flags as text', (): void => {
         const nodes = parseText('<t:1543424460:x>', ParserPresets.MESSAGE);
         expect(nodes).toEqual([{ type: 'text', content: '<t:1543424460:x>' }]);
     });
 
-    it('should parse links', () => {
+    it('should parse links', (): void => {
         const text = 'Check out https://rolling.catfla.re for more';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -81,7 +81,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should parse Klipy links', () => {
+    it('should parse Klipy links', (): void => {
         const text = 'Check out https://klipy.com/g/4823106377700464 for more';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -95,7 +95,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should parse standard Klipy GIF links', () => {
+    it('should parse standard Klipy GIF links', (): void => {
         const text =
             'Check out https://klipy.com/gifs/floppa-michael--k01KRS7EZ3ZN5K93KWB5G0QSA5Z';
         const nodes = parseText(text, ParserPresets.MESSAGE);
@@ -109,7 +109,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should parse standard Klipy sticker links', () => {
+    it('should parse standard Klipy sticker links', (): void => {
         const text = 'https://klipy.com/stickers/happy-cat-123';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -121,7 +121,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should handle complex mixed text', () => {
+    it('should handle complex mixed text', (): void => {
         const text =
             '***Bold Italic*** and **Bold** with <emoji:test> and https://link.com';
         const nodes = parseText(text, ParserPresets.MESSAGE);
@@ -136,7 +136,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should parse headings', () => {
+    it('should parse headings', (): void => {
         const text = '# Heading 1\n## Heading 2\n### Heading 3';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -146,13 +146,13 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should parse ## heading with a leading number as h2, not ordered_list', () => {
+    it('should parse ## heading with a leading number as h2, not ordered_list', (): void => {
         const text = '## 2. Your Account';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([{ type: 'h2', content: '2. Your Account' }]);
     });
 
-    it('should parse subtext', () => {
+    it('should parse subtext', (): void => {
         const text = '-# This is subtext';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -160,7 +160,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should parse spoilers', () => {
+    it('should parse spoilers', (): void => {
         const text = 'This is a ||spoiler|| message';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -170,7 +170,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should parse inline code', () => {
+    it('should parse inline code', (): void => {
         const text = 'Use `npm install` to get started';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -180,7 +180,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should parse code blocks', () => {
+    it('should parse code blocks', (): void => {
         const text = '```typescript\nconst x = 1;\n```';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -192,7 +192,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should parse mermaid code blocks as mermaid nodes', () => {
+    it('should parse mermaid code blocks as mermaid nodes', (): void => {
         const text = '```mermaid\ngraph TD;\nA-->B;\n```';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -203,7 +203,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should parse invite links', () => {
+    it('should parse invite links', (): void => {
         const text = 'Join us: https://catfla.re/invite/serchat-dev';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -216,7 +216,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should parse rolling invite links', () => {
+    it('should parse rolling invite links', (): void => {
         const text = 'https://rolling.catfla.re/invite/special';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -227,7 +227,7 @@ describe('TextParser', () => {
             },
         ]);
     });
-    it('should parse channel links from rolling.catfla.re', () => {
+    it('should parse channel links from rolling.catfla.re', (): void => {
         const text =
             'Check this channel: https://rolling.catfla.re/chat/@server/6911caf7eefdd0a9fe8160e5/channel/692c89c811f314d2aea864d1';
         const nodes = parseText(text, ParserPresets.MESSAGE);
@@ -242,7 +242,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should parse channel links from catfla.re', () => {
+    it('should parse channel links from catfla.re', (): void => {
         const text =
             'https://catfla.re/chat/@server/serverId123/channel/channelId456';
         const nodes = parseText(text, ParserPresets.MESSAGE);
@@ -256,7 +256,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should parse channel links from localhost', () => {
+    it('should parse channel links from localhost', (): void => {
         const text =
             'http://localhost:5173/chat/@server/serverId/channel/channelId';
         const nodes = parseText(text, ParserPresets.MESSAGE);
@@ -270,7 +270,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should parse channel links from localhost:8001', () => {
+    it('should parse channel links from localhost:8001', (): void => {
         const text =
             'http://localhost:8001/chat/@server/serverId/channel/channelId';
         const nodes = parseText(text, ParserPresets.MESSAGE);
@@ -284,7 +284,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should parse message links with messageId from localhost:5173', () => {
+    it('should parse message links with messageId from localhost:5173', (): void => {
         const text =
             'http://localhost:5173/chat/@server/6911caf7eefdd0a9fe8160e5/channel/695a948fc14c479df60a50a0/message/695b916b70e8c8265d45a4b9';
         const nodes = parseText(text, ParserPresets.MESSAGE);
@@ -298,7 +298,7 @@ describe('TextParser', () => {
             },
         ]);
     });
-    it('should parse channel mention URL as channel_link', () => {
+    it('should parse channel mention URL as channel_link', (): void => {
         const text =
             'http://localhost:5173/chat/@server/serv456/channel/chan123';
         const nodes = parseText(text, ParserPresets.MESSAGE);
@@ -311,7 +311,7 @@ describe('TextParser', () => {
             },
         ]);
     });
-    it('should parse file embeds', () => {
+    it('should parse file embeds', (): void => {
         const text = '[%file%](https://example.com/image.png)';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -322,7 +322,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should parse named links', () => {
+    it('should parse named links', (): void => {
         const text = 'Check [Serchat](https://rolling.catfla.re) now';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -336,7 +336,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should parse named links within another element', () => {
+    it('should parse named links within another element', (): void => {
         const text = '# Check [Serchat](https://rolling.catfla.re) now';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -355,7 +355,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should parse bold within italic', () => {
+    it('should parse bold within italic', (): void => {
         const text = 'This is *italic and **bold** text*';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -371,7 +371,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should parse links within spoilers', () => {
+    it('should parse links within spoilers', (): void => {
         const text = 'Secret: ||[Serchat](https://rolling.catfla.re)||';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -389,7 +389,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should parse ordered list items', () => {
+    it('should parse ordered list items', (): void => {
         const text = '1. First item\n2. Second item';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -408,7 +408,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should parse indented ordered list items', () => {
+    it('should parse indented ordered list items', (): void => {
         const text = '1. Parent\n  2. Child\n    3. Grandchild';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -423,7 +423,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should parse ordered list items with nested formatting', () => {
+    it('should parse ordered list items with nested formatting', (): void => {
         const text = '1. Item with **bold** and [link](https://test.com)';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -445,7 +445,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should not parse digits in the middle of a line as ordered list', () => {
+    it('should not parse digits in the middle of a line as ordered list', (): void => {
         const text = 'There is 1. something here';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -453,7 +453,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should skip newline after list item even if followed by normal text', () => {
+    it('should skip newline after list item even if followed by normal text', (): void => {
         const text = '1. Item\nNormal text';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -462,7 +462,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should parse unordered list items (-)', () => {
+    it('should parse unordered list items (-)', (): void => {
         const text = '- First item\n- Second item';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -471,7 +471,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should parse nested unordered list items', () => {
+    it('should parse nested unordered list items', (): void => {
         const text = '- Parent\n  - Child\n    - Grandchild';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -481,7 +481,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should parse unordered list items (*)', () => {
+    it('should parse unordered list items (*)', (): void => {
         const text = '* First item\n* Second item';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -490,7 +490,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should parse unordered list items (+)', () => {
+    it('should parse unordered list items (+)', (): void => {
         const text = '+ First item\n+ Second item';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -499,7 +499,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should parse unordered list items with nested formatting', () => {
+    it('should parse unordered list items with nested formatting', (): void => {
         const text = '- Item with **bold** and [link](https://test.com)';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -520,7 +520,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should parse basic markdown tables', () => {
+    it('should parse basic markdown tables', (): void => {
         const text =
             '| Syntax      | Description |\n| ----------- | ----------- |\n| Header      | Title       |\n| Paragraph   | Text        |';
         const nodes = parseText(text, ParserPresets.MESSAGE);
@@ -536,7 +536,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should parse tables with single column', () => {
+    it('should parse tables with single column', (): void => {
         const text = '| Column 1 |\n| -------- |\n| Value 1  |\n| Value 2  |';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -548,7 +548,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should parse tables with many columns', () => {
+    it('should parse tables with many columns', (): void => {
         const text =
             '| A | B | C | D |\n| - | - | - | - |\n| 1 | 2 | 3 | 4 |\n| 5 | 6 | 7 | 8 |';
         const nodes = parseText(text, ParserPresets.MESSAGE);
@@ -564,7 +564,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should parse tables with alignment indicators in separator', () => {
+    it('should parse tables with alignment indicators in separator', (): void => {
         const text =
             '| Left | Center | Right |\n| :--- | :----: | ---: |\n| L | C | R |';
         const nodes = parseText(text, ParserPresets.MESSAGE);
@@ -577,7 +577,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should not parse incomplete tables without separator', () => {
+    it('should not parse incomplete tables without separator', (): void => {
         const text = '| Header 1 | Header 2 |\n| Value 1  | Value 2  |';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).not.toContainEqual({
@@ -585,7 +585,7 @@ describe('TextParser', () => {
         });
     });
 
-    it('should parse tables with mismatched column counts', () => {
+    it('should parse tables with mismatched column counts', (): void => {
         const text =
             '| Header 1 | Header 2 |\n| --- | --- |\n| Value 1 | Value 2 | Extra |';
         const nodes = parseText(text, ParserPresets.MESSAGE);
@@ -598,7 +598,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should parse tables with empty cells', () => {
+    it('should parse tables with empty cells', (): void => {
         const text =
             '| A | B | C |\n| - | - | - |\n| 1 |   | 3 |\n|   | 2 |   |';
         const nodes = parseText(text, ParserPresets.MESSAGE);
@@ -614,7 +614,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should parse tables with markdown formatting in cells', () => {
+    it('should parse tables with markdown formatting in cells', (): void => {
         const text =
             '| **Bold** | *Italic* |\n| --- | --- |\n| Normal | **bold cell** |\n| Text | *italic cell* |';
         const nodes = parseText(text, ParserPresets.MESSAGE);
@@ -633,7 +633,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should parse tables with mixed formatting in cells', () => {
+    it('should parse tables with mixed formatting in cells', (): void => {
         const text =
             '| Header | Content |\n| --- | --- |\n| ***Bold Italic*** | Normal |';
         const nodes = parseText(text, ParserPresets.MESSAGE);
@@ -651,7 +651,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should parse tables with links in cells', () => {
+    it('should parse tables with links in cells', (): void => {
         const text =
             '| Link | Named |\n| --- | --- |\n| https://test.com | [Serchat](https://rolling.catfla.re) |';
         const nodes = parseText(text, ParserPresets.MESSAGE);
@@ -681,7 +681,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should parse table at the beginning of text', () => {
+    it('should parse table at the beginning of text', (): void => {
         const text = '| Header |\n| ------ |\n| Value  |';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -693,7 +693,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should parse text before table on different line', () => {
+    it('should parse text before table on different line', (): void => {
         const text = 'Some text\n| Header |\n| ------ |\n| Value  |';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -706,7 +706,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should parse text after table on different line', () => {
+    it('should parse text after table on different line', (): void => {
         const text = '| Header |\n| ------ |\n| Value  |\nSome text';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -719,7 +719,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should not parse table if not at line start', () => {
+    it('should not parse table if not at line start', (): void => {
         const text = 'Text | Header |\n| ------ |\n| Value  |';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         // Should not parse as table since table doesn't start at line beginning
@@ -729,16 +729,16 @@ describe('TextParser', () => {
         });
     });
 
-    it('should parse multiple tables in sequence', () => {
+    it('should parse multiple tables in sequence', (): void => {
         const text =
             '| A | B |\n| - | - |\n| 1 | 2 |\n| C | D |\n| - | - |\n| 3 | 4 |';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         // After first table ends at row 3, trying to continue from line 4 which has "| C | D |"
         // This will either be parsed as a second table or combined, depending on implementation
-        expect(nodes.some((n) => n.type === 'table')).toBe(true);
+        expect(nodes.some((n): boolean => n.type === 'table')).toBe(true);
     });
 
-    it('should handle tables with spaces around pipes', () => {
+    it('should handle tables with spaces around pipes', (): void => {
         const text =
             '|  Header 1  |  Header 2  |\n|  ---  |  ---  |\n|  Value 1  |  Value 2  |';
         const nodes = parseText(text, ParserPresets.MESSAGE);
@@ -751,7 +751,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should parse table with empty cells and mismatched rows', () => {
+    it('should parse table with empty cells and mismatched rows', (): void => {
         const text = '|a|b|c|\n|-|-|-|\n|a|||b|||c|';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -763,7 +763,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should parse inline LaTeX with $$...$$', () => {
+    it('should parse inline LaTeX with $$...$$', (): void => {
         const text = 'The formula $$E = mc^2$$ is famous';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -773,13 +773,13 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should parse display LaTeX with $\\n...\\n$', () => {
+    it('should parse display LaTeX with $\\n...\\n$', (): void => {
         const text = '$\nE = mc^2\n$';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([{ type: 'latex', content: 'E = mc^2' }]);
     });
 
-    it('should parse multiline display LaTeX', () => {
+    it('should parse multiline display LaTeX', (): void => {
         const text = '$\n\\frac{a}{b}\n+ c\n$';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -787,19 +787,19 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should not parse $$ as display LaTeX when content has no newline after opening', () => {
+    it('should not parse $$ as display LaTeX when content has no newline after opening', (): void => {
         const text = '$$x$$';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([{ type: 'inline_latex', content: 'x' }]);
     });
 
-    it('should not parse unclosed inline LaTeX as latex node', () => {
+    it('should not parse unclosed inline LaTeX as latex node', (): void => {
         const text = '$$unclosed';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([{ type: 'text', content: '$$unclosed' }]);
     });
 
-    it('should not parse $ without newline as display LaTeX', () => {
+    it('should not parse $ without newline as display LaTeX', (): void => {
         const text = '$E = mc^2$';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         // Single $ not followed by newline should not parse as latex
@@ -813,7 +813,7 @@ describe('TextParser', () => {
         });
     });
 
-    it('should handle escaped markdown characters like \\* and \\|', () => {
+    it('should handle escaped markdown characters like \\* and \\|', (): void => {
         const text = 'Hello \\*not bold\\* and \\|\\|not spoiler\\|\\|';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -830,7 +830,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should handle escaped markdown characters like \\` and \\\\', () => {
+    it('should handle escaped markdown characters like \\` and \\\\', (): void => {
         const text = 'Escaped \\`code\\` and backslash \\\\';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -843,7 +843,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should parse thematic breaks', () => {
+    it('should parse thematic breaks', (): void => {
         const text = 'Above\n---\nBelow';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -853,7 +853,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should parse thematic breaks with trailing spaces', () => {
+    it('should parse thematic breaks with trailing spaces', (): void => {
         const text = '---   \nNext line';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -862,23 +862,27 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should not parse thematic breaks with more or fewer than 3 dashes', () => {
+    it('should not parse thematic breaks with more or fewer than 3 dashes', (): void => {
         const text1 = '----\nLine';
         const nodes1 = parseText(text1, ParserPresets.MESSAGE);
-        expect(nodes1.some((n) => n.type === 'thematic_break')).toBe(false);
+        expect(nodes1.some((n): boolean => n.type === 'thematic_break')).toBe(
+            false,
+        );
 
         const text2 = '--\nLine';
         const nodes2 = parseText(text2, ParserPresets.MESSAGE);
-        expect(nodes2.some((n) => n.type === 'thematic_break')).toBe(false);
+        expect(nodes2.some((n): boolean => n.type === 'thematic_break')).toBe(
+            false,
+        );
     });
 
-    it('should not parse thematic breaks not at the start of a line', () => {
+    it('should not parse thematic breaks not at the start of a line', (): void => {
         const text = 'Text ---';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([{ type: 'text', content: 'Text ---' }]);
     });
 
-    it('should parse underline text', () => {
+    it('should parse underline text', (): void => {
         const text = 'Hello __underline__ world';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -888,7 +892,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should parse strikethrough text', () => {
+    it('should parse strikethrough text', (): void => {
         const text = 'Hello ~~strikethrough~~ world';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -898,7 +902,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should parse curly underline text', () => {
+    it('should parse curly underline text', (): void => {
         const text = 'Hello _~curly underline~_ world';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -908,7 +912,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should parse jagged underline text', () => {
+    it('should parse jagged underline text', (): void => {
         const text = 'Hello _^jagged underline^_ world';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -918,7 +922,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should parse double underline text', () => {
+    it('should parse double underline text', (): void => {
         const text = 'Hello ___double underline___ world';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -928,7 +932,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should prefer double underline over single underline', () => {
+    it('should prefer double underline over single underline', (): void => {
         const text = '___double___ and __single__';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -938,7 +942,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should parse doubly curly underline text', () => {
+    it('should parse doubly curly underline text', (): void => {
         const text = 'Hello _~~doubly curly~~_ world';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -948,7 +952,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should prefer doubly curly over single curly and strikethrough', () => {
+    it('should prefer doubly curly over single curly and strikethrough', (): void => {
         const text = '_~~double~~_, _~single~_, and ~~strike~~';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -960,7 +964,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should parse dashed underline text', () => {
+    it('should parse dashed underline text', (): void => {
         const text = 'Hello _-dashed underline-_ world';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -970,7 +974,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should parse dotted underline text', () => {
+    it('should parse dotted underline text', (): void => {
         const text = 'Hello _.dotted underline._ world';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -980,7 +984,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should parse rhythm underline text', () => {
+    it('should parse rhythm underline text', (): void => {
         const text = 'Hello _-.rhythm underline.-_ world';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -990,7 +994,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should parse superscript text', () => {
+    it('should parse superscript text', (): void => {
         const text = 'E = mc^2^';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -999,7 +1003,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should parse subscript text', () => {
+    it('should parse subscript text', (): void => {
         const text = 'H~2~O';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -1009,7 +1013,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should handle nested formatting within super/subscript', () => {
+    it('should handle nested formatting within super/subscript', (): void => {
         const text = '^**bold**^ and ~*italic*~';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -1025,7 +1029,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should prefer strikethrough over subscript', () => {
+    it('should prefer strikethrough over subscript', (): void => {
         const text = '~~strike~~ and ~sub~';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -1035,7 +1039,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should prefer jagged underline over superscript', () => {
+    it('should prefer jagged underline over superscript', (): void => {
         const text = '_^jagged^_ and ^super^';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -1045,7 +1049,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should not parse unclosed super/subscript', () => {
+    it('should not parse unclosed super/subscript', (): void => {
         const text = '^unclosed and ~unclosed';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -1053,13 +1057,13 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should not parse multiline super/subscript', () => {
+    it('should not parse multiline super/subscript', (): void => {
         const text = '^line1\nline2^';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([{ type: 'text', content: '^line1\nline2^' }]);
     });
 
-    it('should parse stacked superscript/subscript text', () => {
+    it('should parse stacked superscript/subscript text', (): void => {
         const text = '^top|bottom^';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -1071,7 +1075,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should parse stacked script with nested formatting', () => {
+    it('should parse stacked script with nested formatting', (): void => {
         const text = '^**bold**|*italic*^';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -1083,13 +1087,13 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should fall back to normal superscript if no pipe is present', () => {
+    it('should fall back to normal superscript if no pipe is present', (): void => {
         const text = '^normal^';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([{ type: 'superscript', content: 'normal' }]);
     });
 
-    it('should not parse C/C++/C# programmer as header', () => {
+    it('should not parse C/C++/C# programmer as header', (): void => {
         const text = 'C/C++/C# programmer';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -1097,7 +1101,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should parse complex nested formatting with underline and strikethrough', () => {
+    it('should parse complex nested formatting with underline and strikethrough', (): void => {
         const text =
             'This is **bold and ~~strikethrough and __underlined__~~**';
         const nodes = parseText(text, ParserPresets.MESSAGE);
@@ -1119,7 +1123,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should parse single-line blockquote', () => {
+    it('should parse single-line blockquote', (): void => {
         const text = '> This is a quote';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -1131,7 +1135,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should parse single-line blockquote with nested formatting', () => {
+    it('should parse single-line blockquote with nested formatting', (): void => {
         const text = '> Quote with **bold**';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -1146,7 +1150,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should parse multi-line blockquote', () => {
+    it('should parse multi-line blockquote', (): void => {
         const text = '>>> This is a\nmulti-line\nquote';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -1158,13 +1162,13 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should not parse blockquote if not at start of line', () => {
+    it('should not parse blockquote if not at start of line', (): void => {
         const text = 'Not a > quote';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([{ type: 'text', content: 'Not a > quote' }]);
     });
 
-    it('should handle escaped blockquote', () => {
+    it('should handle escaped blockquote', (): void => {
         const text = '\\> Not a quote';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -1173,7 +1177,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should group consecutive blockquote lines', () => {
+    it('should group consecutive blockquote lines', (): void => {
         const text = '> Line 1\n> Line 2';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -1185,7 +1189,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should parse nested blockquotes', () => {
+    it('should parse nested blockquotes', (): void => {
         const text = '> level 1\n> > level 2';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -1204,7 +1208,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should handle mixed nesting with no spaces', () => {
+    it('should handle mixed nesting with no spaces', (): void => {
         const text = '>>level 2';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -1223,7 +1227,7 @@ describe('TextParser', () => {
     });
     // ─── GitHub Admonitions ───────────────────────────────────────────────────────
 
-    it('should parse GitHub-style NOTE admonition', () => {
+    it('should parse GitHub-style NOTE admonition', (): void => {
         const text = '> [!NOTE]\n> This is a note.';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -1239,7 +1243,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should parse GitHub-style TIP admonition', () => {
+    it('should parse GitHub-style TIP admonition', (): void => {
         const text = '> [!TIP]\n> This is a tip.';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -1255,7 +1259,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should parse GitHub-style IMPORTANT admonition', () => {
+    it('should parse GitHub-style IMPORTANT admonition', (): void => {
         const text = '> [!IMPORTANT]\n> This is important.';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -1271,7 +1275,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should parse GitHub-style WARNING admonition', () => {
+    it('should parse GitHub-style WARNING admonition', (): void => {
         const text = '> [!WARNING]\n> This is a warning.';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -1287,7 +1291,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should parse GitHub-style CAUTION admonition', () => {
+    it('should parse GitHub-style CAUTION admonition', (): void => {
         const text = '> [!CAUTION]\n> This is a caution.';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -1303,7 +1307,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should parse GitHub-style admonition case-insensitively', () => {
+    it('should parse GitHub-style admonition case-insensitively', (): void => {
         const text = '> [!warning]\n> Be careful.';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -1319,7 +1323,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should parse GitHub-style admonition with multi-line body', () => {
+    it('should parse GitHub-style admonition with multi-line body', (): void => {
         const text = '> [!CAUTION]\n> Line 1\n> Line 2';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -1335,7 +1339,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should parse all GitHub admonition types', () => {
+    it('should parse all GitHub admonition types', (): void => {
         for (const t of ['note', 'tip', 'important', 'warning', 'caution']) {
             const text = `> [!${t.toUpperCase()}]\n> Body`;
             const nodes = parseText(text, ParserPresets.MESSAGE);
@@ -1346,7 +1350,7 @@ describe('TextParser', () => {
         }
     });
 
-    it('should fall back to blockquote for unknown GitHub-style type', () => {
+    it('should fall back to blockquote for unknown GitHub-style type', (): void => {
         const text = '> [!CUSTOMTYPE]\n> Content';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -1358,7 +1362,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should parse GitHub admonition body with inline bold formatting', () => {
+    it('should parse GitHub admonition body with inline bold formatting', (): void => {
         const text = '> [!WARNING]\n> This is **bold** text.';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -1378,7 +1382,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should parse GitHub admonition body with inline italic formatting', () => {
+    it('should parse GitHub admonition body with inline italic formatting', (): void => {
         const text = '> [!NOTE]\n> This is *italic* text.';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes[0]).toMatchObject({
@@ -1390,7 +1394,7 @@ describe('TextParser', () => {
         expect(content).toContainEqual({ type: 'italic', content: 'italic' });
     });
 
-    it('should parse GitHub admonition body with inline code', () => {
+    it('should parse GitHub admonition body with inline code', (): void => {
         const text = '> [!TIP]\n> Use `code` here.';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes[0]).toMatchObject({
@@ -1405,19 +1409,19 @@ describe('TextParser', () => {
         });
     });
 
-    it('should not parse GitHub admonition without leading blockquote marker', () => {
+    it('should not parse GitHub admonition without leading blockquote marker', (): void => {
         const text = '[!NOTE]\nThis is a note.';
         const nodes = parseText(text, ParserPresets.MESSAGE);
-        expect(nodes.some((n) => n.type === 'admonition')).toBe(false);
+        expect(nodes.some((n): boolean => n.type === 'admonition')).toBe(false);
     });
 
-    it('should not parse GitHub admonition with missing body line marker', () => {
+    it('should not parse GitHub admonition with missing body line marker', (): void => {
         const text = '> [!NOTE]\nThis is a note without the > prefix.';
         const nodes = parseText(text, ParserPresets.MESSAGE);
-        expect(nodes.some((n) => n.type === 'admonition')).toBe(false);
+        expect(nodes.some((n): boolean => n.type === 'admonition')).toBe(false);
     });
 
-    it('should parse GitHub admonition with empty body', () => {
+    it('should parse GitHub admonition with empty body', (): void => {
         const text = '> [!NOTE]\n> ';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes[0]).toMatchObject({
@@ -1430,7 +1434,7 @@ describe('TextParser', () => {
 
     // ─── Obsidian Admonitions ─────────────────────────────────────────────────────
 
-    it('should parse Obsidian-style NOTE admonition with no title', () => {
+    it('should parse Obsidian-style NOTE admonition with no title', (): void => {
         const text = '> [!note]\n> This is a note.';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -1446,7 +1450,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should parse Obsidian-style admonition with custom title', () => {
+    it('should parse Obsidian-style admonition with custom title', (): void => {
         const text = '> [!warning] Watch Out\n> Content here.';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -1462,7 +1466,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should parse Obsidian collapsible admonition expanded (+)', () => {
+    it('should parse Obsidian collapsible admonition expanded (+)', (): void => {
         const text = '> [!tip]+ Helpful Tip\n> Body text.';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -1478,7 +1482,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should parse Obsidian collapsible admonition collapsed (-)', () => {
+    it('should parse Obsidian collapsible admonition collapsed (-)', (): void => {
         const text = '> [!danger]-\n> Hidden content.';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -1494,7 +1498,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should parse Obsidian collapsible admonition collapsed (-) with title', () => {
+    it('should parse Obsidian collapsible admonition collapsed (-) with title', (): void => {
         const text = '> [!warning]- Collapsible Warning\n> Hidden content.';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -1510,7 +1514,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should parse Obsidian collapsible admonition expanded (+) with no title', () => {
+    it('should parse Obsidian collapsible admonition expanded (+) with no title', (): void => {
         const text = '> [!note]+\n> Visible by default.';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -1526,7 +1530,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should parse known Obsidian type without fold or title as Obsidian admonition', () => {
+    it('should parse known Obsidian type without fold or title as Obsidian admonition', (): void => {
         const text = '> [!info]\n> Just info.';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes[0]).toMatchObject({
@@ -1537,7 +1541,7 @@ describe('TextParser', () => {
         });
     });
 
-    it('should parse bug type as Obsidian admonition', () => {
+    it('should parse bug type as Obsidian admonition', (): void => {
         const text = '> [!bug]\n> a';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes[0]).toMatchObject({
@@ -1548,7 +1552,7 @@ describe('TextParser', () => {
         });
     });
 
-    it('should render unknown Obsidian type as generic admonition when fold modifier present', () => {
+    it('should render unknown Obsidian type as generic admonition when fold modifier present', (): void => {
         const text = '> [!custom]+ Expanded\n> Content.';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -1564,7 +1568,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should parse Obsidian admonition with multi-line body', () => {
+    it('should parse Obsidian admonition with multi-line body', (): void => {
         const text = '> [!warning]\n> Line 1\n> Line 2';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes[0]).toMatchObject({
@@ -1575,7 +1579,7 @@ describe('TextParser', () => {
         });
     });
 
-    it('should parse Obsidian admonition case-insensitively', () => {
+    it('should parse Obsidian admonition case-insensitively', (): void => {
         const text = '> [!WARNING]\n> A warning.';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes[0]).toMatchObject({
@@ -1584,7 +1588,7 @@ describe('TextParser', () => {
         });
     });
 
-    it('should parse all Obsidian admonition types', () => {
+    it('should parse all Obsidian admonition types', (): void => {
         for (const t of [
             'note',
             'tip',
@@ -1605,7 +1609,7 @@ describe('TextParser', () => {
         }
     });
 
-    it('should parse Obsidian admonition with empty body', () => {
+    it('should parse Obsidian admonition with empty body', (): void => {
         const text = '> [!note]\n> ';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes[0]).toMatchObject({
@@ -1616,7 +1620,7 @@ describe('TextParser', () => {
         });
     });
 
-    it('should parse MyST-style NOTE admonition', () => {
+    it('should parse MyST-style NOTE admonition', (): void => {
         const text = ':::{note}\nA simple note.\n:::';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -1630,7 +1634,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should parse MyST-style TIP admonition', () => {
+    it('should parse MyST-style TIP admonition', (): void => {
         const text = ':::{tip}\nA helpful tip.\n:::';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -1644,7 +1648,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should parse MyST-style IMPORTANT admonition', () => {
+    it('should parse MyST-style IMPORTANT admonition', (): void => {
         const text = ':::{important}\nThis is important.\n:::';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -1658,7 +1662,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should parse MyST-style WARNING admonition', () => {
+    it('should parse MyST-style WARNING admonition', (): void => {
         const text = ':::{warning}\nThis is a warning.\n:::';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -1672,7 +1676,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should parse MyST-style CAUTION admonition', () => {
+    it('should parse MyST-style CAUTION admonition', (): void => {
         const text = ':::{caution}\nThis is a caution.\n:::';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -1686,7 +1690,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should parse MyST-style DANGER admonition', () => {
+    it('should parse MyST-style DANGER admonition', (): void => {
         const text = ':::{danger}\nThis is danger.\n:::';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -1700,7 +1704,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should parse MyST-style ERROR admonition', () => {
+    it('should parse MyST-style ERROR admonition', (): void => {
         const text = ':::{error}\nThis is an error.\n:::';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -1714,7 +1718,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should parse MyST-style HINT admonition', () => {
+    it('should parse MyST-style HINT admonition', (): void => {
         const text = ':::{hint}\nThis is a hint.\n:::';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -1728,7 +1732,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should parse MyST-style SEEALSO admonition', () => {
+    it('should parse MyST-style SEEALSO admonition', (): void => {
         const text = ':::{seealso}\nSee also this.\n:::';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -1742,7 +1746,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should parse MyST admonition with custom title', () => {
+    it('should parse MyST admonition with custom title', (): void => {
         const text = ':::{warning} Watch Out\nDanger ahead.\n:::';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -1756,7 +1760,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should parse MyST admonition with case-insensitive type', () => {
+    it('should parse MyST admonition with case-insensitive type', (): void => {
         const text = ':::{WARNING}\nA warning.\n:::';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes[0]).toMatchObject({
@@ -1766,7 +1770,7 @@ describe('TextParser', () => {
         });
     });
 
-    it('should parse MyST admonition with multi-paragraph body', () => {
+    it('should parse MyST admonition with multi-paragraph body', (): void => {
         const text = ':::{danger}\nFirst paragraph.\n\nSecond paragraph.\n:::';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes[0]).toMatchObject({
@@ -1778,7 +1782,7 @@ describe('TextParser', () => {
         expect(content).toBeDefined();
     });
 
-    it('should parse MyST admonition with multi-line body', () => {
+    it('should parse MyST admonition with multi-line body', (): void => {
         const text = ':::{warning}\nLine 1\nLine 2\nLine 3\n:::';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes[0]).toMatchObject({
@@ -1792,7 +1796,7 @@ describe('TextParser', () => {
         expect(content).toContain('Line 3');
     });
 
-    it('should parse MyST admonition followed by normal text', () => {
+    it('should parse MyST admonition followed by normal text', (): void => {
         const text = ':::{note}\nNote body.\n:::\nAfter text';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes[0]).toMatchObject({ type: 'admonition', style: 'myst' });
@@ -1802,7 +1806,7 @@ describe('TextParser', () => {
         });
     });
 
-    it('should parse MyST admonition preceded by normal text', () => {
+    it('should parse MyST admonition preceded by normal text', (): void => {
         const text = 'Before text\n:::{note}\nNote body.\n:::';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes[0]).toMatchObject({
@@ -1812,19 +1816,19 @@ describe('TextParser', () => {
         expect(nodes[1]).toMatchObject({ type: 'admonition', style: 'myst' });
     });
 
-    it('should not parse MyST admonition if not at start of line', () => {
+    it('should not parse MyST admonition if not at start of line', (): void => {
         const text = 'Some text :::{note}\nBody\n:::';
         const nodes = parseText(text, ParserPresets.MESSAGE);
-        expect(nodes.some((n) => n.type === 'admonition')).toBe(false);
+        expect(nodes.some((n): boolean => n.type === 'admonition')).toBe(false);
     });
 
-    it('should not parse unclosed MyST admonition', () => {
+    it('should not parse unclosed MyST admonition', (): void => {
         const text = ':::{note}\nBody without closing fence';
         const nodes = parseText(text, ParserPresets.MESSAGE);
-        expect(nodes.some((n) => n.type === 'admonition')).toBe(false);
+        expect(nodes.some((n): boolean => n.type === 'admonition')).toBe(false);
     });
 
-    it('should parse unknown MyST type as generic admonition', () => {
+    it('should parse unknown MyST type as generic admonition', (): void => {
         const text = ':::{customtype}\nContent.\n:::';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
@@ -1838,7 +1842,7 @@ describe('TextParser', () => {
         ]);
     });
 
-    it('should parse MyST admonition with empty body', () => {
+    it('should parse MyST admonition with empty body', (): void => {
         const text = ':::{note}\n\n:::';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes[0]).toMatchObject({
@@ -1848,7 +1852,7 @@ describe('TextParser', () => {
         });
     });
 
-    it('should parse all MyST admonition types', () => {
+    it('should parse all MyST admonition types', (): void => {
         for (const t of [
             'note',
             'tip',
@@ -1870,11 +1874,11 @@ describe('TextParser', () => {
         }
     });
 
-    it('does not parse heading levels when that specific heading feature is disabled', () => {
+    it('does not parse heading levels when that specific heading feature is disabled', (): void => {
         const options = {
             ...ParserPresets.MESSAGE,
             features: ParserPresets.MESSAGE.features.filter(
-                (feature) => feature !== ParserFeature.H1,
+                (feature): boolean => feature !== ParserFeature.H1,
             ),
         };
 
@@ -1883,8 +1887,8 @@ describe('TextParser', () => {
         ]);
     });
 
-    describe('Alternative URLs', () => {
-        it('should parse invite links from alternative URLs', () => {
+    describe('Alternative URLs', (): void => {
+        it('should parse invite links from alternative URLs', (): void => {
             vi.stubEnv('VITE_ALTERNATIVE_URLS', '["http://localhost:5173"]');
             const text = 'Join: http://localhost:5173/invite/osdev';
             const nodes = parseText(text, ParserPresets.MESSAGE);
@@ -1899,7 +1903,7 @@ describe('TextParser', () => {
             vi.unstubAllEnvs();
         });
 
-        it('should parse channel links from alternative URLs', () => {
+        it('should parse channel links from alternative URLs', (): void => {
             vi.stubEnv(
                 'VITE_ALTERNATIVE_URLS',
                 '["https://my-custom-domain.com"]',

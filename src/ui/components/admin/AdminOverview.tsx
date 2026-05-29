@@ -102,7 +102,7 @@ export const AdminOverview = (): ReactNode => {
                                 )}
                                 key={value}
                                 type="button"
-                                onClick={() => setRange(value)}
+                                onClick={(): void => setRange(value)}
                             >
                                 {label}
                             </button>

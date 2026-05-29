@@ -27,9 +27,9 @@ const timeListeners = new Set<() => void>();
 
 const startTimeInterval = (): void => {
     if (intervalId !== null) return;
-    intervalId = setInterval(() => {
+    intervalId = setInterval((): void => {
         globalNow = Date.now();
-        timeListeners.forEach((l) => l());
+        timeListeners.forEach((l): void => l());
     }, 1000);
 };
 
@@ -43,7 +43,7 @@ const stopTimeInterval = (): void => {
 const subscribeTime = (callback: () => void): (() => void) => {
     timeListeners.add(callback);
     startTimeInterval();
-    return () => {
+    return (): void => {
         timeListeners.delete(callback);
         stopTimeInterval();
     };
@@ -78,7 +78,7 @@ export const usePermissions = (
 
     const memberByUserId = useMemo(() => {
         const map = new Map<string, NonNullable<typeof members>[number]>();
-        members?.forEach((serverMember) => {
+        members?.forEach((serverMember): void => {
             map.set(serverMember.userId, serverMember);
         });
         return map;
@@ -86,7 +86,7 @@ export const usePermissions = (
 
     const channelById = useMemo(() => {
         const map = new Map<string, NonNullable<typeof channels>[number]>();
-        channels?.forEach((channel) => {
+        channels?.forEach((channel): void => {
             map.set(channel._id, channel);
         });
         return map;
@@ -94,7 +94,7 @@ export const usePermissions = (
 
     const categoryById = useMemo(() => {
         const map = new Map<string, NonNullable<typeof categories>[number]>();
-        categories?.forEach((category) => {
+        categories?.forEach((category): void => {
             map.set(category._id, category);
         });
         return map;
@@ -114,24 +114,24 @@ export const usePermissions = (
     const shouldTrackTime = !!member?.communicationDisabledUntil && !isOwner;
 
     const now = useSyncExternalStore(
-        shouldTrackTime ? subscribeTime : () => () => {},
-        shouldTrackTime ? getTimeSnapshot : () => 0,
-        shouldTrackTime ? getServerTimeSnapshot : () => 0,
+        shouldTrackTime ? subscribeTime : (): (() => void) => (): void => {},
+        shouldTrackTime ? getTimeSnapshot : (): number => 0,
+        shouldTrackTime ? getServerTimeSnapshot : (): number => 0,
     );
 
     const userRoles = useMemo(() => {
         if (!member || !roles) return [];
         return roles
-            .filter((role) => member.roles.includes(role._id))
-            .sort((a, b) => b.position - a.position);
+            .filter((role): boolean => member.roles.includes(role._id))
+            .sort((a, b): number => b.position - a.position);
     }, [member, roles]);
 
     const everyoneRole = useMemo(
-        () => roles?.find((r) => r.name === '@everyone'),
+        () => roles?.find((r): boolean => r.name === '@everyone'),
         [roles],
     );
 
-    const permissions = useMemo(() => {
+    const permissions = useMemo((): Record<keyof RolePermissions, boolean> => {
         const perms: Record<keyof RolePermissions, boolean> = {
             sendMessages: false,
             manageMessages: false,
@@ -167,7 +167,7 @@ export const usePermissions = (
             currentUser?._id &&
             server.ownerId === currentUser._id
         ) {
-            Object.keys(perms).forEach((key) => {
+            Object.keys(perms).forEach((key): void => {
                 perms[key as keyof RolePermissions] = true;
             });
             return perms;
@@ -180,7 +180,7 @@ export const usePermissions = (
                     {
                         serverId,
                         currentUserId: currentUser?._id,
-                        memberUserIds: members?.map((m) => m.userId),
+                        memberUserIds: members?.map((m): string => m.userId),
                     },
                 );
             }
@@ -188,8 +188,12 @@ export const usePermissions = (
         }
 
         // Administrator has all permissions
-        if (userRoles.some((r) => r.permissions?.administrator)) {
-            Object.keys(perms).forEach((key) => {
+        if (
+            userRoles.some(
+                (r): boolean | undefined => r.permissions?.administrator,
+            )
+        ) {
+            Object.keys(perms).forEach((key): void => {
                 perms[key as keyof RolePermissions] = true;
             });
             return perms;
@@ -244,7 +248,12 @@ export const usePermissions = (
             }
 
             // 3. Base Server Permissions
-            if (userRoles.some((r) => r.permissions?.[permKey])) return true;
+            if (
+                userRoles.some(
+                    (r): boolean | undefined => r.permissions?.[permKey],
+                )
+            )
+                return true;
             if (everyoneRole?.permissions?.[permKey]) return true;
 
             if (
@@ -256,7 +265,7 @@ export const usePermissions = (
             return false;
         };
 
-        Object.keys(perms).forEach((key) => {
+        Object.keys(perms).forEach((key): void => {
             perms[key as keyof RolePermissions] = evaluatePermission(
                 key as keyof RolePermissions,
             );
@@ -273,11 +282,19 @@ export const usePermissions = (
                     {
                         channelPermissions:
                             channelById.get(channelId)?.permissions,
-                        userRoles: userRoles.map((r) => ({
-                            id: r._id,
-                            name: r.name,
-                            position: r.position,
-                        })),
+                        userRoles: userRoles.map(
+                            (
+                                r,
+                            ): {
+                                id: string;
+                                name: string;
+                                position: number;
+                            } => ({
+                                id: r._id,
+                                name: r.name,
+                                position: r.position,
+                            }),
+                        ),
                         everyonePermissions: everyoneRole?.permissions,
                         computedPerms: perms,
                     },

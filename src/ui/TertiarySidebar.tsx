@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { AnimatePresence, motion } from 'framer-motion';
 import { Search, X } from 'lucide-react';
@@ -24,12 +24,12 @@ interface TertiarySidebarProps {
     onMobileClose?: () => void;
 }
 
-export const TertiarySidebar: React.FC<TertiarySidebarProps> = ({
+export const TertiarySidebar = ({
     selectedFriendId: selectedFriendIdOverride,
     selectedServerId: selectedServerIdOverride,
     ignoreUrlMatch,
     onMobileClose,
-}) => {
+}: TertiarySidebarProps) => {
     const {
         selectedFriendId,
         selectedServerId,
@@ -49,19 +49,19 @@ export const TertiarySidebar: React.FC<TertiarySidebarProps> = ({
 
     const dispatch = useAppDispatch();
     const showMobileMemberList = useAppSelector(
-        (state) => state.nav.showMobileMemberList,
+        (state): boolean => state.nav.showMobileMemberList,
     );
 
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const searchInputRef = useRef<HTMLInputElement>(null);
 
-    useEffect(() => {
+    useEffect((): (() => void) | undefined => {
         if (isSearchOpen) {
-            const timeoutId = setTimeout(() => {
+            const timeoutId = setTimeout((): void => {
                 searchInputRef.current?.focus();
             }, 100);
-            return () => clearTimeout(timeoutId);
+            return (): void => clearTimeout(timeoutId);
         }
     }, [isSearchOpen]);
 
@@ -122,7 +122,7 @@ export const TertiarySidebar: React.FC<TertiarySidebarProps> = ({
                                         'p-1 text-muted-foreground transition-colors hover:text-foreground',
                                         isSearchOpen && 'text-primary',
                                     )}
-                                    onClick={() => {
+                                    onClick={(): void => {
                                         setIsSearchOpen(!isSearchOpen);
                                         if (isSearchOpen) setSearchQuery('');
                                     }}
@@ -134,7 +134,10 @@ export const TertiarySidebar: React.FC<TertiarySidebarProps> = ({
                                 <button
                                     aria-label="Close member list"
                                     className="p-1 text-muted-foreground transition-colors hover:text-foreground md:hidden"
-                                    onClick={() =>
+                                    onClick={(): void | {
+                                        payload: undefined;
+                                        type: 'nav/toggleMobileMemberList';
+                                    } =>
                                         onMobileClose
                                             ? onMobileClose()
                                             : dispatch(toggleMobileMemberList())
@@ -161,7 +164,7 @@ export const TertiarySidebar: React.FC<TertiarySidebarProps> = ({
                                     placeholder="Search (supports regex /pattern/)..."
                                     ref={searchInputRef}
                                     value={searchQuery}
-                                    onChange={(e) =>
+                                    onChange={(e): void =>
                                         setSearchQuery(e.target.value)
                                     }
                                 />

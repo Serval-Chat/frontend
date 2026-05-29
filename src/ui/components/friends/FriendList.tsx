@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { useNavigate } from 'react-router-dom';
 
 import { useFriends } from '@/api/friends/friends.queries';
@@ -8,12 +6,14 @@ import { Skeleton } from '@/ui/components/common/Skeleton';
 import { UserItem } from '@/ui/components/common/UserItem';
 import { Box } from '@/ui/components/layout/Box';
 
-export const FriendList: React.FC = () => {
+export const FriendList = () => {
     const { data: friends, isLoading } = useFriends();
     const selectedFriendId = useAppSelector(
-        (state) => state.nav.selectedFriendId,
+        (state): string | null => state.nav.selectedFriendId,
     );
-    const unreadDms = useAppSelector((state) => state.unread.unreadDms);
+    const unreadDms = useAppSelector(
+        (state): Record<string, number> => state.unread.unreadDms,
+    );
 
     const navigate = useNavigate();
 
@@ -21,7 +21,7 @@ export const FriendList: React.FC = () => {
         void navigate(`/chat/@user/${friendId}`);
     };
 
-    const sortedFriends = friends?.slice().sort((a, b) => {
+    const sortedFriends = friends?.slice().sort((a, b): 1 | -1 | 0 => {
         const aUnread = unreadDms[a._id] || 0;
         const bUnread = unreadDms[b._id] || 0;
 
@@ -56,7 +56,9 @@ export const FriendList: React.FC = () => {
                         isActive={selectedFriendId === String(friend._id)}
                         key={String(friend._id)}
                         userId={String(friend._id)}
-                        onClick={() => handleFriendClick(String(friend._id))}
+                        onClick={(): void =>
+                            handleFriendClick(String(friend._id))
+                        }
                     />
                 ))
             )}

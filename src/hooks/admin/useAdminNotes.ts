@@ -15,7 +15,7 @@ export const useAdminNotes = (
 ): UseQueryResult<AdminNote[], Error> =>
     useQuery<AdminNote[]>({
         queryKey: ['admin-notes', targetType, targetId],
-        queryFn: () =>
+        queryFn: (): Promise<AdminNote[]> =>
             targetType === 'Server'
                 ? adminNotesApi.getServerNotes(targetId)
                 : adminNotesApi.getUserNotes(targetId),
@@ -37,8 +37,9 @@ export const useCreateAdminNote = (): UseMutationResult<
             targetId: string;
             targetType: 'Server' | 'User';
             content: string;
-        }) => adminNotesApi.createNote(targetId, targetType, content),
-        onSuccess: (_, variables) => {
+        }): Promise<AdminNote> =>
+            adminNotesApi.createNote(targetId, targetType, content),
+        onSuccess: (_, variables): void => {
             void queryClient.invalidateQueries({
                 queryKey: [
                     'admin-notes',
@@ -63,8 +64,8 @@ export const useUpdateAdminNote = (): UseMutationResult<
         }: {
             noteId: string;
             content: string;
-        }) => adminNotesApi.updateNote(noteId, content),
-        onSuccess: (updatedNote) => {
+        }): Promise<AdminNote> => adminNotesApi.updateNote(noteId, content),
+        onSuccess: (updatedNote): void => {
             void queryClient.invalidateQueries({
                 queryKey: [
                     'admin-notes',
@@ -83,9 +84,14 @@ export const useDeleteAdminNote = (): UseMutationResult<
 > => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: ({ noteId, reason }: { noteId: string; reason: string }) =>
-            adminNotesApi.deleteNote(noteId, reason),
-        onSuccess: (deletedNote) => {
+        mutationFn: ({
+            noteId,
+            reason,
+        }: {
+            noteId: string;
+            reason: string;
+        }): Promise<AdminNote> => adminNotesApi.deleteNote(noteId, reason),
+        onSuccess: (deletedNote): void => {
             void queryClient.invalidateQueries({
                 queryKey: [
                     'admin-notes',

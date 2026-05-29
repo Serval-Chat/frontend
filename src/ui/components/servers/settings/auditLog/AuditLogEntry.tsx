@@ -137,14 +137,14 @@ const getActionDetails = (
 const formatActionName = (action: string): string =>
     action
         .split('_')
-        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .map((word): string => word.charAt(0).toUpperCase() + word.slice(1))
         .join(' ');
 
-export const AuditLogEntry: React.FC<AuditLogEntryProps> = ({
+export const AuditLogEntry = ({
     entry,
     serverId,
     globalExpandState,
-}) => {
+}: AuditLogEntryProps) => {
     const { icon: Icon, color, bg } = getActionDetails(entry.action);
     const [expandedRoles, setExpandedRoles] = useState(false);
     const [profileState, setProfileState] = useState<{
@@ -153,10 +153,12 @@ export const AuditLogEntry: React.FC<AuditLogEntryProps> = ({
         y: number;
     } | null>(null);
 
-    const handleProfileClick = (id: string) => (e: React.MouseEvent) => {
-        e.stopPropagation();
-        setProfileState({ id, x: e.clientX, y: e.clientY });
-    };
+    const handleProfileClick =
+        (id: string): ((e: React.MouseEvent) => void) =>
+        (e: React.MouseEvent): void => {
+            e.stopPropagation();
+            setProfileState({ id, x: e.clientX, y: e.clientY });
+        };
 
     const [prevGlobalExpandState, setPrevGlobalExpandState] =
         useState(globalExpandState);
@@ -173,25 +175,27 @@ export const AuditLogEntry: React.FC<AuditLogEntryProps> = ({
     const { data: members } = useMembers(serverId);
 
     const currentMember = profileState?.id
-        ? members?.find((m) => m.user._id === profileState.id)
+        ? members?.find((m): boolean => m.user._id === profileState.id)
         : undefined;
 
     const currentMemberRoles = currentMember?.roles
         ? (currentMember.roles
-              .map((roleId) => roles?.find((r) => r._id === roleId))
+              .map((roleId): Role | undefined =>
+                  roles?.find((r): boolean => r._id === roleId),
+              )
               .filter(Boolean) as Role[])
         : undefined;
 
     const topRoleWithColor = currentMemberRoles
         ? [...currentMemberRoles]
-              .sort((a, b) => b.position - a.position)
-              .find((r) => r.color || r.startColor)
+              .sort((a, b): number => b.position - a.position)
+              .find((r): string | undefined => r.color || r.startColor)
         : undefined;
 
     const topRoleWithIcon = currentMemberRoles
         ? [...currentMemberRoles]
-              .sort((a, b) => b.position - a.position)
-              .find((r) => r.icon)
+              .sort((a, b): number => b.position - a.position)
+              .find((r): string | undefined => r.icon)
         : undefined;
 
     const getTargetDisplay = (): React.ReactNode => {
@@ -207,7 +211,7 @@ export const AuditLogEntry: React.FC<AuditLogEntryProps> = ({
                 onClick={userId ? handleProfileClick(userId) : undefined}
                 onKeyDown={
                     userId
-                        ? (e) => {
+                        ? (e): void => {
                               if (e.key === 'Enter' || e.key === ' ')
                                   handleProfileClick(userId)(
                                       e as unknown as React.MouseEvent,
@@ -391,7 +395,7 @@ export const AuditLogEntry: React.FC<AuditLogEntryProps> = ({
             roleName: string,
             indicator?: React.ReactNode,
         ): React.ReactNode => {
-            const role = roles?.find((r) => r.name === roleName);
+            const role = roles?.find((r): boolean => r.name === roleName);
             const style = getRoleStyle(role);
 
             return (
@@ -426,8 +430,9 @@ export const AuditLogEntry: React.FC<AuditLogEntryProps> = ({
                         className="flex flex-col"
                         style={{ padding: 0, margin: 0 }}
                     >
-                        {oldOrder.map((roleName) =>
-                            renderRoleItem(String(roleName)),
+                        {oldOrder.map(
+                            (roleName): React.ReactNode =>
+                                renderRoleItem(String(roleName)),
                         )}
                     </ul>
                 </div>
@@ -518,7 +523,7 @@ export const AuditLogEntry: React.FC<AuditLogEntryProps> = ({
                         className="flex flex-col"
                         style={{ padding: 0, margin: 0 }}
                     >
-                        {newOrder.map((roleName) => {
+                        {newOrder.map((roleName): React.ReactNode => {
                             const oldIndex = oldOrder.indexOf(String(roleName));
                             const newIndex = newOrder.indexOf(String(roleName));
                             const diff =
@@ -621,7 +626,9 @@ export const AuditLogEntry: React.FC<AuditLogEntryProps> = ({
                         <div className="mt-2 text-sm">
                             <button
                                 className="hover:text-text flex items-center gap-1 text-xs text-text-muted"
-                                onClick={() => setExpandedRoles(!expandedRoles)}
+                                onClick={(): void =>
+                                    setExpandedRoles(!expandedRoles)
+                                }
                             >
                                 {expandedRoles ? (
                                     <ChevronDown className="h-3 w-3" />
@@ -742,7 +749,7 @@ export const AuditLogEntry: React.FC<AuditLogEntryProps> = ({
                     roles={currentMemberRoles}
                     serverId={serverId}
                     userId={profileState.id}
-                    onClose={() => setProfileState(null)}
+                    onClose={(): void => setProfileState(null)}
                 />
             )}
         </div>

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { animate, useMotionValue } from 'framer-motion';
 import { motion } from 'framer-motion';
@@ -29,7 +29,7 @@ const SPRING = { type: 'spring', stiffness: 300, damping: 35 } as const;
 /**
  * @description Chat page with smooth swipe gesture navigation on mobile.
  */
-export const Chat: React.FC = () => {
+export const Chat = () => {
     const { data: user, error } = useMe();
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
@@ -59,15 +59,15 @@ export const Chat: React.FC = () => {
     }));
 
     const [isMobile, setIsMobile] = useState(isMobileViewport);
-    useEffect(() => {
+    useEffect((): (() => void) => {
         const mq = window.matchMedia('(max-width: 767px)');
         const onChange = (e: MediaQueryListEvent): void =>
             setIsMobile(e.matches);
         mq.addEventListener('change', onChange);
-        return () => mq.removeEventListener('change', onChange);
+        return (): void => mq.removeEventListener('change', onChange);
     }, []);
 
-    useEffect(() => {
+    useEffect((): void => {
         if (error) console.error('Error fetching user:', error);
     }, [user, error]);
 
@@ -84,34 +84,34 @@ export const Chat: React.FC = () => {
     );
 
     const targetXRef = useRef(targetX());
-    useEffect(() => {
+    useEffect((): void => {
         targetXRef.current = targetX();
     }, [targetX]);
 
     const x = useMotionValue(0);
 
-    useEffect(() => {
+    useEffect((): void => {
         void animate(x, targetX(), SPRING);
     }, [targetX, x]);
 
     const dragStartXRef = useRef(0);
     const isMobileRef = useRef(isMobile);
-    useEffect(() => {
+    useEffect((): void => {
         isMobileRef.current = isMobile;
     }, [isMobile]);
 
     const showMobileMemberListRef = useRef(showMobileMemberList);
-    useEffect(() => {
+    useEffect((): void => {
         showMobileMemberListRef.current = showMobileMemberList;
     }, [showMobileMemberList]);
 
-    const handleDragStart = useCallback(() => {
+    const handleDragStart = useCallback((): void => {
         if (!isMobileRef.current) return;
         dragStartXRef.current = x.get();
     }, [x]);
 
     const handleDragMove = useCallback(
-        (deltaX: number) => {
+        (deltaX: number): void => {
             if (!isMobileRef.current) return;
             if (showMobileMemberListRef.current) return;
             const base = dragStartXRef.current;
@@ -125,16 +125,16 @@ export const Chat: React.FC = () => {
     );
 
     const handleDragEnd = useCallback(
-        (_deltaX: number) => {
+        (_deltaX: number): void => {
             if (!isMobileRef.current) return;
-            setTimeout(() => {
+            setTimeout((): void => {
                 void animate(x, targetXRef.current, SPRING);
             }, 0);
         },
         [x],
     );
 
-    const handleSwipeRight = useCallback(() => {
+    const handleSwipeRight = useCallback((): void => {
         if (!isMobileRef.current) return;
 
         if (showMobileMemberList) {
@@ -174,7 +174,7 @@ export const Chat: React.FC = () => {
         navigate,
     ]);
 
-    const handleSwipeLeft = useCallback(() => {
+    const handleSwipeLeft = useCallback((): void => {
         if (!isMobileRef.current) return;
         if (!selectedChannelId && navMode === 'servers' && selectedServerId) {
             const lastChannel = lastOpenedChannelByServer[selectedServerId];

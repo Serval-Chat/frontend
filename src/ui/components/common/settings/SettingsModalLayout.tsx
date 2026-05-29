@@ -17,7 +17,7 @@ interface SettingsModalLayoutProps {
     onMobileBackClick?: () => void;
 }
 
-export const SettingsModalLayout: React.FC<SettingsModalLayoutProps> = ({
+export const SettingsModalLayout = ({
     isOpen,
     onClose,
     sidebar,
@@ -25,7 +25,7 @@ export const SettingsModalLayout: React.FC<SettingsModalLayoutProps> = ({
     closeButtonOffsetClass,
     isMobileSidebarOpen = true,
     onMobileBackClick,
-}) => (
+}: SettingsModalLayoutProps) => (
     <Modal
         fullScreen
         noPadding

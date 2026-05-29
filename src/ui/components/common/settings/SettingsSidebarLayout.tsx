@@ -19,13 +19,13 @@ interface SettingsSidebarLayoutProps {
     setActiveSection: (sectionId: string) => void;
 }
 
-export const SettingsSidebarLayout: React.FC<SettingsSidebarLayoutProps> = ({
+export const SettingsSidebarLayout = ({
     headerText,
     sections,
     activeSection,
     setActiveSection,
-}) => {
-    const visibleSections = sections.filter((s) => !s.hidden);
+}: SettingsSidebarLayoutProps) => {
+    const visibleSections = sections.filter((s): boolean => !s.hidden);
 
     return (
         <div className="flex h-full w-full shrink-0 flex-col gap-4 overflow-y-auto border-r border-border-subtle bg-bg-secondary p-4 md:w-[240px]">
@@ -55,7 +55,7 @@ export const SettingsSidebarLayout: React.FC<SettingsSidebarLayoutProps> = ({
                                 disabled={section.disabled}
                                 key={section.id}
                                 variant={isActive ? 'normal' : 'ghost'}
-                                onClick={() =>
+                                onClick={(): false | void =>
                                     !section.disabled &&
                                     setActiveSection(section.id)
                                 }

@@ -29,7 +29,7 @@ export interface LinkProps extends React.AnchorHTMLAttributes<HTMLAnchorElement>
 /**
  * @description Link component. Support links and router links
  */
-export const Link: React.FC<LinkProps> = ({
+export const Link = ({
     href,
     to,
     children,
@@ -38,7 +38,7 @@ export const Link: React.FC<LinkProps> = ({
     size,
     onClick,
     ...props
-}) => {
+}: LinkProps) => {
     const sizeClass = size ? sizeClasses[size] : undefined;
     const [isModalOpen, setIsModalOpen] = useState(false);
     const targetUrl = to || href || '#';
@@ -132,7 +132,7 @@ export const Link: React.FC<LinkProps> = ({
                 <ConfirmLinkModal
                     isOpen={isModalOpen}
                     url={targetUrl}
-                    onClose={() => setIsModalOpen(false)}
+                    onClose={(): void => setIsModalOpen(false)}
                     onConfirm={handleConfirm}
                 />
             )}

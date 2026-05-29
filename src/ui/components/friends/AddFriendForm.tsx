@@ -13,10 +13,10 @@ interface AddFriendFormProps {
     size?: 'sm' | 'md';
 }
 
-export const AddFriendForm: React.FC<AddFriendFormProps> = ({
+export const AddFriendForm = ({
     className,
     size = 'md',
-}) => {
+}: AddFriendFormProps) => {
     const [username, setUsername] = React.useState('');
     const [status, setStatus] = React.useState<
         { type: 'success' | 'error'; message: string } | undefined
@@ -30,12 +30,12 @@ export const AddFriendForm: React.FC<AddFriendFormProps> = ({
 
         setStatus(undefined);
         sendFriendRequest(username, {
-            onSuccess: () => {
+            onSuccess: (): void => {
                 setUsername('');
                 setStatus({ type: 'success', message: 'Friend request sent!' });
-                setTimeout(() => setStatus(undefined), 3000);
+                setTimeout((): void => setStatus(undefined), 3000);
             },
-            onError: () => {
+            onError: (): void => {
                 setStatus({ type: 'error', message: 'Unknown error :p' });
             },
         });
@@ -51,11 +51,13 @@ export const AddFriendForm: React.FC<AddFriendFormProps> = ({
                     )}
                     placeholder="Username"
                     value={username}
-                    onChange={(e) => {
+                    onChange={(e): void => {
                         setUsername(e.target.value);
                         setStatus(undefined);
                     }}
-                    onKeyDown={(e) => e.key === 'Enter' && submit()}
+                    onKeyDown={(e): false | void =>
+                        e.key === 'Enter' && submit()
+                    }
                 />
                 <IconButton
                     className={cn(

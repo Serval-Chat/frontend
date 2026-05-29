@@ -23,25 +23,25 @@ const furTweakerSlice = createSlice({
     name: 'furTweaker',
     initialState,
     reducers: {
-        setFurTweakerOpen: (state, action: PayloadAction<boolean>) => {
+        setFurTweakerOpen: (state, action: PayloadAction<boolean>): void => {
             state.isOpen = action.payload;
         },
-        toggleFurTweaker: (state) => {
+        toggleFurTweaker: (state): void => {
             state.isOpen = !state.isOpen;
         },
-        setFurSpotCount: (state, action: PayloadAction<number>) => {
+        setFurSpotCount: (state, action: PayloadAction<number>): void => {
             state.spotCount = action.payload;
         },
-        setFurOpacity: (state, action: PayloadAction<number>) => {
+        setFurOpacity: (state, action: PayloadAction<number>): void => {
             state.opacity = action.payload;
         },
-        setFurSeed: (state, action: PayloadAction<number>) => {
+        setFurSeed: (state, action: PayloadAction<number>): void => {
             state.seed = action.payload;
         },
-        setFurBase: (state, action: PayloadAction<string>) => {
+        setFurBase: (state, action: PayloadAction<string>): void => {
             state.base = action.payload;
         },
-        setFurSpotColor: (state, action: PayloadAction<string>) => {
+        setFurSpotColor: (state, action: PayloadAction<string>): void => {
             state.spotColor = action.payload;
         },
     },

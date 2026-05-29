@@ -14,15 +14,15 @@ export function useWebSocket<T = unknown>(
 ): void {
     const callbackRef = useRef(callback);
 
-    useLayoutEffect(() => {
+    useLayoutEffect((): void => {
         callbackRef.current = callback;
     }, [callback]);
 
-    useEffect(() => {
-        const unsubscribe = wsClient.on<T>(event, (payload) => {
+    useEffect((): (() => void) => {
+        const unsubscribe = wsClient.on<T>(event, (payload): void => {
             callbackRef.current(payload);
         });
-        return () => {
+        return (): void => {
             unsubscribe();
         };
     }, [event]);

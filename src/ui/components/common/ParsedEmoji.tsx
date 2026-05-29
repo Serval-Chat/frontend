@@ -21,12 +21,12 @@ interface ParsedEmojiProps {
 /**
  * @description Renders a custom emoji
  */
-export const ParsedEmoji: React.FC<ParsedEmojiProps> = ({
+export const ParsedEmoji = ({
     emojiId,
     className,
     isLarge,
     style,
-}) => {
+}: ParsedEmojiProps) => {
     const [inView, setInView] = useState(false);
     const containerRef = useRef<HTMLDivElement | HTMLImageElement>(null);
     const queryClient = useQueryClient();
@@ -44,14 +44,14 @@ export const ParsedEmoji: React.FC<ParsedEmojiProps> = ({
         queryClient.getQueryData(emojiKeys.detail(emojiId)) ||
         queryClient
             .getQueryData<Emoji[]>(['servers', 'emojis', 'all'])
-            ?.find((e) => e._id === emojiId)
+            ?.find((e): boolean => e._id === emojiId)
     );
 
-    useEffect(() => {
+    useEffect((): (() => void) | undefined => {
         if (isCached || inView) return;
 
         const observer = new IntersectionObserver(
-            ([entry]) => {
+            ([entry]): void => {
                 if (entry.isIntersecting) {
                     setInView(true);
                     observer.disconnect(); // Only need to fetch once
@@ -64,7 +64,7 @@ export const ParsedEmoji: React.FC<ParsedEmojiProps> = ({
             observer.observe(containerRef.current);
         }
 
-        return () => observer.disconnect();
+        return (): void => observer.disconnect();
     }, [isCached, inView]);
 
     const { data: emoji, isLoading } = useEmoji(emojiId, {
@@ -103,7 +103,7 @@ export const ParsedEmoji: React.FC<ParsedEmojiProps> = ({
                         isLarge ? 'h-16 w-16' : 'h-[1.5em] w-[1.5em]',
                         className,
                     )}
-                    onClick={(e: React.MouseEvent) =>
+                    onClick={(e: React.MouseEvent): void =>
                         showEmojiInfo(
                             {
                                 id: emoji._id,
@@ -122,7 +122,7 @@ export const ParsedEmoji: React.FC<ParsedEmojiProps> = ({
                         ref={containerRef as React.RefObject<HTMLImageElement>}
                         src={emojiUrl || ''}
                         style={style}
-                        onError={(e) => {
+                        onError={(e): void => {
                             e.currentTarget.style.display = 'none';
                         }}
                     />

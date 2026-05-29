@@ -12,11 +12,11 @@ interface CreateServerModalProps {
     onSwitchToJoin?: () => void;
 }
 
-export const CreateServerModal: React.FC<CreateServerModalProps> = ({
+export const CreateServerModal = ({
     isOpen,
     onClose,
     onSwitchToJoin,
-}) => {
+}: CreateServerModalProps) => {
     const [name, setName] = useState('');
     const [showConfirm, setShowConfirm] = useState(false);
     const { mutate: createServer, isPending } = useCreateServer();
@@ -25,7 +25,7 @@ export const CreateServerModal: React.FC<CreateServerModalProps> = ({
         createServer(
             { name },
             {
-                onSuccess: () => {
+                onSuccess: (): void => {
                     setShowConfirm(false);
                     onClose();
                     setName('');
@@ -63,7 +63,7 @@ export const CreateServerModal: React.FC<CreateServerModalProps> = ({
                             id="server-name"
                             placeholder="My Awesome Server"
                             value={name}
-                            onChange={(e) => setName(e.target.value)}
+                            onChange={(e): void => setName(e.target.value)}
                         />
                         <Text as="p" size="xs" variant="muted">
                             By creating a server, you agree to our Community
@@ -90,7 +90,7 @@ export const CreateServerModal: React.FC<CreateServerModalProps> = ({
             <Modal
                 isOpen={isOpen && showConfirm}
                 title="Create a Server?"
-                onClose={() => setShowConfirm(false)}
+                onClose={(): void => setShowConfirm(false)}
             >
                 <div className="flex flex-col gap-4">
                     <Text>
@@ -100,14 +100,14 @@ export const CreateServerModal: React.FC<CreateServerModalProps> = ({
                     <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:justify-end">
                         <Button
                             variant="ghost"
-                            onClick={() => setShowConfirm(false)}
+                            onClick={(): void => setShowConfirm(false)}
                         >
                             Cancel
                         </Button>
                         {onSwitchToJoin && (
                             <Button
                                 variant="normal"
-                                onClick={() => {
+                                onClick={(): void => {
                                     setShowConfirm(false);
                                     onSwitchToJoin();
                                 }}

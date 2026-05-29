@@ -20,7 +20,7 @@ export interface AstNode {
     children?: AstNode[];
 }
 
-export const AstRenderer: React.FC<{ nodes: AstNode[] }> = memo(({ nodes }) => (
+export const AstRenderer = memo(({ nodes }: { nodes: AstNode[] }) => (
     <>
         {nodes.map((node, i) => {
             if (node.type === 'text') {
@@ -70,17 +70,17 @@ export const AstRenderer: React.FC<{ nodes: AstNode[] }> = memo(({ nodes }) => (
 ));
 AstRenderer.displayName = 'AstRenderer';
 
-export const CodeModal: React.FC<CodeModalProps> = memo(
-    ({ isOpen, onClose, content, language = 'text' }) => {
+export const CodeModal = memo(
+    ({ isOpen, onClose, content, language = 'text' }: CodeModalProps) => {
         const [highlightedLines, setHighlightedLines] = useState<
             AstNode[][] | null
         >(null);
 
-        useEffect(() => {
+        useEffect((): (() => void) | undefined => {
             if (isOpen) {
                 const worker = new SyntaxWorker();
 
-                worker.onmessage = (e) => {
+                worker.onmessage = (e): void => {
                     setHighlightedLines(e.data);
                     worker.terminate();
                 };
@@ -90,7 +90,7 @@ export const CodeModal: React.FC<CodeModalProps> = memo(
                     language: language.toLowerCase(),
                 });
 
-                return () => {
+                return (): void => {
                     worker.terminate();
                 };
             }
@@ -98,7 +98,11 @@ export const CodeModal: React.FC<CodeModalProps> = memo(
 
         const codeLines =
             highlightedLines ||
-            content.split('\n').map((line) => [{ type: 'text', value: line }]);
+            content
+                .split('\n')
+                .map((line): { type: string; value: string }[] => [
+                    { type: 'text', value: line },
+                ]);
 
         return (
             <Modal

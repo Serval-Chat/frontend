@@ -8,12 +8,12 @@ interface NTTableProps extends React.TableHTMLAttributes<HTMLTableElement> {
     children: React.ReactNode;
 }
 
-export const NTTable: React.FC<NTTableProps> = ({
+export const NTTable = ({
     headers,
     children,
     className,
     ...props
-}) => (
+}: NTTableProps) => (
     <NTScrollArea className="h-full w-full border border-[#dfdfdf] border-r-[#808080] border-b-[#808080] bg-white shadow-[inset_1px_1px_#808080,inset_-1px_-1px_#ffffff]">
         <table
             className={cn(

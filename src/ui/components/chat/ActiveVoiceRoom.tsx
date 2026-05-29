@@ -1,14 +1,13 @@
-import type { FC } from 'react';
 import { useEffect } from 'react';
 
 import { useAppSelector } from '@/store/hooks';
 
-export const ActiveVoiceRoom: FC = () => {
+export const ActiveVoiceRoom = (): null => {
     const { activeVoiceServerId, activeVoiceChannelId } = useAppSelector(
         (state) => state.voice,
     );
 
-    useEffect(() => {
+    useEffect((): void => {
         if (activeVoiceServerId && activeVoiceChannelId) {
             console.error(
                 '[ActiveVoiceRoom] Attempted to connect to voice channel but LiveKit is removed',

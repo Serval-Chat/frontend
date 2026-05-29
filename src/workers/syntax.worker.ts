@@ -59,7 +59,7 @@ function lineify(nodes: AstNode[]): AstNode[][] {
     return lines;
 }
 
-self.onmessage = (e: MessageEvent) => {
+self.onmessage = (e: MessageEvent): void => {
     const { content, language } = e.data;
 
     try {
@@ -75,7 +75,9 @@ self.onmessage = (e: MessageEvent) => {
         console.error('Worker highlight error:', err);
         const lines = content
             .split('\n')
-            .map((line: string) => [{ type: 'text', value: line }]);
+            .map((line: string): { type: string; value: string }[] => [
+                { type: 'text', value: line },
+            ]);
         self.postMessage(lines);
     }
 };

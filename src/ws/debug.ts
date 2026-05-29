@@ -14,7 +14,7 @@ let events: DebugWsEvent[] = [];
 const listeners = new Set<() => void>();
 
 const notify = (): void => {
-    listeners.forEach((l) => l());
+    listeners.forEach((l): void => l());
 };
 
 export const addWsDebugEvent = (
@@ -38,10 +38,10 @@ export const clearWsDebugEvents = (): void => {
 export const useWsDebugEvents = (): DebugWsEvent[] => {
     const [currentEvents, setCurrentEvents] = useState<DebugWsEvent[]>(events);
 
-    useEffect(() => {
+    useEffect((): (() => void) => {
         const listener = (): void => setCurrentEvents([...events]);
         listeners.add(listener);
-        return () => {
+        return (): void => {
             listeners.delete(listener);
         };
     }, []);
@@ -61,10 +61,10 @@ export const toggleWsDebugWindow = (force?: boolean): void => {
 export const useWsDebugWindowOpen = (): boolean => {
     const [open, setOpen] = useState(isWindowOpen);
 
-    useEffect(() => {
+    useEffect((): (() => void) => {
         const listener = (): void => setOpen(isWindowOpen);
         listeners.add(listener);
-        return () => {
+        return (): void => {
             listeners.delete(listener);
         };
     }, []);

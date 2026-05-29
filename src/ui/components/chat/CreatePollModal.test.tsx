@@ -3,19 +3,30 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { CreatePollModal } from './CreatePollModal';
 
-vi.mock('@/hooks/useCustomEmojis', () => ({
-    useCustomEmojis: () => ({
-        customCategories: [],
-        isLoading: false,
+vi.mock(
+    '@/hooks/useCustomEmojis',
+    (): {
+        useCustomEmojis: () => {
+            customCategories: never[];
+            isLoading: boolean;
+        };
+    } => ({
+        useCustomEmojis: (): {
+            customCategories: never[];
+            isLoading: false;
+        } => ({
+            customCategories: [],
+            isLoading: false,
+        }),
     }),
-}));
+);
 
-describe('CreatePollModal', () => {
-    afterEach(() => {
+describe('CreatePollModal', (): void => {
+    afterEach((): void => {
         vi.useRealTimers();
     });
 
-    it('submits a 90 day poll without clamping it to 7 days', () => {
+    it('submits a 90 day poll without clamping it to 7 days', (): void => {
         const now = new Date('2026-05-17T12:00:00.000Z');
         vi.useFakeTimers();
         vi.setSystemTime(now);

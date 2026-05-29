@@ -95,7 +95,7 @@ function hashWord(word: string): string {
 export function censorText(text: string): string {
     if (!text) return text;
 
-    return text.replace(/([a-zA-Z0-9]+)/g, (word) => {
+    return text.replace(/([a-zA-Z0-9]+)/g, (word): string => {
         const lowerWord = word.toLowerCase();
 
         if (CENSORED_WORDS.has(lowerWord)) {

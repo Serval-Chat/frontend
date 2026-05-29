@@ -40,10 +40,10 @@ export function validateSlashCommand(
 ): { ok: true; value: ValidatedSlashCommand } | { ok: false; error: string } {
     let command: SlashCommand | undefined;
     if (parsed.commandId) {
-        command = commands.find((c) => c.id === parsed.commandId);
+        command = commands.find((c): boolean => c.id === parsed.commandId);
     }
     if (!command) {
-        command = commands.find((c) => c.name === parsed.commandName);
+        command = commands.find((c): boolean => c.name === parsed.commandName);
     }
     if (!command) {
         return {
@@ -54,7 +54,7 @@ export function validateSlashCommand(
 
     const definitions = command.options ?? [];
     const requiredCount = definitions.filter(
-        (option) => option.required,
+        (option): boolean | undefined => option.required,
     ).length;
     if (parsed.args.length < requiredCount) {
         return {

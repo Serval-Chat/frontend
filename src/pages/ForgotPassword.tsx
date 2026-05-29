@@ -13,7 +13,7 @@ import { Text } from '@/ui/components/common/Text';
 import { Box } from '@/ui/components/layout/Box';
 import { DefaultBackground } from '@/ui/components/layout/DefaultBackground';
 
-export const ForgotPassword: React.FC = () => {
+export const ForgotPassword = () => {
     const [email, setEmail] = useState('');
     const [status, setStatus] = useState<{
         type: 'error' | 'success';
@@ -65,7 +65,7 @@ export const ForgotPassword: React.FC = () => {
 
                 <form
                     className="space-y-md"
-                    onSubmit={(e) => {
+                    onSubmit={(e): void => {
                         void handleSubmit(e);
                     }}
                 >
@@ -78,7 +78,7 @@ export const ForgotPassword: React.FC = () => {
                             placeholder="Email"
                             type="email"
                             value={email}
-                            onChange={(e) => setEmail(e.target.value)}
+                            onChange={(e): void => setEmail(e.target.value)}
                         />
                     </InputWrapper>
                     <Button

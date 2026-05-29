@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { Check, Minus, X } from 'lucide-react';
 
 import { Button } from '@/ui/components/common/Button';
@@ -14,9 +12,13 @@ interface PermissionOverrideSwitchProps {
     danger?: boolean;
 }
 
-export const PermissionOverrideSwitch: React.FC<
-    PermissionOverrideSwitchProps
-> = ({ label, description, value, onChange, danger }) => (
+export const PermissionOverrideSwitch = ({
+    label,
+    description,
+    value,
+    onChange,
+    danger,
+}: PermissionOverrideSwitchProps) => (
     <div className="flex items-center justify-between border-b border-border-subtle py-3 last:border-b-0">
         <div className="flex-1 pr-4">
             <Text
@@ -40,7 +42,9 @@ export const PermissionOverrideSwitch: React.FC<
                 )}
                 title="Deny"
                 variant="ghost"
-                onClick={() => onChange(value === false ? undefined : false)}
+                onClick={(): void =>
+                    onChange(value === false ? undefined : false)
+                }
             >
                 <X size={16} />
             </Button>
@@ -53,7 +57,7 @@ export const PermissionOverrideSwitch: React.FC<
                 )}
                 title="Inherit"
                 variant="ghost"
-                onClick={() => onChange(undefined)}
+                onClick={(): void => onChange(undefined)}
             >
                 <Minus size={16} />
             </Button>
@@ -66,7 +70,9 @@ export const PermissionOverrideSwitch: React.FC<
                 )}
                 title="Allow"
                 variant="ghost"
-                onClick={() => onChange(value === true ? undefined : true)}
+                onClick={(): void =>
+                    onChange(value === true ? undefined : true)
+                }
             >
                 <Check size={16} />
             </Button>

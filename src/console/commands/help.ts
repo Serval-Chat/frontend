@@ -36,7 +36,7 @@ const HELP_DETAILS: Record<string, string[]> = {
 };
 
 export const helpCommand: ConCommandReactor = {
-    match: (_argc, argv) => argv[0]?.toLowerCase() === 'help',
+    match: (_argc, argv): boolean => argv[0]?.toLowerCase() === 'help',
     execute: (argc, argv) => {
         if (argc > 1) {
             const cmd = argv[1].toLowerCase();

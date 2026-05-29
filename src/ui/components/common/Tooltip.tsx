@@ -15,7 +15,7 @@ interface TooltipProps {
     delay?: number;
 }
 
-export const Tooltip: React.FC<TooltipProps> = ({
+export const Tooltip = ({
     content,
     children,
     position = 'right',
@@ -23,13 +23,13 @@ export const Tooltip: React.FC<TooltipProps> = ({
     triggerClassName,
     fullWidth = false,
     delay = 100,
-}) => {
+}: TooltipProps) => {
     const [isVisible, setIsVisible] = useState(false);
     const [coords, setCoords] = useState({ x: 0, y: 0 });
     const triggerRef = useRef<HTMLDivElement>(null);
     const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-    const updatePosition = useCallback(() => {
+    const updatePosition = useCallback((): void => {
         if (!triggerRef.current) return;
         const rect = triggerRef.current.getBoundingClientRect();
 
@@ -60,7 +60,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
 
     const handleMouseEnter = (): void => {
         if (timeoutRef.current) clearTimeout(timeoutRef.current);
-        timeoutRef.current = setTimeout(() => {
+        timeoutRef.current = setTimeout((): void => {
             setIsVisible(true);
             updatePosition();
         }, delay);
@@ -71,13 +71,13 @@ export const Tooltip: React.FC<TooltipProps> = ({
         setIsVisible(false);
     };
 
-    React.useLayoutEffect(() => {
+    React.useLayoutEffect((): (() => void) | undefined => {
         if (isVisible) {
             updatePosition();
             const hide = (): void => setIsVisible(false);
             window.addEventListener('scroll', hide, true);
             window.addEventListener('resize', hide);
-            return () => {
+            return (): void => {
                 window.removeEventListener('scroll', hide, true);
                 window.removeEventListener('resize', hide);
             };

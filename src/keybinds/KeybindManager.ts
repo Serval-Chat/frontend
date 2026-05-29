@@ -54,7 +54,10 @@ export const KEYBIND_ACTIONS: KeybindAction[] = [
 ];
 
 const ACTIONS_BY_ID = new Map(
-    KEYBIND_ACTIONS.map((action) => [action.id, action]),
+    KEYBIND_ACTIONS.map((action): [KeybindActionId, KeybindAction] => [
+        action.id,
+        action,
+    ]),
 );
 
 const KEY_LABELS: Record<string, string> = {

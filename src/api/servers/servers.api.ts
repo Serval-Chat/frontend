@@ -536,14 +536,7 @@ export const serversApi = {
         await apiClient.post(`/api/v1/servers/${serverId}/ack`);
     },
 
-    getExportState: async (
-        serverId: string,
-        channelId: string,
-    ): Promise<{
-        state: 'available' | 'in_progress' | 'cooling_down';
-        lastExportAt?: string;
-        nextExportAt?: string;
-    }> => {
+    getExportState: async (serverId: string, channelId: string) => {
         const response = await apiClient.get<{
             state: 'available' | 'in_progress' | 'cooling_down';
             lastExportAt?: string;
@@ -567,9 +560,7 @@ export const serversApi = {
             `/api/v1/servers/${serverId}/verification-request`,
         );
     },
-    updateServerSettings: async (
-        settings: ServerSettings,
-    ): Promise<{ message: string; serverSettings: ServerSettings }> => {
+    updateServerSettings: async (settings: ServerSettings) => {
         const response = await apiClient.patch<{
             message: string;
             serverSettings: ServerSettings;

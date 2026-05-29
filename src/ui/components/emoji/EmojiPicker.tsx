@@ -63,7 +63,13 @@ type RowItem =
           id: string;
       };
 
-const EmojiPickerContent: React.FC<{
+const EmojiPickerContent = ({
+    width,
+    height,
+    customCategories,
+    onEmojiSelect,
+    onCustomEmojiSelect,
+}: {
     width: number;
     height: number;
     customCategories: CustomEmojiCategory[];
@@ -73,12 +79,6 @@ const EmojiPickerContent: React.FC<{
         name: string;
         url: string;
     }) => void;
-}> = ({
-    width,
-    height,
-    customCategories,
-    onEmojiSelect,
-    onCustomEmojiSelect,
 }) => {
     const listRef = React.useRef<ListImperativeAPI>(null);
     const scrollOffsetRef = React.useRef<number>(0);
@@ -95,20 +95,20 @@ const EmojiPickerContent: React.FC<{
     } = useEmojiInfoBox();
 
     const listAreaWidth = width - SIDEBAR_WIDTH;
-    const columnCount = useMemo(() => {
+    const columnCount = useMemo((): number => {
         if (width <= 0) return 1;
         return Math.max(1, Math.floor((listAreaWidth - 16) / 42));
     }, [listAreaWidth, width]);
 
-    const flatRows = useMemo(() => {
+    const flatRows = useMemo((): RowItem[] => {
         const rows: RowItem[] = [];
         if (columnCount <= 0 || width <= 0 || height <= 0) return rows;
 
         const normalizedQuery = searchQuery.trim().toLowerCase();
 
-        customCategories.forEach((cat) => {
+        customCategories.forEach((cat): void => {
             const emojis = normalizedQuery
-                ? cat.emojis.filter((e) =>
+                ? cat.emojis.filter((e): boolean =>
                       e.name.toLowerCase().includes(normalizedQuery),
                   )
                 : cat.emojis;
@@ -133,18 +133,19 @@ const EmojiPickerContent: React.FC<{
             }
         });
 
-        categories.forEach((catId) => {
+        categories.forEach((catId): void => {
             const emojis = groupedEmojis[catId] || [];
             const filteredEmojis = normalizedQuery
-                ? emojis.filter((e) => {
+                ? emojis.filter((e): boolean => {
                       const matchName = e.name
                           ?.toLowerCase()
                           .includes(normalizedQuery);
                       const matchShortName = e.short_name
                           ?.toLowerCase()
                           .includes(normalizedQuery);
-                      const matchShortNames = e.short_names?.some((sn) =>
-                          sn.toLowerCase().includes(normalizedQuery),
+                      const matchShortNames = e.short_names?.some(
+                          (sn): boolean =>
+                              sn.toLowerCase().includes(normalizedQuery),
                       );
                       return matchName || matchShortName || matchShortNames;
                   })
@@ -172,11 +173,11 @@ const EmojiPickerContent: React.FC<{
         return rows;
     }, [customCategories, columnCount, width, height, searchQuery]);
 
-    const categoryOffsets = useMemo(() => {
+    const categoryOffsets = useMemo((): Record<string, number> => {
         const offsets: Record<string, number> = {};
         if (width <= 0 || height <= 0) return offsets;
         let currentOffset = 0;
-        flatRows.forEach((row) => {
+        flatRows.forEach((row): void => {
             if (row.type === 'header' && !offsets[row.id])
                 offsets[row.id] = currentOffset;
             currentOffset += row.type === 'header' ? HEADER_HEIGHT : ROW_HEIGHT;
@@ -207,7 +208,7 @@ const EmojiPickerContent: React.FC<{
             }
 
             if (progress < 1) requestAnimationFrame(animateScroll);
-            else setTimeout(() => setIsScrollingTo(false), 50);
+            else setTimeout((): void => setIsScrollingTo(false), 50);
         };
 
         setIsScrollingTo(true);
@@ -242,22 +243,33 @@ const EmojiPickerContent: React.FC<{
 
     const displayCategories = useMemo(
         () => [
-            ...customCategories.map((c) => ({
-                id: c.id,
-                name: c.name,
-                icon: c.icon,
-                type: 'custom' as const,
-            })),
-            ...categories.map((c) => ({
-                id: c,
-                name: c,
-                type: 'standard' as const,
-            })),
+            ...customCategories.map(
+                (
+                    c,
+                ): {
+                    id: string;
+                    name: string;
+                    icon: string | undefined;
+                    type: 'custom';
+                } => ({
+                    id: c.id,
+                    name: c.name,
+                    icon: c.icon,
+                    type: 'custom' as const,
+                }),
+            ),
+            ...categories.map(
+                (c): { id: string; name: string; type: 'standard' } => ({
+                    id: c,
+                    name: c,
+                    type: 'standard' as const,
+                }),
+            ),
         ],
         [customCategories],
     );
 
-    React.useEffect(() => {
+    React.useEffect((): void => {
         if (width <= 0 || height <= 0) return;
         if (displayCategories.length > 0 && !activeCategoryId) {
             setActiveCategoryId(displayCategories[0].id);
@@ -321,7 +333,9 @@ const EmojiPickerContent: React.FC<{
                                     <Button
                                         className="h-10 w-10 shrink-0 rounded-md transition-colors hover:bg-bg-subtle"
                                         variant="ghost"
-                                        onClick={() => onEmojiSelect(unicode)}
+                                        onClick={(): void =>
+                                            onEmojiSelect(unicode)
+                                        }
                                     >
                                         <ParsedUnicodeEmoji
                                             className="h-8 w-8"
@@ -351,10 +365,10 @@ const EmojiPickerContent: React.FC<{
                                     <Button
                                         className="h-10 w-10 shrink-0 rounded-md transition-colors hover:bg-bg-subtle"
                                         variant="ghost"
-                                        onClick={() =>
+                                        onClick={(): void | undefined =>
                                             onCustomEmojiSelect?.(custom)
                                         }
-                                        onContextMenu={(e) =>
+                                        onContextMenu={(e): void =>
                                             showEmojiInfo(custom, e)
                                         }
                                     >
@@ -398,7 +412,9 @@ const EmojiPickerContent: React.FC<{
                                     >[0]['server']
                                 }
                                 size="xs"
-                                onClick={() => handleCategoryClick(cat.id)}
+                                onClick={(): void =>
+                                    handleCategoryClick(cat.id)
+                                }
                             />
                             {isActive && (
                                 <div className="absolute top-1/2 -left-3.5 h-6 w-1.5 -translate-y-1/2 rounded-full bg-primary shadow-[0_0_8px_rgba(var(--primary),0.5)]" />
@@ -415,7 +431,7 @@ const EmojiPickerContent: React.FC<{
                             key={cat.id}
                             title={cat.name}
                             variant="nav"
-                            onClick={() => handleCategoryClick(cat.id)}
+                            onClick={(): void => handleCategoryClick(cat.id)}
                         >
                             <div className="flex h-8 w-8 items-center justify-center overflow-hidden p-1">
                                 {categoryIconMap[cat.id] && (
@@ -443,7 +459,9 @@ const EmojiPickerContent: React.FC<{
                             icon={<Search size={14} />}
                             placeholder="Search emojis..."
                             value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
+                            onChange={(e): void =>
+                                setSearchQuery(e.target.value)
+                            }
                         />
                     </Box>
                     <Box className="flex h-[20px] items-center justify-between">
@@ -452,11 +470,7 @@ const EmojiPickerContent: React.FC<{
                                 ? 'Search Results'
                                 : (
                                       flatRows.find(
-                                          (
-                                              r,
-                                          ): r is RowItem & {
-                                              type: 'header';
-                                          } =>
+                                          (r) =>
                                               r.type === 'header' &&
                                               r.id === activeCategoryId,
                                       ) as
@@ -475,10 +489,14 @@ const EmojiPickerContent: React.FC<{
                     rowHeight={getRowHeight}
                     rowProps={{}}
                     style={{ height: height - 72, width: listAreaWidth }}
-                    onRowsRendered={({ startIndex }: { startIndex: number }) =>
+                    onRowsRendered={({
+                        startIndex,
+                    }: {
+                        startIndex: number;
+                    }): void =>
                         handleItemsRendered({ visibleStartIndex: startIndex })
                     }
-                    onScroll={(e: React.UIEvent<HTMLDivElement>) =>
+                    onScroll={(e: React.UIEvent<HTMLDivElement>): void =>
                         handleScroll({
                             scrollOffset: e.currentTarget.scrollTop,
                         })
@@ -498,19 +516,19 @@ const EmojiPickerContent: React.FC<{
     );
 };
 
-export const EmojiPicker: React.FC<EmojiPickerProps> = ({
+export const EmojiPicker = ({
     onEmojiSelect,
     onCustomEmojiSelect,
     customCategories = [],
     className,
-}) => {
+}: EmojiPickerProps) => {
     const [containerRef, { width, height }] = useMeasure<HTMLDivElement>();
 
     useLockBodyScroll(true);
 
-    React.useEffect(() => {
+    React.useEffect((): (() => void) => {
         document.body.classList.add('picker-open');
-        return () => {
+        return (): void => {
             document.body.classList.remove('picker-open');
         };
     }, []);

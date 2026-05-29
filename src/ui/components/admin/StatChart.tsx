@@ -74,7 +74,7 @@ const StatTooltip = ({
 StatTooltip.displayName = 'StatTooltip';
 
 const makeXTickFormatter =
-    (range: StatsRange, dataLength: number) =>
+    (range: StatsRange, dataLength: number): ((idx: number) => string) =>
     (idx: number): string => {
         if (range === '24h') {
             const hoursAgo = 23 - idx;
@@ -108,7 +108,10 @@ export const StatChart = ({
     range,
     color = 'var(--color-primary)',
 }: StatChartProps): ReactNode => {
-    const chartData = data.map((value, i) => ({ hour: i, value }));
+    const chartData = data.map((value, i): { hour: number; value: number } => ({
+        hour: i,
+        value,
+    }));
     const gradId = `grad-${title.replace(/\s+/g, '-').toLowerCase()}`;
     const xTickFormatter = makeXTickFormatter(range, data.length);
 

@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { UserX } from 'lucide-react';
 
 import { Button } from '@/ui/components/common/Button';
@@ -17,13 +15,13 @@ interface KickUserModalProps {
     userAvatar?: string | null;
 }
 
-export const KickUserModal: React.FC<KickUserModalProps> = ({
+export const KickUserModal = ({
     isOpen,
     onClose,
     onConfirm,
     username,
     userAvatar,
-}) => (
+}: KickUserModalProps) => (
     <Modal isOpen={isOpen} title="Kick Member" onClose={onClose}>
         <Box className="space-y-6">
             <Box className="flex flex-col items-center gap-4 py-4 text-center">
@@ -48,7 +46,7 @@ export const KickUserModal: React.FC<KickUserModalProps> = ({
                 </Button>
                 <Button
                     variant="danger"
-                    onClick={() => {
+                    onClick={(): void => {
                         onConfirm();
                         onClose();
                     }}

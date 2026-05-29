@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { AnimatePresence, motion } from 'framer-motion';
 
 import { Button } from '@/ui/components/common/Button';
@@ -23,7 +21,7 @@ interface SettingsFloatingBarProps {
 /**
  * @description A floating action bar for settings to handle unsaved changes.
  */
-export const SettingsFloatingBar: React.FC<SettingsFloatingBarProps> = ({
+export const SettingsFloatingBar = ({
     isVisible,
     isPending = false,
     onSave,
@@ -35,7 +33,7 @@ export const SettingsFloatingBar: React.FC<SettingsFloatingBarProps> = ({
     containerClassName,
     offset = '240px',
     isFixed = true,
-}) => (
+}: SettingsFloatingBarProps) => (
     <AnimatePresence>
         {isVisible && (
             <motion.div

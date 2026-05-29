@@ -74,17 +74,17 @@ export const AuthenticatedLayout = (): ReactNode => {
     const [showReconnecting, setShowReconnecting] = React.useState(false);
     const isDebugWindowOpen = useWsDebugWindowOpen();
 
-    React.useEffect(() => {
+    React.useEffect((): (() => void) => {
         let timeout: NodeJS.Timeout;
         if (status === 'reconnecting' || status === 'connecting') {
-            timeout = setTimeout(() => setShowReconnecting(true), 1500);
+            timeout = setTimeout((): void => setShowReconnecting(true), 1500);
         } else {
             setShowReconnecting(false);
         }
-        return () => clearTimeout(timeout);
+        return (): void => clearTimeout(timeout);
     }, [status]);
 
-    React.useEffect(() => {
+    React.useEffect((): void => {
         if (isAuthenticated && user && !isInitialDataLoading) {
             void syncWebPush();
         }
@@ -94,7 +94,10 @@ export const AuthenticatedLayout = (): ReactNode => {
         return <Navigate replace to="/login" />;
     }
 
-    const meBanError = (() => {
+    const meBanError = ((): {
+        reason?: string;
+        expirationTimestamp?: string;
+    } | null => {
         const err = meError as AxiosError<{
             error?: string;
             ban?: { reason?: string; expirationTimestamp?: string };

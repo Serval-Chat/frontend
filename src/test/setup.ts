@@ -10,17 +10,19 @@ const createStorageMock = (): Partial<Storage> & {
 } => {
     let store: Record<string, string> = {};
     return {
-        getItem: vi.fn((key: string) => store[key] || null),
-        setItem: vi.fn((key: string, value: string) => {
+        getItem: vi.fn((key: string): string | null => store[key] || null),
+        setItem: vi.fn((key: string, value: string): void => {
             store[key] = value.toString();
         }),
-        removeItem: vi.fn((key: string) => {
+        removeItem: vi.fn((key: string): void => {
             delete store[key];
         }),
-        clear: vi.fn(() => {
+        clear: vi.fn((): void => {
             store = {};
         }),
-        key: vi.fn((index: number) => Object.keys(store)[index] || null),
+        key: vi.fn(
+            (index: number): string | null => Object.keys(store)[index] || null,
+        ),
         get length() {
             return Object.keys(store).length;
         },
@@ -34,7 +36,7 @@ if (typeof window !== 'undefined') {
     vi.stubGlobal('localStorage', localStorageMock);
     vi.stubGlobal('sessionStorage', sessionStorageMock);
 
-    beforeEach(() => {
+    beforeEach((): void => {
         localStorageMock.clear();
         sessionStorageMock.clear();
     });

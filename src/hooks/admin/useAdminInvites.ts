@@ -6,7 +6,7 @@ import { adminInvitesApi } from '@/api/admin/invites.api';
 export const useAdminInvites = (): UseQueryResult<string[], Error> =>
     useQuery<string[]>({
         queryKey: ['admin-invites'],
-        queryFn: () => adminInvitesApi.getInvites(),
+        queryFn: (): Promise<string[]> => adminInvitesApi.getInvites(),
     });
 
 export const useCreateAdminInvite = (): UseMutationResult<
@@ -18,8 +18,9 @@ export const useCreateAdminInvite = (): UseMutationResult<
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: () => adminInvitesApi.createInvite(),
-        onSuccess: () => {
+        mutationFn: (): Promise<{ message: string; token: string }> =>
+            adminInvitesApi.createInvite(),
+        onSuccess: (): void => {
             void queryClient.invalidateQueries({ queryKey: ['admin-invites'] });
         },
     });
@@ -34,8 +35,9 @@ export const useDeleteAdminInvite = (): UseMutationResult<
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: ({ token }) => adminInvitesApi.deleteInvite(token),
-        onSuccess: () => {
+        mutationFn: ({ token }): Promise<void> =>
+            adminInvitesApi.deleteInvite(token),
+        onSuccess: (): void => {
             void queryClient.invalidateQueries({ queryKey: ['admin-invites'] });
         },
     });
@@ -49,8 +51,11 @@ export const useCreateBatchAdminInvites = (): UseMutationResult<
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: ({ count }) => adminInvitesApi.createBatchInvites(count),
-        onSuccess: () => {
+        mutationFn: ({
+            count,
+        }): Promise<{ message: string; tokens: string[] }> =>
+            adminInvitesApi.createBatchInvites(count),
+        onSuccess: (): void => {
             void queryClient.invalidateQueries({ queryKey: ['admin-invites'] });
         },
     });

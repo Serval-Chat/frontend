@@ -7,12 +7,12 @@ interface TableProps extends React.TableHTMLAttributes<HTMLTableElement> {
     fullWidth?: boolean;
 }
 
-export const Table: React.FC<TableProps> = ({
+export const Table = ({
     children,
     className,
     fullWidth = true,
     ...props
-}) => (
+}: TableProps) => (
     <div
         className={cn(
             'overflow-hidden rounded-lg border border-border-subtle',
@@ -36,11 +36,11 @@ interface TableHeaderProps extends React.HTMLAttributes<HTMLTableSectionElement>
     children: React.ReactNode;
 }
 
-export const TableHeader: React.FC<TableHeaderProps> = ({
+export const TableHeader = ({
     children,
     className,
     ...props
-}) => (
+}: TableHeaderProps) => (
     <thead
         className={cn(
             'border-b border-border-subtle bg-bg-secondary text-muted-foreground',
@@ -56,11 +56,11 @@ interface TableBodyProps extends React.HTMLAttributes<HTMLTableSectionElement> {
     children: React.ReactNode;
 }
 
-export const TableBody: React.FC<TableBodyProps> = ({
+export const TableBody = ({
     children,
     className,
     ...props
-}) => (
+}: TableBodyProps) => (
     <tbody
         className={cn('divide-y divide-border-subtle', className)}
         {...props}
@@ -73,11 +73,7 @@ interface TableRowProps extends React.HTMLAttributes<HTMLTableRowElement> {
     children: React.ReactNode;
 }
 
-export const TableRow: React.FC<TableRowProps> = ({
-    children,
-    className,
-    ...props
-}) => (
+export const TableRow = ({ children, className, ...props }: TableRowProps) => (
     <tr
         className={cn('group transition-colors hover:bg-bg-subtle', className)}
         {...props}
@@ -91,12 +87,12 @@ interface TableHeadProps extends React.ThHTMLAttributes<HTMLTableCellElement> {
     align?: 'left' | 'center' | 'right';
 }
 
-export const TableHead: React.FC<TableHeadProps> = ({
+export const TableHead = ({
     children,
     className,
     align = 'left',
     ...props
-}) => (
+}: TableHeadProps) => (
     <th
         className={cn(
             'border-r border-border-subtle px-4 py-3 text-[10px] font-bold tracking-wider uppercase last:border-0',
@@ -117,14 +113,14 @@ interface TableCellProps extends React.TdHTMLAttributes<HTMLTableCellElement> {
     muted?: boolean;
 }
 
-export const TableCell: React.FC<TableCellProps> = ({
+export const TableCell = ({
     children,
     className,
     align = 'left',
     monospace,
     muted,
     ...props
-}) => (
+}: TableCellProps) => (
     <td
         className={cn(
             'border-r border-border-subtle px-4 py-4 last:border-0',

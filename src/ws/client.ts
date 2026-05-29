@@ -159,7 +159,7 @@ class WsClient {
         const set = this.handlers.get(type)!;
         set.add(handler as EventHandler<unknown>);
 
-        return () => this.off(type, handler);
+        return (): void => this.off(type, handler);
     }
 
     /**
@@ -252,7 +252,7 @@ class WsClient {
         const typeHandlers = this.handlers.get(type);
 
         if (typeHandlers) {
-            [...typeHandlers].forEach((handler) => {
+            [...typeHandlers].forEach((handler): void => {
                 try {
                     handler(payload, meta);
                 } catch (error) {
@@ -291,7 +291,7 @@ class WsClient {
             console.log(
                 `[WS] Reconnecting in ${delay}ms... (Attempt ${this.reconnectAttempts + 1})`,
             );
-            this.reconnectTimeout = window.setTimeout(() => {
+            this.reconnectTimeout = window.setTimeout((): void => {
                 this.reconnectTimeout = null;
                 this.reconnectAttempts++;
                 this.connect(this.token ?? undefined);
@@ -306,7 +306,7 @@ class WsClient {
 
     private startPing(): void {
         this.stopPing();
-        this.pingInterval = window.setInterval(() => {
+        this.pingInterval = window.setInterval((): void => {
             this.send(WsEvents.PING);
         }, 30000);
     }

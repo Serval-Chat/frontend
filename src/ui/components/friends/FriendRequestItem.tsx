@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { Check, X } from 'lucide-react';
 
 import {
@@ -19,11 +17,11 @@ interface FriendRequestItemProps {
     fromUsername: string;
 }
 
-export const FriendRequestItem: React.FC<FriendRequestItemProps> = ({
+export const FriendRequestItem = ({
     requestId,
     fromId,
     fromUsername,
-}) => {
+}: FriendRequestItemProps) => {
     const { data: userProfile } = useUserById(fromId);
     const { mutate: accept, isPending: isAccepting } = useAcceptFriendRequest();
     const { mutate: reject, isPending: isRejecting } = useRejectFriendRequest();
@@ -51,7 +49,7 @@ export const FriendRequestItem: React.FC<FriendRequestItemProps> = ({
                     disabled={isRejecting}
                     loading={isAccepting}
                     variant="normal"
-                    onClick={() => accept(requestId)}
+                    onClick={(): void => accept(requestId)}
                 >
                     <Check className="h-4 w-4" />
                 </Button>
@@ -60,7 +58,7 @@ export const FriendRequestItem: React.FC<FriendRequestItemProps> = ({
                     disabled={isAccepting}
                     loading={isRejecting}
                     variant="normal"
-                    onClick={() => reject(requestId)}
+                    onClick={(): void => reject(requestId)}
                 >
                     <X className="h-4 w-4" />
                 </Button>

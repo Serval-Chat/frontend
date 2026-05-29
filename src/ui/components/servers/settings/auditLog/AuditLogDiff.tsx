@@ -30,8 +30,8 @@ function flattenChange(change: IAuditLogChange): Array<{
             new Set([...Object.keys(before), ...Object.keys(after)]),
         );
         const rows = allKeys
-            .filter((k) => before[k] !== after[k])
-            .map((k) => ({
+            .filter((k): boolean => before[k] !== after[k])
+            .map((k): { field: string; before: string; after: string } => ({
                 field: k,
                 before: formatBool(before[k]),
                 after: formatBool(after[k]),
@@ -150,7 +150,7 @@ function formatValue(value: unknown, field?: string): string | React.ReactNode {
     return String(value);
 }
 
-export const AuditLogDiff: React.FC<AuditLogDiffProps> = ({ changes }) => {
+export const AuditLogDiff = ({ changes }: AuditLogDiffProps) => {
     const [expanded, setExpanded] = useState(false);
 
     if (!changes || changes.length === 0) return null;
@@ -162,7 +162,7 @@ export const AuditLogDiff: React.FC<AuditLogDiffProps> = ({ changes }) => {
         <div className="mt-2 text-sm">
             <button
                 className="hover:text-text flex items-center gap-1 text-xs text-text-muted"
-                onClick={() => setExpanded(!expanded)}
+                onClick={(): void => setExpanded(!expanded)}
             >
                 {expanded ? (
                     <ChevronDown className="h-3 w-3" />

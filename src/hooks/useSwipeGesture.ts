@@ -66,7 +66,7 @@ export const useSwipeGesture = ({
     const onDragMoveRef = useRef(onDragMove);
     const onDragEndRef = useRef(onDragEnd);
 
-    useLayoutEffect(() => {
+    useLayoutEffect((): void => {
         onSwipeLeftRef.current = onSwipeLeft;
         onSwipeRightRef.current = onSwipeRight;
         thresholdRef.current = threshold;
@@ -82,7 +82,7 @@ export const useSwipeGesture = ({
     const startYRef = useRef<number>(0);
     const cancelledRef = useRef<boolean>(false);
 
-    const handleTouchStart = useCallback((e: TouchEvent) => {
+    const handleTouchStart = useCallback((e: TouchEvent): void => {
         const touch = e.touches[0];
         if (!touch) return;
         startXRef.current = touch.clientX;
@@ -91,7 +91,7 @@ export const useSwipeGesture = ({
         onDragStartRef.current?.();
     }, []);
 
-    const handleTouchMove = useCallback((e: TouchEvent) => {
+    const handleTouchMove = useCallback((e: TouchEvent): void => {
         if (cancelledRef.current) return;
         const touch = e.touches[0];
         if (!touch) return;
@@ -107,7 +107,7 @@ export const useSwipeGesture = ({
         onDragMoveRef.current?.(deltaX);
     }, []);
 
-    const handleTouchEnd = useCallback((e: TouchEvent) => {
+    const handleTouchEnd = useCallback((e: TouchEvent): void => {
         if (cancelledRef.current) return;
 
         const touch = e.changedTouches[0];
@@ -136,7 +136,7 @@ export const useSwipeGesture = ({
      * never miss the mount.
      */
     const ref = useCallback(
-        (el: HTMLElement | null) => {
+        (el: HTMLElement | null): (() => void) | undefined => {
             if (!el || !enabledRef.current) return;
 
             el.addEventListener('touchstart', handleTouchStart, {
@@ -147,7 +147,7 @@ export const useSwipeGesture = ({
             });
             el.addEventListener('touchend', handleTouchEnd, { passive: true });
 
-            return () => {
+            return (): void => {
                 el.removeEventListener('touchstart', handleTouchStart);
                 el.removeEventListener('touchmove', handleTouchMove);
                 el.removeEventListener('touchend', handleTouchEnd);

@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { cn } from '@/utils/cn';
 
 interface BadgeProps {
@@ -8,11 +6,7 @@ interface BadgeProps {
     maxCount?: number;
 }
 
-export const Badge: React.FC<BadgeProps> = ({
-    count,
-    className,
-    maxCount = 99,
-}) => {
+export const Badge = ({ count, className, maxCount = 99 }: BadgeProps) => {
     if (count <= 0) return null;
 
     const displayCount = count > maxCount ? `${maxCount}+` : count;

@@ -15,7 +15,7 @@ import { Box } from '@/ui/components/layout/Box';
 
 import { RolePicker } from './ServerOnboardingModals';
 
-export const ServerRolesPage: React.FC = () => {
+export const ServerRolesPage = () => {
     const { serverId } = useParams<{ serverId: string }>();
     const navigate = useNavigate();
     const { data: onboarding } = useOnboarding(serverId ?? '');
@@ -25,18 +25,20 @@ export const ServerRolesPage: React.FC = () => {
     const [selectedRoleIds, setSelectedRoleIds] = useState<string[]>([]);
     const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
-    React.useEffect(() => {
+    React.useEffect((): void => {
         if (!onboarding) return;
         const allowed = new Set(onboarding.onboarding.selfAssignableRoleIds);
         setSelectedRoleIds(
-            onboarding.member.roles.filter((roleId) => allowed.has(roleId)),
+            onboarding.member.roles.filter((roleId): boolean =>
+                allowed.has(roleId),
+            ),
         );
     }, [onboarding]);
 
     const handleSave = (): void => {
         if (!serverId) return;
         updateSelfRoles.mutate(selectedRoleIds, {
-            onSuccess: () => setHasUnsavedChanges(false),
+            onSuccess: (): void => setHasUnsavedChanges(false),
         });
     };
 
@@ -102,7 +104,7 @@ export const ServerRolesPage: React.FC = () => {
                         <div className="flex gap-2">
                             <Button
                                 variant="ghost"
-                                onClick={() => {
+                                onClick={(): void => {
                                     if (onboarding) {
                                         const allowed = new Set(
                                             onboarding.onboarding
@@ -110,7 +112,8 @@ export const ServerRolesPage: React.FC = () => {
                                         );
                                         setSelectedRoleIds(
                                             onboarding.member.roles.filter(
-                                                (roleId) => allowed.has(roleId),
+                                                (roleId): boolean =>
+                                                    allowed.has(roleId),
                                             ),
                                         );
                                     }

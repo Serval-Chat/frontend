@@ -24,7 +24,7 @@ export const useSmartPosition = ({
 }: UseSmartPositionOptions): Position => {
     const [coords, setCoords] = useState<Position>(position || { x: 0, y: 0 });
 
-    const updatePosition = useCallback(() => {
+    const updatePosition = useCallback((): void => {
         if (!isOpen || !elementRef.current) return;
 
         const elementRect = elementRef.current.getBoundingClientRect();
@@ -65,13 +65,13 @@ export const useSmartPosition = ({
         // Top edge
         if (y < padding) y = padding;
 
-        setCoords((prev) => {
+        setCoords((prev): Position => {
             if (prev.x === x && prev.y === y) return prev;
             return { x, y };
         });
     }, [isOpen, position, triggerRef, elementRef, padding, offset]);
 
-    useLayoutEffect(() => {
+    useLayoutEffect((): (() => void) | undefined => {
         if (isOpen) {
             updatePosition();
             window.addEventListener('resize', updatePosition);
@@ -79,13 +79,13 @@ export const useSmartPosition = ({
 
             let resizeObserver: ResizeObserver | null = null;
             if (elementRef.current) {
-                resizeObserver = new ResizeObserver(() => {
+                resizeObserver = new ResizeObserver((): void => {
                     updatePosition();
                 });
                 resizeObserver.observe(elementRef.current);
             }
 
-            return () => {
+            return (): void => {
                 window.removeEventListener('resize', updatePosition);
                 window.removeEventListener('scroll', updatePosition, true);
                 if (resizeObserver) {

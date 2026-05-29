@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { type Theme, useTheme } from '@/providers/ThemeProvider';
 import { Button } from '@/ui/components/common/Button';
 import { cn } from '@/utils/cn';
@@ -20,10 +18,10 @@ const THEMES = [
     { id: 'high-contrast', label: 'High Contrast' },
 ] as const;
 
-export const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({
+export const ThemeSwitcher = ({
     className,
     variant = 'default',
-}) => {
+}: ThemeSwitcherProps) => {
     const { theme, setTheme } = useTheme();
 
     return (
@@ -41,7 +39,7 @@ export const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({
                     )}
                     key={t.id}
                     variant="ghost"
-                    onClick={() => setTheme(t.id as Theme)}
+                    onClick={(): void => setTheme(t.id as Theme)}
                 >
                     <div
                         className={cn(

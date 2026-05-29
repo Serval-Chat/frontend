@@ -104,11 +104,11 @@ const addMessageToInfiniteCache = (
 ): void => {
     queryClient.setQueryData<InfiniteData<ChatMessage[]>>(
         queryKey,
-        (oldData) => {
+        (oldData): InfiniteData<ChatMessage[], unknown> | undefined => {
             if (!oldData) return oldData;
 
             const firstPage = oldData.pages[0] || [];
-            if (firstPage.some((msg) => msg._id === newMessage._id)) {
+            if (firstPage.some((msg): boolean => msg._id === newMessage._id)) {
                 return oldData;
             }
 
@@ -187,7 +187,9 @@ const playNotificationSound = (queryClient: QueryClient): void => {
         const me = queryClient.getQueryData<User>(['me']);
         const settings = me?.settings;
         const customSounds = settings?.notificationSounds || [];
-        const enabledCustomSounds = customSounds.filter((s) => s.enabled);
+        const enabledCustomSounds = customSounds.filter(
+            (s): boolean => s.enabled,
+        );
         const useDefault = settings?.useDefaultSounds !== false;
 
         let soundUrl = '';
@@ -201,7 +203,10 @@ const playNotificationSound = (queryClient: QueryClient): void => {
                 soundUrl = enabledCustomSounds[randomIndex].url;
             } else {
                 if (soundQueue.length === 0) {
-                    soundQueue = Array.from({ length: 12 }, (_, i) => i + 1);
+                    soundQueue = Array.from(
+                        { length: 12 },
+                        (_, i): number => i + 1,
+                    );
                     for (let i = soundQueue.length - 1; i > 0; i--) {
                         const j = Math.floor(Math.random() * (i + 1));
                         [soundQueue[i], soundQueue[j]] = [
@@ -215,7 +220,10 @@ const playNotificationSound = (queryClient: QueryClient): void => {
             }
         } else if (useDefault) {
             if (soundQueue.length === 0) {
-                soundQueue = Array.from({ length: 12 }, (_, i) => i + 1);
+                soundQueue = Array.from(
+                    { length: 12 },
+                    (_, i): number => i + 1,
+                );
                 for (let i = soundQueue.length - 1; i > 0; i--) {
                     const j = Math.floor(Math.random() * (i + 1));
                     [soundQueue[i], soundQueue[j]] = [
@@ -233,7 +241,7 @@ const playNotificationSound = (queryClient: QueryClient): void => {
         const audio = new Audio(soundUrl);
         const playPromise = audio.play();
         if (playPromise !== undefined) {
-            playPromise.catch(() => {});
+            playPromise.catch((): void => {});
         }
     }, 0);
 };
@@ -241,7 +249,7 @@ const playNotificationSound = (queryClient: QueryClient): void => {
 const syncSoundCache = (user: User | undefined): void => {
     const sounds = user?.settings?.notificationSounds;
     if (!sounds) return;
-    const urls = sounds.map((s) => s.url);
+    const urls = sounds.map((s): string => s.url);
     void pruneSoundCache(urls);
     for (const url of urls) {
         void cacheSound(url);
@@ -264,7 +272,7 @@ export const setupGlobalWsHandlers = (
     const cleanups: (() => void)[] = [];
 
     cleanups.push(
-        wsClient.on<IWsErrorEvent>(WsEvents.ERROR, (payload) => {
+        wsClient.on<IWsErrorEvent>(WsEvents.ERROR, (payload): void => {
             console.error('[WS] Global Error:', payload.message);
         }),
     );
@@ -272,7 +280,7 @@ export const setupGlobalWsHandlers = (
     cleanups.push(
         wsClient.on<IWsAuthenticatedEvent>(
             WsEvents.AUTHENTICATED,
-            (payload) => {
+            (payload): void => {
                 if (payload.user) {
                     currentUser = {
                         id: payload.user.id,
@@ -288,17 +296,17 @@ export const setupGlobalWsHandlers = (
                     dispatch(setBackendInstanceId(payload.instanceId));
                     serversApi
                         .getUnreadStatus()
-                        .then((unreadMap) => {
+                        .then((unreadMap): void => {
                             dispatch(setUnreadServers(unreadMap));
                         })
-                        .catch(() => {});
+                        .catch((): void => {});
 
                     chatApi
                         .getUnreadCounts()
-                        .then((counts) => {
+                        .then((counts): void => {
                             dispatch(setUnreadDms(counts));
                         })
-                        .catch(() => {});
+                        .catch((): void => {});
 
                     void queryClient.invalidateQueries({ queryKey: ['me'] });
                     void queryClient.invalidateQueries({
@@ -324,7 +332,7 @@ export const setupGlobalWsHandlers = (
     cleanups.push(
         wsClient.on<{ serverId: string; hasUnread: boolean }>(
             WsEvents.SERVER_UNREAD_UPDATED,
-            (payload) => {
+            (payload): void => {
                 dispatch(
                     setServerUnread({
                         serverId: payload.serverId,
@@ -338,7 +346,7 @@ export const setupGlobalWsHandlers = (
     cleanups.push(
         wsClient.on<{ peerId: string; count: number }>(
             WsEvents.DM_UNREAD_UPDATED,
-            (payload) => {
+            (payload): void => {
                 dispatch(
                     setDmUnread({
                         userId: payload.peerId,
@@ -352,24 +360,26 @@ export const setupGlobalWsHandlers = (
     cleanups.push(
         wsClient.on<IChannelUnreadUpdatedEvent>(
             WsEvents.CHANNEL_UNREAD_UPDATED,
-            (payload) => {
+            (payload): void => {
                 queryClient.setQueryData<Channel[]>(
                     SERVERS_QUERY_KEYS.channels(payload.serverId),
-                    (oldChannels) => {
+                    (oldChannels): Channel[] | undefined => {
                         if (!oldChannels) return oldChannels;
-                        return oldChannels.map((channel) =>
-                            channel._id === payload.channelId
-                                ? {
-                                      ...channel,
-                                      lastMessageAt:
-                                          payload.lastMessageAt !== undefined
-                                              ? payload.lastMessageAt
-                                              : channel.lastMessageAt,
-                                      lastReadAt:
-                                          payload.lastReadAt ??
-                                          channel.lastReadAt,
-                                  }
-                                : channel,
+                        return oldChannels.map(
+                            (channel): Channel =>
+                                channel._id === payload.channelId
+                                    ? {
+                                          ...channel,
+                                          lastMessageAt:
+                                              payload.lastMessageAt !==
+                                              undefined
+                                                  ? payload.lastMessageAt
+                                                  : channel.lastMessageAt,
+                                          lastReadAt:
+                                              payload.lastReadAt ??
+                                              channel.lastReadAt,
+                                      }
+                                    : channel,
                         );
                     },
                 );
@@ -388,7 +398,7 @@ export const setupGlobalWsHandlers = (
     );
 
     cleanups.push(
-        wsClient.on<IMessageDm>(WsEvents.MESSAGE_DM, (payload) => {
+        wsClient.on<IMessageDm>(WsEvents.MESSAGE_DM, (payload): void => {
             addMessageToInfiniteCache(
                 queryClient,
                 CHAT_QUERY_KEYS.userMessages(payload.senderId),
@@ -407,23 +417,26 @@ export const setupGlobalWsHandlers = (
     );
 
     cleanups.push(
-        wsClient.on<IMessageServer>(WsEvents.MESSAGE_SERVER, (payload) => {
-            addMessageToInfiniteCache(
-                queryClient,
-                CHAT_QUERY_KEYS.channelMessages(
-                    payload.serverId,
-                    payload.channelId,
-                    null,
-                ),
-                convertServerMessageToChatMessage(payload),
-            );
-        }),
+        wsClient.on<IMessageServer>(
+            WsEvents.MESSAGE_SERVER,
+            (payload): void => {
+                addMessageToInfiniteCache(
+                    queryClient,
+                    CHAT_QUERY_KEYS.channelMessages(
+                        payload.serverId,
+                        payload.channelId,
+                        null,
+                    ),
+                    convertServerMessageToChatMessage(payload),
+                );
+            },
+        ),
     );
 
     cleanups.push(
         wsClient.on<IInteractionResponseServerEvent>(
             WsEvents.INTERACTION_RESPONSE_SERVER,
-            (payload) => {
+            (payload): void => {
                 if (!currentUser) return;
 
                 const dummyMessage: ChatMessage = {
@@ -463,7 +476,7 @@ export const setupGlobalWsHandlers = (
     );
 
     cleanups.push(
-        wsClient.on<IMentionEvent>(WsEvents.MENTION, (payload) => {
+        wsClient.on<IMentionEvent>(WsEvents.MENTION, (payload): void => {
             if (
                 payload.type === 'mention' &&
                 payload.senderId !== currentUser?.id
@@ -477,7 +490,7 @@ export const setupGlobalWsHandlers = (
 
             queryClient.setQueryData<{ pings: PingNotification[] }>(
                 ['pings'],
-                (old) => {
+                (old): { pings: PingNotification[] } => {
                     const newPing: PingNotification = {
                         id: payload.message.messageId,
                         type: (payload.type === 'reaction'
@@ -495,7 +508,8 @@ export const setupGlobalWsHandlers = (
 
                     if (!old) return { pings: [newPing] };
 
-                    if (old.pings.some((p) => p.id === newPing.id)) return old;
+                    if (old.pings.some((p): boolean => p.id === newPing.id))
+                        return old;
 
                     return {
                         ...old,
@@ -509,7 +523,7 @@ export const setupGlobalWsHandlers = (
     cleanups.push(
         wsClient.on<{ sounds: UserSettings['notificationSounds'] }>(
             'notification_sounds_updated',
-            (payload) => {
+            (payload): void => {
                 queryClient.setQueryData<User>(['me'], (old) => {
                     if (!old) return old;
                     return {
@@ -531,7 +545,7 @@ export const setupGlobalWsHandlers = (
             userId: string;
             settings?: UserSettings;
             activeMute?: User['activeMute'];
-        }>(WsEvents.USER_UPDATED, (payload) => {
+        }>(WsEvents.USER_UPDATED, (payload): void => {
             if (payload.userId === currentUser?.id) {
                 queryClient.setQueryData<User>(['me'], (old) => {
                     if (!old) return old;
@@ -567,125 +581,158 @@ export const setupGlobalWsHandlers = (
     );
 
     const upsertFriendAtTop = (friend: Friend): void => {
-        [FRIENDS_QUERY_KEY, FRIEND_PROFILES_QUERY_KEY].forEach((queryKey) => {
-            queryClient.setQueriesData<Friend[]>({ queryKey }, (old) => {
-                if (!old) return old;
-                return [
-                    friend,
-                    ...old.filter(
-                        (cachedFriend) => cachedFriend._id !== friend._id,
-                    ),
-                ];
-            });
-        });
+        [FRIENDS_QUERY_KEY, FRIEND_PROFILES_QUERY_KEY].forEach(
+            (queryKey): void => {
+                queryClient.setQueriesData<Friend[]>(
+                    { queryKey },
+                    (old): Friend[] | undefined => {
+                        if (!old) return old;
+                        return [
+                            friend,
+                            ...old.filter(
+                                (cachedFriend): boolean =>
+                                    cachedFriend._id !== friend._id,
+                            ),
+                        ];
+                    },
+                );
+            },
+        );
     };
 
     const removeFriendFromCaches = (friendId: string): void => {
-        [FRIENDS_QUERY_KEY, FRIEND_PROFILES_QUERY_KEY].forEach((queryKey) => {
-            queryClient.setQueriesData<Friend[]>({ queryKey }, (old) => {
-                if (!old) return old;
-                return old.filter((friend) => friend._id !== friendId);
-            });
-        });
+        [FRIENDS_QUERY_KEY, FRIEND_PROFILES_QUERY_KEY].forEach(
+            (queryKey): void => {
+                queryClient.setQueriesData<Friend[]>(
+                    { queryKey },
+                    (old): Friend[] | undefined => {
+                        if (!old) return old;
+                        return old.filter(
+                            (friend): boolean => friend._id !== friendId,
+                        );
+                    },
+                );
+            },
+        );
     };
 
     const upsertChannel = (channel: Channel): void => {
         queryClient.setQueriesData<Channel[]>(
             { queryKey: SERVERS_QUERY_KEYS.channels(channel.serverId) },
-            (old) => {
+            (old): Channel[] | undefined => {
                 if (!old) return old;
                 return [
                     ...old.filter(
-                        (cachedChannel) => cachedChannel._id !== channel._id,
+                        (cachedChannel): boolean =>
+                            cachedChannel._id !== channel._id,
                     ),
                     channel,
-                ].sort((a, b) => a.position - b.position);
+                ].sort((a, b): number => a.position - b.position);
             },
         );
     };
 
     cleanups.push(
-        wsClient.on<{ friend?: Friend }>(WsEvents.FRIEND_ADDED, (payload) => {
-            if (payload.friend) {
-                upsertFriendAtTop(payload.friend);
-            }
-            void queryClient.invalidateQueries({ queryKey: FRIENDS_QUERY_KEY });
-            void queryClient.invalidateQueries({
-                queryKey: FRIEND_PROFILES_QUERY_KEY,
-            });
-            void queryClient.invalidateQueries({
-                queryKey: FRIEND_REQUESTS_QUERY_KEY,
-            });
-        }),
-    );
-
-    cleanups.push(
-        wsClient.on<{ userId?: string }>(WsEvents.FRIEND_REMOVED, (payload) => {
-            if (payload.userId) {
-                removeFriendFromCaches(payload.userId);
-            }
-            void queryClient.invalidateQueries({ queryKey: FRIENDS_QUERY_KEY });
-            void queryClient.invalidateQueries({
-                queryKey: FRIEND_PROFILES_QUERY_KEY,
-            });
-            void queryClient.invalidateQueries({
-                queryKey: FRIEND_REQUESTS_QUERY_KEY,
-            });
-        }),
-    );
-
-    cleanups.push(
-        wsClient.on(WsEvents.INCOMING_REQUEST_ADDED, () => {
-            void queryClient.invalidateQueries({ queryKey: FRIENDS_QUERY_KEY });
-            void queryClient.invalidateQueries({
-                queryKey: FRIEND_REQUESTS_QUERY_KEY,
-            });
-        }),
-    );
-
-    cleanups.push(
-        wsClient.on(WsEvents.INCOMING_REQUEST_REMOVED, () => {
-            void queryClient.invalidateQueries({ queryKey: FRIENDS_QUERY_KEY });
-            void queryClient.invalidateQueries({
-                queryKey: FRIEND_REQUESTS_QUERY_KEY,
-            });
-        }),
-    );
-
-    cleanups.push(
-        wsClient.on<IPresenceSyncEvent>(WsEvents.PRESENCE_SYNC, (payload) => {
-            const onlineUsers = [...payload.online];
-            const me = queryClient.getQueryData<{ id: string }>(['me']);
-
-            if (me && !onlineUsers.some((u) => u.userId === me.id)) {
-                onlineUsers.push({
-                    userId: me.id,
-                    username: (me as unknown as User).username || '',
-                    status: undefined,
+        wsClient.on<{ friend?: Friend }>(
+            WsEvents.FRIEND_ADDED,
+            (payload): void => {
+                if (payload.friend) {
+                    upsertFriendAtTop(payload.friend);
+                }
+                void queryClient.invalidateQueries({
+                    queryKey: FRIENDS_QUERY_KEY,
                 });
-            }
+                void queryClient.invalidateQueries({
+                    queryKey: FRIEND_PROFILES_QUERY_KEY,
+                });
+                void queryClient.invalidateQueries({
+                    queryKey: FRIEND_REQUESTS_QUERY_KEY,
+                });
+            },
+        ),
+    );
 
-            dispatch(setOnlineUsers(onlineUsers));
+    cleanups.push(
+        wsClient.on<{ userId?: string }>(
+            WsEvents.FRIEND_REMOVED,
+            (payload): void => {
+                if (payload.userId) {
+                    removeFriendFromCaches(payload.userId);
+                }
+                void queryClient.invalidateQueries({
+                    queryKey: FRIENDS_QUERY_KEY,
+                });
+                void queryClient.invalidateQueries({
+                    queryKey: FRIEND_PROFILES_QUERY_KEY,
+                });
+                void queryClient.invalidateQueries({
+                    queryKey: FRIEND_REQUESTS_QUERY_KEY,
+                });
+            },
+        ),
+    );
+
+    cleanups.push(
+        wsClient.on(WsEvents.INCOMING_REQUEST_ADDED, (): void => {
+            void queryClient.invalidateQueries({ queryKey: FRIENDS_QUERY_KEY });
+            void queryClient.invalidateQueries({
+                queryKey: FRIEND_REQUESTS_QUERY_KEY,
+            });
         }),
     );
 
     cleanups.push(
-        wsClient.on<IUserOnlineEvent>(WsEvents.USER_ONLINE, (payload) => {
+        wsClient.on(WsEvents.INCOMING_REQUEST_REMOVED, (): void => {
+            void queryClient.invalidateQueries({ queryKey: FRIENDS_QUERY_KEY });
+            void queryClient.invalidateQueries({
+                queryKey: FRIEND_REQUESTS_QUERY_KEY,
+            });
+        }),
+    );
+
+    cleanups.push(
+        wsClient.on<IPresenceSyncEvent>(
+            WsEvents.PRESENCE_SYNC,
+            (payload): void => {
+                const onlineUsers = [...payload.online];
+                const me = queryClient.getQueryData<{ id: string }>(['me']);
+
+                if (
+                    me &&
+                    !onlineUsers.some((u): boolean => u.userId === me.id)
+                ) {
+                    onlineUsers.push({
+                        userId: me.id,
+                        username: (me as unknown as User).username || '',
+                        status: undefined,
+                    });
+                }
+
+                dispatch(setOnlineUsers(onlineUsers));
+            },
+        ),
+    );
+
+    cleanups.push(
+        wsClient.on<IUserOnlineEvent>(WsEvents.USER_ONLINE, (payload): void => {
             dispatch(setUserOnline(payload));
         }),
     );
 
     cleanups.push(
-        wsClient.on<IUserOfflineEvent>(WsEvents.USER_OFFLINE, (payload) => {
-            dispatch(setUserOffline(payload));
-            dispatch(clearUserFromAllVoiceChannels(payload.userId));
-        }),
+        wsClient.on<IUserOfflineEvent>(
+            WsEvents.USER_OFFLINE,
+            (payload): void => {
+                dispatch(setUserOffline(payload));
+                dispatch(clearUserFromAllVoiceChannels(payload.userId));
+            },
+        ),
     );
 
     cleanups.push(
         wsClient.on<IUserJoinedVoiceEvent>(
             WsEvents.USER_JOINED_VOICE,
-            (payload) => {
+            (payload): void => {
                 dispatch(
                     addVoiceParticipant({
                         channelId: payload.channelId,
@@ -699,7 +746,7 @@ export const setupGlobalWsHandlers = (
     cleanups.push(
         wsClient.on<IUserLeftVoiceEvent>(
             WsEvents.USER_LEFT_VOICE,
-            (payload) => {
+            (payload): void => {
                 dispatch(
                     removeVoiceParticipant({
                         channelId: payload.channelId,
@@ -711,33 +758,36 @@ export const setupGlobalWsHandlers = (
     );
 
     cleanups.push(
-        wsClient.on<IVoiceJoinedEvent>(WsEvents.VOICE_JOINED, (payload) => {
-            dispatch(
-                setVoiceParticipants({
-                    channelId: payload.channelId,
-                    userIds: payload.participants ?? [],
-                }),
-            );
-            if (payload.voiceStates) {
-                Object.entries(payload.voiceStates).forEach(
-                    ([userId, state]) => {
-                        dispatch(
-                            setVoiceUserState({
-                                userId,
-                                isMuted: state.isMuted,
-                                isDeafened: state.isDeafened,
-                            }),
-                        );
-                    },
+        wsClient.on<IVoiceJoinedEvent>(
+            WsEvents.VOICE_JOINED,
+            (payload): void => {
+                dispatch(
+                    setVoiceParticipants({
+                        channelId: payload.channelId,
+                        userIds: payload.participants ?? [],
+                    }),
                 );
-            }
-        }),
+                if (payload.voiceStates) {
+                    Object.entries(payload.voiceStates).forEach(
+                        ([userId, state]): void => {
+                            dispatch(
+                                setVoiceUserState({
+                                    userId,
+                                    isMuted: state.isMuted,
+                                    isDeafened: state.isDeafened,
+                                }),
+                            );
+                        },
+                    );
+                }
+            },
+        ),
     );
 
     cleanups.push(
         wsClient.on<IVoiceStateUpdatedEvent>(
             WsEvents.VOICE_STATE_UPDATED,
-            (payload) => {
+            (payload): void => {
                 dispatch(
                     setVoiceUserState({
                         userId: payload.userId,
@@ -759,138 +809,156 @@ export const setupGlobalWsHandlers = (
     );
 
     cleanups.push(
-        wsClient.on<IStatusUpdatedEvent>(WsEvents.STATUS_UPDATED, (payload) => {
-            dispatch(
-                updateUserStatusByUsername({
-                    username: payload.username,
-                    customStatus: payload.status,
-                }),
-            );
+        wsClient.on<IStatusUpdatedEvent>(
+            WsEvents.STATUS_UPDATED,
+            (payload): void => {
+                dispatch(
+                    updateUserStatusByUsername({
+                        username: payload.username,
+                        customStatus: payload.status,
+                    }),
+                );
 
-            if (currentUser && payload.username === currentUser.username) {
-                queryClient.setQueryData<User>(['me'], (old) => {
-                    if (!old) return old;
-                    return {
-                        ...old,
-                        customStatus: payload.status
-                            ? {
-                                  text: payload.status.text,
-                                  emoji: payload.status.emoji || undefined,
-                                  expiresAt: payload.status.expiresAt
-                                      ? new Date(payload.status.expiresAt)
-                                      : null,
-                                  updatedAt: new Date(payload.status.updatedAt),
-                              }
-                            : null,
-                    };
-                });
-            }
-
-            queryClient.setQueriesData<ServerMember[]>(
-                { queryKey: ['servers', 'members'] },
-                (old) => {
-                    if (!old) return old;
-                    return old.map((member) =>
-                        member.user.username === payload.username
-                            ? {
-                                  ...member,
-                                  user: {
-                                      ...member.user,
-                                      customStatus: payload.status
-                                          ? {
-                                                text: payload.status.text,
-                                                emoji:
-                                                    payload.status.emoji ||
-                                                    undefined,
-                                                expiresAt: payload.status
-                                                    .expiresAt
-                                                    ? new Date(
-                                                          payload.status
-                                                              .expiresAt,
-                                                      )
-                                                    : null,
-                                                updatedAt: new Date(
-                                                    payload.status.updatedAt,
-                                                ),
-                                            }
+                if (currentUser && payload.username === currentUser.username) {
+                    queryClient.setQueryData<User>(['me'], (old) => {
+                        if (!old) return old;
+                        return {
+                            ...old,
+                            customStatus: payload.status
+                                ? {
+                                      text: payload.status.text,
+                                      emoji: payload.status.emoji || undefined,
+                                      expiresAt: payload.status.expiresAt
+                                          ? new Date(payload.status.expiresAt)
                                           : null,
-                                  },
-                              }
-                            : member,
-                    );
-                },
-            );
+                                      updatedAt: new Date(
+                                          payload.status.updatedAt,
+                                      ),
+                                  }
+                                : null,
+                        };
+                    });
+                }
 
-            queryClient.setQueriesData<Friend[]>(
-                { queryKey: FRIENDS_QUERY_KEY },
-                (old) => {
-                    if (!old) return old;
-                    return old.map((friend) =>
-                        friend.username === payload.username
-                            ? {
-                                  ...friend,
-                                  customStatus: payload.status
-                                      ? {
-                                            text: payload.status.text,
-                                            emoji:
-                                                payload.status.emoji ||
-                                                undefined,
-                                        }
-                                      : null,
-                              }
-                            : friend,
-                    );
-                },
-            );
-        }),
+                queryClient.setQueriesData<ServerMember[]>(
+                    { queryKey: ['servers', 'members'] },
+                    (old): ServerMember[] | undefined => {
+                        if (!old) return old;
+                        return old.map(
+                            (member): ServerMember =>
+                                member.user.username === payload.username
+                                    ? {
+                                          ...member,
+                                          user: {
+                                              ...member.user,
+                                              customStatus: payload.status
+                                                  ? {
+                                                        text: payload.status
+                                                            .text,
+                                                        emoji:
+                                                            payload.status
+                                                                .emoji ||
+                                                            undefined,
+                                                        expiresAt: payload
+                                                            .status.expiresAt
+                                                            ? new Date(
+                                                                  payload.status
+                                                                      .expiresAt,
+                                                              )
+                                                            : null,
+                                                        updatedAt: new Date(
+                                                            payload.status
+                                                                .updatedAt,
+                                                        ),
+                                                    }
+                                                  : null,
+                                          },
+                                      }
+                                    : member,
+                        );
+                    },
+                );
+
+                queryClient.setQueriesData<Friend[]>(
+                    { queryKey: FRIENDS_QUERY_KEY },
+                    (old): Friend[] | undefined => {
+                        if (!old) return old;
+                        return old.map(
+                            (friend): Friend =>
+                                friend.username === payload.username
+                                    ? {
+                                          ...friend,
+                                          customStatus: payload.status
+                                              ? {
+                                                    text: payload.status.text,
+                                                    emoji:
+                                                        payload.status.emoji ||
+                                                        undefined,
+                                                }
+                                              : null,
+                                      }
+                                    : friend,
+                        );
+                    },
+                );
+            },
+        ),
     );
 
     cleanups.push(
-        wsClient.on<IUserUpdatedEvent>(WsEvents.USER_UPDATED, (payload) => {
-            const isMe =
-                payload.senderId === currentUser?.id ||
-                payload.userId === currentUser?.id;
+        wsClient.on<IUserUpdatedEvent>(
+            WsEvents.USER_UPDATED,
+            (payload): void => {
+                const isMe =
+                    payload.senderId === currentUser?.id ||
+                    payload.userId === currentUser?.id;
 
-            if (isMe) {
-                void queryClient.invalidateQueries({ queryKey: ['me'] });
-            }
-            void queryClient.invalidateQueries({
-                queryKey: ['user', payload.userId],
-            });
+                if (isMe) {
+                    void queryClient.invalidateQueries({ queryKey: ['me'] });
+                }
+                void queryClient.invalidateQueries({
+                    queryKey: ['user', payload.userId],
+                });
 
-            queryClient.setQueriesData<ServerMember[]>(
-                { queryKey: ['servers', 'members'] },
-                (old) => {
-                    if (!old) return old;
-                    return old.map((member) =>
-                        member.userId === payload.userId
-                            ? {
-                                  ...member,
-                                  user: { ...member.user, ...payload } as User,
-                              }
-                            : member,
-                    );
-                },
-            );
+                queryClient.setQueriesData<ServerMember[]>(
+                    { queryKey: ['servers', 'members'] },
+                    (old): ServerMember[] | undefined => {
+                        if (!old) return old;
+                        return old.map(
+                            (member): ServerMember =>
+                                member.userId === payload.userId
+                                    ? {
+                                          ...member,
+                                          user: {
+                                              ...member.user,
+                                              ...payload,
+                                          } as User,
+                                      }
+                                    : member,
+                        );
+                    },
+                );
 
-            queryClient.setQueriesData<Friend[]>(
-                { queryKey: FRIENDS_QUERY_KEY },
-                (old) => {
-                    if (!old) return old;
-                    return old.map((friend) =>
-                        friend._id === payload.userId
-                            ? { ...friend, ...payload }
-                            : friend,
-                    );
-                },
-            );
-        }),
+                queryClient.setQueriesData<Friend[]>(
+                    { queryKey: FRIENDS_QUERY_KEY },
+                    (old): Friend[] | undefined => {
+                        if (!old) return old;
+                        return old.map(
+                            (friend): Friend =>
+                                friend._id === payload.userId
+                                    ? { ...friend, ...payload }
+                                    : friend,
+                        );
+                    },
+                );
+            },
+        ),
     );
 
     cleanups.push(
         wsClient.on<IUserBannerUpdatedEvent>(
             WsEvents.USER_BANNER_UPDATED,
-            (payload) => {
+            (payload): void => {
                 void queryClient.invalidateQueries({ queryKey: ['user'] });
                 if (currentUser && payload.username === currentUser.username) {
                     void queryClient.invalidateQueries({ queryKey: ['me'] });
@@ -898,18 +966,19 @@ export const setupGlobalWsHandlers = (
 
                 queryClient.setQueriesData<ServerMember[]>(
                     { queryKey: ['servers', 'members'] },
-                    (old) => {
+                    (old): ServerMember[] | undefined => {
                         if (!old) return old;
-                        return old.map((member) =>
-                            member.user.username === payload.username
-                                ? {
-                                      ...member,
-                                      user: {
-                                          ...member.user,
-                                          banner: payload.banner,
-                                      },
-                                  }
-                                : member,
+                        return old.map(
+                            (member): ServerMember =>
+                                member.user.username === payload.username
+                                    ? {
+                                          ...member,
+                                          user: {
+                                              ...member.user,
+                                              banner: payload.banner,
+                                          },
+                                      }
+                                    : member,
                         );
                     },
                 );
@@ -920,7 +989,7 @@ export const setupGlobalWsHandlers = (
     cleanups.push(
         wsClient.on<IDisplayNameUpdatedEvent>(
             WsEvents.DISPLAY_NAME_UPDATED,
-            (payload) => {
+            (payload): void => {
                 void queryClient.invalidateQueries({ queryKey: ['user'] });
                 if (currentUser && payload.username === currentUser.username) {
                     void queryClient.invalidateQueries({ queryKey: ['me'] });
@@ -928,33 +997,35 @@ export const setupGlobalWsHandlers = (
 
                 queryClient.setQueriesData<ServerMember[]>(
                     { queryKey: ['servers', 'members'] },
-                    (old) => {
+                    (old): ServerMember[] | undefined => {
                         if (!old) return old;
-                        return old.map((member) =>
-                            member.user.username === payload.username
-                                ? {
-                                      ...member,
-                                      user: {
-                                          ...member.user,
-                                          displayName: payload.displayName,
-                                      },
-                                  }
-                                : member,
+                        return old.map(
+                            (member): ServerMember =>
+                                member.user.username === payload.username
+                                    ? {
+                                          ...member,
+                                          user: {
+                                              ...member.user,
+                                              displayName: payload.displayName,
+                                          },
+                                      }
+                                    : member,
                         );
                     },
                 );
 
                 queryClient.setQueriesData<Friend[]>(
                     { queryKey: FRIENDS_QUERY_KEY },
-                    (old) => {
+                    (old): Friend[] | undefined => {
                         if (!old) return old;
-                        return old.map((friend) =>
-                            friend.username === payload.username
-                                ? {
-                                      ...friend,
-                                      displayName: payload.displayName,
-                                  }
-                                : friend,
+                        return old.map(
+                            (friend): Friend =>
+                                friend.username === payload.username
+                                    ? {
+                                          ...friend,
+                                          displayName: payload.displayName,
+                                      }
+                                    : friend,
                         );
                     },
                 );
@@ -963,34 +1034,42 @@ export const setupGlobalWsHandlers = (
     );
 
     cleanups.push(
-        wsClient.on<IMemberUpdatedEvent>(WsEvents.MEMBER_UPDATED, (payload) => {
-            void queryClient.invalidateQueries({
-                queryKey: SERVERS_QUERY_KEYS.members(payload.serverId),
-            });
-            if (currentUser && payload.userId === currentUser.id) {
-                void queryClient.invalidateQueries({ queryKey: ['me'] });
+        wsClient.on<IMemberUpdatedEvent>(
+            WsEvents.MEMBER_UPDATED,
+            (payload): void => {
                 void queryClient.invalidateQueries({
-                    queryKey: SERVERS_QUERY_KEYS.onboarding(payload.serverId),
+                    queryKey: SERVERS_QUERY_KEYS.members(payload.serverId),
                 });
-            }
-        }),
+                if (currentUser && payload.userId === currentUser.id) {
+                    void queryClient.invalidateQueries({ queryKey: ['me'] });
+                    void queryClient.invalidateQueries({
+                        queryKey: SERVERS_QUERY_KEYS.onboarding(
+                            payload.serverId,
+                        ),
+                    });
+                }
+            },
+        ),
     );
 
     cleanups.push(
-        wsClient.on<IMemberAddedEvent>(WsEvents.MEMBER_ADDED, (payload) => {
-            if (currentUser && payload.userId === currentUser.id) {
+        wsClient.on<IMemberAddedEvent>(
+            WsEvents.MEMBER_ADDED,
+            (payload): void => {
+                if (currentUser && payload.userId === currentUser.id) {
+                    void queryClient.invalidateQueries({
+                        queryKey: SERVERS_QUERY_KEYS.list,
+                    });
+                }
                 void queryClient.invalidateQueries({
-                    queryKey: SERVERS_QUERY_KEYS.list,
+                    queryKey: SERVERS_QUERY_KEYS.members(payload.serverId),
                 });
-            }
-            void queryClient.invalidateQueries({
-                queryKey: SERVERS_QUERY_KEYS.members(payload.serverId),
-            });
-        }),
+            },
+        ),
     );
 
     cleanups.push(
-        wsClient.on<IRoleEvent>(WsEvents.ROLE_CREATED, (payload) => {
+        wsClient.on<IRoleEvent>(WsEvents.ROLE_CREATED, (payload): void => {
             if (payload.senderId === currentUser?.id) return;
             void queryClient.invalidateQueries({
                 queryKey: SERVERS_QUERY_KEYS.roles(payload.serverId),
@@ -999,7 +1078,7 @@ export const setupGlobalWsHandlers = (
     );
 
     cleanups.push(
-        wsClient.on<IRoleEvent>(WsEvents.ROLE_UPDATED, (payload) => {
+        wsClient.on<IRoleEvent>(WsEvents.ROLE_UPDATED, (payload): void => {
             if (payload.senderId === currentUser?.id) return;
             void queryClient.invalidateQueries({
                 queryKey: SERVERS_QUERY_KEYS.roles(payload.serverId),
@@ -1008,18 +1087,9 @@ export const setupGlobalWsHandlers = (
     );
 
     cleanups.push(
-        wsClient.on<IRoleDeletedEvent>(WsEvents.ROLE_DELETED, (payload) => {
-            if (payload.senderId === currentUser?.id) return;
-            void queryClient.invalidateQueries({
-                queryKey: SERVERS_QUERY_KEYS.roles(payload.serverId),
-            });
-        }),
-    );
-
-    cleanups.push(
-        wsClient.on<IRolesReorderedEvent>(
-            WsEvents.ROLES_REORDERED,
-            (payload) => {
+        wsClient.on<IRoleDeletedEvent>(
+            WsEvents.ROLE_DELETED,
+            (payload): void => {
                 if (payload.senderId === currentUser?.id) return;
                 void queryClient.invalidateQueries({
                     queryKey: SERVERS_QUERY_KEYS.roles(payload.serverId),
@@ -1029,27 +1099,45 @@ export const setupGlobalWsHandlers = (
     );
 
     cleanups.push(
-        wsClient.on<IChannelEvent>(WsEvents.CHANNEL_CREATED, (payload) => {
-            upsertChannel(payload.channel);
-            void queryClient.invalidateQueries({
-                queryKey: SERVERS_QUERY_KEYS.channels(payload.serverId),
-            });
-        }),
+        wsClient.on<IRolesReorderedEvent>(
+            WsEvents.ROLES_REORDERED,
+            (payload): void => {
+                if (payload.senderId === currentUser?.id) return;
+                void queryClient.invalidateQueries({
+                    queryKey: SERVERS_QUERY_KEYS.roles(payload.serverId),
+                });
+            },
+        ),
     );
 
     cleanups.push(
-        wsClient.on<IChannelEvent>(WsEvents.CHANNEL_UPDATED, (payload) => {
-            if (payload.senderId === currentUser?.id) return;
-            void queryClient.invalidateQueries({
-                queryKey: SERVERS_QUERY_KEYS.channels(payload.serverId),
-            });
-        }),
+        wsClient.on<IChannelEvent>(
+            WsEvents.CHANNEL_CREATED,
+            (payload): void => {
+                upsertChannel(payload.channel);
+                void queryClient.invalidateQueries({
+                    queryKey: SERVERS_QUERY_KEYS.channels(payload.serverId),
+                });
+            },
+        ),
+    );
+
+    cleanups.push(
+        wsClient.on<IChannelEvent>(
+            WsEvents.CHANNEL_UPDATED,
+            (payload): void => {
+                if (payload.senderId === currentUser?.id) return;
+                void queryClient.invalidateQueries({
+                    queryKey: SERVERS_QUERY_KEYS.channels(payload.serverId),
+                });
+            },
+        ),
     );
 
     cleanups.push(
         wsClient.on<IChannelDeletedEvent>(
             WsEvents.CHANNEL_DELETED,
-            (payload) => {
+            (payload): void => {
                 if (payload.senderId === currentUser?.id) return;
                 void queryClient.invalidateQueries({
                     queryKey: SERVERS_QUERY_KEYS.channels(payload.serverId),
@@ -1064,7 +1152,7 @@ export const setupGlobalWsHandlers = (
     cleanups.push(
         wsClient.on<IChannelsReorderedEvent>(
             WsEvents.CHANNELS_REORDERED,
-            (payload) => {
+            (payload): void => {
                 if (payload.senderId === currentUser?.id) return;
                 void queryClient.invalidateQueries({
                     queryKey: SERVERS_QUERY_KEYS.channels(payload.serverId),
@@ -1074,27 +1162,33 @@ export const setupGlobalWsHandlers = (
     );
 
     cleanups.push(
-        wsClient.on<ICategoryEvent>(WsEvents.CATEGORY_CREATED, (payload) => {
-            if (payload.senderId === currentUser?.id) return;
-            void queryClient.invalidateQueries({
-                queryKey: SERVERS_QUERY_KEYS.categories(payload.serverId),
-            });
-        }),
+        wsClient.on<ICategoryEvent>(
+            WsEvents.CATEGORY_CREATED,
+            (payload): void => {
+                if (payload.senderId === currentUser?.id) return;
+                void queryClient.invalidateQueries({
+                    queryKey: SERVERS_QUERY_KEYS.categories(payload.serverId),
+                });
+            },
+        ),
     );
 
     cleanups.push(
-        wsClient.on<ICategoryEvent>(WsEvents.CATEGORY_UPDATED, (payload) => {
-            if (payload.senderId === currentUser?.id) return;
-            void queryClient.invalidateQueries({
-                queryKey: SERVERS_QUERY_KEYS.categories(payload.serverId),
-            });
-        }),
+        wsClient.on<ICategoryEvent>(
+            WsEvents.CATEGORY_UPDATED,
+            (payload): void => {
+                if (payload.senderId === currentUser?.id) return;
+                void queryClient.invalidateQueries({
+                    queryKey: SERVERS_QUERY_KEYS.categories(payload.serverId),
+                });
+            },
+        ),
     );
 
     cleanups.push(
         wsClient.on<ICategoryDeletedEvent>(
             WsEvents.CATEGORY_DELETED,
-            (payload) => {
+            (payload): void => {
                 if (payload.senderId === currentUser?.id) return;
                 void queryClient.invalidateQueries({
                     queryKey: SERVERS_QUERY_KEYS.categories(payload.serverId),
@@ -1109,7 +1203,7 @@ export const setupGlobalWsHandlers = (
     cleanups.push(
         wsClient.on<ICategoriesReorderedEvent>(
             WsEvents.CATEGORIES_REORDERED,
-            (payload) => {
+            (payload): void => {
                 if (payload.senderId === currentUser?.id) return;
                 void queryClient.invalidateQueries({
                     queryKey: SERVERS_QUERY_KEYS.categories(payload.serverId),
@@ -1121,7 +1215,7 @@ export const setupGlobalWsHandlers = (
     cleanups.push(
         wsClient.on<IPermissionsUpdatedEvent>(
             WsEvents.CHANNEL_PERMISSIONS_UPDATED,
-            (payload) => {
+            (payload): void => {
                 if (payload.senderId === currentUser?.id) return;
                 void queryClient.invalidateQueries({
                     queryKey: [
@@ -1141,7 +1235,7 @@ export const setupGlobalWsHandlers = (
     cleanups.push(
         wsClient.on<IPermissionsUpdatedEvent>(
             WsEvents.CATEGORY_PERMISSIONS_UPDATED,
-            (payload) => {
+            (payload): void => {
                 if (payload.senderId === currentUser?.id) return;
                 void queryClient.invalidateQueries({
                     queryKey: [
@@ -1176,41 +1270,47 @@ export const setupGlobalWsHandlers = (
     );
 
     cleanups.push(
-        wsClient.on<IServerJoinedEvent>(WsEvents.SERVER_JOINED, (payload) => {
-            if (payload.voiceStates) {
-                Object.entries(
-                    payload.voiceStates as Record<string, string[]>,
-                ).forEach(([channelId, userIds]) => {
-                    dispatch(setVoiceParticipants({ channelId, userIds }));
-                });
-            }
-        }),
+        wsClient.on<IServerJoinedEvent>(
+            WsEvents.SERVER_JOINED,
+            (payload): void => {
+                if (payload.voiceStates) {
+                    Object.entries(
+                        payload.voiceStates as Record<string, string[]>,
+                    ).forEach(([channelId, userIds]): void => {
+                        dispatch(setVoiceParticipants({ channelId, userIds }));
+                    });
+                }
+            },
+        ),
     );
 
     cleanups.push(
-        wsClient.on<IServerUpdatedEvent>(WsEvents.SERVER_UPDATED, (payload) => {
-            if (payload.senderId === currentUser?.id) return;
-            void queryClient.invalidateQueries({
-                queryKey: SERVERS_QUERY_KEYS.details(payload.serverId),
-            });
-            void queryClient.invalidateQueries({
-                queryKey: SERVERS_QUERY_KEYS.list,
-            });
-            void queryClient.invalidateQueries({
-                queryKey: SERVERS_QUERY_KEYS.onboarding(payload.serverId),
-            });
-            void queryClient.invalidateQueries({
-                queryKey: SERVERS_QUERY_KEYS.onboardingSettings(
-                    payload.serverId,
-                ),
-            });
-        }),
+        wsClient.on<IServerUpdatedEvent>(
+            WsEvents.SERVER_UPDATED,
+            (payload): void => {
+                if (payload.senderId === currentUser?.id) return;
+                void queryClient.invalidateQueries({
+                    queryKey: SERVERS_QUERY_KEYS.details(payload.serverId),
+                });
+                void queryClient.invalidateQueries({
+                    queryKey: SERVERS_QUERY_KEYS.list,
+                });
+                void queryClient.invalidateQueries({
+                    queryKey: SERVERS_QUERY_KEYS.onboarding(payload.serverId),
+                });
+                void queryClient.invalidateQueries({
+                    queryKey: SERVERS_QUERY_KEYS.onboardingSettings(
+                        payload.serverId,
+                    ),
+                });
+            },
+        ),
     );
 
     cleanups.push(
         wsClient.on<ICommandsUpdatedEvent>(
             WsEvents.COMMANDS_UPDATED,
-            (payload) => {
+            (payload): void => {
                 void queryClient.invalidateQueries({
                     queryKey: COMMANDS_QUERY_KEYS.serverCommands(
                         payload.serverId,
@@ -1223,7 +1323,7 @@ export const setupGlobalWsHandlers = (
     cleanups.push(
         wsClient.on<{ serverId: string; senderId?: string }>(
             WsEvents.SERVER_DELETED,
-            (payload) => {
+            (payload): void => {
                 if (payload.senderId === currentUser?.id) return;
                 void queryClient.invalidateQueries({
                     queryKey: SERVERS_QUERY_KEYS.list,
@@ -1235,7 +1335,7 @@ export const setupGlobalWsHandlers = (
     cleanups.push(
         wsClient.on<IServerIconUpdatedEvent>(
             WsEvents.SERVER_ICON_UPDATED,
-            (payload) => {
+            (payload): void => {
                 if (payload.senderId === currentUser?.id) return;
                 void queryClient.invalidateQueries({
                     queryKey: SERVERS_QUERY_KEYS.details(payload.serverId),
@@ -1250,7 +1350,7 @@ export const setupGlobalWsHandlers = (
     cleanups.push(
         wsClient.on<IServerBannerUpdatedEvent>(
             WsEvents.SERVER_BANNER_UPDATED,
-            (payload) => {
+            (payload): void => {
                 if (payload.senderId === currentUser?.id) return;
                 void queryClient.invalidateQueries({
                     queryKey: SERVERS_QUERY_KEYS.details(payload.serverId),
@@ -1262,7 +1362,7 @@ export const setupGlobalWsHandlers = (
     cleanups.push(
         wsClient.on<IOwnershipTransferredEvent>(
             WsEvents.OWNERSHIP_TRANSFERRED,
-            (payload) => {
+            (payload): void => {
                 void queryClient.invalidateQueries({
                     queryKey: SERVERS_QUERY_KEYS.details(payload.serverId),
                 });
@@ -1271,26 +1371,32 @@ export const setupGlobalWsHandlers = (
     );
 
     cleanups.push(
-        wsClient.on<IMemberRemovedEvent>(WsEvents.MEMBER_REMOVED, (payload) => {
-            void queryClient.invalidateQueries({
-                queryKey: SERVERS_QUERY_KEYS.members(payload.serverId),
-            });
-            if (currentUser && payload.userId === currentUser.id) {
+        wsClient.on<IMemberRemovedEvent>(
+            WsEvents.MEMBER_REMOVED,
+            (payload): void => {
                 void queryClient.invalidateQueries({
-                    queryKey: SERVERS_QUERY_KEYS.list,
+                    queryKey: SERVERS_QUERY_KEYS.members(payload.serverId),
                 });
-            }
-        }),
+                if (currentUser && payload.userId === currentUser.id) {
+                    void queryClient.invalidateQueries({
+                        queryKey: SERVERS_QUERY_KEYS.list,
+                    });
+                }
+            },
+        ),
     );
 
     // Emoji events
     cleanups.push(
-        wsClient.on<IEmojiUpdatedEvent>(WsEvents.EMOJI_UPDATED, (payload) => {
-            if (payload.senderId === currentUser?.id) return;
-            void queryClient.invalidateQueries({
-                queryKey: SERVERS_QUERY_KEYS.emojis(payload.serverId),
-            });
-        }),
+        wsClient.on<IEmojiUpdatedEvent>(
+            WsEvents.EMOJI_UPDATED,
+            (payload): void => {
+                if (payload.senderId === currentUser?.id) return;
+                void queryClient.invalidateQueries({
+                    queryKey: SERVERS_QUERY_KEYS.emojis(payload.serverId),
+                });
+            },
+        ),
     );
 
     // Message editing events
@@ -1303,7 +1409,7 @@ export const setupGlobalWsHandlers = (
             editedAt: string;
             isEdited: boolean;
             attachments?: ChatMessage['attachments'];
-        }>(WsEvents.MESSAGE_SERVER_EDITED, (payload) => {
+        }>(WsEvents.MESSAGE_SERVER_EDITED, (payload): void => {
             // Update the message in the cache
             const queryKey = CHAT_QUERY_KEYS.channelMessages(
                 payload.serverId,
@@ -1316,20 +1422,22 @@ export const setupGlobalWsHandlers = (
             if (currentData?.pages) {
                 queryClient.setQueryData(queryKey, {
                     ...currentData,
-                    pages: currentData.pages.map((page: ChatMessage[]) =>
-                        page.map((msg) =>
-                            msg._id === payload.messageId
-                                ? {
-                                      ...msg,
-                                      text: payload.text,
-                                      isEdited: payload.isEdited,
-                                      editedAt: payload.editedAt,
-                                      attachments:
-                                          payload.attachments ??
-                                          msg.attachments,
-                                  }
-                                : msg,
-                        ),
+                    pages: currentData.pages.map(
+                        (page: ChatMessage[]): ChatMessage[] =>
+                            page.map(
+                                (msg): ChatMessage =>
+                                    msg._id === payload.messageId
+                                        ? {
+                                              ...msg,
+                                              text: payload.text,
+                                              isEdited: payload.isEdited,
+                                              editedAt: payload.editedAt,
+                                              attachments:
+                                                  payload.attachments ??
+                                                  msg.attachments,
+                                          }
+                                        : msg,
+                            ),
                     ),
                 });
             }
@@ -1345,32 +1453,34 @@ export const setupGlobalWsHandlers = (
             editedAt: string;
             isEdited: boolean;
             attachments?: ChatMessage['attachments'];
-        }>(WsEvents.MESSAGE_DM_EDITED, (payload) => {
+        }>(WsEvents.MESSAGE_DM_EDITED, (payload): void => {
             // Update DM message in cache for both users
             const queryKey1 = CHAT_QUERY_KEYS.userMessages(payload.senderId);
             const queryKey2 = CHAT_QUERY_KEYS.userMessages(payload.receiverId);
 
-            [queryKey1, queryKey2].forEach((queryKey) => {
+            [queryKey1, queryKey2].forEach((queryKey): void => {
                 const currentData = queryClient.getQueryData(queryKey) as
                     | InfiniteData<ChatMessage[]>
                     | undefined;
                 if (currentData?.pages) {
                     queryClient.setQueryData(queryKey, {
                         ...currentData,
-                        pages: currentData.pages.map((page: ChatMessage[]) =>
-                            page.map((msg) =>
-                                msg._id === payload.messageId
-                                    ? {
-                                          ...msg,
-                                          text: payload.text,
-                                          isEdited: payload.isEdited,
-                                          editedAt: payload.editedAt,
-                                          attachments:
-                                              payload.attachments ??
-                                              msg.attachments,
-                                      }
-                                    : msg,
-                            ),
+                        pages: currentData.pages.map(
+                            (page: ChatMessage[]): ChatMessage[] =>
+                                page.map(
+                                    (msg): ChatMessage =>
+                                        msg._id === payload.messageId
+                                            ? {
+                                                  ...msg,
+                                                  text: payload.text,
+                                                  isEdited: payload.isEdited,
+                                                  editedAt: payload.editedAt,
+                                                  attachments:
+                                                      payload.attachments ??
+                                                      msg.attachments,
+                                              }
+                                            : msg,
+                                ),
                         ),
                     });
                 }
@@ -1379,15 +1489,15 @@ export const setupGlobalWsHandlers = (
     );
 
     cleanups.push(
-        wsClient.on(WsEvents.DISCONNECTED, () => {
+        wsClient.on(WsEvents.DISCONNECTED, (): void => {
             // We consciously do not invalidate active queries here to avoid
             // triggering a giant fetch storm while the network might be down.
             // Queries will be automatically invalidated on the AUTHENTICATED event.
         }),
     );
 
-    return () => {
-        cleanups.forEach((cleanup) => cleanup());
+    return (): void => {
+        cleanups.forEach((cleanup): void => cleanup());
     };
 };
 
@@ -1395,8 +1505,9 @@ export const setupGlobalWsHandlers = (
  * @description WS handlers
  */
 export const wsHandlers = {
-    onMessageDm: (handler: (message: IMessageDm) => void) =>
+    onMessageDm: (handler: (message: IMessageDm) => void): (() => void) =>
         wsClient.on(WsEvents.MESSAGE_DM, handler),
-    onMessageServer: (handler: (message: IMessageServer) => void) =>
-        wsClient.on(WsEvents.MESSAGE_SERVER, handler),
+    onMessageServer: (
+        handler: (message: IMessageServer) => void,
+    ): (() => void) => wsClient.on(WsEvents.MESSAGE_SERVER, handler),
 };

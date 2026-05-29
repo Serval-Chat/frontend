@@ -105,7 +105,7 @@ export interface TextProps
 /**
  * @description Text component
  */
-export const Text: React.FC<TextProps> = ({
+export const Text = ({
     className,
     variant,
     size,
@@ -120,7 +120,7 @@ export const Text: React.FC<TextProps> = ({
     as: Tag = 'span',
     children,
     ...props
-}) => (
+}: TextProps) => (
     <Tag
         className={cn(
             textVariants({

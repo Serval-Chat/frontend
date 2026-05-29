@@ -57,7 +57,7 @@ vi.mock('@/ui/components/admin/AdminIAM', () => ({
             <button
                 data-testid="view-user-btn"
                 type="button"
-                onClick={() => onViewUser('user-42')}
+                onClick={(): void => onViewUser('user-42')}
             >
                 View user
             </button>
@@ -102,7 +102,7 @@ vi.mock('@/ui/components/admin/AdminServers', () => ({
         <div data-testid="admin-servers">
             <button
                 data-testid="view-server-btn"
-                onClick={() => onViewServer('server-1')}
+                onClick={(): void => onViewServer('server-1')}
             >
                 View
             </button>
@@ -132,10 +132,10 @@ vi.mock('@/ui/components/common/Text', () => ({
     ),
 }));
 
-describe('Admin page', () => {
+describe('Admin page', (): void => {
     beforeEach(() => vi.clearAllMocks());
 
-    it('renders the Overview section by default', () => {
+    it('renders the Overview section by default', (): void => {
         render(
             <MemoryRouter initialEntries={['/admin/overview']}>
                 <Routes>
@@ -146,7 +146,7 @@ describe('Admin page', () => {
         expect(screen.getByTestId('admin-overview')).toBeInTheDocument();
     });
 
-    it('shows "System Overview" as the title by default', () => {
+    it('shows "System Overview" as the title by default', (): void => {
         render(
             <MemoryRouter initialEntries={['/admin/overview']}>
                 <Routes>
@@ -159,7 +159,7 @@ describe('Admin page', () => {
         );
     });
 
-    it('passes "overview" as the active section to the sidebar by default', () => {
+    it('passes "overview" as the active section to the sidebar by default', (): void => {
         render(
             <MemoryRouter initialEntries={['/admin/overview']}>
                 <Routes>
@@ -173,7 +173,7 @@ describe('Admin page', () => {
         );
     });
 
-    it('switches to the Users section when the sidebar emits "users"', () => {
+    it('switches to the Users section when the sidebar emits "users"', (): void => {
         render(
             <MemoryRouter initialEntries={['/admin/overview']}>
                 <Routes>
@@ -188,7 +188,7 @@ describe('Admin page', () => {
         );
     });
 
-    it('switches to Audit Logs when the sidebar emits "logs"', () => {
+    it('switches to Audit Logs when the sidebar emits "logs"', (): void => {
         render(
             <MemoryRouter initialEntries={['/admin/overview']}>
                 <Routes>
@@ -203,7 +203,7 @@ describe('Admin page', () => {
         );
     });
 
-    it('switches to Badges when the sidebar emits "badges"', () => {
+    it('switches to Badges when the sidebar emits "badges"', (): void => {
         render(
             <MemoryRouter initialEntries={['/admin/overview']}>
                 <Routes>
@@ -216,7 +216,7 @@ describe('Admin page', () => {
         expect(screen.getByTestId('admin-title')).toHaveTextContent('Badges');
     });
 
-    it('switches to Settings when the sidebar emits "settings"', () => {
+    it('switches to Settings when the sidebar emits "settings"', (): void => {
         render(
             <MemoryRouter initialEntries={['/admin/overview']}>
                 <Routes>
@@ -231,7 +231,7 @@ describe('Admin page', () => {
         );
     });
 
-    it('shows "Coming Soon" content for "servers" section (no component implemented yet)', () => {
+    it('shows "Coming Soon" content for "servers" section (no component implemented yet)', (): void => {
         render(
             <MemoryRouter initialEntries={['/admin/overview']}>
                 <Routes>
@@ -246,7 +246,7 @@ describe('Admin page', () => {
         );
     });
 
-    it('shows AdminBansAndMutes component for "bans" section', () => {
+    it('shows AdminBansAndMutes component for "bans" section', (): void => {
         render(
             <MemoryRouter initialEntries={['/admin/overview']}>
                 <Routes>
@@ -261,7 +261,7 @@ describe('Admin page', () => {
         );
     });
 
-    it('shows UserDetail when AdminIAM emits onViewUser, and title becomes "User Details"', () => {
+    it('shows UserDetail when AdminIAM emits onViewUser, and title becomes "User Details"', (): void => {
         render(
             <MemoryRouter initialEntries={['/admin/overview']}>
                 <Routes>
@@ -284,7 +284,7 @@ describe('Admin page', () => {
         expect(screen.queryByTestId('admin-iam')).not.toBeInTheDocument();
     });
 
-    it('returns to the IAM list when UserDetail emits onBack', () => {
+    it('returns to the IAM list when UserDetail emits onBack', (): void => {
         render(
             <MemoryRouter initialEntries={['/admin/overview']}>
                 <Routes>
@@ -308,7 +308,7 @@ describe('Admin page', () => {
         );
     });
 
-    it('clears the selected user when navigating away from users and back', () => {
+    it('clears the selected user when navigating away from users and back', (): void => {
         render(
             <MemoryRouter initialEntries={['/admin/overview']}>
                 <Routes>

@@ -19,7 +19,7 @@ interface UserProfilePictureProps {
     onClick?: (e: React.MouseEvent) => void;
 }
 
-export const UserProfilePicture: React.FC<UserProfilePictureProps> = ({
+export const UserProfilePicture = ({
     src,
     username,
     status = 'offline',
@@ -27,7 +27,7 @@ export const UserProfilePicture: React.FC<UserProfilePictureProps> = ({
     noIndicator = false,
     className,
     onClick,
-}) => (
+}: UserProfilePictureProps) => (
     <Box
         className={cn(
             'relative inline-flex items-center justify-center',

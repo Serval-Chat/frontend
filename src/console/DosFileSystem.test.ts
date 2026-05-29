@@ -2,12 +2,12 @@ import { beforeEach, describe, expect, it } from 'vitest';
 
 import { DosFileSystem } from '@/console/DosFileSystem';
 
-describe('DosFileSystem', () => {
-    beforeEach(() => {
+describe('DosFileSystem', (): void => {
+    beforeEach((): void => {
         localStorage.clear();
     });
 
-    it('starts at C:\\ and persists entries to localStorage', () => {
+    it('starts at C:\\ and persists entries to localStorage', (): void => {
         const fs = new DosFileSystem();
 
         fs.makeDirectory('APPS');
@@ -20,7 +20,7 @@ describe('DosFileSystem', () => {
         expect(reloaded.readFile('HELLO.TXT')).toBe('hello');
     });
 
-    it('enforces 8.3 names', () => {
+    it('enforces 8.3 names', (): void => {
         const fs = new DosFileSystem();
 
         expect(() => fs.makeDirectory('TOOLONGNAME')).toThrow(
@@ -31,7 +31,7 @@ describe('DosFileSystem', () => {
         );
     });
 
-    it('copies, moves, renames, and deletes files', () => {
+    it('copies, moves, renames, and deletes files', (): void => {
         const fs = new DosFileSystem();
 
         fs.writeFile('A.TXT', 'alpha');
@@ -42,19 +42,21 @@ describe('DosFileSystem', () => {
         expect(fs.readFile('A.TXT')).toBe('alpha');
         expect(fs.readFile('D.TXT')).toBe('alpha');
         expect(fs.delete('D.TXT')).toBe(1);
-        expect(() => fs.readFile('D.TXT')).toThrow(
+        expect((): string => fs.readFile('D.TXT')).toThrow(
             'The system cannot find the path specified.',
         );
     });
 
-    it('sets and clears file attributes', () => {
+    it('sets and clears file attributes', (): void => {
         const fs = new DosFileSystem();
 
         fs.writeFile('LOCK.TXT', 'locked');
         expect(fs.setAttributes('LOCK.TXT', ['+R'])[0].attributes).toContain(
             'R',
         );
-        expect(() => fs.delete('LOCK.TXT')).toThrow('Access is denied.');
+        expect((): number => fs.delete('LOCK.TXT')).toThrow(
+            'Access is denied.',
+        );
         expect(() => fs.writeFile('LOCK.TXT', 'changed')).toThrow(
             'Access is denied.',
         );

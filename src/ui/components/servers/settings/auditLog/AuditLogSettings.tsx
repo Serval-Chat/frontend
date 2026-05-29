@@ -24,9 +24,7 @@ interface AuditLogSettingsProps {
     serverId: string;
 }
 
-export const AuditLogSettings: React.FC<AuditLogSettingsProps> = ({
-    serverId,
-}) => {
+export const AuditLogSettings = ({ serverId }: AuditLogSettingsProps) => {
     const [filters, setFilters] = useState<IAuditLogFilters>({});
     const [globalExpandState, setGlobalExpandState] = useState<
         'expanded' | 'collapsed' | null
@@ -43,14 +41,14 @@ export const AuditLogSettings: React.FC<AuditLogSettingsProps> = ({
 
     const queryClient = useQueryClient();
 
-    useEffect(() => {
+    useEffect((): void => {
         if (serverId) {
             wsMessages.joinServer(serverId);
         }
     }, [serverId]);
 
     const handleAuditLogEntry = React.useCallback(
-        (payload: { serverId: string; entry: IAuditLogEntry }) => {
+        (payload: { serverId: string; entry: IAuditLogEntry }): void => {
             if (payload.serverId !== serverId) {
                 return;
             }
@@ -79,8 +77,9 @@ export const AuditLogSettings: React.FC<AuditLogSettingsProps> = ({
     }
 
     const entries =
-        data?.pages.flatMap((page) => page?.entries || []).filter(Boolean) ??
-        [];
+        data?.pages
+            .flatMap((page): IAuditLogEntry[] => page?.entries || [])
+            .filter(Boolean) ?? [];
 
     return (
         <div className="max-w-5xl space-y-6 pb-20">
@@ -121,10 +120,11 @@ export const AuditLogSettings: React.FC<AuditLogSettingsProps> = ({
                             <Button
                                 className="h-8 px-3 text-xs"
                                 variant="ghost"
-                                onClick={() => {
+                                onClick={(): void => {
                                     setGlobalExpandState(null);
                                     setTimeout(
-                                        () => setGlobalExpandState('expanded'),
+                                        (): void =>
+                                            setGlobalExpandState('expanded'),
                                         0,
                                     );
                                 }}
@@ -135,10 +135,11 @@ export const AuditLogSettings: React.FC<AuditLogSettingsProps> = ({
                             <Button
                                 className="h-8 px-3 text-xs"
                                 variant="ghost"
-                                onClick={() => {
+                                onClick={(): void => {
                                     setGlobalExpandState(null);
                                     setTimeout(
-                                        () => setGlobalExpandState('collapsed'),
+                                        (): void =>
+                                            setGlobalExpandState('collapsed'),
                                         0,
                                     );
                                 }}
@@ -165,7 +166,7 @@ export const AuditLogSettings: React.FC<AuditLogSettingsProps> = ({
                             <Button
                                 disabled={isFetchingNextPage}
                                 variant="ghost"
-                                onClick={() => void fetchNextPage()}
+                                onClick={(): undefined => void fetchNextPage()}
                             >
                                 {isFetchingNextPage
                                     ? 'Loading more...'

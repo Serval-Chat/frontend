@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { X } from 'lucide-react';
 
@@ -9,19 +9,19 @@ import { Text } from '@/ui/components/common/Text';
 
 const isTauri = (): boolean => '__TAURI_INTERNALS__' in window;
 
-export const PushPrompt: React.FC = () => {
+export const PushPrompt = () => {
     const [isVisible, setIsVisible] = useState(false);
     const [isGranting, setIsGranting] = useState(false);
 
-    useEffect(() => {
+    useEffect((): (() => void) | undefined => {
         if (isTauri() || !('Notification' in window)) return;
 
         if (Notification.permission === 'default') {
             const isDismissed =
                 localStorage.getItem('push_prompt_dismissed') === 'true';
             if (!isDismissed) {
-                const timer = setTimeout(() => setIsVisible(true), 1500);
-                return () => clearTimeout(timer);
+                const timer = setTimeout((): void => setIsVisible(true), 1500);
+                return (): void => clearTimeout(timer);
             }
         }
     }, []);
@@ -84,7 +84,7 @@ export const PushPrompt: React.FC = () => {
                     loading={isGranting}
                     size="sm"
                     variant="primary"
-                    onClick={() => {
+                    onClick={(): void => {
                         void handleEnable();
                     }}
                 >

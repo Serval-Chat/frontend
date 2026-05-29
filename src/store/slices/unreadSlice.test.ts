@@ -11,14 +11,14 @@ import {
     unreadReducer,
 } from './unreadSlice';
 
-describe('unreadSlice', () => {
+describe('unreadSlice', (): void => {
     const initialState = {
         unreadServers: {},
         unreadDms: {},
     };
 
-    describe('setUnreadServers', () => {
-        it('replaces the entire unreadServers map', () => {
+    describe('setUnreadServers', (): void => {
+        it('replaces the entire unreadServers map', (): void => {
             const state = unreadReducer(
                 initialState,
                 setUnreadServers({
@@ -31,8 +31,8 @@ describe('unreadSlice', () => {
         });
     });
 
-    describe('setServerUnread', () => {
-        it('creates an entry with hasUnread=true and pingCount=0 when none exists', () => {
+    describe('setServerUnread', (): void => {
+        it('creates an entry with hasUnread=true and pingCount=0 when none exists', (): void => {
             const state = unreadReducer(
                 initialState,
                 setServerUnread({ serverId: 'srv1', unread: true }),
@@ -43,7 +43,7 @@ describe('unreadSlice', () => {
             });
         });
 
-        it('updates hasUnread without touching pingCount when entry already exists', () => {
+        it('updates hasUnread without touching pingCount when entry already exists', (): void => {
             const existing = {
                 unreadServers: {
                     srv1: { hasUnread: false, pingCount: 5 },
@@ -61,8 +61,8 @@ describe('unreadSlice', () => {
         });
     });
 
-    describe('setServerPingCount', () => {
-        it('creates an entry with the given count when none exists', () => {
+    describe('setServerPingCount', (): void => {
+        it('creates an entry with the given count when none exists', (): void => {
             const state = unreadReducer(
                 initialState,
                 setServerPingCount({ serverId: 'srv1', count: 7 }),
@@ -70,7 +70,7 @@ describe('unreadSlice', () => {
             expect(state.unreadServers['srv1'].pingCount).toBe(7);
         });
 
-        it('overwrites an existing ping count', () => {
+        it('overwrites an existing ping count', (): void => {
             const existing = {
                 unreadServers: { srv1: { hasUnread: true, pingCount: 3 } },
                 unreadDms: {},
@@ -83,8 +83,8 @@ describe('unreadSlice', () => {
         });
     });
 
-    describe('incrementServerPing', () => {
-        it('creates an entry with pingCount=1 when none exists', () => {
+    describe('incrementServerPing', (): void => {
+        it('creates an entry with pingCount=1 when none exists', (): void => {
             const state = unreadReducer(
                 initialState,
                 incrementServerPing({ serverId: 'srv1' }),
@@ -95,7 +95,7 @@ describe('unreadSlice', () => {
             });
         });
 
-        it('increments the ping count by exactly 1 each call', () => {
+        it('increments the ping count by exactly 1 each call', (): void => {
             let state = unreadReducer(
                 initialState,
                 incrementServerPing({ serverId: 'srv1' }),
@@ -111,7 +111,7 @@ describe('unreadSlice', () => {
             expect(state.unreadServers['srv1'].pingCount).toBe(3);
         });
 
-        it('does not double-count when the same dispatch is made once', () => {
+        it('does not double-count when the same dispatch is made once', (): void => {
             const state = unreadReducer(
                 initialState,
                 incrementServerPing({ serverId: 'srv1' }),
@@ -120,8 +120,8 @@ describe('unreadSlice', () => {
         });
     });
 
-    describe('decrementServerPing', () => {
-        it('decrements the ping count by 1', () => {
+    describe('decrementServerPing', (): void => {
+        it('decrements the ping count by 1', (): void => {
             const existing = {
                 unreadServers: { srv1: { hasUnread: true, pingCount: 3 } },
                 unreadDms: {},
@@ -133,7 +133,7 @@ describe('unreadSlice', () => {
             expect(state.unreadServers['srv1'].pingCount).toBe(2);
         });
 
-        it('does not go below 0', () => {
+        it('does not go below 0', (): void => {
             const existing = {
                 unreadServers: { srv1: { hasUnread: false, pingCount: 0 } },
                 unreadDms: {},
@@ -145,7 +145,7 @@ describe('unreadSlice', () => {
             expect(state.unreadServers['srv1'].pingCount).toBe(0);
         });
 
-        it('does nothing for an unknown server', () => {
+        it('does nothing for an unknown server', (): void => {
             const state = unreadReducer(
                 initialState,
                 decrementServerPing({ serverId: 'unknown' }),
@@ -154,8 +154,8 @@ describe('unreadSlice', () => {
         });
     });
 
-    describe('setUnreadDms', () => {
-        it('replaces the entire unreadDms map', () => {
+    describe('setUnreadDms', (): void => {
+        it('replaces the entire unreadDms map', (): void => {
             const state = unreadReducer(
                 initialState,
                 setUnreadDms({ user1: 4, user2: 0 }),
@@ -164,8 +164,8 @@ describe('unreadSlice', () => {
         });
     });
 
-    describe('setDmUnread', () => {
-        it('sets the DM unread count for a user', () => {
+    describe('setDmUnread', (): void => {
+        it('sets the DM unread count for a user', (): void => {
             const state = unreadReducer(
                 initialState,
                 setDmUnread({ userId: 'user1', count: 5 }),
@@ -173,7 +173,7 @@ describe('unreadSlice', () => {
             expect(state.unreadDms['user1']).toBe(5);
         });
 
-        it('receiving the same DM_UNREAD_UPDATED count twice does not double-count', () => {
+        it('receiving the same DM_UNREAD_UPDATED count twice does not double-count', (): void => {
             let state = unreadReducer(
                 initialState,
                 setDmUnread({ userId: 'user1', count: 1 }),
@@ -185,7 +185,7 @@ describe('unreadSlice', () => {
             expect(state.unreadDms['user1']).toBe(1);
         });
 
-        it('clears DM ping when count is set to 0', () => {
+        it('clears DM ping when count is set to 0', (): void => {
             let state = unreadReducer(
                 initialState,
                 setDmUnread({ userId: 'user1', count: 3 }),
@@ -197,7 +197,7 @@ describe('unreadSlice', () => {
             expect(state.unreadDms['user1']).toBe(0);
         });
 
-        it('clears DM unread badge after read acknowledgement (count → 0)', () => {
+        it('clears DM unread badge after read acknowledgement (count → 0)', (): void => {
             const withPing = {
                 unreadServers: {},
                 unreadDms: { user1: 2 },
@@ -210,8 +210,8 @@ describe('unreadSlice', () => {
         });
     });
 
-    describe('DM ping while in server view', () => {
-        it('updating a DM count does not affect server ping state', () => {
+    describe('DM ping while in server view', (): void => {
+        it('updating a DM count does not affect server ping state', (): void => {
             const serverState = {
                 unreadServers: { srv1: { hasUnread: false, pingCount: 2 } },
                 unreadDms: {},
@@ -224,7 +224,7 @@ describe('unreadSlice', () => {
             expect(state.unreadDms['user1']).toBe(3);
         });
 
-        it('a server ping increment does not affect DM unread counts', () => {
+        it('a server ping increment does not affect DM unread counts', (): void => {
             const dmState = {
                 unreadServers: {},
                 unreadDms: { user1: 2 },

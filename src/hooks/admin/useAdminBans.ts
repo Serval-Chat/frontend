@@ -18,14 +18,25 @@ import { extractApiError } from '@/utils/extractApiError';
 
 export const adminBansKeys = {
     all: ['admin', 'bans'] as const,
-    diagnostic: () => [...adminBansKeys.all, 'diagnostic'] as const,
-    list: (limit: number, offset: number) =>
+    diagnostic: (): readonly ['admin', 'bans', 'diagnostic'] =>
+        [...adminBansKeys.all, 'diagnostic'] as const,
+    list: (
+        limit: number,
+        offset: number,
+    ): readonly ['admin', 'bans', 'list', number, number] =>
         [...adminBansKeys.all, 'list', limit, offset] as const,
-    mutesList: (limit: number, offset: number) =>
+    mutesList: (
+        limit: number,
+        offset: number,
+    ): readonly ['admin', 'bans', 'mutes', 'list', number, number] =>
         [...adminBansKeys.all, 'mutes', 'list', limit, offset] as const,
-    userBans: (userId: string) =>
+    userBans: (
+        userId: string,
+    ): readonly ['admin', 'bans', 'user', string, 'bans'] =>
         [...adminBansKeys.all, 'user', userId, 'bans'] as const,
-    userMutes: (userId: string) =>
+    userMutes: (
+        userId: string,
+    ): readonly ['admin', 'bans', 'user', string, 'mutes'] =>
         [...adminBansKeys.all, 'user', userId, 'mutes'] as const,
 };
 
@@ -35,7 +46,8 @@ export const useAdminBansDiagnostic = (): UseQueryResult<
 > =>
     useQuery({
         queryKey: adminBansKeys.diagnostic(),
-        queryFn: () => adminBansApi.getBansDiagnostic(),
+        queryFn: (): Promise<AdminBansDiagnostic> =>
+            adminBansApi.getBansDiagnostic(),
     });
 
 export const useAdminBansList = (
@@ -44,7 +56,8 @@ export const useAdminBansList = (
 ): UseQueryResult<AdminBan[], Error> =>
     useQuery({
         queryKey: adminBansKeys.list(limit, offset),
-        queryFn: () => adminBansApi.listBans(limit, offset),
+        queryFn: (): Promise<AdminBan[]> =>
+            adminBansApi.listBans(limit, offset),
     });
 
 export const useAdminMutesList = (
@@ -53,7 +66,8 @@ export const useAdminMutesList = (
 ): UseQueryResult<AdminMute[], Error> =>
     useQuery({
         queryKey: adminBansKeys.mutesList(limit, offset),
-        queryFn: () => adminBansApi.listMutes(limit, offset),
+        queryFn: (): Promise<AdminMute[]> =>
+            adminBansApi.listMutes(limit, offset),
     });
 
 export const useAdminUserBans = (
@@ -61,7 +75,8 @@ export const useAdminUserBans = (
 ): UseQueryResult<AdminBanHistoryItem[], Error> =>
     useQuery({
         queryKey: adminBansKeys.userBans(userId!),
-        queryFn: () => adminBansApi.getUserBans(userId!),
+        queryFn: (): Promise<AdminBanHistoryItem[]> =>
+            adminBansApi.getUserBans(userId!),
         enabled: !!userId,
     });
 
@@ -70,7 +85,8 @@ export const useAdminUserMutes = (
 ): UseQueryResult<AdminBanHistoryItem[], Error> =>
     useQuery({
         queryKey: adminBansKeys.userMutes(userId!),
-        queryFn: () => adminBansApi.getUserMutes(userId!),
+        queryFn: (): Promise<AdminBanHistoryItem[]> =>
+            adminBansApi.getUserMutes(userId!),
         enabled: !!userId,
     });
 
@@ -91,8 +107,8 @@ export const useAdminBanUser = (): UseMutationResult<
             userId: string;
             reason: string;
             duration: number;
-        }) => adminBansApi.banUser(userId, reason, duration),
-        onSuccess: (_, variables) => {
+        }): Promise<AdminBan> => adminBansApi.banUser(userId, reason, duration),
+        onSuccess: (_, variables): void => {
             void queryClient.invalidateQueries({
                 queryKey: adminBansKeys.userBans(variables.userId),
             });
@@ -103,7 +119,7 @@ export const useAdminBanUser = (): UseMutationResult<
             void queryClient.invalidateQueries({ queryKey: ['admin-users'] });
             showToast('User banned successfully', 'success');
         },
-        onError: (error) => {
+        onError: (error): void => {
             showToast(extractApiError(error, 'Failed to ban user'), 'error');
         },
     });
@@ -118,8 +134,9 @@ export const useAdminUnbanUser = (): UseMutationResult<
     const { showToast } = useToast();
 
     return useMutation({
-        mutationFn: (userId: string) => adminBansApi.unbanUser(userId),
-        onSuccess: (_, userId) => {
+        mutationFn: (userId: string): Promise<{ message: string }> =>
+            adminBansApi.unbanUser(userId),
+        onSuccess: (_, userId): void => {
             void queryClient.invalidateQueries({
                 queryKey: adminBansKeys.userBans(userId),
             });
@@ -130,7 +147,7 @@ export const useAdminUnbanUser = (): UseMutationResult<
             void queryClient.invalidateQueries({ queryKey: ['admin-users'] });
             showToast('User unbanned successfully', 'success');
         },
-        onError: (error) => {
+        onError: (error): void => {
             showToast(extractApiError(error, 'Failed to unban user'), 'error');
         },
     });
@@ -153,8 +170,9 @@ export const useAdminMuteUser = (): UseMutationResult<
             userId: string;
             reason: string;
             duration: number;
-        }) => adminBansApi.muteUser(userId, reason, duration),
-        onSuccess: (_, variables) => {
+        }): Promise<AdminMute> =>
+            adminBansApi.muteUser(userId, reason, duration),
+        onSuccess: (_, variables): void => {
             void queryClient.invalidateQueries({
                 queryKey: adminBansKeys.userMutes(variables.userId),
             });
@@ -165,7 +183,7 @@ export const useAdminMuteUser = (): UseMutationResult<
             void queryClient.invalidateQueries({ queryKey: ['admin-users'] });
             showToast('User muted successfully', 'success');
         },
-        onError: (error) => {
+        onError: (error): void => {
             showToast(extractApiError(error, 'Failed to mute user'), 'error');
         },
     });
@@ -180,8 +198,9 @@ export const useAdminUnmuteUser = (): UseMutationResult<
     const { showToast } = useToast();
 
     return useMutation({
-        mutationFn: (userId: string) => adminBansApi.unmuteUser(userId),
-        onSuccess: (_, userId) => {
+        mutationFn: (userId: string): Promise<{ message: string }> =>
+            adminBansApi.unmuteUser(userId),
+        onSuccess: (_, userId): void => {
             void queryClient.invalidateQueries({
                 queryKey: adminBansKeys.userMutes(userId),
             });
@@ -192,7 +211,7 @@ export const useAdminUnmuteUser = (): UseMutationResult<
             void queryClient.invalidateQueries({ queryKey: ['admin-users'] });
             showToast('User unmuted successfully', 'success');
         },
-        onError: (error) => {
+        onError: (error): void => {
             showToast(extractApiError(error, 'Failed to unmute user'), 'error');
         },
     });

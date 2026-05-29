@@ -3,8 +3,8 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { Timestamp } from './Timestamp';
 
-describe('Timestamp', () => {
-    it('floors relative years instead of rounding up', () => {
+describe('Timestamp', (): void => {
+    it('floors relative years instead of rounding up', (): void => {
         vi.useFakeTimers();
         vi.setSystemTime(new Date('2026-05-28T00:00:00.000Z'));
 

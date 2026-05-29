@@ -67,7 +67,7 @@ export const AdminServerDetail = ({
     const { mutate: deleteInvite, isPending: isDeletingInvite } =
         useDeleteAdminServerInvite(serverId);
 
-    const serverAge = useMemo(() => {
+    const serverAge = useMemo((): string => {
         if (!server) return '';
         const created = new Date(server.createdAt);
         const now = new Date();
@@ -112,18 +112,18 @@ export const AdminServerDetail = ({
         )
             return;
         deleteServer(serverId, {
-            onSuccess: () =>
+            onSuccess: (): void =>
                 showToast('Server soft-deleted successfully', 'success'),
-            onError: (err) =>
+            onError: (err): void =>
                 showToast(err.message || 'Failed to delete server', 'error'),
         });
     };
 
     const handleRestore = (): void => {
         restoreServer(serverId, {
-            onSuccess: () =>
+            onSuccess: (): void =>
                 showToast('Server restored successfully', 'success'),
-            onError: (err) =>
+            onError: (err): void =>
                 showToast(err.message || 'Failed to restore server', 'error'),
         });
     };
@@ -132,9 +132,9 @@ export const AdminServerDetail = ({
         if (!window.confirm('Are you sure you want to revoke this invite?'))
             return;
         deleteInvite(inviteId, {
-            onSuccess: () =>
+            onSuccess: (): void =>
                 showToast('Invite revoked successfully', 'success'),
-            onError: (err) =>
+            onError: (err): void =>
                 showToast(err.message || 'Failed to revoke invite', 'error'),
         });
     };
@@ -148,9 +148,9 @@ export const AdminServerDetail = ({
             )
                 return;
             unverifyServer(serverId, {
-                onSuccess: () =>
+                onSuccess: (): void =>
                     showToast('Verification badge removed', 'success'),
-                onError: (err) =>
+                onError: (err): void =>
                     showToast(err.message || 'Failed to remove badge', 'error'),
             });
         } else {
@@ -163,9 +163,9 @@ export const AdminServerDetail = ({
                     return;
             }
             verifyServer(serverId, {
-                onSuccess: () =>
+                onSuccess: (): void =>
                     showToast('Server verified successfully', 'success'),
-                onError: (err) =>
+                onError: (err): void =>
                     showToast(
                         err.message || 'Failed to verify server',
                         'error',
@@ -266,7 +266,7 @@ export const AdminServerDetail = ({
                                 <Button
                                     className="gap-2 rounded-lg text-xs"
                                     variant="normal"
-                                    onClick={() =>
+                                    onClick={(): void =>
                                         onViewUser(server.owner!._id)
                                     }
                                 >
@@ -395,7 +395,7 @@ export const AdminServerDetail = ({
                                                 className="h-6 w-6 p-0 text-danger hover:bg-danger/10"
                                                 disabled={isDeletingInvite}
                                                 variant="ghost"
-                                                onClick={() =>
+                                                onClick={(): void =>
                                                     handleRevokeInvite(
                                                         invite._id,
                                                     )

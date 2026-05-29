@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 
 import { useMembers } from '@/api/servers/servers.queries';
 import { useUserById } from '@/api/users/users.queries';
@@ -17,11 +17,7 @@ const isValidUserId = (id: string): boolean => /^[a-f\d]{24}$/i.test(id);
 /**
  * @description Beautifully renders a user mention.
  */
-export const Mention: React.FC<MentionProps> = ({
-    userId,
-    serverId,
-    size = 'sm',
-}) => {
+export const Mention = ({ userId, serverId, size = 'sm' }: MentionProps) => {
     const [isPopupOpen, setIsPopupOpen] = useState(false);
     const triggerRef = useRef<HTMLSpanElement>(null);
     const { data: user, isLoading: isUserLoading } = useUserById(userId);
@@ -42,7 +38,7 @@ export const Mention: React.FC<MentionProps> = ({
         );
     }
 
-    const member = members?.find((m) => m.userId === userId);
+    const member = members?.find((m): boolean => m.userId === userId);
 
     const displayName = member?.nickname
         ? member.nickname
@@ -58,7 +54,7 @@ export const Mention: React.FC<MentionProps> = ({
                 as="span"
                 className="inline-flex cursor-pointer items-baseline rounded bg-primary/10 px-1.5 py-[4px] font-medium text-primary transition-colors select-none hover:bg-primary/20"
                 ref={triggerRef}
-                onClick={() => setIsPopupOpen(true)}
+                onClick={(): void => setIsPopupOpen(true)}
             >
                 <Text as="span" className="leading-none" size={size}>
                     @{displayName}
@@ -70,7 +66,7 @@ export const Mention: React.FC<MentionProps> = ({
                 serverId={serverId}
                 triggerRef={triggerRef}
                 userId={userId}
-                onClose={() => setIsPopupOpen(false)}
+                onClose={(): void => setIsPopupOpen(false)}
             />
         </>
     );

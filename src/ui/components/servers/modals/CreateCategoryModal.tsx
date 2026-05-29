@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 import { serversApi } from '@/api/servers/servers.api';
 import { Button } from '@/ui/components/common/Button';
@@ -12,11 +12,11 @@ interface CreateCategoryModalProps {
     serverId: string;
 }
 
-export const CreateCategoryModal: React.FC<CreateCategoryModalProps> = ({
+export const CreateCategoryModal = ({
     isOpen,
     onClose,
     serverId,
-}) => {
+}: CreateCategoryModalProps) => {
     const [name, setName] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -62,8 +62,8 @@ export const CreateCategoryModal: React.FC<CreateCategoryModalProps> = ({
                     <Input
                         placeholder="New Category"
                         value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        onKeyDown={(e) => {
+                        onChange={(e): void => setName(e.target.value)}
+                        onKeyDown={(e): void => {
                             if (e.key === 'Enter' && name.trim()) {
                                 void handleCreate();
                             }
@@ -89,7 +89,7 @@ export const CreateCategoryModal: React.FC<CreateCategoryModalProps> = ({
                         disabled={!name.trim() || isLoading}
                         loading={isLoading}
                         variant="primary"
-                        onClick={() => void handleCreate()}
+                        onClick={(): undefined => void handleCreate()}
                     >
                         Create Category
                     </Button>

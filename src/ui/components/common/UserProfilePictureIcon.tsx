@@ -23,13 +23,13 @@ const isAbsoluteUrl = (url: string): boolean => {
     }
 };
 
-export const UserProfilePictureIcon: React.FC<UserProfilePictureIconProps> = ({
+export const UserProfilePictureIcon = ({
     src,
     username,
     size = 'md',
     className,
     onClick,
-}) => {
+}: UserProfilePictureIconProps) => {
     const isFilename = src && !isAbsoluteUrl(src) && !src.includes('/');
     const effectiveSrc = isFilename ? `/api/v1/profile/picture/${src}` : src;
     const iconUrl = getSafeUrl(
@@ -38,7 +38,7 @@ export const UserProfilePictureIcon: React.FC<UserProfilePictureIconProps> = ({
 
     const initials = (username || '')
         .split(' ')
-        .map((word) => word[0])
+        .map((word): string => word[0])
         .join('')
         .slice(0, 2)
         .toUpperCase();

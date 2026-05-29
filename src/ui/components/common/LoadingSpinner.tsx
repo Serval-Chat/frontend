@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { Box } from '@/ui/components/layout/Box';
 import { cn } from '@/utils/cn';
 
@@ -11,10 +9,10 @@ interface LoadingSpinnerProps {
 /**
  * @description A loading spinner
  */
-export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
+export const LoadingSpinner = ({
     className,
     size = 'md',
-}) => {
+}: LoadingSpinnerProps) => {
     const sizeClasses = {
         sm: 'w-4 h-4 border-2',
         md: 'w-5 h-5 border-2',

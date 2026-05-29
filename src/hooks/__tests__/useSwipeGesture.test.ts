@@ -19,15 +19,15 @@ const makeTouchEvent = (
     });
 };
 
-describe('useSwipeGesture', () => {
+describe('useSwipeGesture', (): void => {
     let el: HTMLDivElement;
 
-    beforeEach(() => {
+    beforeEach((): void => {
         el = document.createElement('div');
         document.body.appendChild(el);
     });
 
-    afterEach(() => {
+    afterEach((): void => {
         document.body.removeChild(el);
         vi.restoreAllMocks();
     });
@@ -45,11 +45,11 @@ describe('useSwipeGesture', () => {
         return result;
     };
 
-    it('calls onSwipeRight when finger moves far enough to the right', () => {
+    it('calls onSwipeRight when finger moves far enough to the right', (): void => {
         const onSwipeRight = vi.fn();
         setup({ onSwipeRight });
 
-        act(() => {
+        act((): void => {
             el.dispatchEvent(makeTouchEvent('touchstart', 50, 100));
             el.dispatchEvent(makeTouchEvent('touchmove', 80, 104));
             el.dispatchEvent(makeTouchEvent('touchend', 130, 108));
@@ -58,11 +58,11 @@ describe('useSwipeGesture', () => {
         expect(onSwipeRight).toHaveBeenCalledOnce();
     });
 
-    it('calls onSwipeLeft when finger moves far enough to the left', () => {
+    it('calls onSwipeLeft when finger moves far enough to the left', (): void => {
         const onSwipeLeft = vi.fn();
         setup({ onSwipeLeft });
 
-        act(() => {
+        act((): void => {
             el.dispatchEvent(makeTouchEvent('touchstart', 200, 100));
             el.dispatchEvent(makeTouchEvent('touchmove', 170, 104));
             el.dispatchEvent(makeTouchEvent('touchend', 120, 108));
@@ -71,12 +71,12 @@ describe('useSwipeGesture', () => {
         expect(onSwipeLeft).toHaveBeenCalledOnce();
     });
 
-    it('does NOT fire when horizontal distance is below threshold', () => {
+    it('does NOT fire when horizontal distance is below threshold', (): void => {
         const onSwipeLeft = vi.fn();
         const onSwipeRight = vi.fn();
         setup({ onSwipeLeft, onSwipeRight, threshold: 60 });
 
-        act(() => {
+        act((): void => {
             el.dispatchEvent(makeTouchEvent('touchstart', 100, 100));
             el.dispatchEvent(makeTouchEvent('touchend', 130, 100));
         });
@@ -85,11 +85,11 @@ describe('useSwipeGesture', () => {
         expect(onSwipeLeft).not.toHaveBeenCalled();
     });
 
-    it('does NOT fire when vertical drift exceeds maxVerticalDrift (scroll detection)', () => {
+    it('does NOT fire when vertical drift exceeds maxVerticalDrift (scroll detection)', (): void => {
         const onSwipeRight = vi.fn();
         setup({ onSwipeRight, threshold: 50, maxVerticalDrift: 80 });
 
-        act(() => {
+        act((): void => {
             el.dispatchEvent(makeTouchEvent('touchstart', 50, 100));
             el.dispatchEvent(makeTouchEvent('touchmove', 80, 200));
             el.dispatchEvent(makeTouchEvent('touchend', 130, 210));
@@ -98,11 +98,11 @@ describe('useSwipeGesture', () => {
         expect(onSwipeRight).not.toHaveBeenCalled();
     });
 
-    it('does NOT fire when vertical drift on touchend exceeds limit (no touchmove)', () => {
+    it('does NOT fire when vertical drift on touchend exceeds limit (no touchmove)', (): void => {
         const onSwipeLeft = vi.fn();
         setup({ onSwipeLeft, threshold: 50, maxVerticalDrift: 80 });
 
-        act(() => {
+        act((): void => {
             el.dispatchEvent(makeTouchEvent('touchstart', 200, 100));
             el.dispatchEvent(makeTouchEvent('touchend', 100, 200));
         });
@@ -110,12 +110,12 @@ describe('useSwipeGesture', () => {
         expect(onSwipeLeft).not.toHaveBeenCalled();
     });
 
-    it('does NOT call callbacks when enabled is false', () => {
+    it('does NOT call callbacks when enabled is false', (): void => {
         const onSwipeRight = vi.fn();
         const onSwipeLeft = vi.fn();
         setup({ onSwipeRight, onSwipeLeft, enabled: false });
 
-        act(() => {
+        act((): void => {
             el.dispatchEvent(makeTouchEvent('touchstart', 50, 100));
             el.dispatchEvent(makeTouchEvent('touchend', 150, 104));
         });
@@ -124,18 +124,18 @@ describe('useSwipeGesture', () => {
         expect(onSwipeLeft).not.toHaveBeenCalled();
     });
 
-    it('handles multiple sequential swipes correctly', () => {
+    it('handles multiple sequential swipes correctly', (): void => {
         const onSwipeRight = vi.fn();
         setup({ onSwipeRight });
 
         // First swipe
-        act(() => {
+        act((): void => {
             el.dispatchEvent(makeTouchEvent('touchstart', 50, 100));
             el.dispatchEvent(makeTouchEvent('touchend', 150, 104));
         });
 
         // Second swipe
-        act(() => {
+        act((): void => {
             el.dispatchEvent(makeTouchEvent('touchstart', 50, 200));
             el.dispatchEvent(makeTouchEvent('touchend', 160, 205));
         });

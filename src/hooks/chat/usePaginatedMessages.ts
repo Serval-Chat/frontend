@@ -40,7 +40,7 @@ export const usePaginatedMessages = (
     );
 
     const limit = 50;
-    const isViewingOlderMessages = React.useMemo(() => {
+    const isViewingOlderMessages = React.useMemo((): boolean => {
         if (!targetMessageId || !channelMessages.data) return false;
 
         const pages = channelMessages.data.pages;
@@ -48,7 +48,7 @@ export const usePaginatedMessages = (
 
         // Find target message without flattening
         for (const page of pages) {
-            targetMsg = page.find((m) => m._id === targetMessageId);
+            targetMsg = page.find((m): boolean => m._id === targetMessageId);
             if (targetMsg) break;
         }
 

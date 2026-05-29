@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 
 import { CheckCheck, Inbox, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -18,20 +18,23 @@ interface PingInboxProps {
     onClose: () => void;
 }
 
-export const PingInbox: React.FC<PingInboxProps> = ({ onClose }) => {
+export const PingInbox = ({ onClose }: PingInboxProps) => {
     const { data, isLoading } = usePings();
     const { mutate: clearAll } = useClearAllPings();
     const [searchQuery, setSearchQuery] = useState('');
     const [isClearModalOpen, setIsClearModalOpen] = useState(false);
     const navigate = useNavigate();
 
-    const pings = useMemo(() => data?.pings || [], [data?.pings]);
+    const pings = useMemo(
+        (): PingNotification[] => data?.pings || [],
+        [data?.pings],
+    );
 
-    const filteredPings = useMemo(() => {
+    const filteredPings = useMemo((): PingNotification[] => {
         const query = searchQuery.toLowerCase();
         if (!query) return pings;
         return pings.filter(
-            (p: PingNotification) =>
+            (p: PingNotification): boolean | '' =>
                 (p.sender && p.sender.toLowerCase().includes(query)) ||
                 (p.message &&
                     'text' in p.message &&
@@ -80,7 +83,7 @@ export const PingInbox: React.FC<PingInboxProps> = ({ onClose }) => {
                             size="sm"
                             title="Clear all"
                             variant="ghost"
-                            onClick={() => setIsClearModalOpen(true)}
+                            onClick={(): void => setIsClearModalOpen(true)}
                         />
                     )}
                     <IconButton
@@ -101,7 +104,7 @@ export const PingInbox: React.FC<PingInboxProps> = ({ onClose }) => {
                     size="sm"
                     value={searchQuery}
                     variant="secondary"
-                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onChange={(e): void => setSearchQuery(e.target.value)}
                 />
             </div>
 
@@ -121,7 +124,7 @@ export const PingInbox: React.FC<PingInboxProps> = ({ onClose }) => {
                         <PingItem
                             key={ping.id}
                             ping={ping}
-                            onClick={() => handlePingClick(ping)}
+                            onClick={(): void => handlePingClick(ping)}
                         />
                     ))
                 ) : (
@@ -140,7 +143,7 @@ export const PingInbox: React.FC<PingInboxProps> = ({ onClose }) => {
 
             <ClearPingsModal
                 isOpen={isClearModalOpen}
-                onClose={() => setIsClearModalOpen(false)}
+                onClose={(): void => setIsClearModalOpen(false)}
                 onConfirm={clearAll}
             />
         </Box>

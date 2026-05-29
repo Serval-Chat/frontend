@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { Box } from '@/ui/components/layout/Box';
 import { cn } from '@/utils/cn';
 
@@ -11,9 +9,11 @@ interface UserProfileStatusIndicatorProps {
     className?: string;
 }
 
-export const UserProfileStatusIndicator: React.FC<
-    UserProfileStatusIndicatorProps
-> = ({ status, size = 'md', className }) => {
+export const UserProfileStatusIndicator = ({
+    status,
+    size = 'md',
+    className,
+}: UserProfileStatusIndicatorProps) => {
     const sizeClasses = {
         xs: 'w-2.5 h-2.5 border-[1.5px]',
         sm: 'w-2.5 h-2.5 border-[1.5px]',

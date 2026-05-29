@@ -127,7 +127,7 @@ export const useLoginForm = (): LoginFormResult => {
 
             await setupWebPush();
             await checkAndMigrateVapid();
-            listenForSwNavigation((url) => {
+            listenForSwNavigation((url): void => {
                 void navigate(url);
             });
 

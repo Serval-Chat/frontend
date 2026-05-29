@@ -32,7 +32,7 @@ vi.mock('react-router-dom', () => ({
     useParams: vi.fn().mockReturnValue({ serverId: 'url-server' }),
 }));
 
-describe('useTertiarySidebarData', () => {
+describe('useTertiarySidebarData', (): void => {
     const mockMember = {
         userId: 'user-1',
         roles: ['role-1'],
@@ -45,7 +45,7 @@ describe('useTertiarySidebarData', () => {
         permissions: { viewChannels: true },
     } as Role;
 
-    beforeEach(() => {
+    beforeEach((): void => {
         vi.clearAllMocks();
 
         vi.mocked(useAppSelector).mockImplementation((selector) =>
@@ -82,7 +82,7 @@ describe('useTertiarySidebarData', () => {
         } as never);
     });
 
-    it('enables server member queries for explicit split-view sidebar context', () => {
+    it('enables server member queries for explicit split-view sidebar context', (): void => {
         const { result } = renderHook(() =>
             useTertiarySidebarData({
                 selectedServerId: 'pane-server',
@@ -104,7 +104,7 @@ describe('useTertiarySidebarData', () => {
         expect(result.current.members).toEqual([mockMember]);
     });
 
-    it('keeps route mismatches disabled outside explicit split-view context', () => {
+    it('keeps route mismatches disabled outside explicit split-view context', (): void => {
         renderHook(() =>
             useTertiarySidebarData({
                 selectedServerId: 'pane-server',
@@ -117,7 +117,7 @@ describe('useTertiarySidebarData', () => {
         });
     });
 
-    it('filters server members that cannot view the selected channel', () => {
+    it('filters server members that cannot view the selected channel', (): void => {
         const visibleMember = {
             userId: 'visible-user',
             roles: ['visible-role'],

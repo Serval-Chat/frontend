@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { tryExecuteSlashCommand } from './lexical/slashCommandExecution';
 
-describe('tryExecuteSlashCommand', () => {
+describe('tryExecuteSlashCommand', (): void => {
     const commands = [
         {
             id: 'cmd-1',
@@ -19,7 +19,7 @@ describe('tryExecuteSlashCommand', () => {
         },
     ];
 
-    it('executes known slash command in server context', async () => {
+    it('executes known slash command in server context', async (): Promise<void> => {
         const showToast = vi.fn();
         const createInteraction = vi.fn().mockResolvedValue({ success: true });
         const onSuccess = vi.fn();
@@ -47,7 +47,7 @@ describe('tryExecuteSlashCommand', () => {
         expect(onSuccess).toHaveBeenCalled();
     });
 
-    it('blocks command usage in DMs', async () => {
+    it('blocks command usage in DMs', async (): Promise<void> => {
         const showToast = vi.fn();
 
         const result = await tryExecuteSlashCommand({
@@ -69,7 +69,7 @@ describe('tryExecuteSlashCommand', () => {
         );
     });
 
-    it('blocks unknown commands', async () => {
+    it('blocks unknown commands', async (): Promise<void> => {
         const showToast = vi.fn();
 
         const result = await tryExecuteSlashCommand({
@@ -91,7 +91,7 @@ describe('tryExecuteSlashCommand', () => {
         );
     });
 
-    it('blocks missing required options', async () => {
+    it('blocks missing required options', async (): Promise<void> => {
         const showToast = vi.fn();
 
         const result = await tryExecuteSlashCommand({
@@ -113,7 +113,7 @@ describe('tryExecuteSlashCommand', () => {
         );
     });
 
-    it('blocks invalid option coercion', async () => {
+    it('blocks invalid option coercion', async (): Promise<void> => {
         const showToast = vi.fn();
         const boolCommands = [
             {

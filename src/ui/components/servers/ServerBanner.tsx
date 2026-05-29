@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { BadgeCheck } from 'lucide-react';
 
 import type { ServerBanner as ServerBannerData } from '@/api/servers/servers.types';
@@ -17,12 +15,12 @@ interface ServerBannerProps {
 /**
  * @description Renders the server banner with the name.
  */
-export const ServerBanner: React.FC<ServerBannerProps> = ({
+export const ServerBanner = ({
     name,
     banner,
     loading,
     verified,
-}) => (
+}: ServerBannerProps) => (
     <div className="group relative z-content w-full shrink-0 overflow-hidden bg-bg-secondary shadow-[0_2px_10px_0_rgba(0,0,0,0.4)]">
         {/* Banner (Image or Color) */}
         {banner && !loading && (

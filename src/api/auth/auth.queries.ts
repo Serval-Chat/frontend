@@ -21,7 +21,7 @@ export const useLogin = (): UseMutationResult<
 > =>
     useMutation({
         mutationFn: authApi.login,
-        onSuccess: async (data) => {
+        onSuccess: async (data): Promise<void> => {
             if (data.token) {
                 await setAuthToken(data.token);
             }
@@ -35,7 +35,7 @@ export const useRegister = (): UseMutationResult<
 > =>
     useMutation({
         mutationFn: authApi.register,
-        onSuccess: async (data) => {
+        onSuccess: async (data): Promise<void> => {
             await setAuthToken(data.token);
         },
     });
@@ -47,7 +47,7 @@ export const useChangePassword = (): UseMutationResult<
 > =>
     useMutation({
         mutationFn: authApi.changePassword,
-        onSuccess: async (data) => {
+        onSuccess: async (data): Promise<void> => {
             await setAuthToken(data.token);
         },
     });
@@ -59,7 +59,7 @@ export const useChangeLogin = (): UseMutationResult<
 > =>
     useMutation({
         mutationFn: authApi.changeLogin,
-        onSuccess: async (data) => {
+        onSuccess: async (data): Promise<void> => {
             await setAuthToken(data.token);
         },
     });

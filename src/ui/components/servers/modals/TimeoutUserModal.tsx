@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 import { Button } from '@/ui/components/common/Button';
 import { Heading } from '@/ui/components/common/Heading';
@@ -26,13 +26,13 @@ const DURATIONS = [
     { label: '1 Week', value: 604800 },
 ];
 
-export const TimeoutUserModal: React.FC<TimeoutUserModalProps> = ({
+export const TimeoutUserModal = ({
     isOpen,
     onClose,
     onConfirm,
     username,
     userAvatar,
-}) => {
+}: TimeoutUserModalProps) => {
     const [reason, setReason] = useState('');
     const [selectedDuration, setSelectedDuration] = useState(300);
 
@@ -77,7 +77,9 @@ export const TimeoutUserModal: React.FC<TimeoutUserModalProps> = ({
                                 )}
                                 key={d.value}
                                 type="button"
-                                onClick={() => setSelectedDuration(d.value)}
+                                onClick={(): void =>
+                                    setSelectedDuration(d.value)
+                                }
                             >
                                 {d.label}
                             </button>
@@ -97,7 +99,7 @@ export const TimeoutUserModal: React.FC<TimeoutUserModalProps> = ({
                         id="timeout-reason"
                         placeholder="e.g. Spamming, inappropriate behavior..."
                         value={reason}
-                        onChange={(e) => setReason(e.target.value)}
+                        onChange={(e): void => setReason(e.target.value)}
                     />
                 </Box>
 

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import { Link, Navigate } from 'react-router-dom';
@@ -21,7 +21,7 @@ import { DefaultBackground } from '@/ui/components/layout/DefaultBackground';
 /**
  * @description Login page
  */
-export const Login: React.FC = () => {
+export const Login = () => {
     const { isAuthenticated } = useAuth();
     const {
         loginInput,
@@ -78,7 +78,7 @@ export const Login: React.FC = () => {
 
                 <form
                     className="space-y-md"
-                    onSubmit={(e) => void handleSubmit(e)}
+                    onSubmit={(e): undefined => void handleSubmit(e)}
                 >
                     <InputWrapper>
                         {requiresTwoFactor ? (
@@ -91,7 +91,7 @@ export const Login: React.FC = () => {
                                 }
                                 type="text"
                                 value={twoFactorCode}
-                                onChange={(e) =>
+                                onChange={(e): void =>
                                     setTwoFactorCode(
                                         e.target.value
                                             .toUpperCase()
@@ -107,7 +107,9 @@ export const Login: React.FC = () => {
                                 placeholder="E-mail"
                                 type="text"
                                 value={loginInput}
-                                onChange={(e) => setLoginInput(e.target.value)}
+                                onChange={(e): void =>
+                                    setLoginInput(e.target.value)
+                                }
                             />
                         )}
                     </InputWrapper>
@@ -124,7 +126,7 @@ export const Login: React.FC = () => {
                                             showPassword ? 'text' : 'password'
                                         }
                                         value={password}
-                                        onChange={(e) =>
+                                        onChange={(e): void =>
                                             setPassword(e.target.value)
                                         }
                                     />
@@ -141,7 +143,7 @@ export const Login: React.FC = () => {
                                                 : 'Show password'
                                         }
                                         type="button"
-                                        onClick={() =>
+                                        onClick={(): void =>
                                             setShowPassword(!showPassword)
                                         }
                                     >
@@ -159,7 +161,7 @@ export const Login: React.FC = () => {
                                         checked={rememberMe}
                                         className="border-border/50 h-4 w-4 rounded bg-background/50 text-primary focus:ring-primary"
                                         type="checkbox"
-                                        onChange={(e) =>
+                                        onChange={(e): void =>
                                             setRememberMe(e.target.checked)
                                         }
                                     />
@@ -181,8 +183,10 @@ export const Login: React.FC = () => {
                             <button
                                 className="text-primary hover:underline"
                                 type="button"
-                                onClick={() =>
-                                    setUseBackupCode((current) => !current)
+                                onClick={(): void =>
+                                    setUseBackupCode(
+                                        (current): boolean => !current,
+                                    )
                                 }
                             >
                                 {useBackupCode

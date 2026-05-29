@@ -1,7 +1,7 @@
 /**
  * @description Table of contents component
  */
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 import { useAutoHighlight } from '@/hooks/useAutoHighlight';
 import { Button } from '@/ui/components/common/Button';
@@ -18,7 +18,7 @@ export interface TOCProps {
     sections: TOCSection[];
 }
 
-const TOCItem: React.FC<{ section: TOCSection }> = ({ section }) => {
+const TOCItem = ({ section }: { section: TOCSection }) => {
     const [isOpen, setIsOpen] = useState(true); // collapsible state
 
     const hasChildren = section.children && section.children.length > 0;
@@ -33,7 +33,7 @@ const TOCItem: React.FC<{ section: TOCSection }> = ({ section }) => {
                         )}
                         size="sm"
                         variant="ghost"
-                        onClick={() => setIsOpen(!isOpen)}
+                        onClick={(): void => setIsOpen(!isOpen)}
                     >
                         {isOpen ? '▾' : '▸'}
                     </Button>
@@ -72,7 +72,7 @@ const collectAllIds = (sections: TOCSection[]): string[] => {
     return ids;
 };
 
-export const TableOfContents: React.FC<TOCProps> = ({ sections }) => {
+export const TableOfContents = ({ sections }: TOCProps) => {
     const allIds = collectAllIds(sections);
     useAutoHighlight(allIds);
 

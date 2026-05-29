@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 import { Reorder, useDragControls } from 'framer-motion';
 import { GripVertical, Plus, Trash2 } from 'lucide-react';
@@ -19,28 +19,32 @@ interface RoleNavbarProps {
     onReorderRoles: (newRoles: Role[]) => void;
 }
 
-export const RoleNavbar: React.FC<RoleNavbarProps> = ({
+export const RoleNavbar = ({
     roles,
     selectedRoleId,
     onSelectRole,
     onAddRole,
     onDeleteRole,
     onReorderRoles,
-}) => {
+}: RoleNavbarProps) => {
     // Roles are usually sorted by position in descending order (highest role first)
-    const [localRoles, setLocalRoles] = useState(() =>
-        [...roles].sort((a, b) => b.position - a.position),
+    const [localRoles, setLocalRoles] = useState((): Role[] =>
+        [...roles].sort((a, b): number => b.position - a.position),
     );
     const [prevRoles, setPrevRoles] = useState(roles);
 
     if (roles !== prevRoles) {
-        setLocalRoles([...roles].sort((a, b) => b.position - a.position));
+        setLocalRoles(
+            [...roles].sort((a, b): number => b.position - a.position),
+        );
         setPrevRoles(roles);
     }
 
-    const originalSorted = [...roles].sort((a, b) => b.position - a.position);
+    const originalSorted = [...roles].sort(
+        (a, b): number => b.position - a.position,
+    );
     const hasOrderChanged = localRoles.some(
-        (role, idx) => role._id !== originalSorted[idx]?._id,
+        (role, idx): boolean => role._id !== originalSorted[idx]?._id,
     );
 
     const handleSave = (): void => {
@@ -52,7 +56,9 @@ export const RoleNavbar: React.FC<RoleNavbarProps> = ({
     };
 
     const handleReset = (): void => {
-        setLocalRoles([...roles].sort((a, b) => b.position - a.position));
+        setLocalRoles(
+            [...roles].sort((a, b): number => b.position - a.position),
+        );
     };
 
     return (
@@ -82,9 +88,9 @@ export const RoleNavbar: React.FC<RoleNavbarProps> = ({
                             isActive={selectedRoleId === role._id}
                             key={role._id}
                             role={role}
-                            onDelete={() => onDeleteRole(role._id)}
-                            onDragEnd={() => {}}
-                            onSelect={() => onSelectRole(role._id)}
+                            onDelete={(): void => onDeleteRole(role._id)}
+                            onDragEnd={(): void => {}}
+                            onSelect={(): void => onSelectRole(role._id)}
                         />
                     ))}
                 </Reorder.Group>
@@ -109,13 +115,13 @@ interface RoleItemProps {
     onDragEnd: () => void;
 }
 
-const RoleItem: React.FC<RoleItemProps> = ({
+const RoleItem = ({
     role,
     isActive,
     onSelect,
     onDelete,
     onDragEnd,
-}) => {
+}: RoleItemProps) => {
     const controls = useDragControls();
     const isEveryone = role.name === '@everyone';
     const roleStyle = getRoleStyle(role);
@@ -133,7 +139,7 @@ const RoleItem: React.FC<RoleItemProps> = ({
         >
             <div
                 className="cursor-grab p-0.5 opacity-0 transition-opacity group-hover:opacity-100 active:cursor-grabbing"
-                onPointerDown={(e) => controls.start(e)}
+                onPointerDown={(e): void => controls.start(e)}
             >
                 <GripVertical size={12} />
             </div>
@@ -158,7 +164,7 @@ const RoleItem: React.FC<RoleItemProps> = ({
                     icon={Trash2}
                     iconSize={12}
                     variant="ghost"
-                    onClick={(e) => {
+                    onClick={(e): void => {
                         e.stopPropagation();
                         onDelete();
                     }}

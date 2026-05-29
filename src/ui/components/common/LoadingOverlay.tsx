@@ -15,13 +15,13 @@ interface LoadingOverlayProps {
     containerRef?: React.RefObject<HTMLElement | null>;
 }
 
-export const LoadingOverlay: React.FC<LoadingOverlayProps> = ({
+export const LoadingOverlay = ({
     isOpen,
     message = 'Processing...',
     transparent = false,
     blur = true,
     containerRef,
-}) => {
+}: LoadingOverlayProps) => {
     const content = (
         <AnimatePresence>
             {isOpen && (

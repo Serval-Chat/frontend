@@ -62,7 +62,7 @@ const countAttachments = (n: ASTNode): number => {
     let count = n.type === 'file' || n.type === 'klipy' ? 1 : 0;
     if ('content' in n && Array.isArray(n.content)) {
         count += n.content.reduce(
-            (acc, curr) => acc + countAttachments(curr),
+            (acc, curr): number => acc + countAttachments(curr),
             0,
         );
     }
@@ -79,12 +79,12 @@ const hasVisibleContentRecursively = (
     if (n.type === 'file' || n.type === 'klipy') return !condenseFiles;
     if (n.type === 'text') return n.content.trim().length > 0;
     if ('content' in n && Array.isArray(n.content)) {
-        return n.content.some((curr) =>
+        return n.content.some((curr): boolean =>
             hasVisibleContentRecursively(curr, condenseFiles),
         );
     }
     if ('text' in n && Array.isArray(n.text)) {
-        return n.text.some((curr) =>
+        return n.text.some((curr): boolean =>
             hasVisibleContentRecursively(curr, condenseFiles),
         );
     }
@@ -110,21 +110,29 @@ export const ParsedText = React.memo<ParsedTextProps>(
         onResize,
     }) => {
         const fileNodesCount = React.useMemo(
-            () => nodes.reduce((acc, curr) => acc + countAttachments(curr), 0),
+            (): number =>
+                nodes.reduce(
+                    (acc, curr): number => acc + countAttachments(curr),
+                    0,
+                ),
             [nodes],
         );
 
         const displayNodes = React.useMemo(
-            () =>
+            (): ASTNode[] =>
                 condenseFiles
                     ? nodes.filter(
-                          (n) => n.type !== 'file' && n.type !== 'klipy',
+                          (n): boolean =>
+                              n.type !== 'file' && n.type !== 'klipy',
                       )
                     : nodes,
             [nodes, condenseFiles],
         );
 
-        const groupedNodes = React.useMemo(() => {
+        const groupedNodes = React.useMemo((): (
+            | ASTNode
+            | { type: '_cl_group'; items: ChecklistNode[] }
+        )[] => {
             type GroupedNode =
                 | ASTNode
                 | { type: '_cl_group'; items: ChecklistNode[] };
@@ -145,8 +153,8 @@ export const ParsedText = React.memo<ParsedTextProps>(
         }, [displayNodes]);
 
         const hasVisibleContent = React.useMemo(
-            () =>
-                nodes.some((n) =>
+            (): boolean =>
+                nodes.some((n): boolean =>
                     hasVisibleContentRecursively(n, condenseFiles),
                 ),
             [nodes, condenseFiles],

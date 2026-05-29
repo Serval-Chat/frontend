@@ -23,7 +23,7 @@ export const store = configureStore({
 });
 
 let prevLastChannels = store.getState().nav.lastOpenedChannelByServer;
-store.subscribe(() => {
+store.subscribe((): void => {
     const next = store.getState().nav.lastOpenedChannelByServer;
     if (next !== prevLastChannels) {
         prevLastChannels = next;

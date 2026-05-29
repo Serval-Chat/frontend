@@ -34,8 +34,8 @@ vi.mock('@/api/users/users.queries', () => ({
     useMe: vi.fn(),
 }));
 
-describe('ServerOverviewSettings', () => {
-    beforeEach(() => {
+describe('ServerOverviewSettings', (): void => {
+    beforeEach((): void => {
         vi.clearAllMocks();
 
         Object.defineProperty(window, 'location', {
@@ -98,8 +98,8 @@ describe('ServerOverviewSettings', () => {
         } as never);
     });
 
-    it('redirects to /chat/@me after successful server deletion', () => {
-        const mockDeleteServer = vi.fn((_id, options) => {
+    it('redirects to /chat/@me after successful server deletion', (): void => {
+        const mockDeleteServer = vi.fn((_id, options): void => {
             options.onSuccess();
         });
         vi.mocked(ServerQueries.useDeleteServer).mockReturnValue({
@@ -131,7 +131,7 @@ describe('ServerOverviewSettings', () => {
         expect(mockNavigate).toHaveBeenCalledWith('/chat/@me');
     });
 
-    it('shows discovery blockers when opt-in is enabled before eligibility is met', () => {
+    it('shows discovery blockers when opt-in is enabled before eligibility is met', (): void => {
         vi.mocked(ServerQueries.useServerDetails).mockReturnValue({
             data: {
                 _id: 'server123',
@@ -174,7 +174,7 @@ describe('ServerOverviewSettings', () => {
         ).toBeInTheDocument();
     });
 
-    it('uses unsaved description and tags when showing discovery blockers', () => {
+    it('uses unsaved description and tags when showing discovery blockers', (): void => {
         vi.mocked(ServerQueries.useServerDetails).mockReturnValue({
             data: {
                 _id: 'server123',

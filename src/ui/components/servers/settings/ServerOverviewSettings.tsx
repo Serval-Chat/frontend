@@ -44,9 +44,9 @@ const DESCRIPTION_BLOCKER = 'Server must have a description.';
 const TAGS_BLOCKER = 'Server must have at least one tag.';
 const OPT_IN_BLOCKER = 'Server must opt in to discovery.';
 
-export const ServerOverviewSettings: React.FC<ServerOverviewSettingsProps> = ({
+export const ServerOverviewSettings = ({
     serverId,
-}) => {
+}: ServerOverviewSettingsProps) => {
     const navigate = useNavigate();
     const { data: server, isLoading } = useServerDetails(serverId);
     const { mutate: updateServer, isPending: isUpdatingServer } =
@@ -83,7 +83,7 @@ export const ServerOverviewSettings: React.FC<ServerOverviewSettingsProps> = ({
     >('avatar');
     const [isCropModalOpen, setIsCropModalOpen] = useState(false);
 
-    React.useEffect(() => {
+    React.useEffect((): void => {
         if (server) {
             setName(server.name);
             setOriginalName(server.name);
@@ -108,7 +108,7 @@ export const ServerOverviewSettings: React.FC<ServerOverviewSettingsProps> = ({
         updateServer(
             { name, description, discoveryEnabled, tags },
             {
-                onSuccess: () => {
+                onSuccess: (): void => {
                     setOriginalName(name);
                     setOriginalDescription(description);
                     setOriginalDiscoveryEnabled(discoveryEnabled);
@@ -126,7 +126,7 @@ export const ServerOverviewSettings: React.FC<ServerOverviewSettingsProps> = ({
     };
 
     const handleRemoveTag = (tagToRemove: string): void => {
-        setTags(tags.filter((t) => t !== tagToRemove));
+        setTags(tags.filter((t): boolean => t !== tagToRemove));
     };
 
     const handleIconChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
@@ -167,10 +167,10 @@ export const ServerOverviewSettings: React.FC<ServerOverviewSettingsProps> = ({
     const { mutate: requestVerification, isPending: isRequestingVerification } =
         useRequestServerVerification(serverId);
     const { data: discoveryStatus } = useServerDiscoveryStatus(serverId);
-    const effectiveDiscoveryBlockers = React.useMemo(() => {
+    const effectiveDiscoveryBlockers = React.useMemo((): string[] => {
         if (!discoveryStatus) return [];
 
-        const blockers = discoveryStatus.blockers.filter((blocker) => {
+        const blockers = discoveryStatus.blockers.filter((blocker): boolean => {
             if (blocker === DESCRIPTION_BLOCKER) {
                 return description.trim() === '';
             }
@@ -212,7 +212,7 @@ export const ServerOverviewSettings: React.FC<ServerOverviewSettingsProps> = ({
     const handleDeleteServer = (): void => {
         if (!server || confirmDeleteName !== server.name) return;
         deleteServer(serverId, {
-            onSuccess: () => {
+            onSuccess: (): void => {
                 void navigate('/chat/@me');
             },
         });
@@ -220,7 +220,7 @@ export const ServerOverviewSettings: React.FC<ServerOverviewSettingsProps> = ({
 
     const handleTransferOwnership = (newOwnerId: string): void => {
         transferOwnership(newOwnerId, {
-            onSuccess: () => {
+            onSuccess: (): void => {
                 setIsTransferModalOpen(false);
             },
         });
@@ -280,8 +280,10 @@ export const ServerOverviewSettings: React.FC<ServerOverviewSettingsProps> = ({
                             className="group relative flex h-32 w-32 cursor-pointer items-center justify-center overflow-hidden rounded-3xl border border-border-subtle bg-bg-subtle transition-all hover:border-primary"
                             role="button"
                             tabIndex={0}
-                            onClick={() => iconInputRef.current?.click()}
-                            onKeyDown={(e) => {
+                            onClick={(): void | undefined =>
+                                iconInputRef.current?.click()
+                            }
+                            onKeyDown={(e): void => {
                                 if (e.key === 'Enter' || e.key === ' ') {
                                     e.preventDefault();
                                     iconInputRef.current?.click();
@@ -324,8 +326,10 @@ export const ServerOverviewSettings: React.FC<ServerOverviewSettingsProps> = ({
                             className="group relative flex aspect-[16/9] w-full cursor-pointer items-center justify-center overflow-hidden rounded-xl border border-border-subtle bg-bg-subtle transition-all hover:border-primary md:w-64"
                             role="button"
                             tabIndex={0}
-                            onClick={() => bannerInputRef.current?.click()}
-                            onKeyDown={(e) => {
+                            onClick={(): void | undefined =>
+                                bannerInputRef.current?.click()
+                            }
+                            onKeyDown={(e): void => {
                                 if (e.key === 'Enter' || e.key === ' ') {
                                     e.preventDefault();
                                     bannerInputRef.current?.click();
@@ -373,7 +377,7 @@ export const ServerOverviewSettings: React.FC<ServerOverviewSettingsProps> = ({
                             id="serverName"
                             placeholder="Enter server name"
                             value={name}
-                            onChange={(e) => setName(e.target.value)}
+                            onChange={(e): void => setName(e.target.value)}
                         />
                     </div>
 
@@ -395,7 +399,7 @@ export const ServerOverviewSettings: React.FC<ServerOverviewSettingsProps> = ({
                             maxLength={500}
                             placeholder="Tell people what your server is about..."
                             value={description}
-                            onChange={(e) =>
+                            onChange={(e): void =>
                                 setDescription(e.target.value.slice(0, 500))
                             }
                         />
@@ -421,10 +425,10 @@ export const ServerOverviewSettings: React.FC<ServerOverviewSettingsProps> = ({
                                     maxLength={25}
                                     placeholder="Add a tag..."
                                     value={tagInput}
-                                    onChange={(e) =>
+                                    onChange={(e): void =>
                                         setTagInput(e.target.value)
                                     }
-                                    onKeyDown={(e) => {
+                                    onKeyDown={(e): void => {
                                         if (e.key === 'Enter') {
                                             e.preventDefault();
                                             handleAddTag();
@@ -454,7 +458,9 @@ export const ServerOverviewSettings: React.FC<ServerOverviewSettingsProps> = ({
                                         {tag}
                                         <button
                                             className="rounded-full p-1 opacity-60 transition-all hover:bg-primary/20 hover:opacity-100"
-                                            onClick={() => handleRemoveTag(tag)}
+                                            onClick={(): void =>
+                                                handleRemoveTag(tag)
+                                            }
                                         >
                                             <X size={12} />
                                         </button>
@@ -560,7 +566,7 @@ export const ServerOverviewSettings: React.FC<ServerOverviewSettingsProps> = ({
                                     className="min-w-[120px]"
                                     loading={isRequestingVerification}
                                     variant="primary"
-                                    onClick={() => requestVerification()}
+                                    onClick={(): void => requestVerification()}
                                 >
                                     <BadgeCheck className="mr-2 h-4 w-4" />
                                     Apply
@@ -593,7 +599,9 @@ export const ServerOverviewSettings: React.FC<ServerOverviewSettingsProps> = ({
                             <Button
                                 className="min-w-[120px]"
                                 variant="danger"
-                                onClick={() => setIsTransferModalOpen(true)}
+                                onClick={(): void =>
+                                    setIsTransferModalOpen(true)
+                                }
                             >
                                 <UserPlus className="mr-2 h-4 w-4" />
                                 Transfer
@@ -613,7 +621,7 @@ export const ServerOverviewSettings: React.FC<ServerOverviewSettingsProps> = ({
                             <Button
                                 className="min-w-[120px]"
                                 variant="danger"
-                                onClick={() => setIsDeleteModalOpen(true)}
+                                onClick={(): void => setIsDeleteModalOpen(true)}
                             >
                                 <Trash2 className="mr-2 h-4 w-4" />
                                 Delete Server
@@ -626,7 +634,7 @@ export const ServerOverviewSettings: React.FC<ServerOverviewSettingsProps> = ({
             <SettingsFloatingBar
                 isPending={isPending}
                 isVisible={hasChanges}
-                onReset={() => {
+                onReset={(): void => {
                     setName(originalName);
                     setDescription(originalDescription);
                     setDiscoveryEnabled(originalDiscoveryEnabled);
@@ -640,7 +648,7 @@ export const ServerOverviewSettings: React.FC<ServerOverviewSettingsProps> = ({
                 imageFile={cropFile}
                 isOpen={isCropModalOpen}
                 type={cropType}
-                onClose={() => setIsCropModalOpen(false)}
+                onClose={(): void => setIsCropModalOpen(false)}
                 onConfirm={handleCropConfirm}
             />
 
@@ -649,7 +657,7 @@ export const ServerOverviewSettings: React.FC<ServerOverviewSettingsProps> = ({
                 className="max-w-md"
                 isOpen={isDeleteModalOpen}
                 title={`Delete '${server.name}'`}
-                onClose={() => {
+                onClose={(): void => {
                     setIsDeleteModalOpen(false);
                     setConfirmDeleteName('');
                 }}
@@ -673,7 +681,7 @@ export const ServerOverviewSettings: React.FC<ServerOverviewSettingsProps> = ({
                             id="confirm-delete-name"
                             placeholder={server.name}
                             value={confirmDeleteName}
-                            onChange={(e) =>
+                            onChange={(e): void =>
                                 setConfirmDeleteName(e.target.value)
                             }
                         />
@@ -683,7 +691,7 @@ export const ServerOverviewSettings: React.FC<ServerOverviewSettingsProps> = ({
                         <Button
                             className="min-w-[96px]"
                             variant="ghost"
-                            onClick={() => setIsDeleteModalOpen(false)}
+                            onClick={(): void => setIsDeleteModalOpen(false)}
                         >
                             Cancel
                         </Button>
@@ -705,7 +713,7 @@ export const ServerOverviewSettings: React.FC<ServerOverviewSettingsProps> = ({
                 className="max-w-md"
                 isOpen={isTransferModalOpen}
                 title="Transfer Ownership"
-                onClose={() => setIsTransferModalOpen(false)}
+                onClose={(): void => setIsTransferModalOpen(false)}
             >
                 <div className="space-y-6">
                     <Text size="sm" variant="muted">
@@ -716,7 +724,7 @@ export const ServerOverviewSettings: React.FC<ServerOverviewSettingsProps> = ({
 
                     <div className="custom-scrollbar max-h-[300px] space-y-2 overflow-y-auto">
                         {members
-                            ?.filter((m) => m.userId !== me?._id)
+                            ?.filter((m): boolean => m.userId !== me?._id)
                             .map((member) => (
                                 <div
                                     className="group flex items-center justify-between rounded-md p-2 transition-colors hover:bg-bg-subtle"
@@ -758,7 +766,7 @@ export const ServerOverviewSettings: React.FC<ServerOverviewSettingsProps> = ({
                                         loading={isTransferring}
                                         size="sm"
                                         variant="primary"
-                                        onClick={() =>
+                                        onClick={(): void =>
                                             handleTransferOwnership(
                                                 member.userId,
                                             )
@@ -773,7 +781,7 @@ export const ServerOverviewSettings: React.FC<ServerOverviewSettingsProps> = ({
                     <div className="-mx-6 -mb-6 flex justify-end p-6 pt-4">
                         <Button
                             variant="ghost"
-                            onClick={() => setIsTransferModalOpen(false)}
+                            onClick={(): void => setIsTransferModalOpen(false)}
                         >
                             Cancel
                         </Button>

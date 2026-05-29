@@ -76,17 +76,17 @@ function drawSplines(
     svg.replaceChildren(...pathEls);
 }
 
-export const ChecklistGroup: React.FC<ChecklistGroupProps> = ({
+export const ChecklistGroup = ({
     nodes,
     renderContent,
-}) => {
+}: ChecklistGroupProps) => {
     const stageRef = useRef<HTMLDivElement>(null);
     const svgRef = useRef<SVGSVGElement>(null);
     const boxEls = useRef<Array<HTMLElement | null>>([]);
 
-    const pairs = useMemo(() => buildPairs(nodes), [nodes]);
+    const pairs = useMemo((): [number, number][] => buildPairs(nodes), [nodes]);
 
-    const redraw = useCallback(() => {
+    const redraw = useCallback((): void => {
         if (svgRef.current && stageRef.current) {
             drawSplines(
                 svgRef.current,
@@ -97,20 +97,23 @@ export const ChecklistGroup: React.FC<ChecklistGroupProps> = ({
         }
     }, [pairs]);
 
-    useLayoutEffect(() => {
+    useLayoutEffect((): (() => void) | undefined => {
         redraw();
         const stage = stageRef.current;
         if (!stage) return;
         const obs = new ResizeObserver(redraw);
         obs.observe(stage);
-        return () => {
+        return (): void => {
             obs.disconnect();
         };
     }, [redraw]);
 
-    const setBoxRef = useCallback((idx: number, el: HTMLElement | null) => {
-        boxEls.current[idx] = el;
-    }, []);
+    const setBoxRef = useCallback(
+        (idx: number, el: HTMLElement | null): void => {
+            boxEls.current[idx] = el;
+        },
+        [],
+    );
 
     return (
         <div className="relative my-1" ref={stageRef}>
@@ -149,12 +152,12 @@ interface ChecklistRowProps {
     renderContent: (node: ChecklistNode) => React.ReactNode;
 }
 
-const ChecklistRow: React.FC<ChecklistRowProps> = ({
+const ChecklistRow = ({
     idx,
     node,
     setBoxRef,
     renderContent,
-}) => {
+}: ChecklistRowProps) => {
     const { checked, depth = 0 } = node;
 
     return (
@@ -162,7 +165,7 @@ const ChecklistRow: React.FC<ChecklistRowProps> = ({
             className="flex items-center gap-2.5 py-[3px]"
             style={{ paddingLeft: `${depth * INDENT_PX}px` }}
         >
-            <div className="shrink-0" ref={(el) => setBoxRef(idx, el)}>
+            <div className="shrink-0" ref={(el): void => setBoxRef(idx, el)}>
                 <motion.div
                     animate={checked ? 'checked' : 'unchecked'}
                     className={cn(

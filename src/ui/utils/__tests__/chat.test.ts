@@ -8,7 +8,7 @@ import {
     resolveWebhookUser,
 } from '@/ui/utils/chat';
 
-describe('chat utils', () => {
+describe('chat utils', (): void => {
     const role1 = { _id: '1', position: 1, color: '#ff0000' } as Role;
     const role2 = { _id: '2', position: 2, color: null } as Role;
     const role3 = { _id: '3', position: 3, color: '#00ff00' } as Role;
@@ -19,22 +19,22 @@ describe('chat utils', () => {
         ['3', role3],
     ]);
 
-    describe('getHighestRoleForMember', () => {
-        it('returns the highest role by position', () => {
+    describe('getHighestRoleForMember', (): void => {
+        it('returns the highest role by position', (): void => {
             expect(getHighestRoleForMember(['1', '2'], roleMap)).toBe(role2);
             expect(getHighestRoleForMember(['1', '2', '3'], roleMap)).toBe(
                 role3,
             );
         });
 
-        it('returns undefined if no roles', () => {
+        it('returns undefined if no roles', (): void => {
             expect(getHighestRoleForMember([], roleMap)).toBeUndefined();
             expect(getHighestRoleForMember(undefined, roleMap)).toBeUndefined();
         });
     });
 
-    describe('getHighestColorRoleForMember', () => {
-        it('returns the highest role with a color', () => {
+    describe('getHighestColorRoleForMember', (): void => {
+        it('returns the highest role with a color', (): void => {
             expect(getHighestColorRoleForMember(['1', '2'], roleMap)).toBe(
                 role1,
             );
@@ -43,7 +43,7 @@ describe('chat utils', () => {
             );
         });
 
-        it('returns undefined if no role has a color', () => {
+        it('returns undefined if no role has a color', (): void => {
             const noColorRole = { _id: '4', position: 4, color: null } as Role;
             const anotherNoColorRole = { _id: '5', position: 5 } as Role;
             const localMap = new Map<string, Role>([
@@ -55,7 +55,7 @@ describe('chat utils', () => {
             ).toBeUndefined();
         });
 
-        it('ignores the default color #99aab5 and passes through to the next role', () => {
+        it('ignores the default color #99aab5 and passes through to the next role', (): void => {
             const defaultColorRole = {
                 _id: '8',
                 position: 8,
@@ -80,7 +80,7 @@ describe('chat utils', () => {
             ).toBeUndefined();
         });
 
-        it('handles @everyone role properly (passes through if default, applies if custom)', () => {
+        it('handles @everyone role properly (passes through if default, applies if custom)', (): void => {
             const everyoneDefault = {
                 _id: '10',
                 name: '@everyone',
@@ -118,7 +118,7 @@ describe('chat utils', () => {
             );
         });
 
-        it('supports multi-color roles', () => {
+        it('supports multi-color roles', (): void => {
             const multiColorRole = {
                 _id: '6',
                 position: 6,
@@ -130,7 +130,7 @@ describe('chat utils', () => {
             );
         });
 
-        it('supports gradient roles defined by startColor/endColor', () => {
+        it('supports gradient roles defined by startColor/endColor', (): void => {
             const gradientRole = {
                 _id: '7',
                 position: 7,
@@ -144,8 +144,8 @@ describe('chat utils', () => {
         });
     });
 
-    describe('resolveWebhookUser', () => {
-        it('returns undefined if message is not a webhook', () => {
+    describe('resolveWebhookUser', (): void => {
+        it('returns undefined if message is not a webhook', (): void => {
             const msg = {
                 _id: 'msg1',
                 isWebhook: false,
@@ -154,7 +154,7 @@ describe('chat utils', () => {
             expect(resolveWebhookUser(msg)).toBeUndefined();
         });
 
-        it('resolves webhook user details correctly', () => {
+        it('resolves webhook user details correctly', (): void => {
             const msg = {
                 _id: 'msg2',
                 isWebhook: true,

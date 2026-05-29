@@ -8,12 +8,12 @@ const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
 });
 
-const TestWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+const TestWrapper = ({ children }: { children: React.ReactNode }) => (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
 );
 
-describe('MessageContent embeds', () => {
-    it('renders embed-only bot message content', () => {
+describe('MessageContent embeds', (): void => {
+    it('renders embed-only bot message content', (): void => {
         render(
             <TestWrapper>
                 <MessageContent
@@ -32,7 +32,7 @@ describe('MessageContent embeds', () => {
         expect(screen.getByText('All systems operational')).toBeInTheDocument();
     });
 
-    it('renders both plain text and embed content', () => {
+    it('renders both plain text and embed content', (): void => {
         render(
             <TestWrapper>
                 <MessageContent

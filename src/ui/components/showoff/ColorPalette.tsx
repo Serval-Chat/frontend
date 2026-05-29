@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { Heading } from '@/ui/components/common/Heading';
 import { Text } from '@/ui/components/common/Text';
 import { SHOWOFF_SECTIONS } from '@/ui/components/showoff/config';
@@ -10,11 +8,7 @@ interface ColorSwatchProps {
     description?: string;
 }
 
-const ColorSwatch: React.FC<ColorSwatchProps> = ({
-    name,
-    variable,
-    description,
-}) => (
+const ColorSwatch = ({ name, variable, description }: ColorSwatchProps) => (
     <div className="flex flex-col gap-2">
         <div
             className="h-24 w-full rounded-lg border border-border-subtle shadow-md"
@@ -41,7 +35,7 @@ const ColorSwatch: React.FC<ColorSwatchProps> = ({
     </div>
 );
 
-export const ColorPalette: React.FC = () => (
+export const ColorPalette = () => (
     <section className="mt-12 px-6 py-6" id={SHOWOFF_SECTIONS.colorPalette}>
         <Heading className="mb-6" level={2} variant="section">
             Leptailurus Serval Color Palette

@@ -8,23 +8,26 @@ export function useFlashText(
     const [text, setText] = useState(initialText);
     const initialRef = useRef(initialText);
 
-    useEffect(() => {
+    useEffect((): void => {
         initialRef.current = initialText;
     }, [initialText]);
     const timeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(
         undefined,
     );
 
-    const flash = useCallback(() => {
+    const flash = useCallback((): void => {
         clearTimeout(timeoutRef.current);
         setText(flashText);
         timeoutRef.current = setTimeout(
-            () => setText(initialRef.current),
+            (): void => setText(initialRef.current),
             duration,
         );
     }, [flashText, duration]);
 
-    useEffect(() => () => clearTimeout(timeoutRef.current), []);
+    useEffect(
+        (): (() => void) => (): void => clearTimeout(timeoutRef.current),
+        [],
+    );
 
     return [text, flash] as const;
 }
@@ -50,7 +53,7 @@ export function useFlashGroup<T extends string>(
     const [flashing, setFlashing] = useState<Partial<Record<T, boolean>>>({});
     const configsRef = useRef(configs);
 
-    useEffect(() => {
+    useEffect((): void => {
         configsRef.current = configs;
     }, [configs]);
 
@@ -58,7 +61,7 @@ export function useFlashGroup<T extends string>(
         {},
     );
 
-    const trigger = useCallback((key: T) => {
+    const trigger = useCallback((key: T): void => {
         const cfg = configsRef.current[key];
 
         // clear existing timeout for this key
@@ -66,23 +69,38 @@ export function useFlashGroup<T extends string>(
             clearTimeout(timeoutsRef.current[key]);
         }
 
-        setFlashing((prev) => ({ ...prev, [key]: true }));
+        setFlashing(
+            (prev): Partial<Record<T, boolean>> & { [x: string]: boolean } => ({
+                ...prev,
+                [key]: true,
+            }),
+        );
 
-        timeoutsRef.current[key] = setTimeout(() => {
-            setFlashing((prev) => ({ ...prev, [key]: false }));
+        timeoutsRef.current[key] = setTimeout((): void => {
+            setFlashing(
+                (
+                    prev,
+                ): Partial<Record<T, boolean>> & { [x: string]: boolean } => ({
+                    ...prev,
+                    [key]: false,
+                }),
+            );
             delete timeoutsRef.current[key];
         }, cfg.duration ?? 2500);
     }, []);
 
     // cleanup on unmount
-    useEffect(() => {
+    useEffect((): (() => void) => {
         const timeouts = timeoutsRef.current;
-        return () => {
+        return (): void => {
             Object.values(timeouts).forEach(clearTimeout);
         };
     }, []);
 
-    const results = useMemo(() => {
+    const results = useMemo((): Record<
+        T,
+        { label: string; trigger: () => void; isFlashing: boolean }
+    > => {
         const res = {} as Record<T, ReturnType<typeof useFlash>>;
         for (const key in configs) {
             const k = key as T;
@@ -91,7 +109,7 @@ export function useFlashGroup<T extends string>(
             const label = isFlashing ? cfg.flash : cfg.initial;
             res[k] = {
                 label,
-                trigger: () => trigger(k),
+                trigger: (): void => trigger(k),
                 isFlashing,
             };
         }

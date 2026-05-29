@@ -24,13 +24,13 @@ interface StickerInfoBoxProps {
     onClose?: () => void;
 }
 
-export const StickerInfoBox: React.FC<StickerInfoBoxProps> = ({
+export const StickerInfoBox = ({
     sticker,
     server,
     className,
     position,
     onClose,
-}) => {
+}: StickerInfoBoxProps): React.ReactPortal => {
     const isUnknownServer = !server;
     const infoBoxRef = useRef<HTMLDivElement>(null);
 
@@ -51,7 +51,7 @@ export const StickerInfoBox: React.FC<StickerInfoBoxProps> = ({
                     tabIndex={0}
                     onClick={onClose}
                     onContextMenu={onClose}
-                    onKeyDown={(e) => {
+                    onKeyDown={(e): void => {
                         if (
                             e.key === 'Escape' ||
                             e.key === 'Enter' ||

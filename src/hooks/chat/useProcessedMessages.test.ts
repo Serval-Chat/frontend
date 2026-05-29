@@ -5,8 +5,8 @@ import type { ChatMessage } from '@/api/chat/chat.types';
 import type { User } from '@/api/users/users.types';
 import { useProcessedMessages } from '@/hooks/chat/useProcessedMessages';
 
-describe('useProcessedMessages', () => {
-    it('preserves embeds through processed message mapping', () => {
+describe('useProcessedMessages', (): void => {
+    it('preserves embeds through processed message mapping', (): void => {
         const message: ChatMessage = {
             _id: 'm1',
             text: '',

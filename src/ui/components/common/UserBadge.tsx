@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { Shield } from 'lucide-react';
 
 import type { Badge } from '@/api/users/users.types';
@@ -13,7 +11,7 @@ interface UserBadgeProps {
     className?: string;
 }
 
-export const UserBadge: React.FC<UserBadgeProps> = ({ badge, className }) => {
+export const UserBadge = ({ badge, className }: UserBadgeProps) => {
     const IconComponent = ICON_MAP[badge.icon] || Shield;
     const color = badge.color || '#747F8D';
 

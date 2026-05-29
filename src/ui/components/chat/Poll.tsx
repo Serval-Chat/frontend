@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { useMutation } from '@tanstack/react-query';
 import { Check, Clock, Trophy, Users } from 'lucide-react';
@@ -35,15 +35,10 @@ function formatTimeLeft(ms: number): string {
     return `${seconds}s left`;
 }
 
-export const Poll: React.FC<PollProps> = ({
-    poll,
-    messageId,
-    serverId,
-    channelId,
-}) => {
+export const Poll = ({ poll, messageId, serverId, channelId }: PollProps) => {
     const { data: me } = useMe();
     const [isVotersModalOpen, setIsVotersModalOpen] = useState(false);
-    const [now, setNow] = useState(() => Date.now());
+    const [now, setNow] = useState((): number => Date.now());
 
     const expiresAt = poll.expiresAt
         ? new Date(poll.expiresAt).getTime()
@@ -51,25 +46,25 @@ export const Poll: React.FC<PollProps> = ({
     const isExpired = expiresAt !== null && now >= expiresAt;
     const timeLeftMs = expiresAt !== null ? Math.max(0, expiresAt - now) : null;
 
-    useEffect(() => {
+    useEffect((): (() => void) | undefined => {
         if (isExpired || expiresAt === null) return;
-        const interval = setInterval(() => setNow(Date.now()), 1000);
-        return () => clearInterval(interval);
+        const interval = setInterval((): void => setNow(Date.now()), 1000);
+        return (): void => clearInterval(interval);
     }, [isExpired, expiresAt]);
 
-    const totalVotes = useMemo(() => {
+    const totalVotes = useMemo((): number => {
         let count = 0;
         if (!poll?.options) return 0;
-        poll.options.forEach((opt) => {
+        poll.options.forEach((opt): void => {
             count += opt.votes?.length || 0;
         });
         return count;
     }, [poll.options]);
 
-    const myVotes = useMemo(() => {
+    const myVotes = useMemo((): Set<string> => {
         const votes = new Set<string>();
         if (!me || !poll?.options) return votes;
-        poll.options.forEach((opt) => {
+        poll.options.forEach((opt): void => {
             if (opt.votes?.includes(me._id)) {
                 votes.add(opt.id);
             }
@@ -77,18 +72,20 @@ export const Poll: React.FC<PollProps> = ({
         return votes;
     }, [poll.options, me]);
 
-    const maxVotes = useMemo(() => {
+    const maxVotes = useMemo((): number => {
         if (!poll?.options || totalVotes === 0) return 0;
-        return Math.max(...poll.options.map((o) => o.votes?.length || 0));
+        return Math.max(
+            ...poll.options.map((o): number => o.votes?.length || 0),
+        );
     }, [poll.options, totalVotes]);
 
-    const winnerIds = useMemo(() => {
+    const winnerIds = useMemo((): Set<string> => {
         if (!isExpired || maxVotes === 0 || !poll?.options)
             return new Set<string>();
         return new Set(
             poll.options
-                .filter((o) => (o.votes?.length || 0) === maxVotes)
-                .map((o) => o.id),
+                .filter((o): boolean => (o.votes?.length || 0) === maxVotes)
+                .map((o): string => o.id),
         );
     }, [isExpired, maxVotes, poll.options]);
 
@@ -198,7 +195,7 @@ export const Poll: React.FC<PollProps> = ({
                                         'pointer-events-none cursor-not-allowed opacity-70',
                                 )}
                                 key={option.id || index}
-                                onClick={() =>
+                                onClick={(): false | void =>
                                     !isExpired && handleVote(option.id)
                                 }
                             >
@@ -302,7 +299,7 @@ export const Poll: React.FC<PollProps> = ({
                 {showVotersButton && (
                     <button
                         className="flex items-center gap-1.5 rounded-md border border-border-subtle px-2.5 py-1 text-[10px] font-bold tracking-widest text-muted-foreground uppercase transition-all hover:bg-white/5 hover:text-foreground active:scale-[0.98]"
-                        onClick={() => setIsVotersModalOpen(true)}
+                        onClick={(): void => setIsVotersModalOpen(true)}
                     >
                         <Users size={10} />
                         View voters
@@ -314,7 +311,7 @@ export const Poll: React.FC<PollProps> = ({
                 isOpen={isVotersModalOpen}
                 poll={poll}
                 serverId={serverId}
-                onClose={() => setIsVotersModalOpen(false)}
+                onClose={(): void => setIsVotersModalOpen(false)}
             />
         </Box>
     );

@@ -43,7 +43,7 @@ export const getHighestRoleForMember = (
     if (!roleIds || roleIds.length === 0) return undefined;
 
     let highestRole: Role | undefined = undefined;
-    roleIds.forEach((roleId) => {
+    roleIds.forEach((roleId): void => {
         const role = roleMap.get(roleId);
         if (role && (!highestRole || role.position > highestRole.position)) {
             highestRole = role;
@@ -63,7 +63,7 @@ export const getHighestColorRoleForMember = (
     if (!roleIds || roleIds.length === 0) return undefined;
 
     let highestRole: Role | undefined = undefined;
-    roleIds.forEach((roleId) => {
+    roleIds.forEach((roleId): void => {
         const role = roleMap.get(roleId);
         const isDefaultColor = (c: string): boolean =>
             c.toLowerCase() === '#99aab5';
@@ -93,7 +93,7 @@ export const getHighestRoleWithIconForMember = (
     if (!roleIds || roleIds.length === 0) return undefined;
 
     let highestRole: Role | undefined = undefined;
-    roleIds.forEach((roleId) => {
+    roleIds.forEach((roleId): void => {
         const role = roleMap.get(roleId);
         if (
             role &&
@@ -193,7 +193,9 @@ export const resolveReplyTo = (
         if (repliedId) {
             const repliedMsg =
                 messageById?.get(repliedId) ??
-                allMessages.find((m) => m._id.toString() === repliedId);
+                allMessages.find(
+                    (m): boolean => m._id.toString() === repliedId,
+                );
 
             if (repliedMsg) {
                 let referencedUser: User | undefined = undefined;

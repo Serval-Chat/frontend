@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 import { Check, X } from 'lucide-react';
 
@@ -23,13 +23,13 @@ interface ImageCropModalProps {
     onConfirm: (processedFile: File) => void;
 }
 
-export const ImageCropModal: React.FC<ImageCropModalProps> = ({
+export const ImageCropModal = ({
     isOpen,
     onClose,
     imageFile,
     type,
     onConfirm,
-}) => {
+}: ImageCropModalProps) => {
     const [crop, setCrop] = useState<CropSelection | null>(null);
     const [isProcessing, setIsProcessing] = useState(false);
 

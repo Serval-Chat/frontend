@@ -19,7 +19,7 @@ const hasUsableDimensions = (
 const readImageDimensionsWithElement = (
     file: File,
 ): Promise<MediaDimensions | undefined> =>
-    new Promise((resolve) => {
+    new Promise((resolve): void => {
         const url = URL.createObjectURL(file);
         const image = new Image();
 
@@ -27,7 +27,7 @@ const readImageDimensionsWithElement = (
             URL.revokeObjectURL(url);
         };
 
-        image.onload = () => {
+        image.onload = (): void => {
             const dimensions = {
                 width: image.naturalWidth,
                 height: image.naturalHeight,
@@ -35,7 +35,7 @@ const readImageDimensionsWithElement = (
             cleanup();
             resolve(hasUsableDimensions(dimensions) ? dimensions : undefined);
         };
-        image.onerror = () => {
+        image.onerror = (): void => {
             cleanup();
             resolve(undefined);
         };
@@ -62,7 +62,7 @@ const readImageDimensions = async (
 const readVideoDimensions = (
     file: File,
 ): Promise<MediaDimensions | undefined> =>
-    new Promise((resolve) => {
+    new Promise((resolve): void => {
         const url = URL.createObjectURL(file);
         const video = document.createElement('video');
 
@@ -73,7 +73,7 @@ const readVideoDimensions = (
         };
 
         video.preload = 'metadata';
-        video.onloadedmetadata = () => {
+        video.onloadedmetadata = (): void => {
             const dimensions = {
                 width: video.videoWidth,
                 height: video.videoHeight,
@@ -81,7 +81,7 @@ const readVideoDimensions = (
             cleanup();
             resolve(hasUsableDimensions(dimensions) ? dimensions : undefined);
         };
-        video.onerror = () => {
+        video.onerror = (): void => {
             cleanup();
             resolve(undefined);
         };

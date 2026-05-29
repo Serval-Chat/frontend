@@ -41,13 +41,13 @@ export const useCreateBlockProfile = (): UseMutationResult<
 
     return useMutation({
         mutationFn: blocksApi.createProfile,
-        onSuccess: () => {
+        onSuccess: (): void => {
             void queryClient.invalidateQueries({
                 queryKey: BLOCKS_QUERY_KEYS.profiles,
             });
             showToast('Block profile created', 'success');
         },
-        onError: (error: Error) => {
+        onError: (error: Error): void => {
             showToast(error.message || 'Failed to create profile', 'error');
         },
     });
@@ -68,8 +68,8 @@ export const useUpdateBlockProfile = (): UseMutationResult<
         }: {
             id: string;
             data: { name?: string; flags?: number };
-        }) => blocksApi.updateProfile(id, data),
-        onSuccess: () => {
+        }): Promise<BlockProfile> => blocksApi.updateProfile(id, data),
+        onSuccess: (): void => {
             void queryClient.invalidateQueries({
                 queryKey: BLOCKS_QUERY_KEYS.profiles,
             });
@@ -81,7 +81,7 @@ export const useUpdateBlockProfile = (): UseMutationResult<
             });
             showToast('Block profile updated', 'success');
         },
-        onError: (error: Error) => {
+        onError: (error: Error): void => {
             showToast(error.message || 'Failed to update profile', 'error');
         },
     });
@@ -97,7 +97,7 @@ export const useDeleteBlockProfile = (): UseMutationResult<
 
     return useMutation({
         mutationFn: blocksApi.deleteProfile,
-        onSuccess: () => {
+        onSuccess: (): void => {
             void queryClient.invalidateQueries({
                 queryKey: BLOCKS_QUERY_KEYS.profiles,
             });
@@ -109,7 +109,7 @@ export const useDeleteBlockProfile = (): UseMutationResult<
             });
             showToast('Block profile deleted', 'success');
         },
-        onError: (error: Error) => {
+        onError: (error: Error): void => {
             showToast(error.message || 'Failed to delete profile', 'error');
         },
     });
@@ -139,8 +139,9 @@ export const useUpsertBlock = (): UseMutationResult<
         }: {
             targetUserId: string;
             profileId: string;
-        }) => blocksApi.blockUser(targetUserId, profileId),
-        onSuccess: () => {
+        }): Promise<BlockRelationship> =>
+            blocksApi.blockUser(targetUserId, profileId),
+        onSuccess: (): void => {
             void queryClient.invalidateQueries({
                 queryKey: BLOCKS_QUERY_KEYS.list,
             });
@@ -149,7 +150,7 @@ export const useUpsertBlock = (): UseMutationResult<
             });
             showToast('User blocked', 'success');
         },
-        onError: (error: Error) => {
+        onError: (error: Error): void => {
             showToast(error.message || 'Failed to block user', 'error');
         },
     });
@@ -161,7 +162,7 @@ export const useRemoveBlock = (): UseMutationResult<void, Error, string> => {
 
     return useMutation({
         mutationFn: blocksApi.unblockUser,
-        onSuccess: () => {
+        onSuccess: (): void => {
             void queryClient.invalidateQueries({
                 queryKey: BLOCKS_QUERY_KEYS.list,
             });
@@ -170,7 +171,7 @@ export const useRemoveBlock = (): UseMutationResult<void, Error, string> => {
             });
             showToast('User unblocked', 'success');
         },
-        onError: (error: Error) => {
+        onError: (error: Error): void => {
             showToast(error.message || 'Failed to unblock user', 'error');
         },
     });

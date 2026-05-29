@@ -10,7 +10,7 @@ interface GradientTextProps extends React.HTMLAttributes<HTMLDivElement> {
     children: React.ReactNode;
 }
 
-export const GradientText: React.FC<GradientTextProps> = ({
+export const GradientText = ({
     colors,
     angle = 45,
     repeating = false,
@@ -18,7 +18,7 @@ export const GradientText: React.FC<GradientTextProps> = ({
     className,
     style,
     ...props
-}) => {
+}: GradientTextProps) => {
     const gradientFunction = repeating
         ? 'repeating-linear-gradient'
         : 'linear-gradient';

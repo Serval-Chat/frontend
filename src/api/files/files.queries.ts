@@ -8,7 +8,8 @@ export const useFileMetadata = (
 ): UseQueryResult<FileMetadata | null, Error> =>
     useQuery({
         queryKey: ['fileMetadata', filename],
-        queryFn: () => (filename ? filesApi.getFileMetadata(filename) : null),
+        queryFn: (): Promise<FileMetadata> | null =>
+            filename ? filesApi.getFileMetadata(filename) : null,
         enabled: !!filename,
     });
 
@@ -17,7 +18,8 @@ export const useProxyMetadata = (
 ): UseQueryResult<ProxyMetadata | null, Error> =>
     useQuery({
         queryKey: ['proxyMetadata', url],
-        queryFn: () => (url ? filesApi.getProxyMetadata(url) : null),
+        queryFn: (): Promise<ProxyMetadata> | null =>
+            url ? filesApi.getProxyMetadata(url) : null,
         enabled: !!url,
     });
 
@@ -26,7 +28,8 @@ export const useProxyContent = (
 ): UseQueryResult<string | null, Error> =>
     useQuery({
         queryKey: ['proxyContent', url],
-        queryFn: () => (url ? filesApi.getProxyContent(url) : null),
+        queryFn: (): Promise<string> | null =>
+            url ? filesApi.getProxyContent(url) : null,
         enabled: !!url,
     });
 
@@ -35,6 +38,7 @@ export const useFileContent = (
 ): UseQueryResult<string | null, Error> =>
     useQuery({
         queryKey: ['fileContent', url],
-        queryFn: () => (url ? filesApi.getFileContent(url) : null),
+        queryFn: (): Promise<string> | null =>
+            url ? filesApi.getFileContent(url) : null,
         enabled: !!url,
     });

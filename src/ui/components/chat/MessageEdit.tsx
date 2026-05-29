@@ -52,7 +52,7 @@ const EditorBridge = ({
     onReady: (e: LexicalEditor) => void;
 }): React.ReactNode => {
     const [editor] = useLexicalComposerContext();
-    React.useEffect(() => {
+    React.useEffect((): void => {
         onReady(editor);
     }, [editor, onReady]);
     return null;
@@ -68,7 +68,7 @@ interface MessageEditProps {
     onSuccess?: () => void;
 }
 
-export const MessageEdit: React.FC<MessageEditProps> = ({
+export const MessageEdit = ({
     messageId,
     initialText,
     serverId,
@@ -76,7 +76,7 @@ export const MessageEdit: React.FC<MessageEditProps> = ({
     receiverId,
     onCancel,
     onSuccess,
-}) => {
+}: MessageEditProps) => {
     const [text, setText] = useState(initialText);
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
     const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
@@ -97,7 +97,7 @@ export const MessageEdit: React.FC<MessageEditProps> = ({
     });
     const { data: roles } = useRoles(serverId || '', { enabled: !!serverId });
 
-    const friendUsers = React.useMemo(() => {
+    const friendUsers = React.useMemo((): User[] => {
         if (!friends) return [];
         return friends as unknown as User[];
     }, [friends]);
@@ -122,7 +122,7 @@ export const MessageEdit: React.FC<MessageEditProps> = ({
         null,
     );
 
-    React.useEffect(() => {
+    React.useEffect((): (() => void) => {
         const handleResize = (): void => setIsMobile(window.innerWidth <= 768);
         window.addEventListener('resize', handleResize);
 
@@ -147,25 +147,25 @@ export const MessageEdit: React.FC<MessageEditProps> = ({
         window.addEventListener('keydown', handleGlobalKeyDown);
 
         if (editorInstance) {
-            setTimeout(() => {
+            setTimeout((): void => {
                 editorInstance.focus();
             }, 0);
         }
 
-        return () => {
+        return (): void => {
             window.removeEventListener('resize', handleResize);
             window.removeEventListener('keydown', handleGlobalKeyDown);
         };
     }, [editorInstance, keybindManager]);
 
     // Close emoji picker when clicking outside
-    useClickAway(emojiPickerRef, () => {
+    useClickAway(emojiPickerRef, (): void => {
         setShowEmojiPicker(false);
     });
 
     const handleEmojiSelect = (emoji: string): void => {
         if (editorInstance) {
-            editorInstance.update(() => {
+            editorInstance.update((): void => {
                 const selection = $getSelection();
                 if ($isRangeSelection(selection)) {
                     selection.insertNodes([
@@ -185,7 +185,7 @@ export const MessageEdit: React.FC<MessageEditProps> = ({
         name: string;
     }): void => {
         if (editorInstance) {
-            editorInstance.update(() => {
+            editorInstance.update((): void => {
                 const selection = editorInstance
                     .getEditorState()
                     .read(() => $getSelection());
@@ -238,7 +238,7 @@ export const MessageEdit: React.FC<MessageEditProps> = ({
     const initialConfig = {
         namespace: 'MessageEdit',
         nodes: [ChipNode],
-        onError: (error: Error) => console.error(error),
+        onError: (error: Error): void => console.error(error),
         theme: {
             paragraph: 'mb-0',
             text: {
@@ -261,7 +261,7 @@ export const MessageEdit: React.FC<MessageEditProps> = ({
                         contentEditable={
                             <ContentEditable
                                 className="custom-scrollbar h-full max-h-[200px] min-h-[60px] w-full resize-none overflow-y-auto px-3 py-2 pb-8 text-sm text-foreground outline-none"
-                                onKeyDown={(e) => {
+                                onKeyDown={(e): void => {
                                     if (e.key === 'Escape') {
                                         e.preventDefault();
                                         onCancel();
@@ -287,7 +287,7 @@ export const MessageEdit: React.FC<MessageEditProps> = ({
                     <LexicalEmojiPlugin />
                     <LexicalSubmitPlugin
                         isAutocompleteOpenRef={isAutocompleteOpenRef}
-                        onSendMessage={(msg) => {
+                        onSendMessage={(msg): true => {
                             if (!isMobile) handleSubmit(msg);
                             return true;
                         }}
@@ -299,14 +299,14 @@ export const MessageEdit: React.FC<MessageEditProps> = ({
                         roles={roles}
                         serverEmojis={allServerEmojis}
                         serverId={serverId}
-                        onOpenChange={(isOpen) => {
+                        onOpenChange={(isOpen): void => {
                             isAutocompleteOpenRef.current = isOpen;
                         }}
                     />
                     <OnChangePlugin
-                        onChange={(editorState, editor) => {
+                        onChange={(editorState, editor): void => {
                             if (!editorInstance) setEditorInstance(editor);
-                            editorState.read(() => {
+                            editorState.read((): void => {
                                 setText($getRawMessageText());
                             });
                         }}
@@ -325,7 +325,7 @@ export const MessageEdit: React.FC<MessageEditProps> = ({
                     size="sm"
                     title="Add Emoji"
                     variant="ghost"
-                    onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                    onClick={(): void => setShowEmojiPicker(!showEmojiPicker)}
                 >
                     <Smile size={14} />
                 </Button>
@@ -355,7 +355,7 @@ export const MessageEdit: React.FC<MessageEditProps> = ({
                     size="sm"
                     title="Save (Enter)"
                     variant="ghost"
-                    onClick={() => handleSubmit()}
+                    onClick={(): void => handleSubmit()}
                 >
                     <Check size={14} />
                 </Button>

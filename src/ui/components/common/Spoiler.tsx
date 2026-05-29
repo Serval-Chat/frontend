@@ -11,7 +11,7 @@ interface SpoilerProps {
 /**
  * @description A spoiler element. Shows its content on click
  */
-export const Spoiler: React.FC<SpoilerProps> = ({ children, className }) => {
+export const Spoiler = ({ children, className }: SpoilerProps) => {
     const [isRevealed, setIsRevealed] = useState(false);
 
     return (
@@ -24,7 +24,7 @@ export const Spoiler: React.FC<SpoilerProps> = ({ children, className }) => {
                     : 'bg-spoiler select-none hover:opacity-80',
                 className,
             )}
-            onClick={() => setIsRevealed(true)}
+            onClick={(): void => setIsRevealed(true)}
         >
             <Box
                 as="span"

@@ -38,7 +38,7 @@ const splitGraphemes = (value: string): string[] => {
 
     return Array.from(
         new Segmenter('en', { granularity: 'grapheme' }).segment(value),
-        ({ segment }) => segment,
+        ({ segment }): string => segment,
     );
 };
 
@@ -57,21 +57,25 @@ const measureText = (
 };
 
 const getFallbackGlyphPositions = (glyphs: string[]): number[] =>
-    glyphs.map((_, index) => (index + 0.5) / Math.max(glyphs.length, 1));
+    glyphs.map(
+        (_, index): number => (index + 0.5) / Math.max(glyphs.length, 1),
+    );
 
 const getGlyphSegments = (value: string): GlyphSegment[] => {
     const counts = new Map<string, number>();
 
-    return splitGraphemes(value).map((glyph, order) => {
-        const count = counts.get(glyph) ?? 0;
-        counts.set(glyph, count + 1);
+    return splitGraphemes(value).map(
+        (glyph, order): { glyph: string; key: string; order: number } => {
+            const count = counts.get(glyph) ?? 0;
+            counts.set(glyph, count + 1);
 
-        return {
-            glyph,
-            key: `${glyph}-${count}`,
-            order,
-        };
-    });
+            return {
+                glyph,
+                key: `${glyph}-${count}`,
+                order,
+            };
+        },
+    );
 };
 
 const roleMentionTextSize: Partial<
@@ -101,40 +105,37 @@ const roleMentionIconSize: Partial<
 /**
  * @description Renders a role mention with per-glyph contrast over role colors.
  */
-export const RoleMention: React.FC<RoleMentionProps> = ({
-    roleId,
-    size = 'sm',
-}) => {
+export const RoleMention = ({ roleId, size = 'sm' }: RoleMentionProps) => {
     const rootRef = React.useRef<HTMLElement | null>(null);
     const iconRef = React.useRef<SVGSVGElement | null>(null);
     const textRef = React.useRef<HTMLElement | null>(null);
     const measureCanvasRef = React.useRef<HTMLCanvasElement | null>(null);
     const selectedServerId = useAppSelector(
-        (state) => state.nav.selectedServerId,
+        (state): string | null => state.nav.selectedServerId,
     );
     const { data: roles, isLoading } = useRoles(selectedServerId, {
         enabled: !!selectedServerId,
     });
 
-    const role = roles?.find((r) => r._id === roleId);
+    const role = roles?.find((r): boolean => r._id === roleId);
 
     const roleName = role ? role.name : isLoading ? '...' : 'unknown-role';
 
     const style = getRoleStyle(role);
     const glyphSegments = React.useMemo(
-        () => getGlyphSegments(roleName),
+        (): GlyphSegment[] => getGlyphSegments(roleName),
         [roleName],
     );
     const glyphs = React.useMemo(
-        () => glyphSegments.map(({ glyph }) => glyph),
+        (): string[] => glyphSegments.map(({ glyph }): string => glyph),
         [glyphSegments],
     );
-    const [glyphPositions, setGlyphPositions] = React.useState<number[]>(() =>
-        getFallbackGlyphPositions(glyphs),
+    const [glyphPositions, setGlyphPositions] = React.useState<number[]>(
+        (): number[] => getFallbackGlyphPositions(glyphs),
     );
     const [iconPosition, setIconPosition] = React.useState(0.08);
 
-    React.useLayoutEffect(() => {
+    React.useLayoutEffect((): (() => void) | undefined => {
         const rootElement = rootRef.current;
         const iconElement = iconRef.current;
         const textElement = textRef.current;
@@ -160,7 +161,7 @@ export const RoleMention: React.FC<RoleMentionProps> = ({
                 (measureCanvasRef.current = document.createElement('canvas'));
             let textOffset = 0;
 
-            const nextPositions = glyphs.map((glyph) => {
+            const nextPositions = glyphs.map((glyph): number => {
                 const glyphWidth = measureText(
                     canvas,
                     computedStyle.font,
@@ -192,21 +193,23 @@ export const RoleMention: React.FC<RoleMentionProps> = ({
         observer.observe(rootElement);
         observer.observe(textElement);
 
-        return () => observer.disconnect();
+        return (): void => observer.disconnect();
     }, [glyphs]);
 
     const glyphTextStyles = React.useMemo(
-        () =>
-            glyphs.map((_, index) =>
-                getReadableRoleTextStyleAt(
-                    role,
-                    glyphPositions[index] ?? (index + 0.5) / glyphs.length,
-                ),
+        (): React.CSSProperties[] =>
+            glyphs.map(
+                (_, index): React.CSSProperties =>
+                    getReadableRoleTextStyleAt(
+                        role,
+                        glyphPositions[index] ?? (index + 0.5) / glyphs.length,
+                    ),
             ),
         [glyphPositions, glyphs, role],
     );
     const iconTextStyle = React.useMemo(
-        () => getReadableRoleTextStyleAt(role, iconPosition),
+        (): React.CSSProperties =>
+            getReadableRoleTextStyleAt(role, iconPosition),
         [iconPosition, role],
     );
     const normalizedSize = size ?? 'sm';

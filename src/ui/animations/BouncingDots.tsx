@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { type Variants, motion } from 'framer-motion';
 
 import { cn } from '@/utils/cn';
@@ -24,13 +22,13 @@ const dotVariants: Variants = {
     }),
 };
 
-export const BouncingDots: React.FC<BouncingDotsProps> = ({
+export const BouncingDots = ({
     className,
     dotClassName,
     color = 'bg-primary',
     size = 8,
     count = 3,
-}) => (
+}: BouncingDotsProps) => (
     <div className={cn('flex items-center space-x-1', className)}>
         {Array.from({ length: count }).map((_, i) => (
             <motion.div

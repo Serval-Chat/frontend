@@ -108,7 +108,7 @@ const FLAG_GROUPS = [
     },
 ];
 
-export const BlockingSettings: React.FC = () => {
+export const BlockingSettings = () => {
     const [view, setView] = useState<'users' | 'profiles'>('users');
 
     const { data: blocks, isLoading: isBlocksLoading } = useBlocks();
@@ -130,7 +130,7 @@ export const BlockingSettings: React.FC = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const renameInputRef = React.useRef<HTMLInputElement>(null);
 
-    React.useEffect(() => {
+    React.useEffect((): void => {
         if (renamingProfileId) {
             renameInputRef.current?.focus();
         }
@@ -192,12 +192,14 @@ export const BlockingSettings: React.FC = () => {
                             className="w-full rounded-md border border-white/10 bg-black/40 py-1.5 pr-3 pl-9 text-xs text-foreground transition-all outline-none placeholder:text-white/20 focus:border-primary/50 focus:bg-black/60"
                             placeholder="Search blocked users..."
                             value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
+                            onChange={(e): void =>
+                                setSearchQuery(e.target.value)
+                            }
                         />
                         {searchQuery && (
                             <button
                                 className="absolute top-1/2 right-2 -translate-y-1/2 text-white/30 hover:text-white"
-                                onClick={() => setSearchQuery('')}
+                                onClick={(): void => setSearchQuery('')}
                             >
                                 <X size={12} />
                             </button>
@@ -220,7 +222,7 @@ export const BlockingSettings: React.FC = () => {
                     <Box className="grid gap-3">
                         {(() => {
                             const filtered = blocks.filter(
-                                (b: { targetUsername?: string }) =>
+                                (b: { targetUsername?: string }): boolean =>
                                     (b.targetUsername || '')
                                         .toLowerCase()
                                         .includes(searchQuery.toLowerCase()),
@@ -257,7 +259,7 @@ export const BlockingSettings: React.FC = () => {
                                                 className="rounded-md border border-white/10 bg-black/40 px-2 py-1 text-xs text-foreground outline-none focus:border-primary"
                                                 title="Assigned Block Profile"
                                                 value={block.profileId}
-                                                onChange={(e) =>
+                                                onChange={(e): void =>
                                                     upsertBlock({
                                                         targetUserId:
                                                             block.targetUserId,
@@ -282,7 +284,7 @@ export const BlockingSettings: React.FC = () => {
                                                 size="sm"
                                                 title="Unblock"
                                                 variant="ghost"
-                                                onClick={() =>
+                                                onClick={(): void =>
                                                     removeBlock(
                                                         block.targetUserId,
                                                     )
@@ -351,10 +353,10 @@ export const BlockingSettings: React.FC = () => {
                                             ref={renameInputRef}
                                             title="Rename Profile"
                                             value={renameValue}
-                                            onChange={(e) =>
+                                            onChange={(e): void =>
                                                 setRenameValue(e.target.value)
                                             }
-                                            onKeyDown={(e) => {
+                                            onKeyDown={(e): void => {
                                                 if (e.key === 'Enter')
                                                     handleSaveRename(
                                                         profile.id,
@@ -367,7 +369,7 @@ export const BlockingSettings: React.FC = () => {
                                             icon={Check}
                                             size="sm"
                                             variant="primary"
-                                            onClick={() =>
+                                            onClick={(): void =>
                                                 handleSaveRename(profile.id)
                                             }
                                         />
@@ -375,7 +377,7 @@ export const BlockingSettings: React.FC = () => {
                                             icon={X}
                                             size="sm"
                                             variant="ghost"
-                                            onClick={() =>
+                                            onClick={(): void =>
                                                 setRenamingProfileId(null)
                                             }
                                         />
@@ -391,7 +393,7 @@ export const BlockingSettings: React.FC = () => {
                                             size="sm"
                                             title="Rename Profile"
                                             variant="ghost"
-                                            onClick={() =>
+                                            onClick={(): void =>
                                                 handleStartRename(profile)
                                             }
                                         />
@@ -409,7 +411,7 @@ export const BlockingSettings: React.FC = () => {
                                         size="sm"
                                         title="Edit Profile Flags"
                                         variant="ghost"
-                                        onClick={() =>
+                                        onClick={(): void =>
                                             setEditingProfileId(
                                                 editingProfileId === profile.id
                                                     ? null
@@ -424,7 +426,7 @@ export const BlockingSettings: React.FC = () => {
                                         size="sm"
                                         title="Delete Profile"
                                         variant="ghost"
-                                        onClick={() =>
+                                        onClick={(): void =>
                                             deleteProfile(profile.id)
                                         }
                                     />
@@ -472,7 +474,7 @@ export const BlockingSettings: React.FC = () => {
                                                                             : 'border-transparent bg-white/5 text-muted-foreground hover:bg-white/10 hover:text-foreground',
                                                                     )}
                                                                     key={flag}
-                                                                    onClick={() =>
+                                                                    onClick={(): void =>
                                                                         handleToggleFlag(
                                                                             profile.id,
                                                                             profile.flags,
@@ -558,14 +560,14 @@ export const BlockingSettings: React.FC = () => {
                 <Button
                     size="sm"
                     variant={view === 'users' ? 'primary' : 'ghost'}
-                    onClick={() => setView('users')}
+                    onClick={(): void => setView('users')}
                 >
                     Blocked Users
                 </Button>
                 <Button
                     size="sm"
                     variant={view === 'profiles' ? 'primary' : 'ghost'}
-                    onClick={() => setView('profiles')}
+                    onClick={(): void => setView('profiles')}
                 >
                     Block Profiles
                 </Button>

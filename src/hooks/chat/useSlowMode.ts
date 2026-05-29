@@ -15,7 +15,7 @@ export function useSlowMode(
         ? undefined
         : (currentChannel?.slowModeNextMessageAllowedAt ?? undefined);
 
-    useEffect(() => {
+    useEffect((): (() => void) => {
         let interval: NodeJS.Timeout | undefined;
 
         const update = (): void => {
@@ -26,7 +26,7 @@ export function useSlowMode(
             const nextAllowedAt = new Date(currentAllowedAt).getTime();
             const now = Date.now();
             const remaining = Math.ceil((nextAllowedAt - now) / 1000);
-            setCooldown((prev) => {
+            setCooldown((prev): number => {
                 const newVal = remaining > 0 ? remaining : 0;
                 return prev === newVal ? prev : newVal;
             });
@@ -39,7 +39,7 @@ export function useSlowMode(
             interval = setInterval(update, 1000);
         }
 
-        return () => {
+        return (): void => {
             clearTimeout(timer);
             if (interval) clearInterval(interval);
         };

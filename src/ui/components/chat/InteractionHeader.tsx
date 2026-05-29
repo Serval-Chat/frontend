@@ -22,7 +22,7 @@ interface InteractionHeaderProps {
     isDeleted?: boolean;
 }
 
-export const InteractionHeader: React.FC<InteractionHeaderProps> = React.memo(
+export const InteractionHeader = React.memo(
     ({
         user,
         command,
@@ -34,14 +34,14 @@ export const InteractionHeader: React.FC<InteractionHeaderProps> = React.memo(
         disableGlow,
         disableGlowAndColors,
         isDeleted,
-    }) => {
+    }: InteractionHeaderProps) => {
         if (!command) return null;
 
         const invocationString = `/${command}${
             options?.length
                 ? ' ' +
                   options
-                      .map((opt) => {
+                      .map((opt): string => {
                           let valStr = String(opt.value);
                           if (
                               typeof opt.value === 'object' &&

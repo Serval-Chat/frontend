@@ -10,10 +10,13 @@ export const BlockSyncProvider = (): null => {
     const { data: blocksData } = useBlocks();
     const { data: profilesData } = useBlockProfiles();
 
-    useEffect(() => {
+    useEffect((): void => {
         if (!blocksData) return;
         const blockMap = blocksData.reduce<Record<string, number>>(
-            (acc: Record<string, number>, b: BlockRelationship) => {
+            (
+                acc: Record<string, number>,
+                b: BlockRelationship,
+            ): Record<string, number> => {
                 acc[b.targetUserId] = b.flags;
                 return acc;
             },
@@ -22,7 +25,7 @@ export const BlockSyncProvider = (): null => {
         dispatch(setBlocks(blockMap));
     }, [blocksData, dispatch]);
 
-    useEffect(() => {
+    useEffect((): void => {
         if (!profilesData) return;
         dispatch(setProfiles(profilesData));
     }, [profilesData, dispatch]);

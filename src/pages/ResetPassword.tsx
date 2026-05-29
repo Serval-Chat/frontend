@@ -14,7 +14,7 @@ import { Text } from '@/ui/components/common/Text';
 import { Box } from '@/ui/components/layout/Box';
 import { DefaultBackground } from '@/ui/components/layout/DefaultBackground';
 
-export const ResetPassword: React.FC = () => {
+export const ResetPassword = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const [token, setToken] = useState('');
@@ -26,7 +26,7 @@ export const ResetPassword: React.FC = () => {
     } | null>(null);
     const [isLoading, setIsLoading] = useState(false);
 
-    useEffect(() => {
+    useEffect((): void => {
         // Extract token from hash fragment: #token=...
         const hash = location.hash;
         if (hash) {
@@ -69,7 +69,7 @@ export const ResetPassword: React.FC = () => {
                 type: 'success',
                 message: 'Password reset successful! Redirecting to login...',
             });
-            void setTimeout(() => {
+            void setTimeout((): void => {
                 void navigate('/login');
             }, 2000);
         } catch (error: unknown) {
@@ -116,7 +116,7 @@ export const ResetPassword: React.FC = () => {
 
                 <form
                     className="space-y-md"
-                    onSubmit={(e) => {
+                    onSubmit={(e): void => {
                         void handleSubmit(e);
                     }}
                 >
@@ -130,7 +130,9 @@ export const ResetPassword: React.FC = () => {
                             placeholder="New Password"
                             type="password"
                             value={newPassword}
-                            onChange={(e) => setNewPassword(e.target.value)}
+                            onChange={(e): void =>
+                                setNewPassword(e.target.value)
+                            }
                         />
                     </InputWrapper>
                     <InputWrapper>
@@ -143,7 +145,9 @@ export const ResetPassword: React.FC = () => {
                             placeholder="Confirm New Password"
                             type="password"
                             value={confirmPassword}
-                            onChange={(e) => setConfirmPassword(e.target.value)}
+                            onChange={(e): void =>
+                                setConfirmPassword(e.target.value)
+                            }
                         />
                     </InputWrapper>
                     <Button

@@ -135,9 +135,12 @@ const formatTimestamp = (
     }
 };
 
-export const Timestamp: React.FC<TimestampProps> = ({ timestamp, flag }) => {
-    const [now, setNow] = React.useState(() => Date.now());
-    const date = React.useMemo(() => new Date(timestamp * 1000), [timestamp]);
+export const Timestamp = ({ timestamp, flag }: TimestampProps) => {
+    const [now, setNow] = React.useState((): number => Date.now());
+    const date = React.useMemo(
+        (): Date => new Date(timestamp * 1000),
+        [timestamp],
+    );
     const label = formatTimestamp(date, flag, now);
     const title = Number.isNaN(date.getTime())
         ? 'Invalid date'
@@ -146,11 +149,14 @@ export const Timestamp: React.FC<TimestampProps> = ({ timestamp, flag }) => {
               timeStyle: 'long',
           });
 
-    React.useEffect(() => {
+    React.useEffect((): (() => void) | undefined => {
         if (flag !== 'R') return undefined;
 
-        const interval = window.setInterval(() => setNow(Date.now()), 30_000);
-        return () => window.clearInterval(interval);
+        const interval = window.setInterval(
+            (): void => setNow(Date.now()),
+            30_000,
+        );
+        return (): void => window.clearInterval(interval);
     }, [flag]);
 
     return (

@@ -9,10 +9,10 @@ export interface SlashCommandChipProps {
     editor: LexicalEditor;
 }
 
-export const SlashCommandChipComponent: React.FC<SlashCommandChipProps> = ({
+export const SlashCommandChipComponent = ({
     commandName,
     editor,
-}) => {
+}: SlashCommandChipProps) => {
     const handleCancel = (e: React.MouseEvent): void => {
         e.preventDefault();
         e.stopPropagation();

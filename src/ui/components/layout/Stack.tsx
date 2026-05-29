@@ -54,7 +54,7 @@ export interface StackProps
 /**
  * @description Generic flexbox container component
  */
-export const Stack: React.FC<StackProps> = ({
+export const Stack = ({
     direction,
     gap,
     wrap,
@@ -63,7 +63,7 @@ export const Stack: React.FC<StackProps> = ({
     className,
     children,
     ...props
-}) => (
+}: StackProps) => (
     <div
         className={cn(
             stackVariants({

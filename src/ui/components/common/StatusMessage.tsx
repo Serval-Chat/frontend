@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { AnimatePresence, motion } from 'framer-motion';
 
 import { Box } from '@/ui/components/layout/Box';
@@ -15,11 +13,11 @@ export interface StatusMessageProps {
 /**
  * @description Status message component
  */
-export const StatusMessage: React.FC<StatusMessageProps> = ({
+export const StatusMessage = ({
     message,
     type,
     className,
-}) => (
+}: StatusMessageProps) => (
     <AnimatePresence mode="wait">
         {message && (
             <Box

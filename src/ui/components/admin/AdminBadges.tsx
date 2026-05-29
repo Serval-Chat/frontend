@@ -47,11 +47,11 @@ const AssignBadgeModal = ({
     const [searchTerm, setSearchTerm] = useState('');
     const [debouncedSearch, setDebouncedSearch] = useState('');
 
-    useEffect(() => {
-        const timer = setTimeout(() => {
+    useEffect((): (() => void) => {
+        const timer = setTimeout((): void => {
             setDebouncedSearch(searchTerm);
         }, ADMIN_CONSTANTS.SEARCH_DEBOUNCE_MS);
-        return () => clearTimeout(timer);
+        return (): void => clearTimeout(timer);
     }, [searchTerm]);
 
     const { data: users, isLoading } = useAdminUsers(debouncedSearch, 0, 10);
@@ -61,10 +61,10 @@ const AssignBadgeModal = ({
         assignBadge(
             { userId, badgeId: badge.id },
             {
-                onSuccess: () => {
+                onSuccess: (): void => {
                     showToast('Badge assigned successfully', 'success');
                 },
-                onError: (e) => {
+                onError: (e): void => {
                     showToast(e.message || 'Failed to assign badge', 'error');
                 },
             },
@@ -100,7 +100,7 @@ const AssignBadgeModal = ({
                         size="admin"
                         value={searchTerm}
                         variant="admin"
-                        onChange={(e) => setSearchTerm(e.target.value)}
+                        onChange={(e): void => setSearchTerm(e.target.value)}
                     />
                 </Box>
 
@@ -163,7 +163,9 @@ const AssignBadgeModal = ({
                                                 ? 'ghost'
                                                 : 'primary'
                                         }
-                                        onClick={() => handleAssign(user._id)}
+                                        onClick={(): void =>
+                                            handleAssign(user._id)
+                                        }
                                     >
                                         {user.badges &&
                                         user.badges.includes(badge.id) ? (
@@ -281,11 +283,11 @@ const BadgeEditor = ({
                     },
                 },
                 {
-                    onSuccess: () => {
+                    onSuccess: (): void => {
                         showToast('Badge updated', 'success');
                         onClose();
                     },
-                    onError: (e) => {
+                    onError: (e): void => {
                         showToast(
                             e.message || 'Failed to update badge',
                             'error',
@@ -305,11 +307,11 @@ const BadgeEditor = ({
                 color,
             },
             {
-                onSuccess: () => {
+                onSuccess: (): void => {
                     showToast('Badge created', 'success');
                     onClose();
                 },
-                onError: (e) => {
+                onError: (e): void => {
                     showToast(e.message || 'Failed to create badge', 'error');
                 },
             },
@@ -346,7 +348,7 @@ const BadgeEditor = ({
                             size="admin"
                             value={id}
                             variant="admin"
-                            onChange={(e) => setId(e.target.value)}
+                            onChange={(e): void => setId(e.target.value)}
                         />
                     </div>
 
@@ -362,7 +364,7 @@ const BadgeEditor = ({
                             size="admin"
                             value={name}
                             variant="admin"
-                            onChange={(e) => setName(e.target.value)}
+                            onChange={(e): void => setName(e.target.value)}
                         />
                     </div>
                 </div>
@@ -380,7 +382,7 @@ const BadgeEditor = ({
                             placeholder="Select icon"
                             searchPlaceholder="Search icons..."
                             value={selectedIcon}
-                            onChange={(value) => setIcon(value ?? '')}
+                            onChange={(value): void => setIcon(value ?? '')}
                         />
                     </div>
 
@@ -396,7 +398,7 @@ const BadgeEditor = ({
                             size="admin"
                             value={color}
                             variant="admin"
-                            onChange={(e) => setColor(e.target.value)}
+                            onChange={(e): void => setColor(e.target.value)}
                         />
                     </div>
                 </div>
@@ -411,7 +413,7 @@ const BadgeEditor = ({
                     <TextArea
                         placeholder="Shown on hover"
                         value={description}
-                        onChange={(e) => setDescription(e.target.value)}
+                        onChange={(e): void => setDescription(e.target.value)}
                     />
                 </div>
 
@@ -456,7 +458,7 @@ export const AdminBadges = (): ReactNode => {
                 </div>
                 <Button
                     variant="primary"
-                    onClick={() => {
+                    onClick={(): void => {
                         setEditingBadge(null);
                         setEditorOpen(true);
                     }}
@@ -511,7 +513,7 @@ export const AdminBadges = (): ReactNode => {
                                             size="sm"
                                             title="Assign badge to user"
                                             variant="ghost"
-                                            onClick={() => {
+                                            onClick={(): void => {
                                                 setAssigningBadge(badgeItem);
                                             }}
                                         >
@@ -521,7 +523,7 @@ export const AdminBadges = (): ReactNode => {
                                             size="sm"
                                             title="Edit badge"
                                             variant="ghost"
-                                            onClick={() => {
+                                            onClick={(): void => {
                                                 setEditingBadge(badgeItem);
                                                 setEditorOpen(true);
                                             }}
@@ -533,7 +535,7 @@ export const AdminBadges = (): ReactNode => {
                                             size="sm"
                                             title="Delete badge"
                                             variant="ghost"
-                                            onClick={() => {
+                                            onClick={(): void => {
                                                 const confirmed =
                                                     window.confirm(
                                                         `Delete badge ${badgeItem.id}?`,
@@ -543,12 +545,12 @@ export const AdminBadges = (): ReactNode => {
                                                 deleteBadge(
                                                     { badgeId: badgeItem.id },
                                                     {
-                                                        onSuccess: () =>
+                                                        onSuccess: (): void =>
                                                             showToast(
                                                                 'Badge deleted',
                                                                 'success',
                                                             ),
-                                                        onError: (e) =>
+                                                        onError: (e): void =>
                                                             showToast(
                                                                 e.message ||
                                                                     'Failed to delete badge',
@@ -579,14 +581,14 @@ export const AdminBadges = (): ReactNode => {
             {editorOpen && (
                 <BadgeEditor
                     badge={editingBadge}
-                    onClose={() => setEditorOpen(false)}
+                    onClose={(): void => setEditorOpen(false)}
                 />
             )}
 
             {assigningBadge && (
                 <AssignBadgeModal
                     badge={assigningBadge}
-                    onClose={() => setAssigningBadge(null)}
+                    onClose={(): void => setAssigningBadge(null)}
                 />
             )}
         </div>

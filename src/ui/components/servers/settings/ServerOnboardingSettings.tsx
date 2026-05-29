@@ -37,15 +37,21 @@ const channelIcon = (channel: Channel): React.ReactNode => (
 );
 
 const sortByPosition = <T extends { position: number }>(items: T[]): T[] =>
-    [...items].sort((a, b) => a.position - b.position);
+    [...items].sort((a, b): number => a.position - b.position);
 
-const RoleSelectGrid: React.FC<{
+const RoleSelectGrid = ({
+    roles,
+    selectedIds,
+    onChange,
+}: {
     roles: Role[];
     selectedIds: string[];
     onChange: (roleIds: string[]) => void;
-}> = ({ roles, selectedIds, onChange }) => {
+}) => {
     const selected = new Set(selectedIds);
-    const selectableRoles = roles.filter((role) => role.name !== '@everyone');
+    const selectableRoles = roles.filter(
+        (role): boolean => role.name !== '@everyone',
+    );
 
     const toggleRole = (roleId: string): void => {
         const next = new Set(selected);
@@ -71,7 +77,7 @@ const RoleSelectGrid: React.FC<{
                         )}
                         key={role._id}
                         type="button"
-                        onClick={() => toggleRole(role._id)}
+                        onClick={(): void => toggleRole(role._id)}
                     >
                         <div className="flex items-center gap-2">
                             <RoleDot role={role} />
@@ -105,15 +111,20 @@ const RoleSelectGrid: React.FC<{
     );
 };
 
-const WelcomeChannelGrid: React.FC<{
+const WelcomeChannelGrid = ({
+    channels,
+    categories,
+    selectedIds,
+    onChange,
+}: {
     channels: Channel[];
     categories?: Category[];
     selectedIds: string[];
     onChange: (channelIds: string[]) => void;
-}> = ({ channels, categories, selectedIds, onChange }) => {
+}) => {
     const selected = new Set(selectedIds);
     const selectableChannels = sortByPosition(
-        channels.filter((channel) => channel.type !== 'link'),
+        channels.filter((channel): boolean => channel.type !== 'link'),
     );
 
     const toggleChannel = (channelId: string): void => {
@@ -133,18 +144,23 @@ const WelcomeChannelGrid: React.FC<{
             {
                 category: null,
                 channels: sortedChannels.filter(
-                    (channel) =>
+                    (channel): boolean =>
                         !channel.categoryId ||
-                        !categories?.find((c) => c._id === channel.categoryId),
+                        !categories?.find(
+                            (c): boolean => c._id === channel.categoryId,
+                        ),
                 ),
             },
-            ...sortedCategories.map((category) => ({
-                category,
-                channels: sortedChannels.filter(
-                    (channel) => channel.categoryId === category._id,
-                ),
-            })),
-        ].filter((group) => group.channels.length > 0);
+            ...sortedCategories.map(
+                (category): { category: Category; channels: Channel[] } => ({
+                    category,
+                    channels: sortedChannels.filter(
+                        (channel): boolean =>
+                            channel.categoryId === category._id,
+                    ),
+                }),
+            ),
+        ].filter((group): boolean => group.channels.length > 0);
     }, [selectableChannels, categories]);
 
     return (
@@ -175,7 +191,9 @@ const WelcomeChannelGrid: React.FC<{
                                     key={channel._id}
                                     type="button"
                                     variant="normal"
-                                    onClick={() => toggleChannel(channel._id)}
+                                    onClick={(): void =>
+                                        toggleChannel(channel._id)
+                                    }
                                 >
                                     {channelIcon(channel)}
                                     <span className="truncate">
@@ -191,9 +209,9 @@ const WelcomeChannelGrid: React.FC<{
     );
 };
 
-export const ServerOnboardingSettings: React.FC<
-    ServerOnboardingSettingsProps
-> = ({ serverId }) => {
+export const ServerOnboardingSettings = ({
+    serverId,
+}: ServerOnboardingSettingsProps) => {
     const { data: settings, isLoading: isSettingsLoading } =
         useOnboardingSettings(serverId);
     const { data: roles, isLoading: isRolesLoading } = useRoles(serverId);
@@ -213,7 +231,7 @@ export const ServerOnboardingSettings: React.FC<
     const [welcomeChannelIds, setWelcomeChannelIds] = useState<string[]>([]);
     const [baseline, setBaseline] = useState<string>('');
 
-    React.useEffect(() => {
+    React.useEffect((): void => {
         if (!settings) return;
         setEnabled(settings.enabled);
         const parsedRules = settings.guidelines ?? [];
@@ -230,21 +248,25 @@ export const ServerOnboardingSettings: React.FC<
     }, [settings]);
 
     const channelOptions = useMemo(
-        () =>
+        (): { id: string; label: string; icon: React.ReactNode }[] =>
             sortByPosition(
-                (channels ?? []).filter((c) => c.type !== 'link'),
-            ).map((channel) => ({
-                id: channel._id,
-                label: channel.name,
-                icon: channelIcon(channel),
-            })),
+                (channels ?? []).filter((c): boolean => c.type !== 'link'),
+            ).map(
+                (
+                    channel,
+                ): { id: string; label: string; icon: React.ReactNode } => ({
+                    id: channel._id,
+                    label: channel.name,
+                    icon: channelIcon(channel),
+                }),
+            ),
         [channels],
     );
 
     const current = useMemo(
         () => ({
             enabled,
-            guidelines: rules.map((r) => r.trim()).filter(Boolean),
+            guidelines: rules.map((r): string => r.trim()).filter(Boolean),
             selfAssignableRoleIds,
             landingChannelId,
             welcomeChannelIds,
@@ -270,7 +292,7 @@ export const ServerOnboardingSettings: React.FC<
 
     const handleSave = (): void => {
         updateSettings.mutate(current, {
-            onSuccess: (next) => {
+            onSuccess: (next): void => {
                 const parsedRules = next.guidelines ?? [];
                 setRules(parsedRules);
                 setBaseline(
@@ -351,12 +373,12 @@ export const ServerOnboardingSettings: React.FC<
                                         id={`rule-input-${idx}`}
                                         placeholder={`Rule #${idx + 1} description...`}
                                         value={rule}
-                                        onChange={(e) => {
+                                        onChange={(e): void => {
                                             const next = [...rules];
                                             next[idx] = e.target.value;
                                             setRules(next);
                                         }}
-                                        onKeyDown={(e) => {
+                                        onKeyDown={(e): void => {
                                             if (
                                                 e.key === 'Enter' &&
                                                 !e.shiftKey
@@ -365,7 +387,7 @@ export const ServerOnboardingSettings: React.FC<
                                                 const next = [...rules];
                                                 next.splice(idx + 1, 0, '');
                                                 setRules(next);
-                                                setTimeout(() => {
+                                                setTimeout((): void => {
                                                     document
                                                         .getElementById(
                                                             `rule-input-${idx + 1}`,
@@ -380,9 +402,9 @@ export const ServerOnboardingSettings: React.FC<
                                     className="h-8 w-8 min-w-0 shrink-0 rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-danger/10 hover:text-danger"
                                     type="button"
                                     variant="ghost"
-                                    onClick={() => {
+                                    onClick={(): void => {
                                         const next = rules.filter(
-                                            (_, i) => i !== idx,
+                                            (_, i): boolean => i !== idx,
                                         );
                                         setRules(next);
                                     }}
@@ -397,9 +419,9 @@ export const ServerOnboardingSettings: React.FC<
                 <Button
                     className="flex w-full items-center justify-center rounded-lg border border-dashed border-border-subtle py-2.5 text-muted-foreground transition-all hover:border-primary/50 hover:bg-primary/5 hover:text-foreground"
                     variant="ghost"
-                    onClick={() => {
+                    onClick={(): void => {
                         setRules([...rules, '']);
-                        setTimeout(() => {
+                        setTimeout((): void => {
                             document
                                 .getElementById(`rule-input-${rules.length}`)
                                 ?.focus();

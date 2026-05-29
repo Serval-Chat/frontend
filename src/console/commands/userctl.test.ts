@@ -19,7 +19,7 @@ vi.mock('@/api/users/users.api', () => ({
     },
 }));
 
-describe('userctl command', () => {
+describe('userctl command', (): void => {
     let mockContext: CommandContext;
 
     const mockUsers: Record<string, Partial<User>> = {
@@ -49,7 +49,7 @@ describe('userctl command', () => {
         },
     };
 
-    beforeEach(() => {
+    beforeEach((): void => {
         vi.clearAllMocks();
         mockContext = {
             dispatch: vi.fn() as any,
@@ -63,17 +63,17 @@ describe('userctl command', () => {
         ]);
 
         vi.mocked(usersApi.getById).mockImplementation(
-            async (id: string) => mockUsers[id] as User,
+            async (id: string): Promise<User> => mockUsers[id] as User,
         );
     });
 
-    it('matches userctl command', () => {
+    it('matches userctl command', (): void => {
         expect(userctlCommand.match(1, ['userctl'])).toBe(true);
         expect(userctlCommand.match(2, ['userctl', '/query'])).toBe(true);
         expect(userctlCommand.match(1, ['help'])).toBe(false);
     });
 
-    it('displays usage on help flag', async () => {
+    it('displays usage on help flag', async (): Promise<void> => {
         const result = await userctlCommand.execute(
             2,
             ['userctl', '/?'],
@@ -86,7 +86,7 @@ describe('userctl command', () => {
         expect(result.output?.join('\n')).toContain('/require-all');
     });
 
-    it('returns error on invalid operand', async () => {
+    it('returns error on invalid operand', async (): Promise<void> => {
         const result = await userctlCommand.execute(
             2,
             ['userctl', '/invalid'],
@@ -97,7 +97,7 @@ describe('userctl command', () => {
         );
     });
 
-    it('returns error on missing query target', async () => {
+    it('returns error on missing query target', async (): Promise<void> => {
         const result = await userctlCommand.execute(
             2,
             ['userctl', '/query'],
@@ -108,7 +108,7 @@ describe('userctl command', () => {
         );
     });
 
-    it('queries friends with default options (uname, dname)', async () => {
+    it('queries friends with default options (uname, dname)', async (): Promise<void> => {
         const result = await userctlCommand.execute(
             3,
             ['userctl', '/query', 'friends'],
@@ -123,7 +123,7 @@ describe('userctl command', () => {
         expect(usersApi.getById).not.toHaveBeenCalled();
     });
 
-    it('queries friends with /hide-empty', async () => {
+    it('queries friends with /hide-empty', async (): Promise<void> => {
         const result = await userctlCommand.execute(
             4,
             ['userctl', '/query', 'friends', '/hide-empty'],
@@ -138,7 +138,7 @@ describe('userctl command', () => {
         expect(usersApi.getById).not.toHaveBeenCalled();
     });
 
-    it('queries friends with /require-all (default columns: uname, dname)', async () => {
+    it('queries friends with /require-all (default columns: uname, dname)', async (): Promise<void> => {
         const result = await userctlCommand.execute(
             4,
             ['userctl', '/query', 'friends', '/require-all'],
@@ -153,7 +153,7 @@ describe('userctl command', () => {
         expect(usersApi.getById).not.toHaveBeenCalled();
     });
 
-    it('queries friends with /filter and /require-all', async () => {
+    it('queries friends with /filter and /require-all', async (): Promise<void> => {
         const result = await userctlCommand.execute(
             5,
             [
@@ -174,7 +174,7 @@ describe('userctl command', () => {
         expect(usersApi.getById).not.toHaveBeenCalled();
     });
 
-    it('returns error on invalid filters', async () => {
+    it('returns error on invalid filters', async (): Promise<void> => {
         const result = await userctlCommand.execute(
             4,
             ['userctl', '/query', 'friends', '/filter:invalid_field'],
@@ -185,7 +185,7 @@ describe('userctl command', () => {
         );
     });
 
-    it('returns error on extra operands', async () => {
+    it('returns error on extra operands', async (): Promise<void> => {
         const result = await userctlCommand.execute(
             4,
             ['userctl', '/query', 'friends', '/extra'],
@@ -196,7 +196,7 @@ describe('userctl command', () => {
         );
     });
 
-    it('queries friends with badges and colors them', async () => {
+    it('queries friends with badges and colors them', async (): Promise<void> => {
         mockUsers['1'].badges = [
             {
                 _id: 'b1',

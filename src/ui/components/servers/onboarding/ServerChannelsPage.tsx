@@ -17,9 +17,9 @@ import { Box } from '@/ui/components/layout/Box';
 import { ChannelPreferenceGroup } from './ServerOnboardingModals';
 
 const sortByPosition = <T extends { position: number }>(items: T[]): T[] =>
-    [...items].sort((a, b) => a.position - b.position);
+    [...items].sort((a, b): number => a.position - b.position);
 
-export const ServerChannelsPage: React.FC = () => {
+export const ServerChannelsPage = () => {
     const { serverId } = useParams<{ serverId: string }>();
     const navigate = useNavigate();
     const { data: onboarding } = useOnboarding(serverId ?? '');
@@ -31,7 +31,7 @@ export const ServerChannelsPage: React.FC = () => {
     const [hiddenCategoryIds, setHiddenCategoryIds] = useState<string[]>([]);
     const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
-    React.useEffect(() => {
+    React.useEffect((): void => {
         if (!onboarding) return;
         setHiddenChannelIds(onboarding.member.hiddenChannelIds ?? []);
         setHiddenCategoryIds(onboarding.member.hiddenCategoryIds ?? []);
@@ -43,12 +43,12 @@ export const ServerChannelsPage: React.FC = () => {
     const groupedChannels = useMemo(() => {
         const sortedChannels = sortByPosition(channels ?? []);
         const sortedCategories = sortByPosition(categories ?? []);
-        const categoryIds = new Set(sortedCategories.map((c) => c._id));
+        const categoryIds = new Set(sortedCategories.map((c): string => c._id));
         return [
             {
                 category: null,
                 channels: sortedChannels.filter(
-                    (channel) =>
+                    (channel): boolean =>
                         !channel.categoryId ||
                         !categoryIds.has(channel.categoryId),
                 ),
@@ -56,34 +56,37 @@ export const ServerChannelsPage: React.FC = () => {
             ...sortedCategories.map((category) => ({
                 category,
                 channels: sortedChannels.filter(
-                    (channel) => channel.categoryId === category._id,
+                    (channel): boolean => channel.categoryId === category._id,
                 ),
             })),
-        ].filter((group) => group.category !== null || group.channels.length);
+        ].filter(
+            (group): number | true =>
+                group.category !== null || group.channels.length,
+        );
     }, [channels, categories]);
 
     const handleSave = (): void => {
         if (!serverId) return;
         updatePreferences.mutate(
             { hiddenCategoryIds, hiddenChannelIds },
-            { onSuccess: () => setHasUnsavedChanges(false) },
+            { onSuccess: (): void => setHasUnsavedChanges(false) },
         );
     };
 
     const handleToggleChannel = (channelId: string): void => {
         setHasUnsavedChanges(true);
-        setHiddenChannelIds((prev) =>
+        setHiddenChannelIds((prev): string[] =>
             prev.includes(channelId)
-                ? prev.filter((id) => id !== channelId)
+                ? prev.filter((id): boolean => id !== channelId)
                 : [...prev, channelId],
         );
     };
 
     const handleToggleCategory = (categoryId: string): void => {
         setHasUnsavedChanges(true);
-        setHiddenCategoryIds((prev) =>
+        setHiddenCategoryIds((prev): string[] =>
             prev.includes(categoryId)
-                ? prev.filter((id) => id !== categoryId)
+                ? prev.filter((id): boolean => id !== categoryId)
                 : [...prev, categoryId],
         );
     };
@@ -150,7 +153,7 @@ export const ServerChannelsPage: React.FC = () => {
                         <div className="flex gap-2">
                             <Button
                                 variant="ghost"
-                                onClick={() => {
+                                onClick={(): void => {
                                     if (onboarding) {
                                         setHiddenChannelIds(
                                             onboarding.member

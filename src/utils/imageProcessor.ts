@@ -82,11 +82,11 @@ async function processStaticImage(
 ): Promise<File> {
     const { maxWidth = 1024, maxHeight = 1024, crop, quality = 0.9 } = options;
 
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve, reject): void => {
         const img = new Image();
         const url = URL.createObjectURL(file);
 
-        img.onload = () => {
+        img.onload = (): void => {
             try {
                 if (crop) {
                     validateCrop(crop, img.width, img.height);
@@ -129,7 +129,7 @@ async function processStaticImage(
                 }
 
                 canvas.toBlob(
-                    (blob) => {
+                    (blob): void => {
                         URL.revokeObjectURL(url);
                         if (!blob) {
                             reject(new Error('Failed to create WebP blob'));
@@ -151,7 +151,7 @@ async function processStaticImage(
             }
         };
 
-        img.onerror = () => {
+        img.onerror = (): void => {
             URL.revokeObjectURL(url);
             reject(new Error('Failed to load image for processing'));
         };
@@ -181,7 +181,7 @@ async function processGif(
         maxHeight,
     );
 
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve, reject): void => {
         const gifEncoder = new GIF({
             workers: 2,
             quality: 10,
@@ -282,7 +282,7 @@ async function processGif(
             }
         }
 
-        gifEncoder.on('finished', (blob) => {
+        gifEncoder.on('finished', (blob): void => {
             canvas.width = canvas.height = 0;
             accumCanvas.width = accumCanvas.height = 0;
             prevCanvas.width = prevCanvas.height = 0;
@@ -296,15 +296,15 @@ async function processGif(
 }
 
 async function getImageDimensions(file: File): Promise<ImageSize> {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve, reject): void => {
         const img = new Image();
         const url = URL.createObjectURL(file);
-        img.onload = () => {
+        img.onload = (): void => {
             const dims = { width: img.width, height: img.height };
             URL.revokeObjectURL(url);
             resolve(dims);
         };
-        img.onerror = () => {
+        img.onerror = (): void => {
             URL.revokeObjectURL(url);
             reject(new Error('Failed to read image dimensions'));
         };

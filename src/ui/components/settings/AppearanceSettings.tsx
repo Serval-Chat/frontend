@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 
 import { Plus, X } from 'lucide-react';
 import { HexColorPicker } from 'react-colorful';
@@ -64,9 +64,7 @@ interface AppearanceSettingsFormProps {
     user: User;
 }
 
-const AppearanceSettingsForm: React.FC<AppearanceSettingsFormProps> = ({
-    user,
-}) => {
+const AppearanceSettingsForm = ({ user }: AppearanceSettingsFormProps) => {
     const { showToast } = useToast();
     const { mutate: updateStyle, isPending: isUpdatingStyle } =
         useUpdateStyle();
@@ -88,11 +86,13 @@ const AppearanceSettingsForm: React.FC<AppearanceSettingsFormProps> = ({
     );
     const [gradientColors, setGradientColors] = useState<
         { id: string; value: string }[]
-    >(() =>
-        (user.usernameGradient?.colors || []).map((c) => ({
-            id: Math.random().toString(36),
-            value: c,
-        })),
+    >((): { id: string; value: string }[] =>
+        (user.usernameGradient?.colors || []).map(
+            (c): { id: string; value: string } => ({
+                id: Math.random().toString(36),
+                value: c,
+            }),
+        ),
     );
     const [gradientAngle, setGradientAngle] = useState(
         user.usernameGradient?.angle ?? 90,
@@ -113,7 +113,7 @@ const AppearanceSettingsForm: React.FC<AppearanceSettingsFormProps> = ({
         usernameFont !== (user.usernameFont ?? 'default') ||
         glowEnabled !== (user.usernameGlow?.enabled ?? false) ||
         gradientEnabled !== (user.usernameGradient?.enabled ?? false) ||
-        JSON.stringify(gradientColors.map((c) => c.value)) !==
+        JSON.stringify(gradientColors.map((c): string => c.value)) !==
             JSON.stringify(user.usernameGradient?.colors || []) ||
         gradientAngle !== (user.usernameGradient?.angle ?? 90) ||
         localCustomFontUrl !== (user.settings?.customFontUrl ?? '') ||
@@ -139,7 +139,7 @@ const AppearanceSettingsForm: React.FC<AppearanceSettingsFormProps> = ({
             },
             usernameGradient: {
                 enabled: gradientEnabled,
-                colors: gradientColors.map((c) => c.value),
+                colors: gradientColors.map((c): string => c.value),
                 angle: gradientAngle,
             },
         });
@@ -165,10 +165,12 @@ const AppearanceSettingsForm: React.FC<AppearanceSettingsFormProps> = ({
         setGlowEnabled(user.usernameGlow?.enabled ?? false);
         setGradientEnabled(user.usernameGradient?.enabled ?? false);
         setGradientColors(
-            (user.usernameGradient?.colors || []).map((c) => ({
-                id: Math.random().toString(36),
-                value: c,
-            })),
+            (user.usernameGradient?.colors || []).map(
+                (c): { id: string; value: string } => ({
+                    id: Math.random().toString(36),
+                    value: c,
+                }),
+            ),
         );
         setGradientAngle(user.usernameGradient?.angle ?? 90);
         setLocalCustomFontUrl(user.settings?.customFontUrl ?? '');
@@ -213,7 +215,7 @@ const AppearanceSettingsForm: React.FC<AppearanceSettingsFormProps> = ({
         },
         usernameGradient: {
             enabled: gradientEnabled,
-            colors: gradientColors.map((c) => c.value),
+            colors: gradientColors.map((c): string => c.value),
             angle: gradientAngle,
         },
     };
@@ -302,7 +304,7 @@ const AppearanceSettingsForm: React.FC<AppearanceSettingsFormProps> = ({
                                 <Button
                                     size="sm"
                                     variant="ghost"
-                                    onClick={() => {
+                                    onClick={(): void => {
                                         setLocalCustomFontUrl('');
                                         setLocalCustomFontFamily('');
                                     }}
@@ -328,7 +330,7 @@ const AppearanceSettingsForm: React.FC<AppearanceSettingsFormProps> = ({
                                         placeholder="https://fonts.googleapis.com/css2?family=..."
                                         type="text"
                                         value={localCustomFontUrl}
-                                        onChange={(e) =>
+                                        onChange={(e): void =>
                                             setLocalCustomFontUrl(
                                                 e.target.value,
                                             )
@@ -348,7 +350,7 @@ const AppearanceSettingsForm: React.FC<AppearanceSettingsFormProps> = ({
                                         placeholder="e.g. Open Sans"
                                         type="text"
                                         value={localCustomFontFamily}
-                                        onChange={(e) =>
+                                        onChange={(e): void =>
                                             setLocalCustomFontFamily(
                                                 e.target.value,
                                             )
@@ -386,7 +388,7 @@ const AppearanceSettingsForm: React.FC<AppearanceSettingsFormProps> = ({
                                             ? null
                                             : usernameFont
                                     }
-                                    onChange={(val) => {
+                                    onChange={(val): void => {
                                         setUsernameFont(
                                             (val as UsernameFont) || 'default',
                                         );
@@ -435,7 +437,7 @@ const AppearanceSettingsForm: React.FC<AppearanceSettingsFormProps> = ({
                                                                 colorItem.value,
                                                         }}
                                                         variant="ghost"
-                                                        onClick={(e) => {
+                                                        onClick={(e): void => {
                                                             triggerRef.current =
                                                                 e.currentTarget;
                                                             setActiveColorPicker(
@@ -460,7 +462,7 @@ const AppearanceSettingsForm: React.FC<AppearanceSettingsFormProps> = ({
                                                         className="absolute -top-1 -right-1 h-4 w-4 min-w-0 rounded-full border-none bg-danger p-0.5 text-white opacity-0 shadow-none transition-opacity group-hover:opacity-100"
                                                         size="sm"
                                                         variant="primary"
-                                                        onClick={() =>
+                                                        onClick={(): void =>
                                                             removeGradientColor(
                                                                 index,
                                                             )
@@ -491,14 +493,14 @@ const AppearanceSettingsForm: React.FC<AppearanceSettingsFormProps> = ({
                                                                     tabIndex={
                                                                         -1
                                                                     }
-                                                                    onClick={() =>
+                                                                    onClick={(): void =>
                                                                         setActiveColorPicker(
                                                                             null,
                                                                         )
                                                                     }
                                                                     onKeyDown={(
                                                                         e,
-                                                                    ) => {
+                                                                    ): void => {
                                                                         if (
                                                                             e.key ===
                                                                             'Escape'
@@ -515,7 +517,7 @@ const AppearanceSettingsForm: React.FC<AppearanceSettingsFormProps> = ({
                                                                         }
                                                                         onChange={(
                                                                             c,
-                                                                        ) =>
+                                                                        ): void =>
                                                                             updateGradientColor(
                                                                                 index,
                                                                                 c,
@@ -553,7 +555,7 @@ const AppearanceSettingsForm: React.FC<AppearanceSettingsFormProps> = ({
                                                 min={0}
                                                 type="range"
                                                 value={gradientAngle}
-                                                onChange={(e) =>
+                                                onChange={(e): void =>
                                                     setGradientAngle(
                                                         Number(e.target.value),
                                                     )
@@ -582,7 +584,7 @@ const AppearanceSettingsForm: React.FC<AppearanceSettingsFormProps> = ({
     );
 };
 
-export const AppearanceSettings: React.FC = () => {
+export const AppearanceSettings = () => {
     const { data: user } = useMe();
     if (!user) return null;
     return <AppearanceSettingsForm key={user._id} user={user} />;

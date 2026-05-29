@@ -7,13 +7,13 @@ interface NTPanelProps extends React.HTMLAttributes<HTMLDivElement> {
     children: React.ReactNode;
 }
 
-export const NTPanel: React.FC<NTPanelProps> = ({
+export const NTPanel = ({
     variant = 'inset',
     className,
     children,
     style,
     ...props
-}) => {
+}: NTPanelProps) => {
     const shadow =
         variant === 'inset'
             ? 'inset 1px 1px #808080, inset -1px -1px #ffffff, inset 2px 2px #000000, inset -2px -2px #dfdfdf'

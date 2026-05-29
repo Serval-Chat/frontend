@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 import { Plus } from 'lucide-react';
 
@@ -8,7 +8,7 @@ import { IconButton } from '@/ui/components/common/IconButton';
 import { RoleDot } from '@/ui/components/common/RoleDot';
 import { cn } from '@/utils/cn';
 
-export const RoleColorDot: React.FC<{ role?: Role }> = ({ role }) => (
+export const RoleColorDot = ({ role }: { role?: Role }) => (
     <RoleDot className="h-3 w-3" role={role} size={12} />
 );
 
@@ -18,11 +18,11 @@ interface RoleListItemProps {
     onClick: () => void;
 }
 
-export const RoleListItem: React.FC<RoleListItemProps> = ({
+export const RoleListItem = ({
     role,
     isActive,
     onClick,
-}) => (
+}: RoleListItemProps) => (
     <Button
         aria-current={isActive ? 'true' : undefined}
         className={cn(
@@ -46,10 +46,10 @@ interface AddRoleDropdownProps {
     onAdd: (role: Role) => void;
 }
 
-export const AddRoleDropdown: React.FC<AddRoleDropdownProps> = ({
+export const AddRoleDropdown = ({
     availableRoles,
     onAdd,
-}) => {
+}: AddRoleDropdownProps) => {
     const [isOpen, setIsOpen] = useState(false);
 
     return (
@@ -59,7 +59,7 @@ export const AddRoleDropdown: React.FC<AddRoleDropdownProps> = ({
                 size="sm"
                 title="Add Role Override"
                 variant="ghost"
-                onClick={() => setIsOpen((prev) => !prev)}
+                onClick={(): void => setIsOpen((prev): boolean => !prev)}
             />
             {isOpen && (
                 <>
@@ -68,8 +68,8 @@ export const AddRoleDropdown: React.FC<AddRoleDropdownProps> = ({
                         className="fixed inset-0 z-40"
                         role="button"
                         tabIndex={-1}
-                        onClick={() => setIsOpen(false)}
-                        onKeyDown={(e) => {
+                        onClick={(): void => setIsOpen(false)}
+                        onKeyDown={(e): void => {
                             if (e.key === 'Escape' || e.key === 'Enter')
                                 setIsOpen(false);
                         }}
@@ -81,7 +81,7 @@ export const AddRoleDropdown: React.FC<AddRoleDropdownProps> = ({
                                     <button
                                         className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-foreground hover:bg-bg-subtle"
                                         key={role._id}
-                                        onClick={() => {
+                                        onClick={(): void => {
                                             onAdd(role);
                                             setIsOpen(false);
                                         }}

@@ -30,30 +30,39 @@ interface PinsDrawerProps {
     anchorRef?: React.RefObject<HTMLElement | null>;
 }
 
-const PinnedMessageItem: React.FC<{
+const PinnedMessageItem = ({
+    pin,
+    serverId,
+    channelId,
+    me,
+    serverDetails,
+    onJump,
+}: {
     pin: ChatMessage;
     serverId: string;
     channelId: string;
     me?: User | null;
     serverDetails?: Server | null;
     onJump: (id: string) => void;
-}> = ({ pin, serverId, channelId, me, serverDetails, onJump }) => {
+}) => {
     const { data: members } = useMembers(serverId, { enabled: !!serverId });
     const { data: serverRoles } = useRoles(serverId, { enabled: !!serverId });
 
-    const processedPin = React.useMemo(() => {
+    const processedPin = React.useMemo((): ProcessedChatMessage => {
         const webhookUser = resolveWebhookUser(pin);
         const member = webhookUser
             ? undefined
-            : members?.find((m) => m.userId === pin.senderId);
+            : members?.find((m): boolean => m.userId === pin.senderId);
         const roles =
-            serverRoles?.filter((r) => member?.roles.includes(r._id)) || [];
+            serverRoles?.filter((r): boolean | undefined =>
+                member?.roles.includes(r._id),
+            ) || [];
         const highestRole = [...roles].sort(
-            (a, b) => (b.position || 0) - (a.position || 0),
+            (a, b): number => (b.position || 0) - (a.position || 0),
         )[0];
         const iconRole = [...roles]
-            .filter((r) => r.icon)
-            .sort((a, b) => (b.position || 0) - (a.position || 0))[0];
+            .filter((r): string | undefined => r.icon)
+            .sort((a, b): number => (b.position || 0) - (a.position || 0))[0];
 
         return {
             ...pin,
@@ -69,7 +78,7 @@ const PinnedMessageItem: React.FC<{
     return (
         <Box
             className="group relative cursor-pointer overflow-hidden rounded-lg border border-[var(--divider)] bg-[var(--bg-subtle)] transition-colors hover:bg-[var(--bg-subtle-hover)]"
-            onClick={() => onJump(pin._id)}
+            onClick={(): void => onJump(pin._id)}
         >
             <Box className="pointer-events-none pb-2">
                 <Message
@@ -97,7 +106,7 @@ const PinnedMessageItem: React.FC<{
                     className="h-6 text-[10px] text-[var(--primary)] hover:bg-[var(--primary-muted)]"
                     size="sm"
                     variant="ghost"
-                    onClick={(e) => {
+                    onClick={(e): void => {
                         e.stopPropagation();
                         onJump(pin._id);
                     }}
@@ -109,12 +118,12 @@ const PinnedMessageItem: React.FC<{
     );
 };
 
-export const PinsDrawer: React.FC<PinsDrawerProps> = ({
+export const PinsDrawer = ({
     serverId,
     channelId,
     onClose,
     anchorRef,
-}) => {
+}: PinsDrawerProps): React.ReactPortal | null => {
     const dispatch = useAppDispatch();
     const { data: pins, isLoading } = usePinnedMessages(serverId, channelId);
     const { data: me } = useMe();
@@ -122,7 +131,7 @@ export const PinsDrawer: React.FC<PinsDrawerProps> = ({
         enabled: !!serverId,
     });
 
-    useEffect(() => {
+    useEffect((): void => {
         if (me?._id && channelId) {
             const key = `serchat_pins_last_viewed_${me._id}_${channelId}`;
             localStorage.setItem(key, Date.now().toString());
@@ -130,7 +139,7 @@ export const PinsDrawer: React.FC<PinsDrawerProps> = ({
         }
     }, [me?._id, channelId]);
 
-    const [width, setWidth] = useState(() => {
+    const [width, setWidth] = useState((): number => {
         const saved = localStorage.getItem('pins-drawer-width');
         return saved ? Math.min(Math.max(parseInt(saved, 10), 300), 800) : 400;
     });
@@ -139,7 +148,7 @@ export const PinsDrawer: React.FC<PinsDrawerProps> = ({
         null,
     );
 
-    useEffect(() => {
+    useEffect((): void => {
         if (anchorRef?.current) {
             const rect = anchorRef.current.getBoundingClientRect();
             setCoords({
@@ -152,7 +161,7 @@ export const PinsDrawer: React.FC<PinsDrawerProps> = ({
     const isResizing = useRef(false);
 
     const startResizing = useCallback(
-        (e: React.MouseEvent) => {
+        (e: React.MouseEvent): void => {
             e.preventDefault();
             isResizing.current = true;
             document.body.style.cursor = 'col-resize';
@@ -182,7 +191,7 @@ export const PinsDrawer: React.FC<PinsDrawerProps> = ({
         [coords],
     );
 
-    useEffect(() => {
+    useEffect((): void => {
         localStorage.setItem('pins-drawer-width', width.toString());
     }, [width]);
 
@@ -241,7 +250,8 @@ export const PinsDrawer: React.FC<PinsDrawerProps> = ({
                     ) : pins && pins.length > 0 ? (
                         pins
                             .filter(
-                                (p: ChatMessage) => p.isPinned || p.isSticky,
+                                (p: ChatMessage): boolean =>
+                                    p.isPinned || p.isSticky,
                             )
                             .map((pin: ChatMessage) => (
                                 <PinnedMessageItem

@@ -37,13 +37,15 @@ vi.mock('@/ui/components/common/UserItem', () => ({
 
 vi.mock('@tanstack/react-virtual', () => ({
     useVirtualizer: vi.fn().mockImplementation((options: any) => ({
-        getVirtualItems: () =>
-            Array.from({ length: options.count }).map((_, i) => ({
-                index: i,
-                start: i * 44,
-                key: i,
-            })),
-        getTotalSize: () => options.count * 44,
+        getVirtualItems: (): { index: number; start: number; key: number }[] =>
+            Array.from({ length: options.count }).map(
+                (_, i): { index: number; start: number; key: number } => ({
+                    index: i,
+                    start: i * 44,
+                    key: i,
+                }),
+            ),
+        getTotalSize: (): number => options.count * 44,
         scrollToIndex: vi.fn(),
         measureElement: vi.fn(),
     })),
@@ -51,7 +53,7 @@ vi.mock('@tanstack/react-virtual', () => ({
 
 const mockScrollRef = { current: document.createElement('div') };
 
-describe('ServerSidebarSection', () => {
+describe('ServerSidebarSection', (): void => {
     const mockMe = { _id: 'me-id', username: 'Me' } as User;
     const mockRoles: Role[] = [
         {
@@ -162,14 +164,14 @@ describe('ServerSidebarSection', () => {
             joinedAt: new Date().toISOString(),
         }) as ServerMember;
 
-    beforeEach(() => {
+    beforeEach((): void => {
         vi.clearAllMocks();
         // Default: everyone is offline except 'me'
         (useMe as Mock).mockReturnValue({ data: mockMe });
         applySelectorState({}); // presenceMap and blocks are empty
     });
 
-    it('ranks and groups members by separated roles and online status', () => {
+    it('ranks and groups members by separated roles and online status', (): void => {
         // Set u1, u2, u3 as online
         applySelectorState({
             presenceMap: {
@@ -200,7 +202,7 @@ describe('ServerSidebarSection', () => {
         expect(screen.getByTestId('user-item-u4')).toBeDefined();
     });
 
-    it('sorts members alphabetically within each group', () => {
+    it('sorts members alphabetically within each group', (): void => {
         // Set all as online
         applySelectorState({
             presenceMap: {
@@ -227,7 +229,7 @@ describe('ServerSidebarSection', () => {
         expect(adminItems[1].getAttribute('data-testid')).toBe('user-item-u3'); // Bob
     });
 
-    it('moves a user to Offline group when they go offline', async () => {
+    it('moves a user to Offline group when they go offline', async (): Promise<void> => {
         // Initial state: u1 is online
         applySelectorState({
             presenceMap: {
@@ -271,7 +273,7 @@ describe('ServerSidebarSection', () => {
         expect(screen.getByText(/Offline - 1/)).toBeDefined();
     });
 
-    it('respects role separation permissions', () => {
+    it('respects role separation permissions', (): void => {
         // Dave (u4) is online. His highest role "Member" is NOT separated.
         applySelectorState({
             presenceMap: {
@@ -294,7 +296,7 @@ describe('ServerSidebarSection', () => {
         expect(screen.queryByText(/Member/)).toBeNull();
     });
 
-    it('moves stale offline snapshots to Online group when presence turns online (regression)', () => {
+    it('moves stale offline snapshots to Online group when presence turns online (regression)', (): void => {
         const members = [
             makeMember({ id: 'u10', username: 'Human', online: false }),
             makeMember({
@@ -346,7 +348,7 @@ describe('ServerSidebarSection', () => {
         expect(screen.getByText(/Online - 2/)).toBeDefined();
     });
 
-    it('moves stale online snapshots to Offline group when presence turns offline (regression)', () => {
+    it('moves stale online snapshots to Offline group when presence turns offline (regression)', (): void => {
         const member = makeMember({
             id: 'u20',
             username: 'AlwaysOnlineSnapshot',
@@ -423,42 +425,45 @@ describe('ServerSidebarSection', () => {
             blocks: { u30: BlockFlags.HIDE_THEIR_PRESENCE },
             expectedOnline: false,
         },
-    ])('$caseName', ({ online, presenceStatus, blocks, expectedOnline }) => {
-        const member = makeMember({
-            id: 'u30',
-            username: 'MatrixUser',
-            online,
-        });
+    ])(
+        '$caseName',
+        ({ online, presenceStatus, blocks, expectedOnline }): void => {
+            const member = makeMember({
+                id: 'u30',
+                username: 'MatrixUser',
+                online,
+            });
 
-        applySelectorState({
-            presenceMap: { u30: { status: presenceStatus } },
-            blocks,
-        });
+            applySelectorState({
+                presenceMap: { u30: { status: presenceStatus } },
+                blocks,
+            });
 
-        render(
-            <ServerSidebarSection
-                isLoading={false}
-                memberIconRoleMap={new Map()}
-                memberRoleMap={new Map()}
-                members={[member]}
-                roles={mockRoles}
-                scrollRef={mockScrollRef as any}
-            />,
-        );
+            render(
+                <ServerSidebarSection
+                    isLoading={false}
+                    memberIconRoleMap={new Map()}
+                    memberRoleMap={new Map()}
+                    members={[member]}
+                    roles={mockRoles}
+                    scrollRef={mockScrollRef as any}
+                />,
+            );
 
-        if (expectedOnline) {
-            expect(screen.getByText(/Online - 1/)).toBeDefined();
-            expect(screen.queryByText(/Offline - 1/)).toBeNull();
-        } else {
-            expect(screen.getByText(/Offline - 1/)).toBeDefined();
-            expect(screen.queryByText(/Online - 1/)).toBeNull();
-        }
-    });
+            if (expectedOnline) {
+                expect(screen.getByText(/Online - 1/)).toBeDefined();
+                expect(screen.queryByText(/Offline - 1/)).toBeNull();
+            } else {
+                expect(screen.getByText(/Offline - 1/)).toBeDefined();
+                expect(screen.queryByText(/Online - 1/)).toBeNull();
+            }
+        },
+    );
 
-    it('renders a static member list fallback when the virtualizer has not measured rows yet', () => {
+    it('renders a static member list fallback when the virtualizer has not measured rows yet', (): void => {
         vi.mocked(useVirtualizer).mockReturnValueOnce({
-            getVirtualItems: () => [],
-            getTotalSize: () => 0,
+            getVirtualItems: (): never[] => [],
+            getTotalSize: (): number => 0,
             scrollToIndex: vi.fn(),
             measureElement: vi.fn(),
         } as never);

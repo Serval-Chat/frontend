@@ -42,7 +42,7 @@ import { UserProfilePicture } from '@/ui/components/common/UserProfilePicture';
 import { cn } from '@/utils/cn';
 import { APP_LOCALE } from '@/utils/locale';
 
-const createDefaultPermissions = (): AdminPermissions => ({
+const createDefaultPermissions = () => ({
     adminAccess: false,
     viewUsers: false,
     manageUsers: false,
@@ -94,7 +94,7 @@ const PermissionEditor = ({
         updatePermissions(
             { userId: user._id, permissions },
             {
-                onSuccess: () => {
+                onSuccess: (): void => {
                     setShowConfirm(false);
                     onClose();
                 },
@@ -128,7 +128,7 @@ const PermissionEditor = ({
                         className="flex-1 rounded-md py-1 text-xs font-bold transition-colors"
                         disabled={!canEdit}
                         variant="ghost"
-                        onClick={() => setRole('user')}
+                        onClick={(): void => setRole('user')}
                     >
                         User
                     </Button>
@@ -136,7 +136,7 @@ const PermissionEditor = ({
                         className="flex-1 rounded-md py-1 text-xs font-bold text-caution transition-colors"
                         disabled={!canEdit}
                         variant="ghost"
-                        onClick={() => setRole('moderator')}
+                        onClick={(): void => setRole('moderator')}
                     >
                         Moderator
                     </Button>
@@ -144,7 +144,7 @@ const PermissionEditor = ({
                         className="flex-1 rounded-md py-1 text-xs font-bold text-danger transition-colors"
                         disabled={!canEdit}
                         variant="ghost"
-                        onClick={() => setRole('admin')}
+                        onClick={(): void => setRole('admin')}
                     >
                         Admin
                     </Button>
@@ -165,7 +165,7 @@ const PermissionEditor = ({
                                 <span className="text-sm font-medium">
                                     {key
                                         .replace(/([A-Z])/g, ' $1')
-                                        .replace(/^./, (str) =>
+                                        .replace(/^./, (str): string =>
                                             str.toUpperCase(),
                                         )}
                                 </span>
@@ -175,7 +175,7 @@ const PermissionEditor = ({
                             </div>
                             <Toggle
                                 checked={permissions[key]}
-                                onChange={() => togglePermission(key)}
+                                onChange={(): void => togglePermission(key)}
                             />
                         </div>
                     ))}
@@ -227,7 +227,7 @@ const PermissionEditor = ({
                         <div className="flex justify-end gap-3">
                             <Button
                                 variant="ghost"
-                                onClick={() => setShowConfirm(false)}
+                                onClick={(): void => setShowConfirm(false)}
                             >
                                 Cancel
                             </Button>
@@ -290,12 +290,12 @@ export const AdminIAM = ({
     const [editingUser, setEditingUser] = useState<AdminUser | null>(null);
     const LIMIT = ADMIN_CONSTANTS.DEFAULT_PAGE_SIZE;
 
-    useEffect(() => {
-        const timer = setTimeout(() => {
+    useEffect((): (() => void) => {
+        const timer = setTimeout((): void => {
             setDebouncedSearch(searchTerm);
             setPage(0);
         }, ADMIN_CONSTANTS.SEARCH_DEBOUNCE_MS);
-        return () => clearTimeout(timer);
+        return (): void => clearTimeout(timer);
     }, [searchTerm]);
 
     const { data: users, isLoading } = useAdminUsers(
@@ -335,7 +335,7 @@ export const AdminIAM = ({
                         type="text"
                         value={searchTerm}
                         variant="admin"
-                        onChange={(e) => setSearchTerm(e.target.value)}
+                        onChange={(e): void => setSearchTerm(e.target.value)}
                     />
                 </div>
             </div>
@@ -435,7 +435,9 @@ export const AdminIAM = ({
                                             size="sm"
                                             title="View Full Details"
                                             variant="ghost"
-                                            onClick={() => onViewUser(user._id)}
+                                            onClick={(): void =>
+                                                onViewUser(user._id)
+                                            }
                                         >
                                             <Eye size={16} />
                                         </Button>
@@ -443,7 +445,9 @@ export const AdminIAM = ({
                                             size="sm"
                                             title="Edit Permissions"
                                             variant="ghost"
-                                            onClick={() => setEditingUser(user)}
+                                            onClick={(): void =>
+                                                setEditingUser(user)
+                                            }
                                         >
                                             <Edit2 size={16} />
                                         </Button>
@@ -482,7 +486,9 @@ export const AdminIAM = ({
                     <Button
                         disabled={page === 0}
                         variant="ghost"
-                        onClick={() => setPage((p) => Math.max(0, p - 1))}
+                        onClick={(): void =>
+                            setPage((p): number => Math.max(0, p - 1))
+                        }
                     >
                         <ChevronLeft size={16} />
                         Previous
@@ -493,7 +499,7 @@ export const AdminIAM = ({
                     <Button
                         disabled={users.length < LIMIT}
                         variant="ghost"
-                        onClick={() => setPage((p) => p + 1)}
+                        onClick={(): void => setPage((p): number => p + 1)}
                     >
                         Next
                         <ChevronRight size={16} />
@@ -505,7 +511,7 @@ export const AdminIAM = ({
             {editingUser && (
                 <PermissionEditor
                     user={editingUser}
-                    onClose={() => setEditingUser(null)}
+                    onClose={(): void => setEditingUser(null)}
                 />
             )}
         </div>

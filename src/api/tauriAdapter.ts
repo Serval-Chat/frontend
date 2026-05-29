@@ -23,11 +23,11 @@ const appendSearchParams = (url: string, params: unknown): string => {
 
     const searchParams = new URLSearchParams();
     Object.entries(params as Record<string, unknown>).forEach(
-        ([key, value]) => {
+        ([key, value]): void => {
             if (value === undefined || value === null) return;
 
             if (Array.isArray(value)) {
-                value.forEach((item) => {
+                value.forEach((item): void => {
                     if (item !== undefined && item !== null) {
                         searchParams.append(key, String(item));
                     }
@@ -49,7 +49,9 @@ const appendSearchParams = (url: string, params: unknown): string => {
  * @description Native Tauri HTTP adapter for Axios.
  * This bypasses the browser's CORS preflight (OPTIONS) requests.
  */
-export const tauriAdapter: AxiosAdapter = async (config) => {
+export const tauriAdapter: AxiosAdapter = async (
+    config,
+): Promise<AxiosResponse> => {
     const { url, baseURL, method, data, headers, params, timeout } = config;
 
     const fullUrl = appendSearchParams(resolveUrl(url, baseURL), params);
@@ -58,7 +60,9 @@ export const tauriAdapter: AxiosAdapter = async (config) => {
         const response = await fetch(fullUrl, {
             method: method?.toUpperCase() || 'GET',
             headers: Object.fromEntries(
-                Object.entries(headers || {}).map(([k, v]) => [k, String(v)]),
+                Object.entries(headers || {}).map(
+                    ([k, v]): [string, string] => [k, String(v)],
+                ),
             ),
             body: data,
             connectTimeout: timeout,

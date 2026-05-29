@@ -30,10 +30,10 @@ export const AdminInvites = (): ReactNode => {
 
     const handleCreateInvite = (): void => {
         createInvite(undefined, {
-            onSuccess: (data: { token: string }) => {
+            onSuccess: (data: { token: string }): void => {
                 setGeneratedToken(data.token);
             },
-            onError: (e: Error) => {
+            onError: (e: Error): void => {
                 showToast(e.message || 'Failed to create invite', 'error');
             },
         });
@@ -49,7 +49,7 @@ export const AdminInvites = (): ReactNode => {
         createBatch(
             { count },
             {
-                onSuccess: (data: { tokens: string[] }) => {
+                onSuccess: (data: { tokens: string[] }): void => {
                     showToast(
                         `Successfully generated ${data.tokens.length} invites`,
                         'success',
@@ -68,7 +68,7 @@ export const AdminInvites = (): ReactNode => {
                     document.body.removeChild(a);
                     URL.revokeObjectURL(url);
                 },
-                onError: (e: Error) => {
+                onError: (e: Error): void => {
                     showToast(e.message || 'Failed to generate batch', 'error');
                 },
             },
@@ -107,7 +107,7 @@ export const AdminInvites = (): ReactNode => {
                     <Button
                         disabled={isCreating || isBatchCreating}
                         variant="normal"
-                        onClick={() => setIsBatchModalOpen(true)}
+                        onClick={(): void => setIsBatchModalOpen(true)}
                     >
                         <Layers size={16} /> Batch Generate
                     </Button>
@@ -125,7 +125,7 @@ export const AdminInvites = (): ReactNode => {
             <Modal
                 isOpen={isBatchModalOpen}
                 title="Batch Generate Invites"
-                onClose={() => setIsBatchModalOpen(false)}
+                onClose={(): void => setIsBatchModalOpen(false)}
             >
                 <div className="space-y-4 py-2">
                     <Text as="p" size="sm" variant="muted">
@@ -140,8 +140,10 @@ export const AdminInvites = (): ReactNode => {
                             placeholder="Count (1-1000)"
                             type="number"
                             value={batchCount}
-                            onChange={(e) => setBatchCount(e.target.value)}
-                            onKeyDown={(e) => {
+                            onChange={(e): void =>
+                                setBatchCount(e.target.value)
+                            }
+                            onKeyDown={(e): void => {
                                 if (e.key === 'Enter') handleBatchCreate();
                             }}
                         />
@@ -149,7 +151,7 @@ export const AdminInvites = (): ReactNode => {
                     <div className="flex justify-end gap-2 pt-2">
                         <Button
                             variant="ghost"
-                            onClick={() => setIsBatchModalOpen(false)}
+                            onClick={(): void => setIsBatchModalOpen(false)}
                         >
                             Cancel
                         </Button>
@@ -167,7 +169,7 @@ export const AdminInvites = (): ReactNode => {
             <Modal
                 isOpen={!!generatedToken}
                 title="Invite Created"
-                onClose={() => setGeneratedToken(null)}
+                onClose={(): void => setGeneratedToken(null)}
             >
                 <div className="space-y-4 py-4">
                     <Text as="p" weight="medium">
@@ -183,7 +185,7 @@ export const AdminInvites = (): ReactNode => {
                             iconSize={18}
                             title="Copy to clipboard"
                             variant="ghost"
-                            onClick={() => {
+                            onClick={(): void => {
                                 if (generatedToken) {
                                     void navigator.clipboard.writeText(
                                         generatedToken,
@@ -200,7 +202,7 @@ export const AdminInvites = (): ReactNode => {
                     <div className="flex justify-end pt-2">
                         <Button
                             variant="primary"
-                            onClick={() => setGeneratedToken(null)}
+                            onClick={(): void => setGeneratedToken(null)}
                         >
                             Done
                         </Button>

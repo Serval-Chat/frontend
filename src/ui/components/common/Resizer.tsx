@@ -12,12 +12,12 @@ interface ResizerProps {
 /**
  * A thin vertical bar that acts as a drag handle for resizing.
  */
-export const Resizer: React.FC<ResizerProps> = ({
+export const Resizer = ({
     onMouseDown,
     isResizing,
     side,
     className,
-}) => (
+}: ResizerProps) => (
     <div
         className={cn(
             'group absolute top-0 bottom-0 z-50 w-1 cursor-col-resize transition-colors hover:bg-primary/30',

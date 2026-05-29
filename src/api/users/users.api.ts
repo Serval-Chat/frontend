@@ -10,47 +10,56 @@ import type {
 } from './users.types';
 
 export const usersApi = {
-    getMe: () => apiClient.get<User>('/api/v1/profile/me').then((r) => r.data),
+    getMe: (): Promise<User> =>
+        apiClient.get<User>('/api/v1/profile/me').then((r): User => r.data),
 
-    getById: (id: string) =>
-        apiClient.get<User>(`/api/v1/profile/${id}`).then((r) => r.data),
+    getById: (id: string): Promise<User> =>
+        apiClient.get<User>(`/api/v1/profile/${id}`).then((r): User => r.data),
 
-    getBulk: (ids: string[]) =>
+    getBulk: (ids: string[]): Promise<User[]> =>
         apiClient
             .post<User[]>('/api/v1/profile/bulk', { ids })
-            .then((r) => r.data),
+            .then((r): User[] => r.data),
 
-    updateBio: (bio: string) =>
+    updateBio: (bio: string): Promise<{ message: string; bio: string }> =>
         apiClient
             .patch<{
                 message: string;
                 bio: string;
             }>('/api/v1/profile/bio', { bio })
-            .then((r) => r.data),
+            .then((r): { message: string; bio: string } => r.data),
 
-    updatePronouns: (pronouns: string) =>
+    updatePronouns: (
+        pronouns: string,
+    ): Promise<{ message: string; pronouns: string }> =>
         apiClient
             .patch<{
                 message: string;
                 pronouns: string;
             }>('/api/v1/profile/pronouns', { pronouns })
-            .then((r) => r.data),
+            .then((r): { message: string; pronouns: string } => r.data),
 
-    updateDisplayName: (displayName: string) =>
+    updateDisplayName: (
+        displayName: string,
+    ): Promise<{ message: string; displayName: string | null }> =>
         apiClient
             .patch<{
                 message: string;
                 displayName: string | null;
             }>('/api/v1/profile/display-name', { displayName })
-            .then((r) => r.data),
+            .then(
+                (r): { message: string; displayName: string | null } => r.data,
+            ),
 
-    updateUsername: (newUsername: string) =>
+    updateUsername: (
+        newUsername: string,
+    ): Promise<{ message: string; username: string }> =>
         apiClient
             .patch<{
                 message: string;
                 username: string;
             }>('/api/v1/profile/username', { newUsername })
-            .then((r) => r.data),
+            .then((r): { message: string; username: string } => r.data),
 
     updateStyle: (data: {
         usernameFont?: UsernameFont;
@@ -66,21 +75,25 @@ export const usersApi = {
             }>('/api/v1/profile/style', data)
             .then((r) => r.data),
 
-    updateSettings: (data: Partial<UserSettings>) =>
+    updateSettings: (
+        data: Partial<UserSettings>,
+    ): Promise<{ message: string; settings: UserSettings }> =>
         apiClient
             .post<{
                 message: string;
                 settings: UserSettings;
             }>('/api/v1/settings', data)
-            .then((r) => r.data),
+            .then((r): { message: string; settings: UserSettings } => r.data),
 
-    updateLanguage: (language: string) =>
+    updateLanguage: (
+        language: string,
+    ): Promise<{ message: string; language: string }> =>
         apiClient
             .patch<{
                 message: string;
                 language: string;
             }>('/api/v1/profile/language', { language })
-            .then((r) => r.data),
+            .then((r): { message: string; language: string } => r.data),
 
     updateStatus: (data: {
         text?: string;
@@ -88,14 +101,16 @@ export const usersApi = {
         expiresAt?: string | null;
         expiresInMinutes?: number;
         clear?: boolean;
-    }) =>
+    }): Promise<{ customStatus: User['customStatus'] }> =>
         apiClient
             .patch<{
                 customStatus: User['customStatus'];
             }>('/api/v1/profile/status', data)
-            .then((r) => r.data),
+            .then((r): { customStatus: User['customStatus'] } => r.data),
 
-    updateProfilePicture: (file: File) => {
+    updateProfilePicture: (
+        file: File,
+    ): Promise<{ message: string; profilePicture: string }> => {
         const formData = new FormData();
         formData.append('profilePicture', file);
         return apiClient
@@ -103,10 +118,12 @@ export const usersApi = {
                 message: string;
                 profilePicture: string;
             }>('/api/v1/profile/picture', formData)
-            .then((r) => r.data);
+            .then((r): { message: string; profilePicture: string } => r.data);
     },
 
-    updateBanner: (file: File) => {
+    updateBanner: (
+        file: File,
+    ): Promise<{ message: string; banner: string }> => {
         const formData = new FormData();
         formData.append('banner', file);
         return apiClient
@@ -114,16 +131,18 @@ export const usersApi = {
                 message: string;
                 banner: string;
             }>('/api/v1/profile/banner', formData)
-            .then((r) => r.data);
+            .then((r): { message: string; banner: string } => r.data);
     },
 
-    createWebsiteConnection: (website: string) =>
+    createWebsiteConnection: (
+        website: string,
+    ): Promise<CreateWebsiteConnectionResponse> =>
         apiClient
             .post<CreateWebsiteConnectionResponse>(
                 '/api/v1/profile/connections/website',
                 { website },
             )
-            .then((r) => r.data),
+            .then((r): CreateWebsiteConnectionResponse => r.data),
 
     verifyConnection: (connectionId: string) =>
         apiClient
@@ -133,10 +152,10 @@ export const usersApi = {
             }>(`/api/v1/profile/connections/${connectionId}/verify`)
             .then((r) => r.data),
 
-    removeConnection: (connectionId: string) =>
+    removeConnection: (connectionId: string): Promise<{ message: string }> =>
         apiClient
             .delete<{
                 message: string;
             }>(`/api/v1/profile/connections/${connectionId}`)
-            .then((r) => r.data),
+            .then((r): { message: string } => r.data),
 };

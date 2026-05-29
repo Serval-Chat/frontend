@@ -24,7 +24,7 @@ interface ModalProps {
 /**
  * @description A modal component
  */
-export const Modal: React.FC<ModalProps> = ({
+export const Modal = ({
     isOpen,
     onClose,
     title,
@@ -35,8 +35,8 @@ export const Modal: React.FC<ModalProps> = ({
     fullScreen = false,
     wrapperClassName,
     zIndex,
-}) => {
-    React.useEffect(() => {
+}: ModalProps): React.ReactPortal | null => {
+    React.useEffect((): (() => void) => {
         const handleKeyDown = (e: KeyboardEvent): void => {
             if (e.key === 'Escape' && isOpen) {
                 onClose();
@@ -48,7 +48,7 @@ export const Modal: React.FC<ModalProps> = ({
             document.body.style.overflow = 'hidden';
         }
 
-        return () => {
+        return (): void => {
             window.removeEventListener('keydown', handleKeyDown);
             document.body.style.overflow = '';
         };

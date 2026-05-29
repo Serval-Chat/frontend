@@ -1,5 +1,7 @@
 import { type ReactNode, useEffect, useState } from 'react';
 
+import type { JSX } from 'react/jsx-runtime';
+
 import { ParsedText } from '@/ui/components/common/ParsedText';
 import { Box } from '@/ui/components/layout/Box';
 import { TopNavBar } from '@/ui/components/layout/TopNavBar';
@@ -24,14 +26,14 @@ export const Tos = (): ReactNode => {
     const [raw, setRaw] = useState<string | null>(null);
     const [error, setError] = useState(false);
 
-    useEffect(() => {
+    useEffect((): void => {
         fetch('/tos.md')
-            .then((res) => {
+            .then((res): Promise<string> => {
                 if (!res.ok) throw new Error('Failed to fetch');
                 return res.text();
             })
             .then(setRaw)
-            .catch(() => setError(true));
+            .catch((): void => setError(true));
     }, []);
 
     const { ts, content } =
@@ -68,13 +70,17 @@ export const Tos = (): ReactNode => {
                     </p>
                 ) : raw === null ? (
                     <div className="space-y-3">
-                        {Array.from({ length: 10 }).map((_, i) => (
-                            <div
-                                className="h-4 animate-pulse rounded bg-bg-subtle"
-                                key={i}
-                                style={{ width: `${65 + (i % 4) * 8}%` }}
-                            />
-                        ))}
+                        {/* eslint-disable react/no-array-index-key */}
+                        {Array.from({ length: 10 }).map(
+                            (_, i): JSX.Element => (
+                                <div
+                                    className="h-4 animate-pulse rounded bg-bg-subtle"
+                                    key={String(i)}
+                                    style={{ width: `${65 + (i % 4) * 8}%` }}
+                                />
+                            ),
+                        )}
+                        {/* eslint-enable react/no-array-index-key */}
                     </div>
                 ) : (
                     <ParsedText nodes={nodes} size="sm" />

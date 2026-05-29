@@ -79,10 +79,7 @@ const SECTION_ID_TO_URL: Record<string, string> = {
     developer: 'developer',
 };
 
-export const SettingsModal: React.FC<SettingsModalProps> = ({
-    isOpen,
-    onClose,
-}) => {
+export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
     const location = useLocation();
     const navigate = useNavigate();
 
@@ -133,7 +130,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                                     className="text-muted-foreground hover:bg-bg-subtle hover:text-foreground"
                                     icon={ChevronLeft}
                                     iconSize={24}
-                                    onClick={() => setIsMobileSidebarOpen(true)}
+                                    onClick={(): void =>
+                                        setIsMobileSidebarOpen(true)
+                                    }
                                 />
                             </div>
                             <Heading

@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { Settings, Shield, SlidersHorizontal, Webhook } from 'lucide-react';
 
 import {
@@ -13,11 +11,11 @@ interface ChannelSettingsSidebarProps {
     channelName: string;
 }
 
-export const ChannelSettingsSidebar: React.FC<ChannelSettingsSidebarProps> = ({
+export const ChannelSettingsSidebar = ({
     activeSection,
     setActiveSection,
     channelName,
-}) => {
+}: ChannelSettingsSidebarProps) => {
     const sections: SettingsSidebarSection[] = [
         {
             id: 'overview',

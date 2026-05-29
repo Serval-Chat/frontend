@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { removeAuthToken } from '@/utils/authToken';
 
 interface BannedScreenProps {
@@ -18,11 +16,11 @@ const formatExpiry = (ts: string | Date | undefined): string | null => {
     });
 };
 
-export const BannedScreen: React.FC<BannedScreenProps> = ({
+export const BannedScreen = ({
     reason,
     expirationTimestamp,
     onLogout,
-}) => {
+}: BannedScreenProps) => {
     const expiry = formatExpiry(expirationTimestamp);
 
     const handleLogout = (): void => {

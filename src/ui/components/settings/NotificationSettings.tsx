@@ -18,7 +18,7 @@ import { Toggle } from '@/ui/components/common/Toggle';
 import { Box } from '@/ui/components/layout/Box';
 import { cacheSound, pruneSoundCache } from '@/utils/soundCache';
 
-export const NotificationSettings: React.FC = () => {
+export const NotificationSettings = () => {
     const { showToast } = useToast();
     const { data: user, isLoading } = useMe();
     const { mutate: updateSettings, isPending: isSaving } = useUpdateSettings();
@@ -26,9 +26,9 @@ export const NotificationSettings: React.FC = () => {
         useUploadNotificationSound();
     const { mutate: deleteSound } = useDeleteNotificationSound();
 
-    React.useEffect(() => {
+    React.useEffect((): void => {
         if (!user?.settings?.notificationSounds) return;
-        const urls = user.settings.notificationSounds.map((s) => s.url);
+        const urls = user.settings.notificationSounds.map((s): string => s.url);
         void pruneSoundCache(urls);
         for (const url of urls) {
             void cacheSound(url);
@@ -60,7 +60,7 @@ export const NotificationSettings: React.FC = () => {
     };
 
     React.useEffect(
-        () => () => {
+        (): (() => void) => (): void => {
             if (animationFrameRef.current) {
                 cancelAnimationFrame(animationFrameRef.current);
             }
@@ -79,7 +79,7 @@ export const NotificationSettings: React.FC = () => {
 
     const isSoundEnabled = (id: string): boolean => {
         if (localEnabledMap[id] !== undefined) return localEnabledMap[id];
-        const sound = customSounds.find((s) => s.id === id);
+        const sound = customSounds.find((s): boolean => s.id === id);
         return sound ? sound.enabled : false;
     };
 
@@ -87,15 +87,19 @@ export const NotificationSettings: React.FC = () => {
         localUseDefault !== null || Object.keys(localEnabledMap).length > 0;
 
     const handleSave = (): void => {
-        const updatedSounds = customSounds.map((s) => ({
-            id: s.id,
-            name: s.name,
-            url: s.url,
-            enabled:
-                localEnabledMap[s.id] !== undefined
-                    ? localEnabledMap[s.id]
-                    : s.enabled,
-        }));
+        const updatedSounds = customSounds.map(
+            (
+                s,
+            ): { id: string; name: string; url: string; enabled: boolean } => ({
+                id: s.id,
+                name: s.name,
+                url: s.url,
+                enabled:
+                    localEnabledMap[s.id] !== undefined
+                        ? localEnabledMap[s.id]
+                        : s.enabled,
+            }),
+        );
 
         updateSettings(
             {
@@ -103,7 +107,7 @@ export const NotificationSettings: React.FC = () => {
                 notificationSounds: updatedSounds,
             },
             {
-                onSuccess: () => {
+                onSuccess: (): void => {
                     setLocalUseDefault(null);
                     setLocalEnabledMap({});
                 },
@@ -120,10 +124,10 @@ export const NotificationSettings: React.FC = () => {
         const file = e.target.files?.[0];
         if (file) {
             uploadSound(file, {
-                onSuccess: () => {
+                onSuccess: (): void => {
                     showToast('Sound uploaded successfully!', 'success');
                 },
-                onError: (error: Error) => {
+                onError: (error: Error): void => {
                     const axiosError = error as AxiosError<{
                         message?: string;
                     }>;
@@ -158,24 +162,24 @@ export const NotificationSettings: React.FC = () => {
         setPlayingId(id);
         setProgress(0);
 
-        audio.onplay = () => {
+        audio.onplay = (): void => {
             animationFrameRef.current = requestAnimationFrame(updateProgress);
         };
 
-        audio.onended = () => {
+        audio.onended = (): void => {
             if (animationFrameRef.current)
                 cancelAnimationFrame(animationFrameRef.current);
             setPlayingId(null);
             setProgress(0);
         };
 
-        void audio.play().catch(() => {
+        void audio.play().catch((): void => {
             setPlayingId(null);
         });
     };
 
     const toggleSound = (id: string): void => {
-        setLocalEnabledMap((prev) => ({
+        setLocalEnabledMap((prev): { [x: string]: boolean } => ({
             ...prev,
             [id]: !isSoundEnabled(id),
         }));
@@ -232,7 +236,9 @@ export const NotificationSettings: React.FC = () => {
                             disabled={customSounds.length >= 10 || isUploading}
                             size="sm"
                             variant="primary"
-                            onClick={() => fileInputRef.current?.click()}
+                            onClick={(): void | undefined =>
+                                fileInputRef.current?.click()
+                            }
                         >
                             {isUploading ? (
                                 <Loader2
@@ -284,7 +290,7 @@ export const NotificationSettings: React.FC = () => {
                                                 checked={isSoundEnabled(
                                                     sound.id,
                                                 )}
-                                                onCheckedChange={() =>
+                                                onCheckedChange={(): void =>
                                                     toggleSound(sound.id)
                                                 }
                                             />
@@ -305,7 +311,7 @@ export const NotificationSettings: React.FC = () => {
                                                 }
                                                 size="sm"
                                                 variant="ghost"
-                                                onClick={() =>
+                                                onClick={(): void =>
                                                     playPreview(
                                                         sound.id,
                                                         sound.url,
@@ -317,7 +323,7 @@ export const NotificationSettings: React.FC = () => {
                                                 icon={Trash2}
                                                 size="sm"
                                                 variant="ghost"
-                                                onClick={() =>
+                                                onClick={(): void =>
                                                     deleteSound(sound.id)
                                                 }
                                             />

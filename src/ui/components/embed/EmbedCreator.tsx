@@ -45,8 +45,8 @@ const Section = ({
             <button
                 className="flex w-full items-center justify-between px-4 py-3 text-left"
                 type="button"
-                onClick={() => {
-                    setOpen((o) => !o);
+                onClick={(): void => {
+                    setOpen((o): boolean => !o);
                 }}
             >
                 <span className="flex items-center gap-2 text-sm font-semibold text-foreground">
@@ -97,12 +97,14 @@ interface FieldsEditorProps {
 
 const FieldsEditor = ({ fields, onChange }: FieldsEditorProps): ReactNode => {
     const update = (idx: number, patch: Partial<EmbedField>): void => {
-        const next = fields.map((f, i) => (i === idx ? { ...f, ...patch } : f));
+        const next = fields.map(
+            (f, i): EmbedField => (i === idx ? { ...f, ...patch } : f),
+        );
         onChange(next);
     };
 
     const remove = (idx: number): void => {
-        onChange(fields.filter((_, i) => i !== idx));
+        onChange(fields.filter((_, i): boolean => i !== idx));
     };
 
     const add = (): void => {
@@ -128,7 +130,7 @@ const FieldsEditor = ({ fields, onChange }: FieldsEditorProps): ReactNode => {
                         <button
                             className="text-muted-foreground transition-colors hover:text-danger"
                             type="button"
-                            onClick={() => {
+                            onClick={(): void => {
                                 remove(idx);
                             }}
                         >
@@ -140,7 +142,7 @@ const FieldsEditor = ({ fields, onChange }: FieldsEditorProps): ReactNode => {
                             <Input
                                 placeholder="Field name"
                                 value={field.name}
-                                onChange={(e) => {
+                                onChange={(e): void => {
                                     update(idx, { name: e.target.value });
                                 }}
                             />
@@ -149,7 +151,7 @@ const FieldsEditor = ({ fields, onChange }: FieldsEditorProps): ReactNode => {
                             <TextArea
                                 placeholder="Field value"
                                 value={field.value}
-                                onChange={(e) => {
+                                onChange={(e): void => {
                                     update(idx, { value: e.target.value });
                                 }}
                             />
@@ -157,7 +159,7 @@ const FieldsEditor = ({ fields, onChange }: FieldsEditorProps): ReactNode => {
                         <Toggle
                             checked={field.inline ?? false}
                             label="Inline"
-                            onCheckedChange={(checked) => {
+                            onCheckedChange={(checked): void => {
                                 update(idx, { inline: checked });
                             }}
                         />
@@ -233,7 +235,7 @@ const EmbedEditor = ({
                                 maxLength={256}
                                 placeholder="Embed title"
                                 value={embed.title ?? ''}
-                                onChange={(e) => {
+                                onChange={(e): void => {
                                     set('title', e.target.value || undefined);
                                 }}
                             />
@@ -244,7 +246,7 @@ const EmbedEditor = ({
                                     className="h-8 w-10 cursor-pointer rounded border border-border-subtle bg-transparent"
                                     type="color"
                                     value={decimalToHex(embed.color)}
-                                    onChange={(e) => {
+                                    onChange={(e): void => {
                                         set(
                                             'color',
                                             hexToDecimal(e.target.value),
@@ -255,7 +257,7 @@ const EmbedEditor = ({
                                     className="text-xs text-muted-foreground hover:text-foreground"
                                     title="Remove color"
                                     type="button"
-                                    onClick={() => {
+                                    onClick={(): void => {
                                         set('color', undefined);
                                     }}
                                 >
@@ -270,7 +272,7 @@ const EmbedEditor = ({
                             placeholder="https://example.com"
                             type="url"
                             value={embed.url ?? ''}
-                            onChange={(e) => {
+                            onChange={(e): void => {
                                 set('url', e.target.value || undefined);
                             }}
                         />
@@ -281,7 +283,7 @@ const EmbedEditor = ({
                             maxLength={4096}
                             placeholder="Embed description (markdown supported)"
                             value={embed.description ?? ''}
-                            onChange={(e) => {
+                            onChange={(e): void => {
                                 set('description', e.target.value || undefined);
                             }}
                         />
@@ -296,7 +298,7 @@ const EmbedEditor = ({
                                 maxLength={256}
                                 placeholder="Author name"
                                 value={embed.author?.name ?? ''}
-                                onChange={(e) => {
+                                onChange={(e): void => {
                                     setAuthor('name', e.target.value);
                                 }}
                             />
@@ -306,7 +308,7 @@ const EmbedEditor = ({
                                 placeholder="https://example.com"
                                 type="url"
                                 value={embed.author?.url ?? ''}
-                                onChange={(e) => {
+                                onChange={(e): void => {
                                     setAuthor('url', e.target.value);
                                 }}
                             />
@@ -316,7 +318,7 @@ const EmbedEditor = ({
                                 placeholder="https://example.com/icon.png"
                                 type="url"
                                 value={embed.author?.icon_url ?? ''}
-                                onChange={(e) => {
+                                onChange={(e): void => {
                                     setAuthor('icon_url', e.target.value);
                                 }}
                             />
@@ -332,7 +334,7 @@ const EmbedEditor = ({
                                 maxLength={2048}
                                 placeholder="Footer text"
                                 value={embed.footer?.text ?? ''}
-                                onChange={(e) => {
+                                onChange={(e): void => {
                                     setFooter('text', e.target.value);
                                 }}
                             />
@@ -342,7 +344,7 @@ const EmbedEditor = ({
                                 placeholder="https://example.com/icon.png"
                                 type="url"
                                 value={embed.footer?.icon_url ?? ''}
-                                onChange={(e) => {
+                                onChange={(e): void => {
                                     setFooter('icon_url', e.target.value);
                                 }}
                             />
@@ -355,7 +357,7 @@ const EmbedEditor = ({
                                         ? embed.timestamp.slice(0, 16)
                                         : ''
                                 }
-                                onChange={(e) => {
+                                onChange={(e): void => {
                                     set(
                                         'timestamp',
                                         e.target.value
@@ -381,7 +383,7 @@ const EmbedEditor = ({
                                 placeholder="https://example.com/thumbnail.png"
                                 type="url"
                                 value={embed.thumbnail?.url ?? ''}
-                                onChange={(e) => {
+                                onChange={(e): void => {
                                     set(
                                         'thumbnail',
                                         e.target.value
@@ -399,7 +401,7 @@ const EmbedEditor = ({
                                 placeholder="https://example.com/image.png"
                                 type="url"
                                 value={embed.image?.url ?? ''}
-                                onChange={(e) => {
+                                onChange={(e): void => {
                                     set(
                                         'image',
                                         e.target.value
@@ -420,7 +422,7 @@ const EmbedEditor = ({
                 >
                     <FieldsEditor
                         fields={embed.fields ?? []}
-                        onChange={(fields) => {
+                        onChange={(fields): void => {
                             set(
                                 'fields',
                                 fields.length > 0 ? fields : undefined,
@@ -455,10 +457,12 @@ const PollAnswersEditor = ({
     onChange,
 }: PollEditorProps): ReactNode => {
     const update = (idx: number, text: string): void => {
-        onChange(answers.map((a, i) => (i === idx ? { ...a, text } : a)));
+        onChange(
+            answers.map((a, i): PollAnswer => (i === idx ? { ...a, text } : a)),
+        );
     };
     const remove = (idx: number): void => {
-        onChange(answers.filter((_, i) => i !== idx));
+        onChange(answers.filter((_, i): boolean => i !== idx));
     };
     const add = (): void => {
         if (answers.length >= 10) return;
@@ -476,14 +480,14 @@ const PollAnswersEditor = ({
                     <Input
                         placeholder={`Answer ${idx + 1}`}
                         value={answer.text}
-                        onChange={(e) => {
+                        onChange={(e): void => {
                             update(idx, e.target.value);
                         }}
                     />
                     <button
                         className="shrink-0 text-muted-foreground transition-colors hover:text-danger"
                         type="button"
-                        onClick={() => {
+                        onClick={(): void => {
                             remove(idx);
                         }}
                     >
@@ -538,7 +542,7 @@ export const EmbedCreator = ({
     const removeEmbed = (idx: number): void => {
         set(
             'embeds',
-            (value.embeds ?? []).filter((_, i) => i !== idx),
+            (value.embeds ?? []).filter((_, i): boolean => i !== idx),
         );
     };
 
@@ -573,7 +577,7 @@ export const EmbedCreator = ({
                             )}
                             placeholder="Message content…"
                             value={value.content ?? ''}
-                            onChange={(e) => {
+                            onChange={(e): void => {
                                 set('content', e.target.value || undefined);
                             }}
                         />
@@ -582,21 +586,21 @@ export const EmbedCreator = ({
                         <Toggle
                             checked={value.tts ?? false}
                             label="TTS"
-                            onCheckedChange={(v) => {
+                            onCheckedChange={(v): void => {
                                 set('tts', v || undefined);
                             }}
                         />
                         <Toggle
                             checked={value.suppress_embeds ?? false}
                             label="Suppress embeds"
-                            onCheckedChange={(v) => {
+                            onCheckedChange={(v): void => {
                                 set('suppress_embeds', v || undefined);
                             }}
                         />
                         <Toggle
                             checked={value.ephemeral ?? false}
                             label="Ephemeral"
-                            onCheckedChange={(v) => {
+                            onCheckedChange={(v): void => {
                                 set('ephemeral', v || undefined);
                             }}
                         />
@@ -630,10 +634,10 @@ export const EmbedCreator = ({
                         // eslint-disable-next-line react/no-array-index-key
                         key={`embed-${idx}-${embed.title?.slice(0, 10)}`}
                         total={value.embeds?.length ?? 1}
-                        onChange={(e) => {
+                        onChange={(e): void => {
                             updateEmbed(idx, e);
                         }}
-                        onRemove={() => {
+                        onRemove={(): void => {
                             removeEmbed(idx);
                         }}
                     />
@@ -661,7 +665,7 @@ export const EmbedCreator = ({
                                 <Input
                                     placeholder="What do you think?"
                                     value={value.poll.question}
-                                    onChange={(e) => {
+                                    onChange={(e): void => {
                                         set('poll', {
                                             ...value.poll!,
                                             question: e.target.value,
@@ -672,7 +676,7 @@ export const EmbedCreator = ({
                             <Field label="Answers">
                                 <PollAnswersEditor
                                     answers={value.poll.answers}
-                                    onChange={(answers) => {
+                                    onChange={(answers): void => {
                                         set('poll', {
                                             ...value.poll!,
                                             answers,
@@ -689,7 +693,7 @@ export const EmbedCreator = ({
                                         min={1}
                                         type="number"
                                         value={value.poll.duration}
-                                        onChange={(e) => {
+                                        onChange={(e): void => {
                                             set('poll', {
                                                 ...value.poll!,
                                                 duration: Number(
@@ -709,7 +713,7 @@ export const EmbedCreator = ({
                                             false
                                         }
                                         label=""
-                                        onCheckedChange={(v) => {
+                                        onCheckedChange={(v): void => {
                                             set('poll', {
                                                 ...value.poll!,
                                                 allow_multiselect:
@@ -738,7 +742,7 @@ export const EmbedCreator = ({
                         )}
                         title="Copy JSON"
                         type="button"
-                        onClick={() => {
+                        onClick={(): void => {
                             void navigator.clipboard.writeText(json);
                         }}
                     >

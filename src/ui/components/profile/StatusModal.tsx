@@ -25,12 +25,12 @@ interface StatusModalProps {
 const isCustomEmoji = (emoji: string): boolean =>
     /^[0-9a-fA-F]{24}$/.test(emoji);
 
-export const StatusModal: React.FC<StatusModalProps> = ({
+export const StatusModal = ({
     isOpen,
     onClose,
     initialText = '',
     initialEmoji = '',
-}) => {
+}: StatusModalProps) => {
     const [statusText, setStatusText] = useState(initialText);
     const [statusEmoji, setStatusEmoji] = useState(initialEmoji);
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
@@ -40,7 +40,7 @@ export const StatusModal: React.FC<StatusModalProps> = ({
     const { customCategories } = useCustomEmojis({ enabled: isOpen });
     const { mutate: updateStatus, isPending } = useUpdateStatus();
 
-    useClickAway(emojiPickerRef, (e) => {
+    useClickAway(emojiPickerRef, (e): void => {
         if (triggerRef.current?.contains(e.target as Node)) {
             return;
         }
@@ -62,14 +62,14 @@ export const StatusModal: React.FC<StatusModalProps> = ({
                     emoji: statusEmoji || undefined,
                 },
                 {
-                    onSuccess: () => onClose(),
+                    onSuccess: (): void => onClose(),
                 },
             );
         } else {
             updateStatus(
                 { clear: true },
                 {
-                    onSuccess: () => onClose(),
+                    onSuccess: (): void => onClose(),
                 },
             );
         }
@@ -79,7 +79,7 @@ export const StatusModal: React.FC<StatusModalProps> = ({
         updateStatus(
             { clear: true },
             {
-                onSuccess: () => {
+                onSuccess: (): void => {
                     setStatusText('');
                     setStatusEmoji('');
                     onClose();
@@ -124,7 +124,9 @@ export const StatusModal: React.FC<StatusModalProps> = ({
                             className="h-8 w-8 min-w-0 p-1"
                             ref={triggerRef}
                             variant="ghost"
-                            onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                            onClick={(): void =>
+                                setShowEmojiPicker(!showEmojiPicker)
+                            }
                         >
                             {renderEmojiPreview()}
                         </Button>
@@ -156,8 +158,8 @@ export const StatusModal: React.FC<StatusModalProps> = ({
                         placeholder="What's happening?"
                         ref={inputRef}
                         value={statusText}
-                        onChange={(e) => setStatusText(e.target.value)}
-                        onKeyDown={(e) => {
+                        onChange={(e): void => setStatusText(e.target.value)}
+                        onKeyDown={(e): void => {
                             if (e.key === 'Enter') {
                                 handleSave();
                             }
@@ -167,7 +169,7 @@ export const StatusModal: React.FC<StatusModalProps> = ({
                         <Button
                             className="h-8 w-8 min-w-0 p-1 text-muted-foreground hover:text-foreground"
                             variant="ghost"
-                            onClick={() => {
+                            onClick={(): void => {
                                 setStatusText('');
                                 setStatusEmoji('');
                             }}

@@ -10,10 +10,7 @@ interface PageWrapperProps {
 /**
  * @description Page wrapper with alignments and spacings
  */
-export const PageWrapper: React.FC<PageWrapperProps> = ({
-    children,
-    className,
-}) => (
+export const PageWrapper = ({ children, className }: PageWrapperProps) => (
     <div className={cn('relative z-content space-y-md text-center', className)}>
         {children}
     </div>

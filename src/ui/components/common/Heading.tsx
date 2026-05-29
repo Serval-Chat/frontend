@@ -33,13 +33,13 @@ export interface HeadingProps
 /**
  * @description Header of various sizes and variants
  */
-export const Heading: React.FC<HeadingProps> = ({
+export const Heading = ({
     level = 1,
     variant,
     className,
     children,
     ...props
-}) => {
+}: HeadingProps) => {
     const Tag = `h${level}` as React.ElementType;
 
     return (

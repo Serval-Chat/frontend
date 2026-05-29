@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { Skeleton } from '@/ui/components/common/Skeleton';
 import { cn } from '@/utils/cn';
 
@@ -7,9 +5,7 @@ interface MessageSkeletonProps {
     isCompact?: boolean;
 }
 
-export const MessageSkeleton: React.FC<MessageSkeletonProps> = ({
-    isCompact,
-}) => {
+export const MessageSkeleton = ({ isCompact }: MessageSkeletonProps) => {
     const primaryWidth = isCompact ? '66%' : '82%';
     const secondaryWidth = isCompact ? '38%' : '54%';
 

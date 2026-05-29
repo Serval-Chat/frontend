@@ -32,7 +32,7 @@ import { ChannelIcon } from '@/ui/components/servers/ChannelIcon';
 import { cn } from '@/utils/cn';
 
 const sortByPosition = <T extends { position: number }>(items: T[]): T[] =>
-    [...items].sort((a, b) => a.position - b.position);
+    [...items].sort((a, b): number => a.position - b.position);
 
 const channelIcon = (channel: Channel): React.ReactNode => (
     <ChannelIcon
@@ -94,16 +94,21 @@ function drawChannelSplines(
     svg.replaceChildren(...paths);
 }
 
-export const RolePicker: React.FC<{
+export const RolePicker = ({
+    roles,
+    allowedRoleIds,
+    selectedRoleIds,
+    onChange,
+}: {
     roles: Role[];
     allowedRoleIds: string[];
     selectedRoleIds: string[];
     onChange: (roleIds: string[]) => void;
-}> = ({ roles, allowedRoleIds, selectedRoleIds, onChange }) => {
+}) => {
     const allowed = new Set(allowedRoleIds);
     const selected = new Set(selectedRoleIds);
     const availableRoles = sortByPosition(
-        roles.filter((role) => allowed.has(role._id)),
+        roles.filter((role): boolean => allowed.has(role._id)),
     );
 
     const toggleRole = (roleId: string): void => {
@@ -113,7 +118,7 @@ export const RolePicker: React.FC<{
         } else {
             next.add(roleId);
         }
-        onChange([...next].filter((id) => allowed.has(id)));
+        onChange([...next].filter((id): boolean => allowed.has(id)));
     };
 
     if (availableRoles.length === 0) {
@@ -138,7 +143,7 @@ export const RolePicker: React.FC<{
                         )}
                         key={role._id}
                         type="button"
-                        onClick={() => toggleRole(role._id)}
+                        onClick={(): void => toggleRole(role._id)}
                     >
                         <div className="flex items-center gap-2">
                             <RoleDot role={role} />
@@ -178,28 +183,30 @@ interface ServerSelfRolesModalProps {
     serverId: string;
 }
 
-export const ServerSelfRolesModal: React.FC<ServerSelfRolesModalProps> = ({
+export const ServerSelfRolesModal = ({
     isOpen,
     onClose,
     serverId,
-}) => {
+}: ServerSelfRolesModalProps) => {
     const { data: onboarding } = useOnboarding(serverId, { enabled: isOpen });
     const { data: roles } = useRoles(serverId, { enabled: isOpen });
     const updateSelfRoles = useUpdateSelfRoles(serverId);
     const allowedRoleIds = onboarding?.onboarding.selfAssignableRoleIds ?? [];
     const [selectedRoleIds, setSelectedRoleIds] = useState<string[]>([]);
 
-    React.useEffect(() => {
+    React.useEffect((): void => {
         if (!onboarding) return;
         const allowed = new Set(onboarding.onboarding.selfAssignableRoleIds);
         setSelectedRoleIds(
-            onboarding.member.roles.filter((roleId) => allowed.has(roleId)),
+            onboarding.member.roles.filter((roleId): boolean =>
+                allowed.has(roleId),
+            ),
         );
     }, [onboarding]);
 
     const handleSave = (): void => {
         updateSelfRoles.mutate(selectedRoleIds, {
-            onSuccess: () => onClose(),
+            onSuccess: (): void => onClose(),
         });
     };
 
@@ -238,20 +245,20 @@ export const ServerSelfRolesModal: React.FC<ServerSelfRolesModalProps> = ({
     );
 };
 
-export const ChannelPreferenceGroup: React.FC<{
-    category: Category | null;
-    channels: Channel[];
-    hiddenCategories: Set<string>;
-    hiddenChannels: Set<string>;
-    onToggleCategory: (categoryId: string) => void;
-    onToggleChannel: (channelId: string) => void;
-}> = ({
+export const ChannelPreferenceGroup = ({
     category,
     channels,
     hiddenCategories,
     hiddenChannels,
     onToggleCategory,
     onToggleChannel,
+}: {
+    category: Category | null;
+    channels: Channel[];
+    hiddenCategories: Set<string>;
+    hiddenChannels: Set<string>;
+    onToggleCategory: (categoryId: string) => void;
+    onToggleChannel: (channelId: string) => void;
 }) => {
     const [isOpen, setIsOpen] = useState(true);
     const stageRef = useRef<HTMLDivElement>(null);
@@ -259,7 +266,7 @@ export const ChannelPreferenceGroup: React.FC<{
     const categoryRef = useRef<HTMLButtonElement>(null);
     const channelRefs = useRef<Array<HTMLButtonElement | null>>([]);
 
-    const redraw = useCallback(() => {
+    const redraw = useCallback((): void => {
         if (!svgRef.current || !stageRef.current || !isOpen) return;
         drawChannelSplines(
             svgRef.current,
@@ -269,12 +276,12 @@ export const ChannelPreferenceGroup: React.FC<{
         );
     }, [isOpen]);
 
-    useLayoutEffect(() => {
+    useLayoutEffect((): (() => void) | undefined => {
         let frame = 0;
         let secondFrame = 0;
 
         const drawAfterLayout = (): void => {
-            frame = window.requestAnimationFrame(() => {
+            frame = window.requestAnimationFrame((): void => {
                 secondFrame = window.requestAnimationFrame(redraw);
             });
         };
@@ -289,14 +296,14 @@ export const ChannelPreferenceGroup: React.FC<{
         }
         if (categoryRef.current) obs.observe(categoryRef.current);
 
-        return () => {
+        return (): void => {
             window.cancelAnimationFrame(frame);
             window.cancelAnimationFrame(secondFrame);
             obs.disconnect();
         };
     }, [redraw, channels.length]);
 
-    React.useEffect(() => {
+    React.useEffect((): void => {
         if (!isOpen) svgRef.current?.replaceChildren();
     }, [isOpen]);
 
@@ -331,11 +338,11 @@ export const ChannelPreferenceGroup: React.FC<{
                     ref={categoryRef}
                     type="button"
                     variant="ghost"
-                    onClick={() => {
+                    onClick={(): void => {
                         if (category) {
                             onToggleCategory(category._id);
                         } else {
-                            setIsOpen((value) => !value);
+                            setIsOpen((value): boolean => !value);
                         }
                     }}
                 >
@@ -345,9 +352,9 @@ export const ChannelPreferenceGroup: React.FC<{
                             !isOpen && '-rotate-90',
                         )}
                         size={16}
-                        onClick={(e) => {
+                        onClick={(e): void => {
                             e.stopPropagation();
-                            setIsOpen((value) => !value);
+                            setIsOpen((value): boolean => !value);
                         }}
                     />
                     <Folder
@@ -376,12 +383,14 @@ export const ChannelPreferenceGroup: React.FC<{
                                     )}
                                     innerClassName="w-full justify-start"
                                     key={channel._id}
-                                    ref={(el) => {
+                                    ref={(el): void => {
                                         channelRefs.current[index] = el;
                                     }}
                                     type="button"
                                     variant="ghost"
-                                    onClick={() => onToggleChannel(channel._id)}
+                                    onClick={(): void =>
+                                        onToggleChannel(channel._id)
+                                    }
                                 >
                                     {channelIcon(channel)}
                                     <span className="min-w-0 flex-1 truncate">
@@ -409,9 +418,11 @@ interface ChannelPreferencesModalProps {
     serverId: string;
 }
 
-export const ChannelPreferencesModal: React.FC<
-    ChannelPreferencesModalProps
-> = ({ isOpen, onClose, serverId }) => {
+export const ChannelPreferencesModal = ({
+    isOpen,
+    onClose,
+    serverId,
+}: ChannelPreferencesModalProps) => {
     const { data: onboarding } = useOnboarding(serverId, { enabled: isOpen });
     const { data: channels } = useChannels(serverId, { enabled: isOpen });
     const { data: categories } = useCategories(serverId, { enabled: isOpen });
@@ -419,7 +430,7 @@ export const ChannelPreferencesModal: React.FC<
     const [hiddenChannelIds, setHiddenChannelIds] = useState<string[]>([]);
     const [hiddenCategoryIds, setHiddenCategoryIds] = useState<string[]>([]);
 
-    React.useEffect(() => {
+    React.useEffect((): void => {
         if (!onboarding) return;
         setHiddenChannelIds(onboarding.member.hiddenChannelIds ?? []);
         setHiddenCategoryIds(onboarding.member.hiddenCategoryIds ?? []);
@@ -430,23 +441,29 @@ export const ChannelPreferencesModal: React.FC<
     const groupedChannels = useMemo(() => {
         const sortedChannels = sortByPosition(channels ?? []);
         const sortedCategories = sortByPosition(categories ?? []);
-        const categoryIds = new Set(sortedCategories.map((c) => c._id));
+        const categoryIds = new Set(sortedCategories.map((c): string => c._id));
         return [
             {
                 category: null,
                 channels: sortedChannels.filter(
-                    (channel) =>
+                    (channel): boolean =>
                         !channel.categoryId ||
                         !categoryIds.has(channel.categoryId),
                 ),
             },
-            ...sortedCategories.map((category) => ({
-                category,
-                channels: sortedChannels.filter(
-                    (channel) => channel.categoryId === category._id,
-                ),
-            })),
-        ].filter((group) => group.category !== null || group.channels.length);
+            ...sortedCategories.map(
+                (category): { category: Category; channels: Channel[] } => ({
+                    category,
+                    channels: sortedChannels.filter(
+                        (channel): boolean =>
+                            channel.categoryId === category._id,
+                    ),
+                }),
+            ),
+        ].filter(
+            (group): number | true =>
+                group.category !== null || group.channels.length,
+        );
     }, [channels, categories]);
 
     const toggleId = (
@@ -463,7 +480,7 @@ export const ChannelPreferencesModal: React.FC<
     const handleSave = (): void => {
         updatePreferences.mutate(
             { hiddenChannelIds, hiddenCategoryIds },
-            { onSuccess: () => onClose() },
+            { onSuccess: (): void => onClose() },
         );
     };
 
@@ -495,14 +512,14 @@ export const ChannelPreferencesModal: React.FC<
                                     hiddenCategories={hiddenCategories}
                                     hiddenChannels={hiddenChannels}
                                     key={group.category?._id ?? 'uncategorized'}
-                                    onToggleCategory={(categoryId) =>
+                                    onToggleCategory={(categoryId): void =>
                                         toggleId(
                                             categoryId,
                                             hiddenCategories,
                                             setHiddenCategoryIds,
                                         )
                                     }
-                                    onToggleChannel={(channelId) =>
+                                    onToggleChannel={(channelId): void =>
                                         toggleId(
                                             channelId,
                                             hiddenChannels,
@@ -536,9 +553,9 @@ interface ServerOnboardingModalProps {
     serverId: string;
 }
 
-export const ServerOnboardingModal: React.FC<ServerOnboardingModalProps> = ({
+export const ServerOnboardingModal = ({
     serverId,
-}) => {
+}: ServerOnboardingModalProps) => {
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
     const { data: onboarding } = useOnboarding(serverId);
@@ -555,23 +572,25 @@ export const ServerOnboardingModal: React.FC<ServerOnboardingModalProps> = ({
         onboarding?.member.onboardingRequired === true &&
         onboarding.member.onboardingCompletedAt == null;
 
-    React.useEffect(() => {
+    React.useEffect((): void => {
         if (!onboarding) return;
         const allowed = new Set(onboarding.onboarding.selfAssignableRoleIds);
         setSelectedRoleIds(
-            onboarding.member.roles.filter((roleId) => allowed.has(roleId)),
+            onboarding.member.roles.filter((roleId): boolean =>
+                allowed.has(roleId),
+            ),
         );
     }, [onboarding]);
 
     const rulesList = useMemo(
-        () => onboarding?.onboarding.guidelines ?? [],
+        (): string[] => onboarding?.onboarding.guidelines ?? [],
         [onboarding?.onboarding.guidelines],
     );
     const hasGuidelines = rulesList.length > 0;
     const hasSelfRoles =
         (onboarding?.onboarding.selfAssignableRoleIds.length ?? 0) > 0;
     const steps = useMemo(
-        () =>
+        (): { id: 'rules' | 'roles' | 'welcome'; label: string }[] =>
             [
                 hasGuidelines
                     ? ({ id: 'rules', label: 'Server Rules' } as const)
@@ -589,7 +608,7 @@ export const ServerOnboardingModal: React.FC<ServerOnboardingModalProps> = ({
     const firstStep = steps[0]?.id ?? 'welcome';
     const roleStepOrWelcome = hasSelfRoles ? 'roles' : 'welcome';
 
-    React.useEffect(() => {
+    React.useEffect((): void => {
         if (!onboarding) return;
 
         if (!hasGuidelines) {
@@ -617,23 +636,25 @@ export const ServerOnboardingModal: React.FC<ServerOnboardingModalProps> = ({
 
     const handleAcceptRules = (): void => {
         acceptRules.mutate(undefined, {
-            onSuccess: () => setStep(roleStepOrWelcome),
+            onSuccess: (): void => setStep(roleStepOrWelcome),
         });
     };
 
     const handleRolesNext = (): void => {
         updateSelfRoles.mutate(selectedRoleIds, {
-            onSuccess: () => setStep('welcome'),
+            onSuccess: (): void => setStep('welcome'),
         });
     };
 
     const handleFinish = (): void => {
         completeOnboarding.mutate(undefined, {
-            onSuccess: () => {
+            onSuccess: (): void => {
                 const landing =
                     onboarding?.onboarding.landingChannelId ||
                     onboarding?.onboarding.welcomeChannelIds[0] ||
-                    channels?.find((channel) => channel.type !== 'link')?._id;
+                    channels?.find(
+                        (channel): boolean => channel.type !== 'link',
+                    )?._id;
                 if (landing) {
                     dispatch(setSelectedChannelId(landing));
                     void navigate(
@@ -645,13 +666,13 @@ export const ServerOnboardingModal: React.FC<ServerOnboardingModalProps> = ({
         });
     };
 
-    const welcomeChannels = (channels ?? []).filter((channel) =>
+    const welcomeChannels = (channels ?? []).filter((channel): boolean =>
         onboarding?.onboarding.welcomeChannelIds.includes(channel._id),
     );
 
     const stepIndex = Math.max(
         0,
-        steps.findIndex((s) => s.id === step),
+        steps.findIndex((s): boolean => s.id === step),
     );
 
     return (
@@ -660,7 +681,7 @@ export const ServerOnboardingModal: React.FC<ServerOnboardingModalProps> = ({
             isOpen
             showCloseButton={false}
             title="Welcome to Server Onboarding"
-            onClose={() => {}}
+            onClose={(): void => {}}
         >
             {!onboarding || !roles || !channels ? (
                 <div className="flex min-h-40 items-center justify-center">
@@ -793,7 +814,7 @@ export const ServerOnboardingModal: React.FC<ServerOnboardingModalProps> = ({
                                         checked={accepted}
                                         className="sr-only"
                                         type="checkbox"
-                                        onChange={(e) =>
+                                        onChange={(e): void =>
                                             setAccepted(e.target.checked)
                                         }
                                     />
@@ -900,7 +921,7 @@ export const ServerOnboardingModal: React.FC<ServerOnboardingModalProps> = ({
                                             key={channel._id}
                                             type="button"
                                             variant="normal"
-                                            onClick={() => {
+                                            onClick={(): void => {
                                                 dispatch(
                                                     setSelectedChannelId(
                                                         channel._id,

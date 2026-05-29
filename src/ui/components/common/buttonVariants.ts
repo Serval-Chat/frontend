@@ -30,7 +30,11 @@ export const buttonVariants = cva(
             },
         },
         compoundVariants: Object.entries(mutedClasses).map(
-            ([variant, className]) => ({
+            ([variant, className]): {
+                variant: keyof typeof mutedClasses;
+                loading: boolean;
+                class: string;
+            } => ({
                 variant: variant as keyof typeof mutedClasses,
                 loading: true,
                 class: className,

@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { Camera } from 'lucide-react';
 
 import { Box } from '@/ui/components/layout/Box';
@@ -19,7 +17,7 @@ interface ProfileBannerProps {
 /**
  * @description Reusable profile banner component with color calculation formula.
  */
-export const ProfileBanner: React.FC<ProfileBannerProps> = ({
+export const ProfileBanner = ({
     banner,
     bannerColor: propsBannerColor,
     usernameGradient,
@@ -27,7 +25,7 @@ export const ProfileBanner: React.FC<ProfileBannerProps> = ({
     className,
     height = 120,
     alt = 'User Banner',
-}) => {
+}: ProfileBannerProps) => {
     const defaultColor = '#5865F2';
     const bannerColor =
         propsBannerColor || usernameGradient?.colors?.[0] || defaultColor;

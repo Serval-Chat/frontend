@@ -13,11 +13,11 @@ interface FileQueueProps {
     onToggleSpoiler: (id: string) => void;
 }
 
-export const FileQueue: React.FC<FileQueueProps> = ({
+export const FileQueue = ({
     files,
     onRemove,
     onToggleSpoiler,
-}) => {
+}: FileQueueProps) => {
     if (files.length === 0) return null;
 
     return (
@@ -26,27 +26,31 @@ export const FileQueue: React.FC<FileQueueProps> = ({
                 <FileQueueItem
                     file={file}
                     key={file.id}
-                    onRemove={() => onRemove(file.id)}
-                    onToggleSpoiler={() => onToggleSpoiler(file.id)}
+                    onRemove={(): void => onRemove(file.id)}
+                    onToggleSpoiler={(): void => onToggleSpoiler(file.id)}
                 />
             ))}
         </Box>
     );
 };
 
-const FileQueueItem: React.FC<{
+const FileQueueItem = ({
+    file,
+    onRemove,
+    onToggleSpoiler,
+}: {
     file: QueuedFile;
     onRemove: () => void;
     onToggleSpoiler: () => void;
-}> = ({ file, onRemove, onToggleSpoiler }) => {
+}) => {
     const isImage = file.file.type.startsWith('image/');
-    const previewUrl = useMemo(() => {
+    const previewUrl = useMemo((): string | null => {
         if (!isImage) return null;
         return URL.createObjectURL(file.file);
     }, [file.file, isImage]);
 
     React.useEffect(
-        () => () => {
+        (): (() => void) => (): void => {
             if (previewUrl) URL.revokeObjectURL(previewUrl);
         },
         [previewUrl],
@@ -84,7 +88,7 @@ const FileQueueItem: React.FC<{
                             className="h-8 w-8 border-none bg-black/60 p-0 hover:bg-black/80"
                             size="sm"
                             variant="ghost"
-                            onClick={(e) => {
+                            onClick={(e): void => {
                                 e.stopPropagation();
                                 onToggleSpoiler();
                             }}
@@ -100,7 +104,7 @@ const FileQueueItem: React.FC<{
                         className="h-8 w-8 border-none bg-black/60 p-0 text-red-400 hover:bg-black/80 hover:text-red-300"
                         size="sm"
                         variant="ghost"
-                        onClick={(e) => {
+                        onClick={(e): void => {
                             e.stopPropagation();
                             onRemove();
                         }}

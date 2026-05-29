@@ -35,12 +35,12 @@ const findCollisions = (
     if (!binding) return [];
 
     return KEYBIND_ACTIONS.filter(
-        (action) =>
+        (action): boolean =>
             action.id !== actionId && sameBinding(binding, keybinds[action.id]),
-    ).map((action) => action.label);
+    ).map((action): string => action.label);
 };
 
-export const KeybindSettings: React.FC = () => {
+export const KeybindSettings = () => {
     const { data: user, isLoading } = useMe();
     const { mutate: updateSettings, isPending } = useUpdateSettings();
     const [draft, setDraft] = React.useState<UserKeybinds>({});
@@ -52,11 +52,11 @@ export const KeybindSettings: React.FC = () => {
         [user?.settings?.keybinds],
     );
 
-    React.useEffect(() => {
+    React.useEffect((): void => {
         setDraft(savedKeybinds);
     }, [savedKeybinds]);
 
-    React.useEffect(() => {
+    React.useEffect((): (() => void) | undefined => {
         if (!recordingAction) return undefined;
 
         const handleKeyDown = (event: KeyboardEvent): void => {
@@ -82,7 +82,7 @@ export const KeybindSettings: React.FC = () => {
                 return;
             }
 
-            setDraft((current) => ({
+            setDraft((current): { [x: string]: KeybindBinding | null } => ({
                 ...current,
                 [recordingAction]: normalizeBinding(
                     KeybindManager.fromEvent(event),
@@ -92,13 +92,14 @@ export const KeybindSettings: React.FC = () => {
         };
 
         window.addEventListener('keydown', handleKeyDown, true);
-        return () => window.removeEventListener('keydown', handleKeyDown, true);
+        return (): void =>
+            window.removeEventListener('keydown', handleKeyDown, true);
     }, [recordingAction]);
 
     const hasChanges = React.useMemo(
-        () =>
+        (): boolean =>
             KEYBIND_ACTIONS.some(
-                (action) =>
+                (action): boolean =>
                     !sameBinding(draft[action.id], savedKeybinds[action.id]),
             ),
         [draft, savedKeybinds],
@@ -114,7 +115,7 @@ export const KeybindSettings: React.FC = () => {
     };
 
     const handleResetToDefault = (actionId: KeybindActionId): void => {
-        setDraft((current) => {
+        setDraft((current): { [x: string]: KeybindBinding | null } => {
             const next = { ...current };
             delete next[actionId];
             return next;
@@ -122,7 +123,10 @@ export const KeybindSettings: React.FC = () => {
     };
 
     const handleClear = (actionId: KeybindActionId): void => {
-        setDraft((current) => ({ ...current, [actionId]: null }));
+        setDraft((current): { [x: string]: KeybindBinding | null } => ({
+            ...current,
+            [actionId]: null,
+        }));
     };
 
     if (isLoading) {
@@ -191,7 +195,7 @@ export const KeybindSettings: React.FC = () => {
                                               ? 'danger'
                                               : 'ghost'
                                     }
-                                    onClick={() =>
+                                    onClick={(): void =>
                                         setRecordingAction(action.id)
                                     }
                                 >
@@ -207,7 +211,7 @@ export const KeybindSettings: React.FC = () => {
                                     icon={RotateCcw}
                                     title="Reset to default"
                                     variant="ghost"
-                                    onClick={() =>
+                                    onClick={(): void =>
                                         handleResetToDefault(action.id)
                                     }
                                 >
@@ -217,7 +221,7 @@ export const KeybindSettings: React.FC = () => {
                                     icon={X}
                                     title="Clear keybind"
                                     variant="ghost"
-                                    onClick={() => handleClear(action.id)}
+                                    onClick={(): void => handleClear(action.id)}
                                 >
                                     Clear
                                 </Button>

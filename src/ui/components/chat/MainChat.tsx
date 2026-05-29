@@ -58,27 +58,27 @@ interface MainChatProps {
     hideMemberListButton?: boolean;
 }
 
-export const MainChat: React.FC<MainChatProps> = ({
+export const MainChat = ({
     requireUrlMatch = true,
     headerActions,
     onToggleMemberList,
     isMemberListOpen,
     hideMemberListButton,
-}) => {
+}: MainChatProps) => {
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
     const location = useLocation();
     const selectedFriendId = useAppSelector(
-        (state) => state.nav.selectedFriendId,
+        (state): string | null => state.nav.selectedFriendId,
     );
     const selectedServerId = useAppSelector(
-        (state) => state.nav.selectedServerId,
+        (state): string | null => state.nav.selectedServerId,
     );
     const selectedChannelId = useAppSelector(
-        (state) => state.nav.selectedChannelId,
+        (state): string | null => state.nav.selectedChannelId,
     );
     const targetMessageId = useAppSelector(
-        (state) => state.nav.targetMessageId,
+        (state): string | null => state.nav.targetMessageId,
     );
 
     const [isDragging, setIsDragging] = useState(false);
@@ -94,7 +94,7 @@ export const MainChat: React.FC<MainChatProps> = ({
         (state) => state.furTweaker,
     );
 
-    React.useEffect(() => {
+    React.useEffect((): (() => void) | undefined => {
         if (theme !== 'serval' || !chatContainerRef.current) return;
 
         const opts = {
@@ -107,7 +107,7 @@ export const MainChat: React.FC<MainChatProps> = ({
 
         const cleanup = applyServalBackground(chatContainerRef.current, opts);
 
-        return () => {
+        return (): void => {
             cleanup();
         };
     }, [theme, opacity, seed, base, spotColor, spotCount]);
@@ -115,17 +115,17 @@ export const MainChat: React.FC<MainChatProps> = ({
     const { data: currentUser } = useMe();
     const keybindManager = useKeybindManager(currentUser?.settings?.keybinds);
 
-    useEffect(() => {
+    useEffect((): (() => void) => {
         const handleKeyDown = (e: KeyboardEvent): void => {
             if (keybindManager.matches('debug.typing.more', e)) {
                 e.preventDefault();
                 e.stopPropagation();
-                setDebugTypingCount((prev) => (prev + 1) % 5);
+                setDebugTypingCount((prev): number => (prev + 1) % 5);
             }
             if (keybindManager.matches('debug.typing.less', e)) {
                 e.preventDefault();
                 e.stopPropagation();
-                setDebugTypingCount((prev) => (prev - 1 + 5) % 5);
+                setDebugTypingCount((prev): number => (prev - 1 + 5) % 5);
             }
             if (keybindManager.matches('debug.theme.previous', e)) {
                 e.preventDefault();
@@ -144,7 +144,8 @@ export const MainChat: React.FC<MainChatProps> = ({
             }
         };
         window.addEventListener('keydown', handleKeyDown, true);
-        return () => window.removeEventListener('keydown', handleKeyDown, true);
+        return (): void =>
+            window.removeEventListener('keydown', handleKeyDown, true);
     }, [keybindManager, theme, setTheme]);
 
     const { data: friendUser, isError: isFriendError } = useUserById(
@@ -186,7 +187,7 @@ export const MainChat: React.FC<MainChatProps> = ({
         !selectedServerId || hasPermission('sendMessages') || isTimedOut;
 
     const selectedChannel = React.useMemo(
-        () => channels?.find((c) => c._id === selectedChannelId),
+        () => channels?.find((c): boolean => c._id === selectedChannelId),
         [channels, selectedChannelId],
     );
 
@@ -233,22 +234,29 @@ export const MainChat: React.FC<MainChatProps> = ({
     const typingUsersWithDebug = React.useMemo(
         () => [
             ...typingUsers,
-            ...Array.from({ length: debugTypingCount }, (_, i) => ({
-                userId: `__debug_${i}__`,
-                username: `TestUser${i > 0 ? i + 1 : ''}`,
-            })),
+            ...Array.from(
+                { length: debugTypingCount },
+                (_, i): { userId: string; username: string } => ({
+                    userId: `__debug_${i}__`,
+                    username: `TestUser${i > 0 ? i + 1 : ''}`,
+                }),
+            ),
         ],
         [typingUsers, debugTypingCount],
     );
 
     const resolvedTypingUsers = React.useMemo(
-        () =>
-            typingUsersWithDebug.map((u) => {
-                const member = fullMemberMap.get(u.userId);
-                const resolvedName =
-                    member?.nickname || member?.user?.displayName || u.username;
-                return { ...u, username: resolvedName };
-            }),
+        (): { username: string; userId: string }[] =>
+            typingUsersWithDebug.map(
+                (u): { username: string; userId: string } => {
+                    const member = fullMemberMap.get(u.userId);
+                    const resolvedName =
+                        member?.nickname ||
+                        member?.user?.displayName ||
+                        u.username;
+                    return { ...u, username: resolvedName };
+                },
+            ),
         [typingUsersWithDebug, fullMemberMap],
     );
 
@@ -302,19 +310,19 @@ export const MainChat: React.FC<MainChatProps> = ({
         navigate,
     ]);
 
-    React.useEffect(() => {
+    React.useEffect((): void => {
         if (isFriendError && selectedFriendId) {
             void navigate('/chat/@me', { replace: true });
         }
     }, [isFriendError, selectedFriendId, navigate]);
 
-    React.useEffect(() => {
+    React.useEffect((): void => {
         if (selectedServerId && selectedChannelId) {
             wsMessages.markChannelRead(selectedServerId, selectedChannelId);
 
             if (pings?.pings) {
                 const hasPingsInActiveChannel = pings.pings.some(
-                    (p) => p.channelId === selectedChannelId,
+                    (p): boolean => p.channelId === selectedChannelId,
                 );
                 if (hasPingsInActiveChannel) {
                     clearChannelPings(selectedChannelId);
@@ -324,10 +332,11 @@ export const MainChat: React.FC<MainChatProps> = ({
             wsMessages.markDmRead(selectedFriendId);
             if (pings?.pings) {
                 const friendPings = pings.pings.filter(
-                    (p) => p.senderId === selectedFriendId && !p.serverId,
+                    (p): boolean =>
+                        p.senderId === selectedFriendId && !p.serverId,
                 );
                 if (friendPings.length > 0) {
-                    friendPings.forEach((p) => deletePing(p.id));
+                    friendPings.forEach((p): void => deletePing(p.id));
                 }
             }
         }
@@ -357,13 +366,13 @@ export const MainChat: React.FC<MainChatProps> = ({
     );
 
     const handleReplyToMessage = React.useCallback(
-        (msg: ProcessedChatMessage) => {
+        (msg: ProcessedChatMessage): void => {
             setReplyingTo(msg);
         },
         [],
     );
 
-    const handleLoadMore = React.useCallback(() => {
+    const handleLoadMore = React.useCallback((): void => {
         void fetchNextPage();
     }, [fetchNextPage]);
 
@@ -402,7 +411,7 @@ export const MainChat: React.FC<MainChatProps> = ({
                 selectedFriendId={selectedFriendId}
                 showPins={showPins}
                 onToggleMemberList={onToggleMemberList}
-                onTogglePins={() => setShowPins((v) => !v)}
+                onTogglePins={(): void => setShowPins((v): boolean => !v)}
             />
 
             {isServerContext && (
@@ -512,7 +521,7 @@ export const MainChat: React.FC<MainChatProps> = ({
                             sendMessage={sendMessage}
                             sendTyping={sendTyping}
                             setCooldown={setCooldown}
-                            onCancelReply={() => setReplyingTo(null)}
+                            onCancelReply={(): void => setReplyingTo(null)}
                         />
                     ) : (
                         <Box className="mx-4 mb-4 flex h-[56px] items-center rounded-lg border border-border-subtle bg-[var(--bg-msg-input)] px-4">

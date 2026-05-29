@@ -7,7 +7,7 @@ export const useAutoHighlight = (sectionIds: string[]): void => {
     const location = useLocation();
     const lastHighlightedHash = useRef<string | null>(null);
 
-    useEffect(() => {
+    useEffect((): (() => void) | undefined => {
         const hash = location.hash.substring(1);
 
         // only highlight if this is a new hash
@@ -51,11 +51,11 @@ export const useAutoHighlight = (sectionIds: string[]): void => {
         );
 
         // remove highlight after animation
-        const timeout = setTimeout(() => {
+        const timeout = setTimeout((): void => {
             element.classList.remove(...highlightClasses);
         }, 1500);
 
-        return () => {
+        return (): void => {
             clearTimeout(timeout);
             element.classList.remove(...highlightClasses);
         };

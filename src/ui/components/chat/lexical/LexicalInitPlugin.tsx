@@ -19,11 +19,11 @@ export const LexicalInitPlugin = ({
     const [editor] = useLexicalComposerContext();
     const initialized = useRef(false);
 
-    useEffect(() => {
+    useEffect((): void => {
         if (initialized.current) return;
         initialized.current = true;
 
-        editor.update(() => {
+        editor.update((): void => {
             const root = $getRoot();
             root.clear();
             const p = $createParagraphNode();
@@ -33,7 +33,7 @@ export const LexicalInitPlugin = ({
 
             const parts = initialText.split(tokenRegex);
 
-            parts.forEach((part) => {
+            parts.forEach((part): void => {
                 if (!part) return;
 
                 if (part === '<everyone>') {
@@ -55,7 +55,7 @@ export const LexicalInitPlugin = ({
                     p.append($createChipNode('emoji', { id }));
                 } else {
                     const lines = part.split('\n');
-                    lines.forEach((line, i) => {
+                    lines.forEach((line, i): void => {
                         if (line) {
                             p.append($createTextNode(line));
                         }

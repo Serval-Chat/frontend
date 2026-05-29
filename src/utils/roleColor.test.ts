@@ -20,8 +20,8 @@ const makeRole = (role: Partial<Role>): Role =>
         ...role,
     }) as Role;
 
-describe('roleColor', () => {
-    it('parses common CSS color formats used by role colors', () => {
+describe('roleColor', (): void => {
+    it('parses common CSS color formats used by role colors', (): void => {
         expect(parseCssColor('#fff')).toEqual({ r: 255, g: 255, b: 255 });
         expect(parseCssColor('#112233')).toEqual({ r: 17, g: 34, b: 51 });
         expect(parseCssColor('rgb(12, 34, 56)')).toEqual({
@@ -31,7 +31,7 @@ describe('roleColor', () => {
         });
     });
 
-    it('samples multi-stop role gradients across the pill', () => {
+    it('samples multi-stop role gradients across the pill', (): void => {
         const role = makeRole({
             colors: ['#000000', '#ffffff'],
         });
@@ -53,7 +53,7 @@ describe('roleColor', () => {
         });
     });
 
-    it('uses a single role color stop as both the painted and sampled background', () => {
+    it('uses a single role color stop as both the painted and sampled background', (): void => {
         const role = makeRole({
             colors: ['#fff7a8'],
         });
@@ -66,7 +66,7 @@ describe('roleColor', () => {
         });
     });
 
-    it('wraps samples for repeated role gradients', () => {
+    it('wraps samples for repeated role gradients', (): void => {
         const role = makeRole({
             colors: ['#000000', '#ffffff'],
             gradientRepeat: 2,
@@ -84,7 +84,7 @@ describe('roleColor', () => {
         });
     });
 
-    it('chooses dark glyphs on bright role colors and white glyphs on dark role colors', () => {
+    it('chooses dark glyphs on bright role colors and white glyphs on dark role colors', (): void => {
         expect(
             getReadableRoleTextColorAt(makeRole({ color: '#fff7a8' }), 0.5),
         ).toBe('#111827');
@@ -93,7 +93,7 @@ describe('roleColor', () => {
         ).toBe('#ffffff');
     });
 
-    it('keeps transition samples on a high contrast foreground instead of a low contrast gray', () => {
+    it('keeps transition samples on a high contrast foreground instead of a low contrast gray', (): void => {
         const role = makeRole({
             colors: ['#000000', '#ffffff'],
         });

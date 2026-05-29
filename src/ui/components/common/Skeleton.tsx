@@ -11,14 +11,14 @@ export interface SkeletonProps extends React.HTMLAttributes<HTMLDivElement> {
 /**
  * @description Shows preview of content when its still loading
  */
-export const Skeleton: React.FC<SkeletonProps> = ({
+export const Skeleton = ({
     className,
     variant = 'rectangular',
     width,
     height,
     style,
     ...props
-}) => (
+}: SkeletonProps) => (
     <div
         className={cn(
             'animate-pulse bg-white/5',

@@ -81,20 +81,20 @@ const mockBot: Bot = {
     updatedAt: '2024-01-01T00:00:00Z',
 };
 
-describe('usePublicBotInfo', () => {
+describe('usePublicBotInfo', (): void => {
     beforeEach(() => vi.clearAllMocks());
 
-    it('fetches public bot info', async () => {
+    it('fetches public bot info', async (): Promise<void> => {
         vi.mocked(botsApi.getPublicInfo).mockResolvedValue(mockPublicInfo);
         const { result } = renderHook(() => usePublicBotInfo('abc123'), {
             wrapper: makeWrapper(),
         });
-        await waitFor(() => expect(result.current.isSuccess).toBe(true));
+        await waitFor((): void => expect(result.current.isSuccess).toBe(true));
         expect(result.current.data).toEqual(mockPublicInfo);
         expect(botsApi.getPublicInfo).toHaveBeenCalledWith('abc123');
     });
 
-    it('is disabled when clientId is empty', () => {
+    it('is disabled when clientId is empty', (): void => {
         const { result } = renderHook(() => usePublicBotInfo(''), {
             wrapper: makeWrapper(),
         });
@@ -102,61 +102,61 @@ describe('usePublicBotInfo', () => {
         expect(botsApi.getPublicInfo).not.toHaveBeenCalled();
     });
 
-    it('surfaces errors from the api', async () => {
+    it('surfaces errors from the api', async (): Promise<void> => {
         vi.mocked(botsApi.getPublicInfo).mockRejectedValue(
             new Error('Not found'),
         );
         const { result } = renderHook(() => usePublicBotInfo('badid'), {
             wrapper: makeWrapper(),
         });
-        await waitFor(() => expect(result.current.isError).toBe(true));
+        await waitFor((): void => expect(result.current.isError).toBe(true));
         expect(result.current.error?.message).toBe('Not found');
     });
 });
 
-describe('useBots', () => {
+describe('useBots', (): void => {
     beforeEach(() => vi.clearAllMocks());
 
-    it('fetches the owned bot list', async () => {
+    it('fetches the owned bot list', async (): Promise<void> => {
         vi.mocked(botsApi.list).mockResolvedValue([mockBot]);
         const { result } = renderHook(() => useBots(), {
             wrapper: makeWrapper(),
         });
-        await waitFor(() => expect(result.current.isSuccess).toBe(true));
+        await waitFor((): void => expect(result.current.isSuccess).toBe(true));
         expect(result.current.data).toHaveLength(1);
         expect(result.current.data![0].clientId).toBe('abc123');
     });
 
-    it('returns empty array when user has no bots', async () => {
+    it('returns empty array when user has no bots', async (): Promise<void> => {
         vi.mocked(botsApi.list).mockResolvedValue([]);
         const { result } = renderHook(() => useBots(), {
             wrapper: makeWrapper(),
         });
-        await waitFor(() => expect(result.current.isSuccess).toBe(true));
+        await waitFor((): void => expect(result.current.isSuccess).toBe(true));
         expect(result.current.data).toEqual([]);
     });
 });
 
-describe('useCreateBot', () => {
+describe('useCreateBot', (): void => {
     beforeEach(() => vi.clearAllMocks());
 
-    it('calls api and returns bot with one-time secret', async () => {
+    it('calls api and returns bot with one-time secret', async (): Promise<void> => {
         const response = { bot: mockBot, clientSecret: 'supersecret' };
         vi.mocked(botsApi.create).mockResolvedValue(response);
         const { result } = renderHook(() => useCreateBot(), {
             wrapper: makeWrapper(),
         });
 
-        await act(async () => {
+        await act(async (): Promise<void> => {
             result.current.mutate({ name: 'My Bot' });
         });
 
-        await waitFor(() => expect(result.current.isSuccess).toBe(true));
+        await waitFor((): void => expect(result.current.isSuccess).toBe(true));
         expect(result.current.data).toEqual(response);
         expect(botsApi.create).toHaveBeenCalledWith({ name: 'My Bot' });
     });
 
-    it('surfaces creation errors', async () => {
+    it('surfaces creation errors', async (): Promise<void> => {
         vi.mocked(botsApi.create).mockRejectedValue(
             new Error('Maximum 25 bots per user'),
         );
@@ -164,30 +164,30 @@ describe('useCreateBot', () => {
             wrapper: makeWrapper(),
         });
 
-        await act(async () => {
+        await act(async (): Promise<void> => {
             result.current.mutate({ name: 'Bot' });
         });
 
-        await waitFor(() => expect(result.current.isError).toBe(true));
+        await waitFor((): void => expect(result.current.isError).toBe(true));
         expect(result.current.error?.message).toBe('Maximum 25 bots per user');
     });
 });
 
-describe('useAuthorizeBot', () => {
+describe('useAuthorizeBot', (): void => {
     beforeEach(() => vi.clearAllMocks());
 
-    it('calls authorize api with correct clientId and serverId', async () => {
+    it('calls authorize api with correct clientId and serverId', async (): Promise<void> => {
         const response = { serverId: 'srv1', serverName: 'My Server' };
         vi.mocked(botsApi.authorize).mockResolvedValue(response);
         const { result } = renderHook(() => useAuthorizeBot(), {
             wrapper: makeWrapper(),
         });
 
-        await act(async () => {
+        await act(async (): Promise<void> => {
             result.current.mutate({ clientId: 'abc123', serverId: 'srv1' });
         });
 
-        await waitFor(() => expect(result.current.isSuccess).toBe(true));
+        await waitFor((): void => expect(result.current.isSuccess).toBe(true));
         expect(botsApi.authorize).toHaveBeenCalledWith(
             'abc123',
             'srv1',
@@ -196,7 +196,7 @@ describe('useAuthorizeBot', () => {
         expect(result.current.data).toEqual(response);
     });
 
-    it('surfaces conflict error when bot already in server', async () => {
+    it('surfaces conflict error when bot already in server', async (): Promise<void> => {
         vi.mocked(botsApi.authorize).mockRejectedValue(
             new Error('Bot is already in this server'),
         );
@@ -204,31 +204,31 @@ describe('useAuthorizeBot', () => {
             wrapper: makeWrapper(),
         });
 
-        await act(async () => {
+        await act(async (): Promise<void> => {
             result.current.mutate({ clientId: 'abc123', serverId: 'srv1' });
         });
 
-        await waitFor(() => expect(result.current.isError).toBe(true));
+        await waitFor((): void => expect(result.current.isError).toBe(true));
         expect(result.current.error?.message).toBe(
             'Bot is already in this server',
         );
     });
 });
 
-describe('useDeleteBot', () => {
+describe('useDeleteBot', (): void => {
     beforeEach(() => vi.clearAllMocks());
 
-    it('calls delete api with clientId', async () => {
+    it('calls delete api with clientId', async (): Promise<void> => {
         vi.mocked(botsApi.delete).mockResolvedValue(undefined);
         const { result } = renderHook(() => useDeleteBot(), {
             wrapper: makeWrapper(),
         });
 
-        await act(async () => {
+        await act(async (): Promise<void> => {
             result.current.mutate({ clientId: 'abc123' });
         });
 
-        await waitFor(() => expect(result.current.isSuccess).toBe(true));
+        await waitFor((): void => expect(result.current.isSuccess).toBe(true));
         expect(botsApi.delete).toHaveBeenCalledWith('abc123');
     });
 });

@@ -30,13 +30,13 @@ export const AdminBansAndMutes = (): ReactNode => {
             <div className="flex gap-4 border-b border-border-subtle pb-4">
                 <Button
                     variant={activeTab === 'bans' ? 'primary' : 'normal'}
-                    onClick={() => setActiveTab('bans')}
+                    onClick={(): void => setActiveTab('bans')}
                 >
                     Active Bans
                 </Button>
                 <Button
                     variant={activeTab === 'mutes' ? 'primary' : 'normal'}
-                    onClick={() => setActiveTab('mutes')}
+                    onClick={(): void => setActiveTab('mutes')}
                 >
                     Active Mutes
                 </Button>
@@ -81,7 +81,7 @@ const BansList = (): ReactNode => {
                                 <Text
                                     className="cursor-pointer text-primary hover:underline"
                                     weight="semibold"
-                                    onClick={() =>
+                                    onClick={(): undefined =>
                                         void navigate(
                                             `/admin/users/${ban.userId}`,
                                         )
@@ -123,7 +123,7 @@ const BansList = (): ReactNode => {
                                 disabled={isUnbanning}
                                 size="sm"
                                 variant="danger"
-                                onClick={() => unbanUser(ban.userId)}
+                                onClick={(): void => unbanUser(ban.userId)}
                             >
                                 Unban
                             </Button>
@@ -167,7 +167,7 @@ const MutesList = (): ReactNode => {
                                 <Text
                                     className="cursor-pointer text-primary hover:underline"
                                     weight="semibold"
-                                    onClick={() =>
+                                    onClick={(): undefined =>
                                         void navigate(
                                             `/admin/users/${mute.userId}`,
                                         )
@@ -209,7 +209,7 @@ const MutesList = (): ReactNode => {
                                 disabled={isUnmuting}
                                 size="sm"
                                 variant="danger"
-                                onClick={() => unmuteUser(mute.userId)}
+                                onClick={(): void => unmuteUser(mute.userId)}
                             >
                                 Unmute
                             </Button>

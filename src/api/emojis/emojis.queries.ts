@@ -9,7 +9,8 @@ import type { Emoji } from './emojis.types';
 
 export const emojiKeys = {
     all: ['emojis'] as const,
-    detail: (id: string) => [...emojiKeys.all, 'detail', id] as const,
+    detail: (id: string): readonly ['emojis', 'detail', string] =>
+        [...emojiKeys.all, 'detail', id] as const,
 };
 
 export const useEmoji = (
@@ -20,14 +21,14 @@ export const useEmoji = (
 
     return useQuery({
         queryKey: emojiKeys.detail(emojiId),
-        queryFn: () => emojisApi.getEmojiById(emojiId),
-        initialData: () => {
+        queryFn: (): Promise<Emoji> => emojisApi.getEmojiById(emojiId),
+        initialData: (): Emoji | undefined => {
             const allEmojis = queryClient.getQueryData<Emoji[]>([
                 'servers',
                 'emojis',
                 'all',
             ]);
-            return allEmojis?.find((e) => e._id === emojiId);
+            return allEmojis?.find((e): boolean => e._id === emojiId);
         },
         staleTime: Infinity, // Emojis are static
         ...options,

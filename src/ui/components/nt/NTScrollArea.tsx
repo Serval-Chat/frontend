@@ -26,12 +26,12 @@ interface NTScrollAreaProps extends React.HTMLAttributes<HTMLDivElement> {
     viewportClassName?: string;
 }
 
-export const NTScrollArea: React.FC<NTScrollAreaProps> = ({
+export const NTScrollArea = ({
     children,
     className,
     viewportClassName,
     ...props
-}) => {
+}: NTScrollAreaProps) => {
     const viewportRef = useRef<HTMLDivElement>(null);
     const [metrics, setMetrics] = useState<ScrollMetrics>({
         clientHeight: 0,
@@ -42,7 +42,7 @@ export const NTScrollArea: React.FC<NTScrollAreaProps> = ({
         scrollWidth: 0,
     });
 
-    const updateMetrics = useCallback(() => {
+    const updateMetrics = useCallback((): void => {
         const viewport = viewportRef.current;
         if (!viewport) return;
 
@@ -56,11 +56,11 @@ export const NTScrollArea: React.FC<NTScrollAreaProps> = ({
         });
     }, []);
 
-    useLayoutEffect(() => {
+    useLayoutEffect((): void => {
         updateMetrics();
     }, [children, updateMetrics]);
 
-    useEffect(() => {
+    useEffect((): (() => void) | undefined => {
         const viewport = viewportRef.current;
         if (!viewport) return;
 
@@ -73,7 +73,7 @@ export const NTScrollArea: React.FC<NTScrollAreaProps> = ({
 
         window.addEventListener('resize', updateMetrics);
 
-        return () => {
+        return (): void => {
             resizeObserver.disconnect();
             window.removeEventListener('resize', updateMetrics);
         };
@@ -86,12 +86,12 @@ export const NTScrollArea: React.FC<NTScrollAreaProps> = ({
         metrics.scrollWidth > 0 &&
         metrics.scrollWidth > metrics.clientWidth + 1;
 
-    const scrollBy = useCallback((left: number, top: number) => {
+    const scrollBy = useCallback((left: number, top: number): void => {
         viewportRef.current?.scrollBy({ left, top });
     }, []);
 
     const startDrag = useCallback(
-        (axis: 'horizontal' | 'vertical', event: React.PointerEvent) => {
+        (axis: 'horizontal' | 'vertical', event: React.PointerEvent): void => {
             event.preventDefault();
             const viewport = viewportRef.current;
             if (!viewport) return;
@@ -144,7 +144,10 @@ export const NTScrollArea: React.FC<NTScrollAreaProps> = ({
         [metrics],
     );
 
-    const verticalThumb = useMemo(() => {
+    const verticalThumb = useMemo((): {
+        size: number;
+        start: number;
+    } | null => {
         if (!hasVertical) return null;
 
         const trackSize = metrics.clientHeight - SCROLLBAR_SIZE * 2;
@@ -163,7 +166,10 @@ export const NTScrollArea: React.FC<NTScrollAreaProps> = ({
         return { size: thumbSize, start: top };
     }, [hasVertical, metrics]);
 
-    const horizontalThumb = useMemo(() => {
+    const horizontalThumb = useMemo((): {
+        size: number;
+        start: number;
+    } | null => {
         if (!hasHorizontal) return null;
 
         const trackSize = metrics.clientWidth - SCROLLBAR_SIZE * 2;
@@ -210,14 +216,14 @@ export const NTScrollArea: React.FC<NTScrollAreaProps> = ({
                         aria-label="Scroll up"
                         className="nt-scroll-area__button nt-scroll-area__button--up"
                         type="button"
-                        onClick={() => scrollBy(0, -SCROLL_STEP)}
+                        onClick={(): void => scrollBy(0, -SCROLL_STEP)}
                     />
                     <div className="nt-scroll-area__track" />
                     <button
                         aria-label="Scroll down"
                         className="nt-scroll-area__button nt-scroll-area__button--down"
                         type="button"
-                        onClick={() => scrollBy(0, SCROLL_STEP)}
+                        onClick={(): void => scrollBy(0, SCROLL_STEP)}
                     />
                     <div
                         className="nt-scroll-area__thumb nt-scroll-area__thumb--vertical"
@@ -226,7 +232,9 @@ export const NTScrollArea: React.FC<NTScrollAreaProps> = ({
                             height: verticalThumb.size,
                             top: verticalThumb.start,
                         }}
-                        onPointerDown={(event) => startDrag('vertical', event)}
+                        onPointerDown={(event): void =>
+                            startDrag('vertical', event)
+                        }
                     />
                 </div>
             )}
@@ -241,14 +249,14 @@ export const NTScrollArea: React.FC<NTScrollAreaProps> = ({
                         aria-label="Scroll left"
                         className="nt-scroll-area__button nt-scroll-area__button--left"
                         type="button"
-                        onClick={() => scrollBy(-SCROLL_STEP, 0)}
+                        onClick={(): void => scrollBy(-SCROLL_STEP, 0)}
                     />
                     <div className="nt-scroll-area__track" />
                     <button
                         aria-label="Scroll right"
                         className="nt-scroll-area__button nt-scroll-area__button--right"
                         type="button"
-                        onClick={() => scrollBy(SCROLL_STEP, 0)}
+                        onClick={(): void => scrollBy(SCROLL_STEP, 0)}
                     />
                     <div
                         className="nt-scroll-area__thumb nt-scroll-area__thumb--horizontal"
@@ -257,7 +265,7 @@ export const NTScrollArea: React.FC<NTScrollAreaProps> = ({
                             left: horizontalThumb.start,
                             width: horizontalThumb.size,
                         }}
-                        onPointerDown={(event) =>
+                        onPointerDown={(event): void =>
                             startDrag('horizontal', event)
                         }
                     />

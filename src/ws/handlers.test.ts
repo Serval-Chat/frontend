@@ -65,14 +65,14 @@ function emitWsEvent(
 
 const PINGS_KEY = ['pings'];
 
-describe('setupGlobalWsHandlers - ping behaviour', () => {
+describe('setupGlobalWsHandlers - ping behaviour', (): void => {
     let mockWs: MockWebSocket;
     let queryClient: QueryClient;
     let mockDispatch: ReturnType<typeof vi.fn>;
     let dispatch: Dispatch<UnknownAction>;
     let cleanup: () => void;
 
-    beforeEach(() => {
+    beforeEach((): void => {
         vi.clearAllMocks();
 
         wsClient.disconnect();
@@ -110,13 +110,13 @@ describe('setupGlobalWsHandlers - ping behaviour', () => {
         cleanup = setupGlobalWsHandlers(queryClient, dispatch);
     });
 
-    afterEach(() => {
+    afterEach((): void => {
         cleanup();
         queryClient.clear();
         vi.restoreAllMocks();
     });
 
-    describe('MENTION event (server channel)', () => {
+    describe('MENTION event (server channel)', (): void => {
         const serverId = 'server-abc';
         const channelId = 'channel-xyz';
 
@@ -139,7 +139,7 @@ describe('setupGlobalWsHandlers - ping behaviour', () => {
             },
         };
 
-        it('adds exactly ONE ping to the cache and dispatches incrementServerPing once', () => {
+        it('adds exactly ONE ping to the cache and dispatches incrementServerPing once', (): void => {
             emitWsEvent(mockWs, WsEvents.MENTION, mentionPayload);
 
             const cached = queryClient.getQueryData<{
@@ -155,7 +155,7 @@ describe('setupGlobalWsHandlers - ping behaviour', () => {
             expect(dispatch).toHaveBeenCalledTimes(1);
         });
 
-        it('does NOT add a duplicate ping when the same message arrives twice', () => {
+        it('does NOT add a duplicate ping when the same message arrives twice', (): void => {
             emitWsEvent(mockWs, WsEvents.MENTION, mentionPayload);
             emitWsEvent(mockWs, WsEvents.MENTION, mentionPayload);
 
@@ -166,7 +166,7 @@ describe('setupGlobalWsHandlers - ping behaviour', () => {
             expect(cached?.pings).toHaveLength(1);
 
             const incrementCalls = mockDispatch.mock.calls.filter(
-                (call: unknown[]) =>
+                (call: unknown[]): boolean =>
                     JSON.stringify(call[0]) ===
                     JSON.stringify(incrementServerPing({ serverId })),
             );
@@ -174,7 +174,7 @@ describe('setupGlobalWsHandlers - ping behaviour', () => {
             expect(cached?.pings).toHaveLength(1);
         });
 
-        it('accumulates distinct pings from different messages', () => {
+        it('accumulates distinct pings from different messages', (): void => {
             emitWsEvent(mockWs, WsEvents.MENTION, mentionPayload);
             emitWsEvent(mockWs, WsEvents.MENTION, {
                 ...mentionPayload,
@@ -188,7 +188,7 @@ describe('setupGlobalWsHandlers - ping behaviour', () => {
             expect(cached?.pings).toHaveLength(2);
         });
 
-        it('server ping is cleared after useClearChannelPings (simulated via setServerPingCount)', () => {
+        it('server ping is cleared after useClearChannelPings (simulated via setServerPingCount)', (): void => {
             emitWsEvent(mockWs, WsEvents.MENTION, mentionPayload);
 
             dispatch(setServerPingCount({ serverId, count: 0 }));
@@ -198,7 +198,7 @@ describe('setupGlobalWsHandlers - ping behaviour', () => {
             );
         });
 
-        it('server ping decrements by one after useDeletePing (simulated via decrementServerPing)', () => {
+        it('server ping decrements by one after useDeletePing (simulated via decrementServerPing)', (): void => {
             emitWsEvent(mockWs, WsEvents.MENTION, mentionPayload);
             emitWsEvent(mockWs, WsEvents.MENTION, {
                 ...mentionPayload,
@@ -213,8 +213,8 @@ describe('setupGlobalWsHandlers - ping behaviour', () => {
         });
     });
 
-    describe('DM_UNREAD_UPDATED event (received while in server view)', () => {
-        it('updates the DM unread count via setDmUnread', () => {
+    describe('DM_UNREAD_UPDATED event (received while in server view)', (): void => {
+        it('updates the DM unread count via setDmUnread', (): void => {
             emitWsEvent(mockWs, WsEvents.DM_UNREAD_UPDATED, {
                 peerId: 'user-42',
                 count: 1,
@@ -225,7 +225,7 @@ describe('setupGlobalWsHandlers - ping behaviour', () => {
             );
         });
 
-        it('receiving the same DM_UNREAD_UPDATED count twice dispatches setDmUnread twice but the value stays the same (idempotent set)', () => {
+        it('receiving the same DM_UNREAD_UPDATED count twice dispatches setDmUnread twice but the value stays the same (idempotent set)', (): void => {
             emitWsEvent(mockWs, WsEvents.DM_UNREAD_UPDATED, {
                 peerId: 'user-42',
                 count: 1,
@@ -236,7 +236,7 @@ describe('setupGlobalWsHandlers - ping behaviour', () => {
             });
 
             const dmCalls = mockDispatch.mock.calls.filter(
-                (call: unknown[]) =>
+                (call: unknown[]): boolean =>
                     JSON.stringify(call[0]) ===
                     JSON.stringify(
                         setDmUnread({ userId: 'user-42', count: 1 }),
@@ -245,7 +245,7 @@ describe('setupGlobalWsHandlers - ping behaviour', () => {
             expect(dmCalls).toHaveLength(2);
         });
 
-        it('clears the DM ping when DM_UNREAD_UPDATED arrives with count=0', () => {
+        it('clears the DM ping when DM_UNREAD_UPDATED arrives with count=0', (): void => {
             emitWsEvent(mockWs, WsEvents.DM_UNREAD_UPDATED, {
                 peerId: 'user-42',
                 count: 3,
@@ -262,8 +262,8 @@ describe('setupGlobalWsHandlers - ping behaviour', () => {
         });
     });
 
-    describe('CHANNEL_UNREAD_UPDATED event', () => {
-        it('does not invalidate channel messages for a mark-read/open-channel update', () => {
+    describe('CHANNEL_UNREAD_UPDATED event', (): void => {
+        it('does not invalidate channel messages for a mark-read/open-channel update', (): void => {
             const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries');
 
             emitWsEvent(mockWs, WsEvents.CHANNEL_UNREAD_UPDATED, {
@@ -284,8 +284,8 @@ describe('setupGlobalWsHandlers - ping behaviour', () => {
         });
     });
 
-    describe('message cache freshness', () => {
-        it('adds server messages to an already cached live channel query', () => {
+    describe('message cache freshness', (): void => {
+        it('adds server messages to an already cached live channel query', (): void => {
             const queryKey = CHAT_QUERY_KEYS.channelMessages(
                 'server-1',
                 'channel-1',
@@ -322,7 +322,7 @@ describe('setupGlobalWsHandlers - ping behaviour', () => {
             ]);
         });
 
-        it('does not duplicate server messages when the same event arrives twice', () => {
+        it('does not duplicate server messages when the same event arrives twice', (): void => {
             const queryKey = CHAT_QUERY_KEYS.channelMessages(
                 'server-1',
                 'channel-1',
@@ -354,7 +354,7 @@ describe('setupGlobalWsHandlers - ping behaviour', () => {
             expect(cached?.pages[0]).toHaveLength(1);
         });
 
-        it('adds DM messages to the cached peer conversation', () => {
+        it('adds DM messages to the cached peer conversation', (): void => {
             const peerQueryKey = CHAT_QUERY_KEYS.userMessages('user-2');
             queryClient.setQueryData<InfiniteData<ChatMessage[]>>(
                 peerQueryKey,
@@ -390,7 +390,7 @@ describe('setupGlobalWsHandlers - ping behaviour', () => {
             ]);
         });
 
-        it('updates cached channel unread metadata and invalidates the live message query', () => {
+        it('updates cached channel unread metadata and invalidates the live message query', (): void => {
             const messagesQueryKey = CHAT_QUERY_KEYS.channelMessages(
                 'server-1',
                 'channel-1',
@@ -437,7 +437,7 @@ describe('setupGlobalWsHandlers - ping behaviour', () => {
             ).toBe(true);
         });
 
-        it('invalidates chat message queries after authentication', () => {
+        it('invalidates chat message queries after authentication', (): void => {
             vi.spyOn(serversApi, 'getUnreadStatus').mockResolvedValue({});
             vi.spyOn(chatApi, 'getUnreadCounts').mockResolvedValue({});
 
@@ -473,11 +473,11 @@ describe('setupGlobalWsHandlers - ping behaviour', () => {
         });
     });
 
-    describe('server ping cleared when the pinged channel is viewed', () => {
+    describe('server ping cleared when the pinged channel is viewed', (): void => {
         const serverId = 'server-abc';
         const channelId = 'channel-xyz';
 
-        it('setServerPingCount(0) clears the badge after the user reads the channel', () => {
+        it('setServerPingCount(0) clears the badge after the user reads the channel', (): void => {
             emitWsEvent(mockWs, WsEvents.MENTION, {
                 type: 'mention',
                 senderId: 'user-1',
@@ -504,12 +504,12 @@ describe('setupGlobalWsHandlers - ping behaviour', () => {
 
             queryClient.setQueryData<{ pings: PingNotification[] }>(
                 PINGS_KEY,
-                (old) => {
+                (old): { pings: PingNotification[] } | undefined => {
                     if (!old) return old;
                     return {
                         ...old,
                         pings: old.pings.filter(
-                            (p) => p.channelId !== channelId,
+                            (p): boolean => p.channelId !== channelId,
                         ),
                     };
                 },
@@ -527,8 +527,8 @@ describe('setupGlobalWsHandlers - ping behaviour', () => {
         });
     });
 
-    describe('FRIEND_ADDED event', () => {
-        it('places the accepted friend at the top of the cached friends list', () => {
+    describe('FRIEND_ADDED event', (): void => {
+        it('places the accepted friend at the top of the cached friends list', (): void => {
             const existingFriend: Friend = {
                 _id: 'friend-old',
                 username: 'oldfriend',
@@ -555,11 +555,11 @@ describe('setupGlobalWsHandlers - ping behaviour', () => {
             expect(
                 queryClient
                     .getQueryData<Friend[]>(FRIENDS_QUERY_KEY)
-                    ?.map((friend) => friend._id),
+                    ?.map((friend): string => friend._id),
             ).toEqual(['friend-new', 'friend-old']);
         });
 
-        it('synchronizes the accepted friend into the friend profiles cache', () => {
+        it('synchronizes the accepted friend into the friend profiles cache', (): void => {
             const existingFriend: Friend = {
                 _id: 'friend-old',
                 username: 'oldfriend',
@@ -586,13 +586,13 @@ describe('setupGlobalWsHandlers - ping behaviour', () => {
             expect(
                 queryClient
                     .getQueryData<Friend[]>(FRIEND_PROFILES_QUERY_KEY)
-                    ?.map((friend) => friend._id),
+                    ?.map((friend): string => friend._id),
             ).toEqual(['friend-new', 'friend-old']);
         });
     });
 
-    describe('FRIEND_REMOVED event', () => {
-        it('removes the unfriended user from friends and friend profiles caches', () => {
+    describe('FRIEND_REMOVED event', (): void => {
+        it('removes the unfriended user from friends and friend profiles caches', (): void => {
             const removedFriend: Friend = {
                 _id: 'friend-removed',
                 username: 'removedfriend',
@@ -625,17 +625,17 @@ describe('setupGlobalWsHandlers - ping behaviour', () => {
             expect(
                 queryClient
                     .getQueryData<Friend[]>(FRIENDS_QUERY_KEY)
-                    ?.map((friend) => friend._id),
+                    ?.map((friend): string => friend._id),
             ).toEqual(['friend-kept']);
             expect(
                 queryClient
                     .getQueryData<Friend[]>(FRIEND_PROFILES_QUERY_KEY)
-                    ?.map((friend) => friend._id),
+                    ?.map((friend): string => friend._id),
             ).toEqual(['friend-kept']);
         });
     });
 
-    describe('CHANNEL_CREATED event', () => {
+    describe('CHANNEL_CREATED event', (): void => {
         const serverId = 'server-1';
 
         const existingChannel: Channel = {
@@ -656,7 +656,7 @@ describe('setupGlobalWsHandlers - ping behaviour', () => {
             categoryId: null,
         };
 
-        it('adds a channel created by another user to the cached channel list without a reload', () => {
+        it('adds a channel created by another user to the cached channel list without a reload', (): void => {
             queryClient.setQueryData<Channel[]>(
                 SERVERS_QUERY_KEYS.channels(serverId),
                 [existingChannel],
@@ -673,11 +673,11 @@ describe('setupGlobalWsHandlers - ping behaviour', () => {
                     .getQueryData<
                         Channel[]
                     >(SERVERS_QUERY_KEYS.channels(serverId))
-                    ?.map((channel) => channel._id),
+                    ?.map((channel): string => channel._id),
             ).toEqual(['channel-old', 'channel-new']);
         });
 
-        it('adds a channel created by the current user to the cached channel list without a reload', () => {
+        it('adds a channel created by the current user to the cached channel list without a reload', (): void => {
             queryClient.setQueryData<User>(['me'], {
                 _id: 'current-user',
                 username: 'alice',
@@ -700,11 +700,11 @@ describe('setupGlobalWsHandlers - ping behaviour', () => {
                     .getQueryData<
                         Channel[]
                     >(SERVERS_QUERY_KEYS.channels(serverId))
-                    ?.map((channel) => channel._id),
+                    ?.map((channel): string => channel._id),
             ).toEqual(['channel-old', 'channel-new']);
         });
 
-        it('keeps the cached channel list ordered by position when the created channel belongs in the middle', () => {
+        it('keeps the cached channel list ordered by position when the created channel belongs in the middle', (): void => {
             queryClient.setQueryData<Channel[]>(
                 SERVERS_QUERY_KEYS.channels(serverId),
                 [
@@ -734,7 +734,7 @@ describe('setupGlobalWsHandlers - ping behaviour', () => {
                     .getQueryData<
                         Channel[]
                     >(SERVERS_QUERY_KEYS.channels(serverId))
-                    ?.map((channel) => channel._id),
+                    ?.map((channel): string => channel._id),
             ).toEqual(['channel-old', 'channel-new', 'channel-late']);
         });
     });

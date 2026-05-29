@@ -82,92 +82,90 @@ const flattenReplyText = (text: string): string =>
         .replace(/\s+/g, ' ')
         .trim();
 
-const MeasuredReplyText: React.FC<MeasuredReplyTextProps> = React.memo(
-    ({ text }) => {
-        const flattenedText = useMemo(() => flattenReplyText(text), [text]);
-        const nodes = useMemo(
-            () =>
-                parseText(flattenedText, {
-                    features: REPLY_PREVIEW_FEATURES,
-                }),
-            [flattenedText],
+const MeasuredReplyText = React.memo(({ text }: MeasuredReplyTextProps) => {
+    const flattenedText = useMemo((): string => flattenReplyText(text), [text]);
+    const nodes = useMemo(
+        () =>
+            parseText(flattenedText, {
+                features: REPLY_PREVIEW_FEATURES,
+            }),
+        [flattenedText],
+    );
+    const containerRef = useRef<HTMLSpanElement | null>(null);
+    const observedWidthRef = useRef<number | null>(null);
+    const [visibleText, setVisibleText] = useState(flattenedText);
+    const visibleNodes = useMemo(
+        () =>
+            parseText(visibleText, {
+                features: REPLY_PREVIEW_FEATURES,
+            }),
+        [visibleText],
+    );
+
+    const measure = useCallback((): void => {
+        const container = containerRef.current;
+        if (!container) return;
+
+        const maxHeight = Math.ceil(getSingleLineHeight(container));
+
+        if (container.scrollHeight <= maxHeight) {
+            return;
+        }
+
+        const heightRatio = maxHeight / container.scrollHeight;
+        const nextLength = Math.max(
+            0,
+            Math.floor(visibleText.length * heightRatio) - 3,
         );
-        const containerRef = useRef<HTMLSpanElement | null>(null);
-        const observedWidthRef = useRef<number | null>(null);
-        const [visibleText, setVisibleText] = useState(flattenedText);
-        const visibleNodes = useMemo(
-            () =>
-                parseText(visibleText, {
-                    features: REPLY_PREVIEW_FEATURES,
-                }),
-            [visibleText],
+        const nextText = truncateText(flattenedText, nextLength);
+
+        setVisibleText((current): string =>
+            nextText.length < current.length ? nextText : '...',
         );
+    }, [flattenedText, visibleText]);
 
-        const measure = useCallback(() => {
-            const container = containerRef.current;
-            if (!container) return;
+    useLayoutEffect((): (() => void) => {
+        const frame = window.requestAnimationFrame(measure);
+        return (): void => window.cancelAnimationFrame(frame);
+    }, [measure]);
 
-            const maxHeight = Math.ceil(getSingleLineHeight(container));
+    useLayoutEffect((): (() => void) | undefined => {
+        const container = containerRef.current;
+        if (!container || typeof ResizeObserver === 'undefined') return;
 
-            if (container.scrollHeight <= maxHeight) {
-                return;
-            }
+        const observedElement = container.parentElement ?? container;
+        const observer = new ResizeObserver(([entry]): void => {
+            const width =
+                entry?.contentRect.width ?? observedElement.clientWidth;
+            if (observedWidthRef.current === width) return;
 
-            const heightRatio = maxHeight / container.scrollHeight;
-            const nextLength = Math.max(
-                0,
-                Math.floor(visibleText.length * heightRatio) - 3,
-            );
-            const nextText = truncateText(flattenedText, nextLength);
+            observedWidthRef.current = width;
+            setVisibleText(flattenedText);
+        });
+        observer.observe(observedElement);
 
-            setVisibleText((current) =>
-                nextText.length < current.length ? nextText : '...',
-            );
-        }, [flattenedText, visibleText]);
+        return (): void => observer.disconnect();
+    }, [flattenedText]);
 
-        useLayoutEffect(() => {
-            const frame = window.requestAnimationFrame(measure);
-            return () => window.cancelAnimationFrame(frame);
-        }, [measure]);
-
-        useLayoutEffect(() => {
-            const container = containerRef.current;
-            if (!container || typeof ResizeObserver === 'undefined') return;
-
-            const observedElement = container.parentElement ?? container;
-            const observer = new ResizeObserver(([entry]) => {
-                const width =
-                    entry?.contentRect.width ?? observedElement.clientWidth;
-                if (observedWidthRef.current === width) return;
-
-                observedWidthRef.current = width;
-                setVisibleText(flattenedText);
-            });
-            observer.observe(observedElement);
-
-            return () => observer.disconnect();
-        }, [flattenedText]);
-
-        return (
-            <span
-                className="block min-w-0 overflow-hidden leading-normal"
-                ref={containerRef}
-            >
-                <ParsedText
-                    condenseFiles
-                    condenseInvites
-                    nodes={visibleText === flattenedText ? nodes : visibleNodes}
-                    size="xs"
-                    wrap="nowrap"
-                />
-            </span>
-        );
-    },
-);
+    return (
+        <span
+            className="block min-w-0 overflow-hidden leading-normal"
+            ref={containerRef}
+        >
+            <ParsedText
+                condenseFiles
+                condenseInvites
+                nodes={visibleText === flattenedText ? nodes : visibleNodes}
+                size="xs"
+                wrap="nowrap"
+            />
+        </span>
+    );
+});
 
 MeasuredReplyText.displayName = 'MeasuredReplyText';
 
-export const ReplyPreview: React.FC<ReplyPreviewProps> = React.memo(
+export const ReplyPreview = React.memo(
     ({
         user: initialUser,
         role,
@@ -181,7 +179,7 @@ export const ReplyPreview: React.FC<ReplyPreviewProps> = React.memo(
         disableGlowAndColors,
         disableColors,
         disableGlow,
-    }) => {
+    }: ReplyPreviewProps) => {
         const isUnknownUser = initialUser.username === 'Unknown';
         const { data: fetchedUser } = useUserById(initialUser._id, {
             enabled: isUnknownUser,
@@ -193,7 +191,9 @@ export const ReplyPreview: React.FC<ReplyPreviewProps> = React.memo(
         return (
             <Box
                 className="group/reply ml-[24px] flex h-5 max-h-5 cursor-pointer items-center gap-2 overflow-hidden opacity-60 transition-opacity select-none hover:opacity-100"
-                onClick={() => replyToId && onClick?.(replyToId)}
+                onClick={(): void | '' | undefined =>
+                    replyToId && onClick?.(replyToId)
+                }
             >
                 {/* Spine */}
                 <Box className="mt-[11px] h-[18px] w-[36px] flex-shrink-0 rounded-tl-lg border-t-2 border-l-2 border-border-subtle" />

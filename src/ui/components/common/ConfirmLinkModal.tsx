@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { ShieldAlert } from 'lucide-react';
 
 import { Button } from './Button';
@@ -16,12 +14,12 @@ interface ConfirmLinkModalProps {
 /**
  * @description Modal that asks the user to confirm opening an external link.
  */
-export const ConfirmLinkModal: React.FC<ConfirmLinkModalProps> = ({
+export const ConfirmLinkModal = ({
     isOpen,
     onClose,
     onConfirm,
     url,
-}) => (
+}: ConfirmLinkModalProps) => (
     <Modal
         isOpen={isOpen}
         showCloseButton={false}

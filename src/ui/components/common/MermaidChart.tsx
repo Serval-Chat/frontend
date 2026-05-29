@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import mermaid from 'mermaid';
 
@@ -75,14 +75,14 @@ const resolveThemeVariables = (): Record<string, string> => {
 /**
  * @description Renders a mermaid chart
  */
-export const MermaidChart: React.FC<MermaidChartProps> = ({ content }) => {
+export const MermaidChart = ({ content }: MermaidChartProps) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const [svgContent, setSvgContent] = useState<string>('');
     const [error, setError] = useState<string | null>(null);
 
     const { theme } = useTheme();
 
-    useEffect(() => {
+    useEffect((): void => {
         const renderChart = async (): Promise<void> => {
             try {
                 mermaid.initialize({

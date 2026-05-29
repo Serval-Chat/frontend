@@ -18,19 +18,19 @@ const blockingSlice = createSlice({
     name: 'blocking',
     initialState,
     reducers: {
-        setBlocks(state, action: PayloadAction<Record<string, number>>) {
+        setBlocks(state, action: PayloadAction<Record<string, number>>): void {
             state.blocks = action.payload;
         },
         addBlock(
             state,
             action: PayloadAction<{ targetUserId: string; flags: number }>,
-        ) {
+        ): void {
             state.blocks[action.payload.targetUserId] = action.payload.flags;
         },
-        removeBlock(state, action: PayloadAction<string>) {
+        removeBlock(state, action: PayloadAction<string>): void {
             delete state.blocks[action.payload];
         },
-        setProfiles(state, action: PayloadAction<BlockProfile[]>) {
+        setProfiles(state, action: PayloadAction<BlockProfile[]>): void {
             state.profiles = action.payload;
         },
     },
@@ -41,6 +41,6 @@ export const { setBlocks, addBlock, removeBlock, setProfiles } =
 export const blockingReducer = blockingSlice.reducer;
 
 export const selectBlockFlagsForUser =
-    (userId: string) =>
+    (userId: string): ((state: RootState) => number) =>
     (state: RootState): number =>
         state.blocking.blocks[userId] ?? 0;

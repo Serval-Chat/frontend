@@ -21,17 +21,30 @@ vi.mock('@/api/reactions/reactions.queries', () => ({
     useRemoveReaction: () => ({ mutate: vi.fn() }),
 }));
 
-vi.mock('@/api/users/users.queries', () => ({
-    useMe: () => ({ data: { _id: 'me' } }),
-}));
+vi.mock(
+    '@/api/users/users.queries',
+    (): { useMe: () => { data: { _id: string } } } => ({
+        useMe: (): { data: { _id: string } } => ({ data: { _id: 'me' } }),
+    }),
+);
 
-vi.mock('@/hooks/useCustomEmojis', () => ({
-    useCustomEmojis: () => ({ customCategories: [] }),
-}));
+vi.mock(
+    '@/hooks/useCustomEmojis',
+    (): { useCustomEmojis: () => { customCategories: never[] } } => ({
+        useCustomEmojis: (): { customCategories: never[] } => ({
+            customCategories: [],
+        }),
+    }),
+);
 
-vi.mock('@/hooks/usePermissions', () => ({
-    usePermissions: () => ({ hasPermission: () => false }),
-}));
+vi.mock(
+    '@/hooks/usePermissions',
+    (): { usePermissions: () => { hasPermission: () => boolean } } => ({
+        usePermissions: (): { hasPermission: () => false } => ({
+            hasPermission: (): false => false,
+        }),
+    }),
+);
 
 vi.mock('@/ui/components/common/ParsedEmoji', () => ({
     ParsedEmoji: ({ emojiId }: { emojiId: string }) => (
@@ -41,13 +54,15 @@ vi.mock('@/ui/components/common/ParsedEmoji', () => ({
 
 vi.mock('@tanstack/react-virtual', () => ({
     useVirtualizer: vi.fn().mockImplementation((options: any) => ({
-        getVirtualItems: () =>
-            Array.from({ length: options.count }).map((_, i) => ({
-                index: i,
-                start: 0,
-                key: i,
-            })),
-        getTotalSize: () => options.count * 100,
+        getVirtualItems: (): { index: number; start: number; key: number }[] =>
+            Array.from({ length: options.count }).map(
+                (_, i): { index: number; start: number; key: number } => ({
+                    index: i,
+                    start: 0,
+                    key: i,
+                }),
+            ),
+        getTotalSize: (): number => options.count * 100,
         scrollToIndex: vi.fn(),
         measureElement: vi.fn(),
     })),
@@ -57,7 +72,7 @@ const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
 });
 
-const TestWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+const TestWrapper = ({ children }: { children: React.ReactNode }) => (
     <BrowserRouter>
         <QueryClientProvider client={queryClient}>
             {children}
@@ -90,16 +105,16 @@ vi.mock('@/ui/components/chat/MessageItem', () => ({
     ),
 }));
 
-describe('Frontend Blocking Content Filters', () => {
+describe('Frontend Blocking Content Filters', (): void => {
     let mockUseAppSelector: ReturnType<typeof vi.spyOn>;
 
-    beforeEach(() => {
+    beforeEach((): void => {
         vi.clearAllMocks();
         mockUseAppSelector = vi.spyOn(hooksPattern, 'useAppSelector');
     });
 
-    describe('MessagesList (Flags: SPOILER_MESSAGES, HIDE_REPLIES_TO_THEM)', () => {
-        it('renders collapsed group for messages from blocked users (Flag 2)', () => {
+    describe('MessagesList (Flags: SPOILER_MESSAGES, HIDE_REPLIES_TO_THEM)', (): void => {
+        it('renders collapsed group for messages from blocked users (Flag 2)', (): void => {
             mockUseAppSelector.mockReturnValue({
                 'sender-blocked': BlockFlags.SPOILER_MESSAGES,
             });
@@ -153,7 +168,7 @@ describe('Frontend Blocking Content Filters', () => {
             ).toBeInTheDocument();
         });
 
-        it('completely hides messages that are replies to blocked users (Flag 4)', () => {
+        it('completely hides messages that are replies to blocked users (Flag 4)', (): void => {
             mockUseAppSelector.mockReturnValue({
                 'sender-blocked': BlockFlags.HIDE_REPLIES_TO_THEM,
             });
@@ -193,8 +208,8 @@ describe('Frontend Blocking Content Filters', () => {
         });
     });
 
-    describe('TypingIndicator (Flag 8: HIDE_FROM_TYPING_INDICATORS)', () => {
-        it('removes blocked users from typing users list', () => {
+    describe('TypingIndicator (Flag 8: HIDE_FROM_TYPING_INDICATORS)', (): void => {
+        it('removes blocked users from typing users list', (): void => {
             mockUseAppSelector.mockReturnValue({
                 'blocked-usr': BlockFlags.HIDE_FROM_TYPING_INDICATORS,
             });
@@ -216,8 +231,8 @@ describe('Frontend Blocking Content Filters', () => {
         });
     });
 
-    describe('Reactions (Flag 9: HIDE_THEIR_REACTIONS)', () => {
-        it('removes the blocked user from the users array so chip count drops', () => {
+    describe('Reactions (Flag 9: HIDE_THEIR_REACTIONS)', (): void => {
+        it('removes the blocked user from the users array so chip count drops', (): void => {
             mockUseAppSelector.mockReturnValue({
                 'u-blocked': BlockFlags.HIDE_THEIR_REACTIONS,
             });
@@ -248,7 +263,7 @@ describe('Frontend Blocking Content Filters', () => {
             expect(container.textContent).not.toMatch(/👍/);
         });
 
-        it('renders custom reactions by emoji id when the reaction has no URL', () => {
+        it('renders custom reactions by emoji id when the reaction has no URL', (): void => {
             mockUseAppSelector.mockReturnValue({});
 
             const reactions: MessageReaction[] = [

@@ -1,4 +1,4 @@
-import type { UseMutationResult, UseQueryResult } from '@tanstack/react-query';
+import type { UseQueryResult } from '@tanstack/react-query';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { apiClient } from '@/api/client';
@@ -9,7 +9,7 @@ import type {
     AdminUser,
 } from '@/types/admin';
 
-const createDefaultPermissions = (): AdminPermissions => ({
+const createDefaultPermissions = () => ({
     adminAccess: false,
     viewUsers: false,
     manageUsers: false,
@@ -25,7 +25,7 @@ const createDefaultPermissions = (): AdminPermissions => ({
 /**
  * Normalizes user permissions from the API
  */
-const normalizePermissions = (permissions: unknown): AdminPermissions => {
+const normalizePermissions = (permissions: unknown) => {
     const defaults = createDefaultPermissions();
     if (!permissions || typeof permissions !== 'object') {
         return defaults;
@@ -34,9 +34,11 @@ const normalizePermissions = (permissions: unknown): AdminPermissions => {
     const p = permissions as Record<string, unknown>;
     const normalized: Partial<AdminPermissions> = {};
 
-    (Object.keys(defaults) as (keyof AdminPermissions)[]).forEach((key) => {
-        normalized[key] = p[key] === true;
-    });
+    (Object.keys(defaults) as (keyof AdminPermissions)[]).forEach(
+        (key): void => {
+            normalized[key] = p[key] === true;
+        },
+    );
 
     return normalized as AdminPermissions;
 };
@@ -86,12 +88,7 @@ export const useAdminUserDetail = (
         enabled: !!userId,
     });
 
-export const useUpdateUserPermissions = (): UseMutationResult<
-    { message: string },
-    Error,
-    { userId: string; permissions: AdminPermissions },
-    unknown
-> => {
+export const useUpdateUserPermissions = () => {
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: async ({
@@ -100,7 +97,7 @@ export const useUpdateUserPermissions = (): UseMutationResult<
         }: {
             userId: string;
             permissions: AdminPermissions;
-        }) => {
+        }): Promise<{ message: string }> => {
             const { data } = await apiClient.put<{ message: string }>(
                 `/api/v1/admin/users/${userId}/permissions`,
                 {
@@ -109,7 +106,7 @@ export const useUpdateUserPermissions = (): UseMutationResult<
             );
             return data;
         },
-        onSuccess: () => {
+        onSuccess: (): void => {
             void queryClient.invalidateQueries({ queryKey: ['admin-users'] });
             void queryClient.invalidateQueries({ queryKey: ['admin-list'] });
             void queryClient.invalidateQueries({

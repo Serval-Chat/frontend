@@ -27,7 +27,7 @@ export const useResizable = ({
     storageKey,
     side,
 }: UseResizableOptions): UseResizableResult => {
-    const [width, setWidth] = useState(() => {
+    const [width, setWidth] = useState((): number => {
         const stored = localStorage.getItem(storageKey);
         if (stored) {
             const parsed = parseInt(stored, 10);
@@ -45,13 +45,13 @@ export const useResizable = ({
     const pendingWidthRef = useRef(width);
     const frameRef = useRef<number | null>(null);
 
-    useEffect(() => {
+    useEffect((): void => {
         currentWidthRef.current = width;
         pendingWidthRef.current = width;
     }, [width]);
 
     const handleMouseDown = useCallback(
-        (e: React.MouseEvent) => {
+        (e: React.MouseEvent): void => {
             e.preventDefault();
             setIsResizing(true);
             startXRef.current = e.clientX;
@@ -64,7 +64,7 @@ export const useResizable = ({
     );
 
     const handleMouseMove = useCallback(
-        (e: MouseEvent) => {
+        (e: MouseEvent): void => {
             const delta = e.clientX - startXRef.current;
             let newWidth: number;
 
@@ -79,7 +79,7 @@ export const useResizable = ({
             currentWidthRef.current = newWidth;
 
             if (frameRef.current !== null) return;
-            frameRef.current = window.requestAnimationFrame(() => {
+            frameRef.current = window.requestAnimationFrame((): void => {
                 frameRef.current = null;
                 setWidth(pendingWidthRef.current);
             });
@@ -87,7 +87,7 @@ export const useResizable = ({
         [side, minWidth, maxWidth],
     );
 
-    const handleMouseUp = useCallback(() => {
+    const handleMouseUp = useCallback((): void => {
         if (frameRef.current !== null) {
             window.cancelAnimationFrame(frameRef.current);
             frameRef.current = null;
@@ -100,7 +100,7 @@ export const useResizable = ({
         document.body.style.userSelect = '';
     }, [storageKey]);
 
-    useEffect(() => {
+    useEffect((): (() => void) => {
         if (isResizing) {
             window.addEventListener('mousemove', handleMouseMove);
             window.addEventListener('mouseup', handleMouseUp);
@@ -109,7 +109,7 @@ export const useResizable = ({
             window.removeEventListener('mouseup', handleMouseUp);
         }
 
-        return () => {
+        return (): void => {
             if (frameRef.current !== null) {
                 window.cancelAnimationFrame(frameRef.current);
                 frameRef.current = null;

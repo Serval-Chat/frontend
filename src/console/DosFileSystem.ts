@@ -63,14 +63,14 @@ export class DosFileSystem {
 
         return Object.values(this.entries)
             .filter(
-                (entry) =>
+                (entry): boolean =>
                     entry.path !== resolved.directory &&
                     this.parentPath(entry.path) === resolved.directory,
             )
-            .filter((entry) =>
+            .filter((entry): boolean =>
                 this.matchesPattern(entry.name, resolved.pattern),
             )
-            .sort((a, b) => {
+            .sort((a, b): number => {
                 if (a.type !== b.type) return a.type === 'directory' ? -1 : 1;
                 return a.name.localeCompare(b.name);
             });
@@ -184,7 +184,7 @@ export class DosFileSystem {
     public delete(pathPattern: string): number {
         const resolved = this.resolvePattern(pathPattern);
         const entries = this.list(pathPattern).filter(
-            (entry) => entry.type === 'file',
+            (entry): boolean => entry.type === 'file',
         );
         for (const entry of entries) {
             if (entry.attributes.includes('R')) {
@@ -422,7 +422,7 @@ export class DosFileSystem {
 
     private hasChildren(path: string): boolean {
         return Object.values(this.entries).some(
-            (entry) => this.parentPath(entry.path) === path,
+            (entry): boolean => this.parentPath(entry.path) === path,
         );
     }
 

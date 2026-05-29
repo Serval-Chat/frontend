@@ -6,12 +6,12 @@ import type { User } from '@/api/users/users.types';
 
 import { StyledUserName } from './StyledUserName';
 
-vi.mock('@/utils/apiUrl', () => ({
-    resolveApiUrl: (url: string) => `http://api${url}`,
+vi.mock('@/utils/apiUrl', (): { resolveApiUrl: (url: string) => string } => ({
+    resolveApiUrl: (url: string): string => `http://api${url}`,
 }));
 
-describe('StyledUserName Bot Coloring', () => {
-    it('uses role color when role is present', () => {
+describe('StyledUserName Bot Coloring', (): void => {
+    it('uses role color when role is present', (): void => {
         const botUser: User = {
             _id: 'bot-1',
             username: 'Bot',
@@ -36,7 +36,7 @@ describe('StyledUserName Bot Coloring', () => {
         expect(firstCharSpan?.style.color).toBe('rgb(255, 0, 0)');
     });
 
-    it('prioritizes role color over user gradient', () => {
+    it('prioritizes role color over user gradient', (): void => {
         const user: User = {
             _id: 'user-1',
             username: 'Alpha',
@@ -66,7 +66,7 @@ describe('StyledUserName Bot Coloring', () => {
         expect(firstCharSpan?.style.backgroundImage).toBe('');
     });
 
-    it('uses user gradient when no role color is provided', () => {
+    it('uses user gradient when no role color is provided', (): void => {
         const user: User = {
             _id: 'user-2',
             username: 'Gradient',
@@ -95,7 +95,7 @@ describe('StyledUserName Bot Coloring', () => {
         expect(firstCharSpan?.style.color).toBe('transparent');
     });
 
-    it('falls back to @everyone default role color', () => {
+    it('falls back to @everyone default role color', (): void => {
         const user: User = { _id: 'user-3', username: 'EveryoneUser' } as User;
         const everyoneRole: Role = {
             _id: 'everyone-role',
@@ -116,7 +116,7 @@ describe('StyledUserName Bot Coloring', () => {
         expect(firstCharSpan?.style.color).toBe('rgb(153, 170, 181)');
     });
 
-    it('does not apply user gradient when colors are disabled', () => {
+    it('does not apply user gradient when colors are disabled', (): void => {
         const user: User = {
             _id: 'user-4',
             username: 'NoColor',
@@ -139,7 +139,7 @@ describe('StyledUserName Bot Coloring', () => {
         expect(firstCharSpan?.style.color).toBe('');
     });
 
-    it('keeps role color and removes glow when custom colors and glow are disabled', () => {
+    it('keeps role color and removes glow when custom colors and glow are disabled', (): void => {
         const user: User = {
             _id: 'user-5',
             username: 'RoleWins',
@@ -177,7 +177,7 @@ describe('StyledUserName Bot Coloring', () => {
         ).toHaveLength(0);
     });
 
-    it('does not use a disabled user glow color over role color', () => {
+    it('does not use a disabled user glow color over role color', (): void => {
         const user: User = {
             _id: 'user-6',
             username: 'RoleGlow',
@@ -216,7 +216,7 @@ describe('StyledUserName Bot Coloring', () => {
         expect(firstGlowSpan?.style.color).toBe('rgb(230, 126, 34)');
     });
 
-    it('does not use an enabled user glow color over role color', () => {
+    it('does not use an enabled user glow color over role color', (): void => {
         const user: User = {
             _id: 'user-7',
             username: 'RoleGlowWins',

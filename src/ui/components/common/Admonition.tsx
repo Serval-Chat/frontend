@@ -149,11 +149,7 @@ function getAdmonitionTheme(admonitionType: string): {
 /**
  * Renders an admonition
  */
-export const Admonition: React.FC<AdmonitionProps> = ({
-    node,
-    isNested,
-    children,
-}) => {
+export const Admonition = ({ node, isNested, children }: AdmonitionProps) => {
     const theme = getAdmonitionTheme(node.admonitionType);
     const displayTitle =
         node.title ??

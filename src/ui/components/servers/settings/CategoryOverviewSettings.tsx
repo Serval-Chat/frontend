@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 import { Trash2 } from 'lucide-react';
 
@@ -19,9 +19,10 @@ interface CategoryOverviewSettingsProps {
     onDeleted?: () => void;
 }
 
-export const CategoryOverviewSettings: React.FC<
-    CategoryOverviewSettingsProps
-> = ({ category, onDeleted }) => {
+export const CategoryOverviewSettings = ({
+    category,
+    onDeleted,
+}: CategoryOverviewSettingsProps) => {
     const [name, setName] = useState(category.name);
     const [originalName, setOriginalName] = useState(category.name);
 
@@ -50,7 +51,7 @@ export const CategoryOverviewSettings: React.FC<
                 name,
             },
             {
-                onSuccess: () => {
+                onSuccess: (): void => {
                     setOriginalName(name);
                 },
             },
@@ -63,7 +64,7 @@ export const CategoryOverviewSettings: React.FC<
 
     const handleDelete = (): void => {
         deleteCategory(category._id, {
-            onSuccess: () => {
+            onSuccess: (): void => {
                 onDeleted?.();
             },
         });
@@ -90,7 +91,7 @@ export const CategoryOverviewSettings: React.FC<
                         id="category-name"
                         placeholder="new-category"
                         value={name}
-                        onChange={(e) => setName(e.target.value)}
+                        onChange={(e): void => setName(e.target.value)}
                     />
                 </div>
             </div>
@@ -118,7 +119,7 @@ export const CategoryOverviewSettings: React.FC<
                         <Button
                             className="min-w-[120px]"
                             variant="danger"
-                            onClick={() => setIsDeleteConfirmOpen(true)}
+                            onClick={(): void => setIsDeleteConfirmOpen(true)}
                         >
                             <Trash2 className="mr-2 h-4 w-4" />
                             Delete Category
@@ -139,7 +140,7 @@ export const CategoryOverviewSettings: React.FC<
                 className="max-w-md"
                 isOpen={isDeleteConfirmOpen}
                 title="Delete Category"
-                onClose={() => setIsDeleteConfirmOpen(false)}
+                onClose={(): void => setIsDeleteConfirmOpen(false)}
             >
                 <div className="space-y-6">
                     <div className="border-status-error bg-status-error-bg text-status-error rounded-md border p-4 text-sm">
@@ -151,7 +152,7 @@ export const CategoryOverviewSettings: React.FC<
                     <div className="-mx-6 -mb-6 flex justify-end gap-3 bg-bg-secondary p-6 pt-4">
                         <Button
                             variant="ghost"
-                            onClick={() => setIsDeleteConfirmOpen(false)}
+                            onClick={(): void => setIsDeleteConfirmOpen(false)}
                         >
                             Cancel
                         </Button>

@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { X } from 'lucide-react';
 
 import { useCancelFriendRequest } from '@/api/friends/friends.queries';
@@ -16,11 +14,11 @@ interface SentFriendRequestItemProps {
     toUsername: string;
 }
 
-export const SentFriendRequestItem: React.FC<SentFriendRequestItemProps> = ({
+export const SentFriendRequestItem = ({
     requestId,
     toId,
     toUsername,
-}) => {
+}: SentFriendRequestItemProps) => {
     const { data: userProfile } = useUserById(toId);
     const { mutate: cancel, isPending: isCancelling } =
         useCancelFriendRequest();
@@ -47,7 +45,7 @@ export const SentFriendRequestItem: React.FC<SentFriendRequestItemProps> = ({
                     className="h-8 w-8 rounded-full border-transparent p-0 text-red-500 hover:border-red-500/50 hover:bg-red-500/10 hover:text-red-600"
                     loading={isCancelling}
                     variant="normal"
-                    onClick={() => cancel(requestId)}
+                    onClick={(): void => cancel(requestId)}
                 >
                     <X className="h-4 w-4" />
                 </Button>

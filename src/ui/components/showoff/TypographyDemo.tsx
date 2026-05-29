@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { GradientText } from '@/ui/components/common/GradientText';
 import { Heading } from '@/ui/components/common/Heading';
 import { MutedText } from '@/ui/components/common/MutedText';
@@ -9,7 +7,7 @@ import { DemoItem } from './DemoItem';
 import { DemoSection } from './DemoSection';
 import { SHOWOFF_SECTIONS } from './config';
 
-export const TypographyDemo: React.FC = () => (
+export const TypographyDemo = () => (
     <DemoSection
         id={SHOWOFF_SECTIONS.typography}
         title="Typography & Text System"

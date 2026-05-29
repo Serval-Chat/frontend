@@ -1,10 +1,8 @@
-import React from 'react';
-
 import { Button } from '@/ui/components/common/Button';
 import { Link } from '@/ui/components/common/Link';
 import { Box } from '@/ui/components/layout/Box';
 
-export const TopNavBar: React.FC = () => (
+export const TopNavBar = () => (
     <Box className="sticky top-0 z-[var(--z-index-sticky)] w-full border-b border-border-subtle bg-background">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
             <Link

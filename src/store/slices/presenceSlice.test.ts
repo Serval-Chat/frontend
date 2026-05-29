@@ -8,13 +8,13 @@ import {
     updateUserStatusByUsername,
 } from './presenceSlice';
 
-describe('presenceSlice', () => {
+describe('presenceSlice', (): void => {
     const initialState = {
         users: {},
         backendInstanceId: null,
     };
 
-    it('should handle setOnlineUsers', () => {
+    it('should handle setOnlineUsers', (): void => {
         const users = [
             { userId: '1', username: 'alice', status: { text: 'Available' } },
             { userId: '2', username: 'bob' },
@@ -34,7 +34,7 @@ describe('presenceSlice', () => {
         });
     });
 
-    it('should handle setUserOnline', () => {
+    it('should handle setUserOnline', (): void => {
         const user = {
             userId: '1',
             username: 'alice',
@@ -49,7 +49,7 @@ describe('presenceSlice', () => {
         });
     });
 
-    it('should handle setUserOffline', () => {
+    it('should handle setUserOffline', (): void => {
         const existingState = {
             users: {
                 '1': {
@@ -69,7 +69,7 @@ describe('presenceSlice', () => {
         expect(state.users['1'].customStatus).toBeNull();
     });
 
-    it('should handle setUserOffline for unknown user', () => {
+    it('should handle setUserOffline for unknown user', (): void => {
         const state = presenceReducer(
             initialState,
             setUserOffline({ userId: '2', username: 'bob' }),
@@ -82,7 +82,7 @@ describe('presenceSlice', () => {
         });
     });
 
-    it('should handle updateUserStatusByUsername', () => {
+    it('should handle updateUserStatusByUsername', (): void => {
         const existingState = {
             users: {
                 '1': {

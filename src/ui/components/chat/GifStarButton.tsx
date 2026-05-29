@@ -11,11 +11,11 @@ interface GifStarButtonProps {
     className?: string;
 }
 
-export const GifStarButton: React.FC<GifStarButtonProps> = ({
+export const GifStarButton = ({
     isFavorited,
     onClick,
     className,
-}) => (
+}: GifStarButtonProps) => (
     <Button
         className={cn(
             'h-8 w-8 rounded-full bg-black/50 p-0 backdrop-blur-sm transition-all hover:scale-110 hover:bg-black/70 active:scale-95',

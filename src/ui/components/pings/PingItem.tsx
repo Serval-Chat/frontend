@@ -17,15 +17,15 @@ interface PingItemProps {
     onClick: () => void;
 }
 
-export const PingItem: React.FC<PingItemProps> = ({ ping, onClick }) => {
+export const PingItem = ({ ping, onClick }: PingItemProps) => {
     const { mutate: deletePing } = useDeletePing();
     const { data: servers } = useServers();
     const { data: channels } = useChannels(ping.serverId || null);
 
-    const server = servers?.find((s) => s._id === ping.serverId);
+    const server = servers?.find((s): boolean => s._id === ping.serverId);
     const serverName = server?.name;
     const channelName = channels?.find(
-        (c: Channel) => c._id === ping.channelId,
+        (c: Channel): boolean => c._id === ping.channelId,
     )?.name;
 
     const handleDelete = (e: React.MouseEvent): void => {
@@ -47,7 +47,7 @@ export const PingItem: React.FC<PingItemProps> = ({ ping, onClick }) => {
             role="button"
             tabIndex={0}
             onClick={onClick}
-            onKeyDown={(e) => {
+            onKeyDown={(e): void => {
                 if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault();
                     onClick();

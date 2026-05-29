@@ -48,7 +48,7 @@ interface ChannelItemProps {
 /**
  * @description Renders a single channel item with an icon.
  */
-export const ChannelItem: React.FC<ChannelItemProps> = React.memo(
+export const ChannelItem = React.memo(
     ({
         name,
         type,
@@ -64,7 +64,7 @@ export const ChannelItem: React.FC<ChannelItemProps> = React.memo(
         onClick,
         onSettingsClick,
         onMouseEnter,
-    }) => {
+    }: ChannelItemProps) => {
         const channelClasses = cn(
             'group flex w-full items-center justify-between rounded-md border-none px-2 py-1.5 shadow-none transition-all',
             disabled
@@ -87,7 +87,7 @@ export const ChannelItem: React.FC<ChannelItemProps> = React.memo(
                     )}
                     role="button"
                     tabIndex={disabled ? -1 : 0}
-                    onKeyDown={(e) => {
+                    onKeyDown={(e): void => {
                         if (disabled) return;
                         if (e.key === 'Enter' || e.key === ' ') {
                             e.preventDefault();
@@ -138,7 +138,7 @@ export const ChannelItem: React.FC<ChannelItemProps> = React.memo(
                                 iconSize={14}
                                 title="Edit Channel"
                                 variant="ghost"
-                                onClick={(e) => {
+                                onClick={(e): void => {
                                     e.stopPropagation();
                                     onSettingsClick(e);
                                 }}
@@ -165,135 +165,129 @@ export const ChannelItem: React.FC<ChannelItemProps> = React.memo(
 
 ChannelItem.displayName = 'ChannelItem';
 
-export const VoiceParticipant: React.FC<{ userId: string }> = React.memo(
-    ({ userId }) => {
-        const { data: user } = useUserById(userId);
-        const { speakingUsers, voiceUserStates, userVolumes } = useAppSelector(
-            (state) => state.voice,
-        );
-        const { data: currentUser } = useMe();
-        const { data: friends } = useFriends();
-        const dispatch = useAppDispatch();
+export const VoiceParticipant = React.memo(({ userId }: { userId: string }) => {
+    const { data: user } = useUserById(userId);
+    const { speakingUsers, voiceUserStates, userVolumes } = useAppSelector(
+        (state) => state.voice,
+    );
+    const { data: currentUser } = useMe();
+    const { data: friends } = useFriends();
+    const dispatch = useAppDispatch();
 
-        const isSpeaking = speakingUsers.includes(userId);
-        const userState = voiceUserStates[userId];
-        const isMe = currentUser?._id === userId;
-        const isFriend = friends?.some((f) => f._id === userId);
+    const isSpeaking = speakingUsers.includes(userId);
+    const userState = voiceUserStates[userId];
+    const isMe = currentUser?._id === userId;
+    const isFriend = friends?.some((f): boolean => f._id === userId);
 
-        if (!user) {
-            return (
-                <div className="group/voice mt-0.5 flex flex-row items-center gap-2 rounded-md py-1 pr-2 pl-2 transition-colors hover:bg-white/5">
-                    <div className="h-4 w-4 shrink-0 animate-pulse rounded-full bg-bg-secondary" />
-                    <span className="flex-1 animate-pulse truncate text-xs font-medium text-muted-foreground">
-                        Connecting...
-                    </span>
-                </div>
-            );
-        }
-
-        const items: ContextMenuItem[] = [];
-
-        if (!isMe) {
-            const volume = userVolumes[userId] ?? 1;
-            items.push({
-                type: 'custom',
-                content: (
-                    <div className="flex min-w-[180px] flex-col gap-2 p-1">
-                        <div className="flex items-center justify-between text-xs font-bold tracking-wider text-muted-foreground uppercase">
-                            <div className="flex items-center gap-1.5">
-                                <Volume2 size={12} />
-                                User Volume
-                            </div>
-                            <span>
-                                {Math.round(
-                                    (isNaN(volume) ? 1.0 : volume) * 100,
-                                )}
-                                %
-                            </span>
-                        </div>
-                        <input
-                            className="w-full cursor-pointer accent-primary"
-                            max="2"
-                            min="0"
-                            step="0.01"
-                            type="range"
-                            value={volume}
-                            onChange={(e) => {
-                                dispatch(
-                                    setUserVolume({
-                                        userId,
-                                        volume: parseFloat(e.target.value),
-                                    }),
-                                );
-                            }}
-                        />
-                    </div>
-                ),
-            });
-            items.push({ type: 'divider' });
-        }
-
-        items.push({
-            label: 'Show Profile',
-            icon: UserIcon,
-            onClick: () => {
-                /* Profile logic usually handled by popups */
-            },
-        });
-
-        if (isFriend && !isMe) {
-            items.push({
-                label: 'Message',
-                icon: MessageSquare,
-                onClick: () => dispatch(setSelectedFriendId(userId)),
-            });
-        }
-
-        items.push({
-            label: 'Copy User ID',
-            icon: Copy,
-            onClick: () => {
-                void navigator.clipboard.writeText(userId);
-            },
-        });
-
+    if (!user) {
         return (
-            <ContextMenu className="w-full" items={items}>
-                <div className="group/voice mt-0.5 flex cursor-pointer flex-row items-center gap-2 rounded-md py-1 pr-2 pl-2 transition-colors hover:bg-white/5">
-                    <UserProfilePicture
-                        noIndicator
-                        className={cn(
-                            'rounded-full ring-2 ring-offset-1 ring-offset-[var(--secondary-bg)] transition-all duration-200',
-                            isSpeaking ? 'ring-success' : 'ring-transparent',
-                        )}
-                        size="xs"
-                        src={user.profilePicture}
-                        username={user.username}
-                    />
-                    <span className="flex-1 truncate text-xs font-medium text-muted-foreground">
-                        {user.displayName || user.username}
-                    </span>
-                    {userState &&
-                        (userState.isMuted || userState.isDeafened) && (
-                            <div className="mr-1 ml-auto flex shrink-0 items-center gap-1">
-                                {userState.isMuted && (
-                                    <MicOff
-                                        className="text-destructive"
-                                        size={10}
-                                    />
-                                )}
-                                {userState.isDeafened && (
-                                    <HeadphoneOff
-                                        className="text-destructive"
-                                        size={10}
-                                    />
-                                )}
-                            </div>
-                        )}
-                </div>
-            </ContextMenu>
+            <div className="group/voice mt-0.5 flex flex-row items-center gap-2 rounded-md py-1 pr-2 pl-2 transition-colors hover:bg-white/5">
+                <div className="h-4 w-4 shrink-0 animate-pulse rounded-full bg-bg-secondary" />
+                <span className="flex-1 animate-pulse truncate text-xs font-medium text-muted-foreground">
+                    Connecting...
+                </span>
+            </div>
         );
-    },
-);
+    }
+
+    const items: ContextMenuItem[] = [];
+
+    if (!isMe) {
+        const volume = userVolumes[userId] ?? 1;
+        items.push({
+            type: 'custom',
+            content: (
+                <div className="flex min-w-[180px] flex-col gap-2 p-1">
+                    <div className="flex items-center justify-between text-xs font-bold tracking-wider text-muted-foreground uppercase">
+                        <div className="flex items-center gap-1.5">
+                            <Volume2 size={12} />
+                            User Volume
+                        </div>
+                        <span>
+                            {Math.round((isNaN(volume) ? 1.0 : volume) * 100)}%
+                        </span>
+                    </div>
+                    <input
+                        className="w-full cursor-pointer accent-primary"
+                        max="2"
+                        min="0"
+                        step="0.01"
+                        type="range"
+                        value={volume}
+                        onChange={(e): void => {
+                            dispatch(
+                                setUserVolume({
+                                    userId,
+                                    volume: parseFloat(e.target.value),
+                                }),
+                            );
+                        }}
+                    />
+                </div>
+            ),
+        });
+        items.push({ type: 'divider' });
+    }
+
+    items.push({
+        label: 'Show Profile',
+        icon: UserIcon,
+        onClick: (): void => {
+            /* Profile logic usually handled by popups */
+        },
+    });
+
+    if (isFriend && !isMe) {
+        items.push({
+            label: 'Message',
+            icon: MessageSquare,
+            onClick: (): {
+                payload: string | null;
+                type: 'nav/setSelectedFriendId';
+            } => dispatch(setSelectedFriendId(userId)),
+        });
+    }
+
+    items.push({
+        label: 'Copy User ID',
+        icon: Copy,
+        onClick: (): void => {
+            void navigator.clipboard.writeText(userId);
+        },
+    });
+
+    return (
+        <ContextMenu className="w-full" items={items}>
+            <div className="group/voice mt-0.5 flex cursor-pointer flex-row items-center gap-2 rounded-md py-1 pr-2 pl-2 transition-colors hover:bg-white/5">
+                <UserProfilePicture
+                    noIndicator
+                    className={cn(
+                        'rounded-full ring-2 ring-offset-1 ring-offset-[var(--secondary-bg)] transition-all duration-200',
+                        isSpeaking ? 'ring-success' : 'ring-transparent',
+                    )}
+                    size="xs"
+                    src={user.profilePicture}
+                    username={user.username}
+                />
+                <span className="flex-1 truncate text-xs font-medium text-muted-foreground">
+                    {user.displayName || user.username}
+                </span>
+                {userState && (userState.isMuted || userState.isDeafened) && (
+                    <div className="mr-1 ml-auto flex shrink-0 items-center gap-1">
+                        {userState.isMuted && (
+                            <MicOff className="text-destructive" size={10} />
+                        )}
+                        {userState.isDeafened && (
+                            <HeadphoneOff
+                                className="text-destructive"
+                                size={10}
+                            />
+                        )}
+                    </div>
+                )}
+            </div>
+        </ContextMenu>
+    );
+});
 
 VoiceParticipant.displayName = 'VoiceParticipant';

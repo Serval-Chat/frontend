@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { LexicalPastePlugin } from './LexicalPastePlugin';
 
 const insertText = vi.fn();
-const update = vi.fn((callback: () => void) => callback());
+const update = vi.fn((callback: () => void): void => callback());
 let pasteHandler: ((event: ClipboardEvent) => boolean) | undefined;
 
 vi.mock('@lexical/react/LexicalComposerContext', () => ({
@@ -21,29 +21,33 @@ vi.mock('@lexical/react/LexicalComposerContext', () => ({
 
 vi.mock('lexical', () => ({
     $getSelection: () => ({ insertText }),
-    $isRangeSelection: () => true,
+    $isRangeSelection: (): true => true,
     COMMAND_PRIORITY_CRITICAL: 4,
     PASTE_COMMAND: Symbol('paste'),
 }));
 
-describe('LexicalPastePlugin', () => {
-    afterEach(() => {
+describe('LexicalPastePlugin', (): void => {
+    afterEach((): void => {
         vi.clearAllMocks();
         pasteHandler = undefined;
     });
 
-    it('inserts text/plain and ignores text/html formatting on rich paste', async () => {
+    it('inserts text/plain and ignores text/html formatting on rich paste', async (): Promise<void> => {
         const preventDefault = vi.fn();
 
         render(<LexicalPastePlugin onPasteFiles={vi.fn()} />);
 
-        await waitFor(() => expect(pasteHandler).toBeDefined());
+        await waitFor((): void => expect(pasteHandler).toBeDefined());
 
         const handled = pasteHandler?.({
             clipboardData: {
                 files: [],
                 items: [],
-                getData: (type: string) =>
+                getData: (
+                    type: string,
+                ):
+                    | 'const value = true;'
+                    | '<span style="font-style: italic">const value = true;</span>' =>
                     type === 'text/plain'
                         ? 'const value = true;'
                         : '<span style="font-style: italic">const value = true;</span>',

@@ -35,11 +35,11 @@ interface ChannelSettingsModalProps {
     channel: Channel;
 }
 
-export const ChannelSettingsModal: React.FC<ChannelSettingsModalProps> = ({
+export const ChannelSettingsModal = ({
     isOpen,
     onClose,
     channel,
-}) => {
+}: ChannelSettingsModalProps) => {
     const [activeSection, setActiveSection] = useState<string>('overview');
     const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(true);
 
@@ -63,7 +63,7 @@ export const ChannelSettingsModal: React.FC<ChannelSettingsModalProps> = ({
                 />
             }
             onClose={onClose}
-            onMobileBackClick={() => setIsMobileSidebarOpen(true)}
+            onMobileBackClick={(): void => setIsMobileSidebarOpen(true)}
         >
             <React.Suspense fallback={null}>
                 {activeSection === 'overview' ? (

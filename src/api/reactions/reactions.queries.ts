@@ -37,7 +37,7 @@ export const useAddReaction = (): UseMutationResult<
             serverId?: string;
             channelId?: string;
             data: AddReactionRequest;
-        }) => {
+        }): Promise<ReactionsResponse> => {
             if (serverId && channelId) {
                 return reactionsApi.addServerReaction(
                     serverId,
@@ -48,19 +48,27 @@ export const useAddReaction = (): UseMutationResult<
             }
             return reactionsApi.addDmReaction(messageId, data);
         },
-        onSuccess: (response, variables) => {
+        onSuccess: (response, variables): void => {
             const { messageId } = variables;
             queryClient.setQueriesData<InfiniteData<ChatMessage[]>>(
                 { queryKey: ['chat', 'messages'] },
-                (old) => {
+                (
+                    old,
+                ):
+                    | { pages: ChatMessage[][]; pageParams: unknown[] }
+                    | undefined => {
                     if (!old) return old;
                     return {
                         ...old,
-                        pages: old.pages.map((page) =>
-                            page.map((msg) =>
-                                msg._id === messageId
-                                    ? { ...msg, reactions: response.reactions }
-                                    : msg,
+                        pages: old.pages.map((page): ChatMessage[] =>
+                            page.map(
+                                (msg): ChatMessage =>
+                                    msg._id === messageId
+                                        ? {
+                                              ...msg,
+                                              reactions: response.reactions,
+                                          }
+                                        : msg,
                             ),
                         ),
                     };
@@ -93,7 +101,7 @@ export const useRemoveReaction = (): UseMutationResult<
             serverId?: string;
             channelId?: string;
             data: RemoveReactionRequest;
-        }) => {
+        }): Promise<ReactionsResponse> => {
             if (serverId && channelId) {
                 return reactionsApi.removeServerReaction(
                     serverId,
@@ -104,19 +112,27 @@ export const useRemoveReaction = (): UseMutationResult<
             }
             return reactionsApi.removeDmReaction(messageId, data);
         },
-        onSuccess: (response, variables) => {
+        onSuccess: (response, variables): void => {
             const { messageId } = variables;
             queryClient.setQueriesData<InfiniteData<ChatMessage[]>>(
                 { queryKey: ['chat', 'messages'] },
-                (old) => {
+                (
+                    old,
+                ):
+                    | { pages: ChatMessage[][]; pageParams: unknown[] }
+                    | undefined => {
                     if (!old) return old;
                     return {
                         ...old,
-                        pages: old.pages.map((page) =>
-                            page.map((msg) =>
-                                msg._id === messageId
-                                    ? { ...msg, reactions: response.reactions }
-                                    : msg,
+                        pages: old.pages.map((page): ChatMessage[] =>
+                            page.map(
+                                (msg): ChatMessage =>
+                                    msg._id === messageId
+                                        ? {
+                                              ...msg,
+                                              reactions: response.reactions,
+                                          }
+                                        : msg,
                             ),
                         ),
                     };

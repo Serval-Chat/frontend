@@ -122,7 +122,9 @@ const SuccessCard = ({
             <Button
                 className="w-full py-3 text-base font-semibold"
                 variant="primary"
-                onClick={() => void navigate(`/chat/@server/${serverId}`)}
+                onClick={(): undefined =>
+                    void navigate(`/chat/@server/${serverId}`)
+                }
             >
                 <ExternalLink size={14} /> Go to Server
             </Button>
@@ -163,12 +165,15 @@ export const BotAuthorize = (): ReactNode => {
     const botName = botInfo?.displayName ?? botInfo?.username ?? '';
     const activePermissions = urlPermissions ?? botInfo?.botPermissions;
     const requestedPerms = activePermissions
-        ? BOT_PERMISSION_KEYS.filter((k) => activePermissions[k])
+        ? BOT_PERMISSION_KEYS.filter(
+              (k): boolean | undefined => activePermissions[k],
+          )
         : [];
 
-    const manageableServers = servers?.filter((s) => s.canManage) ?? [];
+    const manageableServers =
+        servers?.filter((s): boolean | undefined => s.canManage) ?? [];
     const selectedServer = manageableServers.find(
-        (s) => s._id === selectedServerId,
+        (s): boolean => s._id === selectedServerId,
     );
 
     const handleAuthorize = (): void => {
@@ -185,10 +190,10 @@ export const BotAuthorize = (): ReactNode => {
                     : undefined,
             },
             {
-                onSuccess: ({ serverName, serverId }) => {
+                onSuccess: ({ serverName, serverId }): void => {
                     setSuccess({ serverName, serverId });
                 },
-                onError: (e) =>
+                onError: (e): void =>
                     showToast(e.message || 'Authorization failed', 'error'),
             },
         );
@@ -336,8 +341,8 @@ export const BotAuthorize = (): ReactNode => {
                                                 'border-primary/40 bg-bg-secondary/50',
                                         )}
                                         type="button"
-                                        onClick={() =>
-                                            setDropdownOpen((o) => !o)
+                                        onClick={(): void =>
+                                            setDropdownOpen((o): boolean => !o)
                                         }
                                     >
                                         {selectedServer ? (
@@ -403,7 +408,7 @@ export const BotAuthorize = (): ReactNode => {
                                                                 )}
                                                                 key={server._id}
                                                                 type="button"
-                                                                onClick={() => {
+                                                                onClick={(): void => {
                                                                     setSelectedServerId(
                                                                         server._id,
                                                                     );

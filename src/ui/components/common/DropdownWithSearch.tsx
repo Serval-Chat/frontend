@@ -30,7 +30,7 @@ interface DropdownWithSearchProps {
     allowClear?: boolean;
 }
 
-export const DropdownWithSearch: React.FC<DropdownWithSearchProps> = ({
+export const DropdownWithSearch = ({
     options,
     value,
     onChange,
@@ -40,26 +40,27 @@ export const DropdownWithSearch: React.FC<DropdownWithSearchProps> = ({
     className,
     noOptionsMessage = 'No options found',
     allowClear = true,
-}) => {
+}: DropdownWithSearchProps) => {
     const [isOpen, setIsOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const containerRef = useRef<HTMLDivElement>(null);
     const dropdownRef = useRef<HTMLDivElement>(null);
 
     const selectedOption = useMemo(
-        () => options.find((opt) => opt.id === value),
+        (): DropdownOption | undefined =>
+            options.find((opt): boolean => opt.id === value),
         [options, value],
     );
 
     const filteredOptions = useMemo(
-        () =>
-            options.filter((opt) =>
+        (): DropdownOption[] =>
+            options.filter((opt): boolean =>
                 opt.label.toLowerCase().includes(searchQuery.toLowerCase()),
             ),
         [options, searchQuery],
     );
 
-    useEffect(() => {
+    useEffect((): (() => void) => {
         const handleClickOutside = (event: MouseEvent): void => {
             if (
                 containerRef.current &&
@@ -72,7 +73,7 @@ export const DropdownWithSearch: React.FC<DropdownWithSearchProps> = ({
         if (isOpen) {
             document.addEventListener('mousedown', handleClickOutside);
         }
-        return () => {
+        return (): void => {
             document.removeEventListener('mousedown', handleClickOutside);
         };
     }, [isOpen]);
@@ -139,7 +140,7 @@ export const DropdownWithSearch: React.FC<DropdownWithSearchProps> = ({
                             role="button"
                             tabIndex={0}
                             onClick={handleClear}
-                            onKeyDown={(e) => {
+                            onKeyDown={(e): void => {
                                 if (e.key === 'Enter' || e.key === ' ') {
                                     handleClear(e);
                                 }
@@ -179,7 +180,7 @@ export const DropdownWithSearch: React.FC<DropdownWithSearchProps> = ({
                                     placeholder={searchPlaceholder}
                                     size="sm"
                                     value={searchQuery}
-                                    onChange={(e) =>
+                                    onChange={(e): void =>
                                         setSearchQuery(e.target.value)
                                     }
                                 />
@@ -200,7 +201,9 @@ export const DropdownWithSearch: React.FC<DropdownWithSearchProps> = ({
                                         key={option.id || option.label}
                                         size="md"
                                         variant="ghost"
-                                        onClick={() => handleSelect(option.id)}
+                                        onClick={(): void =>
+                                            handleSelect(option.id)
+                                        }
                                     >
                                         <div className="flex items-center gap-3 overflow-hidden">
                                             {option.icon && (

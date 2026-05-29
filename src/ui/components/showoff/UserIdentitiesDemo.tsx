@@ -1,5 +1,3 @@
-import React from 'react';
-
 import type { User, UsernameFont } from '@/api/users/users.types';
 import { StyledUserName } from '@/ui/components/common/StyledUserName';
 import { UserProfilePicture } from '@/ui/components/common/UserProfilePicture';
@@ -22,7 +20,7 @@ const ALL_FONTS: UsernameFont[] = [
     'Workbench',
 ];
 
-export const UserIdentitiesDemo: React.FC = () => {
+export const UserIdentitiesDemo = () => {
     // Mock users
     const mockUsers: Record<string, User> = {
         normal: {

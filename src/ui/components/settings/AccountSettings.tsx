@@ -41,7 +41,7 @@ import { ChangePasswordModal } from './ChangePasswordModal';
 import { ImageCropModal } from './ImageCropModal';
 import { WebsiteConnectionsSettings } from './WebsiteConnectionsSettings';
 
-export const AccountSettings: React.FC = () => {
+export const AccountSettings = () => {
     const { data: user } = useMe();
     const { showToast } = useToast();
     const queryClient = useQueryClient();
@@ -81,7 +81,7 @@ export const AccountSettings: React.FC = () => {
     const { customCategories } = useCustomEmojis({ enabled: true });
 
     const friendUsers = useMemo(
-        () => friendsList as unknown as User[],
+        (): User[] => friendsList as unknown as User[],
         [friendsList],
     );
 
@@ -129,22 +129,22 @@ export const AccountSettings: React.FC = () => {
     const handleSave = (): void => {
         if (displayName !== originalDisplayName) {
             updateDisplayName(displayName, {
-                onSuccess: () => setOriginalDisplayName(displayName),
+                onSuccess: (): void => setOriginalDisplayName(displayName),
             });
         }
         if (pronouns !== originalPronouns) {
             updatePronouns(pronouns, {
-                onSuccess: () => setOriginalPronouns(pronouns),
+                onSuccess: (): void => setOriginalPronouns(pronouns),
             });
         }
         if (bio !== originalBio) {
             updateBio(bio, {
-                onSuccess: () => setOriginalBio(bio),
+                onSuccess: (): void => setOriginalBio(bio),
             });
         }
         if (username !== originalUsername) {
             updateUsername(username, {
-                onSuccess: () => setOriginalUsername(username),
+                onSuccess: (): void => setOriginalUsername(username),
             });
         }
     };
@@ -347,8 +347,12 @@ export const AccountSettings: React.FC = () => {
                     <UserProfileCard
                         presenceStatus="online"
                         user={previewUser}
-                        onAvatarClick={() => avatarInputRef.current?.click()}
-                        onBannerClick={() => bannerInputRef.current?.click()}
+                        onAvatarClick={(): void | undefined =>
+                            avatarInputRef.current?.click()
+                        }
+                        onBannerClick={(): void | undefined =>
+                            bannerInputRef.current?.click()
+                        }
                     />
                 </div>
 
@@ -366,7 +370,9 @@ export const AccountSettings: React.FC = () => {
                             placeholder="Display Name"
                             type="text"
                             value={displayName}
-                            onChange={(e) => setDisplayName(e.target.value)}
+                            onChange={(e): void =>
+                                setDisplayName(e.target.value)
+                            }
                         />
                     </div>
 
@@ -382,7 +388,7 @@ export const AccountSettings: React.FC = () => {
                             placeholder="Username"
                             type="text"
                             value={username}
-                            onChange={(e) => setUsername(e.target.value)}
+                            onChange={(e): void => setUsername(e.target.value)}
                         />
                         <Text as="p" size="xs" variant="muted">
                             Changing your username might require a fresh login.
@@ -401,7 +407,7 @@ export const AccountSettings: React.FC = () => {
                             placeholder="He/Him, They/Them, etc."
                             type="text"
                             value={pronouns}
-                            onChange={(e) => setPronouns(e.target.value)}
+                            onChange={(e): void => setPronouns(e.target.value)}
                         />
                     </div>
 
@@ -417,7 +423,8 @@ export const AccountSettings: React.FC = () => {
                                 initialConfig={{
                                     namespace: 'BioEditor',
                                     nodes: [ChipNode],
-                                    onError: (error) => console.error(error),
+                                    onError: (error): void =>
+                                        console.error(error),
                                     theme: {
                                         paragraph: 'mb-0',
                                         text: {
@@ -448,13 +455,13 @@ export const AccountSettings: React.FC = () => {
                                 <LexicalAutocompletePlugin
                                     friends={friendUsers}
                                     serverEmojis={allServerEmojis}
-                                    onOpenChange={(isOpen) => {
+                                    onOpenChange={(isOpen): void => {
                                         isAutocompleteOpenRef.current = isOpen;
                                     }}
                                 />
                                 <OnChangePlugin
-                                    onChange={(editorState) => {
-                                        editorState.read(() => {
+                                    onChange={(editorState): void => {
+                                        editorState.read((): void => {
                                             const rawText =
                                                 $getRawMessageText();
                                             if (rawText.length <= 190) {
@@ -493,7 +500,9 @@ export const AccountSettings: React.FC = () => {
                                 <Button
                                     size="sm"
                                     variant="normal"
-                                    onClick={() => setIsLoginModalOpen(true)}
+                                    onClick={(): void =>
+                                        setIsLoginModalOpen(true)
+                                    }
                                 >
                                     Change E-mail
                                 </Button>
@@ -509,7 +518,9 @@ export const AccountSettings: React.FC = () => {
                                 <Button
                                     size="sm"
                                     variant="normal"
-                                    onClick={() => setIsPasswordModalOpen(true)}
+                                    onClick={(): void =>
+                                        setIsPasswordModalOpen(true)
+                                    }
                                 >
                                     Change Password
                                 </Button>
@@ -531,7 +542,7 @@ export const AccountSettings: React.FC = () => {
                                             loading={isTwoFactorLoading}
                                             size="sm"
                                             variant="normal"
-                                            onClick={() =>
+                                            onClick={(): undefined =>
                                                 void handleStartTwoFactorSetup()
                                             }
                                         >
@@ -563,7 +574,7 @@ export const AccountSettings: React.FC = () => {
                                                 placeholder="Enter first 6-digit code"
                                                 type="text"
                                                 value={twoFactorCode}
-                                                onChange={(e) =>
+                                                onChange={(e): void =>
                                                     setTwoFactorCode(
                                                         e.target.value.replace(
                                                             /\D/g,
@@ -577,7 +588,7 @@ export const AccountSettings: React.FC = () => {
                                                     isTwoFactorConfirmLoading
                                                 }
                                                 variant="normal"
-                                                onClick={() =>
+                                                onClick={(): undefined =>
                                                     void handleConfirmTwoFactorSetup()
                                                 }
                                             >
@@ -598,7 +609,7 @@ export const AccountSettings: React.FC = () => {
                                                 placeholder="6-digit code"
                                                 type="text"
                                                 value={twoFactorCode}
-                                                onChange={(e) =>
+                                                onChange={(e): void =>
                                                     setTwoFactorCode(
                                                         e.target.value.replace(
                                                             /\D/g,
@@ -613,7 +624,7 @@ export const AccountSettings: React.FC = () => {
                                                 }
                                                 size="sm"
                                                 variant="normal"
-                                                onClick={() =>
+                                                onClick={(): undefined =>
                                                     void handleRegenerateBackupCodes()
                                                 }
                                             >
@@ -642,7 +653,7 @@ export const AccountSettings: React.FC = () => {
                                                             ? twoFactorBackupCode
                                                             : twoFactorCode
                                                     }
-                                                    onChange={(e) => {
+                                                    onChange={(e): void => {
                                                         if (
                                                             showDisableBackupInput
                                                         ) {
@@ -668,9 +679,12 @@ export const AccountSettings: React.FC = () => {
                                                     <button
                                                         className="text-xs text-primary hover:underline"
                                                         type="button"
-                                                        onClick={() =>
+                                                        onClick={(): void =>
                                                             setShowDisableBackupInput(
-                                                                (prev) => !prev,
+                                                                (
+                                                                    prev,
+                                                                ): boolean =>
+                                                                    !prev,
                                                             )
                                                         }
                                                     >
@@ -684,7 +698,7 @@ export const AccountSettings: React.FC = () => {
                                                         }
                                                         size="sm"
                                                         variant="danger"
-                                                        onClick={() =>
+                                                        onClick={(): undefined =>
                                                             void handleDisableTwoFactor()
                                                         }
                                                     >
@@ -703,7 +717,7 @@ export const AccountSettings: React.FC = () => {
                         isFixed={false}
                         isPending={isPending}
                         isVisible={hasChanges}
-                        onReset={() => {
+                        onReset={(): void => {
                             setDisplayName(originalDisplayName);
                             setUsername(originalUsername);
                             setPronouns(originalPronouns);
@@ -716,26 +730,26 @@ export const AccountSettings: React.FC = () => {
 
             <ChangeLoginModal
                 isOpen={isLoginModalOpen}
-                onClose={() => setIsLoginModalOpen(false)}
+                onClose={(): void => setIsLoginModalOpen(false)}
             />
 
             <ChangePasswordModal
                 isOpen={isPasswordModalOpen}
-                onClose={() => setIsPasswordModalOpen(false)}
+                onClose={(): void => setIsPasswordModalOpen(false)}
             />
 
             <ImageCropModal
                 imageFile={cropFile}
                 isOpen={isCropModalOpen}
                 type={cropType}
-                onClose={() => setIsCropModalOpen(false)}
+                onClose={(): void => setIsCropModalOpen(false)}
                 onConfirm={handleCropConfirm}
             />
 
             <Modal
                 isOpen={isBackupModalOpen}
                 title="Backup Codes"
-                onClose={() => {
+                onClose={(): void => {
                     setIsBackupModalOpen(false);
                     setBackupCodes([]);
                 }}
@@ -752,7 +766,7 @@ export const AccountSettings: React.FC = () => {
                     <div className="flex justify-end">
                         <Button
                             variant="normal"
-                            onClick={() => {
+                            onClick={(): void => {
                                 setIsBackupModalOpen(false);
                                 setBackupCodes([]);
                             }}

@@ -21,27 +21,27 @@ interface ToastContextType {
 
 const ToastContext = createContext<ToastContextType | undefined>(undefined);
 
-export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({
-    children,
-}) => {
+export const ToastProvider = ({ children }: { children: React.ReactNode }) => {
     const [toasts, setToasts] = useState<Toast[]>([]);
 
     const showToast = useCallback(
-        (message: string, type: ToastType = 'info') => {
+        (message: string, type: ToastType = 'info'): void => {
             const id =
                 Math.random().toString(36).substring(7) +
                 Date.now().toString(36);
-            setToasts((prev) => [...prev, { id, message, type }]);
+            setToasts((prev): Toast[] => [...prev, { id, message, type }]);
 
-            setTimeout(() => {
-                setToasts((prev) => prev.filter((t) => t.id !== id));
+            setTimeout((): void => {
+                setToasts((prev): Toast[] =>
+                    prev.filter((t): boolean => t.id !== id),
+                );
             }, 5000);
         },
         [],
     );
 
-    const removeToast = useCallback((id: string) => {
-        setToasts((prev) => prev.filter((t) => t.id !== id));
+    const removeToast = useCallback((id: string): void => {
+        setToasts((prev): Toast[] => prev.filter((t): boolean => t.id !== id));
     }, []);
 
     return (
@@ -53,7 +53,7 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({
                         <ToastItem
                             key={toast.id}
                             toast={toast}
-                            onClose={() => removeToast(toast.id)}
+                            onClose={(): void => removeToast(toast.id)}
                         />
                     ))}
                 </AnimatePresence>
@@ -71,9 +71,12 @@ export const useToast = (): ToastContextType => {
     return context;
 };
 
-const ToastItem: React.FC<{ toast: Toast; onClose: () => void }> = ({
+const ToastItem = ({
     toast,
     onClose,
+}: {
+    toast: Toast;
+    onClose: () => void;
 }) => {
     const icons = {
         success: <CheckCircle2 className="text-green-400" size={18} />,

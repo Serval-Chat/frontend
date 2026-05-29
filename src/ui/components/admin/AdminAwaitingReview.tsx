@@ -89,7 +89,7 @@ export const AdminAwaitingReview = ({
                     icon={Play}
                     loading={isRunningVerification}
                     size="sm"
-                    onClick={() => runVerificationNow()}
+                    onClick={(): void => runVerificationNow()}
                 >
                     Run now
                 </Button>
@@ -300,7 +300,7 @@ export const AdminAwaitingReview = ({
                                             size="sm"
                                             title="View Details"
                                             variant="ghost"
-                                            onClick={() =>
+                                            onClick={(): void =>
                                                 onViewServer(server._id)
                                             }
                                         >
@@ -312,7 +312,7 @@ export const AdminAwaitingReview = ({
                                             size="sm"
                                             title="Force Verified"
                                             variant="ghost"
-                                            onClick={() =>
+                                            onClick={(): void =>
                                                 setVerificationOverride({
                                                     serverId: server._id,
                                                     override: 'verified',
@@ -327,7 +327,7 @@ export const AdminAwaitingReview = ({
                                             size="sm"
                                             title="Force Unverified"
                                             variant="ghost"
-                                            onClick={() =>
+                                            onClick={(): void =>
                                                 setVerificationOverride({
                                                     serverId: server._id,
                                                     override: 'unverified',
@@ -342,7 +342,7 @@ export const AdminAwaitingReview = ({
                                                 size="sm"
                                                 title="Clear Verification Override"
                                                 variant="ghost"
-                                                onClick={() =>
+                                                onClick={(): void =>
                                                     setVerificationOverride({
                                                         serverId: server._id,
                                                         override: null,
@@ -387,7 +387,9 @@ export const AdminAwaitingReview = ({
                     <Button
                         disabled={page === 0}
                         variant="ghost"
-                        onClick={() => setPage((p) => Math.max(0, p - 1))}
+                        onClick={(): void =>
+                            setPage((p): number => Math.max(0, p - 1))
+                        }
                     >
                         Previous
                     </Button>
@@ -397,7 +399,7 @@ export const AdminAwaitingReview = ({
                     <Button
                         disabled={data.items.length < LIMIT}
                         variant="ghost"
-                        onClick={() => setPage((p) => p + 1)}
+                        onClick={(): void => setPage((p): number => p + 1)}
                     >
                         Next
                     </Button>

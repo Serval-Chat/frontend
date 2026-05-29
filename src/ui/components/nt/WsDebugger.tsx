@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vs } from 'react-syntax-highlighter/dist/esm/styles/prism';
@@ -22,12 +22,14 @@ const getPayloadText = (payload: unknown): string =>
 const getPayloadPreview = (payload: unknown): string =>
     JSON.stringify(payload) ?? String(payload);
 
-export const WsDebugger: React.FC = () => {
+export const WsDebugger = () => {
     const events = useWsDebugEvents();
 
     const filteredEvents = useMemo(
         () =>
-            events.filter((e) => !(e.direction === 'in' && e.type === 'pong')),
+            events.filter(
+                (e): boolean => !(e.direction === 'in' && e.type === 'pong'),
+            ),
         [events],
     );
 

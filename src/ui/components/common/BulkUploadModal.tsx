@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { Loader2 } from 'lucide-react';
 
 import { Button } from './Button';
@@ -17,7 +15,7 @@ interface BulkUploadModalProps {
     isCancelling?: boolean;
 }
 
-export const BulkUploadModal: React.FC<BulkUploadModalProps> = ({
+export const BulkUploadModal = ({
     isOpen,
     total,
     uploaded,
@@ -26,7 +24,7 @@ export const BulkUploadModal: React.FC<BulkUploadModalProps> = ({
     onClose,
     onCancel,
     isCancelling = false,
-}) => {
+}: BulkUploadModalProps) => {
     const isFinished = uploaded + errors === total && total > 0;
     const progress = total > 0 ? ((uploaded + errors) / total) * 100 : 0;
 
@@ -36,7 +34,7 @@ export const BulkUploadModal: React.FC<BulkUploadModalProps> = ({
             isOpen={isOpen}
             showCloseButton={isFinished && !isCancelling}
             title={title}
-            onClose={isFinished ? onClose : () => {}}
+            onClose={isFinished ? onClose : (): void => {}}
         >
             <div className="space-y-8 py-2">
                 <div className="space-y-3">

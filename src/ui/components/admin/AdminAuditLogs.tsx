@@ -45,7 +45,7 @@ const LogEntry = ({ log }: LogEntryProps): ReactNode => {
     const formatActionType = (type: string): string =>
         type
             .split('_')
-            .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+            .map((word): string => word.charAt(0).toUpperCase() + word.slice(1))
             .join(' ');
 
     const renderUser = (
@@ -66,7 +66,9 @@ const LogEntry = ({ log }: LogEntryProps): ReactNode => {
                     !hasData && 'cursor-default',
                     isExpanded && 'bg-bg-secondary',
                 )}
-                onClick={() => hasData && setIsExpanded(!isExpanded)}
+                onClick={(): false | void | undefined =>
+                    hasData && setIsExpanded(!isExpanded)
+                }
             >
                 {/* Timestamp */}
                 <TableCell>
@@ -260,7 +262,7 @@ export const AdminAuditLogs = (): ReactNode => {
                             className="transition-focus w-full cursor-pointer appearance-none rounded-xl border border-border-subtle bg-background py-2.5 pr-10 pl-4 text-sm outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10"
                             id="admin-select"
                             value={filters.actorId}
-                            onChange={(e) =>
+                            onChange={(e): void =>
                                 setFilters((prev) => ({
                                     ...prev,
                                     actorId: e.target.value,
@@ -295,7 +297,7 @@ export const AdminAuditLogs = (): ReactNode => {
                             className="transition-focus w-full cursor-pointer appearance-none rounded-xl border border-border-subtle bg-background py-2.5 pr-10 pl-4 text-sm outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10"
                             id="action-select"
                             value={filters.actionType}
-                            onChange={(e) =>
+                            onChange={(e): void =>
                                 setFilters((prev) => ({
                                     ...prev,
                                     actionType: e.target.value,
@@ -335,7 +337,9 @@ export const AdminAuditLogs = (): ReactNode => {
                         type="text"
                         value={filters.targetUserId}
                         variant="admin"
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                        onChange={(
+                            e: React.ChangeEvent<HTMLInputElement>,
+                        ): void =>
                             setFilters((prev) => ({
                                 ...prev,
                                 targetUserId: e.target.value,
@@ -394,7 +398,7 @@ export const AdminAuditLogs = (): ReactNode => {
                             disabled={filters.offset === 0}
                             size="sm"
                             variant="normal"
-                            onClick={() =>
+                            onClick={(): void =>
                                 setFilters((prev) => ({
                                     ...prev,
                                     offset: Math.max(
@@ -416,7 +420,7 @@ export const AdminAuditLogs = (): ReactNode => {
                             }
                             size="sm"
                             variant="normal"
-                            onClick={() =>
+                            onClick={(): void =>
                                 setFilters((prev) => ({
                                     ...prev,
                                     offset:

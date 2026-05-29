@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 import type { BlockProfile } from '@/api/blocks/blocks.queries';
 import { Button } from '@/ui/components/common/Button';
@@ -17,21 +17,21 @@ export interface BlockUserModalProps {
     profiles: BlockProfile[];
 }
 
-export const BlockUserModal: React.FC<BlockUserModalProps> = ({
+export const BlockUserModal = ({
     isOpen,
     onClose,
     onConfirm,
     username,
     userAvatar,
     profiles,
-}) => {
+}: BlockUserModalProps) => {
     const [selectedProfileId, setSelectedProfileId] = useState<string>(
-        () => profiles[0]?.id || '',
+        (): string => profiles[0]?.id || '',
     );
 
     if (
         profiles.length > 0 &&
-        !profiles.some((p) => p.id === selectedProfileId)
+        !profiles.some((p): boolean => p.id === selectedProfileId)
     ) {
         setSelectedProfileId(profiles[0].id);
     }
@@ -74,7 +74,9 @@ export const BlockUserModal: React.FC<BlockUserModalProps> = ({
                         className="w-full rounded-md border border-white/10 bg-bg-secondary px-3 py-2 text-sm text-foreground outline-none focus:border-primary"
                         id="block-profile-select"
                         value={selectedProfileId}
-                        onChange={(e) => setSelectedProfileId(e.target.value)}
+                        onChange={(e): void =>
+                            setSelectedProfileId(e.target.value)
+                        }
                     >
                         {profiles.map((p) => (
                             <option key={p.id} value={p.id}>

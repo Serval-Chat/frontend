@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { AnimatePresence, motion } from 'framer-motion';
 
@@ -22,24 +22,26 @@ const MESSAGES = [
 /**
  * @description Serchat loading and offline screen.
  */
-export const LoadingScreen: React.FC<LoadingScreenProps> = ({
+export const LoadingScreen = ({
     message,
     type = 'loading',
     isVisible = true,
-}) => {
+}: LoadingScreenProps) => {
     const [randomMessage, setRandomMessage] = useState(MESSAGES[0]);
 
-    useEffect(() => {
+    useEffect((): (() => void) | undefined => {
         if (type === 'loading' && !message) {
-            const interval = setInterval(() => {
-                setRandomMessage((prev) => {
-                    const filtered = MESSAGES.filter((m) => m !== prev);
+            const interval = setInterval((): void => {
+                setRandomMessage((prev): string => {
+                    const filtered = MESSAGES.filter(
+                        (m): boolean => m !== prev,
+                    );
                     return filtered[
                         Math.floor(Math.random() * filtered.length)
                     ];
                 });
             }, 3000);
-            return () => clearInterval(interval);
+            return (): void => clearInterval(interval);
         }
     }, [type, message]);
 

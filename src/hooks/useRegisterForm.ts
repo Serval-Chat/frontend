@@ -166,7 +166,7 @@ export const useRegisterForm = (): RegisterFormResult => {
 
             await setupWebPush();
             await checkAndMigrateVapid();
-            listenForSwNavigation((url) => {
+            listenForSwNavigation((url): void => {
                 void navigate(url);
             });
 

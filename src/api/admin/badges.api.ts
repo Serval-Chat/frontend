@@ -24,12 +24,15 @@ export const adminBadgesApi = {
         await apiClient.delete(`/api/v1/admin/badges/${badgeId}`);
     },
 
-    assignBadgeToUser: (userId: string, badgeId: string) =>
+    assignBadgeToUser: (
+        userId: string,
+        badgeId: string,
+    ): Promise<{ message: string }> =>
         apiClient
             .post<{ message: string }>(`/api/v1/admin/users/${userId}/badges`, {
                 badgeId,
             })
-            .then((r) => r.data),
+            .then((r): { message: string } => r.data),
 
     removeBadgeFromUser: async (
         userId: string,

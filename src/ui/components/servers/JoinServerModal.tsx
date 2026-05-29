@@ -11,10 +11,7 @@ interface JoinServerModalProps {
     onClose: () => void;
 }
 
-export const JoinServerModal: React.FC<JoinServerModalProps> = ({
-    isOpen,
-    onClose,
-}) => {
+export const JoinServerModal = ({ isOpen, onClose }: JoinServerModalProps) => {
     const [inviteCode, setInviteCode] = useState('');
     const { mutate: joinServer, isPending } = useJoinServer();
 
@@ -26,7 +23,7 @@ export const JoinServerModal: React.FC<JoinServerModalProps> = ({
         const code = inviteCode.split('/').pop() || inviteCode;
 
         joinServer(code, {
-            onSuccess: () => {
+            onSuccess: (): void => {
                 onClose();
                 setInviteCode('');
             },
@@ -51,7 +48,7 @@ export const JoinServerModal: React.FC<JoinServerModalProps> = ({
                         id="invite-code"
                         placeholder="cats (yes this is real, join this)"
                         value={inviteCode}
-                        onChange={(e) => setInviteCode(e.target.value)}
+                        onChange={(e): void => setInviteCode(e.target.value)}
                     />
                     <Text as="p" size="xs" variant="muted">
                         Enter an invite code to join an existing server.

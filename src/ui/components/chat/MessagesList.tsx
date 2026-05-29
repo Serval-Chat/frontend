@@ -57,7 +57,7 @@ interface MessagesListProps {
     roleMap?: Map<string, Role>;
 }
 
-export const MessagesList: React.FC<MessagesListProps> = React.memo(
+export const MessagesList = React.memo(
     ({
         messages,
         onLoadMore,
@@ -81,9 +81,11 @@ export const MessagesList: React.FC<MessagesListProps> = React.memo(
         fullMemberMap,
         userRolesMap,
         roleMap,
-    }) => {
+    }: MessagesListProps) => {
         const dispatch = useAppDispatch();
-        const blocks = useAppSelector((state) => state.blocking.blocks);
+        const blocks = useAppSelector(
+            (state): Record<string, number> => state.blocking.blocks,
+        );
         const scrollContainerRef = useRef<HTMLDivElement>(null);
         const [isAtBottom, setIsAtBottom] = useState(true);
         const lastScrollHeightRef = useRef<number>(0);
@@ -95,18 +97,18 @@ export const MessagesList: React.FC<MessagesListProps> = React.memo(
 
         const [, startTransitionHighlight] = useTransition();
 
-        useEffect(() => {
-            startTransitionHighlight(() => {
+        useEffect((): void => {
+            startTransitionHighlight((): void => {
                 setInternalHighlightId(activeHighlightId ?? null);
             });
         }, [activeHighlightId]);
 
-        useEffect(() => {
+        useEffect((): (() => void) | undefined => {
             if (!isLoadingMore) {
-                const t = setTimeout(() => {
+                const t = setTimeout((): void => {
                     loadMoreCooldownRef.current = false;
                 }, 100);
-                return () => clearTimeout(t);
+                return (): void => clearTimeout(t);
             }
         }, [isLoadingMore]);
 
@@ -145,7 +147,7 @@ export const MessagesList: React.FC<MessagesListProps> = React.memo(
                 currentBlockedGroup = [];
             };
 
-            messages.forEach((msg) => {
+            messages.forEach((msg): void => {
                 const senderBlocks = blocks[msg.senderId] || 0;
                 const isSenderBlocked = !!(
                     senderBlocks & BlockFlags.HIDE_MESSAGES
@@ -179,7 +181,7 @@ export const MessagesList: React.FC<MessagesListProps> = React.memo(
 
         const [, startTransitionGroup] = useTransition();
         const virtualItemsRef = useRef(virtualItems);
-        useLayoutEffect(() => {
+        useLayoutEffect((): void => {
             virtualItemsRef.current = virtualItems;
         }, [virtualItems]);
 
@@ -194,7 +196,7 @@ export const MessagesList: React.FC<MessagesListProps> = React.memo(
                 if (options.adjustments !== undefined) {
                     isPrependingScrollRef.current = true;
                     container.scrollTop = toOffset;
-                    requestAnimationFrame(() => {
+                    requestAnimationFrame((): void => {
                         isPrependingScrollRef.current = false;
                     });
                 } else if (options.behavior === 'smooth') {
@@ -209,9 +211,10 @@ export const MessagesList: React.FC<MessagesListProps> = React.memo(
         // eslint-disable-next-line react-hooks/incompatible-library
         const rowVirtualizer = useVirtualizer({
             count: virtualItems.length,
-            getScrollElement: () => scrollContainerRef.current,
+            getScrollElement: (): HTMLDivElement | null =>
+                scrollContainerRef.current,
             scrollToFn,
-            estimateSize: useCallback((index: number) => {
+            estimateSize: useCallback((index: number): number => {
                 const item = virtualItemsRef.current[index];
                 if (!item) return 100;
                 if (
@@ -246,7 +249,7 @@ export const MessagesList: React.FC<MessagesListProps> = React.memo(
                 return 100;
             }, []),
             getItemKey: useCallback(
-                (index: number) => {
+                (index: number): string | number => {
                     const item = virtualItems[index];
                     if (!item) return index;
                     if (item.type === 'message') return item.message._id;
@@ -261,7 +264,7 @@ export const MessagesList: React.FC<MessagesListProps> = React.memo(
         const requestMeasure = useCallback((): void => {
             if (measureFrameRef.current !== null) return;
 
-            measureFrameRef.current = requestAnimationFrame(() => {
+            measureFrameRef.current = requestAnimationFrame((): void => {
                 measureFrameRef.current = null;
 
                 const container = scrollContainerRef.current;
@@ -277,7 +280,7 @@ export const MessagesList: React.FC<MessagesListProps> = React.memo(
         }, [rowVirtualizer]);
 
         useEffect(
-            () => () => {
+            (): (() => void) => (): void => {
                 if (measureFrameRef.current !== null) {
                     cancelAnimationFrame(measureFrameRef.current);
                 }
@@ -285,8 +288,8 @@ export const MessagesList: React.FC<MessagesListProps> = React.memo(
             [],
         );
         const toggleGroup = useCallback((groupId: string): void => {
-            startTransitionGroup(() => {
-                setExpandedGroups((prev) => {
+            startTransitionGroup((): void => {
+                setExpandedGroups((prev): Set<string> => {
                     const next = new Set(prev);
                     if (next.has(groupId)) {
                         next.delete(groupId);
@@ -299,14 +302,14 @@ export const MessagesList: React.FC<MessagesListProps> = React.memo(
         }, []);
 
         const onReplyClickRef = useRef(onReplyClick);
-        useLayoutEffect(() => {
+        useLayoutEffect((): void => {
             onReplyClickRef.current = onReplyClick;
         });
 
         const handleReplyClick = useCallback(
             (messageId: string): void => {
                 const index = virtualItemsRef.current.findIndex(
-                    (item) =>
+                    (item): boolean =>
                         item.type === 'message' &&
                         item.message._id === messageId,
                 );
@@ -315,7 +318,7 @@ export const MessagesList: React.FC<MessagesListProps> = React.memo(
                         align: 'center',
                         behavior: 'smooth',
                     });
-                    startTransitionHighlight(() => {
+                    startTransitionHighlight((): void => {
                         setInternalHighlightId(messageId);
                     });
                 }
@@ -351,7 +354,7 @@ export const MessagesList: React.FC<MessagesListProps> = React.memo(
             }
         }, [hasMore, isLoadingMore, onLoadMore]);
 
-        useEffect(() => {
+        useEffect((): void => {
             const container = scrollContainerRef.current;
             if (!container) return;
 
@@ -370,12 +373,12 @@ export const MessagesList: React.FC<MessagesListProps> = React.memo(
 
         const prevFirstMessageIdRef = useRef<string | null>(null);
 
-        useLayoutEffect(() => {
+        useLayoutEffect((): void => {
             const container = scrollContainerRef.current;
             if (!container || virtualItems.length === 0) return;
 
             const firstMessage = virtualItems.find(
-                (item) => item.type === 'message',
+                (item): boolean => item.type === 'message',
             ) as { message: { _id: string } } | undefined;
             const firstMessageId = firstMessage?.message._id ?? null;
             const isPrepending =
@@ -393,7 +396,7 @@ export const MessagesList: React.FC<MessagesListProps> = React.memo(
                 if (heightDiff > 0) {
                     isPrependingScrollRef.current = true;
                     container.scrollTop += heightDiff;
-                    requestAnimationFrame(() => {
+                    requestAnimationFrame((): void => {
                         isPrependingScrollRef.current = false;
                     });
                 }
@@ -415,7 +418,7 @@ export const MessagesList: React.FC<MessagesListProps> = React.memo(
 
         const lastScrolledIdRef = useRef<string | null>(null);
 
-        useEffect(() => {
+        useEffect((): void => {
             if (!activeHighlightId) {
                 lastScrolledIdRef.current = null;
                 return;
@@ -426,7 +429,7 @@ export const MessagesList: React.FC<MessagesListProps> = React.memo(
             }
 
             const index = virtualItems.findIndex(
-                (item) =>
+                (item): boolean =>
                     item.type === 'message' &&
                     item.message._id === activeHighlightId,
             );
@@ -436,21 +439,21 @@ export const MessagesList: React.FC<MessagesListProps> = React.memo(
             }
         }, [activeHighlightId, virtualItems, rowVirtualizer]);
 
-        useEffect(() => {
+        useEffect((): (() => void) | undefined => {
             if (!highlightId) return;
 
-            const timer = setTimeout(() => {
+            const timer = setTimeout((): void => {
                 setInternalHighlightId(null);
                 dispatch(setTargetMessageId(null));
             }, 2000);
 
-            return () => {
+            return (): void => {
                 clearTimeout(timer);
             };
         }, [highlightId, dispatch]);
 
         useEffect(
-            () => () => {
+            (): (() => void) => (): void => {
                 if (activeHighlightId) {
                     dispatch(setTargetMessageId(null));
                 }
@@ -557,7 +560,7 @@ export const MessagesList: React.FC<MessagesListProps> = React.memo(
                                         <Box className="my-1 px-4 py-2">
                                             <Box
                                                 className="text-foreground-muted flex cursor-pointer items-center gap-2 text-xs font-medium transition-colors hover:text-foreground"
-                                                onClick={() =>
+                                                onClick={(): void =>
                                                     toggleGroup(item.id)
                                                 }
                                             >

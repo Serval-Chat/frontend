@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { Box } from '@/ui/components/layout/Box';
 import { cn } from '@/utils/cn';
 
@@ -8,7 +6,7 @@ interface DividerProps {
     fullWidth?: boolean;
 }
 
-export const Divider: React.FC<DividerProps> = ({ className, fullWidth }) => (
+export const Divider = ({ className, fullWidth }: DividerProps) => (
     <Box
         className={cn(
             'flex w-full items-center justify-center py-[2px]',

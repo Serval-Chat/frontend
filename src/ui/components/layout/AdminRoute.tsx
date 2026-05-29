@@ -26,7 +26,7 @@ export const AdminRoute = (): ReactNode => {
     const hasAdminAccess =
         permissions &&
         (permissions.adminAccess === true ||
-            Object.values(permissions).some((val) => val === true));
+            Object.values(permissions).some((val): boolean => val === true));
 
     if (!hasAdminAccess) {
         console.warn(

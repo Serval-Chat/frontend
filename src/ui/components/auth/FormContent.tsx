@@ -10,10 +10,7 @@ interface FormContentProps {
 /**
  * @description container for forms
  */
-export const FormContent: React.FC<FormContentProps> = ({
-    children,
-    className,
-}) => (
+export const FormContent = ({ children, className }: FormContentProps) => (
     <div
         className={cn(
             'relative z-content w-full max-w-110 flex-shrink-0 space-y-xl rounded-lg border border-border-subtle bg-bg-subtle/50 p-lg shadow-lg backdrop-blur-xl',

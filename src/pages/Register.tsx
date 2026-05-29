@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 import { AnimatePresence, motion } from 'framer-motion';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
@@ -17,7 +17,7 @@ import { DefaultBackground } from '@/ui/components/layout/DefaultBackground';
 /**
  * @description Register page
  */
-export const Register: React.FC = () => {
+export const Register = () => {
     const {
         login,
         setLogin,
@@ -55,7 +55,7 @@ export const Register: React.FC = () => {
 
                 <form
                     className="space-y-md"
-                    onSubmit={(e) => void handleSubmit(e)}
+                    onSubmit={(e): undefined => void handleSubmit(e)}
                 >
                     <InputWrapper>
                         <Input
@@ -65,7 +65,7 @@ export const Register: React.FC = () => {
                             placeholder="E-mail"
                             type="email"
                             value={login}
-                            onChange={(e) => setLogin(e.target.value)}
+                            onChange={(e): void => setLogin(e.target.value)}
                         />
                         <AnimatePresence>
                             {errors.login && (
@@ -88,7 +88,7 @@ export const Register: React.FC = () => {
                             placeholder="Username (display name)"
                             type="text"
                             value={username}
-                            onChange={(e) => setUsername(e.target.value)}
+                            onChange={(e): void => setUsername(e.target.value)}
                         />
                         <AnimatePresence>
                             {errors.username && (
@@ -112,7 +112,9 @@ export const Register: React.FC = () => {
                                 placeholder="Password"
                                 type={showPassword ? 'text' : 'password'}
                                 value={password}
-                                onChange={(e) => setPassword(e.target.value)}
+                                onChange={(e): void =>
+                                    setPassword(e.target.value)
+                                }
                             />
                             <button
                                 aria-label={
@@ -127,7 +129,9 @@ export const Register: React.FC = () => {
                                         : 'Show password'
                                 }
                                 type="button"
-                                onClick={() => setShowPassword(!showPassword)}
+                                onClick={(): void =>
+                                    setShowPassword(!showPassword)
+                                }
                             >
                                 {showPassword ? (
                                     <EyeOff size={18} />
@@ -158,7 +162,7 @@ export const Register: React.FC = () => {
                                 placeholder="Confirm Password"
                                 type={showConfirmPassword ? 'text' : 'password'}
                                 value={confirmPassword}
-                                onChange={(e) =>
+                                onChange={(e): void =>
                                     setConfirmPassword(e.target.value)
                                 }
                             />
@@ -175,7 +179,7 @@ export const Register: React.FC = () => {
                                         : 'Show password'
                                 }
                                 type="button"
-                                onClick={() =>
+                                onClick={(): void =>
                                     setShowConfirmPassword(!showConfirmPassword)
                                 }
                             >
@@ -205,7 +209,9 @@ export const Register: React.FC = () => {
                             placeholder="Invite Token"
                             type="text"
                             value={inviteToken}
-                            onChange={(e) => setInviteToken(e.target.value)}
+                            onChange={(e): void =>
+                                setInviteToken(e.target.value)
+                            }
                         />
                         <AnimatePresence>
                             {errors.inviteToken && (

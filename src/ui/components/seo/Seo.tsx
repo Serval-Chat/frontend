@@ -81,7 +81,7 @@ const ensureCanonical = (): HTMLLinkElement => {
 export const Seo = (): null => {
     const { pathname } = useLocation();
 
-    useEffect(() => {
+    useEffect((): void => {
         const config = getSeoConfig(pathname);
         const canonicalUrl = config.canonicalPath
             ? `${SITE_URL}${config.canonicalPath}`
@@ -90,41 +90,62 @@ export const Seo = (): null => {
 
         document.title = config.title;
 
-        setMeta('meta[name="description"]', 'content', config.description, () =>
-            ensureMetaName('description'),
+        setMeta(
+            'meta[name="description"]',
+            'content',
+            config.description,
+            (): HTMLMetaElement => ensureMetaName('description'),
         );
-        setMeta('meta[name="robots"]', 'content', robots, () =>
-            ensureMetaName('robots'),
+        setMeta(
+            'meta[name="robots"]',
+            'content',
+            robots,
+            (): HTMLMetaElement => ensureMetaName('robots'),
         );
         setMeta('link[rel="canonical"]', 'href', canonicalUrl, ensureCanonical);
 
-        setMeta('meta[property="og:title"]', 'content', config.title, () =>
-            ensureMetaProperty('og:title'),
+        setMeta(
+            'meta[property="og:title"]',
+            'content',
+            config.title,
+            (): HTMLMetaElement => ensureMetaProperty('og:title'),
         );
         setMeta(
             'meta[property="og:description"]',
             'content',
             config.description,
-            () => ensureMetaProperty('og:description'),
+            (): HTMLMetaElement => ensureMetaProperty('og:description'),
         );
-        setMeta('meta[property="og:url"]', 'content', canonicalUrl, () =>
-            ensureMetaProperty('og:url'),
+        setMeta(
+            'meta[property="og:url"]',
+            'content',
+            canonicalUrl,
+            (): HTMLMetaElement => ensureMetaProperty('og:url'),
         );
-        setMeta('meta[property="og:image"]', 'content', DEFAULT_IMAGE, () =>
-            ensureMetaProperty('og:image'),
+        setMeta(
+            'meta[property="og:image"]',
+            'content',
+            DEFAULT_IMAGE,
+            (): HTMLMetaElement => ensureMetaProperty('og:image'),
         );
 
-        setMeta('meta[name="twitter:title"]', 'content', config.title, () =>
-            ensureMetaName('twitter:title'),
+        setMeta(
+            'meta[name="twitter:title"]',
+            'content',
+            config.title,
+            (): HTMLMetaElement => ensureMetaName('twitter:title'),
         );
         setMeta(
             'meta[name="twitter:description"]',
             'content',
             config.description,
-            () => ensureMetaName('twitter:description'),
+            (): HTMLMetaElement => ensureMetaName('twitter:description'),
         );
-        setMeta('meta[name="twitter:image"]', 'content', DEFAULT_IMAGE, () =>
-            ensureMetaName('twitter:image'),
+        setMeta(
+            'meta[name="twitter:image"]',
+            'content',
+            DEFAULT_IMAGE,
+            (): HTMLMetaElement => ensureMetaName('twitter:image'),
         );
     }, [pathname]);
 

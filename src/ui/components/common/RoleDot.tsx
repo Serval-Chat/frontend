@@ -1,5 +1,3 @@
-import React from 'react';
-
 import type { Role } from '@/api/servers/servers.types';
 import { Box } from '@/ui/components/layout/Box';
 import { cn } from '@/utils/cn';
@@ -14,11 +12,7 @@ interface RoleDotProps {
 /**
  * @description Renders a small dot with the role's color(s).
  */
-export const RoleDot: React.FC<RoleDotProps> = ({
-    role,
-    className,
-    size = 12,
-}) => {
+export const RoleDot = ({ role, className, size = 12 }: RoleDotProps) => {
     const style = getRoleStyle(role);
 
     return (

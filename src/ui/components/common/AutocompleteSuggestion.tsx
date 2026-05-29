@@ -67,17 +67,17 @@ interface AutocompleteSuggestionProps {
     anchorElementRef?: React.RefObject<HTMLElement | null>;
 }
 
-export const AutocompleteSuggestion: React.FC<AutocompleteSuggestionProps> = ({
+export const AutocompleteSuggestion = ({
     suggestions,
     selectedIndex,
     onSelect,
     anchorElementRef,
-}) => {
+}: AutocompleteSuggestionProps) => {
     const mobileMenuEdgeGap = 16;
     const [mobileMenuStyle, setMobileMenuStyle] =
         React.useState<React.CSSProperties>();
 
-    React.useLayoutEffect(() => {
+    React.useLayoutEffect((): (() => void) | undefined => {
         if (suggestions.length === 0) {
             setMobileMenuStyle(undefined);
             return;
@@ -116,7 +116,7 @@ export const AutocompleteSuggestion: React.FC<AutocompleteSuggestionProps> = ({
             updateMobileMenuStyle,
         );
 
-        return () => {
+        return (): void => {
             window.removeEventListener('resize', updateMobileMenuStyle);
             window.visualViewport?.removeEventListener(
                 'resize',
@@ -144,7 +144,7 @@ export const AutocompleteSuggestion: React.FC<AutocompleteSuggestionProps> = ({
                             ${index === selectedIndex ? 'text-primary-foreground bg-primary/15' : 'hover:bg-white/5'}
                         `}
                         key={getSuggestionKey(suggestion)}
-                        onMouseDown={(e: React.MouseEvent) => {
+                        onMouseDown={(e: React.MouseEvent): void => {
                             e.preventDefault();
                             onSelect(suggestion);
                         }}

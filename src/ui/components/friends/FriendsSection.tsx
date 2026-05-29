@@ -21,10 +21,10 @@ const FriendRequestNavItem = (): React.ReactNode => {
     const navigate = useNavigate();
     const { data: requests } = useIncomingRequests();
     const selectedFriendId = useAppSelector(
-        (state) => state.nav.selectedFriendId,
+        (state): string | null => state.nav.selectedFriendId,
     );
     const selectedChannelId = useAppSelector(
-        (state) => state.nav.selectedChannelId,
+        (state): string | null => state.nav.selectedChannelId,
     );
 
     const isActive = !selectedFriendId && !selectedChannelId;
@@ -37,7 +37,7 @@ const FriendRequestNavItem = (): React.ReactNode => {
                     ? 'bg-bg-tertiary text-foreground'
                     : 'text-foreground-muted hover:bg-bg-subtle hover:text-foreground',
             )}
-            onClick={() => {
+            onClick={(): void => {
                 void navigate('/chat/@me');
             }}
         >
@@ -53,7 +53,7 @@ const FriendRequestNavItem = (): React.ReactNode => {
     );
 };
 
-export const FriendsSection: React.FC = () => (
+export const FriendsSection = () => (
     <Box className="flex h-full flex-col overflow-hidden">
         <Box className="shrink-0 px-3 pt-4 pb-2">
             <FriendsHeader />

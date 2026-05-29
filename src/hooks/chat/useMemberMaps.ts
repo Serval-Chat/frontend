@@ -24,44 +24,44 @@ export const useMemberMaps = (
     roles?: Role[],
 ): MemberMapsResult => {
     // Lookup for user objects by userId
-    const serverMemberMap = React.useMemo(() => {
+    const serverMemberMap = React.useMemo((): Map<string, User> => {
         const map = new Map<string, User>();
-        members?.forEach((m) => {
+        members?.forEach((m): void => {
             if (m.user) map.set(m.userId, m.user);
         });
         return map;
     }, [members]);
 
     // Lookup for full member objects by userId
-    const fullMemberMap = React.useMemo(() => {
+    const fullMemberMap = React.useMemo((): Map<string, ServerMember> => {
         const map = new Map<string, ServerMember>();
-        members?.forEach((m) => {
+        members?.forEach((m): void => {
             map.set(m.userId, m);
         });
         return map;
     }, [members]);
 
     // Lookup for Role objects by roleId
-    const roleMap = React.useMemo(() => {
+    const roleMap = React.useMemo((): Map<string, Role> => {
         const map = new Map<string, Role>();
-        roles?.forEach((r) => map.set(r._id, r));
+        roles?.forEach((r): Map<string, Role> => map.set(r._id, r));
         return map;
     }, [roles]);
 
     // Lookup for Role[] by userId
-    const userRolesMap = React.useMemo(() => {
+    const userRolesMap = React.useMemo((): Map<string, Role[]> => {
         const map = new Map<string, Role[]>();
         if (!members || !roles) return map;
 
-        const everyoneRole = roles.find((r) => r.name === '@everyone');
+        const everyoneRole = roles.find((r): boolean => r.name === '@everyone');
 
-        members.forEach((m) => {
+        members.forEach((m): void => {
             const memberRoleIds = m.roles ? [...m.roles] : [];
             if (everyoneRole && !memberRoleIds.includes(everyoneRole._id)) {
                 memberRoleIds.push(everyoneRole._id);
             }
             const memberRoles = memberRoleIds
-                .map((roleId) => roleMap.get(roleId))
+                .map((roleId): Role | undefined => roleMap.get(roleId))
                 .filter((role): role is Role => !!role);
             map.set(m.userId, memberRoles);
         });
@@ -69,13 +69,13 @@ export const useMemberMaps = (
     }, [members, roles, roleMap]);
 
     // Lookup for highest Role by userId
-    const highestRoleMap = React.useMemo(() => {
+    const highestRoleMap = React.useMemo((): Map<string, Role> => {
         const map = new Map<string, Role>();
         if (!members || !roles) return map;
 
-        const everyoneRole = roles.find((r) => r.name === '@everyone');
+        const everyoneRole = roles.find((r): boolean => r.name === '@everyone');
 
-        members.forEach((m) => {
+        members.forEach((m): void => {
             const memberRoleIds = m.roles ? [...m.roles] : [];
             if (everyoneRole && !memberRoleIds.includes(everyoneRole._id)) {
                 memberRoleIds.push(everyoneRole._id);
@@ -90,13 +90,13 @@ export const useMemberMaps = (
     }, [members, roles, roleMap]);
 
     // Lookup for highest Role with icon by userId
-    const iconRoleMap = React.useMemo(() => {
+    const iconRoleMap = React.useMemo((): Map<string, Role> => {
         const map = new Map<string, Role>();
         if (!members || !roles) return map;
 
-        const everyoneRole = roles.find((r) => r.name === '@everyone');
+        const everyoneRole = roles.find((r): boolean => r.name === '@everyone');
 
-        members.forEach((m) => {
+        members.forEach((m): void => {
             const memberRoleIds = m.roles ? [...m.roles] : [];
             if (everyoneRole && !memberRoleIds.includes(everyoneRole._id)) {
                 memberRoleIds.push(everyoneRole._id);

@@ -156,10 +156,10 @@ const DROPDOWN_OPTIONS = ACTION_OPTIONS.map((opt) => ({
     icon: getActionIcon(opt.value),
 }));
 
-export const AuditLogFilters: React.FC<AuditLogFiltersProps> = ({
+export const AuditLogFilters = ({
     filters,
     onFiltersChange,
-}) => {
+}: AuditLogFiltersProps) => {
     const handleActionChange = (value: string | null): void => {
         onFiltersChange({
             ...filters,

@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { type Theme, useTheme } from '@/providers/ThemeProvider';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { toggleThemeTweaker } from '@/store/slices/themeTweakerSlice';
@@ -18,14 +16,16 @@ const THEMES = [
     { id: 'high-contrast', label: 'High Contrast' },
 ] as const;
 
-export const ThemeTweaker: React.FC = () => {
+export const ThemeTweaker = () => {
     const dispatch = useAppDispatch();
-    const isOpen = useAppSelector((state) => state.themeTweaker.isOpen);
+    const isOpen = useAppSelector(
+        (state): boolean => state.themeTweaker.isOpen,
+    );
     const { theme, setTheme } = useTheme();
 
     if (!isOpen) return null;
 
-    const currentIndex = THEMES.findIndex((t) => t.id === theme);
+    const currentIndex = THEMES.findIndex((t): boolean => t.id === theme);
 
     const handlePrevious = (): void => {
         const nextIndex =
@@ -50,7 +50,10 @@ export const ThemeTweaker: React.FC = () => {
             defaultY={250}
             icon="/icons/retro/chip.png"
             title="Theme Switcher"
-            onClose={() => dispatch(toggleThemeTweaker())}
+            onClose={(): {
+                payload: undefined;
+                type: 'themeTweaker/toggleThemeTweaker';
+            } => dispatch(toggleThemeTweaker())}
         >
             <div className="flex min-h-0 flex-1 flex-col bg-[#c0c0c0] p-2">
                 <NTPanel

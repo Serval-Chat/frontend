@@ -62,18 +62,24 @@ const canMemberViewChannel = ({
     if (serverDetails.ownerId === member.userId) return true;
 
     const roleMap = new Map<string, Role>();
-    roles.forEach((role) => roleMap.set(role._id, role));
+    roles.forEach((role): Map<string, Role> => roleMap.set(role._id, role));
 
     const userRoles = member.roles
-        .map((roleId) => roleMap.get(roleId))
+        .map((roleId): Role | undefined => roleMap.get(roleId))
         .filter((role): role is Role => !!role)
-        .sort((a, b) => b.position - a.position);
+        .sort((a, b): number => b.position - a.position);
 
-    if (userRoles.some((role) => role.permissions?.administrator)) {
+    if (
+        userRoles.some(
+            (role): boolean | undefined => role.permissions?.administrator,
+        )
+    ) {
         return true;
     }
 
-    const everyoneRole = roles.find((role) => role.name === '@everyone');
+    const everyoneRole = roles.find(
+        (role): boolean => role.name === '@everyone',
+    );
 
     const getOverride = (
         overrides?: Record<string, Record<string, boolean>>,
@@ -106,7 +112,7 @@ const canMemberViewChannel = ({
     if (channelOverride !== undefined) return channelOverride;
 
     const category = channel.categoryId
-        ? categories?.find((item) => item._id === channel.categoryId)
+        ? categories?.find((item): boolean => item._id === channel.categoryId)
         : undefined;
     const categoryOverride = getOverride(
         category?.permissions,
@@ -114,10 +120,20 @@ const canMemberViewChannel = ({
     );
     if (categoryOverride !== undefined) return categoryOverride;
 
-    if (userRoles.some((role) => role.permissions?.viewCategories)) return true;
+    if (
+        userRoles.some(
+            (role): boolean | undefined => role.permissions?.viewCategories,
+        )
+    )
+        return true;
     if (everyoneRole?.permissions?.viewCategories) return true;
 
-    if (userRoles.some((role) => role.permissions?.viewChannels)) return true;
+    if (
+        userRoles.some(
+            (role): boolean | undefined => role.permissions?.viewChannels,
+        )
+    )
+        return true;
     if (everyoneRole?.permissions?.viewChannels) return true;
 
     return true;
@@ -132,16 +148,17 @@ export const useTertiarySidebarData = (
     const location = useLocation();
     const params = useParams();
     const storeSelectedFriendId = useAppSelector(
-        (state) => state.nav.selectedFriendId,
+        (state): string | null => state.nav.selectedFriendId,
     );
     const storeSelectedServerId = useAppSelector(
-        (state) => state.nav.selectedServerId,
+        (state): string | null => state.nav.selectedServerId,
     );
     const storeSelectedChannelId = useAppSelector(
-        (state) => state.nav.selectedChannelId,
+        (state): string | null => state.nav.selectedChannelId,
     );
     const isSplitViewActive = useAppSelector(
-        (state) => !!(state.nav.splitView.left || state.nav.splitView.right),
+        (state): boolean =>
+            !!(state.nav.splitView.left || state.nav.splitView.right),
     );
     const selectedFriendId =
         options.selectedFriendId !== undefined
@@ -184,18 +201,18 @@ export const useTertiarySidebarData = (
         enabled: isServerContextReady && !!selectedChannelId,
     });
 
-    const visibleMembers = React.useMemo(() => {
+    const visibleMembers = React.useMemo((): ServerMember[] | undefined => {
         if (!members || !selectedChannelId) return members;
         if (!channels || !categories || !roles || !serverDetails) {
             return undefined;
         }
 
         const channel = channels?.find(
-            (item) => item._id === selectedChannelId,
+            (item): boolean => item._id === selectedChannelId,
         );
         if (!channel) return [];
 
-        return members.filter((member) =>
+        return members.filter((member): boolean =>
             canMemberViewChannel({
                 categories,
                 channel,
@@ -219,18 +236,21 @@ export const useTertiarySidebarData = (
             (!channels || !categories || !roles || !serverDetails));
 
     // Build role lookup maps
-    const { memberRoleMap, memberIconRoleMap } = React.useMemo(() => {
+    const { memberRoleMap, memberIconRoleMap } = React.useMemo((): {
+        memberRoleMap: Map<string, Role>;
+        memberIconRoleMap: Map<string, Role>;
+    } => {
         const mrMap = new Map<string, Role>();
         const mirMap = new Map<string, Role>();
         if (!visibleMembers || !roles)
             return { memberRoleMap: mrMap, memberIconRoleMap: mirMap };
 
         const roleMap = new Map<string, Role>();
-        roles.forEach((r) => roleMap.set(r._id, r));
+        roles.forEach((r): Map<string, Role> => roleMap.set(r._id, r));
 
-        const everyoneRole = roles.find((r) => r.name === '@everyone');
+        const everyoneRole = roles.find((r): boolean => r.name === '@everyone');
 
-        visibleMembers.forEach((m) => {
+        visibleMembers.forEach((m): void => {
             const memberRoleIds = m.roles ? [...m.roles] : [];
             if (everyoneRole && !memberRoleIds.includes(everyoneRole._id)) {
                 memberRoleIds.push(everyoneRole._id);

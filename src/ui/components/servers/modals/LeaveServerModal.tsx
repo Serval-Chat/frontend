@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { useLeaveServer } from '@/api/servers/servers.queries';
 import { Button } from '@/ui/components/common/Button';
 import { Modal } from '@/ui/components/common/Modal';
@@ -12,17 +10,17 @@ interface LeaveServerModalProps {
     serverName: string;
 }
 
-export const LeaveServerModal: React.FC<LeaveServerModalProps> = ({
+export const LeaveServerModal = ({
     isOpen,
     onClose,
     serverId,
     serverName,
-}) => {
+}: LeaveServerModalProps) => {
     const { mutate: leaveServer, isPending } = useLeaveServer();
 
     const handleLeave = (): void => {
         leaveServer(serverId, {
-            onSuccess: () => {
+            onSuccess: (): void => {
                 onClose();
             },
         });

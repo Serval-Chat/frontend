@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 import { ChevronLeft } from 'lucide-react';
 
@@ -180,7 +180,9 @@ const stripUnknownKeys = (
 };
 
 const normalizeOverrides = (perms: Overrides, roles: Role[]): Overrides => {
-    const everyoneRoleId = roles.find((r) => r.name === '@everyone')?._id;
+    const everyoneRoleId = roles.find(
+        (r): boolean => r.name === '@everyone',
+    )?._id;
     const normalized: Overrides = {};
 
     for (const [id, permsObj] of Object.entries(perms)) {
@@ -190,11 +192,11 @@ const normalizeOverrides = (perms: Overrides, roles: Role[]): Overrides => {
     return normalized;
 };
 
-export const PermissionsEditorTab: React.FC<PermissionsEditorTabProps> = ({
+export const PermissionsEditorTab = ({
     serverId,
     targetId,
     targetType,
-}) => {
+}: PermissionsEditorTabProps) => {
     const permissionGroups = getPermissionGroups(targetType);
     const { data: roles = [] } = useRoles(serverId);
 
@@ -236,11 +238,11 @@ export const PermissionsEditorTab: React.FC<PermissionsEditorTabProps> = ({
 
     const effectiveSelectedRoleId =
         selectedRoleId ||
-        roles.find((r) => r.name === '@everyone')?._id ||
+        roles.find((r): boolean => r.name === '@everyone')?._id ||
         roles[0]?._id ||
         null;
 
-    const visibleRoles = roles.filter((role) => {
+    const visibleRoles = roles.filter((role): boolean => {
         if (role.name === '@everyone') return true;
         if (selectedRoleId === role._id) return true;
         const overrides = localOverrides[role._id];
@@ -248,7 +250,8 @@ export const PermissionsEditorTab: React.FC<PermissionsEditorTabProps> = ({
     });
 
     const availableRolesToAdd = roles.filter(
-        (role) => !visibleRoles.some((vr) => vr._id === role._id),
+        (role): boolean =>
+            !visibleRoles.some((vr): boolean => vr._id === role._id),
     );
 
     const handlePermissionChange = (
@@ -256,7 +259,7 @@ export const PermissionsEditorTab: React.FC<PermissionsEditorTabProps> = ({
         key: string,
         value: boolean | undefined,
     ): void => {
-        setLocalOverrides((prev) => {
+        setLocalOverrides((prev): { [x: string]: Record<string, boolean> } => {
             const next = { ...prev };
             if (!next[roleId]) next[roleId] = {};
 
@@ -274,8 +277,9 @@ export const PermissionsEditorTab: React.FC<PermissionsEditorTabProps> = ({
     const handleAddRole = (role: Role): void => {
         setSelectedRoleId(role._id);
         setIsMobileListOpen(false);
-        setLocalOverrides((prev) =>
-            role._id in prev ? prev : { ...prev, [role._id]: {} },
+        setLocalOverrides(
+            (prev): Overrides =>
+                role._id in prev ? prev : { ...prev, [role._id]: {} },
         );
     };
 
@@ -301,7 +305,9 @@ export const PermissionsEditorTab: React.FC<PermissionsEditorTabProps> = ({
         setHasChanges(false);
     };
 
-    const selectedRole = roles.find((r) => r._id === effectiveSelectedRoleId);
+    const selectedRole = roles.find(
+        (r): boolean => r._id === effectiveSelectedRoleId,
+    );
     const currentRoleOverrides = effectiveSelectedRoleId
         ? (localOverrides[effectiveSelectedRoleId] ?? {})
         : {};
@@ -314,7 +320,7 @@ export const PermissionsEditorTab: React.FC<PermissionsEditorTabProps> = ({
                     <div className="sticky top-0 z-20 mx-[-2rem] mb-4 flex w-full shrink-0 items-center border-b border-border-subtle bg-background px-4 px-[2rem] py-4 md:hidden">
                         <button
                             className="flex items-center gap-1 font-medium text-muted-foreground transition-colors hover:text-foreground"
-                            onClick={() => setIsMobileListOpen(true)}
+                            onClick={(): void => setIsMobileListOpen(true)}
                         >
                             <ChevronLeft size={20} />
                             Back
@@ -355,7 +361,7 @@ export const PermissionsEditorTab: React.FC<PermissionsEditorTabProps> = ({
                                                         perm.key
                                                     ]
                                                 }
-                                                onChange={(val) =>
+                                                onChange={(val): void =>
                                                     handlePermissionChange(
                                                         selectedRole._id,
                                                         perm.key,
@@ -378,7 +384,7 @@ export const PermissionsEditorTab: React.FC<PermissionsEditorTabProps> = ({
                     isPending={isSaving}
                     isVisible={hasChanges}
                     onReset={handleReset}
-                    onSave={() => {
+                    onSave={(): void => {
                         void handleSave();
                     }}
                 />
@@ -398,7 +404,7 @@ export const PermissionsEditorTab: React.FC<PermissionsEditorTabProps> = ({
                             isActive={effectiveSelectedRoleId === role._id}
                             key={role._id}
                             role={role}
-                            onClick={() => {
+                            onClick={(): void => {
                                 setSelectedRoleId(role._id);
                                 setIsMobileListOpen(false);
                             }}

@@ -76,7 +76,7 @@ export const ServerItem = React.memo(
             contextMenuItems.push({
                 label: 'Mark as Read',
                 icon: Check,
-                onClick: () => markAsRead(server._id),
+                onClick: (): void => markAsRead(server._id),
             });
         }
 
@@ -84,7 +84,7 @@ export const ServerItem = React.memo(
             contextMenuItems.push({
                 label: 'Server Settings',
                 icon: Settings,
-                onClick: () => setIsSettingsOpen(true),
+                onClick: (): void => setIsSettingsOpen(true),
             });
         }
 
@@ -104,7 +104,9 @@ export const ServerItem = React.memo(
                 serverIds: [server._id],
             };
 
-            const newOrder = currentOrder.filter((id) => id !== server._id);
+            const newOrder = currentOrder.filter(
+                (id): boolean => id !== server._id,
+            );
             const serverIndex = currentOrder.indexOf(server._id);
             if (serverIndex !== -1) {
                 newOrder.splice(serverIndex, 0, newFolder);
@@ -119,7 +121,7 @@ export const ServerItem = React.memo(
             if (!me) return;
             const currentOrder = me.serverSettings?.order || [];
             const newOrder = currentOrder
-                .map((item) => {
+                .map((item): string | IServerFolder | null => {
                     if (typeof item === 'string') {
                         if (item === server._id) return null;
                         return item;
@@ -150,10 +152,12 @@ export const ServerItem = React.memo(
                 type: 'submenu',
                 label: 'Add to Folder',
                 icon: FolderInput,
-                items: folders.map((f) => ({
-                    label: f.name,
-                    onClick: () => handleAddToFolder(f.id),
-                })),
+                items: folders.map(
+                    (f): { label: string; onClick: () => void } => ({
+                        label: f.name,
+                        onClick: (): void => handleAddToFolder(f.id),
+                    }),
+                ),
             });
         }
 
@@ -161,7 +165,7 @@ export const ServerItem = React.memo(
         contextMenuItems.push({
             label: 'Copy Server ID',
             icon: Copy,
-            onClick: () => {
+            onClick: (): void => {
                 void navigator.clipboard.writeText(server._id);
             },
         });
@@ -172,14 +176,14 @@ export const ServerItem = React.memo(
                 label: 'Leave Server',
                 icon: LogOut,
                 variant: 'danger',
-                onClick: () => setIsLeaveModalOpen(true),
+                onClick: (): void => setIsLeaveModalOpen(true),
             });
         }
 
         const queryClient = useQueryClient();
         const prefetchedRef = React.useRef(false);
 
-        React.useEffect(() => {
+        React.useEffect((): void => {
             prefetchedRef.current = false;
         }, [server._id]);
 
@@ -191,7 +195,8 @@ export const ServerItem = React.memo(
 
             void queryClient.prefetchQuery({
                 queryKey: SERVERS_QUERY_KEYS.details(serverId),
-                queryFn: () => serversApi.getServerDetails(serverId),
+                queryFn: (): Promise<Server> =>
+                    serversApi.getServerDetails(serverId),
                 staleTime: 5 * 60 * 1000,
             });
 
@@ -262,7 +267,7 @@ export const ServerItem = React.memo(
                         <ServerSettingsModal
                             isOpen={isSettingsOpen}
                             serverId={server._id}
-                            onClose={() => setIsSettingsOpen(false)}
+                            onClose={(): void => setIsSettingsOpen(false)}
                         />
                     </React.Suspense>
                 )}
@@ -273,7 +278,7 @@ export const ServerItem = React.memo(
                             isOpen={isLeaveModalOpen}
                             serverId={server._id}
                             serverName={server.name}
-                            onClose={() => setIsLeaveModalOpen(false)}
+                            onClose={(): void => setIsLeaveModalOpen(false)}
                         />
                     </React.Suspense>
                 )}

@@ -1,4 +1,7 @@
-import axios from 'axios';
+import axios, {
+    type AxiosResponse,
+    type InternalAxiosRequestConfig,
+} from 'axios';
 
 import { getBrowserApiBaseUrl } from '@/utils/apiBaseUrl';
 import { getAuthToken, removeAuthToken } from '@/utils/authToken';
@@ -21,25 +24,27 @@ const isInvalidRequest = (url: string | undefined): boolean => {
     return false;
 };
 
-apiClient.interceptors.request.use((config) => {
-    const token = getAuthToken();
-    if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-    }
-    if (config.url && isInvalidRequest(config.url)) {
-        const readableUrl = config.url.replace(/^https?:\/\/[^/]+\//, '/');
-        const trace = new Error(
-            `[INVALID REQUEST] ${config.method?.toUpperCase() || 'GET'} ${readableUrl}`,
-        );
-        console.error(trace.message);
-        console.error(trace.stack);
-    }
-    return config;
-});
+apiClient.interceptors.request.use(
+    (config): InternalAxiosRequestConfig<unknown> => {
+        const token = getAuthToken();
+        if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
+        }
+        if (config.url && isInvalidRequest(config.url)) {
+            const readableUrl = config.url.replace(/^https?:\/\/[^/]+\//, '/');
+            const trace = new Error(
+                `[INVALID REQUEST] ${config.method?.toUpperCase() || 'GET'} ${readableUrl}`,
+            );
+            console.error(trace.message);
+            console.error(trace.stack);
+        }
+        return config;
+    },
+);
 
 apiClient.interceptors.response.use(
-    (response) => response,
-    async (error) => {
+    (response): AxiosResponse => response,
+    async (error): Promise<never> => {
         if (error.response?.status === 401) {
             await removeAuthToken();
         }

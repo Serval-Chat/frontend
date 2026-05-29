@@ -39,52 +39,60 @@ interface ServerFolderProps {
     dragControls?: DragControls;
 }
 
-export const ServerFolder: React.FC<ServerFolderProps> = ({
+export const ServerFolder = ({
     folder,
     servers,
     activeServerId,
     unreadServers,
     onServerClick,
     dragControls,
-}) => {
+}: ServerFolderProps) => {
     const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);
     const { data: me } = useMe();
     const { mutate: updateSettings } = useUpdateServerSettings();
     const dispatch = useAppDispatch();
-    const openedFolders = useAppSelector((state) => state.nav.openedFolders);
+    const openedFolders = useAppSelector(
+        (state): string[] => state.nav.openedFolders,
+    );
     const isOpen = openedFolders.includes(folder.id);
 
     const totalPings = React.useMemo(
-        () =>
+        (): number =>
             folder.serverIds.reduce(
-                (acc, id) => acc + (unreadServers[id]?.pingCount || 0),
+                (acc, id): number => acc + (unreadServers[id]?.pingCount || 0),
                 0,
             ),
         [folder.serverIds, unreadServers],
     );
 
     const hasUnread = React.useMemo(
-        () => folder.serverIds.some((id) => unreadServers[id]?.hasUnread),
+        (): boolean =>
+            folder.serverIds.some(
+                (id): boolean => unreadServers[id]?.hasUnread,
+            ),
         [folder.serverIds, unreadServers],
     );
     const hasActiveServer = React.useMemo(
-        () => folder.serverIds.some((id) => id === activeServerId),
+        (): boolean =>
+            folder.serverIds.some((id): boolean => id === activeServerId),
         [folder.serverIds, activeServerId],
     );
 
     const folderServers = React.useMemo(
-        () =>
+        (): Server[] =>
             folder.serverIds
-                .map((id) => servers.find((s) => s._id === id))
+                .map((id): Server | undefined =>
+                    servers.find((s): boolean => s._id === id),
+                )
                 .filter((s): s is Server => !!s),
         [servers, folder.serverIds],
     );
 
     const handleReorderServers = (newServers: Server[]): void => {
         if (!me) return;
-        const newServerIds = newServers.map((s) => s._id);
+        const newServerIds = newServers.map((s): string => s._id);
         const currentOrder = me.serverSettings?.order || [];
-        const newOrder = currentOrder.map((item) => {
+        const newOrder = currentOrder.map((item): string | IServerFolder => {
             if (typeof item !== 'string' && item.id === folder.id) {
                 return { ...item, serverIds: newServerIds };
             }
@@ -106,7 +114,7 @@ export const ServerFolder: React.FC<ServerFolderProps> = ({
         if (!me) return;
 
         const currentOrder = me.serverSettings?.order || [];
-        const newOrder = currentOrder.map((item) => {
+        const newOrder = currentOrder.map((item): string | IServerFolder => {
             if (typeof item !== 'string' && item.id === folder.id) {
                 return { ...item, name: newName };
             }
@@ -120,7 +128,8 @@ export const ServerFolder: React.FC<ServerFolderProps> = ({
         if (!me) return;
         const currentOrder = me.serverSettings?.order || [];
         const folderIndex = currentOrder.findIndex(
-            (item) => typeof item !== 'string' && item.id === folder.id,
+            (item): boolean =>
+                typeof item !== 'string' && item.id === folder.id,
         );
         if (folderIndex === -1) return;
 
@@ -133,7 +142,7 @@ export const ServerFolder: React.FC<ServerFolderProps> = ({
     const handleSetColor = (color: string): void => {
         if (!me) return;
         const currentOrder = me.serverSettings?.order || [];
-        const newOrder = currentOrder.map((item) => {
+        const newOrder = currentOrder.map((item): string | IServerFolder => {
             if (typeof item !== 'string' && item.id === folder.id) {
                 return { ...item, color };
             }
@@ -154,11 +163,26 @@ export const ServerFolder: React.FC<ServerFolderProps> = ({
             label: 'Set Color',
             icon: Palette,
             items: [
-                { label: 'Blue', onClick: () => handleSetColor('#5865f2') },
-                { label: 'Green', onClick: () => handleSetColor('#23a559') },
-                { label: 'Yellow', onClick: () => handleSetColor('#fee75c') },
-                { label: 'Fuchsia', onClick: () => handleSetColor('#eb459e') },
-                { label: 'Red', onClick: () => handleSetColor('#ed4245') },
+                {
+                    label: 'Blue',
+                    onClick: (): void => handleSetColor('#5865f2'),
+                },
+                {
+                    label: 'Green',
+                    onClick: (): void => handleSetColor('#23a559'),
+                },
+                {
+                    label: 'Yellow',
+                    onClick: (): void => handleSetColor('#fee75c'),
+                },
+                {
+                    label: 'Fuchsia',
+                    onClick: (): void => handleSetColor('#eb459e'),
+                },
+                {
+                    label: 'Red',
+                    onClick: (): void => handleSetColor('#ed4245'),
+                },
             ],
         },
         { type: 'divider' },
@@ -194,7 +218,9 @@ export const ServerFolder: React.FC<ServerFolderProps> = ({
                                     : 'rounded-[1.2rem]',
                             )}
                             style={{ backgroundColor: folder.color + '15' }} // ~8% opacity
-                            onPointerDown={(e) => dragControls?.start(e)}
+                            onPointerDown={(e): void | undefined =>
+                                dragControls?.start(e)
+                            }
                             onTap={handleToggleFolder}
                         >
                             <div
@@ -242,7 +268,7 @@ export const ServerFolder: React.FC<ServerFolderProps> = ({
             <RenameFolderModal
                 currentName={folder.name}
                 isOpen={isRenameModalOpen}
-                onClose={() => setIsRenameModalOpen(false)}
+                onClose={(): void => setIsRenameModalOpen(false)}
                 onRename={onRenameConfirm}
             />
 
@@ -280,7 +306,7 @@ export const ServerFolder: React.FC<ServerFolderProps> = ({
                                             isUnread={unreadStatus?.hasUnread}
                                             pingCount={unreadStatus?.pingCount}
                                             server={server}
-                                            onClick={() =>
+                                            onClick={(): void =>
                                                 onServerClick(server._id)
                                             }
                                         />

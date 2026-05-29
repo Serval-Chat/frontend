@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { useResizable } from '@/hooks/useResizable';
 import { useAppShallowSelector } from '@/store/hooks';
 import { useMobileSwipeContext } from '@/ui/MobileSwipeContext';
@@ -14,7 +12,7 @@ import { cn } from '@/utils/cn';
 /**
  * @description Secondary navigation bar
  */
-export const SecondaryNavBar: React.FC = () => {
+export const SecondaryNavBar = () => {
     const { navMode, mobileHomeTab, selectedFriendId, selectedChannelId } =
         useAppShallowSelector((state) => ({
             navMode: state.nav.navMode,

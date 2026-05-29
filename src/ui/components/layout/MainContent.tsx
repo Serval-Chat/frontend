@@ -26,10 +26,13 @@ import { FriendRequestList } from '@/ui/components/friends/FriendRequestList';
 import { Box } from '@/ui/components/layout/Box';
 import { cn } from '@/utils/cn';
 
-const ActiveVoiceRoom = React.lazy(() =>
-    import('@/ui/components/chat/ActiveVoiceRoom').then((m) => ({
-        default: m.ActiveVoiceRoom,
-    })),
+const ActiveVoiceRoom = React.lazy(
+    (): Promise<{ default: never } | { default: () => null }> =>
+        import('@/ui/components/chat/ActiveVoiceRoom').then(
+            (m): { default: () => null } => ({
+                default: m.ActiveVoiceRoom,
+            }),
+        ),
 );
 
 const ServerRolesPage = React.lazy(() =>
@@ -46,9 +49,9 @@ const ServerChannelsPage = React.lazy(() =>
     ),
 );
 
-const ActiveVoiceRoomMount: React.FC = React.memo(() => {
+const ActiveVoiceRoomMount = React.memo(() => {
     const hasActiveVoiceRoom = useAppSelector(
-        (state) =>
+        (state): boolean =>
             !!state.voice.activeVoiceServerId &&
             !!state.voice.activeVoiceChannelId,
     );
@@ -68,18 +71,18 @@ ActiveVoiceRoomMount.displayName = 'ActiveVoiceRoomMount';
  * thinking they are in a specific channel/friend context. Used for rendering the
  * chat UI in the background during swipe gestures.
  */
-const ProxyProvider: React.FC<{
-    overrideServerId?: string | null;
-    overrideChannelId?: string | null;
-    overrideFriendId?: string | null;
-    overrideTargetMessageId?: string | null;
-    children: React.ReactNode;
-}> = ({
+const ProxyProvider = ({
     overrideServerId,
     overrideChannelId,
     overrideFriendId,
     overrideTargetMessageId,
     children,
+}: {
+    overrideServerId?: string | null;
+    overrideChannelId?: string | null;
+    overrideFriendId?: string | null;
+    overrideTargetMessageId?: string | null;
+    children: React.ReactNode;
 }) => {
     const store = useStore<RootState>();
 
@@ -164,10 +167,13 @@ const getConversationKey = (
     return `channel-${conversation.serverId}-${conversation.channelId}`;
 };
 
-const SplitViewPane: React.FC<{
+const SplitViewPane = ({
+    side,
+    conversation,
+}: {
     side: SplitViewSide;
     conversation: SplitViewConversation | null;
-}> = ({ side, conversation }) => {
+}) => {
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
     const { splitView, activeMobileMemberListSide } = useAppShallowSelector(
@@ -207,7 +213,7 @@ const SplitViewPane: React.FC<{
                             iconSize={15}
                             title={`Close ${side} split pane`}
                             variant="ghost"
-                            onClick={() => {
+                            onClick={(): void => {
                                 const otherSide: SplitViewSide =
                                     side === 'left' ? 'right' : 'left';
                                 const remaining = splitView[otherSide];
@@ -233,9 +239,10 @@ const SplitViewPane: React.FC<{
                     isMemberListOpen={isMobileMemberListOpen}
                     key={getConversationKey(conversation)}
                     requireUrlMatch={false}
-                    onToggleMemberList={() =>
-                        dispatch(toggleMobileMemberListForSplitView(side))
-                    }
+                    onToggleMemberList={(): {
+                        payload: SplitViewSide;
+                        type: 'nav/toggleMobileMemberListForSplitView';
+                    } => dispatch(toggleMobileMemberListForSplitView(side))}
                 />
                 {isMobileMemberListOpen &&
                     createPortal(
@@ -248,7 +255,10 @@ const SplitViewPane: React.FC<{
                                         ? conversation.serverId
                                         : null
                                 }
-                                onMobileClose={() =>
+                                onMobileClose={(): {
+                                    payload: SplitViewSide;
+                                    type: 'nav/toggleMobileMemberListForSplitView';
+                                } =>
                                     dispatch(
                                         toggleMobileMemberListForSplitView(
                                             side,
@@ -267,7 +277,7 @@ const SplitViewPane: React.FC<{
 /**
  * @description Main chat area content component.
  */
-export const MainContent: React.FC = () => {
+export const MainContent = () => {
     const {
         selectedFriendId,
         selectedServerId,

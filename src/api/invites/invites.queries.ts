@@ -16,8 +16,9 @@ import type {
 
 export const inviteKeys = {
     all: ['invites'] as const,
-    details: (code: string) => [...inviteKeys.all, 'details', code] as const,
-    serverInvites: (serverId: string) =>
+    details: (code: string): readonly ['invites', 'details', string] =>
+        [...inviteKeys.all, 'details', code] as const,
+    serverInvites: (serverId: string): readonly ['invites', 'server', string] =>
         [...inviteKeys.all, 'server', serverId] as const,
 };
 
@@ -27,7 +28,8 @@ export const useInviteDetails = (
 ): UseQueryResult<InviteDetails, Error> =>
     useQuery({
         queryKey: inviteKeys.details(code),
-        queryFn: () => invitesApi.getInviteDetails(code),
+        queryFn: (): Promise<InviteDetails> =>
+            invitesApi.getInviteDetails(code),
         enabled: (options.enabled ?? true) && !!code,
     });
 
@@ -36,7 +38,8 @@ export const useServerInvites = (
 ): UseQueryResult<ServerInvite[], Error> =>
     useQuery({
         queryKey: inviteKeys.serverInvites(serverId),
-        queryFn: () => invitesApi.getServerInvites(serverId),
+        queryFn: (): Promise<ServerInvite[]> =>
+            invitesApi.getServerInvites(serverId),
         enabled: !!serverId,
     });
 
@@ -46,9 +49,9 @@ export const useCreateInvite = (
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: (data: CreateInviteData) =>
+        mutationFn: (data: CreateInviteData): Promise<ServerInvite> =>
             invitesApi.createInvite(serverId, data),
-        onSuccess: () => {
+        onSuccess: (): void => {
             void queryClient.invalidateQueries({
                 queryKey: inviteKeys.serverInvites(serverId),
             });
@@ -68,9 +71,9 @@ export const useDeleteInvite = (
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: (inviteId: string) =>
+        mutationFn: (inviteId: string): Promise<void> =>
             invitesApi.deleteInvite(serverId, inviteId),
-        onSuccess: () => {
+        onSuccess: (): void => {
             void queryClient.invalidateQueries({
                 queryKey: inviteKeys.serverInvites(serverId),
             });
@@ -93,7 +96,7 @@ export const useJoinServer = (): UseMutationResult<
 
     return useMutation({
         mutationFn: invitesApi.joinServer,
-        onSuccess: () => {
+        onSuccess: (): void => {
             // Invalidate servers list to show the new server
             void queryClient.invalidateQueries({ queryKey: ['servers'] });
         },

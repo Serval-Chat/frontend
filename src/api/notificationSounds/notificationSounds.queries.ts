@@ -16,7 +16,7 @@ export const useUploadNotificationSound = (): UseMutationResult<
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: async (file: File) => {
+        mutationFn: async (file: File): Promise<NotificationSound> => {
             const formData = new FormData();
             formData.append('file', file);
             const response = await apiClient.post(
@@ -30,7 +30,7 @@ export const useUploadNotificationSound = (): UseMutationResult<
             );
             return response.data;
         },
-        onSuccess: (newSound) => {
+        onSuccess: (newSound): void => {
             queryClient.setQueryData<User>(['me'], (old) => {
                 if (!old) return old;
                 return {
@@ -39,7 +39,7 @@ export const useUploadNotificationSound = (): UseMutationResult<
                         ...old.settings,
                         notificationSounds: (
                             old.settings?.notificationSounds || []
-                        ).some((s) => s.id === newSound.id)
+                        ).some((s): boolean => s.id === newSound.id)
                             ? old.settings?.notificationSounds
                             : [
                                   ...(old.settings?.notificationSounds || []),
@@ -61,11 +61,11 @@ export const useDeleteNotificationSound = (): UseMutationResult<
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: async (id: string) => {
+        mutationFn: async (id: string): Promise<string> => {
             await apiClient.delete(`/api/v1/notification-sounds/${id}`);
             return id;
         },
-        onSuccess: (deletedId) => {
+        onSuccess: (deletedId): void => {
             queryClient.setQueryData<User>(['me'], (old) => {
                 if (!old) return old;
                 return {
@@ -74,7 +74,7 @@ export const useDeleteNotificationSound = (): UseMutationResult<
                         ...old.settings,
                         notificationSounds: (
                             old.settings?.notificationSounds || []
-                        ).filter((s) => s.id !== deletedId),
+                        ).filter((s): boolean => s.id !== deletedId),
                     },
                 };
             });

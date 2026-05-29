@@ -22,11 +22,11 @@ vi.mock('@/store/hooks', () => ({
     useAppSelector: vi.fn(),
 }));
 
-describe('NavigationSync', () => {
+describe('NavigationSync', (): void => {
     const mockNavigate = vi.fn();
     const mockDispatch = vi.fn();
 
-    beforeEach(() => {
+    beforeEach((): void => {
         vi.clearAllMocks();
         vi.mocked(useNavigate).mockReturnValue(mockNavigate);
         vi.mocked(useAppDispatch).mockReturnValue(mockDispatch);
@@ -36,7 +36,7 @@ describe('NavigationSync', () => {
         } as never);
     });
 
-    it('navigates to @me when serverId is invalid', () => {
+    it('navigates to @me when serverId is invalid', (): void => {
         vi.mocked(useLocation).mockReturnValue({
             pathname: '/chat/@server/invalid/channel/123',
         } as never);
@@ -52,7 +52,7 @@ describe('NavigationSync', () => {
         });
     });
 
-    it('navigates to server root when channelId is invalid', () => {
+    it('navigates to server root when channelId is invalid', (): void => {
         const validServerId = '507f1f77bcf86cd799439011';
         vi.mocked(useLocation).mockReturnValue({
             pathname: `/chat/@server/${validServerId}/channel/invalid`,
@@ -70,7 +70,7 @@ describe('NavigationSync', () => {
         );
     });
 
-    it('navigates to channel root when messageId is invalid', () => {
+    it('navigates to channel root when messageId is invalid', (): void => {
         const validServerId = '507f1f77bcf86cd799439011';
         const validChannelId = '507f1f77bcf86cd799439012';
         vi.mocked(useLocation).mockReturnValue({
@@ -90,7 +90,7 @@ describe('NavigationSync', () => {
         );
     });
 
-    it('navigates to @me when userId is invalid', () => {
+    it('navigates to @me when userId is invalid', (): void => {
         vi.mocked(useLocation).mockReturnValue({
             pathname: '/chat/@user/invalid',
         } as never);
@@ -103,7 +103,7 @@ describe('NavigationSync', () => {
         });
     });
 
-    it('clears channel context on server self-roles pages', () => {
+    it('clears channel context on server self-roles pages', (): void => {
         const validServerId = '507f1f77bcf86cd799439011';
         vi.mocked(useLocation).mockReturnValue({
             pathname: `/chat/@server/${validServerId}/self-roles`,
@@ -122,7 +122,7 @@ describe('NavigationSync', () => {
         expect(mockDispatch).toHaveBeenCalledWith(setTargetMessageId(null));
     });
 
-    it('does not leave the restored last channel active when entering self-roles from another server', () => {
+    it('does not leave the restored last channel active when entering self-roles from another server', (): void => {
         const validServerId = '507f1f77bcf86cd799439011';
         vi.mocked(useLocation).mockReturnValue({
             pathname: `/chat/@server/${validServerId}/self-roles`,

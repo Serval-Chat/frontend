@@ -48,14 +48,14 @@ const renderWithProviders = (
     );
 };
 
-describe('Login Page Integration', () => {
-    beforeEach(() => {
+describe('Login Page Integration', (): void => {
+    beforeEach((): void => {
         vi.clearAllMocks();
         localStorage.clear();
         sessionStorage.clear();
     });
 
-    it('requires both email and password to enable the submit button', () => {
+    it('requires both email and password to enable the submit button', (): void => {
         renderWithProviders();
         const button = screen.getByRole('button', { name: /There we go!/i });
         expect(button).toBeDisabled();
@@ -71,7 +71,7 @@ describe('Login Page Integration', () => {
         expect(button).not.toBeDisabled();
     });
 
-    it('submits on enter key if fields are valid', async () => {
+    it('submits on enter key if fields are valid', async (): Promise<void> => {
         vi.mocked(authApi.login).mockResolvedValueOnce({
             token: 'mock-token',
             username: 'mock-user',
@@ -88,7 +88,7 @@ describe('Login Page Integration', () => {
         const passwordInput = screen.getByPlaceholderText('Password');
         fireEvent.submit(passwordInput);
 
-        await waitFor(() => {
+        await waitFor((): void => {
             expect(authApi.login).toHaveBeenCalledWith({
                 login: 'test@example.com',
                 password: 'password123',
@@ -96,7 +96,7 @@ describe('Login Page Integration', () => {
         });
     });
 
-    it('shows loading indicator, prevents duplicate submit, and handles error clarity', async () => {
+    it('shows loading indicator, prevents duplicate submit, and handles error clarity', async (): Promise<void> => {
         const mockError = new Error('Request Error') as Error & {
             isAxiosError?: boolean;
             response?: { data: { message: string } };
@@ -118,12 +118,12 @@ describe('Login Page Integration', () => {
 
         expect(button).toBeDisabled();
 
-        await waitFor(() => {
+        await waitFor((): void => {
             expect(screen.getByText('Invalid credentials')).toBeInTheDocument();
         });
     });
 
-    it('respects remember me persistence and redirects to /chat/@me on success', async () => {
+    it('respects remember me persistence and redirects to /chat/@me on success', async (): Promise<void> => {
         const setAuthTokenSpy = vi.spyOn(authTokenModule, 'setAuthToken');
         vi.mocked(authApi.login).mockResolvedValueOnce({
             token: 'mock-token',
@@ -145,7 +145,7 @@ describe('Login Page Integration', () => {
 
         fireEvent.click(screen.getByRole('button', { name: /There we go!/i }));
 
-        await waitFor(() => {
+        await waitFor((): void => {
             expect(setAuthTokenSpy).toHaveBeenCalledWith('mock-token', false);
             expect(screen.getByTestId('location-display')).toHaveTextContent(
                 '/chat/@me',
@@ -153,14 +153,14 @@ describe('Login Page Integration', () => {
         });
     });
 
-    it('protects authenticated users by redirecting straight to chat context', () => {
+    it('protects authenticated users by redirecting straight to chat context', (): void => {
         renderWithProviders(['/login'], true);
         expect(screen.getByTestId('location-display')).toHaveTextContent(
             '/chat/@me',
         );
     });
 
-    it('can toggle password visibility', () => {
+    it('can toggle password visibility', (): void => {
         renderWithProviders();
         const passwordInput = screen.getByPlaceholderText('Password');
 

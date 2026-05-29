@@ -33,14 +33,14 @@ const renderComponent = (): RenderResult =>
         </QueryClientProvider>,
     );
 
-describe('BlockingSettings', () => {
+describe('BlockingSettings', (): void => {
     const mockUpsertBlock = vi.fn();
     const mockRemoveBlock = vi.fn();
     const mockCreateProfile = vi.fn();
     const mockUpdateProfile = vi.fn();
     const mockDeleteProfile = vi.fn();
 
-    beforeEach(() => {
+    beforeEach((): void => {
         vi.clearAllMocks();
 
         vi.mocked(blocksQueries.useBlocks).mockReturnValue({
@@ -82,15 +82,15 @@ describe('BlockingSettings', () => {
         } as any as UseMutationResult<void, Error, string>);
     });
 
-    describe('Users Tab', () => {
-        it('renders empty state when no blocks exist', () => {
+    describe('Users Tab', (): void => {
+        it('renders empty state when no blocks exist', (): void => {
             renderComponent();
             expect(
                 screen.getByText("You haven't blocked anyone yet."),
             ).toBeInTheDocument();
         });
 
-        it('renders blocked users list with assigned profile select', () => {
+        it('renders blocked users list with assigned profile select', (): void => {
             vi.mocked(blocksQueries.useBlocks).mockReturnValue({
                 data: [
                     {
@@ -115,7 +115,7 @@ describe('BlockingSettings', () => {
             ).toBeInTheDocument();
         });
 
-        it('removes block when unblock clicked', () => {
+        it('removes block when unblock clicked', (): void => {
             vi.mocked(blocksQueries.useBlocks).mockReturnValue({
                 data: [
                     {
@@ -139,7 +139,7 @@ describe('BlockingSettings', () => {
             expect(mockRemoveBlock).toHaveBeenCalledWith('user-1');
         });
 
-        it('filters the list based on search query', () => {
+        it('filters the list based on search query', (): void => {
             vi.mocked(blocksQueries.useBlocks).mockReturnValue({
                 data: [
                     {
@@ -178,8 +178,8 @@ describe('BlockingSettings', () => {
         });
     });
 
-    describe('Profiles Tab', () => {
-        it('switches to profiles tab and renders created profiles', () => {
+    describe('Profiles Tab', (): void => {
+        it('switches to profiles tab and renders created profiles', (): void => {
             renderComponent();
 
             fireEvent.click(screen.getByText('Block Profiles'));
@@ -190,7 +190,7 @@ describe('BlockingSettings', () => {
             expect(screen.getByText('Default')).toBeInTheDocument();
         });
 
-        it('creates a new profile', () => {
+        it('creates a new profile', (): void => {
             renderComponent();
             fireEvent.click(screen.getByText('Block Profiles'));
 
@@ -203,7 +203,7 @@ describe('BlockingSettings', () => {
             });
         });
 
-        it('renames a profile', () => {
+        it('renames a profile', (): void => {
             renderComponent();
             fireEvent.click(screen.getByText('Block Profiles'));
 
@@ -224,7 +224,7 @@ describe('BlockingSettings', () => {
             });
         });
 
-        it('deletes a profile safely', () => {
+        it('deletes a profile safely', (): void => {
             vi.mocked(blocksQueries.useBlockProfiles).mockReturnValue({
                 data: [
                     { id: 'p1', name: 'Profile 1', flags: 0 },

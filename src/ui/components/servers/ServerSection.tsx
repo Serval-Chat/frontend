@@ -31,18 +31,18 @@ const ServerOnboardingModal = React.lazy(() =>
 /**
  * @description Orchestrates server-specific navigation (banner, channels, categories).
  */
-export const ServerSection: React.FC = () => {
+export const ServerSection = () => {
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
     const { channelId } = useParams();
     const selectedServerId = useAppSelector(
-        (state) => state.nav.selectedServerId,
+        (state): string | null => state.nav.selectedServerId,
     );
     const selectedChannelId = useAppSelector(
-        (state) => state.nav.selectedChannelId,
+        (state): string | null => state.nav.selectedChannelId,
     );
     const lastOpenedChannelByServer = useAppSelector(
-        (state) => state.nav.lastOpenedChannelByServer,
+        (state): Record<string, string> => state.nav.lastOpenedChannelByServer,
     );
 
     const {
@@ -67,7 +67,7 @@ export const ServerSection: React.FC = () => {
         location.pathname.endsWith('/self-roles') ||
         location.pathname.endsWith('/channels-and-categories');
 
-    useEffect(() => {
+    useEffect((): void => {
         if (!selectedServerId) return;
         if (isSpecialView) return;
 
@@ -79,7 +79,7 @@ export const ServerSection: React.FC = () => {
         if (!isPlaceholderChannels && channels) {
             if (selectedChannelId) {
                 const channelExists = channels.some(
-                    (c) => c._id === selectedChannelId,
+                    (c): boolean => c._id === selectedChannelId,
                 );
                 if (!channelExists) {
                     dispatch(setSelectedChannelId(null));
@@ -99,14 +99,16 @@ export const ServerSection: React.FC = () => {
                 const lastChannelId =
                     lastOpenedChannelByServer[selectedServerId];
                 const sortedChannels = [...channels].sort(
-                    (a, b) => a.position - b.position,
+                    (a, b): number => a.position - b.position,
                 );
                 const firstChannel = sortedChannels.find(
-                    (c) => c.type !== 'link',
+                    (c): boolean => c.type !== 'link',
                 );
                 const lastChannelExists =
                     lastChannelId !== undefined &&
-                    sortedChannels.some((c) => c._id === lastChannelId);
+                    sortedChannels.some(
+                        (c): boolean => c._id === lastChannelId,
+                    );
                 if (lastChannelId !== undefined && !lastChannelExists) {
                     dispatch(clearLastOpenedChannelForServer(selectedServerId));
                 }
@@ -164,7 +166,7 @@ export const ServerSection: React.FC = () => {
                                     iconComponent={Shield}
                                     name="Roles"
                                     type="text"
-                                    onClick={() => {
+                                    onClick={(): void => {
                                         void navigate(
                                             `/chat/@server/${selectedServerId}/self-roles`,
                                         );
@@ -175,7 +177,7 @@ export const ServerSection: React.FC = () => {
                                 iconComponent={Hash}
                                 name="Channels & Categories"
                                 type="text"
-                                onClick={() => {
+                                onClick={(): void => {
                                     void navigate(
                                         `/chat/@server/${selectedServerId}/channels-and-categories`,
                                     );

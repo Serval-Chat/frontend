@@ -23,9 +23,11 @@ export const useAdminAuditLogs = (
 ): UseQueryResult<AuditLog[], Error> =>
     useQuery<AuditLog[]>({
         queryKey: ['admin-audit-logs', filters],
-        queryFn: async () => {
+        queryFn: async (): Promise<AuditLog[]> => {
             const params = Object.fromEntries(
-                Object.entries(filters).filter(([_, value]) => value !== ''),
+                Object.entries(filters).filter(
+                    ([_, value]): boolean => value !== '',
+                ),
             );
 
             const { data } = await apiClient.get<AuditLog[]>(

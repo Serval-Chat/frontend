@@ -14,13 +14,13 @@ export const useCustomEmojis = (options?: {
         enabled: options?.enabled ?? true,
     });
 
-    const customCategories = React.useMemo(() => {
+    const customCategories = React.useMemo((): CustomEmojiCategory[] => {
         if (!servers || !allEmojis) return [];
 
         return servers
-            .map((server) => {
+            .map((server): CustomEmojiCategory | null => {
                 const emojis = allEmojis.filter(
-                    (e) => e.serverId?.toString() === server._id,
+                    (e): boolean => e.serverId?.toString() === server._id,
                 );
                 if (emojis.length === 0) return null;
 
@@ -28,12 +28,21 @@ export const useCustomEmojis = (options?: {
                     id: server._id,
                     name: server.name,
                     icon: server.icon,
-                    emojis: emojis.map((e) => ({
-                        id: e._id,
-                        name: e.name,
-                        url: e.imageUrl,
-                        serverId: e.serverId,
-                    })),
+                    emojis: emojis.map(
+                        (
+                            e,
+                        ): {
+                            id: string;
+                            name: string;
+                            url: string;
+                            serverId: string;
+                        } => ({
+                            id: e._id,
+                            name: e.name,
+                            url: e.imageUrl,
+                            serverId: e.serverId,
+                        }),
+                    ),
                 } as CustomEmojiCategory;
             })
             .filter((cat): cat is CustomEmojiCategory => cat !== null);

@@ -15,7 +15,7 @@ export function ToastDemo(): ReactNode {
             <Stack wrap direction="row" gap="xs">
                 <Button
                     variant="success"
-                    onClick={() =>
+                    onClick={(): void =>
                         showToast('Success toast example!', 'success')
                     }
                 >
@@ -23,13 +23,17 @@ export function ToastDemo(): ReactNode {
                 </Button>
                 <Button
                     variant="danger"
-                    onClick={() => showToast('Error toast example!', 'error')}
+                    onClick={(): void =>
+                        showToast('Error toast example!', 'error')
+                    }
                 >
                     Show Error Toast
                 </Button>
                 <Button
                     variant="primary"
-                    onClick={() => showToast('Info toast example!', 'info')}
+                    onClick={(): void =>
+                        showToast('Info toast example!', 'info')
+                    }
                 >
                     Show Info Toast
                 </Button>
