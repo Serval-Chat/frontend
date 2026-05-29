@@ -17,6 +17,8 @@ interface ModalProps {
     showCloseButton?: boolean;
     noPadding?: boolean;
     fullScreen?: boolean;
+    wrapperClassName?: string;
+    zIndex?: number;
 }
 
 /**
@@ -31,6 +33,8 @@ export const Modal: React.FC<ModalProps> = ({
     showCloseButton = true,
     noPadding = false,
     fullScreen = false,
+    wrapperClassName,
+    zIndex,
 }) => {
     React.useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent): void => {
@@ -59,7 +63,9 @@ export const Modal: React.FC<ModalProps> = ({
                     className={cn(
                         'fixed inset-0 z-modal flex items-center justify-center',
                         !fullScreen && 'p-4',
+                        wrapperClassName,
                     )}
+                    style={{ zIndex }}
                 >
                     <motion.div
                         animate={{ opacity: 1 }}

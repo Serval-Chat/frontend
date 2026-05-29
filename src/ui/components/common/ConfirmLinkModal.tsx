@@ -26,6 +26,7 @@ export const ConfirmLinkModal: React.FC<ConfirmLinkModalProps> = ({
         isOpen={isOpen}
         showCloseButton={false}
         title="External Link"
+        zIndex={10000}
         onClose={onClose}
     >
         <div className="space-y-6">
