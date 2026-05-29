@@ -218,6 +218,120 @@ const EmbedCard = memo(
 
         if (!hasContent) return null;
 
+        if (embed.type === 'youtube' && embed.video?.url) {
+            const isShorts = embed.url?.includes('/shorts/') ?? false;
+            return (
+                <div
+                    className={cn(
+                        'mt-1 flex flex-col overflow-hidden rounded-r-sm',
+                        isShorts ? 'max-w-[300px]' : 'max-w-[520px]',
+                    )}
+                    key={index}
+                    style={{
+                        borderLeft: '4px solid #ff0000',
+                    }}
+                >
+                    <div
+                        className={cn(
+                            'flex w-full flex-col rounded-r-sm',
+                            variant === 'preview'
+                                ? 'bg-embed-bg'
+                                : 'bg-embed-bg/70',
+                        )}
+                    >
+                        {/* Provider */}
+                        <div className="px-4 pt-3 pb-1">
+                            <p
+                                className={cn(
+                                    'mb-0.5 text-xs',
+                                    isDeleted
+                                        ? 'text-danger/80'
+                                        : 'text-muted-foreground',
+                                )}
+                            >
+                                {embed.provider?.url ? (
+                                    <Link
+                                        className="hover:underline"
+                                        href={embed.provider.url}
+                                    >
+                                        {embed.provider.name ?? 'YouTube'}
+                                    </Link>
+                                ) : (
+                                    (embed.provider?.name ?? 'YouTube')
+                                )}
+                            </p>
+
+                            {/* Title */}
+                            {embed.title && (
+                                <p
+                                    className={cn(
+                                        'mb-0.5 text-sm font-semibold',
+                                        isDeleted
+                                            ? 'text-danger'
+                                            : 'text-foreground',
+                                    )}
+                                >
+                                    {embed.url ? (
+                                        <Link
+                                            className="text-primary hover:underline"
+                                            href={embed.url}
+                                        >
+                                            {embed.title}
+                                        </Link>
+                                    ) : (
+                                        embed.title
+                                    )}
+                                </p>
+                            )}
+
+                            {/* Author / channel */}
+                            {embed.author?.name && (
+                                <p
+                                    className={cn(
+                                        'mb-2 text-xs',
+                                        isDeleted
+                                            ? 'text-danger/80'
+                                            : 'text-muted-foreground',
+                                    )}
+                                >
+                                    {embed.author.url ? (
+                                        <Link
+                                            className="hover:underline"
+                                            href={embed.author.url}
+                                        >
+                                            {embed.author.name}
+                                        </Link>
+                                    ) : (
+                                        embed.author.name
+                                    )}
+                                </p>
+                            )}
+                        </div>
+
+                        <div
+                            className={cn(
+                                'relative w-full overflow-hidden',
+                                isDeleted && 'opacity-50 grayscale',
+                            )}
+                            style={{
+                                aspectRatio: isShorts ? '9 / 16' : '16 / 9',
+                            }}
+                        >
+                            <iframe
+                                allowFullScreen
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                className="absolute inset-0 h-full w-full"
+                                referrerPolicy="strict-origin-when-cross-origin"
+                                src={embed.video.url}
+                                title={embed.title ?? 'YouTube video'}
+                                onLoad={onResize}
+                            />
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
         if (embed.type === 'video' && embed.video?.url) {
             return (
                 <div className="mt-1 flex" key={index}>

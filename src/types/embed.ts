@@ -12,7 +12,8 @@ export type EmbedType =
     | 'video'
     | 'gifv'
     | 'article'
-    | 'link';
+    | 'link'
+    | 'youtube';
 
 export interface EmbedField {
     name: string;
