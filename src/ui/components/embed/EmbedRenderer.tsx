@@ -319,7 +319,6 @@ const EmbedCard = memo(
                         >
                             <iframe
                                 allowFullScreen
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                                 className="absolute inset-0 h-full w-full"
                                 referrerPolicy="strict-origin-when-cross-origin"
                                 src={embed.video.url}
