@@ -103,7 +103,7 @@ export const CreateChannelModal = ({
         try {
             await serversApi.createChannel(serverId, {
                 name: name.trim(),
-                categoryId,
+                categoryId: categoryId ?? undefined,
                 type: channelType,
                 emoji: emoji || undefined,
                 emojiType,
