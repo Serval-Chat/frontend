@@ -334,13 +334,13 @@ const EmbedCard = memo(
 
         if (embed.type === 'video' && embed.video?.url) {
             return (
-                <div className="mt-1 flex" key={index}>
+                <div className="mt-1 flex w-fit" key={index}>
                     {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
                     <video
                         controls
                         playsInline
                         className={cn(
-                            'max-h-96 max-w-[520px] rounded-md object-contain',
+                            'max-h-96 max-w-[520px] rounded-md',
                             isDeleted && 'opacity-50 grayscale',
                         )}
                         preload="metadata"
@@ -354,22 +354,15 @@ const EmbedCard = memo(
 
         if (embed.type === 'image' && embed.image?.url) {
             return (
-                <div className="mt-1 flex" key={index}>
+                <div className="mt-1 flex w-fit" key={index}>
                     <EmbedImage
                         alt={embed.title || 'Image'}
                         className="block"
                         imageClassName={cn(
-                            'max-h-96 max-w-[520px] rounded-md object-contain',
+                            'max-h-96 max-w-[520px] rounded-md',
                             isDeleted && 'opacity-50 grayscale',
                         )}
                         src={imageUrl}
-                        style={
-                            embed.image?.width && embed.image.height
-                                ? {
-                                      aspectRatio: `${embed.image.width} / ${embed.image.height}`,
-                                  }
-                                : { minHeight: '100px' }
-                        }
                         onResize={onResize}
                     />
                 </div>
@@ -378,7 +371,7 @@ const EmbedCard = memo(
 
         return (
             <div
-                className="mt-1 flex max-w-[520px] overflow-hidden rounded-r-sm"
+                className="mt-1 flex w-fit max-w-[520px] overflow-hidden rounded-r-sm"
                 key={index}
                 style={{
                     borderLeft: `4px solid ${barColor ?? 'var(--color-embed-border)'}`,
@@ -386,7 +379,7 @@ const EmbedCard = memo(
             >
                 <div
                     className={cn(
-                        'flex w-full flex-col rounded-r-sm px-4 py-3',
+                        'flex w-auto flex-col rounded-r-sm px-4 py-3',
                         variant === 'preview'
                             ? 'bg-embed-bg'
                             : 'bg-embed-bg/70',
@@ -645,19 +638,12 @@ const EmbedCard = memo(
                     {embed.image?.url && (
                         <EmbedImage
                             alt={embed.title || 'Image'}
-                            className="mt-3 block w-full"
+                            className="mt-3 block"
                             imageClassName={cn(
-                                'max-h-72 w-full rounded object-contain',
+                                'max-h-72 max-w-[488px] rounded',
                                 isDeleted && 'opacity-50 grayscale',
                             )}
                             src={imageUrl}
-                            style={
-                                embed.image?.width && embed.image.height
-                                    ? {
-                                          aspectRatio: `${embed.image.width} / ${embed.image.height}`,
-                                      }
-                                    : { minHeight: '80px' }
-                            }
                             onResize={onResize}
                         />
                     )}
