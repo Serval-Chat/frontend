@@ -1,13 +1,18 @@
 import { useState } from 'react';
 
 import { Reorder, useDragControls } from 'framer-motion';
-import { GripVertical, Plus, Trash2 } from 'lucide-react';
+import { Copy, GripVertical, Plus, Trash2 } from 'lucide-react';
 
 import type { Role } from '@/api/servers/servers.types';
+import {
+    ContextMenu,
+    type ContextMenuItem,
+} from '@/ui/components/common/ContextMenu';
 import { IconButton } from '@/ui/components/common/IconButton';
 import { RoleDot } from '@/ui/components/common/RoleDot';
 import { SettingsFloatingBar } from '@/ui/components/common/SettingsFloatingBar';
 import { Text } from '@/ui/components/common/Text';
+import { useToast } from '@/ui/components/common/Toast';
 import { getRoleStyle } from '@/utils/roleColor';
 
 interface RoleNavbarProps {
@@ -123,53 +128,64 @@ const RoleItem = ({
     onDragEnd,
 }: RoleItemProps) => {
     const controls = useDragControls();
+    const { showToast } = useToast();
     const isEveryone = role.name === '@everyone';
     const roleStyle = getRoleStyle(role);
 
+    const handleCopyRoleId = (): void => {
+        void navigator.clipboard.writeText(role._id);
+        showToast('Role ID copied to clipboard', 'success');
+    };
+
+    const contextItems: ContextMenuItem[] = [
+        {
+            label: 'Copy Role ID',
+            icon: Copy,
+            onClick: handleCopyRoleId,
+        },
+    ];
+
+    if (!isEveryone) {
+        contextItems.push({
+            label: 'Delete',
+            icon: Trash2,
+            onClick: onDelete,
+        });
+    }
+
     return (
-        <Reorder.Item
-            className={`group flex cursor-pointer items-center gap-1.5 rounded p-1 transition-colors
-                ${isActive ? 'bg-bg-secondary text-foreground' : 'text-muted-foreground hover:bg-bg-subtle hover:text-foreground'}
-            `}
-            dragControls={controls}
-            dragListener={false}
-            value={role}
-            onClick={onSelect}
-            onDragEnd={onDragEnd}
-        >
-            <div
-                className="cursor-grab p-0.5 opacity-0 transition-opacity group-hover:opacity-100 active:cursor-grabbing"
-                onPointerDown={(e): void => controls.start(e)}
+        <ContextMenu className="w-full" items={contextItems}>
+            <Reorder.Item
+                className={`group flex cursor-pointer items-center gap-1.5 rounded p-1 transition-colors
+                    ${isActive ? 'bg-bg-secondary text-foreground' : 'text-muted-foreground hover:bg-bg-subtle hover:text-foreground'}
+                `}
+                dragControls={controls}
+                dragListener={false}
+                value={role}
+                onClick={onSelect}
+                onDragEnd={onDragEnd}
             >
-                <GripVertical size={12} />
-            </div>
+                <div
+                    className="cursor-grab p-0.5 opacity-0 transition-opacity group-hover:opacity-100 active:cursor-grabbing"
+                    onPointerDown={(e): void => controls.start(e)}
+                >
+                    <GripVertical size={12} />
+                </div>
 
-            <RoleDot role={role} size={8} />
+                <RoleDot role={role} size={8} />
 
-            <Text
-                className="flex-1 truncate text-[13px]"
-                style={{
-                    color:
-                        roleStyle.backgroundColor ||
-                        roleStyle.color ||
-                        undefined,
-                }}
-            >
-                {role.name}
-            </Text>
-
-            {!isEveryone && (
-                <IconButton
-                    className="h-6 w-6 p-0 text-danger opacity-0 transition-opacity group-hover:opacity-100 hover:bg-danger-muted"
-                    icon={Trash2}
-                    iconSize={12}
-                    variant="ghost"
-                    onClick={(e): void => {
-                        e.stopPropagation();
-                        onDelete();
+                <Text
+                    className="flex-1 truncate text-[13px]"
+                    style={{
+                        color:
+                            roleStyle.backgroundColor ||
+                            roleStyle.color ||
+                            undefined,
                     }}
-                />
-            )}
-        </Reorder.Item>
+                >
+                    {role.name}
+                </Text>
+            </Reorder.Item>
+        </ContextMenu>
     );
 };
