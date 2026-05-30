@@ -57,5 +57,8 @@
   "include": [
     "src",
     "src/main.tsx"
+  ],
+  "exclude": [
+    "src/api/generated"
   ]
 }

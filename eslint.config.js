@@ -18,7 +18,7 @@ const __dirname = path.dirname(__filename);
 
 
 export default tseslint.config(
-  { ignores: ['dist', 'src-tauri/**/*', 'vitest.config.ts', 'vite.config.ts'] },
+  { ignores: ['dist', 'src-tauri/**/*', 'vitest.config.ts', 'vite.config.ts', 'src/api/generated/**/*'] },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
     files: ['**/*.{ts,tsx}'],
@@ -75,7 +75,7 @@ export default tseslint.config(
       '@typescript-eslint/no-explicit-any': 'error',
       '@typescript-eslint/switch-exhaustiveness-check': 'error',
       '@typescript-eslint/consistent-type-imports': ['error', { prefer: 'type-imports' }],
-      '@typescript-eslint/explicit-function-return-type': ['warn', { allowExpressions: true }],
+      '@typescript-eslint/explicit-function-return-type': 'off',
       '@typescript-eslint/no-floating-promises': 'warn',
       '@typescript-eslint/no-misused-promises': 'warn',
       '@typescript-eslint/await-thenable': 'warn',
