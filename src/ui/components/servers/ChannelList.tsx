@@ -257,7 +257,11 @@ export const ChannelList = ({
     const [items, setItems] = useState<ListItem[]>([]);
     const [isReordering, setIsReordering] = useState(false);
     const [syncLock, setSyncLock] = useState(false);
+    const [activeItemId, setActiveItemId] = useState<string | null>(null);
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+    const syncLockTimeoutRef = React.useRef<ReturnType<
+        typeof setTimeout
+    > | null>(null);
 
     useVoiceStates(selectedServerId);
 
@@ -279,6 +283,19 @@ export const ChannelList = ({
         window.addEventListener('resize', handleResize);
         return (): void => window.removeEventListener('resize', handleResize);
     }, []);
+
+    useEffect((): void => {
+        setItems([]);
+        setCollapsedCategories({});
+        setIsReordering(false);
+        setActiveItemId(null);
+        setSyncLock(false);
+
+        if (syncLockTimeoutRef.current) {
+            clearTimeout(syncLockTimeoutRef.current);
+            syncLockTimeoutRef.current = null;
+        }
+    }, [selectedServerId]);
 
     // Sync items when props change
     useEffect((): void => {
@@ -362,8 +379,6 @@ export const ChannelList = ({
             [categoryId]: !prev[categoryId],
         }));
     };
-
-    const [activeItemId, setActiveItemId] = useState<string | null>(null);
 
     const visibleItems = React.useMemo(
         (): ListItem[] =>
@@ -537,7 +552,10 @@ export const ChannelList = ({
             setIsReordering(false);
             setActiveItemId(null);
             setSyncLock(true);
-            setTimeout((): void => setSyncLock(false), 500);
+            syncLockTimeoutRef.current = setTimeout((): void => {
+                setSyncLock(false);
+                syncLockTimeoutRef.current = null;
+            }, 500);
         }
     }, [selectedServerId, canManageChannels, items]);
 
@@ -670,10 +688,23 @@ export const ChannelList = ({
             } catch (error) {
                 console.error('Failed to reorder items:', error);
             } finally {
-                setTimeout((): void => setSyncLock(false), 500);
+                syncLockTimeoutRef.current = setTimeout((): void => {
+                    setSyncLock(false);
+                    syncLockTimeoutRef.current = null;
+                }, 500);
             }
         },
         [selectedServerId, canManageChannels, items],
+    );
+
+    useEffect(
+        (): (() => void) => (): void => {
+            if (syncLockTimeoutRef.current) {
+                clearTimeout(syncLockTimeoutRef.current);
+                syncLockTimeoutRef.current = null;
+            }
+        },
+        [],
     );
 
     const channelsRef = React.useRef(channels);
