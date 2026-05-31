@@ -8,7 +8,7 @@ import {
 } from '@/api/servers/servers.queries';
 import type { Role, Server, ServerMember } from '@/api/servers/servers.types';
 import { useStickerInfoBox } from '@/hooks/useStickerInfoBox';
-import type { Embed } from '@/types/embed';
+import type { ButtonComponent, Embed } from '@/types/embed';
 import { ParsedText } from '@/ui/components/common/ParsedText';
 import { Tooltip } from '@/ui/components/common/Tooltip';
 import { EmbedRenderer } from '@/ui/components/embed/EmbedRenderer';
@@ -30,6 +30,7 @@ interface MessageContentProps {
     serverId?: string;
     stickerId?: string | null;
     embeds?: Embed[];
+    components?: ButtonComponent[];
     attachments?: MessageAttachment[];
     poll?: MessagePoll | null;
     isDeleted?: boolean;
@@ -39,6 +40,8 @@ interface MessageContentProps {
     senderId?: string;
     senderMember?: ServerMember;
     senderRoles?: Role[];
+    isEphemeral?: boolean;
+    invocationId?: string;
     onResize?: () => void;
 }
 
@@ -48,6 +51,7 @@ export const MessageContent = React.memo(
         serverId,
         stickerId,
         embeds,
+        components,
         attachments,
         poll,
         isDeleted,
@@ -57,6 +61,8 @@ export const MessageContent = React.memo(
         senderId,
         senderMember,
         senderRoles,
+        isEphemeral,
+        invocationId,
         onResize,
     }: MessageContentProps) => {
         const { data: sticker } = useSticker(stickerId || null);
@@ -150,10 +156,16 @@ export const MessageContent = React.memo(
                         onResize={onResize}
                     />
                 )}
-                {embeds && embeds.length > 0 && (
+                {((embeds && embeds.length > 0) ||
+                    (components && components.length > 0)) && (
                     <EmbedRenderer
+                        channelId={channelId}
+                        invocationId={invocationId}
                         isDeleted={isDeleted}
-                        payload={{ embeds, content: undefined }}
+                        isEphemeral={isEphemeral}
+                        messageId={messageId}
+                        payload={{ embeds, components, content: undefined }}
+                        senderId={senderId}
                         serverId={serverId}
                         variant="chat"
                         onResize={onResize}

@@ -11,7 +11,7 @@ import type {
     Server,
     ServerBanner,
 } from '@/api/servers/servers.types';
-import type { Embed } from '@/types/embed';
+import type { ButtonComponent, Embed } from '@/types/embed';
 import type { JsonValue } from '@/types/json';
 
 export type { Category, Channel, Server, ServerBanner };
@@ -39,6 +39,8 @@ export interface IInteractionResponseServerEvent {
     senderUsername?: string;
     senderIsBot?: boolean;
     senderProfilePicture?: string | null;
+    embeds?: Embed[];
+    components?: ButtonComponent[];
     invocationId?: string;
     ephemeral?: boolean;
 }
@@ -98,6 +100,7 @@ export interface IMessageDm {
     stickerId: string | null;
     poll: MessagePoll | null;
     embeds: Embed[];
+    components?: ButtonComponent[];
     attachments: MessageAttachment[];
     reactions: [];
     interaction: null;
@@ -124,6 +127,7 @@ export interface IMessageServer {
     webhookUsername?: string;
     webhookAvatarUrl?: string;
     embeds: Embed[];
+    components?: ButtonComponent[];
     attachments: MessageAttachment[];
     reactions: MessageReaction[];
     interaction: {
@@ -165,6 +169,7 @@ export interface IMessageServerSent {
     isSticky: false;
     isWebhook: false;
     embeds: Embed[];
+    components?: ButtonComponent[];
     attachments: MessageAttachment[];
     reactions: [];
     interaction: {

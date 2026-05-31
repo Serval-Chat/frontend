@@ -1,4 +1,4 @@
-import type { Embed } from '@/types/embed';
+import type { ButtonComponent, Embed } from '@/types/embed';
 import type { InteractionValue } from '@/types/interactions';
 
 export interface UnicodeReactionData {
@@ -96,6 +96,7 @@ export interface ChatMessage {
     webhookUsername?: string;
     webhookAvatarUrl?: string;
     embeds: Embed[];
+    components?: ButtonComponent[];
     attachments: MessageAttachment[];
     reactions: MessageReaction[];
     interaction: {
@@ -107,4 +108,5 @@ export interface ChatMessage {
     senderIsBot: boolean;
     deletedAt?: string;
     isEphemeral?: boolean;
+    invocationId?: string;
 }

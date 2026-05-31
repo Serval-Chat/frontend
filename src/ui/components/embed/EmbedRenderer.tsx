@@ -6,12 +6,15 @@ import {
     useState,
 } from 'react';
 
+import { interactionsApi } from '@/api/interactions/interactions.api';
 import { useMe } from '@/api/users/users.queries';
-import type { Embed, MessagePayload } from '@/types/embed';
+import type { ButtonComponent, Embed, MessagePayload } from '@/types/embed';
 import { ImageLightbox } from '@/ui/components/common/ImageLightbox';
 import { Link } from '@/ui/components/common/Link';
 import { ParsedText } from '@/ui/components/common/ParsedText';
+import { useToast } from '@/ui/components/common/Toast';
 import { cn } from '@/utils/cn';
+import { extractApiError } from '@/utils/extractApiError';
 import { APP_LOCALE } from '@/utils/locale';
 import { getSafeUrl } from '@/utils/proxy';
 import {
@@ -156,7 +159,7 @@ const EmbedCard = memo(
         const { data: me } = useMe();
         const use24HourTime = me?.settings?.use24HourTime ?? false;
         const barColor = colorToCss(embed.color);
-        const hasContent =
+        const hasContent = Boolean(
             embed.title ??
             embed.description ??
             embed.author ??
@@ -164,7 +167,8 @@ const EmbedCard = memo(
             embed.thumbnail ??
             embed.image ??
             embed.video ??
-            (embed.fields && embed.fields.length > 0);
+            embed.fields?.length,
+        );
 
         const imageUrl = embed.image?.url
             ? getSafeUrl(embed.image.url)
@@ -693,6 +697,96 @@ const EmbedCard = memo(
 );
 EmbedCard.displayName = 'EmbedCard';
 
+interface EmbedButtonsProps {
+    buttons: ButtonComponent[] | undefined;
+    serverId?: string;
+    channelId?: string;
+    messageId?: string;
+    isDeleted?: boolean;
+    pendingButtonKey?: string | null;
+    onButtonClick: (componentIndex: number, button: ButtonComponent) => void;
+}
+
+const EmbedButtons = memo(
+    ({
+        buttons,
+        serverId,
+        channelId,
+        messageId,
+        isDeleted,
+        pendingButtonKey,
+        onButtonClick,
+    }: EmbedButtonsProps): ReactNode => {
+        const visibleButtons = buttons
+            ?.filter(
+                (component): component is ButtonComponent =>
+                    component.type === 'button',
+            )
+            .slice(0, 8);
+        if (!visibleButtons || visibleButtons.length === 0) return null;
+
+        return (
+            <div className="mt-2 flex flex-wrap gap-2">
+                {visibleButtons.map((button, buttonIndex) => {
+                    const buttonKey = `${button.custom_id ?? button.url ?? buttonIndex}`;
+                    const disabled =
+                        button.disabled === true ||
+                        isDeleted === true ||
+                        pendingButtonKey === buttonKey ||
+                        (button.style !== 'link' &&
+                            (!serverId ||
+                                !channelId ||
+                                !messageId ||
+                                !button.custom_id));
+                    const label =
+                        button.label ?? button.emoji?.name ?? 'Button';
+                    const className = cn(
+                        'rounded px-3 py-1.5 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60',
+                        button.style === 'primary' &&
+                            'text-primary-foreground bg-primary hover:bg-primary/90',
+                        button.style === 'secondary' &&
+                            'bg-bg-secondary text-foreground hover:bg-bg-secondary/80',
+                        button.style === 'success' &&
+                            'bg-success text-white hover:bg-success/90',
+                        button.style === 'danger' &&
+                            'bg-danger text-white hover:bg-danger/90',
+                        button.style === 'link' &&
+                            'border border-border-subtle bg-transparent text-primary hover:bg-bg-secondary',
+                    );
+
+                    if (button.style === 'link' && button.url) {
+                        return (
+                            <Link
+                                external
+                                className={className}
+                                href={button.url}
+                                key={buttonKey}
+                            >
+                                {label}
+                            </Link>
+                        );
+                    }
+
+                    return (
+                        <button
+                            className={className}
+                            disabled={disabled}
+                            key={buttonKey}
+                            type="button"
+                            onClick={(): void => {
+                                onButtonClick(buttonIndex, button);
+                            }}
+                        >
+                            {label}
+                        </button>
+                    );
+                })}
+            </div>
+        );
+    },
+);
+EmbedButtons.displayName = 'EmbedButtons';
+
 // ─── main component ──────────────────────────────────────────────────────────
 
 export interface EmbedRendererProps {
@@ -700,6 +794,11 @@ export interface EmbedRendererProps {
     className?: string;
     variant?: 'preview' | 'chat';
     serverId?: string;
+    channelId?: string;
+    messageId?: string;
+    senderId?: string;
+    isEphemeral?: boolean;
+    invocationId?: string;
     isDeleted?: boolean;
     onResize?: () => void;
 }
@@ -709,12 +808,58 @@ export const EmbedRenderer = ({
     className,
     variant = 'preview',
     serverId,
+    channelId,
+    messageId,
+    senderId,
+    isEphemeral,
+    invocationId,
     isDeleted,
     onResize,
 }: EmbedRendererProps): ReactNode => {
-    const hasAnything = Boolean(
-        payload.content?.trim() || payload.embeds?.length || payload.poll,
+    const { showToast } = useToast();
+    const [pendingButtonKey, setPendingButtonKey] = useState<string | null>(
+        null,
     );
+    const hasAnything = Boolean(
+        payload.content?.trim() ||
+        payload.embeds?.length ||
+        payload.components?.length ||
+        payload.poll,
+    );
+
+    const handleButtonClick = async (
+        componentIndex: number,
+        button: ButtonComponent,
+    ): Promise<void> => {
+        if (
+            button.style === 'link' ||
+            button.disabled === true ||
+            !serverId ||
+            !channelId ||
+            !messageId ||
+            !button.custom_id
+        ) {
+            return;
+        }
+
+        const buttonKey = `${button.custom_id}`;
+        setPendingButtonKey(buttonKey);
+        try {
+            await interactionsApi.createComponentInteraction({
+                serverId,
+                channelId,
+                messageId,
+                componentIndex,
+                customId: button.custom_id,
+                invocationId: isEphemeral ? invocationId : undefined,
+                botUserId: isEphemeral ? senderId : undefined,
+            });
+        } catch (error) {
+            showToast(extractApiError(error), 'error');
+        } finally {
+            setPendingButtonKey(null);
+        }
+    };
 
     if (!hasAnything && variant === 'preview') {
         return (
@@ -764,16 +909,30 @@ export const EmbedRenderer = ({
 
             {/* Embeds */}
             {payload.embeds?.map((embed, i) => (
-                <EmbedCard
-                    embed={embed}
-                    index={i}
-                    isDeleted={isDeleted}
+                <div
+                    className="flex flex-col items-start"
                     key={`embed-${embed.title ?? ''}-${embed.color ?? i}`}
-                    serverId={serverId}
-                    variant={variant}
-                    onResize={onResize}
-                />
+                >
+                    <EmbedCard
+                        embed={embed}
+                        index={i}
+                        isDeleted={isDeleted}
+                        serverId={serverId}
+                        variant={variant}
+                        onResize={onResize}
+                    />
+                </div>
             ))}
+
+            <EmbedButtons
+                buttons={payload.components}
+                channelId={channelId}
+                isDeleted={isDeleted}
+                messageId={messageId}
+                pendingButtonKey={pendingButtonKey}
+                serverId={serverId}
+                onButtonClick={handleButtonClick}
+            />
 
             {/* Poll preview */}
             {payload.poll &&

@@ -135,7 +135,7 @@ export interface AllowedMentions {
 export interface MessagePayload {
     content?: string;
     embeds?: Embed[]; // max 10
-    components?: ActionRow[]; // max 5
+    components?: ButtonComponent[]; // max 8, bot-authored messages only
     allowed_mentions?: AllowedMentions;
     tts?: boolean;
     ephemeral?: boolean; // bot/interaction responses only

@@ -68,6 +68,7 @@ export function useChatWS(
             stickerId: message.stickerId,
             poll: message.poll,
             embeds: message.embeds,
+            components: message.components ?? [],
             attachments: message.attachments,
             reactions: message.reactions,
             interaction: null,
@@ -100,6 +101,7 @@ export function useChatWS(
                     ? message.webhookAvatarUrl
                     : undefined,
             embeds: message.embeds,
+            components: message.components ?? [],
             attachments: message.attachments,
             reactions: message.reactions,
             interaction:
@@ -503,6 +505,7 @@ export function useChatWS(
                 editedAt: string;
                 isEdited: boolean;
                 embeds?: ChatMessage['embeds'];
+                components?: ChatMessage['components'];
                 attachments?: ChatMessage['attachments'];
             }): void => {
                 queryClient.setQueriesData<InfiniteData<ChatMessage[]>>(
@@ -531,6 +534,12 @@ export function useChatWS(
                                                   text: payload.text,
                                                   isEdited: payload.isEdited,
                                                   editedAt: payload.editedAt,
+                                                  embeds:
+                                                      payload.embeds ??
+                                                      msg.embeds,
+                                                  components:
+                                                      payload.components ??
+                                                      msg.components,
                                                   attachments:
                                                       payload.attachments ??
                                                       msg.attachments,
@@ -555,6 +564,7 @@ export function useChatWS(
                 editedAt: string;
                 isEdited: boolean;
                 embeds?: ChatMessage['embeds'];
+                components?: ChatMessage['components'];
                 attachments?: ChatMessage['attachments'];
             }): void => {
                 if (!selectedFriendId) return;
@@ -586,6 +596,9 @@ export function useChatWS(
                                                   attachments:
                                                       payload.attachments ??
                                                       msg.attachments,
+                                                  components:
+                                                      payload.components ??
+                                                      msg.components,
                                               }
                                             : msg,
                                 ),

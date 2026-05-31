@@ -34,4 +34,20 @@ export const interactionsApi = {
         );
         return res.data;
     },
+
+    createComponentInteraction: async (data: {
+        serverId: string;
+        channelId: string;
+        messageId: string;
+        componentIndex: number;
+        customId: string;
+        invocationId?: string;
+        botUserId?: string;
+    }): Promise<{ success: boolean }> => {
+        const res = await apiClient.post<{ success: boolean }>(
+            '/api/v1/interactions/components',
+            data,
+        );
+        return res.data;
+    },
 };

@@ -472,8 +472,11 @@ export const Message = React.memo(
                             <MessageContent
                                 attachments={message.attachments}
                                 channelId={message.channelId}
+                                components={message.components}
                                 embeds={message.embeds}
+                                invocationId={message.invocationId}
                                 isDeleted={!!message.deletedAt}
+                                isEphemeral={message.isEphemeral}
                                 messageId={message._id}
                                 poll={message.poll}
                                 senderId={message.senderId}

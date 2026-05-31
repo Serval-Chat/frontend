@@ -453,13 +453,15 @@ export const setupGlobalWsHandlers = (
                     isPinned: false,
                     isSticky: false,
                     isWebhook: false,
-                    embeds: [],
+                    embeds: payload.embeds ?? [],
+                    components: payload.components ?? [],
                     attachments: [],
                     reactions: [],
                     interaction: null,
                     poll: null,
                     stickerId: null,
                     isEphemeral: true,
+                    invocationId: payload.invocationId,
                 };
 
                 addMessageToInfiniteCache(
