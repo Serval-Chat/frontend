@@ -103,7 +103,7 @@ export const PrimaryNavBar = () => {
                 'relative z-50 flex h-full flex-col items-center gap-3',
                 showInbox && 'z-[var(--z-index-popover)]',
                 'pt-[calc(0.75rem+env(safe-area-inset-top))] pb-[calc(0.75rem+env(safe-area-inset-bottom))]',
-                'bg-[--color-background]',
+                'pride-glass-strong bg-[--color-background]',
                 'w-[72px] shrink-0',
                 !inSwipePanel && isChatActive && 'max-md:hidden',
             )}

@@ -187,7 +187,7 @@ const SplitViewPane = ({
 
     if (!conversation) {
         return (
-            <Box className="flex min-w-0 flex-1 items-center justify-center bg-[var(--chat-bg)] px-6 text-center">
+            <Box className="chat-background flex min-w-0 flex-1 items-center justify-center px-6 text-center">
                 <Text className="max-w-64 text-muted-foreground" size="sm">
                     Use a channel or DM context menu to add a chat here.
                 </Text>
@@ -198,7 +198,7 @@ const SplitViewPane = ({
     const isDm = conversation.type === 'dm';
 
     return (
-        <Box className="flex min-w-0 flex-1 flex-col overflow-hidden bg-[var(--chat-bg)]">
+        <Box className="chat-background flex min-w-0 flex-1 flex-col overflow-hidden">
             <ProxyProvider
                 overrideChannelId={isDm ? null : conversation.channelId}
                 overrideFriendId={isDm ? conversation.friendId : null}
@@ -339,7 +339,7 @@ export const MainContent = () => {
                     <ServerChannelsPage />
                 </React.Suspense>
             ) : isSplitViewActive ? (
-                <Box className="flex min-h-0 flex-1 flex-col overflow-hidden bg-[var(--chat-bg)] md:flex-row">
+                <Box className="chat-background flex min-h-0 flex-1 flex-col overflow-hidden md:flex-row">
                     <SplitViewPane conversation={splitView.left} side="left" />
                     <Box className="h-px shrink-0 bg-border-subtle md:h-full md:w-px" />
                     <SplitViewPane

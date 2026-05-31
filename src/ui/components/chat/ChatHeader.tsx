@@ -108,7 +108,7 @@ export const ChatHeader = ({
     return (
         <Box
             as="header"
-            className="z-50 flex shrink-0 items-start border-b border-white/5 bg-[var(--bg-chat-header)] px-4 backdrop-blur-sm"
+            className="pride-glass-strong z-50 flex shrink-0 items-start border-b border-white/5 bg-[var(--bg-chat-header)] px-4 backdrop-blur-sm"
         >
             {/* Left: icon + name + description */}
             <Box

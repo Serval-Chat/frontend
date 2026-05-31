@@ -929,7 +929,7 @@ export const MessageInput = ({
     return (
         <Box
             className={cn(
-                'relative mx-4 mb-4 flex flex-col overflow-visible rounded-lg border border-border-subtle bg-[var(--bg-msg-input)] transition-colors focus-within:border-primary/50',
+                'pride-glass-input relative mx-4 mb-4 flex flex-col overflow-visible rounded-lg border border-border-subtle bg-[var(--bg-msg-input)] transition-colors focus-within:border-primary/50',
                 isSlowModeError && 'animate-shake !border-danger',
             )}
         >
@@ -940,7 +940,7 @@ export const MessageInput = ({
             />
 
             {replyingTo && replyingUser && (
-                <Box className="flex items-center justify-between gap-3 border-b border-border-subtle bg-bg-subtle/30 px-3 py-2">
+                <Box className="pride-glass flex items-center justify-between gap-3 border-b border-border-subtle bg-bg-subtle/30 px-3 py-2">
                     <Box className="flex min-w-0 items-center gap-2">
                         <Text className="text-xs whitespace-nowrap text-muted-foreground">
                             Replying to
@@ -992,7 +992,7 @@ export const MessageInput = ({
                 </Box>
             )}
 
-            <Box className="relative flex items-end gap-2 p-2">
+            <Box className="relative flex items-center gap-2 p-2">
                 <input
                     multiple
                     ref={fileInputRef}
@@ -1001,7 +1001,7 @@ export const MessageInput = ({
                     onChange={handleFileChange}
                 />
                 <Button
-                    className="mb-1 h-8 w-8 shrink-0 p-0"
+                    className="h-8 w-8 shrink-0 p-0"
                     disabled={cooldown > 0 && !canBypassSlowMode}
                     size="sm"
                     variant="ghost"
@@ -1172,7 +1172,7 @@ export const MessageInput = ({
 
                 <Button
                     className={cn(
-                        'mb-1 h-8 w-8 shrink-0 p-0',
+                        'h-8 w-8 shrink-0 p-0',
                         showEmojiPicker && 'text-primary',
                     )}
                     size="sm"
@@ -1188,7 +1188,7 @@ export const MessageInput = ({
 
                 <Button
                     className={cn(
-                        'mb-1 h-8 w-8 shrink-0 p-0',
+                        'h-8 w-8 shrink-0 p-0',
                         showStickerPicker && 'text-primary',
                     )}
                     size="sm"
@@ -1205,7 +1205,7 @@ export const MessageInput = ({
                 <Box className="relative">
                     <Button
                         className={cn(
-                            'mb-1 h-8 w-8 shrink-0 p-0',
+                            'h-8 w-8 shrink-0 p-0',
                             showGifPicker && 'text-primary',
                         )}
                         size="sm"
@@ -1256,7 +1256,7 @@ export const MessageInput = ({
 
                 <Button
                     className={cn(
-                        'mb-1 h-8 w-8 shrink-0 p-0',
+                        'h-8 w-8 shrink-0 p-0',
                         showPollModal && 'text-primary',
                     )}
                     size="sm"
@@ -1273,7 +1273,7 @@ export const MessageInput = ({
 
                 {(hasText || files.length > 0) && isMobile && (
                     <Button
-                        className="mb-1 h-8 w-8 shrink-0 p-0 text-primary"
+                        className="h-8 w-8 shrink-0 p-0 text-primary"
                         disabled={isUploading}
                         size="sm"
                         variant="ghost"

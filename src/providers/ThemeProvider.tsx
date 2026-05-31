@@ -16,7 +16,8 @@ export type Theme =
     | 'cherry'
     | 'high-contrast'
     | 'violet'
-    | 'forest-green';
+    | 'forest-green'
+    | 'pride';
 
 interface ThemeContextType {
     theme: Theme;
@@ -67,6 +68,7 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
             'theme-high-contrast',
             'theme-violet',
             'theme-forest-green',
+            'theme-pride',
         );
         root.classList.add(`theme-${theme}`);
         localStorage.setItem('theme', theme);

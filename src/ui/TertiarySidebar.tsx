@@ -79,7 +79,7 @@ export const TertiarySidebar = ({
         <Box
             as="aside"
             className={cn(
-                'relative flex h-full shrink-0 flex-col bg-[var(--tertiary-bg)]',
+                'pride-glass relative flex h-full shrink-0 flex-col border-l border-border-subtle bg-[var(--tertiary-bg)]',
                 'pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]',
                 'md:flex',
                 'max-md:fixed max-md:inset-y-0 max-md:right-0 max-md:z-[var(--z-index-top)] max-md:w-64 max-md:shadow-2xl',
@@ -154,7 +154,7 @@ export const TertiarySidebar = ({
                     {isSearchOpen && selectedServerId && (
                         <motion.div
                             animate={{ height: 'auto', opacity: 1 }}
-                            className="shrink-0 overflow-hidden border-b border-border-subtle bg-bg-subtle/50"
+                            className="pride-glass shrink-0 overflow-hidden border-b border-border-subtle bg-bg-subtle/50"
                             exit={{ height: 0, opacity: 0 }}
                             initial={{ height: 0, opacity: 0 }}
                         >

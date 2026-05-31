@@ -14,6 +14,7 @@ const THEMES = [
     { id: 'violet', label: 'Violet' },
     { id: 'forest-green', label: 'Forest Green' },
     { id: 'high-contrast', label: 'High Contrast' },
+    { id: 'pride', label: 'Pride' },
 ] as const;
 
 export const ThemeTweaker = () => {

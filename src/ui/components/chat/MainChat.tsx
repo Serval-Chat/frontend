@@ -48,6 +48,7 @@ const THEMES: Theme[] = [
     'high-contrast',
     'violet',
     'forest-green',
+    'pride',
 ];
 
 interface MainChatProps {
@@ -378,7 +379,7 @@ export const MainChat = ({
 
     if (!selectedFriendId && !selectedChannelId) {
         return (
-            <Box>
+            <Box className="chat-background flex min-h-0 flex-1 flex-col">
                 <ChatHeader
                     actions={headerActions}
                     friendUser={undefined}
@@ -397,7 +398,7 @@ export const MainChat = ({
 
     return (
         <Box
-            className="relative flex min-h-0 flex-1 flex-col overflow-hidden"
+            className="chat-background relative flex min-h-0 flex-1 flex-col overflow-hidden"
             onDragLeave={handleDragLeave}
             onDragOver={handleDragOver}
             onDrop={handleDrop}
@@ -438,7 +439,7 @@ export const MainChat = ({
 
             {selectedChannel?.type === 'voice' ? (
                 <Box
-                    className="flex flex-1 items-center justify-center bg-[var(--chat-bg)] p-8"
+                    className="chat-background flex flex-1 items-center justify-center p-8"
                     ref={chatContainerRef}
                 >
                     <Text className="text-muted-foreground">
@@ -524,7 +525,7 @@ export const MainChat = ({
                             onCancelReply={(): void => setReplyingTo(null)}
                         />
                     ) : (
-                        <Box className="mx-4 mb-4 flex h-[56px] items-center rounded-lg border border-border-subtle bg-[var(--bg-msg-input)] px-4">
+                        <Box className="pride-glass-input mx-4 mb-4 flex h-[56px] items-center rounded-lg border border-border-subtle bg-[var(--bg-msg-input)] px-4">
                             <Text className="text-muted-foreground" size="sm">
                                 You can&apos;t type in this channel.
                             </Text>

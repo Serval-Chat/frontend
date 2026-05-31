@@ -62,7 +62,7 @@ export const ActiveVoicePanel = () => {
     const { icon: SignalIcon, color: signalColor } = getSignalIcon();
 
     return (
-        <div className="flex flex-col border-b border-border-subtle bg-[var(--chat-bg)] px-2 py-2">
+        <div className="chat-background pride-glass flex flex-col border-b border-border-subtle px-2 py-2">
             <div className="flex items-center justify-between">
                 <div className="flex flex-1 flex-col overflow-hidden px-1">
                     <div

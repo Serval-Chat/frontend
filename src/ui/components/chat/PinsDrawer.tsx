@@ -211,7 +211,7 @@ export const PinsDrawer = ({
 
             <motion.div
                 animate={{ opacity: 1, y: 0, scale: 1 }}
-                className="fixed z-[var(--z-index-top)] flex origin-top-right flex-col overflow-hidden rounded-xl border border-[var(--divider)] bg-[var(--tertiary-bg)] shadow-2xl"
+                className="pride-glass-strong fixed z-[var(--z-index-top)] flex origin-top-right flex-col overflow-hidden rounded-xl border border-[var(--divider)] bg-[var(--tertiary-bg)] shadow-2xl"
                 exit={{ opacity: 0, y: -10, scale: 0.95 }}
                 initial={{ opacity: 0, y: -10, scale: 0.95 }}
                 style={{
@@ -227,7 +227,7 @@ export const PinsDrawer = ({
                     onMouseDown={startResizing}
                 />
 
-                <Box className="relative z-20 flex h-12 items-center justify-between border-b border-[var(--divider)] bg-[var(--tertiary-bg)] px-4">
+                <Box className="pride-glass relative z-20 flex h-12 items-center justify-between border-b border-[var(--divider)] bg-[var(--tertiary-bg)] px-4">
                     <Box className="flex items-center gap-2">
                         <Pin className="h-4 w-4 text-muted-foreground" />
                         <Text className="font-semibold" size="sm">
@@ -242,7 +242,7 @@ export const PinsDrawer = ({
                     </button>
                 </Box>
 
-                <Box className="custom-scrollbar flex-1 space-y-4 overflow-y-auto bg-[var(--tertiary-bg)] p-4">
+                <Box className="custom-scrollbar pride-glass flex-1 space-y-4 overflow-y-auto bg-[var(--tertiary-bg)] p-4">
                     {isLoading ? (
                         <Text className="py-8 text-center text-muted-foreground">
                             Loading pins...

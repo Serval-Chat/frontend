@@ -1,6 +1,5 @@
 import React from 'react';
 
-import { Text } from '@/ui/components/common/Text';
 import { Box } from '@/ui/components/layout/Box';
 import { resolveApiUrl } from '@/utils/apiUrl';
 import { cn } from '@/utils/cn';
@@ -44,17 +43,17 @@ export const UserProfilePictureIcon = ({
         .toUpperCase();
 
     const sizeClasses = {
-        xs: 'w-5 h-5 text-[10px]',
-        sm: 'w-8 h-8 text-xs',
-        md: 'w-10 h-10 text-sm',
-        lg: 'w-12 h-12 text-base',
-        xl: 'w-20 h-20 text-2xl',
+        xs: 'h-5 w-5 text-[10px]',
+        sm: 'h-8 w-8 text-xs',
+        md: 'h-10 w-10 text-sm',
+        lg: 'h-12 w-12 text-base',
+        xl: 'h-20 w-20 text-3xl',
     };
 
     return (
         <Box
             className={cn(
-                'text-foreground-muted flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-muted-foreground/20 font-bold',
+                'flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-[var(--avatar-fallback-bg)] font-bold text-[var(--avatar-fallback-text)]',
                 sizeClasses[size],
                 className,
             )}
@@ -67,9 +66,9 @@ export const UserProfilePictureIcon = ({
                     src={iconUrl}
                 />
             ) : (
-                <Text as="span" size="xs">
+                <span className="text-[var(--avatar-fallback-text)]">
                     {initials}
-                </Text>
+                </span>
             )}
         </Box>
     );

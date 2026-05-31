@@ -222,7 +222,7 @@ export const Chat = () => {
 
     if (!isMobile) {
         return (
-            <Box className="flex h-[100dvh] w-full overflow-hidden bg-[var(--chat-bg)]">
+            <Box className="chat-background flex h-[100dvh] w-full overflow-hidden">
                 <Outlet />
                 <PrimaryNavBar />
                 <SecondaryNavBar />
@@ -234,7 +234,7 @@ export const Chat = () => {
 
     return (
         <Box
-            className="relative h-[100dvh] w-full overflow-hidden bg-[var(--chat-bg)]"
+            className="chat-background relative h-[100dvh] w-full overflow-hidden"
             ref={swipeRef}
         >
             <Outlet />

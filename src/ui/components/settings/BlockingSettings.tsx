@@ -185,11 +185,11 @@ export const BlockingSettings = () => {
 
                     <Box className="relative w-64">
                         <Search
-                            className="absolute top-1/2 left-3 -translate-y-1/2 text-white/30"
+                            className="absolute top-1/2 left-3 -translate-y-1/2 text-[var(--settings-search-icon)]"
                             size={14}
                         />
                         <input
-                            className="w-full rounded-md border border-white/10 bg-black/40 py-1.5 pr-3 pl-9 text-xs text-foreground transition-all outline-none placeholder:text-white/20 focus:border-primary/50 focus:bg-black/60"
+                            className="w-full rounded-md border border-[var(--settings-search-border)] bg-[var(--settings-search-bg)] py-1.5 pr-3 pl-9 text-xs text-foreground transition-all outline-none placeholder:text-[var(--settings-search-placeholder)] focus:border-primary/50 focus:bg-[var(--settings-search-bg-focus)]"
                             placeholder="Search blocked users..."
                             value={searchQuery}
                             onChange={(e): void =>
@@ -198,7 +198,7 @@ export const BlockingSettings = () => {
                         />
                         {searchQuery && (
                             <button
-                                className="absolute top-1/2 right-2 -translate-y-1/2 text-white/30 hover:text-white"
+                                className="absolute top-1/2 right-2 -translate-y-1/2 text-[var(--settings-search-icon)] hover:text-foreground"
                                 onClick={(): void => setSearchQuery('')}
                             >
                                 <X size={12} />
@@ -247,7 +247,7 @@ export const BlockingSettings = () => {
                                     flags: number;
                                 }) => (
                                     <Box
-                                        className="flex items-center justify-between rounded-xl border border-white/5 bg-white/[0.02] p-3 transition-colors hover:border-white/10"
+                                        className="flex items-center justify-between rounded-xl border border-[var(--settings-edit-card-border)] bg-[var(--settings-edit-card-bg)] p-3 transition-colors hover:border-[var(--settings-edit-card-border-hover)]"
                                         key={block.targetUserId}
                                     >
                                         <UserItem
@@ -256,7 +256,7 @@ export const BlockingSettings = () => {
                                         />
                                         <Box className="flex items-center gap-3">
                                             <select
-                                                className="rounded-md border border-white/10 bg-black/40 px-2 py-1 text-xs text-foreground outline-none focus:border-primary"
+                                                className="rounded-md border border-[var(--settings-edit-control-border)] bg-[var(--settings-edit-control-bg)] px-2 py-1 text-xs text-foreground outline-none focus:border-primary"
                                                 title="Assigned Block Profile"
                                                 value={block.profileId}
                                                 onChange={(e): void =>
@@ -341,7 +341,7 @@ export const BlockingSettings = () => {
                                 'flex flex-col overflow-hidden rounded-xl border transition-all duration-200',
                                 editingProfileId === profile.id
                                     ? 'border-primary/30 bg-primary/[0.02] shadow-lg'
-                                    : 'border-white/5 bg-white/[0.02] hover:border-white/10',
+                                    : 'border-[var(--settings-edit-card-border)] bg-[var(--settings-edit-card-bg)] hover:border-[var(--settings-edit-card-border-hover)]',
                             )}
                             key={profile.id}
                         >
@@ -349,7 +349,7 @@ export const BlockingSettings = () => {
                                 {renamingProfileId === profile.id ? (
                                     <Box className="flex items-center gap-2">
                                         <input
-                                            className="rounded border border-primary/50 bg-black/40 px-2 py-1 text-sm outline-none"
+                                            className="rounded border border-primary/50 bg-[var(--settings-edit-control-bg)] px-2 py-1 text-sm outline-none"
                                             ref={renameInputRef}
                                             title="Rename Profile"
                                             value={renameValue}
@@ -434,7 +434,7 @@ export const BlockingSettings = () => {
                             </Box>
 
                             {editingProfileId === profile.id && (
-                                <Box className="border-t border-white/5 bg-black/20 p-4">
+                                <Box className="border-t border-[var(--settings-edit-card-border)] bg-[var(--settings-edit-bg)] p-4">
                                     <Box className="flex flex-col">
                                         {FLAG_GROUPS.map((group, idx) => (
                                             <Box key={group.title}>

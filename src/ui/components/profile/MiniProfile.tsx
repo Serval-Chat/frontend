@@ -46,7 +46,7 @@ export const MiniProfile = () => {
     if (!user) return null;
 
     return (
-        <Box className="flex h-[60px] shrink-0 items-center justify-between border-t border-border-subtle bg-[var(--tertiary-bg)] px-2 py-2">
+        <Box className="pride-glass flex h-[60px] shrink-0 items-center justify-between border-t border-border-subtle bg-[var(--tertiary-bg)] px-2 py-2">
             <Box className="mr-2 flex min-w-0 flex-1 items-center">
                 <UserProfilePicture
                     className="mr-2 shrink-0"

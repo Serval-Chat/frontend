@@ -98,11 +98,11 @@ export const ServerChannelsPage = () => {
     if (!serverId) return null;
 
     return (
-        <Box className="relative flex min-h-0 flex-1 flex-col overflow-hidden bg-[var(--chat-bg)]">
+        <Box className="chat-background relative flex min-h-0 flex-1 flex-col overflow-hidden">
             {/* Header */}
             <Box
                 as="header"
-                className="z-50 flex shrink-0 items-center gap-3 border-b border-white/5 bg-[var(--bg-chat-header)] px-4 py-3 backdrop-blur-sm"
+                className="pride-glass-strong z-50 flex shrink-0 items-center gap-3 border-b border-white/5 bg-[var(--bg-chat-header)] px-4 py-3 backdrop-blur-sm"
             >
                 <button
                     aria-label="Back to server"
@@ -145,7 +145,7 @@ export const ServerChannelsPage = () => {
             </Box>
 
             {hasUnsavedChanges && (
-                <div className="absolute bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-xl border border-border-subtle bg-bg-secondary/90 px-6 py-4 whitespace-nowrap shadow-xl backdrop-blur-md">
+                <div className="pride-glass-input absolute bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-xl border border-border-subtle bg-bg-secondary/90 px-6 py-4 whitespace-nowrap shadow-xl backdrop-blur-md">
                     <div className="flex items-center gap-6">
                         <Text className="text-sm font-medium">
                             Careful - you have unsaved changes!

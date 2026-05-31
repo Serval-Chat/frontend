@@ -114,7 +114,7 @@ export const StickyMessageBar = ({
     return (
         <Box
             className={cn(
-                'group relative flex flex-col bg-[var(--bg-secondary)]',
+                'group pride-glass relative flex flex-col bg-[var(--bg-secondary)]',
                 viewState !== 'hidden'
                     ? 'border-b border-[var(--divider)]'
                     : '',
@@ -183,7 +183,7 @@ export const StickyMessageBar = ({
                         : '-bottom-[11px]',
                 )}
             >
-                <Box className="flex items-center justify-center overflow-hidden rounded-b-sm border-x border-b border-[var(--divider)] bg-[var(--bg-secondary)]">
+                <Box className="pride-glass flex items-center justify-center overflow-hidden rounded-b-sm border-x border-b border-[var(--divider)] bg-[var(--bg-secondary)]">
                     {(viewState === 'compact' || viewState === 'hidden') && (
                         <button
                             className="flex h-3 w-5 items-center justify-center text-muted-foreground transition-colors hover:bg-white/5 hover:text-foreground"

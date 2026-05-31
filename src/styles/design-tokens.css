@@ -90,6 +90,23 @@
     --chat-bg: var(--local-chat-bg);
     --primary-bg: var(--local-primary-bg);
     --bg-msg-input: var(--background);
+    --avatar-fallback-bg: color-mix(
+        in srgb,
+        var(--muted-foreground) 20%,
+        transparent
+    );
+    --avatar-fallback-text: var(--muted-foreground);
+    --settings-search-bg: rgb(0 0 0 / 0.4);
+    --settings-search-bg-focus: rgb(0 0 0 / 0.6);
+    --settings-search-border: rgb(255 255 255 / 0.1);
+    --settings-search-icon: rgb(255 255 255 / 0.3);
+    --settings-search-placeholder: rgb(255 255 255 / 0.2);
+    --settings-edit-bg: rgb(0 0 0 / 0.2);
+    --settings-edit-control-bg: rgb(0 0 0 / 0.4);
+    --settings-edit-control-border: rgb(255 255 255 / 0.1);
+    --settings-edit-card-bg: rgb(255 255 255 / 0.02);
+    --settings-edit-card-border: rgb(255 255 255 / 0.05);
+    --settings-edit-card-border-hover: rgb(255 255 255 / 0.1);
 
     --text-muted: var(--muted-foreground);
     --embed-bg: var(--bg-secondary);
@@ -476,4 +493,69 @@
     --spoiler-reveal-bg: rgba(255, 255, 255, 0.05);
 
     --activity-indicator: #a78bfa;
+}
+
+.theme-pride {
+    --primary: #d9668f;
+    --primary-hover: #c6537d;
+    --danger: #e88787;
+    --danger-hover: #de7373;
+    --caution: #f2b86b;
+    --caution-hover: #e8ab57;
+    --success: #64b88a;
+    --success-hover: #51aa7a;
+    --primary-muted: #fde8f0;
+    --primary-muted-text: #9f3f63;
+    --danger-muted: #fdecec;
+    --danger-muted-text: #ab4f4f;
+    --caution-muted: #fff4e3;
+    --caution-muted-text: #a06a24;
+    --success-muted: #e8f6ee;
+    --success-muted-text: #2f7650;
+    --background: #fff8fc;
+    --foreground: #442b45;
+    --foreground-inverse: #ffffff;
+    --muted-foreground: #7c6480;
+    --muted-foreground-hover: #634f67;
+    --border-subtle: rgba(138, 102, 143, 0.22);
+    --bg-subtle: rgba(255, 255, 255, 0.58);
+    --bg-secondary: rgba(255, 255, 255, 0.74);
+    --placeholder: rgba(68, 43, 69, 0.45);
+    --divider: rgba(138, 102, 143, 0.18);
+    --pride-glass-bg: rgba(255, 248, 252, 0.44);
+    --pride-glass-bg-strong: rgba(255, 248, 252, 0.54);
+    --pride-glass-input-bg: rgba(255, 248, 252, 0.48);
+    --pride-glass-border: rgba(255, 255, 255, 0.28);
+    --pride-glass-shadow: 0 12px 38px rgba(115, 78, 125, 0.09);
+    --pride-glass-input-shadow: 0 14px 38px rgba(115, 78, 125, 0.12);
+    --avatar-fallback-bg: #ffffff;
+    --avatar-fallback-text: #111111;
+    --settings-search-bg: rgba(255, 248, 252, 0.54);
+    --settings-search-bg-focus: rgba(255, 248, 252, 0.68);
+    --settings-search-border: rgba(255, 255, 255, 0.32);
+    --settings-search-icon: rgba(68, 43, 69, 0.48);
+    --settings-search-placeholder: rgba(68, 43, 69, 0.48);
+    --settings-edit-bg: rgba(255, 248, 252, 0.36);
+    --settings-edit-control-bg: rgba(255, 248, 252, 0.58);
+    --settings-edit-control-border: rgba(255, 255, 255, 0.34);
+    --settings-edit-card-bg: rgba(255, 248, 252, 0.34);
+    --settings-edit-card-border: rgba(255, 255, 255, 0.24);
+    --settings-edit-card-border-hover: rgba(255, 255, 255, 0.38);
+
+    --local-chat-bg: linear-gradient(
+        40deg,
+        #ffd2dc 0%,
+        #ffddb7 16.67%,
+        #fff0b7 33.34%,
+        #d7f4c8 50%,
+        #c4e7ff 66.67%,
+        #d8d0ff 83.34%,
+        #f4d0ff 100%
+    );
+    --local-primary-bg: #fff7fd;
+
+    --spoiler-bg: #8f5a94;
+    --spoiler-reveal-bg: rgba(255, 255, 255, 0.35);
+
+    --activity-indicator: #b35db6;
 }

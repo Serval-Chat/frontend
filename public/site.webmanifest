@@ -1,7 +1,7 @@
 {
   "name": "Serchat",
   "short_name": "Serchat",
-  "description": "Serchat is a modern chat app for communities and your servals.",
+  "description": "Serchat is a chat app for communities and your servals.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

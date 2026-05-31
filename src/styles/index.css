@@ -41,6 +41,46 @@
 }
 
 @layer utilities {
+    .chat-background {
+        background: var(--chat-bg);
+    }
+
+    .theme-pride .pride-glass {
+        background: var(--pride-glass-bg) !important;
+        border-color: var(--pride-glass-border) !important;
+        box-shadow: var(--pride-glass-shadow);
+        backdrop-filter: blur(18px) saturate(1.25);
+    }
+
+    .theme-pride .pride-glass-strong {
+        background: var(--pride-glass-bg-strong) !important;
+        border-color: var(--pride-glass-border) !important;
+        box-shadow: var(--pride-glass-shadow);
+        backdrop-filter: blur(22px) saturate(1.35);
+    }
+
+    .theme-pride .pride-glass-input {
+        background: var(--pride-glass-input-bg) !important;
+        border-color: var(--pride-glass-border) !important;
+        box-shadow: var(--pride-glass-input-shadow);
+        backdrop-filter: blur(20px) saturate(1.3);
+    }
+
+    .theme-pride .pride-nav-button {
+        background: rgba(255, 248, 252, 0.26) !important;
+        border: 1px solid rgba(255, 255, 255, 0.18) !important;
+        box-shadow:
+            0 10px 24px rgba(115, 78, 125, 0.08),
+            inset 0 1px 0 rgba(255, 255, 255, 0.42);
+        backdrop-filter: blur(16px) saturate(1.25);
+    }
+
+    .theme-pride .pride-nav-button:hover,
+    .theme-pride .pride-nav-button.bg-primary\/20 {
+        background: rgba(255, 248, 252, 0.42) !important;
+        color: var(--primary);
+    }
+
     @keyframes marquee {
         0%,
         15% {

@@ -22,7 +22,7 @@ export const IconButton = ({
 }: IconButtonProps) => (
     <Button
         className={cn(
-            'relative transition-all duration-200',
+            'pride-nav-button relative transition-all duration-200',
             className,
             isActive && 'bg-primary/20 text-primary',
         )}
