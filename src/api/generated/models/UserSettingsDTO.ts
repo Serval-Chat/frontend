@@ -13,6 +13,7 @@ export type UserSettingsDTO = {
     disableCustomUsernameFonts?: boolean;
     disableCustomUsernameColors?: boolean;
     disableCustomUsernameGlow?: boolean;
+    limitedAnimations?: boolean;
     keybinds?: Record<string, any>;
 };
 export namespace UserSettingsDTO {

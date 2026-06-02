@@ -19,8 +19,13 @@ import type {
 } from '@/api/pings/pings.types';
 import { serversApi } from '@/api/servers/servers.api';
 import { SERVERS_QUERY_KEYS } from '@/api/servers/servers.queries';
-import type { Channel, ServerMember } from '@/api/servers/servers.types';
+import type {
+    Channel,
+    Server,
+    ServerMember,
+} from '@/api/servers/servers.types';
 import type { User, UserSettings } from '@/api/users/users.types';
+import type { RootState } from '@/store';
 import {
     setBackendInstanceId,
     setOnlineUsers,
@@ -42,6 +47,8 @@ import {
     setVoiceParticipants,
     setVoiceUserState,
 } from '@/store/slices/voiceSlice';
+import type { ProcessedChatMessage } from '@/types/chat.ui';
+import { showInAppNotification } from '@/ui/notifications/inAppNotifications';
 import { getValidMessageInteraction } from '@/ui/utils/chat';
 import { cacheSound, pruneSoundCache } from '@/utils/soundCache';
 
@@ -88,6 +95,7 @@ import {
 } from './events';
 
 let soundQueue: number[] = [];
+const shownInAppNotificationIds = new Set<string>();
 
 interface IChannelUnreadUpdatedEvent {
     serverId: string;
@@ -96,6 +104,35 @@ interface IChannelUnreadUpdatedEvent {
     lastReadAt?: string;
     senderId?: string;
 }
+
+const mergeIfChanged = <T extends object>(item: T, patch: Partial<T>): T => {
+    const record = item as Record<string, unknown>;
+    for (const [key, value] of Object.entries(patch)) {
+        if (record[key] !== value) {
+            return { ...item, ...patch };
+        }
+    }
+
+    return item;
+};
+
+const updateCachedFriend = <T extends Friend | User>(
+    old: T[] | undefined,
+    friendId: string,
+    update: (friend: T) => T,
+): T[] | undefined => {
+    if (!old) return old;
+
+    let changed = false;
+    const next = old.map((friend): T => {
+        if (friend._id !== friendId) return friend;
+        const updated = update(friend);
+        if (updated !== friend) changed = true;
+        return updated;
+    });
+
+    return changed ? next : old;
+};
 
 const addMessageToInfiniteCache = (
     queryClient: QueryClient,
@@ -125,6 +162,17 @@ const convertDmToChatMessage = (message: IMessageDm): ChatMessage => ({
     text: message.text,
     createdAt: message.createdAt,
     senderId: message.senderId,
+    senderProfilePicture:
+        message.senderProfilePicture ??
+        getStringField(message, [
+            'senderAvatarUrl',
+            'senderAvatarURL',
+            'senderAvatar',
+            'avatarUrl',
+            'avatarURL',
+            'avatar',
+            'profilePicture',
+        ]),
     receiverId: message.receiverId,
     replyToId: message.replyToId,
     repliedTo: message.repliedTo,
@@ -151,6 +199,17 @@ const convertServerMessageToChatMessage = (
     serverId: message.serverId,
     channelId: message.channelId,
     replyToId: message.replyToId,
+    senderProfilePicture:
+        message.senderProfilePicture ??
+        getStringField(message, [
+            'senderAvatarUrl',
+            'senderAvatarURL',
+            'senderAvatar',
+            'avatarUrl',
+            'avatarURL',
+            'avatar',
+            'profilePicture',
+        ]),
     isEdited: message.isEdited,
     isPinned: message.isPinned,
     isSticky: message.isSticky,
@@ -246,6 +305,160 @@ const playNotificationSound = (queryClient: QueryClient): void => {
     }, 0);
 };
 
+const normalizeNotificationText = (text: string | undefined): string => {
+    const normalized = (text ?? '').replace(/\s+/g, ' ').trim();
+    if (!normalized) return 'Sent an attachment or embed.';
+    return normalized;
+};
+
+const getStringField = (
+    value: unknown,
+    fields: readonly string[],
+): string | undefined => {
+    if (!value || typeof value !== 'object') return undefined;
+    const record = value as Record<string, unknown>;
+
+    for (const field of fields) {
+        const fieldValue = record[field];
+        if (typeof fieldValue === 'string' && fieldValue.trim()) {
+            return fieldValue;
+        }
+    }
+
+    return undefined;
+};
+
+const resolveNotificationProfilePicture = (
+    queryClient: QueryClient,
+    message: ChatMessage,
+): string | undefined => {
+    const cachedUser = queryClient.getQueryData<User>([
+        'user',
+        message.senderId,
+    ]);
+    if (cachedUser?.profilePicture) return cachedUser.profilePicture;
+
+    const friendProfiles =
+        queryClient.getQueryData<User[]>(FRIEND_PROFILES_QUERY_KEY) ?? [];
+    const friendProfile = friendProfiles.find(
+        (friend): boolean => friend._id === message.senderId,
+    );
+    if (friendProfile?.profilePicture) return friendProfile.profilePicture;
+
+    const friends = queryClient.getQueryData<Friend[]>(FRIENDS_QUERY_KEY) ?? [];
+    const friend = friends.find(
+        (friendItem): boolean => friendItem._id === message.senderId,
+    );
+    if (friend?.profilePicture) return friend.profilePicture;
+
+    if (message.serverId) {
+        const members =
+            queryClient.getQueryData<ServerMember[]>(
+                SERVERS_QUERY_KEYS.members(message.serverId),
+            ) ?? [];
+        const member = members.find(
+            (serverMember): boolean => serverMember.userId === message.senderId,
+        );
+        if (member?.user?.profilePicture) return member.user.profilePicture;
+    }
+
+    return (
+        message.senderProfilePicture ??
+        getStringField(message, [
+            'senderAvatarUrl',
+            'senderAvatarURL',
+            'senderAvatar',
+            'avatarUrl',
+            'avatarURL',
+            'avatar',
+            'profilePicture',
+        ])
+    );
+};
+
+const buildNotificationUser = ({
+    id,
+    username,
+    profilePicture,
+}: {
+    id: string;
+    username?: string;
+    profilePicture?: string | null;
+}): User => ({
+    _id: id,
+    login: username || 'Unknown',
+    username: username || 'Unknown',
+    displayName: username || 'Unknown',
+    profilePicture: profilePicture ?? undefined,
+    createdAt: new Date(),
+});
+
+const buildNotificationMessage = (
+    queryClient: QueryClient,
+    message: ChatMessage,
+    username?: string,
+): ProcessedChatMessage => ({
+    ...message,
+    _id: message._id || `notification-${message.senderId}-${message.createdAt}`,
+    text: message.text ?? '',
+    createdAt: message.createdAt || new Date().toISOString(),
+    stickerId: message.stickerId ?? null,
+    isEdited: message.isEdited ?? false,
+    isPinned: message.isPinned ?? false,
+    isSticky: message.isSticky ?? false,
+    isWebhook: message.isWebhook ?? false,
+    embeds: message.embeds ?? [],
+    attachments: message.attachments ?? [],
+    reactions: message.reactions ?? [],
+    interaction: message.interaction ?? null,
+    poll: message.poll ?? null,
+    senderIsBot: message.senderIsBot ?? false,
+    user: buildNotificationUser({
+        id: message.senderId,
+        username,
+        profilePicture: resolveNotificationProfilePicture(queryClient, message),
+    }),
+});
+
+const showDedupedInAppNotification = ({
+    id,
+    kind,
+    title,
+    serverIcon,
+    serverName,
+    chatMessage,
+    message,
+}: {
+    id: string;
+    kind: 'dm' | 'mention';
+    title: string;
+    serverIcon?: string;
+    serverName?: string;
+    chatMessage: ProcessedChatMessage;
+    message: string;
+}): void => {
+    if (shownInAppNotificationIds.has(id)) return;
+    shownInAppNotificationIds.add(id);
+
+    if (shownInAppNotificationIds.size > 200) {
+        const first = shownInAppNotificationIds.values().next().value as
+            | string
+            | undefined;
+        if (first) shownInAppNotificationIds.delete(first);
+    }
+
+    showInAppNotification({
+        id,
+        kind,
+        chatMessage,
+        serverIcon,
+        serverName,
+        title,
+        message,
+        type: 'info',
+    });
+};
+
 const syncSoundCache = (user: User | undefined): void => {
     const sounds = user?.settings?.notificationSounds;
     if (!sounds) return;
@@ -262,6 +475,7 @@ const syncSoundCache = (user: User | undefined): void => {
 export const setupGlobalWsHandlers = (
     queryClient: QueryClient,
     dispatch: Dispatch,
+    getState?: () => RootState,
 ): (() => void) => {
     const me = queryClient.getQueryData<User>(['me']);
     syncSoundCache(me);
@@ -270,6 +484,26 @@ export const setupGlobalWsHandlers = (
         : null;
 
     const cleanups: (() => void)[] = [];
+
+    const isReadingChannel = (
+        serverId?: string,
+        channelId?: string,
+    ): boolean => {
+        if (!serverId || !channelId || !getState) return false;
+
+        const { nav } = getState();
+        const isSelectedChannel =
+            nav.selectedServerId === serverId &&
+            nav.selectedChannelId === channelId;
+        if (isSelectedChannel) return true;
+
+        return Object.values(nav.splitView).some(
+            (conversation): boolean =>
+                conversation?.type === 'channel' &&
+                conversation.serverId === serverId &&
+                conversation.channelId === channelId,
+        );
+    };
 
     cleanups.push(
         wsClient.on<IWsErrorEvent>(WsEvents.ERROR, (payload): void => {
@@ -412,6 +646,17 @@ export const setupGlobalWsHandlers = (
 
             if (payload.senderId !== currentUser?.id) {
                 playNotificationSound(queryClient);
+                showDedupedInAppNotification({
+                    id: `dm-${payload._id ?? payload.messageId}`,
+                    kind: 'dm',
+                    title: '',
+                    chatMessage: buildNotificationMessage(
+                        queryClient,
+                        convertDmToChatMessage(payload),
+                        payload.senderUsername,
+                    ),
+                    message: normalizeNotificationText(payload.text),
+                });
             }
         }),
     );
@@ -481,9 +726,41 @@ export const setupGlobalWsHandlers = (
         wsClient.on<IMentionEvent>(WsEvents.MENTION, (payload): void => {
             if (
                 payload.type === 'mention' &&
-                payload.senderId !== currentUser?.id
+                payload.senderId !== currentUser?.id &&
+                !isReadingChannel(payload.serverId, payload.channelId)
             ) {
+                const servers = queryClient.getQueryData<Server[]>(
+                    SERVERS_QUERY_KEYS.list,
+                );
+                const server = payload.serverId
+                    ? servers?.find(
+                          (candidate): boolean =>
+                              candidate._id === payload.serverId,
+                      )
+                    : undefined;
                 playNotificationSound(queryClient);
+                showDedupedInAppNotification({
+                    id: `mention-${payload.message.messageId}`,
+                    kind: 'mention',
+                    title: server
+                        ? `${payload.sender} mentioned you in ${server.name}`
+                        : '',
+                    serverIcon: server?.icon,
+                    serverName: server?.name,
+                    chatMessage: buildNotificationMessage(
+                        queryClient,
+                        'serverId' in payload.message &&
+                            !!payload.message.serverId
+                            ? convertServerMessageToChatMessage(
+                                  payload.message as IMessageServer,
+                              )
+                            : convertDmToChatMessage(
+                                  payload.message as IMessageDm,
+                              ),
+                        payload.sender,
+                    ),
+                    message: normalizeNotificationText(payload.message.text),
+                });
             }
 
             if (payload.serverId) {
@@ -885,22 +1162,71 @@ export const setupGlobalWsHandlers = (
                     { queryKey: FRIENDS_QUERY_KEY },
                     (old): Friend[] | undefined => {
                         if (!old) return old;
-                        return old.map(
-                            (friend): Friend =>
-                                friend.username === payload.username
-                                    ? {
-                                          ...friend,
-                                          customStatus: payload.status
-                                              ? {
-                                                    text: payload.status.text,
-                                                    emoji:
-                                                        payload.status.emoji ||
-                                                        undefined,
-                                                }
-                                              : null,
-                                      }
-                                    : friend,
-                        );
+
+                        let changed = false;
+                        const customStatus = payload.status
+                            ? {
+                                  text: payload.status.text,
+                                  emoji: payload.status.emoji || undefined,
+                              }
+                            : null;
+                        const next = old.map((friend): Friend => {
+                            if (friend.username !== payload.username) {
+                                return friend;
+                            }
+
+                            if (
+                                friend.customStatus?.text ===
+                                    customStatus?.text &&
+                                friend.customStatus?.emoji ===
+                                    customStatus?.emoji
+                            ) {
+                                return friend;
+                            }
+
+                            changed = true;
+                            return { ...friend, customStatus };
+                        });
+
+                        return changed ? next : old;
+                    },
+                );
+
+                queryClient.setQueriesData<User[]>(
+                    { queryKey: FRIEND_PROFILES_QUERY_KEY },
+                    (old): User[] | undefined => {
+                        if (!old) return old;
+
+                        let changed = false;
+                        const customStatus = payload.status
+                            ? {
+                                  text: payload.status.text,
+                                  emoji: payload.status.emoji || undefined,
+                                  expiresAt: payload.status.expiresAt
+                                      ? new Date(payload.status.expiresAt)
+                                      : null,
+                                  updatedAt: new Date(payload.status.updatedAt),
+                              }
+                            : null;
+                        const next = old.map((friend): User => {
+                            if (friend.username !== payload.username) {
+                                return friend;
+                            }
+
+                            if (
+                                friend.customStatus?.text ===
+                                    customStatus?.text &&
+                                friend.customStatus?.emoji ===
+                                    customStatus?.emoji
+                            ) {
+                                return friend;
+                            }
+
+                            changed = true;
+                            return { ...friend, customStatus };
+                        });
+
+                        return changed ? next : old;
                     },
                 );
             },
@@ -943,15 +1269,21 @@ export const setupGlobalWsHandlers = (
 
                 queryClient.setQueriesData<Friend[]>(
                     { queryKey: FRIENDS_QUERY_KEY },
-                    (old): Friend[] | undefined => {
-                        if (!old) return old;
-                        return old.map(
-                            (friend): Friend =>
-                                friend._id === payload.userId
-                                    ? { ...friend, ...payload }
-                                    : friend,
-                        );
-                    },
+                    (old): Friend[] | undefined =>
+                        updateCachedFriend(old, payload.userId, (friend) =>
+                            mergeIfChanged(friend, payload),
+                        ),
+                );
+
+                queryClient.setQueriesData<User[]>(
+                    { queryKey: FRIEND_PROFILES_QUERY_KEY },
+                    (old): User[] | undefined =>
+                        updateCachedFriend(old, payload.userId, (friend) =>
+                            mergeIfChanged(
+                                friend,
+                                payload as unknown as Partial<User>,
+                            ),
+                        ),
                 );
             },
         ),
@@ -1020,15 +1352,43 @@ export const setupGlobalWsHandlers = (
                     { queryKey: FRIENDS_QUERY_KEY },
                     (old): Friend[] | undefined => {
                         if (!old) return old;
-                        return old.map(
-                            (friend): Friend =>
-                                friend.username === payload.username
-                                    ? {
-                                          ...friend,
-                                          displayName: payload.displayName,
-                                      }
-                                    : friend,
-                        );
+
+                        let changed = false;
+                        const next = old.map((friend): Friend => {
+                            if (friend.username !== payload.username) {
+                                return friend;
+                            }
+
+                            const updated = mergeIfChanged(friend, {
+                                displayName: payload.displayName,
+                            });
+                            if (updated !== friend) changed = true;
+                            return updated;
+                        });
+
+                        return changed ? next : old;
+                    },
+                );
+
+                queryClient.setQueriesData<User[]>(
+                    { queryKey: FRIEND_PROFILES_QUERY_KEY },
+                    (old): User[] | undefined => {
+                        if (!old) return old;
+
+                        let changed = false;
+                        const next = old.map((friend): User => {
+                            if (friend.username !== payload.username) {
+                                return friend;
+                            }
+
+                            const updated = mergeIfChanged(friend, {
+                                displayName: payload.displayName,
+                            });
+                            if (updated !== friend) changed = true;
+                            return updated;
+                        });
+
+                        return changed ? next : old;
                     },
                 );
             },

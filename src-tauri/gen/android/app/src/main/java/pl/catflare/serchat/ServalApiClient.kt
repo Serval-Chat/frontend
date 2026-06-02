@@ -1,6 +1,8 @@
 package pl.catflare.serchat
 
 import org.json.JSONObject
+import android.content.Context
+import android.provider.Settings
 import java.net.HttpURLConnection
 import java.net.URL
 import kotlin.concurrent.thread
@@ -8,6 +10,7 @@ import kotlin.concurrent.thread
 object ServalApiClient {
     var authToken: String? = null
     var serverUrl: String = "https://rolling.catfla.re/"
+    var appContext: Context? = null
 
     fun registerFcmToken(token: String) {
         if (authToken == null) return
@@ -22,11 +25,26 @@ object ServalApiClient {
                 conn.setRequestProperty("Authorization", "Bearer $authToken")
                 conn.doOutput = true
 
-                val jsonBody = JSONObject().put("token", token).toString()
+                val jsonBody = JSONObject()
+                    .put("token", token)
+                    .put("deviceId", getDeviceId())
+                    .toString()
                 conn.outputStream.use { it.write(jsonBody.toByteArray()) }
             } catch (e: Exception) {
                 e.printStackTrace()
             }
         }
+    }
+
+    private fun getDeviceId(): String {
+        val context = appContext
+        if (context != null) {
+            return Settings.Secure.getString(
+                context.contentResolver,
+                Settings.Secure.ANDROID_ID
+            ) ?: "android-unknown"
+        }
+
+        return "android-unknown"
     }
 }

@@ -15,6 +15,30 @@ interface TooltipProps {
     delay?: number;
 }
 
+const TOOLTIP_MEDIA_QUERY =
+    '(hover: hover) and (pointer: fine) and (min-width: 768px)';
+
+const useTooltipsEnabled = (): boolean => {
+    const [isEnabled, setIsEnabled] = useState((): boolean => {
+        if (typeof window === 'undefined') return false;
+        return window.matchMedia(TOOLTIP_MEDIA_QUERY).matches;
+    });
+
+    React.useEffect((): (() => void) | undefined => {
+        if (typeof window === 'undefined') return undefined;
+
+        const query = window.matchMedia(TOOLTIP_MEDIA_QUERY);
+        const handleChange = (): void => setIsEnabled(query.matches);
+
+        handleChange();
+        query.addEventListener('change', handleChange);
+
+        return (): void => query.removeEventListener('change', handleChange);
+    }, []);
+
+    return isEnabled;
+};
+
 export const Tooltip = ({
     content,
     children,
@@ -24,10 +48,11 @@ export const Tooltip = ({
     fullWidth = false,
     delay = 100,
 }: TooltipProps) => {
+    const tooltipsEnabled = useTooltipsEnabled();
     const [isVisible, setIsVisible] = useState(false);
     const [coords, setCoords] = useState({ x: 0, y: 0 });
     const triggerRef = useRef<HTMLDivElement>(null);
-    const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     const updatePosition = useCallback((): void => {
         if (!triggerRef.current) return;
@@ -59,6 +84,8 @@ export const Tooltip = ({
     }, [position]);
 
     const handleMouseEnter = (): void => {
+        if (!tooltipsEnabled) return;
+
         if (timeoutRef.current) clearTimeout(timeoutRef.current);
         timeoutRef.current = setTimeout((): void => {
             setIsVisible(true);
@@ -70,6 +97,20 @@ export const Tooltip = ({
         if (timeoutRef.current) clearTimeout(timeoutRef.current);
         setIsVisible(false);
     };
+
+    React.useEffect((): void => {
+        if (tooltipsEnabled) return;
+
+        if (timeoutRef.current) clearTimeout(timeoutRef.current);
+        setIsVisible(false);
+    }, [tooltipsEnabled]);
+
+    React.useEffect(
+        (): (() => void) => (): void => {
+            if (timeoutRef.current) clearTimeout(timeoutRef.current);
+        },
+        [],
+    );
 
     React.useLayoutEffect((): (() => void) | undefined => {
         if (isVisible) {
@@ -112,38 +153,39 @@ export const Tooltip = ({
             >
                 {children}
             </div>
-            {createPortal(
-                <AnimatePresence>
-                    {isVisible && (
-                        <motion.div
-                            animate={animate[position]}
-                            className={cn(
-                                'pointer-events-none fixed z-[var(--z-index-tooltip)] rounded-lg bg-[#111214] px-3 py-1.5 text-[13px] font-bold whitespace-nowrap text-[#f2f3f5] shadow-2xl',
-                                'before:absolute before:border-[6px] before:border-transparent before:content-[""]',
-                                position === 'right' &&
-                                    'before:top-1/2 before:right-full before:-mr-[1px] before:-translate-y-1/2 before:border-r-[#111214]',
-                                position === 'top' &&
-                                    'before:top-full before:left-1/2 before:-mt-[1px] before:-translate-x-1/2 before:border-t-[#111214]',
-                                position === 'bottom' &&
-                                    'before:bottom-full before:left-1/2 before:-mb-[1px] before:-translate-x-1/2 before:border-b-[#111214]',
-                                position === 'left' &&
-                                    'before:top-1/2 before:left-full before:-ml-[1px] before:-translate-y-1/2 before:border-l-[#111214]',
-                                className,
-                            )}
-                            exit={variants[position]}
-                            initial={variants[position]}
-                            style={{
-                                top: coords.y,
-                                left: coords.x,
-                            }}
-                            transition={{ duration: 0.1, ease: 'easeOut' }}
-                        >
-                            {content}
-                        </motion.div>
-                    )}
-                </AnimatePresence>,
-                document.body,
-            )}
+            {tooltipsEnabled &&
+                createPortal(
+                    <AnimatePresence>
+                        {isVisible && (
+                            <motion.div
+                                animate={animate[position]}
+                                className={cn(
+                                    'pointer-events-none fixed z-[var(--z-index-tooltip)] rounded-lg bg-[#111214] px-3 py-1.5 text-[13px] font-bold whitespace-nowrap text-[#f2f3f5] shadow-2xl',
+                                    'before:absolute before:border-[6px] before:border-transparent before:content-[""]',
+                                    position === 'right' &&
+                                        'before:top-1/2 before:right-full before:-mr-[1px] before:-translate-y-1/2 before:border-r-[#111214]',
+                                    position === 'top' &&
+                                        'before:top-full before:left-1/2 before:-mt-[1px] before:-translate-x-1/2 before:border-t-[#111214]',
+                                    position === 'bottom' &&
+                                        'before:bottom-full before:left-1/2 before:-mb-[1px] before:-translate-x-1/2 before:border-b-[#111214]',
+                                    position === 'left' &&
+                                        'before:top-1/2 before:left-full before:-ml-[1px] before:-translate-y-1/2 before:border-l-[#111214]',
+                                    className,
+                                )}
+                                exit={variants[position]}
+                                initial={variants[position]}
+                                style={{
+                                    top: coords.y,
+                                    left: coords.x,
+                                }}
+                                transition={{ duration: 0.1, ease: 'easeOut' }}
+                            >
+                                {content}
+                            </motion.div>
+                        )}
+                    </AnimatePresence>,
+                    document.body,
+                )}
         </>
     );
 };

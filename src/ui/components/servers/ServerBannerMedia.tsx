@@ -1,5 +1,8 @@
 import type { CSSProperties, ReactNode } from 'react';
 
+import { useLimitedAnimations } from '@/providers/LimitedAnimationsProvider';
+import { PausedAnimatedImage } from '@/ui/components/common/PausedAnimatedImage';
+import { isAnimatedImageUrl } from '@/utils/animationPreferences';
 import { cn } from '@/utils/cn';
 
 import { resolveServerBannerUrl } from './bannerUtils';
@@ -24,17 +27,23 @@ export const ServerBannerMedia = ({
     imageClassName,
     fallbackClassName,
 }: ServerBannerMediaProps): ReactNode => {
+    const limitedAnimations = useLimitedAnimations();
+
     if (banner?.type === 'image' || banner?.type === 'gif') {
         const bannerUrl = resolveServerBannerUrl(banner.value);
         if (bannerUrl) {
             return (
-                <img
+                <PausedAnimatedImage
                     alt={alt}
                     className={cn(
                         'h-full w-full object-cover',
                         className,
                         imageClassName,
                     )}
+                    paused={
+                        limitedAnimations &&
+                        (banner.type === 'gif' || isAnimatedImageUrl(bannerUrl))
+                    }
                     src={bannerUrl}
                 />
             );

@@ -1,9 +1,13 @@
 import React from 'react';
 
+import { useLimitedAnimations } from '@/providers/LimitedAnimationsProvider';
 import { Box } from '@/ui/components/layout/Box';
+import { isAnimatedImageUrl } from '@/utils/animationPreferences';
 import { resolveApiUrl } from '@/utils/apiUrl';
 import { cn } from '@/utils/cn';
 import { getSafeUrl } from '@/utils/proxy';
+
+import { PausedAnimatedImage } from './PausedAnimatedImage';
 
 interface UserProfilePictureIconProps {
     src?: string | null;
@@ -29,11 +33,14 @@ export const UserProfilePictureIcon = ({
     className,
     onClick,
 }: UserProfilePictureIconProps) => {
+    const limitedAnimations = useLimitedAnimations();
     const isFilename = src && !isAbsoluteUrl(src) && !src.includes('/');
     const effectiveSrc = isFilename ? `/api/v1/profile/picture/${src}` : src;
     const iconUrl = getSafeUrl(
         resolveApiUrl(effectiveSrc || undefined) || undefined,
     );
+
+    const shouldShowImage = !!iconUrl;
 
     const initials = (username || '')
         .split(' ')
@@ -59,10 +66,11 @@ export const UserProfilePictureIcon = ({
             )}
             onClick={onClick}
         >
-            {iconUrl ? (
-                <img
+            {shouldShowImage ? (
+                <PausedAnimatedImage
                     alt={username}
                     className="h-full w-full object-cover"
+                    paused={limitedAnimations && isAnimatedImageUrl(iconUrl)}
                     src={iconUrl}
                 />
             ) : (

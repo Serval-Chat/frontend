@@ -48,6 +48,9 @@ interface ContextMenuProps {
     onOpenChange?: (open: boolean) => void;
 }
 
+const CONTEXT_MENU_OPEN_EVENT = 'serchat:context-menu-open';
+let nextContextMenuId = 0;
+
 /**
  * @description A context menu that appears on right-click.
  */
@@ -75,6 +78,16 @@ export const ContextMenu = ({
     const [isOpen, setIsOpen] = useState(false);
     const [clickPosition, setClickPosition] = useState({ x: 0, y: 0 });
     const menuRef = useRef<HTMLDivElement>(null);
+    const menuIdRef = useRef(nextContextMenuId++);
+
+    const closeMenu = React.useCallback((): void => {
+        setIsOpen((wasOpen): boolean => {
+            if (wasOpen) {
+                onOpenChange?.(false);
+            }
+            return false;
+        });
+    }, [onOpenChange]);
 
     const handleContextMenu = (e: React.MouseEvent): void => {
         e.preventDefault();
@@ -82,15 +95,15 @@ export const ContextMenu = ({
 
         if (items.length === 0) return;
 
+        window.dispatchEvent(
+            new CustomEvent<number>(CONTEXT_MENU_OPEN_EVENT, {
+                detail: menuIdRef.current,
+            }),
+        );
         setClickPosition({ x: e.clientX, y: e.clientY });
         setIsOpen(true);
         onOpenChange?.(true);
     };
-
-    const closeMenu = React.useCallback((): void => {
-        setIsOpen(false);
-        onOpenChange?.(false);
-    }, [onOpenChange]);
 
     const position = useSmartPosition({
         isOpen,
@@ -128,6 +141,24 @@ export const ContextMenu = ({
             document.removeEventListener('mousedown', handleClickOutside);
         };
     }, [isOpen, closeMenu]);
+
+    useEffect((): (() => void) => {
+        const handleAnotherMenuOpen = (event: Event): void => {
+            const openEvent = event as CustomEvent<number>;
+            if (openEvent.detail !== menuIdRef.current) {
+                closeMenu();
+            }
+        };
+
+        window.addEventListener(CONTEXT_MENU_OPEN_EVENT, handleAnotherMenuOpen);
+
+        return (): void => {
+            window.removeEventListener(
+                CONTEXT_MENU_OPEN_EVENT,
+                handleAnotherMenuOpen,
+            );
+        };
+    }, [closeMenu]);
 
     const filteredItems = filterItems(items);
 

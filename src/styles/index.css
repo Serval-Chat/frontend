@@ -38,6 +38,17 @@
         line-height: 1.5;
         font-weight: 400;
     }
+
+    .limited-animations *,
+    .limited-animations *::before,
+    .limited-animations *::after {
+        scroll-behavior: auto !important;
+        transition-duration: 0.001ms !important;
+        transition-delay: 0ms !important;
+        animation-duration: 0.001ms !important;
+        animation-delay: 0ms !important;
+        animation-iteration-count: 1 !important;
+    }
 }
 
 @layer utilities {
@@ -114,6 +125,19 @@
 
     .animate-shake {
         animation: shake 0.2s ease-in-out 0s 2;
+    }
+
+    .no-scrollbar,
+    .scrollbar-none {
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+
+    .no-scrollbar::-webkit-scrollbar,
+    .scrollbar-none::-webkit-scrollbar {
+        display: none;
+        width: 0;
+        height: 0;
     }
 }
 

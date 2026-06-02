@@ -59,6 +59,13 @@ export const Chat = () => {
     }));
 
     const [isMobile, setIsMobile] = useState(isMobileViewport);
+    const [visualViewportBounds, setVisualViewportBounds] = useState({
+        top: 0,
+        height:
+            typeof window !== 'undefined'
+                ? window.visualViewport?.height || window.innerHeight
+                : 0,
+    });
     useEffect((): (() => void) => {
         const mq = window.matchMedia('(max-width: 767px)');
         const onChange = (e: MediaQueryListEvent): void =>
@@ -66,6 +73,31 @@ export const Chat = () => {
         mq.addEventListener('change', onChange);
         return (): void => mq.removeEventListener('change', onChange);
     }, []);
+
+    useEffect((): (() => void) | undefined => {
+        if (!isMobile) return;
+
+        const viewport = window.visualViewport;
+
+        const updateBounds = (): void => {
+            setVisualViewportBounds({
+                top: viewport?.offsetTop ?? 0,
+                height: viewport?.height ?? window.innerHeight,
+            });
+            window.scrollTo(0, 0);
+        };
+
+        updateBounds();
+        viewport?.addEventListener('resize', updateBounds);
+        viewport?.addEventListener('scroll', updateBounds);
+        window.addEventListener('resize', updateBounds);
+
+        return (): void => {
+            viewport?.removeEventListener('resize', updateBounds);
+            viewport?.removeEventListener('scroll', updateBounds);
+            window.removeEventListener('resize', updateBounds);
+        };
+    }, [isMobile]);
 
     useEffect((): void => {
         if (error) console.error('Error fetching user:', error);
@@ -222,7 +254,7 @@ export const Chat = () => {
 
     if (!isMobile) {
         return (
-            <Box className="chat-background flex h-[100dvh] w-full overflow-hidden">
+            <Box className="chat-background fixed inset-0 flex w-full overflow-hidden overscroll-none">
                 <Outlet />
                 <PrimaryNavBar />
                 <SecondaryNavBar />
@@ -234,8 +266,12 @@ export const Chat = () => {
 
     return (
         <Box
-            className="chat-background relative h-[100dvh] w-full overflow-hidden"
+            className="chat-background fixed right-0 left-0 w-full overflow-hidden overscroll-none"
             ref={swipeRef}
+            style={{
+                top: visualViewportBounds.top,
+                height: visualViewportBounds.height,
+            }}
         >
             <Outlet />
             <MobileSwipeContext.Provider value>

@@ -60,6 +60,7 @@ export interface UserSettings {
     disableCustomUsernameFonts?: boolean;
     disableCustomUsernameColors?: boolean;
     disableCustomUsernameGlow?: boolean;
+    limitedAnimations?: boolean;
     customFontUrl?: string;
     customFontFamily?: string;
     notificationSounds?: NotificationSound[];

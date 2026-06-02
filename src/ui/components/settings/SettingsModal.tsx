@@ -5,6 +5,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 
 import { Heading } from '@/ui/components/common/Heading';
 import { IconButton } from '@/ui/components/common/IconButton';
+import { LoadingSpinner } from '@/ui/components/common/LoadingSpinner';
 import { Modal } from '@/ui/components/common/Modal';
 import { cn } from '@/utils/cn';
 
@@ -55,6 +56,7 @@ const KeybindSettings = React.lazy(() =>
 interface SettingsModalProps {
     isOpen: boolean;
     onClose: () => void;
+    sectionOverride?: string | null;
 }
 
 const SECTION_URL_MAP: Record<string, string> = {
@@ -79,25 +81,51 @@ const SECTION_ID_TO_URL: Record<string, string> = {
     developer: 'developer',
 };
 
-export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
+const SettingsSectionLoading = () => (
+    <div className="flex min-h-[240px] flex-1 items-center justify-center">
+        <LoadingSpinner size="lg" />
+    </div>
+);
+
+export const SettingsModal = ({
+    isOpen,
+    onClose,
+    sectionOverride,
+}: SettingsModalProps) => {
     const location = useLocation();
     const navigate = useNavigate();
 
     const urlSegment = location.pathname.split('/').pop() ?? '';
-    const activeSection = SECTION_URL_MAP[urlSegment] ?? 'account';
+    const routeSection = SECTION_URL_MAP[urlSegment] ?? 'account';
 
     const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(true);
+    const [pendingSection, setPendingSection] = useState<string | null>(null);
+
+    const activeSection = pendingSection ?? sectionOverride ?? routeSection;
+    const isSectionLoading =
+        (pendingSection !== null && pendingSection !== routeSection) ||
+        (sectionOverride !== null &&
+            sectionOverride !== undefined &&
+            sectionOverride !== routeSection);
 
     const handleSetSection = (sectionId: string): void => {
+        setPendingSection(sectionId);
         setIsMobileSidebarOpen(false);
         const urlPath = SECTION_ID_TO_URL[sectionId] ?? 'my-account';
         void navigate(`/chat/@setting/${urlPath}`, { replace: true });
     };
 
+    React.useEffect((): void => {
+        if (pendingSection === routeSection) {
+            setPendingSection(null);
+        }
+    }, [pendingSection, routeSection]);
+
     return (
         <Modal
+            mobileFullScreen
             noPadding
-            className="flex h-[92vh] max-h-[900px] w-[96%] max-w-[1200px] flex-row overflow-hidden bg-background p-0"
+            className="flex flex-row overflow-hidden bg-background p-0 md:h-[92vh] md:max-h-[900px] md:w-[96%] md:max-w-[1200px]"
             isOpen={isOpen}
             showCloseButton={false}
             onClose={onClose}
@@ -114,6 +142,7 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
                     <SettingsSidebar
                         activeSection={activeSection}
                         setActiveSection={handleSetSection}
+                        onClose={onClose}
                     />
                 </div>
 
@@ -151,31 +180,42 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
                         />
                     </div>
 
-                    <div className="scrollbar-thin scrollbar-thumb-bg-secondary scrollbar-track-transparent flex-1 overflow-y-auto p-6">
-                        <React.Suspense fallback={null}>
-                            {activeSection === 'account' && <AccountSettings />}
-                            {activeSection === 'appearance' && (
-                                <AppearanceSettings />
-                            )}
-                            {activeSection === 'accessibility' && (
-                                <AccessibilitySettings />
-                            )}
-                            {activeSection === 'blocking' && (
-                                <BlockingSettings />
-                            )}
-                            {activeSection === 'standing' && (
-                                <StandingSettings />
-                            )}
-                            {activeSection === 'notifications' && (
-                                <NotificationSettings />
-                            )}
-                            {activeSection === 'keybinds' && (
-                                <KeybindSettings />
-                            )}
-                            {activeSection === 'developer' && (
-                                <DeveloperSettings />
-                            )}
-                        </React.Suspense>
+                    <div
+                        className="scrollbar-thin scrollbar-thumb-bg-secondary scrollbar-track-transparent flex-1 overflow-y-auto p-6"
+                        key={activeSection}
+                    >
+                        {isSectionLoading ? (
+                            <SettingsSectionLoading />
+                        ) : (
+                            <React.Suspense
+                                fallback={<SettingsSectionLoading />}
+                            >
+                                {activeSection === 'account' && (
+                                    <AccountSettings />
+                                )}
+                                {activeSection === 'appearance' && (
+                                    <AppearanceSettings />
+                                )}
+                                {activeSection === 'accessibility' && (
+                                    <AccessibilitySettings />
+                                )}
+                                {activeSection === 'blocking' && (
+                                    <BlockingSettings />
+                                )}
+                                {activeSection === 'standing' && (
+                                    <StandingSettings />
+                                )}
+                                {activeSection === 'notifications' && (
+                                    <NotificationSettings />
+                                )}
+                                {activeSection === 'keybinds' && (
+                                    <KeybindSettings />
+                                )}
+                                {activeSection === 'developer' && (
+                                    <DeveloperSettings />
+                                )}
+                            </React.Suspense>
+                        )}
                     </div>
                 </div>
             </div>

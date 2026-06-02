@@ -15,6 +15,7 @@ export type UserSettingsResponseDTO = {
     disableCustomUsernameFonts?: boolean;
     disableCustomUsernameColors?: boolean;
     disableCustomUsernameGlow?: boolean;
+    limitedAnimations?: boolean;
     customFontUrl?: string;
     customFontFamily?: string;
     notificationSounds?: Array<NotificationSoundDTO>;

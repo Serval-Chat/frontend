@@ -1034,9 +1034,7 @@ export const ChannelList = ({
                         parsed.hostname.endsWith('.catfla.re')
                     ) {
                         if (parsed.pathname.startsWith('/chat/@setting')) {
-                            React.startTransition((): void => {
-                                void navigate(parsed.pathname);
-                            });
+                            void navigate(parsed.pathname);
                             return;
                         }
                         window.open(url, '_blank', 'noopener,noreferrer');

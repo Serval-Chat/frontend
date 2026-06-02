@@ -5,17 +5,120 @@ import { CheckCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 import { useFriendProfiles } from '@/api/friends/friends.queries';
+import type { User } from '@/api/users/users.types';
+import { useAppSelector } from '@/store/hooks';
 import { Heading } from '@/ui/components/common/Heading';
 import { MutedText } from '@/ui/components/common/MutedText';
+import { ParsedEmoji } from '@/ui/components/common/ParsedEmoji';
+import { ParsedUnicodeEmoji } from '@/ui/components/common/ParsedUnicodeEmoji';
 import { Skeleton } from '@/ui/components/common/Skeleton';
 import { Text } from '@/ui/components/common/Text';
-import { UserItem } from '@/ui/components/common/UserItem';
+import { UserProfilePicture } from '@/ui/components/common/UserProfilePicture';
+import type { UserStatus } from '@/ui/components/common/UserProfileStatusIndicator';
 import { Box } from '@/ui/components/layout/Box';
+import { cn } from '@/utils/cn';
 
-export const FriendListMain = () => {
+const FriendProfileRow = React.memo(
+    ({
+        friend,
+        onOpenDm,
+    }: {
+        friend: User;
+        onOpenDm: (friendId: string) => void;
+    }) => {
+        const userId = String(friend._id);
+        const presenceStatus = useAppSelector(
+            (state): UserStatus =>
+                state.presence.users[userId]?.status ?? 'offline',
+        );
+        const presenceCustomText = useAppSelector(
+            (state): string | undefined =>
+                state.presence.users[userId]?.customStatus?.text,
+        );
+        const presenceCustomEmoji = useAppSelector(
+            (state): string | null | undefined =>
+                state.presence.users[userId]?.customStatus?.emoji,
+        );
+        const displayName = friend.displayName || friend.username;
+        const customText = presenceCustomText ?? friend.customStatus?.text;
+        const customEmoji = presenceCustomEmoji ?? friend.customStatus?.emoji;
+
+        const handleOpenDm = React.useCallback((): void => {
+            onOpenDm(userId);
+        }, [onOpenDm, userId]);
+
+        return (
+            <Box className="group flex items-center justify-between gap-4">
+                <button
+                    className={cn(
+                        'flex h-11 min-w-0 flex-1 cursor-pointer items-center gap-3 overflow-hidden rounded-md px-3 text-left transition-colors',
+                        'text-foreground-muted hover:bg-bg-subtle',
+                    )}
+                    type="button"
+                    onClick={handleOpenDm}
+                >
+                    <UserProfilePicture
+                        size="sm"
+                        src={friend.profilePicture}
+                        status={presenceStatus}
+                        username={displayName}
+                    />
+                    <Box className="flex min-w-0 flex-1 flex-col overflow-hidden">
+                        <Text className="truncate text-sm font-medium text-foreground">
+                            {displayName}
+                        </Text>
+                        {(customText || customEmoji) && (
+                            <Box className="flex min-w-0 items-center gap-1">
+                                {customEmoji && (
+                                    <span className="flex shrink-0 items-center">
+                                        {/^[0-9a-fA-F]{24}$/.test(
+                                            customEmoji,
+                                        ) ? (
+                                            <ParsedEmoji
+                                                className="h-3.5 w-3.5"
+                                                emojiId={customEmoji}
+                                            />
+                                        ) : (
+                                            <ParsedUnicodeEmoji
+                                                className="text-xs"
+                                                content={customEmoji}
+                                            />
+                                        )}
+                                    </span>
+                                )}
+                                {customText && (
+                                    <Text className="text-foreground-muted truncate text-xs">
+                                        {customText}
+                                    </Text>
+                                )}
+                            </Box>
+                        )}
+                    </Box>
+                </button>
+                <button
+                    className="text-foreground-muted flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-md bg-bg-secondary transition-colors hover:bg-bg-subtle hover:text-foreground"
+                    type="button"
+                    onClick={handleOpenDm}
+                >
+                    <MessageSquare size={18} />
+                </button>
+            </Box>
+        );
+    },
+);
+
+FriendProfileRow.displayName = 'FriendProfileRow';
+
+export const FriendListMain = React.memo(() => {
     const { data: friends, isLoading } = useFriendProfiles();
     const navigate = useNavigate();
     const [search, setSearch] = React.useState('');
+    const handleOpenDm = React.useCallback(
+        (friendId: string): void => {
+            void navigate(`/chat/@user/${friendId}`);
+        },
+        [navigate],
+    );
 
     const filteredFriends = React.useMemo(() => {
         if (!friends) return [];
@@ -52,11 +155,15 @@ export const FriendListMain = () => {
         return groups;
     }, [sortedFriends]);
 
-    const groupKeys = Object.keys(groupedFriends).sort((a, b): number => {
-        if (a === '#') return -1;
-        if (b === '#') return 1;
-        return a.localeCompare(b);
-    });
+    const groupKeys = React.useMemo(
+        () =>
+            Object.keys(groupedFriends).sort((a, b): number => {
+                if (a === '#') return -1;
+                if (b === '#') return 1;
+                return a.localeCompare(b);
+            }),
+        [groupedFriends],
+    );
 
     if (isLoading) {
         return (
@@ -130,31 +237,16 @@ export const FriendListMain = () => {
                         <Box className="h-[1px] flex-1 bg-bg-subtle/30" />
                     </Box>
                     {groupedFriends[key]?.map((friend) => (
-                        <Box
-                            className="group flex items-center justify-between gap-4"
+                        <FriendProfileRow
+                            friend={friend}
                             key={String(friend._id)}
-                        >
-                            <UserItem
-                                hideUnread
-                                className="flex-1"
-                                user={friend}
-                                userId={String(friend._id)}
-                                onClick={(): void => {
-                                    void navigate(`/chat/@user/${friend._id}`);
-                                }}
-                            />
-                            <Box
-                                className="text-foreground-muted flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-md bg-bg-secondary transition-colors hover:bg-bg-subtle hover:text-foreground"
-                                onClick={(): void => {
-                                    void navigate(`/chat/@user/${friend._id}`);
-                                }}
-                            >
-                                <MessageSquare size={18} />
-                            </Box>
-                        </Box>
+                            onOpenDm={handleOpenDm}
+                        />
                     ))}
                 </Box>
             ))}
         </Box>
     );
-};
+});
+
+FriendListMain.displayName = 'FriendListMain';

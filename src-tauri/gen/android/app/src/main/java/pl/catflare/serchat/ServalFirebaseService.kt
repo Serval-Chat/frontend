@@ -11,6 +11,11 @@ import androidx.core.app.NotificationCompat
 
 class ServalFirebaseService : FirebaseMessagingService() {
 
+    override fun onCreate() {
+        super.onCreate()
+        ServalApiClient.appContext = applicationContext
+    }
+
     override fun onMessageReceived(message: RemoteMessage) {
         val title = message.notification?.title ?: return
         val body  = message.notification?.body  ?: return
@@ -60,6 +65,7 @@ class ServalFirebaseService : FirebaseMessagingService() {
             .setContentIntent(pendingIntent)
             .build()
 
-        manager.notify(System.currentTimeMillis().toInt(), notif)
+        val notificationTag = data["tag"] ?: type
+        manager.notify(notificationTag, 0, notif)
     }
 }

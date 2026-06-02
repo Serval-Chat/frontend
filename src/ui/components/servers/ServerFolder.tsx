@@ -5,11 +5,14 @@ import {
     type DragControls,
     Reorder,
     motion,
+    useDragControls,
 } from 'framer-motion';
 import {
+    Check,
     Edit2,
     Folder as FolderIcon,
     LayoutPanelLeft,
+    MoveVertical,
     Palette,
 } from 'lucide-react';
 
@@ -30,6 +33,8 @@ import { ServerIcon } from './ServerIcon';
 import { ServerItem } from './ServerItem';
 import { RenameFolderModal } from './modals/RenameFolderModal';
 
+const CONTEXT_MENU_TAP_SUPPRESSION_MS = 2000;
+
 interface ServerFolderProps {
     folder: IServerFolder;
     servers: Server[];
@@ -37,6 +42,12 @@ interface ServerFolderProps {
     unreadServers: Record<string, { hasUnread: boolean; pingCount: number }>;
     onServerClick: (serverId: string) => void;
     dragControls?: DragControls;
+    disableReorder?: boolean;
+    onStartReorderFolder?: () => void;
+    onStartReorderServer?: (serverId: string, folderId: string) => void;
+    onConfirmServerPosition?: (folderId: string, index: number) => void;
+    isMobileReordering?: boolean;
+    pickedServerId?: string | null;
 }
 
 export const ServerFolder = ({
@@ -46,8 +57,18 @@ export const ServerFolder = ({
     unreadServers,
     onServerClick,
     dragControls,
+    disableReorder = false,
+    onStartReorderFolder,
+    onStartReorderServer,
+    onConfirmServerPosition,
+    isMobileReordering = false,
+    pickedServerId = null,
 }: ServerFolderProps) => {
     const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);
+    const suppressNextTapRef = React.useRef(false);
+    const suppressTapTimeoutRef = React.useRef<ReturnType<
+        typeof setTimeout
+    > | null>(null);
     const { data: me } = useMe();
     const { mutate: updateSettings } = useUpdateServerSettings();
     const dispatch = useAppDispatch();
@@ -103,8 +124,44 @@ export const ServerFolder = ({
     };
 
     const handleToggleFolder = (): void => {
+        if (suppressNextTapRef.current) {
+            suppressNextTapRef.current = false;
+            if (suppressTapTimeoutRef.current) {
+                clearTimeout(suppressTapTimeoutRef.current);
+                suppressTapTimeoutRef.current = null;
+            }
+            return;
+        }
+
         dispatch(toggleFolder(folder.id));
     };
+
+    React.useEffect(
+        (): (() => void) => (): void => {
+            if (suppressTapTimeoutRef.current) {
+                clearTimeout(suppressTapTimeoutRef.current);
+            }
+        },
+        [],
+    );
+
+    const suppressNextTap = React.useCallback((): void => {
+        suppressNextTapRef.current = true;
+        if (suppressTapTimeoutRef.current) {
+            clearTimeout(suppressTapTimeoutRef.current);
+        }
+        suppressTapTimeoutRef.current = setTimeout((): void => {
+            suppressNextTapRef.current = false;
+            suppressTapTimeoutRef.current = null;
+        }, CONTEXT_MENU_TAP_SUPPRESSION_MS);
+    }, []);
+
+    const handleContextMenuOpenChange = React.useCallback(
+        (open: boolean): void => {
+            if (open) suppressNextTap();
+        },
+        [suppressNextTap],
+    );
 
     const handleRenameFolder = (): void => {
         setIsRenameModalOpen(true);
@@ -153,6 +210,19 @@ export const ServerFolder = ({
     };
 
     const contextMenuItems: ContextMenuItem[] = [
+        ...(onStartReorderFolder
+            ? [
+                  {
+                      label: 'Reorder Folder',
+                      icon: MoveVertical,
+                      onClick: (): void => {
+                          suppressNextTap();
+                          onStartReorderFolder();
+                      },
+                  } satisfies ContextMenuItem,
+                  { type: 'divider' } satisfies ContextMenuItem,
+              ]
+            : []),
         {
             label: 'Rename Folder',
             icon: Edit2,
@@ -208,7 +278,10 @@ export const ServerFolder = ({
                     )}
                 />
 
-                <ContextMenu items={contextMenuItems}>
+                <ContextMenu
+                    items={contextMenuItems}
+                    onOpenChange={handleContextMenuOpenChange}
+                >
                     <Tooltip content={folder.name}>
                         <motion.button
                             className={cn(
@@ -218,9 +291,17 @@ export const ServerFolder = ({
                                     : 'rounded-[1.2rem]',
                             )}
                             style={{ backgroundColor: folder.color + '15' }} // ~8% opacity
-                            onPointerDown={(e): void | undefined =>
-                                dragControls?.start(e)
-                            }
+                            onPointerDown={(e): void => {
+                                if (
+                                    disableReorder ||
+                                    e.pointerType !== 'mouse' ||
+                                    e.button !== 0
+                                ) {
+                                    return;
+                                }
+
+                                dragControls?.start(e);
+                            }}
                             onTap={handleToggleFolder}
                         >
                             <div
@@ -285,38 +366,170 @@ export const ServerFolder = ({
                             style={{ backgroundColor: folder.color + '15' }}
                         />
 
-                        <Reorder.Group
-                            axis="y"
-                            className="flex w-full flex-col items-center gap-2"
-                            values={folderServers}
-                            onReorder={handleReorderServers}
-                        >
-                            {folderServers.map((server) => {
-                                const unreadStatus = unreadServers[server._id];
-                                return (
-                                    <Reorder.Item
-                                        className="w-full"
-                                        key={server._id}
-                                        value={server}
-                                    >
-                                        <ServerItem
+                        {disableReorder ? (
+                            <div className="flex w-full touch-pan-y flex-col items-center gap-2">
+                                {isMobileReordering &&
+                                    pickedServerId &&
+                                    onConfirmServerPosition && (
+                                        <MobileFolderDropTarget
+                                            onConfirm={(): void =>
+                                                onConfirmServerPosition(
+                                                    folder.id,
+                                                    0,
+                                                )
+                                            }
+                                        />
+                                    )}
+                                {folderServers.map((server, index) => {
+                                    const unreadStatus =
+                                        unreadServers[server._id];
+                                    return (
+                                        <React.Fragment key={server._id}>
+                                            <div
+                                                className={cn(
+                                                    'w-full',
+                                                    pickedServerId ===
+                                                        server._id &&
+                                                        'opacity-40',
+                                                )}
+                                            >
+                                                <ServerItem
+                                                    isActive={
+                                                        activeServerId ===
+                                                        server._id
+                                                    }
+                                                    isUnread={
+                                                        unreadStatus?.hasUnread
+                                                    }
+                                                    pingCount={
+                                                        unreadStatus?.pingCount
+                                                    }
+                                                    server={server}
+                                                    onClick={(): void =>
+                                                        onServerClick(
+                                                            server._id,
+                                                        )
+                                                    }
+                                                    onStartReorder={
+                                                        onStartReorderServer
+                                                            ? (): void =>
+                                                                  onStartReorderServer(
+                                                                      server._id,
+                                                                      folder.id,
+                                                                  )
+                                                            : undefined
+                                                    }
+                                                />
+                                            </div>
+                                            {isMobileReordering &&
+                                                pickedServerId &&
+                                                onConfirmServerPosition && (
+                                                    <MobileFolderDropTarget
+                                                        onConfirm={(): void =>
+                                                            onConfirmServerPosition(
+                                                                folder.id,
+                                                                index + 1,
+                                                            )
+                                                        }
+                                                    />
+                                                )}
+                                        </React.Fragment>
+                                    );
+                                })}
+                            </div>
+                        ) : (
+                            <Reorder.Group
+                                axis="y"
+                                className="flex w-full flex-col items-center gap-2"
+                                values={folderServers}
+                                onReorder={handleReorderServers}
+                            >
+                                {folderServers.map((server) => {
+                                    const unreadStatus =
+                                        unreadServers[server._id];
+                                    return (
+                                        <FolderServerItem
                                             isActive={
                                                 activeServerId === server._id
                                             }
                                             isUnread={unreadStatus?.hasUnread}
+                                            key={server._id}
                                             pingCount={unreadStatus?.pingCount}
                                             server={server}
                                             onClick={(): void =>
                                                 onServerClick(server._id)
                                             }
                                         />
-                                    </Reorder.Item>
-                                );
-                            })}
-                        </Reorder.Group>
+                                    );
+                                })}
+                            </Reorder.Group>
+                        )}
                     </motion.div>
                 )}
             </AnimatePresence>
         </div>
     );
 };
+
+const FolderServerItem = React.memo(
+    ({
+        server,
+        isActive,
+        isUnread,
+        pingCount,
+        onClick,
+    }: {
+        server: Server;
+        isActive?: boolean;
+        isUnread?: boolean;
+        pingCount?: number;
+        onClick: () => void;
+    }) => {
+        const dragControls = useDragControls();
+
+        return (
+            <Reorder.Item
+                className="w-full"
+                dragControls={dragControls}
+                dragListener={false}
+                value={server}
+            >
+                <div
+                    className="w-full touch-pan-y select-none"
+                    onPointerDown={(e): void => {
+                        if (e.pointerType !== 'mouse' || e.button !== 0) {
+                            return;
+                        }
+
+                        dragControls.start(e);
+                    }}
+                >
+                    <ServerItem
+                        isActive={isActive}
+                        isUnread={isUnread}
+                        pingCount={pingCount}
+                        server={server}
+                        onClick={onClick}
+                    />
+                </div>
+            </Reorder.Item>
+        );
+    },
+);
+
+FolderServerItem.displayName = 'FolderServerItem';
+
+const MobileFolderDropTarget = React.memo(
+    ({ onConfirm }: { onConfirm: () => void }) => (
+        <button
+            aria-label="Place server here"
+            className="relative z-[2] flex h-7 w-12 items-center justify-center rounded-full border border-primary/40 bg-primary/15 text-primary shadow-lg backdrop-blur-sm"
+            type="button"
+            onClick={onConfirm}
+        >
+            <Check className="h-4 w-4" />
+        </button>
+    ),
+);
+
+MobileFolderDropTarget.displayName = 'MobileFolderDropTarget';

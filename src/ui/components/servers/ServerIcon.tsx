@@ -3,7 +3,10 @@ import React from 'react';
 import { motion } from 'framer-motion';
 
 import type { Server } from '@/api/servers/servers.types';
+import { useLimitedAnimations } from '@/providers/LimitedAnimationsProvider';
 import { Badge } from '@/ui/components/common/Badge';
+import { PausedAnimatedImage } from '@/ui/components/common/PausedAnimatedImage';
+import { isAnimatedImageUrl } from '@/utils/animationPreferences';
 import { resolveApiUrl } from '@/utils/apiUrl';
 import { cn } from '@/utils/cn';
 
@@ -25,7 +28,9 @@ export const ServerIcon = React.memo(
         size = 'md',
         badgeCount,
     }: ServerIconProps) => {
+        const limitedAnimations = useLimitedAnimations();
         const iconUrl = resolveApiUrl(server.icon);
+        const shouldShowIcon = !!iconUrl;
 
         const initials = server.name
             .split(' ')
@@ -100,13 +105,16 @@ export const ServerIcon = React.memo(
                               }`,
                     )}
                 >
-                    {iconUrl ? (
-                        <img
+                    {shouldShowIcon ? (
+                        <PausedAnimatedImage
                             alt={server.name}
                             className="h-full w-full object-cover"
                             decoding="async"
                             draggable="false"
                             loading="lazy"
+                            paused={
+                                limitedAnimations && isAnimatedImageUrl(iconUrl)
+                            }
                             src={iconUrl}
                         />
                     ) : (

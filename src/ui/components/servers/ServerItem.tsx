@@ -7,6 +7,7 @@ import {
     FolderInput,
     FolderPlus,
     LogOut,
+    MoveVertical,
     Settings,
 } from 'lucide-react';
 
@@ -41,19 +42,29 @@ const ServerSettingsModal = React.lazy(() =>
     })),
 );
 
+const CONTEXT_MENU_TAP_SUPPRESSION_MS = 2000;
+
 interface ServerItemProps {
     server: Server;
     isActive?: boolean;
     isUnread?: boolean;
     pingCount?: number;
     onClick?: () => void;
+    onStartReorder?: () => void;
 }
 
 /**
  * @description A component representing a single server in the list with a context menu.
  */
 export const ServerItem = React.memo(
-    ({ server, isActive, isUnread, pingCount, onClick }: ServerItemProps) => {
+    ({
+        server,
+        isActive,
+        isUnread,
+        pingCount,
+        onClick,
+        onStartReorder,
+    }: ServerItemProps) => {
         const [isSettingsOpen, setIsSettingsOpen] = useState(false);
         const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false);
         const { hasPermission, isOwner } = usePermissions(server._id, null, {
@@ -71,6 +82,14 @@ export const ServerItem = React.memo(
             hasPermission('manageInvites');
 
         const contextMenuItems: ContextMenuItem[] = [];
+
+        if (onStartReorder) {
+            contextMenuItems.push({
+                label: 'Reorder',
+                icon: MoveVertical,
+                onClick: onStartReorder,
+            });
+        }
 
         if (isUnread || (pingCount && pingCount > 0)) {
             contextMenuItems.push({
@@ -182,10 +201,23 @@ export const ServerItem = React.memo(
 
         const queryClient = useQueryClient();
         const prefetchedRef = React.useRef(false);
+        const suppressNextTapRef = React.useRef(false);
+        const suppressTapTimeoutRef = React.useRef<ReturnType<
+            typeof setTimeout
+        > | null>(null);
 
         React.useEffect((): void => {
             prefetchedRef.current = false;
         }, [server._id]);
+
+        React.useEffect(
+            (): (() => void) => (): void => {
+                if (suppressTapTimeoutRef.current) {
+                    clearTimeout(suppressTapTimeoutRef.current);
+                }
+            },
+            [],
+        );
 
         const prefetchServer = React.useCallback((): void => {
             if (isActive || prefetchedRef.current) return;
@@ -223,6 +255,35 @@ export const ServerItem = React.memo(
             });
         }, [isActive, queryClient, server._id]);
 
+        const handleContextMenuOpenChange = React.useCallback(
+            (open: boolean): void => {
+                if (!open) return;
+
+                suppressNextTapRef.current = true;
+                if (suppressTapTimeoutRef.current) {
+                    clearTimeout(suppressTapTimeoutRef.current);
+                }
+                suppressTapTimeoutRef.current = setTimeout((): void => {
+                    suppressNextTapRef.current = false;
+                    suppressTapTimeoutRef.current = null;
+                }, CONTEXT_MENU_TAP_SUPPRESSION_MS);
+            },
+            [],
+        );
+
+        const handleServerClick = React.useCallback((): void => {
+            if (suppressNextTapRef.current) {
+                suppressNextTapRef.current = false;
+                if (suppressTapTimeoutRef.current) {
+                    clearTimeout(suppressTapTimeoutRef.current);
+                    suppressTapTimeoutRef.current = null;
+                }
+                return;
+            }
+
+            onClick?.();
+        }, [onClick]);
+
         return (
             <>
                 <div
@@ -241,13 +302,16 @@ export const ServerItem = React.memo(
                         )}
                     />
                     {contextMenuItems.length > 0 ? (
-                        <ContextMenu items={contextMenuItems}>
+                        <ContextMenu
+                            items={contextMenuItems}
+                            onOpenChange={handleContextMenuOpenChange}
+                        >
                             <Tooltip content={server.name}>
                                 <ServerIcon
                                     badgeCount={pingCount}
                                     isActive={isActive}
                                     server={server}
-                                    onClick={onClick}
+                                    onClick={handleServerClick}
                                 />
                             </Tooltip>
                         </ContextMenu>

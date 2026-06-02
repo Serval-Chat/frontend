@@ -181,6 +181,7 @@ export const MessagesList = React.memo(
 
         const [, startTransitionGroup] = useTransition();
         const virtualItemsRef = useRef(virtualItems);
+        const didApplyInitialScrollRef = useRef(false);
         useLayoutEffect((): void => {
             virtualItemsRef.current = virtualItems;
         }, [virtualItems]);
@@ -258,6 +259,8 @@ export const MessagesList = React.memo(
                 },
                 [virtualItems],
             ),
+            initialOffset: (): number =>
+                activeHighlightId ? 0 : Number.MAX_SAFE_INTEGER,
             overscan: 10,
         });
         const measureFrameRef = useRef<number | null>(null);
@@ -372,6 +375,7 @@ export const MessagesList = React.memo(
         const totalSize = rowVirtualizer.getTotalSize();
 
         const prevFirstMessageIdRef = useRef<string | null>(null);
+        const prevLastItemKeyRef = useRef<string | number | null>(null);
 
         useLayoutEffect((): void => {
             const container = scrollContainerRef.current;
@@ -388,6 +392,17 @@ export const MessagesList = React.memo(
 
             prevFirstMessageIdRef.current = firstMessageId;
 
+            const lastItem =
+                [...virtualItems]
+                    .reverse()
+                    .find((item): boolean => item.type !== 'spacer') ??
+                virtualItems[virtualItems.length - 1];
+            const lastItemKey =
+                lastItem.type === 'message'
+                    ? lastItem.message._id
+                    : lastItem.type === 'blocked-group'
+                      ? lastItem.id
+                      : lastItem.type;
             const newScrollHeight = container.scrollHeight;
 
             if (isPrepending && lastScrollHeightRef.current !== 0) {
@@ -405,15 +420,30 @@ export const MessagesList = React.memo(
             }
 
             if (isAtBottom) {
+                if (!didApplyInitialScrollRef.current) {
+                    didApplyInitialScrollRef.current = true;
+                    isAtBottomRef.current = true;
+                    lastScrollHeightRef.current = newScrollHeight;
+                    prevLastItemKeyRef.current = lastItemKey;
+                    return;
+                }
+
+                if (prevLastItemKeyRef.current === lastItemKey) {
+                    lastScrollHeightRef.current = newScrollHeight;
+                    return;
+                }
+
                 rowVirtualizer.scrollToIndex(virtualItems.length - 1, {
                     align: 'end',
                 });
                 isAtBottomRef.current = true;
                 lastScrollHeightRef.current = newScrollHeight;
+                prevLastItemKeyRef.current = lastItemKey;
                 return;
             }
 
             lastScrollHeightRef.current = newScrollHeight;
+            prevLastItemKeyRef.current = lastItemKey;
         }, [virtualItems, totalSize, isAtBottom, rowVirtualizer]);
 
         const lastScrolledIdRef = useRef<string | null>(null);

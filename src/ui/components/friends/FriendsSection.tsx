@@ -3,7 +3,8 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { useIncomingRequests } from '@/api/friends/friends.queries';
-import { useAppSelector } from '@/store/hooks';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { setMobileHomeTab } from '@/store/slices/navSlice';
 import { Divider } from '@/ui/components/common/Divider';
 import { Text } from '@/ui/components/common/Text';
 import { Box } from '@/ui/components/layout/Box';
@@ -18,6 +19,7 @@ const FriendsHeader = (): React.ReactNode => (
 );
 
 const FriendRequestNavItem = (): React.ReactNode => {
+    const dispatch = useAppDispatch();
     const navigate = useNavigate();
     const { data: requests } = useIncomingRequests();
     const selectedFriendId = useAppSelector(
@@ -38,6 +40,7 @@ const FriendRequestNavItem = (): React.ReactNode => {
                     : 'text-foreground-muted hover:bg-bg-subtle hover:text-foreground',
             )}
             onClick={(): void => {
+                dispatch(setMobileHomeTab('requests'));
                 void navigate('/chat/@me');
             }}
         >

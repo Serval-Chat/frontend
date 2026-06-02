@@ -5,7 +5,9 @@ import { Loader2 } from 'lucide-react';
 
 import { klipyApi } from '@/api/klipy/klipy.api';
 import type { KlipyFavorite } from '@/api/klipy/klipy.types';
+import { useLimitedAnimations } from '@/providers/LimitedAnimationsProvider';
 import { GifStarButton } from '@/ui/components/chat/GifStarButton';
+import { PausedAnimatedImage } from '@/ui/components/common/PausedAnimatedImage';
 import { Box } from '@/ui/components/layout/Box';
 import { cn } from '@/utils/cn';
 
@@ -17,6 +19,7 @@ interface GifPlayerProps {
 
 export const GifPlayer = ({ klipyId, url, onResize }: GifPlayerProps) => {
     const queryClient = useQueryClient();
+    const limitedAnimations = useLimitedAnimations();
 
     const {
         data: metadata,
@@ -132,11 +135,13 @@ export const GifPlayer = ({ klipyId, url, onResize }: GifPlayerProps) => {
                 metadata.contentType === 'gif' ? 'bg-black' : 'bg-transparent',
             )}
         >
-            <img
+            <PausedAnimatedImage
                 alt="Klipy Content"
                 className="block"
                 decoding="async"
+                fallbackSrc={metadata.previewUrl}
                 loading="lazy"
+                paused={limitedAnimations && metadata.contentType === 'gif'}
                 src={metadata.url}
                 style={{
                     width: '100%',

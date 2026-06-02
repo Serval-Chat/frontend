@@ -9,9 +9,8 @@ import {
     useOnboarding,
     useUpdateChannelPreferences,
 } from '@/api/servers/servers.queries';
-import { Button } from '@/ui/components/common/Button';
 import { LoadingSpinner } from '@/ui/components/common/LoadingSpinner';
-import { Text } from '@/ui/components/common/Text';
+import { SettingsFloatingBar } from '@/ui/components/common/SettingsFloatingBar';
 import { Box } from '@/ui/components/layout/Box';
 
 import { ChannelPreferenceGroup } from './ServerOnboardingModals';
@@ -144,42 +143,24 @@ export const ServerChannelsPage = () => {
                 )}
             </Box>
 
-            {hasUnsavedChanges && (
-                <div className="pride-glass-input absolute bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-xl border border-border-subtle bg-bg-secondary/90 px-6 py-4 whitespace-nowrap shadow-xl backdrop-blur-md">
-                    <div className="flex items-center gap-6">
-                        <Text className="text-sm font-medium">
-                            Careful - you have unsaved changes!
-                        </Text>
-                        <div className="flex gap-2">
-                            <Button
-                                variant="ghost"
-                                onClick={(): void => {
-                                    if (onboarding) {
-                                        setHiddenChannelIds(
-                                            onboarding.member
-                                                .hiddenChannelIds ?? [],
-                                        );
-                                        setHiddenCategoryIds(
-                                            onboarding.member
-                                                .hiddenCategoryIds ?? [],
-                                        );
-                                    }
-                                    setHasUnsavedChanges(false);
-                                }}
-                            >
-                                Reset
-                            </Button>
-                            <Button
-                                loading={updatePreferences.isPending}
-                                variant="primary"
-                                onClick={handleSave}
-                            >
-                                Save Changes
-                            </Button>
-                        </div>
-                    </div>
-                </div>
-            )}
+            <SettingsFloatingBar
+                containerClassName="pride-glass-input"
+                isPending={updatePreferences.isPending}
+                isVisible={hasUnsavedChanges}
+                offset="0px"
+                onReset={(): void => {
+                    if (onboarding) {
+                        setHiddenChannelIds(
+                            onboarding.member.hiddenChannelIds ?? [],
+                        );
+                        setHiddenCategoryIds(
+                            onboarding.member.hiddenCategoryIds ?? [],
+                        );
+                    }
+                    setHasUnsavedChanges(false);
+                }}
+                onSave={handleSave}
+            />
         </Box>
     );
 };

@@ -17,6 +17,7 @@ interface ModalProps {
     showCloseButton?: boolean;
     noPadding?: boolean;
     fullScreen?: boolean;
+    mobileFullScreen?: boolean;
     wrapperClassName?: string;
     zIndex?: number;
 }
@@ -33,6 +34,7 @@ export const Modal = ({
     showCloseButton = true,
     noPadding = false,
     fullScreen = false,
+    mobileFullScreen = false,
     wrapperClassName,
     zIndex,
 }: ModalProps): React.ReactPortal | null => {
@@ -63,6 +65,7 @@ export const Modal = ({
                     className={cn(
                         'fixed inset-0 z-modal flex items-center justify-center',
                         !fullScreen && 'p-4',
+                        mobileFullScreen && 'p-0 md:p-4',
                         wrapperClassName,
                     )}
                     style={{ zIndex }}
@@ -85,6 +88,8 @@ export const Modal = ({
                             fullScreen
                                 ? 'max-h-none w-screen max-w-none rounded-none border-none'
                                 : 'max-h-[90vh] max-w-2xl',
+                            mobileFullScreen &&
+                                'mt-[env(safe-area-inset-top)] mb-[env(safe-area-inset-bottom)] h-[calc(100dvh-env(safe-area-inset-top)-env(safe-area-inset-bottom))] max-h-none w-screen max-w-none rounded-none border-none md:mt-0 md:mb-0 md:h-auto md:max-h-[90vh] md:rounded-xl md:border',
                             className,
                         )}
                         exit={

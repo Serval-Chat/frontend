@@ -75,6 +75,10 @@ export const TertiarySidebar = ({
 
     const scrollContainerRef = useRef<HTMLDivElement>(null);
 
+    if (!selectedFriendId && !selectedServerId) {
+        return null;
+    }
+
     return (
         <Box
             as="aside"

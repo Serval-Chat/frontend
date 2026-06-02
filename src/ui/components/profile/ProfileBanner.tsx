@@ -1,6 +1,9 @@
 import { Camera } from 'lucide-react';
 
+import { useLimitedAnimations } from '@/providers/LimitedAnimationsProvider';
+import { PausedAnimatedImage } from '@/ui/components/common/PausedAnimatedImage';
 import { Box } from '@/ui/components/layout/Box';
+import { isAnimatedImageUrl } from '@/utils/animationPreferences';
 import { resolveApiUrl } from '@/utils/apiUrl';
 import { cn } from '@/utils/cn';
 
@@ -26,9 +29,12 @@ export const ProfileBanner = ({
     height = 120,
     alt = 'User Banner',
 }: ProfileBannerProps) => {
+    const limitedAnimations = useLimitedAnimations();
     const defaultColor = '#5865F2';
     const bannerColor =
         propsBannerColor || usernameGradient?.colors?.[0] || defaultColor;
+    const bannerUrl = resolveApiUrl(banner || undefined) || '';
+    const shouldShowBanner = !!bannerUrl;
 
     return (
         <Box
@@ -43,11 +49,12 @@ export const ProfileBanner = ({
             }}
             onClick={onBannerClick}
         >
-            {banner && banner.trim() !== '' && (
-                <img
+            {shouldShowBanner && (
+                <PausedAnimatedImage
                     alt={alt}
                     className="h-full w-full object-cover"
-                    src={resolveApiUrl(banner) || ''}
+                    paused={limitedAnimations && isAnimatedImageUrl(bannerUrl)}
+                    src={bannerUrl}
                 />
             )}
             {onBannerClick && (

@@ -16,13 +16,16 @@ import {
     useProxyMetadata,
 } from '@/api/files/files.queries';
 import type { FileMetadata, ProxyMetadata } from '@/api/files/files.types';
+import { useLimitedAnimations } from '@/providers/LimitedAnimationsProvider';
 import { Button } from '@/ui/components/common/Button';
 import { CodeModal } from '@/ui/components/common/CodeModal';
 import { ImageLightbox } from '@/ui/components/common/ImageLightbox';
 import { Link } from '@/ui/components/common/Link';
 import { LoadingSpinner } from '@/ui/components/common/LoadingSpinner';
+import { PausedAnimatedImage } from '@/ui/components/common/PausedAnimatedImage';
 import { Text } from '@/ui/components/common/Text';
 import { Box } from '@/ui/components/layout/Box';
+import { isAnimatedImageUrl } from '@/utils/animationPreferences';
 import { cn } from '@/utils/cn';
 import { getSafeUrl, isInternalUrl } from '@/utils/proxy';
 
@@ -66,6 +69,7 @@ const getMediaBoxStyle = (
 };
 
 export const FileEmbed = ({ url, attachment, onResize }: FileEmbedProps) => {
+    const limitedAnimations = useLimitedAnimations();
     const attachmentUrl =
         attachment !== undefined
             ? `/api/v1/files/download/${encodeURIComponent(attachment.attachmentId)}${attachment.spoiler === true ? '#spoiler' : ''}`
@@ -146,7 +150,7 @@ export const FileEmbed = ({ url, attachment, onResize }: FileEmbedProps) => {
                         }
                     }}
                 >
-                    <img
+                    <PausedAnimatedImage
                         alt={displayName || 'File content'}
                         className={cn(
                             'block h-full max-h-[min(450px,70vh)] w-full rounded-lg object-contain transition-opacity duration-300',
@@ -157,6 +161,11 @@ export const FileEmbed = ({ url, attachment, onResize }: FileEmbedProps) => {
                         decoding="async"
                         height={mediaDimensions.height}
                         loading="eager"
+                        paused={
+                            limitedAnimations &&
+                            (mimeType === 'image/gif' ||
+                                isAnimatedImageUrl(displayUrl))
+                        }
                         src={displayUrl!}
                         style={{ aspectRatio: mediaBoxStyle.aspectRatio }}
                         width={mediaDimensions.width}

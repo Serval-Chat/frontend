@@ -8,9 +8,8 @@ import {
     useRoles,
     useUpdateSelfRoles,
 } from '@/api/servers/servers.queries';
-import { Button } from '@/ui/components/common/Button';
 import { LoadingSpinner } from '@/ui/components/common/LoadingSpinner';
-import { Text } from '@/ui/components/common/Text';
+import { SettingsFloatingBar } from '@/ui/components/common/SettingsFloatingBar';
 import { Box } from '@/ui/components/layout/Box';
 
 import { RolePicker } from './ServerOnboardingModals';
@@ -95,44 +94,26 @@ export const ServerRolesPage = () => {
                 )}
             </Box>
 
-            {hasUnsavedChanges && (
-                <div className="pride-glass-input absolute bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-xl border border-border-subtle bg-bg-secondary/90 px-6 py-4 whitespace-nowrap shadow-xl backdrop-blur-md">
-                    <div className="flex items-center gap-6">
-                        <Text className="text-sm font-medium">
-                            Careful - you have unsaved changes!
-                        </Text>
-                        <div className="flex gap-2">
-                            <Button
-                                variant="ghost"
-                                onClick={(): void => {
-                                    if (onboarding) {
-                                        const allowed = new Set(
-                                            onboarding.onboarding
-                                                .selfAssignableRoleIds,
-                                        );
-                                        setSelectedRoleIds(
-                                            onboarding.member.roles.filter(
-                                                (roleId): boolean =>
-                                                    allowed.has(roleId),
-                                            ),
-                                        );
-                                    }
-                                    setHasUnsavedChanges(false);
-                                }}
-                            >
-                                Reset
-                            </Button>
-                            <Button
-                                loading={updateSelfRoles.isPending}
-                                variant="primary"
-                                onClick={handleSave}
-                            >
-                                Save Changes
-                            </Button>
-                        </div>
-                    </div>
-                </div>
-            )}
+            <SettingsFloatingBar
+                containerClassName="pride-glass-input"
+                isPending={updateSelfRoles.isPending}
+                isVisible={hasUnsavedChanges}
+                offset="0px"
+                onReset={(): void => {
+                    if (onboarding) {
+                        const allowed = new Set(
+                            onboarding.onboarding.selfAssignableRoleIds,
+                        );
+                        setSelectedRoleIds(
+                            onboarding.member.roles.filter((roleId): boolean =>
+                                allowed.has(roleId),
+                            ),
+                        );
+                    }
+                    setHasUnsavedChanges(false);
+                }}
+                onSave={handleSave}
+            />
         </Box>
     );
 };

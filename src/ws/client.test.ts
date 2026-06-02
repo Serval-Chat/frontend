@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { wsClient } from './client';
 
@@ -14,22 +14,26 @@ interface MockWebSocket {
 
 describe('WsClient', (): void => {
     let mockWebSocket: MockWebSocket;
+    let sockets: MockWebSocket[];
 
     beforeEach((): void => {
         vi.clearAllMocks();
+        vi.useFakeTimers();
 
         // Use public API to reset state
         wsClient.disconnect();
 
-        mockWebSocket = {
+        sockets = [];
+
+        const createMockWebSocket = (): MockWebSocket => ({
             send: vi.fn(),
             close: vi.fn(),
-            readyState: 1, // OPEN
+            readyState: 0, // CONNECTING
             onopen: null,
             onmessage: null,
             onerror: null,
             onclose: null,
-        };
+        });
 
         class WebSocketMock {
             static CONNECTING = 0;
@@ -37,6 +41,8 @@ describe('WsClient', (): void => {
             static CLOSING = 2;
             static CLOSED = 3;
             constructor() {
+                mockWebSocket = createMockWebSocket();
+                sockets.push(mockWebSocket);
                 return mockWebSocket as any as WebSocket;
             }
         }
@@ -45,6 +51,12 @@ describe('WsClient', (): void => {
 
         // Initialize the client
         wsClient.connect('test-token');
+    });
+
+    afterEach((): void => {
+        wsClient.disconnect();
+        vi.useRealTimers();
+        vi.unstubAllGlobals();
     });
 
     it('should subscribe to events', (): void => {
@@ -83,5 +95,59 @@ describe('WsClient', (): void => {
         }
 
         expect(handler).not.toHaveBeenCalled();
+    });
+
+    it('reconnects after an unexpected close', (): void => {
+        expect(sockets).toHaveLength(1);
+
+        mockWebSocket.onclose?.({
+            code: 1006,
+            reason: 'network lost',
+        } as CloseEvent);
+
+        expect(wsClient.getStatus()).toBe('disconnected');
+
+        vi.advanceTimersByTime(1000);
+
+        expect(sockets).toHaveLength(2);
+    });
+
+    it('does not reconnect after an intentional disconnect', (): void => {
+        const firstSocket = mockWebSocket;
+
+        wsClient.disconnect();
+        firstSocket.onclose?.({ code: 1000, reason: 'logout' } as CloseEvent);
+
+        vi.advanceTimersByTime(30000);
+
+        expect(sockets).toHaveLength(1);
+    });
+
+    it('ignores stale close events from sockets replaced during token changes', (): void => {
+        const firstSocket = mockWebSocket;
+
+        wsClient.connect('next-token');
+
+        expect(sockets).toHaveLength(2);
+        firstSocket.onclose?.({ code: 1000, reason: 'replaced' } as CloseEvent);
+
+        vi.advanceTimersByTime(30000);
+
+        expect(sockets).toHaveLength(2);
+    });
+
+    it('cancels pending reconnects when a fresh connect is requested', (): void => {
+        mockWebSocket.onclose?.({
+            code: 1006,
+            reason: 'network lost',
+        } as CloseEvent);
+
+        wsClient.connect('test-token');
+
+        expect(sockets).toHaveLength(2);
+
+        vi.advanceTimersByTime(1000);
+
+        expect(sockets).toHaveLength(2);
     });
 });

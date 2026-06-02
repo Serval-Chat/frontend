@@ -21,6 +21,9 @@ export const AccessibilitySettings = () => {
     const [localDisableGlow, setLocalDisableGlow] = useState<boolean | null>(
         null,
     );
+    const [localLimitedAnimations, setLocalLimitedAnimations] = useState<
+        boolean | null
+    >(null);
 
     const disableCustomFonts =
         localDisableFonts !== null
@@ -37,6 +40,11 @@ export const AccessibilitySettings = () => {
             ? localDisableGlow
             : user?.settings?.disableCustomUsernameGlow || false;
 
+    const limitedAnimations =
+        localLimitedAnimations !== null
+            ? localLimitedAnimations
+            : user?.settings?.limitedAnimations || false;
+
     const hasChanges =
         (localDisableFonts !== null &&
             localDisableFonts !==
@@ -46,7 +54,10 @@ export const AccessibilitySettings = () => {
                 (user?.settings?.disableCustomUsernameColors || false)) ||
         (localDisableGlow !== null &&
             localDisableGlow !==
-                (user?.settings?.disableCustomUsernameGlow || false));
+                (user?.settings?.disableCustomUsernameGlow || false)) ||
+        (localLimitedAnimations !== null &&
+            localLimitedAnimations !==
+                (user?.settings?.limitedAnimations || false));
 
     const handleSave = (): void => {
         updateSettings(
@@ -54,12 +65,14 @@ export const AccessibilitySettings = () => {
                 disableCustomUsernameFonts: disableCustomFonts,
                 disableCustomUsernameColors: disableCustomColors,
                 disableCustomUsernameGlow: disableCustomGlow,
+                limitedAnimations,
             },
             {
                 onSuccess: (): void => {
                     setLocalDisableFonts(null);
                     setLocalDisableColors(null);
                     setLocalDisableGlow(null);
+                    setLocalLimitedAnimations(null);
                 },
             },
         );
@@ -69,6 +82,7 @@ export const AccessibilitySettings = () => {
         setLocalDisableFonts(null);
         setLocalDisableColors(null);
         setLocalDisableGlow(null);
+        setLocalLimitedAnimations(null);
     };
 
     if (isLoading) {
@@ -168,6 +182,30 @@ export const AccessibilitySettings = () => {
                                 <Toggle
                                     checked={disableCustomGlow}
                                     onCheckedChange={setLocalDisableGlow}
+                                />
+                            </div>
+
+                            <div className="flex items-start justify-between gap-4 rounded-lg border border-border-subtle bg-bg-subtle p-4">
+                                <div className="space-y-1">
+                                    <div className="flex items-center gap-2">
+                                        <Eye
+                                            className="text-muted-foreground"
+                                            size={16}
+                                        />
+                                        <Text weight="medium">
+                                            Limited Animations
+                                        </Text>
+                                    </div>
+                                    <Text size="sm" variant="muted">
+                                        Reduce interface motion and stop
+                                        animated media such as GIF profile
+                                        pictures, banners, and GIF embeds from
+                                        playing automatically.
+                                    </Text>
+                                </div>
+                                <Toggle
+                                    checked={limitedAnimations}
+                                    onCheckedChange={setLocalLimitedAnimations}
                                 />
                             </div>
                         </div>

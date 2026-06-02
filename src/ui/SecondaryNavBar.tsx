@@ -36,7 +36,7 @@ export const SecondaryNavBar = () => {
             as="aside"
             className={cn(
                 'no-scrollbar pride-glass relative flex h-full shrink-0 flex-col border-r border-border-subtle bg-[var(--secondary-bg)]',
-                'pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]',
+                'pt-[env(safe-area-inset-top)] pb-0 md:pb-[env(safe-area-inset-bottom)]',
                 !inSwipePanel &&
                     navMode === 'friends' &&
                     isNothingSelected &&

@@ -6,17 +6,22 @@ import {
     Shield,
     ShieldAlert,
     User,
+    X,
 } from 'lucide-react';
 
 import { Button } from '@/ui/components/common/Button';
+import { Heading } from '@/ui/components/common/Heading';
+import { IconButton } from '@/ui/components/common/IconButton';
 
 interface SettingsSidebarProps {
     activeSection: string;
+    onClose: () => void;
     setActiveSection: (section: string) => void;
 }
 
 export const SettingsSidebar = ({
     activeSection,
+    onClose,
     setActiveSection,
 }: SettingsSidebarProps) => {
     const sections = [
@@ -32,6 +37,18 @@ export const SettingsSidebar = ({
 
     return (
         <div className="flex w-full shrink-0 flex-col gap-1 overflow-y-auto border-r border-border-subtle bg-[var(--secondary-bg)] p-3 md:w-[200px]">
+            <div className="mb-2 flex items-center justify-between border-b border-border-subtle px-2 pb-3 md:hidden">
+                <Heading className="m-0" level={2} variant="section">
+                    Settings
+                </Heading>
+                <IconButton
+                    className="border border-border-subtle text-muted-foreground hover:bg-danger-muted hover:text-danger"
+                    icon={X}
+                    iconSize={20}
+                    onClick={onClose}
+                />
+            </div>
+
             {sections.map((section) => {
                 const Icon = section.icon;
                 const isActive = activeSection === section.id;

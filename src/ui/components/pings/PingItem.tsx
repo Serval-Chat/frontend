@@ -4,11 +4,11 @@ import { X } from 'lucide-react';
 
 import { useDeletePing } from '@/api/pings/pings.queries';
 import type { PingNotification } from '@/api/pings/pings.types';
-import { useChannels, useServers } from '@/api/servers/servers.queries';
-import type { Channel } from '@/api/servers/servers.types';
+import { useServers } from '@/api/servers/servers.queries';
 import { MessageContent } from '@/ui/components/chat/MessageContent';
 import { IconButton } from '@/ui/components/common/IconButton';
 import { Text } from '@/ui/components/common/Text';
+import { ServerIcon } from '@/ui/components/servers/ServerIcon';
 import { cn } from '@/utils/cn';
 import { formatDate } from '@/utils/timestamp';
 
@@ -20,13 +20,8 @@ interface PingItemProps {
 export const PingItem = ({ ping, onClick }: PingItemProps) => {
     const { mutate: deletePing } = useDeletePing();
     const { data: servers } = useServers();
-    const { data: channels } = useChannels(ping.serverId || null);
 
     const server = servers?.find((s): boolean => s._id === ping.serverId);
-    const serverName = server?.name;
-    const channelName = channels?.find(
-        (c: Channel): boolean => c._id === ping.channelId,
-    )?.name;
 
     const handleDelete = (e: React.MouseEvent): void => {
         e.stopPropagation();
@@ -76,11 +71,18 @@ export const PingItem = ({ ping, onClick }: PingItemProps) => {
                 />
             </div>
 
-            <div className="mb-1 flex items-center gap-1 truncate text-[10px] font-medium text-primary">
-                {serverName && <span>{serverName}</span>}
-                {serverName && channelName && <span>/</span>}
-                {channelName && <span>#{channelName}</span>}
-            </div>
+            {server && (
+                <div className="mb-1 flex items-center gap-1.5 truncate text-[10px] font-medium text-primary">
+                    <ServerIcon
+                        className="pointer-events-none shrink-0"
+                        server={server}
+                        size="xxs"
+                    />
+                    <span className="truncate">
+                        {ping.sender} mentioned you in {server.name}
+                    </span>
+                </div>
+            )}
 
             <div className="line-clamp-3 overflow-hidden text-sm text-foreground opacity-90">
                 <MessageContent text={snippet} />

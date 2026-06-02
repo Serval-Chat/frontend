@@ -33,7 +33,7 @@ class WsClient {
     private messageQueue: string[] = [];
     private maxQueuedMessages = 100;
     private isAuthenticated = false;
-    private intentionallyClosed = false;
+    private connectionId = 0;
     private state:
         | 'disconnected'
         | 'connecting'
@@ -69,7 +69,7 @@ class WsClient {
      * Connect to the WebSocket server.
      */
     public connect(token?: string): void {
-        this.intentionallyClosed = false;
+        this.clearReconnectTimeout();
         const nextToken = token || null;
         if (
             this.socket &&
@@ -77,37 +77,38 @@ class WsClient {
                 this.socket.readyState === WebSocket.CONNECTING)
         ) {
             if (this.token === nextToken) return;
-            this.disconnect();
-            this.intentionallyClosed = false;
+            this.closeSocket();
+            this.stopPing();
+            this.isAuthenticated = false;
         }
         this.token = nextToken;
         if (this.socket?.readyState === WebSocket.OPEN) return;
 
         console.log('[WS] Connecting to:', this.url);
         this.state = 'connecting';
-        this.socket = new WebSocket(this.url);
+        const connectionId = ++this.connectionId;
+        const socket = new WebSocket(this.url);
+        this.socket = socket;
 
-        this.socket.onopen = this.handleOpen.bind(this);
-        this.socket.onmessage = this.handleMessage.bind(this);
-        this.socket.onerror = this.handleError.bind(this);
-        this.socket.onclose = this.handleClose.bind(this);
+        socket.onopen = (): void => this.handleOpen(socket, connectionId);
+        socket.onmessage = (event): void =>
+            this.handleMessage(event, socket, connectionId);
+        socket.onerror = (event): void =>
+            this.handleError(event, socket, connectionId);
+        socket.onclose = (event): void =>
+            this.handleClose(event, socket, connectionId);
     }
 
     /**
      * Disconnect from the WebSocket server.
      */
     public disconnect(): void {
-        this.intentionallyClosed = true;
-        if (this.reconnectTimeout !== null) {
-            window.clearTimeout(this.reconnectTimeout);
-            this.reconnectTimeout = null;
-        }
+        this.connectionId++;
+        this.clearReconnectTimeout();
         this.stopPing();
         this.isAuthenticated = false;
-        if (this.socket) {
-            this.socket.close();
-            this.socket = null;
-        }
+        this.reconnectAttempts = 0;
+        this.closeSocket();
         this.state = 'disconnected';
         this.token = null;
     }
@@ -175,7 +176,9 @@ class WsClient {
         }
     }
 
-    private handleOpen(): void {
+    private handleOpen(socket: WebSocket, connectionId: number): void {
+        if (!this.isCurrentSocket(socket, connectionId)) return;
+
         console.log('[WS] Connection established');
         this.state = 'connected';
         this.reconnectAttempts = 0;
@@ -188,7 +191,13 @@ class WsClient {
         }
     }
 
-    private handleMessage(event: MessageEvent): void {
+    private handleMessage(
+        event: MessageEvent,
+        socket: WebSocket,
+        connectionId: number,
+    ): void {
+        if (!this.isCurrentSocket(socket, connectionId)) return;
+
         try {
             const envelope: IWsEnvelope = JSON.parse(event.data);
             const { type, payload } = envelope.event;
@@ -262,14 +271,23 @@ class WsClient {
         }
     }
 
-    private handleError(error: Event): void {
+    private handleError(
+        error: Event,
+        socket: WebSocket,
+        connectionId: number,
+    ): void {
+        if (!this.isCurrentSocket(socket, connectionId)) return;
+
         console.error('[WS] Error:', error);
     }
 
-    private handleClose(event: CloseEvent): void {
-        if (this.intentionallyClosed) {
-            this.intentionallyClosed = false;
-            console.log('[WS] Connection closed intentionally');
+    private handleClose(
+        event: CloseEvent,
+        socket: WebSocket,
+        connectionId: number,
+    ): void {
+        if (!this.isCurrentSocket(socket, connectionId)) {
+            console.log('[WS] Ignoring stale socket close');
             return;
         }
 
@@ -278,6 +296,7 @@ class WsClient {
         this.stopPing();
         this.isAuthenticated = false;
         this.state = 'disconnected';
+        this.socket = null;
         this.emit(WsEvents.DISCONNECTED, {
             code: event.code,
             reason: event.reason,
@@ -297,6 +316,28 @@ class WsClient {
                 this.connect(this.token ?? undefined);
             }, delay);
         }
+    }
+
+    private isCurrentSocket(socket: WebSocket, connectionId: number): boolean {
+        return this.socket === socket && this.connectionId === connectionId;
+    }
+
+    private clearReconnectTimeout(): void {
+        if (this.reconnectTimeout !== null) {
+            window.clearTimeout(this.reconnectTimeout);
+            this.reconnectTimeout = null;
+        }
+    }
+
+    private closeSocket(): void {
+        if (!this.socket) return;
+
+        this.socket.onopen = null;
+        this.socket.onmessage = null;
+        this.socket.onerror = null;
+        this.socket.onclose = null;
+        this.socket.close();
+        this.socket = null;
     }
 
     private authenticate(token: string): void {

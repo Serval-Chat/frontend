@@ -1,3 +1,4 @@
+import { useVirtualizer } from '@tanstack/react-virtual';
 import { render } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -117,6 +118,36 @@ describe('MessagesList Scroll Behavior', (): void => {
             />,
         );
 
+        expect(mockScrollToIndex).toHaveBeenCalledWith(1, { align: 'center' });
+    });
+
+    it('starts cached message lists at the bottom without a corrective scroll', (): void => {
+        render(<MessagesList hasMore={false} messages={mockMessages} />);
+
+        const options = vi.mocked(useVirtualizer).mock.calls[0][0] as {
+            initialOffset: () => number;
+        };
+
+        expect(options.initialOffset()).toBe(Number.MAX_SAFE_INTEGER);
+        expect(mockScrollToIndex).not.toHaveBeenCalledWith(2, {
+            align: 'end',
+        });
+    });
+
+    it('starts targeted message lists at the top so highlight scrolling can center the target', (): void => {
+        render(
+            <MessagesList
+                activeHighlightId="msg-2"
+                hasMore={false}
+                messages={mockMessages}
+            />,
+        );
+
+        const options = vi.mocked(useVirtualizer).mock.calls[0][0] as {
+            initialOffset: () => number;
+        };
+
+        expect(options.initialOffset()).toBe(0);
         expect(mockScrollToIndex).toHaveBeenCalledWith(1, { align: 'center' });
     });
 

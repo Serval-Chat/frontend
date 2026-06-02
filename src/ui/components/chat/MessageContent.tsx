@@ -8,12 +8,15 @@ import {
 } from '@/api/servers/servers.queries';
 import type { Role, Server, ServerMember } from '@/api/servers/servers.types';
 import { useStickerInfoBox } from '@/hooks/useStickerInfoBox';
+import { useLimitedAnimations } from '@/providers/LimitedAnimationsProvider';
 import type { ButtonComponent, Embed } from '@/types/embed';
 import { ParsedText } from '@/ui/components/common/ParsedText';
+import { PausedAnimatedImage } from '@/ui/components/common/PausedAnimatedImage';
 import { Tooltip } from '@/ui/components/common/Tooltip';
 import { EmbedRenderer } from '@/ui/components/embed/EmbedRenderer';
 import { StickerInfoBox } from '@/ui/components/emoji/StickerInfoBox';
 import { Box } from '@/ui/components/layout/Box';
+import { isAnimatedImageUrl } from '@/utils/animationPreferences';
 import { resolveApiUrl } from '@/utils/apiUrl';
 import { cn } from '@/utils/cn';
 import {
@@ -66,6 +69,7 @@ export const MessageContent = React.memo(
         onResize,
     }: MessageContentProps) => {
         const { data: sticker } = useSticker(stickerId || null);
+        const limitedAnimations = useLimitedAnimations();
         const { data: channels = [] } = useChannels(serverId || null, {
             enabled: !!serverId,
         });
@@ -206,9 +210,13 @@ export const MessageContent = React.memo(
                                     )
                                 }
                             >
-                                <img
+                                <PausedAnimatedImage
                                     alt={sticker.name}
                                     className="h-auto max-w-full select-none"
+                                    paused={
+                                        limitedAnimations &&
+                                        isAnimatedImageUrl(sticker.imageUrl)
+                                    }
                                     src={resolveApiUrl(sticker.imageUrl) || ''}
                                     onLoad={onResize}
                                 />

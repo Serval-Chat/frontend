@@ -82,6 +82,7 @@ export interface IMessageDm {
     _id: string;
     senderId: string;
     senderUsername: string;
+    senderProfilePicture?: string | null;
     receiverId: string;
     receiverUsername: string;
     text: string;
@@ -117,6 +118,7 @@ export interface IMessageServer {
     channelId: string;
     senderId: string;
     senderUsername: string;
+    senderProfilePicture?: string | null;
     text: string;
     createdAt: string;
     replyToId?: string;

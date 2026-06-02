@@ -1,4 +1,7 @@
+import type { CSSProperties } from 'react';
+
 import { AnimatePresence, motion } from 'framer-motion';
+import { AlertTriangle } from 'lucide-react';
 
 import { Button } from '@/ui/components/common/Button';
 import { Text } from '@/ui/components/common/Text';
@@ -38,37 +41,55 @@ export const SettingsFloatingBar = ({
         {isVisible && (
             <motion.div
                 animate={{ y: 0, opacity: 1 }}
+                aria-live="polite"
                 className={cn(
                     isFixed ? 'fixed' : 'absolute',
-                    'pointer-events-none right-0 bottom-8 z-fixed flex justify-center px-4',
-                    isFixed && `left-[${offset}]`,
+                    'pointer-events-none right-0 bottom-[max(1rem,env(safe-area-inset-bottom))] z-fixed flex justify-center px-3 sm:px-4',
+                    isFixed &&
+                        'left-0 md:left-[var(--settings-floating-offset)]',
                     !isFixed && 'left-0',
                     className,
                 )}
                 exit={{ y: 100, opacity: 0 }}
                 initial={{ y: 100, opacity: 0 }}
-                style={isFixed ? { left: offset } : undefined}
+                role="alert"
+                style={
+                    isFixed
+                        ? ({
+                              '--settings-floating-offset': offset,
+                          } as CSSProperties)
+                        : undefined
+                }
                 transition={{ type: 'spring', damping: 25, stiffness: 200 }}
             >
                 <div
                     className={cn(
-                        'pointer-events-auto flex w-full max-w-2xl items-center gap-6 rounded-lg border border-border-subtle bg-background p-4 shadow-2xl backdrop-blur-md',
+                        'pointer-events-auto flex w-full max-w-2xl flex-col gap-3 rounded-lg border border-border-subtle bg-background/95 p-3 shadow-2xl backdrop-blur-md sm:flex-row sm:items-center sm:gap-6 sm:p-4',
                         containerClassName,
                     )}
                 >
-                    <Text className="flex-1" size="sm">
-                        {message}
-                    </Text>
-                    <div className="flex gap-3">
+                    <div className="flex min-w-0 flex-1 items-start gap-3">
+                        <AlertTriangle
+                            aria-hidden="true"
+                            className="mt-0.5 shrink-0 text-caution"
+                            size={18}
+                        />
+                        <Text className="min-w-0 flex-1 leading-snug" size="sm">
+                            {message}
+                        </Text>
+                    </div>
+                    <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:gap-3">
                         <Button
-                            className="min-w-[96px]"
+                            aria-label="Discard unsaved changes"
+                            className="min-h-11 min-w-0 sm:min-w-[96px]"
                             variant="ghost"
                             onClick={onReset}
                         >
                             {resetLabel}
                         </Button>
                         <Button
-                            className="min-w-[96px]"
+                            aria-label="Save unsaved changes"
+                            className="min-h-11 min-w-0 sm:min-w-[96px]"
                             loading={isPending}
                             variant="success"
                             onClick={onSave}

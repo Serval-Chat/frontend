@@ -12,7 +12,8 @@
     "format": "prettier --write src/",
     "test": "vitest",
     "lint:fix": "eslint . --fix --cache",
-    "knip": "knip"
+    "knip": "knip",
+    "tauri": "tauri"
   },
   "lint-staged": {
     "src/**/*.{ts,tsx,js,jsx}": [

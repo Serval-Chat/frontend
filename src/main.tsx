@@ -5,6 +5,7 @@ import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 
 import { teardownWebPush } from '@/lib/pushClient';
+import { LimitedAnimationsProvider } from '@/providers/LimitedAnimationsProvider';
 import { QueryProvider } from '@/providers/QueryProvider';
 import { StoreProvider } from '@/providers/StoreProvider';
 import { ThemeProvider } from '@/providers/ThemeProvider';
@@ -14,6 +15,7 @@ import { AdminRoute } from '@/ui/components/layout/AdminRoute';
 import { AuthenticatedLayout } from '@/ui/components/layout/AuthenticatedLayout';
 import { NavigationSync } from '@/ui/components/layout/NavigationSync';
 import { Seo } from '@/ui/components/seo/Seo';
+import { InAppNotificationProvider } from '@/ui/notifications/InAppNotificationProvider';
 import { hasAuthToken } from '@/utils/authToken';
 
 const Admin = lazy(() =>
@@ -96,171 +98,227 @@ createRoot(document.getElementById('root')!).render(
                 <ThemeProvider>
                     <ToastProvider>
                         <BrowserRouter>
-                            <Seo />
-                            <Suspense
-                                fallback={
-                                    <div className="flex h-screen items-center justify-center">
-                                        Loading...
-                                    </div>
-                                }
-                            >
-                                <Routes>
-                                    <Route
-                                        element={
-                                            <WebOnly>
-                                                <App />
-                                            </WebOnly>
+                            <LimitedAnimationsProvider>
+                                <InAppNotificationProvider>
+                                    <Seo />
+                                    <Suspense
+                                        fallback={
+                                            <div className="flex h-screen items-center justify-center">
+                                                Loading...
+                                            </div>
                                         }
-                                        path="/"
-                                    />
-                                    <Route element={<Login />} path="/login" />
-                                    <Route
-                                        element={<Invite />}
-                                        path="/invite/:inviteId"
-                                    />
-                                    <Route
-                                        element={<TauriGateway />}
-                                        path="/gateway"
-                                    />
-                                    <Route
-                                        element={
-                                            <WebOnly>
-                                                <ForgotPassword />
-                                            </WebOnly>
-                                        }
-                                        path="/forgot-password"
-                                    />
-                                    <Route
-                                        element={
-                                            <WebOnly>
-                                                <ResetPassword />
-                                            </WebOnly>
-                                        }
-                                        path="/reset-password"
-                                    />
-                                    <Route
-                                        element={
-                                            <WebOnly>
-                                                <Register />
-                                            </WebOnly>
-                                        }
-                                        path="/register"
-                                    />
-                                    <Route
-                                        element={<Downloads />}
-                                        path="/downloads"
-                                    />
-                                    <Route element={<Tos />} path="/tos" />
-                                    <Route element={<AuthenticatedLayout />}>
-                                        <Route element={<Chat />} path="/chat">
+                                    >
+                                        <Routes>
                                             <Route
-                                                index
-                                                element={<NavigationSync />}
+                                                element={
+                                                    <WebOnly>
+                                                        <App />
+                                                    </WebOnly>
+                                                }
+                                                path="/"
                                             />
                                             <Route
-                                                element={<NavigationSync />}
-                                                path="@me"
+                                                element={<Login />}
+                                                path="/login"
                                             />
                                             <Route
-                                                element={<NavigationSync />}
-                                                path="@server/:serverId"
+                                                element={<Invite />}
+                                                path="/invite/:inviteId"
                                             />
                                             <Route
-                                                element={<NavigationSync />}
-                                                path="@server/:serverId/channel/:channelId"
+                                                element={<TauriGateway />}
+                                                path="/gateway"
                                             />
                                             <Route
-                                                element={<NavigationSync />}
-                                                path="@server/:serverId/self-roles"
+                                                element={
+                                                    <WebOnly>
+                                                        <ForgotPassword />
+                                                    </WebOnly>
+                                                }
+                                                path="/forgot-password"
                                             />
                                             <Route
-                                                element={<NavigationSync />}
-                                                path="@server/:serverId/channels-and-categories"
+                                                element={
+                                                    <WebOnly>
+                                                        <ResetPassword />
+                                                    </WebOnly>
+                                                }
+                                                path="/reset-password"
                                             />
                                             <Route
-                                                element={<NavigationSync />}
-                                                path="@server/:serverId/channel/:channelId/message/:messageId"
+                                                element={
+                                                    <WebOnly>
+                                                        <Register />
+                                                    </WebOnly>
+                                                }
+                                                path="/register"
                                             />
                                             <Route
-                                                element={<NavigationSync />}
-                                                path="@user/:userId"
+                                                element={<Downloads />}
+                                                path="/downloads"
                                             />
                                             <Route
-                                                element={<NavigationSync />}
-                                                path="@user/:userId/message/:messageId"
+                                                element={<Tos />}
+                                                path="/tos"
                                             />
                                             <Route
-                                                element={<NavigationSync />}
-                                                path="@setting"
+                                                element={
+                                                    <AuthenticatedLayout />
+                                                }
                                             >
                                                 <Route
-                                                    element={<NavigationSync />}
-                                                    path="my-account"
+                                                    element={<Chat />}
+                                                    path="/chat"
+                                                >
+                                                    <Route
+                                                        index
+                                                        element={
+                                                            <NavigationSync />
+                                                        }
+                                                    />
+                                                    <Route
+                                                        element={
+                                                            <NavigationSync />
+                                                        }
+                                                        path="@me"
+                                                    />
+                                                    <Route
+                                                        element={
+                                                            <NavigationSync />
+                                                        }
+                                                        path="@server/:serverId"
+                                                    />
+                                                    <Route
+                                                        element={
+                                                            <NavigationSync />
+                                                        }
+                                                        path="@server/:serverId/channel/:channelId"
+                                                    />
+                                                    <Route
+                                                        element={
+                                                            <NavigationSync />
+                                                        }
+                                                        path="@server/:serverId/self-roles"
+                                                    />
+                                                    <Route
+                                                        element={
+                                                            <NavigationSync />
+                                                        }
+                                                        path="@server/:serverId/channels-and-categories"
+                                                    />
+                                                    <Route
+                                                        element={
+                                                            <NavigationSync />
+                                                        }
+                                                        path="@server/:serverId/channel/:channelId/message/:messageId"
+                                                    />
+                                                    <Route
+                                                        element={
+                                                            <NavigationSync />
+                                                        }
+                                                        path="@user/:userId"
+                                                    />
+                                                    <Route
+                                                        element={
+                                                            <NavigationSync />
+                                                        }
+                                                        path="@user/:userId/message/:messageId"
+                                                    />
+                                                    <Route
+                                                        element={
+                                                            <NavigationSync />
+                                                        }
+                                                        path="@setting"
+                                                    >
+                                                        <Route
+                                                            element={
+                                                                <NavigationSync />
+                                                            }
+                                                            path="my-account"
+                                                        />
+                                                        <Route
+                                                            element={
+                                                                <NavigationSync />
+                                                            }
+                                                            path="appearance"
+                                                        />
+                                                        <Route
+                                                            element={
+                                                                <NavigationSync />
+                                                            }
+                                                            path="accessibility"
+                                                        />
+                                                        <Route
+                                                            element={
+                                                                <NavigationSync />
+                                                            }
+                                                            path="standing"
+                                                        />
+                                                        <Route
+                                                            element={
+                                                                <NavigationSync />
+                                                            }
+                                                            path="developer"
+                                                        />
+                                                        <Route
+                                                            element={
+                                                                <NavigationSync />
+                                                            }
+                                                            path="blocking"
+                                                        />
+                                                        <Route
+                                                            element={
+                                                                <NavigationSync />
+                                                            }
+                                                            path="notifications"
+                                                        />
+                                                        <Route
+                                                            element={
+                                                                <NavigationSync />
+                                                            }
+                                                            path="keybinds"
+                                                        />
+                                                    </Route>
+                                                </Route>
+                                                <Route
+                                                    element={
+                                                        <WebOnly>
+                                                            <Showoff />
+                                                        </WebOnly>
+                                                    }
+                                                    path="/showoff"
                                                 />
                                                 <Route
-                                                    element={<NavigationSync />}
-                                                    path="appearance"
-                                                />
-                                                <Route
-                                                    element={<NavigationSync />}
-                                                    path="accessibility"
-                                                />
-                                                <Route
-                                                    element={<NavigationSync />}
-                                                    path="standing"
-                                                />
-                                                <Route
-                                                    element={<NavigationSync />}
-                                                    path="developer"
-                                                />
-                                                <Route
-                                                    element={<NavigationSync />}
-                                                    path="blocking"
-                                                />
-                                                <Route
-                                                    element={<NavigationSync />}
-                                                    path="notifications"
-                                                />
-                                                <Route
-                                                    element={<NavigationSync />}
-                                                    path="keybinds"
+                                                    element={<EmbedBuilder />}
+                                                    path="/embed-builder"
                                                 />
                                             </Route>
-                                        </Route>
-                                        <Route
-                                            element={
-                                                <WebOnly>
-                                                    <Showoff />
-                                                </WebOnly>
-                                            }
-                                            path="/showoff"
-                                        />
-                                        <Route
-                                            element={<EmbedBuilder />}
-                                            path="/embed-builder"
-                                        />
-                                    </Route>
-                                    <Route element={<AdminRoute />}>
-                                        <Route
-                                            element={
-                                                <WebOnly>
-                                                    <Admin />
-                                                </WebOnly>
-                                            }
-                                            path="/admin/*"
-                                        />
-                                    </Route>
-                                    <Route
-                                        element={<BotAuthorize />}
-                                        path="/authorize"
-                                    />
-                                    <Route
-                                        element={<Developer />}
-                                        path="/developer/*"
-                                    />
-                                    <Route element={<NotFound />} path="*" />
-                                </Routes>
-                            </Suspense>
+                                            <Route element={<AdminRoute />}>
+                                                <Route
+                                                    element={
+                                                        <WebOnly>
+                                                            <Admin />
+                                                        </WebOnly>
+                                                    }
+                                                    path="/admin/*"
+                                                />
+                                            </Route>
+                                            <Route
+                                                element={<BotAuthorize />}
+                                                path="/authorize"
+                                            />
+                                            <Route
+                                                element={<Developer />}
+                                                path="/developer/*"
+                                            />
+                                            <Route
+                                                element={<NotFound />}
+                                                path="*"
+                                            />
+                                        </Routes>
+                                    </Suspense>
+                                </InAppNotificationProvider>
+                            </LimitedAnimationsProvider>
                         </BrowserRouter>
                     </ToastProvider>
                 </ThemeProvider>

@@ -250,6 +250,12 @@ const navSlice = createSlice({
             state.mobileHomeTab =
                 state.mobileHomeTab === 'friends' ? 'requests' : 'friends';
         },
+        setMobileHomeTab: (
+            state,
+            action: PayloadAction<'friends' | 'requests'>,
+        ): void => {
+            state.mobileHomeTab = action.payload;
+        },
         toggleMobileMemberList: (state): void => {
             state.showMobileMemberList = !state.showMobileMemberList;
             state.mobileMemberListSplitViewSide = null;
@@ -297,6 +303,7 @@ export const {
     clearSplitViewPane,
     closeSplitView,
     toggleMobileHomeTab,
+    setMobileHomeTab,
     toggleMobileMemberList,
     toggleMobileMemberListForSplitView,
     toggleFolder,

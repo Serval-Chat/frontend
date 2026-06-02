@@ -10,10 +10,11 @@ import {
     useAppSelector,
     useAppShallowSelector,
 } from '@/store/hooks';
-import { toggleMobileHomeTab } from '@/store/slices/navSlice';
+import { setMobileHomeTab } from '@/store/slices/navSlice';
 import { useMobileSwipeContext } from '@/ui/MobileSwipeContext';
 import { Divider } from '@/ui/components/common/Divider';
 import { IconButton } from '@/ui/components/common/IconButton';
+import { LoadingSpinner } from '@/ui/components/common/LoadingSpinner';
 import { Tooltip } from '@/ui/components/common/Tooltip';
 import { Box } from '@/ui/components/layout/Box';
 import { ServerList } from '@/ui/components/servers/ServerList';
@@ -49,6 +50,14 @@ const SettingsModal = React.lazy(() =>
     })),
 );
 
+const SettingsModalLoading = () => (
+    <Box className="fixed inset-0 z-modal flex items-center justify-center bg-black/60 backdrop-blur-sm">
+        <Box className="flex h-[100dvh] w-screen items-center justify-center bg-background md:h-[92vh] md:max-h-[900px] md:w-[96%] md:max-w-[1200px] md:rounded-xl md:border md:border-border-subtle">
+            <LoadingSpinner size="lg" />
+        </Box>
+    </Box>
+);
+
 export const PrimaryNavBar = () => {
     const { navMode, selectedFriendId, selectedChannelId } =
         useAppShallowSelector((state) => ({
@@ -73,6 +82,9 @@ export const PrimaryNavBar = () => {
     const [showJoinServer, setShowJoinServer] = useState(false);
     const [showDiscovery, setShowDiscovery] = useState(false);
     const [showInbox, setShowInbox] = useState(false);
+    const [settingsSectionOverride, setSettingsSectionOverride] = useState<
+        string | null
+    >(null);
 
     const showSettings = location.pathname.startsWith('/chat/@setting');
     const inSwipePanel = useMobileSwipeContext();
@@ -80,14 +92,14 @@ export const PrimaryNavBar = () => {
     const isChatActive = !!selectedFriendId || !!selectedChannelId;
 
     const handleHomeClick = (): void => {
-        if (navMode === 'friends' && location.pathname === '/chat/@me') {
-            dispatch(toggleMobileHomeTab());
-        } else {
+        dispatch(setMobileHomeTab('friends'));
+        if (navMode !== 'friends' || location.pathname !== '/chat/@me') {
             void navigate('/chat/@me');
         }
     };
 
     const handleSettingsClick = (): void => {
+        setSettingsSectionOverride('account');
         void navigate('/chat/@setting/my-account');
     };
 
@@ -96,11 +108,22 @@ export const PrimaryNavBar = () => {
         void navigate(-1);
     };
 
+    React.useEffect((): void => {
+        if (!showSettings) {
+            setSettingsSectionOverride(null);
+            return;
+        }
+
+        if (location.pathname === '/chat/@setting/my-account') {
+            setSettingsSectionOverride(null);
+        }
+    }, [location.pathname, showSettings]);
+
     return (
         <Box
             as="nav"
             className={cn(
-                'relative z-50 flex h-full flex-col items-center gap-3',
+                'relative z-50 flex h-full flex-col items-center gap-3 after:pointer-events-none after:absolute after:inset-x-0 after:bottom-0 after:hidden after:h-[env(safe-area-inset-bottom)] after:bg-[--color-background] max-md:after:block',
                 showInbox && 'z-[var(--z-index-popover)]',
                 'pt-[calc(0.75rem+env(safe-area-inset-top))] pb-[calc(0.75rem+env(safe-area-inset-bottom))]',
                 'pride-glass-strong bg-[--color-background]',
@@ -192,9 +215,10 @@ export const PrimaryNavBar = () => {
             </Box>
 
             {showSettings && (
-                <React.Suspense fallback={null}>
+                <React.Suspense fallback={<SettingsModalLoading />}>
                     <SettingsModal
                         isOpen={showSettings}
+                        sectionOverride={settingsSectionOverride}
                         onClose={handleCloseSettings}
                     />
                 </React.Suspense>

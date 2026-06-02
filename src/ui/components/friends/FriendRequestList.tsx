@@ -1,11 +1,13 @@
 import React from 'react';
 
-import { CheckCircle } from 'lucide-react';
+import { ArrowLeft, CheckCircle } from 'lucide-react';
 
 import {
     useIncomingRequests,
     useOutgoingRequests,
 } from '@/api/friends/friends.queries';
+import { useAppDispatch } from '@/store/hooks';
+import { setMobileHomeTab } from '@/store/slices/navSlice';
 import { Heading } from '@/ui/components/common/Heading';
 import { MutedText } from '@/ui/components/common/MutedText';
 import { Skeleton } from '@/ui/components/common/Skeleton';
@@ -19,6 +21,7 @@ import { FriendRequestItem } from './FriendRequestItem';
 import { SentFriendRequestItem } from './SentFriendRequestItem';
 
 export const FriendRequestList = () => {
+    const dispatch = useAppDispatch();
     const { data: requests, isLoading } = useIncomingRequests();
     const { data: sentRequests } = useOutgoingRequests();
     const [view, setView] = React.useState<
@@ -77,6 +80,18 @@ export const FriendRequestList = () => {
         <Box className="flex h-full flex-col overflow-hidden">
             <Box className="flex h-12 shrink-0 items-center border-b border-bg-subtle bg-bg-secondary px-4 shadow-sm">
                 <Box className="flex flex-1 items-center gap-4">
+                    <button
+                        aria-label="Back to friends list"
+                        className="text-foreground-muted hover:bg-bg-tertiary -ml-2 rounded-md p-2 transition-colors hover:text-foreground md:hidden"
+                        type="button"
+                        onClick={(): {
+                            payload: 'friends' | 'requests';
+                            type: 'nav/setMobileHomeTab';
+                        } => dispatch(setMobileHomeTab('friends'))}
+                    >
+                        <ArrowLeft className="h-5 w-5" />
+                    </button>
+
                     <Heading className="text-sm font-bold" level={2}>
                         Friends
                     </Heading>
