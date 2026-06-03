@@ -1,7 +1,7 @@
 import { apiClient } from '@/api/client';
 
 export interface AdminBan {
-    _id: string;
+    id: string;
     userId: string;
     reason: string;
     issuedBy: string;
@@ -11,7 +11,7 @@ export interface AdminBan {
 }
 
 export interface AdminMute {
-    _id: string;
+    id: string;
     userId: string;
     reason: string;
     issuedBy: string;
@@ -21,7 +21,7 @@ export interface AdminMute {
 }
 
 export interface AdminBanHistoryItem {
-    _id: string;
+    id: string;
     reason: string;
     timestamp: string;
     expirationTimestamp: string;

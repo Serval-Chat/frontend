@@ -274,10 +274,10 @@ const UserItemInner = React.memo(
 
         const isFriend = useMemo(
             (): boolean =>
-                friends?.some((f): boolean => f._id === userId) ?? false,
+                friends?.some((f): boolean => f.id === userId) ?? false,
             [friends, userId],
         );
-        const isMe = currentUser?._id === userId;
+        const isMe = currentUser?.id === userId;
 
         const activeVoiceChannelId = useAppSelector(
             (state): string | null => state.voice.activeVoiceChannelId,
@@ -334,19 +334,19 @@ const UserItemInner = React.memo(
 
         const myMember = useMemo(
             (): ServerMember | undefined =>
-                members?.find((m): boolean => m.userId === currentUser?._id),
-            [members, currentUser?._id],
+                members?.find((m): boolean => m.userId === currentUser?.id),
+            [members, currentUser?.id],
         );
         const myRoles = useMemo(
             (): Role[] | undefined =>
                 serverRoles?.filter(
                     (r) =>
-                        myMember?.roles.includes(r._id) ||
+                        myMember?.roles.includes(r.id) ||
                         r.name === '@everyone',
                 ),
             [serverRoles, myMember?.roles],
         );
-        const isOwner = serverDetails?.ownerId === currentUser?._id;
+        const isOwner = serverDetails?.ownerId === currentUser?.id;
 
         const myHighestRole = useMemo(
             (): Role | undefined =>
@@ -394,7 +394,7 @@ const UserItemInner = React.memo(
         );
         const targetRoles = useMemo(
             (): Role[] | undefined =>
-                serverRoles?.filter((r) => targetMember?.roles.includes(r._id)),
+                serverRoles?.filter((r) => targetMember?.roles.includes(r.id)),
             [serverRoles, targetMember?.roles],
         );
         const targetHighestRole = useMemo(
@@ -612,7 +612,7 @@ const UserItemInner = React.memo(
                             ? rolesToDisplay.map((r) => {
                                   const hasRole = allRoles?.some(
                                       (ur): boolean =>
-                                          String(ur._id) === String(r._id),
+                                          String(ur.id) === String(r.id),
                                   );
 
                                   // Hierarchy check: can only manage roles strictly below your highest role
@@ -637,12 +637,12 @@ const UserItemInner = React.memo(
 
                                           if (hasRole) {
                                               removeRole({
-                                                  roleId: r._id,
+                                                  roleId: r.id,
                                                   userId,
                                               });
                                           } else {
                                               addRole({
-                                                  roleId: r._id,
+                                                  roleId: r.id,
                                                   userId,
                                               });
                                           }

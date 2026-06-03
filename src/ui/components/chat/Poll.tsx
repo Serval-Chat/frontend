@@ -65,7 +65,7 @@ export const Poll = ({ poll, messageId, serverId, channelId }: PollProps) => {
         const votes = new Set<string>();
         if (!me || !poll?.options) return votes;
         poll.options.forEach((opt): void => {
-            if (opt.votes?.includes(me._id)) {
+            if (opt.votes?.includes(me.id)) {
                 votes.add(opt.id);
             }
         });

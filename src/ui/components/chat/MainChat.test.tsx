@@ -229,7 +229,7 @@ describe('MainChat fallback logic', (): void => {
         });
 
         vi.mocked(useUserById).mockReturnValue({
-            data: { _id: 'validUserId123', username: 'RealFriend' },
+            data: { id: 'validUserId123', username: 'RealFriend' },
             isError: false,
         } as never);
 

@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '@/api/client';
 
 export interface AdminUserShort {
-    _id: string;
+    id: string;
     username: string;
     displayName?: string;
 }

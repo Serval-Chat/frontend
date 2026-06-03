@@ -39,7 +39,7 @@ export const useFriendProfiles = (
         queryFn: async (): Promise<User[]> => {
             const profiles = await friendsApi.getFriendProfiles();
             for (const profile of profiles) {
-                const id = profile._id;
+                const id = profile.id;
                 if (id) {
                     queryClient.setQueryData(['user', id], profile);
                 }
@@ -94,7 +94,7 @@ export const useAcceptFriendRequest = (): UseMutationResult<
                     FRIENDS_QUERY_KEY,
                     (friends): Friend[] =>
                         friends?.some(
-                            (existing): boolean => existing._id === friend._id,
+                            (existing): boolean => existing.id === friend.id,
                         )
                             ? friends
                             : [...(friends ?? []), friend],

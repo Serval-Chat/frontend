@@ -4,7 +4,7 @@
 import type { ChannelPermissionsMapDTO } from './ChannelPermissionsMapDTO';
 
 export type CategoryResponseDTO = {
-    _id?: string;
+    id?: string;
     serverId: string;
     name: string;
     position: number;

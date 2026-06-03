@@ -117,7 +117,7 @@ export const RoleMention = ({ roleId, size = 'sm' }: RoleMentionProps) => {
         enabled: !!selectedServerId,
     });
 
-    const role = roles?.find((r): boolean => r._id === roleId);
+    const role = roles?.find((r): boolean => r.id === roleId);
 
     const roleName = role ? role.name : isLoading ? '...' : 'unknown-role';
 

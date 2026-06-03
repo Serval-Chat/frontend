@@ -62,7 +62,7 @@ const ruleMatchesSender = (
     if (rule.targetType === 'role') {
         return (
             senderMember?.roles.includes(rule.targetId) === true ||
-            senderRoles?.some((role): boolean => role._id === rule.targetId) ===
+            senderRoles?.some((role): boolean => role.id === rule.targetId) ===
                 true
         );
     }
@@ -115,7 +115,7 @@ const hasBypassMarkdownRestrictions = (params: {
         let hasDeny = false;
 
         for (const role of params.senderRoles ?? []) {
-            const roleOverride = overrides[role._id];
+            const roleOverride = overrides[role.id];
             const value = roleOverride?.bypassMarkdownRestrictions;
             if (value === true) return true;
             if (value === false) hasDeny = true;

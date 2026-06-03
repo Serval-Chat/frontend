@@ -12,7 +12,7 @@ vi.mock('@/api/users/users.queries', async (importOriginal) => {
         ...actual,
         useUserById: vi.fn(() => ({
             data: {
-                _id: '690cdf6250f11be9566ea1ea',
+                id: '690cdf6250f11be9566ea1ea',
                 username: 'gorku',
                 displayName: 'gorciu',
             },
@@ -37,7 +37,7 @@ describe('ReplyPreview', (): void => {
                     text="<userid:'690cdf6250f11be9566ea1ea'> ui bug"
                     user={
                         {
-                            _id: '690cdf6250f11be9566ea1eb',
+                            id: '690cdf6250f11be9566ea1eb',
                             username: 'gorku',
                             displayName: 'gorciu',
                         } as never

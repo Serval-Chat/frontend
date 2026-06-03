@@ -3,5 +3,5 @@
 /* tslint:disable */
 
 export type UserLookupResponseDTO = {
-    _id: string;
+    id: string;
 };

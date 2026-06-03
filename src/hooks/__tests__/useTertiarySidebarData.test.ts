@@ -36,10 +36,10 @@ describe('useTertiarySidebarData', (): void => {
     const mockMember = {
         userId: 'user-1',
         roles: ['role-1'],
-        user: { _id: 'user-1', username: 'Alice' },
+        user: { id: 'user-1', username: 'Alice' },
     } as ServerMember;
     const mockRole = {
-        _id: 'role-1',
+        id: 'role-1',
         name: 'Member',
         position: 1,
         permissions: { viewChannels: true },
@@ -59,13 +59,13 @@ describe('useTertiarySidebarData', (): void => {
             } as never),
         );
         vi.mocked(UserQueries.useMe).mockReturnValue({
-            data: { _id: 'me', username: 'Me' } as User,
+            data: { id: 'me', username: 'Me' } as User,
         } as never);
         vi.mocked(UserQueries.useUserById).mockReturnValue({
             data: undefined,
         } as never);
         vi.mocked(ServerQueries.useServerDetails).mockReturnValue({
-            data: { _id: 'pane-server', name: 'Pane Server' } as Server,
+            data: { id: 'pane-server', name: 'Pane Server' } as Server,
         } as never);
         vi.mocked(ServerQueries.useMembers).mockReturnValue({
             data: [mockMember],
@@ -121,17 +121,17 @@ describe('useTertiarySidebarData', (): void => {
         const visibleMember = {
             userId: 'visible-user',
             roles: ['visible-role'],
-            user: { _id: 'visible-user', username: 'Visible' },
+            user: { id: 'visible-user', username: 'Visible' },
         } as ServerMember;
         const hiddenMember = {
             userId: 'hidden-user',
             roles: ['hidden-role'],
-            user: { _id: 'hidden-user', username: 'Hidden' },
+            user: { id: 'hidden-user', username: 'Hidden' },
         } as ServerMember;
 
         vi.mocked(ServerQueries.useServerDetails).mockReturnValue({
             data: {
-                _id: 'pane-server',
+                id: 'pane-server',
                 ownerId: 'owner-user',
                 name: 'Pane Server',
             } as Server,
@@ -143,13 +143,13 @@ describe('useTertiarySidebarData', (): void => {
         vi.mocked(ServerQueries.useRoles).mockReturnValue({
             data: [
                 {
-                    _id: 'visible-role',
+                    id: 'visible-role',
                     name: 'Visible',
                     position: 2,
                     permissions: { viewChannels: true },
                 },
                 {
-                    _id: 'hidden-role',
+                    id: 'hidden-role',
                     name: 'Hidden',
                     position: 1,
                     permissions: { viewChannels: true },
@@ -159,7 +159,7 @@ describe('useTertiarySidebarData', (): void => {
         vi.mocked(ServerQueries.useChannels).mockReturnValue({
             data: [
                 {
-                    _id: 'channel-1',
+                    id: 'channel-1',
                     name: 'Secret',
                     permissions: {
                         'visible-role': { viewChannels: true },

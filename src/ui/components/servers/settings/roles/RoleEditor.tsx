@@ -57,18 +57,18 @@ export const RoleEditor = ({
     >((): { id: string; color: string }[] => {
         if (role.colors && role.colors.length > 0) {
             return role.colors.map((c, i): { id: string; color: string } => ({
-                id: `color-${role._id}-${i}`,
+                id: `color-${role.id}-${i}`,
                 color: c,
             }));
         } else if (role.startColor && role.endColor) {
             return [
-                { id: `color-${role._id}-0`, color: role.startColor },
-                { id: `color-${role._id}-1`, color: role.endColor },
+                { id: `color-${role.id}-0`, color: role.startColor },
+                { id: `color-${role.id}-1`, color: role.endColor },
             ];
         }
         return [
-            { id: `color-${role._id}-0`, color: '#99aab5' },
-            { id: `color-${role._id}-1`, color: '#2c2f33' },
+            { id: `color-${role.id}-0`, color: '#99aab5' },
+            { id: `color-${role.id}-1`, color: '#2c2f33' },
         ];
     });
     const [gradientRepeat, setGradientRepeat] = useState(
@@ -115,7 +115,7 @@ export const RoleEditor = ({
         try {
             await serversApi.uploadRoleIcon(
                 role.serverId,
-                role._id,
+                role.id,
                 croppedFile,
             );
         } catch (error) {
@@ -142,7 +142,7 @@ export const RoleEditor = ({
                   : ['#99aab5', '#2c2f33'];
         setCustomColorItems(
             colors.map((c, i): { id: string; color: string } => ({
-                id: `color-${role._id}-${i}`,
+                id: `color-${role.id}-${i}`,
                 color: c,
             })),
         );
@@ -620,7 +620,7 @@ export const RoleEditor = ({
                                                 }
                                                 role={previewRole}
                                                 user={me}
-                                                userId={me._id}
+                                                userId={me.id}
                                             />
                                         )}
                                     </div>
@@ -645,13 +645,13 @@ export const RoleEditor = ({
                                                         disableGlowAndColors
                                                     }
                                                     message={{
-                                                        _id: 'preview',
+                                                        id: 'preview',
                                                         text: 'Hello! This is how your role colors will look in the chat.',
                                                         createdAt:
                                                             new Date().toISOString(),
                                                         serverId: 'preview',
                                                         channelId: 'preview',
-                                                        senderId: me._id,
+                                                        senderId: me.id,
                                                         attachments: [],
                                                         embeds: [],
                                                         interaction: null,

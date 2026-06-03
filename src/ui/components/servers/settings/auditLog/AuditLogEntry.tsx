@@ -175,13 +175,13 @@ export const AuditLogEntry = ({
     const { data: members } = useMembers(serverId);
 
     const currentMember = profileState?.id
-        ? members?.find((m): boolean => m.user._id === profileState.id)
+        ? members?.find((m): boolean => m.user.id === profileState.id)
         : undefined;
 
     const currentMemberRoles = currentMember?.roles
         ? (currentMember.roles
               .map((roleId): Role | undefined =>
-                  roles?.find((r): boolean => r._id === roleId),
+                  roles?.find((r): boolean => r.id === roleId),
               )
               .filter(Boolean) as Role[])
         : undefined;

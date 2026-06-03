@@ -83,7 +83,7 @@ export const ServerList = () => {
     const orderedItems = React.useMemo((): (string | IServerFolder)[] => {
         if (!me || !servers) return [];
 
-        const serverIds = servers.map((s): string => s._id);
+        const serverIds = servers.map((s): string => s.id);
         const savedOrder = me.serverSettings?.order || [];
 
         const filteredOrder = savedOrder.filter((item): boolean => {
@@ -311,43 +311,43 @@ export const ServerList = () => {
             return [mobileDropBefore, node, mobileDropAfter].filter(Boolean);
         }
 
-        const server = servers.find((s): boolean => s._id === item);
+        const server = servers.find((s): boolean => s.id === item);
         if (!server) return null;
 
-        const unreadStatus = unreadServers[server._id];
+        const unreadStatus = unreadServers[server.id];
 
         const node = disableReorder ? (
             <div
                 className={`relative z-[1] w-full ${
                     mobileReorderItem?.type === 'server' &&
-                    mobileReorderItem.id === server._id
+                    mobileReorderItem.id === server.id
                         ? 'opacity-40'
                         : ''
                 }`}
                 key={key}
             >
                 <ServerItem
-                    isActive={selectedServerId === server._id}
+                    isActive={selectedServerId === server.id}
                     isUnread={unreadStatus?.hasUnread}
                     pingCount={unreadStatus?.pingCount}
                     server={server}
-                    onClick={(): void => handleServerClick(server._id)}
+                    onClick={(): void => handleServerClick(server.id)}
                     onStartReorder={(): void =>
                         setMobileReorderItem({
                             type: 'server',
-                            id: server._id,
+                            id: server.id,
                         })
                     }
                 />
             </div>
         ) : (
             <ServerItemWrapper
-                isActive={selectedServerId === server._id}
+                isActive={selectedServerId === server.id}
                 isUnread={unreadStatus?.hasUnread}
                 key={key}
                 pingCount={unreadStatus?.pingCount}
                 server={server}
-                onClick={(): void => handleServerClick(server._id)}
+                onClick={(): void => handleServerClick(server.id)}
                 onDragEnd={handleDragEnd}
             />
         );
@@ -458,7 +458,7 @@ const ServerItemWrapper = React.memo(
                     damping: 30,
                     mass: 0.8,
                 }}
-                value={props.server._id}
+                value={props.server.id}
                 whileDrag={{
                     scale: 1.05,
                     zIndex: 10,

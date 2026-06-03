@@ -79,7 +79,7 @@ export interface IWsErrorEvent {
  */
 export interface IMessageDm {
     messageId: string;
-    _id: string;
+    id: string;
     senderId: string;
     senderUsername: string;
     senderProfilePicture?: string | null;
@@ -113,7 +113,7 @@ export interface IMessageDm {
  */
 export interface IMessageServer {
     messageId: string;
-    _id: string;
+    id: string;
     serverId: string;
     channelId: string;
     senderId: string;
@@ -157,7 +157,7 @@ export interface IMessagesServerBulkDeleted {
  */
 export interface IMessageServerSent {
     messageId: string;
-    _id: string;
+    id: string;
     serverId: string;
     channelId: string;
     senderId: string;

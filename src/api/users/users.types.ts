@@ -94,7 +94,6 @@ export interface AdminPermissions {
 }
 
 export interface Badge {
-    _id: string;
     id: string;
     name: string;
     description: string;
@@ -130,7 +129,7 @@ export interface CreateWebsiteConnectionResponse {
 }
 
 export interface User {
-    _id: string;
+    id: string;
     login: string;
     username: string;
     nickname?: string | null;

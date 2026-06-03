@@ -92,7 +92,7 @@ export const ServerBansSettings = ({ serverId }: ServerBansSettingsProps) => {
                         </TableHeader>
                         <TableBody>
                             {bans.map((ban) => (
-                                <TableRow key={String(ban._id)}>
+                                <TableRow key={String(ban.id)}>
                                     <TableCell>
                                         <Box className="flex items-center gap-3">
                                             <UserProfilePicture

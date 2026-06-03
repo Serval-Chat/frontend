@@ -48,7 +48,7 @@ export const usePaginatedMessages = (
 
         // Find target message without flattening
         for (const page of pages) {
-            targetMsg = page.find((m): boolean => m._id === targetMessageId);
+            targetMsg = page.find((m): boolean => m.id === targetMessageId);
             if (targetMsg) break;
         }
 

@@ -48,7 +48,7 @@ export const useEmojiInfo = ({
             const servers = queryClient.getQueryData<Server[]>(
                 SERVERS_QUERY_KEYS.list,
             );
-            return servers?.find((s): boolean => s._id === serverId);
+            return servers?.find((s): boolean => s.id === serverId);
         },
         retry: false,
     });

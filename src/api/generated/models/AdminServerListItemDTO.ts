@@ -6,7 +6,7 @@ import type { AdminServerBannerDTO } from './AdminServerBannerDTO';
 import type { AdminServerOwnerDTO } from './AdminServerOwnerDTO';
 
 export type AdminServerListItemDTO = {
-    _id: string;
+    id: string;
     name: string;
     description?: string;
     icon: Record<string, any> | null;

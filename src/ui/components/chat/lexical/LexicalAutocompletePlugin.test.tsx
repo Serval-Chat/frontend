@@ -4,9 +4,7 @@ const createMatchTrigger =
     (
         allEmojis: any[] = [],
         serverEmojis: any[] = [],
-    ): ((
-        text: string,
-    ) => {
+    ): ((text: string) => {
         leadOffset: number;
         matchingString: string;
         replaceableString: string;
@@ -148,7 +146,7 @@ describe('Emoji Autocomplete Logic', (): void => {
     it('should handle custom emoji exact matching', (): void => {
         const customEmojis = [
             {
-                _id: '1',
+                id: '1',
                 name: 'pepega',
                 imageUrl: 'url1',
                 serverId: 's1',
@@ -156,7 +154,7 @@ describe('Emoji Autocomplete Logic', (): void => {
                 createdAt: '2024-01-01',
             },
             {
-                _id: '2',
+                id: '2',
                 name: 'pepehands',
                 imageUrl: 'url2',
                 serverId: 's1',

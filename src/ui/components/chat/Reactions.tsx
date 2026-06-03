@@ -106,7 +106,7 @@ export const Reactions = React.memo(
 
         const handleReactionClick = React.useCallback(
             (reaction: MessageReaction): void => {
-                const hasReacted = reaction.users.includes(me?._id || '');
+                const hasReacted = reaction.users.includes(me?.id || '');
 
                 if (hasReacted) {
                     removeReaction.mutate({
@@ -144,7 +144,7 @@ export const Reactions = React.memo(
                 messageId,
                 serverId,
                 channelId,
-                me?._id,
+                me?.id,
             ],
         );
 
@@ -153,7 +153,7 @@ export const Reactions = React.memo(
         const filteredReactions = reactions
             .map((r) => {
                 const filteredUsers = r.users.filter((uid): boolean => {
-                    if (uid === me?._id) return true;
+                    if (uid === me?.id) return true;
                     const userBlocks = blocks[uid] || 0;
                     return !(userBlocks & BlockFlags.HIDE_THEIR_REACTIONS);
                 });
@@ -168,7 +168,7 @@ export const Reactions = React.memo(
         return (
             <Box className="mt-1 mb-1 flex flex-wrap gap-1">
                 {filteredReactions.map((reaction) => {
-                    const hasReacted = reaction.users.includes(me?._id || '');
+                    const hasReacted = reaction.users.includes(me?.id || '');
                     const reactionKey =
                         reaction.emojiType === 'custom'
                             ? reaction.emojiId

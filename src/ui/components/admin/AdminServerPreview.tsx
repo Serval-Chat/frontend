@@ -52,7 +52,7 @@ export const AdminServerPreview = ({
                     </Heading>
                 </div>
                 <Box className="font-mono text-sm font-medium text-muted-foreground select-text">
-                    {server._id}
+                    {server.id}
                 </Box>
                 <div className="mt-2 flex flex-wrap items-center gap-2">
                     {server.deletedAt && (

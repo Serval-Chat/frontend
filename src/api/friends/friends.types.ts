@@ -1,5 +1,5 @@
 export interface Friend {
-    _id: string;
+    id: string;
     username: string;
     displayName?: string | null;
     createdAt: string;
@@ -12,7 +12,7 @@ export interface Friend {
 }
 
 export interface FriendRequest {
-    _id: string;
+    id: string;
     from?: string;
     fromId?: string;
     to?: string;

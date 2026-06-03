@@ -3,7 +3,7 @@
 /* tslint:disable */
 
 export type ServerInviteResponseDTO = {
-    _id: string;
+    id: string;
     code: string;
     serverId: string;
     createdByUserId: string;

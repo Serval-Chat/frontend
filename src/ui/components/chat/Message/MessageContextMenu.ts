@@ -83,7 +83,7 @@ export function buildContextMenuItems({
             label: 'Copy Message Link',
             icon: Copy,
             onClick: (): void => {
-                const link = `/chat/@server/${message.serverId}/channel/${message.channelId}/message/${message._id}`;
+                const link = `/chat/@server/${message.serverId}/channel/${message.channelId}/message/${message.id}`;
                 void navigator.clipboard.writeText(
                     `${window.location.origin}${link}`,
                 );
@@ -106,13 +106,13 @@ export function buildContextMenuItems({
         label: 'Copy Message ID',
         icon: Copy,
         onClick: (): void => {
-            void navigator.clipboard.writeText(message._id);
+            void navigator.clipboard.writeText(message.id);
         },
     });
 
     if (!isMessageSender) {
         const isFriend = friends?.some(
-            (f): boolean => f._id === message.senderId,
+            (f): boolean => f.id === message.senderId,
         );
         items.push({ type: 'divider' });
 
@@ -211,7 +211,7 @@ export function buildContextMenuItems({
                 rolesToDisplay.length > 0
                     ? rolesToDisplay.map((r) => {
                           const hasRole = userRoles?.some(
-                              (ur): boolean => String(ur._id) === String(r._id),
+                              (ur): boolean => String(ur.id) === String(r.id),
                           );
 
                           const canManageThisRole =
@@ -237,9 +237,9 @@ export function buildContextMenuItems({
                               onClick: (): void => {
                                   if (!canManageThisRole) return;
                                   if (hasRole) {
-                                      onRemoveRole(r._id);
+                                      onRemoveRole(r.id);
                                   } else {
-                                      onAddRole(r._id);
+                                      onAddRole(r.id);
                                   }
                               },
                               rightIcon: hasRole ? Check : undefined,

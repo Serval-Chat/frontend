@@ -180,7 +180,7 @@ export const AdminAwaitingReview = ({
                         </TableRow>
                     ) : data?.items && data.items.length > 0 ? (
                         data.items.map((server) => (
-                            <TableRow key={server._id}>
+                            <TableRow key={server.id}>
                                 <TableCell className="min-w-0">
                                     <div className="flex items-center gap-3 overflow-hidden">
                                         <ServerIcon
@@ -192,7 +192,7 @@ export const AdminAwaitingReview = ({
                                                 {server.name}
                                             </span>
                                             <span className="font-mono text-[10px] text-muted-foreground opacity-60">
-                                                {server._id}
+                                                {server.id}
                                             </span>
                                         </div>
                                     </div>
@@ -301,7 +301,7 @@ export const AdminAwaitingReview = ({
                                             title="View Details"
                                             variant="ghost"
                                             onClick={(): void =>
-                                                onViewServer(server._id)
+                                                onViewServer(server.id)
                                             }
                                         >
                                             <Eye size={16} />
@@ -314,7 +314,7 @@ export const AdminAwaitingReview = ({
                                             variant="ghost"
                                             onClick={(): void =>
                                                 setVerificationOverride({
-                                                    serverId: server._id,
+                                                    serverId: server.id,
                                                     override: 'verified',
                                                 })
                                             }
@@ -329,7 +329,7 @@ export const AdminAwaitingReview = ({
                                             variant="ghost"
                                             onClick={(): void =>
                                                 setVerificationOverride({
-                                                    serverId: server._id,
+                                                    serverId: server.id,
                                                     override: 'unverified',
                                                 })
                                             }
@@ -344,7 +344,7 @@ export const AdminAwaitingReview = ({
                                                 variant="ghost"
                                                 onClick={(): void =>
                                                     setVerificationOverride({
-                                                        serverId: server._id,
+                                                        serverId: server.id,
                                                         override: null,
                                                     })
                                                 }

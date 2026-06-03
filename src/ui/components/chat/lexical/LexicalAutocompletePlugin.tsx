@@ -41,13 +41,12 @@ class AutocompleteOption extends MenuOption {
     constructor(suggestion: Suggestion) {
         let key = suggestion.type;
         if (suggestion.type === 'everyone') key += 'everyone';
-        else if (suggestion.type === 'user') key += suggestion.user._id;
-        else if (suggestion.type === 'role') key += suggestion.role._id;
+        else if (suggestion.type === 'user') key += suggestion.user.id;
+        else if (suggestion.type === 'role') key += suggestion.role.id;
         else if (suggestion.type === 'emoji')
             key += suggestion.emoji.short_name;
-        else if (suggestion.type === 'server-emoji')
-            key += suggestion.emoji._id;
-        else if (suggestion.type === 'channel') key += suggestion.channel._id;
+        else if (suggestion.type === 'server-emoji') key += suggestion.emoji.id;
+        else if (suggestion.type === 'channel') key += suggestion.channel.id;
 
         super(key);
         this.suggestion = suggestion;
@@ -146,7 +145,7 @@ export const LexicalAutocompletePlugin = ({
                         : matchesDisplayName
                           ? 1
                           : 2;
-                    memberPriority.set(member.user._id, priority);
+                    memberPriority.set(member.user.id, priority);
                     userSuggestions.push({
                         type: 'user',
                         user: member.user,
@@ -159,14 +158,14 @@ export const LexicalAutocompletePlugin = ({
                 friends.forEach((friend): void => {
                     if (!friend) return;
 
-                    const userBlocks = blocks[friend._id] || 0;
+                    const userBlocks = blocks[friend.id] || 0;
                     if (userBlocks & BlockFlags.HIDE_FROM_MENTIONS) return;
 
                     const username = friend.username.toLowerCase();
                     const displayName = friend.displayName?.toLowerCase() || '';
                     const alreadyAdded = userSuggestions.some(
                         (s): boolean =>
-                            s.type === 'user' && s.user._id === friend._id,
+                            s.type === 'user' && s.user.id === friend.id,
                     );
                     if (
                         !alreadyAdded &&
@@ -174,7 +173,7 @@ export const LexicalAutocompletePlugin = ({
                             displayName.includes(query))
                     ) {
                         const priority = displayName.includes(query) ? 0 : 1;
-                        memberPriority.set(friend._id, priority);
+                        memberPriority.set(friend.id, priority);
                         userSuggestions.push({ type: 'user', user: friend });
                     }
                 });
@@ -183,11 +182,11 @@ export const LexicalAutocompletePlugin = ({
             userSuggestions.sort((a, b): number => {
                 const pa =
                     a.type === 'user'
-                        ? (memberPriority.get(a.user._id) ?? 99)
+                        ? (memberPriority.get(a.user.id) ?? 99)
                         : 99;
                 const pb =
                     b.type === 'user'
-                        ? (memberPriority.get(b.user._id) ?? 99)
+                        ? (memberPriority.get(b.user.id) ?? 99)
                         : 99;
                 return pa - pb;
             });
@@ -351,7 +350,7 @@ export const LexicalAutocompletePlugin = ({
                                         if ($isRangeSelection(selection2)) {
                                             selection2.insertNodes([
                                                 $createChipNode('emoji', {
-                                                    id: customEmoji._id,
+                                                    id: customEmoji.id,
                                                     label: customEmoji.name,
                                                     imageUrl:
                                                         customEmoji.imageUrl,
@@ -418,7 +417,7 @@ export const LexicalAutocompletePlugin = ({
                 let chipNode;
                 if (suggestion.type === 'user') {
                     chipNode = $createChipNode('user', {
-                        id: suggestion.user._id,
+                        id: suggestion.user.id,
                         label:
                             suggestion.nickname ||
                             suggestion.user.displayName ||
@@ -427,19 +426,19 @@ export const LexicalAutocompletePlugin = ({
                     });
                 } else if (suggestion.type === 'role') {
                     chipNode = $createChipNode('role', {
-                        id: suggestion.role._id,
+                        id: suggestion.role.id,
                         label: suggestion.role.name,
                         color: suggestion.role.color || undefined,
                     });
                 } else if (suggestion.type === 'server-emoji') {
                     chipNode = $createChipNode('emoji', {
-                        id: suggestion.emoji._id,
+                        id: suggestion.emoji.id,
                         label: suggestion.emoji.name,
                         imageUrl: suggestion.emoji.imageUrl,
                     });
                 } else if (suggestion.type === 'channel') {
                     chipNode = $createChipNode('channel', {
-                        id: suggestion.channel._id,
+                        id: suggestion.channel.id,
                         label: suggestion.channel.name,
                         serverId: suggestion.channel.serverId,
                     });

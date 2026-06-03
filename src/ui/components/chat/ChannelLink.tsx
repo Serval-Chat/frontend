@@ -35,7 +35,7 @@ export const ChannelLink = ({
 
     const channel = useMemo(() => {
         if (!channels) return null;
-        return channels.find((ch): boolean => ch._id === channelId) || null;
+        return channels.find((ch): boolean => ch.id === channelId) || null;
     }, [channels, channelId]);
 
     const isLoading = serverLoading || channelsLoading;
@@ -54,11 +54,11 @@ export const ChannelLink = ({
         if (server && channel) {
             if (messageId) {
                 void navigate(
-                    `/chat/@server/${server._id}/channel/${channel._id}/message/${messageId}`,
+                    `/chat/@server/${server.id}/channel/${channel.id}/message/${messageId}`,
                 );
             } else {
                 void navigate(
-                    `/chat/@server/${server._id}/channel/${channel._id}`,
+                    `/chat/@server/${server.id}/channel/${channel.id}`,
                 );
             }
         }

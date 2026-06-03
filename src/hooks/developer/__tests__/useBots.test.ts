@@ -72,7 +72,7 @@ const mockPublicInfo: PublicBotInfo = {
 };
 
 const mockBot: Bot = {
-    _id: 'botid1',
+    id: 'botid1',
     clientId: 'abc123',
     ownerId: 'owner1',
     userId: 'userid1',

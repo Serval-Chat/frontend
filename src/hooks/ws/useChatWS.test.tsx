@@ -31,8 +31,8 @@ vi.mock(
 
 vi.mock(
     '@/api/users/users.queries',
-    (): { useMe: () => { data: { _id: string } } } => ({
-        useMe: (): { data: { _id: string } } => ({ data: { _id: 'me' } }),
+    (): { useMe: () => { data: { id: string } } } => ({
+        useMe: (): { data: { id: string } } => ({ data: { id: 'me' } }),
     }),
 );
 

@@ -68,7 +68,7 @@ export const serversApi = {
         }>('/api/v1/servers', { name });
 
         if (icon) {
-            await serversApi.uploadServerIcon(response.data.server._id, icon);
+            await serversApi.uploadServerIcon(response.data.server.id, icon);
         }
 
         return response.data;

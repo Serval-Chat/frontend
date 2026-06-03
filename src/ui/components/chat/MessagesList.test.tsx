@@ -24,8 +24,8 @@ vi.mock('@/ui/components/chat/MessageItem', () => ({
     }) => (
         <div
             data-highlighted={isHighlighted}
-            data-testid={`message-${message._id}`}
-            id={`message-${message._id}`}
+            data-testid={`message-${message.id}`}
+            id={`message-${message.id}`}
         >
             {message.text}
             <button type="button" onClick={onResize}>
@@ -74,7 +74,7 @@ describe('MessagesList Scroll Behavior', (): void => {
 
     const mockMessages: ProcessedChatMessage[] = [
         {
-            _id: 'msg-1',
+            id: 'msg-1',
             text: 'Hello',
             channelId: 'ch-1',
             serverId: 'srv-1',
@@ -84,14 +84,14 @@ describe('MessagesList Scroll Behavior', (): void => {
             isEdited: false,
             readBy: [],
             user: {
-                _id: 'usr-1',
+                id: 'usr-1',
                 username: 'User 1',
                 email: 'user1@test.com',
                 status: 'online',
             },
         } as any as ProcessedChatMessage,
         {
-            _id: 'msg-2',
+            id: 'msg-2',
             text: 'World',
             channelId: 'ch-1',
             serverId: 'srv-1',
@@ -101,7 +101,7 @@ describe('MessagesList Scroll Behavior', (): void => {
             isEdited: false,
             readBy: [],
             user: {
-                _id: 'usr-2',
+                id: 'usr-2',
                 username: 'User 2',
                 email: 'user2@test.com',
                 status: 'online',
@@ -178,7 +178,7 @@ describe('MessagesList Scroll Behavior', (): void => {
 
         const newMessages = [
             ...mockMessages,
-            { ...mockMessages[0], _id: 'msg-3' },
+            { ...mockMessages[0], id: 'msg-3' },
         ];
         rerender(
             <MessagesList
@@ -214,7 +214,7 @@ describe('MessagesList Scroll Behavior', (): void => {
         );
         const newMessages = [
             ...mockMessages,
-            { ...mockMessages[0], _id: 'msg-3', text: 'New Message' },
+            { ...mockMessages[0], id: 'msg-3', text: 'New Message' },
         ];
 
         rerender(

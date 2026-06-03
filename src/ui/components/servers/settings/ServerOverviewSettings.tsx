@@ -207,7 +207,7 @@ export const ServerOverviewSettings = ({
     const [confirmDeleteName, setConfirmDeleteName] = useState('');
 
     const isOwner =
-        !!server && !!me && server.ownerId.toString() === me._id.toString();
+        !!server && !!me && server.ownerId.toString() === me.id.toString();
 
     const handleDeleteServer = (): void => {
         if (!server || confirmDeleteName !== server.name) return;
@@ -724,7 +724,7 @@ export const ServerOverviewSettings = ({
 
                     <div className="custom-scrollbar max-h-[300px] space-y-2 overflow-y-auto">
                         {members
-                            ?.filter((m): boolean => m.userId !== me?._id)
+                            ?.filter((m): boolean => m.userId !== me?.id)
                             .map((member) => (
                                 <div
                                     className="group flex items-center justify-between rounded-md p-2 transition-colors hover:bg-bg-subtle"

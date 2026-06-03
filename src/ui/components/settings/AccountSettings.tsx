@@ -89,7 +89,7 @@ export const AccountSettings = () => {
         () =>
             customCategories.flatMap((cat) =>
                 cat.emojis.map((e) => ({
-                    _id: e.id,
+                    id: e.id,
                     name: e.name,
                     imageUrl: e.url,
                     serverId: cat.id,

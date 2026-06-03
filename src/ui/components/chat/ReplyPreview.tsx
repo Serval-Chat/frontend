@@ -181,7 +181,7 @@ export const ReplyPreview = React.memo(
         disableGlow,
     }: ReplyPreviewProps) => {
         const isUnknownUser = initialUser.username === 'Unknown';
-        const { data: fetchedUser } = useUserById(initialUser._id, {
+        const { data: fetchedUser } = useUserById(initialUser.id, {
             enabled: isUnknownUser,
         });
         const user = isUnknownUser && fetchedUser ? fetchedUser : initialUser;

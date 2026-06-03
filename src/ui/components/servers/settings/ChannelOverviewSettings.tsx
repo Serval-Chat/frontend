@@ -66,23 +66,23 @@ export const ChannelOverviewSettings = ({
 
     const { mutate: updateChannel, isPending: isUpdating } = useUpdateChannel(
         channel.serverId,
-        channel._id,
+        channel.id,
     );
     const { mutate: deleteChannel, isPending: isDeleting } = useDeleteChannel(
         channel.serverId,
     );
 
-    const { hasPermission } = usePermissions(channel.serverId, channel._id);
+    const { hasPermission } = usePermissions(channel.serverId, channel.id);
     const canExport = hasPermission('exportChannelMessages');
 
     const { data: exportState, isLoading: isLoadingExportState } =
-        useExportChannelState(channel.serverId, channel._id);
+        useExportChannelState(channel.serverId, channel.id);
     const { mutate: requestExport, isPending: isRequestingExport } =
-        useRequestExportChannel(channel.serverId, channel._id);
+        useRequestExportChannel(channel.serverId, channel.id);
 
-    const [prevChannelId, setPrevChannelId] = useState(channel._id);
-    if (channel._id !== prevChannelId) {
-        setPrevChannelId(channel._id);
+    const [prevChannelId, setPrevChannelId] = useState(channel.id);
+    if (channel.id !== prevChannelId) {
+        setPrevChannelId(channel.id);
         setName(channel.name);
         setOriginalName(channel.name);
         setDescription(channel.description || '');
@@ -166,7 +166,7 @@ export const ChannelOverviewSettings = ({
     };
 
     const handleDelete = (): void => {
-        deleteChannel(channel._id, {
+        deleteChannel(channel.id, {
             onSuccess: (): void => {
                 onDeleted?.();
             },

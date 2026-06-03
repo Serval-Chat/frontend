@@ -23,12 +23,12 @@ vi.mock('@/ui/components/chat/MessageItem', () => ({
         message,
         isHighlighted,
     }: {
-        message: { _id: string; text: string };
+        message: { id: string; text: string };
         isHighlighted?: boolean;
     }) => (
         <div
             data-highlighted={!!isHighlighted}
-            data-testid={`msg-${message._id}`}
+            data-testid={`msg-${message.id}`}
         >
             {message.text}
         </div>
@@ -88,8 +88,8 @@ vi.mock('@tanstack/react-virtual', () => ({
 describe('MessagesList Highlight Logic', (): void => {
     const mockDispatch = vi.fn();
     const mockMessages = [
-        { _id: '1', text: 'Msg 1' },
-        { _id: '2', text: 'Msg 2' },
+        { id: '1', text: 'Msg 1' },
+        { id: '2', text: 'Msg 2' },
     ] as any as ProcessedChatMessage[];
 
     beforeEach((): void => {
@@ -170,7 +170,7 @@ describe('MessagesList Highlight Logic', (): void => {
         );
         const newMessages = [
             ...mockMessages,
-            { _id: '3', text: 'Msg 3' } as any as ProcessedChatMessage,
+            { id: '3', text: 'Msg 3' } as any as ProcessedChatMessage,
         ];
         act((): void => {
             rerender(

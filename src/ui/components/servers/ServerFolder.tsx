@@ -103,7 +103,7 @@ export const ServerFolder = ({
         (): Server[] =>
             folder.serverIds
                 .map((id): Server | undefined =>
-                    servers.find((s): boolean => s._id === id),
+                    servers.find((s): boolean => s.id === id),
                 )
                 .filter((s): s is Server => !!s),
         [servers, folder.serverIds],
@@ -111,7 +111,7 @@ export const ServerFolder = ({
 
     const handleReorderServers = (newServers: Server[]): void => {
         if (!me) return;
-        const newServerIds = newServers.map((s): string => s._id);
+        const newServerIds = newServers.map((s): string => s.id);
         const currentOrder = me.serverSettings?.order || [];
         const newOrder = currentOrder.map((item): string | IServerFolder => {
             if (typeof item !== 'string' && item.id === folder.id) {
@@ -327,7 +327,7 @@ export const ServerFolder = ({
                                             .map((server) => (
                                                 <ServerIcon
                                                     className="pointer-events-none !bg-transparent"
-                                                    key={server._id}
+                                                    key={server.id}
                                                     server={server}
                                                     size="xxs"
                                                 />
@@ -382,21 +382,21 @@ export const ServerFolder = ({
                                     )}
                                 {folderServers.map((server, index) => {
                                     const unreadStatus =
-                                        unreadServers[server._id];
+                                        unreadServers[server.id];
                                     return (
-                                        <React.Fragment key={server._id}>
+                                        <React.Fragment key={server.id}>
                                             <div
                                                 className={cn(
                                                     'w-full',
                                                     pickedServerId ===
-                                                        server._id &&
+                                                        server.id &&
                                                         'opacity-40',
                                                 )}
                                             >
                                                 <ServerItem
                                                     isActive={
                                                         activeServerId ===
-                                                        server._id
+                                                        server.id
                                                     }
                                                     isUnread={
                                                         unreadStatus?.hasUnread
@@ -406,15 +406,13 @@ export const ServerFolder = ({
                                                     }
                                                     server={server}
                                                     onClick={(): void =>
-                                                        onServerClick(
-                                                            server._id,
-                                                        )
+                                                        onServerClick(server.id)
                                                     }
                                                     onStartReorder={
                                                         onStartReorderServer
                                                             ? (): void =>
                                                                   onStartReorderServer(
-                                                                      server._id,
+                                                                      server.id,
                                                                       folder.id,
                                                                   )
                                                             : undefined
@@ -446,18 +444,18 @@ export const ServerFolder = ({
                             >
                                 {folderServers.map((server) => {
                                     const unreadStatus =
-                                        unreadServers[server._id];
+                                        unreadServers[server.id];
                                     return (
                                         <FolderServerItem
                                             isActive={
-                                                activeServerId === server._id
+                                                activeServerId === server.id
                                             }
                                             isUnread={unreadStatus?.hasUnread}
-                                            key={server._id}
+                                            key={server.id}
                                             pingCount={unreadStatus?.pingCount}
                                             server={server}
                                             onClick={(): void =>
-                                                onServerClick(server._id)
+                                                onServerClick(server.id)
                                             }
                                         />
                                     );

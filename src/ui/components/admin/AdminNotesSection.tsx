@@ -157,7 +157,7 @@ export const AdminNotesSection = ({
                                         ? 'border-border-subtle bg-bg-secondary/30 opacity-80 grayscale-[0.5]'
                                         : 'border-border-subtle bg-bg-subtle hover:border-primary/30',
                                 )}
-                                key={note._id}
+                                key={note.id}
                             >
                                 <div className="mb-3 flex items-start justify-between gap-4">
                                     <div className="flex items-center gap-3">
@@ -187,7 +187,7 @@ export const AdminNotesSection = ({
                                                             className="bg-info/10 text-info hover:bg-info/20 flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-bold tracking-tight uppercase transition-colors"
                                                             onClick={(): void =>
                                                                 toggleHistory(
-                                                                    note._id,
+                                                                    note.id,
                                                                 )
                                                             }
                                                         >
@@ -199,7 +199,7 @@ export const AdminNotesSection = ({
                                                                 className={cn(
                                                                     'transition-transform',
                                                                     expandedHistoryIds.has(
-                                                                        note._id,
+                                                                        note.id,
                                                                     ) &&
                                                                         'rotate-180',
                                                                 )}
@@ -222,7 +222,7 @@ export const AdminNotesSection = ({
                                                 size="sm"
                                                 variant="ghost"
                                                 onClick={(): void => {
-                                                    setActiveNoteId(note._id);
+                                                    setActiveNoteId(note.id);
                                                     setNoteContent(
                                                         note.content,
                                                     );
@@ -236,7 +236,7 @@ export const AdminNotesSection = ({
                                                 size="sm"
                                                 variant="ghost"
                                                 onClick={(): void => {
-                                                    setActiveNoteId(note._id);
+                                                    setActiveNoteId(note.id);
                                                     setIsDeleteModalOpen(true);
                                                 }}
                                             >
@@ -252,7 +252,7 @@ export const AdminNotesSection = ({
                                     </Text>
                                 </div>
 
-                                {expandedHistoryIds.has(note._id) &&
+                                {expandedHistoryIds.has(note.id) &&
                                     note.history.length > 0 && (
                                         <div className="border-info/20 bg-info/5 animate-in fade-in slide-in-from-top-2 mt-4 space-y-3 rounded-xl border p-3 duration-200">
                                             <div className="text-info flex items-center gap-2 text-[10px] font-bold tracking-widest uppercase">

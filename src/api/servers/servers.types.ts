@@ -21,7 +21,7 @@ export interface MarkdownBlockadeRule {
 }
 
 export interface Server {
-    _id: string;
+    id: string;
     name: string;
     ownerId: string;
     icon?: string;
@@ -84,7 +84,7 @@ export interface ServerDiscoveryStatus {
 export type ChannelType = 'text' | 'voice' | 'link';
 
 export interface Channel {
-    _id: string;
+    id: string;
     name: string;
     serverId: string;
     type: ChannelType;
@@ -104,7 +104,7 @@ export interface Channel {
 }
 
 export interface Category {
-    _id: string;
+    id: string;
     name: string;
     serverId: string;
     position: number;
@@ -140,7 +140,7 @@ export interface RolePermissions {
 }
 
 export interface Role {
-    _id: string;
+    id: string;
     serverId: string;
     name: string;
     color: string | null;
@@ -157,7 +157,7 @@ export interface Role {
 }
 
 export interface ServerMember {
-    _id: string;
+    id: string;
     serverId: string;
     userId: string;
     nickname?: string;
@@ -179,7 +179,7 @@ export interface ServerOnboardingState {
 }
 
 export interface ServerBan {
-    _id: string;
+    id: string;
     serverId: string;
     userId: string;
     bannedBy: string;

@@ -3,7 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 export type AdminChannelShortDTO = {
-    _id: string;
+    id: string;
     name: string;
     description?: string;
     type: AdminChannelShortDTO.type;

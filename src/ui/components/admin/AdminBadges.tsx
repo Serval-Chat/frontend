@@ -115,7 +115,7 @@ const AssignBadgeModal = ({
                             users.map((user) => (
                                 <Box
                                     className="flex items-center justify-between rounded-xl border border-border-subtle bg-bg-secondary/20 p-4 transition-all hover:bg-bg-secondary/40"
-                                    key={user._id}
+                                    key={user.id}
                                 >
                                     <Box className="flex items-center gap-4 overflow-hidden">
                                         <UserProfilePicture
@@ -164,7 +164,7 @@ const AssignBadgeModal = ({
                                                 : 'primary'
                                         }
                                         onClick={(): void =>
-                                            handleAssign(user._id)
+                                            handleAssign(user.id)
                                         }
                                     >
                                         {user.badges &&
@@ -249,7 +249,6 @@ const BadgeEditor = ({
 
     const previewBadge: Badge = useMemo(
         () => ({
-            _id: badge?._id ?? 'preview',
             id: id || 'id',
             name: name || 'Name',
             description: description || '',
@@ -257,7 +256,7 @@ const BadgeEditor = ({
             color: color || '#3b82f6',
             createdAt: badge?.createdAt ?? new Date().toISOString(),
         }),
-        [badge?._id, badge?.createdAt, color, description, icon, id, name],
+        [badge?.id, badge?.createdAt, color, description, icon, id, name],
     );
 
     const handleSave = (): void => {

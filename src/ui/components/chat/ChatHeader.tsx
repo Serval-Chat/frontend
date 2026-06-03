@@ -69,9 +69,9 @@ export const ChatHeader = ({
 
     // Sync lastViewedAt from localStorage
     useEffect((): (() => void) | undefined => {
-        if (!me?._id || !selectedChannelId) return;
+        if (!me?.id || !selectedChannelId) return;
 
-        const key = `serchat_pins_last_viewed_${me._id}_${selectedChannelId}`;
+        const key = `serchat_pins_last_viewed_${me.id}_${selectedChannelId}`;
         const update = (): void => {
             const saved = localStorage.getItem(key);
             setLastViewedAt(saved ? parseInt(saved, 10) : 0);
@@ -80,7 +80,7 @@ export const ChatHeader = ({
         update();
         window.addEventListener('storage', update);
         return (): void => window.removeEventListener('storage', update);
-    }, [me?._id, selectedChannelId]);
+    }, [me?.id, selectedChannelId]);
 
     const hasUnreadPins = React.useMemo((): boolean => {
         if (!pins || pins.length === 0 || showPins) return false;

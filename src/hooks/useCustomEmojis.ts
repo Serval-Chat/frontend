@@ -20,12 +20,12 @@ export const useCustomEmojis = (options?: {
         return servers
             .map((server): CustomEmojiCategory | null => {
                 const emojis = allEmojis.filter(
-                    (e): boolean => e.serverId?.toString() === server._id,
+                    (e): boolean => e.serverId?.toString() === server.id,
                 );
                 if (emojis.length === 0) return null;
 
                 return {
-                    id: server._id,
+                    id: server.id,
                     name: server.name,
                     icon: server.icon,
                     emojis: emojis.map(
@@ -37,7 +37,7 @@ export const useCustomEmojis = (options?: {
                             url: string;
                             serverId: string;
                         } => ({
-                            id: e._id,
+                            id: e.id,
                             name: e.name,
                             url: e.imageUrl,
                             serverId: e.serverId,

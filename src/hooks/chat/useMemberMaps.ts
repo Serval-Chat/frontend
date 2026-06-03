@@ -44,7 +44,7 @@ export const useMemberMaps = (
     // Lookup for Role objects by roleId
     const roleMap = React.useMemo((): Map<string, Role> => {
         const map = new Map<string, Role>();
-        roles?.forEach((r): Map<string, Role> => map.set(r._id, r));
+        roles?.forEach((r): Map<string, Role> => map.set(r.id, r));
         return map;
     }, [roles]);
 
@@ -57,8 +57,8 @@ export const useMemberMaps = (
 
         members.forEach((m): void => {
             const memberRoleIds = m.roles ? [...m.roles] : [];
-            if (everyoneRole && !memberRoleIds.includes(everyoneRole._id)) {
-                memberRoleIds.push(everyoneRole._id);
+            if (everyoneRole && !memberRoleIds.includes(everyoneRole.id)) {
+                memberRoleIds.push(everyoneRole.id);
             }
             const memberRoles = memberRoleIds
                 .map((roleId): Role | undefined => roleMap.get(roleId))
@@ -77,8 +77,8 @@ export const useMemberMaps = (
 
         members.forEach((m): void => {
             const memberRoleIds = m.roles ? [...m.roles] : [];
-            if (everyoneRole && !memberRoleIds.includes(everyoneRole._id)) {
-                memberRoleIds.push(everyoneRole._id);
+            if (everyoneRole && !memberRoleIds.includes(everyoneRole.id)) {
+                memberRoleIds.push(everyoneRole.id);
             }
             const highestRole = getHighestColorRoleForMember(
                 memberRoleIds,
@@ -98,8 +98,8 @@ export const useMemberMaps = (
 
         members.forEach((m): void => {
             const memberRoleIds = m.roles ? [...m.roles] : [];
-            if (everyoneRole && !memberRoleIds.includes(everyoneRole._id)) {
-                memberRoleIds.push(everyoneRole._id);
+            if (everyoneRole && !memberRoleIds.includes(everyoneRole.id)) {
+                memberRoleIds.push(everyoneRole.id);
             }
             const iconRole = getHighestRoleWithIconForMember(
                 memberRoleIds,

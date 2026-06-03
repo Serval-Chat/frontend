@@ -205,8 +205,8 @@ export const FriendRequestList = () => {
                                 <FriendRequestItem
                                     fromId={request.fromId || ''}
                                     fromUsername={request.from || ''}
-                                    key={request._id}
-                                    requestId={request._id}
+                                    key={request.id}
+                                    requestId={request.id}
                                 />
                             ))}
                         </Box>
@@ -228,8 +228,8 @@ export const FriendRequestList = () => {
                         <Box className="space-y-2 p-4">
                             {sentRequests.map((request) => (
                                 <SentFriendRequestItem
-                                    key={request._id}
-                                    requestId={request._id}
+                                    key={request.id}
+                                    requestId={request.id}
                                     toId={request.toId || ''}
                                     toUsername={request.to || ''}
                                 />

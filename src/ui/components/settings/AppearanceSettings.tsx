@@ -587,5 +587,5 @@ const AppearanceSettingsForm = ({ user }: AppearanceSettingsFormProps) => {
 export const AppearanceSettings = () => {
     const { data: user } = useMe();
     if (!user) return null;
-    return <AppearanceSettingsForm key={user._id} user={user} />;
+    return <AppearanceSettingsForm key={user.id} user={user} />;
 };

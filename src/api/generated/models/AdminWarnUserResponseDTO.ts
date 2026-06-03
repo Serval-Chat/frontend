@@ -3,7 +3,7 @@
 /* tslint:disable */
 
 export type AdminWarnUserResponseDTO = {
-    _id: string;
+    id: string;
     userId: string;
     issuedBy: string;
     message: string;

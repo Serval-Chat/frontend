@@ -12,7 +12,7 @@ import { getBlockedMarkdownFeatures } from './markdownBlockade';
 
 const makeServer = (rules: MarkdownBlockadeRule[]): Server =>
     ({
-        _id: 'server-1',
+        id: 'server-1',
         name: 'Server',
         ownerId: 'owner-user',
         markdownBlockadeRules: rules,
@@ -20,13 +20,13 @@ const makeServer = (rules: MarkdownBlockadeRule[]): Server =>
 
 const makeMember = (roles: string[]): ServerMember =>
     ({
-        _id: 'member-1',
+        id: 'member-1',
         serverId: 'server-1',
         userId: 'owner-user',
         roles,
         joinedAt: '2026-05-26T00:00:00.000Z',
         user: {
-            _id: 'owner-user',
+            id: 'owner-user',
             login: 'owner@example.com',
             username: 'Owner',
             createdAt: new Date(),
@@ -36,7 +36,7 @@ const makeMember = (roles: string[]): ServerMember =>
 describe('markdown blockade resolution', (): void => {
     it('lets a specific empty role rule override broader everyone disallowed features', (): void => {
         const ownerRole: Role = {
-            _id: 'owner-role',
+            id: 'owner-role',
             serverId: 'server-1',
             name: 'Owner',
             color: null,
@@ -50,7 +50,7 @@ describe('markdown blockade resolution', (): void => {
             },
             {
                 targetType: 'role',
-                targetId: ownerRole._id,
+                targetId: ownerRole.id,
                 features: [],
             },
         ]);
@@ -59,7 +59,7 @@ describe('markdown blockade resolution', (): void => {
             getBlockedMarkdownFeatures({
                 server,
                 senderId: 'owner-user',
-                senderMember: makeMember([ownerRole._id]),
+                senderMember: makeMember([ownerRole.id]),
                 senderRoles: [ownerRole],
             }),
         ).toEqual([]);
@@ -86,7 +86,7 @@ describe('markdown blockade resolution', (): void => {
 
     it('does not block markdown when a sender role can bypass markdown restrictions', (): void => {
         const trustedRole: Role = {
-            _id: 'trusted-role',
+            id: 'trusted-role',
             serverId: 'server-1',
             name: 'Trusted',
             color: null,
@@ -107,7 +107,7 @@ describe('markdown blockade resolution', (): void => {
             getBlockedMarkdownFeatures({
                 server,
                 senderId: 'owner-user',
-                senderMember: makeMember([trustedRole._id]),
+                senderMember: makeMember([trustedRole.id]),
                 senderRoles: [trustedRole],
             }),
         ).toEqual([]);
@@ -115,7 +115,7 @@ describe('markdown blockade resolution', (): void => {
 
     it('does not block markdown when a channel override grants bypass markdown restrictions', (): void => {
         const memberRole: Role = {
-            _id: 'member-role',
+            id: 'member-role',
             serverId: 'server-1',
             name: 'Member',
             color: null,
@@ -133,19 +133,19 @@ describe('markdown blockade resolution', (): void => {
             getBlockedMarkdownFeatures({
                 server,
                 channel: {
-                    _id: 'channel-1',
+                    id: 'channel-1',
                     serverId: 'server-1',
                     name: 'general',
                     type: 'text',
                     position: 0,
                     permissions: {
-                        [memberRole._id]: {
+                        [memberRole.id]: {
                             bypassMarkdownRestrictions: true,
                         },
                     },
                 },
                 senderId: 'owner-user',
-                senderMember: makeMember([memberRole._id]),
+                senderMember: makeMember([memberRole.id]),
                 senderRoles: [memberRole],
             }),
         ).toEqual([]);

@@ -24,7 +24,7 @@ describe('userctl command', (): void => {
 
     const mockUsers: Record<string, Partial<User>> = {
         '1': {
-            _id: '1',
+            id: '1',
             username: 'alice',
             displayName: 'Alice',
             pronouns: 'she/her',
@@ -32,7 +32,7 @@ describe('userctl command', (): void => {
             badges: [],
         },
         '2': {
-            _id: '2',
+            id: '2',
             username: 'bob',
             displayName: 'Bob',
             pronouns: '',
@@ -40,7 +40,7 @@ describe('userctl command', (): void => {
             badges: [],
         },
         '3': {
-            _id: '3',
+            id: '3',
             username: 'charlie',
             displayName: '',
             pronouns: 'he/him',
@@ -199,7 +199,6 @@ describe('userctl command', (): void => {
     it('queries friends with badges and colors them', async (): Promise<void> => {
         mockUsers['1'].badges = [
             {
-                _id: 'b1',
                 id: 'early_supporter',
                 name: 'Early Supporter',
                 color: '#ff5555',

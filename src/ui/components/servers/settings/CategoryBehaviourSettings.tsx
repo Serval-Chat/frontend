@@ -14,7 +14,7 @@ export const CategoryBehaviourSettings = ({
 }: CategoryBehaviourSettingsProps) => {
     const { mutate: updateCategory, isPending } = useUpdateCategory(
         category.serverId,
-        category._id,
+        category.id,
     );
 
     return (

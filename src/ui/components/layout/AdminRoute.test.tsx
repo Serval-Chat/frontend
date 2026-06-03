@@ -62,7 +62,7 @@ describe('AdminRoute', (): void => {
     it('redirects to / when the user has no admin permissions at all', (): void => {
         vi.mocked(UsersQueries.useMe).mockReturnValue({
             data: {
-                _id: 'user-1',
+                id: 'user-1',
                 username: 'alice',
                 permissions: {
                     adminAccess: false,
@@ -89,7 +89,7 @@ describe('AdminRoute', (): void => {
     it('redirects to / when the user has no permissions object', (): void => {
         vi.mocked(UsersQueries.useMe).mockReturnValue({
             data: {
-                _id: 'user-2',
+                id: 'user-2',
                 username: 'bob',
                 permissions: undefined,
             },
@@ -105,7 +105,7 @@ describe('AdminRoute', (): void => {
     it('renders the outlet when the user has adminAccess=true', (): void => {
         vi.mocked(UsersQueries.useMe).mockReturnValue({
             data: {
-                _id: 'admin-1',
+                id: 'admin-1',
                 username: 'superadmin',
                 permissions: {
                     adminAccess: true,
@@ -132,7 +132,7 @@ describe('AdminRoute', (): void => {
     it('renders the outlet when the user has any single permission (e.g. viewUsers)', (): void => {
         vi.mocked(UsersQueries.useMe).mockReturnValue({
             data: {
-                _id: 'mod-1',
+                id: 'mod-1',
                 username: 'moderator',
                 permissions: {
                     adminAccess: false,
@@ -158,7 +158,7 @@ describe('AdminRoute', (): void => {
     it('renders the outlet for a moderator with multiple (but non-super) permissions', (): void => {
         vi.mocked(UsersQueries.useMe).mockReturnValue({
             data: {
-                _id: 'mod-2',
+                id: 'mod-2',
                 username: 'partial-mod',
                 permissions: {
                     adminAccess: false,

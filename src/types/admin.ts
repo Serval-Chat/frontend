@@ -14,10 +14,10 @@ export interface AdminStats {
 }
 
 export interface AuditLog {
-    _id: string;
-    actorId: string | { _id: string; username: string };
+    id: string;
+    actorId: string | { id: string; username: string };
     actionType: string;
-    targetUserId?: string | { _id: string; username: string };
+    targetUserId?: string | { id: string; username: string };
     additionalData?: Record<string, unknown>;
     timestamp: string | Date;
 }
@@ -36,7 +36,7 @@ export interface AdminPermissions {
 }
 
 export interface AdminUser {
-    _id: string;
+    id: string;
     username: string;
     login: string;
     displayName: string | null;
@@ -52,7 +52,7 @@ export interface AdminUser {
 }
 
 export interface AdminUserServer {
-    _id: string;
+    id: string;
     name: string;
     description?: string;
     icon: string | null;
@@ -72,14 +72,14 @@ export interface AdminExtendedUser extends AdminUser {
     servers: AdminUserServer[];
 }
 export interface AdminServerOwner {
-    _id: string;
+    id: string;
     username: string;
     displayName: string | null;
     profilePicture: string | null;
 }
 
 export interface AdminServerListItem {
-    _id: string;
+    id: string;
     name: string;
     icon: string | null;
     banner?: {
@@ -115,7 +115,7 @@ export interface AdminServerVerificationStats {
 }
 
 export interface AdminChannelShort {
-    _id: string;
+    id: string;
     name: string;
     type: 'text' | 'voice' | 'link';
     position: number;
@@ -129,7 +129,7 @@ export interface AdminServerDetails extends AdminServerListItem {
 }
 
 export interface AdminNoteAdminInfo {
-    _id: string;
+    id: string;
     username: string;
     displayName?: string;
     profilePicture?: string;
@@ -142,7 +142,7 @@ export interface AdminNoteHistory {
 }
 
 export interface AdminNote {
-    _id: string;
+    id: string;
     targetId: string;
     targetType: 'User' | 'Server';
     adminId: AdminNoteAdminInfo;

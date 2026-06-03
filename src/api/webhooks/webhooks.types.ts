@@ -1,5 +1,5 @@
 export interface Webhook {
-    _id: string;
+    id: string;
     name: string;
     token: string;
     avatarUrl?: string;
@@ -12,7 +12,7 @@ export interface CreateWebhookRequest {
 }
 
 export interface WebhookResponse {
-    _id: string;
+    id: string;
     name: string;
     token: string;
     avatarUrl?: string;

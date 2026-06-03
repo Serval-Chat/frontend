@@ -6,11 +6,11 @@ import type { User } from '@/api/users/users.types';
 import { useMemberMaps } from '@/hooks/chat/useMemberMaps';
 
 const makeUser = (id: string, username: string): User =>
-    ({ _id: id, username }) as User;
+    ({ id: id, username }) as User;
 
 const makeMember = (userId: string, roles: string[]): ServerMember =>
     ({
-        _id: `member-${userId}`,
+        id: `member-${userId}`,
         serverId: 'server-1',
         userId,
         roles,
@@ -22,7 +22,7 @@ describe('useMemberMaps', (): void => {
     it('uses @everyone color role when member has no explicit roles', (): void => {
         const roles: Role[] = [
             {
-                _id: 'everyone',
+                id: 'everyone',
                 serverId: 'server-1',
                 name: '@everyone',
                 color: '#ff0000',
@@ -32,20 +32,20 @@ describe('useMemberMaps', (): void => {
         const members: ServerMember[] = [makeMember('u1', [])];
 
         const { result } = renderHook(() => useMemberMaps(members, roles));
-        expect(result.current.highestRoleMap.get('u1')?._id).toBe('everyone');
+        expect(result.current.highestRoleMap.get('u1')?.id).toBe('everyone');
     });
 
     it('prefers higher explicit role over @everyone for username color', (): void => {
         const roles: Role[] = [
             {
-                _id: 'everyone',
+                id: 'everyone',
                 serverId: 'server-1',
                 name: '@everyone',
                 color: '#99aab5',
                 position: 0,
             } as Role,
             {
-                _id: 'vip',
+                id: 'vip',
                 serverId: 'server-1',
                 name: 'VIP',
                 color: '#ff0066',
@@ -55,13 +55,13 @@ describe('useMemberMaps', (): void => {
         const members: ServerMember[] = [makeMember('u1', ['vip'])];
 
         const { result } = renderHook(() => useMemberMaps(members, roles));
-        expect(result.current.highestRoleMap.get('u1')?._id).toBe('vip');
+        expect(result.current.highestRoleMap.get('u1')?.id).toBe('vip');
     });
 
     it('adds @everyone for icon role resolution too', (): void => {
         const roles: Role[] = [
             {
-                _id: 'everyone',
+                id: 'everyone',
                 serverId: 'server-1',
                 name: '@everyone',
                 color: '#99aab5',
@@ -72,13 +72,13 @@ describe('useMemberMaps', (): void => {
         const members: ServerMember[] = [makeMember('u1', [])];
 
         const { result } = renderHook(() => useMemberMaps(members, roles));
-        expect(result.current.iconRoleMap.get('u1')?._id).toBe('everyone');
+        expect(result.current.iconRoleMap.get('u1')?.id).toBe('everyone');
     });
 
     it('resolves @everyone when it only has start/end gradient colors', (): void => {
         const roles: Role[] = [
             {
-                _id: 'everyone',
+                id: 'everyone',
                 serverId: 'server-1',
                 name: '@everyone',
                 color: null,
@@ -90,6 +90,6 @@ describe('useMemberMaps', (): void => {
         const members: ServerMember[] = [makeMember('u1', [])];
 
         const { result } = renderHook(() => useMemberMaps(members, roles));
-        expect(result.current.highestRoleMap.get('u1')?._id).toBe('everyone');
+        expect(result.current.highestRoleMap.get('u1')?.id).toBe('everyone');
     });
 });

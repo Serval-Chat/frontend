@@ -74,7 +74,7 @@ const BansList = (): ReactNode => {
                 {bans.map((ban) => (
                     <div
                         className="bg-background-subtle flex flex-col gap-3 rounded-xl border border-border-subtle p-4"
-                        key={ban._id}
+                        key={ban.id}
                     >
                         <div className="flex items-start justify-between">
                             <div className="flex flex-col">
@@ -160,7 +160,7 @@ const MutesList = (): ReactNode => {
                 {mutes.map((mute) => (
                     <div
                         className="bg-background-subtle flex flex-col gap-3 rounded-xl border border-border-subtle p-4"
-                        key={mute._id}
+                        key={mute.id}
                     >
                         <div className="flex items-start justify-between">
                             <div className="flex flex-col">

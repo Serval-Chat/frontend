@@ -80,7 +80,7 @@ export const AddRoleDropdown = ({
                                 availableRoles.map((role) => (
                                     <button
                                         className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-foreground hover:bg-bg-subtle"
-                                        key={role._id}
+                                        key={role.id}
                                         onClick={(): void => {
                                             onAdd(role);
                                             setIsOpen(false);

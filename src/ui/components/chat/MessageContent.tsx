@@ -77,14 +77,14 @@ export const MessageContent = React.memo(
             enabled: !!serverId,
         });
         const channel = useMemo(
-            () => channels.find((item): boolean => item._id === channelId),
+            () => channels.find((item): boolean => item.id === channelId),
             [channelId, channels],
         );
         const category = useMemo(
             () =>
                 channel?.categoryId
                     ? categories.find(
-                          (item): boolean => item._id === channel.categoryId,
+                          (item): boolean => item.id === channel.categoryId,
                       )
                     : undefined,
             [categories, channel],

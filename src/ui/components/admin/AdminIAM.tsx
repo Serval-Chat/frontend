@@ -92,7 +92,7 @@ const PermissionEditor = ({
 
     const confirmSave = (): void => {
         updatePermissions(
-            { userId: user._id, permissions },
+            { userId: user.id, permissions },
             {
                 onSuccess: (): void => {
                     setShowConfirm(false);
@@ -361,7 +361,7 @@ export const AdminIAM = ({
                         </TableRow>
                     ) : users && users.length > 0 ? (
                         users.map((user) => (
-                            <TableRow key={user._id}>
+                            <TableRow key={user.id}>
                                 <TableCell className="min-w-0">
                                     <div className="flex min-w-0 items-center gap-3 overflow-hidden">
                                         <UserProfilePicture
@@ -436,7 +436,7 @@ export const AdminIAM = ({
                                             title="View Full Details"
                                             variant="ghost"
                                             onClick={(): void =>
-                                                onViewUser(user._id)
+                                                onViewUser(user.id)
                                             }
                                         >
                                             <Eye size={16} />

@@ -92,7 +92,7 @@ const ServerBehaviourSettingsForm = ({
 
     const dropdownOptions = useMemo(() => {
         const roleOptions = selectableRoles.map((role) => ({
-            id: role._id,
+            id: role.id,
             label: role.name,
             icon: <RoleDot role={role} />,
         }));
@@ -228,7 +228,7 @@ export const ServerBehaviourSettings = ({
 
     return (
         <ServerBehaviourSettingsForm
-            key={server._id}
+            key={server.id}
             roles={roles}
             server={server}
             serverId={serverId}

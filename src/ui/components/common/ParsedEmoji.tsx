@@ -44,7 +44,7 @@ export const ParsedEmoji = ({
         queryClient.getQueryData(emojiKeys.detail(emojiId)) ||
         queryClient
             .getQueryData<Emoji[]>(['servers', 'emojis', 'all'])
-            ?.find((e): boolean => e._id === emojiId)
+            ?.find((e): boolean => e.id === emojiId)
     );
 
     useEffect((): (() => void) | undefined => {
@@ -106,7 +106,7 @@ export const ParsedEmoji = ({
                     onClick={(e: React.MouseEvent): void =>
                         showEmojiInfo(
                             {
-                                id: emoji._id,
+                                id: emoji.id,
                                 name: emoji.name,
                                 url: emoji.imageUrl,
                                 serverId: emoji.serverId,

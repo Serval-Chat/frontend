@@ -4,7 +4,7 @@
 import type { ServerBannerDTO } from './ServerBannerDTO';
 
 export type ServerResponseDTO = {
-    _id?: string;
+    id?: string;
     name: string;
     ownerId: string;
     icon?: string;

@@ -3,7 +3,7 @@
 /* tslint:disable */
 
 export type EmojiResponseDTO = {
-    _id: string;
+    id: string;
     name: string;
     imageUrl: string;
     serverId: string;

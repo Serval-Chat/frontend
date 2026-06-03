@@ -53,7 +53,7 @@ const LogEntry = ({ log }: LogEntryProps): ReactNode => {
     ): string => {
         if (!user) return 'Unknown';
         if (typeof user === 'string') return user;
-        return user.username || user._id || 'Unknown';
+        return user.username || user.id || 'Unknown';
     };
 
     const date = new Date(log.timestamp);
@@ -96,7 +96,7 @@ const LogEntry = ({ log }: LogEntryProps): ReactNode => {
                             size="sm"
                             title={
                                 typeof log.actorId === 'object'
-                                    ? log.actorId._id
+                                    ? log.actorId.id
                                     : log.actorId
                             }
                             weight="medium"
@@ -148,7 +148,7 @@ const LogEntry = ({ log }: LogEntryProps): ReactNode => {
                                     size="sm"
                                     title={
                                         typeof log.targetUserId === 'object'
-                                            ? log.targetUserId._id
+                                            ? log.targetUserId.id
                                             : log.targetUserId
                                     }
                                 >
@@ -271,7 +271,7 @@ export const AdminAuditLogs = (): ReactNode => {
                         >
                             <option value="">All Administrators</option>
                             {admins?.map((admin) => (
-                                <option key={admin._id} value={admin._id}>
+                                <option key={admin.id} value={admin.id}>
                                     {admin.username}
                                 </option>
                             ))}
@@ -364,7 +364,7 @@ export const AdminAuditLogs = (): ReactNode => {
                 </TableHeader>
                 <TableBody>
                     {logs.length > 0 ? (
-                        logs.map((log) => <LogEntry key={log._id} log={log} />)
+                        logs.map((log) => <LogEntry key={log.id} log={log} />)
                     ) : (
                         <TableRow>
                             <TableCell align="center" colSpan={5}>

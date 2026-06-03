@@ -64,7 +64,7 @@ export const useUserMessages = (
         initialPageParam: undefined as string | undefined,
         getNextPageParam: (lastPage): string | undefined => {
             if (lastPage.length < LIMIT) return undefined;
-            return lastPage[0]._id;
+            return lastPage[0].id;
         },
         enabled: !!userId,
     });
@@ -103,7 +103,7 @@ export const useChannelMessages = (
         initialPageParam: undefined as string | undefined,
         getNextPageParam: (lastPage): string | undefined => {
             if (lastPage.length < LIMIT) return undefined;
-            return lastPage[0]._id;
+            return lastPage[0].id;
         },
         enabled: !!serverId && !!channelId,
         staleTime: Infinity,
@@ -171,7 +171,7 @@ export const useDeleteMessage = (): {
                             pages: oldData.pages.map((page): ChatMessage[] =>
                                 page.map(
                                     (msg): ChatMessage =>
-                                        msg._id === variables.messageId
+                                        msg.id === variables.messageId
                                             ? {
                                                   ...msg,
                                                   deletedAt:
@@ -201,7 +201,7 @@ export const useDeleteMessage = (): {
                             pages: oldData.pages.map((page): ChatMessage[] =>
                                 page.map(
                                     (msg): ChatMessage =>
-                                        msg._id === variables.messageId
+                                        msg.id === variables.messageId
                                             ? {
                                                   ...msg,
                                                   deletedAt:
@@ -298,7 +298,7 @@ export const useEditChannelMessage = (): {
                         pages: oldData.pages.map((page): ChatMessage[] =>
                             page.map(
                                 (msg): ChatMessage =>
-                                    msg._id === variables.messageId
+                                    msg.id === variables.messageId
                                         ? {
                                               ...msg,
                                               text: variables.content,

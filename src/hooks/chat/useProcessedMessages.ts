@@ -39,7 +39,7 @@ export const useProcessedMessages = (
             );
         const messageById = new Map<string, ChatMessage>();
         allMessages.forEach((message): void => {
-            messageById.set(message._id.toString(), message);
+            messageById.set(message.id.toString(), message);
         });
 
         const result = allMessages.map((msg): ProcessedChatMessage => {
@@ -54,7 +54,7 @@ export const useProcessedMessages = (
             if (!user) {
                 if (selectedFriendId) {
                     user =
-                        msg.senderId === currentUser?._id
+                        msg.senderId === currentUser?.id
                             ? (currentUser as User)
                             : (friendUser as User);
                 } else if (selectedServerId) {
@@ -66,7 +66,7 @@ export const useProcessedMessages = (
 
             if (!user && msg.isEphemeral && msg.senderUsername) {
                 user = {
-                    _id: msg.senderId,
+                    id: msg.senderId,
                     username: msg.senderUsername,
                     displayName: msg.senderUsername,
                     profilePicture: msg.senderProfilePicture ?? undefined,
@@ -91,8 +91,7 @@ export const useProcessedMessages = (
             const next = {
                 ...msg,
                 user:
-                    user ||
-                    ({ _id: msg.senderId, username: 'Unknown' } as User),
+                    user || ({ id: msg.senderId, username: 'Unknown' } as User),
                 role: role,
                 iconRole: iconRole,
                 replyTo: resolvedReplyTo,
@@ -117,7 +116,7 @@ export const useProcessedMessages = (
                     prev.user === next.user &&
                     prev.role === next.role &&
                     prev.iconRole === next.iconRole &&
-                    prev.replyTo?._id === next.replyTo?._id &&
+                    prev.replyTo?.id === next.replyTo?.id &&
                     prev.replyTo?.text === next.replyTo?.text &&
                     prev.replyTo?.isEdited === next.replyTo?.isEdited &&
                     prev.replyTo?.deletedAt === next.replyTo?.deletedAt;

@@ -87,7 +87,7 @@ export const usePermissions = (
     const channelById = useMemo(() => {
         const map = new Map<string, NonNullable<typeof channels>[number]>();
         channels?.forEach((channel): void => {
-            map.set(channel._id, channel);
+            map.set(channel.id, channel);
         });
         return map;
     }, [channels]);
@@ -95,20 +95,20 @@ export const usePermissions = (
     const categoryById = useMemo(() => {
         const map = new Map<string, NonNullable<typeof categories>[number]>();
         categories?.forEach((category): void => {
-            map.set(category._id, category);
+            map.set(category.id, category);
         });
         return map;
     }, [categories]);
 
     const member = useMemo(() => {
         if (!members || !currentUser || !serverId) return null;
-        return memberByUserId.get(currentUser._id) ?? null;
+        return memberByUserId.get(currentUser.id) ?? null;
     }, [members, currentUser, serverId, memberByUserId]);
 
     const isOwner = !!(
         server?.ownerId &&
-        currentUser?._id &&
-        server.ownerId === currentUser._id
+        currentUser?.id &&
+        server.ownerId === currentUser.id
     );
 
     const shouldTrackTime = !!member?.communicationDisabledUntil && !isOwner;
@@ -122,7 +122,7 @@ export const usePermissions = (
     const userRoles = useMemo(() => {
         if (!member || !roles) return [];
         return roles
-            .filter((role): boolean => member.roles.includes(role._id))
+            .filter((role): boolean => member.roles.includes(role.id))
             .sort((a, b): number => b.position - a.position);
     }, [member, roles]);
 
@@ -164,8 +164,8 @@ export const usePermissions = (
         // Owner has all permissions
         if (
             server?.ownerId &&
-            currentUser?._id &&
-            server.ownerId === currentUser._id
+            currentUser?.id &&
+            server.ownerId === currentUser.id
         ) {
             Object.keys(perms).forEach((key): void => {
                 perms[key as keyof RolePermissions] = true;
@@ -179,7 +179,7 @@ export const usePermissions = (
                     '[usePermissions] No member record found for current user - all permissions default to false.',
                     {
                         serverId,
-                        currentUserId: currentUser?._id,
+                        currentUserId: currentUser?.id,
                         memberUserIds: members?.map((m): string => m.userId),
                     },
                 );
@@ -209,14 +209,14 @@ export const usePermissions = (
                 let hasDeny = false;
 
                 for (const role of userRoles) {
-                    const roleOver = overrides[role._id];
+                    const roleOver = overrides[role.id];
                     if (roleOver && roleOver[permKey] !== undefined) {
                         if (roleOver[permKey]) return true;
                         hasDeny = true;
                     }
                 }
 
-                const everyoneId = everyoneRole?._id;
+                const everyoneId = everyoneRole?.id;
                 const everyoneOver =
                     (everyoneId ? overrides[everyoneId] : undefined) ??
                     overrides['everyone'];
@@ -290,7 +290,7 @@ export const usePermissions = (
                                 name: string;
                                 position: number;
                             } => ({
-                                id: r._id,
+                                id: r.id,
                                 name: r.name,
                                 position: r.position,
                             }),

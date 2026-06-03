@@ -174,7 +174,7 @@ export const useServers = (): UseQueryResult<Server[], Error> => {
             const servers = await serversApi.getServers();
             for (const server of servers) {
                 queryClient.setQueryData(
-                    SERVERS_QUERY_KEYS.details(server._id),
+                    SERVERS_QUERY_KEYS.details(server.id),
                     server,
                 );
             }

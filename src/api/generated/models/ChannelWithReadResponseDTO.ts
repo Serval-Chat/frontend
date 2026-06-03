@@ -5,7 +5,7 @@
 import type { ChannelPermissionsMapDTO } from './ChannelPermissionsMapDTO';
 
 export type ChannelWithReadResponseDTO = {
-    _id?: string;
+    id?: string;
     serverId: string;
     name: string;
     type: ChannelWithReadResponseDTO.type;

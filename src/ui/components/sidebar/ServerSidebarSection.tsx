@@ -58,7 +58,7 @@ export const ServerSidebarSection = ({
             .map((m) => {
                 const userBlocks = blocks[m.userId] || 0;
                 const presence = presenceMap[m.userId];
-                const isMeMember = me && m.userId === me._id;
+                const isMeMember = me && m.userId === me.id;
                 const forceOffline = !!(
                     userBlocks & BlockFlags.HIDE_THEIR_PRESENCE
                 );
@@ -130,7 +130,7 @@ export const ServerSidebarSection = ({
 
         const roleLookup = new Map<string, Role>();
         if (roles) {
-            roles.forEach((r): Map<string, Role> => roleLookup.set(r._id, r));
+            roles.forEach((r): Map<string, Role> => roleLookup.set(r.id, r));
         }
 
         const offlineGroup = getGroup('offline', 'Offline', -9999);
@@ -162,7 +162,7 @@ export const ServerSidebarSection = ({
 
             if (highestSeparatedRole) {
                 const group = getGroup(
-                    highestSeparatedRole._id,
+                    highestSeparatedRole.id,
                     highestSeparatedRole.name,
                     highestSeparatedRole.position,
                 );
@@ -249,7 +249,7 @@ export const ServerSidebarSection = ({
             if (m?.roles) {
                 const memberRoleSet = new Set(m.roles.map(String));
                 const filteredRoles = roles.filter((r): boolean =>
-                    memberRoleSet.has(String(r._id)),
+                    memberRoleSet.has(String(r.id)),
                 );
 
                 const cached = roleListCache.current.get(m.userId);
@@ -257,7 +257,7 @@ export const ServerSidebarSection = ({
                     cached &&
                     cached.length === filteredRoles.length &&
                     cached.every(
-                        (r, i): boolean => r._id === filteredRoles[i]._id,
+                        (r, i): boolean => r.id === filteredRoles[i].id,
                     )
                 ) {
                     map.set(m.userId, cached);
@@ -316,7 +316,7 @@ export const ServerSidebarSection = ({
                                 joinedAt={item.member.joinedAt}
                                 nickname={item.member.nickname}
                                 role={memberRoleMap.get(item.member.userId)}
-                                serverId={String(serverDetails?._id || '')}
+                                serverId={String(serverDetails?.id || '')}
                                 serverRoles={roles}
                                 user={item.member.user}
                                 userId={String(item.member.userId)}
@@ -387,7 +387,7 @@ export const ServerSidebarSection = ({
                                 joinedAt={item.member.joinedAt}
                                 nickname={item.member.nickname}
                                 role={memberRoleMap.get(item.member.userId)}
-                                serverId={String(serverDetails?._id || '')}
+                                serverId={String(serverDetails?.id || '')}
                                 serverRoles={roles}
                                 user={item.member.user}
                                 userId={String(item.member.userId)}

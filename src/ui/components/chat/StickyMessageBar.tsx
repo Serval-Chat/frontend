@@ -57,7 +57,7 @@ export const StickyMessageBar = ({
             : members?.find((m): boolean => m.userId === raw.senderId);
         const roles =
             serverRoles?.filter((r): boolean | undefined =>
-                member?.roles.includes(r._id),
+                member?.roles.includes(r.id),
             ) || [];
         const highestRole = [...roles].sort(
             (a, b): number => (b.position || 0) - (a.position || 0),
@@ -71,7 +71,7 @@ export const StickyMessageBar = ({
             serverId,
             channelId,
             user: webhookUser ||
-                member?.user || { _id: raw.senderId, username: 'Unknown' },
+                member?.user || { id: raw.senderId, username: 'Unknown' },
             role: highestRole,
             iconRole: iconRole,
         } as ProcessedChatMessage;
@@ -80,13 +80,13 @@ export const StickyMessageBar = ({
     React.useLayoutEffect((): void => {
         if (!latestSticky) return;
 
-        if (lastStickyId.current !== latestSticky._id) {
+        if (lastStickyId.current !== latestSticky.id) {
             if (contentRef.current && contentRef.current.scrollHeight > 80) {
                 setViewState('compact');
             } else {
                 setViewState('expanded');
             }
-            lastStickyId.current = latestSticky._id;
+            lastStickyId.current = latestSticky.id;
         }
     }, [latestSticky]);
 
@@ -157,7 +157,7 @@ export const StickyMessageBar = ({
                             onClick={(): {
                                 payload: string | null;
                                 type: 'nav/setTargetMessageId';
-                            } => dispatch(setTargetMessageId(latestSticky._id))}
+                            } => dispatch(setTargetMessageId(latestSticky.id))}
                         >
                             Jump
                         </Button>

@@ -3,7 +3,7 @@
 /* tslint:disable */
 
 export type OutgoingFriendRequestResponseDTO = {
-    _id: string;
+    id: string;
     to?: string;
     toId?: string;
     createdAt: string;

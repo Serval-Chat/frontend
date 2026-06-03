@@ -122,7 +122,7 @@ export const Message = React.memo(
             message.serverId || '',
         );
 
-        const isMessageSender = me?._id === message.senderId;
+        const isMessageSender = me?.id === message.senderId;
         const { canEdit, canDelete, canPin } = useMessagePermissions(
             message,
             isMessageSender,
@@ -133,20 +133,20 @@ export const Message = React.memo(
         const handleEmojiSelect = React.useCallback(
             (emoji: string): void => {
                 addReaction({
-                    messageId: message._id,
+                    messageId: message.id,
                     serverId: message.serverId,
                     channelId: message.channelId,
                     data: { emoji, emojiType: 'unicode' },
                 });
                 setShowPicker(false);
             },
-            [addReaction, message._id, message.serverId, message.channelId],
+            [addReaction, message.id, message.serverId, message.channelId],
         );
 
         const handleCustomEmojiSelect = React.useCallback(
             (emoji: { id: string; name: string }): void => {
                 addReaction({
-                    messageId: message._id,
+                    messageId: message.id,
                     serverId: message.serverId,
                     channelId: message.channelId,
                     data: {
@@ -157,14 +157,14 @@ export const Message = React.memo(
                 });
                 setShowPicker(false);
             },
-            [addReaction, message._id, message.serverId, message.channelId],
+            [addReaction, message.id, message.serverId, message.channelId],
         );
 
         useClickAway(pickerRef, (): void => setShowPicker(false));
 
         useEvent('editLastMessage', (event: CustomEvent): void => {
             const { messageId } = event.detail;
-            if (messageId === message._id && canEdit) {
+            if (messageId === message.id && canEdit) {
                 setIsEditing(true);
             }
         });
@@ -173,13 +173,13 @@ export const Message = React.memo(
             deleteMessage({
                 serverId: message.serverId,
                 channelId: message.channelId,
-                messageId: message._id,
+                messageId: message.id,
                 userId: message.receiverId ?? message.senderId,
             });
         }, [
             message.serverId,
             message.channelId,
-            message._id,
+            message.id,
             message.receiverId,
             message.senderId,
             deleteMessage,
@@ -206,20 +206,20 @@ export const Message = React.memo(
                 togglePin({
                     serverId: message.serverId,
                     channelId: message.channelId,
-                    messageId: message._id,
+                    messageId: message.id,
                 });
             }
-        }, [message.serverId, message.channelId, message._id, togglePin]);
+        }, [message.serverId, message.channelId, message.id, togglePin]);
 
         const handleToggleSticky = React.useCallback((): void => {
             if (message.serverId && message.channelId) {
                 toggleSticky({
                     serverId: message.serverId,
                     channelId: message.channelId,
-                    messageId: message._id,
+                    messageId: message.id,
                 });
             }
-        }, [message.serverId, message.channelId, message._id, toggleSticky]);
+        }, [message.serverId, message.channelId, message.id, toggleSticky]);
 
         const handleShowPicker = React.useCallback((): void => {
             setShowPicker(true);
@@ -280,7 +280,7 @@ export const Message = React.memo(
                     disableGlow: isGlowDisabled,
                     disableGlowAndColors,
                     extraData: {
-                        messageId: message._id,
+                        messageId: message.id,
                         messageRole: message.role,
                         propRole: role,
                         currentUserSettings: me?.settings,
@@ -295,7 +295,7 @@ export const Message = React.memo(
             isColorsDisabled,
             isGlowDisabled,
             disableGlowAndColors,
-            message._id,
+            message.id,
             message.role,
             role,
             me?.settings,
@@ -320,7 +320,7 @@ export const Message = React.memo(
 
         const myHighestRolePosition = React.useMemo((): number => {
             if (!me || !roleMap || !fullMemberMap) return -1;
-            const myMember = fullMemberMap.get(me._id);
+            const myMember = fullMemberMap.get(me.id);
             if (!myMember) return -1;
 
             const myRoles = myMember.roles
@@ -397,7 +397,7 @@ export const Message = React.memo(
                         disableGlowAndColors={disableGlowAndColors}
                         interaction={message.replyTo.interaction}
                         isWebhook={message.replyTo.isWebhook}
-                        replyToId={message.replyTo._id}
+                        replyToId={message.replyTo.id}
                         role={message.replyTo.role}
                         text={message.replyTo.text}
                         user={message.replyTo.user}
@@ -463,7 +463,7 @@ export const Message = React.memo(
                             <MessageEdit
                                 channelId={message.channelId}
                                 initialText={message.text}
-                                messageId={message._id}
+                                messageId={message.id}
                                 receiverId={message.receiverId}
                                 serverId={message.serverId}
                                 onCancel={handleCancelEdit}
@@ -477,7 +477,7 @@ export const Message = React.memo(
                                 invocationId={message.invocationId}
                                 isDeleted={!!message.deletedAt}
                                 isEphemeral={message.isEphemeral}
-                                messageId={message._id}
+                                messageId={message.id}
                                 poll={message.poll}
                                 senderId={message.senderId}
                                 senderMember={senderMember}
@@ -491,7 +491,7 @@ export const Message = React.memo(
                         )}
                         <Reactions
                             channelId={message.channelId}
-                            messageId={message._id}
+                            messageId={message.id}
                             reactions={message.reactions ?? EMPTY_REACTIONS}
                             serverId={message.serverId}
                             onAddClick={handleAddReactionClick}
@@ -551,7 +551,7 @@ export const Message = React.memo(
                         'border-l-2 border-[var(--primary)] bg-[var(--primary-muted)]',
                     mentionsMe && 'border-l-2 border-[var(--caution)]',
                 )}
-                id={`message-${message._id}`}
+                id={`message-${message.id}`}
                 onDoubleClick={handleDoubleClick}
                 onMouseLeave={handleClosePicker}
             >
@@ -580,7 +580,7 @@ export const Message = React.memo(
                     serverId={message.serverId}
                     triggerRef={avatarRef}
                     user={user}
-                    userId={user._id}
+                    userId={user.id}
                     onClose={handleCloseProfile}
                 />
                 <CodeModal

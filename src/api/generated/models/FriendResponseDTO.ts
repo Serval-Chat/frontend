@@ -3,7 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 export type FriendResponseDTO = {
-    _id: string;
+    id: string;
     username: string;
     displayName?: string;
     createdAt: Record<string, any>;

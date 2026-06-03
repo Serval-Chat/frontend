@@ -10,7 +10,7 @@ import { SHOWOFF_SECTIONS } from './config';
 
 export const NavigationDemo = () => {
     const mockServer: Server = {
-        _id: '1',
+        id: '1',
         name: "Catflare's Hideout",
         icon: undefined,
         ownerId: 'owner',
@@ -19,7 +19,7 @@ export const NavigationDemo = () => {
     };
 
     const mockFriend: Friend = {
-        _id: '1',
+        id: '1',
         username: 'catflare',
         displayName: 'Cat Flare',
         profilePicture: null,
@@ -112,7 +112,7 @@ export const NavigationDemo = () => {
                     <UserItem
                         noFetch
                         initialData={mockFriend}
-                        userId={mockFriend._id}
+                        userId={mockFriend.id}
                     />
                     <UserItem
                         isActive

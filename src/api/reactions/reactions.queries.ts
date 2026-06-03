@@ -63,7 +63,7 @@ export const useAddReaction = (): UseMutationResult<
                         pages: old.pages.map((page): ChatMessage[] =>
                             page.map(
                                 (msg): ChatMessage =>
-                                    msg._id === messageId
+                                    msg.id === messageId
                                         ? {
                                               ...msg,
                                               reactions: response.reactions,
@@ -127,7 +127,7 @@ export const useRemoveReaction = (): UseMutationResult<
                         pages: old.pages.map((page): ChatMessage[] =>
                             page.map(
                                 (msg): ChatMessage =>
-                                    msg._id === messageId
+                                    msg.id === messageId
                                         ? {
                                               ...msg,
                                               reactions: response.reactions,

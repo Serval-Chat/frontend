@@ -5,7 +5,7 @@ import type { AdminNoteAdminInfoDTO } from './AdminNoteAdminInfoDTO';
 import type { AdminNoteHistoryDTO } from './AdminNoteHistoryDTO';
 
 export type AdminNoteResponseDTO = {
-    _id: string;
+    id: string;
     targetId: string;
     targetType: string;
     adminId: AdminNoteAdminInfoDTO;

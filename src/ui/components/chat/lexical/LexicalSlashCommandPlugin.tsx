@@ -43,7 +43,7 @@ class SlashCommandOption extends MenuOption {
         super(
             data.type === 'command'
                 ? `slash-cmd-${data.command.id}`
-                : `slash-user-${data.user._id}`,
+                : `slash-user-${data.user.id}`,
         );
         this.type = data.type;
         if (data.type === 'command') {

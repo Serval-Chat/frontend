@@ -3,7 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 export type FriendRequestDTO = {
-    _id: string;
+    id: string;
     from: string;
     to: string;
     status: string;

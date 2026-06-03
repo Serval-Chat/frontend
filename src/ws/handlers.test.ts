@@ -313,7 +313,7 @@ describe('setupGlobalWsHandlers - ping behaviour', (): void => {
 
             expect(cached?.pages[0]).toMatchObject([
                 {
-                    _id: 'message-1',
+                    id: 'message-1',
                     text: 'new message',
                     serverId: 'server-1',
                     channelId: 'channel-1',
@@ -382,7 +382,7 @@ describe('setupGlobalWsHandlers - ping behaviour', (): void => {
 
             expect(cached?.pages[0]).toMatchObject([
                 {
-                    _id: 'dm-1',
+                    id: 'dm-1',
                     senderId: 'user-1',
                     receiverId: 'user-2',
                     text: 'hello',
@@ -407,7 +407,7 @@ describe('setupGlobalWsHandlers - ping behaviour', (): void => {
                 SERVERS_QUERY_KEYS.channels('server-1'),
                 [
                     {
-                        _id: 'channel-1',
+                        id: 'channel-1',
                         name: 'general',
                         serverId: 'server-1',
                         type: 'text',
@@ -530,14 +530,14 @@ describe('setupGlobalWsHandlers - ping behaviour', (): void => {
     describe('FRIEND_ADDED event', (): void => {
         it('places the accepted friend at the top of the cached friends list', (): void => {
             const existingFriend: Friend = {
-                _id: 'friend-old',
+                id: 'friend-old',
                 username: 'oldfriend',
                 createdAt: '2026-01-01T00:00:00.000Z',
                 profilePicture: null,
                 customStatus: null,
             };
             const acceptedFriend: Friend = {
-                _id: 'friend-new',
+                id: 'friend-new',
                 username: 'newfriend',
                 createdAt: '2026-02-01T00:00:00.000Z',
                 profilePicture: null,
@@ -555,20 +555,20 @@ describe('setupGlobalWsHandlers - ping behaviour', (): void => {
             expect(
                 queryClient
                     .getQueryData<Friend[]>(FRIENDS_QUERY_KEY)
-                    ?.map((friend): string => friend._id),
+                    ?.map((friend): string => friend.id),
             ).toEqual(['friend-new', 'friend-old']);
         });
 
         it('synchronizes the accepted friend into the friend profiles cache', (): void => {
             const existingFriend: Friend = {
-                _id: 'friend-old',
+                id: 'friend-old',
                 username: 'oldfriend',
                 createdAt: '2026-01-01T00:00:00.000Z',
                 profilePicture: null,
                 customStatus: null,
             };
             const acceptedFriend: Friend = {
-                _id: 'friend-new',
+                id: 'friend-new',
                 username: 'newfriend',
                 createdAt: '2026-02-01T00:00:00.000Z',
                 profilePicture: null,
@@ -586,7 +586,7 @@ describe('setupGlobalWsHandlers - ping behaviour', (): void => {
             expect(
                 queryClient
                     .getQueryData<Friend[]>(FRIEND_PROFILES_QUERY_KEY)
-                    ?.map((friend): string => friend._id),
+                    ?.map((friend): string => friend.id),
             ).toEqual(['friend-new', 'friend-old']);
         });
     });
@@ -594,14 +594,14 @@ describe('setupGlobalWsHandlers - ping behaviour', (): void => {
     describe('FRIEND_REMOVED event', (): void => {
         it('removes the unfriended user from friends and friend profiles caches', (): void => {
             const removedFriend: Friend = {
-                _id: 'friend-removed',
+                id: 'friend-removed',
                 username: 'removedfriend',
                 createdAt: '2026-01-01T00:00:00.000Z',
                 profilePicture: null,
                 customStatus: null,
             };
             const keptFriend: Friend = {
-                _id: 'friend-kept',
+                id: 'friend-kept',
                 username: 'keptfriend',
                 createdAt: '2026-02-01T00:00:00.000Z',
                 profilePicture: null,
@@ -625,12 +625,12 @@ describe('setupGlobalWsHandlers - ping behaviour', (): void => {
             expect(
                 queryClient
                     .getQueryData<Friend[]>(FRIENDS_QUERY_KEY)
-                    ?.map((friend): string => friend._id),
+                    ?.map((friend): string => friend.id),
             ).toEqual(['friend-kept']);
             expect(
                 queryClient
                     .getQueryData<Friend[]>(FRIEND_PROFILES_QUERY_KEY)
-                    ?.map((friend): string => friend._id),
+                    ?.map((friend): string => friend.id),
             ).toEqual(['friend-kept']);
         });
     });
@@ -639,7 +639,7 @@ describe('setupGlobalWsHandlers - ping behaviour', (): void => {
         const serverId = 'server-1';
 
         const existingChannel: Channel = {
-            _id: 'channel-old',
+            id: 'channel-old',
             name: 'general',
             serverId,
             type: 'text',
@@ -648,7 +648,7 @@ describe('setupGlobalWsHandlers - ping behaviour', (): void => {
         };
 
         const createdChannel: Channel = {
-            _id: 'channel-new',
+            id: 'channel-new',
             name: 'new-channel',
             serverId,
             type: 'text',
@@ -673,13 +673,13 @@ describe('setupGlobalWsHandlers - ping behaviour', (): void => {
                     .getQueryData<
                         Channel[]
                     >(SERVERS_QUERY_KEYS.channels(serverId))
-                    ?.map((channel): string => channel._id),
+                    ?.map((channel): string => channel.id),
             ).toEqual(['channel-old', 'channel-new']);
         });
 
         it('adds a channel created by the current user to the cached channel list without a reload', (): void => {
             queryClient.setQueryData<User>(['me'], {
-                _id: 'current-user',
+                id: 'current-user',
                 username: 'alice',
             } as User);
             cleanup();
@@ -700,7 +700,7 @@ describe('setupGlobalWsHandlers - ping behaviour', (): void => {
                     .getQueryData<
                         Channel[]
                     >(SERVERS_QUERY_KEYS.channels(serverId))
-                    ?.map((channel): string => channel._id),
+                    ?.map((channel): string => channel.id),
             ).toEqual(['channel-old', 'channel-new']);
         });
 
@@ -710,7 +710,7 @@ describe('setupGlobalWsHandlers - ping behaviour', (): void => {
                 [
                     existingChannel,
                     {
-                        _id: 'channel-late',
+                        id: 'channel-late',
                         name: 'later',
                         serverId,
                         type: 'text',
@@ -734,7 +734,7 @@ describe('setupGlobalWsHandlers - ping behaviour', (): void => {
                     .getQueryData<
                         Channel[]
                     >(SERVERS_QUERY_KEYS.channels(serverId))
-                    ?.map((channel): string => channel._id),
+                    ?.map((channel): string => channel.id),
             ).toEqual(['channel-old', 'channel-new', 'channel-late']);
         });
     });

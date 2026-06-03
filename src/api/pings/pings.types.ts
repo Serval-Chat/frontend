@@ -1,5 +1,5 @@
 export interface PingMentionMessage {
-    _id: string;
+    id: string;
     text: string;
     senderId: string;
     senderUsername: string;

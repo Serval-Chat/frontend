@@ -24,20 +24,20 @@ export const UserIdentitiesDemo = () => {
     // Mock users
     const mockUsers: Record<string, User> = {
         normal: {
-            _id: '1',
+            id: '1',
             username: 'NormalUser',
             login: 'normal',
             createdAt: new Date(),
         } as User,
         glowing: {
-            _id: '2',
+            id: '2',
             username: 'Glowing',
             login: 'glow',
             usernameGlow: { enabled: true, color: '#3b82f6' },
             createdAt: new Date(),
         } as User,
         gradient: {
-            _id: '3',
+            id: '3',
             username: 'Gayass',
             login: 'rainbow',
             usernameGradient: {
@@ -48,7 +48,7 @@ export const UserIdentitiesDemo = () => {
             createdAt: new Date(),
         } as User,
         fancy: {
-            _id: '4',
+            id: '4',
             username: 'Average british person',
             login: 'fancy',
             usernameFont: 'Pacifico' as User['usernameFont'],
@@ -163,7 +163,7 @@ export const UserIdentitiesDemo = () => {
                             <StyledUserName
                                 user={
                                     {
-                                        _id: `font-${font}`,
+                                        id: `font-${font}`,
                                         username:
                                             font === 'default'
                                                 ? 'Default font (Inter)'

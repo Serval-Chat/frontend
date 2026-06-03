@@ -342,11 +342,11 @@ export const MessageInput = ({
         enabled: showStickerPicker,
     });
     const myMember = useMemo(
-        () => members.find((m): boolean => m.userId === me?._id),
-        [members, me?._id],
+        () => members.find((m): boolean => m.userId === me?.id),
+        [members, me?.id],
     );
 
-    const isOwner = serverDetails?.ownerId === me?._id;
+    const isOwner = serverDetails?.ownerId === me?.id;
     const [remainingTimeoutMs, setRemainingTimeoutMs] = useState<number>(0);
 
     useEffect((): (() => void) | undefined => {
@@ -505,7 +505,7 @@ export const MessageInput = ({
     );
 
     const currentChannel = useMemo(
-        () => channels.find((c): boolean => c._id === selectedChannelId),
+        () => channels.find((c): boolean => c.id === selectedChannelId),
         [channels, selectedChannelId],
     );
 
@@ -513,7 +513,7 @@ export const MessageInput = ({
         () =>
             customCategories.flatMap((cat) =>
                 cat.emojis.map((e) => ({
-                    _id: e.id,
+                    id: e.id,
                     name: e.name,
                     imageUrl: e.url,
                     serverId: cat.id,
@@ -529,7 +529,7 @@ export const MessageInput = ({
 
         if (isServerContextReady && serverDetails) {
             cats.push({
-                id: serverDetails._id,
+                id: serverDetails.id,
                 name: serverDetails.name,
                 icon: serverDetails.icon,
                 stickers: currentServerStickers,
@@ -552,7 +552,7 @@ export const MessageInput = ({
         stickersByServer.forEach((serverStickers, sid): void => {
             if (serverStickers.length > 0) {
                 const serverInfo = serverList.find(
-                    (s): boolean => s._id === sid,
+                    (s): boolean => s.id === sid,
                 );
                 cats.push({
                     id: sid,
@@ -574,7 +574,7 @@ export const MessageInput = ({
     ]);
 
     const findLastMyMessage = useMemo(() => {
-        if (!me?._id) return null;
+        if (!me?.id) return null;
 
         const pages =
             selectedServerId && selectedChannelId
@@ -590,7 +590,7 @@ export const MessageInput = ({
             for (let i = page.length - 1; i >= 0; i--) {
                 const msg = page[i];
                 if (
-                    msg.senderId === me._id &&
+                    msg.senderId === me.id &&
                     msg.text &&
                     msg.text.trim() !== ''
                 ) {
@@ -601,7 +601,7 @@ export const MessageInput = ({
 
         return null;
     }, [
-        me?._id,
+        me?.id,
         selectedServerId,
         selectedChannelId,
         selectedFriendId,
@@ -719,7 +719,7 @@ export const MessageInput = ({
             if (finalMessage || attachments.length > 0) {
                 sendMessage(
                     finalMessage,
-                    replyingTo?._id,
+                    replyingTo?.id,
                     undefined,
                     undefined,
                     attachments,
@@ -770,12 +770,12 @@ export const MessageInput = ({
                 );
                 return;
             }
-            sendMessage('', replyingTo?._id, undefined, poll);
+            sendMessage('', replyingTo?.id, undefined, poll);
             onCancelReply?.();
         },
         [
             sendMessage,
-            replyingTo?._id,
+            replyingTo?.id,
             onCancelReply,
             isGloballyMuted,
             showToast,
@@ -865,7 +865,7 @@ export const MessageInput = ({
 
     const isUnknownReplyingUser = replyingTo?.user?.username === 'Unknown';
     const { data: fetchedReplyingUser } = useUserById(
-        replyingTo?.user?._id || '',
+        replyingTo?.user?.id || '',
         {
             enabled: !!replyingTo && isUnknownReplyingUser,
         },
@@ -1038,7 +1038,7 @@ export const MessageInput = ({
                                                         {
                                                             detail: {
                                                                 messageId:
-                                                                    lastMessage._id,
+                                                                    lastMessage.id,
                                                                 serverId:
                                                                     lastMessage.serverId,
                                                                 channelId:

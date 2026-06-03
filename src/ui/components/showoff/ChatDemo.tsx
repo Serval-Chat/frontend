@@ -11,7 +11,7 @@ import { DemoSection } from './DemoSection';
 
 const MOCK_USERS: Record<string, User> = {
     catflare: {
-        _id: 'u1',
+        id: 'u1',
         login: 'catflare',
         createdAt: new Date(),
         username: 'catflare',
@@ -29,7 +29,7 @@ const MOCK_USERS: Record<string, User> = {
         },
     },
     hexagon: {
-        _id: 'u2',
+        id: 'u2',
         login: 'hexagon',
         createdAt: new Date(),
         username: 'hexagon',
@@ -48,7 +48,7 @@ const MOCK_USERS: Record<string, User> = {
         },
     },
     evalyn: {
-        _id: 'u3',
+        id: 'u3',
         login: 'evalyn',
         createdAt: new Date(),
         username: 'evalyn',
@@ -66,7 +66,7 @@ const MOCK_USERS: Record<string, User> = {
         },
     },
     mintsuki: {
-        _id: 'u4',
+        id: 'u4',
         login: 'mintsuki',
         createdAt: new Date(),
         username: 'mintsuki',
@@ -133,67 +133,67 @@ const demoMessage = (
 
 const MOCK_MESSAGES: ProcessedChatMessage[] = [
     demoMessage({
-        _id: '0',
+        id: '0',
         text: 'Hello everyone! I hope you guys like Serchat uwu',
         createdAt: new Date(Date.now() - 3600000).toISOString(),
         user: MOCK_USERS.catflare,
-        senderId: MOCK_USERS.catflare._id,
+        senderId: MOCK_USERS.catflare.id,
     }),
     demoMessage({
-        _id: '1',
+        id: '1',
         text: 'Yas! I love this place',
         createdAt: new Date(Date.now() - 3550000).toISOString(),
         user: MOCK_USERS.hexagon,
-        senderId: MOCK_USERS.hexagon._id,
+        senderId: MOCK_USERS.hexagon.id,
         replyTo: {
-            _id: '0',
+            id: '0',
             user: MOCK_USERS.catflare,
             text: 'Hello everyone! I hope you guys like Serchat uwu',
         },
     }),
     demoMessage({
-        _id: '2',
+        id: '2',
         text: "Please fix this bug. I can't change default role for my members!",
         createdAt: new Date(Date.now() - 3500000).toISOString(),
         user: MOCK_USERS.evalyn,
-        senderId: MOCK_USERS.evalyn._id,
+        senderId: MOCK_USERS.evalyn.id,
         reactions: [
             {
                 emoji: '😃',
                 emojiType: 'unicode',
                 count: 1,
-                users: [MOCK_USERS.mintsuki._id],
+                users: [MOCK_USERS.mintsuki.id],
             },
         ],
     }),
     demoMessage({
-        _id: '3',
+        id: '3',
         text: 'I forgot my password. Could you plz reset it thx',
         createdAt: new Date(Date.now() - 3450000).toISOString(),
         user: MOCK_USERS.mintsuki,
-        senderId: MOCK_USERS.mintsuki._id,
+        senderId: MOCK_USERS.mintsuki.id,
     }),
     demoMessage({
-        _id: '4',
+        id: '4',
         text: 'Eh fine but I got no reset password feature :sob:',
         createdAt: new Date(Date.now() - 3400000).toISOString(),
         user: MOCK_USERS.catflare,
-        senderId: MOCK_USERS.catflare._id,
+        senderId: MOCK_USERS.catflare.id,
         replyTo: {
-            _id: '3',
+            id: '3',
             user: MOCK_USERS.mintsuki,
             text: 'I forgot my password. Could you plz reset it thx',
         },
     }),
     demoMessage({
-        _id: '5',
+        id: '5',
         text: 'Anyways @everyone I have to reload the server. New update incoming :333',
         createdAt: new Date(Date.now() - 3350000).toISOString(),
         user: MOCK_USERS.catflare,
-        senderId: MOCK_USERS.catflare._id,
+        senderId: MOCK_USERS.catflare.id,
     }),
     demoMessage({
-        _id: '7',
+        id: '7',
         text:
             'Some code idk```c\n' +
             '#include <stdio.h>\n' +
@@ -206,7 +206,7 @@ const MOCK_MESSAGES: ProcessedChatMessage[] = [
             '```',
         createdAt: new Date(Date.now() - 3250000).toISOString(),
         user: MOCK_USERS.evalyn,
-        senderId: MOCK_USERS.evalyn._id,
+        senderId: MOCK_USERS.evalyn.id,
     }),
 ];
 

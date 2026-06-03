@@ -79,7 +79,7 @@ export const ServerSection = () => {
         if (!isPlaceholderChannels && channels) {
             if (selectedChannelId) {
                 const channelExists = channels.some(
-                    (c): boolean => c._id === selectedChannelId,
+                    (c): boolean => c.id === selectedChannelId,
                 );
                 if (!channelExists) {
                     dispatch(setSelectedChannelId(null));
@@ -106,16 +106,14 @@ export const ServerSection = () => {
                 );
                 const lastChannelExists =
                     lastChannelId !== undefined &&
-                    sortedChannels.some(
-                        (c): boolean => c._id === lastChannelId,
-                    );
+                    sortedChannels.some((c): boolean => c.id === lastChannelId);
                 if (lastChannelId !== undefined && !lastChannelExists) {
                     dispatch(clearLastOpenedChannelForServer(selectedServerId));
                 }
 
                 const targetChannelId = lastChannelExists
                     ? lastChannelId
-                    : firstChannel?._id;
+                    : firstChannel?.id;
 
                 if (targetChannelId) {
                     void navigate(

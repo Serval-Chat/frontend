@@ -182,7 +182,7 @@ const stripUnknownKeys = (
 const normalizeOverrides = (perms: Overrides, roles: Role[]): Overrides => {
     const everyoneRoleId = roles.find(
         (r): boolean => r.name === '@everyone',
-    )?._id;
+    )?.id;
     const normalized: Overrides = {};
 
     for (const [id, permsObj] of Object.entries(perms)) {
@@ -238,20 +238,20 @@ export const PermissionsEditorTab = ({
 
     const effectiveSelectedRoleId =
         selectedRoleId ||
-        roles.find((r): boolean => r.name === '@everyone')?._id ||
-        roles[0]?._id ||
+        roles.find((r): boolean => r.name === '@everyone')?.id ||
+        roles[0]?.id ||
         null;
 
     const visibleRoles = roles.filter((role): boolean => {
         if (role.name === '@everyone') return true;
-        if (selectedRoleId === role._id) return true;
-        const overrides = localOverrides[role._id];
+        if (selectedRoleId === role.id) return true;
+        const overrides = localOverrides[role.id];
         return overrides && Object.keys(overrides).length > 0;
     });
 
     const availableRolesToAdd = roles.filter(
         (role): boolean =>
-            !visibleRoles.some((vr): boolean => vr._id === role._id),
+            !visibleRoles.some((vr): boolean => vr.id === role.id),
     );
 
     const handlePermissionChange = (
@@ -275,11 +275,11 @@ export const PermissionsEditorTab = ({
     };
 
     const handleAddRole = (role: Role): void => {
-        setSelectedRoleId(role._id);
+        setSelectedRoleId(role.id);
         setIsMobileListOpen(false);
         setLocalOverrides(
             (prev): Overrides =>
-                role._id in prev ? prev : { ...prev, [role._id]: {} },
+                role.id in prev ? prev : { ...prev, [role.id]: {} },
         );
     };
 
@@ -306,7 +306,7 @@ export const PermissionsEditorTab = ({
     };
 
     const selectedRole = roles.find(
-        (r): boolean => r._id === effectiveSelectedRoleId,
+        (r): boolean => r.id === effectiveSelectedRoleId,
     );
     const currentRoleOverrides = effectiveSelectedRoleId
         ? (localOverrides[effectiveSelectedRoleId] ?? {})
@@ -363,7 +363,7 @@ export const PermissionsEditorTab = ({
                                                 }
                                                 onChange={(val): void =>
                                                     handlePermissionChange(
-                                                        selectedRole._id,
+                                                        selectedRole.id,
                                                         perm.key,
                                                         val,
                                                     )
@@ -401,11 +401,11 @@ export const PermissionsEditorTab = ({
                 <div className="flex flex-col gap-1">
                     {visibleRoles.map((role) => (
                         <RoleListItem
-                            isActive={effectiveSelectedRoleId === role._id}
-                            key={role._id}
+                            isActive={effectiveSelectedRoleId === role.id}
+                            key={role.id}
                             role={role}
                             onClick={(): void => {
-                                setSelectedRoleId(role._id);
+                                setSelectedRoleId(role.id);
                                 setIsMobileListOpen(false);
                             }}
                         />

@@ -42,7 +42,7 @@ export const ServerChannelsPage = () => {
     const groupedChannels = useMemo(() => {
         const sortedChannels = sortByPosition(channels ?? []);
         const sortedCategories = sortByPosition(categories ?? []);
-        const categoryIds = new Set(sortedCategories.map((c): string => c._id));
+        const categoryIds = new Set(sortedCategories.map((c): string => c.id));
         return [
             {
                 category: null,
@@ -55,7 +55,7 @@ export const ServerChannelsPage = () => {
             ...sortedCategories.map((category) => ({
                 category,
                 channels: sortedChannels.filter(
-                    (channel): boolean => channel.categoryId === category._id,
+                    (channel): boolean => channel.categoryId === category.id,
                 ),
             })),
         ].filter(
@@ -134,7 +134,7 @@ export const ServerChannelsPage = () => {
                                 channels={group.channels}
                                 hiddenCategories={hiddenCategories}
                                 hiddenChannels={hiddenChannels}
-                                key={group.category?._id ?? 'uncategorized'}
+                                key={group.category?.id ?? 'uncategorized'}
                                 onToggleCategory={handleToggleCategory}
                                 onToggleChannel={handleToggleChannel}
                             />

@@ -8,7 +8,7 @@ import { useProcessedMessages } from '@/hooks/chat/useProcessedMessages';
 describe('useProcessedMessages', (): void => {
     it('preserves embeds through processed message mapping', (): void => {
         const message: ChatMessage = {
-            _id: 'm1',
+            id: 'm1',
             text: '',
             createdAt: new Date().toISOString(),
             senderId: 'u1',
@@ -26,7 +26,7 @@ describe('useProcessedMessages', (): void => {
             stickerId: null,
             senderIsBot: false,
         };
-        const user: User = { _id: 'u1', username: 'bot' } as User;
+        const user: User = { id: 'u1', username: 'bot' } as User;
 
         const { result } = renderHook(() =>
             useProcessedMessages(

@@ -3,7 +3,7 @@
 /* tslint:disable */
 
 export type ServerCreateResponseDTO = {
-    _id: string;
+    id: string;
     name: string;
     ownerId: string;
     icon?: string;

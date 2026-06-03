@@ -5,7 +5,7 @@ import type { BotPermissionsDTO } from './BotPermissionsDTO';
 import type { BotUserDTO } from './BotUserDTO';
 
 export type BotResponseDTO = {
-    _id: string;
+    id: string;
     clientId: string;
     ownerId: string;
     userId: BotUserDTO;

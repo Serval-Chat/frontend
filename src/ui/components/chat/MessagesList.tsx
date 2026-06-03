@@ -142,7 +142,7 @@ export const MessagesList = React.memo(
                 items.push({
                     type: 'blocked-group',
                     messages: [...currentBlockedGroup],
-                    id: `blocked-${currentBlockedGroup[0]._id}`,
+                    id: `blocked-${currentBlockedGroup[0].id}`,
                 });
                 currentBlockedGroup = [];
             };
@@ -153,7 +153,7 @@ export const MessagesList = React.memo(
                     senderBlocks & BlockFlags.HIDE_MESSAGES
                 );
 
-                const replyToSenderId = msg.replyTo?.user?._id;
+                const replyToSenderId = msg.replyTo?.user?.id;
                 const isReplyToBlocked =
                     replyToSenderId &&
                     !!(
@@ -253,7 +253,7 @@ export const MessagesList = React.memo(
                 (index: number): string | number => {
                     const item = virtualItems[index];
                     if (!item) return index;
-                    if (item.type === 'message') return item.message._id;
+                    if (item.type === 'message') return item.message.id;
                     if (item.type === 'blocked-group') return item.id;
                     return item.type;
                 },
@@ -314,7 +314,7 @@ export const MessagesList = React.memo(
                 const index = virtualItemsRef.current.findIndex(
                     (item): boolean =>
                         item.type === 'message' &&
-                        item.message._id === messageId,
+                        item.message.id === messageId,
                 );
                 if (index !== -1) {
                     rowVirtualizer.scrollToIndex(index, {
@@ -383,8 +383,8 @@ export const MessagesList = React.memo(
 
             const firstMessage = virtualItems.find(
                 (item): boolean => item.type === 'message',
-            ) as { message: { _id: string } } | undefined;
-            const firstMessageId = firstMessage?.message._id ?? null;
+            ) as { message: { id: string } } | undefined;
+            const firstMessageId = firstMessage?.message.id ?? null;
             const isPrepending =
                 prevFirstMessageIdRef.current !== null &&
                 firstMessageId !== null &&
@@ -399,7 +399,7 @@ export const MessagesList = React.memo(
                 virtualItems[virtualItems.length - 1];
             const lastItemKey =
                 lastItem.type === 'message'
-                    ? lastItem.message._id
+                    ? lastItem.message.id
                     : lastItem.type === 'blocked-group'
                       ? lastItem.id
                       : lastItem.type;
@@ -461,7 +461,7 @@ export const MessagesList = React.memo(
             const index = virtualItems.findIndex(
                 (item): boolean =>
                     item.type === 'message' &&
-                    item.message._id === activeHighlightId,
+                    item.message.id === activeHighlightId,
             );
             if (index !== -1) {
                 rowVirtualizer.scrollToIndex(index, { align: 'center' });
@@ -551,7 +551,7 @@ export const MessagesList = React.memo(
                                             hasPermission={hasPermission}
                                             iconRole={item.message.iconRole}
                                             isHighlighted={
-                                                highlightId === item.message._id
+                                                highlightId === item.message.id
                                             }
                                             isOwner={isOwner}
                                             me={me}
@@ -633,12 +633,12 @@ export const MessagesList = React.memo(
                                                                 }
                                                                 isHighlighted={
                                                                     highlightId ===
-                                                                    msg._id
+                                                                    msg.id
                                                                 }
                                                                 isOwner={
                                                                     isOwner
                                                                 }
-                                                                key={msg._id}
+                                                                key={msg.id}
                                                                 me={me}
                                                                 message={msg}
                                                                 prevMessage={

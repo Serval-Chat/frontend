@@ -3,7 +3,7 @@
 /* tslint:disable */
 
 export type WebhookResponseDTO = {
-    _id: string;
+    id: string;
     name: string;
     token: string;
     avatarUrl?: string;

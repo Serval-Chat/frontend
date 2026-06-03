@@ -76,7 +76,7 @@ export const ChannelSettingsModal = ({
                 ) : activeSection === 'webhooks' ? (
                     <SettingsContentPane>
                         <ChannelWebhookSettings
-                            channelId={channel._id}
+                            channelId={channel.id}
                             serverId={channel.serverId}
                         />
                     </SettingsContentPane>
@@ -88,7 +88,7 @@ export const ChannelSettingsModal = ({
                     <div className="flex h-full flex-1 flex-col overflow-hidden">
                         <PermissionsEditorTab
                             serverId={channel.serverId}
-                            targetId={channel._id}
+                            targetId={channel.id}
                             targetType="channel"
                         />
                     </div>

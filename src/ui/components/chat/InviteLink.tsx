@@ -125,7 +125,7 @@ export const InviteLink = ({ code, url }: InviteLinkProps) => {
     const [copied, setCopied] = React.useState(false);
     const { showToast } = useToast();
 
-    const isJoined = servers?.some((s): boolean => s._id === invite?.server.id);
+    const isJoined = servers?.some((s): boolean => s.id === invite?.server.id);
 
     const handleCopy = (): void => {
         void navigator.clipboard.writeText(url);

@@ -5,7 +5,7 @@
 import type { AdminUserServerInfoDTO } from './AdminUserServerInfoDTO';
 
 export type AdminExtendedUserDetailsDTO = {
-    _id: string;
+    id: string;
     username: string;
     login: string;
     displayName: Record<string, any> | null;

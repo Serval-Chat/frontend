@@ -33,7 +33,7 @@ export type BotPermissionKey = (typeof BOT_PERMISSION_KEYS)[number];
 export type BotPermissions = Partial<Record<BotPermissionKey, boolean>>;
 
 export interface BotUser {
-    _id: string;
+    id: string;
     username: string;
     displayName?: string;
     bio?: string;
@@ -45,7 +45,7 @@ export interface BotUser {
 }
 
 export interface Bot {
-    _id: string;
+    id: string;
     clientId: string;
     ownerId: string;
     userId: string | BotUser;

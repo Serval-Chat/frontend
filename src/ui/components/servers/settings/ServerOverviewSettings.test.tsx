@@ -47,7 +47,7 @@ describe('ServerOverviewSettings', (): void => {
 
         vi.mocked(ServerQueries.useServerDetails).mockReturnValue({
             data: {
-                _id: 'server123',
+                id: 'server123',
                 icon: 'icon.png',
                 name: 'Test Server',
                 ownerId: 'user123',
@@ -61,7 +61,7 @@ describe('ServerOverviewSettings', (): void => {
         } as never);
 
         vi.mocked(UserQueries.useMe).mockReturnValue({
-            data: { _id: 'user123' },
+            data: { id: 'user123' },
         } as never);
 
         vi.mocked(ServerQueries.useUpdateServer).mockReturnValue({
@@ -99,7 +99,7 @@ describe('ServerOverviewSettings', (): void => {
     });
 
     it('redirects to /chat/@me after successful server deletion', (): void => {
-        const mockDeleteServer = vi.fn((_id, options): void => {
+        const mockDeleteServer = vi.fn((_serverId, options): void => {
             options.onSuccess();
         });
         vi.mocked(ServerQueries.useDeleteServer).mockReturnValue({
@@ -134,7 +134,7 @@ describe('ServerOverviewSettings', (): void => {
     it('shows discovery blockers when opt-in is enabled before eligibility is met', (): void => {
         vi.mocked(ServerQueries.useServerDetails).mockReturnValue({
             data: {
-                _id: 'server123',
+                id: 'server123',
                 icon: 'icon.png',
                 name: 'Test Server',
                 ownerId: 'user123',
@@ -177,7 +177,7 @@ describe('ServerOverviewSettings', (): void => {
     it('uses unsaved description and tags when showing discovery blockers', (): void => {
         vi.mocked(ServerQueries.useServerDetails).mockReturnValue({
             data: {
-                _id: 'server123',
+                id: 'server123',
                 icon: 'icon.png',
                 name: 'Test Server',
                 ownerId: 'user123',

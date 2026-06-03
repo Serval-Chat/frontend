@@ -3,7 +3,7 @@
 /* tslint:disable */
 
 export type AdminNoteAdminInfoDTO = {
-    _id: string;
+    id: string;
     username: string;
     displayName?: string;
     profilePicture?: string;

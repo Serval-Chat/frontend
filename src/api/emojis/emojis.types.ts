@@ -1,5 +1,5 @@
 export interface Emoji {
-    _id: string;
+    id: string;
     name: string;
     imageUrl: string;
     serverId: string;

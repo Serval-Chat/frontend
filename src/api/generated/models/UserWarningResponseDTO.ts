@@ -4,7 +4,7 @@
 import type { UserWarningIssuedByDTO } from './UserWarningIssuedByDTO';
 
 export type UserWarningResponseDTO = {
-    _id: string;
+    id: string;
     userId: string;
     message: string;
     issuedBy: UserWarningIssuedByDTO;

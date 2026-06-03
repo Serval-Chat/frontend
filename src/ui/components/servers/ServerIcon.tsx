@@ -11,7 +11,7 @@ import { resolveApiUrl } from '@/utils/apiUrl';
 import { cn } from '@/utils/cn';
 
 interface ServerIconProps {
-    server: Omit<Server, '_id' | 'ownerId'> | Server;
+    server: Omit<Server, 'id' | 'ownerId'> | Server;
     isActive?: boolean;
     onClick?: () => void;
     className?: string;

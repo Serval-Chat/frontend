@@ -23,8 +23,8 @@ vi.mock('@/api/reactions/reactions.queries', () => ({
 
 vi.mock(
     '@/api/users/users.queries',
-    (): { useMe: () => { data: { _id: string } } } => ({
-        useMe: (): { data: { _id: string } } => ({ data: { _id: 'me' } }),
+    (): { useMe: () => { data: { id: string } } } => ({
+        useMe: (): { data: { id: string } } => ({ data: { id: 'me' } }),
     }),
 );
 
@@ -81,13 +81,13 @@ const TestWrapper = ({ children }: { children: React.ReactNode }) => (
 );
 
 interface MockMessage {
-    _id: string;
+    id: string;
     messageId: string;
     senderId: string;
     text: string;
     createdAt: string;
-    replyTo?: { _id: string; user?: { _id: string }; text: string };
-    user: { _id: string; username: string };
+    replyTo?: { id: string; user?: { id: string }; text: string };
+    user: { id: string; username: string };
 }
 
 vi.mock('@/ui/components/chat/MessageItem', () => ({
@@ -121,28 +121,28 @@ describe('Frontend Blocking Content Filters', (): void => {
 
             const messages: MockMessage[] = [
                 {
-                    _id: 'm1',
+                    id: 'm1',
                     messageId: 'm1',
                     senderId: 'sender-ok',
                     text: 'Hello',
                     createdAt: '2023-01-01T00:00:00Z',
-                    user: { _id: 'sender-ok', username: 'Ok' },
+                    user: { id: 'sender-ok', username: 'Ok' },
                 },
                 {
-                    _id: 'm2',
+                    id: 'm2',
                     messageId: 'm2',
                     senderId: 'sender-blocked',
                     text: 'Bad',
                     createdAt: '2023-01-01T00:01:00Z',
-                    user: { _id: 'sender-blocked', username: 'Blocked' },
+                    user: { id: 'sender-blocked', username: 'Blocked' },
                 },
                 {
-                    _id: 'm3',
+                    id: 'm3',
                     messageId: 'm3',
                     senderId: 'sender-blocked',
                     text: 'Stuff',
                     createdAt: '2023-01-01T00:02:00Z',
-                    user: { _id: 'sender-blocked', username: 'Blocked' },
+                    user: { id: 'sender-blocked', username: 'Blocked' },
                 },
             ];
 
@@ -175,25 +175,25 @@ describe('Frontend Blocking Content Filters', (): void => {
 
             const messages: MockMessage[] = [
                 {
-                    _id: 'm1',
+                    id: 'm1',
                     messageId: 'm1',
                     senderId: 'sender-ok',
                     text: 'Normal',
                     createdAt: '2023-01-01T00:00:00Z',
-                    user: { _id: 'sender-ok', username: 'Ok' },
+                    user: { id: 'sender-ok', username: 'Ok' },
                 },
                 {
-                    _id: 'm2',
+                    id: 'm2',
                     messageId: 'm2',
                     senderId: 'ok-2',
                     text: 'Reply to Bob',
                     createdAt: '2023-01-01T00:01:00Z',
                     replyTo: {
-                        _id: 'm1',
-                        user: { _id: 'sender-blocked' },
+                        id: 'm1',
+                        user: { id: 'sender-blocked' },
                         text: 'Hello',
                     },
-                    user: { _id: 'ok-2', username: 'Ok 2' },
+                    user: { id: 'ok-2', username: 'Ok 2' },
                 },
             ];
 

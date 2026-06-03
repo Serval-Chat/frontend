@@ -15,7 +15,7 @@ export const MiniProfile = () => {
     const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
 
     const presence = useAppSelector(
-        (state) => state.presence.users[user?._id || ''],
+        (state) => state.presence.users[user?.id || ''],
     );
     const backendInstanceId = useAppSelector(
         (state): string | null => state.presence.backendInstanceId,

@@ -35,12 +35,12 @@ export const ServerRoleSettings = ({ serverId }: ServerRoleSettingsProps) => {
 
     const effectiveSelectedId =
         selectedRoleId ||
-        roles?.find((r): boolean => r.name === '@everyone')?._id ||
-        roles?.[0]?._id ||
+        roles?.find((r): boolean => r.name === '@everyone')?.id ||
+        roles?.[0]?.id ||
         null;
 
     const selectedRole = roles?.find(
-        (r): boolean => r._id === effectiveSelectedId,
+        (r): boolean => r.id === effectiveSelectedId,
     );
 
     const handleAddRole = (): void => {
@@ -51,7 +51,7 @@ export const ServerRoleSettings = ({ serverId }: ServerRoleSettingsProps) => {
             },
             {
                 onSuccess: (newRole): void => {
-                    setSelectedRoleId(newRole._id);
+                    setSelectedRoleId(newRole.id);
                     setIsMobileListOpen(false);
                 },
             },
@@ -65,7 +65,7 @@ export const ServerRoleSettings = ({ serverId }: ServerRoleSettingsProps) => {
                     const everyone = roles?.find(
                         (r): boolean => r.name === '@everyone',
                     );
-                    setSelectedRoleId(everyone?._id || null);
+                    setSelectedRoleId(everyone?.id || null);
                 }
             },
         });
@@ -81,7 +81,7 @@ export const ServerRoleSettings = ({ serverId }: ServerRoleSettingsProps) => {
     const handleReorderRoles = (newRoles: Role[]): void => {
         const positions = newRoles.map(
             (r, i): { roleId: string; position: number } => ({
-                roleId: r._id,
+                roleId: r.id,
                 position: newRoles.length - i,
             }),
         );
@@ -157,7 +157,7 @@ export const ServerRoleSettings = ({ serverId }: ServerRoleSettingsProps) => {
                         disableGlowAndColors={
                             server?.disableUsernameGlowAndCustomColor
                         }
-                        key={selectedRole._id}
+                        key={selectedRole.id}
                         role={selectedRole}
                         onReset={(): void => {}}
                         onSave={handleSaveRole}

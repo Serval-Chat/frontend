@@ -276,7 +276,7 @@ export const useServerWS = (serverId?: string): void => {
                         (old): Channel[] | undefined =>
                             old?.map(
                                 (c): Channel =>
-                                    c._id === payload.channelId
+                                    c.id === payload.channelId
                                         ? {
                                               ...c,
                                               lastReadAt:

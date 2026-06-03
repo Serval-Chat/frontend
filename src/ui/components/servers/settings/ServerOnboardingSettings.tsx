@@ -39,6 +39,11 @@ const channelIcon = (channel: Channel): React.ReactNode => (
 const sortByPosition = <T extends { position: number }>(items: T[]): T[] =>
     [...items].sort((a, b): number => a.position - b.position);
 
+const toStringArray = (value: unknown): string[] =>
+    Array.isArray(value)
+        ? value.filter((item): item is string => typeof item === 'string')
+        : [];
+
 const RoleSelectGrid = ({
     roles,
     selectedIds,
@@ -66,7 +71,7 @@ const RoleSelectGrid = ({
     return (
         <div className="grid gap-2 sm:grid-cols-2">
             {selectableRoles.map((role) => {
-                const isSelected = selected.has(role._id);
+                const isSelected = selected.has(role.id);
                 return (
                     <button
                         className={cn(
@@ -75,9 +80,9 @@ const RoleSelectGrid = ({
                                 ? 'border-primary bg-primary/10'
                                 : 'hover:border-border border-border-subtle bg-bg-subtle hover:bg-bg-secondary/60',
                         )}
-                        key={role._id}
+                        key={role.id}
                         type="button"
-                        onClick={(): void => toggleRole(role._id)}
+                        onClick={(): void => toggleRole(role.id)}
                     >
                         <div className="flex items-center gap-2">
                             <RoleDot role={role} />
@@ -147,7 +152,7 @@ const WelcomeChannelGrid = ({
                     (channel): boolean =>
                         !channel.categoryId ||
                         !categories?.find(
-                            (c): boolean => c._id === channel.categoryId,
+                            (c): boolean => c.id === channel.categoryId,
                         ),
                 ),
             },
@@ -156,7 +161,7 @@ const WelcomeChannelGrid = ({
                     category,
                     channels: sortedChannels.filter(
                         (channel): boolean =>
-                            channel.categoryId === category._id,
+                            channel.categoryId === category.id,
                     ),
                 }),
             ),
@@ -168,7 +173,7 @@ const WelcomeChannelGrid = ({
             {groupedChannels.map((group) => (
                 <div
                     className="space-y-2"
-                    key={group.category?._id ?? 'uncategorized'}
+                    key={group.category?.id ?? 'uncategorized'}
                 >
                     {group.category && (
                         <Text className="px-1 text-xs font-bold tracking-wider text-muted-foreground/70 uppercase">
@@ -177,7 +182,7 @@ const WelcomeChannelGrid = ({
                     )}
                     <div className="grid gap-2 sm:grid-cols-2">
                         {group.channels.map((channel) => {
-                            const isSelected = selected.has(channel._id);
+                            const isSelected = selected.has(channel.id);
                             return (
                                 <Button
                                     className={cn(
@@ -188,11 +193,11 @@ const WelcomeChannelGrid = ({
                                     )}
                                     disabled={!isSelected && selected.size >= 8}
                                     innerClassName="justify-start"
-                                    key={channel._id}
+                                    key={channel.id}
                                     type="button"
                                     variant="normal"
                                     onClick={(): void =>
-                                        toggleChannel(channel._id)
+                                        toggleChannel(channel.id)
                                     }
                                 >
                                     {channelIcon(channel)}
@@ -234,15 +239,19 @@ export const ServerOnboardingSettings = ({
     React.useEffect((): void => {
         if (!settings) return;
         setEnabled(settings.enabled);
-        const parsedRules = settings.guidelines ?? [];
+        const parsedRules = toStringArray(settings.guidelines);
         setRules(parsedRules);
-        setSelfAssignableRoleIds(settings.selfAssignableRoleIds ?? []);
+        setSelfAssignableRoleIds(toStringArray(settings.selfAssignableRoleIds));
         setLandingChannelId(settings.landingChannelId ?? null);
-        setWelcomeChannelIds(settings.welcomeChannelIds ?? []);
+        setWelcomeChannelIds(toStringArray(settings.welcomeChannelIds));
         setBaseline(
             JSON.stringify({
                 ...settings,
                 guidelines: parsedRules,
+                selfAssignableRoleIds: toStringArray(
+                    settings.selfAssignableRoleIds,
+                ),
+                welcomeChannelIds: toStringArray(settings.welcomeChannelIds),
             }),
         );
     }, [settings]);
@@ -255,7 +264,7 @@ export const ServerOnboardingSettings = ({
                 (
                     channel,
                 ): { id: string; label: string; icon: React.ReactNode } => ({
-                    id: channel._id,
+                    id: channel.id,
                     label: channel.name,
                     icon: channelIcon(channel),
                 }),
@@ -284,21 +293,31 @@ export const ServerOnboardingSettings = ({
     const handleReset = (): void => {
         if (!settings) return;
         setEnabled(settings.enabled);
-        setRules(settings.guidelines ?? []);
-        setSelfAssignableRoleIds(settings.selfAssignableRoleIds ?? []);
+        setRules(toStringArray(settings.guidelines));
+        setSelfAssignableRoleIds(toStringArray(settings.selfAssignableRoleIds));
         setLandingChannelId(settings.landingChannelId ?? null);
-        setWelcomeChannelIds(settings.welcomeChannelIds ?? []);
+        setWelcomeChannelIds(toStringArray(settings.welcomeChannelIds));
     };
 
     const handleSave = (): void => {
         updateSettings.mutate(current, {
             onSuccess: (next): void => {
-                const parsedRules = next.guidelines ?? [];
+                const parsedRules = toStringArray(next.guidelines);
                 setRules(parsedRules);
+                setSelfAssignableRoleIds(
+                    toStringArray(next.selfAssignableRoleIds),
+                );
+                setWelcomeChannelIds(toStringArray(next.welcomeChannelIds));
                 setBaseline(
                     JSON.stringify({
                         ...next,
                         guidelines: parsedRules,
+                        selfAssignableRoleIds: toStringArray(
+                            next.selfAssignableRoleIds,
+                        ),
+                        welcomeChannelIds: toStringArray(
+                            next.welcomeChannelIds,
+                        ),
                     }),
                 );
             },

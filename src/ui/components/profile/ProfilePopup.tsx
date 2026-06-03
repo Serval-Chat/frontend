@@ -112,12 +112,12 @@ const ProfilePopupContent = ({
     const finalRoles = React.useMemo((): Role[] | undefined => {
         if (roles) return roles;
         if (!member || !serverRoles) return undefined;
-        return serverRoles.filter((r) => member.roles.includes(r._id));
+        return serverRoles.filter((r) => member.roles.includes(r.id));
     }, [roles, member, serverRoles]);
 
     const roleMap = React.useMemo((): Map<string, Role> => {
         const map = new Map<string, Role>();
-        serverRoles?.forEach((r): Map<string, Role> => map.set(r._id, r));
+        serverRoles?.forEach((r): Map<string, Role> => map.set(r.id, r));
         return map;
     }, [serverRoles]);
 
@@ -128,8 +128,8 @@ const ProfilePopupContent = ({
         const everyoneRole = serverRoles.find(
             (r): boolean => r.name === '@everyone',
         );
-        if (everyoneRole && !memberRoleIds.includes(everyoneRole._id)) {
-            memberRoleIds.push(everyoneRole._id);
+        if (everyoneRole && !memberRoleIds.includes(everyoneRole.id)) {
+            memberRoleIds.push(everyoneRole.id);
         }
         return getHighestColorRoleForMember(memberRoleIds, roleMap);
     }, [role, member, roleMap, serverRoles]);
@@ -141,8 +141,8 @@ const ProfilePopupContent = ({
         const everyoneRole = serverRoles.find(
             (r): boolean => r.name === '@everyone',
         );
-        if (everyoneRole && !memberRoleIds.includes(everyoneRole._id)) {
-            memberRoleIds.push(everyoneRole._id);
+        if (everyoneRole && !memberRoleIds.includes(everyoneRole.id)) {
+            memberRoleIds.push(everyoneRole.id);
         }
         return getHighestRoleWithIconForMember(memberRoleIds, roleMap);
     }, [iconRole, member, roleMap, serverRoles]);
@@ -162,13 +162,13 @@ const ProfilePopupContent = ({
         (user && 'customStatus' in user ? user.customStatus?.emoji : undefined);
 
     const { data: currentUser } = useMe();
-    const isOwner = serverDetails?.ownerId === currentUser?._id;
+    const isOwner = serverDetails?.ownerId === currentUser?.id;
     const myMember = members?.find(
-        (m): boolean => m.userId === currentUser?._id,
+        (m): boolean => m.userId === currentUser?.id,
     );
     const myRoles = serverRoles?.filter(
         (r): boolean =>
-            myMember?.roles.includes(r._id) || r.name === '@everyone',
+            myMember?.roles.includes(r.id) || r.name === '@everyone',
     );
     const canManageRoles =
         isOwner ||

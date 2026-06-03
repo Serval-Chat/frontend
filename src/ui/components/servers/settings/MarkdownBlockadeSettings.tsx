@@ -90,7 +90,7 @@ export const MarkdownBlockadeSettings = ({
 
     const targetOptions = useMemo(() => {
         const roleOptions = roles.map((role: Role) => ({
-            id: `role:${role._id}`,
+            id: `role:${role.id}`,
             label: role.name,
             icon: <RoleDot role={role} />,
             description: 'Role',

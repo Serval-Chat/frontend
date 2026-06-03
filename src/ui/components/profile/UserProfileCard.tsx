@@ -120,7 +120,7 @@ const RoleSelector = ({
                     {rolesToDisplay.length > 0 ? (
                         rolesToDisplay.map((role) => {
                             const hasRole = userRoles?.some(
-                                (ur): boolean => ur._id === role._id,
+                                (ur): boolean => ur.id === role.id,
                             );
                             const canManageThisRole =
                                 isOwner ||
@@ -136,12 +136,12 @@ const RoleSelector = ({
                                             : 'cursor-not-allowed opacity-50',
                                     )}
                                     disabled={!canManageThisRole}
-                                    key={role._id}
+                                    key={role.id}
                                     onClick={(): void => {
                                         if (hasRole) {
-                                            onRemoveRole(role._id);
+                                            onRemoveRole(role.id);
                                         } else {
-                                            onAddRole(role._id);
+                                            onAddRole(role.id);
                                         }
                                     }}
                                 >
@@ -205,7 +205,7 @@ export const UserProfileCard = ({
     const { mutate: addRole } = useAddRoleToMember(serverId || '');
     const { mutate: removeRole } = useRemoveRoleFromMember(serverId || '');
 
-    const userId = propUserId || user?._id;
+    const userId = propUserId || user?.id;
     const presence = useAppSelector((state) =>
         userId ? state.presence.users[userId] : undefined,
     );
@@ -313,7 +313,7 @@ export const UserProfileCard = ({
                     {user?.badges && user?.badges.length > 0 && (
                         <Box className="mt-2 flex flex-wrap gap-1.5">
                             {user.badges.map((badge) => (
-                                <UserBadge badge={badge} key={badge._id} />
+                                <UserBadge badge={badge} key={badge.id} />
                             ))}
                         </Box>
                     )}
@@ -498,7 +498,7 @@ export const UserProfileCard = ({
                                                         canManageThisRole &&
                                                         'hover:border-danger/30 hover:bg-danger/5',
                                                 )}
-                                                key={r._id}
+                                                key={r.id}
                                             >
                                                 <RoleDot role={r} />
                                                 <Text
@@ -516,7 +516,7 @@ export const UserProfileCard = ({
                                                             onClick={(): void =>
                                                                 removeRole({
                                                                     userId,
-                                                                    roleId: r._id,
+                                                                    roleId: r.id,
                                                                 })
                                                             }
                                                         >
@@ -530,13 +530,13 @@ export const UserProfileCard = ({
                                             <Tooltip
                                                 className="z-[10000] max-w-[200px] font-normal whitespace-normal"
                                                 content={r.description}
-                                                key={r._id}
+                                                key={r.id}
                                                 position="top"
                                             >
                                                 {pill}
                                             </Tooltip>
                                         ) : (
-                                            <React.Fragment key={r._id}>
+                                            <React.Fragment key={r.id}>
                                                 {pill}
                                             </React.Fragment>
                                         );
@@ -545,28 +545,28 @@ export const UserProfileCard = ({
                     </Box>
                 )}
 
-                {currentUser?._id !== user?._id && !user?.isBot && (
+                {currentUser?.id !== user?.id && !user?.isBot && (
                     <Box className="mt-4 flex gap-2">
                         <Button
                             className="flex-1 gap-2"
                             size="sm"
                             onClick={(): void => {
-                                if (user?._id) {
-                                    void navigate(`/chat/@user/${user._id}`);
+                                if (user?.id) {
+                                    void navigate(`/chat/@user/${user.id}`);
                                 }
                             }}
                         >
                             <MessageSquare size={14} />
                             Message
                         </Button>
-                        {friends?.some((f): boolean => f._id === user?._id) ? (
+                        {friends?.some((f): boolean => f.id === user?.id) ? (
                             <Button
                                 className="gap-2"
                                 size="sm"
                                 variant="danger"
                                 onClick={(): void => {
-                                    if (user?._id) {
-                                        removeFriend(user._id);
+                                    if (user?.id) {
+                                        removeFriend(user.id);
                                     }
                                 }}
                             >
@@ -653,7 +653,7 @@ export const UserProfileCard = ({
                                 {adminData.servers.map((server) => (
                                     <div
                                         className="flex items-center gap-2 rounded-lg border border-border-subtle/50 bg-bg-secondary/30 p-1.5 transition-colors hover:bg-bg-secondary/50"
-                                        key={server._id}
+                                        key={server.id}
                                     >
                                         <div className="h-6 w-6 flex-shrink-0 overflow-hidden rounded bg-bg-secondary">
                                             {server.icon ? (

@@ -28,7 +28,7 @@ export const useEmoji = (
                 'emojis',
                 'all',
             ]);
-            return allEmojis?.find((e): boolean => e._id === emojiId);
+            return allEmojis?.find((e): boolean => e.id === emojiId);
         },
         staleTime: Infinity, // Emojis are static
         ...options,

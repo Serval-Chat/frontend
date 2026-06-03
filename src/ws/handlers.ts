@@ -125,7 +125,7 @@ const updateCachedFriend = <T extends Friend | User>(
 
     let changed = false;
     const next = old.map((friend): T => {
-        if (friend._id !== friendId) return friend;
+        if (friend.id !== friendId) return friend;
         const updated = update(friend);
         if (updated !== friend) changed = true;
         return updated;
@@ -145,7 +145,7 @@ const addMessageToInfiniteCache = (
             if (!oldData) return oldData;
 
             const firstPage = oldData.pages[0] || [];
-            if (firstPage.some((msg): boolean => msg._id === newMessage._id)) {
+            if (firstPage.some((msg): boolean => msg.id === newMessage.id)) {
                 return oldData;
             }
 
@@ -158,7 +158,7 @@ const addMessageToInfiniteCache = (
 };
 
 const convertDmToChatMessage = (message: IMessageDm): ChatMessage => ({
-    _id: message._id ?? message.messageId,
+    id: message.id ?? message.messageId,
     text: message.text,
     createdAt: message.createdAt,
     senderId: message.senderId,
@@ -192,7 +192,7 @@ const convertDmToChatMessage = (message: IMessageDm): ChatMessage => ({
 const convertServerMessageToChatMessage = (
     message: IMessageServer,
 ): ChatMessage => ({
-    _id: message._id ?? message.messageId,
+    id: message.id ?? message.messageId,
     text: message.text,
     createdAt: message.createdAt,
     senderId: message.senderId,
@@ -341,13 +341,13 @@ const resolveNotificationProfilePicture = (
     const friendProfiles =
         queryClient.getQueryData<User[]>(FRIEND_PROFILES_QUERY_KEY) ?? [];
     const friendProfile = friendProfiles.find(
-        (friend): boolean => friend._id === message.senderId,
+        (friend): boolean => friend.id === message.senderId,
     );
     if (friendProfile?.profilePicture) return friendProfile.profilePicture;
 
     const friends = queryClient.getQueryData<Friend[]>(FRIENDS_QUERY_KEY) ?? [];
     const friend = friends.find(
-        (friendItem): boolean => friendItem._id === message.senderId,
+        (friendItem): boolean => friendItem.id === message.senderId,
     );
     if (friend?.profilePicture) return friend.profilePicture;
 
@@ -385,7 +385,7 @@ const buildNotificationUser = ({
     username?: string;
     profilePicture?: string | null;
 }): User => ({
-    _id: id,
+    id: id,
     login: username || 'Unknown',
     username: username || 'Unknown',
     displayName: username || 'Unknown',
@@ -399,7 +399,7 @@ const buildNotificationMessage = (
     username?: string,
 ): ProcessedChatMessage => ({
     ...message,
-    _id: message._id || `notification-${message.senderId}-${message.createdAt}`,
+    id: message.id || `notification-${message.senderId}-${message.createdAt}`,
     text: message.text ?? '',
     createdAt: message.createdAt || new Date().toISOString(),
     stickerId: message.stickerId ?? null,
@@ -480,7 +480,7 @@ export const setupGlobalWsHandlers = (
     const me = queryClient.getQueryData<User>(['me']);
     syncSoundCache(me);
     let currentUser: { id: string; username: string } | null = me
-        ? { id: me._id, username: me.username }
+        ? { id: me.id, username: me.username }
         : null;
 
     const cleanups: (() => void)[] = [];
@@ -601,7 +601,7 @@ export const setupGlobalWsHandlers = (
                         if (!oldChannels) return oldChannels;
                         return oldChannels.map(
                             (channel): Channel =>
-                                channel._id === payload.channelId
+                                channel.id === payload.channelId
                                     ? {
                                           ...channel,
                                           lastMessageAt:
@@ -647,7 +647,7 @@ export const setupGlobalWsHandlers = (
             if (payload.senderId !== currentUser?.id) {
                 playNotificationSound(queryClient);
                 showDedupedInAppNotification({
-                    id: `dm-${payload._id ?? payload.messageId}`,
+                    id: `dm-${payload.id ?? payload.messageId}`,
                     kind: 'dm',
                     title: '',
                     chatMessage: buildNotificationMessage(
@@ -685,7 +685,7 @@ export const setupGlobalWsHandlers = (
                 if (!currentUser) return;
 
                 const dummyMessage: ChatMessage = {
-                    _id: `ephemeral-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+                    id: `ephemeral-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
                     serverId: payload.serverId,
                     channelId: payload.channelId,
                     text: payload.text,
@@ -735,7 +735,7 @@ export const setupGlobalWsHandlers = (
                 const server = payload.serverId
                     ? servers?.find(
                           (candidate): boolean =>
-                              candidate._id === payload.serverId,
+                              candidate.id === payload.serverId,
                       )
                     : undefined;
                 playNotificationSound(queryClient);
@@ -870,7 +870,7 @@ export const setupGlobalWsHandlers = (
                             friend,
                             ...old.filter(
                                 (cachedFriend): boolean =>
-                                    cachedFriend._id !== friend._id,
+                                    cachedFriend.id !== friend.id,
                             ),
                         ];
                     },
@@ -887,7 +887,7 @@ export const setupGlobalWsHandlers = (
                     (old): Friend[] | undefined => {
                         if (!old) return old;
                         return old.filter(
-                            (friend): boolean => friend._id !== friendId,
+                            (friend): boolean => friend.id !== friendId,
                         );
                     },
                 );
@@ -903,7 +903,7 @@ export const setupGlobalWsHandlers = (
                 return [
                     ...old.filter(
                         (cachedChannel): boolean =>
-                            cachedChannel._id !== channel._id,
+                            cachedChannel.id !== channel.id,
                     ),
                     channel,
                 ].sort((a, b): number => a.position - b.position);
@@ -1788,7 +1788,7 @@ export const setupGlobalWsHandlers = (
                         (page: ChatMessage[]): ChatMessage[] =>
                             page.map(
                                 (msg): ChatMessage =>
-                                    msg._id === payload.messageId
+                                    msg.id === payload.messageId
                                         ? {
                                               ...msg,
                                               text: payload.text,
@@ -1831,7 +1831,7 @@ export const setupGlobalWsHandlers = (
                             (page: ChatMessage[]): ChatMessage[] =>
                                 page.map(
                                     (msg): ChatMessage =>
-                                        msg._id === payload.messageId
+                                        msg.id === payload.messageId
                                             ? {
                                                   ...msg,
                                                   text: payload.text,

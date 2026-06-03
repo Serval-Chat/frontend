@@ -3,7 +3,7 @@ export interface WarningIssuedBy {
 }
 
 export interface Warning {
-    _id: string;
+    id: string;
     userId: string;
     message: string;
     issuedBy: WarningIssuedBy;

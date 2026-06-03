@@ -69,7 +69,7 @@ export interface OutgoingPoll {
 }
 
 export interface ChatMessage {
-    _id: string;
+    id: string;
     text: string;
     createdAt: string;
     senderId: string;

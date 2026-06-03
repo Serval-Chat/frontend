@@ -3,7 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 export type PingExportMessageDTO = {
-    _id: string;
+    id: string;
     text: string;
     type: PingExportMessageDTO.type;
 };

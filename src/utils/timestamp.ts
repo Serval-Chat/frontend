@@ -64,7 +64,7 @@ export function formatDate(date: string | Date): string {
 interface Message {
     senderId?: string;
     user?: {
-        _id?: string;
+        id?: string;
         username?: string;
     };
     createdAt: string | Date;
@@ -80,7 +80,7 @@ export function shouldGroupMessages(
     currentMsg: Message,
 ): boolean {
     const getSenderId = (msg: Message): string | undefined =>
-        msg.senderId || msg.user?._id || msg.user?.username;
+        msg.senderId || msg.user?.id || msg.user?.username;
 
     const id1 = getSenderId(prevMsg);
     const id2 = getSenderId(currentMsg);

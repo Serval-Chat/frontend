@@ -6,7 +6,7 @@ import type { MessageAttachmentResponseDTO } from './MessageAttachmentResponseDT
 import type { MessageReactionDTO } from './MessageReactionDTO';
 
 export type ServerMessageResponseDTO = {
-    _id: string;
+    id: string;
     serverId: string;
     channelId: string;
     senderId: string;

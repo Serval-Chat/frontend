@@ -134,7 +134,7 @@ export const ChannelWebhookSettings = ({
                             webhooks.map((webhook) => (
                                 <div
                                     className="space-y-3 rounded-lg border border-border-subtle bg-bg-secondary p-4"
-                                    key={webhook._id}
+                                    key={webhook.id}
                                 >
                                     <div className="flex items-center justify-between gap-3">
                                         <div className="flex min-w-0 items-center gap-3">
@@ -181,13 +181,13 @@ export const ChannelWebhookSettings = ({
                                             loading={
                                                 deleteWebhook.isPending &&
                                                 deleteWebhook.variables ===
-                                                    webhook._id
+                                                    webhook.id
                                             }
                                             size="sm"
                                             variant="danger"
                                             onClick={(): void =>
                                                 setPendingDeleteWebhookId(
-                                                    webhook._id,
+                                                    webhook.id,
                                                 )
                                             }
                                         >
@@ -218,13 +218,13 @@ export const ChannelWebhookSettings = ({
                                                 variant="ghost"
                                                 onClick={(): void =>
                                                     handleCopy(
-                                                        webhook._id,
+                                                        webhook.id,
                                                         webhook.token,
                                                     )
                                                 }
                                             >
                                                 {copiedWebhookId ===
-                                                webhook._id ? (
+                                                webhook.id ? (
                                                     <Check className="h-4 w-4 text-primary" />
                                                 ) : (
                                                     <Copy className="h-4 w-4" />

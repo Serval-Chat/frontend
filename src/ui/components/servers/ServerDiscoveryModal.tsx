@@ -98,7 +98,7 @@ export const ServerDiscoveryModal = ({
     const { data: joinedServers = [] } = useServers();
     const joinedServerIds = useMemo(
         (): Set<string> =>
-            new Set(joinedServers.map((server): string => server._id)),
+            new Set(joinedServers.map((server): string => server.id)),
         [joinedServers],
     );
     const { mutate: joinServer, isPending: isJoining } = useJoinServer();

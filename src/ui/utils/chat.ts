@@ -23,7 +23,7 @@ export const resolveWebhookUser = (msg: ChatMessage): User | undefined => {
                 ? `/api/v1/embed/proxy?url=${encodeURIComponent(rawAvatar)}`
                 : rawAvatar;
         return {
-            _id: `webhook-${msg._id}`,
+            id: `webhook-${msg.id}`,
             username: msg.webhookUsername,
             displayName: msg.webhookUsername,
             profilePicture: avatarUrl,
@@ -134,13 +134,13 @@ export const resolveReplyTo = (
         }
 
         replyTo = {
-            _id: msg.referenced_message._id,
+            id: msg.referenced_message.id,
             text: msg.referenced_message.text,
             attachments: msg.referenced_message.attachments,
             user:
                 referencedUser ||
                 ({
-                    _id: msg.referenced_message.senderId,
+                    id: msg.referenced_message.senderId,
                     username: 'Unknown',
                 } as User),
             role: undefined,
@@ -169,13 +169,13 @@ export const resolveReplyTo = (
         }
 
         replyTo = {
-            _id: parent._id,
+            id: parent.id,
             text: parent.text,
             attachments: parent.attachments,
             user:
                 referencedUser ||
                 ({
-                    _id: parent.senderId,
+                    id: parent.senderId,
                     username: 'Unknown',
                 } as User),
             role: undefined,
@@ -193,9 +193,7 @@ export const resolveReplyTo = (
         if (repliedId) {
             const repliedMsg =
                 messageById?.get(repliedId) ??
-                allMessages.find(
-                    (m): boolean => m._id.toString() === repliedId,
-                );
+                allMessages.find((m): boolean => m.id.toString() === repliedId);
 
             if (repliedMsg) {
                 let referencedUser: User | undefined = undefined;
@@ -207,13 +205,13 @@ export const resolveReplyTo = (
                 }
 
                 replyTo = {
-                    _id: repliedMsg._id,
+                    id: repliedMsg.id,
                     text: repliedMsg.text,
                     attachments: repliedMsg.attachments,
                     user:
                         referencedUser ||
                         ({
-                            _id: repliedMsg.senderId,
+                            id: repliedMsg.senderId,
                             username: 'Unknown',
                         } as User),
                     role: undefined,
@@ -231,10 +229,10 @@ export const resolveReplyTo = (
 
     if (!replyTo && msg.repliedTo) {
         replyTo = {
-            _id: msg.repliedTo.messageId,
+            id: msg.repliedTo.messageId,
             text: msg.repliedTo.text,
             user: {
-                _id: msg.repliedTo.senderId,
+                id: msg.repliedTo.senderId,
                 username: msg.repliedTo.senderUsername || 'Unknown',
                 displayName: msg.repliedTo.senderUsername || 'Unknown',
                 isBot: false,
@@ -246,11 +244,11 @@ export const resolveReplyTo = (
     }
 
     if (replyTo) {
-        const replySenderId = replyTo.user?._id?.toString();
+        const replySenderId = replyTo.user?.id?.toString();
         if (replySenderId) {
             if (selectedFriendId) {
                 replyTo.user =
-                    replySenderId === currentUser?._id
+                    replySenderId === currentUser?.id
                         ? (currentUser as User)
                         : (friendUser as User);
             } else if (selectedServerId) {
@@ -264,7 +262,7 @@ export const resolveReplyTo = (
 
     if (replyTo && !replyTo.user) {
         replyTo.user = {
-            _id: (msg.replyToId || msg.repliedToMessageId) as string,
+            id: (msg.replyToId || msg.repliedToMessageId) as string,
             username: 'Unknown',
         } as User;
     }

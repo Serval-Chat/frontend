@@ -213,7 +213,7 @@ export const ServerInviteSettings = ({
                         </TableHeader>
                         <TableBody>
                             {invites.map((invite) => (
-                                <TableRow key={invite._id}>
+                                <TableRow key={invite.id}>
                                     <TableCell monospace>
                                         {invite.customPath || invite.code}
                                     </TableCell>
@@ -246,7 +246,7 @@ export const ServerInviteSettings = ({
                                                 title="Delete"
                                                 variant="ghost"
                                                 onClick={(): void =>
-                                                    handleDelete(invite._id)
+                                                    handleDelete(invite.id)
                                                 }
                                             >
                                                 <Trash2 className="text-status-error h-4 w-4" />

@@ -15,8 +15,8 @@ export const DMSidebarSection = ({ friend, me }: DMSidebarSectionProps) => (
             Direct Message
         </div>
         <div className="min-w-0 space-y-0">
-            <UserItem noFetch user={friend} userId={friend._id} />
-            <UserItem noFetch user={me} userId={me._id} />
+            <UserItem noFetch user={friend} userId={friend.id} />
+            <UserItem noFetch user={me} userId={me.id} />
         </div>
     </div>
 );

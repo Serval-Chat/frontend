@@ -13,12 +13,12 @@ vi.mock('@/utils/apiUrl', (): { resolveApiUrl: (url: string) => string } => ({
 describe('StyledUserName Bot Coloring', (): void => {
     it('uses role color when role is present', (): void => {
         const botUser: User = {
-            _id: 'bot-1',
+            id: 'bot-1',
             username: 'Bot',
             isBot: true,
         } as User;
         const coloredRole: Role = {
-            _id: 'role-1',
+            id: 'role-1',
             serverId: 'server-1',
             color: '#ff0000',
             name: 'Bot Role',
@@ -38,7 +38,7 @@ describe('StyledUserName Bot Coloring', (): void => {
 
     it('prioritizes role color over user gradient', (): void => {
         const user: User = {
-            _id: 'user-1',
+            id: 'user-1',
             username: 'Alpha',
             usernameGradient: {
                 enabled: true,
@@ -47,7 +47,7 @@ describe('StyledUserName Bot Coloring', (): void => {
             },
         } as User;
         const role: Role = {
-            _id: 'role-1',
+            id: 'role-1',
             serverId: 'server-1',
             name: 'Moderator',
             color: '#ff0000',
@@ -68,7 +68,7 @@ describe('StyledUserName Bot Coloring', (): void => {
 
     it('uses user gradient when no role color is provided', (): void => {
         const user: User = {
-            _id: 'user-2',
+            id: 'user-2',
             username: 'Gradient',
             usernameGradient: {
                 enabled: true,
@@ -96,9 +96,9 @@ describe('StyledUserName Bot Coloring', (): void => {
     });
 
     it('falls back to @everyone default role color', (): void => {
-        const user: User = { _id: 'user-3', username: 'EveryoneUser' } as User;
+        const user: User = { id: 'user-3', username: 'EveryoneUser' } as User;
         const everyoneRole: Role = {
-            _id: 'everyone-role',
+            id: 'everyone-role',
             serverId: 'server-1',
             name: '@everyone',
             color: '#99aab5',
@@ -118,7 +118,7 @@ describe('StyledUserName Bot Coloring', (): void => {
 
     it('does not apply user gradient when colors are disabled', (): void => {
         const user: User = {
-            _id: 'user-4',
+            id: 'user-4',
             username: 'NoColor',
             usernameGradient: {
                 enabled: true,
@@ -141,7 +141,7 @@ describe('StyledUserName Bot Coloring', (): void => {
 
     it('keeps role color and removes glow when custom colors and glow are disabled', (): void => {
         const user: User = {
-            _id: 'user-5',
+            id: 'user-5',
             username: 'RoleWins',
             usernameGradient: {
                 enabled: true,
@@ -155,7 +155,7 @@ describe('StyledUserName Bot Coloring', (): void => {
             },
         } as User;
         const role: Role = {
-            _id: 'role-2',
+            id: 'role-2',
             serverId: 'server-1',
             name: 'Member',
             color: '#ff0000',
@@ -179,7 +179,7 @@ describe('StyledUserName Bot Coloring', (): void => {
 
     it('does not use a disabled user glow color over role color', (): void => {
         const user: User = {
-            _id: 'user-6',
+            id: 'user-6',
             username: 'RoleGlow',
             usernameGradient: {
                 enabled: true,
@@ -193,7 +193,7 @@ describe('StyledUserName Bot Coloring', (): void => {
             },
         } as User;
         const role: Role = {
-            _id: 'role-3',
+            id: 'role-3',
             serverId: 'server-1',
             name: 'Administrator',
             color: '#e67e22',
@@ -218,7 +218,7 @@ describe('StyledUserName Bot Coloring', (): void => {
 
     it('does not use an enabled user glow color over role color', (): void => {
         const user: User = {
-            _id: 'user-7',
+            id: 'user-7',
             username: 'RoleGlowWins',
             usernameGradient: {
                 enabled: true,
@@ -232,7 +232,7 @@ describe('StyledUserName Bot Coloring', (): void => {
             },
         } as User;
         const role: Role = {
-            _id: 'role-4',
+            id: 'role-4',
             serverId: 'server-1',
             name: 'Administrator',
             color: '#e67e22',

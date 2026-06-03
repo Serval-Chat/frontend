@@ -21,7 +21,7 @@ export const PingItem = ({ ping, onClick }: PingItemProps) => {
     const { mutate: deletePing } = useDeletePing();
     const { data: servers } = useServers();
 
-    const server = servers?.find((s): boolean => s._id === ping.serverId);
+    const server = servers?.find((s): boolean => s.id === ping.serverId);
 
     const handleDelete = (e: React.MouseEvent): void => {
         e.stopPropagation();

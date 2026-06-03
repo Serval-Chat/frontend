@@ -14,7 +14,7 @@ export const ChannelBehaviourSettings = ({
 }: ChannelBehaviourSettingsProps) => {
     const { mutate: updateChannel, isPending } = useUpdateChannel(
         channel.serverId,
-        channel._id,
+        channel.id,
     );
 
     return (

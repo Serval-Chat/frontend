@@ -118,7 +118,7 @@ const ChannelRow = React.memo(
         const queryClient = useQueryClient();
         const { hasPermission, isLoading, permissions } = usePermissions(
             selectedServerId,
-            channel._id,
+            channel.id,
         );
         const canView = hasPermission('viewChannels');
         const canConnect = hasPermission('connect');
@@ -129,25 +129,25 @@ const ChannelRow = React.memo(
             void queryClient.prefetchInfiniteQuery({
                 queryKey: CHAT_QUERY_KEYS.channelMessages(
                     selectedServerId,
-                    channel._id,
+                    channel.id,
                     null,
                 ),
                 queryFn: ({ pageParam }) =>
                     chatApi.getChannelMessages(
                         selectedServerId,
-                        channel._id,
+                        channel.id,
                         PREFETCH_LIMIT,
                         pageParam as string | undefined,
                     ),
                 initialPageParam: undefined,
                 staleTime: Infinity,
             });
-        }, [queryClient, selectedServerId, channel._id, channel.type]);
+        }, [queryClient, selectedServerId, channel.id, channel.type]);
 
         // Only hide if loading is finished and canView is explicitly false
         if (!isLoading && !canView) {
             console.warn(
-                `[ChannelRow] Hiding channel "${channel.name}" (${channel._id}) - viewChannels=false.`,
+                `[ChannelRow] Hiding channel "${channel.name}" (${channel.id}) - viewChannels=false.`,
                 {
                     channelPermissionOverrides: channel.permissions,
                     computedPermissions: permissions,
@@ -167,7 +167,7 @@ const ChannelRow = React.memo(
             <ContextMenu
                 className="block w-full"
                 items={getChannelMenuItems(channel)}
-                key={channel._id}
+                key={channel.id}
             >
                 <ChannelItem
                     connectedUserIds={connectedUserIds}
@@ -175,10 +175,10 @@ const ChannelRow = React.memo(
                     emoji={channel.emoji}
                     emojiType={channel.emojiType}
                     icon={channel.icon}
-                    isActive={selectedChannelId === channel._id}
+                    isActive={selectedChannelId === channel.id}
                     isUnread={!!isUnread}
                     name={channel.name}
-                    pingCount={channelPings[channel._id]}
+                    pingCount={channelPings[channel.id]}
                     type={channel.type}
                     onClick={(): void => handleChannelClick(channel)}
                     onMouseEnter={handleMouseEnter}
@@ -266,7 +266,7 @@ export const ChannelList = ({
     useVoiceStates(selectedServerId);
 
     const existingCategoryIds = React.useMemo(
-        (): Set<string> => new Set(categories.map((cat): string => cat._id)),
+        (): Set<string> => new Set(categories.map((cat): string => cat.id)),
         [categories],
     );
     const hiddenChannels = React.useMemo(
@@ -302,10 +302,10 @@ export const ChannelList = ({
         if (isReordering || syncLock) return;
 
         const visibleCategories = categories.filter(
-            (category): boolean => !hiddenCategories.has(category._id),
+            (category): boolean => !hiddenCategories.has(category.id),
         );
         const visibleChannels = channels.filter((channel): boolean => {
-            if (hiddenChannels.has(channel._id)) return false;
+            if (hiddenChannels.has(channel.id)) return false;
             if (
                 channel.categoryId &&
                 hiddenCategories.has(channel.categoryId)
@@ -329,17 +329,17 @@ export const ChannelList = ({
                 !c.categoryId || !existingCategoryIds.has(c.categoryId),
         );
         uncategorized.forEach((c): number =>
-            newList.push({ type: 'channel', id: c._id, data: c }),
+            newList.push({ type: 'channel', id: c.id, data: c }),
         );
 
         // Add categories and their channels
         sortedCategories.forEach((cat): void => {
-            newList.push({ type: 'category', id: cat._id, data: cat });
+            newList.push({ type: 'category', id: cat.id, data: cat });
             const catChannels = sortedChannels.filter(
-                (c): boolean => c.categoryId === cat._id,
+                (c): boolean => c.categoryId === cat.id,
             );
             catChannels.forEach((c): number =>
-                newList.push({ type: 'channel', id: c._id, data: c }),
+                newList.push({ type: 'channel', id: c.id, data: c }),
             );
         });
 
@@ -359,7 +359,7 @@ export const ChannelList = ({
         if (!selectedChannelId || !selectedServerId) return;
 
         const channel = channels.find(
-            (c): boolean => c._id === selectedChannelId,
+            (c): boolean => c.id === selectedChannelId,
         );
         if (!channel) return;
 
@@ -499,12 +499,12 @@ export const ChannelList = ({
                     const channel = item.data;
                     if (channel.categoryId !== currentCategoryId) {
                         channelUpdates.push({
-                            id: channel._id,
+                            id: channel.id,
                             updates: { categoryId: currentCategoryId },
                         });
                     }
                     channelPositions.push({
-                        channelId: channel._id,
+                        channelId: channel.id,
                         position: channelPos++,
                     });
                 }
@@ -674,15 +674,15 @@ export const ChannelList = ({
                     const item2 = targetItem.data as Category;
 
                     await serversApi.reorderCategories(selectedServerId, [
-                        { categoryId: item1._id, position: item2.position },
-                        { categoryId: item2._id, position: item1.position },
+                        { categoryId: item1.id, position: item2.position },
+                        { categoryId: item2.id, position: item1.position },
                     ]);
                 } else {
                     const item1 = itemToMove.data as Channel;
                     const item2 = targetItem.data as Channel;
                     await serversApi.reorderChannels(selectedServerId, [
-                        { channelId: item1._id, position: item2.position },
-                        { channelId: item2._id, position: item1.position },
+                        { channelId: item1.id, position: item2.position },
+                        { channelId: item2.id, position: item1.position },
                     ]);
                 }
             } catch (error) {
@@ -722,7 +722,7 @@ export const ChannelList = ({
                     label: 'Copy Channel Link',
                     icon: LinkIcon,
                     onClick: (): void => {
-                        const url = `${window.location.origin}/chat/@server/${channel.serverId}/channel/${channel._id}`;
+                        const url = `${window.location.origin}/chat/@server/${channel.serverId}/channel/${channel.id}`;
                         void navigator.clipboard.writeText(url);
                     },
                 },
@@ -730,7 +730,7 @@ export const ChannelList = ({
                     label: 'Copy Channel ID',
                     icon: Copy,
                     onClick: (): void => {
-                        void navigator.clipboard.writeText(channel._id);
+                        void navigator.clipboard.writeText(channel.id);
                     },
                 },
             ];
@@ -751,7 +751,7 @@ export const ChannelList = ({
                                         conversation: {
                                             type: 'channel',
                                             serverId: channel.serverId,
-                                            channelId: channel._id,
+                                            channelId: channel.id,
                                         },
                                     }),
                                 );
@@ -767,7 +767,7 @@ export const ChannelList = ({
                                         conversation: {
                                             type: 'channel',
                                             serverId: channel.serverId,
-                                            channelId: channel._id,
+                                            channelId: channel.id,
                                         },
                                     }),
                                 );
@@ -794,7 +794,7 @@ export const ChannelList = ({
                         )
                         .sort((a, b): number => a.position - b.position);
                     const index = siblings.findIndex(
-                        (c): boolean => c._id === channel._id,
+                        (c): boolean => c.id === channel.id,
                     );
 
                     items.push({ type: 'divider' });
@@ -807,7 +807,7 @@ export const ChannelList = ({
                                 void handleMoveItemMobile(
                                     {
                                         type: 'channel',
-                                        id: channel._id,
+                                        id: channel.id,
                                         data: channel,
                                     },
                                     'up',
@@ -822,7 +822,7 @@ export const ChannelList = ({
                                 void handleMoveItemMobile(
                                     {
                                         type: 'channel',
-                                        id: channel._id,
+                                        id: channel.id,
                                         data: channel,
                                     },
                                     'down',
@@ -837,7 +837,7 @@ export const ChannelList = ({
                         label: 'Uncategorized',
                         icon: Folder,
                         onClick: (): undefined =>
-                            void handleMoveToCategory(channel._id, null),
+                            void handleMoveToCategory(channel.id, null),
                     },
                     ...[...categoriesRef.current]
                         .sort((a, b): number => a.position - b.position)
@@ -845,7 +845,7 @@ export const ChannelList = ({
                             label: cat.name,
                             icon: Folder,
                             onClick: (): undefined =>
-                                void handleMoveToCategory(channel._id, cat._id),
+                                void handleMoveToCategory(channel.id, cat.id),
                         })),
                 ];
 
@@ -858,7 +858,7 @@ export const ChannelList = ({
                         const targetCat = categoriesRef.current.find(
                             (c): boolean => c.name === opt.label,
                         );
-                        return targetCat?._id !== currentCatId;
+                        return targetCat?.id !== currentCatId;
                     }
                     return false;
                 });
@@ -888,7 +888,7 @@ export const ChannelList = ({
                     label: 'Copy Category ID',
                     icon: Copy,
                     onClick: (): void => {
-                        void navigator.clipboard.writeText(category._id);
+                        void navigator.clipboard.writeText(category.id);
                     },
                 },
             ];
@@ -907,7 +907,7 @@ export const ChannelList = ({
                         (a, b): number => a.position - b.position,
                     );
                     const index = siblings.findIndex(
-                        (c): boolean => c._id === category._id,
+                        (c): boolean => c.id === category.id,
                     );
 
                     const moveItems: ContextMenuItem[] = [];
@@ -919,7 +919,7 @@ export const ChannelList = ({
                                 void handleMoveItemMobile(
                                     {
                                         type: 'category',
-                                        id: category._id,
+                                        id: category.id,
                                         data: category,
                                     },
                                     'up',
@@ -934,7 +934,7 @@ export const ChannelList = ({
                                 void handleMoveItemMobile(
                                     {
                                         type: 'category',
-                                        id: category._id,
+                                        id: category.id,
                                         data: category,
                                     },
                                     'down',
@@ -1009,15 +1009,15 @@ export const ChannelList = ({
                     dispatch(
                         joinVoiceRoom({
                             serverId: selectedServerId,
-                            channelId: channel._id,
+                            channelId: channel.id,
                         }),
                     );
 
-                    if (me?._id) {
+                    if (me?.id) {
                         dispatch(
                             addVoiceParticipant({
-                                channelId: channel._id,
-                                userId: me._id,
+                                channelId: channel.id,
+                                userId: me.id,
                             }),
                         );
                     }
@@ -1050,7 +1050,7 @@ export const ChannelList = ({
             if (selectedServerId) {
                 React.startTransition((): void => {
                     void navigate(
-                        `/chat/@server/${selectedServerId}/channel/${channel._id}`,
+                        `/chat/@server/${selectedServerId}/channel/${channel.id}`,
                     );
                 });
             }
@@ -1061,7 +1061,7 @@ export const ChannelList = ({
             syncLock,
             selectedServerId,
             dispatch,
-            me?._id,
+            me?.id,
             navigate,
         ],
     );
@@ -1103,7 +1103,7 @@ export const ChannelList = ({
                             if (item.type === 'category') {
                                 const category = item.data;
                                 const isCollapsed =
-                                    collapsedCategories[category._id];
+                                    collapsedCategories[category.id];
 
                                 return (
                                     <Reorder.Item
@@ -1156,9 +1156,7 @@ export const ChannelList = ({
                                                 tabIndex={0}
                                                 onClick={(e): void => {
                                                     e.stopPropagation();
-                                                    toggleCategory(
-                                                        category._id,
-                                                    );
+                                                    toggleCategory(category.id);
                                                 }}
                                                 onKeyDown={(e): void => {
                                                     if (
@@ -1166,7 +1164,7 @@ export const ChannelList = ({
                                                         e.key === ' '
                                                     ) {
                                                         toggleCategory(
-                                                            category._id,
+                                                            category.id,
                                                         );
                                                     }
                                                 }}
@@ -1215,7 +1213,7 @@ export const ChannelList = ({
                                                             ): void => {
                                                                 e.stopPropagation();
                                                                 setCreateCategoryId(
-                                                                    category._id,
+                                                                    category.id,
                                                                 );
                                                                 setCreateModalOpen(
                                                                     true,
@@ -1288,7 +1286,7 @@ export const ChannelList = ({
                                             connectedUserIds={
                                                 channel.type === 'voice'
                                                     ? voiceParticipants[
-                                                          channel._id
+                                                          channel.id
                                                       ]
                                                     : undefined
                                             }

@@ -62,11 +62,11 @@ const mockBotInfo = {
 };
 
 const mockServers = [
-    { _id: 'srv1', name: 'My Server', canManage: true },
-    { _id: 'srv2', name: 'Another Server', canManage: true },
+    { id: 'srv1', name: 'My Server', canManage: true },
+    { id: 'srv2', name: 'Another Server', canManage: true },
 ];
 
-const mockUser = { _id: 'u1', username: 'testuser' };
+const mockUser = { id: 'u1', username: 'testuser' };
 
 function renderPage(search = '?client_id=abc123'): RenderResult {
     const queryClient = new QueryClient({

@@ -16,7 +16,7 @@ export const UserProfilePopupDemo = () => {
     const triggerRef = useRef<HTMLDivElement>(null);
 
     const mockUser: User = {
-        _id: 'mock-1',
+        id: 'mock-1',
         username: 'catflare',
         displayName: 'Catflare',
         login: 'nekoflare',
@@ -29,7 +29,6 @@ export const UserProfilePopupDemo = () => {
         pronouns: 'she/her',
         badges: [
             {
-                _id: 'bad-1',
                 id: 'early_supporter',
                 name: 'Early Supporter',
                 description: 'Supported the project in its early stages.',
@@ -38,7 +37,6 @@ export const UserProfilePopupDemo = () => {
                 createdAt: new Date().toISOString(),
             },
             {
-                _id: 'bad-2',
                 id: 'developer',
                 name: 'Developer',
                 description:
@@ -48,7 +46,6 @@ export const UserProfilePopupDemo = () => {
                 createdAt: new Date().toISOString(),
             },
             {
-                _id: 'bad-3',
                 id: 'serval_enthusiast',
                 name: 'Serval Enthusiast',
                 description: 'Really, really likes servals.',
@@ -96,7 +93,7 @@ export const UserProfilePopupDemo = () => {
                         joinedAt={new Date('2024-05-20').toISOString()}
                         triggerRef={triggerRef}
                         user={mockUser}
-                        userId={mockUser._id}
+                        userId={mockUser.id}
                         onClose={(): void => setIsPopupOpen(false)}
                     />
                 </div>
@@ -115,21 +112,21 @@ export const UserProfilePopupDemo = () => {
                         noFetch
                         allRoles={[
                             {
-                                _id: 'role-1',
+                                id: 'role-1',
                                 name: 'Admin',
                                 color: '#FF0000',
                                 position: 0,
                                 serverId: 's1',
                             },
                             {
-                                _id: 'role-2',
+                                id: 'role-2',
                                 name: 'Moderator',
                                 color: '#00FF00',
                                 position: 1,
                                 serverId: 's1',
                             },
                             {
-                                _id: 'role-3',
+                                id: 'role-3',
                                 name: 'idk',
                                 color: null,
                                 colors: ['#6b6cc2', '#c300ff'],
@@ -138,13 +135,13 @@ export const UserProfilePopupDemo = () => {
                             },
                         ]}
                         user={mockUser}
-                        userId={mockUser._id}
+                        userId={mockUser.id}
                     />
                     <UserItem
                         noFetch
                         user={
                             {
-                                _id: 'mock-2',
+                                id: 'mock-2',
                                 username: 'RegularUser',
                                 createdAt: new Date(),
                                 customStatus: { text: 'Just chilling' },

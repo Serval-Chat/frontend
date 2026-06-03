@@ -173,7 +173,7 @@ export const BotAuthorize = (): ReactNode => {
     const manageableServers =
         servers?.filter((s): boolean | undefined => s.canManage) ?? [];
     const selectedServer = manageableServers.find(
-        (s): boolean => s._id === selectedServerId,
+        (s): boolean => s.id === selectedServerId,
     );
 
     const handleAuthorize = (): void => {
@@ -403,14 +403,14 @@ export const BotAuthorize = (): ReactNode => {
                                                                 className={cn(
                                                                     'flex w-full items-center gap-2.5 px-3.5 py-2.5 text-left text-sm transition-colors hover:bg-bg-secondary/50',
                                                                     selectedServerId ===
-                                                                        server._id &&
+                                                                        server.id &&
                                                                         'bg-primary/10',
                                                                 )}
-                                                                key={server._id}
+                                                                key={server.id}
                                                                 type="button"
                                                                 onClick={(): void => {
                                                                     setSelectedServerId(
-                                                                        server._id,
+                                                                        server.id,
                                                                     );
                                                                     setDropdownOpen(
                                                                         false,
@@ -438,7 +438,7 @@ export const BotAuthorize = (): ReactNode => {
                                                                     }
                                                                 </span>
                                                                 {selectedServerId ===
-                                                                    server._id && (
+                                                                    server.id && (
                                                                     <Check
                                                                         className="text-primary"
                                                                         size={

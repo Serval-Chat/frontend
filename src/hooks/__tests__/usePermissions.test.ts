@@ -29,17 +29,17 @@ describe('usePermissions', (): void => {
         vi.clearAllMocks();
     });
 
-    const mockMe = { _id: 'user1' } as User;
-    const mockServer = { _id: 'server1', ownerId: 'owner1' } as Server;
+    const mockMe = { id: 'user1' } as User;
+    const mockServer = { id: 'server1', ownerId: 'owner1' } as Server;
     const mockMember = { userId: 'user1', roles: ['role1'] } as ServerMember;
     const mockEveryoneRole = {
-        _id: 'everyone_id',
+        id: 'everyone_id',
         name: '@everyone',
         position: 0,
         permissions: { sendMessages: true },
     } as Role;
     const mockRole1 = {
-        _id: 'role1',
+        id: 'role1',
         name: 'Role 1',
         position: 1,
         permissions: { sendMessages: false },
@@ -76,7 +76,7 @@ describe('usePermissions', (): void => {
         vi.mocked(ServerQueries.useChannels).mockReturnValue({
             data: [
                 {
-                    _id: 'channel1',
+                    id: 'channel1',
                     permissions: {
                         role1: { sendMessages: false },
                         everyone_id: { sendMessages: false },
@@ -103,13 +103,13 @@ describe('usePermissions', (): void => {
         vi.mocked(ServerQueries.useRoles).mockReturnValue({
             data: [
                 {
-                    _id: 'everyone_id',
+                    id: 'everyone_id',
                     name: '@everyone',
                     position: 0,
                     permissions: { sendMessages: false },
                 },
                 {
-                    _id: 'role1',
+                    id: 'role1',
                     name: 'Role 1',
                     position: 1,
                     permissions: { sendMessages: false },
@@ -120,7 +120,7 @@ describe('usePermissions', (): void => {
         vi.mocked(ServerQueries.useChannels).mockReturnValue({
             data: [
                 {
-                    _id: 'channel1',
+                    id: 'channel1',
                     permissions: {
                         role1: { sendMessages: true },
                     },
@@ -140,7 +140,7 @@ describe('usePermissions', (): void => {
         vi.mocked(ServerQueries.useChannels).mockReturnValue({
             data: [
                 {
-                    _id: 'channel1',
+                    id: 'channel1',
                     permissions: {
                         everyone: { sendMessages: false },
                     },
@@ -161,7 +161,7 @@ describe('usePermissions', (): void => {
         vi.mocked(ServerQueries.useChannels).mockReturnValue({
             data: [
                 {
-                    _id: 'channel1',
+                    id: 'channel1',
                     categoryId: 'cat1',
                     permissions: {}, // no channel override
                 } as never,
@@ -170,7 +170,7 @@ describe('usePermissions', (): void => {
         vi.mocked(ServerQueries.useCategories).mockReturnValue({
             data: [
                 {
-                    _id: 'cat1',
+                    id: 'cat1',
                     permissions: { role1: { sendMessages: false } },
                 } as never,
             ],
@@ -188,7 +188,7 @@ describe('usePermissions', (): void => {
         vi.mocked(ServerQueries.useChannels).mockReturnValue({
             data: [
                 {
-                    _id: 'channel1',
+                    id: 'channel1',
                     categoryId: 'cat1',
                     permissions: { role1: { sendMessages: true } },
                 } as never,
@@ -197,7 +197,7 @@ describe('usePermissions', (): void => {
         vi.mocked(ServerQueries.useCategories).mockReturnValue({
             data: [
                 {
-                    _id: 'cat1',
+                    id: 'cat1',
                     permissions: { role1: { sendMessages: false } },
                 } as never,
             ],
@@ -212,10 +212,10 @@ describe('usePermissions', (): void => {
 
     it('owner ignores all overrides', (): void => {
         vi.mocked(UserQueries.useMe).mockReturnValue({
-            data: { _id: 'owner1' },
+            data: { id: 'owner1' },
         } as never);
         vi.mocked(ServerQueries.useServerDetails).mockReturnValue({
-            data: { _id: 'server1', ownerId: 'owner1' },
+            data: { id: 'server1', ownerId: 'owner1' },
         } as never);
         vi.mocked(ServerQueries.useMembers).mockReturnValue({
             data: [{ userId: 'owner1', roles: [] }],
@@ -226,7 +226,7 @@ describe('usePermissions', (): void => {
         vi.mocked(ServerQueries.useChannels).mockReturnValue({
             data: [
                 {
-                    _id: 'channel1',
+                    id: 'channel1',
                     permissions: { everyone: { sendMessages: false } },
                 },
             ],
@@ -245,7 +245,7 @@ describe('usePermissions', (): void => {
             data: [
                 mockEveryoneRole,
                 {
-                    _id: 'admin_role',
+                    id: 'admin_role',
                     name: 'Admin',
                     position: 10,
                     permissions: { administrator: true },
@@ -258,7 +258,7 @@ describe('usePermissions', (): void => {
         vi.mocked(ServerQueries.useChannels).mockReturnValue({
             data: [
                 {
-                    _id: 'channel1',
+                    id: 'channel1',
                     permissions: {
                         everyone: { sendMessages: false },
                         admin_role: { sendMessages: false },

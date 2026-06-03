@@ -3,7 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 export type DmMessageResponseDTO = {
-    _id: string;
+    id: string;
     senderId: string;
     receiverId: string;
     text: string;

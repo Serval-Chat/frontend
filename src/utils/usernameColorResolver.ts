@@ -384,7 +384,7 @@ export const buildUsernameColorResolverReport = (
                 },
                 user: input.user
                     ? {
-                          _id: input.user._id,
+                          id: input.user.id,
                           username: input.user.username,
                           displayName: input.user.displayName,
                           usernameGradient: input.user.usernameGradient,
@@ -394,7 +394,7 @@ export const buildUsernameColorResolverReport = (
                     : undefined,
                 role: input.role
                     ? {
-                          _id: input.role._id,
+                          id: input.role.id,
                           name: input.role.name,
                           position: input.role.position,
                           color: input.role.color,

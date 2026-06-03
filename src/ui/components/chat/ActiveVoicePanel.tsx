@@ -42,7 +42,7 @@ export const ActiveVoicePanel = () => {
     if (!activeVoiceServerId || !activeVoiceChannelId) return null;
 
     const channel = channels?.find(
-        (c): boolean => c._id === activeVoiceChannelId,
+        (c): boolean => c.id === activeVoiceChannelId,
     );
 
     const getSignalIcon = (): { icon: typeof Signal; color: string } => {

@@ -55,13 +55,13 @@ describe('server role member mutations', (): void => {
     const userId = 'user-1';
     const roleId = 'role-can-see-private';
     const memberWithoutRole: ServerMember = {
-        _id: 'member-1',
+        id: 'member-1',
         userId,
         serverId,
         roles: [],
         joinedAt: '2026-05-26T00:00:00.000Z',
         user: {
-            _id: userId,
+            id: userId,
             login: 'visible-tester',
             username: 'Visible Tester',
             createdAt: new Date('2026-05-26T00:00:00.000Z'),

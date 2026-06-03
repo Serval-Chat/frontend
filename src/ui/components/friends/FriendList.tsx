@@ -22,8 +22,8 @@ export const FriendList = () => {
     };
 
     const sortedFriends = friends?.slice().sort((a, b): 1 | -1 | 0 => {
-        const aUnread = unreadDms[a._id] || 0;
-        const bUnread = unreadDms[b._id] || 0;
+        const aUnread = unreadDms[a.id] || 0;
+        const bUnread = unreadDms[b.id] || 0;
 
         if (aUnread > 0 && bUnread === 0) return -1;
         if (bUnread > 0 && aUnread === 0) return 1;
@@ -53,11 +53,11 @@ export const FriendList = () => {
                 sortedFriends?.map((friend) => (
                     <UserItem
                         initialData={friend}
-                        isActive={selectedFriendId === String(friend._id)}
-                        key={String(friend._id)}
-                        userId={String(friend._id)}
+                        isActive={selectedFriendId === String(friend.id)}
+                        key={String(friend.id)}
+                        userId={String(friend.id)}
                         onClick={(): void =>
-                            handleFriendClick(String(friend._id))
+                            handleFriendClick(String(friend.id))
                         }
                     />
                 ))

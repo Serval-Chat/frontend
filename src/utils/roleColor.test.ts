@@ -12,7 +12,7 @@ import {
 
 const makeRole = (role: Partial<Role>): Role =>
     ({
-        _id: 'role-1',
+        id: 'role-1',
         serverId: 'server-1',
         name: 'Readable Role',
         color: null,

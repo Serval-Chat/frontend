@@ -303,16 +303,16 @@ export const AutocompleteSuggestion = ({
 const getSuggestionKey = (suggestion: Suggestion): string => {
     switch (suggestion.type) {
         case 'user':
-            return `user-${suggestion.user._id}`;
+            return `user-${suggestion.user.id}`;
         case 'role':
-            return `role-${suggestion.role._id}`;
+            return `role-${suggestion.role.id}`;
         case 'emoji':
             return `emoji-${suggestion.emoji.short_name}`;
         case 'server-emoji':
-            return `server-emoji-${suggestion.emoji._id}`;
+            return `server-emoji-${suggestion.emoji.id}`;
         case 'everyone':
             return 'everyone';
         case 'channel':
-            return `channel-${suggestion.channel._id}`;
+            return `channel-${suggestion.channel.id}`;
     }
 };

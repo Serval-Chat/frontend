@@ -188,7 +188,7 @@ export const MainChat = ({
         !selectedServerId || hasPermission('sendMessages') || isTimedOut;
 
     const selectedChannel = React.useMemo(
-        () => channels?.find((c): boolean => c._id === selectedChannelId),
+        () => channels?.find((c): boolean => c.id === selectedChannelId),
         [channels, selectedChannelId],
     );
 

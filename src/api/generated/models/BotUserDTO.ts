@@ -3,7 +3,7 @@
 /* tslint:disable */
 
 export type BotUserDTO = {
-    _id: string;
+    id: string;
     username: string;
     displayName?: string;
     bio?: string;

@@ -49,7 +49,7 @@ export const RoleNavbar = ({
         (a, b): number => b.position - a.position,
     );
     const hasOrderChanged = localRoles.some(
-        (role, idx): boolean => role._id !== originalSorted[idx]?._id,
+        (role, idx): boolean => role.id !== originalSorted[idx]?.id,
     );
 
     const handleSave = (): void => {
@@ -90,12 +90,12 @@ export const RoleNavbar = ({
                 >
                     {localRoles.map((role) => (
                         <RoleItem
-                            isActive={selectedRoleId === role._id}
-                            key={role._id}
+                            isActive={selectedRoleId === role.id}
+                            key={role.id}
                             role={role}
-                            onDelete={(): void => onDeleteRole(role._id)}
+                            onDelete={(): void => onDeleteRole(role.id)}
                             onDragEnd={(): void => {}}
-                            onSelect={(): void => onSelectRole(role._id)}
+                            onSelect={(): void => onSelectRole(role.id)}
                         />
                     ))}
                 </Reorder.Group>
@@ -133,7 +133,7 @@ const RoleItem = ({
     const roleStyle = getRoleStyle(role);
 
     const handleCopyRoleId = (): void => {
-        void navigator.clipboard.writeText(role._id);
+        void navigator.clipboard.writeText(role.id);
         showToast('Role ID copied to clipboard', 'success');
     };
 

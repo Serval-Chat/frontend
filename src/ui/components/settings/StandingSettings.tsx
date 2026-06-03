@@ -65,7 +65,7 @@ export const StandingSettings = () => {
                         {warnings?.map((warning) => (
                             <div
                                 className="rounded-lg border border-border-subtle bg-bg-subtle p-4"
-                                key={warning._id}
+                                key={warning.id}
                             >
                                 <div className="mb-2 flex items-start justify-between">
                                     <div className="flex items-center gap-2">
@@ -117,7 +117,7 @@ export const StandingSettings = () => {
                                                 size="sm"
                                                 variant="danger"
                                                 onClick={(): void =>
-                                                    acknowledge(warning._id)
+                                                    acknowledge(warning.id)
                                                 }
                                             >
                                                 Acknowledge

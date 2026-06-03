@@ -4,7 +4,7 @@
 import type { SlashCommandOptionDTO } from './SlashCommandOptionDTO';
 
 export type SlashCommandDTO = {
-    _id: string;
+    id: string;
     botId: string;
     name: string;
     description: string;

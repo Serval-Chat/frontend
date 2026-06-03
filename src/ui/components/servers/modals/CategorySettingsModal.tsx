@@ -75,7 +75,7 @@ export const CategorySettingsModal = ({
                     <div className="flex h-full flex-1 flex-col overflow-hidden">
                         <PermissionsEditorTab
                             serverId={category.serverId}
-                            targetId={category._id}
+                            targetId={category.id}
                             targetType="category"
                         />
                     </div>

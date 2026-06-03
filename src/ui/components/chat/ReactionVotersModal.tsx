@@ -75,7 +75,7 @@ export const ReactionVotersModal = ({
             (r): boolean => r.emoji === selectedEmoji,
         );
         const voterIds = selectedReaction?.users || [];
-        return users.filter((u): boolean => voterIds.includes(u._id));
+        return users.filter((u): boolean => voterIds.includes(u.id));
     }, [users, reactions, selectedEmoji]);
 
     return (
@@ -166,11 +166,11 @@ export const ReactionVotersModal = ({
                             </Text>
                             {votersForSelected.map((user) => {
                                 const member = members?.find(
-                                    (m): boolean => m.userId === user._id,
+                                    (m): boolean => m.userId === user.id,
                                 );
                                 const userRoles =
                                     roles?.filter((r): boolean | undefined =>
-                                        member?.roles.includes(r._id),
+                                        member?.roles.includes(r.id),
                                     ) || [];
                                 const sortedRoles = [...userRoles].sort(
                                     (a, b): number => b.position - a.position,
@@ -191,12 +191,12 @@ export const ReactionVotersModal = ({
                                             serverDetails?.disableUsernameGlowAndCustomColor
                                         }
                                         iconRole={iconRole}
-                                        key={user._id}
+                                        key={user.id}
                                         role={role}
                                         serverId={serverId}
                                         serverRoles={roles}
                                         user={user}
-                                        userId={user._id}
+                                        userId={user.id}
                                     />
                                 );
                             })}

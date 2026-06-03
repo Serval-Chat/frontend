@@ -3,7 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 export type ServerRoleResponseDTO = {
-    _id: string;
+    id: string;
     serverId: string;
     name: string;
     color: string;

@@ -3,7 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 export type AdminUserShortDTO = {
-    _id: string;
+    id: string;
     username: string;
     displayName: Record<string, any> | null;
 };

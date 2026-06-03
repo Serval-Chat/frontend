@@ -9,9 +9,9 @@ import {
 } from '@/ui/utils/chat';
 
 describe('chat utils', (): void => {
-    const role1 = { _id: '1', position: 1, color: '#ff0000' } as Role;
-    const role2 = { _id: '2', position: 2, color: null } as Role;
-    const role3 = { _id: '3', position: 3, color: '#00ff00' } as Role;
+    const role1 = { id: '1', position: 1, color: '#ff0000' } as Role;
+    const role2 = { id: '2', position: 2, color: null } as Role;
+    const role3 = { id: '3', position: 3, color: '#00ff00' } as Role;
 
     const roleMap = new Map<string, Role>([
         ['1', role1],
@@ -44,8 +44,8 @@ describe('chat utils', (): void => {
         });
 
         it('returns undefined if no role has a color', (): void => {
-            const noColorRole = { _id: '4', position: 4, color: null } as Role;
-            const anotherNoColorRole = { _id: '5', position: 5 } as Role;
+            const noColorRole = { id: '4', position: 4, color: null } as Role;
+            const anotherNoColorRole = { id: '5', position: 5 } as Role;
             const localMap = new Map<string, Role>([
                 ['4', noColorRole],
                 ['5', anotherNoColorRole],
@@ -57,12 +57,12 @@ describe('chat utils', (): void => {
 
         it('ignores the default color #99aab5 and passes through to the next role', (): void => {
             const defaultColorRole = {
-                _id: '8',
+                id: '8',
                 position: 8,
                 color: '#99aab5',
             } as Role;
             const customColorRole = {
-                _id: '9',
+                id: '9',
                 position: 5,
                 color: '#ff00ff',
             } as Role;
@@ -82,19 +82,19 @@ describe('chat utils', (): void => {
 
         it('handles @everyone role properly (passes through if default, applies if custom)', (): void => {
             const everyoneDefault = {
-                _id: '10',
+                id: '10',
                 name: '@everyone',
                 position: 0,
                 color: '#99aab5',
             } as Role;
             const everyoneCustom = {
-                _id: '11',
+                id: '11',
                 name: '@everyone',
                 position: 0,
                 color: '#123456',
             } as Role;
             const someRole = {
-                _id: '12',
+                id: '12',
                 name: 'Some Role',
                 position: 1,
                 color: '#99aab5',
@@ -120,7 +120,7 @@ describe('chat utils', (): void => {
 
         it('supports multi-color roles', (): void => {
             const multiColorRole = {
-                _id: '6',
+                id: '6',
                 position: 6,
                 colors: ['#ff0000', '#00ff00'],
             } as Role;
@@ -132,7 +132,7 @@ describe('chat utils', (): void => {
 
         it('supports gradient roles defined by startColor/endColor', (): void => {
             const gradientRole = {
-                _id: '7',
+                id: '7',
                 position: 7,
                 startColor: '#111111',
                 endColor: '#222222',
@@ -147,7 +147,7 @@ describe('chat utils', (): void => {
     describe('resolveWebhookUser', (): void => {
         it('returns undefined if message is not a webhook', (): void => {
             const msg = {
-                _id: 'msg1',
+                id: 'msg1',
                 isWebhook: false,
                 text: 'hello',
             } as ChatMessage;
@@ -156,7 +156,7 @@ describe('chat utils', (): void => {
 
         it('resolves webhook user details correctly', (): void => {
             const msg = {
-                _id: 'msg2',
+                id: 'msg2',
                 isWebhook: true,
                 webhookUsername: 'Bridge Bot',
                 webhookAvatarUrl: 'https://example.com/avatar.png',
@@ -165,7 +165,7 @@ describe('chat utils', (): void => {
 
             const user = resolveWebhookUser(msg);
             expect(user).toBeDefined();
-            expect(user?._id).toBe('webhook-msg2');
+            expect(user?.id).toBe('webhook-msg2');
             expect(user?.username).toBe('Bridge Bot');
             expect(user?.displayName).toBe('Bridge Bot');
             expect(user?.profilePicture).toBe(

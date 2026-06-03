@@ -4,7 +4,7 @@
 import type { AdminBanHistoryItemDTO } from './AdminBanHistoryItemDTO';
 
 export type AdminBanUserResponseDTO = {
-    _id: string;
+    id: string;
     userId: string;
     reason: string;
     issuedBy: string;

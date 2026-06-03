@@ -134,7 +134,7 @@ export const userctlCommand: ConCommandReactor = {
                 context.writeLine('userctl: Querying friend records...');
             }
             const baseProfiles = await friendsApi.getFriendProfiles();
-            const profileIds = baseProfiles.map((p): string => p._id);
+            const profileIds = baseProfiles.map((p): string => p.id);
             const needsBadgeData = selectedFields.includes('badges');
 
             if (needsBadgeData && context.writeLine) {

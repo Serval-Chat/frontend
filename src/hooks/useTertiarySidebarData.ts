@@ -62,7 +62,7 @@ const canMemberViewChannel = ({
     if (serverDetails.ownerId === member.userId) return true;
 
     const roleMap = new Map<string, Role>();
-    roles.forEach((role): Map<string, Role> => roleMap.set(role._id, role));
+    roles.forEach((role): Map<string, Role> => roleMap.set(role.id, role));
 
     const userRoles = member.roles
         .map((roleId): Role | undefined => roleMap.get(roleId))
@@ -89,7 +89,7 @@ const canMemberViewChannel = ({
         let hasDeny = false;
 
         for (const role of userRoles) {
-            const roleOverride = overrides[role._id];
+            const roleOverride = overrides[role.id];
             if (roleOverride?.[permissionKey] !== undefined) {
                 if (roleOverride[permissionKey]) return true;
                 hasDeny = true;
@@ -97,7 +97,7 @@ const canMemberViewChannel = ({
         }
 
         const everyoneOverride =
-            (everyoneRole ? overrides[everyoneRole._id] : undefined) ??
+            (everyoneRole ? overrides[everyoneRole.id] : undefined) ??
             overrides.everyone;
 
         if (everyoneOverride?.[permissionKey] !== undefined) {
@@ -112,7 +112,7 @@ const canMemberViewChannel = ({
     if (channelOverride !== undefined) return channelOverride;
 
     const category = channel.categoryId
-        ? categories?.find((item): boolean => item._id === channel.categoryId)
+        ? categories?.find((item): boolean => item.id === channel.categoryId)
         : undefined;
     const categoryOverride = getOverride(
         category?.permissions,
@@ -208,7 +208,7 @@ export const useTertiarySidebarData = (
         }
 
         const channel = channels?.find(
-            (item): boolean => item._id === selectedChannelId,
+            (item): boolean => item.id === selectedChannelId,
         );
         if (!channel) return [];
 
@@ -246,14 +246,14 @@ export const useTertiarySidebarData = (
             return { memberRoleMap: mrMap, memberIconRoleMap: mirMap };
 
         const roleMap = new Map<string, Role>();
-        roles.forEach((r): Map<string, Role> => roleMap.set(r._id, r));
+        roles.forEach((r): Map<string, Role> => roleMap.set(r.id, r));
 
         const everyoneRole = roles.find((r): boolean => r.name === '@everyone');
 
         visibleMembers.forEach((m): void => {
             const memberRoleIds = m.roles ? [...m.roles] : [];
-            if (everyoneRole && !memberRoleIds.includes(everyoneRole._id)) {
-                memberRoleIds.push(everyoneRole._id);
+            if (everyoneRole && !memberRoleIds.includes(everyoneRole.id)) {
+                memberRoleIds.push(everyoneRole.id);
             }
 
             const highestRole = getHighestColorRoleForMember(

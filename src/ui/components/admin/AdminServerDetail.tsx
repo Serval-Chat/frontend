@@ -267,7 +267,7 @@ export const AdminServerDetail = ({
                                     className="gap-2 rounded-lg text-xs"
                                     variant="normal"
                                     onClick={(): void =>
-                                        onViewUser(server.owner!._id)
+                                        onViewUser(server.owner!.id)
                                     }
                                 >
                                     <Eye size={14} />
@@ -371,7 +371,7 @@ export const AdminServerDetail = ({
                                     {invites.map((invite) => (
                                         <div
                                             className="flex items-center justify-between rounded-lg border border-border-subtle/50 bg-bg-secondary/30 p-2"
-                                            key={invite._id}
+                                            key={invite.id}
                                         >
                                             <div className="flex flex-col">
                                                 <span className="font-mono text-xs leading-tight font-bold">
@@ -397,7 +397,7 @@ export const AdminServerDetail = ({
                                                 variant="ghost"
                                                 onClick={(): void =>
                                                     handleRevokeInvite(
-                                                        invite._id,
+                                                        invite.id,
                                                     )
                                                 }
                                             >

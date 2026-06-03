@@ -206,7 +206,7 @@ export const ServerEmojiSettings = ({ serverId }: ServerEmojiSettingsProps) => {
                         name,
                         file: fileToUpload,
                     });
-                    uploadedIdsRef.current.push(newEmoji._id);
+                    uploadedIdsRef.current.push(newEmoji.id);
                     setBulkStatus(
                         (
                             prev,
@@ -379,9 +379,9 @@ export const ServerEmojiSettings = ({ serverId }: ServerEmojiSettingsProps) => {
                         {emojis.map((emoji) => (
                             <div
                                 className="group relative aspect-square overflow-hidden rounded-lg border border-border-subtle bg-bg-subtle transition-all hover:border-primary"
-                                key={emoji._id}
+                                key={emoji.id}
                                 onMouseEnter={(): void =>
-                                    setHoveredEmojiId(emoji._id)
+                                    setHoveredEmojiId(emoji.id)
                                 }
                                 onMouseLeave={(): void =>
                                     setHoveredEmojiId(null)
@@ -396,7 +396,7 @@ export const ServerEmojiSettings = ({ serverId }: ServerEmojiSettingsProps) => {
                                         }
                                     />
                                 </div>
-                                {hoveredEmojiId === emoji._id && (
+                                {hoveredEmojiId === emoji.id && (
                                     <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-black/60 p-2">
                                         <Text
                                             align="center"
@@ -413,7 +413,7 @@ export const ServerEmojiSettings = ({ serverId }: ServerEmojiSettingsProps) => {
                                             size="sm"
                                             variant="danger"
                                             onClick={(): void =>
-                                                deleteEmoji(emoji._id)
+                                                deleteEmoji(emoji.id)
                                             }
                                         >
                                             <Trash2 className="h-3 w-3" />

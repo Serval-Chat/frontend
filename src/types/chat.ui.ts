@@ -13,7 +13,7 @@ export interface ProcessedChatMessage extends Omit<
     role?: Role;
     iconRole?: Role;
     replyTo?: {
-        _id: string;
+        id: string;
         user: User;
         role?: Role;
         iconRole?: Role;

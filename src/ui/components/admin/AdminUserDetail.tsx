@@ -861,7 +861,7 @@ export const AdminUserDetail = ({
                                         size="xs"
                                         weight="bold"
                                     >
-                                        {adminData._id}
+                                        {adminData.id}
                                     </Text>
                                 </div>
                                 <div className="flex items-center justify-between border-b border-border-subtle/50 py-2">
@@ -959,7 +959,7 @@ export const AdminUserDetail = ({
                                     warnings.map((warning) => (
                                         <div
                                             className="group rounded-lg border border-border-subtle bg-bg-secondary/50 p-3 transition-colors hover:border-caution/30"
-                                            key={warning._id}
+                                            key={warning.id}
                                         >
                                             <div className="mb-2 flex items-start justify-between gap-3">
                                                 <Text
@@ -1042,7 +1042,7 @@ export const AdminUserDetail = ({
                     {(adminData.servers || []).map((server) => (
                         <div
                             className="hover:border-border-hover flex items-center justify-between rounded-xl border border-border-subtle bg-bg-secondary/30 p-4 transition-all hover:bg-bg-secondary/50"
-                            key={server._id}
+                            key={server.id}
                         >
                             <div className="flex items-center gap-4">
                                 <ServerIcon

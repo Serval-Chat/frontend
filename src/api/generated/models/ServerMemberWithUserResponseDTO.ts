@@ -3,7 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 export type ServerMemberWithUserResponseDTO = {
-    _id: string;
+    id: string;
     serverId: string;
     userId: string;
     roles: Array<string>;

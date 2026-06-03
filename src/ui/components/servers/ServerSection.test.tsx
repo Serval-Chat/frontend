@@ -138,7 +138,7 @@ describe('ServerSection fallback logic', (): void => {
         } as never);
 
         vi.mocked(ServerQueries.useChannels).mockReturnValue({
-            data: [{ _id: 'realChannel1' }, { _id: 'realChannel2' }],
+            data: [{ id: 'realChannel1' }, { id: 'realChannel2' }],
             isLoading: false,
             isError: false,
         } as never);
@@ -179,7 +179,7 @@ describe('ServerSection fallback logic', (): void => {
         vi.mocked(ServerQueries.useChannels).mockReturnValue({
             data: [
                 {
-                    _id: 'realChannel1',
+                    id: 'realChannel1',
                     type: 'text',
                     position: 0,
                 },

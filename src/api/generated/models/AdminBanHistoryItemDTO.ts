@@ -3,7 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 export type AdminBanHistoryItemDTO = {
-    _id?: string;
+    id?: string;
     reason: string;
     timestamp: Record<string, any>;
     expirationTimestamp: Record<string, any>;

@@ -55,7 +55,7 @@ const PinnedMessageItem = ({
             : members?.find((m): boolean => m.userId === pin.senderId);
         const roles =
             serverRoles?.filter((r): boolean | undefined =>
-                member?.roles.includes(r._id),
+                member?.roles.includes(r.id),
             ) || [];
         const highestRole = [...roles].sort(
             (a, b): number => (b.position || 0) - (a.position || 0),
@@ -69,7 +69,7 @@ const PinnedMessageItem = ({
             serverId,
             channelId,
             user: webhookUser ||
-                member?.user || { _id: pin.senderId, username: 'Unknown' },
+                member?.user || { id: pin.senderId, username: 'Unknown' },
             role: highestRole,
             iconRole: iconRole,
         } as ProcessedChatMessage;
@@ -78,7 +78,7 @@ const PinnedMessageItem = ({
     return (
         <Box
             className="group relative cursor-pointer overflow-hidden rounded-lg border border-[var(--divider)] bg-[var(--bg-subtle)] transition-colors hover:bg-[var(--bg-subtle-hover)]"
-            onClick={(): void => onJump(pin._id)}
+            onClick={(): void => onJump(pin.id)}
         >
             <Box className="pointer-events-none pb-2">
                 <Message
@@ -108,7 +108,7 @@ const PinnedMessageItem = ({
                     variant="ghost"
                     onClick={(e): void => {
                         e.stopPropagation();
-                        onJump(pin._id);
+                        onJump(pin.id);
                     }}
                 >
                     Jump to message
@@ -132,12 +132,12 @@ export const PinsDrawer = ({
     });
 
     useEffect((): void => {
-        if (me?._id && channelId) {
-            const key = `serchat_pins_last_viewed_${me._id}_${channelId}`;
+        if (me?.id && channelId) {
+            const key = `serchat_pins_last_viewed_${me.id}_${channelId}`;
             localStorage.setItem(key, Date.now().toString());
             window.dispatchEvent(new Event('storage'));
         }
-    }, [me?._id, channelId]);
+    }, [me?.id, channelId]);
 
     const [width, setWidth] = useState((): number => {
         const saved = localStorage.getItem('pins-drawer-width');
@@ -256,7 +256,7 @@ export const PinsDrawer = ({
                             .map((pin: ChatMessage) => (
                                 <PinnedMessageItem
                                     channelId={channelId}
-                                    key={pin._id}
+                                    key={pin.id}
                                     me={me}
                                     pin={pin}
                                     serverDetails={serverDetails}

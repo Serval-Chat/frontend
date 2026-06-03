@@ -8,7 +8,7 @@ import { MessageHeader } from './MessageHeader';
 describe('MessageHeader', (): void => {
     it('renders bot tag for bot users', (): void => {
         const botUser: User = {
-            _id: 'u1',
+            id: 'u1',
             username: 'helper-bot',
             isBot: true,
         } as User;
@@ -25,7 +25,7 @@ describe('MessageHeader', (): void => {
 
     it('does not render bot tag for non-bot users', (): void => {
         const humanUser: User = {
-            _id: 'u2',
+            id: 'u2',
             username: 'alice',
             isBot: false,
         } as User;
@@ -42,7 +42,7 @@ describe('MessageHeader', (): void => {
 
     it('renders webhook tag for webhook messages', (): void => {
         const webhookUser: User = {
-            _id: 'u3',
+            id: 'u3',
             username: 'incoming-hook',
             isBot: false,
         } as User;

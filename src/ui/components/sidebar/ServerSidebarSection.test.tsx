@@ -27,7 +27,7 @@ vi.mock('@/ui/components/common/UserItem', () => ({
         <div
             data-displayname={user.displayName || ''}
             data-role={role?.name || 'none'}
-            data-testid={`user-item-${user._id}`}
+            data-testid={`user-item-${user.id}`}
             data-username={user.username}
         >
             {user.displayName || user.username}
@@ -54,22 +54,22 @@ vi.mock('@tanstack/react-virtual', () => ({
 const mockScrollRef = { current: document.createElement('div') };
 
 describe('ServerSidebarSection', (): void => {
-    const mockMe = { _id: 'me-id', username: 'Me' } as User;
+    const mockMe = { id: 'me-id', username: 'Me' } as User;
     const mockRoles: Role[] = [
         {
-            _id: 'role-admin',
+            id: 'role-admin',
             name: 'Admin',
             position: 10,
             separateFromOtherRoles: true,
         } as Role,
         {
-            _id: 'role-mod',
+            id: 'role-mod',
             name: 'Moderator',
             position: 5,
             separateFromOtherRoles: true,
         } as Role,
         {
-            _id: 'role-default',
+            id: 'role-default',
             name: 'Member',
             position: 1,
             separateFromOtherRoles: false,
@@ -78,11 +78,11 @@ describe('ServerSidebarSection', (): void => {
 
     const mockMembers: ServerMember[] = [
         {
-            _id: 'm1',
+            id: 'm1',
             userId: 'u1',
             serverId: 'srv-1',
             user: {
-                _id: 'u1',
+                id: 'u1',
                 username: 'Alice',
                 displayName: 'Alice Display',
             } as User,
@@ -90,26 +90,26 @@ describe('ServerSidebarSection', (): void => {
             joinedAt: new Date().toISOString(),
         },
         {
-            _id: 'm2',
+            id: 'm2',
             userId: 'u2',
             serverId: 'srv-1',
-            user: { _id: 'u2', username: 'Charlie' } as User,
+            user: { id: 'u2', username: 'Charlie' } as User,
             roles: ['role-mod'],
             joinedAt: new Date().toISOString(),
         },
         {
-            _id: 'm3',
+            id: 'm3',
             userId: 'u3',
             serverId: 'srv-1',
-            user: { _id: 'u3', username: 'Bob' } as User,
+            user: { id: 'u3', username: 'Bob' } as User,
             roles: ['role-admin'],
             joinedAt: new Date().toISOString(),
         },
         {
-            _id: 'm4',
+            id: 'm4',
             userId: 'u4',
             serverId: 'srv-1',
-            user: { _id: 'u4', username: 'Dave' } as User,
+            user: { id: 'u4', username: 'Dave' } as User,
             roles: ['role-default'],
             joinedAt: new Date().toISOString(),
         },
@@ -151,11 +151,11 @@ describe('ServerSidebarSection', (): void => {
         isBot?: boolean;
     }): ServerMember =>
         ({
-            _id: `m-${id}`,
+            id: `m-${id}`,
             userId: id,
             serverId: 'srv-1',
             user: {
-                _id: id,
+                id: id,
                 username,
                 isBot,
             } as User,

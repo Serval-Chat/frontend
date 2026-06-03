@@ -36,15 +36,15 @@ export function useMessageData(
     interactionRole: Role | undefined;
 } {
     const isUnknownUser = initialUser.username === 'Unknown';
-    const { data: fetchedUser } = useUserById(initialUser._id, {
+    const { data: fetchedUser } = useUserById(initialUser.id, {
         enabled: isUnknownUser,
     });
     let user = isUnknownUser && fetchedUser ? fetchedUser : initialUser;
 
     if (data?.senderMember?.nickname) {
         user = { ...user, nickname: data.senderMember.nickname };
-    } else if (data?.fullMemberMap?.has(user._id)) {
-        const member = data.fullMemberMap.get(user._id);
+    } else if (data?.fullMemberMap?.has(user.id)) {
+        const member = data.fullMemberMap.get(user.id);
         if (member?.nickname) {
             user = { ...user, nickname: member.nickname };
         }
@@ -65,7 +65,7 @@ export function useMessageData(
     const fullMemberMap = data?.fullMemberMap;
     const roleMap = data?.roleMap;
 
-    const myId = me?._id;
+    const myId = me?.id;
     const mentionsMe = React.useMemo((): boolean => {
         if (!myId) return false;
 
@@ -92,7 +92,7 @@ export function useMessageData(
         if (!member) return undefined;
         return {
             ...member.user,
-            _id: member.userId,
+            id: member.userId,
             username:
                 member.user.username || message.interaction!.user.username,
             displayName: member.user.displayName,

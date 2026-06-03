@@ -51,7 +51,7 @@ export const useStickerInfo = ({
             const servers = queryClient.getQueryData<Server[]>(
                 SERVERS_QUERY_KEYS.list,
             );
-            return servers?.find((s): boolean => s._id === serverIdToUse);
+            return servers?.find((s): boolean => s.id === serverIdToUse);
         },
         retry: false,
     });

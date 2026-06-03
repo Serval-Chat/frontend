@@ -54,7 +54,7 @@ export function useChatWS(
 
     const convertDmToChatMessage = useCallback(
         (message: IMessageDm): ChatMessage => ({
-            _id: message._id,
+            id: message.id,
             text: message.text,
             createdAt: message.createdAt,
             senderId: message.senderId,
@@ -79,7 +79,7 @@ export function useChatWS(
 
     const convertServerMessageToChatMessage = useCallback(
         (message: IMessageServer | IMessageServerSent): ChatMessage => ({
-            _id: message._id,
+            id: message.id,
             text: message.text,
             createdAt: message.createdAt,
             senderId: message.senderId,
@@ -132,7 +132,7 @@ export function useChatWS(
 
                     if (
                         firstPage.some(
-                            (msg): boolean => msg._id === newMessage._id,
+                            (msg): boolean => msg.id === newMessage.id,
                         )
                     ) {
                         return oldData;
@@ -175,7 +175,7 @@ export function useChatWS(
                         pages: oldData.pages.map((page): ChatMessage[] =>
                             page.map(
                                 (msg): ChatMessage =>
-                                    msg._id === payload.messageId
+                                    msg.id === payload.messageId
                                         ? updateMessageReactions(
                                               msg,
                                               payload,
@@ -281,7 +281,7 @@ export function useChatWS(
                             if (!oldChannels) return oldChannels;
                             return oldChannels.map(
                                 (ch): Channel =>
-                                    ch._id === selectedChannelId
+                                    ch.id === selectedChannelId
                                         ? {
                                               ...ch,
                                               slowModeNextMessageAllowedAt:
@@ -356,12 +356,12 @@ export function useChatWS(
                 if (
                     selectedFriendId &&
                     payload.senderId === selectedFriendId &&
-                    payload.senderId !== user?._id
+                    payload.senderId !== user?.id
                 ) {
                     addTypingUser(payload.senderId, payload.senderUsername);
                 }
             },
-            [selectedFriendId, user?._id, addTypingUser],
+            [selectedFriendId, user?.id, addTypingUser],
         ),
     );
 
@@ -376,12 +376,12 @@ export function useChatWS(
                 if (
                     selectedChannelId &&
                     payload.channelId === selectedChannelId &&
-                    payload.senderId !== user?._id
+                    payload.senderId !== user?.id
                 ) {
                     addTypingUser(payload.senderId, payload.senderUsername);
                 }
             },
-            [selectedChannelId, user?._id, addTypingUser],
+            [selectedChannelId, user?.id, addTypingUser],
         ),
     );
 
@@ -414,7 +414,7 @@ export function useChatWS(
                                 if (payload.hard === false) {
                                     return page.map(
                                         (msg): ChatMessage =>
-                                            msg._id === payload.messageId
+                                            msg.id === payload.messageId
                                                 ? {
                                                       ...msg,
                                                       deletedAt:
@@ -425,7 +425,7 @@ export function useChatWS(
                                 }
                                 return page.filter(
                                     (msg): boolean =>
-                                        msg._id !== payload.messageId,
+                                        msg.id !== payload.messageId,
                                 );
                             }),
                         };
@@ -468,7 +468,7 @@ export function useChatWS(
                                 if (payload.hard === false) {
                                     return page.map(
                                         (msg): ChatMessage =>
-                                            payload.messageIds.includes(msg._id)
+                                            payload.messageIds.includes(msg.id)
                                                 ? {
                                                       ...msg,
                                                       deletedAt:
@@ -479,7 +479,7 @@ export function useChatWS(
                                 }
                                 return page.filter(
                                     (msg): boolean =>
-                                        !payload.messageIds.includes(msg._id),
+                                        !payload.messageIds.includes(msg.id),
                                 );
                             }),
                         };
@@ -528,7 +528,7 @@ export function useChatWS(
                             pages: oldData.pages.map((page): ChatMessage[] =>
                                 page.map(
                                     (msg): ChatMessage =>
-                                        msg._id === payload.messageId
+                                        msg.id === payload.messageId
                                             ? {
                                                   ...msg,
                                                   text: payload.text,
@@ -587,7 +587,7 @@ export function useChatWS(
                             pages: oldData.pages.map((page): ChatMessage[] =>
                                 page.map(
                                     (msg): ChatMessage =>
-                                        msg._id === payload.messageId
+                                        msg.id === payload.messageId
                                             ? {
                                                   ...msg,
                                                   text: payload.text,
@@ -635,7 +635,7 @@ export function useChatWS(
                             pages: oldData.pages.map((page): ChatMessage[] =>
                                 page.filter(
                                     (msg): boolean =>
-                                        msg._id !== payload.messageId,
+                                        msg.id !== payload.messageId,
                                 ),
                             ),
                         };
@@ -675,7 +675,7 @@ export function useChatWS(
                             pages: oldData.pages.map((page): ChatMessage[] =>
                                 page.map(
                                     (msg): ChatMessage =>
-                                        msg._id === payload.messageId
+                                        msg.id === payload.messageId
                                             ? {
                                                   ...msg,
                                                   embeds: payload.embeds,
@@ -718,7 +718,7 @@ export function useChatWS(
                             pages: oldData.pages.map((page): ChatMessage[] =>
                                 page.map(
                                     (msg): ChatMessage =>
-                                        msg._id === payload.messageId
+                                        msg.id === payload.messageId
                                             ? {
                                                   ...msg,
                                                   embeds: payload.embeds,
@@ -764,7 +764,7 @@ export function useChatWS(
                             pages: oldData.pages.map((page): ChatMessage[] =>
                                 page.map(
                                     (msg): ChatMessage =>
-                                        msg._id === payload.messageId
+                                        msg.id === payload.messageId
                                             ? {
                                                   ...msg,
                                                   isPinned: payload.isPinned,
@@ -810,7 +810,7 @@ export function useChatWS(
                                     (page): ChatMessage[] =>
                                         page.map(
                                             (msg): ChatMessage =>
-                                                msg._id === payload.messageId
+                                                msg.id === payload.messageId
                                                     ? {
                                                           ...msg,
                                                           poll: payload.poll,
@@ -856,7 +856,7 @@ export function useChatWS(
                             pages: oldData.pages.map((page): ChatMessage[] =>
                                 page.map(
                                     (msg): ChatMessage =>
-                                        msg._id === payload.messageId
+                                        msg.id === payload.messageId
                                             ? { ...msg, poll: payload.poll }
                                             : msg,
                                 ),

@@ -176,8 +176,8 @@ export const VoiceParticipant = React.memo(({ userId }: { userId: string }) => {
 
     const isSpeaking = speakingUsers.includes(userId);
     const userState = voiceUserStates[userId];
-    const isMe = currentUser?._id === userId;
-    const isFriend = friends?.some((f): boolean => f._id === userId);
+    const isMe = currentUser?.id === userId;
+    const isFriend = friends?.some((f): boolean => f.id === userId);
 
     if (!user) {
         return (

@@ -35,7 +35,7 @@ vi.mock('@/api/servers/servers.queries', () => ({
 }));
 
 vi.mock('@/api/users/users.queries', () => ({
-    useMe: (): { data: { _id: string } } => ({ data: { _id: 'me' } }),
+    useMe: (): { data: { id: string } } => ({ data: { id: 'me' } }),
     useUserById: (): { data: null } => ({ data: null }),
 }));
 
@@ -110,7 +110,7 @@ describe('UserItem', (): void => {
 
     it('renders a bot tag for bot users', (): void => {
         const botUser: User = {
-            _id: 'bot-1',
+            id: 'bot-1',
             username: 'helper-bot',
             isBot: true,
         } as User;
@@ -121,12 +121,12 @@ describe('UserItem', (): void => {
 
     it('hides Add Friend action for bots while keeping it for humans', (): void => {
         const botUser: User = {
-            _id: 'bot-1',
+            id: 'bot-1',
             username: 'helper-bot',
             isBot: true,
         } as User;
         const humanUser: User = {
-            _id: 'user-2',
+            id: 'user-2',
             username: 'alice',
             isBot: false,
         } as User;

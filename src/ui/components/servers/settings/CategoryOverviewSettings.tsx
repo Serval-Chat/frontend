@@ -30,15 +30,15 @@ export const CategoryOverviewSettings = ({
 
     const { mutate: updateCategory, isPending: isUpdating } = useUpdateCategory(
         category.serverId,
-        category._id,
+        category.id,
     );
     const { mutate: deleteCategory, isPending: isDeleting } = useDeleteCategory(
         category.serverId,
     );
 
-    const [prevCategoryId, setPrevCategoryId] = useState(category._id);
-    if (category._id !== prevCategoryId) {
-        setPrevCategoryId(category._id);
+    const [prevCategoryId, setPrevCategoryId] = useState(category.id);
+    if (category.id !== prevCategoryId) {
+        setPrevCategoryId(category.id);
         setName(category.name);
         setOriginalName(category.name);
     }
@@ -63,7 +63,7 @@ export const CategoryOverviewSettings = ({
     };
 
     const handleDelete = (): void => {
-        deleteCategory(category._id, {
+        deleteCategory(category.id, {
             onSuccess: (): void => {
                 onDeleted?.();
             },

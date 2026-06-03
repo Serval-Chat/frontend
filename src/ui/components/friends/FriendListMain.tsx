@@ -26,7 +26,7 @@ const FriendProfileRow = React.memo(
         friend: User;
         onOpenDm: (friendId: string) => void;
     }) => {
-        const userId = String(friend._id);
+        const userId = String(friend.id);
         const presenceStatus = useAppSelector(
             (state): UserStatus =>
                 state.presence.users[userId]?.status ?? 'offline',
@@ -239,7 +239,7 @@ export const FriendListMain = React.memo(() => {
                     {groupedFriends[key]?.map((friend) => (
                         <FriendProfileRow
                             friend={friend}
-                            key={String(friend._id)}
+                            key={String(friend.id)}
                             onOpenDm={handleOpenDm}
                         />
                     ))}

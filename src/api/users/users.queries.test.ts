@@ -56,7 +56,7 @@ describe('useUserById', (): void => {
 
     it('does not fetch for IDs starting with @ (malformed mentions)', async (): Promise<void> => {
         vi.mocked(usersApi.getById).mockResolvedValue({
-            _id: 'bad',
+            id: 'bad',
             username: 'bad',
         } as never);
 
@@ -75,7 +75,7 @@ describe('useUserById', (): void => {
 
     it('fetches normally for valid ObjectId-style IDs', async (): Promise<void> => {
         vi.mocked(usersApi.getById).mockResolvedValue({
-            _id: '507f1f77bcf86cd799439011',
+            id: '507f1f77bcf86cd799439011',
             username: 'alice',
         } as never);
 
@@ -99,7 +99,7 @@ describe('useUpdateStyle', (): void => {
     it('updates cached style from submitted values when the response omits disabled fields', async (): Promise<void> => {
         const { queryClient, wrapper } = makeHarness();
         queryClient.setQueryData<User>(['me'], {
-            _id: 'user-1',
+            id: 'user-1',
             login: 'alice',
             username: 'Alice',
             createdAt: new Date(),

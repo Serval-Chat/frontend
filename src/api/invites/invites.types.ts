@@ -22,7 +22,7 @@ export interface InviteDetails {
 }
 
 export interface ServerInvite {
-    _id: string;
+    id: string;
     serverId: string;
     code: string;
     customPath?: string;

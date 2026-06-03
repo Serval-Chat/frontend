@@ -34,8 +34,8 @@ describe('timestamp utils', (): void => {
     });
 
     describe('shouldGroupMessages', (): void => {
-        const userA = { _id: 'user1', username: 'alice' };
-        const userB = { _id: 'user2', username: 'bob' };
+        const userA = { id: 'user1', username: 'alice' };
+        const userB = { id: 'user2', username: 'bob' };
 
         it('returns true for same user within 5 minutes', (): void => {
             const msg1 = { user: userA, createdAt: '2024-03-20T12:00:00Z' };

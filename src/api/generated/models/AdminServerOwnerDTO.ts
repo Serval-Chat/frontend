@@ -3,7 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 export type AdminServerOwnerDTO = {
-    _id: string;
+    id: string;
     username: string;
     displayName: Record<string, any> | null;
     profilePicture: Record<string, any> | null;

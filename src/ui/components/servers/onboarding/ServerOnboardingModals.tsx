@@ -108,7 +108,7 @@ export const RolePicker = ({
     const allowed = new Set(allowedRoleIds);
     const selected = new Set(selectedRoleIds);
     const availableRoles = sortByPosition(
-        roles.filter((role): boolean => allowed.has(role._id)),
+        roles.filter((role): boolean => allowed.has(role.id)),
     );
 
     const toggleRole = (roleId: string): void => {
@@ -132,7 +132,7 @@ export const RolePicker = ({
     return (
         <div className="grid gap-2 sm:grid-cols-2">
             {availableRoles.map((role) => {
-                const isSelected = selected.has(role._id);
+                const isSelected = selected.has(role.id);
                 return (
                     <button
                         className={cn(
@@ -141,9 +141,9 @@ export const RolePicker = ({
                                 ? 'border-primary bg-primary/10'
                                 : 'hover:border-border border-border-subtle bg-bg-subtle hover:bg-bg-secondary/60',
                         )}
-                        key={role._id}
+                        key={role.id}
                         type="button"
-                        onClick={(): void => toggleRole(role._id)}
+                        onClick={(): void => toggleRole(role.id)}
                     >
                         <div className="flex items-center gap-2">
                             <RoleDot role={role} />
@@ -308,7 +308,7 @@ export const ChannelPreferenceGroup = ({
     }, [isOpen]);
 
     const isCategoryHidden =
-        category !== null && hiddenCategories.has(category._id);
+        category !== null && hiddenCategories.has(category.id);
 
     return (
         <div className="relative rounded-md border border-border-subtle bg-bg-secondary/40 p-2">
@@ -340,7 +340,7 @@ export const ChannelPreferenceGroup = ({
                     variant="ghost"
                     onClick={(): void => {
                         if (category) {
-                            onToggleCategory(category._id);
+                            onToggleCategory(category.id);
                         } else {
                             setIsOpen((value): boolean => !value);
                         }
@@ -372,7 +372,7 @@ export const ChannelPreferenceGroup = ({
                 {isOpen && (
                     <div className="mt-1 space-y-1 pl-8">
                         {channels.map((channel, index) => {
-                            const isHidden = hiddenChannels.has(channel._id);
+                            const isHidden = hiddenChannels.has(channel.id);
                             return (
                                 <Button
                                     className={cn(
@@ -382,14 +382,14 @@ export const ChannelPreferenceGroup = ({
                                             : 'bg-transparent text-muted-foreground hover:bg-white/5 hover:text-foreground',
                                     )}
                                     innerClassName="w-full justify-start"
-                                    key={channel._id}
+                                    key={channel.id}
                                     ref={(el): void => {
                                         channelRefs.current[index] = el;
                                     }}
                                     type="button"
                                     variant="ghost"
                                     onClick={(): void =>
-                                        onToggleChannel(channel._id)
+                                        onToggleChannel(channel.id)
                                     }
                                 >
                                     {channelIcon(channel)}
@@ -441,7 +441,7 @@ export const ChannelPreferencesModal = ({
     const groupedChannels = useMemo(() => {
         const sortedChannels = sortByPosition(channels ?? []);
         const sortedCategories = sortByPosition(categories ?? []);
-        const categoryIds = new Set(sortedCategories.map((c): string => c._id));
+        const categoryIds = new Set(sortedCategories.map((c): string => c.id));
         return [
             {
                 category: null,
@@ -456,7 +456,7 @@ export const ChannelPreferencesModal = ({
                     category,
                     channels: sortedChannels.filter(
                         (channel): boolean =>
-                            channel.categoryId === category._id,
+                            channel.categoryId === category.id,
                     ),
                 }),
             ),
@@ -511,7 +511,7 @@ export const ChannelPreferencesModal = ({
                                     channels={group.channels}
                                     hiddenCategories={hiddenCategories}
                                     hiddenChannels={hiddenChannels}
-                                    key={group.category?._id ?? 'uncategorized'}
+                                    key={group.category?.id ?? 'uncategorized'}
                                     onToggleCategory={(categoryId): void =>
                                         toggleId(
                                             categoryId,
@@ -654,7 +654,7 @@ export const ServerOnboardingModal = ({
                     onboarding?.onboarding.welcomeChannelIds[0] ||
                     channels?.find(
                         (channel): boolean => channel.type !== 'link',
-                    )?._id;
+                    )?.id;
                 if (landing) {
                     dispatch(setSelectedChannelId(landing));
                     void navigate(
@@ -667,7 +667,7 @@ export const ServerOnboardingModal = ({
     };
 
     const welcomeChannels = (channels ?? []).filter((channel): boolean =>
-        onboarding?.onboarding.welcomeChannelIds.includes(channel._id),
+        onboarding?.onboarding.welcomeChannelIds.includes(channel.id),
     );
 
     const stepIndex = Math.max(
@@ -918,17 +918,17 @@ export const ServerOnboardingModal = ({
                                         <Button
                                             className="justify-start rounded-xl border border-border-subtle bg-bg-secondary/40 px-4 py-3 text-left shadow-none transition-all duration-200 hover:border-primary hover:bg-bg-secondary/80"
                                             innerClassName="justify-start"
-                                            key={channel._id}
+                                            key={channel.id}
                                             type="button"
                                             variant="normal"
                                             onClick={(): void => {
                                                 dispatch(
                                                     setSelectedChannelId(
-                                                        channel._id,
+                                                        channel.id,
                                                     ),
                                                 );
                                                 void navigate(
-                                                    `/chat/@server/${serverId}/channel/${channel._id}`,
+                                                    `/chat/@server/${serverId}/channel/${channel.id}`,
                                                 );
                                             }}
                                         >
