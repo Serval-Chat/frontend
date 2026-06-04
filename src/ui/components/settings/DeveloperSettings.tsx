@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/react';
 import { Bug } from 'lucide-react';
 
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
@@ -11,6 +12,19 @@ import { Button } from '@/ui/components/common/Button';
 import { Heading } from '@/ui/components/common/Heading';
 import { Toggle } from '@/ui/components/common/Toggle';
 import { toggleWsDebugWindow, useWsDebugWindowOpen } from '@/ws/debug';
+
+const crashFrontend = async (): Promise<void> => {
+    const error = new Error(
+        `Manual frontend crash from Developer Settings (${new Date().toISOString()})`,
+    );
+
+    Sentry.captureException(error);
+    await Sentry.flush(2000);
+
+    setTimeout(() => {
+        throw error;
+    }, 0);
+};
 
 export const DeveloperSettings = () => {
     const dispatch = useAppDispatch();
@@ -141,6 +155,27 @@ export const DeveloperSettings = () => {
                             type: 'debugOptions/toggleUsernameColorResolverContextMenu';
                         } => dispatch(toggleUsernameColorResolverContextMenu())}
                     />
+                </div>
+
+                <div className="flex items-center justify-between rounded-md border border-danger/40 bg-bg-subtle p-4">
+                    <div className="flex flex-col gap-1">
+                        <div className="flex items-center gap-2 font-semibold text-danger">
+                            <Bug size={18} />
+                            Crash Frontend
+                        </div>
+                        <span className="text-sm text-muted-foreground">
+                            Unsafely throws an uncaught browser error for
+                            telemetry testing.
+                        </span>
+                    </div>
+                    <Button
+                        variant="danger"
+                        onClick={(): void => {
+                            void crashFrontend();
+                        }}
+                    >
+                        Crash Now
+                    </Button>
                 </div>
             </div>
         </div>

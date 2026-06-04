@@ -9,6 +9,7 @@ import { LimitedAnimationsProvider } from '@/providers/LimitedAnimationsProvider
 import { QueryProvider } from '@/providers/QueryProvider';
 import { StoreProvider } from '@/providers/StoreProvider';
 import { ThemeProvider } from '@/providers/ThemeProvider';
+import '@/sentry';
 import '@/styles/index.css';
 import { ToastProvider } from '@/ui/components/common/Toast';
 import { AdminRoute } from '@/ui/components/layout/AdminRoute';
