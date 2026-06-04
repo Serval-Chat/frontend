@@ -1355,13 +1355,15 @@ export const useMarkServerRead = (): UseMutationResult<void, Error, string> => {
         mutationFn: (serverId: string): Promise<void> =>
             serversApi.markServerRead(serverId),
         onMutate: async (serverId) => {
-            await queryClient.cancelQueries({
-                queryKey: SERVERS_QUERY_KEYS.unread(),
-            });
-            await queryClient.cancelQueries({ queryKey: ['pings'] });
-            await queryClient.cancelQueries({
-                queryKey: SERVERS_QUERY_KEYS.channels(serverId),
-            });
+            await Promise.all([
+                queryClient.cancelQueries({
+                    queryKey: SERVERS_QUERY_KEYS.unread(),
+                }),
+                queryClient.cancelQueries({ queryKey: ['pings'] }),
+                queryClient.cancelQueries({
+                    queryKey: SERVERS_QUERY_KEYS.channels(serverId),
+                }),
+            ]);
 
             // Snapshot the previous values
             const previousUnread = queryClient.getQueryData(

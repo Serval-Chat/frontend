@@ -320,6 +320,7 @@ export const PermissionsEditorTab = ({
                     <div className="sticky top-0 z-20 mx-[-2rem] mb-4 flex w-full shrink-0 items-center border-b border-border-subtle bg-background px-4 px-[2rem] py-4 md:hidden">
                         <button
                             className="flex items-center gap-1 font-medium text-muted-foreground transition-colors hover:text-foreground"
+                            type="button"
                             onClick={(): void => setIsMobileListOpen(true)}
                         >
                             <ChevronLeft size={20} />

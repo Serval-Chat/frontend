@@ -84,6 +84,7 @@ export const PollVotersModal = ({
                                     : 'hover:bg-white/5',
                             )}
                             key={option.id}
+                            type="button"
                             onClick={(): void => setSelectedOptionId(option.id)}
                         >
                             <Box className="flex min-w-0 items-center gap-2">
@@ -139,7 +140,8 @@ export const PollVotersModal = ({
                                     roles?.filter((r): boolean | undefined =>
                                         member?.roles.includes(r.id),
                                     ) || [];
-                                const sortedRoles = [...userRoles].sort(
+                                const sortedRoles = userRoles.slice();
+                                sortedRoles.sort(
                                     (a, b): number => b.position - a.position,
                                 );
                                 const role = sortedRoles[0];

@@ -95,9 +95,10 @@ const RoleSelector = ({
     const [isOpen, setIsOpen] = React.useState(false);
     const triggerRef = React.useRef<HTMLButtonElement>(null);
 
-    const rolesToDisplay = allRoles
-        .filter((r): boolean => r.name !== '@everyone')
-        .sort((a, b): number => b.position - a.position);
+    const rolesToDisplay = allRoles.filter(
+        (r): boolean => r.name !== '@everyone',
+    );
+    rolesToDisplay.sort((a, b): number => b.position - a.position);
 
     return (
         <>
@@ -105,6 +106,7 @@ const RoleSelector = ({
                 className="hover:bg-bg-tertiary flex h-5 w-5 items-center justify-center rounded-md border border-border-subtle bg-bg-secondary text-muted-foreground transition-colors hover:text-foreground"
                 ref={triggerRef}
                 title="Add Role"
+                type="button"
                 onClick={(): void => setIsOpen(true)}
             >
                 <Plus size={14} />
@@ -137,6 +139,7 @@ const RoleSelector = ({
                                     )}
                                     disabled={!canManageThisRole}
                                     key={role.id}
+                                    type="button"
                                     onClick={(): void => {
                                         if (hasRole) {
                                             onRemoveRole(role.id);
@@ -477,7 +480,8 @@ export const UserProfileCard = ({
                         </Box>
                         <Box className="flex flex-wrap gap-2">
                             {roles &&
-                                [...roles]
+                                roles
+                                    .slice()
                                     .sort(
                                         (a, b): number =>
                                             b.position - a.position,
@@ -513,6 +517,7 @@ export const UserProfileCard = ({
                                                         <button
                                                             className="ml-0.5 hidden text-muted-foreground group-hover:block hover:text-danger"
                                                             title="Remove Role"
+                                                            type="button"
                                                             onClick={(): void =>
                                                                 removeRole({
                                                                     userId,

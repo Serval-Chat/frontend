@@ -20,116 +20,102 @@ export interface ButtonProps
     iconPosition?: 'left' | 'right';
 }
 
-export const Button = React.memo(
-    React.forwardRef<HTMLButtonElement, ButtonProps>(
-        (
-            {
-                children,
+const ButtonComponent = ({
+    children,
+    className,
+    variant,
+    size,
+    loading,
+    retainSize,
+    innerClassName,
+    disabled,
+    icon: Icon,
+    iconClassName,
+    iconPosition = 'left',
+    ref,
+    ...props
+}: ButtonProps & { ref?: React.Ref<HTMLButtonElement> }) => {
+    const buttonRef = useRef<HTMLButtonElement>(null);
+    const [dimensions, setDimensions] = useState<{
+        width: number | string;
+        height: number | string;
+    }>({ width: 'auto', height: 'auto' });
+
+    useLayoutEffect((): (() => void) | undefined => {
+        if (!retainSize && !loading) return;
+
+        const updateDimensions = (): void => {
+            if (!buttonRef.current) return;
+            const { width, height } = buttonRef.current.getBoundingClientRect();
+            setDimensions(
+                (
+                    prev,
+                ): {
+                    width: number | string;
+                    height: number | string;
+                } => {
+                    if (retainSize && prev.width !== 'auto') return prev;
+                    if (loading && prev.width !== 'auto') return prev;
+
+                    if (prev.width === width && prev.height === height)
+                        return prev;
+                    return { width, height };
+                },
+            );
+        };
+
+        updateDimensions();
+
+        window.addEventListener('resize', updateDimensions);
+        return (): void =>
+            window.removeEventListener('resize', updateDimensions);
+    }, [loading, retainSize, children]);
+
+    const dimensionStyles =
+        (retainSize || loading) && dimensions.width !== 'auto'
+            ? { width: dimensions.width, height: dimensions.height }
+            : undefined;
+
+    React.useImperativeHandle(ref, (): HTMLButtonElement => buttonRef.current!);
+
+    return (
+        <button
+            aria-busy={loading || undefined}
+            className={cn(
+                'relative',
+                buttonVariants({ variant, size }),
                 className,
-                variant,
-                size,
-                loading,
-                retainSize,
-                innerClassName,
-                disabled,
-                icon: Icon,
-                iconClassName,
-                iconPosition = 'left',
-                ...props
-            },
-            ref,
-        ) => {
-            const buttonRef = useRef<HTMLButtonElement>(null);
-            const [dimensions, setDimensions] = useState<{
-                width: number | string;
-                height: number | string;
-            }>({ width: 'auto', height: 'auto' });
+            )}
+            disabled={loading || disabled}
+            ref={buttonRef}
+            style={dimensionStyles}
+            type="button"
+            {...props}
+        >
+            <span
+                className={cn(
+                    'flex items-center justify-center gap-[inherit]',
+                    loading ? 'opacity-0' : undefined,
+                    innerClassName,
+                )}
+            >
+                {Icon && iconPosition === 'left' && (
+                    <Icon className={cn('shrink-0', iconClassName)} size={16} />
+                )}
+                {children}
+                {Icon && iconPosition === 'right' && (
+                    <Icon className={cn('shrink-0', iconClassName)} size={16} />
+                )}
+            </span>
+            {loading && (
+                <div className="absolute inset-0 flex items-center justify-center">
+                    <BouncingDots color="bg-current" size={4} />
+                </div>
+            )}
+        </button>
+    );
+};
 
-            useLayoutEffect((): (() => void) | undefined => {
-                if (!retainSize && !loading) return;
-
-                const updateDimensions = (): void => {
-                    if (!buttonRef.current) return;
-                    const { width, height } =
-                        buttonRef.current.getBoundingClientRect();
-                    setDimensions(
-                        (
-                            prev,
-                        ): {
-                            width: number | string;
-                            height: number | string;
-                        } => {
-                            if (retainSize && prev.width !== 'auto')
-                                return prev;
-                            if (loading && prev.width !== 'auto') return prev;
-
-                            if (prev.width === width && prev.height === height)
-                                return prev;
-                            return { width, height };
-                        },
-                    );
-                };
-
-                updateDimensions();
-
-                window.addEventListener('resize', updateDimensions);
-                return (): void =>
-                    window.removeEventListener('resize', updateDimensions);
-            }, [loading, retainSize, children]);
-
-            const dimensionStyles =
-                (retainSize || loading) && dimensions.width !== 'auto'
-                    ? { width: dimensions.width, height: dimensions.height }
-                    : undefined;
-
-            React.useImperativeHandle(
-                ref,
-                (): HTMLButtonElement => buttonRef.current!,
-            );
-
-            return (
-                <button
-                    aria-busy={loading || undefined}
-                    className={cn(
-                        'relative',
-                        buttonVariants({ variant, size }),
-                        className,
-                    )}
-                    disabled={loading || disabled}
-                    ref={buttonRef}
-                    style={dimensionStyles}
-                    {...props}
-                >
-                    <span
-                        className={cn(
-                            'flex items-center justify-center gap-[inherit]',
-                            loading ? 'opacity-0' : undefined,
-                            innerClassName,
-                        )}
-                    >
-                        {Icon && iconPosition === 'left' && (
-                            <Icon
-                                className={cn('shrink-0', iconClassName)}
-                                size={16}
-                            />
-                        )}
-                        {children}
-                        {Icon && iconPosition === 'right' && (
-                            <Icon
-                                className={cn('shrink-0', iconClassName)}
-                                size={16}
-                            />
-                        )}
-                    </span>
-                    {loading && (
-                        <div className="absolute inset-0 flex items-center justify-center">
-                            <BouncingDots color="bg-current" size={4} />
-                        </div>
-                    )}
-                </button>
-            );
-        },
-    ),
-);
+export const Button = React.memo(ButtonComponent);
 
 Button.displayName = 'Button';

@@ -52,9 +52,13 @@ export const KeybindSettings = () => {
         [user?.settings?.keybinds],
     );
 
-    React.useEffect((): void => {
+    const [prevSavedKeybinds, setPrevSavedKeybinds] =
+        React.useState(savedKeybinds);
+
+    if (savedKeybinds !== prevSavedKeybinds) {
+        setPrevSavedKeybinds(savedKeybinds);
         setDraft(savedKeybinds);
-    }, [savedKeybinds]);
+    }
 
     React.useEffect((): (() => void) | undefined => {
         if (!recordingAction) return undefined;

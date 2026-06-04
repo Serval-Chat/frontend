@@ -235,26 +235,33 @@ export const ServerOnboardingSettings = ({
     );
     const [welcomeChannelIds, setWelcomeChannelIds] = useState<string[]>([]);
     const [baseline, setBaseline] = useState<string>('');
+    const [prevSettings, setPrevSettings] = useState(settings);
 
-    React.useEffect((): void => {
-        if (!settings) return;
-        setEnabled(settings.enabled);
-        const parsedRules = toStringArray(settings.guidelines);
-        setRules(parsedRules);
-        setSelfAssignableRoleIds(toStringArray(settings.selfAssignableRoleIds));
-        setLandingChannelId(settings.landingChannelId ?? null);
-        setWelcomeChannelIds(toStringArray(settings.welcomeChannelIds));
-        setBaseline(
-            JSON.stringify({
-                ...settings,
-                guidelines: parsedRules,
-                selfAssignableRoleIds: toStringArray(
-                    settings.selfAssignableRoleIds,
-                ),
-                welcomeChannelIds: toStringArray(settings.welcomeChannelIds),
-            }),
-        );
-    }, [settings]);
+    if (settings !== prevSettings) {
+        setPrevSettings(settings);
+        if (settings) {
+            setEnabled(settings.enabled);
+            const parsedRules = toStringArray(settings.guidelines);
+            setRules(parsedRules);
+            setSelfAssignableRoleIds(
+                toStringArray(settings.selfAssignableRoleIds),
+            );
+            setLandingChannelId(settings.landingChannelId ?? null);
+            setWelcomeChannelIds(toStringArray(settings.welcomeChannelIds));
+            setBaseline(
+                JSON.stringify({
+                    ...settings,
+                    guidelines: parsedRules,
+                    selfAssignableRoleIds: toStringArray(
+                        settings.selfAssignableRoleIds,
+                    ),
+                    welcomeChannelIds: toStringArray(
+                        settings.welcomeChannelIds,
+                    ),
+                }),
+            );
+        }
+    }
 
     const channelOptions = useMemo(
         (): { id: string; label: string; icon: React.ReactNode }[] =>

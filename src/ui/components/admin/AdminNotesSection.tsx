@@ -185,6 +185,7 @@ export const AdminNotesSection = ({
                                                     !isDeleted && (
                                                         <button
                                                             className="bg-info/10 text-info hover:bg-info/20 flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-bold tracking-tight uppercase transition-colors"
+                                                            type="button"
                                                             onClick={(): void =>
                                                                 toggleHistory(
                                                                     note.id,

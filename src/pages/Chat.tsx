@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { animate, useMotionValue } from 'framer-motion';
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 import { Outlet, useNavigate } from 'react-router-dom';
 
 import { useMe } from '@/api/users/users.queries';
@@ -89,7 +89,7 @@ export const Chat = () => {
 
         updateBounds();
         viewport?.addEventListener('resize', updateBounds);
-        viewport?.addEventListener('scroll', updateBounds);
+        viewport?.addEventListener('scroll', updateBounds, { passive: true });
         window.addEventListener('resize', updateBounds);
 
         return (): void => {
@@ -115,7 +115,7 @@ export const Chat = () => {
         [panelIndex],
     );
 
-    const targetXRef = useRef(targetX());
+    const targetXRef = useRef<number | null>(null);
     useEffect((): void => {
         targetXRef.current = targetX();
     }, [targetX]);
@@ -160,10 +160,10 @@ export const Chat = () => {
         (_deltaX: number): void => {
             if (!isMobileRef.current) return;
             setTimeout((): void => {
-                void animate(x, targetXRef.current, SPRING);
+                void animate(x, targetXRef.current ?? targetX(), SPRING);
             }, 0);
         },
-        [x],
+        [targetX, x],
     );
 
     const handleSwipeRight = useCallback((): void => {
@@ -275,12 +275,11 @@ export const Chat = () => {
         >
             <Outlet />
             <MobileSwipeContext.Provider value>
-                <motion.div
+                <m.div
                     className="flex h-full"
                     style={{
                         x,
                         width: '200vw',
-                        willChange: 'transform',
                     }}
                 >
                     {/* Panel 0: List (PrimaryNavBar + SecondaryNavBar) */}
@@ -295,7 +294,7 @@ export const Chat = () => {
                     <div className="flex h-full w-screen shrink-0 flex-col overflow-hidden">
                         <MainContent />
                     </div>
-                </motion.div>
+                </m.div>
             </MobileSwipeContext.Provider>
 
             {/* TertiarySidebar: fixed overlay, slides in from right independently */}

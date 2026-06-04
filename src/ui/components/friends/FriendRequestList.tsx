@@ -28,11 +28,20 @@ export const FriendRequestList = () => {
         'all' | 'pending' | 'sent' | 'blocked' | 'add'
     >('pending');
 
-    React.useEffect((): void => {
-        if (!isLoading && (!requests || requests.length === 0)) {
-            setView('all');
-        }
-    }, [isLoading, requests]);
+    const requestCount = requests?.length ?? 0;
+    const [prevRequestCount, setPrevRequestCount] =
+        React.useState(requestCount);
+    if (
+        !isLoading &&
+        requestCount !== prevRequestCount &&
+        requestCount === 0 &&
+        view === 'pending'
+    ) {
+        setPrevRequestCount(requestCount);
+        setView('all');
+    } else if (requestCount !== prevRequestCount) {
+        setPrevRequestCount(requestCount);
+    }
 
     if (isLoading) {
         return (
@@ -106,6 +115,7 @@ export const FriendRequestList = () => {
                                     ? 'bg-primary text-foreground-inverse hover:bg-primary-hover'
                                     : 'text-foreground-muted hover:bg-bg-tertiary hover:text-foreground',
                             )}
+                            type="button"
                             onClick={(): void => setView('all')}
                         >
                             All
@@ -117,6 +127,7 @@ export const FriendRequestList = () => {
                                     ? 'bg-primary text-foreground-inverse hover:bg-primary-hover'
                                     : 'text-foreground-muted hover:bg-bg-tertiary hover:text-foreground',
                             )}
+                            type="button"
                             onClick={(): void => setView('pending')}
                         >
                             Pending
@@ -133,6 +144,7 @@ export const FriendRequestList = () => {
                                     ? 'bg-primary text-foreground-inverse hover:bg-primary-hover'
                                     : 'text-foreground-muted hover:bg-bg-tertiary hover:text-foreground',
                             )}
+                            type="button"
                             onClick={(): void => setView('sent')}
                         >
                             Sent
@@ -150,6 +162,7 @@ export const FriendRequestList = () => {
                                     ? 'bg-primary text-foreground-inverse hover:bg-primary-hover'
                                     : 'text-foreground-muted hover:bg-bg-tertiary hover:text-foreground',
                             )}
+                            type="button"
                             onClick={(): void => setView('blocked')}
                         >
                             Blocked
@@ -162,6 +175,7 @@ export const FriendRequestList = () => {
                                     ? 'bg-success text-white'
                                     : 'bg-success/20 text-success hover:bg-success hover:text-white',
                             )}
+                            type="button"
                             onClick={(): void => setView('add')}
                         >
                             Add friend

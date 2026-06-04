@@ -8,7 +8,7 @@ import {
 } from '@/api/servers/servers.queries';
 import type { Role, Server, ServerMember } from '@/api/servers/servers.types';
 import { useStickerInfoBox } from '@/hooks/useStickerInfoBox';
-import { useLimitedAnimations } from '@/providers/LimitedAnimationsProvider';
+import { useLimitedAnimations } from '@/providers/limitedAnimationsContext';
 import type { ButtonComponent, Embed } from '@/types/embed';
 import { ParsedText } from '@/ui/components/common/ParsedText';
 import { PausedAnimatedImage } from '@/ui/components/common/PausedAnimatedImage';
@@ -198,6 +198,7 @@ export const MessageContent = React.memo(
                         <Tooltip content={sticker.name} position="top">
                             <button
                                 className="cursor-pointer border-none bg-transparent p-0 transition-opacity outline-none hover:opacity-90 active:opacity-80"
+                                type="button"
                                 onClick={(e): void =>
                                     showStickerInfo(
                                         {

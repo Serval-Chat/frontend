@@ -115,11 +115,9 @@ export const SettingsModal = ({
         void navigate(`/chat/@setting/${urlPath}`, { replace: true });
     };
 
-    React.useEffect((): void => {
-        if (pendingSection === routeSection) {
-            setPendingSection(null);
-        }
-    }, [pendingSection, routeSection]);
+    if (pendingSection !== null && pendingSection === routeSection) {
+        setPendingSection(null);
+    }
 
     return (
         <Modal

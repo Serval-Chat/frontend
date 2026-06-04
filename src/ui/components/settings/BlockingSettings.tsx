@@ -189,6 +189,7 @@ export const BlockingSettings = () => {
                             size={14}
                         />
                         <input
+                            aria-label="Search blocked users"
                             className="w-full rounded-md border border-[var(--settings-search-border)] bg-[var(--settings-search-bg)] py-1.5 pr-3 pl-9 text-xs text-foreground transition-all outline-none placeholder:text-[var(--settings-search-placeholder)] focus:border-primary/50 focus:bg-[var(--settings-search-bg-focus)]"
                             placeholder="Search blocked users..."
                             value={searchQuery}
@@ -199,6 +200,7 @@ export const BlockingSettings = () => {
                         {searchQuery && (
                             <button
                                 className="absolute top-1/2 right-2 -translate-y-1/2 text-[var(--settings-search-icon)] hover:text-foreground"
+                                type="button"
                                 onClick={(): void => setSearchQuery('')}
                             >
                                 <X size={12} />
@@ -349,6 +351,7 @@ export const BlockingSettings = () => {
                                 {renamingProfileId === profile.id ? (
                                     <Box className="flex items-center gap-2">
                                         <input
+                                            aria-label="Rename block profile"
                                             className="rounded border border-primary/50 bg-[var(--settings-edit-control-bg)] px-2 py-1 text-sm outline-none"
                                             ref={renameInputRef}
                                             title="Rename Profile"
@@ -474,6 +477,7 @@ export const BlockingSettings = () => {
                                                                             : 'border-transparent bg-white/5 text-muted-foreground hover:bg-white/10 hover:text-foreground',
                                                                     )}
                                                                     key={flag}
+                                                                    type="button"
                                                                     onClick={(): void =>
                                                                         handleToggleFlag(
                                                                             profile.id,

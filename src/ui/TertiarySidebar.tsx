@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, m } from 'framer-motion';
 import { Search, X } from 'lucide-react';
 
 import { useResizable } from '@/hooks/useResizable';
@@ -129,6 +129,7 @@ export const TertiarySidebar = ({
                                         'p-1 text-muted-foreground transition-colors hover:text-foreground',
                                         isSearchOpen && 'text-primary',
                                     )}
+                                    type="button"
                                     onClick={(): void => {
                                         setIsSearchOpen(!isSearchOpen);
                                         if (isSearchOpen) setSearchQuery('');
@@ -141,6 +142,7 @@ export const TertiarySidebar = ({
                                 <button
                                     aria-label="Close member list"
                                     className="p-1 text-muted-foreground transition-colors hover:text-foreground md:hidden"
+                                    type="button"
                                     onClick={(): void | {
                                         payload: undefined;
                                         type: 'nav/toggleMobileMemberList';
@@ -159,7 +161,7 @@ export const TertiarySidebar = ({
 
                 <AnimatePresence>
                     {isSearchOpen && selectedServerId && (
-                        <motion.div
+                        <m.div
                             animate={{ height: 'auto', opacity: 1 }}
                             className="pride-glass shrink-0 overflow-hidden border-b border-border-subtle bg-bg-subtle/50"
                             exit={{ height: 0, opacity: 0 }}
@@ -176,7 +178,7 @@ export const TertiarySidebar = ({
                                     }
                                 />
                             </div>
-                        </motion.div>
+                        </m.div>
                     )}
                 </AnimatePresence>
 

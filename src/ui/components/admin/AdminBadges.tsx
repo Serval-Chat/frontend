@@ -256,7 +256,7 @@ const BadgeEditor = ({
             color: color || '#3b82f6',
             createdAt: badge?.createdAt ?? new Date().toISOString(),
         }),
-        [badge?.id, badge?.createdAt, color, description, icon, id, name],
+        [badge?.createdAt, color, description, icon, id, name],
     );
 
     const handleSave = (): void => {

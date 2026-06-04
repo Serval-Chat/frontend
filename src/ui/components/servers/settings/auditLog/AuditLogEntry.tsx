@@ -179,56 +179,59 @@ export const AuditLogEntry = ({
         : undefined;
 
     const currentMemberRoles = currentMember?.roles
-        ? (currentMember.roles
-              .map((roleId): Role | undefined =>
-                  roles?.find((r): boolean => r.id === roleId),
-              )
-              .filter(Boolean) as Role[])
+        ? currentMember.roles.reduce<Role[]>((resolvedRoles, roleId) => {
+              const role = roles?.find((r): boolean => r.id === roleId);
+              if (role) resolvedRoles.push(role);
+              return resolvedRoles;
+          }, [])
         : undefined;
 
     const topRoleWithColor = currentMemberRoles
-        ? [...currentMemberRoles]
-              .sort((a, b): number => b.position - a.position)
-              .find((r): string | undefined => r.color || r.startColor)
-        : undefined;
+        ?.slice()
+        .sort((a, b): number => b.position - a.position)
+        .find((r): string | undefined => r.color || r.startColor);
 
     const topRoleWithIcon = currentMemberRoles
-        ? [...currentMemberRoles]
-              .sort((a, b): number => b.position - a.position)
-              .find((r): string | undefined => r.icon)
-        : undefined;
+        ?.slice()
+        .sort((a, b): number => b.position - a.position)
+        .find((r): string | undefined => r.icon);
 
     const getTargetDisplay = (): React.ReactNode => {
         const renderUserWithAvatar = (
             username: string,
             avatarUrl?: string,
             userId?: string,
-        ): React.ReactNode => (
-            <span
-                className={`relative top-[-1px] inline-flex items-center gap-1.5 align-middle mix-blend-plus-lighter ${userId ? 'cursor-pointer hover:underline' : ''}`}
-                role={userId ? 'button' : undefined}
-                tabIndex={userId ? 0 : undefined}
-                onClick={userId ? handleProfileClick(userId) : undefined}
-                onKeyDown={
-                    userId
-                        ? (e): void => {
-                              if (e.key === 'Enter' || e.key === ' ')
-                                  handleProfileClick(userId)(
-                                      e as unknown as React.MouseEvent,
-                                  );
-                          }
-                        : undefined
-                }
-            >
-                <UserProfilePicture
-                    noIndicator
-                    size="xs"
-                    src={avatarUrl}
-                    username={username}
-                />
-                {`@${username}`}
-            </span>
-        );
+        ): React.ReactNode => {
+            const content = (
+                <>
+                    <UserProfilePicture
+                        noIndicator
+                        size="xs"
+                        src={avatarUrl}
+                        username={username}
+                    />
+                    {`@${username}`}
+                </>
+            );
+
+            if (!userId) {
+                return (
+                    <span className="relative top-[-1px] inline-flex items-center gap-1.5 align-middle mix-blend-plus-lighter">
+                        {content}
+                    </span>
+                );
+            }
+
+            return (
+                <button
+                    className="relative top-[-1px] inline-flex cursor-pointer items-center gap-1.5 border-0 bg-transparent p-0 align-middle mix-blend-plus-lighter hover:underline"
+                    type="button"
+                    onClick={handleProfileClick(userId)}
+                >
+                    {content}
+                </button>
+            );
+        };
 
         if (entry.action === 'role_given' || entry.action === 'role_removed') {
             const roleName = entry.metadata?.roleName
@@ -626,6 +629,7 @@ export const AuditLogEntry = ({
                         <div className="mt-2 text-sm">
                             <button
                                 className="hover:text-text flex items-center gap-1 text-xs text-text-muted"
+                                type="button"
                                 onClick={(): void =>
                                     setExpandedRoles(!expandedRoles)
                                 }

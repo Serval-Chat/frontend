@@ -16,7 +16,7 @@ import {
     useProxyMetadata,
 } from '@/api/files/files.queries';
 import type { FileMetadata, ProxyMetadata } from '@/api/files/files.types';
-import { useLimitedAnimations } from '@/providers/LimitedAnimationsProvider';
+import { useLimitedAnimations } from '@/providers/limitedAnimationsContext';
 import { Button } from '@/ui/components/common/Button';
 import { CodeModal } from '@/ui/components/common/CodeModal';
 import { ImageLightbox } from '@/ui/components/common/ImageLightbox';

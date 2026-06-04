@@ -4,10 +4,7 @@ import { MotionConfig } from 'framer-motion';
 
 import { useMe } from '@/api/users/users.queries';
 
-const LimitedAnimationsContext = React.createContext(false);
-
-export const useLimitedAnimations = (): boolean =>
-    React.useContext(LimitedAnimationsContext);
+import { LimitedAnimationsContext } from './limitedAnimationsContext';
 
 export const LimitedAnimationsProvider = ({
     children,

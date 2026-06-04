@@ -5,7 +5,7 @@ import { Loader2 } from 'lucide-react';
 
 import { klipyApi } from '@/api/klipy/klipy.api';
 import type { KlipyFavorite } from '@/api/klipy/klipy.types';
-import { useLimitedAnimations } from '@/providers/LimitedAnimationsProvider';
+import { useLimitedAnimations } from '@/providers/limitedAnimationsContext';
 import { GifStarButton } from '@/ui/components/chat/GifStarButton';
 import { PausedAnimatedImage } from '@/ui/components/common/PausedAnimatedImage';
 import { Box } from '@/ui/components/layout/Box';

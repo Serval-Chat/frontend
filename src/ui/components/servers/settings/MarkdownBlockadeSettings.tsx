@@ -73,8 +73,10 @@ const parseTargetValue = (
     return { targetType: 'everyone', targetId: 'everyone' };
 };
 
+const EMPTY_RULES: MarkdownBlockadeRule[] = [];
+
 export const MarkdownBlockadeSettings = ({
-    rules = [],
+    rules = EMPTY_RULES,
     serverId,
     isPending,
     onSave,

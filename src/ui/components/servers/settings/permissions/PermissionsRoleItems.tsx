@@ -63,11 +63,11 @@ export const AddRoleDropdown = ({
             />
             {isOpen && (
                 <>
-                    <div
+                    <button
                         aria-label="Close menu"
-                        className="fixed inset-0 z-40"
-                        role="button"
+                        className="fixed inset-0 z-40 border-0 bg-transparent p-0"
                         tabIndex={-1}
+                        type="button"
                         onClick={(): void => setIsOpen(false)}
                         onKeyDown={(e): void => {
                             if (e.key === 'Escape' || e.key === 'Enter')
@@ -81,6 +81,7 @@ export const AddRoleDropdown = ({
                                     <button
                                         className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-foreground hover:bg-bg-subtle"
                                         key={role.id}
+                                        type="button"
                                         onClick={(): void => {
                                             onAdd(role);
                                             setIsOpen(false);

@@ -78,10 +78,7 @@ export const AutocompleteSuggestion = ({
         React.useState<React.CSSProperties>();
 
     React.useLayoutEffect((): (() => void) | undefined => {
-        if (suggestions.length === 0) {
-            setMobileMenuStyle(undefined);
-            return;
-        }
+        if (suggestions.length === 0) return;
 
         const updateMobileMenuStyle = (): void => {
             const anchorElement = anchorElementRef?.current;
@@ -114,6 +111,7 @@ export const AutocompleteSuggestion = ({
         window.visualViewport?.addEventListener(
             'scroll',
             updateMobileMenuStyle,
+            { passive: true },
         );
 
         return (): void => {
@@ -131,10 +129,13 @@ export const AutocompleteSuggestion = ({
 
     if (suggestions.length === 0) return null;
 
+    const resolvedMobileMenuStyle =
+        suggestions.length === 0 ? undefined : mobileMenuStyle;
+
     return (
         <Box
             className="absolute right-0 bottom-full left-0 z-[var(--z-index-popover)] mx-4 mb-2 overflow-hidden rounded-lg border border-border-subtle bg-background shadow-lg backdrop-blur-md max-md:mx-0 max-md:rounded-none"
-            style={mobileMenuStyle}
+            style={resolvedMobileMenuStyle}
         >
             <Box className="scrollbar-thin max-h-72 overflow-y-auto p-1">
                 {suggestions.map((suggestion, index) => (

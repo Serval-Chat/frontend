@@ -72,13 +72,14 @@ const getRelativeValue = (
     };
 };
 
+const relativeTimeFormatter = new Intl.RelativeTimeFormat(APP_LOCALE, {
+    numeric: 'auto',
+});
+
 const formatRelativeTime = (date: Date, now: number): string => {
-    const formatter = new Intl.RelativeTimeFormat(APP_LOCALE, {
-        numeric: 'auto',
-    });
     const { value, unit } = getRelativeValue(date, now);
 
-    return formatter.format(value, unit);
+    return relativeTimeFormatter.format(value, unit);
 };
 
 const formatTimestamp = (

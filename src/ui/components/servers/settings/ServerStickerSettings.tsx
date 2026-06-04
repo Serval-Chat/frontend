@@ -23,6 +23,7 @@ import { Input } from '@/ui/components/common/Input';
 import { Text } from '@/ui/components/common/Text';
 import { ImageCropModal } from '@/ui/components/settings/ImageCropModal';
 import { resolveApiUrl } from '@/utils/apiUrl';
+import { convertToWebp } from '@/utils/convertToWebp';
 import { WsEvents } from '@/ws';
 
 interface ServerStickerSettingsProps {
@@ -121,42 +122,6 @@ export const ServerStickerSettings = ({
     const handleUploadClick = (): void => {
         fileInputRef.current?.click();
     };
-
-    const convertToWebp = (blob: Blob, fileName: string): Promise<File> =>
-        new Promise((resolve, reject): void => {
-            const url = URL.createObjectURL(blob);
-            const img = new Image();
-            img.onload = (): void => {
-                const canvas = document.createElement('canvas');
-                canvas.width = img.width;
-                canvas.height = img.height;
-                const ctx = canvas.getContext('2d');
-                if (!ctx) {
-                    reject(new Error('Failed to get canvas context'));
-                    return;
-                }
-                ctx.drawImage(img, 0, 0);
-                canvas.toBlob((convertedBlob): void => {
-                    if (convertedBlob) {
-                        const newName =
-                            fileName.replace(/\.[^/.]+$/, '') + '.webp';
-                        resolve(
-                            new File([convertedBlob], newName, {
-                                type: 'image/webp',
-                            }),
-                        );
-                    } else {
-                        reject(new Error('Failed to convert to webp'));
-                    }
-                    URL.revokeObjectURL(url);
-                }, 'image/webp');
-            };
-            img.onerror = (): void => {
-                URL.revokeObjectURL(url);
-                reject(new Error('Failed to load image'));
-            };
-            img.src = url;
-        });
 
     const handleBulkFileSelect = async (
         event: React.ChangeEvent<HTMLInputElement>,
@@ -265,13 +230,15 @@ export const ServerStickerSettings = ({
 
         // Delete already uploaded stickers
         const idsToDelete = [...uploadedIdsRef.current];
-        for (const id of idsToDelete) {
-            try {
-                await deleteStickerAsync(id);
-            } catch (err) {
-                console.error(`Failed to delete sticker ${id}:`, err);
-            }
-        }
+        await Promise.all(
+            idsToDelete.map(async (id): Promise<void> => {
+                try {
+                    await deleteStickerAsync(id);
+                } catch (err) {
+                    console.error(`Failed to delete sticker ${id}:`, err);
+                }
+            }),
+        );
 
         uploadedIdsRef.current = [];
         setIsCancelling(false);
@@ -320,6 +287,7 @@ export const ServerStickerSettings = ({
 
                 <input
                     accept="image/png,image/jpeg,image/gif,image/webp"
+                    aria-label="Upload sticker image"
                     className="hidden"
                     ref={fileInputRef}
                     type="file"
@@ -327,6 +295,7 @@ export const ServerStickerSettings = ({
                 />
                 <input
                     accept=".zip,application/zip"
+                    aria-label="Upload sticker archive"
                     className="hidden"
                     ref={bulkFileInputRef}
                     type="file"

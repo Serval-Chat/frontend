@@ -39,6 +39,7 @@ const FriendRequestNavItem = (): React.ReactNode => {
                     ? 'bg-bg-tertiary text-foreground'
                     : 'text-foreground-muted hover:bg-bg-subtle hover:text-foreground',
             )}
+            type="button"
             onClick={(): void => {
                 dispatch(setMobileHomeTab('requests'));
                 void navigate('/chat/@me');

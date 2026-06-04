@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { useLimitedAnimations } from '@/providers/LimitedAnimationsProvider';
+import { useLimitedAnimations } from '@/providers/limitedAnimationsContext';
 import { Box } from '@/ui/components/layout/Box';
 import { isAnimatedImageUrl } from '@/utils/animationPreferences';
 import { resolveApiUrl } from '@/utils/apiUrl';
@@ -26,6 +26,14 @@ const isAbsoluteUrl = (url: string): boolean => {
     }
 };
 
+const AVATAR_SIZE_CLASSES = {
+    xs: 'h-5 w-5 text-[10px]',
+    sm: 'h-8 w-8 text-xs',
+    md: 'h-10 w-10 text-sm',
+    lg: 'h-12 w-12 text-base',
+    xl: 'h-20 w-20 text-3xl',
+};
+
 export const UserProfilePictureIcon = ({
     src,
     username,
@@ -49,19 +57,11 @@ export const UserProfilePictureIcon = ({
         .slice(0, 2)
         .toUpperCase();
 
-    const sizeClasses = {
-        xs: 'h-5 w-5 text-[10px]',
-        sm: 'h-8 w-8 text-xs',
-        md: 'h-10 w-10 text-sm',
-        lg: 'h-12 w-12 text-base',
-        xl: 'h-20 w-20 text-3xl',
-    };
-
     return (
         <Box
             className={cn(
                 'flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-[var(--avatar-fallback-bg)] font-bold text-[var(--avatar-fallback-text)]',
-                sizeClasses[size],
+                AVATAR_SIZE_CLASSES[size],
                 className,
             )}
             onClick={onClick}

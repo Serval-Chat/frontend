@@ -153,14 +153,15 @@ export const DevBotDetail = ({
     const [tokenReset, setTokenReset] = useState(false);
     const [showDelete, setShowDelete] = useState(false);
 
-    React.useEffect((): void => {
-        if (bot && user) {
-            setName(user.displayName ?? user.username ?? '');
-            setDescription(user.bio ?? '');
-            setPermissions(bot.botPermissions);
-            setBannerColor(user.bannerColor ?? '');
-        }
-    }, [bot, user]);
+    const botUserKey = bot && user ? `${bot.id}:${user.id}` : null;
+    const [prevBotUserKey, setPrevBotUserKey] = React.useState(botUserKey);
+    if (botUserKey !== prevBotUserKey && bot && user) {
+        setPrevBotUserKey(botUserKey);
+        setName(user.displayName ?? user.username ?? '');
+        setDescription(user.bio ?? '');
+        setPermissions(bot.botPermissions);
+        setBannerColor(user.bannerColor ?? '');
+    }
 
     const currentName = user?.displayName ?? user?.username ?? '';
     const hasNameChanged = name.trim() !== currentName.trim();

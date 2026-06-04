@@ -83,7 +83,10 @@ export const ServerOverviewSettings = ({
     >('avatar');
     const [isCropModalOpen, setIsCropModalOpen] = useState(false);
 
-    React.useEffect((): void => {
+    const [prevServer, setPrevServer] = React.useState(server);
+
+    if (server !== prevServer) {
+        setPrevServer(server);
         if (server) {
             setName(server.name);
             setOriginalName(server.name);
@@ -94,7 +97,7 @@ export const ServerOverviewSettings = ({
             setTags(server.tags || []);
             setOriginalTags(server.tags || []);
         }
-    }, [server]);
+    }
 
     const hasChanges =
         name !== originalName ||
@@ -276,10 +279,9 @@ export const ServerOverviewSettings = ({
                         >
                             Server Icon
                         </label>
-                        <div
+                        <button
                             className="group relative flex h-32 w-32 cursor-pointer items-center justify-center overflow-hidden rounded-3xl border border-border-subtle bg-bg-subtle transition-all hover:border-primary"
-                            role="button"
-                            tabIndex={0}
+                            type="button"
                             onClick={(): void | undefined =>
                                 iconInputRef.current?.click()
                             }
@@ -312,7 +314,7 @@ export const ServerOverviewSettings = ({
                                     Change Icon
                                 </Text>
                             </div>
-                        </div>
+                        </button>
                     </div>
 
                     <div className="space-y-3">
@@ -322,10 +324,9 @@ export const ServerOverviewSettings = ({
                         >
                             Server Banner
                         </label>
-                        <div
+                        <button
                             className="group relative flex aspect-[16/9] w-full cursor-pointer items-center justify-center overflow-hidden rounded-xl border border-border-subtle bg-bg-subtle transition-all hover:border-primary md:w-64"
-                            role="button"
-                            tabIndex={0}
+                            type="button"
                             onClick={(): void | undefined =>
                                 bannerInputRef.current?.click()
                             }
@@ -360,7 +361,7 @@ export const ServerOverviewSettings = ({
                                     Change Banner
                                 </Text>
                             </div>
-                        </div>
+                        </button>
                     </div>
                 </div>
 
@@ -458,6 +459,7 @@ export const ServerOverviewSettings = ({
                                         {tag}
                                         <button
                                             className="rounded-full p-1 opacity-60 transition-all hover:bg-primary/20 hover:opacity-100"
+                                            type="button"
                                             onClick={(): void =>
                                                 handleRemoveTag(tag)
                                             }

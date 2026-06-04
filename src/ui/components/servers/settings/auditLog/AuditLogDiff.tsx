@@ -162,6 +162,7 @@ export const AuditLogDiff = ({ changes }: AuditLogDiffProps) => {
         <div className="mt-2 text-sm">
             <button
                 className="hover:text-text flex items-center gap-1 text-xs text-text-muted"
+                type="button"
                 onClick={(): void => setExpanded(!expanded)}
             >
                 {expanded ? (

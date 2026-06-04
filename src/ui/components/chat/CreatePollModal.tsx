@@ -25,6 +25,14 @@ const EmojiPicker = React.lazy(() =>
 const MIN_POLL_DURATION_MS = 5 * 60 * 1000;
 const MAX_POLL_DURATION_DAYS = 90;
 const MAX_POLL_DURATION_MS = MAX_POLL_DURATION_DAYS * 24 * 60 * 60 * 1000;
+const POLL_DURATION_PRESETS = [
+    { label: '5 min', val: 5, unit: 'minutes' },
+    { label: '15 min', val: 15, unit: 'minutes' },
+    { label: '1 hr', val: 1, unit: 'hours' },
+    { label: '1 day', val: 1, unit: 'days' },
+    { label: '7 days', val: 7, unit: 'days' },
+    { label: '90 days', val: 90, unit: 'days' },
+] as const;
 
 interface PollOptionInput {
     id: string;
@@ -55,6 +63,7 @@ export const CreatePollModal = ({
     onClose,
     onSubmit,
 }: CreatePollModalProps) => {
+    const [prevIsOpen, setPrevIsOpen] = useState(isOpen);
     const [title, setTitle] = useState('');
     const [options, setOptions] = useState<PollOptionInput[]>([
         { id: '1', text: '' },
@@ -65,7 +74,7 @@ export const CreatePollModal = ({
     const [durationUnit, setDurationUnit] = useState<
         'minutes' | 'hours' | 'days'
     >('hours');
-    const [expiryPreview, setExpiryPreview] = useState<string>('');
+    const [previewBaseTime] = useState((): number => Date.now());
 
     const [activeEmojiOption, setActiveEmojiOption] = useState<string | null>(
         null,
@@ -73,6 +82,22 @@ export const CreatePollModal = ({
     const [pickerCoords, setPickerCoords] = useState({ top: 0, left: 0 });
     const emojiPickerRef = useRef<HTMLDivElement>(null);
     const triggerRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+
+    if (isOpen !== prevIsOpen) {
+        setPrevIsOpen(isOpen);
+
+        if (!isOpen) {
+            setTitle('');
+            setOptions([
+                { id: '1', text: '' },
+                { id: '2', text: '' },
+            ]);
+            setMultiSelect(false);
+            setDurationValue(1);
+            setDurationUnit('hours');
+            setActiveEmojiOption(null);
+        }
+    }
 
     const updatePickerPosition = (id: string): void => {
         const trigger = triggerRefs.current[id];
@@ -137,44 +162,14 @@ export const CreatePollModal = ({
               ? MAX_POLL_DURATION_DAYS * 24
               : MAX_POLL_DURATION_DAYS;
 
-    const PRESETS = [
-        { label: '5 min', val: 5, unit: 'minutes' },
-        { label: '15 min', val: 15, unit: 'minutes' },
-        { label: '1 hr', val: 1, unit: 'hours' },
-        { label: '1 day', val: 1, unit: 'days' },
-        { label: '7 days', val: 7, unit: 'days' },
-        { label: '90 days', val: 90, unit: 'days' },
-    ] as const;
-
-    React.useEffect((): void => {
-        if (!isOpen) {
-            setTitle('');
-            setOptions([
-                { id: '1', text: '' },
-                { id: '2', text: '' },
-            ]);
-            setMultiSelect(false);
-            setDurationValue(1);
-            setDurationUnit('hours');
-            setActiveEmojiOption(null);
-        }
-    }, [isOpen]);
-
-    React.useEffect((): void => {
-        if (isOpen) {
-            setExpiryPreview(
-                new Date(Date.now() + getDurationMs()).toLocaleString(
-                    APP_LOCALE,
-                    {
-                        month: 'short',
-                        day: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit',
-                    },
-                ),
-            );
-        }
-    }, [isOpen, durationValue, durationUnit, getDurationMs]);
+    const expiryPreview = new Date(
+        previewBaseTime + getDurationMs(),
+    ).toLocaleString(APP_LOCALE, {
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+    });
 
     const { customCategories } = useCustomEmojis({
         enabled: activeEmojiOption !== null,
@@ -410,7 +405,7 @@ export const CreatePollModal = ({
                         Poll Duration
                     </Text>
                     <Box className="mb-2 flex flex-wrap gap-2">
-                        {PRESETS.map((p) => (
+                        {POLL_DURATION_PRESETS.map((p) => (
                             <Button
                                 className={
                                     durationValue === p.val &&

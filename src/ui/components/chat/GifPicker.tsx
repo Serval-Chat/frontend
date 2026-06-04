@@ -1,5 +1,6 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
     GripHorizontal,
     Loader2,
@@ -37,10 +38,8 @@ export const GifPicker = ({ onSelect, onClose }: GifPickerProps) => {
     const [tab, setTab] = useState<'trending' | 'stickers' | 'favorites'>(
         'trending',
     );
-    const [gifs, setGifs] = useState<GifItem[]>([]);
-    const [loading, setLoading] = useState(false);
-    const [favoritedIds, setFavoritedIds] = useState<Set<string>>(new Set());
     const debouncedSearch = useDebounce(search, 500);
+    const queryClient = useQueryClient();
 
     const [size, setSize] = useState(() => {
         const saved = localStorage.getItem(STORAGE_KEY);
@@ -107,59 +106,40 @@ export const GifPicker = ({ onSelect, onClose }: GifPickerProps) => {
         };
     }, [size]);
 
-    const fetchFavorites = useCallback(async (): Promise<void> => {
-        try {
-            const favorites = await klipyApi.getFavorites();
-            const favIds = new Set<string>(
-                favorites.map((f): string => String(f.klipyId)),
-            );
-            setFavoritedIds(favIds);
-        } catch (err) {
-            console.error('Failed to fetch favorites:', err);
-        }
-    }, []);
-
-    const fetchGifs = useCallback(async (): Promise<void> => {
-        setLoading(true);
-        try {
-            let fetchedGifs: KlipyGif[];
+    const { data: gifs = [], isFetching: loading } = useQuery({
+        queryKey: ['gif-picker', tab, debouncedSearch],
+        queryFn: async (): Promise<KlipyGif[]> => {
             if (tab === 'favorites') {
-                const favorites = await klipyApi.getFavorites();
-                fetchedGifs = favorites;
-                const favIds = new Set<string>(
-                    favorites.map((f): string => String(f.klipyId)),
-                );
-                setFavoritedIds(favIds);
-                setFavoritedIds(favIds);
-            } else if (tab === 'stickers') {
-                if (debouncedSearch !== '') {
-                    fetchedGifs =
-                        await klipyApi.searchStickers(debouncedSearch);
-                } else {
-                    fetchedGifs = await klipyApi.getTrendingStickers();
-                }
-            } else if (debouncedSearch !== '') {
-                fetchedGifs = await klipyApi.searchGifs(debouncedSearch);
-            } else {
-                fetchedGifs = await klipyApi.getTrendingGifs();
+                return klipyApi.getFavorites();
             }
-            setGifs(fetchedGifs);
-        } catch (err) {
-            console.error('Failed to fetch GIFs:', err);
-        } finally {
-            setLoading(false);
-        }
-    }, [tab, debouncedSearch]);
+            if (tab === 'stickers') {
+                if (debouncedSearch !== '') {
+                    return klipyApi.searchStickers(debouncedSearch);
+                }
+                return klipyApi.getTrendingStickers();
+            }
+            if (debouncedSearch !== '') {
+                return klipyApi.searchGifs(debouncedSearch);
+            }
+            return klipyApi.getTrendingGifs();
+        },
+    });
 
-    useEffect((): void => {
-        void fetchGifs();
-    }, [fetchGifs]);
+    const { data: favoritedIdsFromQuery = new Set<string>() } = useQuery({
+        queryKey: ['gif-picker-favorites'],
+        queryFn: async (): Promise<Set<string>> => {
+            const favorites = await klipyApi.getFavorites();
+            return new Set(favorites.map((f): string => String(f.klipyId)));
+        },
+        enabled: tab !== 'favorites',
+    });
 
-    useEffect((): void => {
-        if (tab !== 'favorites') {
-            void fetchFavorites();
+    const favoritedIds = useMemo((): Set<string> => {
+        if (tab === 'favorites') {
+            return new Set(gifs.map((f): string => String(f.klipyId)));
         }
-    }, [tab, fetchFavorites]);
+        return favoritedIdsFromQuery;
+    }, [tab, gifs, favoritedIdsFromQuery]);
 
     const handleToggleFavorite = async (
         e: React.MouseEvent,
@@ -186,35 +166,22 @@ export const GifPicker = ({ onSelect, onClose }: GifPickerProps) => {
         const height = gif.height || gif.file?.sm?.gif?.height || 150;
 
         try {
-            const { favorited: isNowFavorited } = await klipyApi.toggleFavorite(
-                {
-                    klipyId,
-                    slug,
-                    url,
-                    previewUrl,
-                    width,
-                    height,
-                    contentType,
-                },
-            );
-
-            setFavoritedIds((prev): Set<string> => {
-                const next = new Set(prev);
-                if (isNowFavorited) {
-                    next.add(klipyId);
-                } else {
-                    next.delete(klipyId);
-                }
-                return next;
+            await klipyApi.toggleFavorite({
+                klipyId,
+                slug,
+                url,
+                previewUrl,
+                width,
+                height,
+                contentType,
             });
 
-            if (tab === 'favorites' && !isNowFavorited) {
-                setGifs((prev): KlipyGif[] =>
-                    prev.filter(
-                        (g): boolean => String(g.klipyId || g.id) !== klipyId,
-                    ),
-                );
-            }
+            void queryClient.invalidateQueries({
+                queryKey: ['gif-picker-favorites'],
+            });
+            void queryClient.invalidateQueries({
+                queryKey: ['gif-picker'],
+            });
         } catch (err) {
             console.error('Failed to toggle favorite:', err);
         }

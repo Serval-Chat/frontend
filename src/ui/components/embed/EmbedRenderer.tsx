@@ -2,6 +2,7 @@ import {
     type CSSProperties,
     type ReactNode,
     memo,
+    useCallback,
     useMemo,
     useState,
 } from 'react';
@@ -23,7 +24,16 @@ import {
     parseText,
 } from '@/utils/textParser/parser';
 
-// Remove static timestampFormatter
+const timestampFormatter12Hour = new Intl.DateTimeFormat(APP_LOCALE, {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+    hour12: true,
+});
+const timestampFormatter24Hour = new Intl.DateTimeFormat(APP_LOCALE, {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+    hour12: false,
+});
 
 const colorToCss = (color: number | undefined): string | undefined => {
     if (color === undefined) return undefined;
@@ -36,16 +46,28 @@ const formatTimestamp = (
 ): string | undefined => {
     if (!iso) return undefined;
     try {
-        const formatter = new Intl.DateTimeFormat(APP_LOCALE, {
-            dateStyle: 'medium',
-            timeStyle: 'short',
-            hour12: !use24HourTime,
-        });
+        const formatter = use24HourTime
+            ? timestampFormatter24Hour
+            : timestampFormatter12Hour;
         return formatter.format(new Date(iso));
     } catch {
         return iso;
     }
 };
+
+const getEmbedKey = (embed: Embed): string =>
+    [
+        embed.type,
+        embed.url,
+        embed.video?.url,
+        embed.image?.url,
+        embed.thumbnail?.url,
+        embed.title,
+        embed.description,
+        embed.color,
+    ]
+        .filter(Boolean)
+        .join(':');
 
 interface ParsedEmbedTextProps {
     text: string;
@@ -140,7 +162,6 @@ EmbedImage.displayName = 'EmbedImage';
 
 interface EmbedCardProps {
     embed: Embed;
-    index: number;
     variant: 'preview' | 'chat';
     serverId?: string;
     isDeleted?: boolean;
@@ -150,7 +171,6 @@ interface EmbedCardProps {
 const EmbedCard = memo(
     ({
         embed,
-        index,
         variant,
         serverId,
         isDeleted,
@@ -233,7 +253,6 @@ const EmbedCard = memo(
                         'mt-1 flex flex-col overflow-hidden rounded-r-sm',
                         isShorts ? 'max-w-[300px]' : 'max-w-[520px]',
                     )}
-                    key={index}
                     style={{
                         borderLeft: '4px solid #ff0000',
                     }}
@@ -328,6 +347,7 @@ const EmbedCard = memo(
                                 allowFullScreen
                                 className="absolute inset-0 h-full w-full"
                                 referrerPolicy="strict-origin-when-cross-origin"
+                                sandbox="allow-presentation allow-scripts"
                                 src={embed.video.url}
                                 title={embed.title ?? 'YouTube video'}
                                 onLoad={onResize}
@@ -340,11 +360,11 @@ const EmbedCard = memo(
 
         if (embed.type === 'video' && embed.video?.url) {
             return (
-                <div className="mt-1 flex w-fit" key={index}>
-                    {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
+                <div className="mt-1 flex w-fit">
                     <video
                         controls
                         playsInline
+                        aria-label={embed.title ?? 'Embedded video'}
                         className={cn(
                             'max-h-96 max-w-[520px] rounded-md',
                             isDeleted && 'opacity-50 grayscale',
@@ -353,14 +373,16 @@ const EmbedCard = memo(
                         src={embed.video.url}
                         onLoadedData={onResize}
                         onLoadedMetadata={onResize}
-                    />
+                    >
+                        <track kind="captions" label="Captions" srcLang="en" />
+                    </video>
                 </div>
             );
         }
 
         if (embed.type === 'image' && embed.image?.url) {
             return (
-                <div className="mt-1 flex w-fit" key={index}>
+                <div className="mt-1 flex w-fit">
                     <EmbedImage
                         alt={embed.title || 'Image'}
                         className="block"
@@ -378,7 +400,6 @@ const EmbedCard = memo(
         return (
             <div
                 className="mt-1 flex w-fit max-w-[520px] overflow-hidden rounded-r-sm"
-                key={index}
                 style={{
                     borderLeft: `4px solid ${barColor ?? 'var(--color-embed-border)'}`,
                 }}
@@ -826,40 +847,62 @@ export const EmbedRenderer = ({
         payload.components?.length ||
         payload.poll,
     );
+    const visiblePollAnswers = useMemo(
+        () =>
+            payload.poll?.answers.filter(
+                (answer): boolean => answer.text.trim() !== '',
+            ) ?? [],
+        [payload.poll?.answers],
+    );
+    const shouldRenderPollPreview = Boolean(
+        payload.poll &&
+        (visiblePollAnswers.length > 0 || payload.poll.question.trim()),
+    );
 
-    const handleButtonClick = async (
-        componentIndex: number,
-        button: ButtonComponent,
-    ): Promise<void> => {
-        if (
-            button.style === 'link' ||
-            button.disabled === true ||
-            !serverId ||
-            !channelId ||
-            !messageId ||
-            !button.custom_id
-        ) {
-            return;
-        }
+    const handleButtonClick = useCallback(
+        async (
+            componentIndex: number,
+            button: ButtonComponent,
+        ): Promise<void> => {
+            if (
+                button.style === 'link' ||
+                button.disabled === true ||
+                !serverId ||
+                !channelId ||
+                !messageId ||
+                !button.custom_id
+            ) {
+                return;
+            }
 
-        const buttonKey = `${button.custom_id}`;
-        setPendingButtonKey(buttonKey);
-        try {
-            await interactionsApi.createComponentInteraction({
-                serverId,
-                channelId,
-                messageId,
-                componentIndex,
-                customId: button.custom_id,
-                invocationId: isEphemeral ? invocationId : undefined,
-                botUserId: isEphemeral ? senderId : undefined,
-            });
-        } catch (error) {
-            showToast(extractApiError(error), 'error');
-        } finally {
-            setPendingButtonKey(null);
-        }
-    };
+            const buttonKey = `${button.custom_id}`;
+            setPendingButtonKey(buttonKey);
+            try {
+                await interactionsApi.createComponentInteraction({
+                    serverId,
+                    channelId,
+                    messageId,
+                    componentIndex,
+                    customId: button.custom_id,
+                    invocationId: isEphemeral ? invocationId : undefined,
+                    botUserId: isEphemeral ? senderId : undefined,
+                });
+            } catch (error) {
+                showToast(extractApiError(error), 'error');
+            } finally {
+                setPendingButtonKey(null);
+            }
+        },
+        [
+            channelId,
+            invocationId,
+            isEphemeral,
+            messageId,
+            senderId,
+            serverId,
+            showToast,
+        ],
+    );
 
     if (!hasAnything && variant === 'preview') {
         return (
@@ -908,14 +951,13 @@ export const EmbedRenderer = ({
             )}
 
             {/* Embeds */}
-            {payload.embeds?.map((embed, i) => (
+            {payload.embeds?.map((embed) => (
                 <div
                     className="flex flex-col items-start"
-                    key={`embed-${embed.title ?? ''}-${embed.color ?? i}`}
+                    key={getEmbedKey(embed)}
                 >
                     <EmbedCard
                         embed={embed}
-                        index={i}
                         isDeleted={isDeleted}
                         serverId={serverId}
                         variant={variant}
@@ -931,82 +973,71 @@ export const EmbedRenderer = ({
                 messageId={messageId}
                 pendingButtonKey={pendingButtonKey}
                 serverId={serverId}
-                onButtonClick={handleButtonClick}
+                onButtonClick={(componentIndex, button): void => {
+                    void handleButtonClick(componentIndex, button);
+                }}
             />
 
             {/* Poll preview */}
-            {payload.poll &&
-                (() => {
-                    const visibleAnswers = payload.poll.answers.filter(
-                        (a): boolean => a.text.trim() !== '',
-                    );
-                    if (
-                        visibleAnswers.length === 0 &&
-                        !payload.poll.question.trim()
-                    )
-                        return null;
-                    return (
-                        <div
-                            className={cn(
-                                'mt-2 max-w-[520px] overflow-hidden rounded-lg border border-border-subtle bg-embed-bg',
-                                isDeleted && 'opacity-60 grayscale',
-                            )}
-                        >
-                            {/* Header */}
-                            <div className="px-4 pt-4 pb-3">
-                                <span className="mb-1 inline-flex items-center gap-1.5 rounded-full border border-border-subtle bg-bg-subtle px-2.5 py-0.5 text-[10px] font-semibold tracking-widest text-muted-foreground uppercase">
-                                    Poll
-                                </span>
-                                {payload.poll.question.trim() && (
-                                    <p className="mt-2 text-base leading-snug font-semibold text-foreground">
-                                        {payload.poll.question}
-                                    </p>
-                                )}
-                            </div>
+            {shouldRenderPollPreview && payload.poll && (
+                <div
+                    className={cn(
+                        'mt-2 max-w-[520px] overflow-hidden rounded-lg border border-border-subtle bg-embed-bg',
+                        isDeleted && 'opacity-60 grayscale',
+                    )}
+                >
+                    {/* Header */}
+                    <div className="px-4 pt-4 pb-3">
+                        <span className="mb-1 inline-flex items-center gap-1.5 rounded-full border border-border-subtle bg-bg-subtle px-2.5 py-0.5 text-[10px] font-semibold tracking-widest text-muted-foreground uppercase">
+                            Poll
+                        </span>
+                        {payload.poll.question.trim() && (
+                            <p className="mt-2 text-base leading-snug font-semibold text-foreground">
+                                {payload.poll.question}
+                            </p>
+                        )}
+                    </div>
 
-                            {/* Answers */}
-                            {visibleAnswers.length > 0 && (
-                                <ul className="flex flex-col gap-1.5 px-4 pb-3">
-                                    {visibleAnswers.map((answer) => (
-                                        <li key={`answer-${answer.text}`}>
-                                            <button
-                                                className="flex w-full cursor-pointer items-center gap-3 rounded-lg border border-border-subtle bg-bg-subtle px-3 py-2.5 text-left text-sm text-foreground hover:bg-bg-secondary"
-                                                type="button"
-                                            >
-                                                <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2 border-border-subtle">
-                                                    <span className="h-1.5 w-1.5 rounded-full" />
-                                                </span>
-                                                {answer.emoji?.name && (
-                                                    <span>
-                                                        {answer.emoji.name}
-                                                    </span>
-                                                )}
-                                                <span className="flex-1">
-                                                    {answer.text}
-                                                </span>
-                                            </button>
-                                        </li>
-                                    ))}
-                                </ul>
-                            )}
+                    {/* Answers */}
+                    {visiblePollAnswers.length > 0 && (
+                        <ul className="flex flex-col gap-1.5 px-4 pb-3">
+                            {visiblePollAnswers.map((answer) => (
+                                <li key={`answer-${answer.text}`}>
+                                    <button
+                                        className="flex w-full cursor-pointer items-center gap-3 rounded-lg border border-border-subtle bg-bg-subtle px-3 py-2.5 text-left text-sm text-foreground hover:bg-bg-secondary"
+                                        type="button"
+                                    >
+                                        <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2 border-border-subtle">
+                                            <span className="h-1.5 w-1.5 rounded-full" />
+                                        </span>
+                                        {answer.emoji?.name && (
+                                            <span>{answer.emoji.name}</span>
+                                        )}
+                                        <span className="flex-1">
+                                            {answer.text}
+                                        </span>
+                                    </button>
+                                </li>
+                            ))}
+                        </ul>
+                    )}
 
-                            {/* Footer meta */}
-                            <div className="flex flex-wrap items-center gap-2 border-t border-border-subtle px-4 py-2.5">
-                                <span className="text-xs text-muted-foreground">
-                                    {payload.poll.duration}h
-                                </span>
-                                {payload.poll.allow_multiselect && (
-                                    <span className="rounded-full bg-bg-subtle px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
-                                        Can select multiple
-                                    </span>
-                                )}
-                                <span className="ml-auto text-[10px] text-muted-foreground">
-                                    0 votes · poll not started
-                                </span>
-                            </div>
-                        </div>
-                    );
-                })()}
+                    {/* Footer meta */}
+                    <div className="flex flex-wrap items-center gap-2 border-t border-border-subtle px-4 py-2.5">
+                        <span className="text-xs text-muted-foreground">
+                            {payload.poll.duration}h
+                        </span>
+                        {payload.poll.allow_multiselect && (
+                            <span className="rounded-full bg-bg-subtle px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
+                                Can select multiple
+                            </span>
+                        )}
+                        <span className="ml-auto text-[10px] text-muted-foreground">
+                            0 votes · poll not started
+                        </span>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

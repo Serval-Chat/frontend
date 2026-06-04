@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 import { Shield } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -23,16 +23,21 @@ export const ServerRolesPage = () => {
     const allowedRoleIds = onboarding?.onboarding.selfAssignableRoleIds ?? [];
     const [selectedRoleIds, setSelectedRoleIds] = useState<string[]>([]);
     const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+    const [prevOnboarding, setPrevOnboarding] = useState(onboarding);
 
-    React.useEffect((): void => {
-        if (!onboarding) return;
-        const allowed = new Set(onboarding.onboarding.selfAssignableRoleIds);
-        setSelectedRoleIds(
-            onboarding.member.roles.filter((roleId): boolean =>
-                allowed.has(roleId),
-            ),
-        );
-    }, [onboarding]);
+    if (onboarding !== prevOnboarding) {
+        setPrevOnboarding(onboarding);
+        if (onboarding) {
+            const allowed = new Set(
+                onboarding.onboarding.selfAssignableRoleIds,
+            );
+            setSelectedRoleIds(
+                onboarding.member.roles.filter((roleId): boolean =>
+                    allowed.has(roleId),
+                ),
+            );
+        }
+    }
 
     const handleSave = (): void => {
         if (!serverId) return;
@@ -62,6 +67,7 @@ export const ServerRolesPage = () => {
                 <button
                     aria-label="Back to server"
                     className="p-1 text-muted-foreground transition-colors hover:text-foreground md:hidden"
+                    type="button"
                     onClick={handleBack}
                 >
                     ←

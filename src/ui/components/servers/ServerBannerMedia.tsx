@@ -1,6 +1,6 @@
 import type { CSSProperties, ReactNode } from 'react';
 
-import { useLimitedAnimations } from '@/providers/LimitedAnimationsProvider';
+import { useLimitedAnimations } from '@/providers/limitedAnimationsContext';
 import { PausedAnimatedImage } from '@/ui/components/common/PausedAnimatedImage';
 import { isAnimatedImageUrl } from '@/utils/animationPreferences';
 import { cn } from '@/utils/cn';

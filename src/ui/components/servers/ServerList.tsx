@@ -110,11 +110,15 @@ export const ServerList = () => {
 
         return [...filteredOrder, ...newServers];
     }, [me, servers]);
-    const [items, setItems] = React.useState<(string | IServerFolder)[]>([]);
+    const [items, setItems] =
+        React.useState<(string | IServerFolder)[]>(orderedItems);
+    const [prevOrderedItems, setPrevOrderedItems] =
+        React.useState(orderedItems);
 
-    React.useEffect((): void => {
+    if (orderedItems !== prevOrderedItems) {
+        setPrevOrderedItems(orderedItems);
         setItems(orderedItems);
-    }, [orderedItems]);
+    }
 
     const handleReorder = React.useCallback(
         (newItems: (string | IServerFolder)[]): void => {

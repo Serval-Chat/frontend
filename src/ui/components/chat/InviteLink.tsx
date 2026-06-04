@@ -18,6 +18,19 @@ interface InviteLinkProps {
     url: string;
 }
 
+const INVITE_TAG_SKELETONS = [
+    { id: 'tag-skel-name', widthClassName: 'w-16' },
+    { id: 'tag-skel-count', widthClassName: 'w-12' },
+    { id: 'tag-skel-server', widthClassName: 'w-20' },
+    { id: 'tag-skel-status', widthClassName: 'w-14' },
+    { id: 'tag-skel-owner', widthClassName: 'w-24' },
+    { id: 'tag-skel-kind', widthClassName: 'w-10' },
+    { id: 'tag-skel-region', widthClassName: 'w-18' },
+    { id: 'tag-skel-members', widthClassName: 'w-16' },
+    { id: 'tag-skel-activity', widthClassName: 'w-20' },
+    { id: 'tag-skel-age', widthClassName: 'w-12' },
+];
+
 export const InviteLinkSkeleton = ({
     containerRef,
     hasBanner,
@@ -26,73 +39,58 @@ export const InviteLinkSkeleton = ({
     containerRef?: React.Ref<HTMLDivElement>;
     hasBanner?: boolean;
     tagCount?: number;
-}) => {
-    const tagSkeletons = [
-        { id: 'tag-skel-name', widthClassName: 'w-16' },
-        { id: 'tag-skel-count', widthClassName: 'w-12' },
-        { id: 'tag-skel-server', widthClassName: 'w-20' },
-        { id: 'tag-skel-status', widthClassName: 'w-14' },
-        { id: 'tag-skel-owner', widthClassName: 'w-24' },
-        { id: 'tag-skel-kind', widthClassName: 'w-10' },
-        { id: 'tag-skel-region', widthClassName: 'w-18' },
-        { id: 'tag-skel-members', widthClassName: 'w-16' },
-        { id: 'tag-skel-activity', widthClassName: 'w-20' },
-        { id: 'tag-skel-age', widthClassName: 'w-12' },
-    ];
+}) => (
+    <Box
+        className="my-2 flex w-80 flex-col overflow-hidden rounded-lg bg-bg-secondary transition-all"
+        ref={containerRef}
+    >
+        {hasBanner && (
+            <Skeleton
+                className="h-20 w-full rounded-none"
+                variant="rectangular"
+            />
+        )}
 
-    return (
-        <Box
-            className="my-2 flex w-80 flex-col overflow-hidden rounded-lg bg-bg-secondary transition-all"
-            ref={containerRef}
-        >
-            {hasBanner && (
+        <div className="flex flex-col gap-4 p-4">
+            <Skeleton className="h-3 w-40" variant="text" />
+
+            <div className="flex items-center gap-3">
                 <Skeleton
-                    className="h-20 w-full rounded-none"
+                    className="h-12 w-12 shrink-0 rounded-xl"
                     variant="rectangular"
                 />
+                <div className="flex min-w-0 flex-1 flex-col gap-2">
+                    <Skeleton className="h-5 w-3/4" variant="text" />
+                    <Skeleton className="h-3 w-1/2" variant="text" />
+                </div>
+            </div>
+
+            {tagCount > 0 && (
+                <div className="flex flex-wrap gap-1.5">
+                    {INVITE_TAG_SKELETONS.slice(0, tagCount).map((tag) => (
+                        <Skeleton
+                            className={`h-5 ${tag.widthClassName}`}
+                            key={tag.id}
+                            variant="rectangular"
+                        />
+                    ))}
+                </div>
             )}
 
-            <div className="flex flex-col gap-4 p-4">
-                <Skeleton className="h-3 w-40" variant="text" />
-
-                <div className="flex items-center gap-3">
-                    <Skeleton
-                        className="h-12 w-12 shrink-0 rounded-xl"
-                        variant="rectangular"
-                    />
-                    <div className="flex min-w-0 flex-1 flex-col gap-2">
-                        <Skeleton className="h-5 w-3/4" variant="text" />
-                        <Skeleton className="h-3 w-1/2" variant="text" />
-                    </div>
-                </div>
-
-                {tagCount > 0 && (
-                    <div className="flex flex-wrap gap-1.5">
-                        {tagSkeletons.slice(0, tagCount).map((tag) => (
-                            <Skeleton
-                                className={`h-5 ${tag.widthClassName}`}
-                                key={tag.id}
-                                variant="rectangular"
-                            />
-                        ))}
-                    </div>
-                )}
-
-                <Skeleton className="h-8 w-full" variant="rectangular" />
-            </div>
-        </Box>
-    );
-};
+            <Skeleton className="h-8 w-full" variant="rectangular" />
+        </div>
+    </Box>
+);
 
 export const InviteLink = ({ code, url }: InviteLinkProps) => {
-    const [inView, setInView] = React.useState(false);
-    const containerRef = React.useRef<HTMLDivElement>(null);
     const queryClient = useQueryClient();
-
-    const isCached = !!queryClient.getQueryData(['invites', 'details', code]);
+    const [inView, setInView] = React.useState(
+        (): boolean => !!queryClient.getQueryData(['invites', 'details', code]),
+    );
+    const containerRef = React.useRef<HTMLDivElement>(null);
 
     React.useEffect((): (() => void) | undefined => {
-        if (isCached || inView) return;
+        if (inView) return;
 
         const observer = new IntersectionObserver(
             ([entry]): void => {
@@ -109,14 +107,14 @@ export const InviteLink = ({ code, url }: InviteLinkProps) => {
         }
 
         return (): void => observer.disconnect();
-    }, [isCached, inView]);
+    }, [inView]);
 
     const {
         data: invite,
         isLoading,
         error,
     } = useInviteDetails(code, {
-        enabled: isCached || inView,
+        enabled: inView,
     });
 
     const { data: servers } = useServers();
@@ -134,7 +132,7 @@ export const InviteLink = ({ code, url }: InviteLinkProps) => {
         showToast('Copied the invite URL in to the clipboard!', 'success');
     };
 
-    if (isLoading || (!isCached && !inView)) {
+    if (isLoading || !inView) {
         return <InviteLinkSkeleton containerRef={containerRef} />;
     }
 

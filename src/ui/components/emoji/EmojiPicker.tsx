@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo, useState } from 'react';
 
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 import { Search } from 'lucide-react';
 import { useLockBodyScroll, useMeasure } from 'react-use';
 import { List } from 'react-window';
@@ -269,12 +269,9 @@ const EmojiPickerContent = ({
         [customCategories],
     );
 
-    React.useEffect((): void => {
-        if (width <= 0 || height <= 0) return;
-        if (displayCategories.length > 0 && !activeCategoryId) {
-            setActiveCategoryId(displayCategories[0].id);
-        }
-    }, [displayCategories, activeCategoryId, width, height]);
+    const resolvedActiveCategoryId =
+        activeCategoryId ??
+        (width > 0 && height > 0 ? (displayCategories[0]?.id ?? null) : null);
 
     const Row = useCallback(
         ({ index, style }: RowComponentProps) => {
@@ -397,7 +394,7 @@ const EmojiPickerContent = ({
         <div className="flex h-full w-full overflow-hidden">
             <Box className="scrollbar-hide flex w-[44px] flex-shrink-0 flex-col items-center gap-2 overflow-y-auto border-r border-divider/50 bg-bg-subtle/50 py-3 shadow-inner">
                 {displayCategories.map((cat) => {
-                    const isActive = activeCategoryId === cat.id;
+                    const isActive = resolvedActiveCategoryId === cat.id;
                     return cat.type === 'custom' ? (
                         <Box className="relative flex-shrink-0" key={cat.id}>
                             <ServerIcon
@@ -472,7 +469,7 @@ const EmojiPickerContent = ({
                                       flatRows.find(
                                           (r) =>
                                               r.type === 'header' &&
-                                              r.id === activeCategoryId,
+                                              r.id === resolvedActiveCategoryId,
                                       ) as
                                           | (RowItem & { type: 'header' })
                                           | undefined
@@ -516,10 +513,12 @@ const EmojiPickerContent = ({
     );
 };
 
+const EMPTY_CUSTOM_CATEGORIES: CustomEmojiCategory[] = [];
+
 export const EmojiPicker = ({
     onEmojiSelect,
     onCustomEmojiSelect,
-    customCategories = [],
+    customCategories = EMPTY_CUSTOM_CATEGORIES,
     className,
 }: EmojiPickerProps) => {
     const [containerRef, { width, height }] = useMeasure<HTMLDivElement>();
@@ -534,7 +533,7 @@ export const EmojiPicker = ({
     }, []);
 
     return (
-        <motion.div
+        <m.div
             animate={{ opacity: 1, scale: 1, y: 0 }}
             className={cn(
                 'relative flex h-[500px] w-[min(480px,calc(100vw-24px))] overflow-hidden rounded-xl border border-divider bg-background shadow-2xl',
@@ -553,6 +552,6 @@ export const EmojiPicker = ({
                     onEmojiSelect={onEmojiSelect}
                 />
             )}
-        </motion.div>
+        </m.div>
     );
 };

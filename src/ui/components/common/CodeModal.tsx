@@ -20,6 +20,8 @@ export interface AstNode {
     children?: AstNode[];
 }
 
+const EMPTY_AST_NODES: AstNode[] = [];
+
 export const AstRenderer = memo(({ nodes }: { nodes: AstNode[] }) => (
     <>
         {nodes.map((node, i) => {
@@ -60,7 +62,7 @@ export const AstRenderer = memo(({ nodes }: { nodes: AstNode[] }) => (
                         key={`element-${i}-${node.tagName}`}
                         style={style}
                     >
-                        <AstRenderer nodes={node.children || []} />
+                        <AstRenderer nodes={node.children || EMPTY_AST_NODES} />
                     </Tag>
                 );
             }

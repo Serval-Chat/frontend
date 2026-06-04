@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, m } from 'framer-motion';
 import { Download, X, ZoomIn, ZoomOut } from 'lucide-react';
 import { createPortal } from 'react-dom';
 
@@ -21,14 +21,17 @@ export const ImageLightbox = ({
     onClose,
 }: ImageLightboxProps): React.ReactPortal | null => {
     const [scale, setScale] = React.useState(1);
+    const onCloseEvent = React.useEffectEvent(onClose);
+
+    if (!isOpen && scale !== 1) {
+        setScale(1);
+    }
 
     React.useEffect((): (() => void) | undefined => {
-        if (!isOpen) {
-            setScale(1);
-            return;
-        }
+        if (!isOpen) return;
+
         const handleKey = (e: KeyboardEvent): void => {
-            if (e.key === 'Escape') onClose();
+            if (e.key === 'Escape') onCloseEvent();
         };
         window.addEventListener('keydown', handleKey);
         document.body.style.overflow = 'hidden';
@@ -36,7 +39,7 @@ export const ImageLightbox = ({
             window.removeEventListener('keydown', handleKey);
             document.body.style.overflow = '';
         };
-    }, [isOpen, onClose]);
+    }, [isOpen]);
 
     const zoomIn = (e: React.MouseEvent): void => {
         e.stopPropagation();
@@ -72,7 +75,7 @@ export const ImageLightbox = ({
             {isOpen && (
                 <div className="fixed inset-0 z-top flex flex-col">
                     {/* Backdrop */}
-                    <motion.div
+                    <m.div
                         animate={{ opacity: 1 }}
                         className="absolute inset-0 bg-black/85 backdrop-blur-md"
                         exit={{ opacity: 0 }}
@@ -89,6 +92,7 @@ export const ImageLightbox = ({
                             <button
                                 aria-label="Zoom out"
                                 className="rounded-md p-2 text-white/70 transition-colors hover:bg-white/10 hover:text-white active:bg-white/20"
+                                type="button"
                                 onClick={zoomOut}
                             >
                                 <ZoomOut size={20} />
@@ -99,6 +103,7 @@ export const ImageLightbox = ({
                             <button
                                 aria-label="Zoom in"
                                 className="rounded-md p-2 text-white/70 transition-colors hover:bg-white/10 hover:text-white active:bg-white/20"
+                                type="button"
                                 onClick={zoomIn}
                             >
                                 <ZoomIn size={20} />
@@ -107,6 +112,7 @@ export const ImageLightbox = ({
                             <button
                                 aria-label="Download"
                                 className="rounded-md p-2 text-white/70 transition-colors hover:bg-white/10 hover:text-white active:bg-white/20"
+                                type="button"
                                 onClick={(e): void => {
                                     e.stopPropagation();
                                     void handleDownload();
@@ -117,6 +123,7 @@ export const ImageLightbox = ({
                             <button
                                 aria-label="Close"
                                 className="ml-1 rounded-md p-2 text-white/70 transition-colors hover:bg-white/10 hover:text-white active:bg-white/20"
+                                type="button"
                                 onClick={onClose}
                             >
                                 <X size={20} />
@@ -125,10 +132,9 @@ export const ImageLightbox = ({
                     </div>
 
                     {/* Image area */}
-                    <div
-                        className="relative flex flex-1 items-center justify-center overflow-auto focus:outline-none"
-                        role="button"
-                        tabIndex={0}
+                    <button
+                        className="relative flex flex-1 items-center justify-center overflow-auto border-0 bg-transparent p-0 focus:outline-none"
+                        type="button"
                         onClick={onClose}
                         onKeyDown={(e): void => {
                             if (e.key === 'Enter' || e.key === ' ') {
@@ -143,7 +149,7 @@ export const ImageLightbox = ({
                             }
                         }}
                     >
-                        <motion.img
+                        <m.img
                             alt={alt}
                             animate={{ opacity: 1, scale }}
                             className="rounded-lg shadow-2xl select-none"
@@ -166,7 +172,7 @@ export const ImageLightbox = ({
                                 if (scale > 1) setScale(1);
                             }}
                         />
-                    </div>
+                    </button>
                 </div>
             )}
         </AnimatePresence>,

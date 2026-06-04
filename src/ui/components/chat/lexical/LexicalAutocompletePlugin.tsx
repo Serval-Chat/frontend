@@ -91,12 +91,18 @@ const AutocompleteMenuWrapper = ({
     );
 };
 
+const EMPTY_MEMBERS: ServerMember[] = [];
+const EMPTY_ROLES: Role[] = [];
+const EMPTY_FRIENDS: User[] = [];
+const EMPTY_SERVER_EMOJIS: Emoji[] = [];
+const EMPTY_CHANNELS: Channel[] = [];
+
 export const LexicalAutocompletePlugin = ({
-    members = [],
-    roles = [],
-    friends = [],
-    serverEmojis = [],
-    channels = [],
+    members = EMPTY_MEMBERS,
+    roles = EMPTY_ROLES,
+    friends = EMPTY_FRIENDS,
+    serverEmojis = EMPTY_SERVER_EMOJIS,
+    channels = EMPTY_CHANNELS,
     serverId,
     onOpenChange,
 }: LexicalAutocompletePluginProps) => {

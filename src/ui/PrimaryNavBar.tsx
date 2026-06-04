@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, m } from 'framer-motion';
 import { Bell, Compass, Home, Plus, Settings, Telescope } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
@@ -91,6 +91,13 @@ export const PrimaryNavBar = () => {
 
     const isChatActive = !!selectedFriendId || !!selectedChannelId;
 
+    if (
+        (!showSettings || location.pathname === '/chat/@setting/my-account') &&
+        settingsSectionOverride !== null
+    ) {
+        setSettingsSectionOverride(null);
+    }
+
     const handleHomeClick = (): void => {
         dispatch(setMobileHomeTab('friends'));
         if (navMode !== 'friends' || location.pathname !== '/chat/@me') {
@@ -107,17 +114,6 @@ export const PrimaryNavBar = () => {
         // Navigate back to the previous state or @me
         void navigate(-1);
     };
-
-    React.useEffect((): void => {
-        if (!showSettings) {
-            setSettingsSectionOverride(null);
-            return;
-        }
-
-        if (location.pathname === '/chat/@setting/my-account') {
-            setSettingsSectionOverride(null);
-        }
-    }, [location.pathname, showSettings]);
 
     return (
         <Box
@@ -191,7 +187,7 @@ export const PrimaryNavBar = () => {
 
                 <AnimatePresence>
                     {showInbox && (
-                        <motion.div
+                        <m.div
                             animate={{ opacity: 1, x: 0, scale: 1 }}
                             className="absolute bottom-0 left-[calc(100%+12px)] z-[var(--z-index-popover)] origin-bottom-left"
                             exit={{ opacity: 0, x: -10, scale: 0.95 }}
@@ -203,7 +199,7 @@ export const PrimaryNavBar = () => {
                                     onClose={(): void => setShowInbox(false)}
                                 />
                             </React.Suspense>
-                        </motion.div>
+                        </m.div>
                     )}
                 </AnimatePresence>
             </Box>

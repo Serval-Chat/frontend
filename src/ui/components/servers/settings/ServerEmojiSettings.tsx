@@ -18,6 +18,7 @@ import { Input } from '@/ui/components/common/Input';
 import { Text } from '@/ui/components/common/Text';
 import { ImageCropModal } from '@/ui/components/settings/ImageCropModal';
 import { resolveApiUrl } from '@/utils/apiUrl';
+import { convertToWebp } from '@/utils/convertToWebp';
 import { WsEvents } from '@/ws';
 
 interface ServerEmojiSettingsProps {
@@ -107,42 +108,6 @@ export const ServerEmojiSettings = ({ serverId }: ServerEmojiSettingsProps) => {
     const handleUploadClick = (): void => {
         fileInputRef.current?.click();
     };
-
-    const convertToWebp = (blob: Blob, fileName: string): Promise<File> =>
-        new Promise((resolve, reject): void => {
-            const url = URL.createObjectURL(blob);
-            const img = new Image();
-            img.onload = (): void => {
-                const canvas = document.createElement('canvas');
-                canvas.width = img.width;
-                canvas.height = img.height;
-                const ctx = canvas.getContext('2d');
-                if (!ctx) {
-                    reject(new Error('Failed to get canvas context'));
-                    return;
-                }
-                ctx.drawImage(img, 0, 0);
-                canvas.toBlob((convertedBlob): void => {
-                    if (convertedBlob) {
-                        const newName =
-                            fileName.replace(/\.[^/.]+$/, '') + '.webp';
-                        resolve(
-                            new File([convertedBlob], newName, {
-                                type: 'image/webp',
-                            }),
-                        );
-                    } else {
-                        reject(new Error('Failed to convert to webp'));
-                    }
-                    URL.revokeObjectURL(url);
-                }, 'image/webp');
-            };
-            img.onerror = (): void => {
-                URL.revokeObjectURL(url);
-                reject(new Error('Failed to load image'));
-            };
-            img.src = url;
-        });
 
     const handleBulkFileSelect = async (
         event: React.ChangeEvent<HTMLInputElement>,
@@ -249,13 +214,15 @@ export const ServerEmojiSettings = ({ serverId }: ServerEmojiSettingsProps) => {
         setIsCancelling(true);
 
         const idsToDelete = [...uploadedIdsRef.current];
-        for (const id of idsToDelete) {
-            try {
-                await deleteEmojiAsync(id);
-            } catch (err) {
-                console.error(`Failed to delete emoji ${id}:`, err);
-            }
-        }
+        await Promise.all(
+            idsToDelete.map(async (id): Promise<void> => {
+                try {
+                    await deleteEmojiAsync(id);
+                } catch (err) {
+                    console.error(`Failed to delete emoji ${id}:`, err);
+                }
+            }),
+        );
 
         uploadedIdsRef.current = [];
         setIsCancelling(false);
@@ -304,6 +271,7 @@ export const ServerEmojiSettings = ({ serverId }: ServerEmojiSettingsProps) => {
 
                 <input
                     accept="image/png,image/jpeg,image/gif,image/webp"
+                    aria-label="Upload emoji image"
                     className="hidden"
                     ref={fileInputRef}
                     type="file"
@@ -311,6 +279,7 @@ export const ServerEmojiSettings = ({ serverId }: ServerEmojiSettingsProps) => {
                 />
                 <input
                     accept=".zip,application/zip"
+                    aria-label="Upload emoji archive"
                     className="hidden"
                     ref={bulkFileInputRef}
                     type="file"

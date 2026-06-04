@@ -97,6 +97,7 @@ export const ReactionVotersModal = ({
                                     : 'hover:bg-white/5',
                             )}
                             key={reaction.emoji}
+                            type="button"
                             onClick={(): void =>
                                 setSelectedEmoji(reaction.emoji)
                             }
@@ -172,7 +173,8 @@ export const ReactionVotersModal = ({
                                     roles?.filter((r): boolean | undefined =>
                                         member?.roles.includes(r.id),
                                     ) || [];
-                                const sortedRoles = [...userRoles].sort(
+                                const sortedRoles = userRoles.slice();
+                                sortedRoles.sort(
                                     (a, b): number => b.position - a.position,
                                 );
                                 const role = sortedRoles[0];

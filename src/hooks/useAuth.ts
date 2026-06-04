@@ -6,7 +6,9 @@ import { hasAuthToken } from '@/utils/authToken';
  * @description Hook for managing and listening to authentication state.
  */
 export const useAuth = (): { isAuthenticated: boolean } => {
-    const [isAuthenticated, setIsAuthenticated] = useState(hasAuthToken());
+    const [isAuthenticated, setIsAuthenticated] = useState((): boolean =>
+        hasAuthToken(),
+    );
 
     useEffect((): (() => void) => {
         const handleAuthChange = (): void => {

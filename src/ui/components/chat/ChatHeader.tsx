@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, m } from 'framer-motion';
 import { Hash, Pin, Users, Volume2, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -158,14 +158,14 @@ export const ChatHeader = ({
                             : selectedChannel?.name || 'No Channel'}
                     </Box>
                     {hasDescription && (
-                        <motion.button
+                        <m.button
                             className="w-full text-left focus:outline-none"
                             type="button"
                             onClick={(): void =>
                                 setDescExpanded((v): boolean => !v)
                             }
                         >
-                            <motion.div
+                            <m.div
                                 animate={
                                     descExpanded ? 'expanded' : 'collapsed'
                                 }
@@ -189,8 +189,8 @@ export const ChatHeader = ({
                                 >
                                     {selectedChannel!.description}
                                 </span>
-                            </motion.div>
-                        </motion.button>
+                            </m.div>
+                        </m.button>
                     )}
                     {hasStatus && (
                         <Text className="text-foreground-muted truncate text-xs">
@@ -214,6 +214,7 @@ export const ChatHeader = ({
                                     : 'text-foreground-muted hover:text-foreground',
                             )}
                             ref={pinButtonRef}
+                            type="button"
                             onClick={onTogglePins}
                         >
                             <Pin className="h-5 w-5" />
@@ -246,6 +247,7 @@ export const ChatHeader = ({
                                     ? 'text-foreground'
                                     : 'text-foreground-muted hover:text-foreground',
                             )}
+                            type="button"
                             onClick={
                                 onToggleMemberList ??
                                 ((): void => {
@@ -263,6 +265,7 @@ export const ChatHeader = ({
                 <button
                     aria-label="Back to contacts"
                     className="text-foreground-muted p-2 transition-colors hover:text-foreground md:hidden"
+                    type="button"
                     onClick={handleBackClick}
                 >
                     <X className="h-6 w-6" />

@@ -162,6 +162,13 @@ const theme = {
     },
 };
 
+const messageInputInitialConfig = {
+    namespace: 'MessageInput',
+    nodes: [ChipNode, SlashCommandChipNode, SlashArgChipNode],
+    onError: (error: Error): void => console.error(error),
+    theme,
+};
+
 const isSameSlashChipState = (
     a: { commandName: string; commandId?: string; argValues: string[] } | null,
     b: { commandName: string; commandId?: string; argValues: string[] } | null,
@@ -347,37 +354,33 @@ export const MessageInput = ({
     );
 
     const isOwner = serverDetails?.ownerId === me?.id;
-    const [remainingTimeoutMs, setRemainingTimeoutMs] = useState<number>(0);
-
-    useEffect((): (() => void) | undefined => {
-        if (!myMember?.communicationDisabledUntil || isOwner) {
-            setRemainingTimeoutMs(0);
-            return;
-        }
-
-        const update = (): void => {
-            const until = new Date(
-                myMember.communicationDisabledUntil!,
-            ).getTime();
-            const now = Date.now();
-            const diff = until - now;
-            setRemainingTimeoutMs(Math.max(0, diff));
-        };
-
-        update();
-        const interval = setInterval(update, 1000);
-        return (): void => clearInterval(interval);
-    }, [myMember?.communicationDisabledUntil, isOwner]);
-
-    const isTimedOut = remainingTimeoutMs > 0;
+    const timeoutUntil =
+        myMember?.communicationDisabledUntil && !isOwner
+            ? new Date(myMember.communicationDisabledUntil).getTime()
+            : 0;
     const activeMute = me?.activeMute ?? null;
     const activeMuteExpiresAt = activeMute?.expirationTimestamp
         ? new Date(activeMute.expirationTimestamp)
         : null;
+    const needsLiveClock =
+        timeoutUntil > 0 ||
+        (activeMute !== null && activeMuteExpiresAt !== null);
+    const [now, setNow] = useState(() => Date.now());
+
+    useEffect((): (() => void) | undefined => {
+        if (!needsLiveClock) return;
+        const update = (): void => setNow(Date.now());
+        update();
+        const interval = setInterval(update, 1000);
+        return (): void => clearInterval(interval);
+    }, [needsLiveClock]);
+
+    const remainingTimeoutMs =
+        timeoutUntil > 0 ? Math.max(0, timeoutUntil - now) : 0;
+    const isTimedOut = remainingTimeoutMs > 0;
     const isGloballyMuted =
         activeMute !== null &&
-        (activeMuteExpiresAt === null ||
-            activeMuteExpiresAt.getTime() > Date.now());
+        (activeMuteExpiresAt === null || activeMuteExpiresAt.getTime() > now);
 
     const formatTimeout = (ms: number): string => {
         const seconds = Math.floor(ms / 1000);
@@ -601,7 +604,7 @@ export const MessageInput = ({
 
         return null;
     }, [
-        me?.id,
+        me,
         selectedServerId,
         selectedChannelId,
         selectedFriendId,
@@ -746,7 +749,7 @@ export const MessageInput = ({
             sendMessage,
             replyingTo,
             onCancelReply,
-            currentChannel?.slowMode,
+            currentChannel,
             cooldown,
             canBypassSlowMode,
             setCooldown,
@@ -793,14 +796,6 @@ export const MessageInput = ({
             e.target.value = '';
         }
     };
-
-    const initialConfigRef = React.useRef({
-        namespace: 'MessageInput',
-        nodes: [ChipNode, SlashCommandChipNode, SlashArgChipNode],
-        onError: (error: Error): void => console.error(error),
-        theme,
-    });
-    const initialConfig = initialConfigRef.current;
 
     const getPlaceholder = (): React.ReactNode => {
         if (isUploading) return 'Uploading...';
@@ -1019,7 +1014,7 @@ export const MessageInput = ({
                             '!border-danger ring-2 !ring-danger ring-offset-1',
                     )}
                 >
-                    <LexicalComposer initialConfig={initialConfig}>
+                    <LexicalComposer initialConfig={messageInputInitialConfig}>
                         <EditorBridge onReady={setEditor} />
                         <RichTextPlugin
                             ErrorBoundary={LexicalErrorBoundary}

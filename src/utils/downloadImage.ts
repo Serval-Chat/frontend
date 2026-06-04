@@ -2,11 +2,19 @@ export const downloadImage = async (
     src: string,
     alt: string,
 ): Promise<void> => {
-    const { fetch } = await import('@tauri-apps/plugin-http');
-    const { writeFile } = await import('@tauri-apps/plugin-fs');
-    const { downloadDir } = await import('@tauri-apps/api/path');
-    const { platform } = await import('@tauri-apps/plugin-os');
-    const { invoke } = await import('@tauri-apps/api/core');
+    const [
+        { fetch },
+        { writeFile },
+        { downloadDir },
+        { platform },
+        { invoke },
+    ] = await Promise.all([
+        import('@tauri-apps/plugin-http'),
+        import('@tauri-apps/plugin-fs'),
+        import('@tauri-apps/api/path'),
+        import('@tauri-apps/plugin-os'),
+        import('@tauri-apps/api/core'),
+    ]);
 
     const response = await fetch(src, { method: 'GET' });
     if (!response.ok) throw new Error('Download failed');

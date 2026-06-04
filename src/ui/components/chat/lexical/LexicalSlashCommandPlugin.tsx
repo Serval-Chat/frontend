@@ -80,10 +80,7 @@ const MenuWrapper = ({
     }, [options.length, selectedIndex, setHighlightedIndex]);
 
     React.useLayoutEffect((): (() => void) | undefined => {
-        if (options.length === 0) {
-            setMobileMenuStyle(undefined);
-            return;
-        }
+        if (options.length === 0) return;
 
         const updateMobileMenuStyle = (): void => {
             const anchorElement = anchorElementRef.current;
@@ -116,6 +113,7 @@ const MenuWrapper = ({
         window.visualViewport?.addEventListener(
             'scroll',
             updateMobileMenuStyle,
+            { passive: true },
         );
 
         return (): void => {
@@ -131,10 +129,13 @@ const MenuWrapper = ({
         };
     }, [anchorElementRef, options.length]);
 
+    const resolvedMobileMenuStyle =
+        options.length === 0 ? undefined : mobileMenuStyle;
+
     return (
         <Box
             className="absolute right-0 bottom-full left-0 z-[var(--z-index-popover)] mx-4 mb-2 overflow-hidden rounded-lg border border-border-subtle bg-background shadow-lg backdrop-blur-md max-md:mx-0 max-md:rounded-none"
-            style={mobileMenuStyle}
+            style={resolvedMobileMenuStyle}
         >
             <Box className="scrollbar-thin max-h-72 overflow-y-auto p-1">
                 {options.map((option, index) => (

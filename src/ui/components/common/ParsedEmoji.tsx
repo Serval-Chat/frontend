@@ -27,9 +27,16 @@ export const ParsedEmoji = ({
     isLarge,
     style,
 }: ParsedEmojiProps) => {
-    const [inView, setInView] = useState(false);
-    const containerRef = useRef<HTMLDivElement | HTMLImageElement>(null);
     const queryClient = useQueryClient();
+    const isEmojiCached = (): boolean =>
+        !!(
+            queryClient.getQueryData(emojiKeys.detail(emojiId)) ||
+            queryClient
+                .getQueryData<Emoji[]>(['servers', 'emojis', 'all'])
+                ?.find((e): boolean => e.id === emojiId)
+        );
+    const [inView, setInView] = useState(isEmojiCached);
+    const containerRef = useRef<HTMLDivElement | HTMLImageElement>(null);
 
     const {
         selectedEmoji,
@@ -39,16 +46,8 @@ export const ParsedEmoji = ({
         closeInfoBox,
     } = useEmojiInfoBox();
 
-    // Fast-path: if the emoji is already in the cache, we don't even need the observer
-    const isCached = !!(
-        queryClient.getQueryData(emojiKeys.detail(emojiId)) ||
-        queryClient
-            .getQueryData<Emoji[]>(['servers', 'emojis', 'all'])
-            ?.find((e): boolean => e.id === emojiId)
-    );
-
     useEffect((): (() => void) | undefined => {
-        if (isCached || inView) return;
+        if (inView) return;
 
         const observer = new IntersectionObserver(
             ([entry]): void => {
@@ -65,13 +64,13 @@ export const ParsedEmoji = ({
         }
 
         return (): void => observer.disconnect();
-    }, [isCached, inView]);
+    }, [inView]);
 
     const { data: emoji, isLoading } = useEmoji(emojiId, {
-        enabled: isCached || inView,
+        enabled: inView,
     });
 
-    if (isLoading || (!isCached && !inView)) {
+    if (isLoading || !inView) {
         return (
             <div
                 className={

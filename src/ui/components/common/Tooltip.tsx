@@ -1,6 +1,6 @@
 import React, { useCallback, useRef, useState } from 'react';
 
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, m } from 'framer-motion';
 import { createPortal } from 'react-dom';
 
 import { cn } from '@/utils/cn';
@@ -17,6 +17,18 @@ interface TooltipProps {
 
 const TOOLTIP_MEDIA_QUERY =
     '(hover: hover) and (pointer: fine) and (min-width: 768px)';
+const TOOLTIP_INITIAL_VARIANTS = {
+    right: { x: -5, y: '-50%', opacity: 0, scale: 0.95 },
+    top: { x: '-50%', y: '-95%', opacity: 0, scale: 0.95 },
+    bottom: { x: '-50%', y: 5, opacity: 0, scale: 0.95 },
+    left: { x: '-95%', y: '-50%', opacity: 0, scale: 0.95 },
+};
+const TOOLTIP_ANIMATE_VARIANTS = {
+    right: { x: 0, y: '-50%', opacity: 1, scale: 1 },
+    top: { x: '-50%', y: '-100%', opacity: 1, scale: 1 },
+    bottom: { x: '-50%', y: 0, opacity: 1, scale: 1 },
+    left: { x: '-100%', y: '-50%', opacity: 1, scale: 1 },
+};
 
 const useTooltipsEnabled = (): boolean => {
     const [isEnabled, setIsEnabled] = useState((): boolean => {
@@ -30,7 +42,6 @@ const useTooltipsEnabled = (): boolean => {
         const query = window.matchMedia(TOOLTIP_MEDIA_QUERY);
         const handleChange = (): void => setIsEnabled(query.matches);
 
-        handleChange();
         query.addEventListener('change', handleChange);
 
         return (): void => query.removeEventListener('change', handleChange);
@@ -98,11 +109,13 @@ export const Tooltip = ({
         setIsVisible(false);
     };
 
-    React.useEffect((): void => {
-        if (tooltipsEnabled) return;
+    const showTooltip = tooltipsEnabled && isVisible;
 
-        if (timeoutRef.current) clearTimeout(timeoutRef.current);
-        setIsVisible(false);
+    React.useEffect((): void => {
+        if (!tooltipsEnabled && timeoutRef.current) {
+            clearTimeout(timeoutRef.current);
+            timeoutRef.current = null;
+        }
     }, [tooltipsEnabled]);
 
     React.useEffect(
@@ -113,7 +126,7 @@ export const Tooltip = ({
     );
 
     React.useLayoutEffect((): (() => void) | undefined => {
-        if (isVisible) {
+        if (showTooltip) {
             updatePosition();
             const hide = (): void => setIsVisible(false);
             window.addEventListener('scroll', hide, true);
@@ -123,21 +136,7 @@ export const Tooltip = ({
                 window.removeEventListener('resize', hide);
             };
         }
-    }, [isVisible, updatePosition]);
-
-    const variants = {
-        right: { x: -5, y: '-50%', opacity: 0, scale: 0.95 },
-        top: { x: '-50%', y: '-95%', opacity: 0, scale: 0.95 },
-        bottom: { x: '-50%', y: 5, opacity: 0, scale: 0.95 },
-        left: { x: '-95%', y: '-50%', opacity: 0, scale: 0.95 },
-    };
-
-    const animate = {
-        right: { x: 0, y: '-50%', opacity: 1, scale: 1 },
-        top: { x: '-50%', y: '-100%', opacity: 1, scale: 1 },
-        bottom: { x: '-50%', y: 0, opacity: 1, scale: 1 },
-        left: { x: '-100%', y: '-50%', opacity: 1, scale: 1 },
-    };
+    }, [showTooltip, updatePosition]);
 
     return (
         <>
@@ -156,9 +155,9 @@ export const Tooltip = ({
             {tooltipsEnabled &&
                 createPortal(
                     <AnimatePresence>
-                        {isVisible && (
-                            <motion.div
-                                animate={animate[position]}
+                        {showTooltip && (
+                            <m.div
+                                animate={TOOLTIP_ANIMATE_VARIANTS[position]}
                                 className={cn(
                                     'pointer-events-none fixed z-[var(--z-index-tooltip)] rounded-lg bg-[#111214] px-3 py-1.5 text-[13px] font-bold whitespace-nowrap text-[#f2f3f5] shadow-2xl',
                                     'before:absolute before:border-[6px] before:border-transparent before:content-[""]',
@@ -172,8 +171,8 @@ export const Tooltip = ({
                                         'before:top-1/2 before:left-full before:-ml-[1px] before:-translate-y-1/2 before:border-l-[#111214]',
                                     className,
                                 )}
-                                exit={variants[position]}
-                                initial={variants[position]}
+                                exit={TOOLTIP_INITIAL_VARIANTS[position]}
+                                initial={TOOLTIP_INITIAL_VARIANTS[position]}
                                 style={{
                                     top: coords.y,
                                     left: coords.x,
@@ -181,7 +180,7 @@ export const Tooltip = ({
                                 transition={{ duration: 0.1, ease: 'easeOut' }}
                             >
                                 {content}
-                            </motion.div>
+                            </m.div>
                         )}
                     </AnimatePresence>,
                     document.body,

@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, m } from 'framer-motion';
 import { Check, ChevronDown, Search, X } from 'lucide-react';
 
 import { Button } from '@/ui/components/common/Button';
@@ -135,10 +135,9 @@ export const DropdownWithSearch = ({
 
                 <div className="ml-2 flex flex-shrink-0 items-center gap-1">
                     {allowClear && value && (
-                        <div
+                        <button
                             className="flex h-6 w-6 cursor-pointer items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-bg-subtle"
-                            role="button"
-                            tabIndex={0}
+                            type="button"
                             onClick={handleClear}
                             onKeyDown={(e): void => {
                                 if (e.key === 'Enter' || e.key === ' ') {
@@ -147,7 +146,7 @@ export const DropdownWithSearch = ({
                             }}
                         >
                             <X size={14} />
-                        </div>
+                        </button>
                     )}
                     <ChevronDown
                         className={cn(
@@ -161,7 +160,7 @@ export const DropdownWithSearch = ({
 
             <AnimatePresence>
                 {isOpen && (
-                    <motion.div
+                    <m.div
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         className="absolute z-[var(--z-index-popover)] mt-2 w-full overflow-hidden rounded-xl border border-border-subtle bg-background shadow-2xl backdrop-blur-md"
                         exit={{ opacity: 0, y: 4, scale: 0.98 }}
@@ -242,7 +241,7 @@ export const DropdownWithSearch = ({
                                 </div>
                             )}
                         </div>
-                    </motion.div>
+                    </m.div>
                 )}
             </AnimatePresence>
         </Box>

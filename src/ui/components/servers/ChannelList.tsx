@@ -89,6 +89,59 @@ type ListItem =
     | { type: 'category'; id: string; data: Category }
     | { type: 'channel'; id: string; data: Channel };
 
+const EMPTY_IDS: string[] = [];
+
+const buildListItems = ({
+    categories,
+    channels,
+    existingCategoryIds,
+    hiddenCategories,
+    hiddenChannels,
+}: {
+    categories: Category[];
+    channels: Channel[];
+    existingCategoryIds: Set<string>;
+    hiddenCategories: Set<string>;
+    hiddenChannels: Set<string>;
+}): ListItem[] => {
+    const visibleCategories = categories.filter(
+        (category): boolean => !hiddenCategories.has(category.id),
+    );
+    const visibleChannels = channels.filter((channel): boolean => {
+        if (hiddenChannels.has(channel.id)) return false;
+        if (channel.categoryId && hiddenCategories.has(channel.categoryId)) {
+            return false;
+        }
+        return true;
+    });
+
+    const sortedCategories = visibleCategories.slice();
+    sortedCategories.sort((a, b): number => a.position - b.position);
+    const sortedChannels = visibleChannels.slice();
+    sortedChannels.sort((a, b): number => a.position - b.position);
+
+    const newList: ListItem[] = [];
+
+    const uncategorized = sortedChannels.filter(
+        (c): boolean => !c.categoryId || !existingCategoryIds.has(c.categoryId),
+    );
+    uncategorized.forEach((c): number =>
+        newList.push({ type: 'channel', id: c.id, data: c }),
+    );
+
+    sortedCategories.forEach((cat): void => {
+        newList.push({ type: 'category', id: cat.id, data: cat });
+        const catChannels = sortedChannels.filter(
+            (c): boolean => c.categoryId === cat.id,
+        );
+        catChannels.forEach((c): number =>
+            newList.push({ type: 'channel', id: c.id, data: c }),
+        );
+    });
+
+    return newList;
+};
+
 type VirtualListItem = ListItem & { virtualRow: VirtualItem };
 
 interface ChannelRowProps {
@@ -206,8 +259,8 @@ export const ChannelList = ({
     categories,
     selectedChannelId,
     scrollRef,
-    hiddenChannelIds = [],
-    hiddenCategoryIds = [],
+    hiddenChannelIds = EMPTY_IDS,
+    hiddenCategoryIds = EMPTY_IDS,
 }: ChannelListProps) => {
     const selectedServerId = useAppSelector(
         (state): string | null => state.nav.selectedServerId,
@@ -277,6 +330,29 @@ export const ChannelList = ({
         (): Set<string> => new Set(hiddenCategoryIds),
         [hiddenCategoryIds],
     );
+    const nextItems = React.useMemo(
+        (): ListItem[] =>
+            buildListItems({
+                categories,
+                channels,
+                existingCategoryIds,
+                hiddenCategories,
+                hiddenChannels,
+            }),
+        [
+            categories,
+            channels,
+            existingCategoryIds,
+            hiddenCategories,
+            hiddenChannels,
+        ],
+    );
+    const [prevSyncItems, setPrevSyncItems] = useState<ListItem[]>(nextItems);
+
+    if (nextItems !== prevSyncItems && !isReordering && !syncLock) {
+        setPrevSyncItems(nextItems);
+        setItems(nextItems);
+    }
 
     useEffect((): (() => void) => {
         const handleResize = (): void => setIsMobile(window.innerWidth < 768);
@@ -296,63 +372,6 @@ export const ChannelList = ({
             syncLockTimeoutRef.current = null;
         }
     }, [selectedServerId]);
-
-    // Sync items when props change
-    useEffect((): void => {
-        if (isReordering || syncLock) return;
-
-        const visibleCategories = categories.filter(
-            (category): boolean => !hiddenCategories.has(category.id),
-        );
-        const visibleChannels = channels.filter((channel): boolean => {
-            if (hiddenChannels.has(channel.id)) return false;
-            if (
-                channel.categoryId &&
-                hiddenCategories.has(channel.categoryId)
-            ) {
-                return false;
-            }
-            return true;
-        });
-
-        const sortedCategories = [...visibleCategories].sort(
-            (a, b): number => a.position - b.position,
-        );
-        const sortedChannels = [...visibleChannels].sort(
-            (a, b): number => a.position - b.position,
-        );
-
-        const newList: ListItem[] = [];
-
-        const uncategorized = sortedChannels.filter(
-            (c): boolean =>
-                !c.categoryId || !existingCategoryIds.has(c.categoryId),
-        );
-        uncategorized.forEach((c): number =>
-            newList.push({ type: 'channel', id: c.id, data: c }),
-        );
-
-        // Add categories and their channels
-        sortedCategories.forEach((cat): void => {
-            newList.push({ type: 'category', id: cat.id, data: cat });
-            const catChannels = sortedChannels.filter(
-                (c): boolean => c.categoryId === cat.id,
-            );
-            catChannels.forEach((c): number =>
-                newList.push({ type: 'channel', id: c.id, data: c }),
-            );
-        });
-
-        setItems(newList);
-    }, [
-        categories,
-        channels,
-        isReordering,
-        syncLock,
-        existingCategoryIds,
-        hiddenChannels,
-        hiddenCategories,
-    ]);
 
     // Mark channel as read when opened
     useEffect((): void => {
@@ -395,6 +414,7 @@ export const ChannelList = ({
         [items, collapsedCategories, existingCategoryIds],
     );
 
+    // eslint-disable-next-line react-hooks/incompatible-library
     const rowVirtualizer = useVirtualizer({
         count: visibleItems.length,
         getScrollElement: (): HTMLDivElement | null => scrollRef.current,
@@ -788,11 +808,10 @@ export const ChannelList = ({
 
                 if (isMobile) {
                     // Check if it can move up/down
-                    const siblings = channelsRef.current
-                        .filter(
-                            (c): boolean => c.categoryId === channel.categoryId,
-                        )
-                        .sort((a, b): number => a.position - b.position);
+                    const siblings = channelsRef.current.filter(
+                        (c): boolean => c.categoryId === channel.categoryId,
+                    );
+                    siblings.sort((a, b): number => a.position - b.position);
                     const index = siblings.findIndex(
                         (c): boolean => c.id === channel.id,
                     );
@@ -839,7 +858,8 @@ export const ChannelList = ({
                         onClick: (): undefined =>
                             void handleMoveToCategory(channel.id, null),
                     },
-                    ...[...categoriesRef.current]
+                    ...categoriesRef.current
+                        .slice()
                         .sort((a, b): number => a.position - b.position)
                         .map((cat) => ({
                             label: cat.name,
@@ -903,9 +923,8 @@ export const ChannelList = ({
                 });
 
                 if (isMobile) {
-                    const siblings = [...categoriesRef.current].sort(
-                        (a, b): number => a.position - b.position,
-                    );
+                    const siblings = categoriesRef.current.slice();
+                    siblings.sort((a, b): number => a.position - b.position);
                     const index = siblings.findIndex(
                         (c): boolean => c.id === category.id,
                     );
@@ -1150,26 +1169,17 @@ export const ChannelList = ({
                                                 category,
                                             )}
                                         >
-                                            <div
-                                                className="group flex cursor-pointer items-center px-1 select-none"
-                                                role="button"
-                                                tabIndex={0}
-                                                onClick={(e): void => {
-                                                    e.stopPropagation();
-                                                    toggleCategory(category.id);
-                                                }}
-                                                onKeyDown={(e): void => {
-                                                    if (
-                                                        e.key === 'Enter' ||
-                                                        e.key === ' '
-                                                    ) {
+                                            <div className="group flex items-center px-1 select-none">
+                                                <button
+                                                    className="flex min-w-0 flex-1 cursor-pointer items-center overflow-hidden border-0 bg-transparent p-0 text-left"
+                                                    type="button"
+                                                    onClick={(e): void => {
+                                                        e.stopPropagation();
                                                         toggleCategory(
                                                             category.id,
                                                         );
-                                                    }
-                                                }}
-                                            >
-                                                <div className="flex flex-1 items-center overflow-hidden">
+                                                    }}
+                                                >
                                                     {canManageChannels && (
                                                         <GripVertical className="mr-0.5 h-3 w-3 shrink-0 text-muted-foreground/30 opacity-0 transition-opacity group-hover:opacity-100" />
                                                     )}
@@ -1184,7 +1194,7 @@ export const ChannelList = ({
                                                     <span className="truncate text-[12px] font-bold tracking-wider text-muted-foreground uppercase transition-colors group-hover:text-foreground/80">
                                                         {category.name}
                                                     </span>
-                                                </div>
+                                                </button>
                                                 {canManageChannels && (
                                                     <div className="flex opacity-0 transition-opacity group-hover:opacity-100">
                                                         <IconButton

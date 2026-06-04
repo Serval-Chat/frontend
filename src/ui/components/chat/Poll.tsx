@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Check, Clock, Trophy, Users } from 'lucide-react';
 
 import { chatApi } from '@/api/chat/chat.api';
@@ -37,6 +37,7 @@ function formatTimeLeft(ms: number): string {
 
 export const Poll = ({ poll, messageId, serverId, channelId }: PollProps) => {
     const { data: me } = useMe();
+    const queryClient = useQueryClient();
     const [isVotersModalOpen, setIsVotersModalOpen] = useState(false);
     const [now, setNow] = useState((): number => Date.now());
 
@@ -72,22 +73,26 @@ export const Poll = ({ poll, messageId, serverId, channelId }: PollProps) => {
         return votes;
     }, [poll.options, me]);
 
-    const maxVotes = useMemo((): number => {
-        if (!poll?.options || totalVotes === 0) return 0;
-        return Math.max(
-            ...poll.options.map((o): number => o.votes?.length || 0),
-        );
-    }, [poll.options, totalVotes]);
-
     const winnerIds = useMemo((): Set<string> => {
-        if (!isExpired || maxVotes === 0 || !poll?.options)
+        if (!poll?.options || totalVotes === 0) {
             return new Set<string>();
-        return new Set(
-            poll.options
-                .filter((o): boolean => (o.votes?.length || 0) === maxVotes)
-                .map((o): string => o.id),
-        );
-    }, [isExpired, maxVotes, poll.options]);
+        }
+
+        let highestVoteCount = 0;
+        const winningOptions = new Set<string>();
+        for (const option of poll.options) {
+            const voteCount = option.votes?.length || 0;
+            if (voteCount > highestVoteCount) {
+                highestVoteCount = voteCount;
+                winningOptions.clear();
+            }
+            if (voteCount === highestVoteCount) {
+                winningOptions.add(option.id);
+            }
+        }
+
+        return isExpired ? winningOptions : new Set<string>();
+    }, [isExpired, poll.options, totalVotes]);
 
     const { mutate: votePoll, isPending } = useMutation({
         mutationFn: async (optionIds: string[]) => {
@@ -101,6 +106,11 @@ export const Poll = ({ poll, messageId, serverId, channelId }: PollProps) => {
             } else {
                 return chatApi.votePollDm(messageId, optionIds);
             }
+        },
+        onSuccess: () => {
+            void queryClient.invalidateQueries({
+                queryKey: ['chat', 'messages'],
+            });
         },
     });
 
@@ -299,6 +309,7 @@ export const Poll = ({ poll, messageId, serverId, channelId }: PollProps) => {
                 {showVotersButton && (
                     <button
                         className="flex items-center gap-1.5 rounded-md border border-border-subtle px-2.5 py-1 text-[10px] font-bold tracking-widest text-muted-foreground uppercase transition-all hover:bg-white/5 hover:text-foreground active:scale-[0.98]"
+                        type="button"
                         onClick={(): void => setIsVotersModalOpen(true)}
                     >
                         <Users size={10} />

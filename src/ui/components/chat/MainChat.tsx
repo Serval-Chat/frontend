@@ -341,7 +341,6 @@ export const MainChat = ({
                 }
             }
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [
         selectedChannelId,
         selectedServerId,
@@ -349,6 +348,7 @@ export const MainChat = ({
         clearChannelPings,
         deletePing,
         messages,
+        pings?.pings,
     ]);
 
     const handleReplyClick = React.useCallback(
@@ -429,6 +429,7 @@ export const MainChat = ({
                     </Text>
                     <button
                         className="text-warning hover:text-warning/80 flex items-center gap-2 transition-colors"
+                        type="button"
                         onClick={handleJumpToLatest}
                     >
                         <X size={16} />

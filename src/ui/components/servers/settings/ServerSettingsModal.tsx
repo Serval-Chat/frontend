@@ -189,6 +189,7 @@ export const ServerSettingsModal = ({
                         <div className="sticky top-0 z-40 flex shrink-0 items-center border-b border-border-subtle bg-background px-4 py-3 md:hidden">
                             <button
                                 className="flex items-center gap-1 font-medium text-muted-foreground transition-colors hover:text-foreground"
+                                type="button"
                                 onClick={(): void =>
                                     setIsMobileSidebarOpen(true)
                                 }

@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 import { Pin, X } from 'lucide-react';
 import { createPortal } from 'react-dom';
 
@@ -11,7 +11,7 @@ import {
     useRoles,
     useServerDetails,
 } from '@/api/servers/servers.queries';
-import type { Server } from '@/api/servers/servers.types';
+import type { Role, Server } from '@/api/servers/servers.types';
 import { useMe } from '@/api/users/users.queries';
 import type { User } from '@/api/users/users.types';
 import { useAppDispatch } from '@/store/hooks';
@@ -29,6 +29,19 @@ interface PinsDrawerProps {
     onClose: () => void;
     anchorRef?: React.RefObject<HTMLElement | null>;
 }
+
+const getHighestRole = (roles: Role[]): Role | undefined =>
+    roles.reduce<Role | undefined>(
+        (highest, role): Role =>
+            !highest || role.position > highest.position ? role : highest,
+        undefined,
+    );
+
+const getHighestIconRole = (roles: Role[]): Role | undefined =>
+    roles.reduce<Role | undefined>((highest, role): Role | undefined => {
+        if (!role.icon) return highest;
+        return !highest || role.position > highest.position ? role : highest;
+    }, undefined);
 
 const PinnedMessageItem = ({
     pin,
@@ -57,12 +70,8 @@ const PinnedMessageItem = ({
             serverRoles?.filter((r): boolean | undefined =>
                 member?.roles.includes(r.id),
             ) || [];
-        const highestRole = [...roles].sort(
-            (a, b): number => (b.position || 0) - (a.position || 0),
-        )[0];
-        const iconRole = [...roles]
-            .filter((r): string | undefined => r.icon)
-            .sort((a, b): number => (b.position || 0) - (a.position || 0))[0];
+        const highestRole = getHighestRole(roles);
+        const iconRole = getHighestIconRole(roles);
 
         return {
             ...pin,
@@ -209,7 +218,7 @@ export const PinsDrawer = ({
                 onClick={onClose}
             />
 
-            <motion.div
+            <m.div
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 className="pride-glass-strong fixed z-[var(--z-index-top)] flex origin-top-right flex-col overflow-hidden rounded-xl border border-[var(--divider)] bg-[var(--tertiary-bg)] shadow-2xl"
                 exit={{ opacity: 0, y: -10, scale: 0.95 }}
@@ -236,6 +245,7 @@ export const PinsDrawer = ({
                     </Box>
                     <button
                         className="p-1 text-muted-foreground transition-colors hover:text-foreground"
+                        type="button"
                         onClick={onClose}
                     >
                         <X size={20} />
@@ -273,7 +283,7 @@ export const PinsDrawer = ({
                         </Box>
                     )}
                 </Box>
-            </motion.div>
+            </m.div>
         </>,
         document.body,
     );

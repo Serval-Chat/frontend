@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 
 import { useLocation, useNavigate } from 'react-router-dom';
 
@@ -17,7 +17,12 @@ import { DefaultBackground } from '@/ui/components/layout/DefaultBackground';
 export const ResetPassword = () => {
     const navigate = useNavigate();
     const location = useLocation();
-    const [token, setToken] = useState('');
+    const token = useMemo((): string => {
+        const hash = location.hash;
+        if (!hash) return '';
+        const params = new URLSearchParams(hash.substring(1));
+        return params.get('token') ?? '';
+    }, [location.hash]);
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [status, setStatus] = useState<{
@@ -25,18 +30,6 @@ export const ResetPassword = () => {
         message: string;
     } | null>(null);
     const [isLoading, setIsLoading] = useState(false);
-
-    useEffect((): void => {
-        // Extract token from hash fragment: #token=...
-        const hash = location.hash;
-        if (hash) {
-            const params = new URLSearchParams(hash.substring(1)); // remove '#'
-            const tokenParam = params.get('token');
-            if (tokenParam) {
-                setToken(tokenParam);
-            }
-        }
-    }, [location]);
 
     const handleSubmit = async (e: React.FormEvent): Promise<void> => {
         e.preventDefault();

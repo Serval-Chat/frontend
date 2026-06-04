@@ -1,6 +1,6 @@
 import { Camera } from 'lucide-react';
 
-import { useLimitedAnimations } from '@/providers/LimitedAnimationsProvider';
+import { useLimitedAnimations } from '@/providers/limitedAnimationsContext';
 import { PausedAnimatedImage } from '@/ui/components/common/PausedAnimatedImage';
 import { Box } from '@/ui/components/layout/Box';
 import { isAnimatedImageUrl } from '@/utils/animationPreferences';

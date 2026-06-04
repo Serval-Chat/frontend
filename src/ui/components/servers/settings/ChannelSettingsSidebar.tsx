@@ -11,40 +11,38 @@ interface ChannelSettingsSidebarProps {
     channelName: string;
 }
 
+const CHANNEL_SETTINGS_SECTIONS: SettingsSidebarSection[] = [
+    {
+        id: 'overview',
+        label: 'Overview',
+        icon: Settings,
+    },
+    {
+        id: 'permissions',
+        label: 'Permissions',
+        icon: Shield,
+    },
+    {
+        id: 'behaviour',
+        label: 'Behaviour',
+        icon: SlidersHorizontal,
+    },
+    {
+        id: 'webhooks',
+        label: 'Webhooks',
+        icon: Webhook,
+    },
+];
+
 export const ChannelSettingsSidebar = ({
     activeSection,
     setActiveSection,
     channelName,
-}: ChannelSettingsSidebarProps) => {
-    const sections: SettingsSidebarSection[] = [
-        {
-            id: 'overview',
-            label: 'Overview',
-            icon: Settings,
-        },
-        {
-            id: 'permissions',
-            label: 'Permissions',
-            icon: Shield,
-        },
-        {
-            id: 'behaviour',
-            label: 'Behaviour',
-            icon: SlidersHorizontal,
-        },
-        {
-            id: 'webhooks',
-            label: 'Webhooks',
-            icon: Webhook,
-        },
-    ];
-
-    return (
-        <SettingsSidebarLayout
-            activeSection={activeSection}
-            headerText={`#${channelName} Settings`}
-            sections={sections}
-            setActiveSection={setActiveSection}
-        />
-    );
-};
+}: ChannelSettingsSidebarProps) => (
+    <SettingsSidebarLayout
+        activeSection={activeSection}
+        headerText={`#${channelName} Settings`}
+        sections={CHANNEL_SETTINGS_SECTIONS}
+        setActiveSection={setActiveSection}
+    />
+);

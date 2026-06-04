@@ -32,7 +32,7 @@ import { ChannelIcon } from '@/ui/components/servers/ChannelIcon';
 import { cn } from '@/utils/cn';
 
 const sortByPosition = <T extends { position: number }>(items: T[]): T[] =>
-    [...items].sort((a, b): number => a.position - b.position);
+    items.slice().sort((a, b): number => a.position - b.position);
 
 const channelIcon = (channel: Channel): React.ReactNode => (
     <ChannelIcon
@@ -43,6 +43,17 @@ const channelIcon = (channel: Channel): React.ReactNode => (
         type={channel.type}
     />
 );
+
+const toggleId = (
+    id: string,
+    current: Set<string>,
+    setter: (ids: string[]) => void,
+): void => {
+    const next = new Set(current);
+    if (next.has(id)) next.delete(id);
+    else next.add(id);
+    setter([...next]);
+};
 
 const CORNER_R = 6;
 
@@ -193,16 +204,21 @@ export const ServerSelfRolesModal = ({
     const updateSelfRoles = useUpdateSelfRoles(serverId);
     const allowedRoleIds = onboarding?.onboarding.selfAssignableRoleIds ?? [];
     const [selectedRoleIds, setSelectedRoleIds] = useState<string[]>([]);
+    const [prevOnboarding, setPrevOnboarding] = useState(onboarding);
 
-    React.useEffect((): void => {
-        if (!onboarding) return;
-        const allowed = new Set(onboarding.onboarding.selfAssignableRoleIds);
-        setSelectedRoleIds(
-            onboarding.member.roles.filter((roleId): boolean =>
-                allowed.has(roleId),
-            ),
-        );
-    }, [onboarding]);
+    if (onboarding !== prevOnboarding) {
+        setPrevOnboarding(onboarding);
+        if (onboarding) {
+            const allowed = new Set(
+                onboarding.onboarding.selfAssignableRoleIds,
+            );
+            setSelectedRoleIds(
+                onboarding.member.roles.filter((roleId): boolean =>
+                    allowed.has(roleId),
+                ),
+            );
+        }
+    }
 
     const handleSave = (): void => {
         updateSelfRoles.mutate(selectedRoleIds, {
@@ -429,12 +445,15 @@ export const ChannelPreferencesModal = ({
     const updatePreferences = useUpdateChannelPreferences(serverId);
     const [hiddenChannelIds, setHiddenChannelIds] = useState<string[]>([]);
     const [hiddenCategoryIds, setHiddenCategoryIds] = useState<string[]>([]);
+    const [prevOnboarding, setPrevOnboarding] = useState(onboarding);
 
-    React.useEffect((): void => {
-        if (!onboarding) return;
-        setHiddenChannelIds(onboarding.member.hiddenChannelIds ?? []);
-        setHiddenCategoryIds(onboarding.member.hiddenCategoryIds ?? []);
-    }, [onboarding]);
+    if (onboarding !== prevOnboarding) {
+        setPrevOnboarding(onboarding);
+        if (onboarding) {
+            setHiddenChannelIds(onboarding.member.hiddenChannelIds ?? []);
+            setHiddenCategoryIds(onboarding.member.hiddenCategoryIds ?? []);
+        }
+    }
 
     const hiddenChannels = new Set(hiddenChannelIds);
     const hiddenCategories = new Set(hiddenCategoryIds);
@@ -465,17 +484,6 @@ export const ChannelPreferencesModal = ({
                 group.category !== null || group.channels.length,
         );
     }, [channels, categories]);
-
-    const toggleId = (
-        id: string,
-        current: Set<string>,
-        setter: (ids: string[]) => void,
-    ): void => {
-        const next = new Set(current);
-        if (next.has(id)) next.delete(id);
-        else next.add(id);
-        setter([...next]);
-    };
 
     const handleSave = (): void => {
         updatePreferences.mutate(
@@ -567,20 +575,11 @@ export const ServerOnboardingModal = ({
     const [accepted, setAccepted] = useState(false);
     const [step, setStep] = useState<'rules' | 'roles' | 'welcome'>('rules');
     const [selectedRoleIds, setSelectedRoleIds] = useState<string[]>([]);
+    const [prevOnboarding, setPrevOnboarding] = useState(onboarding);
 
     const isRequired =
         onboarding?.member.onboardingRequired === true &&
         onboarding.member.onboardingCompletedAt == null;
-
-    React.useEffect((): void => {
-        if (!onboarding) return;
-        const allowed = new Set(onboarding.onboarding.selfAssignableRoleIds);
-        setSelectedRoleIds(
-            onboarding.member.roles.filter((roleId): boolean =>
-                allowed.has(roleId),
-            ),
-        );
-    }, [onboarding]);
 
     const rulesList = useMemo(
         (): string[] => onboarding?.onboarding.guidelines ?? [],
@@ -608,29 +607,30 @@ export const ServerOnboardingModal = ({
     const firstStep = steps[0]?.id ?? 'welcome';
     const roleStepOrWelcome = hasSelfRoles ? 'roles' : 'welcome';
 
-    React.useEffect((): void => {
-        if (!onboarding) return;
+    if (onboarding !== prevOnboarding) {
+        setPrevOnboarding(onboarding);
 
-        if (!hasGuidelines) {
+        if (onboarding) {
+            const allowed = new Set(
+                onboarding.onboarding.selfAssignableRoleIds,
+            );
+            setSelectedRoleIds(
+                onboarding.member.roles.filter((roleId): boolean =>
+                    allowed.has(roleId),
+                ),
+            );
+        }
+
+        if (onboarding && !hasGuidelines) {
             setAccepted(false);
             setStep(firstStep);
-            return;
-        }
-
-        if (onboarding.member.rulesAcceptedAt) {
+        } else if (onboarding?.member.rulesAcceptedAt) {
             setAccepted(true);
             setStep(roleStepOrWelcome);
-            return;
+        } else if (onboarding) {
+            setStep('rules');
         }
-
-        setStep('rules');
-    }, [
-        firstStep,
-        hasGuidelines,
-        onboarding,
-        onboarding?.member.rulesAcceptedAt,
-        roleStepOrWelcome,
-    ]);
+    }
 
     if (!isRequired) return null;
 

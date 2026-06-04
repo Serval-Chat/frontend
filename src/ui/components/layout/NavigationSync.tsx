@@ -125,13 +125,16 @@ export const NavigationSync = (): null => {
             }
         }
         // @setting routes are handled by the SettingsModal via PrimaryNavBar
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [
-        location.pathname,
+        dispatch,
+        location,
+        navigate,
         params.serverId,
         params.channelId,
         params.userId,
         params.messageId,
+        selectedChannelId,
+        selectedServerId,
     ]);
 
     return null;

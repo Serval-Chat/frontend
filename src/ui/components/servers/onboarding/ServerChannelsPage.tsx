@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 
 import { Hash } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -16,7 +16,7 @@ import { Box } from '@/ui/components/layout/Box';
 import { ChannelPreferenceGroup } from './ServerOnboardingModals';
 
 const sortByPosition = <T extends { position: number }>(items: T[]): T[] =>
-    [...items].sort((a, b): number => a.position - b.position);
+    items.slice().sort((a, b): number => a.position - b.position);
 
 export const ServerChannelsPage = () => {
     const { serverId } = useParams<{ serverId: string }>();
@@ -29,12 +29,15 @@ export const ServerChannelsPage = () => {
     const [hiddenChannelIds, setHiddenChannelIds] = useState<string[]>([]);
     const [hiddenCategoryIds, setHiddenCategoryIds] = useState<string[]>([]);
     const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+    const [prevOnboarding, setPrevOnboarding] = useState(onboarding);
 
-    React.useEffect((): void => {
-        if (!onboarding) return;
-        setHiddenChannelIds(onboarding.member.hiddenChannelIds ?? []);
-        setHiddenCategoryIds(onboarding.member.hiddenCategoryIds ?? []);
-    }, [onboarding]);
+    if (onboarding !== prevOnboarding) {
+        setPrevOnboarding(onboarding);
+        if (onboarding) {
+            setHiddenChannelIds(onboarding.member.hiddenChannelIds ?? []);
+            setHiddenCategoryIds(onboarding.member.hiddenCategoryIds ?? []);
+        }
+    }
 
     const hiddenChannels = new Set(hiddenChannelIds);
     const hiddenCategories = new Set(hiddenCategoryIds);
@@ -106,6 +109,7 @@ export const ServerChannelsPage = () => {
                 <button
                     aria-label="Back to server"
                     className="p-1 text-muted-foreground transition-colors hover:text-foreground md:hidden"
+                    type="button"
                     onClick={handleBack}
                 >
                     ←

@@ -9,6 +9,7 @@ import {
     useRoles,
     useServerDetails,
 } from '@/api/servers/servers.queries';
+import type { Role } from '@/api/servers/servers.types';
 import { useAppDispatch } from '@/store/hooks';
 import { setTargetMessageId } from '@/store/slices/navSlice';
 import type { ProcessedChatMessage } from '@/types/chat.ui';
@@ -24,6 +25,19 @@ interface StickyMessageBarProps {
 }
 
 type ViewState = 'expanded' | 'compact' | 'hidden';
+
+const getHighestRole = (roles: Role[]): Role | undefined =>
+    roles.reduce<Role | undefined>(
+        (highest, role): Role =>
+            !highest || role.position > highest.position ? role : highest,
+        undefined,
+    );
+
+const getHighestIconRole = (roles: Role[]): Role | undefined =>
+    roles.reduce<Role | undefined>((highest, role): Role | undefined => {
+        if (!role.icon) return highest;
+        return !highest || role.position > highest.position ? role : highest;
+    }, undefined);
 
 export const StickyMessageBar = ({
     serverId,
@@ -43,13 +57,15 @@ export const StickyMessageBar = ({
 
     const latestSticky = React.useMemo((): ProcessedChatMessage | null => {
         if (!pins) return null;
-        const stickies = pins.filter((p: ChatMessage): boolean => p.isSticky);
-        if (stickies.length === 0) return null;
-        const raw = [...stickies].sort(
-            (a, b): number =>
-                new Date(b.createdAt).getTime() -
-                new Date(a.createdAt).getTime(),
-        )[0];
+        const raw = pins.reduce<ChatMessage | null>((latest, pin) => {
+            if (!pin.isSticky) return latest;
+            if (!latest) return pin;
+            return new Date(pin.createdAt).getTime() >
+                new Date(latest.createdAt).getTime()
+                ? pin
+                : latest;
+        }, null);
+        if (!raw) return null;
 
         const webhookUser = resolveWebhookUser(raw);
         const member = webhookUser
@@ -59,12 +75,8 @@ export const StickyMessageBar = ({
             serverRoles?.filter((r): boolean | undefined =>
                 member?.roles.includes(r.id),
             ) || [];
-        const highestRole = [...roles].sort(
-            (a, b): number => (b.position || 0) - (a.position || 0),
-        )[0];
-        const iconRole = [...roles]
-            .filter((r): string | undefined => r.icon)
-            .sort((a, b): number => (b.position || 0) - (a.position || 0))[0];
+        const highestRole = getHighestRole(roles);
+        const iconRole = getHighestIconRole(roles);
 
         return {
             ...raw,
@@ -187,6 +199,7 @@ export const StickyMessageBar = ({
                     {(viewState === 'compact' || viewState === 'hidden') && (
                         <button
                             className="flex h-3 w-5 items-center justify-center text-muted-foreground transition-colors hover:bg-white/5 hover:text-foreground"
+                            type="button"
                             onClick={handlePrev}
                         >
                             <ChevronDown size={10} />
@@ -195,6 +208,7 @@ export const StickyMessageBar = ({
                     {(viewState === 'compact' || viewState === 'expanded') && (
                         <button
                             className="flex h-3 w-5 items-center justify-center text-muted-foreground transition-colors hover:bg-white/5 hover:text-foreground"
+                            type="button"
                             onClick={handleNext}
                         >
                             <ChevronUp size={10} />

@@ -73,16 +73,22 @@ export const AuthenticatedLayout = (): ReactNode => {
         (isHomeRoute && isFriendProfilesLoading);
     const [showReconnecting, setShowReconnecting] = React.useState(false);
     const isDebugWindowOpen = useWsDebugWindowOpen();
+    const isConnecting = status === 'reconnecting' || status === 'connecting';
+    const [prevIsConnecting, setPrevIsConnecting] =
+        React.useState(isConnecting);
 
-    React.useEffect((): (() => void) => {
-        let timeout: NodeJS.Timeout;
-        if (status === 'reconnecting' || status === 'connecting') {
-            timeout = setTimeout((): void => setShowReconnecting(true), 1500);
-        } else {
+    if (isConnecting !== prevIsConnecting) {
+        setPrevIsConnecting(isConnecting);
+        if (!isConnecting) {
             setShowReconnecting(false);
         }
+    }
+
+    React.useEffect((): (() => void) | undefined => {
+        if (!isConnecting) return undefined;
+        const timeout = setTimeout((): void => setShowReconnecting(true), 1500);
         return (): void => clearTimeout(timeout);
-    }, [status]);
+    }, [isConnecting]);
 
     React.useEffect((): void => {
         if (isAuthenticated && user && !isInitialDataLoading) {
