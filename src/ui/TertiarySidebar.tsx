@@ -51,6 +51,9 @@ export const TertiarySidebar = ({
     const showMobileMemberList = useAppSelector(
         (state): boolean => state.nav.showMobileMemberList,
     );
+    const showDesktopMemberList = useAppSelector(
+        (state): boolean => state.nav.showDesktopMemberList,
+    );
 
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
@@ -85,7 +88,7 @@ export const TertiarySidebar = ({
             className={cn(
                 'pride-glass relative flex h-full shrink-0 flex-col border-l border-border-subtle bg-[var(--tertiary-bg)]',
                 'pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]',
-                'md:flex',
+                showDesktopMemberList ? 'md:flex' : 'md:hidden',
                 'max-md:fixed max-md:inset-y-0 max-md:right-0 max-md:z-[var(--z-index-top)] max-md:w-64 max-md:shadow-2xl',
                 'max-md:transition-transform max-md:duration-300 max-md:[transition-timing-function:cubic-bezier(0.25,0.46,0.45,0.94)]',
                 showMobileMemberList

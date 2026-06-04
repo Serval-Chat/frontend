@@ -40,6 +40,7 @@ interface NavState {
     mobileHomeTab: 'friends' | 'requests';
     showMobileMemberList: boolean;
     mobileMemberListSplitViewSide: SplitViewSide | null;
+    showDesktopMemberList: boolean;
     openedFolders: string[];
 }
 
@@ -132,6 +133,7 @@ const initialState: NavState = {
     mobileHomeTab: 'friends',
     showMobileMemberList: false,
     mobileMemberListSplitViewSide: null,
+    showDesktopMemberList: true,
     openedFolders: [],
 };
 
@@ -276,6 +278,9 @@ const navSlice = createSlice({
             state.showMobileMemberList = true;
             state.mobileMemberListSplitViewSide = action.payload;
         },
+        toggleDesktopMemberList: (state): void => {
+            state.showDesktopMemberList = !state.showDesktopMemberList;
+        },
         toggleFolder: (state, action: PayloadAction<string>): void => {
             const index = state.openedFolders.indexOf(action.payload);
             if (index !== -1) {
@@ -306,6 +311,7 @@ export const {
     setMobileHomeTab,
     toggleMobileMemberList,
     toggleMobileMemberListForSplitView,
+    toggleDesktopMemberList,
     toggleFolder,
     openFolder,
 } = navSlice.actions;

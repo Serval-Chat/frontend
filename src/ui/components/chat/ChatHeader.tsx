@@ -13,6 +13,7 @@ import { useAppDispatch, useAppShallowSelector } from '@/store/hooks';
 import {
     setSelectedChannelId,
     setSelectedFriendId,
+    toggleDesktopMemberList,
     toggleMobileMemberList,
 } from '@/store/slices/navSlice';
 import { Text } from '@/ui/components/common/Text';
@@ -50,12 +51,17 @@ export const ChatHeader = ({
 }: ChatHeaderProps) => {
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
-    const { selectedServerId, selectedChannelId, showMobileMemberList } =
-        useAppShallowSelector((state) => ({
-            selectedServerId: state.nav.selectedServerId,
-            selectedChannelId: state.nav.selectedChannelId,
-            showMobileMemberList: state.nav.showMobileMemberList,
-        }));
+    const {
+        selectedServerId,
+        selectedChannelId,
+        showMobileMemberList,
+        showDesktopMemberList,
+    } = useAppShallowSelector((state) => ({
+        selectedServerId: state.nav.selectedServerId,
+        selectedChannelId: state.nav.selectedChannelId,
+        showMobileMemberList: state.nav.showMobileMemberList,
+        showDesktopMemberList: state.nav.showDesktopMemberList,
+    }));
 
     const [descExpanded, setDescExpanded] = useState(false);
     const pinButtonRef = useRef<HTMLButtonElement>(null);
@@ -93,7 +99,11 @@ export const ChatHeader = ({
     const hasDescription = !selectedFriendId && !!selectedChannel?.description;
     const hasStatus = !!selectedFriendId && !!friendUser?.customStatus?.text;
     const showSecondary = hasDescription || hasStatus;
-    const memberListOpen = isMemberListOpen ?? showMobileMemberList;
+    const memberListOpen =
+        isMemberListOpen ??
+        (window.innerWidth >= 768
+            ? showDesktopMemberList
+            : showMobileMemberList);
 
     const handleBackClick = (): void => {
         if (selectedFriendId) {
@@ -224,29 +234,32 @@ export const ChatHeader = ({
                                     />
                                 )}
                         </AnimatePresence>
-
-                        {!hideMemberListButton && (
-                            <button
-                                aria-label="Toggle member list"
-                                className={cn(
-                                    'p-2 transition-colors md:hidden',
-                                    memberListOpen
-                                        ? 'text-foreground'
-                                        : 'text-foreground-muted hover:text-foreground',
-                                )}
-                                onClick={
-                                    onToggleMemberList ??
-                                    ((): {
-                                        payload: undefined;
-                                        type: 'nav/toggleMobileMemberList';
-                                    } => dispatch(toggleMobileMemberList()))
-                                }
-                            >
-                                <Users className="h-5 w-5" />
-                            </button>
-                        )}
                     </>
                 )}
+                {!hideMemberListButton &&
+                    (selectedChannel || selectedFriendId) && (
+                        <button
+                            aria-label="Toggle member list"
+                            className={cn(
+                                'p-2 transition-colors',
+                                memberListOpen
+                                    ? 'text-foreground'
+                                    : 'text-foreground-muted hover:text-foreground',
+                            )}
+                            onClick={
+                                onToggleMemberList ??
+                                ((): void => {
+                                    if (window.innerWidth >= 768) {
+                                        dispatch(toggleDesktopMemberList());
+                                    } else {
+                                        dispatch(toggleMobileMemberList());
+                                    }
+                                })
+                            }
+                        >
+                            <Users className="h-5 w-5" />
+                        </button>
+                    )}
                 <button
                     aria-label="Back to contacts"
                     className="text-foreground-muted p-2 transition-colors hover:text-foreground md:hidden"
