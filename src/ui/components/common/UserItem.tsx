@@ -330,7 +330,8 @@ const UserItemInner = React.memo(
             userVoiceChannelId === activeVoiceChannelId &&
             !isMe,
         );
-        const hasUnread = unreadCount > 0 && !hideUnread && !providedServerId;
+        const hasUnread =
+            unreadCount > 0 && !hideUnread && !providedServerId && !isActive;
 
         const myMember = useMemo(
             (): ServerMember | undefined =>

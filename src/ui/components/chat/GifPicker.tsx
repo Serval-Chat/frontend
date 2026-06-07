@@ -10,6 +10,7 @@ import {
     TrendingUp,
     X,
 } from 'lucide-react';
+import { useClickAway } from 'react-use';
 
 import { klipyApi } from '@/api/klipy/klipy.api';
 import type { KlipyGif } from '@/api/klipy/klipy.types';
@@ -40,6 +41,9 @@ export const GifPicker = ({ onSelect, onClose }: GifPickerProps) => {
     );
     const debouncedSearch = useDebounce(search, 500);
     const queryClient = useQueryClient();
+    const pickerRef = useRef<HTMLDivElement>(null);
+
+    useClickAway(pickerRef, onClose);
 
     const [size, setSize] = useState(() => {
         const saved = localStorage.getItem(STORAGE_KEY);
@@ -190,6 +194,7 @@ export const GifPicker = ({ onSelect, onClose }: GifPickerProps) => {
     return (
         <Box
             className="relative flex flex-col rounded-xl border border-border-subtle bg-bg-primary shadow-2xl"
+            ref={pickerRef}
             style={{ width: `${size.width}px`, height: `${size.height}px` }}
         >
             <div

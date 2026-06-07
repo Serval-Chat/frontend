@@ -211,6 +211,7 @@ const ChannelRow = React.memo(
         }
 
         const isUnread =
+            selectedChannelId !== channel.id &&
             channel.type !== 'link' &&
             channel.lastMessageAt &&
             (!channel.lastReadAt ||

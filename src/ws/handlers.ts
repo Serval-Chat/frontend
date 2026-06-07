@@ -505,6 +505,19 @@ export const setupGlobalWsHandlers = (
         );
     };
 
+    const isReadingDm = (friendId: string): boolean => {
+        if (!getState) return false;
+
+        const { nav } = getState();
+        if (nav.selectedFriendId === friendId) return true;
+
+        return Object.values(nav.splitView).some(
+            (conversation): boolean =>
+                conversation?.type === 'dm' &&
+                conversation.friendId === friendId,
+        );
+    };
+
     cleanups.push(
         wsClient.on<IWsErrorEvent>(WsEvents.ERROR, (payload): void => {
             console.error('[WS] Global Error:', payload.message);
@@ -644,7 +657,10 @@ export const setupGlobalWsHandlers = (
                 convertDmToChatMessage(payload),
             );
 
-            if (payload.senderId !== currentUser?.id) {
+            if (
+                payload.senderId !== currentUser?.id &&
+                !isReadingDm(payload.senderId)
+            ) {
                 playNotificationSound(queryClient);
                 showDedupedInAppNotification({
                     id: `dm-${payload.id ?? payload.messageId}`,

@@ -332,8 +332,15 @@ export const ServerList = () => {
             >
                 <ServerItem
                     isActive={selectedServerId === server.id}
-                    isUnread={unreadStatus?.hasUnread}
-                    pingCount={unreadStatus?.pingCount}
+                    isUnread={
+                        selectedServerId !== server.id &&
+                        unreadStatus?.hasUnread
+                    }
+                    pingCount={
+                        selectedServerId !== server.id
+                            ? unreadStatus?.pingCount
+                            : undefined
+                    }
                     server={server}
                     onClick={(): void => handleServerClick(server.id)}
                     onStartReorder={(): void =>
@@ -347,9 +354,15 @@ export const ServerList = () => {
         ) : (
             <ServerItemWrapper
                 isActive={selectedServerId === server.id}
-                isUnread={unreadStatus?.hasUnread}
+                isUnread={
+                    selectedServerId !== server.id && unreadStatus?.hasUnread
+                }
                 key={key}
-                pingCount={unreadStatus?.pingCount}
+                pingCount={
+                    selectedServerId !== server.id
+                        ? unreadStatus?.pingCount
+                        : undefined
+                }
                 server={server}
                 onClick={(): void => handleServerClick(server.id)}
                 onDragEnd={handleDragEnd}
