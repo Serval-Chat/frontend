@@ -206,13 +206,11 @@ export const usePermissions = (
                 overrides?: Record<string, Record<string, boolean>>,
             ): boolean | undefined => {
                 if (!overrides) return undefined;
-                let hasDeny = false;
 
                 for (const role of userRoles) {
                     const roleOver = overrides[role.id];
-                    if (roleOver && roleOver[permKey] !== undefined) {
-                        if (roleOver[permKey]) return true;
-                        hasDeny = true;
+                    if (roleOver && roleOver[permKey] === true) {
+                        return true;
                     }
                 }
 
@@ -221,12 +219,23 @@ export const usePermissions = (
                     (everyoneId ? overrides[everyoneId] : undefined) ??
                     overrides['everyone'];
 
-                if (everyoneOver && everyoneOver[permKey] !== undefined) {
-                    if (everyoneOver[permKey]) return true;
-                    hasDeny = true;
+                if (everyoneOver && everyoneOver[permKey] === true) {
+                    return true;
                 }
 
-                return hasDeny ? false : undefined;
+                let hasExplicitDeny = false;
+                for (const role of userRoles) {
+                    const roleOver = overrides[role.id];
+                    if (roleOver && roleOver[permKey] === false) {
+                        hasExplicitDeny = true;
+                    }
+                }
+
+                if (everyoneOver && everyoneOver[permKey] === false) {
+                    hasExplicitDeny = true;
+                }
+
+                return hasExplicitDeny ? false : undefined;
             };
 
             if (channelId && channels) {

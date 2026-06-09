@@ -605,12 +605,10 @@ export const useUploadSticker = (
         mutationFn: ({ name, file }): Promise<Sticker> =>
             serversApi.uploadSticker(serverId, name, file),
         onSuccess: (newSticker): void => {
-            // Optimistically update the cache with the new sticker
             queryClient.setQueryData<Sticker[]>(
                 SERVERS_QUERY_KEYS.stickers(serverId),
                 (oldStickers): Sticker[] => {
                     if (!oldStickers) return [newSticker];
-                    // Check if the sticker already exists (in case of duplicate IDs)
                     const exists = oldStickers.some(
                         (s): boolean => s.id === newSticker.id,
                     );

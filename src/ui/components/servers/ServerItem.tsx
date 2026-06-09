@@ -74,7 +74,6 @@ export const ServerItem = React.memo(
         const { data: me } = useMe();
         const { mutate: updateSettings } = useUpdateServerSettings();
 
-        // The owner check is instant off the cache. The role-based permissions will only resolve if the server is actively selected.
         const canManageServer =
             isOwner ||
             hasPermission('manageServer') ||
