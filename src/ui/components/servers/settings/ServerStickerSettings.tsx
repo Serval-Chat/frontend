@@ -111,9 +111,21 @@ export const ServerStickerSettings = ({
         uploadSticker(
             { name: stickerName, file: processedFile },
             {
-                onSuccess: (): void => {
+                onSuccess: (newSticker): void => {
+                    if (import.meta.env.DEV) {
+                        // eslint-disable-next-line no-console
+                        console.log('[Sticker Upload Success]', {
+                            id: newSticker.id,
+                            name: newSticker.name,
+                            imageUrl: newSticker.imageUrl,
+                            resolvedUrl: resolveApiUrl(newSticker.imageUrl),
+                        });
+                    }
                     setStickerName('');
                     setSelectedFile(null);
+                },
+                onError: (error): void => {
+                    console.error('[Sticker Upload Error]', error);
                 },
             },
         );
@@ -380,6 +392,20 @@ export const ServerStickerSettings = ({
                                             resolveApiUrl(sticker.imageUrl) ||
                                             ''
                                         }
+                                        onError={(e): void => {
+                                            console.error(
+                                                '[Sticker Image Load Error]',
+                                                {
+                                                    id: sticker.id,
+                                                    name: sticker.name,
+                                                    imageUrl: sticker.imageUrl,
+                                                    resolvedUrl: resolveApiUrl(
+                                                        sticker.imageUrl,
+                                                    ),
+                                                    error: e,
+                                                },
+                                            );
+                                        }}
                                     />
                                 </div>
                                 {hoveredStickerId === sticker.id && (

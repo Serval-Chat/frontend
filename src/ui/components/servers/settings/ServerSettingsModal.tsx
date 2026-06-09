@@ -105,7 +105,7 @@ const ALL_SECTIONS: {
         id: 'stickers',
         label: 'Stickers',
         icon: Sticker,
-        permission: 'manageServer',
+        permission: 'manageStickers',
     },
     {
         id: 'invites',
@@ -133,7 +133,6 @@ export const ServerSettingsModal = ({
     onClose,
     serverId,
 }: ServerSettingsModalProps) => {
-    const [activeSection, setActiveSection] = useState<string>('overview');
     const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(true);
     const { hasPermission, isOwner } = usePermissions(serverId);
 
@@ -145,6 +144,29 @@ export const ServerSettingsModal = ({
             })),
         [hasPermission, isOwner],
     );
+
+    const defaultSection = React.useMemo(() => {
+        const firstVisibleSection = sections.find((s) => !s.hidden);
+        return firstVisibleSection?.id ?? 'overview';
+    }, [sections]);
+
+    const [activeSection, setActiveSection] = useState<string>(defaultSection);
+
+    // Update active section when it becomes hidden due to permission changes
+    const activeSectionIsHidden = React.useMemo(
+        () => sections.find((s) => s.id === activeSection)?.hidden ?? false,
+        [sections, activeSection],
+    );
+
+    React.useEffect(() => {
+        if (isOpen && activeSectionIsHidden) {
+            // Defer state update to avoid setting state during render
+            const timer = setTimeout(() => {
+                setActiveSection(defaultSection);
+            }, 0);
+            return () => clearTimeout(timer);
+        }
+    }, [isOpen, activeSectionIsHidden, defaultSection]);
 
     const handleSetSection = (sectionId: string): void => {
         setIsMobileSidebarOpen(false);

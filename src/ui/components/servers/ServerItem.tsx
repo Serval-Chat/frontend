@@ -79,7 +79,9 @@ export const ServerItem = React.memo(
             isOwner ||
             hasPermission('manageServer') ||
             hasPermission('manageRoles') ||
-            hasPermission('manageInvites');
+            hasPermission('manageInvites') ||
+            hasPermission('banMembers') ||
+            hasPermission('manageStickers');
 
         const contextMenuItems: ContextMenuItem[] = [];
 

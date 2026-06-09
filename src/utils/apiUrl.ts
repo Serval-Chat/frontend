@@ -1,7 +1,4 @@
-import {
-    getBrowserApiBaseUrl,
-    getConfiguredApiBaseUrl,
-} from '@/utils/apiBaseUrl';
+import { getConfiguredApiBaseUrl } from '@/utils/apiBaseUrl';
 
 /**
  * @description Resolves an API-relative path to a full URL
@@ -19,7 +16,9 @@ export const resolveApiUrl = (path: string | undefined): string | null => {
         return `${apiBaseUrl}/api/v1/file-proxy?url=${encodeURIComponent(path)}`;
     }
 
-    const apiBaseUrl = getBrowserApiBaseUrl();
+    // For relative paths, always use the configured API base URL
+    // This ensures assets like stickers and emojis load from the API server
+    const apiBaseUrl = getConfiguredApiBaseUrl();
     const normalizedPath = path.startsWith('/') ? path : `/${path}`;
 
     return `${apiBaseUrl}${normalizedPath}`;
