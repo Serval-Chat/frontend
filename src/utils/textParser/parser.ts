@@ -301,6 +301,19 @@ export class TextParser {
             }
 
             if (
+                char === '<' &&
+                this.has(ParserFeature.LINK) &&
+                (this.peek('<http://') || this.peek('<https://'))
+            ) {
+                const linkNode = this.tryParseAngleBracketLink();
+                if (linkNode) {
+                    currentText = this.flushText(nodes, currentText);
+                    nodes.push(linkNode);
+                    continue;
+                }
+            }
+
+            if (
                 (char === '-' ||
                     char === '*' ||
                     char === '+' ||
@@ -1225,6 +1238,43 @@ export class TextParser {
             return { type: 'invite', code, url };
         }
 
+        this.index = start;
+        return null;
+    }
+
+    private tryParseAngleBracketLink(): ASTNode | null {
+        const start = this.index;
+        this.index++; // skip '<'
+        let url = '';
+
+        // Continue until we find '>' or whitespace
+        while (this.index < this.text.length) {
+            const c = this.text[this.index];
+            if (c === '>') {
+                // Found closing bracket
+                this.index++; // skip '>'
+                if (url !== '') {
+                    // Return as a regular link, not klipy
+                    // This prevents klipy rendering for angle-bracket URLs
+                    return { type: 'link', url, text: url };
+                }
+                break;
+            }
+            if (
+                c === ' ' ||
+                c === '\n' ||
+                c === '\t' ||
+                c === '\r' ||
+                c === '<'
+            ) {
+                // Invalid - angle bracket links shouldn't contain whitespace or nested <
+                break;
+            }
+            url += c;
+            this.index++;
+        }
+
+        // Failed to parse
         this.index = start;
         return null;
     }

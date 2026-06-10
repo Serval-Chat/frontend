@@ -121,6 +121,47 @@ describe('TextParser', (): void => {
         ]);
     });
 
+    it('should NOT parse Klipy links when wrapped in angle brackets', (): void => {
+        const text =
+            'Check out <https://klipy.com/gifs/so-cute-cat-5--kAIU192Mj> for more';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            { type: 'text', content: 'Check out ' },
+            {
+                type: 'link',
+                url: 'https://klipy.com/gifs/so-cute-cat-5--kAIU192Mj',
+                text: 'https://klipy.com/gifs/so-cute-cat-5--kAIU192Mj',
+            },
+            { type: 'text', content: ' for more' },
+        ]);
+    });
+
+    it('should parse angle bracket links for regular URLs', (): void => {
+        const text = 'Check <https://example.com> out';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            { type: 'text', content: 'Check ' },
+            {
+                type: 'link',
+                url: 'https://example.com',
+                text: 'https://example.com',
+            },
+            { type: 'text', content: ' out' },
+        ]);
+    });
+
+    it('should parse angle bracket Klipy sticker links as regular links', (): void => {
+        const text = '<https://klipy.com/stickers/happy-cat-123>';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            {
+                type: 'link',
+                url: 'https://klipy.com/stickers/happy-cat-123',
+                text: 'https://klipy.com/stickers/happy-cat-123',
+            },
+        ]);
+    });
+
     it('should handle complex mixed text', (): void => {
         const text =
             '***Bold Italic*** and **Bold** with <emoji:test> and https://link.com';
