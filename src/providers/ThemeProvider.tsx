@@ -1,5 +1,6 @@
 import React, {
     createContext,
+    useCallback,
     useContext,
     useEffect,
     useMemo,
@@ -7,8 +8,16 @@ import React, {
 } from 'react';
 
 import { useMe } from '@/api/users/users.queries';
+import {
+    type CustomThemeDraft,
+    type CustomThemeFile,
+    createCustomThemeFile,
+    readCustomThemes,
+    updateCustomThemeFile,
+    writeCustomThemes,
+} from '@/styles/customThemes';
 
-export type Theme =
+export type BuiltInTheme =
     | 'serval'
     | 'dark'
     | 'deep-ocean'
@@ -19,9 +28,36 @@ export type Theme =
     | 'forest-green'
     | 'pride';
 
+export type CustomThemeId = `custom:${string}`;
+export type Theme = BuiltInTheme | CustomThemeId;
+
+const BUILT_IN_THEMES: BuiltInTheme[] = [
+    'serval',
+    'dark',
+    'deep-ocean',
+    'light',
+    'cherry',
+    'high-contrast',
+    'violet',
+    'forest-green',
+    'pride',
+];
+
+const CUSTOM_THEME_STYLE_ID = 'serchat-custom-theme';
+
+const isBuiltInTheme = (theme: string): theme is BuiltInTheme =>
+    BUILT_IN_THEMES.includes(theme as BuiltInTheme);
+
+const getCustomThemeId = (theme: Theme): string | null =>
+    theme.startsWith('custom:') ? theme.slice('custom:'.length) : null;
+
 interface ThemeContextType {
     theme: Theme;
     setTheme: (theme: Theme) => void;
+    builtInThemes: BuiltInTheme[];
+    customThemes: CustomThemeFile[];
+    saveCustomTheme: (theme: CustomThemeDraft) => CustomThemeFile;
+    deleteCustomTheme: (id: string) => void;
     customFontUrl: string;
     setCustomFontUrl: (url: string) => void;
     customFontFamily: string;
@@ -33,9 +69,23 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
     const { data: user } = useMe();
 
-    const [theme, setTheme] = useState<Theme>((): Theme => {
-        const saved = localStorage.getItem('theme');
-        return (saved as Theme) || 'serval';
+    const [customThemes, setCustomThemes] =
+        useState<CustomThemeFile[]>(readCustomThemes);
+    const [theme, setThemeState] = useState<Theme>((): Theme => {
+        const saved =
+            (localStorage.getItem('theme') as Theme | null) || 'serval';
+        const customThemeId = getCustomThemeId(saved);
+
+        if (
+            customThemeId &&
+            !customThemes.some(
+                (customTheme): boolean => customTheme.id === customThemeId,
+            )
+        ) {
+            return 'serval';
+        }
+
+        return saved;
     });
 
     const [localFontUrl, setLocalFontUrl] = useState(
@@ -57,22 +107,104 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
     const setCustomFontFamily = (family: string): void =>
         setLocalFontFamily(family);
 
+    const setTheme = useCallback(
+        (nextTheme: Theme): void => {
+            const customThemeId = getCustomThemeId(nextTheme);
+
+            if (
+                customThemeId &&
+                !customThemes.some(
+                    (customTheme): boolean => customTheme.id === customThemeId,
+                )
+            ) {
+                setThemeState('serval');
+                return;
+            }
+
+            setThemeState(nextTheme);
+        },
+        [customThemes],
+    );
+
     useEffect((): void => {
         const root = document.documentElement;
+        const builtInTheme = isBuiltInTheme(theme) ? theme : 'serval';
+
         root.classList.remove(
-            'theme-serval',
-            'theme-dark',
-            'theme-deep-ocean',
-            'theme-light',
-            'theme-cherry',
-            'theme-high-contrast',
-            'theme-violet',
-            'theme-forest-green',
-            'theme-pride',
+            ...BUILT_IN_THEMES.map(
+                (builtInThemeName): string => `theme-${builtInThemeName}`,
+            ),
         );
-        root.classList.add(`theme-${theme}`);
+        root.classList.add(`theme-${builtInTheme}`);
         localStorage.setItem('theme', theme);
-    }, [theme]);
+
+        const customThemeId = getCustomThemeId(theme);
+        const selectedCustomTheme = customThemes.find(
+            (customTheme): boolean => customTheme.id === customThemeId,
+        );
+        customThemes.forEach((customTheme): void => {
+            root.removeAttribute(customTheme.scopeAttribute);
+        });
+        root.removeAttribute('data-custom-theme');
+
+        let style = document.getElementById(
+            CUSTOM_THEME_STYLE_ID,
+        ) as HTMLStyleElement | null;
+
+        if (selectedCustomTheme) {
+            if (!style) {
+                style = document.createElement('style');
+                style.id = CUSTOM_THEME_STYLE_ID;
+                document.head.appendChild(style);
+            }
+            style.textContent = selectedCustomTheme.css;
+            root.setAttribute(selectedCustomTheme.scopeAttribute, '');
+        } else {
+            style?.remove();
+        }
+    }, [theme, customThemes]);
+
+    const saveCustomTheme = useCallback(
+        (draft: CustomThemeDraft): CustomThemeFile => {
+            const existing = draft.id
+                ? customThemes.find(
+                      (customTheme): boolean => customTheme.id === draft.id,
+                  )
+                : undefined;
+            const nextTheme = existing
+                ? updateCustomThemeFile(existing, draft)
+                : createCustomThemeFile(draft);
+            const nextThemes = existing
+                ? customThemes.map(
+                      (customTheme): CustomThemeFile =>
+                          customTheme.id === nextTheme.id
+                              ? nextTheme
+                              : customTheme,
+                  )
+                : [...customThemes, nextTheme];
+
+            setCustomThemes(nextThemes);
+            writeCustomThemes(nextThemes);
+            return nextTheme;
+        },
+        [customThemes],
+    );
+
+    const deleteCustomTheme = useCallback(
+        (id: string): void => {
+            const nextThemes = customThemes.filter(
+                (customTheme): boolean => customTheme.id !== id,
+            );
+
+            setCustomThemes(nextThemes);
+            writeCustomThemes(nextThemes);
+
+            if (theme === `custom:${id}`) {
+                setTheme('serval');
+            }
+        },
+        [customThemes, setTheme, theme],
+    );
 
     useEffect((): void => {
         const linkId = 'custom-google-font';
@@ -114,12 +246,24 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
         () => ({
             theme,
             setTheme,
+            builtInThemes: BUILT_IN_THEMES,
+            customThemes,
+            saveCustomTheme,
+            deleteCustomTheme,
             customFontUrl,
             setCustomFontUrl,
             customFontFamily,
             setCustomFontFamily,
         }),
-        [theme, customFontUrl, customFontFamily],
+        [
+            theme,
+            customThemes,
+            saveCustomTheme,
+            setTheme,
+            deleteCustomTheme,
+            customFontUrl,
+            customFontFamily,
+        ],
     );
 
     return (

@@ -133,7 +133,7 @@ export class ChipNode extends DecoratorNode<React.ReactNode> {
             case 'everyone':
                 return (
                     <span
-                        className="mx-0.5 inline-flex items-baseline rounded bg-primary px-1.5 text-[0.9em] font-medium text-white shadow-sm"
+                        className="mx-0.5 inline-flex items-baseline rounded bg-[var(--everyone-mention-bg,var(--primary))] px-1.5 py-[4px] text-[0.9em] font-medium text-[var(--everyone-mention-text,#ffffff)] shadow-sm"
                         style={{ verticalAlign: 'baseline' }}
                     >
                         @everyone

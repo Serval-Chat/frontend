@@ -29,7 +29,7 @@ export const Mention = ({ userId, serverId, size = 'sm' }: MentionProps) => {
         return (
             <Box
                 as="span"
-                className="inline-flex cursor-default items-baseline rounded bg-primary/10 px-1.5 py-[4px] font-medium text-primary transition-colors select-none"
+                className="inline-flex cursor-default items-baseline rounded bg-[var(--mention-bg,var(--primary-muted))] px-1.5 py-[4px] font-medium text-[var(--mention-text,var(--primary))] transition-colors select-none"
             >
                 <Text as="span" className="leading-none" size={size}>
                     @unknown user
@@ -52,7 +52,7 @@ export const Mention = ({ userId, serverId, size = 'sm' }: MentionProps) => {
         <>
             <Box
                 as="span"
-                className="inline-flex cursor-pointer items-baseline rounded bg-primary/10 px-1.5 py-[4px] font-medium text-primary transition-colors select-none hover:bg-primary/20"
+                className="inline-flex cursor-pointer items-baseline rounded bg-[var(--mention-bg,var(--primary-muted))] px-1.5 py-[4px] font-medium text-[var(--mention-text,var(--primary))] transition-colors select-none hover:bg-[var(--mention-bg-hover,var(--primary-muted))]"
                 ref={triggerRef}
                 onClick={(): void => setIsPopupOpen(true)}
             >

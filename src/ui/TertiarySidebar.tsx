@@ -86,7 +86,7 @@ export const TertiarySidebar = ({
         <Box
             as="aside"
             className={cn(
-                'pride-glass relative flex h-full shrink-0 flex-col border-l border-border-subtle bg-[var(--tertiary-bg)]',
+                'pride-glass relative flex h-full shrink-0 flex-col border-l border-[var(--member-list-border,var(--border-subtle))] bg-[var(--member-list-bg,var(--tertiary-bg))]',
                 'pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]',
                 showDesktopMemberList ? 'md:flex' : 'md:hidden',
                 'max-md:fixed max-md:inset-y-0 max-md:right-0 max-md:z-[var(--z-index-top)] max-md:w-64 max-md:shadow-2xl',
@@ -118,7 +118,7 @@ export const TertiarySidebar = ({
                             selectedFriendId && 'md:hidden',
                         )}
                     >
-                        <span className="text-xs font-bold tracking-wider text-muted-foreground uppercase">
+                        <span className="text-xs font-bold tracking-wider text-[var(--member-list-header-text,var(--muted-foreground))] uppercase">
                             Members
                         </span>
                         <div className="flex items-center gap-1">

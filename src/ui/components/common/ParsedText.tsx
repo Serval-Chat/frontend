@@ -754,7 +754,7 @@ export const ParsedText = React.memo<ParsedTextProps>(
                             return (
                                 <Box
                                     as="span"
-                                    className="inline-flex cursor-pointer items-baseline rounded bg-primary px-1.5 py-[4px] font-medium text-white shadow-sm transition-opacity select-none hover:opacity-90"
+                                    className="inline-flex cursor-pointer items-baseline rounded bg-[var(--everyone-mention-bg,var(--primary))] px-1.5 py-[4px] font-medium text-[var(--everyone-mention-text,#ffffff)] shadow-sm transition-opacity select-none hover:opacity-90"
                                     key={idx}
                                 >
                                     <Text

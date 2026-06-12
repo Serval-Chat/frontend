@@ -35,8 +35,8 @@ export const SettingsSidebar = ({
     onClose,
     setActiveSection,
 }: SettingsSidebarProps) => (
-    <div className="flex w-full shrink-0 flex-col gap-1 overflow-y-auto border-r border-border-subtle bg-[var(--secondary-bg)] p-3 md:w-[200px]">
-        <div className="mb-2 flex items-center justify-between border-b border-border-subtle px-2 pb-3 md:hidden">
+    <div className="flex h-full w-full shrink-0 flex-col gap-1 overflow-y-auto border-r border-[var(--sidebar-border,var(--border-subtle))] bg-[var(--sidebar-bg,var(--secondary-bg))] p-3 md:w-[200px]">
+        <div className="mb-2 flex items-center justify-between border-b border-[var(--sidebar-border,var(--border-subtle))] px-2 pb-3 md:hidden">
             <Heading className="m-0" level={2} variant="section">
                 Settings
             </Heading>
@@ -57,8 +57,8 @@ export const SettingsSidebar = ({
                     className={`w-full justify-start px-3 py-2.5 text-sm transition-all duration-200
                             ${
                                 isActive
-                                    ? 'border-transparent bg-bg-subtle font-semibold text-foreground'
-                                    : 'text-muted-foreground hover:bg-bg-subtle hover:text-foreground'
+                                    ? 'border-transparent bg-[var(--sidebar-item-active-bg,var(--bg-subtle))] font-semibold text-[var(--sidebar-item-active-text,var(--foreground))]'
+                                    : 'text-[var(--sidebar-item-text,var(--muted-foreground))] hover:bg-[var(--sidebar-item-hover-bg,var(--bg-subtle))] hover:text-[var(--sidebar-item-hover-text,var(--foreground))]'
                             }`}
                     key={section.id}
                     variant={isActive ? 'normal' : 'ghost'}

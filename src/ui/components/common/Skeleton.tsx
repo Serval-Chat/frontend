@@ -21,7 +21,7 @@ export const Skeleton = ({
 }: SkeletonProps) => (
     <div
         className={cn(
-            'animate-pulse bg-white/5',
+            'animate-pulse bg-[var(--skeleton-bg,rgb(255_255_255_/_0.05))]',
             {
                 'rounded-md': variant === 'text' || variant === 'rectangular',
                 'rounded-full': variant === 'circular',

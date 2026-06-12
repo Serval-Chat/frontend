@@ -1,0 +1,187 @@
+/*
+    @name Test theme
+    @author Catflare
+    @description A test theme
+
+    Save a copy of this file, edit it, then upload it in:
+    Settings -> Appearance -> Custom CSS Themes.
+*/
+
+:root {
+    color-scheme: dark;
+
+    /* brand and state colors */
+    --primary: #ff9f1c;
+    --primary-hover: #f18701;
+    --danger: #ff5a5f;
+    --danger-hover: #e1484d;
+    --caution: #ffd166;
+    --caution-hover: #e9b94e;
+    --success: #3ddc97;
+    --success-hover: #2bbf80;
+
+    /* muted state surfaces */
+    --primary-muted: rgb(255 159 28 / 0.14);
+    --primary-muted-text: #ffd29a;
+    --danger-muted: rgb(255 90 95 / 0.14);
+    --danger-muted-text: #ffb6b8;
+    --caution-muted: rgb(255 209 102 / 0.16);
+    --caution-muted-text: #ffe3a1;
+    --success-muted: rgb(61 220 151 / 0.14);
+    --success-muted-text: #a7f3d0;
+
+    /* core app surfaces */
+    --background: #0a0a0f;
+    --foreground: #f7f3ea;
+    --foreground-inverse: #0a0a0f;
+    --muted-foreground: #a9a29a;
+    --muted-foreground-hover: #d7cfc5;
+    --border-subtle: rgb(255 159 28 / 0.15);
+    --bg-subtle: rgb(255 159 28 / 0.06);
+    --bg-secondary: rgb(255 159 28 / 0.08);
+    --placeholder: rgb(247 243 234 / 0.36);
+    --divider: rgb(255 159 28 / 0.12);
+    --text-subtle: #a9a29a;
+    --text-normal: #f7f3ea;
+    --bg-subtle-hover: rgb(255 159 28 / 0.12);
+
+    /* chat and layout backgrounds */
+    --local-chat-bg:
+        radial-gradient(ellipse at 20% 20%, rgb(255 159 28 / 0.08), transparent 50%),
+        radial-gradient(ellipse at 80% 80%, rgb(241 135 1 / 0.06), transparent 50%),
+        linear-gradient(135deg, #0d0d12 0%, #08080c 100%);
+    --local-primary-bg: #0a0a0f;
+    
+    /* Frosted glass sidebars */
+    --tertiary-bg: rgb(13 13 18 / 0.65);
+    --secondary-bg: rgb(16 16 22 / 0.7);
+    --channel-sidebar-bg: rgb(16 16 22 / 0.7);
+    --channel-sidebar-border: rgb(255 159 28 / 0.2);
+    
+    --bg-chat-header: rgb(10 10 15 / 0.85);
+    --bg-msg-input: #15151c;
+
+    /* embeds and rich content */
+    --embed-bg: rgb(255 159 28 / 0.08);
+    --embed-border: rgb(255 159 28 / 0.4);
+    --spoiler-bg: #ff9f1c;
+    --spoiler-reveal-bg: rgb(255 159 28 / 0.1);
+
+    /* syntax highlighting */
+    --syntax-comment: #8b8279;
+    --syntax-keyword: #ff9f1c;
+    --syntax-string: #3ddc97;
+    --syntax-number: #ff7a90;
+    --syntax-function: #ffd166;
+    --syntax-operator: #f7f3ea;
+    --syntax-variable: #9ad7ff;
+    --syntax-type: #c6a7ff;
+
+    /* UI details */
+    --checklist-spine: #ff9f1c;
+    --activity-indicator: #3ddc97;
+    --avatar-fallback-bg: rgb(255 159 28 / 0.2);
+    --avatar-fallback-text: #ffd29a;
+
+    /* identity tags */
+    --bot-tag-bg: #ff9f1c;
+    --bot-tag-text: #0a0a0f;
+    --webhook-tag-bg: #6ee7f9;
+    --webhook-tag-text: #06262d;
+
+    /* mentions */
+    --mention-bg: rgb(255 159 28 / 0.16);
+    --mention-text: #ffd29a;
+    --mention-bg-hover: rgb(255 159 28 / 0.24);
+    --everyone-mention-bg: linear-gradient(135deg, #ff9f1c 0%, #f18701 100%);
+    --everyone-mention-text: #ffffff;
+
+    /* badges */
+    --unread-badge-bg: linear-gradient(135deg, #ff5a5f 0%, #e1484d 100%);
+    --unread-badge-text: #ffffff;
+
+    /* skeleton loading */
+    --skeleton-bg: rgb(255 159 28 / 0.08);
+
+    /* sidebars */
+    --sidebar-bg: rgb(16 16 22 / 0.75);
+    --sidebar-border: rgb(255 159 28 / 0.18);
+    --sidebar-item-text: #a9a29a;
+    --sidebar-item-hover-text: #f7f3ea;
+    --sidebar-item-hover-bg: rgb(255 159 28 / 0.12);
+    --sidebar-item-active-text: #ffd29a;
+    --sidebar-item-active-bg: rgb(255 159 28 / 0.18);
+
+    /* member list sidebar */
+    --member-list-bg: rgb(13 13 18 / 0.65);
+    --member-list-border: rgb(255 159 28 / 0.18);
+    --member-list-header-text: #a9a29a;
+}
+
+/* custom scrollbar styling with gradient */
+* {
+    scrollbar-color: rgb(255 159 28 / 0.6) rgb(255 159 28 / 0.1);
+}
+
+*::-webkit-scrollbar {
+    width: 12px;
+}
+
+*::-webkit-scrollbar-track {
+    background: rgb(255 159 28 / 0.05);
+}
+
+*::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, rgb(255 159 28 / 0.7), rgb(241 135 1 / 0.6));
+    border-radius: 6px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, rgb(255 159 28 / 0.9), rgb(241 135 1 / 0.8));
+    background-clip: padding-box;
+}
+
+/* make links match the theme */
+a,
+a.text-primary {
+    color: #ffb54d;
+    transition: color 0.2s ease;
+}
+
+a:hover {
+    color: #ffd29a;
+}
+
+/* app-level tweaks */
+:root[data-custom-theme] body {
+    background: var(--local-primary-bg);
+}
+
+:root[data-custom-theme] ::selection {
+    background: rgb(255 159 28 / 0.35);
+    color: #ffffff;
+}
+:root[data-custom-theme] .pride-glass {
+    backdrop-filter: blur(18px) saturate(1.3);
+    -webkit-backdrop-filter: blur(18px) saturate(1.3);
+}
+
+/* glow on mentions */
+:root[data-custom-theme] [class*="mention"] {
+    box-shadow: 0 0 12px rgb(255 159 28 / 0.15);
+}
+
+/* badge styling */
+:root[data-custom-theme] [class*="badge"] {
+    box-shadow: 0 2px 8px rgb(255 90 95 / 0.3);
+}
+
+/* orange glow on active elements */
+:root[data-custom-theme] button:focus-visible,
+:root[data-custom-theme] input:focus-visible,
+:root[data-custom-theme] textarea:focus-visible {
+    outline: 2px solid rgb(255 159 28 / 0.5);
+    outline-offset: 2px;
+}
