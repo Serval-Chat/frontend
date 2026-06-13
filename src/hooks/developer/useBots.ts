@@ -8,7 +8,6 @@ import type {
     CreateBotPayload,
     CreateBotResponse,
     PublicBotInfo,
-    ResetSecretResponse,
 } from '@/types/bot';
 
 export const usePublicBotInfo = (
@@ -145,16 +144,6 @@ export const useDeleteBot = (): UseMutationResult<
         },
     });
 };
-
-export const useResetBotSecret = (): UseMutationResult<
-    ResetSecretResponse,
-    Error,
-    { clientId: string }
-> =>
-    useMutation({
-        mutationFn: ({ clientId }): Promise<ResetSecretResponse> =>
-            botsApi.resetSecret(clientId),
-    });
 
 export const useResetBotToken = (): UseMutationResult<
     { token: string },

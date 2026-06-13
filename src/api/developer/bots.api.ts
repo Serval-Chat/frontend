@@ -7,7 +7,6 @@ import type {
     CreateBotPayload,
     CreateBotResponse,
     PublicBotInfo,
-    ResetSecretResponse,
 } from '@/types/bot';
 
 export const botsApi = {
@@ -51,14 +50,6 @@ export const botsApi = {
     delete: async (clientId: string): Promise<void> => {
         await apiClient.delete(`/api/v1/bots/${clientId}`);
     },
-
-    resetSecret: (clientId: string): Promise<ResetSecretResponse> =>
-        apiClient
-            .post<ResetSecretResponse>(
-                `/api/v1/bots/${clientId}/reset-secret`,
-                {},
-            )
-            .then((r): ResetSecretResponse => r.data),
 
     resetToken: (clientId: string): Promise<{ token: string }> =>
         apiClient

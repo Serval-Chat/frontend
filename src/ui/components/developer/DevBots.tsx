@@ -1,19 +1,42 @@
 import { type ReactNode, useState } from 'react';
 
-import { Plus } from 'lucide-react';
+import { Check, Copy, Plus } from 'lucide-react';
 
 import { useBots, useCreateBot } from '@/hooks/developer/useBots';
 import type { Bot } from '@/types/bot';
 import { Button } from '@/ui/components/common/Button';
 import { Input } from '@/ui/components/common/Input';
 import { Modal } from '@/ui/components/common/Modal';
+import { Text } from '@/ui/components/common/Text';
 
 interface DevBotsProps {
     onViewBot: (clientId: string) => void;
 }
 
+const CopyTokenButton = ({ value }: { value: string }): ReactNode => {
+    const [copied, setCopied] = useState(false);
+    const handleCopy = (): void => {
+        void navigator.clipboard.writeText(value);
+        setCopied(true);
+        setTimeout((): void => setCopied(false), 2000);
+    };
+    return (
+        <Button
+            icon={copied ? Check : Copy}
+            size="sm"
+            variant="normal"
+            onClick={handleCopy}
+        >
+            <span className="hidden sm:inline">
+                {copied ? 'Copied!' : 'Copy'}
+            </span>
+        </Button>
+    );
+};
+
 const CreateBotModal = ({ onClose }: { onClose: () => void }): ReactNode => {
     const [name, setName] = useState('');
+    const [newToken, setNewToken] = useState<string | null>(null);
     const createBot = useCreateBot();
 
     const handleSubmit = (): void => {
@@ -21,12 +44,37 @@ const CreateBotModal = ({ onClose }: { onClose: () => void }): ReactNode => {
         createBot.mutate(
             { name: name.trim() },
             {
-                onSuccess: (): void => {
-                    onClose();
+                onSuccess: (data): void => {
+                    setNewToken(data.token);
                 },
             },
         );
     };
+
+    if (newToken !== null) {
+        return (
+            <Modal isOpen title="Bot Created" onClose={onClose}>
+                <div className="flex flex-col gap-4 p-4">
+                    <Text as="p" size="sm" variant="muted">
+                        Your bot token is shown below. Copy it now — it
+                        won&apos;t be shown again. You can reset it later from
+                        the bot settings.
+                    </Text>
+                    <div className="flex gap-2">
+                        <code className="flex-1 rounded-md bg-caution/10 px-3 py-2 font-mono text-sm break-all text-caution">
+                            {newToken}
+                        </code>
+                        <CopyTokenButton value={newToken} />
+                    </div>
+                    <div className="flex justify-end">
+                        <Button variant="primary" onClick={onClose}>
+                            Done
+                        </Button>
+                    </div>
+                </div>
+            </Modal>
+        );
+    }
 
     return (
         <Modal isOpen title="Create a Bot" onClose={onClose}>
@@ -78,7 +126,7 @@ const BotCard = ({
 
     return (
         <div className="hover:border-border flex items-center gap-4 rounded-xl border border-border-subtle bg-bg-secondary p-4 transition-colors">
-            <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center overflow-hidden rounded-full bg-bg-subtle">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-bg-subtle">
                 {avatar ? (
                     <img
                         alt={name}

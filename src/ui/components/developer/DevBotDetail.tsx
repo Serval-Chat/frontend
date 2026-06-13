@@ -14,7 +14,6 @@ import {
     useBot,
     useBotServers,
     useDeleteBot,
-    useResetBotSecret,
     useResetBotToken,
     useUpdateBot,
     useUpdateBotPermissions,
@@ -112,7 +111,6 @@ export const DevBotDetail = ({
     const updateBot = useUpdateBot();
     const uploadPicture = useUploadBotPicture();
     const uploadBanner = useUploadBotBanner();
-    const resetSecret = useResetBotSecret();
     const resetToken = useResetBotToken();
     const deleteBot = useDeleteBot();
 
@@ -149,9 +147,7 @@ export const DevBotDetail = ({
     const [cropFile, setCropFile] = useState<File | null>(null);
     const [cropType, setCropType] = useState<'avatar' | 'banner'>('avatar');
 
-    const [secret, setSecret] = useState<string | null>(null);
     const [token, setToken] = useState<string | null>(null);
-    const [tokenReset, setTokenReset] = useState(false);
     const [showDelete, setShowDelete] = useState(false);
 
     const botUserKey = bot && user ? `${bot.id}:${user.id}` : null;
@@ -198,26 +194,12 @@ export const DevBotDetail = ({
         }
     };
 
-    const handleResetSecret = (): void => {
-        resetSecret.mutate(
-            { clientId },
-            {
-                onSuccess: (data): void => {
-                    setSecret(data.clientSecret);
-                    setTokenReset(false);
-                },
-            },
-        );
-    };
-
     const handleResetToken = (): void => {
         resetToken.mutate(
             { clientId },
             {
                 onSuccess: (data): void => {
                     setToken(data.token);
-                    setTokenReset(true);
-                    setSecret(null);
                 },
             },
         );
@@ -367,50 +349,26 @@ export const DevBotDetail = ({
                                 <CopyButton text="Copy" value={clientId} />
                             </div>
                         </div>
-                        {secret && (
-                            <div className="flex flex-col gap-1">
-                                <Text as="p" size="sm" variant="muted">
-                                    Client Secret - copy now, it won&apos;t be
-                                    shown again
-                                </Text>
-                                <div className="flex gap-2">
-                                    <code className="flex-1 rounded-md bg-caution/10 px-3 py-2 font-mono text-sm break-all text-caution">
-                                        {secret}
-                                    </code>
-                                    <CopyButton text="Copy" value={secret} />
-                                </div>
-                            </div>
-                        )}
-                        {tokenReset && (
-                            <div className="flex items-center gap-2 rounded-md bg-success/10 px-3 py-2 text-sm text-success">
-                                <CheckCircle size={14} />
-                                Bot token invalidated. Any active sessions have
-                                been revoked.
-                            </div>
-                        )}
                         {token && (
                             <div className="flex flex-col gap-1">
                                 <Text as="p" size="sm" variant="muted">
-                                    Bot Token - copy now, it won&apos;t be shown
+                                    Bot Token — copy now, it won&apos;t be shown
                                     again
                                 </Text>
                                 <div className="flex gap-2">
-                                    <code className="flex-1 rounded-md bg-bg-subtle px-3 py-2 font-mono text-sm break-all text-foreground">
+                                    <code className="flex-1 rounded-md bg-caution/10 px-3 py-2 font-mono text-sm break-all text-caution">
                                         {token}
                                     </code>
                                     <CopyButton text="Copy" value={token} />
                                 </div>
+                                <div className="flex items-center gap-2 rounded-md bg-success/10 px-3 py-2 text-sm text-success">
+                                    <CheckCircle size={14} />
+                                    Previous token invalidated. Any active
+                                    sessions have been revoked.
+                                </div>
                             </div>
                         )}
                         <div className="flex flex-wrap gap-2">
-                            <Button
-                                icon={RefreshCw}
-                                loading={resetSecret.isPending}
-                                variant="normal"
-                                onClick={handleResetSecret}
-                            >
-                                Reset Client Secret
-                            </Button>
                             <Button
                                 icon={RefreshCw}
                                 loading={resetToken.isPending}

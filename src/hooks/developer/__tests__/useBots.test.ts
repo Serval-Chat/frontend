@@ -140,8 +140,8 @@ describe('useBots', (): void => {
 describe('useCreateBot', (): void => {
     beforeEach(() => vi.clearAllMocks());
 
-    it('calls api and returns bot with one-time secret', async (): Promise<void> => {
-        const response = { bot: mockBot, clientSecret: 'supersecret' };
+    it('calls api and returns bot with one-time token', async (): Promise<void> => {
+        const response = { bot: mockBot, token: 'serchat_abc123' };
         vi.mocked(botsApi.create).mockResolvedValue(response);
         const { result } = renderHook(() => useCreateBot(), {
             wrapper: makeWrapper(),

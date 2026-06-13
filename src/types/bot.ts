@@ -63,11 +63,7 @@ export interface CreateBotPayload {
 
 export interface CreateBotResponse {
     bot: Bot;
-    clientSecret: string;
-}
-
-export interface ResetSecretResponse {
-    clientSecret: string;
+    token: string;
 }
 
 export interface PublicBotInfo {
