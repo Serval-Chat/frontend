@@ -26,6 +26,7 @@ import { Button } from '@/ui/components/common/Button';
 import { Input } from '@/ui/components/common/Input';
 import { Modal } from '@/ui/components/common/Modal';
 import { Text } from '@/ui/components/common/Text';
+import { TextArea } from '@/ui/components/common/TextArea';
 import { UserProfileCard } from '@/ui/components/profile/UserProfileCard';
 import { ImageCropModal } from '@/ui/components/settings/ImageCropModal';
 import {
@@ -284,8 +285,11 @@ export const DevBotDetail = ({
                             >
                                 Description
                             </label>
-                            <Input
+                            <TextArea
+                                autoResize
+                                className="min-h-25"
                                 id="bot-desc"
+                                maxLength={500}
                                 value={description}
                                 onChange={(e): void =>
                                     setDescription(e.target.value)
