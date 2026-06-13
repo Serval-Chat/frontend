@@ -54,12 +54,14 @@ export const SettingsSidebar = ({
 
             return (
                 <Button
-                    className={`w-full justify-start px-3 py-2.5 text-sm transition-all duration-200
+                    fullWidth
+                    className={`px-3 py-2.5 text-sm transition-all duration-200
                             ${
                                 isActive
                                     ? 'border-transparent bg-[var(--sidebar-item-active-bg,var(--bg-subtle))] font-semibold text-[var(--sidebar-item-active-text,var(--foreground))]'
                                     : 'text-[var(--sidebar-item-text,var(--muted-foreground))] hover:bg-[var(--sidebar-item-hover-bg,var(--bg-subtle))] hover:text-[var(--sidebar-item-hover-text,var(--foreground))]'
                             }`}
+                    justify="start"
                     key={section.id}
                     variant={isActive ? 'normal' : 'ghost'}
                     onClick={(): void => setActiveSection(section.id)}

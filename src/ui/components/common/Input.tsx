@@ -1,62 +1,111 @@
-import React from 'react';
+import React, { useState } from 'react';
+import type { CSSProperties } from 'react';
 
-import { type VariantProps, cva } from 'class-variance-authority';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 
-import { Button } from '@/ui/components/common/Button';
-import { cn } from '@/utils/cn';
+import { colors, fontSize, radius } from '@/ui/theme';
 
-const inputVariants = cva(
-    'w-full text-foreground transition-all duration-200 outline-none placeholder:text-placeholder disabled:cursor-not-allowed disabled:opacity-50',
-    {
-        variants: {
-            variant: {
-                default:
-                    'border border-border-subtle bg-bg-subtle focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1',
-                secondary:
-                    'border border-border-subtle bg-bg-secondary focus:border-primary',
-                admin: 'border border-border-subtle bg-background focus:border-primary/50 focus:ring-2 focus:ring-primary/10',
-            },
-            size: {
-                sm: 'h-8 rounded px-2 py-1 text-xs',
-                md: 'h-10 rounded-md px-3 py-2 text-sm',
-                lg: 'h-12 rounded-lg px-4 py-3 text-base',
-                admin: 'h-11 rounded-xl px-4 py-2.5 text-sm',
-            },
-        },
-        defaultVariants: {
-            variant: 'default',
-            size: 'md',
-        },
-    },
-);
+export type InputVariant = 'default' | 'secondary' | 'admin';
+export type InputSize = 'sm' | 'md' | 'lg' | 'admin';
 
-export interface InputProps
-    extends
-        Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'>,
-        VariantProps<typeof inputVariants> {
+export interface InputProps extends Omit<
+    React.InputHTMLAttributes<HTMLInputElement>,
+    'size' | 'style'
+> {
+    variant?: InputVariant;
+    size?: InputSize;
     minWidth?: number | string;
     maxWidth?: number | string;
-    disabled?: boolean;
     icon?: React.ReactNode;
+    style?: CSSProperties;
 }
+
+const baseInputStyle: CSSProperties = {
+    width: '100%',
+    color: colors.foreground,
+    transition: 'all 0.2s',
+    outline: 'none',
+    fontFamily: 'inherit',
+};
+
+const variantInputStyle: Record<InputVariant, CSSProperties> = {
+    default: {
+        border: `1px solid ${colors.borderSubtle}`,
+        backgroundColor: colors.bgSubtle,
+    },
+    secondary: {
+        border: `1px solid ${colors.borderSubtle}`,
+        backgroundColor: colors.bgSecondary,
+    },
+    admin: {
+        border: `1px solid ${colors.borderSubtle}`,
+        backgroundColor: colors.background,
+    },
+};
+
+const sizeInputStyle: Record<InputSize, CSSProperties> = {
+    sm: {
+        height: '2rem',
+        borderRadius: radius.sm,
+        paddingInline: '0.5rem',
+        paddingBlock: '0.25rem',
+        fontSize: fontSize.xs,
+    },
+    md: {
+        height: '2.5rem',
+        borderRadius: radius.md,
+        paddingInline: '0.75rem',
+        paddingBlock: '0.5rem',
+        fontSize: fontSize.sm,
+    },
+    lg: {
+        height: '3rem',
+        borderRadius: radius.lg,
+        paddingInline: '1rem',
+        paddingBlock: '0.75rem',
+        fontSize: fontSize.base,
+    },
+    admin: {
+        height: '2.75rem',
+        borderRadius: radius.xl,
+        paddingInline: '1rem',
+        paddingBlock: '0.625rem',
+        fontSize: fontSize.sm,
+    },
+};
+
+const stepperBtnStyle: CSSProperties = {
+    width: '20px',
+    height: '16px',
+    background: 'transparent',
+    border: 'none',
+    cursor: 'pointer',
+    borderRadius: '2px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    color: colors.mutedForeground,
+    padding: 0,
+    transition: 'background-color 0.15s, color 0.15s',
+};
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
     (
         {
-            className,
-            variant,
-            size,
+            variant = 'default',
+            size = 'md',
             type,
             minWidth,
             maxWidth,
             disabled,
             icon,
+            style,
             ...props
         },
         ref,
     ) => {
         const internalRef = React.useRef<HTMLInputElement>(null);
+        const [stepperVisible, setStepperVisible] = useState(false);
 
         React.useImperativeHandle(
             ref,
@@ -68,62 +117,106 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         const handleIncrement = (): void => {
             if (internalRef.current) {
                 internalRef.current.stepUp();
-                const event = new Event('input', { bubbles: true });
-                internalRef.current.dispatchEvent(event);
+                internalRef.current.dispatchEvent(
+                    new Event('input', { bubbles: true }),
+                );
             }
         };
 
         const handleDecrement = (): void => {
             if (internalRef.current) {
                 internalRef.current.stepDown();
-                const event = new Event('input', { bubbles: true });
-                internalRef.current.dispatchEvent(event);
+                internalRef.current.dispatchEvent(
+                    new Event('input', { bubbles: true }),
+                );
             }
         };
 
         return (
             <div
-                className="group relative flex w-full items-center"
-                style={{ minWidth, maxWidth, ...props.style }}
+                style={{
+                    position: 'relative',
+                    display: 'flex',
+                    width: '100%',
+                    alignItems: 'center',
+                    minWidth,
+                    maxWidth,
+                }}
+                onMouseEnter={
+                    isNumber && !disabled
+                        ? () => setStepperVisible(true)
+                        : undefined
+                }
+                onMouseLeave={
+                    isNumber && !disabled
+                        ? () => setStepperVisible(false)
+                        : undefined
+                }
             >
                 {icon && (
-                    <div className="pointer-events-none absolute left-3 flex items-center text-muted-foreground">
+                    <span
+                        style={{
+                            pointerEvents: 'none',
+                            position: 'absolute',
+                            left: '0.75rem',
+                            display: 'flex',
+                            alignItems: 'center',
+                            color: colors.mutedForeground,
+                        }}
+                    >
                         {icon}
-                    </div>
+                    </span>
                 )}
                 <input
-                    className={cn(
-                        inputVariants({ variant, size, className }),
-                        isNumber && '[appearance:textfield] pr-9',
-                        icon && 'pl-9',
-                    )}
                     disabled={disabled || undefined}
                     ref={internalRef}
+                    style={{
+                        ...baseInputStyle,
+                        ...variantInputStyle[variant],
+                        ...sizeInputStyle[size],
+                        ...(disabled
+                            ? { cursor: 'not-allowed', opacity: 0.5 }
+                            : {}),
+                        ...(isNumber
+                            ? {
+                                  appearance: 'textfield',
+                                  paddingRight: '2.25rem',
+                              }
+                            : {}),
+                        ...(icon ? { paddingLeft: '2.25rem' } : {}),
+                        minWidth: 'unset',
+                        maxWidth: 'unset',
+                        ...style,
+                    }}
                     type={type}
                     {...props}
-                    style={{ minWidth: 'unset', maxWidth: 'unset' }}
                 />
-
                 {isNumber && !disabled && (
-                    <div className="absolute right-1 flex flex-col gap-[1px] opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100">
-                        <Button
-                            className="text-foreground-muted h-4 w-5 rounded-sm border-none bg-transparent p-0 shadow-none transition-colors hover:bg-white/10 hover:text-foreground"
-                            size="sm"
+                    <div
+                        style={{
+                            position: 'absolute',
+                            right: '4px',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '1px',
+                            opacity: stepperVisible ? 1 : 0,
+                            transition: 'opacity 0.2s',
+                        }}
+                    >
+                        <button
+                            style={stepperBtnStyle}
                             type="button"
-                            variant="ghost"
                             onClick={handleIncrement}
                         >
                             <ChevronUp size={14} />
-                        </Button>
-                        <Button
-                            className="text-foreground-muted h-4 w-5 rounded-sm border-none bg-transparent p-0 shadow-none transition-colors hover:bg-white/10 hover:text-foreground"
-                            size="sm"
+                        </button>
+                        <button
+                            style={stepperBtnStyle}
                             type="button"
-                            variant="ghost"
                             onClick={handleDecrement}
                         >
                             <ChevronDown size={14} />
-                        </Button>
+                        </button>
                     </div>
                 )}
             </div>

@@ -103,11 +103,12 @@ export const DropdownWithSearch = ({
             )}
 
             <Button
+                fullWidth
                 className={cn(
                     'flex w-full items-center justify-between rounded-lg border border-border-subtle bg-bg-secondary px-4 py-2 text-sm shadow-none transition-all duration-200 hover:border-primary/50 focus:ring-2 focus:ring-primary/20 focus:outline-none',
                     isOpen && 'border-primary ring-2 ring-primary/20',
                 )}
-                innerClassName="w-full justify-between"
+                justify="between"
                 type="button"
                 variant="ghost"
                 onClick={handleToggle}
@@ -190,13 +191,14 @@ export const DropdownWithSearch = ({
                             {filteredOptions.length > 0 ? (
                                 filteredOptions.map((option) => (
                                     <Button
+                                        fullWidth
                                         className={cn(
                                             'group flex w-full items-center justify-between rounded-md border-none px-3 py-2 text-left shadow-none transition-colors',
                                             option.id === value
                                                 ? 'bg-primary/10 text-primary'
                                                 : 'text-muted-foreground hover:bg-bg-subtle hover:text-foreground',
                                         )}
-                                        innerClassName="w-full justify-start"
+                                        justify="start"
                                         key={option.id || option.label}
                                         size="md"
                                         variant="ghost"

@@ -1,82 +1,57 @@
 import React from 'react';
+import type { CSSProperties } from 'react';
 
-import { type VariantProps, cva } from 'class-variance-authority';
+import { type SpacingKey, spacing } from '@/ui/theme';
 
-import { cn } from '@/utils/cn';
+type Align = 'start' | 'center' | 'end' | 'stretch';
+type Justify = 'start' | 'center' | 'end' | 'between';
 
-const stackVariants = cva('flex', {
-    variants: {
-        direction: {
-            row: 'flex-row',
-            col: 'flex-col',
-        },
-        gap: {
-            none: 'gap-0',
-            xs: 'gap-xs',
-            sm: 'gap-sm',
-            md: 'gap-md',
-            lg: 'gap-lg',
-            xl: 'gap-xl',
-        },
-        wrap: {
-            true: 'flex-wrap',
-            false: 'flex-nowrap',
-        },
-        align: {
-            start: 'items-start',
-            center: 'items-center',
-            end: 'items-end',
-            stretch: 'items-stretch',
-        },
-        justify: {
-            start: 'justify-start',
-            center: 'justify-center',
-            end: 'justify-end',
-            between: 'justify-between',
-        },
-    },
-    defaultVariants: {
-        direction: 'col',
-        gap: 'md',
-        wrap: false,
-        align: 'stretch',
-        justify: 'start',
-    },
-});
-
-export interface StackProps
-    extends
-        React.HTMLAttributes<HTMLDivElement>,
-        VariantProps<typeof stackVariants> {
+export interface StackProps extends React.HTMLAttributes<HTMLDivElement> {
     children: React.ReactNode;
+    direction?: 'row' | 'col';
+    gap?: SpacingKey;
+    wrap?: boolean;
+    align?: Align;
+    justify?: Justify;
 }
 
-/**
- * @description Generic flexbox container component
- */
+const alignMap: Record<Align, CSSProperties['alignItems']> = {
+    start: 'flex-start',
+    center: 'center',
+    end: 'flex-end',
+    stretch: 'stretch',
+};
+
+const justifyMap: Record<Justify, CSSProperties['justifyContent']> = {
+    start: 'flex-start',
+    center: 'center',
+    end: 'flex-end',
+    between: 'space-between',
+};
+
 export const Stack = ({
-    direction,
-    gap,
+    direction = 'col',
+    gap = 'md',
     wrap,
     align,
     justify,
-    className,
+    style,
     children,
     ...props
-}: StackProps) => (
-    <div
-        className={cn(
-            stackVariants({
-                direction,
-                gap,
-                wrap,
-                align,
-                justify,
-                className,
-            }),
-        )}
-        {...props}
-    >
-        {children}
-    </div>
-);
+}: StackProps) => {
+    const s: CSSProperties = {
+        display: 'flex',
+        flexDirection: direction === 'row' ? 'row' : 'column',
+        gap: spacing[gap],
+    };
+
+    if (align !== undefined) s.alignItems = alignMap[align];
+    if (justify !== undefined) s.justifyContent = justifyMap[justify];
+    if (wrap !== undefined) s.flexWrap = wrap ? 'wrap' : 'nowrap';
+
+    return (
+        <div style={{ ...s, ...style }} {...props}>
+            {children}
+        </div>
+    );
+};

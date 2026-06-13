@@ -1,10 +1,7 @@
 import { type Variants, motion } from 'framer-motion';
 
-import { cn } from '@/utils/cn';
-
 export interface BouncingDotsProps {
-    className?: string;
-    dotClassName?: string;
+    style?: React.CSSProperties;
     color?: string;
     size?: number;
     count?: number;
@@ -23,23 +20,26 @@ const dotVariants: Variants = {
 };
 
 export const BouncingDots = ({
-    className,
-    dotClassName,
-    color = 'bg-primary',
+    style,
+    color = 'var(--primary)',
     size = 8,
     count = 3,
 }: BouncingDotsProps) => (
-    <div className={cn('flex items-center space-x-1', className)}>
+    <div
+        style={{ display: 'flex', alignItems: 'center', gap: '4px', ...style }}
+    >
         {Array.from({ length: count }).map((_, i) => (
             <motion.div
                 animate="animate"
-                className={cn('rounded-full', color, dotClassName)}
                 custom={i}
                 // eslint-disable-next-line react/no-array-index-key
                 key={`dot-${i}`}
                 style={{
                     width: size,
                     height: size,
+                    borderRadius: '50%',
+                    backgroundColor: color,
+                    flexShrink: 0,
                 }}
                 variants={dotVariants}
             />

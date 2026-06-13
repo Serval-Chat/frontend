@@ -344,13 +344,14 @@ export const ChannelPreferenceGroup = ({
                 />
 
                 <Button
+                    fullWidth
                     className={cn(
                         'relative z-content w-full justify-start rounded-md border-none px-2 py-1.5 text-left shadow-none',
                         isCategoryHidden
                             ? 'bg-warning/10 text-warning hover:bg-warning/15'
                             : 'bg-transparent text-foreground hover:bg-white/5',
                     )}
-                    innerClassName="w-full justify-start"
+                    justify="start"
                     ref={categoryRef}
                     type="button"
                     variant="ghost"
@@ -391,13 +392,14 @@ export const ChannelPreferenceGroup = ({
                             const isHidden = hiddenChannels.has(channel.id);
                             return (
                                 <Button
+                                    fullWidth
                                     className={cn(
                                         'relative z-content w-full justify-start rounded-md border-none px-2 py-1.5 text-left shadow-none',
                                         isHidden
                                             ? 'bg-warning/10 text-warning hover:bg-warning/15'
                                             : 'bg-transparent text-muted-foreground hover:bg-white/5 hover:text-foreground',
                                     )}
-                                    innerClassName="w-full justify-start"
+                                    justify="start"
                                     key={channel.id}
                                     ref={(el): void => {
                                         channelRefs.current[index] = el;
@@ -917,7 +919,7 @@ export const ServerOnboardingModal = ({
                                     {welcomeChannels.map((channel) => (
                                         <Button
                                             className="justify-start rounded-xl border border-border-subtle bg-bg-secondary/40 px-4 py-3 text-left shadow-none transition-all duration-200 hover:border-primary hover:bg-bg-secondary/80"
-                                            innerClassName="justify-start"
+                                            justify="start"
                                             key={channel.id}
                                             type="button"
                                             variant="normal"

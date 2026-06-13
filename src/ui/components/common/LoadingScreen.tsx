@@ -113,7 +113,10 @@ export const LoadingScreen = ({
                     </div>
 
                     <div className="absolute bottom-12 flex flex-col items-center gap-2">
-                        <BouncingDots color="bg-primary/30" size={6} />
+                        <BouncingDots
+                            color="color-mix(in srgb, var(--primary) 30%, transparent)"
+                            size={6}
+                        />
                     </div>
                 </motion.div>
             )}

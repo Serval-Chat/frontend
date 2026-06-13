@@ -1,19 +1,32 @@
-import { Box } from '@/ui/components/layout/Box';
+import { colors } from '@/ui/theme';
 import { cn } from '@/utils/cn';
 
 interface DividerProps {
-    className?: string;
     fullWidth?: boolean;
+    className?: string;
+    style?: React.CSSProperties;
 }
 
-export const Divider = ({ className, fullWidth }: DividerProps) => (
-    <Box
-        className={cn(
-            'flex w-full items-center justify-center py-[2px]',
-            !fullWidth && 'px-[12px]',
-            className,
-        )}
+export const Divider = ({ fullWidth, className, style }: DividerProps) => (
+    <div
+        className={cn(className)}
+        style={{
+            display: 'flex',
+            width: '100%',
+            alignItems: 'center',
+            justifyContent: 'center',
+            paddingBlock: '2px',
+            paddingInline: fullWidth ? 0 : '12px',
+            ...style,
+        }}
     >
-        <Box className="h-[3px] w-full rounded-full bg-divider" />
-    </Box>
+        <div
+            style={{
+                height: '3px',
+                width: '100%',
+                borderRadius: '9999px',
+                backgroundColor: colors.divider,
+            }}
+        />
+    </div>
 );

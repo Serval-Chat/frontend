@@ -1,41 +1,54 @@
 import { AnimatePresence, motion } from 'framer-motion';
 
-import { Box } from '@/ui/components/layout/Box';
+import { colors, fontSize, fontWeight, radius } from '@/ui/theme';
 import type { StatusType } from '@/ui/types';
-import { cn } from '@/utils/cn';
 
 export interface StatusMessageProps {
     message: string;
     type: StatusType;
-    className?: string;
+    style?: React.CSSProperties;
 }
 
-/**
- * @description Status message component
- */
-export const StatusMessage = ({
-    message,
-    type,
-    className,
-}: StatusMessageProps) => (
+const typeStyles: Partial<Record<StatusType, React.CSSProperties>> = {
+    error: {
+        borderColor: `color-mix(in srgb, ${colors.danger} 20%, transparent)`,
+        backgroundColor: `color-mix(in srgb, ${colors.danger} 10%, transparent)`,
+        color: colors.danger,
+    },
+    success: {
+        borderColor: `color-mix(in srgb, ${colors.success} 20%, transparent)`,
+        backgroundColor: `color-mix(in srgb, ${colors.success} 10%, transparent)`,
+        color: colors.success,
+    },
+};
+
+export const StatusMessage = ({ message, type, style }: StatusMessageProps) => (
     <AnimatePresence mode="wait">
         {message && (
-            <Box
+            <motion.div
                 animate={{ opacity: 1, y: 0 }}
-                as={motion.div}
-                className={cn(
-                    'flex min-h-10 w-full items-center justify-center rounded-md border px-4 py-2 text-center text-sm font-medium',
-                    type === 'error'
-                        ? 'border-danger/20 bg-danger/10 text-danger'
-                        : 'border-success/20 bg-success/10 text-success',
-                    className,
-                )}
                 exit={{ opacity: 0, y: -10 }}
                 initial={{ opacity: 0, y: -10 }}
+                style={{
+                    display: 'flex',
+                    minHeight: '2.5rem',
+                    width: '100%',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    borderRadius: radius.md,
+                    border: '1px solid',
+                    paddingInline: '1rem',
+                    paddingBlock: '0.5rem',
+                    textAlign: 'center',
+                    fontSize: fontSize.sm,
+                    fontWeight: fontWeight.medium,
+                    ...(typeStyles[type] ?? {}),
+                    ...style,
+                }}
                 transition={{ duration: 0.2 }}
             >
                 {message}
-            </Box>
+            </motion.div>
         )}
     </AnimatePresence>
 );

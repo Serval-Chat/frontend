@@ -192,7 +192,7 @@ const WelcomeChannelGrid = ({
                                             : 'bg-bg-subtle text-muted-foreground hover:text-foreground',
                                     )}
                                     disabled={!isSelected && selected.size >= 8}
-                                    innerClassName="justify-start"
+                                    justify="start"
                                     key={channel.id}
                                     type="button"
                                     variant="normal"
