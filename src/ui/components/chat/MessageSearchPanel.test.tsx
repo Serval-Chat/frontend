@@ -53,44 +53,49 @@ const makeHit = (overrides: Partial<SearchHit> = {}): SearchHit => ({
 });
 
 describe('SearchResultItem', () => {
-    it('renders the ES highlight snippet with the matched term wrapped in <mark>', () => {
+    it('wraps the matched query term in <mark> within the fully parsed message', () => {
         render(
             <SearchResultItem
-                hit={makeHit({ highlight: 'hel<mark>lo</mark> world' })}
+                hit={makeHit({ text: 'hello world' })}
+                query="lo wo"
                 onNavigate={vi.fn()}
             />,
         );
 
-        const mark = screen.getByText('lo');
+        const mark = screen.getByText('lo wo');
         expect(mark.tagName).toBe('MARK');
-        expect(screen.getByText(/hel/).textContent).toBe('hello world');
+        expect(mark.closest('.search-highlight')?.textContent).toBe(
+            'hello world',
+        );
     });
 
-    it('HTML-decodes escaped entities in the highlight instead of showing raw markup as text', () => {
-        // backend escapes the source text via ES's `encoder: 'html'` option, so
-        // a message containing a literal "<" arrives as "&lt;" next to our own
-        // <mark> tags. Rendered as HTML, the entity must decode back to "<".
+    it('renders text containing markup-like characters as plain text, not HTML', () => {
         render(
             <SearchResultItem
-                hit={makeHit({
-                    highlight: '<mark>hello</mark> &lt;script&gt;',
-                })}
+                hit={makeHit({ text: 'hello <script>alert(1)</script>' })}
+                query=""
                 onNavigate={vi.fn()}
             />,
         );
 
-        expect(screen.getByText('<script>', { exact: false })).toBeDefined();
+        expect(
+            screen.getByText('hello <script>alert(1)</script>', {
+                exact: false,
+            }),
+        ).toBeDefined();
         expect(document.querySelector('script')).toBeNull();
     });
 
-    it('falls back to the fully parsed message text when there is no highlight snippet', () => {
+    it('renders the message without highlighting when the query is empty', () => {
         render(
             <SearchResultItem
-                hit={makeHit({ highlight: undefined })}
+                hit={makeHit({ text: 'hello world' })}
+                query=""
                 onNavigate={vi.fn()}
             />,
         );
 
         expect(screen.getByText('hello world')).toBeDefined();
+        expect(document.querySelector('mark')).toBeNull();
     });
 });

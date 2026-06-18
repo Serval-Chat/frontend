@@ -56,7 +56,29 @@ interface ParsedTextProps {
     variant?: TextProps['variant'];
     serverId?: string;
     onResize?: () => void;
+    /** When set, wraps occurrences of this substring in plain-text nodes with <mark> for search highlighting. */
+    highlightQuery?: string;
 }
+
+const escapeRegExp = (s: string): string =>
+    s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+const renderHighlighted = (
+    text: string,
+    query: string | undefined,
+): React.ReactNode => {
+    const trimmed = query?.trim();
+    if (!trimmed) return text;
+    const parts = text.split(new RegExp(`(${escapeRegExp(trimmed)})`, 'gi'));
+    if (parts.length === 1) return text;
+    return parts.map((part, i) =>
+        part.toLowerCase() === trimmed.toLowerCase() ? (
+            <mark key={i}>{part}</mark>
+        ) : (
+            part
+        ),
+    );
+};
 
 const countAttachments = (n: ASTNode): number => {
     let count = n.type === 'file' || n.type === 'klipy' ? 1 : 0;
@@ -108,6 +130,7 @@ export const ParsedText = React.memo<ParsedTextProps>(
         variant,
         serverId,
         onResize,
+        highlightQuery,
     }) => {
         const fileNodesCount = React.useMemo(
             (): number =>
@@ -172,6 +195,7 @@ export const ParsedText = React.memo<ParsedTextProps>(
                 variant,
                 serverId,
                 onResize,
+                highlightQuery,
             }),
             [
                 condenseFiles,
@@ -183,6 +207,7 @@ export const ParsedText = React.memo<ParsedTextProps>(
                 variant,
                 serverId,
                 onResize,
+                highlightQuery,
             ],
         );
 
@@ -221,7 +246,10 @@ export const ParsedText = React.memo<ParsedTextProps>(
                                     variant={variant}
                                     wrap={wrap}
                                 >
-                                    {node.content}
+                                    {renderHighlighted(
+                                        node.content,
+                                        highlightQuery,
+                                    )}
                                 </Text>
                             );
 

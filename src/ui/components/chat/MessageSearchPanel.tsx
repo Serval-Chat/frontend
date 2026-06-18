@@ -140,6 +140,7 @@ function SkeletonRows() {
 
 export function SearchResultItem({
     hit,
+    query,
     onNavigate,
     fullMemberMap,
     highestRoleMap,
@@ -150,6 +151,7 @@ export function SearchResultItem({
     disableGlowAndColors,
 }: {
     hit: SearchHit;
+    query: string;
     onNavigate: (id: string) => void;
     fullMemberMap?: Map<string, ServerMember>;
     highestRoleMap?: Map<string, Role>;
@@ -280,26 +282,14 @@ export function SearchResultItem({
                         timestamp={hit.createdAt}
                         user={user}
                     />
-                    <div className="text-sm leading-relaxed wrap-break-word whitespace-pre-wrap text-foreground">
-                        {hit.highlight ? (
-                            // safe: the backend's ES highlighter is configured with
-                            // encoder: 'html', so hit.highlight has already had any
-                            // HTML in the source message escaped; only our own
-                            // <mark> tags are real markup.
-                            <span
-                                className="search-highlight"
-                                dangerouslySetInnerHTML={{
-                                    __html: hit.highlight,
-                                }}
+                    <div className="search-highlight text-sm leading-relaxed wrap-break-word whitespace-pre-wrap text-foreground">
+                        {hit.text && (
+                            <ParsedText
+                                highlightQuery={query}
+                                nodes={nodes}
+                                serverId={hit.serverId}
+                                wrap="preWrap"
                             />
-                        ) : (
-                            hit.text && (
-                                <ParsedText
-                                    nodes={nodes}
-                                    serverId={hit.serverId}
-                                    wrap="preWrap"
-                                />
-                            )
                         )}
                         {hit.embeds && hit.embeds.length > 0 && (
                             <EmbedRenderer
@@ -779,6 +769,7 @@ export function MessageSearchPanel({
                             hit={hit}
                             iconRoleMap={iconRoleMap}
                             key={hit.id}
+                            query={debouncedQ}
                             onNavigate={onNavigateToMessage}
                         />
                     ))
