@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 
 import { AnimatePresence, m } from 'framer-motion';
-import { Hash, Pin, Users, Volume2, X } from 'lucide-react';
+import { Hash, Pin, Search, Users, Volume2, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 import { usePinnedMessages } from '@/api/chat/chat.queries';
@@ -33,6 +33,8 @@ interface ChatHeaderProps {
     hideMemberListButton?: boolean;
     showPins?: boolean;
     actions?: React.ReactNode;
+    isSearchOpen?: boolean;
+    onToggleSearch?: () => void;
 }
 
 /**
@@ -48,6 +50,8 @@ export const ChatHeader = ({
     hideMemberListButton,
     showPins,
     actions,
+    isSearchOpen,
+    onToggleSearch,
 }: ChatHeaderProps) => {
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
@@ -203,6 +207,23 @@ export const ChatHeader = ({
             {/* Icons Area */}
             <Box className="ml-2 flex shrink-0 items-center gap-1 pt-2">
                 {actions}
+                {(selectedChannel || selectedFriendId) && onToggleSearch && (
+                    <button
+                        aria-label={
+                            isSearchOpen ? 'Close search' : 'Search messages'
+                        }
+                        className={cn(
+                            'p-2 transition-colors',
+                            isSearchOpen
+                                ? 'text-primary'
+                                : 'text-foreground-muted hover:text-foreground',
+                        )}
+                        type="button"
+                        onClick={onToggleSearch}
+                    >
+                        <Search className="h-5 w-5" />
+                    </button>
+                )}
                 {selectedChannel && !selectedFriendId && (
                     <>
                         <button

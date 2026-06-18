@@ -68,6 +68,53 @@ export interface OutgoingPoll {
     expiresAt?: string;
 }
 
+/** Filters sent as raw query params; fromUser/mentionsUser are usernames resolved server-side. */
+export interface SearchFilters {
+    fromUser?: string;
+    mentionsUser?: string;
+    authorType?: 'user' | 'bot' | 'webhook';
+    isPinned?: boolean;
+    hasFile?: boolean;
+    hasEmbed?: boolean;
+    hasLink?: boolean;
+    before?: string;
+    after?: string;
+    strict?: string;
+    // negated variants; prefix `-` in the search input
+    notFromUser?: string;
+    notMentionsUser?: string;
+    notAuthorType?: 'user' | 'bot' | 'webhook';
+    notIsPinned?: boolean;
+    notHasFile?: boolean;
+    notHasEmbed?: boolean;
+    notHasLink?: boolean;
+    notStrict?: string;
+    inChannel?: string[];
+    inCategory?: string[];
+    notInCategory?: string[];
+}
+
+export interface SearchHit {
+    id: string;
+    senderId: string;
+    text: string;
+    highlight?: string;
+    createdAt: string;
+    receiverId?: string;
+    channelId?: string;
+    serverId?: string;
+    embeds?: Embed[];
+    isWebhook: boolean;
+    webhookUsername?: string;
+    webhookAvatarUrl?: string;
+    stickerId?: string;
+}
+
+export interface MessageSearchResponse {
+    hits: SearchHit[];
+    total: number;
+}
+
 export interface ChatMessage {
     id: string;
     text: string;

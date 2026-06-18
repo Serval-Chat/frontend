@@ -13,6 +13,7 @@ import { NavigationDemo } from '@/ui/components/showoff/NavigationDemo';
 import { ProcessingButtons } from '@/ui/components/showoff/ProcessingButtons';
 import { PushPromptDemo } from '@/ui/components/showoff/PushPromptDemo';
 import { RetainSizeButtons } from '@/ui/components/showoff/RetainSizeButtons';
+import { SearchDemo } from '@/ui/components/showoff/SearchDemo';
 import { SpecializedButtons } from '@/ui/components/showoff/SpecializedButtons';
 import { StatusMessages } from '@/ui/components/showoff/StatusMessages';
 import {
@@ -28,6 +29,10 @@ import { SHOWOFF_SECTIONS } from '@/ui/components/showoff/config';
 
 export const Showoff = (): ReactNode => {
     const sections: TOCProps['sections'] = [
+        {
+            id: SHOWOFF_SECTIONS.search,
+            title: 'Message Search',
+        },
         {
             id: SHOWOFF_SECTIONS.typography,
             title: 'Typography & Text System',
@@ -154,6 +159,7 @@ export const Showoff = (): ReactNode => {
                 UI and logic will be later added).
             </Heading>
 
+            <SearchDemo />
             <TypographyDemo />
             <UserIdentitiesDemo />
             <NavigationDemo />

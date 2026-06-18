@@ -2,7 +2,7 @@ import * as Sentry from '@sentry/react';
 
 if (import.meta.env.VITE_ENABLE_SENTRY === 'true') {
     Sentry.init({
-        dsn: 'http://9WV1-H-cICJrw1F-mApuEw:6KwjExzyZ2Sex899YwGmbw@localhost:5151/api/cdkLdNTE-FPioIsq/envelope/',
+        dsn: 'http://DsFPVF8dTaad5DWTwafHWxUh@localhost:5151/895435507996517',
         debug: import.meta.env.DEV,
         integrations: [Sentry.browserTracingIntegration()],
         tracesSampleRate: 1.0,

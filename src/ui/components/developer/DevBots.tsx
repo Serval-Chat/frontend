@@ -56,7 +56,7 @@ const CreateBotModal = ({ onClose }: { onClose: () => void }): ReactNode => {
             <Modal isOpen title="Bot Created" onClose={onClose}>
                 <div className="flex flex-col gap-4 p-4">
                     <Text as="p" size="sm" variant="muted">
-                        Your bot token is shown below. Copy it now — it
+                        Your bot token is shown below. Copy it now - it
                         won&apos;t be shown again. You can reset it later from
                         the bot settings.
                     </Text>

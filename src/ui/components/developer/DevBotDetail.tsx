@@ -352,7 +352,7 @@ export const DevBotDetail = ({
                         {token && (
                             <div className="flex flex-col gap-1">
                                 <Text as="p" size="sm" variant="muted">
-                                    Bot Token — copy now, it won&apos;t be shown
+                                    Bot Token - copy now, it won&apos;t be shown
                                     again
                                 </Text>
                                 <div className="flex gap-2">

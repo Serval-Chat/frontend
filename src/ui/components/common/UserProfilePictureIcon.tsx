@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 import { useLimitedAnimations } from '@/providers/limitedAnimationsContext';
 import { Box } from '@/ui/components/layout/Box';
@@ -48,35 +48,34 @@ export const UserProfilePictureIcon = ({
         resolveApiUrl(effectiveSrc || undefined) || undefined,
     );
 
-    const shouldShowImage = !!iconUrl;
+    const [imgFailed, setImgFailed] = useState(false);
+    const [prevIconUrl, setPrevIconUrl] = useState(iconUrl);
+    if (iconUrl !== prevIconUrl) {
+        setPrevIconUrl(iconUrl);
+        setImgFailed(false);
+    }
 
-    const initials = (username || '')
-        .split(' ')
-        .map((word): string => word[0])
-        .join('')
-        .slice(0, 2)
-        .toUpperCase();
+    const letter = (username || '?')[0].toUpperCase();
 
     return (
         <Box
             className={cn(
-                'flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-[var(--avatar-fallback-bg)] font-bold text-[var(--avatar-fallback-text)]',
+                'flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-(--avatar-fallback-bg) font-bold text-(--avatar-fallback-text)',
                 AVATAR_SIZE_CLASSES[size],
                 className,
             )}
             onClick={onClick}
         >
-            {shouldShowImage ? (
+            {iconUrl && !imgFailed ? (
                 <PausedAnimatedImage
                     alt={username}
                     className="h-full w-full object-cover"
                     paused={limitedAnimations && isAnimatedImageUrl(iconUrl)}
                     src={iconUrl}
+                    onError={() => setImgFailed(true)}
                 />
             ) : (
-                <span className="text-[var(--avatar-fallback-text)]">
-                    {initials}
-                </span>
+                <span className="text-(--avatar-fallback-text)">{letter}</span>
             )}
         </Box>
     );

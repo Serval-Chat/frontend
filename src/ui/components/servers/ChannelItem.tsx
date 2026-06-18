@@ -10,12 +10,12 @@ import {
     User as UserIcon,
     Volume2,
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 import { useFriends } from '@/api/friends/friends.queries';
 import type { ChannelType } from '@/api/servers/servers.types';
 import { useMe, useUserById } from '@/api/users/users.queries';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { setSelectedFriendId } from '@/store/slices/navSlice';
 import { setUserVolume } from '@/store/slices/voiceSlice';
 import {
     ContextMenu,
@@ -173,6 +173,7 @@ export const VoiceParticipant = React.memo(({ userId }: { userId: string }) => {
     const { data: currentUser } = useMe();
     const { data: friends } = useFriends();
     const dispatch = useAppDispatch();
+    const navigate = useNavigate();
 
     const isSpeaking = speakingUsers.includes(userId);
     const userState = voiceUserStates[userId];
@@ -241,10 +242,9 @@ export const VoiceParticipant = React.memo(({ userId }: { userId: string }) => {
         items.push({
             label: 'Message',
             icon: MessageSquare,
-            onClick: (): {
-                payload: string | null;
-                type: 'nav/setSelectedFriendId';
-            } => dispatch(setSelectedFriendId(userId)),
+            onClick: (): void => {
+                void navigate(`/chat/@user/${userId}`);
+            },
         });
     }
 

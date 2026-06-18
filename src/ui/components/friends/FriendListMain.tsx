@@ -210,7 +210,7 @@ export const FriendListMain = React.memo(() => {
         <Box className="space-y-4 p-4">
             <Box className="flex items-center justify-between gap-4 px-3">
                 <Text className="text-xs font-bold tracking-wider uppercase opacity-50">
-                    All Friends — {friends.length}
+                    All Friends - {friends.length}
                 </Text>
                 <Box className="flex max-w-[200px] flex-1 items-center gap-2 rounded-md bg-bg-subtle/50 px-2 py-1 focus-within:bg-bg-subtle">
                     <Search className="text-foreground-muted" size={14} />

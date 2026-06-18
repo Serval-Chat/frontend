@@ -214,30 +214,33 @@ export const GifPicker = ({ onSelect, onClose }: GifPickerProps) => {
             </div>
 
             <Box className="flex shrink-0 items-center justify-between border-b border-border-subtle p-3">
-                <Box className="flex gap-2">
+                <Box className="flex gap-1">
                     <Button
-                        className="flex h-auto min-w-[80px] flex-col gap-1 py-2"
+                        className="gap-1.5 px-3 text-xs"
+                        size="sm"
                         variant={tab === 'trending' ? 'primary' : 'ghost'}
                         onClick={(): void => setTab('trending')}
                     >
-                        <TrendingUp className="h-4 w-4" />
-                        <span className="text-[10px]">Trending</span>
+                        <TrendingUp className="h-3.5 w-3.5 shrink-0" />
+                        Trending
                     </Button>
                     <Button
-                        className="flex h-auto min-w-[80px] flex-col gap-1 py-2"
+                        className="gap-1.5 px-3 text-xs"
+                        size="sm"
                         variant={tab === 'favorites' ? 'primary' : 'ghost'}
                         onClick={(): void => setTab('favorites')}
                     >
-                        <Star className="h-4 w-4" />
-                        <span className="text-[10px]">Favorites</span>
+                        <Star className="h-3.5 w-3.5 shrink-0" />
+                        Favorites
                     </Button>
                     <Button
-                        className="flex h-auto min-w-[80px] flex-col gap-1 py-2"
+                        className="gap-1.5 px-3 text-xs"
+                        size="sm"
                         variant={tab === 'stickers' ? 'primary' : 'ghost'}
                         onClick={(): void => setTab('stickers')}
                     >
-                        <Sticker className="h-4 w-4" />
-                        <span className="text-[10px]">Stickers</span>
+                        <Sticker className="h-3.5 w-3.5 shrink-0" />
+                        Stickers
                     </Button>
                 </Box>
                 <Button size="sm" variant="ghost" onClick={onClose}>
@@ -246,18 +249,15 @@ export const GifPicker = ({ onSelect, onClose }: GifPickerProps) => {
             </Box>
 
             <Box className="shrink-0 p-3">
-                <Box className="relative">
-                    <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                    <Input
-                        className="pl-9"
-                        placeholder="Search Klipy..."
-                        value={search}
-                        onChange={(e): void => {
-                            setSearch(e.target.value);
-                            if (tab === 'favorites') setTab('trending');
-                        }}
-                    />
-                </Box>
+                <Input
+                    icon={<Search size={14} />}
+                    placeholder="Search Klipy..."
+                    value={search}
+                    onChange={(e): void => {
+                        setSearch(e.target.value);
+                        if (tab === 'favorites') setTab('trending');
+                    }}
+                />
             </Box>
 
             <Box className="scrollbar-thin flex-1 overflow-y-auto p-3 pt-0">

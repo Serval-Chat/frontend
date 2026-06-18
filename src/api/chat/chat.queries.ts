@@ -9,7 +9,11 @@ import {
 } from '@tanstack/react-query';
 
 import { chatApi } from './chat.api';
-import type { ChatMessage } from './chat.types';
+import type {
+    ChatMessage,
+    MessageSearchResponse,
+    SearchFilters,
+} from './chat.types';
 
 interface EditUserMessageVariables {
     messageId: string;
@@ -46,10 +50,39 @@ export const CHAT_QUERY_KEYS = {
         channelId: string | null,
     ): readonly ['chat', 'pins', string | null] =>
         ['chat', 'pins', channelId] as const,
+    messageSearch: (
+        mode: 'dm' | 'channel',
+        otherUserId: string | null,
+        serverId: string | null,
+        channelId: string | null,
+        query: string,
+        page: number,
+        filtersKey: string,
+    ): readonly [
+        'chat',
+        'search',
+        string,
+        string | null,
+        string | null,
+        string | null,
+        string,
+        number,
+        string,
+    ] =>
+        [
+            'chat',
+            'search',
+            mode,
+            otherUserId,
+            serverId,
+            channelId,
+            query,
+            page,
+            filtersKey,
+        ] as const,
 };
 
-const LIMIT = 50;
-export const PREFETCH_LIMIT = 15;
+export const LIMIT = 50;
 
 /**
  * @description Hook to fetch messages for a specific user
@@ -452,6 +485,73 @@ export const useToggleSticky = (): {
         isPending: mutation.isPending,
     };
 };
+
+const SEARCH_PAGE_SIZE = 25;
+
+function filtersToKey(f: SearchFilters): string {
+    const entries = Object.entries(f).filter(([, v]) => v !== undefined);
+    if (entries.length === 0) return '';
+    return JSON.stringify(
+        Object.fromEntries(entries.sort(([a], [b]) => a.localeCompare(b))),
+    );
+}
+
+function hasActiveFilters(f: SearchFilters): boolean {
+    return Object.values(f).some((v) => v !== undefined);
+}
+
+/**
+ * @description Hook to search messages in a DM or channel conversation
+ */
+export const useMessageSearch = ({
+    mode,
+    otherUserId,
+    serverId,
+    channelId,
+    query,
+    page = 0,
+    filters = {},
+}: {
+    mode: 'dm' | 'channel';
+    otherUserId?: string;
+    serverId?: string;
+    channelId?: string;
+    query: string;
+    page?: number;
+    filters?: SearchFilters;
+}): UseQueryResult<MessageSearchResponse, Error> =>
+    useQuery({
+        queryKey: CHAT_QUERY_KEYS.messageSearch(
+            mode,
+            otherUserId ?? null,
+            serverId ?? null,
+            channelId ?? null,
+            query,
+            page,
+            filtersToKey(filters),
+        ),
+        queryFn: (): Promise<MessageSearchResponse> =>
+            mode === 'dm'
+                ? chatApi.searchDmMessages(
+                      otherUserId!,
+                      query,
+                      SEARCH_PAGE_SIZE,
+                      page * SEARCH_PAGE_SIZE,
+                      filters,
+                  )
+                : chatApi.searchChannelMessages(
+                      serverId!,
+                      channelId!,
+                      query,
+                      SEARCH_PAGE_SIZE,
+                      page * SEARCH_PAGE_SIZE,
+                      filters,
+                  ),
+        enabled:
+            (query.length >= 1 || hasActiveFilters(filters)) &&
+            (mode === 'dm' ? !!otherUserId : !!serverId && !!channelId),
+        staleTime: 30_000,
+    });
 
 /**
  * @description Hook to fetch pinned messages

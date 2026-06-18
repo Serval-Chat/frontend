@@ -21,6 +21,7 @@ import {
     Volume2,
 } from 'lucide-react';
 import { shallowEqual } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 
 import {
     useBlockProfiles,
@@ -48,7 +49,7 @@ import { useMe, useUserById } from '@/api/users/users.queries';
 import type { User } from '@/api/users/users.types';
 import type { RootState } from '@/store';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { setSelectedFriendId, setSplitViewPane } from '@/store/slices/navSlice';
+import { setSplitViewPane } from '@/store/slices/navSlice';
 import type { UserPresenceStatus } from '@/store/slices/presenceSlice';
 import { setUserVolume } from '@/store/slices/voiceSlice';
 import { Box } from '@/ui/components/layout/Box';
@@ -193,6 +194,7 @@ const UserItemInner = React.memo(
         hideUnread,
     }: UserItemProps & { serverData: ServerData | null }): JSX.Element => {
         const dispatch = useAppDispatch();
+        const navigate = useNavigate();
 
         const serverId =
             providedServerId ||
@@ -435,10 +437,9 @@ const UserItemInner = React.memo(
                 items.push({
                     label: 'Open DMs',
                     icon: MessageSquare,
-                    onClick: (): {
-                        payload: string | null;
-                        type: 'nav/setSelectedFriendId';
-                    } => dispatch(setSelectedFriendId(userId)),
+                    onClick: (): void => {
+                        void navigate(`/chat/@user/${userId}`);
+                    },
                 });
                 items.push({
                     label: 'Add to Split View',
@@ -755,6 +756,7 @@ const UserItemInner = React.memo(
             isFriend,
             isMobile,
             dispatch,
+            navigate,
             userId,
             hasUnread,
             isInSameVoiceChannel,

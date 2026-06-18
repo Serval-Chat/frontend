@@ -1,6 +1,10 @@
 import { apiClient } from '@/api/client';
 
-import type { ChatMessage } from './chat.types';
+import type {
+    ChatMessage,
+    MessageSearchResponse,
+    SearchFilters,
+} from './chat.types';
 
 const normalizeMessage = (message: ChatMessage): ChatMessage => ({
     ...message,
@@ -178,6 +182,41 @@ export const chatApi = {
             { optionIds },
         );
         return normalizeMessage(response.data);
+    },
+
+    /**
+     * @description Search messages in a DM conversation
+     */
+    searchDmMessages: async (
+        otherUserId: string,
+        q: string,
+        limit = 25,
+        offset = 0,
+        filters: SearchFilters = {},
+    ): Promise<MessageSearchResponse> => {
+        const response = await apiClient.get<MessageSearchResponse>(
+            '/api/v1/messages/search',
+            { params: { userId: otherUserId, q, limit, offset, ...filters } },
+        );
+        return response.data;
+    },
+
+    /**
+     * @description Search messages in a server channel
+     */
+    searchChannelMessages: async (
+        serverId: string,
+        channelId: string,
+        q: string,
+        limit = 25,
+        offset = 0,
+        filters: SearchFilters = {},
+    ): Promise<MessageSearchResponse> => {
+        const response = await apiClient.get<MessageSearchResponse>(
+            `/api/v1/servers/${serverId}/channels/${channelId}/messages/search`,
+            { params: { q, limit, offset, ...filters } },
+        );
+        return response.data;
     },
 
     /**

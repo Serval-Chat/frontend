@@ -45,7 +45,7 @@ export const SettingsSidebarLayout = ({
                         return (
                             <Button
                                 className={cn(
-                                    'w-full justify-start px-3 py-2 text-sm transition-all duration-200',
+                                    'w-full px-3 py-2 text-sm transition-all duration-200',
                                     isActive
                                         ? 'border-transparent bg-bg-subtle font-semibold text-foreground'
                                         : 'text-muted-foreground hover:bg-bg-subtle hover:text-foreground',
@@ -53,6 +53,7 @@ export const SettingsSidebarLayout = ({
                                         'cursor-not-allowed opacity-50',
                                 )}
                                 disabled={section.disabled}
+                                justify="start"
                                 key={section.id}
                                 variant={isActive ? 'normal' : 'ghost'}
                                 onClick={(): false | void =>

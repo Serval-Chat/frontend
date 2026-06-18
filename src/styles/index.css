@@ -619,6 +619,14 @@ sub {
     display: block;
 }
 
+.search-highlight mark {
+    background-color: var(--primary);
+    color: var(--foreground-inverse);
+    border-radius: 2px;
+    padding: 0 2px;
+    font-weight: 600;
+}
+
 .react-syntax-highlighter-line {
     display: flex !important;
     align-items: stretch;

@@ -24,7 +24,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 
 import { chatApi } from '@/api/chat/chat.api';
-import { CHAT_QUERY_KEYS, PREFETCH_LIMIT } from '@/api/chat/chat.queries';
+import { CHAT_QUERY_KEYS, LIMIT } from '@/api/chat/chat.queries';
 import { usePings } from '@/api/pings/pings.queries';
 import { serversApi } from '@/api/servers/servers.api';
 import {
@@ -189,7 +189,7 @@ const ChannelRow = React.memo(
                     chatApi.getChannelMessages(
                         selectedServerId,
                         channel.id,
-                        PREFETCH_LIMIT,
+                        LIMIT,
                         pageParam as string | undefined,
                     ),
                 initialPageParam: undefined,

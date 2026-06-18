@@ -11,11 +11,30 @@ import { tauriAdapter } from './tauriAdapter';
 const isTauri = (): boolean =>
     typeof window !== 'undefined' && '__TAURI__' in window;
 
+// serialize arrays as repeated keys (inChannel=a&inChannel=b) so NestJS
+// whitelist validation doesn't choke on bracket notation (inChannel[]=a).
+const serializeParams = (params: Record<string, unknown>): string => {
+    const sp = new URLSearchParams();
+    for (const [key, value] of Object.entries(params)) {
+        if (value === undefined || value === null) continue;
+        if (Array.isArray(value)) {
+            for (const item of value) {
+                if (item !== undefined && item !== null)
+                    sp.append(key, String(item));
+            }
+        } else {
+            sp.append(key, String(value));
+        }
+    }
+    return sp.toString();
+};
+
 export const apiClient = axios.create({
     baseURL: getBrowserApiBaseUrl(),
     timeout: 30000,
     withCredentials: true,
     adapter: isTauri() ? tauriAdapter : undefined,
+    paramsSerializer: serializeParams,
 });
 
 const isInvalidRequest = (url: string | undefined): boolean => {

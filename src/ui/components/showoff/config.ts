@@ -1,4 +1,5 @@
 export const SHOWOFF_SECTIONS = {
+    search: 'search',
     flash: 'flash-buttons',
     processing: 'processing-buttons',
     animations: 'animations',

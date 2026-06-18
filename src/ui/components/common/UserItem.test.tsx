@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { User } from '@/api/users/users.types';
@@ -9,6 +9,12 @@ import { UserItem } from './UserItem';
 
 const dispatchMock = vi.fn();
 const sendFriendRequestMock = vi.fn();
+const navigateMock = vi.fn();
+const friendsMock = vi.fn(() => ({ data: [] as { id: string }[] }));
+
+vi.mock('react-router-dom', () => ({
+    useNavigate: () => navigateMock,
+}));
 
 vi.mock('@/api/blocks/blocks.queries', () => ({
     useBlocks: (): { data: never[] } => ({ data: [] }),
@@ -19,7 +25,7 @@ vi.mock('@/api/blocks/blocks.queries', () => ({
 }));
 
 vi.mock('@/api/friends/friends.queries', () => ({
-    useFriends: (): { data: never[] } => ({ data: [] }),
+    useFriends: () => friendsMock(),
     useRemoveFriend: () => ({ mutate: vi.fn() }),
     useSendFriendRequest: () => ({ mutate: sendFriendRequestMock }),
 }));
@@ -85,7 +91,11 @@ vi.mock('./ContextMenu', () => ({
         items,
     }: {
         children: ReactNode;
-        items: Array<{ label?: string; type?: string }>;
+        items: Array<{
+            label?: string;
+            type?: string;
+            onClick?: () => void;
+        }>;
     }) => (
         <div>
             {children}
@@ -96,7 +106,18 @@ vi.mock('./ContextMenu', () => ({
                             i.type !== 'divider' && i.label,
                     )
                     .map((i) => (
-                        <span key={i.label}>{i.label}</span>
+                        <span
+                            key={i.label}
+                            role="button"
+                            tabIndex={0}
+                            onClick={i.onClick}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter' || e.key === ' ')
+                                    i.onClick?.();
+                            }}
+                        >
+                            {i.label}
+                        </span>
                     ))}
             </div>
         </div>
@@ -138,5 +159,20 @@ describe('UserItem', (): void => {
 
         rerender(<UserItem noFetch user={humanUser} userId="user-2" />);
         expect(screen.getByText('Add Friend')).toBeInTheDocument();
+    });
+
+    it('navigates to the DM route when "Open DMs" is clicked for a friend', (): void => {
+        const friendUser: User = {
+            id: 'user-2',
+            username: 'alice',
+            isBot: false,
+        } as User;
+        friendsMock.mockReturnValue({ data: [{ id: 'user-2' }] });
+
+        render(<UserItem noFetch user={friendUser} userId="user-2" />);
+
+        fireEvent.click(screen.getByText('Open DMs'));
+
+        expect(navigateMock).toHaveBeenCalledWith('/chat/@user/user-2');
     });
 });

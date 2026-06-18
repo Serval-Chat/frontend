@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
+import { AnimatePresence, m } from 'framer-motion';
 import { Upload, X } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
@@ -30,10 +31,12 @@ import type { ProcessedChatMessage } from '@/types/chat.ui';
 import { ChatEmptyState } from '@/ui/components/chat/ChatEmptyState';
 import { ChatHeader } from '@/ui/components/chat/ChatHeader';
 import { MessageInput } from '@/ui/components/chat/MessageInput';
+import { MessageSearchPanel } from '@/ui/components/chat/MessageSearchPanel';
 import { MessagesList } from '@/ui/components/chat/MessagesList';
 import { TypingIndicator } from '@/ui/components/chat/TypingIndicator';
 import { Text } from '@/ui/components/common/Text';
 import { Box } from '@/ui/components/layout/Box';
+import { colors } from '@/ui/theme';
 import { applyServalBackground } from '@/utils/servalFur';
 import { wsMessages } from '@/ws';
 
@@ -88,6 +91,10 @@ export const MainChat = ({
         null,
     );
     const [showPins, setShowPins] = useState(false);
+    const [isSearchOpen, setIsSearchOpen] = useState(false);
+    const [prevConversationKey, setPrevConversationKey] = useState(
+        `${selectedFriendId ?? ''}:${selectedChannelId ?? ''}`,
+    );
     const [debugTypingCount, setDebugTypingCount] = useState(0);
     const { theme, setTheme } = useTheme();
     const chatContainerRef = React.useRef<HTMLElement>(null);
@@ -317,6 +324,35 @@ export const MainChat = ({
         }
     }, [isFriendError, selectedFriendId, navigate]);
 
+    // close search whenever the active conversation changes
+    const conversationKey = `${selectedFriendId ?? ''}:${selectedChannelId ?? ''}`;
+    if (conversationKey !== prevConversationKey) {
+        setPrevConversationKey(conversationKey);
+        setIsSearchOpen(false);
+    }
+
+    const handleNavigateToMessage = useCallback(
+        (messageId: string): void => {
+            dispatch(setTargetMessageId(messageId));
+            if (selectedServerId && selectedChannelId) {
+                void navigate(
+                    `/chat/@server/${selectedServerId}/channel/${selectedChannelId}/message/${messageId}`,
+                );
+            } else if (selectedFriendId) {
+                void navigate(
+                    `/chat/@user/${selectedFriendId}/message/${messageId}`,
+                );
+            }
+        },
+        [
+            dispatch,
+            navigate,
+            selectedServerId,
+            selectedChannelId,
+            selectedFriendId,
+        ],
+    );
+
     React.useEffect((): void => {
         if (selectedServerId && selectedChannelId) {
             wsMessages.markChannelRead(selectedServerId, selectedChannelId);
@@ -408,143 +444,203 @@ export const MainChat = ({
                 friendUser={friendUser}
                 hideMemberListButton={hideMemberListButton}
                 isMemberListOpen={isMemberListOpen}
+                isSearchOpen={isSearchOpen}
                 selectedChannel={selectedChannel}
                 selectedFriendId={selectedFriendId}
                 showPins={showPins}
                 onToggleMemberList={onToggleMemberList}
                 onTogglePins={(): void => setShowPins((v): boolean => !v)}
+                onToggleSearch={(): void => setIsSearchOpen((v): boolean => !v)}
             />
 
-            {isServerContext && (
-                <StickyMessageBar
-                    channelId={selectedChannelId}
-                    serverId={selectedServerId}
-                />
-            )}
-
-            {isViewingOlderMessages && (
-                <Box className="bg-warning/10 border-warning/30 flex items-center justify-between border-b px-6 py-3">
-                    <Text className="text-warning" size="sm">
-                        You are viewing older messages
-                    </Text>
-                    <button
-                        className="text-warning hover:text-warning/80 flex items-center gap-2 transition-colors"
-                        type="button"
-                        onClick={handleJumpToLatest}
-                    >
-                        <X size={16} />
-                        <span className="text-sm">Jump to latest</span>
-                    </button>
-                </Box>
-            )}
-
-            {selectedChannel?.type === 'voice' ? (
-                <Box
-                    className="chat-background flex flex-1 items-center justify-center p-8"
-                    ref={chatContainerRef}
-                >
-                    <Text className="text-muted-foreground">
-                        This is a Voice Channel. Connect to it via the sidebar.
-                    </Text>
-                </Box>
-            ) : (
-                <>
-                    <Box
-                        className="relative flex min-h-0 flex-1 flex-col"
-                        ref={chatContainerRef}
-                    >
-                        <MessagesList
-                            activeHighlightId={targetMessageId}
-                            disableColors={
-                                currentUser?.settings
-                                    ?.disableCustomUsernameColors
-                            }
-                            disableCustomFonts={
-                                serverDetails?.disableCustomFonts ||
-                                currentUser?.settings
-                                    ?.disableCustomUsernameFonts
-                            }
-                            disableGlow={
-                                currentUser?.settings?.disableCustomUsernameGlow
-                            }
-                            disableGlowAndColors={
-                                serverDetails?.disableUsernameGlowAndCustomColor
-                            }
-                            fullMemberMap={fullMemberMap}
-                            hasMore={hasNextPage}
-                            hasMoreNewer={isViewingOlderMessages}
-                            hasPermission={hasPermission}
-                            isLoading={isLoading}
-                            isLoadingMore={isFetchingNextPage}
-                            isOwner={isOwner}
-                            key={selectedChannelId || selectedFriendId}
-                            me={currentUser}
-                            messages={messages}
-                            roleMap={roleMap}
-                            serverDetails={serverDetails}
-                            userRolesMap={userRolesMap}
-                            onLoadMore={handleLoadMore}
-                            onLoadMoreNewer={handleJumpToLatest}
-                            onReplyClick={handleReplyClick}
-                            onReplyToMessage={handleReplyToMessage}
+            {/* horizontal content row: main chat + search sidebar */}
+            <div className="flex min-h-0 flex-1 overflow-hidden">
+                {/* main chat column */}
+                <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
+                    {isServerContext && (
+                        <StickyMessageBar
+                            channelId={selectedChannelId}
+                            serverId={selectedServerId}
                         />
-                        <TypingIndicator
-                            canBypassSlowMode={canBypassSlowMode}
-                            cooldown={cooldown}
-                            isSlowModeEnabled={
-                                !!selectedChannel?.slowMode &&
-                                selectedChannel.slowMode > 0
-                            }
-                            typingUsers={resolvedTypingUsers}
-                        />
-                    </Box>
+                    )}
 
-                    {canSendMessages ? (
-                        <MessageInput
-                            canBypassSlowMode={canBypassSlowMode}
-                            cooldown={cooldown}
-                            disableColors={
-                                currentUser?.settings
-                                    ?.disableCustomUsernameColors
-                            }
-                            disableCustomFonts={
-                                serverDetails?.disableCustomFonts ||
-                                currentUser?.settings
-                                    ?.disableCustomUsernameFonts
-                            }
-                            disableGlow={
-                                currentUser?.settings?.disableCustomUsernameGlow
-                            }
-                            disableGlowAndColors={
-                                serverDetails?.disableUsernameGlowAndCustomColor
-                            }
-                            fileQueueResult={fileQueueResult}
-                            replyingTo={replyingTo}
-                            sendMessage={sendMessage}
-                            sendTyping={sendTyping}
-                            setCooldown={setCooldown}
-                            onCancelReply={(): void => setReplyingTo(null)}
-                        />
+                    {isViewingOlderMessages && (
+                        <Box className="bg-warning/10 border-warning/30 flex items-center justify-between border-b px-6 py-3">
+                            <Text className="text-warning" size="sm">
+                                You are viewing older messages
+                            </Text>
+                            <button
+                                className="text-warning hover:text-warning/80 flex items-center gap-2 transition-colors"
+                                type="button"
+                                onClick={handleJumpToLatest}
+                            >
+                                <X size={16} />
+                                <span className="text-sm">Jump to latest</span>
+                            </button>
+                        </Box>
+                    )}
+
+                    {selectedChannel?.type === 'voice' ? (
+                        <Box
+                            className="chat-background flex flex-1 items-center justify-center p-8"
+                            ref={chatContainerRef}
+                        >
+                            <Text className="text-muted-foreground">
+                                This is a Voice Channel. Connect to it via the
+                                sidebar.
+                            </Text>
+                        </Box>
                     ) : (
-                        <Box className="pride-glass-input mx-4 mb-4 flex h-[56px] items-center rounded-lg border border-border-subtle bg-[var(--bg-msg-input)] px-4">
-                            <Text className="text-muted-foreground" size="sm">
-                                You can&apos;t type in this channel.
-                            </Text>
-                        </Box>
-                    )}
+                        <>
+                            <Box
+                                className="relative flex min-h-0 flex-1 flex-col"
+                                ref={chatContainerRef}
+                            >
+                                <MessagesList
+                                    activeHighlightId={targetMessageId}
+                                    disableColors={
+                                        currentUser?.settings
+                                            ?.disableCustomUsernameColors
+                                    }
+                                    disableCustomFonts={
+                                        serverDetails?.disableCustomFonts ||
+                                        currentUser?.settings
+                                            ?.disableCustomUsernameFonts
+                                    }
+                                    disableGlow={
+                                        currentUser?.settings
+                                            ?.disableCustomUsernameGlow
+                                    }
+                                    disableGlowAndColors={
+                                        serverDetails?.disableUsernameGlowAndCustomColor
+                                    }
+                                    fullMemberMap={fullMemberMap}
+                                    hasMore={hasNextPage}
+                                    hasMoreNewer={isViewingOlderMessages}
+                                    hasPermission={hasPermission}
+                                    isLoading={isLoading}
+                                    isLoadingMore={isFetchingNextPage}
+                                    isOwner={isOwner}
+                                    key={selectedChannelId || selectedFriendId}
+                                    me={currentUser}
+                                    messages={messages}
+                                    roleMap={roleMap}
+                                    serverDetails={serverDetails}
+                                    userRolesMap={userRolesMap}
+                                    onLoadMore={handleLoadMore}
+                                    onLoadMoreNewer={handleJumpToLatest}
+                                    onReplyClick={handleReplyClick}
+                                    onReplyToMessage={handleReplyToMessage}
+                                />
+                                <TypingIndicator
+                                    canBypassSlowMode={canBypassSlowMode}
+                                    cooldown={cooldown}
+                                    isSlowModeEnabled={
+                                        !!selectedChannel?.slowMode &&
+                                        selectedChannel.slowMode > 0
+                                    }
+                                    typingUsers={resolvedTypingUsers}
+                                />
+                            </Box>
 
-                    {isDragging && (
-                        <Box className="animate-in fade-in zoom-in pointer-events-none absolute inset-0 z-[var(--z-index-backdrop)] m-4 flex flex-col items-center justify-center rounded-3xl border-4 border-dashed border-primary/50 bg-bg-primary/80 p-8 backdrop-blur-sm transition-all duration-200">
-                            <div className="mb-4 rounded-full bg-primary/10 p-6">
-                                <Upload className="text-primary" size={48} />
-                            </div>
-                            <Text size="xl" weight="bold">
-                                Drop files to upload
-                            </Text>
-                        </Box>
+                            {canSendMessages ? (
+                                <MessageInput
+                                    canBypassSlowMode={canBypassSlowMode}
+                                    cooldown={cooldown}
+                                    disableColors={
+                                        currentUser?.settings
+                                            ?.disableCustomUsernameColors
+                                    }
+                                    disableCustomFonts={
+                                        serverDetails?.disableCustomFonts ||
+                                        currentUser?.settings
+                                            ?.disableCustomUsernameFonts
+                                    }
+                                    disableGlow={
+                                        currentUser?.settings
+                                            ?.disableCustomUsernameGlow
+                                    }
+                                    disableGlowAndColors={
+                                        serverDetails?.disableUsernameGlowAndCustomColor
+                                    }
+                                    fileQueueResult={fileQueueResult}
+                                    replyingTo={replyingTo}
+                                    sendMessage={sendMessage}
+                                    sendTyping={sendTyping}
+                                    setCooldown={setCooldown}
+                                    onCancelReply={(): void =>
+                                        setReplyingTo(null)
+                                    }
+                                />
+                            ) : (
+                                <Box className="pride-glass-input mx-4 mb-4 flex h-[56px] items-center rounded-lg border border-border-subtle bg-[var(--bg-msg-input)] px-4">
+                                    <Text
+                                        className="text-muted-foreground"
+                                        size="sm"
+                                    >
+                                        You can&apos;t type in this channel.
+                                    </Text>
+                                </Box>
+                            )}
+
+                            {isDragging && (
+                                <Box className="animate-in fade-in zoom-in pointer-events-none absolute inset-0 z-[var(--z-index-backdrop)] m-4 flex flex-col items-center justify-center rounded-3xl border-4 border-dashed border-primary/50 bg-bg-primary/80 p-8 backdrop-blur-sm transition-all duration-200">
+                                    <div className="mb-4 rounded-full bg-primary/10 p-6">
+                                        <Upload
+                                            className="text-primary"
+                                            size={48}
+                                        />
+                                    </div>
+                                    <Text size="xl" weight="bold">
+                                        Drop files to upload
+                                    </Text>
+                                </Box>
+                            )}
+                        </>
                     )}
-                </>
-            )}
+                </div>
+
+                {/* search sidebar, slides in from the right */}
+                <AnimatePresence>
+                    {isSearchOpen && (
+                        <m.aside
+                            animate={{ width: 360 }}
+                            exit={{ width: 0 }}
+                            initial={{ width: 0 }}
+                            key="search-sidebar"
+                            style={{
+                                overflow: 'hidden',
+                                flexShrink: 0,
+                                borderLeft: `1px solid ${colors.borderSubtle}`,
+                                display: 'flex',
+                                flexDirection: 'column',
+                            }}
+                            transition={{ duration: 0.2, ease: 'easeOut' }}
+                        >
+                            <div
+                                style={{
+                                    width: 360,
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    flex: 1,
+                                    height: '100%',
+                                }}
+                            >
+                                <MessageSearchPanel
+                                    channelId={selectedChannelId ?? undefined}
+                                    mode={selectedFriendId ? 'dm' : 'channel'}
+                                    otherUserId={selectedFriendId ?? undefined}
+                                    serverId={selectedServerId ?? undefined}
+                                    onClose={(): void => setIsSearchOpen(false)}
+                                    onNavigateToMessage={
+                                        handleNavigateToMessage
+                                    }
+                                />
+                            </div>
+                        </m.aside>
+                    )}
+                </AnimatePresence>
+            </div>
         </Box>
     );
 };
