@@ -250,7 +250,7 @@ const EmbedCard = memo(
             return (
                 <div
                     className={cn(
-                        'mt-1 flex flex-col overflow-hidden rounded-r-sm',
+                        'mt-1 flex w-full flex-col overflow-hidden rounded-r-sm',
                         isShorts ? 'max-w-[300px]' : 'max-w-[520px]',
                     )}
                     style={{
@@ -347,7 +347,7 @@ const EmbedCard = memo(
                                 allowFullScreen
                                 className="absolute inset-0 h-full w-full"
                                 referrerPolicy="strict-origin-when-cross-origin"
-                                sandbox="allow-presentation allow-scripts"
+                                sandbox="allow-presentation allow-scripts allow-same-origin allow-popups"
                                 src={embed.video.url}
                                 title={embed.title ?? 'YouTube video'}
                                 onLoad={onResize}
