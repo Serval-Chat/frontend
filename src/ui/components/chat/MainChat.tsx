@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 
 import { AnimatePresence, m } from 'framer-motion';
-import { Upload, X } from 'lucide-react';
+import { ChevronDown, Upload, X } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 import {
@@ -32,8 +32,12 @@ import { ChatEmptyState } from '@/ui/components/chat/ChatEmptyState';
 import { ChatHeader } from '@/ui/components/chat/ChatHeader';
 import { MessageInput } from '@/ui/components/chat/MessageInput';
 import { MessageSearchPanel } from '@/ui/components/chat/MessageSearchPanel';
-import { MessagesList } from '@/ui/components/chat/MessagesList';
+import {
+    MessagesList,
+    type MessagesListHandle,
+} from '@/ui/components/chat/MessagesList';
 import { TypingIndicator } from '@/ui/components/chat/TypingIndicator';
+import { Button } from '@/ui/components/common/Button';
 import { Text } from '@/ui/components/common/Text';
 import { Box } from '@/ui/components/layout/Box';
 import { colors } from '@/ui/theme';
@@ -98,6 +102,8 @@ export const MainChat = ({
     const [debugTypingCount, setDebugTypingCount] = useState(0);
     const { theme, setTheme } = useTheme();
     const chatContainerRef = React.useRef<HTMLElement>(null);
+    const messagesListRef = React.useRef<MessagesListHandle>(null);
+    const [isAtBottom, setIsAtBottom] = useState(true);
     const { spotCount, opacity, seed, base, spotColor } = useAppSelector(
         (state) => state.furTweaker,
     );
@@ -524,14 +530,35 @@ export const MainChat = ({
                                     key={selectedChannelId || selectedFriendId}
                                     me={currentUser}
                                     messages={messages}
+                                    ref={messagesListRef}
                                     roleMap={roleMap}
                                     serverDetails={serverDetails}
                                     userRolesMap={userRolesMap}
+                                    onAtBottomChange={setIsAtBottom}
                                     onLoadMore={handleLoadMore}
                                     onLoadMoreNewer={handleJumpToLatest}
                                     onReplyClick={handleReplyClick}
                                     onReplyToMessage={handleReplyToMessage}
                                 />
+                                {!isAtBottom && (
+                                    <Button
+                                        square
+                                        aria-label="Scroll to bottom"
+                                        children={null}
+                                        icon={ChevronDown}
+                                        size="md"
+                                        style={{
+                                            position: 'absolute',
+                                            right: '1rem',
+                                            bottom: '1rem',
+                                            borderRadius: '50%',
+                                        }}
+                                        variant="normal"
+                                        onClick={(): void =>
+                                            messagesListRef.current?.scrollToBottom()
+                                        }
+                                    />
+                                )}
                                 <TypingIndicator
                                     canBypassSlowMode={canBypassSlowMode}
                                     cooldown={cooldown}
