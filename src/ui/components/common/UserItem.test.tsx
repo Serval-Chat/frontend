@@ -28,6 +28,7 @@ vi.mock('@/api/friends/friends.queries', () => ({
     useFriends: () => friendsMock(),
     useRemoveFriend: () => ({ mutate: vi.fn() }),
     useSendFriendRequest: () => ({ mutate: sendFriendRequestMock }),
+    useTogglePinFriend: () => ({ mutate: vi.fn() }),
 }));
 
 vi.mock('@/api/servers/servers.queries', () => ({

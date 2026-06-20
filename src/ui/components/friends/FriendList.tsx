@@ -22,6 +22,12 @@ export const FriendList = () => {
     };
 
     const sortedFriends = friends?.slice().sort((a, b): 1 | -1 | 0 => {
+        const aPinned = a.isPinned ?? false;
+        const bPinned = b.isPinned ?? false;
+
+        if (aPinned && !bPinned) return -1;
+        if (bPinned && !aPinned) return 1;
+
         const aUnread = unreadDms[a.id] || 0;
         const bUnread = unreadDms[b.id] || 0;
 

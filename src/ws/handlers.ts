@@ -968,6 +968,31 @@ export const setupGlobalWsHandlers = (
     );
 
     cleanups.push(
+        wsClient.on<{ friendId: string; isPinned: boolean }>(
+            WsEvents.FRIEND_PIN_UPDATED,
+            (payload): void => {
+                [FRIENDS_QUERY_KEY, FRIEND_PROFILES_QUERY_KEY].forEach(
+                    (queryKey): void => {
+                        queryClient.setQueriesData<Friend[]>(
+                            { queryKey },
+                            (old): Friend[] | undefined =>
+                                old?.map(
+                                    (f): Friend =>
+                                        f.id === payload.friendId
+                                            ? {
+                                                  ...f,
+                                                  isPinned: payload.isPinned,
+                                              }
+                                            : f,
+                                ),
+                        );
+                    },
+                );
+            },
+        ),
+    );
+
+    cleanups.push(
         wsClient.on(WsEvents.INCOMING_REQUEST_ADDED, (): void => {
             void queryClient.invalidateQueries({ queryKey: FRIENDS_QUERY_KEY });
             void queryClient.invalidateQueries({

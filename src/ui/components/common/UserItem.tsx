@@ -13,6 +13,8 @@ import {
     PanelLeftOpen,
     PanelRightOpen,
     PanelTopOpen,
+    Pin,
+    PinOff,
     Shield,
     User as UserIcon,
     UserMinus,
@@ -34,6 +36,7 @@ import {
     useFriends,
     useRemoveFriend,
     useSendFriendRequest,
+    useTogglePinFriend,
 } from '@/api/friends/friends.queries';
 import {
     useAddRoleToMember,
@@ -246,6 +249,7 @@ const UserItemInner = React.memo(
 
         const { mutate: sendFriendRequest } = useSendFriendRequest();
         const { mutate: removeFriend } = useRemoveFriend();
+        const { mutate: togglePinFriend } = useTogglePinFriend();
 
         const { data: blocks } = useBlocks();
         const { data: blockProfiles } = useBlockProfiles();
@@ -277,6 +281,12 @@ const UserItemInner = React.memo(
         const isFriend = useMemo(
             (): boolean =>
                 friends?.some((f): boolean => f.id === userId) ?? false,
+            [friends, userId],
+        );
+        const isPinnedFriend = useMemo(
+            (): boolean =>
+                friends?.find((f): boolean => f.id === userId)?.isPinned ??
+                false,
             [friends, userId],
         );
         const isMe = currentUser?.id === userId;
@@ -476,6 +486,14 @@ const UserItemInner = React.memo(
                             },
                         },
                     ],
+                });
+
+                items.push({
+                    label: isPinnedFriend ? 'Unpin DM' : 'Pin DM',
+                    icon: isPinnedFriend ? PinOff : Pin,
+                    onClick: (): void => {
+                        togglePinFriend(userId);
+                    },
                 });
 
                 if (hasUnread) {
@@ -754,6 +772,8 @@ const UserItemInner = React.memo(
         }, [
             setShowProfile,
             isFriend,
+            isPinnedFriend,
+            togglePinFriend,
             isMobile,
             dispatch,
             navigate,
@@ -914,32 +934,34 @@ const UserItemInner = React.memo(
                             )}
                         </Box>
 
-                        {hasUnread && !userVoiceChannelId && (
-                            <Box className="ml-auto flex h-4 min-w-[16px] shrink-0 items-center justify-center rounded-full bg-danger px-1 text-[10px] font-bold text-white shadow-sm">
-                                {unreadCount}
-                            </Box>
-                        )}
+                        <Box className="ml-auto flex shrink-0 items-center gap-1.5">
+                            {isPinnedFriend && (
+                                <Pin className="h-4 w-4 shrink-0 text-muted-foreground" />
+                            )}
 
-                        {userVoiceChannelId && (
-                            <Box
-                                className={cn(
-                                    'ml-auto flex shrink-0 items-center gap-1.5',
-                                )}
-                            >
-                                {userVoiceState?.isMuted && (
-                                    <MicOff
-                                        className="text-destructive"
-                                        size={14}
-                                    />
-                                )}
-                                {userVoiceState?.isDeafened && (
-                                    <HeadphoneOff
-                                        className="text-destructive"
-                                        size={14}
-                                    />
-                                )}
-                            </Box>
-                        )}
+                            {hasUnread && !userVoiceChannelId && (
+                                <Box className="flex h-4 min-w-[16px] items-center justify-center rounded-full bg-danger px-1 text-[10px] font-bold text-white shadow-sm">
+                                    {unreadCount}
+                                </Box>
+                            )}
+
+                            {userVoiceChannelId && (
+                                <>
+                                    {userVoiceState?.isMuted && (
+                                        <MicOff
+                                            className="text-destructive"
+                                            size={14}
+                                        />
+                                    )}
+                                    {userVoiceState?.isDeafened && (
+                                        <HeadphoneOff
+                                            className="text-destructive"
+                                            size={14}
+                                        />
+                                    )}
+                                </>
+                            )}
+                        </Box>
                     </Box>
                 </ContextMenu>
                 <ProfilePopup

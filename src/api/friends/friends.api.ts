@@ -65,4 +65,14 @@ export const friendsApi = {
     removeFriend: async (friendId: string): Promise<void> => {
         await apiClient.delete(`/api/v1/friends/${friendId}`);
     },
+
+    togglePinFriend: async (
+        friendId: string,
+    ): Promise<{ friendId: string; isPinned: boolean }> => {
+        const response = await apiClient.post<{
+            friendId: string;
+            isPinned: boolean;
+        }>(`/api/v1/friends/${friendId}/pin`);
+        return response.data;
+    },
 };

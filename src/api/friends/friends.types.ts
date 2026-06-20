@@ -9,6 +9,7 @@ export interface Friend {
         emoji?: string;
     } | null;
     latestMessageAt?: string | null;
+    isPinned?: boolean;
 }
 
 export interface FriendRequest {
