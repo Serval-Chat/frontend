@@ -13,6 +13,7 @@ import {
     PanelLeftOpen,
     PanelRightOpen,
     PanelTopOpen,
+    PanelsLeftRight,
     Pin,
     PinOff,
     Shield,
@@ -454,6 +455,7 @@ const UserItemInner = React.memo(
                 items.push({
                     label: 'Add to Split View',
                     type: 'submenu',
+                    icon: PanelsLeftRight,
                     items: [
                         {
                             label: isMobile ? 'Top Pane' : 'Left Side',

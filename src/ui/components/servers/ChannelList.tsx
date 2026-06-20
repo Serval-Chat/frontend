@@ -18,6 +18,7 @@ import {
     PanelLeftOpen,
     PanelRightOpen,
     PanelTopOpen,
+    PanelsLeftRight,
     Plus,
     Settings,
 } from 'lucide-react';
@@ -761,6 +762,7 @@ export const ChannelList = ({
                 items.push({
                     label: 'Add to Split View',
                     type: 'submenu',
+                    icon: PanelsLeftRight,
                     items: [
                         {
                             label: isMobile ? 'Top Pane' : 'Left Side',
