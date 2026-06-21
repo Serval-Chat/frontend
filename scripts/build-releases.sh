@@ -40,13 +40,13 @@ fi
 mkdir -p "$RELEASES_DIR"
 echo "正在收集构建产物..."
 
-APK_SRC="$(find "${SCRIPT_DIR}/src-tauri/gen/android" \
+APK_SRC="$(find "${SCRIPT_DIR}/../src-tauri/gen/android" \
     \( -name "*unsigned*.apk" -o -name "*release*.apk" \) 2>/dev/null \
     | grep -v aligned | head -n1)"
-DEB_SRC="$(find "${SCRIPT_DIR}/src-tauri/target/release/bundle/deb"           -name "*.deb"      2>/dev/null | head -n1)"
-RPM_SRC="$(find "${SCRIPT_DIR}/src-tauri/target/release/bundle/rpm"           -name "*.rpm"      2>/dev/null | head -n1)"
-APPIMAGE_SRC="$(find "${SCRIPT_DIR}/src-tauri/target/release/bundle/appimage" -name "*.AppImage" 2>/dev/null | head -n1)"
-EXE_SRC="$(find "${SCRIPT_DIR}/src-tauri/target/x86_64-pc-windows-msvc/release/bundle/nsis" \
+DEB_SRC="$(find "${SCRIPT_DIR}/../src-tauri/target/release/bundle/deb"           -name "*.deb"      2>/dev/null | head -n1)"
+RPM_SRC="$(find "${SCRIPT_DIR}/../src-tauri/target/release/bundle/rpm"           -name "*.rpm"      2>/dev/null | head -n1)"
+APPIMAGE_SRC="$(find "${SCRIPT_DIR}/../src-tauri/target/release/bundle/appimage" -name "*.AppImage" 2>/dev/null | head -n1)"
+EXE_SRC="$(find "${SCRIPT_DIR}/../src-tauri/target/x86_64-pc-windows-msvc/release/bundle/nsis" \
     -name "*setup*.exe" 2>/dev/null | head -n1)"
 
 [[ -n "$APK_SRC"      ]] || { echo "错误：找不到 APK 文件"           >&2; exit 1; }

@@ -1,3 +1,5 @@
+import { useLocation } from 'react-router-dom';
+
 import { useResizable } from '@/hooks/useResizable';
 import { useAppShallowSelector } from '@/store/hooks';
 import { useMobileSwipeContext } from '@/ui/MobileSwipeContext';
@@ -28,6 +30,12 @@ export const SecondaryNavBar = () => {
         side: 'left',
     });
     const inSwipePanel = useMobileSwipeContext();
+    const location = useLocation();
+
+    const isRolesView = location.pathname.endsWith('/self-roles');
+    const isChannelsView = location.pathname.endsWith(
+        '/channels-and-categories',
+    );
 
     const isNothingSelected = !selectedFriendId && !selectedChannelId;
 
@@ -45,11 +53,17 @@ export const SecondaryNavBar = () => {
                 !inSwipePanel &&
                     navMode === 'servers' &&
                     isNothingSelected &&
+                    !isRolesView &&
+                    !isChannelsView &&
                     'max-md:!w-auto max-md:!flex-1 max-md:shrink',
                 !inSwipePanel &&
                     navMode === 'friends' &&
                     isNothingSelected &&
                     mobileHomeTab === 'requests' &&
+                    'max-md:hidden',
+                !inSwipePanel &&
+                    navMode === 'servers' &&
+                    (isRolesView || isChannelsView) &&
                     'max-md:hidden',
                 !inSwipePanel && !isNothingSelected && 'max-md:hidden',
             )}

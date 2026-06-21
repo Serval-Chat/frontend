@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { animate, useMotionValue } from 'framer-motion';
 import { m } from 'framer-motion';
-import { Outlet, useNavigate } from 'react-router-dom';
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 
 import { useMe } from '@/api/users/users.queries';
 import { useSwipeGesture } from '@/hooks/useSwipeGesture';
@@ -33,6 +33,7 @@ export const Chat = () => {
     const { data: user, error } = useMe();
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
+    const location = useLocation();
 
     const {
         selectedFriendId,
@@ -103,13 +104,18 @@ export const Chat = () => {
         if (error) console.error('Error fetching user:', error);
     }, [user, error]);
 
-    // 0 = list view, 1 = chat view OR pending requests view
+    const isServerSubpageView =
+        location.pathname.endsWith('/self-roles') ||
+        location.pathname.endsWith('/channels-and-categories');
+
+    // 0 = list view, 1 = chat view OR pending requests view OR server subpage view
     const inChat = !!(selectedFriendId || selectedChannelId);
-    const panelIndex = inChat
-        ? 1
-        : navMode === 'friends' && mobileHomeTab === 'requests'
-          ? 1
-          : 0;
+    const panelIndex =
+        inChat || isServerSubpageView
+            ? 1
+            : navMode === 'friends' && mobileHomeTab === 'requests'
+              ? 1
+              : 0;
     const targetX = useCallback(
         (): number => -panelIndex * window.innerWidth,
         [panelIndex],
@@ -180,6 +186,8 @@ export const Chat = () => {
         } else if (selectedChannelId && selectedServerId) {
             dispatch(setSelectedChannelId(null));
             void navigate(`/chat/@server/${selectedServerId}`);
+        } else if (isServerSubpageView && selectedServerId) {
+            void navigate(`/chat/@server/${selectedServerId}`);
         } else if (
             navMode === 'friends' &&
             mobileHomeTab === 'requests' &&
@@ -202,6 +210,7 @@ export const Chat = () => {
         navMode,
         mobileHomeTab,
         lastSelectedFriendId,
+        isServerSubpageView,
         dispatch,
         navigate,
     ]);
