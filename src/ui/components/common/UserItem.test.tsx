@@ -32,6 +32,7 @@ vi.mock('@/api/friends/friends.queries', () => ({
 }));
 
 vi.mock('@/api/servers/servers.queries', () => ({
+    useServers: (): { data: never[] } => ({ data: [] }),
     useAddRoleToMember: () => ({ mutate: vi.fn(), isPending: false }),
     useRemoveRoleFromMember: () => ({ mutate: vi.fn(), isPending: false }),
     useKickMember: () => ({ mutate: vi.fn() }),

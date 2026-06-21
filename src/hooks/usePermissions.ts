@@ -141,6 +141,7 @@ export const usePermissions = (
             banMembers: false,
             kickMembers: false,
             manageInvites: false,
+            inviteUsers: false,
             manageServer: false,
             manageWebhooks: false,
             administrator: false,

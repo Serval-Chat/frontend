@@ -715,6 +715,22 @@ export const RoleEditor = ({
                                 }
                             />
                             <PermissionToggle
+                                description="Allows member to invite new people by creating regular invite links."
+                                label="Invite Users"
+                                value={permissions.inviteUsers !== false}
+                                onChange={(val): void =>
+                                    updatePermission('inviteUsers', val)
+                                }
+                            />
+                            <PermissionToggle
+                                description="Allows member to create, view, and delete all invite links, including custom vanity invites."
+                                label="Manage Invites"
+                                value={permissions.manageInvites || false}
+                                onChange={(val): void =>
+                                    updatePermission('manageInvites', val)
+                                }
+                            />
+                            <PermissionToggle
                                 danger
                                 description="Allows member to kick other members."
                                 label="Kick Members"

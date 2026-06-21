@@ -27,6 +27,7 @@ export interface ServerInvite {
     code: string;
     customPath?: string;
     createdByUserId: string;
+    createdByUsername?: string;
     maxUses?: number;
     uses: number;
     expiresAt?: string;

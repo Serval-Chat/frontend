@@ -46,6 +46,7 @@ import {
     useMembers,
     useRemoveRoleFromMember,
     useServerDetails,
+    useServers,
     useTimeoutMember,
 } from '@/api/servers/servers.queries';
 import type { Role, ServerMember } from '@/api/servers/servers.types';
@@ -59,6 +60,7 @@ import { setUserVolume } from '@/store/slices/voiceSlice';
 import { Box } from '@/ui/components/layout/Box';
 import { ProfilePopup } from '@/ui/components/profile/ProfilePopup';
 import { BlockUserModal } from '@/ui/components/profile/modals/BlockUserModal';
+import { InviteToServerModal } from '@/ui/components/servers/InviteToServerModal';
 import { BanUserModal } from '@/ui/components/servers/modals/BanUserModal';
 import { KickUserModal } from '@/ui/components/servers/modals/KickUserModal';
 import { TimeoutUserModal } from '@/ui/components/servers/modals/TimeoutUserModal';
@@ -227,6 +229,8 @@ const UserItemInner = React.memo(
         const [isTimeoutModalOpen, setIsTimeoutModalOpen] =
             React.useState(false);
         const [isBlockModalOpen, setIsBlockModalOpen] = React.useState(false);
+        const [isInviteToServerModalOpen, setIsInviteToServerModalOpen] =
+            React.useState(false);
         const [colorResolverReport, setColorResolverReport] = React.useState<
             string | null
         >(null);
@@ -247,6 +251,12 @@ const UserItemInner = React.memo(
         });
         const userProfile = providedUser || fetchedUser;
         const { data: friends } = useFriends();
+        const { data: servers } = useServers();
+        const canInviteToAnyServer = useMemo(
+            (): boolean =>
+                servers?.some((s): boolean => !!s.canInvite) ?? false,
+            [servers],
+        );
 
         const { mutate: sendFriendRequest } = useSendFriendRequest();
         const { mutate: removeFriend } = useRemoveFriend();
@@ -452,6 +462,13 @@ const UserItemInner = React.memo(
                         void navigate(`/chat/@user/${userId}`);
                     },
                 });
+                if (canInviteToAnyServer) {
+                    items.push({
+                        label: 'Invite to Server',
+                        icon: UserPlus,
+                        onClick: (): void => setIsInviteToServerModalOpen(true),
+                    });
+                }
                 items.push({
                     label: 'Add to Split View',
                     type: 'submenu',
@@ -774,6 +791,7 @@ const UserItemInner = React.memo(
         }, [
             setShowProfile,
             isFriend,
+            canInviteToAnyServer,
             isPinnedFriend,
             togglePinFriend,
             isMobile,
@@ -793,6 +811,7 @@ const UserItemInner = React.memo(
             upsertBlock,
             removeBlock,
             setIsBlockModalOpen,
+            setIsInviteToServerModalOpen,
             serverRoles,
             sid,
             canManageRoles,
@@ -1047,6 +1066,17 @@ const UserItemInner = React.memo(
                     language="json"
                     onClose={(): void => setColorResolverReport(null)}
                 />
+
+                {isInviteToServerModalOpen && (
+                    <InviteToServerModal
+                        isOpen={isInviteToServerModalOpen}
+                        userId={userId}
+                        username={displayName || username}
+                        onClose={(): void =>
+                            setIsInviteToServerModalOpen(false)
+                        }
+                    />
+                )}
             </>
         );
     },

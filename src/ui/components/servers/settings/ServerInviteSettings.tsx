@@ -206,6 +206,7 @@ export const ServerInviteSettings = ({
                         <TableHeader>
                             <TableRow>
                                 <TableHead>Invite Code</TableHead>
+                                <TableHead>Created By</TableHead>
                                 <TableHead>Uses</TableHead>
                                 <TableHead>Expires At</TableHead>
                                 <TableHead align="right">Actions</TableHead>
@@ -216,6 +217,9 @@ export const ServerInviteSettings = ({
                                 <TableRow key={invite.id}>
                                     <TableCell monospace>
                                         {invite.customPath || invite.code}
+                                    </TableCell>
+                                    <TableCell muted>
+                                        {invite.createdByUsername ?? 'Unknown'}
                                     </TableCell>
                                     <TableCell>
                                         {invite.uses} /{' '}

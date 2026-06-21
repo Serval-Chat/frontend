@@ -40,6 +40,8 @@ export interface Server {
     createdAt?: string;
     updatedAt?: string;
     canManage?: boolean;
+    canInvite?: boolean;
+    preferredInviteCode?: string;
     onboarding?: ServerOnboardingSettings;
 }
 
@@ -121,6 +123,7 @@ export interface RolePermissions {
     banMembers: boolean;
     kickMembers: boolean;
     manageInvites: boolean;
+    inviteUsers: boolean;
     manageServer: boolean;
     manageWebhooks?: boolean;
     administrator: boolean;

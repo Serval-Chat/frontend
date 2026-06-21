@@ -9,6 +9,7 @@ import {
     LogOut,
     MoveVertical,
     Settings,
+    UserPlus,
 } from 'lucide-react';
 
 import { serversApi } from '@/api/servers/servers.api';
@@ -42,6 +43,12 @@ const ServerSettingsModal = React.lazy(() =>
     })),
 );
 
+const InviteFriendsModal = React.lazy(() =>
+    import('./InviteFriendsModal').then((m) => ({
+        default: m.InviteFriendsModal,
+    })),
+);
+
 const CONTEXT_MENU_TAP_SUPPRESSION_MS = 2000;
 
 interface ServerItemProps {
@@ -67,6 +74,7 @@ export const ServerItem = React.memo(
     }: ServerItemProps) => {
         const [isSettingsOpen, setIsSettingsOpen] = useState(false);
         const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false);
+        const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
         const { hasPermission, isOwner } = usePermissions(server.id, null, {
             enabled: isActive,
         });
@@ -97,6 +105,14 @@ export const ServerItem = React.memo(
                 label: 'Mark as Read',
                 icon: Check,
                 onClick: (): void => markAsRead(server.id),
+            });
+        }
+
+        if (server.canInvite) {
+            contextMenuItems.push({
+                label: 'Invite Friends',
+                icon: UserPlus,
+                onClick: (): void => setIsInviteModalOpen(true),
             });
         }
 
@@ -344,6 +360,17 @@ export const ServerItem = React.memo(
                             serverId={server.id}
                             serverName={server.name}
                             onClose={(): void => setIsLeaveModalOpen(false)}
+                        />
+                    </React.Suspense>
+                )}
+
+                {isInviteModalOpen && (
+                    <React.Suspense fallback={null}>
+                        <InviteFriendsModal
+                            isOpen={isInviteModalOpen}
+                            serverId={server.id}
+                            serverName={server.name}
+                            onClose={(): void => setIsInviteModalOpen(false)}
                         />
                     </React.Suspense>
                 )}
