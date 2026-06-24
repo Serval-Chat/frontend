@@ -53,39 +53,39 @@ export const ServerSidebarSection = ({
     const groups = useMemo((): MemberGroup[] => {
         if (!members) return [];
 
-        const processedMembers = members
-            .filter((m) => m && m.user)
-            .map((m) => {
-                const userBlocks = blocks[m.userId] || 0;
-                const presence = presenceMap[m.userId];
-                const isMeMember = me && m.userId === me.id;
-                const forceOffline = !!(
-                    userBlocks & BlockFlags.HIDE_THEIR_PRESENCE
-                );
+        const processedMembers = members.flatMap((m) => {
+            if (!m || !m.user) return [];
+            const userBlocks = blocks[m.userId] || 0;
+            if (userBlocks & BlockFlags.HIDE_FROM_MEMBER_LIST) return [];
+            const presence = presenceMap[m.userId];
+            const isMeMember = me && m.userId === me.id;
+            const forceOffline = !!(
+                userBlocks & BlockFlags.HIDE_THEIR_PRESENCE
+            );
 
-                const onlineFromPresence =
-                    presence?.status !== undefined
-                        ? presence.status === 'online'
-                        : undefined;
-                const onlineFromMemberSnapshot = m.online ?? false;
-                const effectiveOnline =
-                    onlineFromPresence ?? onlineFromMemberSnapshot;
-                const isOnline =
-                    !forceOffline && (effectiveOnline || isMeMember);
+            const onlineFromPresence =
+                presence?.status !== undefined
+                    ? presence.status === 'online'
+                    : undefined;
+            const onlineFromMemberSnapshot = m.online ?? false;
+            const effectiveOnline =
+                onlineFromPresence ?? onlineFromMemberSnapshot;
+            const isOnline = !forceOffline && (effectiveOnline || isMeMember);
 
-                return {
+            return [
+                {
                     member: m,
                     isOnline,
-                    isHidden: !!(userBlocks & BlockFlags.HIDE_FROM_MEMBER_LIST),
+                    isHidden: false as const,
                     sortName: (
                         m.nickname ||
                         m.user.displayName ||
                         m.user.username ||
                         ''
                     ).toLowerCase(),
-                };
-            })
-            .filter((pm): boolean => !pm.isHidden);
+                },
+            ];
+        });
 
         let finalFiltered = processedMembers;
 
@@ -190,7 +190,7 @@ export const ServerSidebarSection = ({
                     position: number;
                 } => ({
                     ...g,
-                    members: [...g.members].sort((a, b): number => {
+                    members: g.members.toSorted((a, b): number => {
                         const nameA = sortMap.get(a.userId) || '';
                         const nameB = sortMap.get(b.userId) || '';
                         return nameA.localeCompare(nameB);

@@ -47,6 +47,7 @@ function chipColors(data: SearchFilterData): { bg: string; color: string } {
     return { bg: colors.bgSubtle, color: colors.mutedForeground };
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 function SearchFilterChip({
     data,
     nodeKey,

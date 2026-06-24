@@ -258,12 +258,8 @@ export const PinsDrawer = ({
                             Loading pins...
                         </Text>
                     ) : pins && pins.length > 0 ? (
-                        pins
-                            .filter(
-                                (p: ChatMessage): boolean =>
-                                    p.isPinned || p.isSticky,
-                            )
-                            .map((pin: ChatMessage) => (
+                        pins.flatMap((pin: ChatMessage) =>
+                            pin.isPinned || pin.isSticky ? (
                                 <PinnedMessageItem
                                     channelId={channelId}
                                     key={pin.id}
@@ -273,7 +269,10 @@ export const PinsDrawer = ({
                                     serverId={serverId}
                                     onJump={handleJump}
                                 />
-                            ))
+                            ) : (
+                                []
+                            ),
+                        )
                     ) : (
                         <Box className="flex flex-col items-center justify-center py-12 text-center opacity-50">
                             <Pin className="mb-4 h-12 w-12 text-muted-foreground" />

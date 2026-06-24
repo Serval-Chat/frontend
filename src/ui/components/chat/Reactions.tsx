@@ -150,20 +150,17 @@ export const Reactions = React.memo(
 
         if (!reactions.length && !showPicker) return null;
 
-        const filteredReactions = reactions
-            .map((r) => {
-                const filteredUsers = r.users.filter((uid): boolean => {
-                    if (uid === me?.id) return true;
-                    const userBlocks = blocks[uid] || 0;
-                    return !(userBlocks & BlockFlags.HIDE_THEIR_REACTIONS);
-                });
-                return {
-                    ...r,
-                    users: filteredUsers,
-                    count: filteredUsers.length,
-                };
-            })
-            .filter((r): boolean => r.count > 0);
+        const filteredReactions = reactions.flatMap((r) => {
+            const filteredUsers = r.users.filter((uid): boolean => {
+                if (uid === me?.id) return true;
+                const userBlocks = blocks[uid] || 0;
+                return !(userBlocks & BlockFlags.HIDE_THEIR_REACTIONS);
+            });
+            if (filteredUsers.length === 0) return [];
+            return [
+                { ...r, users: filteredUsers, count: filteredUsers.length },
+            ];
+        });
 
         return (
             <Box className="mt-1 mb-1 flex flex-wrap gap-1">

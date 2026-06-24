@@ -24,39 +24,44 @@ export interface TextAreaProps
     extends
         Omit<React.TextareaHTMLAttributes<HTMLTextAreaElement>, 'disabled'>,
         VariantProps<typeof textAreaVariants> {
+    ref?: React.Ref<HTMLTextAreaElement>;
     autoResize?: boolean;
 }
 
-const TextArea = React.forwardRef<HTMLTextAreaElement, TextAreaProps>(
-    ({ className, disabled, autoResize = true, ...props }, ref) => {
-        const internalRef = useRef<HTMLTextAreaElement>(null);
+const TextArea = ({
+    className,
+    disabled,
+    autoResize = true,
+    ref,
+    ...props
+}: TextAreaProps) => {
+    const internalRef = useRef<HTMLTextAreaElement>(null);
 
-        React.useImperativeHandle(
-            ref,
-            (): HTMLTextAreaElement => internalRef.current!,
-        );
+    React.useImperativeHandle(
+        ref,
+        (): HTMLTextAreaElement => internalRef.current!,
+    );
 
-        useEffect((): void => {
-            if (autoResize && internalRef.current) {
-                const textarea = internalRef.current;
-                textarea.style.height = 'auto';
-                textarea.style.height = `${textarea.scrollHeight}px`;
-            }
-        }, [props.value, autoResize]);
+    useEffect((): void => {
+        if (autoResize && internalRef.current) {
+            const textarea = internalRef.current;
+            textarea.style.height = 'auto';
+            textarea.style.height = `${textarea.scrollHeight}px`;
+        }
+    }, [props.value, autoResize]);
 
-        return (
-            <Box
-                as="textarea"
-                className={cn(textAreaVariants({ disabled, className }))}
-                disabled={disabled || undefined}
-                ref={internalRef}
-                rows={1}
-                // eslint-disable-next-line react/jsx-props-no-spreading
-                {...props}
-            />
-        );
-    },
-);
+    return (
+        <Box
+            as="textarea"
+            className={cn(textAreaVariants({ disabled, className }))}
+            disabled={disabled || undefined}
+            ref={internalRef}
+            rows={1}
+            // eslint-disable-next-line react/jsx-props-no-spreading
+            {...props}
+        />
+    );
+};
 TextArea.displayName = 'TextArea';
 
 export { TextArea };

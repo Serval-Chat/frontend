@@ -9,7 +9,7 @@ import {
     setSelectedServerId,
     setTargetMessageId,
 } from '@/store/slices/navSlice';
-import { isValidObjectId } from '@/utils/validation';
+import { isValidSnowflakeId } from '@/utils/validation';
 
 /**
  * @description Syncs Redux navigation state from the current URL.
@@ -36,7 +36,7 @@ export const NavigationSync = (): null => {
             dispatch(setSelectedFriendId(null));
             dispatch(setTargetMessageId(null));
         } else if (params.serverId) {
-            if (!isValidObjectId(params.serverId)) {
+            if (!isValidSnowflakeId(params.serverId)) {
                 void navigate('/chat/@me', { replace: true });
                 return;
             }
@@ -63,7 +63,7 @@ export const NavigationSync = (): null => {
             }
 
             if (params.channelId) {
-                if (!isValidObjectId(params.channelId)) {
+                if (!isValidSnowflakeId(params.channelId)) {
                     void navigate(`/chat/@server/${params.serverId}`, {
                         replace: true,
                     });
@@ -76,7 +76,7 @@ export const NavigationSync = (): null => {
                 }
 
                 if (params.messageId) {
-                    if (!isValidObjectId(params.messageId)) {
+                    if (!isValidSnowflakeId(params.messageId)) {
                         void navigate(
                             `/chat/@server/${params.serverId}/channel/${params.channelId}`,
                             { replace: true },
@@ -102,13 +102,13 @@ export const NavigationSync = (): null => {
                 }
             }
         } else if (params.userId) {
-            if (!isValidObjectId(params.userId)) {
+            if (!isValidSnowflakeId(params.userId)) {
                 void navigate('/chat/@me', { replace: true });
                 return;
             }
 
             if (params.messageId) {
-                if (!isValidObjectId(params.messageId)) {
+                if (!isValidSnowflakeId(params.messageId)) {
                     void navigate(`/chat/@user/${params.userId}`, {
                         replace: true,
                     });

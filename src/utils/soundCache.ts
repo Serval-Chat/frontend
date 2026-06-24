@@ -47,8 +47,8 @@ export async function pruneSoundCache(keepUrls: string[]): Promise<void> {
     const keepUrlSet = new Set(keepUrls);
 
     await Promise.all(
-        keys
-            .filter((request): boolean => !keepUrlSet.has(request.url))
-            .map((request): Promise<boolean> => cache.delete(request)),
+        keys.flatMap((request): Promise<boolean>[] =>
+            !keepUrlSet.has(request.url) ? [cache.delete(request)] : [],
+        ),
     );
 }

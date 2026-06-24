@@ -37,7 +37,7 @@ export const validateInviteToken = (value: string): string => {
     return '';
 };
 
-export const isValidObjectId = (id: string | undefined): boolean => {
+export const isValidSnowflakeId = (id: string | undefined): boolean => {
     if (!id) return false;
-    return /^[a-fA-F0-9]{24}$/.test(id);
+    return /^\d{19}$/.test(id);
 };

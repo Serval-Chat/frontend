@@ -92,7 +92,7 @@ export const ServerDiscoveryModal = ({
 
     const normalizedTags = useMemo(
         (): string[] =>
-            [...selectedTags].sort((a, b): number => a.localeCompare(b)),
+            selectedTags.toSorted((a, b): number => a.localeCompare(b)),
         [selectedTags],
     );
     const { data: joinedServers = [] } = useServers();

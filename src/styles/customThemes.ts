@@ -122,7 +122,9 @@ export const readCustomThemes = (): CustomThemeFile[] => {
         const parsed: unknown = JSON.parse(saved);
         if (!Array.isArray(parsed)) return [];
 
-        return parsed.filter(isCustomThemeFile).map(normalizeCustomThemeFile);
+        return parsed.flatMap((item) =>
+            isCustomThemeFile(item) ? [normalizeCustomThemeFile(item)] : [],
+        );
     } catch {
         return [];
     }

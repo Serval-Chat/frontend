@@ -197,19 +197,16 @@ export const LexicalAutocompletePlugin = ({
                 return pa - pb;
             });
 
-            const roleSuggestions: Suggestion[] = roles
-                .filter((role): boolean => {
+            const roleSuggestions: Suggestion[] = roles.flatMap(
+                (role): { type: 'role'; role: Role }[] => {
                     const lowerName = role.name.toLowerCase();
-                    return (
-                        lowerName.includes(query) &&
+                    return lowerName.includes(query) &&
                         lowerName !== 'everyone' &&
                         lowerName !== '@everyone'
-                    );
-                })
-                .map((role): { type: 'role'; role: Role } => ({
-                    type: 'role',
-                    role,
-                }));
+                        ? [{ type: 'role', role }]
+                        : [];
+                },
+            );
 
             const allSuggestions: Suggestion[] = [
                 ...userSuggestions,
@@ -226,27 +223,22 @@ export const LexicalAutocompletePlugin = ({
         }
 
         if (triggerChar === ':') {
-            const emojiSuggestions: Suggestion[] = allEmojis
-                .filter(
-                    (emoji): boolean =>
-                        emoji.short_name.includes(query) ||
-                        emoji.short_names.some((name): boolean =>
-                            name.includes(query),
-                        ),
-                )
-                .map((emoji): { type: 'emoji'; emoji: EmojiData } => ({
-                    type: 'emoji' as const,
-                    emoji,
-                }));
+            const emojiSuggestions: Suggestion[] = allEmojis.flatMap(
+                (emoji): { type: 'emoji'; emoji: EmojiData }[] =>
+                    emoji.short_name.includes(query) ||
+                    emoji.short_names.some((name): boolean =>
+                        name.includes(query),
+                    )
+                        ? [{ type: 'emoji' as const, emoji }]
+                        : [],
+            );
 
-            const serverEmojiSuggestions: Suggestion[] = serverEmojis
-                .filter((emoji): boolean =>
-                    emoji.name.toLowerCase().includes(query),
-                )
-                .map((emoji): { type: 'server-emoji'; emoji: Emoji } => ({
-                    type: 'server-emoji' as const,
-                    emoji,
-                }));
+            const serverEmojiSuggestions: Suggestion[] = serverEmojis.flatMap(
+                (emoji): { type: 'server-emoji'; emoji: Emoji }[] =>
+                    emoji.name.toLowerCase().includes(query)
+                        ? [{ type: 'server-emoji' as const, emoji }]
+                        : [],
+            );
 
             return [...serverEmojiSuggestions, ...emojiSuggestions]
                 .slice(0, 10)
@@ -254,14 +246,12 @@ export const LexicalAutocompletePlugin = ({
         }
 
         if (triggerChar === '#') {
-            const channelSuggestions: Suggestion[] = channels
-                .filter((channel): boolean =>
-                    channel.name.toLowerCase().includes(query),
-                )
-                .map((channel): { type: 'channel'; channel: Channel } => ({
-                    type: 'channel' as const,
-                    channel,
-                }));
+            const channelSuggestions: Suggestion[] = channels.flatMap(
+                (channel): { type: 'channel'; channel: Channel }[] =>
+                    channel.name.toLowerCase().includes(query)
+                        ? [{ type: 'channel' as const, channel }]
+                        : [],
+            );
 
             return channelSuggestions
                 .slice(0, 10)

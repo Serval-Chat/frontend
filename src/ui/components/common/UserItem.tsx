@@ -372,11 +372,11 @@ const UserItemInner = React.memo(
         );
         const isOwner = serverDetails?.ownerId === currentUser?.id;
 
-        const myHighestRole = useMemo(
-            (): Role | undefined =>
-                myRoles?.sort((a, b): number => b.position - a.position)[0],
-            [myRoles],
-        );
+        const myHighestRole = useMemo((): Role | undefined => {
+            if (!myRoles?.length) return undefined;
+            const maxPos = Math.max(...myRoles.map((r): number => r.position));
+            return myRoles.find((r): boolean => r.position === maxPos);
+        }, [myRoles]);
 
         const canManageRoles =
             isOwner ||
@@ -421,11 +421,13 @@ const UserItemInner = React.memo(
                 serverRoles?.filter((r) => targetMember?.roles.includes(r.id)),
             [serverRoles, targetMember?.roles],
         );
-        const targetHighestRole = useMemo(
-            (): Role | undefined =>
-                targetRoles?.sort((a, b): number => b.position - a.position)[0],
-            [targetRoles],
-        );
+        const targetHighestRole = useMemo((): Role | undefined => {
+            if (!targetRoles?.length) return undefined;
+            const maxPos = Math.max(
+                ...targetRoles.map((r): number => r.position),
+            );
+            return targetRoles.find((r): boolean => r.position === maxPos);
+        }, [targetRoles]);
         const targetHighestPosition = targetHighestRole
             ? targetHighestRole.position
             : -1;
@@ -637,7 +639,7 @@ const UserItemInner = React.memo(
                 items.push({ type: 'divider' });
 
                 // Sort roles by position (descending)
-                const sortedRoles = [...serverRoles].sort(
+                const sortedRoles = serverRoles.toSorted(
                     (a, b): number => b.position - a.position,
                 );
                 const rolesToDisplay = sortedRoles.filter(

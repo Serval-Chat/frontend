@@ -1,4 +1,4 @@
-import React, { createContext, useContext } from 'react';
+import React, { createContext, use } from 'react';
 
 const HighlightContext = createContext<string | null>(null);
 
@@ -15,4 +15,4 @@ export const HighlightProvider = ({
 );
 
 // eslint-disable-next-line react-refresh/only-export-components
-export const useHighlightId = (): string | null => useContext(HighlightContext);
+export const useHighlightId = (): string | null => use(HighlightContext);

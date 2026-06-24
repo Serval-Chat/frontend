@@ -12,7 +12,7 @@ vi.mock('@/api/users/users.queries', async (importOriginal) => {
         ...actual,
         useUserById: vi.fn(() => ({
             data: {
-                id: '690cdf6250f11be9566ea1ea',
+                id: '0327554478565752821',
                 username: 'gorku',
                 displayName: 'gorciu',
             },
@@ -34,10 +34,10 @@ describe('ReplyPreview', (): void => {
         render(
             <TestWrapper>
                 <ReplyPreview
-                    text="<userid:'690cdf6250f11be9566ea1ea'> ui bug"
+                    text="<userid:'0327554478565752821'> ui bug"
                     user={
                         {
-                            id: '690cdf6250f11be9566ea1eb',
+                            id: '0327554478565752822',
                             username: 'gorku',
                             displayName: 'gorciu',
                         } as never
@@ -48,7 +48,7 @@ describe('ReplyPreview', (): void => {
 
         expect(screen.getByText('@gorciu')).toBeInTheDocument();
         expect(
-            screen.queryByText("<userid:'690cdf6250f11be9566ea1ea'>"),
+            screen.queryByText("<userid:'0327554478565752821'>"),
         ).not.toBeInTheDocument();
         expect(screen.getByText(/ui bug/)).toBeInTheDocument();
     });

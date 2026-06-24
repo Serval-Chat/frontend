@@ -12,7 +12,7 @@ interface MentionProps {
     size?: TextProps['size'];
 }
 
-const isValidUserId = (id: string): boolean => /^[a-f\d]{24}$/i.test(id);
+const isValidUserId = (id: string): boolean => /^\d{19}$/.test(id);
 
 /**
  * @description Beautifully renders a user mention.

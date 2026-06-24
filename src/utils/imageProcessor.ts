@@ -220,9 +220,10 @@ async function processGif(
         }
 
         for (const frame of frames) {
+            const { width, height } = frame.dims;
             const frameCanvas = document.createElement('canvas');
-            frameCanvas.width = frame.dims.width;
-            frameCanvas.height = frame.dims.height;
+            frameCanvas.width = width;
+            frameCanvas.height = height;
             const frameCtx = frameCanvas.getContext('2d', { alpha: true });
 
             if (!frameCtx) {
@@ -232,8 +233,8 @@ async function processGif(
 
             const frameData = new ImageData(
                 new Uint8ClampedArray(frame.patch),
-                frame.dims.width,
-                frame.dims.height,
+                width,
+                height,
             );
 
             frameCtx.putImageData(frameData, 0, 0);

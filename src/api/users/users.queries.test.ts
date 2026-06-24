@@ -73,21 +73,19 @@ describe('useUserById', (): void => {
         consoleSpy.mockRestore();
     });
 
-    it('fetches normally for valid ObjectId-style IDs', async (): Promise<void> => {
+    it('fetches normally for valid Snowflake-style IDs', async (): Promise<void> => {
         vi.mocked(usersApi.getById).mockResolvedValue({
-            id: '507f1f77bcf86cd799439011',
+            id: '0327554478565752832',
             username: 'alice',
         } as never);
 
         const { result } = renderHook(
-            () => useUserById('507f1f77bcf86cd799439011'),
+            () => useUserById('0327554478565752832'),
             { wrapper: makeWrapper() },
         );
 
         await waitFor((): void => expect(result.current.isSuccess).toBe(true));
-        expect(usersApi.getById).toHaveBeenCalledWith(
-            '507f1f77bcf86cd799439011',
-        );
+        expect(usersApi.getById).toHaveBeenCalledWith('0327554478565752832');
     });
 });
 

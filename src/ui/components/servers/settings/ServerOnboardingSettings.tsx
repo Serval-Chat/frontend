@@ -37,7 +37,7 @@ const channelIcon = (channel: Channel): React.ReactNode => (
 );
 
 const sortByPosition = <T extends { position: number }>(items: T[]): T[] =>
-    [...items].sort((a, b): number => a.position - b.position);
+    items.toSorted((a, b): number => a.position - b.position);
 
 const toStringArray = (value: unknown): string[] =>
     Array.isArray(value)
@@ -282,7 +282,10 @@ export const ServerOnboardingSettings = ({
     const current = useMemo(
         () => ({
             enabled,
-            guidelines: rules.map((r): string => r.trim()).filter(Boolean),
+            guidelines: rules.flatMap((r): string[] => {
+                const t = r.trim();
+                return t ? [t] : [];
+            }),
             selfAssignableRoleIds,
             landingChannelId,
             welcomeChannelIds,

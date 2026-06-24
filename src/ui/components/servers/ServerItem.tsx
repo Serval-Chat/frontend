@@ -156,22 +156,24 @@ export const ServerItem = React.memo(
         const handleAddToFolder = (folderId: string): void => {
             if (!me) return;
             const currentOrder = me.serverSettings?.order || [];
-            const newOrder = currentOrder
-                .map((item): string | IServerFolder | null => {
+            const newOrder = currentOrder.flatMap(
+                (item): (string | IServerFolder)[] => {
                     if (typeof item === 'string') {
-                        if (item === server.id) return null;
-                        return item;
+                        if (item === server.id) return [];
+                        return [item];
                     }
                     if (item.id === folderId) {
-                        if (item.serverIds.includes(server.id)) return item;
-                        return {
-                            ...item,
-                            serverIds: [...item.serverIds, server.id],
-                        };
+                        if (item.serverIds.includes(server.id)) return [item];
+                        return [
+                            {
+                                ...item,
+                                serverIds: [...item.serverIds, server.id],
+                            },
+                        ];
                     }
-                    return item;
-                })
-                .filter(Boolean) as (string | IServerFolder)[];
+                    return [item];
+                },
+            );
 
             updateSettings({ order: newOrder });
         };

@@ -131,17 +131,23 @@ function HighlightedText({
     text: string;
     query: string;
 }): ReactNode {
-    if (!query.trim()) return <>{text}</>;
+    if (!query.trim()) return text;
 
     const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const parts = text.split(new RegExp(`(${escaped})`, 'gi'));
+    const rawParts = text.split(new RegExp(`(${escaped})`, 'gi'));
+    const partsWithKeys: Array<{ part: string; key: number }> = [];
+    let pos = 0;
+    for (const part of rawParts) {
+        partsWithKeys.push({ part, key: pos });
+        pos += part.length;
+    }
 
     return (
         <>
-            {parts.map((part, i) =>
+            {partsWithKeys.map(({ part, key }) =>
                 part.toLowerCase() === query.toLowerCase() ? (
                     <mark
-                        key={i}
+                        key={key}
                         style={{
                             backgroundColor: colors.primary,
                             color: 'var(--foreground-inverse)',

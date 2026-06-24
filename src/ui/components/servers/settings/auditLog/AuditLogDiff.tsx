@@ -29,13 +29,18 @@ function flattenChange(change: IAuditLogChange): Array<{
         const allKeys = Array.from(
             new Set([...Object.keys(before), ...Object.keys(after)]),
         );
-        const rows = allKeys
-            .filter((k): boolean => before[k] !== after[k])
-            .map((k): { field: string; before: string; after: string } => ({
-                field: k,
-                before: formatBool(before[k]),
-                after: formatBool(after[k]),
-            }));
+        const rows = allKeys.flatMap(
+            (k): { field: string; before: string; after: string }[] =>
+                before[k] !== after[k]
+                    ? [
+                          {
+                              field: k,
+                              before: formatBool(before[k]),
+                              after: formatBool(after[k]),
+                          },
+                      ]
+                    : [],
+        );
         if (rows.length === 0) return [];
         return rows;
     }

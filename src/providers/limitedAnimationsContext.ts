@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { use } from 'react';
 
 export const LimitedAnimationsContext = React.createContext(false);
 
 export const useLimitedAnimations = (): boolean =>
-    React.useContext(LimitedAnimationsContext);
+    use(LimitedAnimationsContext);

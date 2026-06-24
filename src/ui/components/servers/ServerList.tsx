@@ -56,7 +56,6 @@ export const ServerList = () => {
         );
         const handleChange = (): void => setDisableReorder(query.matches);
 
-        handleChange();
         query.addEventListener('change', handleChange);
         return (): void => query.removeEventListener('change', handleChange);
     }, []);
@@ -136,27 +135,27 @@ export const ServerList = () => {
             order: (string | IServerFolder)[],
             picked: MobileReorderItem,
         ): (string | IServerFolder)[] =>
-            order
-                .map((item): string | IServerFolder | null => {
-                    if (picked.type === 'folder') {
-                        if (typeof item !== 'string' && item.id === picked.id) {
-                            return null;
-                        }
-                        return item;
+            order.flatMap((item): (string | IServerFolder)[] => {
+                if (picked.type === 'folder') {
+                    if (typeof item !== 'string' && item.id === picked.id) {
+                        return [];
                     }
+                    return [item];
+                }
 
-                    if (typeof item === 'string') {
-                        return item === picked.id ? null : item;
-                    }
+                if (typeof item === 'string') {
+                    return item === picked.id ? [] : [item];
+                }
 
-                    return {
+                return [
+                    {
                         ...item,
                         serverIds: item.serverIds.filter(
                             (serverId): boolean => serverId !== picked.id,
                         ),
-                    };
-                })
-                .filter(Boolean) as (string | IServerFolder)[],
+                    },
+                ];
+            }),
         [],
     );
 

@@ -114,15 +114,11 @@ export const DevBotDetail = ({
     const resetToken = useResetBotToken();
     const deleteBot = useDeleteBot();
 
-    const user = useMemo(
-        () =>
-            bot
-                ? typeof bot.userId === 'object'
-                    ? bot.userId
-                    : bot.user
-                : undefined,
-        [bot],
-    );
+    const user = bot
+        ? typeof bot.userId === 'object'
+            ? bot.userId
+            : bot.user
+        : undefined;
     const profilePreviewUser = useMemo(
         (): Partial<User> | undefined =>
             user

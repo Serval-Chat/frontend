@@ -39,7 +39,7 @@ import type {
 const isValidId = (id: string | null | undefined): boolean => {
     if (!id) return false;
     if (id === 'preview') return true;
-    return /^[a-f\d]{24}$/i.test(id);
+    return /^\d{19}$/.test(id);
 };
 
 const discoveryRecentCache = new Map<string, DiscoveryServersResponse>();

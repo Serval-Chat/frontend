@@ -196,7 +196,7 @@ export function buildContextMenuItems({
     ) {
         items.push({ type: 'divider' });
 
-        const sortedRoles = [...allServerRoles].sort(
+        const sortedRoles = allServerRoles.toSorted(
             (a, b): number => b.position - a.position,
         );
         const rolesToDisplay = sortedRoles.filter(

@@ -34,18 +34,18 @@ export const RoleNavbar = ({
 }: RoleNavbarProps) => {
     // Roles are usually sorted by position in descending order (highest role first)
     const [localRoles, setLocalRoles] = useState((): Role[] =>
-        [...roles].sort((a, b): number => b.position - a.position),
+        roles.toSorted((a, b): number => b.position - a.position),
     );
     const [prevRoles, setPrevRoles] = useState(roles);
 
     if (roles !== prevRoles) {
         setLocalRoles(
-            [...roles].sort((a, b): number => b.position - a.position),
+            roles.toSorted((a, b): number => b.position - a.position),
         );
         setPrevRoles(roles);
     }
 
-    const originalSorted = [...roles].sort(
+    const originalSorted = roles.toSorted(
         (a, b): number => b.position - a.position,
     );
     const hasOrderChanged = localRoles.some(
@@ -62,7 +62,7 @@ export const RoleNavbar = ({
 
     const handleReset = (): void => {
         setLocalRoles(
-            [...roles].sort((a, b): number => b.position - a.position),
+            roles.toSorted((a, b): number => b.position - a.position),
         );
     };
 

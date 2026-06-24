@@ -17,12 +17,12 @@ import { DefaultBackground } from '@/ui/components/layout/DefaultBackground';
 export const ResetPassword = () => {
     const navigate = useNavigate();
     const location = useLocation();
+    const { hash } = location;
     const token = useMemo((): string => {
-        const hash = location.hash;
         if (!hash) return '';
         const params = new URLSearchParams(hash.substring(1));
         return params.get('token') ?? '';
-    }, [location.hash]);
+    }, [hash]);
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [status, setStatus] = useState<{

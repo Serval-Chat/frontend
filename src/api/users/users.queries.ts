@@ -22,7 +22,7 @@ export const useMe = (): UseQueryResult<User, Error> =>
         enabled: hasAuthToken(),
     });
 
-const isValidUserId = (id: string): boolean => /^[a-f\d]{24}$/i.test(id);
+const isValidUserId = (id: string): boolean => /^\d{19}$/.test(id);
 
 export const useUserById = (
     id: string,

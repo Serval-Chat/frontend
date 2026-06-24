@@ -1,7 +1,7 @@
 import React, {
     createContext,
+    use,
     useCallback,
-    useContext,
     useEffect,
     useMemo,
     useState,
@@ -273,7 +273,7 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const useTheme = (): ThemeContextType => {
-    const context = useContext(ThemeContext);
+    const context = use(ThemeContext);
     if (!context) {
         throw new Error('useTheme must be used within a ThemeProvider');
     }

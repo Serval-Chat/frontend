@@ -131,7 +131,7 @@ export const FriendListMain = React.memo(() => {
 
     const sortedFriends = React.useMemo(
         () =>
-            [...filteredFriends].sort((a, b) => {
+            filteredFriends.toSorted((a, b) => {
                 const nameA = (a.displayName || a.username).toLowerCase();
                 const nameB = (b.displayName || b.username).toLowerCase();
                 return nameA.localeCompare(nameB);

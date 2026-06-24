@@ -65,10 +65,8 @@ export class DosFileSystem {
             .filter(
                 (entry): boolean =>
                     entry.path !== resolved.directory &&
-                    this.parentPath(entry.path) === resolved.directory,
-            )
-            .filter((entry): boolean =>
-                this.matchesPattern(entry.name, resolved.pattern),
+                    this.parentPath(entry.path) === resolved.directory &&
+                    this.matchesPattern(entry.name, resolved.pattern),
             )
             .sort((a, b): number => {
                 if (a.type !== b.type) return a.type === 'directory' ? -1 : 1;
@@ -232,7 +230,7 @@ export class DosFileSystem {
                 if (op === '+') attributes.add(attribute);
                 else attributes.delete(attribute);
             }
-            entry.attributes = [...attributes].sort() as DosAttribute[];
+            entry.attributes = [...attributes].toSorted() as DosAttribute[];
             entry.modifiedAt = now();
         }
         this.save();

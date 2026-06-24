@@ -115,7 +115,8 @@ export function useMessageData(
             .filter((r): r is Role => !!r);
         if (!roles.length) return undefined;
 
-        return roles.sort((a, b): number => b.position - a.position)[0];
+        const maxPosition = Math.max(...roles.map((r): number => r.position));
+        return roles.find((r): boolean => r.position === maxPosition);
     }, [message.interaction, fullMemberMap, roleMap]);
 
     return {

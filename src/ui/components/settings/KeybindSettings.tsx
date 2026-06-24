@@ -34,10 +34,11 @@ const findCollisions = (
     const binding = keybinds[actionId];
     if (!binding) return [];
 
-    return KEYBIND_ACTIONS.filter(
-        (action): boolean =>
-            action.id !== actionId && sameBinding(binding, keybinds[action.id]),
-    ).map((action): string => action.label);
+    return KEYBIND_ACTIONS.flatMap((action): string[] =>
+        action.id !== actionId && sameBinding(binding, keybinds[action.id])
+            ? [action.label]
+            : [],
+    );
 };
 
 export const KeybindSettings = () => {

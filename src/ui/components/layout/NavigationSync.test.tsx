@@ -53,7 +53,7 @@ describe('NavigationSync', (): void => {
     });
 
     it('navigates to server root when channelId is invalid', (): void => {
-        const validServerId = '507f1f77bcf86cd799439011';
+        const validServerId = '0327554478565752811';
         vi.mocked(useLocation).mockReturnValue({
             pathname: `/chat/@server/${validServerId}/channel/invalid`,
         } as never);
@@ -71,8 +71,8 @@ describe('NavigationSync', (): void => {
     });
 
     it('navigates to channel root when messageId is invalid', (): void => {
-        const validServerId = '507f1f77bcf86cd799439011';
-        const validChannelId = '507f1f77bcf86cd799439012';
+        const validServerId = '0327554478565752811';
+        const validChannelId = '0327554478565752812';
         vi.mocked(useLocation).mockReturnValue({
             pathname: `/chat/@server/${validServerId}/channel/${validChannelId}/message/invalid`,
         } as never);
@@ -104,7 +104,7 @@ describe('NavigationSync', (): void => {
     });
 
     it('clears channel context on server self-roles pages', (): void => {
-        const validServerId = '507f1f77bcf86cd799439011';
+        const validServerId = '0327554478565752811';
         vi.mocked(useLocation).mockReturnValue({
             pathname: `/chat/@server/${validServerId}/self-roles`,
         } as never);
@@ -112,7 +112,7 @@ describe('NavigationSync', (): void => {
             serverId: validServerId,
         });
         vi.mocked(useAppSelector).mockReturnValue({
-            selectedChannelId: '507f1f77bcf86cd799439012',
+            selectedChannelId: '0327554478565752812',
             selectedServerId: validServerId,
         } as never);
 
@@ -123,7 +123,7 @@ describe('NavigationSync', (): void => {
     });
 
     it('does not leave the restored last channel active when entering self-roles from another server', (): void => {
-        const validServerId = '507f1f77bcf86cd799439011';
+        const validServerId = '0327554478565752811';
         vi.mocked(useLocation).mockReturnValue({
             pathname: `/chat/@server/${validServerId}/self-roles`,
         } as never);
@@ -131,8 +131,8 @@ describe('NavigationSync', (): void => {
             serverId: validServerId,
         });
         vi.mocked(useAppSelector).mockReturnValue({
-            selectedChannelId: '507f1f77bcf86cd799439012',
-            selectedServerId: '507f1f77bcf86cd799439013',
+            selectedChannelId: '0327554478565752812',
+            selectedServerId: '0327554478565752813',
         } as never);
 
         render(<NavigationSync />);

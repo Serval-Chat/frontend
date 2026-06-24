@@ -12,6 +12,7 @@ export interface InputProps extends Omit<
     React.InputHTMLAttributes<HTMLInputElement>,
     'size' | 'style'
 > {
+    ref?: React.Ref<HTMLInputElement>;
     variant?: InputVariant;
     size?: InputSize;
     minWidth?: number | string;
@@ -89,140 +90,136 @@ const stepperBtnStyle: CSSProperties = {
     transition: 'background-color 0.15s, color 0.15s',
 };
 
-const Input = React.forwardRef<HTMLInputElement, InputProps>(
-    (
-        {
-            variant = 'default',
-            size = 'md',
-            type,
-            minWidth,
-            maxWidth,
-            disabled,
-            icon,
-            style,
-            ...props
-        },
+const Input = ({
+    variant = 'default',
+    size = 'md',
+    type,
+    minWidth,
+    maxWidth,
+    disabled,
+    icon,
+    style,
+    ref,
+    ...props
+}: InputProps) => {
+    const internalRef = React.useRef<HTMLInputElement>(null);
+    const [stepperVisible, setStepperVisible] = useState(false);
+
+    React.useImperativeHandle(
         ref,
-    ) => {
-        const internalRef = React.useRef<HTMLInputElement>(null);
-        const [stepperVisible, setStepperVisible] = useState(false);
+        (): HTMLInputElement => internalRef.current!,
+    );
 
-        React.useImperativeHandle(
-            ref,
-            (): HTMLInputElement => internalRef.current!,
-        );
+    const isNumber = type === 'number';
 
-        const isNumber = type === 'number';
+    const handleIncrement = (): void => {
+        if (internalRef.current) {
+            internalRef.current.stepUp();
+            internalRef.current.dispatchEvent(
+                new Event('input', { bubbles: true }),
+            );
+        }
+    };
 
-        const handleIncrement = (): void => {
-            if (internalRef.current) {
-                internalRef.current.stepUp();
-                internalRef.current.dispatchEvent(
-                    new Event('input', { bubbles: true }),
-                );
+    const handleDecrement = (): void => {
+        if (internalRef.current) {
+            internalRef.current.stepDown();
+            internalRef.current.dispatchEvent(
+                new Event('input', { bubbles: true }),
+            );
+        }
+    };
+
+    return (
+        <div
+            style={{
+                position: 'relative',
+                display: 'flex',
+                width: '100%',
+                alignItems: 'center',
+                minWidth,
+                maxWidth,
+            }}
+            onMouseEnter={
+                isNumber && !disabled
+                    ? () => setStepperVisible(true)
+                    : undefined
             }
-        };
-
-        const handleDecrement = (): void => {
-            if (internalRef.current) {
-                internalRef.current.stepDown();
-                internalRef.current.dispatchEvent(
-                    new Event('input', { bubbles: true }),
-                );
+            onMouseLeave={
+                isNumber && !disabled
+                    ? () => setStepperVisible(false)
+                    : undefined
             }
-        };
-
-        return (
-            <div
-                style={{
-                    position: 'relative',
-                    display: 'flex',
-                    width: '100%',
-                    alignItems: 'center',
-                    minWidth,
-                    maxWidth,
-                }}
-                onMouseEnter={
-                    isNumber && !disabled
-                        ? () => setStepperVisible(true)
-                        : undefined
-                }
-                onMouseLeave={
-                    isNumber && !disabled
-                        ? () => setStepperVisible(false)
-                        : undefined
-                }
-            >
-                {icon && (
-                    <span
-                        style={{
-                            pointerEvents: 'none',
-                            position: 'absolute',
-                            left: '0.75rem',
-                            display: 'flex',
-                            alignItems: 'center',
-                            color: colors.mutedForeground,
-                        }}
-                    >
-                        {icon}
-                    </span>
-                )}
-                <input
-                    disabled={disabled || undefined}
-                    ref={internalRef}
+        >
+            {icon && (
+                <span
                     style={{
-                        ...baseInputStyle,
-                        ...variantInputStyle[variant],
-                        ...sizeInputStyle[size],
-                        ...(disabled
-                            ? { cursor: 'not-allowed', opacity: 0.5 }
-                            : {}),
-                        ...(isNumber
-                            ? {
-                                  appearance: 'textfield',
-                                  paddingRight: '2.25rem',
-                              }
-                            : {}),
-                        ...(icon ? { paddingLeft: '2.25rem' } : {}),
-                        minWidth: 'unset',
-                        maxWidth: 'unset',
-                        ...style,
+                        pointerEvents: 'none',
+                        position: 'absolute',
+                        left: '0.75rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        color: colors.mutedForeground,
                     }}
-                    type={type}
-                    {...props}
-                />
-                {isNumber && !disabled && (
-                    <div
-                        style={{
-                            position: 'absolute',
-                            right: '4px',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            gap: '1px',
-                            opacity: stepperVisible ? 1 : 0,
-                            transition: 'opacity 0.2s',
-                        }}
+                >
+                    {icon}
+                </span>
+            )}
+            <input
+                disabled={disabled || undefined}
+                ref={internalRef}
+                style={{
+                    ...baseInputStyle,
+                    ...variantInputStyle[variant],
+                    ...sizeInputStyle[size],
+                    ...(disabled
+                        ? { cursor: 'not-allowed', opacity: 0.5 }
+                        : {}),
+                    ...(isNumber
+                        ? {
+                              appearance: 'textfield',
+                              paddingRight: '2.25rem',
+                          }
+                        : {}),
+                    ...(icon ? { paddingLeft: '2.25rem' } : {}),
+                    minWidth: 'unset',
+                    maxWidth: 'unset',
+                    ...style,
+                }}
+                type={type}
+                {...props}
+            />
+            {isNumber && !disabled && (
+                <div
+                    style={{
+                        position: 'absolute',
+                        right: '4px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '1px',
+                        opacity: stepperVisible ? 1 : 0,
+                        transition: 'opacity 0.2s',
+                    }}
+                >
+                    <button
+                        style={stepperBtnStyle}
+                        type="button"
+                        onClick={handleIncrement}
                     >
-                        <button
-                            style={stepperBtnStyle}
-                            type="button"
-                            onClick={handleIncrement}
-                        >
-                            <ChevronUp size={14} />
-                        </button>
-                        <button
-                            style={stepperBtnStyle}
-                            type="button"
-                            onClick={handleDecrement}
-                        >
-                            <ChevronDown size={14} />
-                        </button>
-                    </div>
-                )}
-            </div>
-        );
-    },
-);
+                        <ChevronUp size={14} />
+                    </button>
+                    <button
+                        style={stepperBtnStyle}
+                        type="button"
+                        onClick={handleDecrement}
+                    >
+                        <ChevronDown size={14} />
+                    </button>
+                </div>
+            )}
+        </div>
+    );
+};
 Input.displayName = 'Input';
 
 export { Input };

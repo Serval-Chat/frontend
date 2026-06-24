@@ -895,8 +895,7 @@ export const AdminUserDetail = ({
                                         weight="bold"
                                     >
                                         {Object.entries(adminData.permissions)
-                                            .filter(([_, v]) => v)
-                                            .map(([k]): string => k)
+                                            .flatMap(([k, v]) => (v ? [k] : []))
                                             .join(', ') || 'None'}
                                     </Text>
                                 </div>

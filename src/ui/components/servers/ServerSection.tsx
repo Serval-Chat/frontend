@@ -98,7 +98,7 @@ export const ServerSection = () => {
 
                 const lastChannelId =
                     lastOpenedChannelByServer[selectedServerId];
-                const sortedChannels = [...channels].sort(
+                const sortedChannels = channels.toSorted(
                     (a, b): number => a.position - b.position,
                 );
                 const firstChannel = sortedChannels.find(

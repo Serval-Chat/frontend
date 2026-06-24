@@ -346,9 +346,8 @@ function TimeSpinner({
 }
 
 function DateTimePicker({ onConfirm }: { onConfirm: (iso: string) => void }) {
-    const now = new Date();
-    const [viewYear, setViewYear] = useState(now.getFullYear());
-    const [viewMonth, setViewMonth] = useState(now.getMonth());
+    const [viewYear, setViewYear] = useState(() => new Date().getFullYear());
+    const [viewMonth, setViewMonth] = useState(() => new Date().getMonth());
     const [selDay, setSelDay] = useState<number | null>(null);
     const [hour, setHour] = useState(0);
     const [minute, setMinute] = useState(0);
@@ -448,9 +447,11 @@ function DateTimePicker({ onConfirm }: { onConfirm: (iso: string) => void }) {
                     gap: 2,
                 }}
             >
-                {Array.from({ length: firstDow }).map((_, i) => (
-                    <span key={`g${i}`} />
-                ))}
+                {['gap-0', 'gap-1', 'gap-2', 'gap-3', 'gap-4', 'gap-5', 'gap-6']
+                    .slice(0, firstDow)
+                    .map((key) => (
+                        <span key={key} />
+                    ))}
                 {Array.from({ length: daysInMonth }, (_, i) => i + 1).map(
                     (d) => {
                         const sel = d === selDay;
@@ -938,6 +939,7 @@ export function SearchFilterPlugin({
 }
 
 // exported helper: insert a text token into the search editor from outside the Lexical context
+// eslint-disable-next-line react-refresh/only-export-components
 export function insertSearchToken(editor: LexicalEditor, token: string): void {
     editor.update(() => {
         const root = $getRoot();

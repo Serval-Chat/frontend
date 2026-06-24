@@ -544,7 +544,6 @@ export const MainChat = ({
                                     <Button
                                         square
                                         aria-label="Scroll to bottom"
-                                        children={null}
                                         icon={ChevronDown}
                                         size="md"
                                         style={{
@@ -557,7 +556,9 @@ export const MainChat = ({
                                         onClick={(): void =>
                                             messagesListRef.current?.scrollToBottom()
                                         }
-                                    />
+                                    >
+                                        {null}
+                                    </Button>
                                 )}
                                 <TypingIndicator
                                     canBypassSlowMode={canBypassSlowMode}
