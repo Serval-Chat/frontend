@@ -63,7 +63,7 @@ export const CreatePollModal = ({
     onClose,
     onSubmit,
 }: CreatePollModalProps) => {
-    const [prevIsOpen, setPrevIsOpen] = useState(isOpen);
+    const [syncedIsOpen, setSyncedIsOpen] = useState(isOpen);
     const [title, setTitle] = useState('');
     const [options, setOptions] = useState<PollOptionInput[]>([
         { id: '1', text: '' },
@@ -83,8 +83,8 @@ export const CreatePollModal = ({
     const emojiPickerRef = useRef<HTMLDivElement>(null);
     const triggerRefs = useRef<Record<string, HTMLButtonElement | null>>({});
 
-    if (isOpen !== prevIsOpen) {
-        setPrevIsOpen(isOpen);
+    if (isOpen !== syncedIsOpen) {
+        setSyncedIsOpen(isOpen);
 
         if (!isOpen) {
             setTitle('');

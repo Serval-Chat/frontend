@@ -312,10 +312,15 @@ const UserItemInner = React.memo(
                         (state: RootState): Record<string, string[]> =>
                             state.voice.voiceParticipants,
                         (vp): string | undefined => {
+                            const userToChannel = new Map<string, string>();
                             for (const [cid, userIds] of Object.entries(vp)) {
-                                if (userIds?.includes(userId)) return cid;
+                                if (userIds) {
+                                    for (const uid of userIds) {
+                                        userToChannel.set(uid, cid);
+                                    }
+                                }
                             }
-                            return undefined;
+                            return userToChannel.get(userId);
                         },
                     ),
                 [userId],
@@ -549,6 +554,7 @@ const UserItemInner = React.memo(
                                 </span>
                             </div>
                             <input
+                                aria-label="User volume"
                                 className="w-full cursor-pointer accent-primary"
                                 max="2"
                                 min="0"

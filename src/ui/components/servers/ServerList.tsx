@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 
 import { Reorder, useDragControls } from 'framer-motion';
 import { Check, X } from 'lucide-react';
@@ -111,11 +111,10 @@ export const ServerList = () => {
     }, [me, servers]);
     const [items, setItems] =
         React.useState<(string | IServerFolder)[]>(orderedItems);
-    const [prevOrderedItems, setPrevOrderedItems] =
-        React.useState(orderedItems);
+    const [syncedOrderedItems, setSyncedOrderedItems] = useState(orderedItems);
 
-    if (orderedItems !== prevOrderedItems) {
-        setPrevOrderedItems(orderedItems);
+    if (orderedItems !== syncedOrderedItems) {
+        setSyncedOrderedItems(orderedItems);
         setItems(orderedItems);
     }
 
@@ -209,20 +208,23 @@ export const ServerList = () => {
         [items, mobileReorderItem, removePickedItem, updateSettings],
     );
 
-    const handleServerClick = (serverId: string): void => {
-        const lastChannelId = lastOpenedChannelByServer[serverId];
-        const isMobile = window.innerWidth < 768;
+    const handleServerClick = useCallback(
+        (serverId: string): void => {
+            const lastChannelId = lastOpenedChannelByServer[serverId];
+            const isMobile = window.innerWidth < 768;
 
-        React.startTransition((): void => {
-            if (!isMobile && lastChannelId) {
-                void navigate(
-                    `/chat/@server/${serverId}/channel/${lastChannelId}`,
-                );
-            } else {
-                void navigate(`/chat/@server/${serverId}`);
-            }
-        });
-    };
+            React.startTransition((): void => {
+                if (!isMobile && lastChannelId) {
+                    void navigate(
+                        `/chat/@server/${serverId}/channel/${lastChannelId}`,
+                    );
+                } else {
+                    void navigate(`/chat/@server/${serverId}`);
+                }
+            });
+        },
+        [lastOpenedChannelByServer, navigate],
+    );
 
     if (isLoading || !servers) {
         return (

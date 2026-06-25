@@ -53,11 +53,10 @@ export const KeybindSettings = () => {
         [user?.settings?.keybinds],
     );
 
-    const [prevSavedKeybinds, setPrevSavedKeybinds] =
-        React.useState(savedKeybinds);
+    const prevSavedKeybindsRef = React.useRef(savedKeybinds);
 
-    if (savedKeybinds !== prevSavedKeybinds) {
-        setPrevSavedKeybinds(savedKeybinds);
+    if (savedKeybinds !== prevSavedKeybindsRef.current) {
+        prevSavedKeybindsRef.current = savedKeybinds;
         setDraft(savedKeybinds);
     }
 

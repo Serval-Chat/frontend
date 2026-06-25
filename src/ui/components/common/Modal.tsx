@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, m } from 'framer-motion';
 import { X } from 'lucide-react';
 import { createPortal } from 'react-dom';
 
@@ -38,10 +38,15 @@ export const Modal = ({
     wrapperClassName,
     zIndex,
 }: ModalProps): React.ReactPortal | null => {
+    const onCloseRef = React.useRef(onClose);
+    React.useLayoutEffect(() => {
+        onCloseRef.current = onClose;
+    });
+
     React.useEffect((): (() => void) => {
         const handleKeyDown = (e: KeyboardEvent): void => {
             if (e.key === 'Escape' && isOpen) {
-                onClose();
+                onCloseRef.current();
             }
         };
 
@@ -54,7 +59,7 @@ export const Modal = ({
             window.removeEventListener('keydown', handleKeyDown);
             document.body.style.overflow = '';
         };
-    }, [isOpen, onClose]);
+    }, [isOpen]);
 
     if (typeof document === 'undefined') return null;
 
@@ -70,14 +75,14 @@ export const Modal = ({
                     )}
                     style={{ zIndex }}
                 >
-                    <motion.div
+                    <m.div
                         animate={{ opacity: 1 }}
                         className="absolute inset-0 bg-black/60 backdrop-blur-sm"
                         exit={{ opacity: 0 }}
                         initial={{ opacity: 0 }}
                         onClick={onClose}
                     />
-                    <motion.div
+                    <m.div
                         animate={
                             fullScreen
                                 ? { opacity: 1 }
@@ -145,7 +150,7 @@ export const Modal = ({
                         >
                             {children}
                         </div>
-                    </motion.div>
+                    </m.div>
                 </div>
             )}
         </AnimatePresence>,

@@ -197,12 +197,11 @@ export const GifPicker = ({ onSelect, onClose }: GifPickerProps) => {
             ref={pickerRef}
             style={{ width: `${size.width}px`, height: `${size.height}px` }}
         >
-            <div
+            <button
                 aria-label="Resize GIF picker"
                 className="absolute -top-1 -left-1 z-[60] flex h-6 w-6 cursor-nw-resize items-center justify-center text-muted-foreground/30 transition-colors hover:text-primary/50"
-                role="button"
-                tabIndex={0}
                 title="Resize"
+                type="button"
                 onKeyDown={(e): void => {
                     if (e.key === 'Enter' || e.key === ' ') e.preventDefault();
                 }}
@@ -211,7 +210,7 @@ export const GifPicker = ({ onSelect, onClose }: GifPickerProps) => {
                 <div className="mr-1 mb-1 rotate-45">
                     <GripHorizontal className="h-3 w-3" />
                 </div>
-            </div>
+            </button>
 
             <Box className="flex shrink-0 items-center justify-between border-b border-border-subtle p-3">
                 <Box className="flex gap-1">

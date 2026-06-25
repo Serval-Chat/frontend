@@ -208,10 +208,8 @@ export const MessageInput = ({
     const [hasText, setHasText] = useState(false);
     const [currentInputText, setCurrentInputText] = useState('');
     const [editor, setEditor] = useState<LexicalEditor | null>(null);
-    const [isMentionAutocompleteOpen, setIsMentionAutocompleteOpen] =
-        useState(false);
-    const [isSlashAutocompleteOpen, setIsSlashAutocompleteOpen] =
-        useState(false);
+    const isMentionOpenRef = useRef(false);
+    const isSlashOpenRef = useRef(false);
     const [slashChipState, setSlashChipState] = useState<{
         commandName: string;
         commandId?: string;
@@ -785,10 +783,15 @@ export const MessageInput = ({
         ],
     );
 
-    useEffect((): void => {
-        isAutocompleteOpenRef.current =
-            isMentionAutocompleteOpen || isSlashAutocompleteOpen;
-    }, [isMentionAutocompleteOpen, isSlashAutocompleteOpen]);
+    const handleMentionOpenChange = useCallback((isOpen: boolean): void => {
+        isMentionOpenRef.current = isOpen;
+        isAutocompleteOpenRef.current = isOpen || isSlashOpenRef.current;
+    }, []);
+
+    const handleSlashOpenChange = useCallback((isOpen: boolean): void => {
+        isSlashOpenRef.current = isOpen;
+        isAutocompleteOpenRef.current = isMentionOpenRef.current || isOpen;
+    }, []);
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
         if (e.target.files) {
@@ -869,6 +872,70 @@ export const MessageInput = ({
         isUnknownReplyingUser && fetchedReplyingUser
             ? fetchedReplyingUser
             : replyingTo?.user;
+
+    const handleCustomEmojiSelect = useCallback(
+        (emoji: { id: string; name: string; url: string }): void => {
+            editor?.update((): void => {
+                const selection = $getSelection();
+                if ($isRangeSelection(selection)) {
+                    const chip = $createChipNode('emoji', {
+                        id: emoji.id,
+                        label: emoji.name,
+                        imageUrl: emoji.url,
+                    });
+                    selection.insertNodes([chip]);
+                }
+            });
+            editor?.focus();
+        },
+        [editor],
+    );
+
+    const handleEmojiSelect = useCallback(
+        (emoji: string): void => {
+            editor?.update((): void => {
+                const selection = $getSelection();
+                if ($isRangeSelection(selection)) {
+                    selection.insertNodes([
+                        $createChipNode('unicode-emoji', {
+                            id: emoji,
+                        }),
+                    ]);
+                }
+            });
+            editor?.focus();
+        },
+        [editor],
+    );
+
+    const messageInputContentEditable = useMemo(
+        () => (
+            <ContentEditable
+                className="custom-scrollbar h-full max-h-[200px] w-full resize-none overflow-y-auto px-3 py-2 text-sm text-foreground outline-none"
+                onKeyDown={(e): void => {
+                    if (e.key === 'ArrowUp' && !hasText) {
+                        const lastMessage = findLastMyMessage;
+                        if (lastMessage) {
+                            e.preventDefault();
+                            const editEvent = new CustomEvent(
+                                'editLastMessage',
+                                {
+                                    detail: {
+                                        messageId: lastMessage.id,
+                                        serverId: lastMessage.serverId,
+                                        channelId: lastMessage.channelId,
+                                        receiverId: lastMessage.receiverId,
+                                    },
+                                },
+                            );
+                            window.dispatchEvent(editEvent);
+                        }
+                    }
+                }}
+            />
+        ),
+        [hasText, findLastMyMessage],
+    );
 
     if (isTimedOut) {
         return (
@@ -990,6 +1057,7 @@ export const MessageInput = ({
             <Box className="relative flex items-center gap-2 p-2">
                 <input
                     multiple
+                    aria-label="Attach files"
                     ref={fileInputRef}
                     style={{ display: 'none' }}
                     type="file"
@@ -1018,37 +1086,7 @@ export const MessageInput = ({
                         <EditorBridge onReady={setEditor} />
                         <RichTextPlugin
                             ErrorBoundary={LexicalErrorBoundary}
-                            contentEditable={
-                                <ContentEditable
-                                    className="custom-scrollbar h-full max-h-[200px] w-full resize-none overflow-y-auto px-3 py-2 text-sm text-foreground outline-none"
-                                    onKeyDown={(e): void => {
-                                        if (e.key === 'ArrowUp' && !hasText) {
-                                            const lastMessage =
-                                                findLastMyMessage;
-                                            if (lastMessage) {
-                                                e.preventDefault();
-                                                const editEvent =
-                                                    new CustomEvent(
-                                                        'editLastMessage',
-                                                        {
-                                                            detail: {
-                                                                messageId:
-                                                                    lastMessage.id,
-                                                                serverId:
-                                                                    lastMessage.serverId,
-                                                                channelId:
-                                                                    lastMessage.channelId,
-                                                                receiverId:
-                                                                    lastMessage.receiverId,
-                                                            },
-                                                        },
-                                                    );
-                                                window.dispatchEvent(editEvent);
-                                            }
-                                        }
-                                    }}
-                                />
-                            }
+                            contentEditable={messageInputContentEditable}
                             placeholder={
                                 <div className="pointer-events-none absolute top-[9px] left-3 max-w-[calc(100%-24px)] truncate text-sm text-placeholder select-none">
                                     {getPlaceholder()}
@@ -1070,15 +1108,13 @@ export const MessageInput = ({
                             roles={roles}
                             serverEmojis={allServerEmojis}
                             serverId={selectedServerId || undefined}
-                            onOpenChange={(isOpen): void => {
-                                setIsMentionAutocompleteOpen(isOpen);
-                            }}
+                            onOpenChange={handleMentionOpenChange}
                         />
                         <LexicalSlashCommandPlugin
                             commands={serverCommands}
                             enabled={isServerContextReady}
                             members={members}
-                            onOpenChange={setIsSlashAutocompleteOpen}
+                            onOpenChange={handleSlashOpenChange}
                         />
                         <OnChangePlugin
                             onChange={(editorState): void => {
@@ -1309,33 +1345,8 @@ export const MessageInput = ({
                     >
                         <EmojiPicker
                             customCategories={customCategories}
-                            onCustomEmojiSelect={(emoji): void => {
-                                editor?.update((): void => {
-                                    const selection = $getSelection();
-                                    if ($isRangeSelection(selection)) {
-                                        const chip = $createChipNode('emoji', {
-                                            id: emoji.id,
-                                            label: emoji.name,
-                                            imageUrl: emoji.url,
-                                        });
-                                        selection.insertNodes([chip]);
-                                    }
-                                });
-                                editor?.focus();
-                            }}
-                            onEmojiSelect={(emoji: string): void => {
-                                editor?.update((): void => {
-                                    const selection = $getSelection();
-                                    if ($isRangeSelection(selection)) {
-                                        selection.insertNodes([
-                                            $createChipNode('unicode-emoji', {
-                                                id: emoji,
-                                            }),
-                                        ]);
-                                    }
-                                });
-                                editor?.focus();
-                            }}
+                            onCustomEmojiSelect={handleCustomEmojiSelect}
+                            onEmojiSelect={handleEmojiSelect}
                         />
                     </React.Suspense>
                 </div>

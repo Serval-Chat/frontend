@@ -34,8 +34,8 @@ export const NTConsole = () => {
 
     const [history, setHistory] = useState(() => terminal.snapshot());
     const [currentInput, setCurrentInput] = useState<string>('');
-    const [commandHistory, setCommandHistory] = useState<string[]>([]);
-    const [historyIndex, setHistoryIndex] = useState<number>(-1);
+    const commandHistoryRef = useRef<string[]>([]);
+    const historyIndexRef = useRef<number>(-1);
     const [isCommandRunning, setIsCommandRunning] = useState<boolean>(false);
     const [activeProgram, setActiveProgram] = useState<ConsoleProgram | null>(
         null,
@@ -162,8 +162,8 @@ export const NTConsole = () => {
             return;
         }
 
-        setCommandHistory((prev): string[] => [...prev, input]);
-        setHistoryIndex(-1);
+        commandHistoryRef.current = [...commandHistoryRef.current, input];
+        historyIndexRef.current = -1;
         setIsCommandRunning(true);
 
         void (async (): Promise<void> => {
@@ -221,26 +221,26 @@ export const NTConsole = () => {
             setCurrentInput('');
         } else if (e.key === 'ArrowUp') {
             e.preventDefault();
-            if (commandHistory.length === 0) return;
+            if (commandHistoryRef.current.length === 0) return;
 
             const newIndex =
-                historyIndex === -1
-                    ? commandHistory.length - 1
-                    : Math.max(0, historyIndex - 1);
+                historyIndexRef.current === -1
+                    ? commandHistoryRef.current.length - 1
+                    : Math.max(0, historyIndexRef.current - 1);
 
-            setHistoryIndex(newIndex);
-            setCurrentInput(commandHistory[newIndex]);
+            historyIndexRef.current = newIndex;
+            setCurrentInput(commandHistoryRef.current[newIndex]);
         } else if (e.key === 'ArrowDown') {
             e.preventDefault();
-            if (historyIndex === -1) return;
+            if (historyIndexRef.current === -1) return;
 
-            const newIndex = historyIndex + 1;
-            if (newIndex >= commandHistory.length) {
-                setHistoryIndex(-1);
+            const newIndex = historyIndexRef.current + 1;
+            if (newIndex >= commandHistoryRef.current.length) {
+                historyIndexRef.current = -1;
                 setCurrentInput('');
             } else {
-                setHistoryIndex(newIndex);
-                setCurrentInput(commandHistory[newIndex]);
+                historyIndexRef.current = newIndex;
+                setCurrentInput(commandHistoryRef.current[newIndex]);
             }
         }
     };
@@ -260,11 +260,17 @@ export const NTConsole = () => {
                 type: 'debugOptions/toggleConsole';
             } => dispatch(toggleConsole())}
         >
-            {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
             <div
+                aria-label="Terminal console"
                 className="flex min-h-0 flex-1 flex-col bg-black font-mono text-[11px] leading-[13px] text-[#c0c0c0]"
                 ref={consoleRef}
+                role="button"
+                tabIndex={0}
                 onClick={handleConsoleClick}
+                onKeyDown={(e): void => {
+                    if (e.key === 'Enter' || e.key === ' ')
+                        handleConsoleClick();
+                }}
             >
                 <span
                     aria-hidden="true"
@@ -313,6 +319,7 @@ export const NTConsole = () => {
                     )}
 
                     <input
+                        aria-label="Terminal input"
                         className="pointer-events-none absolute h-0 w-0 opacity-0"
                         disabled={isCommandRunning}
                         ref={inputRef}

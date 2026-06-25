@@ -9,6 +9,7 @@ import { APP_LOCALE } from '@/utils/locale';
 import { ParserPresets, parseText } from '@/utils/textParser/parser';
 
 const LAST_UPDATED_RE = /<LAST_UPDATED>(\d+)<\/LAST_UPDATED>\n?/;
+const CURRENT_YEAR = new Date().getFullYear();
 
 function extractLastUpdated(raw: string): {
     ts: number | null;
@@ -89,8 +90,7 @@ export const Tos = (): ReactNode => {
 
             <footer className="mx-8 border-t border-border-subtle py-8 text-center text-sm text-muted-foreground">
                 <p>
-                    &copy; {new Date().getFullYear()} Serchat. Made with love
-                    for everyone.
+                    &copy; {CURRENT_YEAR} Serchat. Made with love for everyone.
                 </p>
             </footer>
         </Box>

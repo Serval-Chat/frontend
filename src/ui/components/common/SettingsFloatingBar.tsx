@@ -1,6 +1,6 @@
 import type { CSSProperties } from 'react';
 
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, m } from 'framer-motion';
 import { AlertTriangle } from 'lucide-react';
 
 import { Button } from '@/ui/components/common/Button';
@@ -39,7 +39,7 @@ export const SettingsFloatingBar = ({
 }: SettingsFloatingBarProps) => (
     <AnimatePresence>
         {isVisible && (
-            <motion.div
+            <m.div
                 animate={{ y: 0, opacity: 1 }}
                 aria-live="polite"
                 className={cn(
@@ -98,7 +98,7 @@ export const SettingsFloatingBar = ({
                         </Button>
                     </div>
                 </div>
-            </motion.div>
+            </m.div>
         )}
     </AnimatePresence>
 );

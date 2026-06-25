@@ -14,7 +14,8 @@ export function useTypingIndicator(): {
     clearTypingUsers: () => void;
 } {
     const [typingUsers, setTypingUsers] = useState<TypingUser[]>([]);
-    const timeoutsRef = useRef<Map<string, number>>(new Map());
+    const timeoutsRef = useRef<Map<string, number> | null>(null);
+    if (timeoutsRef.current === null) timeoutsRef.current = new Map();
 
     const addTypingUser = useCallback(
         (userId: string, username: string): void => {
@@ -27,7 +28,7 @@ export function useTypingIndicator(): {
             });
 
             // Clear existing timeout for this user
-            const existingTimeout = timeoutsRef.current.get(userId);
+            const existingTimeout = timeoutsRef.current!.get(userId);
             if (existingTimeout) {
                 window.clearTimeout(existingTimeout);
             }
@@ -37,24 +38,24 @@ export function useTypingIndicator(): {
                 setTypingUsers((prev): TypingUser[] =>
                     prev.filter((u): boolean => u.userId !== userId),
                 );
-                timeoutsRef.current.delete(userId);
+                timeoutsRef.current!.delete(userId);
             }, 3000);
 
-            timeoutsRef.current.set(userId, timeout);
+            timeoutsRef.current!.set(userId, timeout);
         },
         [],
     );
 
     const clearTypingUsers = useCallback((): void => {
         setTypingUsers([]);
-        timeoutsRef.current.forEach((timeout): void =>
+        timeoutsRef.current!.forEach((timeout): void =>
             window.clearTimeout(timeout),
         );
-        timeoutsRef.current.clear();
+        timeoutsRef.current!.clear();
     }, []);
 
     useEffect((): (() => void) => {
-        const timeouts = timeoutsRef.current;
+        const timeouts = timeoutsRef.current!;
         return (): void => {
             // Cleanup all timeouts on unmount
             timeouts.forEach((timeout): void => window.clearTimeout(timeout));

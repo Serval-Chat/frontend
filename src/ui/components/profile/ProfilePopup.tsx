@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, m } from 'framer-motion';
 import { createPortal } from 'react-dom';
 
 import {
@@ -220,7 +220,7 @@ const ProfilePopupContent = ({
 
     return (
         <Box className="pointer-events-none fixed inset-0 z-[9999]">
-            <motion.div
+            <m.div
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 className="pointer-events-auto"
                 exit={{ opacity: 0, scale: 0.95, y: 10 }}
@@ -269,7 +269,7 @@ const ProfilePopupContent = ({
                     user={user as User}
                     userId={userId}
                 />
-            </motion.div>
+            </m.div>
         </Box>
     );
 };

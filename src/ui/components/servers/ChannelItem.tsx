@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 import {
     Copy,
     HeadphoneOff,
@@ -79,7 +79,7 @@ export const ChannelItem = React.memo(
 
         return (
             <div className="mb-[1px] flex flex-col">
-                <motion.div
+                <m.div
                     className={cn(
                         'relative select-none',
                         buttonVariants({ variant: 'ghost' }),
@@ -145,7 +145,7 @@ export const ChannelItem = React.memo(
                             />
                         )}
                     </div>
-                </motion.div>
+                </m.div>
                 {type === 'voice' &&
                     connectedUserIds &&
                     connectedUserIds.length > 0 && (
@@ -209,6 +209,7 @@ export const VoiceParticipant = React.memo(({ userId }: { userId: string }) => {
                         </span>
                     </div>
                     <input
+                        aria-label="Volume"
                         className="w-full cursor-pointer accent-primary"
                         max="2"
                         min="0"

@@ -560,6 +560,7 @@ const AppearanceSettingsForm = ({ user }: AppearanceSettingsFormProps) => {
                             <div className="grid grid-cols-1 gap-3 rounded-lg border border-border-subtle bg-bg-subtle p-4">
                                 <input
                                     accept=".css,text/css"
+                                    aria-label="Upload custom theme CSS"
                                     className="hidden"
                                     ref={customThemeFileInputRef}
                                     type="file"
@@ -867,13 +868,13 @@ const AppearanceSettingsForm = ({ user }: AppearanceSettingsFormProps) => {
                                                                         top: pickerCoords.y,
                                                                     }}
                                                                 >
-                                                                    <div
+                                                                    <button
                                                                         aria-label="Close color picker"
                                                                         className="fixed inset-0"
-                                                                        role="button"
                                                                         tabIndex={
                                                                             -1
                                                                         }
+                                                                        type="button"
                                                                         onClick={(): void =>
                                                                             setActiveColorPicker(
                                                                                 null,
@@ -931,6 +932,7 @@ const AppearanceSettingsForm = ({ user }: AppearanceSettingsFormProps) => {
                                             </span>
                                             <div className="flex items-center gap-4">
                                                 <input
+                                                    aria-label="Gradient angle"
                                                     className="h-1.5 flex-1 cursor-pointer appearance-none rounded-lg bg-bg-secondary accent-primary"
                                                     max={360}
                                                     min={0}

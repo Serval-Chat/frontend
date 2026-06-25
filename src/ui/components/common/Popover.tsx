@@ -1,6 +1,6 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useLayoutEffect, useRef } from 'react';
 
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, m } from 'framer-motion';
 import { createPortal } from 'react-dom';
 
 import { useSmartPosition } from '@/hooks/useSmartPosition';
@@ -26,6 +26,11 @@ export const Popover = ({
     padding = 16,
 }: PopoverProps): React.ReactPortal => {
     const popoverRef = useRef<HTMLDivElement>(null);
+    const onCloseRef = useRef(onClose);
+    useLayoutEffect(() => {
+        onCloseRef.current = onClose;
+    });
+
     const coords = useSmartPosition({
         isOpen,
         elementRef: popoverRef,
@@ -43,13 +48,13 @@ export const Popover = ({
                 triggerRef.current &&
                 !triggerRef.current.contains(event.target as Node)
             ) {
-                onClose();
+                onCloseRef.current();
             }
         };
 
         const handleKeyDown = (event: KeyboardEvent): void => {
             if (event.key === 'Escape') {
-                onClose();
+                onCloseRef.current();
             }
         };
 
@@ -62,12 +67,12 @@ export const Popover = ({
             document.removeEventListener('mousedown', handleClickOutside);
             document.removeEventListener('keydown', handleKeyDown);
         };
-    }, [isOpen, onClose, triggerRef]);
+    }, [isOpen, triggerRef]);
 
     return createPortal(
         <AnimatePresence>
             {isOpen && (
-                <motion.div
+                <m.div
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     className={cn(
                         'fixed z-[var(--z-index-popover)] overflow-hidden rounded-xl border border-border-subtle bg-background shadow-2xl backdrop-blur-md',
@@ -83,7 +88,7 @@ export const Popover = ({
                     transition={{ duration: 0.2, ease: 'easeOut' }}
                 >
                     {children}
-                </motion.div>
+                </m.div>
             )}
         </AnimatePresence>,
         document.body,

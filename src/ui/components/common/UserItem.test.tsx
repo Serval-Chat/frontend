@@ -108,9 +108,8 @@ vi.mock('./ContextMenu', () => ({
                             i.type !== 'divider' && i.label,
                     )
                     .map((i) => (
-                        <span
+                        <button
                             key={i.label}
-                            role="button"
                             tabIndex={0}
                             onClick={i.onClick}
                             onKeyDown={(e) => {
@@ -119,7 +118,7 @@ vi.mock('./ContextMenu', () => ({
                             }}
                         >
                             {i.label}
-                        </span>
+                        </button>
                     ))}
             </div>
         </div>

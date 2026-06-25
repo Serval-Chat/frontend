@@ -243,6 +243,7 @@ const EmbedEditor = ({
                         <Field label="Color">
                             <div className="flex h-10 items-center gap-2">
                                 <input
+                                    aria-label="Embed color"
                                     className="h-8 w-10 cursor-pointer rounded border border-border-subtle bg-transparent"
                                     type="color"
                                     value={decimalToHex(embed.color)}
@@ -732,6 +733,7 @@ export const EmbedCreator = ({
                 <div className="relative">
                     <textarea
                         readOnly
+                        aria-label="JSON output"
                         className="custom-scrollbar w-full resize-none rounded-md border border-border-subtle bg-bg-subtle px-3 py-2 font-mono text-xs text-foreground"
                         rows={14}
                         value={json}

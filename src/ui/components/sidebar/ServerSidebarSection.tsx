@@ -178,25 +178,21 @@ export const ServerSidebarSection = ({
                 sortMap.set(pm.member.userId, pm.sortName),
         );
 
-        const result: MemberGroup[] = Array.from(groupsMap.values())
-            .filter((g): boolean => g.members.length > 0)
-            .map(
-                (
-                    g,
-                ): {
-                    members: ServerMember[];
-                    id: string;
-                    name: string;
-                    position: number;
-                } => ({
+        const result: MemberGroup[] = Array.from(groupsMap.values()).reduce<
+            MemberGroup[]
+        >((acc, g) => {
+            if (g.members.length > 0) {
+                acc.push({
                     ...g,
                     members: g.members.toSorted((a, b): number => {
                         const nameA = sortMap.get(a.userId) || '';
                         const nameB = sortMap.get(b.userId) || '';
                         return nameA.localeCompare(nameB);
                     }),
-                }),
-            );
+                });
+            }
+            return acc;
+        }, []);
 
         result.sort((a, b): number => b.position - a.position);
 
@@ -239,7 +235,8 @@ export const ServerSidebarSection = ({
     });
     const virtualRows = rowVirtualizer.getVirtualItems();
 
-    const roleListCache = React.useRef<Map<string, Role[]>>(new Map());
+    const roleListCache = React.useRef<Map<string, Role[]> | null>(null);
+    if (roleListCache.current === null) roleListCache.current = new Map();
 
     const allRolesMap = useMemo((): Map<string, Role[]> => {
         const map = new Map<string, Role[]>();
@@ -252,7 +249,7 @@ export const ServerSidebarSection = ({
                     memberRoleSet.has(String(r.id)),
                 );
 
-                const cached = roleListCache.current.get(m.userId);
+                const cached = roleListCache.current!.get(m.userId);
                 if (
                     cached &&
                     cached.length === filteredRoles.length &&
@@ -263,7 +260,7 @@ export const ServerSidebarSection = ({
                     map.set(m.userId, cached);
                 } else {
                     map.set(m.userId, filteredRoles);
-                    roleListCache.current.set(m.userId, filteredRoles);
+                    roleListCache.current!.set(m.userId, filteredRoles);
                 }
             }
         });

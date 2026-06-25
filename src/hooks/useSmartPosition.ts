@@ -1,4 +1,4 @@
-import { useCallback, useLayoutEffect, useState } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 
 interface Position {
     x: number;
@@ -24,7 +24,7 @@ export const useSmartPosition = ({
 }: UseSmartPositionOptions): Position => {
     const [coords, setCoords] = useState<Position>(position || { x: 0, y: 0 });
 
-    const updatePosition = useCallback((): void => {
+    const updatePosition = (): void => {
         if (!isOpen || !elementRef.current) return;
 
         const elementRect = elementRef.current.getBoundingClientRect();
@@ -69,32 +69,41 @@ export const useSmartPosition = ({
             if (prev.x === x && prev.y === y) return prev;
             return { x, y };
         });
-    }, [isOpen, position, triggerRef, elementRef, padding, offset]);
+    };
+
+    const updatePositionRef = useRef(updatePosition);
+    useLayoutEffect(() => {
+        updatePositionRef.current = updatePosition;
+    });
 
     useLayoutEffect((): (() => void) | undefined => {
         if (isOpen) {
-            updatePosition();
-            window.addEventListener('resize', updatePosition);
-            window.addEventListener('scroll', updatePosition, true);
+            updatePositionRef.current();
+
+            const resizeHandler = (): void => updatePositionRef.current();
+            const scrollHandler = (): void => updatePositionRef.current();
+
+            window.addEventListener('resize', resizeHandler);
+            window.addEventListener('scroll', scrollHandler, true);
 
             let resizeObserver: ResizeObserver | null = null;
             if (elementRef.current) {
                 resizeObserver = new ResizeObserver((): void => {
-                    updatePosition();
+                    updatePositionRef.current();
                 });
                 resizeObserver.observe(elementRef.current);
             }
 
             return (): void => {
-                window.removeEventListener('resize', updatePosition);
-                window.removeEventListener('scroll', updatePosition, true);
+                window.removeEventListener('resize', resizeHandler);
+                window.removeEventListener('scroll', scrollHandler, true);
                 if (resizeObserver) {
                     resizeObserver.disconnect();
                 }
             };
         }
         return undefined;
-    }, [isOpen, updatePosition, elementRef]);
+    }, [isOpen, elementRef]);
 
     return coords;
 };

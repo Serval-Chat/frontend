@@ -36,9 +36,9 @@ export const CategoryOverviewSettings = ({
         category.serverId,
     );
 
-    const [prevCategoryId, setPrevCategoryId] = useState(category.id);
-    if (category.id !== prevCategoryId) {
-        setPrevCategoryId(category.id);
+    const [syncedCategoryId, setSyncedCategoryId] = useState(category.id);
+    if (category.id !== syncedCategoryId) {
+        setSyncedCategoryId(category.id);
         setName(category.name);
         setOriginalName(category.name);
     }

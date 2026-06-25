@@ -1,4 +1,4 @@
-import { type Variants, motion } from 'framer-motion';
+import { type Variants, m } from 'framer-motion';
 
 export interface BouncingDotsProps {
     style?: React.CSSProperties;
@@ -29,7 +29,7 @@ export const BouncingDots = ({
         style={{ display: 'flex', alignItems: 'center', gap: '4px', ...style }}
     >
         {Array.from({ length: count }).map((_, i) => (
-            <motion.div
+            <m.div
                 animate="animate"
                 custom={i}
                 // eslint-disable-next-line react/no-array-index-key

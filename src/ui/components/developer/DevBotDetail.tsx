@@ -147,9 +147,9 @@ export const DevBotDetail = ({
     const [showDelete, setShowDelete] = useState(false);
 
     const botUserKey = bot && user ? `${bot.id}:${user.id}` : null;
-    const [prevBotUserKey, setPrevBotUserKey] = React.useState(botUserKey);
-    if (botUserKey !== prevBotUserKey && bot && user) {
-        setPrevBotUserKey(botUserKey);
+    const [syncedBotUserKey, setSyncedBotUserKey] = React.useState(botUserKey);
+    if (botUserKey !== syncedBotUserKey && bot && user) {
+        setSyncedBotUserKey(botUserKey);
         setName(user.displayName ?? user.username ?? '');
         setDescription(user.bio ?? '');
         setPermissions(bot.botPermissions);
@@ -470,6 +470,7 @@ export const DevBotDetail = ({
                 <input
                     hidden
                     accept="image/*"
+                    aria-label="Upload bot avatar"
                     ref={avatarInputRef}
                     type="file"
                     onChange={(e): void => {
@@ -484,6 +485,7 @@ export const DevBotDetail = ({
                 <input
                     hidden
                     accept="image/*"
+                    aria-label="Upload bot banner"
                     ref={bannerInputRef}
                     type="file"
                     onChange={(e): void => {

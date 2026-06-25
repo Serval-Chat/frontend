@@ -1,4 +1,4 @@
-import { type ReactNode, useState } from 'react';
+import { type ReactNode, useRef, useState } from 'react';
 
 import {
     ChevronDown,
@@ -50,7 +50,7 @@ export const AdminNotesSection = ({
 
     const [noteContent, setNoteContent] = useState('');
     const [deleteReason, setDeleteReason] = useState('');
-    const [activeNoteId, setActiveNoteId] = useState<string | null>(null);
+    const activeNoteIdRef = useRef<string | null>(null);
     const [expandedHistoryIds, setExpandedHistoryIds] = useState<Set<string>>(
         new Set(),
     );
@@ -81,15 +81,15 @@ export const AdminNotesSection = ({
     };
 
     const handleUpdateNote = (): void => {
-        if (!activeNoteId || !noteContent.trim()) return;
+        if (!activeNoteIdRef.current || !noteContent.trim()) return;
         updateNote(
-            { noteId: activeNoteId, content: noteContent },
+            { noteId: activeNoteIdRef.current, content: noteContent },
             {
                 onSuccess: (): void => {
                     showToast('Note updated', 'success');
                     setIsEditModalOpen(false);
                     setNoteContent('');
-                    setActiveNoteId(null);
+                    activeNoteIdRef.current = null;
                 },
                 onError: (e): void => showToast(e.message, 'error'),
             },
@@ -97,15 +97,15 @@ export const AdminNotesSection = ({
     };
 
     const handleDeleteNote = (): void => {
-        if (!activeNoteId || !deleteReason.trim()) return;
+        if (!activeNoteIdRef.current || !deleteReason.trim()) return;
         deleteNote(
-            { noteId: activeNoteId, reason: deleteReason },
+            { noteId: activeNoteIdRef.current, reason: deleteReason },
             {
                 onSuccess: (): void => {
                     showToast('Note deleted', 'success');
                     setIsDeleteModalOpen(false);
                     setDeleteReason('');
-                    setActiveNoteId(null);
+                    activeNoteIdRef.current = null;
                 },
                 onError: (e): void => showToast(e.message, 'error'),
             },
@@ -223,7 +223,8 @@ export const AdminNotesSection = ({
                                                 size="sm"
                                                 variant="ghost"
                                                 onClick={(): void => {
-                                                    setActiveNoteId(note.id);
+                                                    activeNoteIdRef.current =
+                                                        note.id;
                                                     setNoteContent(
                                                         note.content,
                                                     );
@@ -237,7 +238,8 @@ export const AdminNotesSection = ({
                                                 size="sm"
                                                 variant="ghost"
                                                 onClick={(): void => {
-                                                    setActiveNoteId(note.id);
+                                                    activeNoteIdRef.current =
+                                                        note.id;
                                                     setIsDeleteModalOpen(true);
                                                 }}
                                             >
@@ -437,7 +439,7 @@ export const AdminNotesSection = ({
                 onClose={(): void => {
                     setIsEditModalOpen(false);
                     setNoteContent('');
-                    setActiveNoteId(null);
+                    activeNoteIdRef.current = null;
                 }}
             >
                 <div className="space-y-4 p-6">
@@ -471,7 +473,7 @@ export const AdminNotesSection = ({
                 onClose={(): void => {
                     setIsDeleteModalOpen(false);
                     setDeleteReason('');
-                    setActiveNoteId(null);
+                    activeNoteIdRef.current = null;
                 }}
             >
                 <div className="space-y-4 p-6">

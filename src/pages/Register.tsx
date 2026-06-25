@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, m } from 'framer-motion';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
 
 import { useRegisterForm } from '@/hooks/useRegisterForm';
@@ -69,14 +69,14 @@ export const Register = () => {
                         />
                         <AnimatePresence>
                             {errors.login && (
-                                <motion.small
+                                <m.small
                                     animate={{ opacity: 1, height: 'auto' }}
                                     className="mt-1 block h-0 overflow-hidden text-xs text-red-400"
                                     exit={{ opacity: 0, height: 0 }}
                                     initial={{ opacity: 0, height: 0 }}
                                 >
                                     {errors.login}
-                                </motion.small>
+                                </m.small>
                             )}
                         </AnimatePresence>
                     </InputWrapper>
@@ -92,14 +92,14 @@ export const Register = () => {
                         />
                         <AnimatePresence>
                             {errors.username && (
-                                <motion.small
+                                <m.small
                                     animate={{ opacity: 1, height: 'auto' }}
                                     className="mt-1 block h-0 overflow-hidden text-xs text-red-400"
                                     exit={{ opacity: 0, height: 0 }}
                                     initial={{ opacity: 0, height: 0 }}
                                 >
                                     {errors.username}
-                                </motion.small>
+                                </m.small>
                             )}
                         </AnimatePresence>
                     </InputWrapper>
@@ -142,14 +142,14 @@ export const Register = () => {
                         </div>
                         <AnimatePresence>
                             {errors.password && (
-                                <motion.small
+                                <m.small
                                     animate={{ opacity: 1, height: 'auto' }}
                                     className="mt-1 block h-0 overflow-hidden text-xs text-red-400"
                                     exit={{ opacity: 0, height: 0 }}
                                     initial={{ opacity: 0, height: 0 }}
                                 >
                                     {errors.password}
-                                </motion.small>
+                                </m.small>
                             )}
                         </AnimatePresence>
                     </InputWrapper>
@@ -192,14 +192,14 @@ export const Register = () => {
                         </div>
                         <AnimatePresence>
                             {errors.confirmPassword && (
-                                <motion.small
+                                <m.small
                                     animate={{ opacity: 1, height: 'auto' }}
                                     className="mt-1 block h-0 overflow-hidden text-xs text-red-400"
                                     exit={{ opacity: 0, height: 0 }}
                                     initial={{ opacity: 0, height: 0 }}
                                 >
                                     {errors.confirmPassword}
-                                </motion.small>
+                                </m.small>
                             )}
                         </AnimatePresence>
                     </InputWrapper>
@@ -215,14 +215,14 @@ export const Register = () => {
                         />
                         <AnimatePresence>
                             {errors.inviteToken && (
-                                <motion.small
+                                <m.small
                                     animate={{ opacity: 1, height: 'auto' }}
                                     className="mt-1 block h-0 overflow-hidden text-xs text-red-400"
                                     exit={{ opacity: 0, height: 0 }}
                                     initial={{ opacity: 0, height: 0 }}
                                 >
                                     {errors.inviteToken}
-                                </motion.small>
+                                </m.small>
                             )}
                         </AnimatePresence>
                     </InputWrapper>

@@ -429,7 +429,7 @@ function DateTimePicker({ onConfirm }: { onConfirm: (iso: string) => void }) {
                         key={d}
                         style={{
                             textAlign: 'center',
-                            fontSize: '0.65rem',
+                            fontSize: '0.75rem',
                             color: 'var(--muted-foreground)',
                             padding: '2px 0',
                         }}
@@ -504,7 +504,7 @@ function DateTimePicker({ onConfirm }: { onConfirm: (iso: string) => void }) {
             >
                 <span
                     style={{
-                        fontSize: '0.72rem',
+                        fontSize: '0.75rem',
                         color: 'var(--muted-foreground)',
                         marginRight: 2,
                     }}
@@ -923,7 +923,7 @@ export function SearchFilterPlugin({
                         <span
                             style={{
                                 color: colors.mutedForeground,
-                                fontSize: '0.72rem',
+                                fontSize: '0.75rem',
                             }}
                         >
                             @{m.user.username}

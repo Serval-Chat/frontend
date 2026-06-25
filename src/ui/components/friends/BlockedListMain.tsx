@@ -72,6 +72,7 @@ export const BlockedListMain = () => {
                 <Box className="flex max-w-[200px] flex-1 items-center gap-2 rounded-md bg-bg-subtle/50 px-2 py-1 focus-within:bg-bg-subtle">
                     <Search className="text-foreground-muted" size={14} />
                     <input
+                        aria-label="Search blocked users"
                         className="placeholder:text-foreground-muted w-full bg-transparent text-xs font-medium outline-none"
                         placeholder="Search username"
                         type="text"

@@ -223,13 +223,13 @@ export const PermissionsEditorTab = ({
     const [hasChanges, setHasChanges] = useState(false);
     const [isMobileListOpen, setIsMobileListOpen] = useState(true);
 
-    const [prevInitialPermissions, setPrevInitialPermissions] =
+    const [syncedPermissions, setSyncedPermissions] =
         useState(initialPermissions);
-    const [prevRoles, setPrevRoles] = useState(roles);
+    const [syncedRoles, setSyncedRoles] = useState(roles);
 
-    if (initialPermissions !== prevInitialPermissions || roles !== prevRoles) {
-        setPrevInitialPermissions(initialPermissions);
-        setPrevRoles(roles);
+    if (initialPermissions !== syncedPermissions || roles !== syncedRoles) {
+        setSyncedPermissions(initialPermissions);
+        setSyncedRoles(roles);
         if (initialPermissions) {
             setLocalOverrides(normalizeOverrides(initialPermissions, roles));
             setHasChanges(false);

@@ -80,9 +80,9 @@ export const ChannelOverviewSettings = ({
     const { mutate: requestExport, isPending: isRequestingExport } =
         useRequestExportChannel(channel.serverId, channel.id);
 
-    const [prevChannelId, setPrevChannelId] = useState(channel.id);
-    if (channel.id !== prevChannelId) {
-        setPrevChannelId(channel.id);
+    const [syncedChannelId, setSyncedChannelId] = useState(channel.id);
+    if (channel.id !== syncedChannelId) {
+        setSyncedChannelId(channel.id);
         setName(channel.name);
         setOriginalName(channel.name);
         setDescription(channel.description || '');

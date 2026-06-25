@@ -83,10 +83,10 @@ export const ServerOverviewSettings = ({
     >('avatar');
     const [isCropModalOpen, setIsCropModalOpen] = useState(false);
 
-    const [prevServer, setPrevServer] = React.useState(server);
+    const [syncedServer, setSyncedServer] = useState(server);
 
-    if (server !== prevServer) {
-        setPrevServer(server);
+    if (server !== syncedServer) {
+        setSyncedServer(server);
         if (server) {
             setName(server.name);
             setOriginalName(server.name);

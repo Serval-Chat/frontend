@@ -1,6 +1,6 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, m } from 'framer-motion';
 import type { LucideIcon } from 'lucide-react';
 import { createPortal } from 'react-dom';
 
@@ -54,20 +54,23 @@ let nextContextMenuId = 0;
 /**
  * @description A context menu that appears on right-click.
  */
-const filterItems = (items: ContextMenuItem[]): ContextMenuItem[] =>
-    items
-        .filter((item, index): boolean => {
-            if (item.type !== 'divider') return true;
-            if (index === 0) return false;
-            const prevItem = items[index - 1];
-            if (prevItem && prevItem.type === 'divider') return false;
-            return true;
-        })
-        .filter((item, index, array): boolean => {
-            if (item.type === 'divider' && index === array.length - 1)
-                return false;
-            return true;
-        });
+const filterItems = (items: ContextMenuItem[]): ContextMenuItem[] => {
+    const result: ContextMenuItem[] = [];
+    for (const item of items) {
+        if (item.type !== 'divider') {
+            result.push(item);
+        } else if (
+            result.length > 0 &&
+            result[result.length - 1].type !== 'divider'
+        ) {
+            result.push(item);
+        }
+    }
+    if (result.length > 0 && result[result.length - 1].type === 'divider') {
+        result.pop();
+    }
+    return result;
+};
 
 export const ContextMenu = ({
     items,
@@ -80,14 +83,19 @@ export const ContextMenu = ({
     const menuRef = useRef<HTMLDivElement>(null);
     const menuIdRef = useRef(nextContextMenuId++);
 
+    const onOpenChangeRef = useRef(onOpenChange);
+    useLayoutEffect(() => {
+        onOpenChangeRef.current = onOpenChange;
+    });
+
     const closeMenu = React.useCallback((): void => {
         setIsOpen((wasOpen): boolean => {
             if (wasOpen) {
-                onOpenChange?.(false);
+                onOpenChangeRef.current?.(false);
             }
             return false;
         });
-    }, [onOpenChange]);
+    }, []);
 
     const handleContextMenu = (e: React.MouseEvent): void => {
         e.preventDefault();
@@ -174,7 +182,7 @@ export const ContextMenu = ({
             {isOpen &&
                 createPortal(
                     <AnimatePresence>
-                        <motion.div
+                        <m.div
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             className="context-menu-portal min-w-[220px] overflow-hidden rounded-lg border border-border-subtle bg-background py-2 shadow-lg backdrop-blur-md"
                             exit={{ opacity: 0, scale: 0.95, y: -10 }}
@@ -206,7 +214,7 @@ export const ContextMenu = ({
                                     }
                                 />
                             ))}
-                        </motion.div>
+                        </m.div>
                     </AnimatePresence>,
                     document.body,
                 )}
@@ -278,15 +286,14 @@ const ContextMenuItemRenderer = ({ item, closeMenu }: ContextMenuItemProps) => {
                 onMouseEnter={handleMouseEnter}
                 onMouseLeave={handleMouseLeave}
             >
-                <div
+                <button
                     aria-expanded={isSubmenuOpen}
                     aria-haspopup="true"
                     className={cn(
-                        'flex w-full cursor-pointer items-center justify-between px-3 py-2.5 text-sm text-foreground transition-all duration-150 select-none hover:bg-bg-subtle',
+                        'flex w-full cursor-pointer items-center justify-between px-3 py-2.5 text-left text-sm text-foreground transition-all duration-150 select-none hover:bg-bg-subtle',
                         isSubmenuOpen && 'bg-bg-subtle',
                     )}
-                    role="button"
-                    tabIndex={0}
+                    type="button"
                     onClick={(e): void => {
                         e.stopPropagation();
                         setIsSubmenuOpen((prev): boolean => !prev);
@@ -318,7 +325,7 @@ const ContextMenuItemRenderer = ({ item, closeMenu }: ContextMenuItemProps) => {
                             strokeWidth={2}
                         />
                     </svg>
-                </div>
+                </button>
 
                 {/* Submenu Portal */}
                 <AnimatePresence>
@@ -360,13 +367,13 @@ const ContextMenuItemRenderer = ({ item, closeMenu }: ContextMenuItemProps) => {
     };
 
     return (
-        <div
+        <button
             className={cn(
-                'flex w-full cursor-pointer items-center px-3 py-2.5 text-sm transition-all duration-150 select-none hover:bg-bg-subtle',
+                'flex w-full cursor-pointer items-center px-3 py-2.5 text-left text-sm transition-all duration-150 select-none hover:bg-bg-subtle',
                 getTextColorClass(),
             )}
-            role="button"
             tabIndex={item.variant === 'ghost' ? -1 : 0}
+            type="button"
             onClick={(e): void => {
                 if (item.variant === 'ghost') {
                     e.stopPropagation();
@@ -392,7 +399,7 @@ const ContextMenuItemRenderer = ({ item, closeMenu }: ContextMenuItemProps) => {
             {!Icon && item.indent !== false && <div className="mr-3 h-4 w-4" />}
             <span className="flex-1 font-medium">{item.label}</span>
             {item.rightIcon && <item.rightIcon className="ml-2 h-4 w-4" />}
-        </div>
+        </button>
     );
 };
 
@@ -427,7 +434,7 @@ const SubMenu = ({
     const filteredItems = filterItems(items);
 
     return createPortal(
-        <motion.div
+        <m.div
             animate={{ opacity: 1, scale: 1, x: 0 }}
             className="context-menu-portal fixed z-[var(--z-index-top)] min-w-[180px] overflow-hidden rounded-lg border border-border-subtle bg-background py-2 shadow-lg backdrop-blur-md"
             exit={{ opacity: 0, scale: 0.95, x: -10 }}
@@ -458,7 +465,7 @@ const SubMenu = ({
                     }
                 />
             ))}
-        </motion.div>,
+        </m.div>,
         document.body,
     );
 };

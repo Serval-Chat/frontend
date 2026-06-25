@@ -1,4 +1,10 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import {
+    useCallback,
+    useEffect,
+    useLayoutEffect,
+    useRef,
+    useState,
+} from 'react';
 
 interface UseResizableOptions {
     initialWidth: number;
@@ -100,13 +106,21 @@ export const useResizable = ({
         document.body.style.userSelect = '';
     }, [storageKey]);
 
+    const handleMouseMoveRef = useRef(handleMouseMove);
+    const handleMouseUpRef = useRef(handleMouseUp);
+    useLayoutEffect(() => {
+        handleMouseMoveRef.current = handleMouseMove;
+        handleMouseUpRef.current = handleMouseUp;
+    });
+
     useEffect((): (() => void) => {
+        const moveHandler = (e: MouseEvent): void =>
+            handleMouseMoveRef.current(e);
+        const upHandler = (): void => handleMouseUpRef.current();
+
         if (isResizing) {
-            window.addEventListener('mousemove', handleMouseMove);
-            window.addEventListener('mouseup', handleMouseUp);
-        } else {
-            window.removeEventListener('mousemove', handleMouseMove);
-            window.removeEventListener('mouseup', handleMouseUp);
+            window.addEventListener('mousemove', moveHandler);
+            window.addEventListener('mouseup', upHandler);
         }
 
         return (): void => {
@@ -114,10 +128,10 @@ export const useResizable = ({
                 window.cancelAnimationFrame(frameRef.current);
                 frameRef.current = null;
             }
-            window.removeEventListener('mousemove', handleMouseMove);
-            window.removeEventListener('mouseup', handleMouseUp);
+            window.removeEventListener('mousemove', moveHandler);
+            window.removeEventListener('mouseup', upHandler);
         };
-    }, [isResizing, handleMouseMove, handleMouseUp]);
+    }, [isResizing]);
 
     return {
         width,

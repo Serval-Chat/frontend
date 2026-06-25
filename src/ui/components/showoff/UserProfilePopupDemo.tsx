@@ -11,6 +11,8 @@ import { DemoItem } from './DemoItem';
 import { DemoSection } from './DemoSection';
 import { SHOWOFF_SECTIONS } from './config';
 
+const DEMO_CREATED_AT = new Date();
+
 export const UserProfilePopupDemo = () => {
     const [isPopupOpen, setIsPopupOpen] = useState(false);
     const triggerRef = useRef<HTMLDivElement>(null);
@@ -143,7 +145,7 @@ export const UserProfilePopupDemo = () => {
                             {
                                 id: 'mock-2',
                                 username: 'RegularUser',
-                                createdAt: new Date(),
+                                createdAt: DEMO_CREATED_AT,
                                 customStatus: { text: 'Just chilling' },
                             } as User
                         }

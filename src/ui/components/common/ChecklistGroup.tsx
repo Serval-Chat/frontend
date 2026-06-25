@@ -1,6 +1,6 @@
 import React, { useCallback, useLayoutEffect, useMemo, useRef } from 'react';
 
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 
 import { cn } from '@/utils/cn';
 import type { ChecklistNode } from '@/utils/textParser/types';
@@ -166,7 +166,7 @@ const ChecklistRow = ({
             style={{ paddingLeft: `${depth * INDENT_PX}px` }}
         >
             <div className="shrink-0" ref={(el): void => setBoxRef(idx, el)}>
-                <motion.div
+                <m.div
                     animate={checked ? 'checked' : 'unchecked'}
                     className={cn(
                         'relative flex h-[15px] w-[15px] items-center justify-center rounded',
@@ -187,7 +187,7 @@ const ChecklistRow = ({
                         fill="none"
                         viewBox="0 0 18 18"
                     >
-                        <motion.path
+                        <m.path
                             animate={{
                                 pathLength: checked ? 1 : 0,
                                 opacity: checked ? 1 : 0,
@@ -207,7 +207,7 @@ const ChecklistRow = ({
                             }}
                         />
                     </svg>
-                </motion.div>
+                </m.div>
             </div>
 
             <span

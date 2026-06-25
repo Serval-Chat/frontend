@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
 
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 import { createPortal } from 'react-dom';
 
 import type { Server } from '@/api/servers/servers.types';
@@ -44,11 +44,10 @@ export const EmojiInfoBox = ({
     const content = (
         <>
             {onClose && (
-                <div
+                <button
                     aria-label="Close emoji info"
                     className="fixed inset-0 z-[1060]"
-                    role="button"
-                    tabIndex={0}
+                    type="button"
                     onClick={onClose}
                     onContextMenu={onClose}
                     onKeyDown={(e): void => {
@@ -62,7 +61,7 @@ export const EmojiInfoBox = ({
                     }}
                 />
             )}
-            <motion.div
+            <m.div
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 className={cn(
                     'z-[99999999] flex w-64 flex-col gap-3 rounded-lg border border-divider bg-background p-3 shadow-xl',
@@ -125,7 +124,7 @@ export const EmojiInfoBox = ({
                         </>
                     )}
                 </Box>
-            </motion.div>
+            </m.div>
         </>
     );
 

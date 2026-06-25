@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, m } from 'framer-motion';
 import { createPortal } from 'react-dom';
 
 import { cn } from '@/utils/cn';
@@ -25,7 +25,7 @@ export const LoadingOverlay = ({
     const content = (
         <AnimatePresence>
             {isOpen && (
-                <motion.div
+                <m.div
                     animate={{ opacity: 1 }}
                     className={cn(
                         'z-[9999] flex flex-col items-center justify-center p-6 text-center',
@@ -36,7 +36,7 @@ export const LoadingOverlay = ({
                     exit={{ opacity: 0 }}
                     initial={{ opacity: 0 }}
                 >
-                    <motion.div
+                    <m.div
                         animate={{ scale: 1, y: 0 }}
                         className="flex flex-col items-center gap-4"
                         exit={{ scale: 0.9, y: 10 }}
@@ -54,8 +54,8 @@ export const LoadingOverlay = ({
                                 {message}
                             </span>
                         )}
-                    </motion.div>
-                </motion.div>
+                    </m.div>
+                </m.div>
             )}
         </AnimatePresence>
     );

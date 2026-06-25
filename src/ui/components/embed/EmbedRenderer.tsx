@@ -904,6 +904,13 @@ export const EmbedRenderer = ({
         ],
     );
 
+    const handleButtonClickVoid = useCallback(
+        (componentIndex: number, button: ButtonComponent): void => {
+            void handleButtonClick(componentIndex, button);
+        },
+        [handleButtonClick],
+    );
+
     if (!hasAnything && variant === 'preview') {
         return (
             <div
@@ -973,9 +980,7 @@ export const EmbedRenderer = ({
                 messageId={messageId}
                 pendingButtonKey={pendingButtonKey}
                 serverId={serverId}
-                onButtonClick={(componentIndex, button): void => {
-                    void handleButtonClick(componentIndex, button);
-                }}
+                onButtonClick={handleButtonClickVoid}
             />
 
             {/* Poll preview */}

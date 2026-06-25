@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, m } from 'framer-motion';
 import { X } from 'lucide-react';
 
 import { Message } from '@/ui/components/chat/Message';
@@ -136,7 +136,7 @@ const InAppNotificationCard = ({
     const hasHeader = Boolean(title.trim() || notification.serverName);
 
     return (
-        <motion.article
+        <m.article
             layout
             animate={{ opacity: 1, y: 0, scale: 1 }}
             className="pointer-events-auto relative w-full overflow-hidden rounded-lg border border-primary/25 bg-background/95 shadow-2xl ring-1 ring-white/5 backdrop-blur-md"
@@ -203,6 +203,6 @@ const InAppNotificationCard = ({
                     </Text>
                 )}
             </div>
-        </motion.article>
+        </m.article>
     );
 };

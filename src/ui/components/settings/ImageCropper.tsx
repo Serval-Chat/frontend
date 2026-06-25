@@ -35,12 +35,12 @@ export const ImageCropper = ({
         width: 0,
         height: 0,
     });
-    const [isDragging, setIsDragging] = useState(false);
+    const isDraggingRef = useRef(false);
     const [dragType, setDragType] = useState<HandleType | null>(null);
-    const [dragStart, setDragStart] = useState({
+    const dragStartRef = useRef({
         x: 0,
         y: 0,
-        selection: { ...selection },
+        selection: { x: 0, y: 0, width: 0, height: 0 },
     });
 
     // Load image and initialize selection
@@ -241,12 +241,16 @@ export const ImageCropper = ({
             return;
         }
 
-        setIsDragging(true);
-        setDragStart({ x: mouseX, y: mouseY, selection: { ...selection } });
+        isDraggingRef.current = true;
+        dragStartRef.current = {
+            x: mouseX,
+            y: mouseY,
+            selection: { ...selection },
+        };
     };
 
     const handleMouseMove = (e: React.MouseEvent): void => {
-        if (!isDragging || !dragType || !image) return;
+        if (!isDraggingRef.current || !dragType || !image) return;
 
         const rect = canvasRef.current?.getBoundingClientRect();
         if (!rect) return;
@@ -254,10 +258,10 @@ export const ImageCropper = ({
         const mouseX = e.clientX - rect.left;
         const mouseY = e.clientY - rect.top;
 
-        const dx = mouseX - dragStart.x;
-        const dy = mouseY - dragStart.y;
+        const dx = mouseX - dragStartRef.current.x;
+        const dy = mouseY - dragStartRef.current.y;
 
-        const nextSel = { ...dragStart.selection };
+        const nextSel = { ...dragStartRef.current.selection };
 
         if (dragType === 'move') {
             nextSel.x = Math.max(
@@ -345,7 +349,7 @@ export const ImageCropper = ({
     };
 
     const handleMouseUp = (): void => {
-        setIsDragging(false);
+        isDraggingRef.current = false;
         setDragType(null);
     };
 

@@ -32,17 +32,16 @@ export const RoleNavbar = ({
     onDeleteRole,
     onReorderRoles,
 }: RoleNavbarProps) => {
-    // Roles are usually sorted by position in descending order (highest role first)
     const [localRoles, setLocalRoles] = useState((): Role[] =>
         roles.toSorted((a, b): number => b.position - a.position),
     );
-    const [prevRoles, setPrevRoles] = useState(roles);
+    const [syncedRoles, setSyncedRoles] = useState(roles);
 
-    if (roles !== prevRoles) {
+    if (roles !== syncedRoles) {
+        setSyncedRoles(roles);
         setLocalRoles(
             roles.toSorted((a, b): number => b.position - a.position),
         );
-        setPrevRoles(roles);
     }
 
     const originalSorted = roles.toSorted(

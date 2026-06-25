@@ -41,6 +41,10 @@ import { ChangePasswordModal } from './ChangePasswordModal';
 import { ImageCropModal } from './ImageCropModal';
 import { WebsiteConnectionsSettings } from './WebsiteConnectionsSettings';
 
+const bioContentEditable = (
+    <ContentEditable className="custom-scrollbar h-full max-h-[300px] min-h-[100px] w-full resize-none overflow-y-auto px-3 py-2 text-sm text-foreground outline-none" />
+);
+
 export const AccountSettings = () => {
     const { data: user } = useMe();
     const { showToast } = useToast();
@@ -318,6 +322,7 @@ export const AccountSettings = () => {
             {/* Hidden file inputs */}
             <input
                 accept="image/webp,image/gif,image/png,image/jpeg"
+                aria-label="Upload avatar"
                 className="hidden"
                 ref={avatarInputRef}
                 type="file"
@@ -325,6 +330,7 @@ export const AccountSettings = () => {
             />
             <input
                 accept="image/webp,image/gif,image/png,image/jpeg"
+                aria-label="Upload banner"
                 className="hidden"
                 ref={bannerInputRef}
                 type="file"
@@ -441,9 +447,7 @@ export const AccountSettings = () => {
                                 />
                                 <RichTextPlugin
                                     ErrorBoundary={LexicalErrorBoundary}
-                                    contentEditable={
-                                        <ContentEditable className="custom-scrollbar h-full max-h-[300px] min-h-[100px] w-full resize-none overflow-y-auto px-3 py-2 text-sm text-foreground outline-none" />
-                                    }
+                                    contentEditable={bioContentEditable}
                                     placeholder={
                                         <div className="pointer-events-none absolute top-[9px] left-3 text-sm text-placeholder select-none">
                                             Tell us about yourself...

@@ -82,10 +82,9 @@ export const FurTweaker = () => {
 
                         <div className="mt-auto flex justify-center pt-4">
                             <NTButton
-                                onClick={(): {
-                                    payload: number;
-                                    type: 'furTweaker/setFurSeed';
-                                } => dispatch(setFurSeed(Date.now()))}
+                                onClick={(): void => {
+                                    dispatch(setFurSeed(Date.now()));
+                                }}
                             >
                                 Randomize Seed
                             </NTButton>

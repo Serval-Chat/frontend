@@ -92,6 +92,7 @@ export const CodeBlock = ({
     return (
         <>
             <div
+                aria-label="View code block"
                 className="group relative my-2 cursor-pointer overflow-hidden rounded-lg border border-border-subtle bg-background shadow-sm"
                 role="button"
                 tabIndex={0}

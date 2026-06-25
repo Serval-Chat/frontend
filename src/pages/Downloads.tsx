@@ -8,6 +8,8 @@ import { Text } from '@/ui/components/common/Text';
 import { Box } from '@/ui/components/layout/Box';
 import { TopNavBar } from '@/ui/components/layout/TopNavBar';
 
+const CURRENT_YEAR = new Date().getFullYear();
+
 const WindowsIcon = ({ size = 24 }: { size?: number }): React.ReactNode => (
     <svg
         height={size}
@@ -171,8 +173,7 @@ export const Downloads = (): ReactNode => (
 
         <footer className="mx-8 border-t border-border-subtle py-8 text-center text-sm text-muted-foreground">
             <Text as="p">
-                &copy; {new Date().getFullYear()} Serchat. Made with love for
-                everyone.
+                &copy; {CURRENT_YEAR} Serchat. Made with love for everyone.
             </Text>
         </footer>
     </Box>

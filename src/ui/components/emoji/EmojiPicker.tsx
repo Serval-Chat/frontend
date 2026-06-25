@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 
 import { m } from 'framer-motion';
 import { Search } from 'lucide-react';
@@ -83,7 +83,7 @@ const EmojiPickerContent = ({
     const listRef = React.useRef<ListImperativeAPI>(null);
     const scrollOffsetRef = React.useRef<number>(0);
     const [activeCategoryId, setActiveCategoryId] = useState<string>('');
-    const [isScrollingTo, setIsScrollingTo] = useState(false);
+    const isScrollingToRef = useRef(false);
     const [searchQuery, setSearchQuery] = useState('');
 
     const {
@@ -208,10 +208,13 @@ const EmojiPickerContent = ({
             }
 
             if (progress < 1) requestAnimationFrame(animateScroll);
-            else setTimeout((): void => setIsScrollingTo(false), 50);
+            else
+                setTimeout((): void => {
+                    isScrollingToRef.current = false;
+                }, 50);
         };
 
-        setIsScrollingTo(true);
+        isScrollingToRef.current = true;
         requestAnimationFrame(animateScroll);
     }, []);
 
@@ -225,13 +228,13 @@ const EmojiPickerContent = ({
 
     const handleItemsRendered = useCallback(
         ({ visibleStartIndex }: { visibleStartIndex: number }): void => {
-            if (isScrollingTo) return;
+            if (isScrollingToRef.current) return;
             const firstVisibleRow = flatRows[visibleStartIndex];
             if (firstVisibleRow && firstVisibleRow.id !== activeCategoryId) {
                 setActiveCategoryId(firstVisibleRow.id);
             }
         },
-        [isScrollingTo, flatRows, activeCategoryId],
+        [flatRows, activeCategoryId],
     );
 
     const handleScroll = useCallback(

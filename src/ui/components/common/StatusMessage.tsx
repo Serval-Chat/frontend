@@ -1,4 +1,4 @@
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, m } from 'framer-motion';
 
 import { colors, fontSize, fontWeight, radius } from '@/ui/theme';
 import type { StatusType } from '@/ui/types';
@@ -25,7 +25,7 @@ const typeStyles: Partial<Record<StatusType, React.CSSProperties>> = {
 export const StatusMessage = ({ message, type, style }: StatusMessageProps) => (
     <AnimatePresence mode="wait">
         {message && (
-            <motion.div
+            <m.div
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
                 initial={{ opacity: 0, y: -10 }}
@@ -48,7 +48,7 @@ export const StatusMessage = ({ message, type, style }: StatusMessageProps) => (
                 transition={{ duration: 0.2 }}
             >
                 {message}
-            </motion.div>
+            </m.div>
         )}
     </AnimatePresence>
 );

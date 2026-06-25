@@ -48,12 +48,14 @@ export const UserProfilePictureIcon = ({
         resolveApiUrl(effectiveSrc || undefined) || undefined,
     );
 
-    const [imgFailed, setImgFailed] = useState(false);
-    const [prevIconUrl, setPrevIconUrl] = useState(iconUrl);
-    if (iconUrl !== prevIconUrl) {
-        setPrevIconUrl(iconUrl);
-        setImgFailed(false);
+    const [imgState, setImgState] = useState({
+        failed: false,
+        forUrl: iconUrl,
+    });
+    if (iconUrl !== imgState.forUrl) {
+        setImgState({ failed: false, forUrl: iconUrl });
     }
+    const imgFailed = imgState.forUrl === iconUrl ? imgState.failed : false;
 
     const letter = (username || '?')[0].toUpperCase();
 
@@ -72,7 +74,9 @@ export const UserProfilePictureIcon = ({
                     className="h-full w-full object-cover"
                     paused={limitedAnimations && isAnimatedImageUrl(iconUrl)}
                     src={iconUrl}
-                    onError={() => setImgFailed(true)}
+                    onError={() =>
+                        setImgState({ failed: true, forUrl: iconUrl })
+                    }
                 />
             ) : (
                 <span className="text-(--avatar-fallback-text)">{letter}</span>

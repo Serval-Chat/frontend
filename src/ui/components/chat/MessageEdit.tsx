@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 
 import { ClearEditorPlugin } from '@lexical/react/LexicalClearEditorPlugin';
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
@@ -118,9 +118,7 @@ export const MessageEdit = ({
     );
 
     const isAutocompleteOpenRef = useRef<boolean>(false);
-    const [editorInstance, setEditorInstance] = useState<LexicalEditor | null>(
-        null,
-    );
+    const editorInstanceRef = useRef<LexicalEditor | null>(null);
 
     React.useEffect((): (() => void) => {
         const handleResize = (): void => setIsMobile(window.innerWidth <= 768);
@@ -137,8 +135,8 @@ export const MessageEdit = ({
 
             if (keybindManager.matches('composer.focus', e)) {
                 e.preventDefault();
-                if (editorInstance) {
-                    editorInstance.focus();
+                if (editorInstanceRef.current) {
+                    editorInstanceRef.current.focus();
                     setShowEmojiPicker(false);
                 }
             }
@@ -146,9 +144,9 @@ export const MessageEdit = ({
 
         window.addEventListener('keydown', handleGlobalKeyDown);
 
-        if (editorInstance) {
+        if (editorInstanceRef.current) {
             setTimeout((): void => {
-                editorInstance.focus();
+                editorInstanceRef.current?.focus();
             }, 0);
         }
 
@@ -156,16 +154,16 @@ export const MessageEdit = ({
             window.removeEventListener('resize', handleResize);
             window.removeEventListener('keydown', handleGlobalKeyDown);
         };
-    }, [editorInstance, keybindManager]);
+    }, [keybindManager]);
 
     // Close emoji picker when clicking outside
     useClickAway(emojiPickerRef, (): void => {
         setShowEmojiPicker(false);
     });
 
-    const handleEmojiSelect = (emoji: string): void => {
-        if (editorInstance) {
-            editorInstance.update((): void => {
+    const handleEmojiSelect = useCallback((emoji: string): void => {
+        if (editorInstanceRef.current) {
+            editorInstanceRef.current.update((): void => {
                 const selection = $getSelection();
                 if ($isRangeSelection(selection)) {
                     selection.insertNodes([
@@ -175,34 +173,34 @@ export const MessageEdit = ({
                     ]);
                 }
             });
-            editorInstance.focus();
+            editorInstanceRef.current.focus();
         }
         setShowEmojiPicker(false);
-    };
+    }, []);
 
-    const handleCustomEmojiSelect = (emoji: {
-        id: string;
-        name: string;
-    }): void => {
-        if (editorInstance) {
-            editorInstance.update((): void => {
-                const selection = editorInstance
-                    .getEditorState()
-                    .read(() => $getSelection());
-                if ($isRangeSelection(selection)) {
-                    selection.insertNodes([
-                        $createChipNode('emoji', {
-                            id: emoji.id,
-                            label: emoji.name,
-                        }),
-                    ]);
-                    selection.insertText(' ');
-                }
-            });
-            editorInstance.focus();
-        }
-        setShowEmojiPicker(false);
-    };
+    const handleCustomEmojiSelect = useCallback(
+        (emoji: { id: string; name: string }): void => {
+            if (editorInstanceRef.current) {
+                editorInstanceRef.current.update((): void => {
+                    const selection = editorInstanceRef.current
+                        ?.getEditorState()
+                        .read(() => $getSelection());
+                    if ($isRangeSelection(selection)) {
+                        selection.insertNodes([
+                            $createChipNode('emoji', {
+                                id: emoji.id,
+                                label: emoji.name,
+                            }),
+                        ]);
+                        selection.insertText(' ');
+                    }
+                });
+                editorInstanceRef.current.focus();
+            }
+            setShowEmojiPicker(false);
+        },
+        [],
+    );
 
     const handleSubmit = (overrideText?: string): void => {
         const trimmedText = (overrideText ?? text).trim();
@@ -235,6 +233,28 @@ export const MessageEdit = ({
     const isPending = editChannelMessage.isPending || editUserMessage.isPending;
     const hasChanged = text.trim() !== initialText.trim();
 
+    const contentEditableElement = useMemo(
+        () => (
+            <ContentEditable
+                className="custom-scrollbar h-full max-h-[200px] min-h-[60px] w-full resize-none overflow-y-auto px-3 py-2 pb-8 text-sm text-foreground outline-none"
+                onKeyDown={(e): void => {
+                    if (e.key === 'Escape') {
+                        e.preventDefault();
+                        onCancel();
+                    }
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        if (isMobile) return;
+                        if (!isAutocompleteOpenRef.current) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                        }
+                    }
+                }}
+            />
+        ),
+        [onCancel, isMobile],
+    );
+
     const initialConfig = {
         namespace: 'MessageEdit',
         nodes: [ChipNode],
@@ -254,28 +274,15 @@ export const MessageEdit = ({
         <Box className="relative w-full">
             <div className="relative flex min-h-[60px] flex-1 cursor-text items-start rounded-md border border-border-subtle bg-bg-secondary transition-all duration-200 focus-within:border-primary/30 focus-within:ring-2 focus-within:ring-primary/20 focus-within:outline-none">
                 <LexicalComposer initialConfig={initialConfig}>
-                    <EditorBridge onReady={setEditorInstance} />
+                    <EditorBridge
+                        onReady={(e): void => {
+                            editorInstanceRef.current = e;
+                        }}
+                    />
                     <LexicalInitPlugin initialText={initialText} />
                     <RichTextPlugin
                         ErrorBoundary={LexicalErrorBoundary}
-                        contentEditable={
-                            <ContentEditable
-                                className="custom-scrollbar h-full max-h-[200px] min-h-[60px] w-full resize-none overflow-y-auto px-3 py-2 pb-8 text-sm text-foreground outline-none"
-                                onKeyDown={(e): void => {
-                                    if (e.key === 'Escape') {
-                                        e.preventDefault();
-                                        onCancel();
-                                    }
-                                    if (e.key === 'Enter' && !e.shiftKey) {
-                                        if (isMobile) return;
-                                        if (!isAutocompleteOpenRef.current) {
-                                            e.preventDefault();
-                                            e.stopPropagation();
-                                        }
-                                    }
-                                }}
-                            />
-                        }
+                        contentEditable={contentEditableElement}
                         placeholder={
                             <div className="pointer-events-none absolute top-[9px] left-3 max-w-[calc(100%-24px)] truncate text-sm text-placeholder select-none">
                                 Editing message...
@@ -305,7 +312,8 @@ export const MessageEdit = ({
                     />
                     <OnChangePlugin
                         onChange={(editorState, editor): void => {
-                            if (!editorInstance) setEditorInstance(editor);
+                            if (!editorInstanceRef.current)
+                                editorInstanceRef.current = editor;
                             editorState.read((): void => {
                                 setText($getRawMessageText());
                             });

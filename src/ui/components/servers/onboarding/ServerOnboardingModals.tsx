@@ -204,10 +204,10 @@ export const ServerSelfRolesModal = ({
     const updateSelfRoles = useUpdateSelfRoles(serverId);
     const allowedRoleIds = onboarding?.onboarding.selfAssignableRoleIds ?? [];
     const [selectedRoleIds, setSelectedRoleIds] = useState<string[]>([]);
-    const [prevOnboarding, setPrevOnboarding] = useState(onboarding);
+    const [syncedOnboarding, setSyncedOnboarding] = useState(onboarding);
 
-    if (onboarding !== prevOnboarding) {
-        setPrevOnboarding(onboarding);
+    if (onboarding !== syncedOnboarding) {
+        setSyncedOnboarding(onboarding);
         if (onboarding) {
             const allowed = new Set(
                 onboarding.onboarding.selfAssignableRoleIds,
@@ -447,10 +447,10 @@ export const ChannelPreferencesModal = ({
     const updatePreferences = useUpdateChannelPreferences(serverId);
     const [hiddenChannelIds, setHiddenChannelIds] = useState<string[]>([]);
     const [hiddenCategoryIds, setHiddenCategoryIds] = useState<string[]>([]);
-    const [prevOnboarding, setPrevOnboarding] = useState(onboarding);
+    const [syncedOnboarding2, setSyncedOnboarding2] = useState(onboarding);
 
-    if (onboarding !== prevOnboarding) {
-        setPrevOnboarding(onboarding);
+    if (onboarding !== syncedOnboarding2) {
+        setSyncedOnboarding2(onboarding);
         if (onboarding) {
             setHiddenChannelIds(onboarding.member.hiddenChannelIds ?? []);
             setHiddenCategoryIds(onboarding.member.hiddenCategoryIds ?? []);
@@ -577,7 +577,7 @@ export const ServerOnboardingModal = ({
     const [accepted, setAccepted] = useState(false);
     const [step, setStep] = useState<'rules' | 'roles' | 'welcome'>('rules');
     const [selectedRoleIds, setSelectedRoleIds] = useState<string[]>([]);
-    const [prevOnboarding, setPrevOnboarding] = useState(onboarding);
+    const [syncedOnboarding3, setSyncedOnboarding3] = useState(onboarding);
 
     const isRequired =
         onboarding?.member.onboardingRequired === true &&
@@ -609,8 +609,8 @@ export const ServerOnboardingModal = ({
     const firstStep = steps[0]?.id ?? 'welcome';
     const roleStepOrWelcome = hasSelfRoles ? 'roles' : 'welcome';
 
-    if (onboarding !== prevOnboarding) {
-        setPrevOnboarding(onboarding);
+    if (onboarding !== syncedOnboarding3) {
+        setSyncedOnboarding3(onboarding);
 
         if (onboarding) {
             const allowed = new Set(

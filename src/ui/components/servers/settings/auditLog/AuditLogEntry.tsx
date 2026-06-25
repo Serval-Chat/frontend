@@ -160,10 +160,10 @@ export const AuditLogEntry = ({
             setProfileState({ id, x: e.clientX, y: e.clientY });
         };
 
-    const [prevGlobalExpandState, setPrevGlobalExpandState] =
+    const [syncedGlobalExpandState, setSyncedGlobalExpandState] =
         useState(globalExpandState);
-    if (globalExpandState !== prevGlobalExpandState) {
-        setPrevGlobalExpandState(globalExpandState);
+    if (globalExpandState !== syncedGlobalExpandState) {
+        setSyncedGlobalExpandState(globalExpandState);
         if (globalExpandState === 'expanded') {
             setExpandedRoles(true);
         } else if (globalExpandState === 'collapsed') {

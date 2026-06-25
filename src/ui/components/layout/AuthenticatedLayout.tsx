@@ -74,11 +74,11 @@ export const AuthenticatedLayout = (): ReactNode => {
     const [showReconnecting, setShowReconnecting] = React.useState(false);
     const isDebugWindowOpen = useWsDebugWindowOpen();
     const isConnecting = status === 'reconnecting' || status === 'connecting';
-    const [prevIsConnecting, setPrevIsConnecting] =
+    const [syncedIsConnecting, setSyncedIsConnecting] =
         React.useState(isConnecting);
 
-    if (isConnecting !== prevIsConnecting) {
-        setPrevIsConnecting(isConnecting);
+    if (isConnecting !== syncedIsConnecting) {
+        setSyncedIsConnecting(isConnecting);
         if (!isConnecting) {
             setShowReconnecting(false);
         }

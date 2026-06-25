@@ -164,8 +164,7 @@ export const useRegisterForm = (): RegisterFormResult => {
             });
             await setAuthToken(data.token);
 
-            await setupWebPush();
-            await checkAndMigrateVapid();
+            await Promise.all([setupWebPush(), checkAndMigrateVapid()]);
             listenForSwNavigation((url): void => {
                 void navigate(url);
             });

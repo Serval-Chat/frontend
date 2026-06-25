@@ -235,10 +235,10 @@ export const ServerOnboardingSettings = ({
     );
     const [welcomeChannelIds, setWelcomeChannelIds] = useState<string[]>([]);
     const [baseline, setBaseline] = useState<string>('');
-    const [prevSettings, setPrevSettings] = useState(settings);
+    const [syncedSettings, setSyncedSettings] = useState(settings);
 
-    if (settings !== prevSettings) {
-        setPrevSettings(settings);
+    if (settings !== syncedSettings) {
+        setSyncedSettings(settings);
         if (settings) {
             setEnabled(settings.enabled);
             const parsedRules = toStringArray(settings.guidelines);

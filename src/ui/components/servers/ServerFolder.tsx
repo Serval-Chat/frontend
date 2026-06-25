@@ -4,7 +4,7 @@ import {
     AnimatePresence,
     type DragControls,
     Reorder,
-    motion,
+    m,
     useDragControls,
 } from 'framer-motion';
 import {
@@ -283,7 +283,7 @@ export const ServerFolder = ({
                     onOpenChange={handleContextMenuOpenChange}
                 >
                     <Tooltip content={folder.name}>
-                        <motion.button
+                        <m.button
                             className={cn(
                                 'relative flex h-12 w-12 items-center justify-center bg-[--color-bg-subtle] transition-all duration-200 select-none hover:rounded-[0.75rem]',
                                 isOpen
@@ -341,7 +341,7 @@ export const ServerFolder = ({
                                     {totalPings > 99 ? '99+' : totalPings}
                                 </div>
                             )}
-                        </motion.button>
+                        </m.button>
                     </Tooltip>
                 </ContextMenu>
             </div>
@@ -355,7 +355,7 @@ export const ServerFolder = ({
 
             <AnimatePresence>
                 {isOpen && (
-                    <motion.div
+                    <m.div
                         animate={{ height: 'auto', opacity: 1 }}
                         className="relative flex w-full flex-col items-center gap-2 overflow-hidden py-1.5"
                         exit={{ height: 0, opacity: 0 }}
@@ -462,7 +462,7 @@ export const ServerFolder = ({
                                 })}
                             </Reorder.Group>
                         )}
-                    </motion.div>
+                    </m.div>
                 )}
             </AnimatePresence>
         </div>

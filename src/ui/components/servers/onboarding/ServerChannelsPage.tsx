@@ -29,10 +29,10 @@ export const ServerChannelsPage = () => {
     const [hiddenChannelIds, setHiddenChannelIds] = useState<string[]>([]);
     const [hiddenCategoryIds, setHiddenCategoryIds] = useState<string[]>([]);
     const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-    const [prevOnboarding, setPrevOnboarding] = useState(onboarding);
+    const [syncedOnboarding, setSyncedOnboarding] = useState(onboarding);
 
-    if (onboarding !== prevOnboarding) {
-        setPrevOnboarding(onboarding);
+    if (onboarding !== syncedOnboarding) {
+        setSyncedOnboarding(onboarding);
         if (onboarding) {
             setHiddenChannelIds(onboarding.member.hiddenChannelIds ?? []);
             setHiddenCategoryIds(onboarding.member.hiddenCategoryIds ?? []);

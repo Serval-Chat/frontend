@@ -32,6 +32,8 @@ interface RoleEditorProps {
 
 type ColorType = 'solid' | 'custom';
 
+const ROLE_PREVIEW_TIMESTAMP = new Date().toISOString();
+
 export const RoleEditor = ({
     role,
     onSave,
@@ -336,6 +338,7 @@ export const RoleEditor = ({
 
                                     <input
                                         accept=".png,.jpg,.jpeg,.webp,.gif"
+                                        aria-label="Upload role icon"
                                         className="hidden"
                                         id="role-icon-upload"
                                         type="file"
@@ -648,7 +651,7 @@ export const RoleEditor = ({
                                                         id: 'preview',
                                                         text: 'Hello! This is how your role colors will look in the chat.',
                                                         createdAt:
-                                                            new Date().toISOString(),
+                                                            ROLE_PREVIEW_TIMESTAMP,
                                                         serverId: 'preview',
                                                         channelId: 'preview',
                                                         senderId: me.id,

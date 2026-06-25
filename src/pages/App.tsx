@@ -9,6 +9,8 @@ import { Box } from '@/ui/components/layout/Box';
 import { FeatureTile } from '@/ui/components/layout/FeatureTile';
 import { TopNavBar } from '@/ui/components/layout/TopNavBar';
 
+const CURRENT_YEAR = new Date().getFullYear();
+
 export const App = (): ReactNode => (
     <Box className="flex min-h-screen flex-col bg-background selection:bg-primary/30">
         <TopNavBar />
@@ -94,8 +96,7 @@ export const App = (): ReactNode => (
 
         <footer className="mx-8 border-t border-border-subtle py-8 text-center text-sm text-muted-foreground">
             <Text as="p">
-                &copy; {new Date().getFullYear()} Serchat. Made with love for
-                everyone.
+                &copy; {CURRENT_YEAR} Serchat. Made with love for everyone.
             </Text>
         </footer>
     </Box>

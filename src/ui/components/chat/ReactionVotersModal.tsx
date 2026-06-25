@@ -34,15 +34,11 @@ export const ReactionVotersModal = ({
     initialEmoji,
 }: ReactionVotersModalProps) => {
     const [selectedEmoji, setSelectedEmoji] = useState<string | null>(null);
-    const [prevInitialEmoji, setPrevInitialEmoji] = useState<string | null>(
-        null,
-    );
-    const [prevIsOpen, setPrevIsOpen] = useState(false);
-
     const normalizedInitialEmoji = initialEmoji || null;
-    if (isOpen !== prevIsOpen || normalizedInitialEmoji !== prevInitialEmoji) {
-        setPrevIsOpen(isOpen);
-        setPrevInitialEmoji(normalizedInitialEmoji);
+    const syncKey = `${String(isOpen)}:${String(normalizedInitialEmoji)}`;
+    const [syncedKey, setSyncedKey] = useState(syncKey);
+    if (syncKey !== syncedKey) {
+        setSyncedKey(syncKey);
         if (isOpen) {
             setSelectedEmoji(
                 normalizedInitialEmoji || reactions[0]?.emoji || null,

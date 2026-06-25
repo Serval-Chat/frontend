@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';
@@ -39,6 +39,34 @@ import {
 } from './lexical/SearchFilterPlugin';
 
 const PAGE_SIZE = 25;
+
+const handleSearchKeyDown = (e: {
+    key: string;
+    preventDefault(): void;
+}): void => {
+    if (e.key === 'Enter') e.preventDefault();
+};
+
+const SEARCH_CONTENT_EDITABLE = (
+    <ContentEditable
+        className="outline-none focus-visible:ring-1 focus-visible:ring-primary/50"
+        style={{
+            padding: '6px 10px 6px 32px',
+            borderRadius: radius.md,
+            border: `1px solid ${colors.borderSubtle}`,
+            backgroundColor: colors.bgSubtle,
+            color: colors.foreground,
+            fontSize: '0.8rem',
+            lineHeight: '1.5',
+            minHeight: '32px',
+            maxHeight: '80px',
+            overflowY: 'auto',
+            cursor: 'text',
+            wordBreak: 'break-word',
+        }}
+        onKeyDown={handleSearchKeyDown}
+    />
+);
 
 const SEARCH_BOX_CONFIG = {
     namespace: 'MessageSearch',
@@ -185,12 +213,19 @@ export function SearchResultItem({
     const role = highestRoleMap?.get(hit.senderId);
     const iconRole = iconRoleMap?.get(hit.senderId);
 
+    const webhookAvatarUrl = hit.webhookAvatarUrl;
+    const proxiedWebhookAvatar =
+        webhookAvatarUrl &&
+        (webhookAvatarUrl.startsWith('https://') ||
+            webhookAvatarUrl.startsWith('http://'))
+            ? `/api/v1/embed/proxy?url=${encodeURIComponent(webhookAvatarUrl)}`
+            : webhookAvatarUrl;
     const user = hit.isWebhook
         ? {
               id: hit.senderId,
               login: hit.webhookUsername ?? 'Webhook',
               username: hit.webhookUsername ?? 'Webhook',
-              profilePicture: hit.webhookAvatarUrl,
+              profilePicture: proxiedWebhookAvatar,
               createdAt: new Date(hit.createdAt),
           }
         : (memberUser ?? fetchedUser);
@@ -247,18 +282,18 @@ export function SearchResultItem({
     }
 
     return (
-        <div
-            className="group relative flex flex-col transition-all duration-150 hover:bg-white/2"
-            role="button"
+        <button
+            aria-label="Navigate to message"
+            className="group relative flex w-full flex-col text-left transition-all duration-150 hover:bg-white/2"
             style={{
+                background: 'none',
+                border: 'none',
                 borderBottom: `1px solid ${colors.borderSubtle}`,
                 cursor: 'pointer',
+                padding: 0,
             }}
-            tabIndex={0}
+            type="button"
             onClick={() => onNavigate(hit.id)}
-            onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') onNavigate(hit.id);
-            }}
         >
             <div className="flex items-start gap-1 px-4 py-0.5">
                 <div className="mt-1 flex w-12 shrink-0 justify-center">
@@ -314,7 +349,7 @@ export function SearchResultItem({
                     </div>
                 </div>
             </div>
-        </div>
+        </button>
     );
 }
 
@@ -333,10 +368,9 @@ export function MessageSearchPanel({
         q: '',
         filters: {},
     });
-    const [page, setPage] = useState(0);
-    const [lexicalEditor, setLexicalEditor] = useState<LexicalEditor | null>(
-        null,
-    );
+    const [pageState, setPageState] = useState({ page: 0, forKey: '' });
+    const lexicalEditorRef = useRef<LexicalEditor | null>(null);
+    const focusTimerRef = useRef<number>(0);
 
     const { data: allChannels = [] } = useChannels(serverId ?? null, {
         enabled: mode === 'channel',
@@ -382,20 +416,16 @@ export function MessageSearchPanel({
         liveState.q.trim().length > 0 ||
         Object.values(liveState.filters).some((v) => v !== undefined);
 
-    // reset to page 0 whenever the committed query changes
+    // reset to page 0 whenever the committed query changes (render-time derived state,
+    // avoids both ref-during-render and setState-in-effect)
     const committedKey = `${debouncedQ}:${debouncedFiltersJson}`;
-    const [prevCommittedKey, setPrevCommittedKey] = useState(committedKey);
-    if (committedKey !== prevCommittedKey) {
-        setPrevCommittedKey(committedKey);
-        setPage(0);
+    const page = pageState.forKey === committedKey ? pageState.page : 0;
+    if (pageState.forKey !== committedKey) {
+        setPageState({ page: 0, forKey: committedKey });
     }
 
-    // focus the editor on mount
-    useEffect(() => {
-        if (!lexicalEditor) return;
-        const t = setTimeout(() => lexicalEditor.focus(), 80);
-        return () => clearTimeout(t);
-    }, [lexicalEditor]);
+    // cleanup focus timer on unmount
+    useEffect(() => () => window.clearTimeout(focusTimerRef.current), []);
 
     const { data, isFetching, isError } = useMessageSearch({
         mode,
@@ -439,12 +469,16 @@ export function MessageSearchPanel({
     );
 
     const handleEditorReady = useCallback((editor: LexicalEditor) => {
-        setLexicalEditor(editor);
+        lexicalEditorRef.current = editor;
+        window.clearTimeout(focusTimerRef.current);
+        focusTimerRef.current = window.setTimeout(() => {
+            lexicalEditorRef.current?.focus();
+        }, 80);
     }, []);
 
     function appendToEditor(token: string) {
-        if (!lexicalEditor) return;
-        insertSearchToken(lexicalEditor, token);
+        if (!lexicalEditorRef.current) return;
+        insertSearchToken(lexicalEditorRef.current, token);
     }
 
     return (
@@ -488,29 +522,7 @@ export function MessageSearchPanel({
                         <div style={{ position: 'relative' }}>
                             <PlainTextPlugin
                                 ErrorBoundary={LexicalErrorBoundary}
-                                contentEditable={
-                                    <ContentEditable
-                                        style={{
-                                            outline: 'none',
-                                            padding: '6px 10px 6px 32px',
-                                            borderRadius: radius.md,
-                                            border: `1px solid ${colors.borderSubtle}`,
-                                            backgroundColor: colors.bgSubtle,
-                                            color: colors.foreground,
-                                            fontSize: '0.8rem',
-                                            lineHeight: '1.5',
-                                            minHeight: '32px',
-                                            maxHeight: '80px',
-                                            overflowY: 'auto',
-                                            cursor: 'text',
-                                            wordBreak: 'break-word',
-                                        }}
-                                        onKeyDown={(e) => {
-                                            if (e.key === 'Enter')
-                                                e.preventDefault();
-                                        }}
-                                    />
-                                }
+                                contentEditable={SEARCH_CONTENT_EDITABLE}
                                 placeholder={
                                     <span
                                         style={{
@@ -792,7 +804,12 @@ export function MessageSearchPanel({
                         disabled={!canGoPrev}
                         style={navButtonStyle(canGoPrev)}
                         type="button"
-                        onClick={() => setPage((p) => p - 1)}
+                        onClick={() =>
+                            setPageState({
+                                page: page - 1,
+                                forKey: committedKey,
+                            })
+                        }
                     >
                         <ChevronLeft size={16} />
                     </button>
@@ -803,7 +820,12 @@ export function MessageSearchPanel({
                         disabled={!canGoNext}
                         style={navButtonStyle(canGoNext)}
                         type="button"
-                        onClick={() => setPage((p) => p + 1)}
+                        onClick={() =>
+                            setPageState({
+                                page: page + 1,
+                                forKey: committedKey,
+                            })
+                        }
                     >
                         <ChevronRight size={16} />
                     </button>

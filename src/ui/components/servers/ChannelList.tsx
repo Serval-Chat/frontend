@@ -349,10 +349,10 @@ export const ChannelList = ({
             hiddenChannels,
         ],
     );
-    const [prevSyncItems, setPrevSyncItems] = useState<ListItem[]>(nextItems);
+    const prevSyncItemsRef = React.useRef<ListItem[]>(nextItems);
 
-    if (nextItems !== prevSyncItems && !isReordering && !syncLock) {
-        setPrevSyncItems(nextItems);
+    if (nextItems !== prevSyncItemsRef.current && !isReordering && !syncLock) {
+        prevSyncItemsRef.current = nextItems;
         setItems(nextItems);
     }
 

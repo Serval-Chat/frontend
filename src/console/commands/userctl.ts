@@ -88,7 +88,7 @@ export const userctlCommand: ConCommandReactor = {
                 };
             }
             const fields = fieldsStr.split(',');
-            const allowed = [
+            const allowed = new Set([
                 'uname',
                 'dname',
                 'pronouns',
@@ -96,9 +96,9 @@ export const userctlCommand: ConCommandReactor = {
                 'unamefnt',
                 'webconn',
                 'badges',
-            ];
+            ]);
             for (const field of fields) {
-                if (!allowed.includes(field)) {
+                if (!allowed.has(field)) {
                     return {
                         output: [
                             `userctl: invalid filter field '${field}'`,

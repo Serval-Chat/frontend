@@ -252,6 +252,7 @@ export const NotificationSettings = () => {
                         </Button>
                         <input
                             accept="audio/*"
+                            aria-label="Upload notification sound"
                             className="hidden"
                             ref={fileInputRef}
                             type="file"

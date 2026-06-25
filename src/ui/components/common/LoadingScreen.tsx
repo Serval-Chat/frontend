@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, m } from 'framer-motion';
 
 import { BouncingDots } from '@/ui/animations/BouncingDots';
 import { cn } from '@/utils/cn';
@@ -56,7 +56,7 @@ export const LoadingScreen = ({
     return (
         <AnimatePresence>
             {isVisible && (
-                <motion.div
+                <m.div
                     animate={{ opacity: 1 }}
                     className={cn(
                         'fixed inset-0 z-[9999] flex flex-col items-center justify-center p-8 text-center',
@@ -77,7 +77,7 @@ export const LoadingScreen = ({
                         </div>
 
                         <div className="flex flex-col items-center gap-2">
-                            <motion.div
+                            <m.div
                                 animate={{ opacity: 1, y: 0 }}
                                 initial={{ opacity: 0, y: 5 }}
                                 transition={{ delay: 0.1 }}
@@ -98,9 +98,9 @@ export const LoadingScreen = ({
                                           ? 'Reconnecting'
                                           : 'Offline'}
                                 </span>
-                            </motion.div>
+                            </m.div>
 
-                            <motion.div
+                            <m.div
                                 animate={{ opacity: 1 }}
                                 initial={{ opacity: 0 }}
                                 transition={{ delay: 0.3 }}
@@ -108,7 +108,7 @@ export const LoadingScreen = ({
                                 <p className="text-sm font-medium text-muted-foreground opacity-80">
                                     {displayMessage}
                                 </p>
-                            </motion.div>
+                            </m.div>
                         </div>
                     </div>
 
@@ -118,7 +118,7 @@ export const LoadingScreen = ({
                             size={6}
                         />
                     </div>
-                </motion.div>
+                </m.div>
             )}
         </AnimatePresence>
     );

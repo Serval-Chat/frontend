@@ -34,20 +34,14 @@ export const PingItem = ({ ping, onClick }: PingItemProps) => {
     }
 
     return (
-        <div
+        <button
+            aria-label="Go to ping"
             className={cn(
-                'group flex cursor-pointer flex-col gap-0.5 border-b border-border-subtle p-3 select-none last:border-0',
+                'group flex w-full cursor-pointer flex-col gap-0.5 border-b border-border-subtle p-3 text-left select-none last:border-0',
                 'bg-background hover:bg-bg-subtle',
             )}
-            role="button"
-            tabIndex={0}
+            type="button"
             onClick={onClick}
-            onKeyDown={(e): void => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    onClick();
-                }
-            }}
         >
             <div className="flex items-center justify-between gap-2">
                 <div className="flex min-w-0 items-center gap-1.5">
@@ -87,6 +81,6 @@ export const PingItem = ({ ping, onClick }: PingItemProps) => {
             <div className="line-clamp-3 overflow-hidden text-sm text-foreground opacity-90">
                 <MessageContent text={snippet} />
             </div>
-        </div>
+        </button>
     );
 };

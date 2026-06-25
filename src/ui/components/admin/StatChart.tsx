@@ -1,18 +1,36 @@
-import { type ReactNode } from 'react';
-
-import {
-    Area,
-    AreaChart,
-    CartesianGrid,
-    ResponsiveContainer,
-    Tooltip,
-    XAxis,
-    YAxis,
-} from 'recharts';
+import React, { type ReactNode, Suspense } from 'react';
 
 import type { StatsRange } from '@/hooks/admin/useAdminStats';
 import { Text } from '@/ui/components/common/Text';
 import { Box } from '@/ui/components/layout/Box';
+
+const Area = React.lazy(() =>
+    import('recharts').then((m) => ({ default: m.Area })),
+);
+const AreaChart = React.lazy(() =>
+    import('recharts').then((m) => ({ default: m.AreaChart })),
+);
+const CartesianGrid = React.lazy(() =>
+    import('recharts').then((m) => ({ default: m.CartesianGrid })),
+);
+const ResponsiveContainer = React.lazy(() =>
+    import('recharts').then((m) => ({ default: m.ResponsiveContainer })),
+);
+const Tooltip = React.lazy(() =>
+    import('recharts').then((m) => ({ default: m.Tooltip })),
+);
+const XAxis = React.lazy(() =>
+    import('recharts').then((m) => ({ default: m.XAxis })),
+);
+const YAxis = React.lazy(() =>
+    import('recharts').then((m) => ({ default: m.YAxis })),
+);
+
+const AXIS_TICK_STYLE = { fontSize: 11, fill: 'var(--color-muted-foreground)' };
+const yTickFormatter = (value: number): string =>
+    value >= 1000
+        ? `${(value / 1000).toFixed(value % 1000 === 0 ? 0 : 1)}k`
+        : String(value);
 
 interface StatChartProps {
     title: string;
@@ -129,90 +147,92 @@ export const StatChart = ({
 
             {/* Chart fills remaining height */}
             <Box className="min-h-0 flex-1 px-2 pb-3">
-                <ResponsiveContainer height="100%" width="100%">
-                    <AreaChart
-                        data={chartData}
-                        margin={{ top: 6, right: 12, left: -8, bottom: 0 }}
-                    >
-                        <defs>
-                            <linearGradient
-                                id={gradId}
-                                x1="0"
-                                x2="0"
-                                y1="0"
-                                y2="1"
-                            >
-                                <stop
-                                    offset="0%"
-                                    stopColor={color}
-                                    stopOpacity={0.25}
-                                />
-                                <stop
-                                    offset="100%"
-                                    stopColor={color}
-                                    stopOpacity={0}
-                                />
-                            </linearGradient>
-                        </defs>
-                        <CartesianGrid
-                            stroke="var(--color-border-subtle)"
-                            strokeDasharray="3 3"
-                            vertical={false}
-                        />
-                        <XAxis
-                            axisLine={false}
-                            dataKey="hour"
-                            height={22}
-                            interval={0}
-                            tick={{
-                                fontSize: 11,
-                                fill: 'var(--color-muted-foreground)',
-                            }}
-                            tickFormatter={xTickFormatter}
-                            tickLine={false}
-                        />
-                        <YAxis
-                            allowDecimals={false}
-                            axisLine={false}
-                            tick={{
-                                fontSize: 11,
-                                fill: 'var(--color-muted-foreground)',
-                            }}
-                            tickFormatter={(value) =>
-                                value >= 1000
-                                    ? `${(value / 1000).toFixed(value % 1000 === 0 ? 0 : 1)}k`
-                                    : value
-                            }
-                            tickLine={false}
-                            width={44}
-                        />
-                        <Tooltip
-                            content={
-                                <StatTooltip
-                                    dataLength={data.length}
-                                    range={range}
-                                />
-                            }
-                            cursor={{
-                                stroke: color,
-                                strokeWidth: 1,
-                                strokeDasharray: '4 4',
-                            }}
-                            wrapperStyle={{ outline: 'none' }}
-                        />
-                        <Area
-                            isAnimationActive
-                            activeDot={{ r: 4, fill: color, strokeWidth: 0 }}
-                            animationDuration={500}
-                            dataKey="value"
-                            dot={false}
-                            fill={`url(#${gradId})`}
-                            stroke={color}
-                            strokeWidth={2}
-                            type="linear"
-                        />
-                    </AreaChart>
-                </ResponsiveContainer>
+                <Suspense
+                    fallback={
+                        <div className="flex h-full items-center justify-center text-xs text-muted-foreground">
+                            Loading chart...
+                        </div>
+                    }
+                >
+                    <ResponsiveContainer height="100%" width="100%">
+                        <AreaChart
+                            data={chartData}
+                            margin={{ top: 6, right: 12, left: -8, bottom: 0 }}
+                        >
+                            <defs>
+                                <linearGradient
+                                    id={gradId}
+                                    x1="0"
+                                    x2="0"
+                                    y1="0"
+                                    y2="1"
+                                >
+                                    <stop
+                                        offset="0%"
+                                        stopColor={color}
+                                        stopOpacity={0.25}
+                                    />
+                                    <stop
+                                        offset="100%"
+                                        stopColor={color}
+                                        stopOpacity={0}
+                                    />
+                                </linearGradient>
+                            </defs>
+                            <CartesianGrid
+                                stroke="var(--color-border-subtle)"
+                                strokeDasharray="3 3"
+                                vertical={false}
+                            />
+                            <XAxis
+                                axisLine={false}
+                                dataKey="hour"
+                                height={22}
+                                interval={0}
+                                tick={AXIS_TICK_STYLE}
+                                tickFormatter={xTickFormatter}
+                                tickLine={false}
+                            />
+                            <YAxis
+                                allowDecimals={false}
+                                axisLine={false}
+                                tick={AXIS_TICK_STYLE}
+                                tickFormatter={yTickFormatter}
+                                tickLine={false}
+                                width={44}
+                            />
+                            <Tooltip
+                                content={
+                                    <StatTooltip
+                                        dataLength={data.length}
+                                        range={range}
+                                    />
+                                }
+                                cursor={{
+                                    stroke: color,
+                                    strokeWidth: 1,
+                                    strokeDasharray: '4 4',
+                                }}
+                                wrapperStyle={{ outline: 'none' }}
+                            />
+                            <Area
+                                isAnimationActive
+                                activeDot={{
+                                    r: 4,
+                                    fill: color,
+                                    strokeWidth: 0,
+                                }}
+                                animationDuration={500}
+                                dataKey="value"
+                                dot={false}
+                                fill={`url(#${gradId})`}
+                                stroke={color}
+                                strokeWidth={2}
+                                type="linear"
+                            />
+                        </AreaChart>
+                    </ResponsiveContainer>
+                </Suspense>
             </Box>
         </Box>
     );

@@ -56,28 +56,35 @@ export const NTScrollArea = ({
         });
     }, []);
 
+    const updateMetricsRef = useRef(updateMetrics);
+    useLayoutEffect(() => {
+        updateMetricsRef.current = updateMetrics;
+    });
+
     useLayoutEffect((): void => {
-        updateMetrics();
-    }, [children, updateMetrics]);
+        updateMetricsRef.current();
+    }, [children]);
 
     useEffect((): (() => void) | undefined => {
         const viewport = viewportRef.current;
         if (!viewport) return;
 
-        const resizeObserver = new ResizeObserver(updateMetrics);
+        const handler = (): void => updateMetricsRef.current();
+
+        const resizeObserver = new ResizeObserver(handler);
         resizeObserver.observe(viewport);
 
         if (viewport.firstElementChild) {
             resizeObserver.observe(viewport.firstElementChild);
         }
 
-        window.addEventListener('resize', updateMetrics);
+        window.addEventListener('resize', handler);
 
         return (): void => {
             resizeObserver.disconnect();
-            window.removeEventListener('resize', updateMetrics);
+            window.removeEventListener('resize', handler);
         };
-    }, [updateMetrics]);
+    }, []);
 
     const hasVertical =
         metrics.scrollHeight > 0 &&

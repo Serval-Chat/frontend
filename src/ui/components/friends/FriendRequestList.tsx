@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 import { ArrowLeft, CheckCircle } from 'lucide-react';
 
@@ -29,18 +29,12 @@ export const FriendRequestList = () => {
     >('pending');
 
     const requestCount = requests?.length ?? 0;
-    const [prevRequestCount, setPrevRequestCount] =
-        React.useState(requestCount);
-    if (
-        !isLoading &&
-        requestCount !== prevRequestCount &&
-        requestCount === 0 &&
-        view === 'pending'
-    ) {
-        setPrevRequestCount(requestCount);
-        setView('all');
-    } else if (requestCount !== prevRequestCount) {
-        setPrevRequestCount(requestCount);
+    const [syncedRequestCount, setSyncedRequestCount] = useState(requestCount);
+    if (requestCount !== syncedRequestCount) {
+        setSyncedRequestCount(requestCount);
+        if (!isLoading && requestCount === 0 && view === 'pending') {
+            setView('all');
+        }
     }
 
     if (isLoading) {

@@ -96,7 +96,7 @@ export const MainChat = ({
     );
     const [showPins, setShowPins] = useState(false);
     const [isSearchOpen, setIsSearchOpen] = useState(false);
-    const [prevConversationKey, setPrevConversationKey] = useState(
+    const [syncedConversationKey, setSyncedConversationKey] = useState(
         `${selectedFriendId ?? ''}:${selectedChannelId ?? ''}`,
     );
     const [debugTypingCount, setDebugTypingCount] = useState(0);
@@ -332,8 +332,8 @@ export const MainChat = ({
 
     // close search whenever the active conversation changes
     const conversationKey = `${selectedFriendId ?? ''}:${selectedChannelId ?? ''}`;
-    if (conversationKey !== prevConversationKey) {
-        setPrevConversationKey(conversationKey);
+    if (conversationKey !== syncedConversationKey) {
+        setSyncedConversationKey(conversationKey);
         setIsSearchOpen(false);
     }
 

@@ -250,6 +250,7 @@ export const FileEmbed = ({ url, attachment, onResize }: FileEmbedProps) => {
                         <video
                             controls
                             playsInline
+                            aria-label="Embedded video"
                             className="h-full max-h-[min(450px,70vh)] w-full object-contain"
                             height={mediaDimensions.height}
                             preload="metadata"

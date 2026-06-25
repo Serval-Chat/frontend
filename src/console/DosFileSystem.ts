@@ -1,5 +1,7 @@
 export type DosAttribute = 'A' | 'H' | 'R' | 'S';
 
+const VALID_DOS_ATTRIBUTES = new Set<DosAttribute>(['A', 'H', 'R', 'S']);
+
 export interface DosEntry {
     attributes: DosAttribute[];
     content?: string;
@@ -223,7 +225,7 @@ export class DosFileSystem {
                 const attribute = change[1]?.toUpperCase() as DosAttribute;
                 if (
                     (op !== '+' && op !== '-') ||
-                    !['A', 'H', 'R', 'S'].includes(attribute)
+                    !VALID_DOS_ATTRIBUTES.has(attribute)
                 ) {
                     throw new Error('Invalid parameter - ' + change);
                 }

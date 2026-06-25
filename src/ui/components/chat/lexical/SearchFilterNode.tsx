@@ -102,7 +102,7 @@ function SearchFilterChip({
                 borderRadius: radius.full,
                 backgroundColor: bg,
                 color,
-                fontSize: '0.72rem',
+                fontSize: '0.75rem',
                 fontWeight: 500,
                 lineHeight: 1.6,
                 userSelect: 'none',

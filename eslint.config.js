@@ -18,7 +18,7 @@ const __dirname = path.dirname(__filename);
 
 
 export default tseslint.config(
-  { ignores: ['dist', 'src-tauri/**/*', 'vitest.config.ts', 'vite.config.ts', 'src/api/generated/**/*'] },
+  { ignores: ['dist', 'src-tauri/**/*', 'vitest.config.ts', 'vite.config.ts', 'doctor.config.ts', 'src/api/generated/**/*'] },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
     files: ['**/*.{ts,tsx}'],

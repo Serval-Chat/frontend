@@ -140,10 +140,18 @@ export const useCancelFriendRequest = (): UseMutationResult<
     });
 };
 
-export const useRemoveFriend = (): UseMutationResult<void, Error, string> =>
-    useMutation({
+export const useRemoveFriend = (): UseMutationResult<void, Error, string> => {
+    const queryClient = useQueryClient();
+    return useMutation({
         mutationFn: friendsApi.removeFriend,
+        onSuccess: (): void => {
+            void queryClient.invalidateQueries({ queryKey: FRIENDS_QUERY_KEY });
+            void queryClient.invalidateQueries({
+                queryKey: FRIEND_PROFILES_QUERY_KEY,
+            });
+        },
     });
+};
 
 export const useTogglePinFriend = (): UseMutationResult<
     { friendId: string; isPinned: boolean },

@@ -5,6 +5,8 @@ import type { User } from '@/api/users/users.types';
 
 import { MessageHeader } from './MessageHeader';
 
+const TEST_TIMESTAMP = new Date().toISOString();
+
 describe('MessageHeader', (): void => {
     it('renders bot tag for bot users', (): void => {
         const botUser: User = {
@@ -13,12 +15,7 @@ describe('MessageHeader', (): void => {
             isBot: true,
         } as User;
 
-        render(
-            <MessageHeader
-                timestamp={new Date().toISOString()}
-                user={botUser}
-            />,
-        );
+        render(<MessageHeader timestamp={TEST_TIMESTAMP} user={botUser} />);
 
         expect(screen.getByText('BOT')).toBeInTheDocument();
     });
@@ -30,12 +27,7 @@ describe('MessageHeader', (): void => {
             isBot: false,
         } as User;
 
-        render(
-            <MessageHeader
-                timestamp={new Date().toISOString()}
-                user={humanUser}
-            />,
-        );
+        render(<MessageHeader timestamp={TEST_TIMESTAMP} user={humanUser} />);
 
         expect(screen.queryByText('BOT')).not.toBeInTheDocument();
     });
@@ -50,7 +42,7 @@ describe('MessageHeader', (): void => {
         render(
             <MessageHeader
                 isWebhook
-                timestamp={new Date().toISOString()}
+                timestamp={TEST_TIMESTAMP}
                 user={webhookUser}
             />,
         );

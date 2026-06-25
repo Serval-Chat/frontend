@@ -32,13 +32,13 @@ export const Badge = ({
                 justifyContent: 'center',
                 borderRadius: '10px',
                 paddingInline: '4px',
-                fontSize: '11px',
+                fontSize: '12px',
                 fontWeight: '700',
                 boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.4)',
                 outline: `2.5px solid ${colors.background}`,
                 backgroundColor: colors.unreadBadgeBg,
                 color: colors.unreadBadgeText,
-                transition: 'all 0.2s',
+                transition: 'background-color 0.2s, color 0.2s, outline 0.2s',
                 ...style,
             }}
         >

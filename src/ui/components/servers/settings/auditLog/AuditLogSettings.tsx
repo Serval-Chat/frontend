@@ -77,9 +77,10 @@ export const AuditLogSettings = ({ serverId }: AuditLogSettingsProps) => {
     }
 
     const entries =
-        data?.pages
-            .flatMap((page): IAuditLogEntry[] => page?.entries || [])
-            .filter(Boolean) ?? [];
+        data?.pages.reduce<IAuditLogEntry[]>((acc, page) => {
+            if (page?.entries) acc.push(...page.entries);
+            return acc;
+        }, []) ?? [];
 
     return (
         <div className="max-w-5xl space-y-6 pb-20">
