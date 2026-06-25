@@ -18,74 +18,95 @@ export const PausedAnimatedImage = ({
     ...props
 }: PausedAnimatedImageProps) => {
     const canvasRef = React.useRef<HTMLCanvasElement>(null);
-    const [failed, setFailed] = React.useState(false);
+    const [isGif, setIsGif] = React.useState<boolean | null>(null);
+    const [firstFrameDrawn, setFirstFrameDrawn] = React.useState(false);
+    const [failedToLoad, setFailedToLoad] = React.useState(false);
 
     React.useEffect(() => {
-        if (!paused || !src) return;
+        if (!src || !paused) return;
 
         let cancelled = false;
 
         const drawFirstFrame = async (): Promise<void> => {
             try {
-                setFailed(false);
                 const response = await fetch(src);
                 const buffer = await response.arrayBuffer();
                 if (cancelled) return;
 
                 const gif = parseGIF(buffer);
                 const [frame] = decompressFrames(gif, true);
-                const canvas = canvasRef.current;
-                if (!frame || !canvas) return;
+                if (cancelled) return;
 
-                canvas.width = gif.lsd.width;
-                canvas.height = gif.lsd.height;
+                setIsGif(true);
 
-                const context = canvas.getContext('2d');
-                if (!context) return;
+                setTimeout(() => {
+                    if (cancelled) return;
+                    const canvas = canvasRef.current;
+                    if (!frame || !canvas) return;
 
-                const imageData = new ImageData(
-                    new Uint8ClampedArray(frame.patch),
-                    frame.dims.width,
-                    frame.dims.height,
-                );
-                context.putImageData(
-                    imageData,
-                    frame.dims.left,
-                    frame.dims.top,
-                );
-                onLoad?.({} as React.SyntheticEvent<HTMLImageElement, Event>);
+                    canvas.width = gif.lsd.width;
+                    canvas.height = gif.lsd.height;
+
+                    const context = canvas.getContext('2d');
+                    if (!context) return;
+
+                    const imageData = new ImageData(
+                        new Uint8ClampedArray(frame.patch),
+                        frame.dims.width,
+                        frame.dims.height,
+                    );
+                    context.putImageData(
+                        imageData,
+                        frame.dims.left,
+                        frame.dims.top,
+                    );
+                    setFirstFrameDrawn(true);
+                }, 0);
             } catch {
-                if (!cancelled) setFailed(true);
+                if (!cancelled) {
+                    setIsGif(false);
+                }
             }
         };
 
-        void drawFirstFrame();
+        if (isGif !== false) {
+            void drawFirstFrame();
+        }
 
         return () => {
             cancelled = true;
         };
-    }, [onLoad, paused, src]);
+    }, [paused, src, isGif]);
 
-    if (!paused || failed) {
-        return (
+    const showImg =
+        !paused ||
+        isGif === false ||
+        (isGif === true && !firstFrameDrawn) ||
+        isGif === null;
+
+    return (
+        <>
             <img
                 alt={alt}
                 className={className}
-                src={failed ? fallbackSrc || src : src}
-                style={style}
+                src={isGif === false && failedToLoad ? fallbackSrc || src : src}
+                style={{ ...style, display: showImg ? undefined : 'none' }}
+                onError={() => setFailedToLoad(true)}
                 onLoad={onLoad}
                 {...props}
             />
-        );
-    }
-
-    return (
-        <canvas
-            aria-label={alt}
-            className={className}
-            ref={canvasRef}
-            role={alt ? 'img' : undefined}
-            style={style}
-        />
+            {paused && isGif === true && (
+                <canvas
+                    aria-label={alt}
+                    className={className}
+                    ref={canvasRef}
+                    role={alt ? 'img' : undefined}
+                    style={{
+                        ...style,
+                        display: firstFrameDrawn ? undefined : 'none',
+                    }}
+                />
+            )}
+        </>
     );
 };

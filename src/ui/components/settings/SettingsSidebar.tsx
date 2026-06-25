@@ -5,6 +5,7 @@ import {
     Palette,
     Shield,
     ShieldAlert,
+    Sparkles,
     User,
     X,
 } from 'lucide-react';
@@ -22,6 +23,7 @@ interface SettingsSidebarProps {
 const SETTINGS_SECTIONS = [
     { id: 'account', label: 'My Account', icon: User },
     { id: 'appearance', label: 'Appearance', icon: Palette },
+    { id: 'decorations', label: 'Avatar Decorations', icon: Sparkles },
     { id: 'accessibility', label: 'Accessibility', icon: Eye },
     { id: 'blocking', label: 'Blocking', icon: Shield },
     { id: 'standing', label: 'Standing', icon: ShieldAlert },

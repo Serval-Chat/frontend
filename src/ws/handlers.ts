@@ -840,6 +840,7 @@ export const setupGlobalWsHandlers = (
             userId: string;
             settings?: UserSettings;
             activeMute?: User['activeMute'];
+            decorationId?: string | null;
         }>(WsEvents.USER_UPDATED, (payload): void => {
             if (payload.userId === currentUser?.id) {
                 queryClient.setQueryData<User>(['me'], (old) => {
@@ -859,6 +860,15 @@ export const setupGlobalWsHandlers = (
                             'activeMute',
                         )
                             ? { activeMute: payload.activeMute ?? null }
+                            : {}),
+                        ...(Object.prototype.hasOwnProperty.call(
+                            payload,
+                            'decorationId',
+                        )
+                            ? {
+                                  decorationId:
+                                      payload.decorationId ?? undefined,
+                              }
                             : {}),
                     };
                 });

@@ -114,6 +114,7 @@ export const ParserPresets = {
             ParserFeature.SUBSCRIPT,
             ParserFeature.STACKED_SCRIPT,
             ParserFeature.TIMESTAMP,
+            ParserFeature.DECORATION,
         ],
     },
     BIO: {
@@ -549,6 +550,19 @@ export class TextParser {
                 if (channelLinkNode) {
                     currentText = this.flushText(nodes, currentText);
                     nodes.push(channelLinkNode);
+                    continue;
+                }
+            }
+
+            if (
+                char === 'h' &&
+                this.has(ParserFeature.DECORATION) &&
+                (this.peek('http://') || this.peek('https://'))
+            ) {
+                const decoNode = this.tryParseDecoration();
+                if (decoNode) {
+                    currentText = this.flushText(nodes, currentText);
+                    nodes.push(decoNode);
                     continue;
                 }
             }
@@ -1303,6 +1317,26 @@ export class TextParser {
             }
 
             return { type: 'link', url, text: url };
+        }
+
+        this.index = start;
+        return null;
+    }
+
+    private tryParseDecoration(): ASTNode | null {
+        const start = this.index;
+        let url = '';
+
+        while (this.index < this.text.length) {
+            const c = this.text[this.index];
+            if (c === ' ' || c === '\n' || c === '\t' || c === '\r') break;
+            url += c;
+            this.index++;
+        }
+
+        const match = url.match(/\/decorations\/(\d{17,20})\/?$/);
+        if (match) {
+            return { type: 'decoration', decorationId: match[1] };
         }
 
         this.index = start;

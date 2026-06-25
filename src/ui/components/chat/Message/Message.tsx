@@ -430,6 +430,7 @@ export const Message = React.memo(
                         {isGroupStart ? (
                             <UserProfilePicture
                                 noIndicator
+                                decorationId={user.decorationId}
                                 size="md"
                                 src={user.profilePicture}
                                 username={user.username}

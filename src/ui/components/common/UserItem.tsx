@@ -271,7 +271,13 @@ const UserItemInner = React.memo(
         const [showProfile, setShowProfile] = React.useState(false);
         const itemRef = React.useRef<HTMLDivElement>(null);
 
-        const { username, displayName, profilePicture, customStatus } = useMemo(
+        const {
+            username,
+            displayName,
+            profilePicture,
+            customStatus,
+            decorationId,
+        } = useMemo(
             () => ({
                 username: userProfile?.username || initialData?.username || '',
                 displayName:
@@ -283,6 +289,7 @@ const UserItemInner = React.memo(
                     userProfile?.profilePicture ||
                     initialData?.profilePicture ||
                     null,
+                decorationId: userProfile?.decorationId || null,
                 customStatus:
                     userProfile?.customStatus || initialData?.customStatus,
             }),
@@ -888,6 +895,7 @@ const UserItemInner = React.memo(
                         onClick={handleItemClick}
                     >
                         <UserProfilePicture
+                            decorationId={decorationId}
                             size="sm"
                             src={profilePicture}
                             status={presenceStatus}

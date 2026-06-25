@@ -258,6 +258,7 @@ export const UserProfileCard = ({
                     onClick={onAvatarClick}
                 >
                     <UserProfilePicture
+                        decorationId={user?.decorationId}
                         noIndicator={false}
                         size="xl"
                         src={user?.profilePicture}

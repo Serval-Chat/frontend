@@ -50,6 +50,7 @@ export const MiniProfile = () => {
             <Box className="mr-2 flex min-w-0 flex-1 items-center">
                 <UserProfilePicture
                     className="mr-2 shrink-0"
+                    decorationId={user.decorationId}
                     size="sm"
                     src={user.profilePicture}
                     status={presenceStatus}

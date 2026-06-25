@@ -53,6 +53,12 @@ const KeybindSettings = React.lazy(() =>
     })),
 );
 
+const AvatarDecorationsSettings = React.lazy(() =>
+    import('./AvatarDecorationsSettings').then((m) => ({
+        default: m.AvatarDecorationsSettings,
+    })),
+);
+
 interface SettingsModalProps {
     isOpen: boolean;
     onClose: () => void;
@@ -62,6 +68,7 @@ interface SettingsModalProps {
 const SECTION_URL_MAP: Record<string, string> = {
     'my-account': 'account',
     appearance: 'appearance',
+    decorations: 'decorations',
     accessibility: 'accessibility',
     blocking: 'blocking',
     standing: 'standing',
@@ -73,6 +80,7 @@ const SECTION_URL_MAP: Record<string, string> = {
 const SECTION_ID_TO_URL: Record<string, string> = {
     account: 'my-account',
     appearance: 'appearance',
+    decorations: 'decorations',
     accessibility: 'accessibility',
     blocking: 'blocking',
     standing: 'standing',
@@ -211,6 +219,9 @@ export const SettingsModal = ({
                                 )}
                                 {activeSection === 'developer' && (
                                     <DeveloperSettings />
+                                )}
+                                {activeSection === 'decorations' && (
+                                    <AvatarDecorationsSettings />
                                 )}
                             </React.Suspense>
                         )}

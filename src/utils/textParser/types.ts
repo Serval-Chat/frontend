@@ -46,6 +46,7 @@ export const ParserFeature = {
     SUBSCRIPT: 'SUBSCRIPT',
     STACKED_SCRIPT: 'STACKED_SCRIPT',
     TIMESTAMP: 'TIMESTAMP',
+    DECORATION: 'DECORATION',
 } as const;
 
 export type ParserFeature = (typeof ParserFeature)[keyof typeof ParserFeature];
@@ -94,7 +95,8 @@ export type ASTNodeType =
     | 'superscript'
     | 'subscript'
     | 'stacked_script'
-    | 'timestamp';
+    | 'timestamp'
+    | 'decoration';
 
 export interface TextNode {
     type: 'text';
@@ -301,6 +303,11 @@ export interface TimestampNode {
     flag?: TimestampFlag;
 }
 
+export interface DecorationNode {
+    type: 'decoration';
+    decorationId: string;
+}
+
 export interface TableNode {
     type: 'table';
     headers: (string | ASTNode[])[];
@@ -387,4 +394,5 @@ export type ASTNode =
     | SuperscriptNode
     | SubscriptNode
     | StackedScriptNode
-    | TimestampNode;
+    | TimestampNode
+    | DecorationNode;

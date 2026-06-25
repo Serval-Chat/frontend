@@ -150,6 +150,7 @@ export interface User {
     bio?: string;
     pronouns?: string;
     badges?: Badge[];
+    decorationId?: string;
 
     settings?: UserSettings;
     banner?: string;

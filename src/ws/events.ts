@@ -645,6 +645,7 @@ export interface IUserUpdatedEvent {
     bio?: string | null;
     pronouns?: string | null;
     badges?: string[];
+    decorationId?: string | null;
     oldUsername?: string;
     newUsername?: string;
     usernameFont?: string;

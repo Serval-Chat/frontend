@@ -24,7 +24,7 @@ export const UserProfileStatusIndicator = ({
 }: UserProfileStatusIndicatorProps) => (
     <Box
         className={cn(
-            'absolute -right-[1px] -bottom-[1px] rounded-full border-background',
+            'absolute -right-[1px] -bottom-[1px] z-20 rounded-full border-background',
             STATUS_SIZE_CLASSES[size],
             status === 'online' ? 'bg-success' : 'bg-muted-foreground',
             className,

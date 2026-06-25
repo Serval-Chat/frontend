@@ -3,6 +3,7 @@
 import React from 'react';
 
 import { ChannelLink } from '@/ui/components/chat/ChannelLink';
+import { DecorationEmbed } from '@/ui/components/chat/DecorationEmbed';
 import { FileEmbed } from '@/ui/components/chat/FileEmbed';
 import { GifPlayer } from '@/ui/components/chat/GifPlayer';
 import { InviteLink } from '@/ui/components/chat/InviteLink';
@@ -1017,6 +1018,14 @@ export const ParsedText = React.memo<ParsedTextProps>(
                                     klipyId={node.klipyId}
                                     url={node.url}
                                     onResize={onResize}
+                                />
+                            );
+
+                        case 'decoration':
+                            return (
+                                <DecorationEmbed
+                                    decorationId={node.decorationId}
+                                    key={idx}
                                 />
                             );
 
