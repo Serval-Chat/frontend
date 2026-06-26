@@ -21,17 +21,47 @@ export function $getRawMessageText(): string {
             if (node.hasFormat('code')) {
                 text = `\`${text}\``;
             } else {
-                if (node.hasFormat('bold')) {
-                    text = `**${text}**`;
-                }
-                if (node.hasFormat('italic')) {
-                    text = `*${text}*`;
-                }
-                if (node.hasFormat('strikethrough')) {
-                    text = `~~${text}~~`;
-                }
-                if (node.hasFormat('underline')) {
-                    text = `__${text}__`;
+                const prev = node.getPreviousSibling();
+                const next = node.getNextSibling();
+                const prevText = $isTextNode(prev) ? prev.getTextContent() : '';
+                const nextText = $isTextNode(next) ? next.getTextContent() : '';
+
+                const hasDelimiterSiblings = (delim: string): boolean =>
+                    prevText.endsWith(delim) && nextText.startsWith(delim);
+
+                const isBold = node.hasFormat('bold');
+                const isItalic = node.hasFormat('italic');
+                const isStrike = node.hasFormat('strikethrough');
+                const isUnderline = node.hasFormat('underline');
+
+                if (
+                    !(
+                        isBold &&
+                        isItalic &&
+                        (hasDelimiterSiblings('***') ||
+                            hasDelimiterSiblings('___'))
+                    )
+                ) {
+                    if (
+                        isBold &&
+                        !hasDelimiterSiblings('**') &&
+                        !hasDelimiterSiblings('__')
+                    ) {
+                        text = `**${text}**`;
+                    }
+                    if (
+                        isItalic &&
+                        !hasDelimiterSiblings('*') &&
+                        !hasDelimiterSiblings('_')
+                    ) {
+                        text = `*${text}*`;
+                    }
+                    if (isStrike && !hasDelimiterSiblings('~~')) {
+                        text = `~~${text}~~`;
+                    }
+                    if (isUnderline) {
+                        text = `__${text}__`;
+                    }
                 }
             }
             rawText += text;

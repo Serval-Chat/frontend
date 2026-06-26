@@ -89,6 +89,7 @@ import { CreatePollModal } from './CreatePollModal';
 import { FileQueue } from './FileQueue';
 import { LexicalAutocompletePlugin } from './lexical/LexicalAutocompletePlugin';
 import { LexicalEmojiPlugin } from './lexical/LexicalEmojiPlugin';
+import { LexicalMarkdownFormattingPlugin } from './lexical/LexicalMarkdownFormattingPlugin';
 import { LexicalPastePlugin } from './lexical/LexicalPastePlugin';
 import { LexicalSlashCommandPlugin } from './lexical/LexicalSlashCommandPlugin';
 import { LexicalSubmitPlugin } from './lexical/LexicalSubmitPlugin';
@@ -1095,6 +1096,7 @@ export const MessageInput = ({
                         />
                         <HistoryPlugin />
                         <ClearEditorPlugin />
+                        <LexicalMarkdownFormattingPlugin />
                         <LexicalSubmitPlugin
                             isAutocompleteOpenRef={isAutocompleteOpenRef}
                             onSendMessage={handleSendMessage}

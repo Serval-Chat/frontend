@@ -37,6 +37,7 @@ import { cn } from '@/utils/cn';
 import { LexicalAutocompletePlugin } from './lexical/LexicalAutocompletePlugin';
 import { LexicalEmojiPlugin } from './lexical/LexicalEmojiPlugin';
 import { LexicalInitPlugin } from './lexical/LexicalInitPlugin';
+import { LexicalMarkdownFormattingPlugin } from './lexical/LexicalMarkdownFormattingPlugin';
 import { LexicalSubmitPlugin } from './lexical/LexicalSubmitPlugin';
 import { $getRawMessageText } from './lexical/lexicalUtils';
 
@@ -291,6 +292,7 @@ export const MessageEdit = ({
                     />
                     <HistoryPlugin />
                     <ClearEditorPlugin />
+                    <LexicalMarkdownFormattingPlugin />
                     <LexicalEmojiPlugin />
                     <LexicalSubmitPlugin
                         isAutocompleteOpenRef={isAutocompleteOpenRef}
