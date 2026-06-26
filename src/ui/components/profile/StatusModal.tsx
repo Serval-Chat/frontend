@@ -104,7 +104,13 @@ export const StatusModal = ({
         if (!statusEmoji) return <Smile size={20} />;
 
         if (isCustomEmoji(statusEmoji)) {
-            return <ParsedEmoji className="h-5 w-5" emojiId={statusEmoji} />;
+            return (
+                <ParsedEmoji
+                    nonInteractive
+                    className="h-5 w-5"
+                    emojiId={statusEmoji}
+                />
+            );
         }
 
         return <ParsedUnicodeEmoji className="text-xl" content={statusEmoji} />;

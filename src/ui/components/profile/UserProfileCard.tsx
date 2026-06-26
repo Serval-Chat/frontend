@@ -465,6 +465,7 @@ export const UserProfileCard = ({
                             <Box className="flex shrink-0 items-center">
                                 {/^[0-9a-fA-F]{24}$/.test(finalCustomEmoji) ? (
                                     <ParsedEmoji
+                                        nonInteractive
                                         className="h-4 w-4"
                                         emojiId={finalCustomEmoji}
                                     />

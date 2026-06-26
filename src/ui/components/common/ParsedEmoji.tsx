@@ -16,6 +16,7 @@ interface ParsedEmojiProps {
     className?: string;
     isLarge?: boolean;
     style?: React.CSSProperties;
+    nonInteractive?: boolean;
 }
 
 /**
@@ -26,6 +27,7 @@ export const ParsedEmoji = ({
     className,
     isLarge,
     style,
+    nonInteractive = false,
 }: ParsedEmojiProps) => {
     const queryClient = useQueryClient();
     const isEmojiCached = (): boolean =>
@@ -91,6 +93,26 @@ export const ParsedEmoji = ({
     }
 
     const emojiUrl = resolveApiUrl(emoji.imageUrl);
+
+    if (nonInteractive) {
+        return (
+            <img
+                alt={emoji.name || 'emoji'}
+                className={cn(
+                    'inline-block object-contain align-text-bottom',
+                    isLarge ? 'h-16 w-16' : 'h-[1.5em] w-[1.5em]',
+                    className,
+                )}
+                draggable="false"
+                ref={containerRef as React.RefObject<HTMLImageElement>}
+                src={emojiUrl || ''}
+                style={style}
+                onError={(e): void => {
+                    e.currentTarget.style.display = 'none';
+                }}
+            />
+        );
+    }
 
     return (
         <>

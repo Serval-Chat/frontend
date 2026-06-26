@@ -944,6 +944,7 @@ const UserItemInner = React.memo(
                                                 presenceCustomEmoji,
                                             ) ? (
                                                 <ParsedEmoji
+                                                    nonInteractive
                                                     className="h-3.5 w-3.5"
                                                     emojiId={
                                                         presenceCustomEmoji

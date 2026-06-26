@@ -36,7 +36,11 @@ export const MiniProfile = () => {
         const isCustomEmoji = /^[0-9a-fA-F]{24}$/.test(statusEmoji);
         if (isCustomEmoji) {
             return (
-                <ParsedEmoji className="mr-1 h-4 w-4" emojiId={statusEmoji} />
+                <ParsedEmoji
+                    nonInteractive
+                    className="mr-1 h-4 w-4"
+                    emojiId={statusEmoji}
+                />
             );
         }
 
