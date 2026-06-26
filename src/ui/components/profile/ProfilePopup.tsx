@@ -152,7 +152,8 @@ const ProfilePopupContent = ({
 
     // Presence data
     const presence = useAppSelector((state) => state.presence.users[userId]);
-    const presenceStatus = presence?.status || 'offline';
+    const presenceStatus =
+        presence?.status ?? (member?.online ? 'online' : 'offline');
     const presenceCustomText =
         presence?.customStatus?.text ??
         (user && 'customStatus' in user ? user.customStatus?.text : undefined);

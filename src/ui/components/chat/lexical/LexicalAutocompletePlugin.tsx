@@ -110,6 +110,7 @@ export const LexicalAutocompletePlugin = ({
     const blocks = useAppSelector(
         (state): Record<string, number> => state.blocking.blocks,
     );
+    const presenceUsers = useAppSelector((state) => state.presence.users);
     const [queryString, setQueryString] = useState<string | null>(null);
 
     const allEmojis = useMemo((): EmojiData[] => {
@@ -156,6 +157,9 @@ export const LexicalAutocompletePlugin = ({
                         type: 'user',
                         user: member.user,
                         nickname: member.nickname,
+                        status:
+                            presenceUsers[member.userId]?.status ??
+                            (member.online ? 'online' : 'offline'),
                     });
                 }
             });
@@ -180,7 +184,11 @@ export const LexicalAutocompletePlugin = ({
                     ) {
                         const priority = displayName.includes(query) ? 0 : 1;
                         memberPriority.set(friend.id, priority);
-                        userSuggestions.push({ type: 'user', user: friend });
+                        userSuggestions.push({
+                            type: 'user',
+                            user: friend,
+                            status: presenceUsers[friend.id]?.status,
+                        });
                     }
                 });
             }

@@ -6,6 +6,7 @@ import type { Emoji } from '@/api/emojis/emojis.types';
 import type { Channel, Role } from '@/api/servers/servers.types';
 import type { User } from '@/api/users/users.types';
 import { UserProfilePicture } from '@/ui/components/common/UserProfilePicture';
+import type { UserStatus } from '@/ui/components/common/UserProfileStatusIndicator';
 import { Box } from '@/ui/components/layout/Box';
 import { ICON_MAP } from '@/ui/utils/iconMap';
 import { resolveApiUrl } from '@/utils/apiUrl';
@@ -26,6 +27,7 @@ export interface UserSuggestion {
     type: 'user';
     user: User;
     nickname?: string;
+    status?: UserStatus;
 }
 
 export interface RoleSuggestion {
@@ -155,6 +157,7 @@ export const AutocompleteSuggestion = ({
                                 <UserProfilePicture
                                     size="sm"
                                     src={suggestion.user.profilePicture}
+                                    status={suggestion.status}
                                     username={suggestion.user.username}
                                 />
                                 <Box className="flex min-w-0 flex-col">

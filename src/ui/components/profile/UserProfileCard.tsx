@@ -285,8 +285,8 @@ export const UserProfileCard = ({
         userId ? state.presence.users[userId] : undefined,
     );
 
-    const finalStatus = (propPresenceStatus ||
-        presence?.status ||
+    const finalStatus = (presence?.status ??
+        propPresenceStatus ??
         'offline') as UserStatus;
     const finalCustomText =
         customStatus?.text ??
