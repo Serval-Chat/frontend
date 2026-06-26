@@ -364,9 +364,9 @@ export const UserProfileCard = ({
                 onBannerClick={onBannerClick}
             />
 
-            <Box className="relative z-content -mt-[50px] px-4">
+            <Box className="pointer-events-none relative z-content -mt-[50px] px-4">
                 <Box
-                    className={`relative flex h-[92px] w-[92px] items-center justify-center rounded-full bg-background p-1.5 ${onAvatarClick ? 'group/avatar cursor-pointer' : ''}`}
+                    className={`pointer-events-auto relative flex h-[92px] w-[92px] items-center justify-center rounded-full bg-background p-1.5 ${onAvatarClick ? 'group/avatar cursor-pointer' : ''}`}
                     style={
                         hasCustomColors
                             ? {
