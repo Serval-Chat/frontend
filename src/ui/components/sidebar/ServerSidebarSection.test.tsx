@@ -1,5 +1,5 @@
 import { useVirtualizer } from '@tanstack/react-virtual';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { type Mock, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { Role, ServerMember } from '@/api/servers/servers.types';
@@ -22,18 +22,45 @@ vi.mock('@/ui/components/common/LoadingSpinner', () => ({
     LoadingSpinner: () => <div data-testid="loading-spinner" />,
 }));
 
-vi.mock('@/ui/components/common/UserItem', () => ({
-    UserItem: ({ user, role }: { user: User; role?: Role }) => (
-        <div
-            data-displayname={user.displayName || ''}
-            data-role={role?.name || 'none'}
-            data-testid={`user-item-${user.id}`}
-            data-username={user.username}
-        >
-            {user.displayName || user.username}
-        </div>
-    ),
-}));
+vi.mock('@/ui/components/common/UserItem', async () => {
+    const { useState } = (await vi.importActual('react')) as any;
+    return {
+        UserItem: ({
+            userId,
+            user,
+            role,
+        }: {
+            userId?: string;
+            user?: User;
+            role?: Role;
+        }) => {
+            const [showProfile, setShowProfile] = useState(false);
+            const id = user?.id || userId || '';
+            return (
+                <div
+                    data-displayname={user?.displayName || ''}
+                    data-role={role?.name || 'none'}
+                    data-testid={`user-item-${id}`}
+                    data-username={user?.username}
+                >
+                    <button
+                        data-testid={`open-profile-${id}`}
+                        type="button"
+                        onClick={() => setShowProfile(true)}
+                    >
+                        {user?.displayName || user?.username}
+                    </button>
+                    {showProfile && (
+                        <div
+                            data-testid="profile-popup"
+                            data-userid={userId || id}
+                        />
+                    )}
+                </div>
+            );
+        },
+    };
+});
 
 vi.mock('@tanstack/react-virtual', () => ({
     useVirtualizer: vi.fn().mockImplementation((options: any) => ({
@@ -459,6 +486,55 @@ describe('ServerSidebarSection', (): void => {
             }
         },
     );
+
+    it("does not show a different user's profile popup when a presence change reorders the list", (): void => {
+        const alice = makeMember({ id: 'u-alice', username: 'alice' });
+        const bob = makeMember({ id: 'u-bob', username: 'bob' });
+
+        applySelectorState({
+            presenceMap: {
+                'u-alice': { status: 'online' },
+                'u-bob': { status: 'online' },
+            },
+        });
+
+        const { rerender } = render(
+            <ServerSidebarSection
+                isLoading={false}
+                memberIconRoleMap={new Map()}
+                memberRoleMap={new Map()}
+                members={[alice, bob]}
+                roles={[]}
+                scrollRef={mockScrollRef as any}
+            />,
+        );
+
+        fireEvent.click(screen.getByTestId('open-profile-u-alice'));
+        expect(screen.getByTestId('profile-popup')).toHaveAttribute(
+            'data-userid',
+            'u-alice',
+        );
+
+        applySelectorState({
+            presenceMap: {
+                'u-alice': { status: 'offline' },
+                'u-bob': { status: 'online' },
+            },
+        });
+        rerender(
+            <ServerSidebarSection
+                isLoading={false}
+                memberIconRoleMap={new Map()}
+                memberRoleMap={new Map()}
+                members={[alice, bob]}
+                roles={[]}
+                scrollRef={mockScrollRef as any}
+            />,
+        );
+
+        const popup = screen.queryByTestId('profile-popup');
+        expect(popup?.getAttribute('data-userid')).not.toBe('u-bob');
+    });
 
     it('renders a static member list fallback when the virtualizer has not measured rows yet', (): void => {
         vi.mocked(useVirtualizer).mockReturnValueOnce({

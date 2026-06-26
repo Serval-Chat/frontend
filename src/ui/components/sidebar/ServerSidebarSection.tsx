@@ -382,6 +382,7 @@ export const ServerSidebarSection = ({
                                         : 'online'
                                 }
                                 joinedAt={item.member.joinedAt}
+                                key={String(item.member.userId)}
                                 nickname={item.member.nickname}
                                 role={memberRoleMap.get(item.member.userId)}
                                 serverId={String(serverDetails?.id || '')}

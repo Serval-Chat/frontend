@@ -436,15 +436,15 @@ export const UserProfileCard = ({
                                 as="span"
                                 className={
                                     hasCustomColors
-                                        ? 'ml-2 text-foreground/70'
-                                        : 'ml-2 text-muted-foreground/60'
+                                        ? 'ml-1 inline-flex items-center gap-1 text-foreground/70'
+                                        : 'ml-1 inline-flex items-center gap-1 text-muted-foreground/60'
                                 }
                             >
-                                • {user.pronouns}
+                                <span>•</span>
+                                {user.pronouns}
                             </Text>
                         )}
                     </Box>
-
                     {user?.badges && user?.badges.length > 0 && (
                         <Box className="mt-2 flex flex-wrap gap-1.5">
                             {user.badges.map((badge) => (
