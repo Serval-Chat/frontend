@@ -227,6 +227,7 @@ const AppearanceSettingsForm = ({ user }: AppearanceSettingsFormProps) => {
         type: 'glow' | 'gradient';
         index?: number;
     } | null>(null);
+    const [hexDraft, setHexDraft] = useState('');
     const pickerRef = useRef<HTMLDivElement>(null);
     const triggerRef = useRef<HTMLButtonElement | null>(null);
 
@@ -384,7 +385,7 @@ const AppearanceSettingsForm = ({ user }: AppearanceSettingsFormProps) => {
     };
 
     const addGradientColor = (): void => {
-        if (gradientColors.length < 2) {
+        if (gradientColors.length < 20) {
             setGradientColors([
                 ...gradientColors,
                 { id: Math.random().toString(36), value: '#ff0000' },
@@ -437,12 +438,234 @@ const AppearanceSettingsForm = ({ user }: AppearanceSettingsFormProps) => {
                                 disableCustomFonts={false}
                                 user={previewUser}
                             >
-                                {user.username}
+                                {user.displayName || user.username}
                             </StyledUserName>
                         </div>
                     </div>
 
                     <div className="flex flex-col gap-8">
+                        {/* Gradient Settings */}
+                        <div className="space-y-4">
+                            <div className="flex items-center justify-between">
+                                <Heading level={4}>Username Gradient</Heading>
+                                <Toggle
+                                    checked={gradientEnabled}
+                                    onCheckedChange={setGradientEnabled}
+                                />
+                            </div>
+
+                            {gradientEnabled && (
+                                <div className="space-y-4 rounded-lg border border-border-subtle bg-bg-subtle p-4">
+                                    <div>
+                                        <span className="mb-2 block text-sm font-medium text-muted-foreground">
+                                            Colors (Max 20)
+                                        </span>
+                                        <div className="mb-2 flex flex-wrap gap-2">
+                                            {gradientColors.map(
+                                                (colorItem, index) => (
+                                                    <div
+                                                        className="group relative"
+                                                        key={colorItem.id}
+                                                    >
+                                                        <Button
+                                                            className="border-border h-10 w-10 min-w-0 rounded-full border-2 p-0 shadow-sm focus:ring-2 focus:ring-primary focus:outline-none"
+                                                            style={{
+                                                                backgroundColor:
+                                                                    colorItem.value,
+                                                            }}
+                                                            variant="ghost"
+                                                            onClick={(
+                                                                e,
+                                                            ): void => {
+                                                                triggerRef.current =
+                                                                    e.currentTarget;
+                                                                const isOpen =
+                                                                    activeColorPicker?.type ===
+                                                                        'gradient' &&
+                                                                    activeColorPicker.index ===
+                                                                        index;
+                                                                setActiveColorPicker(
+                                                                    isOpen
+                                                                        ? null
+                                                                        : {
+                                                                              type: 'gradient',
+                                                                              index,
+                                                                          },
+                                                                );
+                                                                if (!isOpen)
+                                                                    setHexDraft(
+                                                                        colorItem.value,
+                                                                    );
+                                                            }}
+                                                        >
+                                                            <span className="sr-only">
+                                                                Select color{' '}
+                                                                {
+                                                                    colorItem.value
+                                                                }
+                                                            </span>
+                                                        </Button>
+                                                        <Button
+                                                            className="absolute -top-1 -right-1 h-4 w-4 min-w-0 rounded-full border-none bg-danger p-0.5 text-white opacity-0 shadow-none transition-opacity group-hover:opacity-100"
+                                                            size="sm"
+                                                            variant="primary"
+                                                            onClick={(): void =>
+                                                                removeGradientColor(
+                                                                    index,
+                                                                )
+                                                            }
+                                                        >
+                                                            <X size={10} />
+                                                        </Button>
+
+                                                        {activeColorPicker?.type ===
+                                                            'gradient' &&
+                                                            activeColorPicker.index ===
+                                                                index &&
+                                                            createPortal(
+                                                                <div
+                                                                    className="z-top"
+                                                                    ref={
+                                                                        pickerRef
+                                                                    }
+                                                                    style={{
+                                                                        position:
+                                                                            'fixed',
+                                                                        left: pickerCoords.x,
+                                                                        top: pickerCoords.y,
+                                                                    }}
+                                                                >
+                                                                    <button
+                                                                        aria-label="Close color picker"
+                                                                        className="fixed inset-0"
+                                                                        tabIndex={
+                                                                            -1
+                                                                        }
+                                                                        type="button"
+                                                                        onClick={(): void =>
+                                                                            setActiveColorPicker(
+                                                                                null,
+                                                                            )
+                                                                        }
+                                                                        onKeyDown={(
+                                                                            e,
+                                                                        ): void => {
+                                                                            if (
+                                                                                e.key ===
+                                                                                'Escape'
+                                                                            )
+                                                                                setActiveColorPicker(
+                                                                                    null,
+                                                                                );
+                                                                        }}
+                                                                    />
+                                                                    <div className="relative overflow-hidden rounded-lg border border-white/10 bg-background shadow-xl">
+                                                                        <HexColorPicker
+                                                                            color={
+                                                                                colorItem.value
+                                                                            }
+                                                                            onChange={(
+                                                                                c,
+                                                                            ): void => {
+                                                                                updateGradientColor(
+                                                                                    index,
+                                                                                    c,
+                                                                                );
+                                                                                setHexDraft(
+                                                                                    c,
+                                                                                );
+                                                                            }}
+                                                                        />
+                                                                        <div className="flex items-center gap-2 bg-bg-secondary px-3 py-2">
+                                                                            <span className="font-mono text-xs text-muted-foreground select-none">
+                                                                                #
+                                                                            </span>
+                                                                            <input
+                                                                                aria-label="Hex color value"
+                                                                                className="w-full bg-transparent font-mono text-xs text-foreground outline-none"
+                                                                                maxLength={
+                                                                                    6
+                                                                                }
+                                                                                spellCheck={
+                                                                                    false
+                                                                                }
+                                                                                type="text"
+                                                                                value={hexDraft.replace(
+                                                                                    /^#/,
+                                                                                    '',
+                                                                                )}
+                                                                                onChange={(
+                                                                                    e,
+                                                                                ): void => {
+                                                                                    const raw =
+                                                                                        e.target.value.replace(
+                                                                                            /[^0-9a-fA-F]/g,
+                                                                                            '',
+                                                                                        );
+                                                                                    setHexDraft(
+                                                                                        `#${raw}`,
+                                                                                    );
+                                                                                    if (
+                                                                                        raw.length ===
+                                                                                        6
+                                                                                    )
+                                                                                        updateGradientColor(
+                                                                                            index,
+                                                                                            `#${raw}`,
+                                                                                        );
+                                                                                }}
+                                                                            />
+                                                                        </div>
+                                                                    </div>
+                                                                </div>,
+                                                                document.body,
+                                                            )}
+                                                    </div>
+                                                ),
+                                            )}
+                                            {gradientColors.length < 20 && (
+                                                <Button
+                                                    className="border-border flex h-10 w-10 min-w-0 items-center justify-center rounded-full border-2 border-dashed p-0 text-muted-foreground shadow-none transition-colors hover:border-primary hover:text-primary"
+                                                    variant="ghost"
+                                                    onClick={addGradientColor}
+                                                >
+                                                    <Plus size={16} />
+                                                </Button>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 gap-4">
+                                        <div>
+                                            <span className="mb-2 block text-sm font-medium text-muted-foreground">
+                                                Angle (Deg)
+                                            </span>
+                                            <div className="flex items-center gap-4">
+                                                <input
+                                                    aria-label="Gradient angle"
+                                                    className="h-1.5 flex-1 cursor-pointer appearance-none rounded-lg bg-bg-secondary accent-primary"
+                                                    max={360}
+                                                    min={0}
+                                                    type="range"
+                                                    value={gradientAngle}
+                                                    onChange={(e): void =>
+                                                        setGradientAngle(
+                                                            Number(
+                                                                e.target.value,
+                                                            ),
+                                                        )
+                                                    }
+                                                />
+                                                <span className="min-w-[3ch] text-sm font-medium text-foreground">
+                                                    {gradientAngle}°
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
                         {/* Theme Settings */}
                         <div className="space-y-4">
                             <Heading level={4}>Theme</Heading>
@@ -781,179 +1004,6 @@ const AppearanceSettingsForm = ({ user }: AppearanceSettingsFormProps) => {
                                     onCheckedChange={setGlowEnabled}
                                 />
                             </div>
-                        </div>
-
-                        {/* Gradient Settings */}
-                        <div className="space-y-4">
-                            <div className="flex items-center justify-between">
-                                <Heading level={4}>Username Gradient</Heading>
-                                <Toggle
-                                    checked={gradientEnabled}
-                                    onCheckedChange={setGradientEnabled}
-                                />
-                            </div>
-
-                            {gradientEnabled && (
-                                <div className="space-y-4 rounded-lg border border-border-subtle bg-bg-subtle p-4">
-                                    <div>
-                                        <span className="mb-2 block text-sm font-medium text-muted-foreground">
-                                            Colors (Max 2)
-                                        </span>
-                                        <div className="mb-2 flex flex-wrap gap-2">
-                                            {gradientColors.map(
-                                                (colorItem, index) => (
-                                                    <div
-                                                        className="group relative"
-                                                        key={colorItem.id}
-                                                    >
-                                                        <Button
-                                                            className="border-border h-10 w-10 min-w-0 rounded-full border-2 p-0 shadow-sm focus:ring-2 focus:ring-primary focus:outline-none"
-                                                            style={{
-                                                                backgroundColor:
-                                                                    colorItem.value,
-                                                            }}
-                                                            variant="ghost"
-                                                            onClick={(
-                                                                e,
-                                                            ): void => {
-                                                                triggerRef.current =
-                                                                    e.currentTarget;
-                                                                setActiveColorPicker(
-                                                                    activeColorPicker?.type ===
-                                                                        'gradient' &&
-                                                                        activeColorPicker.index ===
-                                                                            index
-                                                                        ? null
-                                                                        : {
-                                                                              type: 'gradient',
-                                                                              index,
-                                                                          },
-                                                                );
-                                                            }}
-                                                        >
-                                                            <span className="sr-only">
-                                                                Select color{' '}
-                                                                {
-                                                                    colorItem.value
-                                                                }
-                                                            </span>
-                                                        </Button>
-                                                        <Button
-                                                            className="absolute -top-1 -right-1 h-4 w-4 min-w-0 rounded-full border-none bg-danger p-0.5 text-white opacity-0 shadow-none transition-opacity group-hover:opacity-100"
-                                                            size="sm"
-                                                            variant="primary"
-                                                            onClick={(): void =>
-                                                                removeGradientColor(
-                                                                    index,
-                                                                )
-                                                            }
-                                                        >
-                                                            <X size={10} />
-                                                        </Button>
-
-                                                        {activeColorPicker?.type ===
-                                                            'gradient' &&
-                                                            activeColorPicker.index ===
-                                                                index &&
-                                                            createPortal(
-                                                                <div
-                                                                    className="z-[9999]"
-                                                                    ref={
-                                                                        pickerRef
-                                                                    }
-                                                                    style={{
-                                                                        position:
-                                                                            'fixed',
-                                                                        left: pickerCoords.x,
-                                                                        top: pickerCoords.y,
-                                                                    }}
-                                                                >
-                                                                    <button
-                                                                        aria-label="Close color picker"
-                                                                        className="fixed inset-0"
-                                                                        tabIndex={
-                                                                            -1
-                                                                        }
-                                                                        type="button"
-                                                                        onClick={(): void =>
-                                                                            setActiveColorPicker(
-                                                                                null,
-                                                                            )
-                                                                        }
-                                                                        onKeyDown={(
-                                                                            e,
-                                                                        ): void => {
-                                                                            if (
-                                                                                e.key ===
-                                                                                'Escape'
-                                                                            )
-                                                                                setActiveColorPicker(
-                                                                                    null,
-                                                                                );
-                                                                        }}
-                                                                    />
-                                                                    <div className="relative overflow-hidden rounded-lg shadow-xl">
-                                                                        <HexColorPicker
-                                                                            color={
-                                                                                colorItem.value
-                                                                            }
-                                                                            onChange={(
-                                                                                c,
-                                                                            ): void =>
-                                                                                updateGradientColor(
-                                                                                    index,
-                                                                                    c,
-                                                                                )
-                                                                            }
-                                                                        />
-                                                                    </div>
-                                                                </div>,
-                                                                document.body,
-                                                            )}
-                                                    </div>
-                                                ),
-                                            )}
-                                            {gradientColors.length < 2 && (
-                                                <Button
-                                                    className="border-border flex h-10 w-10 min-w-0 items-center justify-center rounded-full border-2 border-dashed p-0 text-muted-foreground shadow-none transition-colors hover:border-primary hover:text-primary"
-                                                    variant="ghost"
-                                                    onClick={addGradientColor}
-                                                >
-                                                    <Plus size={16} />
-                                                </Button>
-                                            )}
-                                        </div>
-                                    </div>
-
-                                    <div className="grid grid-cols-1 gap-4">
-                                        <div>
-                                            <span className="mb-2 block text-sm font-medium text-muted-foreground">
-                                                Angle (Deg)
-                                            </span>
-                                            <div className="flex items-center gap-4">
-                                                <input
-                                                    aria-label="Gradient angle"
-                                                    className="h-1.5 flex-1 cursor-pointer appearance-none rounded-lg bg-bg-secondary accent-primary"
-                                                    max={360}
-                                                    min={0}
-                                                    type="range"
-                                                    value={gradientAngle}
-                                                    onChange={(e): void =>
-                                                        setGradientAngle(
-                                                            Number(
-                                                                e.target.value,
-                                                            ),
-                                                        )
-                                                    }
-                                                />
-                                                <span className="min-w-[3ch] text-sm font-medium text-foreground">
-                                                    {gradientAngle}°
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
                         </div>
                     </div>
                 </div>

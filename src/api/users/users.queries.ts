@@ -215,6 +215,31 @@ export const useUpdateProfilePicture = (): UseMutationResult<
     });
 };
 
+export const useUpdateAppearance = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: usersApi.updateAppearance,
+        onSuccess: (data): void => {
+            queryClient.setQueryData<User>(['me'], (old) =>
+                old
+                    ? {
+                          ...old,
+                          ...(data.profilePrimaryColor !== undefined && {
+                              profilePrimaryColor:
+                                  data.profilePrimaryColor ?? undefined,
+                          }),
+                          ...(data.profileAccentColor !== undefined && {
+                              profileAccentColor:
+                                  data.profileAccentColor ?? undefined,
+                          }),
+                      }
+                    : old,
+            );
+            void queryClient.invalidateQueries({ queryKey: ['me'] });
+        },
+    });
+};
+
 export const useUpdateBanner = (): UseMutationResult<
     { message: string; banner: string },
     Error,

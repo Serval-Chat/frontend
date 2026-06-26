@@ -15,12 +15,11 @@ import { useAdminUserDetail } from '@/hooks/admin/useAdminUsers';
 import { useSmartPosition } from '@/hooks/useSmartPosition';
 import { useAppSelector } from '@/store/hooks';
 import { Box } from '@/ui/components/layout/Box';
+import { UserProfileCard } from '@/ui/components/profile/UserProfileCard';
 import {
     getHighestColorRoleForMember,
     getHighestRoleWithIconForMember,
 } from '@/ui/utils/chat';
-
-import { UserProfileCard } from './UserProfileCard';
 
 interface ProfilePopupProps {
     userId: string;

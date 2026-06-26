@@ -29,7 +29,7 @@ export const SettingsFloatingBar = ({
     isPending = false,
     onSave,
     onReset,
-    message = 'Careful - you have unsaved changes!',
+    message = 'Careful! you have unsaved changes.',
     saveLabel = 'Save Changes',
     resetLabel = 'Reset',
     className,

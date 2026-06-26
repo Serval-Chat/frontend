@@ -121,6 +121,22 @@ export const usersApi = {
             .then((r): { message: string; profilePicture: string } => r.data);
     },
 
+    updateAppearance: (data: {
+        profilePrimaryColor?: string | null;
+        profileAccentColor?: string | null;
+    }): Promise<{
+        message: string;
+        profilePrimaryColor?: string | null;
+        profileAccentColor?: string | null;
+    }> =>
+        apiClient
+            .patch<{
+                message: string;
+                profilePrimaryColor?: string | null;
+                profileAccentColor?: string | null;
+            }>('/api/v1/profile/appearance', data)
+            .then((r) => r.data),
+
     updateBanner: (
         file: File,
     ): Promise<{ message: string; banner: string }> => {

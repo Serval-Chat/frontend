@@ -155,6 +155,8 @@ export interface User {
     settings?: UserSettings;
     banner?: string;
     bannerColor?: string;
+    profilePrimaryColor?: string;
+    profileAccentColor?: string;
     serverSettings?: ServerSettings;
     totpEnabled?: boolean;
     connections?: UserConnection[];

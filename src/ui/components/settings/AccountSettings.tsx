@@ -8,12 +8,16 @@ import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
 import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin';
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
 import { useQueryClient } from '@tanstack/react-query';
+import { X } from 'lucide-react';
 import QRCode from 'qrcode';
+import { HexColorPicker } from 'react-colorful';
+import { createPortal } from 'react-dom';
 
 import { authApi } from '@/api/auth/auth.api';
 import { useFriends } from '@/api/friends/friends.queries';
 import {
     useMe,
+    useUpdateAppearance,
     useUpdateBanner,
     useUpdateBio,
     useUpdateDisplayName,
@@ -23,6 +27,7 @@ import {
 } from '@/api/users/users.queries';
 import type { User } from '@/api/users/users.types';
 import { useCustomEmojis } from '@/hooks/useCustomEmojis';
+import { useSmartPosition } from '@/hooks/useSmartPosition';
 import { ChipNode } from '@/ui/components/chat/lexical/ChipNode';
 import { LexicalAutocompletePlugin } from '@/ui/components/chat/lexical/LexicalAutocompletePlugin';
 import { LexicalInitPlugin } from '@/ui/components/chat/lexical/LexicalInitPlugin';
@@ -60,10 +65,26 @@ export const AccountSettings = () => {
         useUpdateProfilePicture();
     const { mutate: updateBanner, isPending: isUpdatingBanner } =
         useUpdateBanner();
+    const { mutate: updateAppearance, isPending: isUpdatingAppearance } =
+        useUpdateAppearance();
 
     const avatarInputRef = useRef<HTMLInputElement>(null);
     const bannerInputRef = useRef<HTMLInputElement>(null);
     const isAutocompleteOpenRef = useRef<boolean>(false);
+
+    const [activeColorPicker, setActiveColorPicker] = useState<
+        'primary' | 'accent' | null
+    >(null);
+    const [hexDraft, setHexDraft] = useState('');
+    const colorPickerRef = useRef<HTMLDivElement>(null);
+    const colorPickerTriggerRef = useRef<HTMLButtonElement | null>(null);
+    const colorPickerCoords = useSmartPosition({
+        isOpen: !!activeColorPicker,
+        elementRef: colorPickerRef,
+        triggerRef: colorPickerTriggerRef,
+        padding: 16,
+        offset: 12,
+    });
 
     const [cropFile, setCropFile] = useState<File | null>(null);
     const [cropType, setCropType] = useState<'avatar' | 'banner'>('avatar');
@@ -110,7 +131,8 @@ export const AccountSettings = () => {
         isUpdatingDisplayName ||
         isUpdatingUsername ||
         isUpdatingAvatar ||
-        isUpdatingBanner;
+        isUpdatingBanner ||
+        isUpdatingAppearance;
 
     const [displayName, setDisplayName] = useState(user?.displayName || '');
     const [originalDisplayName, setOriginalDisplayName] = useState(
@@ -130,7 +152,28 @@ export const AccountSettings = () => {
     const [bio, setBio] = useState(user?.bio || '');
     const [originalBio, setOriginalBio] = useState(user?.bio || '');
 
+    const [profilePrimaryColor, setProfilePrimaryColor] = useState<
+        string | null
+    >(user?.profilePrimaryColor ?? null);
+    const [originalProfilePrimaryColor, setOriginalProfilePrimaryColor] =
+        useState<string | null>(user?.profilePrimaryColor ?? null);
+    const [profileAccentColor, setProfileAccentColor] = useState<string | null>(
+        user?.profileAccentColor ?? null,
+    );
+    const [originalProfileAccentColor, setOriginalProfileAccentColor] =
+        useState<string | null>(user?.profileAccentColor ?? null);
+
+    const accentWithoutPrimary =
+        profileAccentColor !== null && profilePrimaryColor === null;
+
     const handleSave = (): void => {
+        if (accentWithoutPrimary) {
+            showToast(
+                'Accent color requires a primary color to be set',
+                'error',
+            );
+            return;
+        }
         if (displayName !== originalDisplayName) {
             updateDisplayName(displayName, {
                 onSuccess: (): void => setOriginalDisplayName(displayName),
@@ -149,6 +192,22 @@ export const AccountSettings = () => {
         if (username !== originalUsername) {
             updateUsername(username, {
                 onSuccess: (): void => setOriginalUsername(username),
+            });
+        }
+        const appearanceUpdate: {
+            profilePrimaryColor?: string | null;
+            profileAccentColor?: string | null;
+        } = {};
+        if (profilePrimaryColor !== originalProfilePrimaryColor)
+            appearanceUpdate.profilePrimaryColor = profilePrimaryColor;
+        if (profileAccentColor !== originalProfileAccentColor)
+            appearanceUpdate.profileAccentColor = profileAccentColor;
+        if (Object.keys(appearanceUpdate).length > 0) {
+            updateAppearance(appearanceUpdate, {
+                onSuccess: (): void => {
+                    setOriginalProfilePrimaryColor(profilePrimaryColor);
+                    setOriginalProfileAccentColor(profileAccentColor);
+                },
             });
         }
     };
@@ -191,7 +250,9 @@ export const AccountSettings = () => {
         displayName !== originalDisplayName ||
         username !== originalUsername ||
         pronouns !== originalPronouns ||
-        bio !== originalBio;
+        bio !== originalBio ||
+        profilePrimaryColor !== originalProfilePrimaryColor ||
+        profileAccentColor !== originalProfileAccentColor;
 
     const handleStartTwoFactorSetup = async (): Promise<void> => {
         setIsTwoFactorLoading(true);
@@ -315,6 +376,8 @@ export const AccountSettings = () => {
         username: username || user.username,
         pronouns: pronouns || user.pronouns,
         bio: bio || user.bio,
+        profilePrimaryColor: profilePrimaryColor ?? undefined,
+        profileAccentColor: profileAccentColor ?? undefined,
     };
 
     return (
@@ -484,6 +547,183 @@ export const AccountSettings = () => {
                         >
                             {bio.length}/190
                         </Text>
+                    </div>
+
+                    <div className="space-y-3">
+                        <p className="text-sm font-bold text-muted-foreground uppercase">
+                            Profile Colors
+                        </p>
+                        <div className="flex flex-wrap gap-6">
+                            {(
+                                [
+                                    {
+                                        key: 'primary' as const,
+                                        label: 'Primary',
+                                        value: profilePrimaryColor,
+                                    },
+                                    {
+                                        key: 'accent' as const,
+                                        label: 'Accent',
+                                        value: profileAccentColor,
+                                    },
+                                ] as const
+                            ).map(({ key, label, value }) => (
+                                <div
+                                    className="flex items-center gap-3"
+                                    key={key}
+                                >
+                                    <div className="group relative">
+                                        <button
+                                            aria-label={`Pick ${label} color`}
+                                            className="h-10 w-10 rounded-full border-2 border-border-subtle shadow-sm focus:ring-2 focus:ring-primary focus:outline-none"
+                                            ref={
+                                                activeColorPicker === key
+                                                    ? colorPickerTriggerRef
+                                                    : undefined
+                                            }
+                                            style={{
+                                                backgroundColor:
+                                                    value ?? undefined,
+                                            }}
+                                            type="button"
+                                            onClick={(e): void => {
+                                                colorPickerTriggerRef.current =
+                                                    e.currentTarget;
+                                                const next =
+                                                    activeColorPicker === key
+                                                        ? null
+                                                        : key;
+                                                setActiveColorPicker(next);
+                                                if (next !== null)
+                                                    setHexDraft(
+                                                        value ?? '#313338',
+                                                    );
+                                            }}
+                                        />
+                                        {value !== null && (
+                                            <button
+                                                aria-label={`Clear ${label} color`}
+                                                className="absolute -top-1 -right-1 h-4 w-4 min-w-0 rounded-full border-none bg-bg-secondary p-0.5 text-muted-foreground opacity-0 shadow-sm transition-opacity group-hover:opacity-100"
+                                                type="button"
+                                                onClick={(): void => {
+                                                    if (key === 'primary') {
+                                                        setProfilePrimaryColor(
+                                                            null,
+                                                        );
+                                                        setProfileAccentColor(
+                                                            null,
+                                                        );
+                                                    } else {
+                                                        setProfileAccentColor(
+                                                            null,
+                                                        );
+                                                    }
+                                                    setActiveColorPicker(null);
+                                                }}
+                                            >
+                                                <X size={10} />
+                                            </button>
+                                        )}
+                                    </div>
+                                    <span className="text-sm text-foreground">
+                                        {label}
+                                    </span>
+                                </div>
+                            ))}
+                        </div>
+                        {activeColorPicker !== null &&
+                            createPortal(
+                                <div
+                                    className="z-top"
+                                    ref={colorPickerRef}
+                                    style={{
+                                        position: 'fixed',
+                                        left: colorPickerCoords.x,
+                                        top: colorPickerCoords.y,
+                                    }}
+                                >
+                                    <button
+                                        aria-label="Close color picker"
+                                        className="fixed inset-0"
+                                        tabIndex={-1}
+                                        type="button"
+                                        onClick={(): void =>
+                                            setActiveColorPicker(null)
+                                        }
+                                        onKeyDown={(e): void => {
+                                            if (e.key === 'Escape')
+                                                setActiveColorPicker(null);
+                                        }}
+                                    />
+                                    <div className="relative overflow-hidden rounded-lg border border-white/10 bg-background shadow-xl">
+                                        <HexColorPicker
+                                            color={
+                                                activeColorPicker === 'primary'
+                                                    ? (profilePrimaryColor ??
+                                                      '#313338')
+                                                    : (profileAccentColor ??
+                                                      '#313338')
+                                            }
+                                            onChange={(c): void => {
+                                                if (
+                                                    activeColorPicker ===
+                                                    'primary'
+                                                ) {
+                                                    setProfilePrimaryColor(c);
+                                                } else {
+                                                    setProfileAccentColor(c);
+                                                }
+                                                setHexDraft(c);
+                                            }}
+                                        />
+                                        <div className="flex items-center gap-2 bg-bg-secondary px-3 py-2">
+                                            <span className="font-mono text-xs text-muted-foreground select-none">
+                                                #
+                                            </span>
+                                            <input
+                                                aria-label="Hex color value"
+                                                className="w-full bg-transparent font-mono text-xs text-foreground outline-none"
+                                                maxLength={7}
+                                                spellCheck={false}
+                                                type="text"
+                                                value={hexDraft.replace(
+                                                    /^#/,
+                                                    '',
+                                                )}
+                                                onChange={(e): void => {
+                                                    const raw =
+                                                        e.target.value.replace(
+                                                            /[^0-9a-fA-F]/g,
+                                                            '',
+                                                        );
+                                                    setHexDraft(`#${raw}`);
+                                                    if (raw.length === 6) {
+                                                        const full = `#${raw}`;
+                                                        if (
+                                                            activeColorPicker ===
+                                                            'primary'
+                                                        ) {
+                                                            setProfilePrimaryColor(
+                                                                full,
+                                                            );
+                                                        } else {
+                                                            setProfileAccentColor(
+                                                                full,
+                                                            );
+                                                        }
+                                                    }
+                                                }}
+                                            />
+                                        </div>
+                                    </div>
+                                </div>,
+                                document.body,
+                            )}
+                        {accentWithoutPrimary && (
+                            <p className="text-xs text-danger">
+                                Accent color requires a primary color.
+                            </p>
+                        )}
                     </div>
 
                     <WebsiteConnectionsSettings />
@@ -726,6 +966,8 @@ export const AccountSettings = () => {
                             setUsername(originalUsername);
                             setPronouns(originalPronouns);
                             setBio(originalBio);
+                            setProfilePrimaryColor(originalProfilePrimaryColor);
+                            setProfileAccentColor(originalProfileAccentColor);
                         }}
                         onSave={handleSave}
                     />
