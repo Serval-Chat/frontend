@@ -84,7 +84,7 @@ export const MessageHeader = React.memo(
                 </Text>
 
                 {isEdited && (
-                    <Text className="text-[10px] font-medium text-text-muted italic">
+                    <Text className="self-center text-[10px] font-medium text-text-muted italic">
                         (edited
                         {editedAt
                             ? ` ${formatTimestamp(editedAt, use24HourTime)}`
