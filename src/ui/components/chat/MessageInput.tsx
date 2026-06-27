@@ -587,21 +587,21 @@ export const MessageInput = ({
 
         if (!pages) return null;
 
-        for (let pageIndex = pages.length - 1; pageIndex >= 0; pageIndex--) {
-            const page = pages[pageIndex];
-            for (let i = page.length - 1; i >= 0; i--) {
-                const msg = page[i];
+        let latest: (typeof pages)[0][0] | null = null;
+        for (const page of pages) {
+            for (const msg of page) {
                 if (
                     msg.senderId === me.id &&
                     msg.text &&
-                    msg.text.trim() !== ''
+                    msg.text.trim() !== '' &&
+                    (!latest || msg.createdAt > latest.createdAt)
                 ) {
-                    return msg;
+                    latest = msg;
                 }
             }
         }
 
-        return null;
+        return latest;
     }, [
         me,
         selectedServerId,
