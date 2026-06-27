@@ -12,8 +12,10 @@ const isTauri = (): boolean => '__TAURI_INTERNALS__' in window;
 
 export async function initTauriNotifications(
     queryClient: QueryClient,
-): Promise<void> {
-    if (!isTauri()) return;
+): Promise<() => void> {
+    if (!isTauri()) return (): void => {};
+
+    const noopCleanup = (): void => {};
 
     try {
         let granted = await isPermissionGranted();
@@ -22,34 +24,46 @@ export async function initTauriNotifications(
             granted = permission === 'granted';
         }
 
-        if (!granted) return;
+        if (!granted) return noopCleanup;
 
-        wsClient.on<IMessageDm>(WsEvents.MESSAGE_DM, (payload): void => {
-            const me = queryClient.getQueryData<{ id: string }>(['me']);
-            if (me && payload.senderId === me.id) return;
+        const cleanupDm = wsClient.on<IMessageDm>(
+            WsEvents.MESSAGE_DM,
+            (payload): void => {
+                const me = queryClient.getQueryData<{ id: string }>(['me']);
+                if (me && payload.senderId === me.id) return;
 
-            sendNotification({
-                title: payload.senderUsername,
-                body: payload.text,
-            });
-        });
+                sendNotification({
+                    title: payload.senderUsername,
+                    body: payload.text,
+                });
+            },
+        );
 
-        wsClient.on<IMentionEvent>(WsEvents.MENTION, (payload): void => {
-            const me = queryClient.getQueryData<{ id: string }>(['me']);
-            if (me && payload.senderId === me.id) return;
+        const cleanupMention = wsClient.on<IMentionEvent>(
+            WsEvents.MENTION,
+            (payload): void => {
+                const me = queryClient.getQueryData<{ id: string }>(['me']);
+                if (me && payload.senderId === me.id) return;
 
-            const isReaction = payload.type === 'reaction';
+                const isReaction = payload.type === 'reaction';
 
-            sendNotification({
-                title: isReaction
-                    ? 'New Reaction'
-                    : `Mention from ${payload.sender}`,
-                body: isReaction
-                    ? `${payload.sender} reacted to your message`
-                    : 'You were mentioned in a channel',
-            });
-        });
+                sendNotification({
+                    title: isReaction
+                        ? 'New Reaction'
+                        : `Mention from ${payload.sender}`,
+                    body: isReaction
+                        ? `${payload.sender} reacted to your message`
+                        : 'You were mentioned in a channel',
+                });
+            },
+        );
+
+        return (): void => {
+            cleanupDm();
+            cleanupMention();
+        };
     } catch (error) {
         console.error('Failed to initialize Tauri notifications:', error);
+        return noopCleanup;
     }
 }

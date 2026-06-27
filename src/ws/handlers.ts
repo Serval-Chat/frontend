@@ -50,6 +50,7 @@ import {
 import type { ProcessedChatMessage } from '@/types/chat.ui';
 import { showInAppNotification } from '@/ui/notifications/inAppNotifications';
 import { getValidMessageInteraction } from '@/ui/utils/chat';
+import { playAudio } from '@/utils/notificationAudio';
 import { cacheSound, pruneSoundCache } from '@/utils/soundCache';
 
 import { wsClient } from './client';
@@ -238,10 +239,7 @@ const convertServerMessageToChatMessage = (
 const playNotificationSound = (queryClient: QueryClient): void => {
     // Run asynchronously to allow for better stacking and prevent blocking WS handlers
     setTimeout((): void => {
-        if (typeof Audio === 'undefined' || typeof document === 'undefined')
-            return;
-        if (typeof document.hasFocus === 'function' && document.hasFocus())
-            return;
+        if (typeof Audio === 'undefined') return;
 
         const me = queryClient.getQueryData<User>(['me']);
         const settings = me?.settings;
@@ -297,11 +295,7 @@ const playNotificationSound = (queryClient: QueryClient): void => {
             return;
         }
 
-        const audio = new Audio(soundUrl);
-        const playPromise = audio.play();
-        if (playPromise !== undefined) {
-            playPromise.catch((): void => {});
-        }
+        void playAudio(soundUrl);
     }, 0);
 };
 
@@ -490,6 +484,7 @@ export const setupGlobalWsHandlers = (
         channelId?: string,
     ): boolean => {
         if (!serverId || !channelId || !getState) return false;
+        if (!document.hasFocus()) return false;
 
         const { nav } = getState();
         const isSelectedChannel =
@@ -507,6 +502,7 @@ export const setupGlobalWsHandlers = (
 
     const isReadingDm = (friendId: string): boolean => {
         if (!getState) return false;
+        if (!document.hasFocus()) return false;
 
         const { nav } = getState();
         if (nav.selectedFriendId === friendId) return true;

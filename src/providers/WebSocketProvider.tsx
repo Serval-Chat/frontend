@@ -9,6 +9,7 @@ import { initTauriNotifications } from '@/lib/tauriNotifications';
 import type { RootState } from '@/store';
 import { useAppDispatch } from '@/store/hooks';
 import { getAuthToken } from '@/utils/authToken';
+import { unlockAudio } from '@/utils/notificationAudio';
 import { setupGlobalWsHandlers, wsClient } from '@/ws';
 
 interface WebSocketProviderProps {
@@ -27,10 +28,38 @@ export const WebSocketProvider = ({
     const store = useStore<RootState>();
 
     useEffect((): (() => void) => {
+        const unlock = (): void => {
+            unlockAudio();
+        };
+        document.addEventListener('click', unlock, { once: true });
+        document.addEventListener('keydown', unlock, { once: true });
+        return (): void => {
+            document.removeEventListener('click', unlock);
+            document.removeEventListener('keydown', unlock);
+        };
+    }, []);
+
+    useEffect((): (() => void) => {
+        let tauriCleanup: (() => void) | undefined;
+
         if (isAuthenticated) {
-            initTauriNotifications(queryClient).catch(console.error);
+            initTauriNotifications(queryClient)
+                .then((cleanup): void => {
+                    tauriCleanup = cleanup;
+                })
+                .catch(console.error);
         }
-        return setupGlobalWsHandlers(queryClient, dispatch, store.getState);
+
+        const wsCleanup = setupGlobalWsHandlers(
+            queryClient,
+            dispatch,
+            store.getState,
+        );
+
+        return (): void => {
+            wsCleanup();
+            tauriCleanup?.();
+        };
     }, [queryClient, dispatch, isAuthenticated, store]);
 
     useEffect((): (() => void) => {
