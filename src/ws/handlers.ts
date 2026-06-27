@@ -1021,15 +1021,16 @@ export const setupGlobalWsHandlers = (
             WsEvents.PRESENCE_SYNC,
             (payload): void => {
                 const onlineUsers = [...payload.online];
-                const me = queryClient.getQueryData<{ id: string }>(['me']);
 
                 if (
-                    me &&
-                    !onlineUsers.some((u): boolean => u.userId === me.id)
+                    currentUser &&
+                    !onlineUsers.some(
+                        (u): boolean => u.userId === currentUser!.id,
+                    )
                 ) {
                     onlineUsers.push({
-                        userId: me.id,
-                        username: (me as unknown as User).username || '',
+                        userId: currentUser.id,
+                        username: currentUser.username,
                         status: undefined,
                     });
                 }

@@ -10,6 +10,7 @@ export interface Friend {
     } | null;
     latestMessageAt?: string | null;
     isPinned?: boolean;
+    isOnline?: boolean;
 }
 
 export interface FriendRequest {

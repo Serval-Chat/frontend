@@ -60,6 +60,9 @@ export const FriendList = () => {
                     <UserItem
                         showPinIcon
                         initialData={friend}
+                        initialPresenceStatus={
+                            friend.isOnline === true ? 'online' : 'offline'
+                        }
                         isActive={selectedFriendId === String(friend.id)}
                         key={String(friend.id)}
                         userId={String(friend.id)}

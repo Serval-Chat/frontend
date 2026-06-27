@@ -39,7 +39,19 @@ const presenceSlice = createSlice({
                 }>
             >,
         ): void => {
-            state.users = {};
+            const incomingIds = new Set(action.payload.map((u) => u.userId));
+
+            for (const uid of Object.keys(state.users)) {
+                if (
+                    !incomingIds.has(uid) &&
+                    state.users[uid].status === 'online'
+                ) {
+                    state.users[uid].status = 'offline';
+                    state.users[uid].customStatus = null;
+                }
+            }
+
+            // Add/update everyone the server says is online.
             action.payload.forEach((user): void => {
                 state.users[user.userId] = {
                     userId: user.userId,
