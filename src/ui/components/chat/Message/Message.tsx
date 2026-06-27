@@ -455,6 +455,7 @@ export const Message = React.memo(
                             isGroupStart={isGroupStart}
                             isWebhook={message.isWebhook}
                             role={resolvedRole}
+                            showUsersPronouns={me?.settings?.showUsersPronouns}
                             timestamp={message.createdAt}
                             use24HourTime={me?.settings?.use24HourTime}
                             user={user}

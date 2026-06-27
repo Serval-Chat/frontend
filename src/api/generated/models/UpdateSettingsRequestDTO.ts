@@ -16,6 +16,7 @@ export type UpdateSettingsRequestDTO = {
     disableCustomUsernameFonts?: boolean;
     disableCustomUsernameColors?: boolean;
     disableCustomUsernameGlow?: boolean;
+    showUsersPronouns?: boolean;
     customFontUrl?: string;
     customFontFamily?: string;
     notificationSounds?: Array<NotificationSoundDTO>;

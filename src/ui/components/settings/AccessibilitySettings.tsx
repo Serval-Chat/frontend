@@ -24,6 +24,9 @@ export const AccessibilitySettings = () => {
     const [localLimitedAnimations, setLocalLimitedAnimations] = useState<
         boolean | null
     >(null);
+    const [localShowUsersPronouns, setLocalShowUsersPronouns] = useState<
+        boolean | null
+    >(null);
 
     const disableCustomFonts =
         localDisableFonts !== null
@@ -45,6 +48,11 @@ export const AccessibilitySettings = () => {
             ? localLimitedAnimations
             : user?.settings?.limitedAnimations || false;
 
+    const showUsersPronouns =
+        localShowUsersPronouns !== null
+            ? localShowUsersPronouns
+            : (user?.settings?.showUsersPronouns ?? false);
+
     const hasChanges =
         (localDisableFonts !== null &&
             localDisableFonts !==
@@ -57,7 +65,10 @@ export const AccessibilitySettings = () => {
                 (user?.settings?.disableCustomUsernameGlow || false)) ||
         (localLimitedAnimations !== null &&
             localLimitedAnimations !==
-                (user?.settings?.limitedAnimations || false));
+                (user?.settings?.limitedAnimations || false)) ||
+        (localShowUsersPronouns !== null &&
+            localShowUsersPronouns !==
+                (user?.settings?.showUsersPronouns ?? false));
 
     const handleSave = (): void => {
         updateSettings(
@@ -66,6 +77,7 @@ export const AccessibilitySettings = () => {
                 disableCustomUsernameColors: disableCustomColors,
                 disableCustomUsernameGlow: disableCustomGlow,
                 limitedAnimations,
+                showUsersPronouns,
             },
             {
                 onSuccess: (): void => {
@@ -73,6 +85,7 @@ export const AccessibilitySettings = () => {
                     setLocalDisableColors(null);
                     setLocalDisableGlow(null);
                     setLocalLimitedAnimations(null);
+                    setLocalShowUsersPronouns(null);
                 },
             },
         );
@@ -83,6 +96,7 @@ export const AccessibilitySettings = () => {
         setLocalDisableColors(null);
         setLocalDisableGlow(null);
         setLocalLimitedAnimations(null);
+        setLocalShowUsersPronouns(null);
     };
 
     if (isLoading) {
@@ -206,6 +220,31 @@ export const AccessibilitySettings = () => {
                                 <Toggle
                                     checked={limitedAnimations}
                                     onCheckedChange={setLocalLimitedAnimations}
+                                />
+                            </div>
+
+                            {/* Show User Pronouns */}
+                            <div className="flex items-start justify-between gap-4 rounded-lg border border-border-subtle bg-bg-subtle p-4">
+                                <div className="space-y-1">
+                                    <div className="flex items-center gap-2">
+                                        <Eye
+                                            className="text-muted-foreground"
+                                            size={16}
+                                        />
+                                        <Text weight="medium">
+                                            Show User Pronouns Next to Their
+                                            Message
+                                        </Text>
+                                    </div>
+                                    <Text size="sm" variant="muted">
+                                        Display a user's pronouns in parentheses
+                                        next to their name in the message
+                                        header.
+                                    </Text>
+                                </div>
+                                <Toggle
+                                    checked={showUsersPronouns}
+                                    onCheckedChange={setLocalShowUsersPronouns}
                                 />
                             </div>
                         </div>

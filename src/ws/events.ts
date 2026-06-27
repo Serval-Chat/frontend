@@ -670,6 +670,7 @@ export interface IUserUpdatedEvent {
         disableCustomUsernameFonts?: boolean;
         disableCustomUsernameColors?: boolean;
         disableCustomUsernameGlow?: boolean;
+        showUsersPronouns?: boolean;
     };
     serverSettings?: {
         order: (

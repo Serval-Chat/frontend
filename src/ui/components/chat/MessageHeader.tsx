@@ -21,6 +21,7 @@ interface MessageHeaderProps {
     disableColors?: boolean;
     disableGlow?: boolean;
     use24HourTime?: boolean;
+    showUsersPronouns?: boolean;
     onClickName?: () => void;
     isEdited?: boolean;
     editedAt?: string;
@@ -39,6 +40,7 @@ export const MessageHeader = React.memo(
         disableColors,
         disableGlow,
         use24HourTime,
+        showUsersPronouns,
         onClickName,
         isEdited,
         editedAt,
@@ -71,8 +73,13 @@ export const MessageHeader = React.memo(
                 {isWebhook && !user.isBot && (
                     <BotTag className="h-4" label="WEBHOOK" />
                 )}
+                {showUsersPronouns && user.pronouns && (
+                    <Text className="self-center text-xs text-text-muted">
+                        ({user.pronouns})
+                    </Text>
+                )}
 
-                <Text className="text-[10px] font-medium tracking-wider text-text-muted uppercase">
+                <Text className="self-center text-[10px] font-medium tracking-wider text-text-muted uppercase">
                     {formatTimestamp(timestamp, use24HourTime)}
                 </Text>
 
