@@ -106,6 +106,7 @@ interface UserItemProps {
     disableGlow?: boolean;
     initialPresenceStatus?: UserStatus;
     hideUnread?: boolean;
+    showPinIcon?: boolean;
 }
 
 interface ServerData {
@@ -198,6 +199,7 @@ const UserItemInner = React.memo(
         disableGlow,
         initialPresenceStatus,
         hideUnread,
+        showPinIcon,
     }: UserItemProps & { serverData: ServerData | null }): JSX.Element => {
         const dispatch = useAppDispatch();
         const navigate = useNavigate();
@@ -973,7 +975,7 @@ const UserItemInner = React.memo(
                         </Box>
 
                         <Box className="ml-auto flex shrink-0 items-center gap-1.5">
-                            {isPinnedFriend && (
+                            {showPinIcon && isPinnedFriend && (
                                 <Pin className="h-4 w-4 shrink-0 text-muted-foreground" />
                             )}
 
@@ -1133,6 +1135,7 @@ export const UserItem = React.memo((props: UserItemProps): JSX.Element => {
                         serverData={serverData}
                         serverId={props.serverId}
                         serverRoles={props.serverRoles}
+                        showPinIcon={props.showPinIcon}
                         user={props.user}
                         userId={props.userId}
                         onClick={props.onClick}
@@ -1162,6 +1165,7 @@ export const UserItem = React.memo((props: UserItemProps): JSX.Element => {
             serverData={null}
             serverId={props.serverId}
             serverRoles={props.serverRoles}
+            showPinIcon={props.showPinIcon}
             user={props.user}
             userId={props.userId}
             onClick={props.onClick}

@@ -58,6 +58,7 @@ export const FriendList = () => {
             ) : (
                 sortedFriends?.map((friend) => (
                     <UserItem
+                        showPinIcon
                         initialData={friend}
                         isActive={selectedFriendId === String(friend.id)}
                         key={String(friend.id)}
