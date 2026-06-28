@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Check, Sparkles } from 'lucide-react';
 
-import { decorationsApi } from '@/api/decorations';
+import { decorationsApi, getDecorationUrl } from '@/api/decorations';
 import { useMe } from '@/api/users/users.queries';
 import { useLimitedAnimations } from '@/providers/limitedAnimationsContext';
 import { Button } from '@/ui/components/common/Button';
@@ -87,7 +87,7 @@ export const DecorationEmbed = ({ decorationId }: DecorationEmbedProps) => {
                         alt=""
                         className="pointer-events-none absolute inset-0 z-10 h-full w-full scale-125 object-cover"
                         paused={limitedAnimations || !isHovered}
-                        src={`/api/v1/decorations/file/${decoration.id}?size=64`}
+                        src={getDecorationUrl(decoration.id, 64)}
                     />
                 </div>
                 <div className="flex min-w-0 flex-1 flex-col">

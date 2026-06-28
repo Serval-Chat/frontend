@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 
+import { getDecorationUrl } from '@/api/decorations';
 import { useLimitedAnimations } from '@/providers/limitedAnimationsContext';
 import { Box } from '@/ui/components/layout/Box';
 import { cn } from '@/utils/cn';
@@ -64,7 +65,10 @@ export const UserProfilePicture = ({
                     alt=""
                     className="pointer-events-none absolute inset-0 z-10 h-full w-full scale-125 object-cover"
                     paused={limitedAnimations || !isHovered}
-                    src={`/api/v1/decorations/file/${decorationId}?size=${DECORATION_SIZE_PX[size] ?? 128}`}
+                    src={getDecorationUrl(
+                        decorationId,
+                        DECORATION_SIZE_PX[size] ?? 128,
+                    )}
                 />
             )}
             {!noIndicator && (

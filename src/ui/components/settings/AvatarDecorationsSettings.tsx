@@ -3,7 +3,7 @@ import { useRef, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Share2, Sparkles, Trash2, Upload } from 'lucide-react';
 
-import { decorationsApi } from '@/api/decorations';
+import { decorationsApi, getDecorationUrl } from '@/api/decorations';
 import { useMe } from '@/api/users/users.queries';
 import { useLimitedAnimations } from '@/providers/limitedAnimationsContext';
 import { Button } from '@/ui/components/common/Button';
@@ -219,7 +219,7 @@ export const AvatarDecorationsSettings = () => {
                                 alt=""
                                 className="pointer-events-none absolute inset-0 z-10 h-full w-full scale-125 object-cover"
                                 paused={limitedAnimations || !isHovered}
-                                src={`/api/v1/decorations/file/${user.decorationId}?size=128`}
+                                src={getDecorationUrl(user.decorationId, 128)}
                             />
                         )}
                         {!user.decorationId && (
@@ -331,7 +331,7 @@ export const AvatarDecorationsSettings = () => {
                                             <div
                                                 className="pointer-events-none absolute inset-0 z-10 scale-125"
                                                 style={{
-                                                    backgroundImage: `url(/api/v1/decorations/file/${deco.id}?size=64)`,
+                                                    backgroundImage: `url(${getDecorationUrl(deco.id, 64)})`,
                                                     backgroundSize: 'cover',
                                                     backgroundPosition:
                                                         'center',
