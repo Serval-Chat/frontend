@@ -5,7 +5,10 @@ export type KeybindActionId =
     | 'debug.typing.more'
     | 'debug.typing.less'
     | 'debug.theme.previous'
-    | 'debug.theme.next';
+    | 'debug.theme.next'
+    | 'debug.notification.example'
+    | 'debug.notification.dm'
+    | 'debug.notification.mention';
 
 export interface KeybindAction {
     id: KeybindActionId;
@@ -50,6 +53,27 @@ export const KEYBIND_ACTIONS: KeybindAction[] = [
         description: 'Switch to the next chat background theme.',
         category: 'Developer',
         defaultBinding: { code: 'Digit4', alt: true },
+    },
+    {
+        id: 'debug.notification.example',
+        label: 'Example Notification',
+        description: 'Show an example in-app notification.',
+        category: 'Developer',
+        defaultBinding: { code: 'Digit5', alt: true },
+    },
+    {
+        id: 'debug.notification.dm',
+        label: 'Example DM Notification',
+        description: 'Show an example DM in-app notification.',
+        category: 'Developer',
+        defaultBinding: { code: 'Digit6', alt: true },
+    },
+    {
+        id: 'debug.notification.mention',
+        label: 'Example Mention Notification',
+        description: 'Show an example mention in-app notification.',
+        category: 'Developer',
+        defaultBinding: { code: 'Digit7', alt: true },
     },
 ];
 

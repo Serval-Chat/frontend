@@ -160,7 +160,7 @@ export const useRegisterForm = (): RegisterFormResult => {
                 login,
                 username,
                 password,
-                invite: inviteToken,
+                invite: inviteToken.trim(),
             });
             await setAuthToken(data.token);
 

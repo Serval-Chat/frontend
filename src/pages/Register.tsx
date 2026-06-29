@@ -205,8 +205,12 @@ export const Register = () => {
                     </InputWrapper>
                     <InputWrapper>
                         <Input
+                            autoCapitalize="none"
+                            autoComplete="off"
+                            autoCorrect="off"
                             className="bg-background/50"
                             placeholder="Invite Token"
+                            spellCheck={false}
                             type="text"
                             value={inviteToken}
                             onChange={(e): void =>

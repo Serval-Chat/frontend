@@ -151,6 +151,13 @@ class WsClient {
     }
 
     /**
+     * Inject a fake inbound event directly into the handler pipeline.
+     */
+    public simulateEvent(type: string, payload: unknown): void {
+        this.emit(type, payload);
+    }
+
+    /**
      * Subscribe to an event.
      */
     public on<T = unknown>(type: string, handler: EventHandler<T>): () => void {

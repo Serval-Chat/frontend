@@ -22,7 +22,7 @@ interface NotificationState {
     queue: RenderedNotification[];
 }
 
-const NOTIFICATION_TIMEOUT_MS = 8000;
+const NOTIFICATION_TIMEOUT_MS = 4000;
 
 export const InAppNotificationProvider = ({
     children,
@@ -144,19 +144,21 @@ const InAppNotificationCard = ({
             initial={{ opacity: 0, y: -18, scale: 0.98 }}
             transition={{ duration: 0.18, ease: 'easeOut' }}
         >
-            {hasHeader ? (
-                <div className="flex items-center gap-2 border-b border-border-subtle px-3 py-1.5">
-                    {notification.serverName && (
-                        <ServerIcon
-                            className="pointer-events-none shrink-0"
-                            server={{
-                                name: notification.serverName,
-                                icon: notification.serverIcon,
-                            }}
-                            size="xxs"
-                        />
-                    )}
-                    <div className="min-w-0 flex-1">
+            <div
+                className={`flex items-center gap-2 px-3 py-1${hasHeader ? ' border-b border-border-subtle' : ''}`}
+            >
+                {notification.serverName && (
+                    <ServerIcon
+                        className="pointer-events-none shrink-0"
+                        server={{
+                            name: notification.serverName,
+                            icon: notification.serverIcon,
+                        }}
+                        size="xxs"
+                    />
+                )}
+                <div className="min-w-0 flex-1">
+                    {title && (
                         <Text
                             className="text-foreground"
                             size="sm"
@@ -164,28 +166,18 @@ const InAppNotificationCard = ({
                         >
                             {title}
                         </Text>
-                    </div>
-                    <Button
-                        aria-label="Close notification"
-                        className="h-7 w-7 shrink-0 border-none p-0 hover:bg-white/5"
-                        size="sm"
-                        variant="ghost"
-                        onClick={onClose}
-                    >
-                        <X size={15} />
-                    </Button>
+                    )}
                 </div>
-            ) : (
                 <Button
                     aria-label="Close notification"
-                    className="absolute top-1 right-1 z-10 h-7 w-7 border-none bg-background/70 p-0 hover:bg-white/5"
+                    className="h-6 w-6 shrink-0 border-none p-0 hover:bg-white/5"
                     size="sm"
                     variant="ghost"
                     onClick={onClose}
                 >
-                    <X size={15} />
+                    <X size={13} />
                 </Button>
-            )}
+            </div>
             <div className="max-h-[18vh] overflow-y-auto py-1">
                 {notification.chatMessage ? (
                     <Message
@@ -203,6 +195,16 @@ const InAppNotificationCard = ({
                     </Text>
                 )}
             </div>
+            <m.div
+                animate={{ scaleX: 0 }}
+                className="h-0.5 bg-primary/50"
+                initial={{ scaleX: 1 }}
+                style={{ originX: 0 }}
+                transition={{
+                    duration: NOTIFICATION_TIMEOUT_MS / 1000,
+                    ease: 'linear',
+                }}
+            />
         </m.article>
     );
 };

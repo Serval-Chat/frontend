@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 
+import { useQueryClient } from '@tanstack/react-query';
 import { AnimatePresence, m } from 'framer-motion';
 import { ChevronDown, Upload, X } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -40,9 +41,10 @@ import { TypingIndicator } from '@/ui/components/chat/TypingIndicator';
 import { Button } from '@/ui/components/common/Button';
 import { Text } from '@/ui/components/common/Text';
 import { Box } from '@/ui/components/layout/Box';
+import { showInAppNotification } from '@/ui/notifications/inAppNotifications';
 import { colors } from '@/ui/theme';
 import { applyServalBackground } from '@/utils/servalFur';
-import { wsMessages } from '@/ws';
+import { WsEvents, wsClient, wsMessages } from '@/ws';
 
 import { StickyMessageBar } from './StickyMessageBar';
 
@@ -127,6 +129,7 @@ export const MainChat = ({
     }, [theme, opacity, seed, base, spotColor, spotCount]);
 
     const { data: currentUser } = useMe();
+    const queryClient = useQueryClient();
     const keybindManager = useKeybindManager(currentUser?.settings?.keybinds);
 
     useEffect((): (() => void) => {
@@ -156,11 +159,99 @@ export const MainChat = ({
                 const nextIndex = (currentIndex + 1) % THEMES.length;
                 setTheme(THEMES[nextIndex]);
             }
+            if (keybindManager.matches('debug.notification.example', e)) {
+                e.preventDefault();
+                e.stopPropagation();
+                showInAppNotification({
+                    title: 'Example Notification',
+                    message: 'This is what a notification looks like!',
+                    type: 'info',
+                });
+            }
+            if (keybindManager.matches('debug.notification.dm', e)) {
+                e.preventDefault();
+                e.stopPropagation();
+                const dmId = `__debug_dm_${Date.now()}`;
+                const debugSenderId = `${currentUser?.id ?? '__debug'}_debug`;
+                if (currentUser) {
+                    queryClient.setQueryData(['user', debugSenderId], {
+                        ...currentUser,
+                        id: debugSenderId,
+                    });
+                }
+                wsClient.simulateEvent(WsEvents.MESSAGE_DM, {
+                    id: dmId,
+                    messageId: dmId,
+                    senderId: debugSenderId,
+                    senderUsername: currentUser?.username ?? 'Unknown',
+                    senderProfilePicture: currentUser?.profilePicture ?? null,
+                    receiverId: currentUser?.id ?? '__debug_me__',
+                    receiverUsername: currentUser?.username ?? 'Unknown',
+                    text: 'Hey, how are you doing?',
+                    createdAt: new Date().toISOString(),
+                    isEdited: false,
+                    isPinned: false,
+                    isSticky: false,
+                    isWebhook: false,
+                    stickerId: null,
+                    poll: null,
+                    embeds: [],
+                    attachments: [],
+                    reactions: [],
+                    interaction: null,
+                    senderIsBot: false,
+                });
+            }
+            if (keybindManager.matches('debug.notification.mention', e)) {
+                e.preventDefault();
+                e.stopPropagation();
+                const mentionId = `__debug_mention_${Date.now()}`;
+                const debugSenderId = `${currentUser?.id ?? '__debug'}_debug`;
+                if (currentUser) {
+                    queryClient.setQueryData(['user', debugSenderId], {
+                        ...currentUser,
+                        id: debugSenderId,
+                    });
+                }
+                wsClient.simulateEvent(WsEvents.MENTION, {
+                    type: 'mention',
+                    senderId: debugSenderId,
+                    sender:
+                        currentUser?.displayName ??
+                        currentUser?.username ??
+                        'Unknown',
+                    serverId: '__debug_server__',
+                    channelId: '__debug_channel__',
+                    message: {
+                        id: mentionId,
+                        messageId: mentionId,
+                        serverId: '__debug_server__',
+                        channelId: '__debug_channel__',
+                        senderId: debugSenderId,
+                        senderUsername: currentUser?.username ?? 'Unknown',
+                        senderProfilePicture:
+                            currentUser?.profilePicture ?? null,
+                        text: `Hey @${currentUser?.username ?? 'you'}, check this out!`,
+                        createdAt: new Date().toISOString(),
+                        isEdited: false,
+                        isPinned: false,
+                        isSticky: false,
+                        isWebhook: false,
+                        embeds: [],
+                        attachments: [],
+                        reactions: [],
+                        interaction: null,
+                        stickerId: null,
+                        poll: null,
+                        senderIsBot: false,
+                    },
+                });
+            }
         };
         window.addEventListener('keydown', handleKeyDown, true);
         return (): void =>
             window.removeEventListener('keydown', handleKeyDown, true);
-    }, [keybindManager, theme, setTheme]);
+    }, [keybindManager, theme, setTheme, currentUser]);
 
     const { data: friendUser, isError: isFriendError } = useUserById(
         selectedFriendId ?? '',

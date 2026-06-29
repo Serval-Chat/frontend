@@ -24,7 +24,13 @@ import type {
     Server,
     ServerMember,
 } from '@/api/servers/servers.types';
-import type { User, UserSettings } from '@/api/users/users.types';
+import type {
+    User,
+    UserSettings,
+    UsernameFont,
+    UsernameGlow,
+    UsernameGradient,
+} from '@/api/users/users.types';
 import type { RootState } from '@/store';
 import {
     setBackendInstanceId,
@@ -370,20 +376,92 @@ const resolveNotificationProfilePicture = (
     );
 };
 
+const resolveNotificationUserExtras = (
+    queryClient: QueryClient,
+    message: ChatMessage,
+): Pick<
+    User,
+    'displayName' | 'usernameFont' | 'usernameGradient' | 'usernameGlow'
+> => {
+    const cachedUser = queryClient.getQueryData<User>([
+        'user',
+        message.senderId,
+    ]);
+    if (cachedUser) {
+        return {
+            displayName: cachedUser.displayName,
+            usernameFont: cachedUser.usernameFont,
+            usernameGradient: cachedUser.usernameGradient,
+            usernameGlow: cachedUser.usernameGlow,
+        };
+    }
+
+    const friendProfiles =
+        queryClient.getQueryData<User[]>(FRIEND_PROFILES_QUERY_KEY) ?? [];
+    const friendProfile = friendProfiles.find(
+        (u): boolean => u.id === message.senderId,
+    );
+    if (friendProfile) {
+        return {
+            displayName: friendProfile.displayName,
+            usernameFont: friendProfile.usernameFont,
+            usernameGradient: friendProfile.usernameGradient,
+            usernameGlow: friendProfile.usernameGlow,
+        };
+    }
+
+    if (message.serverId) {
+        const members =
+            queryClient.getQueryData<ServerMember[]>(
+                SERVERS_QUERY_KEYS.members(message.serverId),
+            ) ?? [];
+        const member = members.find(
+            (m): boolean => m.userId === message.senderId,
+        );
+        if (member?.user) {
+            return {
+                displayName: member.user.displayName,
+                usernameFont: member.user.usernameFont,
+                usernameGradient: member.user.usernameGradient,
+                usernameGlow: member.user.usernameGlow,
+            };
+        }
+    }
+
+    const friends = queryClient.getQueryData<Friend[]>(FRIENDS_QUERY_KEY) ?? [];
+    const friend = friends.find((f): boolean => f.id === message.senderId);
+    if (friend) {
+        return { displayName: friend.displayName };
+    }
+
+    return {};
+};
+
 const buildNotificationUser = ({
     id,
     username,
+    displayName,
     profilePicture,
+    usernameFont,
+    usernameGradient,
+    usernameGlow,
 }: {
     id: string;
     username?: string;
+    displayName?: string | null;
     profilePicture?: string | null;
+    usernameFont?: UsernameFont;
+    usernameGradient?: UsernameGradient;
+    usernameGlow?: UsernameGlow;
 }): User => ({
-    id: id,
+    id,
     login: username || 'Unknown',
     username: username || 'Unknown',
-    displayName: username || 'Unknown',
+    displayName: displayName ?? username ?? 'Unknown',
     profilePicture: profilePicture ?? undefined,
+    usernameFont,
+    usernameGradient,
+    usernameGlow,
     createdAt: new Date(),
 });
 
@@ -391,28 +469,40 @@ const buildNotificationMessage = (
     queryClient: QueryClient,
     message: ChatMessage,
     username?: string,
-): ProcessedChatMessage => ({
-    ...message,
-    id: message.id || `notification-${message.senderId}-${message.createdAt}`,
-    text: message.text ?? '',
-    createdAt: message.createdAt || new Date().toISOString(),
-    stickerId: message.stickerId ?? null,
-    isEdited: message.isEdited ?? false,
-    isPinned: message.isPinned ?? false,
-    isSticky: message.isSticky ?? false,
-    isWebhook: message.isWebhook ?? false,
-    embeds: message.embeds ?? [],
-    attachments: message.attachments ?? [],
-    reactions: message.reactions ?? [],
-    interaction: message.interaction ?? null,
-    poll: message.poll ?? null,
-    senderIsBot: message.senderIsBot ?? false,
-    user: buildNotificationUser({
-        id: message.senderId,
-        username,
-        profilePicture: resolveNotificationProfilePicture(queryClient, message),
-    }),
-});
+): ProcessedChatMessage => {
+    const extras = resolveNotificationUserExtras(queryClient, message);
+    return {
+        ...message,
+        id:
+            message.id ||
+            `notification-${message.senderId}-${message.createdAt}`,
+        text: message.text ?? '',
+        createdAt: message.createdAt || new Date().toISOString(),
+        stickerId: message.stickerId ?? null,
+        isEdited: message.isEdited ?? false,
+        isPinned: message.isPinned ?? false,
+        isSticky: message.isSticky ?? false,
+        isWebhook: message.isWebhook ?? false,
+        embeds: message.embeds ?? [],
+        attachments: message.attachments ?? [],
+        reactions: message.reactions ?? [],
+        interaction: message.interaction ?? null,
+        poll: message.poll ?? null,
+        senderIsBot: message.senderIsBot ?? false,
+        user: buildNotificationUser({
+            id: message.senderId,
+            username,
+            displayName: extras.displayName,
+            profilePicture: resolveNotificationProfilePicture(
+                queryClient,
+                message,
+            ),
+            usernameFont: extras.usernameFont,
+            usernameGradient: extras.usernameGradient,
+            usernameGlow: extras.usernameGlow,
+        }),
+    };
+};
 
 const showDedupedInAppNotification = ({
     id,

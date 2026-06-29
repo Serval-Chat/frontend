@@ -6,6 +6,7 @@ import { createPortal } from 'react-dom';
 
 import {
     useMe,
+    useUpdateAppearance,
     useUpdateSettings,
     useUpdateStyle,
 } from '@/api/users/users.queries';
@@ -20,6 +21,7 @@ import { SettingsFloatingBar } from '@/ui/components/common/SettingsFloatingBar'
 import { StyledUserName } from '@/ui/components/common/StyledUserName';
 import { useToast } from '@/ui/components/common/Toast';
 import { Toggle } from '@/ui/components/common/Toggle';
+import { UserProfileCard } from '@/ui/components/profile/UserProfileCard';
 
 import { ThemeSwitcher } from './ThemeSwitcher';
 
@@ -98,7 +100,10 @@ const AppearanceSettingsForm = ({ user }: AppearanceSettingsFormProps) => {
         useUpdateStyle();
     const { mutate: updateSettings, isPending: isUpdatingSettings } =
         useUpdateSettings();
-    const isPending = isUpdatingStyle || isUpdatingSettings;
+    const { mutate: updateAppearance, isPending: isUpdatingAppearance } =
+        useUpdateAppearance();
+    const isPending =
+        isUpdatingStyle || isUpdatingSettings || isUpdatingAppearance;
 
     const {
         customThemes,
@@ -143,7 +148,19 @@ const AppearanceSettingsForm = ({ user }: AppearanceSettingsFormProps) => {
     const [use24HourTime, setUse24HourTime] = useState(
         user.settings?.use24HourTime ?? false,
     );
+    const [profilePrimaryColor, setProfilePrimaryColor] = useState<
+        string | null
+    >(user.profilePrimaryColor ?? null);
+    const [originalProfilePrimaryColor, setOriginalProfilePrimaryColor] =
+        useState<string | null>(user.profilePrimaryColor ?? null);
+    const [profileAccentColor, setProfileAccentColor] = useState<string | null>(
+        user.profileAccentColor ?? null,
+    );
+    const [originalProfileAccentColor, setOriginalProfileAccentColor] =
+        useState<string | null>(user.profileAccentColor ?? null);
+
     const [editingThemeId, setEditingThemeId] = useState<string | undefined>();
+    const showProfileCard = true;
     const [pendingDeleteThemeId, setPendingDeleteThemeId] = useState<
         string | undefined
     >();
@@ -153,6 +170,9 @@ const AppearanceSettingsForm = ({ user }: AppearanceSettingsFormProps) => {
     const customThemeFileInputRef = useRef<HTMLInputElement>(null);
 
     // Track changes
+    const accentWithoutPrimary =
+        profileAccentColor !== null && profilePrimaryColor === null;
+
     const hasChanges =
         usernameFont !== (user.usernameFont ?? 'default') ||
         glowEnabled !== (user.usernameGlow?.enabled ?? false) ||
@@ -162,7 +182,9 @@ const AppearanceSettingsForm = ({ user }: AppearanceSettingsFormProps) => {
         gradientAngle !== (user.usernameGradient?.angle ?? 90) ||
         localCustomFontUrl !== (user.settings?.customFontUrl ?? '') ||
         localCustomFontFamily !== (user.settings?.customFontFamily ?? '') ||
-        use24HourTime !== (user.settings?.use24HourTime ?? false);
+        use24HourTime !== (user.settings?.use24HourTime ?? false) ||
+        profilePrimaryColor !== originalProfilePrimaryColor ||
+        profileAccentColor !== originalProfileAccentColor;
 
     const handleSave = (): void => {
         if (localCustomFontUrl) {
@@ -202,6 +224,23 @@ const AppearanceSettingsForm = ({ user }: AppearanceSettingsFormProps) => {
 
         setCustomFontUrl(localCustomFontUrl);
         setCustomFontFamily(localCustomFontFamily);
+
+        const appearanceUpdate: {
+            profilePrimaryColor?: string | null;
+            profileAccentColor?: string | null;
+        } = {};
+        if (profilePrimaryColor !== originalProfilePrimaryColor)
+            appearanceUpdate.profilePrimaryColor = profilePrimaryColor;
+        if (profileAccentColor !== originalProfileAccentColor)
+            appearanceUpdate.profileAccentColor = profileAccentColor;
+        if (Object.keys(appearanceUpdate).length > 0) {
+            updateAppearance(appearanceUpdate, {
+                onSuccess: (): void => {
+                    setOriginalProfilePrimaryColor(profilePrimaryColor);
+                    setOriginalProfileAccentColor(profileAccentColor);
+                },
+            });
+        }
     };
 
     const handleReset = (): void => {
@@ -220,11 +259,15 @@ const AppearanceSettingsForm = ({ user }: AppearanceSettingsFormProps) => {
         setLocalCustomFontUrl(user.settings?.customFontUrl ?? '');
         setLocalCustomFontFamily(user.settings?.customFontFamily ?? '');
         setUse24HourTime(user.settings?.use24HourTime ?? false);
+        setProfilePrimaryColor(user.profilePrimaryColor ?? null);
+        setOriginalProfilePrimaryColor(user.profilePrimaryColor ?? null);
+        setProfileAccentColor(user.profileAccentColor ?? null);
+        setOriginalProfileAccentColor(user.profileAccentColor ?? null);
     };
 
     // Color picker helpers
     const [activeColorPicker, setActiveColorPicker] = useState<{
-        type: 'glow' | 'gradient';
+        type: 'glow' | 'gradient' | 'profilePrimary' | 'profileAccent';
         index?: number;
     } | null>(null);
     const [hexDraft, setHexDraft] = useState('');
@@ -371,6 +414,8 @@ const AppearanceSettingsForm = ({ user }: AppearanceSettingsFormProps) => {
 
     const previewUser = {
         ...user,
+        profilePrimaryColor: profilePrimaryColor ?? undefined,
+        profileAccentColor: profileAccentColor ?? undefined,
         usernameFont: usernameFont !== 'default' ? usernameFont : undefined,
         usernameGlow: {
             enabled: glowEnabled,
@@ -411,7 +456,9 @@ const AppearanceSettingsForm = ({ user }: AppearanceSettingsFormProps) => {
 
     return (
         <>
-            <div className="max-w-3xl pb-20">
+            <div
+                className={`pb-20 transition-all duration-500 ease-in-out ${showProfileCard ? 'max-w-6xl' : 'max-w-3xl'}`}
+            >
                 <div className="mb-6 flex items-center justify-between">
                     <Heading level={3}>Appearance</Heading>
                     <Button
@@ -423,587 +470,868 @@ const AppearanceSettingsForm = ({ user }: AppearanceSettingsFormProps) => {
                     </Button>
                 </div>
 
-                <div className="grid grid-cols-1 gap-8">
-                    {/* Preview Section */}
-                    <div className="rounded-lg bg-bg-subtle p-6 text-center">
-                        <Heading
-                            className="mb-4 text-sm font-bold text-muted-foreground uppercase"
-                            level={4}
-                        >
-                            Preview
-                        </Heading>
-                        <div className="flex items-center justify-center rounded border border-border-subtle bg-bg-secondary py-4">
-                            <StyledUserName
-                                className="text-3xl font-bold"
-                                disableCustomFonts={false}
-                                user={previewUser}
-                            >
-                                {user.displayName || user.username}
-                            </StyledUserName>
-                        </div>
-                    </div>
-
-                    <div className="flex flex-col gap-8">
-                        {/* Gradient Settings */}
-                        <div className="space-y-4">
-                            <div className="flex items-center justify-between">
-                                <Heading level={4}>Username Gradient</Heading>
-                                <Toggle
-                                    checked={gradientEnabled}
-                                    onCheckedChange={setGradientEnabled}
-                                />
-                            </div>
-
-                            {gradientEnabled && (
-                                <div className="space-y-4 rounded-lg border border-border-subtle bg-bg-subtle p-4">
-                                    <div>
-                                        <span className="mb-2 block text-sm font-medium text-muted-foreground">
-                                            Colors (Max 20)
-                                        </span>
-                                        <div className="mb-2 flex flex-wrap gap-2">
-                                            {gradientColors.map(
-                                                (colorItem, index) => (
-                                                    <div
-                                                        className="group relative"
-                                                        key={colorItem.id}
-                                                    >
+                <div className="flex flex-col items-start md:flex-row">
+                    <div
+                        className={`w-full min-w-0 flex-1 transition-all duration-500 ease-in-out ${showProfileCard ? 'pb-8 md:pr-8 md:pb-0' : ''}`}
+                    >
+                        <div className="grid grid-cols-1 gap-8">
+                            {/* Profile Colors Section */}
+                            <div className="space-y-4">
+                                <div className="flex items-center justify-between">
+                                    <Heading level={4}>Profile Colors</Heading>
+                                </div>
+                                <div className="rounded-lg border border-border-subtle bg-bg-subtle p-4">
+                                    <div className="flex flex-wrap gap-6">
+                                        {(
+                                            [
+                                                {
+                                                    key: 'profilePrimary' as const,
+                                                    label: 'Primary',
+                                                    value: profilePrimaryColor,
+                                                },
+                                                {
+                                                    key: 'profileAccent' as const,
+                                                    label: 'Accent',
+                                                    value: profileAccentColor,
+                                                },
+                                            ] as const
+                                        ).map(({ key, label, value }) => (
+                                            <div
+                                                className="flex items-center gap-3"
+                                                key={key}
+                                            >
+                                                <span className="text-sm font-medium text-foreground">
+                                                    {label}:
+                                                </span>
+                                                <div className="flex items-center gap-2">
+                                                    <button
+                                                        className="h-8 w-12 rounded border border-border-subtle transition-transform hover:scale-105"
+                                                        style={{
+                                                            backgroundColor:
+                                                                value ??
+                                                                '#313338',
+                                                        }}
+                                                        type="button"
+                                                        onClick={(e): void => {
+                                                            triggerRef.current =
+                                                                e.currentTarget;
+                                                            setHexDraft(
+                                                                value ??
+                                                                    '#313338',
+                                                            );
+                                                            setActiveColorPicker(
+                                                                {
+                                                                    type: key,
+                                                                },
+                                                            );
+                                                        }}
+                                                    />
+                                                    {value && (
                                                         <Button
-                                                            className="border-border h-10 w-10 min-w-0 rounded-full border-2 p-0 shadow-sm focus:ring-2 focus:ring-primary focus:outline-none"
-                                                            style={{
-                                                                backgroundColor:
-                                                                    colorItem.value,
-                                                            }}
+                                                            size="sm"
                                                             variant="ghost"
-                                                            onClick={(
+                                                            onClick={(): void => {
+                                                                if (
+                                                                    key ===
+                                                                    'profilePrimary'
+                                                                ) {
+                                                                    setProfilePrimaryColor(
+                                                                        null,
+                                                                    );
+                                                                    setProfileAccentColor(
+                                                                        null,
+                                                                    );
+                                                                } else {
+                                                                    setProfileAccentColor(
+                                                                        null,
+                                                                    );
+                                                                }
+                                                            }}
+                                                        >
+                                                            <X size={12} />
+                                                        </Button>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    {activeColorPicker &&
+                                        (activeColorPicker.type ===
+                                            'profilePrimary' ||
+                                            activeColorPicker.type ===
+                                                'profileAccent') &&
+                                        createPortal(
+                                            <div
+                                                className="absolute z-[var(--z-index-modal)]"
+                                                ref={pickerRef}
+                                                style={{
+                                                    left: pickerCoords.x,
+                                                    top: pickerCoords.y,
+                                                }}
+                                            >
+                                                <button
+                                                    aria-label="Close color picker"
+                                                    className="fixed inset-0"
+                                                    tabIndex={-1}
+                                                    type="button"
+                                                    onClick={(): void =>
+                                                        setActiveColorPicker(
+                                                            null,
+                                                        )
+                                                    }
+                                                    onKeyDown={(e): void => {
+                                                        if (e.key === 'Escape')
+                                                            setActiveColorPicker(
+                                                                null,
+                                                            );
+                                                    }}
+                                                />
+                                                <div className="relative overflow-hidden rounded-lg border border-white/10 bg-background shadow-xl">
+                                                    <HexColorPicker
+                                                        color={
+                                                            activeColorPicker.type ===
+                                                            'profilePrimary'
+                                                                ? (profilePrimaryColor ??
+                                                                  '#313338')
+                                                                : (profileAccentColor ??
+                                                                  '#313338')
+                                                        }
+                                                        onChange={(c): void => {
+                                                            if (
+                                                                activeColorPicker.type ===
+                                                                'profilePrimary'
+                                                            ) {
+                                                                setProfilePrimaryColor(
+                                                                    c,
+                                                                );
+                                                            } else {
+                                                                setProfileAccentColor(
+                                                                    c,
+                                                                );
+                                                            }
+                                                            setHexDraft(c);
+                                                        }}
+                                                    />
+                                                    <div className="flex items-center gap-2 bg-bg-secondary px-3 py-2">
+                                                        <span className="font-mono text-xs text-muted-foreground select-none">
+                                                            #
+                                                        </span>
+                                                        <input
+                                                            aria-label="Hex color value"
+                                                            className="w-full bg-transparent font-mono text-xs text-foreground outline-none"
+                                                            maxLength={7}
+                                                            spellCheck={false}
+                                                            type="text"
+                                                            value={hexDraft.replace(
+                                                                /^#/,
+                                                                '',
+                                                            )}
+                                                            onChange={(
                                                                 e,
                                                             ): void => {
-                                                                triggerRef.current =
-                                                                    e.currentTarget;
-                                                                const isOpen =
-                                                                    activeColorPicker?.type ===
-                                                                        'gradient' &&
-                                                                    activeColorPicker.index ===
-                                                                        index;
-                                                                setActiveColorPicker(
-                                                                    isOpen
-                                                                        ? null
-                                                                        : {
-                                                                              type: 'gradient',
-                                                                              index,
-                                                                          },
-                                                                );
-                                                                if (!isOpen)
-                                                                    setHexDraft(
-                                                                        colorItem.value,
+                                                                const raw =
+                                                                    e.target.value.replace(
+                                                                        /[^0-9a-fA-F]/g,
+                                                                        '',
                                                                     );
-                                                            }}
-                                                        >
-                                                            <span className="sr-only">
-                                                                Select color{' '}
-                                                                {
-                                                                    colorItem.value
-                                                                }
-                                                            </span>
-                                                        </Button>
-                                                        <Button
-                                                            className="absolute -top-1 -right-1 h-4 w-4 min-w-0 rounded-full border-none bg-danger p-0.5 text-white opacity-0 shadow-none transition-opacity group-hover:opacity-100"
-                                                            size="sm"
-                                                            variant="primary"
-                                                            onClick={(): void =>
-                                                                removeGradientColor(
-                                                                    index,
-                                                                )
-                                                            }
-                                                        >
-                                                            <X size={10} />
-                                                        </Button>
-
-                                                        {activeColorPicker?.type ===
-                                                            'gradient' &&
-                                                            activeColorPicker.index ===
-                                                                index &&
-                                                            createPortal(
-                                                                <div
-                                                                    className="z-top"
-                                                                    ref={
-                                                                        pickerRef
+                                                                setHexDraft(
+                                                                    `#${raw}`,
+                                                                );
+                                                                if (
+                                                                    raw.length ===
+                                                                    6
+                                                                ) {
+                                                                    const full = `#${raw}`;
+                                                                    if (
+                                                                        activeColorPicker.type ===
+                                                                        'profilePrimary'
+                                                                    ) {
+                                                                        setProfilePrimaryColor(
+                                                                            full,
+                                                                        );
+                                                                    } else {
+                                                                        setProfileAccentColor(
+                                                                            full,
+                                                                        );
                                                                     }
+                                                                }
+                                                            }}
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </div>,
+                                            document.body,
+                                        )}
+                                    {accentWithoutPrimary && (
+                                        <p className="mt-2 text-xs text-danger">
+                                            Accent color requires a primary
+                                            color.
+                                        </p>
+                                    )}
+                                </div>
+                            </div>
+                            {/* Preview Section */}
+                            <div className="rounded-lg bg-bg-subtle p-6 text-center">
+                                <Heading
+                                    className="mb-4 text-sm font-bold text-muted-foreground uppercase"
+                                    level={4}
+                                >
+                                    Preview
+                                </Heading>
+                                <div className="flex items-center justify-center rounded border border-border-subtle bg-bg-secondary py-4">
+                                    <StyledUserName
+                                        className="text-3xl font-bold"
+                                        disableCustomFonts={false}
+                                        user={previewUser}
+                                    >
+                                        {user.displayName || user.username}
+                                    </StyledUserName>
+                                </div>
+                            </div>
+
+                            <div className="flex flex-col gap-8">
+                                {/* Gradient Settings */}
+                                <div className="space-y-4">
+                                    <div className="flex items-center justify-between">
+                                        <Heading level={4}>
+                                            Username Gradient
+                                        </Heading>
+                                        <Toggle
+                                            checked={gradientEnabled}
+                                            onCheckedChange={setGradientEnabled}
+                                        />
+                                    </div>
+
+                                    {gradientEnabled && (
+                                        <div className="space-y-4 rounded-lg border border-border-subtle bg-bg-subtle p-4">
+                                            <div>
+                                                <span className="mb-2 block text-sm font-medium text-muted-foreground">
+                                                    Colors (Max 20)
+                                                </span>
+                                                <div className="mb-2 flex flex-wrap gap-2">
+                                                    {gradientColors.map(
+                                                        (colorItem, index) => (
+                                                            <div
+                                                                className="group relative"
+                                                                key={
+                                                                    colorItem.id
+                                                                }
+                                                            >
+                                                                <Button
+                                                                    className="border-border h-10 w-10 min-w-0 rounded-full border-2 p-0 shadow-sm focus:ring-2 focus:ring-primary focus:outline-none"
                                                                     style={{
-                                                                        position:
-                                                                            'fixed',
-                                                                        left: pickerCoords.x,
-                                                                        top: pickerCoords.y,
+                                                                        backgroundColor:
+                                                                            colorItem.value,
+                                                                    }}
+                                                                    variant="ghost"
+                                                                    onClick={(
+                                                                        e,
+                                                                    ): void => {
+                                                                        triggerRef.current =
+                                                                            e.currentTarget;
+                                                                        const isOpen =
+                                                                            activeColorPicker?.type ===
+                                                                                'gradient' &&
+                                                                            activeColorPicker.index ===
+                                                                                index;
+                                                                        setActiveColorPicker(
+                                                                            isOpen
+                                                                                ? null
+                                                                                : {
+                                                                                      type: 'gradient',
+                                                                                      index,
+                                                                                  },
+                                                                        );
+                                                                        if (
+                                                                            !isOpen
+                                                                        )
+                                                                            setHexDraft(
+                                                                                colorItem.value,
+                                                                            );
                                                                     }}
                                                                 >
-                                                                    <button
-                                                                        aria-label="Close color picker"
-                                                                        className="fixed inset-0"
-                                                                        tabIndex={
-                                                                            -1
+                                                                    <span className="sr-only">
+                                                                        Select
+                                                                        color{' '}
+                                                                        {
+                                                                            colorItem.value
                                                                         }
-                                                                        type="button"
-                                                                        onClick={(): void =>
-                                                                            setActiveColorPicker(
-                                                                                null,
-                                                                            )
+                                                                    </span>
+                                                                </Button>
+                                                                <Button
+                                                                    className="absolute -top-1 -right-1 h-4 w-4 min-w-0 rounded-full border-none bg-danger p-0.5 text-white opacity-0 shadow-none transition-opacity group-hover:opacity-100"
+                                                                    size="sm"
+                                                                    variant="primary"
+                                                                    onClick={(): void =>
+                                                                        removeGradientColor(
+                                                                            index,
+                                                                        )
+                                                                    }
+                                                                >
+                                                                    <X
+                                                                        size={
+                                                                            10
                                                                         }
-                                                                        onKeyDown={(
-                                                                            e,
-                                                                        ): void => {
-                                                                            if (
-                                                                                e.key ===
-                                                                                'Escape'
-                                                                            )
-                                                                                setActiveColorPicker(
-                                                                                    null,
-                                                                                );
-                                                                        }}
                                                                     />
-                                                                    <div className="relative overflow-hidden rounded-lg border border-white/10 bg-background shadow-xl">
-                                                                        <HexColorPicker
-                                                                            color={
-                                                                                colorItem.value
+                                                                </Button>
+
+                                                                {activeColorPicker?.type ===
+                                                                    'gradient' &&
+                                                                    activeColorPicker.index ===
+                                                                        index &&
+                                                                    createPortal(
+                                                                        <div
+                                                                            className="z-top"
+                                                                            ref={
+                                                                                pickerRef
                                                                             }
-                                                                            onChange={(
-                                                                                c,
-                                                                            ): void => {
-                                                                                updateGradientColor(
-                                                                                    index,
-                                                                                    c,
-                                                                                );
-                                                                                setHexDraft(
-                                                                                    c,
-                                                                                );
+                                                                            style={{
+                                                                                position:
+                                                                                    'fixed',
+                                                                                left: pickerCoords.x,
+                                                                                top: pickerCoords.y,
                                                                             }}
-                                                                        />
-                                                                        <div className="flex items-center gap-2 bg-bg-secondary px-3 py-2">
-                                                                            <span className="font-mono text-xs text-muted-foreground select-none">
-                                                                                #
-                                                                            </span>
-                                                                            <input
-                                                                                aria-label="Hex color value"
-                                                                                className="w-full bg-transparent font-mono text-xs text-foreground outline-none"
-                                                                                maxLength={
-                                                                                    6
+                                                                        >
+                                                                            <button
+                                                                                aria-label="Close color picker"
+                                                                                className="fixed inset-0"
+                                                                                tabIndex={
+                                                                                    -1
                                                                                 }
-                                                                                spellCheck={
-                                                                                    false
+                                                                                type="button"
+                                                                                onClick={(): void =>
+                                                                                    setActiveColorPicker(
+                                                                                        null,
+                                                                                    )
                                                                                 }
-                                                                                type="text"
-                                                                                value={hexDraft.replace(
-                                                                                    /^#/,
-                                                                                    '',
-                                                                                )}
-                                                                                onChange={(
+                                                                                onKeyDown={(
                                                                                     e,
                                                                                 ): void => {
-                                                                                    const raw =
-                                                                                        e.target.value.replace(
-                                                                                            /[^0-9a-fA-F]/g,
-                                                                                            '',
-                                                                                        );
-                                                                                    setHexDraft(
-                                                                                        `#${raw}`,
-                                                                                    );
                                                                                     if (
-                                                                                        raw.length ===
-                                                                                        6
+                                                                                        e.key ===
+                                                                                        'Escape'
                                                                                     )
-                                                                                        updateGradientColor(
-                                                                                            index,
-                                                                                            `#${raw}`,
+                                                                                        setActiveColorPicker(
+                                                                                            null,
                                                                                         );
                                                                                 }}
                                                                             />
-                                                                        </div>
-                                                                    </div>
-                                                                </div>,
-                                                                document.body,
-                                                            )}
+                                                                            <div className="relative overflow-hidden rounded-lg border border-white/10 bg-background shadow-xl">
+                                                                                <HexColorPicker
+                                                                                    color={
+                                                                                        colorItem.value
+                                                                                    }
+                                                                                    onChange={(
+                                                                                        c,
+                                                                                    ): void => {
+                                                                                        updateGradientColor(
+                                                                                            index,
+                                                                                            c,
+                                                                                        );
+                                                                                        setHexDraft(
+                                                                                            c,
+                                                                                        );
+                                                                                    }}
+                                                                                />
+                                                                                <div className="flex items-center gap-2 bg-bg-secondary px-3 py-2">
+                                                                                    <span className="font-mono text-xs text-muted-foreground select-none">
+                                                                                        #
+                                                                                    </span>
+                                                                                    <input
+                                                                                        aria-label="Hex color value"
+                                                                                        className="w-full bg-transparent font-mono text-xs text-foreground outline-none"
+                                                                                        maxLength={
+                                                                                            6
+                                                                                        }
+                                                                                        spellCheck={
+                                                                                            false
+                                                                                        }
+                                                                                        type="text"
+                                                                                        value={hexDraft.replace(
+                                                                                            /^#/,
+                                                                                            '',
+                                                                                        )}
+                                                                                        onChange={(
+                                                                                            e,
+                                                                                        ): void => {
+                                                                                            const raw =
+                                                                                                e.target.value.replace(
+                                                                                                    /[^0-9a-fA-F]/g,
+                                                                                                    '',
+                                                                                                );
+                                                                                            setHexDraft(
+                                                                                                `#${raw}`,
+                                                                                            );
+                                                                                            if (
+                                                                                                raw.length ===
+                                                                                                6
+                                                                                            )
+                                                                                                updateGradientColor(
+                                                                                                    index,
+                                                                                                    `#${raw}`,
+                                                                                                );
+                                                                                        }}
+                                                                                    />
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>,
+                                                                        document.body,
+                                                                    )}
+                                                            </div>
+                                                        ),
+                                                    )}
+                                                    {gradientColors.length <
+                                                        20 && (
+                                                        <Button
+                                                            className="border-border flex h-10 w-10 min-w-0 items-center justify-center rounded-full border-2 border-dashed p-0 text-muted-foreground shadow-none transition-colors hover:border-primary hover:text-primary"
+                                                            variant="ghost"
+                                                            onClick={
+                                                                addGradientColor
+                                                            }
+                                                        >
+                                                            <Plus size={16} />
+                                                        </Button>
+                                                    )}
+                                                </div>
+                                            </div>
+
+                                            <div className="grid grid-cols-1 gap-4">
+                                                <div>
+                                                    <span className="mb-2 block text-sm font-medium text-muted-foreground">
+                                                        Angle (Deg)
+                                                    </span>
+                                                    <div className="flex items-center gap-4">
+                                                        <input
+                                                            aria-label="Gradient angle"
+                                                            className="h-1.5 flex-1 cursor-pointer appearance-none rounded-lg bg-bg-secondary accent-primary"
+                                                            max={360}
+                                                            min={0}
+                                                            type="range"
+                                                            value={
+                                                                gradientAngle
+                                                            }
+                                                            onChange={(
+                                                                e,
+                                                            ): void =>
+                                                                setGradientAngle(
+                                                                    Number(
+                                                                        e.target
+                                                                            .value,
+                                                                    ),
+                                                                )
+                                                            }
+                                                        />
+                                                        <span className="min-w-[3ch] text-sm font-medium text-foreground">
+                                                            {gradientAngle}°
+                                                        </span>
                                                     </div>
-                                                ),
-                                            )}
-                                            {gradientColors.length < 20 && (
-                                                <Button
-                                                    className="border-border flex h-10 w-10 min-w-0 items-center justify-center rounded-full border-2 border-dashed p-0 text-muted-foreground shadow-none transition-colors hover:border-primary hover:text-primary"
-                                                    variant="ghost"
-                                                    onClick={addGradientColor}
-                                                >
-                                                    <Plus size={16} />
-                                                </Button>
-                                            )}
+                                                </div>
+                                            </div>
                                         </div>
+                                    )}
+                                </div>
+
+                                {/* Theme Settings */}
+                                <div className="space-y-4">
+                                    <Heading level={4}>Theme</Heading>
+                                    <ThemeSwitcher />
+                                </div>
+
+                                <div className="space-y-4">
+                                    <div className="flex items-center justify-between gap-4">
+                                        <div>
+                                            <Heading level={4}>
+                                                Custom CSS Themes
+                                            </Heading>
+                                            <span className="text-sm text-muted-foreground">
+                                                Saved CSS is stored locally in
+                                                this browser and injected when
+                                                selected.
+                                            </span>
+                                        </div>
+                                        <Button
+                                            size="sm"
+                                            variant="ghost"
+                                            onClick={handleNewCustomTheme}
+                                        >
+                                            New CSS Theme
+                                        </Button>
                                     </div>
 
-                                    <div className="grid grid-cols-1 gap-4">
-                                        <div>
-                                            <span className="mb-2 block text-sm font-medium text-muted-foreground">
-                                                Angle (Deg)
-                                            </span>
-                                            <div className="flex items-center gap-4">
+                                    {customThemes.length > 0 && (
+                                        <div className="grid grid-cols-1 gap-2">
+                                            {customThemes.map((customTheme) => (
+                                                <div
+                                                    className="flex items-start justify-between gap-3 rounded-md border border-border-subtle bg-bg-subtle p-3"
+                                                    key={customTheme.id}
+                                                >
+                                                    <button
+                                                        className="min-w-0 flex-1 text-left"
+                                                        type="button"
+                                                        onClick={(): void =>
+                                                            handleEditCustomTheme(
+                                                                customTheme.id,
+                                                            )
+                                                        }
+                                                    >
+                                                        <span className="block truncate text-sm font-bold text-foreground">
+                                                            {customTheme.name}
+                                                        </span>
+                                                        {customTheme.metadata
+                                                            ?.author && (
+                                                            <span className="block text-xs text-muted-foreground">
+                                                                by{' '}
+                                                                {
+                                                                    customTheme
+                                                                        .metadata
+                                                                        .author
+                                                                }
+                                                            </span>
+                                                        )}
+                                                        {customTheme.metadata
+                                                            ?.description && (
+                                                            <span className="mt-1 block text-xs text-muted-foreground">
+                                                                {
+                                                                    customTheme
+                                                                        .metadata
+                                                                        .description
+                                                                }
+                                                            </span>
+                                                        )}
+                                                        <span className="mt-1 block text-xs text-muted-foreground">
+                                                            {theme ===
+                                                            `custom:${customTheme.id}`
+                                                                ? '✓ Active'
+                                                                : 'Saved locally'}
+                                                        </span>
+                                                    </button>
+                                                    <div className="flex flex-col gap-1">
+                                                        <Button
+                                                            size="sm"
+                                                            variant="ghost"
+                                                            onClick={(): void =>
+                                                                setTheme(
+                                                                    `custom:${customTheme.id}`,
+                                                                )
+                                                            }
+                                                        >
+                                                            Use
+                                                        </Button>
+                                                        <Button
+                                                            className="min-w-0 px-2"
+                                                            size="sm"
+                                                            variant="ghost"
+                                                            onClick={(): void =>
+                                                                handleDownloadCustomTheme(
+                                                                    customTheme.name,
+                                                                    customTheme.sourceCss,
+                                                                )
+                                                            }
+                                                        >
+                                                            <Download
+                                                                size={16}
+                                                            />
+                                                        </Button>
+                                                        <Button
+                                                            className="min-w-0 px-2"
+                                                            size="sm"
+                                                            variant="ghost"
+                                                            onClick={(): void =>
+                                                                setPendingDeleteThemeId(
+                                                                    customTheme.id,
+                                                                )
+                                                            }
+                                                        >
+                                                            <Trash2 size={16} />
+                                                        </Button>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+
+                                    <div className="grid grid-cols-1 gap-3 rounded-lg border border-border-subtle bg-bg-subtle p-4">
+                                        <input
+                                            accept=".css,text/css"
+                                            aria-label="Upload custom theme CSS"
+                                            className="hidden"
+                                            ref={customThemeFileInputRef}
+                                            type="file"
+                                            onChange={
+                                                handleCustomThemeFileChange
+                                            }
+                                        />
+                                        <div className="flex flex-wrap items-center justify-between gap-3">
+                                            <div className="min-w-0">
+                                                <span className="block text-xs font-bold text-muted-foreground uppercase">
+                                                    CSS Theme File
+                                                </span>
+                                                <span className="block truncate text-sm text-foreground">
+                                                    {customThemeFileName ||
+                                                        'No CSS file selected'}
+                                                </span>
+                                            </div>
+                                            <div className="flex flex-wrap gap-2">
+                                                <Button
+                                                    icon={Download}
+                                                    size="sm"
+                                                    variant="ghost"
+                                                    onClick={(): void => {
+                                                        const link =
+                                                            document.createElement(
+                                                                'a',
+                                                            );
+                                                        link.href =
+                                                            '/example.css';
+                                                        link.download =
+                                                            'example.css';
+                                                        link.click();
+                                                    }}
+                                                >
+                                                    Example CSS
+                                                </Button>
+                                                <Button
+                                                    icon={Upload}
+                                                    size="sm"
+                                                    variant="ghost"
+                                                    onClick={(): void =>
+                                                        customThemeFileInputRef.current?.click()
+                                                    }
+                                                >
+                                                    Upload CSS
+                                                </Button>
+                                            </div>
+                                        </div>
+                                        <label
+                                            className="text-xs font-bold text-muted-foreground uppercase"
+                                            htmlFor="custom-theme-name"
+                                        >
+                                            Theme Name
+                                        </label>
+                                        <input
+                                            className="w-full rounded-md border border-border-subtle bg-bg-secondary px-3 py-2 text-sm focus:border-primary focus:outline-none"
+                                            id="custom-theme-name"
+                                            placeholder="My Serchat Theme"
+                                            type="text"
+                                            value={customThemeName}
+                                            onChange={(e): void =>
+                                                setCustomThemeName(
+                                                    e.target.value,
+                                                )
+                                            }
+                                        />
+                                        <label
+                                            className="text-xs font-bold text-muted-foreground uppercase"
+                                            htmlFor="custom-theme-css"
+                                        >
+                                            CSS
+                                        </label>
+                                        <textarea
+                                            className="custom-scrollbar min-h-64 w-full resize-y rounded-md border border-border-subtle bg-bg-secondary px-3 py-2 font-mono text-sm leading-6 text-foreground focus:border-primary focus:outline-none"
+                                            id="custom-theme-css"
+                                            placeholder="[data-custom-theme] {&#10;  --background: #101014;&#10;  --foreground: #f4f4f5;&#10;  --primary: #7cdbff;&#10;}"
+                                            spellCheck={false}
+                                            value={customThemeCss}
+                                            onChange={(e): void =>
+                                                setCustomThemeCss(
+                                                    e.target.value,
+                                                )
+                                            }
+                                        />
+                                        <div className="flex flex-wrap justify-end gap-2">
+                                            <Button
+                                                size="sm"
+                                                variant="ghost"
+                                                onClick={handleNewCustomTheme}
+                                            >
+                                                Clear
+                                            </Button>
+                                            <Button
+                                                size="sm"
+                                                variant="primary"
+                                                onClick={handleSaveCustomTheme}
+                                            >
+                                                {editingThemeId
+                                                    ? 'Save CSS Theme'
+                                                    : 'Add CSS Theme'}
+                                            </Button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Message Display Settings */}
+                                <div className="space-y-4">
+                                    <div className="flex flex-col gap-2">
+                                        <div className="flex items-center justify-between">
+                                            <Heading level={4}>
+                                                24-Hour Time
+                                            </Heading>
+                                            <Toggle
+                                                checked={use24HourTime}
+                                                onCheckedChange={
+                                                    setUse24HourTime
+                                                }
+                                            />
+                                        </div>
+                                        <span className="text-sm text-muted-foreground">
+                                            Show message timestamps in 24-hour
+                                            format.
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-4">
+                                    <div className="flex flex-col gap-2">
+                                        <div className="flex items-center justify-between">
+                                            <Heading level={4}>
+                                                Global Font
+                                            </Heading>
+                                            <Button
+                                                size="sm"
+                                                variant="ghost"
+                                                onClick={(): void => {
+                                                    setLocalCustomFontUrl('');
+                                                    setLocalCustomFontFamily(
+                                                        '',
+                                                    );
+                                                }}
+                                            >
+                                                Reset to Default
+                                            </Button>
+                                        </div>
+                                        <span className="text-sm text-muted-foreground">
+                                            Apply a custom font by providing a
+                                            Google APIs link to the font.
+                                        </span>
+                                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                                            <div className="space-y-2">
+                                                <label
+                                                    className="text-xs font-bold text-muted-foreground uppercase"
+                                                    htmlFor="custom-font-url"
+                                                >
+                                                    Google Font CDN URL
+                                                </label>
                                                 <input
-                                                    aria-label="Gradient angle"
-                                                    className="h-1.5 flex-1 cursor-pointer appearance-none rounded-lg bg-bg-secondary accent-primary"
-                                                    max={360}
-                                                    min={0}
-                                                    type="range"
-                                                    value={gradientAngle}
+                                                    className="w-full rounded-md border border-border-subtle bg-bg-secondary px-3 py-2 text-sm focus:border-primary focus:outline-none"
+                                                    id="custom-font-url"
+                                                    placeholder="https://fonts.googleapis.com/css2?family=..."
+                                                    type="text"
+                                                    value={localCustomFontUrl}
                                                     onChange={(e): void =>
-                                                        setGradientAngle(
-                                                            Number(
-                                                                e.target.value,
-                                                            ),
+                                                        setLocalCustomFontUrl(
+                                                            e.target.value,
                                                         )
                                                     }
                                                 />
-                                                <span className="min-w-[3ch] text-sm font-medium text-foreground">
-                                                    {gradientAngle}°
-                                                </span>
+                                            </div>
+                                            <div className="space-y-2">
+                                                <label
+                                                    className="text-xs font-bold text-muted-foreground uppercase"
+                                                    htmlFor="custom-font-family"
+                                                >
+                                                    Font Family Name
+                                                </label>
+                                                <input
+                                                    className="w-full rounded-md border border-border-subtle bg-bg-secondary px-3 py-2 text-sm focus:border-primary focus:outline-none"
+                                                    id="custom-font-family"
+                                                    placeholder="e.g. Open Sans"
+                                                    type="text"
+                                                    value={
+                                                        localCustomFontFamily
+                                                    }
+                                                    onChange={(e): void =>
+                                                        setLocalCustomFontFamily(
+                                                            e.target.value,
+                                                        )
+                                                    }
+                                                />
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                            )}
-                        </div>
 
-                        {/* Theme Settings */}
-                        <div className="space-y-4">
-                            <Heading level={4}>Theme</Heading>
-                            <ThemeSwitcher />
-                        </div>
-
-                        <div className="space-y-4">
-                            <div className="flex items-center justify-between gap-4">
-                                <div>
-                                    <Heading level={4}>
-                                        Custom CSS Themes
-                                    </Heading>
-                                    <span className="text-sm text-muted-foreground">
-                                        Saved CSS is stored locally in this
-                                        browser and injected when selected.
-                                    </span>
-                                </div>
-                                <Button
-                                    size="sm"
-                                    variant="ghost"
-                                    onClick={handleNewCustomTheme}
-                                >
-                                    New CSS Theme
-                                </Button>
-                            </div>
-
-                            {customThemes.length > 0 && (
-                                <div className="grid grid-cols-1 gap-2">
-                                    {customThemes.map((customTheme) => (
-                                        <div
-                                            className="flex items-start justify-between gap-3 rounded-md border border-border-subtle bg-bg-subtle p-3"
-                                            key={customTheme.id}
-                                        >
-                                            <button
-                                                className="min-w-0 flex-1 text-left"
-                                                type="button"
-                                                onClick={(): void =>
-                                                    handleEditCustomTheme(
-                                                        customTheme.id,
-                                                    )
+                                {/* Font Settings */}
+                                <div className="space-y-4">
+                                    <div className="flex flex-col gap-2">
+                                        <Heading level={4}>
+                                            Username Font
+                                        </Heading>
+                                        <span className="text-sm text-muted-foreground">
+                                            Select a custom font for your
+                                            username alias globally.
+                                        </span>
+                                        <div className="relative z-[var(--z-index-dropdown)] max-w-xs">
+                                            <DropdownWithSearch
+                                                allowClear={false}
+                                                options={FONT_OPTIONS.map(
+                                                    (f) => ({
+                                                        ...f,
+                                                        label: f.label,
+                                                        displayLabel: (
+                                                            <span
+                                                                style={f.style}
+                                                            >
+                                                                {f.label}
+                                                            </span>
+                                                        ),
+                                                    }),
+                                                )}
+                                                placeholder="Select Font"
+                                                searchPlaceholder="Search fonts..."
+                                                value={
+                                                    usernameFont === 'default'
+                                                        ? null
+                                                        : usernameFont
                                                 }
-                                            >
-                                                <span className="block truncate text-sm font-bold text-foreground">
-                                                    {customTheme.name}
-                                                </span>
-                                                {customTheme.metadata
-                                                    ?.author && (
-                                                    <span className="block text-xs text-muted-foreground">
-                                                        by{' '}
-                                                        {
-                                                            customTheme.metadata
-                                                                .author
-                                                        }
-                                                    </span>
-                                                )}
-                                                {customTheme.metadata
-                                                    ?.description && (
-                                                    <span className="mt-1 block text-xs text-muted-foreground">
-                                                        {
-                                                            customTheme.metadata
-                                                                .description
-                                                        }
-                                                    </span>
-                                                )}
-                                                <span className="mt-1 block text-xs text-muted-foreground">
-                                                    {theme ===
-                                                    `custom:${customTheme.id}`
-                                                        ? '✓ Active'
-                                                        : 'Saved locally'}
-                                                </span>
-                                            </button>
-                                            <div className="flex flex-col gap-1">
-                                                <Button
-                                                    size="sm"
-                                                    variant="ghost"
-                                                    onClick={(): void =>
-                                                        setTheme(
-                                                            `custom:${customTheme.id}`,
-                                                        )
-                                                    }
-                                                >
-                                                    Use
-                                                </Button>
-                                                <Button
-                                                    className="min-w-0 px-2"
-                                                    size="sm"
-                                                    variant="ghost"
-                                                    onClick={(): void =>
-                                                        handleDownloadCustomTheme(
-                                                            customTheme.name,
-                                                            customTheme.sourceCss,
-                                                        )
-                                                    }
-                                                >
-                                                    <Download size={16} />
-                                                </Button>
-                                                <Button
-                                                    className="min-w-0 px-2"
-                                                    size="sm"
-                                                    variant="ghost"
-                                                    onClick={(): void =>
-                                                        setPendingDeleteThemeId(
-                                                            customTheme.id,
-                                                        )
-                                                    }
-                                                >
-                                                    <Trash2 size={16} />
-                                                </Button>
-                                            </div>
+                                                onChange={(val): void => {
+                                                    setUsernameFont(
+                                                        (val as UsernameFont) ||
+                                                            'default',
+                                                    );
+                                                }}
+                                            />
                                         </div>
-                                    ))}
-                                </div>
-                            )}
-
-                            <div className="grid grid-cols-1 gap-3 rounded-lg border border-border-subtle bg-bg-subtle p-4">
-                                <input
-                                    accept=".css,text/css"
-                                    aria-label="Upload custom theme CSS"
-                                    className="hidden"
-                                    ref={customThemeFileInputRef}
-                                    type="file"
-                                    onChange={handleCustomThemeFileChange}
-                                />
-                                <div className="flex flex-wrap items-center justify-between gap-3">
-                                    <div className="min-w-0">
-                                        <span className="block text-xs font-bold text-muted-foreground uppercase">
-                                            CSS Theme File
-                                        </span>
-                                        <span className="block truncate text-sm text-foreground">
-                                            {customThemeFileName ||
-                                                'No CSS file selected'}
-                                        </span>
-                                    </div>
-                                    <div className="flex flex-wrap gap-2">
-                                        <Button
-                                            icon={Download}
-                                            size="sm"
-                                            variant="ghost"
-                                            onClick={(): void => {
-                                                const link =
-                                                    document.createElement('a');
-                                                link.href = '/example.css';
-                                                link.download = 'example.css';
-                                                link.click();
-                                            }}
-                                        >
-                                            Example CSS
-                                        </Button>
-                                        <Button
-                                            icon={Upload}
-                                            size="sm"
-                                            variant="ghost"
-                                            onClick={(): void =>
-                                                customThemeFileInputRef.current?.click()
-                                            }
-                                        >
-                                            Upload CSS
-                                        </Button>
                                     </div>
                                 </div>
-                                <label
-                                    className="text-xs font-bold text-muted-foreground uppercase"
-                                    htmlFor="custom-theme-name"
-                                >
-                                    Theme Name
-                                </label>
-                                <input
-                                    className="w-full rounded-md border border-border-subtle bg-bg-secondary px-3 py-2 text-sm focus:border-primary focus:outline-none"
-                                    id="custom-theme-name"
-                                    placeholder="My Serchat Theme"
-                                    type="text"
-                                    value={customThemeName}
-                                    onChange={(e): void =>
-                                        setCustomThemeName(e.target.value)
-                                    }
-                                />
-                                <label
-                                    className="text-xs font-bold text-muted-foreground uppercase"
-                                    htmlFor="custom-theme-css"
-                                >
-                                    CSS
-                                </label>
-                                <textarea
-                                    className="custom-scrollbar min-h-64 w-full resize-y rounded-md border border-border-subtle bg-bg-secondary px-3 py-2 font-mono text-sm leading-6 text-foreground focus:border-primary focus:outline-none"
-                                    id="custom-theme-css"
-                                    placeholder="[data-custom-theme] {&#10;  --background: #101014;&#10;  --foreground: #f4f4f5;&#10;  --primary: #7cdbff;&#10;}"
-                                    spellCheck={false}
-                                    value={customThemeCss}
-                                    onChange={(e): void =>
-                                        setCustomThemeCss(e.target.value)
-                                    }
-                                />
-                                <div className="flex flex-wrap justify-end gap-2">
-                                    <Button
-                                        size="sm"
-                                        variant="ghost"
-                                        onClick={handleNewCustomTheme}
-                                    >
-                                        Clear
-                                    </Button>
-                                    <Button
-                                        size="sm"
-                                        variant="primary"
-                                        onClick={handleSaveCustomTheme}
-                                    >
-                                        {editingThemeId
-                                            ? 'Save CSS Theme'
-                                            : 'Add CSS Theme'}
-                                    </Button>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Message Display Settings */}
-                        <div className="space-y-4">
-                            <div className="flex flex-col gap-2">
-                                <div className="flex items-center justify-between">
-                                    <Heading level={4}>24-Hour Time</Heading>
-                                    <Toggle
-                                        checked={use24HourTime}
-                                        onCheckedChange={setUse24HourTime}
-                                    />
-                                </div>
-                                <span className="text-sm text-muted-foreground">
-                                    Show message timestamps in 24-hour format.
-                                </span>
-                            </div>
-                        </div>
-
-                        <div className="space-y-4">
-                            <div className="flex flex-col gap-2">
-                                <div className="flex items-center justify-between">
-                                    <Heading level={4}>Global Font</Heading>
-                                    <Button
-                                        size="sm"
-                                        variant="ghost"
-                                        onClick={(): void => {
-                                            setLocalCustomFontUrl('');
-                                            setLocalCustomFontFamily('');
-                                        }}
-                                    >
-                                        Reset to Default
-                                    </Button>
-                                </div>
-                                <span className="text-sm text-muted-foreground">
-                                    Apply a custom font by providing a Google
-                                    APIs link to the font.
-                                </span>
-                                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                                    <div className="space-y-2">
-                                        <label
-                                            className="text-xs font-bold text-muted-foreground uppercase"
-                                            htmlFor="custom-font-url"
-                                        >
-                                            Google Font CDN URL
-                                        </label>
-                                        <input
-                                            className="w-full rounded-md border border-border-subtle bg-bg-secondary px-3 py-2 text-sm focus:border-primary focus:outline-none"
-                                            id="custom-font-url"
-                                            placeholder="https://fonts.googleapis.com/css2?family=..."
-                                            type="text"
-                                            value={localCustomFontUrl}
-                                            onChange={(e): void =>
-                                                setLocalCustomFontUrl(
-                                                    e.target.value,
-                                                )
-                                            }
-                                        />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <label
-                                            className="text-xs font-bold text-muted-foreground uppercase"
-                                            htmlFor="custom-font-family"
-                                        >
-                                            Font Family Name
-                                        </label>
-                                        <input
-                                            className="w-full rounded-md border border-border-subtle bg-bg-secondary px-3 py-2 text-sm focus:border-primary focus:outline-none"
-                                            id="custom-font-family"
-                                            placeholder="e.g. Open Sans"
-                                            type="text"
-                                            value={localCustomFontFamily}
-                                            onChange={(e): void =>
-                                                setLocalCustomFontFamily(
-                                                    e.target.value,
-                                                )
-                                            }
+                                <div className="space-y-4">
+                                    <div className="flex items-center justify-between">
+                                        <Heading level={4}>
+                                            Username Glow
+                                        </Heading>
+                                        <Toggle
+                                            checked={glowEnabled}
+                                            onCheckedChange={setGlowEnabled}
                                         />
                                     </div>
                                 </div>
                             </div>
                         </div>
+                    </div>
 
-                        {/* Font Settings */}
-                        <div className="space-y-4">
-                            <div className="flex flex-col gap-2">
-                                <Heading level={4}>Username Font</Heading>
-                                <span className="text-sm text-muted-foreground">
-                                    Select a custom font for your username alias
-                                    globally.
-                                </span>
-                                <div className="relative z-[var(--z-index-dropdown)] max-w-xs">
-                                    <DropdownWithSearch
-                                        allowClear={false}
-                                        options={FONT_OPTIONS.map((f) => ({
-                                            ...f,
-                                            label: f.label,
-                                            displayLabel: (
-                                                <span style={f.style}>
-                                                    {f.label}
-                                                </span>
-                                            ),
-                                        }))}
-                                        placeholder="Select Font"
-                                        searchPlaceholder="Search fonts..."
-                                        value={
-                                            usernameFont === 'default'
-                                                ? null
-                                                : usernameFont
-                                        }
-                                        onChange={(val): void => {
-                                            setUsernameFont(
-                                                (val as UsernameFont) ||
-                                                    'default',
-                                            );
-                                        }}
-                                    />
-                                </div>
-                            </div>
-                        </div>
-                        <div className="space-y-4">
-                            <div className="flex items-center justify-between">
-                                <Heading level={4}>Username Glow</Heading>
-                                <Toggle
-                                    checked={glowEnabled}
-                                    onCheckedChange={setGlowEnabled}
-                                />
-                            </div>
+                    {/* Animated Profile Card Column */}
+                    <div
+                        className="w-full shrink-0 overflow-hidden transition-all duration-500 ease-in-out md:sticky md:top-4 md:w-auto"
+                        style={{
+                            width: showProfileCard ? '340px' : '0px',
+                            maxHeight: showProfileCard ? '1000px' : '0px',
+                            opacity: showProfileCard ? 1 : 0,
+                            transform: showProfileCard
+                                ? 'translateY(0) scale(1)'
+                                : 'translateY(20px) scale(0.95)',
+                            pointerEvents: showProfileCard ? 'auto' : 'none',
+                        }}
+                    >
+                        <div className="p-1">
+                            <Heading
+                                className="mb-4 text-sm font-bold text-muted-foreground uppercase"
+                                level={4}
+                            >
+                                Full Profile Preview
+                            </Heading>
+                            <UserProfileCard
+                                presenceStatus="online"
+                                user={previewUser}
+                            />
                         </div>
                     </div>
                 </div>
