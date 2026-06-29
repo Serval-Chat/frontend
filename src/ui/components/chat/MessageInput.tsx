@@ -36,7 +36,12 @@ import {
 import { useLocation } from 'react-router-dom';
 import { useClickAway } from 'react-use';
 
-import { useChannelMessages, useUserMessages } from '@/api/chat/chat.queries';
+import {
+    useChannelMessages,
+    useEditChannelMessage,
+    useEditUserMessage,
+    useUserMessages,
+} from '@/api/chat/chat.queries';
 import type { MessageAttachment, OutgoingPoll } from '@/api/chat/chat.types';
 import { filesApi } from '@/api/files/files.api';
 import { useFriends } from '@/api/friends/friends.queries';
@@ -82,6 +87,7 @@ import {
     readMediaDimensions,
 } from '@/utils/fileDimensions';
 import { APP_LOCALE } from '@/utils/locale';
+import { applySedCommand, isSedCommand } from '@/utils/sed';
 import { ParserPresets, parseText } from '@/utils/textParser/parser';
 import { WsEvents } from '@/ws';
 
@@ -500,6 +506,8 @@ export const MessageInput = ({
         selectedChannelId,
     );
     const { data: userMessages } = useUserMessages(selectedFriendId);
+    const editChannelMessage = useEditChannelMessage();
+    const editUserMessage = useEditUserMessage();
 
     const friendUsers = useMemo(
         (): User[] => friendsList as unknown as User[],
@@ -718,6 +726,33 @@ export const MessageInput = ({
 
             const finalMessage = trimmedText;
 
+            if (finalMessage && isSedCommand(finalMessage)) {
+                if (findLastMyMessage?.text) {
+                    const corrected = applySedCommand(
+                        findLastMyMessage.text,
+                        finalMessage,
+                    );
+                    if (
+                        findLastMyMessage.serverId &&
+                        findLastMyMessage.channelId
+                    ) {
+                        editChannelMessage.mutate({
+                            serverId: findLastMyMessage.serverId,
+                            channelId: findLastMyMessage.channelId,
+                            messageId: findLastMyMessage.id,
+                            content: corrected,
+                        });
+                    } else if (findLastMyMessage.receiverId) {
+                        editUserMessage.mutate({
+                            messageId: findLastMyMessage.id,
+                            content: corrected,
+                            userId: findLastMyMessage.receiverId,
+                        });
+                    }
+                }
+                return true;
+            }
+
             if (finalMessage || attachments.length > 0) {
                 sendMessage(
                     finalMessage,
@@ -760,6 +795,9 @@ export const MessageInput = ({
             serverCommands,
             editor,
             isGloballyMuted,
+            findLastMyMessage,
+            editChannelMessage,
+            editUserMessage,
         ],
     );
 
