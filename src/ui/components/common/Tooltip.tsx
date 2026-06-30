@@ -50,6 +50,72 @@ const useTooltipsEnabled = (): boolean => {
     return isEnabled;
 };
 
+const TOOLTIP_ESTIMATED_W = 280;
+const TOOLTIP_ESTIMATED_H = 36;
+
+type TooltipPosition = 'right' | 'top' | 'bottom' | 'left';
+
+function resolvePosition(
+    rect: DOMRect,
+    preferred: TooltipPosition,
+): { pos: TooltipPosition; x: number; y: number } {
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const GAP = 8;
+
+    const candidates: TooltipPosition[] = [
+        preferred,
+        preferred === 'right'
+            ? 'left'
+            : preferred === 'left'
+              ? 'right'
+              : preferred === 'top'
+                ? 'bottom'
+                : 'top',
+        'bottom',
+        'top',
+        'right',
+        'left',
+    ];
+
+    for (const pos of candidates) {
+        let x = 0;
+        let y = 0;
+
+        switch (pos) {
+            case 'right':
+                x = rect.right + GAP;
+                y = rect.top + rect.height / 2;
+                if (x + TOOLTIP_ESTIMATED_W > vw) continue;
+                break;
+            case 'left':
+                x = rect.left - GAP;
+                y = rect.top + rect.height / 2;
+                if (x - TOOLTIP_ESTIMATED_W < 0) continue;
+                break;
+            case 'top':
+                x = rect.left + rect.width / 2;
+                y = rect.top - GAP;
+                if (y - TOOLTIP_ESTIMATED_H < 0) continue;
+                break;
+            case 'bottom':
+                x = rect.left + rect.width / 2;
+                y = rect.bottom + GAP;
+                if (y + TOOLTIP_ESTIMATED_H > vh) continue;
+                break;
+        }
+
+        return { pos, x, y };
+    }
+
+    // Fallback: bottom
+    return {
+        pos: 'bottom',
+        x: rect.left + rect.width / 2,
+        y: rect.bottom + GAP,
+    };
+}
+
 export const Tooltip = ({
     content,
     children,
@@ -62,35 +128,16 @@ export const Tooltip = ({
     const tooltipsEnabled = useTooltipsEnabled();
     const [isVisible, setIsVisible] = useState(false);
     const [coords, setCoords] = useState({ x: 0, y: 0 });
+    const [effectivePosition, setEffectivePosition] =
+        useState<TooltipPosition>(position);
     const triggerRef = useRef<HTMLDivElement>(null);
     const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     const updatePosition = useCallback((): void => {
         if (!triggerRef.current) return;
         const rect = triggerRef.current.getBoundingClientRect();
-
-        let x = 0;
-        let y = 0;
-
-        switch (position) {
-            case 'right':
-                x = rect.right + 8;
-                y = rect.top + rect.height / 2;
-                break;
-            case 'top':
-                x = rect.left + rect.width / 2;
-                y = rect.top - 8;
-                break;
-            case 'bottom':
-                x = rect.left + rect.width / 2;
-                y = rect.bottom + 8;
-                break;
-            case 'left':
-                x = rect.left - 8;
-                y = rect.top + rect.height / 2;
-                break;
-        }
-
+        const { pos, x, y } = resolvePosition(rect, position);
+        setEffectivePosition(pos);
         setCoords({ x, y });
     }, [position]);
 
@@ -157,22 +204,28 @@ export const Tooltip = ({
                     <AnimatePresence>
                         {showTooltip && (
                             <m.div
-                                animate={TOOLTIP_ANIMATE_VARIANTS[position]}
+                                animate={
+                                    TOOLTIP_ANIMATE_VARIANTS[effectivePosition]
+                                }
                                 className={cn(
                                     'pointer-events-none fixed z-[var(--z-index-tooltip)] rounded-lg bg-[#111214] px-3 py-1.5 text-[13px] font-bold whitespace-nowrap text-[#f2f3f5] shadow-2xl',
                                     'before:absolute before:border-[6px] before:border-transparent before:content-[""]',
-                                    position === 'right' &&
+                                    effectivePosition === 'right' &&
                                         'before:top-1/2 before:right-full before:-mr-[1px] before:-translate-y-1/2 before:border-r-[#111214]',
-                                    position === 'top' &&
+                                    effectivePosition === 'top' &&
                                         'before:top-full before:left-1/2 before:-mt-[1px] before:-translate-x-1/2 before:border-t-[#111214]',
-                                    position === 'bottom' &&
+                                    effectivePosition === 'bottom' &&
                                         'before:bottom-full before:left-1/2 before:-mb-[1px] before:-translate-x-1/2 before:border-b-[#111214]',
-                                    position === 'left' &&
+                                    effectivePosition === 'left' &&
                                         'before:top-1/2 before:left-full before:-ml-[1px] before:-translate-y-1/2 before:border-l-[#111214]',
                                     className,
                                 )}
-                                exit={TOOLTIP_INITIAL_VARIANTS[position]}
-                                initial={TOOLTIP_INITIAL_VARIANTS[position]}
+                                exit={
+                                    TOOLTIP_INITIAL_VARIANTS[effectivePosition]
+                                }
+                                initial={
+                                    TOOLTIP_INITIAL_VARIANTS[effectivePosition]
+                                }
                                 style={{
                                     top: coords.y,
                                     left: coords.x,

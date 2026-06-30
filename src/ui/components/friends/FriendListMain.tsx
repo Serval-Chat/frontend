@@ -12,6 +12,7 @@ import { MutedText } from '@/ui/components/common/MutedText';
 import { ParsedEmoji } from '@/ui/components/common/ParsedEmoji';
 import { ParsedUnicodeEmoji } from '@/ui/components/common/ParsedUnicodeEmoji';
 import { Skeleton } from '@/ui/components/common/Skeleton';
+import { StyledUserName } from '@/ui/components/common/StyledUserName';
 import { Text } from '@/ui/components/common/Text';
 import { UserProfilePicture } from '@/ui/components/common/UserProfilePicture';
 import type { UserStatus } from '@/ui/components/common/UserProfileStatusIndicator';
@@ -64,9 +65,9 @@ const FriendProfileRow = React.memo(
                         username={displayName}
                     />
                     <Box className="flex min-w-0 flex-1 flex-col overflow-hidden">
-                        <Text className="truncate text-sm font-medium text-foreground">
+                        <StyledUserName className="truncate" user={friend}>
                             {displayName}
-                        </Text>
+                        </StyledUserName>
                         {(customText || customEmoji) && (
                             <Box className="flex min-w-0 items-center gap-1">
                                 {customEmoji && (

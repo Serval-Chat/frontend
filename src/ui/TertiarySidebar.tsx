@@ -51,10 +51,6 @@ export const TertiarySidebar = ({
     const showMobileMemberList = useAppSelector(
         (state): boolean => state.nav.showMobileMemberList,
     );
-    const showDesktopMemberList = useAppSelector(
-        (state): boolean => state.nav.showDesktopMemberList,
-    );
-
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const searchInputRef = useRef<HTMLInputElement>(null);
@@ -86,11 +82,10 @@ export const TertiarySidebar = ({
         <Box
             as="aside"
             className={cn(
-                'pride-glass relative flex h-full shrink-0 flex-col border-l border-[var(--member-list-border,var(--border-subtle))] bg-[var(--member-list-bg,var(--tertiary-bg))]',
+                'pride-glass relative flex h-full shrink-0 flex-col border-l border-(--member-list-border,var(--border-subtle)) bg-(--member-list-bg,var(--tertiary-bg))',
                 'pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]',
-                showDesktopMemberList ? 'md:flex' : 'md:hidden',
-                'max-md:fixed max-md:inset-y-0 max-md:right-0 max-md:z-[var(--z-index-top)] max-md:w-64 max-md:shadow-2xl',
-                'max-md:transition-transform max-md:duration-300 max-md:[transition-timing-function:cubic-bezier(0.25,0.46,0.45,0.94)]',
+                'max-md:fixed max-md:inset-y-0 max-md:right-0 max-md:z-top max-md:w-64 max-md:shadow-2xl',
+                'max-md:transition-transform max-md:duration-300 max-md:ease-[cubic-bezier(0.25,0.46,0.45,0.94)]',
                 showMobileMemberList
                     ? 'max-md:translate-x-0'
                     : 'max-md:translate-x-full',
@@ -118,7 +113,7 @@ export const TertiarySidebar = ({
                             selectedFriendId && 'md:hidden',
                         )}
                     >
-                        <span className="text-xs font-bold tracking-wider text-[var(--member-list-header-text,var(--muted-foreground))] uppercase">
+                        <span className="text-xs font-bold tracking-wider text-(--member-list-header-text,var(--muted-foreground)) uppercase">
                             Members
                         </span>
                         <div className="flex items-center gap-1">

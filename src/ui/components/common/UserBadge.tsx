@@ -2,6 +2,7 @@ import { Shield } from 'lucide-react';
 
 import type { Badge } from '@/api/users/users.types';
 import { Text } from '@/ui/components/common/Text';
+import { Tooltip } from '@/ui/components/common/Tooltip';
 import { Box } from '@/ui/components/layout/Box';
 import { ICON_MAP } from '@/ui/utils/iconMap';
 import { cn } from '@/utils/cn';
@@ -44,18 +45,19 @@ export const UserBadge = ({
     }
 
     return (
-        <Box
-            className={cn(
-                'inline-flex shrink-0 cursor-default items-center gap-1 rounded-md border px-1.5 py-0.5 text-[10px] font-bold transition-all',
-                className,
-            )}
-            style={style}
-            title={badge.description || badge.name}
-        >
-            <IconComponent size={12} style={{ color }} />
-            <Text as="span" className="text-[10px] leading-tight" size="xs">
-                {badge.name}
-            </Text>
-        </Box>
+        <Tooltip content={badge.description || badge.name} position="top">
+            <Box
+                className={cn(
+                    'inline-flex shrink-0 cursor-default items-center gap-1 rounded-md border px-1.5 py-0.5 text-[10px] font-bold transition-all',
+                    className,
+                )}
+                style={style}
+            >
+                <IconComponent size={12} style={{ color }} />
+                <Text as="span" className="text-[10px] leading-tight" size="xs">
+                    {badge.name}
+                </Text>
+            </Box>
+        </Tooltip>
     );
 };

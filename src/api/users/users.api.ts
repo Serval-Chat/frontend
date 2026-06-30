@@ -2,6 +2,7 @@ import { apiClient } from '@/api/client';
 
 import type {
     CreateWebsiteConnectionResponse,
+    PrivacySettings,
     User,
     UserSettings,
     UsernameFont,
@@ -174,4 +175,17 @@ export const usersApi = {
                 message: string;
             }>(`/api/v1/profile/connections/${connectionId}`)
             .then((r): { message: string } => r.data),
+
+    updatePrivacySettings: (
+        data: Partial<PrivacySettings>,
+    ): Promise<{ message: string; privacySettings: PrivacySettings }> =>
+        apiClient
+            .patch<{
+                message: string;
+                privacySettings: PrivacySettings;
+            }>('/api/v1/profile/privacy', data)
+            .then(
+                (r): { message: string; privacySettings: PrivacySettings } =>
+                    r.data,
+            ),
 };

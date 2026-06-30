@@ -5,6 +5,7 @@ import {
     Camera,
     Check,
     Globe,
+    HelpCircle,
     MessageSquare,
     Plus,
     Server,
@@ -320,6 +321,19 @@ export const UserProfileCard = ({
             user!.profilePrimaryColor || user!.profileAccentColor!,
         );
 
+    const isOwnProfile = currentUser?.id === user?.id;
+    const ps = user?.privacySettings;
+
+    const renderPrivateFieldHint = (field: keyof NonNullable<typeof ps>) =>
+        isOwnProfile && ps?.[field] === true ? (
+            <Tooltip content="You made this field private" position="top">
+                <HelpCircle
+                    className="ml-1 shrink-0 text-muted-foreground/60"
+                    size={12}
+                />
+            </Tooltip>
+        ) : null;
+
     return (
         <div
             className={`relative isolate flex w-85 flex-col overflow-hidden rounded-2xl border border-border-subtle bg-background shadow-2xl ${className || ''}`}
@@ -363,6 +377,18 @@ export const UserProfileCard = ({
                 usernameGradient={user?.usernameGradient}
                 onBannerClick={onBannerClick}
             />
+            {user?.isPrivate === true && currentUser?.id !== user?.id && (
+                <div className="absolute top-3 right-3 z-10">
+                    <Tooltip
+                        content="This profile is private. Some fields may be hidden from you."
+                        position="left"
+                    >
+                        <div className="flex cursor-default items-center justify-center rounded-full bg-black/50 p-1 text-white backdrop-blur-sm">
+                            <HelpCircle size={16} />
+                        </div>
+                    </Tooltip>
+                </div>
+            )}
 
             <Box className="pointer-events-none relative z-content -mt-[50px] px-4">
                 <Box
@@ -427,6 +453,7 @@ export const UserProfileCard = ({
                             {nickname || user?.displayName || user?.username}
                         </StyledUserName>
                         {user?.isBot && <BotTag className="ml-0" />}
+                        {renderPrivateFieldHint('hideDisplayName')}
                     </Box>
 
                     <Box className="mt-1 text-sm font-medium text-muted-foreground select-text">
@@ -442,12 +469,13 @@ export const UserProfileCard = ({
                             >
                                 <span>•</span>
                                 {user.pronouns}
+                                {renderPrivateFieldHint('hidePronouns')}
                             </Text>
                         )}
                     </Box>
                     {user?.badges && user?.badges.length > 0 && (
                         <Box className="mt-2 flex flex-wrap gap-1.5">
-                            {user.badges.map((badge) => (
+                            {user?.badges?.map((badge) => (
                                 <UserBadge
                                     badge={badge}
                                     darkCard={cardOnDark}
@@ -484,6 +512,7 @@ export const UserProfileCard = ({
                             variant="muted"
                         >
                             {finalCustomText}
+                            {renderPrivateFieldHint('hideStatus')}
                         </Text>
                     </Box>
                 )}
@@ -492,12 +521,15 @@ export const UserProfileCard = ({
 
                 {user?.bio && (
                     <Box className="mb-4">
-                        <Heading
-                            className="mb-2 text-xs font-bold text-muted-foreground uppercase"
-                            level={3}
-                        >
-                            About Me
-                        </Heading>
+                        <div className="mb-2 flex items-center gap-1.5">
+                            <Heading
+                                className="text-xs font-bold text-muted-foreground uppercase"
+                                level={3}
+                            >
+                                About Me
+                            </Heading>
+                            {renderPrivateFieldHint('hideBio')}
+                        </div>
                         <Box className="text-[10px] leading-relaxed whitespace-pre-wrap text-foreground/90">
                             <ParsedText
                                 nodes={bioNodes}
@@ -510,12 +542,15 @@ export const UserProfileCard = ({
 
                 {visibleConnections.length > 0 && (
                     <Box className="mb-4">
-                        <Heading
-                            className="mb-2 text-xs font-bold text-muted-foreground uppercase"
-                            level={3}
-                        >
-                            Connections
-                        </Heading>
+                        <div className="mb-2 flex items-center gap-1.5">
+                            <Heading
+                                className="text-xs font-bold text-muted-foreground uppercase"
+                                level={3}
+                            >
+                                Connections
+                            </Heading>
+                            {renderPrivateFieldHint('hideConnections')}
+                        </div>
                         <Box className="flex flex-col gap-1.5">
                             {visibleConnections.map((connection) => (
                                 <Link

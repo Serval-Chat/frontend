@@ -47,7 +47,7 @@
     --z-index-modal: 1040;
     --z-index-popover: 1050;
     --z-index-toast: 1060;
-    --z-index-tooltip: 1070;
+    --z-index-tooltip: 10000;
     --z-index-top: 9999;
 
     --color-primary: var(--primary);

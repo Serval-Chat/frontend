@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { animate, useMotionValue } from 'framer-motion';
+import { AnimatePresence, animate, useMotionValue } from 'framer-motion';
 import { m } from 'framer-motion';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 
@@ -17,6 +17,7 @@ import { MobileSwipeContext } from '@/ui/MobileSwipeContext';
 import { PrimaryNavBar } from '@/ui/PrimaryNavBar';
 import { SecondaryNavBar } from '@/ui/SecondaryNavBar';
 import { TertiarySidebar } from '@/ui/TertiarySidebar';
+import { transitions } from '@/ui/animations';
 import { Box } from '@/ui/components/layout/Box';
 import { MainContent } from '@/ui/components/layout/MainContent';
 
@@ -45,6 +46,7 @@ export const Chat = () => {
         lastSelectedFriendId,
         lastOpenedChannelByServer,
         isSplitViewActive,
+        showDesktopMemberList,
     } = useAppShallowSelector((state) => ({
         selectedFriendId: state.nav.selectedFriendId,
         selectedServerId: state.nav.selectedServerId,
@@ -57,6 +59,7 @@ export const Chat = () => {
         isSplitViewActive: !!(
             state.nav.splitView.left || state.nav.splitView.right
         ),
+        showDesktopMemberList: state.nav.showDesktopMemberList,
     }));
 
     const [isMobile, setIsMobile] = useState(isMobileViewport);
@@ -268,7 +271,30 @@ export const Chat = () => {
                 <PrimaryNavBar />
                 <SecondaryNavBar />
                 <MainContent />
-                {!isSplitViewActive && <TertiarySidebar />}
+                <AnimatePresence>
+                    {!isSplitViewActive &&
+                        showDesktopMemberList &&
+                        !!(selectedFriendId || selectedServerId) && (
+                            <m.div
+                                animate={{
+                                    width: parseInt(
+                                        localStorage.getItem(
+                                            'tertiary-sidebar-width',
+                                        ) ?? '240',
+                                        10,
+                                    ),
+                                    opacity: 1,
+                                }}
+                                className="h-full overflow-hidden"
+                                exit={{ width: 0, opacity: 0 }}
+                                initial={{ width: 0, opacity: 0 }}
+                                key="desktop-member-list"
+                                transition={transitions.sidebar}
+                            >
+                                <TertiarySidebar />
+                            </m.div>
+                        )}
+                </AnimatePresence>
             </Box>
         );
     }

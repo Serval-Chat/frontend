@@ -94,6 +94,15 @@ export interface AdminPermissions {
     manageInvites?: boolean;
 }
 
+export interface PrivacySettings {
+    privateProfile: boolean;
+    hideDisplayName: boolean;
+    hidePronouns: boolean;
+    hideConnections: boolean;
+    hideBio: boolean;
+    hideStatus: boolean;
+}
+
 export interface Badge {
     id: string;
     name: string;
@@ -165,4 +174,6 @@ export interface User {
         reason: string;
         expirationTimestamp?: string | Date | null;
     } | null;
+    privacySettings?: PrivacySettings;
+    isPrivate?: boolean;
 }

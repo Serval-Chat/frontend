@@ -59,6 +59,10 @@ const AvatarDecorationsSettings = React.lazy(() =>
     })),
 );
 
+const PrivacySettings = React.lazy(() =>
+    import('./PrivacySettings').then((m) => ({ default: m.PrivacySettings })),
+);
+
 interface SettingsModalProps {
     isOpen: boolean;
     onClose: () => void;
@@ -70,6 +74,7 @@ const SECTION_URL_MAP: Record<string, string> = {
     appearance: 'appearance',
     decorations: 'decorations',
     accessibility: 'accessibility',
+    privacy: 'privacy',
     blocking: 'blocking',
     standing: 'standing',
     notifications: 'notifications',
@@ -82,6 +87,7 @@ const SECTION_ID_TO_URL: Record<string, string> = {
     appearance: 'appearance',
     decorations: 'decorations',
     accessibility: 'accessibility',
+    privacy: 'privacy',
     blocking: 'blocking',
     standing: 'standing',
     notifications: 'notifications',
@@ -204,6 +210,9 @@ export const SettingsModal = ({
                                 )}
                                 {activeSection === 'accessibility' && (
                                     <AccessibilitySettings />
+                                )}
+                                {activeSection === 'privacy' && (
+                                    <PrivacySettings />
                                 )}
                                 {activeSection === 'blocking' && (
                                     <BlockingSettings />

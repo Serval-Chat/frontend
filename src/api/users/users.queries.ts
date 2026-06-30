@@ -11,6 +11,7 @@ import { hasAuthToken } from '@/utils/authToken';
 import { usersApi } from './users.api';
 import type {
     CreateWebsiteConnectionResponse,
+    PrivacySettings,
     User,
     UserSettings,
 } from './users.types';
@@ -297,6 +298,23 @@ export const useRemoveConnection = (): UseMutationResult<
     return useMutation({
         mutationFn: usersApi.removeConnection,
         onSuccess: (): void => {
+            void queryClient.invalidateQueries({ queryKey: ['me'] });
+        },
+    });
+};
+
+export const useUpdatePrivacySettings = (): UseMutationResult<
+    { message: string; privacySettings: PrivacySettings },
+    Error,
+    Partial<PrivacySettings>
+> => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: usersApi.updatePrivacySettings,
+        onSuccess: (data): void => {
+            queryClient.setQueryData<User>(['me'], (old) =>
+                old ? { ...old, privacySettings: data.privacySettings } : old,
+            );
             void queryClient.invalidateQueries({ queryKey: ['me'] });
         },
     });

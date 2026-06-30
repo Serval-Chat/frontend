@@ -287,6 +287,12 @@ createRoot(document.getElementById('root')!).render(
                                                                 }
                                                                 path="decorations"
                                                             />
+                                                            <Route
+                                                                element={
+                                                                    <NavigationSync />
+                                                                }
+                                                                path="privacy"
+                                                            />
                                                         </Route>
                                                     </Route>
                                                     <Route
