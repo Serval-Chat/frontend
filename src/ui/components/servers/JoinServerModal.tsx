@@ -48,7 +48,9 @@ export const JoinServerModal = ({ isOpen, onClose }: JoinServerModalProps) => {
                         id="invite-code"
                         placeholder="cats (yes this is real, join this)"
                         value={inviteCode}
-                        onChange={(e): void => setInviteCode(e.target.value)}
+                        onChange={(e): void => {
+                            setInviteCode(e.target.value);
+                        }}
                     />
                     <Text as="p" size="xs" variant="muted">
                         Enter an invite code to join an existing server.

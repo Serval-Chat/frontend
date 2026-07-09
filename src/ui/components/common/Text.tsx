@@ -77,6 +77,17 @@ const transformMap: Record<TextTransform, CSSProperties['textTransform']> = {
     normal: 'none',
 };
 
+const whiteSpaceMap: Record<
+    Exclude<TextWrap, 'breakAll'>,
+    CSSProperties['whiteSpace']
+> = {
+    wrap: 'normal',
+    nowrap: 'nowrap',
+    pre: 'pre',
+    preLine: 'pre-line',
+    preWrap: 'pre-wrap',
+};
+
 export const Text = ({
     as: Tag = 'span',
     variant,
@@ -107,17 +118,7 @@ export const Text = ({
             s.whiteSpace = 'normal';
             s.wordBreak = 'break-all';
         } else {
-            const whiteSpaceMap: Record<
-                Exclude<TextWrap, 'breakAll'>,
-                CSSProperties['whiteSpace']
-            > = {
-                wrap: 'normal',
-                nowrap: 'nowrap',
-                pre: 'pre',
-                preLine: 'pre-line',
-                preWrap: 'pre-wrap',
-            };
-            s.whiteSpace = whiteSpaceMap[wrap as Exclude<TextWrap, 'breakAll'>];
+            s.whiteSpace = whiteSpaceMap[wrap];
         }
     }
     if (leading !== undefined) s.lineHeight = lineHeight[leading];

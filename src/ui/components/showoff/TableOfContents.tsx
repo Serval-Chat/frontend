@@ -26,19 +26,21 @@ const TOCItem = ({ section }: { section: TOCSection }) => {
     return (
         <li>
             <div className="flex items-center space-x-2">
-                {hasChildren && (
+                {hasChildren ? (
                     <Button
                         className={cn(
                             'flex h-4 w-4 min-w-0 items-center justify-center border-none bg-transparent p-0 text-sm text-muted-foreground shadow-none hover:text-muted-foreground-hover',
                         )}
                         size="sm"
                         variant="ghost"
-                        onClick={(): void => setIsOpen(!isOpen)}
+                        onClick={(): void => {
+                            setIsOpen(!isOpen);
+                        }}
                     >
                         {isOpen ? '▾' : '▸'}
                     </Button>
-                )}
-                {!hasChildren && <span className="h-4 w-4 shrink-0" />}
+                ) : null}
+                {hasChildren ? null : <span className="h-4 w-4 shrink-0" />}
                 <a
                     className={cn(
                         'font-sans transition-colors duration-150 hover:text-primary hover:underline',
@@ -49,13 +51,13 @@ const TOCItem = ({ section }: { section: TOCSection }) => {
                 </a>
             </div>
 
-            {hasChildren && isOpen && (
+            {hasChildren && isOpen ? (
                 <ul className="mt-xs ml-lg space-y-xs">
                     {section.children!.map((child) => (
                         <TOCItem key={child.id} section={child} />
                     ))}
                 </ul>
-            )}
+            ) : null}
         </li>
     );
 };

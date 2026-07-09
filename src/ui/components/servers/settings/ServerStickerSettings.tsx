@@ -1,7 +1,6 @@
 import React, { useCallback, useRef, useState } from 'react';
 
 import { useQueryClient } from '@tanstack/react-query';
-import JSZip from 'jszip';
 import { Loader2, Plus, Trash2 } from 'lucide-react';
 
 import {
@@ -15,6 +14,7 @@ import {
     STICKER_MAX_SIZE_BYTES,
     STICKER_NAME_MAX_LENGTH,
 } from '@/constants/stickers';
+import { useBulkAssetUpload } from '@/hooks/useBulkAssetUpload';
 import { useWebSocket } from '@/hooks/ws/useWebSocket';
 import { BulkUploadModal } from '@/ui/components/common/BulkUploadModal';
 import { Button } from '@/ui/components/common/Button';
@@ -23,12 +23,70 @@ import { Input } from '@/ui/components/common/Input';
 import { Text } from '@/ui/components/common/Text';
 import { ImageCropModal } from '@/ui/components/settings/ImageCropModal';
 import { resolveApiUrl } from '@/utils/apiUrl';
-import { convertToWebp } from '@/utils/convertToWebp';
 import { WsEvents } from '@/ws';
 
 interface ServerStickerSettingsProps {
     serverId: string;
 }
+
+const StickerGridItem = ({
+    sticker,
+    isHovered,
+    onHover,
+    onLeave,
+    onDelete,
+}: {
+    sticker: { id: string; name: string; imageUrl: string };
+    isHovered: boolean;
+    onHover: () => void;
+    onLeave: () => void;
+    onDelete: () => void;
+}) => (
+    <div
+        className="group relative aspect-square overflow-hidden rounded-lg border border-border-subtle bg-bg-subtle transition-all hover:border-primary"
+        onMouseEnter={onHover}
+        onMouseLeave={onLeave}
+    >
+        <div className="flex h-full w-full items-center justify-center p-2">
+            <img
+                alt={sticker.name}
+                className="max-h-full max-w-full object-contain"
+                src={resolveApiUrl(sticker.imageUrl) || ''}
+                onError={(e): void => {
+                    console.error('[Sticker Image Load Error]', {
+                        id: sticker.id,
+                        name: sticker.name,
+                        imageUrl: sticker.imageUrl,
+                        resolvedUrl: resolveApiUrl(sticker.imageUrl),
+                        error: e,
+                    });
+                }}
+            />
+        </div>
+        {isHovered ? (
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-black/60 p-2">
+                <Text
+                    align="center"
+                    leading="tight"
+                    size="xs"
+                    variant="inverse"
+                    weight="medium"
+                    wrap="breakAll"
+                >
+                    {sticker.name}
+                </Text>
+                <Button
+                    aria-label="Delete sticker"
+                    size="sm"
+                    variant="danger"
+                    onClick={onDelete}
+                >
+                    <Trash2 className="h-3 w-3" />
+                </Button>
+            </div>
+        ) : null}
+    </div>
+);
 
 export const ServerStickerSettings = ({
     serverId,
@@ -49,15 +107,20 @@ export const ServerStickerSettings = ({
     const [hoveredStickerId, setHoveredStickerId] = useState<string | null>(
         null,
     );
-    const [isBulkUploading, setIsBulkUploading] = useState(false);
-    const [isCancelling, setIsCancelling] = useState(false);
-    const isCancelledRef = useRef(false);
-    const uploadedIdsRef = useRef<string[]>([]);
-    const [bulkStatus, setBulkStatus] = useState({
-        total: 0,
-        uploaded: 0,
-        errors: 0,
-        isOpen: false,
+    const {
+        isBulkUploading,
+        isCancelling,
+        bulkStatus,
+        handleBulkFileSelect,
+        handleCancelBulk,
+        closeBulkStatus,
+    } = useBulkAssetUpload({
+        uploadAsync: uploadStickerAsync,
+        deleteAsync: deleteStickerAsync,
+        toName: (fileName): string =>
+            (fileName.split('.')[0] ?? '')
+                .replace(INVALID_STICKER_NAME_CHARS_REGEX, '')
+                .slice(0, STICKER_NAME_MAX_LENGTH),
     });
     const fileInputRef = useRef<HTMLInputElement>(null);
     const bulkFileInputRef = useRef<HTMLInputElement>(null);
@@ -95,9 +158,10 @@ export const ServerStickerSettings = ({
             setIsCropModalOpen(true);
 
             if (!stickerName) {
-                const name = file.name
-                    .split('.')[0]
-                    .replace(INVALID_STICKER_NAME_CHARS_REGEX, '');
+                const name = (file.name.split('.')[0] ?? '').replace(
+                    INVALID_STICKER_NAME_CHARS_REGEX,
+                    '',
+                );
                 setStickerName(name.slice(0, STICKER_NAME_MAX_LENGTH));
             }
         }
@@ -135,137 +199,6 @@ export const ServerStickerSettings = ({
         fileInputRef.current?.click();
     };
 
-    const handleBulkFileSelect = async (
-        event: React.ChangeEvent<HTMLInputElement>,
-    ): Promise<void> => {
-        const file = event.target.files?.[0];
-        if (!file) return;
-
-        if (bulkFileInputRef.current) {
-            bulkFileInputRef.current.value = '';
-        }
-
-        try {
-            const zip = new JSZip();
-            const loadedZip = await zip.loadAsync(file);
-
-            const validFiles = Object.entries(loadedZip.files).filter(
-                ([relativePath, zipEntry]): boolean => {
-                    if (zipEntry.dir) return false;
-                    const isImage = relativePath.match(
-                        /\.(png|jpg|jpeg|webp|gif)$/i,
-                    );
-                    if (!isImage) return false;
-                    const fileName = zipEntry.name.split('/').pop() || '';
-                    if (fileName.startsWith('.')) return false;
-                    return true;
-                },
-            );
-
-            if (validFiles.length === 0) return;
-
-            setBulkStatus({
-                total: validFiles.length,
-                uploaded: 0,
-                errors: 0,
-                isOpen: true,
-            });
-
-            setIsBulkUploading(true);
-            isCancelledRef.current = false;
-            uploadedIdsRef.current = [];
-
-            for (const [, zipEntry] of validFiles) {
-                if (isCancelledRef.current) break;
-
-                const fileName = zipEntry.name.split('/').pop() || '';
-                const name = fileName
-                    .split('.')[0]
-                    .replace(INVALID_STICKER_NAME_CHARS_REGEX, '');
-                const finalName = name.slice(0, STICKER_NAME_MAX_LENGTH);
-
-                const blob = await zipEntry.async('blob');
-                try {
-                    let fileToUpload: File;
-                    if (fileName.toLowerCase().endsWith('.gif')) {
-                        fileToUpload = new File([blob], fileName, {
-                            type: 'image/gif',
-                        });
-                    } else {
-                        fileToUpload = await convertToWebp(blob, fileName);
-                    }
-                    const newSticker = await uploadStickerAsync({
-                        name: finalName,
-                        file: fileToUpload,
-                    });
-                    uploadedIdsRef.current.push(newSticker.id);
-                    setBulkStatus(
-                        (
-                            prev,
-                        ): {
-                            uploaded: number;
-                            total: number;
-                            errors: number;
-                            isOpen: boolean;
-                        } => ({
-                            ...prev,
-                            uploaded: prev.uploaded + 1,
-                        }),
-                    );
-                } catch (err) {
-                    console.error(`Failed to process ${fileName}:`, err);
-                    setBulkStatus(
-                        (
-                            prev,
-                        ): {
-                            errors: number;
-                            total: number;
-                            uploaded: number;
-                            isOpen: boolean;
-                        } => ({
-                            ...prev,
-                            errors: prev.errors + 1,
-                        }),
-                    );
-                }
-            }
-        } catch (err) {
-            console.error('Failed to process zip file', err);
-        } finally {
-            setIsBulkUploading(false);
-        }
-    };
-
-    const handleCancelBulk = async (): Promise<void> => {
-        isCancelledRef.current = true;
-        setIsCancelling(true);
-
-        // Delete already uploaded stickers
-        const idsToDelete = [...uploadedIdsRef.current];
-        await Promise.all(
-            idsToDelete.map(async (id): Promise<void> => {
-                try {
-                    await deleteStickerAsync(id);
-                } catch (err) {
-                    console.error(`Failed to delete sticker ${id}:`, err);
-                }
-            }),
-        );
-
-        uploadedIdsRef.current = [];
-        setIsCancelling(false);
-        setBulkStatus(
-            (
-                prev,
-            ): {
-                isOpen: false;
-                total: number;
-                uploaded: number;
-                errors: number;
-            } => ({ ...prev, isOpen: false }),
-        );
-    };
-
     return (
         <div className="max-w-5xl space-y-10 pb-20">
             <div>
@@ -290,7 +223,9 @@ export const ServerStickerSettings = ({
                         maxLength={STICKER_NAME_MAX_LENGTH}
                         placeholder="My cool sticker"
                         value={stickerName}
-                        onChange={(e): void => setStickerName(e.target.value)}
+                        onChange={(e): void => {
+                            setStickerName(e.target.value);
+                        }}
                     />
                     <Text size="xs" variant="muted">
                         Up to {STICKER_NAME_MAX_LENGTH} characters.
@@ -374,65 +309,20 @@ export const ServerStickerSettings = ({
 
                         {/* Sticker Grid */}
                         {stickers.map((sticker) => (
-                            <div
-                                className="group relative aspect-square overflow-hidden rounded-lg border border-border-subtle bg-bg-subtle transition-all hover:border-primary"
+                            <StickerGridItem
+                                isHovered={hoveredStickerId === sticker.id}
                                 key={sticker.id}
-                                onMouseEnter={(): void =>
-                                    setHoveredStickerId(sticker.id)
-                                }
-                                onMouseLeave={(): void =>
-                                    setHoveredStickerId(null)
-                                }
-                            >
-                                <div className="flex h-full w-full items-center justify-center p-2">
-                                    <img
-                                        alt={sticker.name}
-                                        className="max-h-full max-w-full object-contain"
-                                        src={
-                                            resolveApiUrl(sticker.imageUrl) ||
-                                            ''
-                                        }
-                                        onError={(e): void => {
-                                            console.error(
-                                                '[Sticker Image Load Error]',
-                                                {
-                                                    id: sticker.id,
-                                                    name: sticker.name,
-                                                    imageUrl: sticker.imageUrl,
-                                                    resolvedUrl: resolveApiUrl(
-                                                        sticker.imageUrl,
-                                                    ),
-                                                    error: e,
-                                                },
-                                            );
-                                        }}
-                                    />
-                                </div>
-                                {hoveredStickerId === sticker.id && (
-                                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-black/60 p-2">
-                                        <Text
-                                            align="center"
-                                            leading="tight"
-                                            size="xs"
-                                            variant="inverse"
-                                            weight="medium"
-                                            wrap="breakAll"
-                                        >
-                                            {sticker.name}
-                                        </Text>
-                                        <Button
-                                            aria-label="Delete sticker"
-                                            size="sm"
-                                            variant="danger"
-                                            onClick={(): void =>
-                                                deleteSticker(sticker.id)
-                                            }
-                                        >
-                                            <Trash2 className="h-3 w-3" />
-                                        </Button>
-                                    </div>
-                                )}
-                            </div>
+                                sticker={sticker}
+                                onDelete={(): void => {
+                                    deleteSticker(sticker.id);
+                                }}
+                                onHover={(): void => {
+                                    setHoveredStickerId(sticker.id);
+                                }}
+                                onLeave={(): void => {
+                                    setHoveredStickerId(null);
+                                }}
+                            />
                         ))}
                     </div>
                 )}
@@ -457,18 +347,7 @@ export const ServerStickerSettings = ({
                 total={bulkStatus.total}
                 uploaded={bulkStatus.uploaded}
                 onCancel={(): undefined => void handleCancelBulk()}
-                onClose={(): void =>
-                    setBulkStatus(
-                        (
-                            prev,
-                        ): {
-                            isOpen: false;
-                            total: number;
-                            uploaded: number;
-                            errors: number;
-                        } => ({ ...prev, isOpen: false }),
-                    )
-                }
+                onClose={closeBulkStatus}
             />
         </div>
     );

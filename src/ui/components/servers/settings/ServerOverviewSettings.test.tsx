@@ -38,7 +38,7 @@ describe('ServerOverviewSettings', (): void => {
     beforeEach((): void => {
         vi.clearAllMocks();
 
-        Object.defineProperty(window, 'location', {
+        Object.defineProperty(globalThis, 'location', {
             configurable: true,
             value: { href: 'http://localhost/' },
             writable: true,
@@ -112,6 +112,9 @@ describe('ServerOverviewSettings', (): void => {
         const dangerZoneDeleteButton = screen.getAllByRole('button', {
             name: /Delete Server/i,
         })[0];
+        if (!dangerZoneDeleteButton) {
+            throw new Error('Delete Server button not found');
+        }
         fireEvent.click(dangerZoneDeleteButton);
 
         const confirmInput = screen.getByLabelText(/Enter Server Name/i);
@@ -121,7 +124,10 @@ describe('ServerOverviewSettings', (): void => {
             .getAllByRole('button', {
                 name: /Delete Server/i,
             })
-            .slice(-1)[0];
+            .at(-1);
+        if (!confirmDeleteButton) {
+            throw new Error('Confirm delete button not found');
+        }
         fireEvent.click(confirmDeleteButton);
 
         expect(mockDeleteServer).toHaveBeenCalledWith(

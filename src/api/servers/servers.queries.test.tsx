@@ -94,7 +94,9 @@ describe('server role member mutations', (): void => {
             result.current.mutate({ userId, roleId });
         });
 
-        await waitFor((): void => expect(result.current.isSuccess).toBe(true));
+        await waitFor((): void => {
+            expect(result.current.isSuccess).toBe(true);
+        });
 
         expect(invalidateSpy).toHaveBeenCalledWith({
             queryKey: SERVERS_QUERY_KEYS.channels(serverId),
@@ -124,7 +126,9 @@ describe('server role member mutations', (): void => {
             result.current.mutate({ userId, roleId });
         });
 
-        await waitFor((): void => expect(result.current.isSuccess).toBe(true));
+        await waitFor((): void => {
+            expect(result.current.isSuccess).toBe(true);
+        });
 
         expect(invalidateSpy).toHaveBeenCalledWith({
             queryKey: SERVERS_QUERY_KEYS.channels(serverId),

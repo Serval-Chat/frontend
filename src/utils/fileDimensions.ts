@@ -27,27 +27,27 @@ const readImageDimensionsWithElement = (
             URL.revokeObjectURL(url);
         };
 
-        image.onload = (): void => {
+        image.addEventListener('load', (): void => {
             const dimensions = {
                 width: image.naturalWidth,
                 height: image.naturalHeight,
             };
             cleanup();
             resolve(hasUsableDimensions(dimensions) ? dimensions : undefined);
-        };
-        image.onerror = (): void => {
+        });
+        image.addEventListener('error', (): void => {
             cleanup();
             resolve(undefined);
-        };
+        });
         image.src = url;
     });
 
 const readImageDimensions = async (
     file: File,
 ): Promise<MediaDimensions | undefined> => {
-    if ('createImageBitmap' in window) {
+    if ('createImageBitmap' in globalThis) {
         try {
-            const bitmap = await window.createImageBitmap(file);
+            const bitmap = await globalThis.createImageBitmap(file);
             const dimensions = { width: bitmap.width, height: bitmap.height };
             bitmap.close();
             if (hasUsableDimensions(dimensions)) return dimensions;
@@ -73,18 +73,18 @@ const readVideoDimensions = (
         };
 
         video.preload = 'metadata';
-        video.onloadedmetadata = (): void => {
+        video.addEventListener('loadedmetadata', (): void => {
             const dimensions = {
                 width: video.videoWidth,
                 height: video.videoHeight,
             };
             cleanup();
             resolve(hasUsableDimensions(dimensions) ? dimensions : undefined);
-        };
-        video.onerror = (): void => {
+        });
+        video.addEventListener('error', (): void => {
             cleanup();
             resolve(undefined);
-        };
+        });
         video.src = url;
     });
 

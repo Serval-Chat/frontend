@@ -22,6 +22,7 @@ import {
     AutocompleteSuggestion,
     type Suggestion,
 } from '@/ui/components/common/AutocompleteSuggestion';
+import type { UserStatus } from '@/ui/components/common/UserProfileStatusIndicator';
 import { getUnicode, groupedEmojis } from '@/utils/emoji';
 import type { EmojiData } from '@/utils/emoji';
 
@@ -32,7 +33,7 @@ interface LexicalAutocompletePluginProps {
     serverEmojis?: Emoji[];
     channels?: Channel[];
     serverId?: string;
-    onOpenChange?: (isOpen: boolean) => void;
+    isOpenRef?: React.MutableRefObject<boolean>;
 }
 
 class AutocompleteOption extends MenuOption {
@@ -40,13 +41,35 @@ class AutocompleteOption extends MenuOption {
 
     constructor(suggestion: Suggestion) {
         let key = suggestion.type;
-        if (suggestion.type === 'everyone') key += 'everyone';
-        else if (suggestion.type === 'user') key += suggestion.user.id;
-        else if (suggestion.type === 'role') key += suggestion.role.id;
-        else if (suggestion.type === 'emoji')
-            key += suggestion.emoji.short_name;
-        else if (suggestion.type === 'server-emoji') key += suggestion.emoji.id;
-        else if (suggestion.type === 'channel') key += suggestion.channel.id;
+        switch (suggestion.type) {
+            case 'everyone': {
+                key += 'everyone';
+                break;
+            }
+            case 'user': {
+                key += suggestion.user.id;
+                break;
+            }
+            case 'role': {
+                key += suggestion.role.id;
+                break;
+            }
+            case 'emoji': {
+                key += suggestion.emoji.short_name;
+                break;
+            }
+            case 'server-emoji': {
+                key += suggestion.emoji.id;
+                break;
+            }
+            case 'channel': {
+                {
+                    key += suggestion.channel.id;
+                    // no default
+                }
+                break;
+            }
+        }
 
         super(key);
         this.suggestion = suggestion;
@@ -97,6 +120,165 @@ const EMPTY_FRIENDS: User[] = [];
 const EMPTY_SERVER_EMOJIS: Emoji[] = [];
 const EMPTY_CHANNELS: Channel[] = [];
 
+const buildAutocompleteOptions = ({
+    queryString,
+    members,
+    friends,
+    roles,
+    allEmojis,
+    serverEmojis,
+    channels,
+    blocks,
+    presenceUsers,
+}: {
+    queryString: string | null;
+    members: ServerMember[];
+    friends: User[];
+    roles: Role[];
+    allEmojis: EmojiData[];
+    serverEmojis: Emoji[];
+    channels: Channel[];
+    blocks: Record<string, number>;
+    presenceUsers: Record<string, { status?: UserStatus } | undefined>;
+}): AutocompleteOption[] => {
+    if (queryString === null || queryString.length === 0) return [];
+
+    const triggerChar = queryString[0];
+    const query = queryString.slice(1).toLowerCase();
+
+    if (triggerChar === '@') {
+        const memberPriority = new Map<string, number>();
+        const userSuggestions: Suggestion[] = [];
+
+        for (const member of members) {
+            const userBlocks = blocks[member.userId] || 0;
+            if (userBlocks & BlockFlags.HIDE_FROM_MENTIONS) continue;
+
+            const username = member.user.username.toLowerCase();
+            const displayName = member.user.displayName?.toLowerCase() || '';
+            const nickname = member.nickname?.toLowerCase() || '';
+
+            const matchesUsername = username.includes(query);
+            const matchesDisplayName =
+                displayName !== '' && displayName.includes(query);
+            const matchesNickname = nickname !== '' && nickname.includes(query);
+
+            if (matchesUsername || matchesDisplayName || matchesNickname) {
+                const priority = matchesNickname
+                    ? 0
+                    : matchesDisplayName
+                      ? 1
+                      : 2;
+                memberPriority.set(member.user.id, priority);
+                userSuggestions.push({
+                    type: 'user',
+                    user: member.user,
+                    nickname: member.nickname,
+                    status:
+                        presenceUsers[member.userId]?.status ??
+                        (member.online ? 'online' : 'offline'),
+                });
+            }
+        }
+
+        if (members.length === 0) {
+            for (const friend of friends) {
+                if (!friend) continue;
+
+                const userBlocks = blocks[friend.id] || 0;
+                if (userBlocks & BlockFlags.HIDE_FROM_MENTIONS) continue;
+
+                const username = friend.username.toLowerCase();
+                const displayName = friend.displayName?.toLowerCase() || '';
+                const alreadyAdded = userSuggestions.some(
+                    (s): boolean =>
+                        s.type === 'user' && s.user.id === friend.id,
+                );
+                if (
+                    !alreadyAdded &&
+                    (username.includes(query) || displayName.includes(query))
+                ) {
+                    const priority = displayName.includes(query) ? 0 : 1;
+                    memberPriority.set(friend.id, priority);
+                    userSuggestions.push({
+                        type: 'user',
+                        user: friend,
+                        status: presenceUsers[friend.id]?.status,
+                    });
+                }
+            }
+        }
+
+        userSuggestions.sort((a, b): number => {
+            const pa =
+                a.type === 'user' ? (memberPriority.get(a.user.id) ?? 99) : 99;
+            const pb =
+                b.type === 'user' ? (memberPriority.get(b.user.id) ?? 99) : 99;
+            return pa - pb;
+        });
+
+        const roleSuggestions: Suggestion[] = roles.flatMap(
+            (role): { type: 'role'; role: Role }[] => {
+                const lowerName = role.name.toLowerCase();
+                return lowerName.includes(query) &&
+                    lowerName !== 'everyone' &&
+                    lowerName !== '@everyone'
+                    ? [{ type: 'role', role }]
+                    : [];
+            },
+        );
+
+        const allSuggestions: Suggestion[] = [
+            ...userSuggestions,
+            ...roleSuggestions,
+        ];
+
+        if ('everyone'.startsWith(query) || query === '') {
+            allSuggestions.unshift({ type: 'everyone' });
+        }
+
+        return allSuggestions
+            .slice(0, 10)
+            .map((s): AutocompleteOption => new AutocompleteOption(s));
+    }
+
+    if (triggerChar === ':') {
+        const emojiSuggestions: Suggestion[] = allEmojis.flatMap(
+            (emoji): { type: 'emoji'; emoji: EmojiData }[] =>
+                emoji.short_name.includes(query) ||
+                emoji.short_names.some((name): boolean => name.includes(query))
+                    ? [{ type: 'emoji' as const, emoji }]
+                    : [],
+        );
+
+        const serverEmojiSuggestions: Suggestion[] = serverEmojis.flatMap(
+            (emoji): { type: 'server-emoji'; emoji: Emoji }[] =>
+                emoji.name.toLowerCase().includes(query)
+                    ? [{ type: 'server-emoji' as const, emoji }]
+                    : [],
+        );
+
+        return [...serverEmojiSuggestions, ...emojiSuggestions]
+            .slice(0, 10)
+            .map((s): AutocompleteOption => new AutocompleteOption(s));
+    }
+
+    if (triggerChar === '#') {
+        const channelSuggestions: Suggestion[] = channels.flatMap(
+            (channel): { type: 'channel'; channel: Channel }[] =>
+                channel.name.toLowerCase().includes(query)
+                    ? [{ type: 'channel' as const, channel }]
+                    : [],
+        );
+
+        return channelSuggestions
+            .slice(0, 10)
+            .map((s): AutocompleteOption => new AutocompleteOption(s));
+    }
+
+    return [];
+};
+
 export const LexicalAutocompletePlugin = ({
     members = EMPTY_MEMBERS,
     roles = EMPTY_ROLES,
@@ -104,7 +286,7 @@ export const LexicalAutocompletePlugin = ({
     serverEmojis = EMPTY_SERVER_EMOJIS,
     channels = EMPTY_CHANNELS,
     serverId,
-    onOpenChange,
+    isOpenRef,
 }: LexicalAutocompletePluginProps) => {
     const [editor] = useLexicalComposerContext();
     const blocks = useAppSelector(
@@ -115,189 +297,62 @@ export const LexicalAutocompletePlugin = ({
 
     const allEmojis = useMemo((): EmojiData[] => {
         const emojis: EmojiData[] = [];
-        Object.values(groupedEmojis).forEach((categoryEmojis): void => {
+        for (const categoryEmojis of Object.values(groupedEmojis)) {
             emojis.push(...categoryEmojis);
-        });
+        }
         return emojis;
     }, []);
 
-    const options = useMemo((): AutocompleteOption[] => {
-        if (queryString === null || queryString.length === 0) return [];
-
-        const triggerChar = queryString[0];
-        const query = queryString.slice(1).toLowerCase();
-
-        if (triggerChar === '@') {
-            const memberPriority = new Map<string, number>();
-            const userSuggestions: Suggestion[] = [];
-
-            members.forEach((member): void => {
-                const userBlocks = blocks[member.userId] || 0;
-                if (userBlocks & BlockFlags.HIDE_FROM_MENTIONS) return;
-
-                const username = member.user.username.toLowerCase();
-                const displayName =
-                    member.user.displayName?.toLowerCase() || '';
-                const nickname = member.nickname?.toLowerCase() || '';
-
-                const matchesUsername = username.includes(query);
-                const matchesDisplayName =
-                    displayName !== '' && displayName.includes(query);
-                const matchesNickname =
-                    nickname !== '' && nickname.includes(query);
-
-                if (matchesUsername || matchesDisplayName || matchesNickname) {
-                    const priority = matchesNickname
-                        ? 0
-                        : matchesDisplayName
-                          ? 1
-                          : 2;
-                    memberPriority.set(member.user.id, priority);
-                    userSuggestions.push({
-                        type: 'user',
-                        user: member.user,
-                        nickname: member.nickname,
-                        status:
-                            presenceUsers[member.userId]?.status ??
-                            (member.online ? 'online' : 'offline'),
-                    });
-                }
-            });
-
-            if (members.length === 0) {
-                friends.forEach((friend): void => {
-                    if (!friend) return;
-
-                    const userBlocks = blocks[friend.id] || 0;
-                    if (userBlocks & BlockFlags.HIDE_FROM_MENTIONS) return;
-
-                    const username = friend.username.toLowerCase();
-                    const displayName = friend.displayName?.toLowerCase() || '';
-                    const alreadyAdded = userSuggestions.some(
-                        (s): boolean =>
-                            s.type === 'user' && s.user.id === friend.id,
-                    );
-                    if (
-                        !alreadyAdded &&
-                        (username.includes(query) ||
-                            displayName.includes(query))
-                    ) {
-                        const priority = displayName.includes(query) ? 0 : 1;
-                        memberPriority.set(friend.id, priority);
-                        userSuggestions.push({
-                            type: 'user',
-                            user: friend,
-                            status: presenceUsers[friend.id]?.status,
-                        });
-                    }
-                });
-            }
-
-            userSuggestions.sort((a, b): number => {
-                const pa =
-                    a.type === 'user'
-                        ? (memberPriority.get(a.user.id) ?? 99)
-                        : 99;
-                const pb =
-                    b.type === 'user'
-                        ? (memberPriority.get(b.user.id) ?? 99)
-                        : 99;
-                return pa - pb;
-            });
-
-            const roleSuggestions: Suggestion[] = roles.flatMap(
-                (role): { type: 'role'; role: Role }[] => {
-                    const lowerName = role.name.toLowerCase();
-                    return lowerName.includes(query) &&
-                        lowerName !== 'everyone' &&
-                        lowerName !== '@everyone'
-                        ? [{ type: 'role', role }]
-                        : [];
-                },
-            );
-
-            const allSuggestions: Suggestion[] = [
-                ...userSuggestions,
-                ...roleSuggestions,
-            ];
-
-            if ('everyone'.startsWith(query) || query === '') {
-                allSuggestions.unshift({ type: 'everyone' });
-            }
-
-            return allSuggestions
-                .slice(0, 10)
-                .map((s): AutocompleteOption => new AutocompleteOption(s));
-        }
-
-        if (triggerChar === ':') {
-            const emojiSuggestions: Suggestion[] = allEmojis.flatMap(
-                (emoji): { type: 'emoji'; emoji: EmojiData }[] =>
-                    emoji.short_name.includes(query) ||
-                    emoji.short_names.some((name): boolean =>
-                        name.includes(query),
-                    )
-                        ? [{ type: 'emoji' as const, emoji }]
-                        : [],
-            );
-
-            const serverEmojiSuggestions: Suggestion[] = serverEmojis.flatMap(
-                (emoji): { type: 'server-emoji'; emoji: Emoji }[] =>
-                    emoji.name.toLowerCase().includes(query)
-                        ? [{ type: 'server-emoji' as const, emoji }]
-                        : [],
-            );
-
-            return [...serverEmojiSuggestions, ...emojiSuggestions]
-                .slice(0, 10)
-                .map((s): AutocompleteOption => new AutocompleteOption(s));
-        }
-
-        if (triggerChar === '#') {
-            const channelSuggestions: Suggestion[] = channels.flatMap(
-                (channel): { type: 'channel'; channel: Channel }[] =>
-                    channel.name.toLowerCase().includes(query)
-                        ? [{ type: 'channel' as const, channel }]
-                        : [],
-            );
-
-            return channelSuggestions
-                .slice(0, 10)
-                .map((s): AutocompleteOption => new AutocompleteOption(s));
-        }
-
-        return [];
-    }, [
-        queryString,
-        members,
-        friends,
-        roles,
-        allEmojis,
-        serverEmojis,
-        channels,
-        blocks,
-    ]);
+    const options = useMemo(
+        (): AutocompleteOption[] =>
+            buildAutocompleteOptions({
+                queryString,
+                members,
+                friends,
+                roles,
+                allEmojis,
+                serverEmojis,
+                channels,
+                blocks,
+                presenceUsers,
+            }),
+        [
+            queryString,
+            members,
+            friends,
+            roles,
+            allEmojis,
+            serverEmojis,
+            channels,
+            blocks,
+            presenceUsers,
+        ],
+    );
 
     const isOpen = queryString !== null && options.length > 0;
 
     React.useEffect((): void => {
-        if (onOpenChange) {
-            onOpenChange(isOpen);
+        // false positive: queryString is set by Lexical's own onQueryChange
+        // callback below (an external subscription), not a handler in this
+        // component, so there's no single event handler to move this ref sync into.
+        // react-doctor-disable-next-line react-doctor/no-event-handler
+        if (isOpenRef) {
+            isOpenRef.current = isOpen;
         }
-    }, [isOpen, onOpenChange]);
+    }, [isOpen, isOpenRef]);
 
     const matchTrigger = useCallback(
         (text: string) => {
-            const completeEmojiMatch = text.match(/(^|\s):([^@#\s:]+):$/);
+            const completeEmojiMatch = /(^|\s):([^@#\s:]+):$/.exec(text);
             if (completeEmojiMatch !== null) {
-                const emojiName = completeEmojiMatch[2].toLowerCase();
+                // The capture group is mandatory in the regex, so a match
+                // guarantees it.
+                const emojiName = completeEmojiMatch[2]!.toLowerCase();
 
                 const matchingUnicodeEmojis = allEmojis.filter(
                     (emoji): boolean =>
                         emoji.short_name === emojiName ||
-                        emoji.short_names.some(
-                            (name): boolean => name === emojiName,
-                        ),
+                        emoji.short_names.includes(emojiName),
                 );
 
                 const matchingCustomEmojis = serverEmojis.filter(
@@ -320,8 +375,9 @@ export const LexicalAutocompletePlugin = ({
                                     0,
                                     offset,
                                 );
-                                const patternMatch =
-                                    beforeCursor.match(/(^|\s):([^:\s]+):$/);
+                                const patternMatch = /(^|\s):([^:\s]+):$/.exec(
+                                    beforeCursor,
+                                );
 
                                 if (patternMatch) {
                                     const patternStart =
@@ -334,8 +390,10 @@ export const LexicalAutocompletePlugin = ({
                                         textContent.slice(offset);
 
                                     if (matchingUnicodeEmojis.length === 1) {
+                                        // length check above guarantees index
+                                        // 0 exists.
                                         const unicode = getUnicode(
-                                            matchingUnicodeEmojis[0],
+                                            matchingUnicodeEmojis[0]!,
                                         );
                                         node.setTextContent(
                                             beforePattern +
@@ -345,8 +403,10 @@ export const LexicalAutocompletePlugin = ({
                                     } else if (
                                         matchingCustomEmojis.length === 1
                                     ) {
+                                        // length check above guarantees index
+                                        // 0 exists.
                                         const customEmoji =
-                                            matchingCustomEmojis[0];
+                                            matchingCustomEmojis[0]!;
                                         node.setTextContent(
                                             beforePattern + afterPattern,
                                         );
@@ -371,17 +431,19 @@ export const LexicalAutocompletePlugin = ({
                 }
             }
 
-            const match = text.match(/(^|\s)([@:#])([^@#\s]{0,20})$/);
+            const match = /(^|\s)([@:#])([^@#\s]{0,20})$/.exec(text);
             if (match !== null) {
-                const trigger = match[2];
-                const matchingString = match[3];
+                // All capture groups are mandatory in the regex, so a match
+                // guarantees they are defined.
+                const trigger = match[2]!;
+                const matchingString = match[3]!;
 
                 if (trigger === ':' && matchingString.length < 2) {
                     return null;
                 }
 
                 return {
-                    leadOffset: match.index! + match[1].length,
+                    leadOffset: match.index + match[1]!.length,
                     matchingString: trigger + matchingString,
                     replaceableString: trigger + matchingString,
                 };
@@ -419,35 +481,54 @@ export const LexicalAutocompletePlugin = ({
                 }
 
                 let chipNode;
-                if (suggestion.type === 'user') {
-                    chipNode = $createChipNode('user', {
-                        id: suggestion.user.id,
-                        label:
-                            suggestion.nickname ||
-                            suggestion.user.displayName ||
-                            suggestion.user.username,
-                        serverId,
-                    });
-                } else if (suggestion.type === 'role') {
-                    chipNode = $createChipNode('role', {
-                        id: suggestion.role.id,
-                        label: suggestion.role.name,
-                        color: suggestion.role.color || undefined,
-                    });
-                } else if (suggestion.type === 'server-emoji') {
-                    chipNode = $createChipNode('emoji', {
-                        id: suggestion.emoji.id,
-                        label: suggestion.emoji.name,
-                        imageUrl: suggestion.emoji.imageUrl,
-                    });
-                } else if (suggestion.type === 'channel') {
-                    chipNode = $createChipNode('channel', {
-                        id: suggestion.channel.id,
-                        label: suggestion.channel.name,
-                        serverId: suggestion.channel.serverId,
-                    });
-                } else if (suggestion.type === 'everyone') {
-                    chipNode = $createChipNode('everyone', { id: 'everyone' });
+                switch (suggestion.type) {
+                    case 'user': {
+                        chipNode = $createChipNode('user', {
+                            id: suggestion.user.id,
+                            label:
+                                suggestion.nickname ||
+                                suggestion.user.displayName ||
+                                suggestion.user.username,
+                            serverId,
+                        });
+
+                        break;
+                    }
+                    case 'role': {
+                        chipNode = $createChipNode('role', {
+                            id: suggestion.role.id,
+                            label: suggestion.role.name,
+                            color: suggestion.role.color || undefined,
+                        });
+
+                        break;
+                    }
+                    case 'server-emoji': {
+                        chipNode = $createChipNode('emoji', {
+                            id: suggestion.emoji.id,
+                            label: suggestion.emoji.name,
+                            imageUrl: suggestion.emoji.imageUrl,
+                        });
+
+                        break;
+                    }
+                    case 'channel': {
+                        chipNode = $createChipNode('channel', {
+                            id: suggestion.channel.id,
+                            label: suggestion.channel.name,
+                            serverId: suggestion.channel.serverId,
+                        });
+
+                        break;
+                    }
+                    case 'everyone': {
+                        chipNode = $createChipNode('everyone', {
+                            id: 'everyone',
+                        });
+
+                        break;
+                    }
+                    // no default
                 }
 
                 if (chipNode) {

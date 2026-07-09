@@ -21,6 +21,12 @@ interface ChannelWebhookSettingsProps {
     channelId: string;
 }
 
+const buildWebhookUrl = (token: string): string =>
+    `${globalThis.location.origin}/api/v1/webhooks/${token}`;
+
+const getWebhookInitial = (webhookName: string): string =>
+    webhookName.trim().charAt(0).toUpperCase() || 'W';
+
 export const ChannelWebhookSettings = ({
     serverId,
     channelId,
@@ -48,21 +54,17 @@ export const ChannelWebhookSettings = ({
         createWebhook.mutate(
             { name: name.trim() },
             {
-                onSuccess: (): void => setName(''),
+                onSuccess: (): void => {
+                    setName('');
+                },
             },
         );
     };
 
-    const buildWebhookUrl = (token: string): string =>
-        `${window.location.origin}/api/v1/webhooks/${token}`;
-
-    const getWebhookInitial = (webhookName: string): string =>
-        webhookName.trim().charAt(0).toUpperCase() || 'W';
-
     const handleCopy = (webhookId: string, token: string): void => {
         void navigator.clipboard.writeText(buildWebhookUrl(token));
         setCopiedWebhookId(webhookId);
-        window.setTimeout((): void => {
+        globalThis.setTimeout((): void => {
             setCopiedWebhookId((current): string | null =>
                 current === webhookId ? null : current,
             );
@@ -72,7 +74,9 @@ export const ChannelWebhookSettings = ({
     const handleConfirmDelete = (): void => {
         if (!pendingDeleteWebhookId) return;
         deleteWebhook.mutate(pendingDeleteWebhookId, {
-            onSuccess: (): void => setPendingDeleteWebhookId(null),
+            onSuccess: (): void => {
+                setPendingDeleteWebhookId(null);
+            },
         });
     };
 
@@ -88,14 +92,7 @@ export const ChannelWebhookSettings = ({
                 </Text>
             </div>
 
-            {!canManageWebhooks ? (
-                <div className="rounded-lg border border-border-subtle bg-bg-secondary p-6">
-                    <Text variant="muted">
-                        You need the Manage Webhooks permission to view and
-                        manage webhooks for this channel.
-                    </Text>
-                </div>
-            ) : (
+            {canManageWebhooks ? (
                 <>
                     <div className="space-y-3 rounded-lg border border-border-subtle bg-bg-secondary p-5">
                         <Text as="p" className="font-medium">
@@ -105,7 +102,9 @@ export const ChannelWebhookSettings = ({
                             <Input
                                 placeholder="Webhook name"
                                 value={name}
-                                onChange={(e): void => setName(e.target.value)}
+                                onChange={(e): void => {
+                                    setName(e.target.value);
+                                }}
                             />
                             <Button
                                 disabled={!canCreate}
@@ -179,17 +178,18 @@ export const ChannelWebhookSettings = ({
                                         </div>
                                         <Button
                                             loading={
-                                                deleteWebhook.isPending &&
-                                                deleteWebhook.variables ===
-                                                    webhook.id
+                                                deleteWebhook.isPending
+                                                    ? deleteWebhook.variables ===
+                                                      webhook.id
+                                                    : false
                                             }
                                             size="sm"
                                             variant="danger"
-                                            onClick={(): void =>
+                                            onClick={(): void => {
                                                 setPendingDeleteWebhookId(
                                                     webhook.id,
-                                                )
-                                            }
+                                                );
+                                            }}
                                         >
                                             <Trash2 className="mr-2 h-4 w-4" />
                                             Delete
@@ -216,12 +216,12 @@ export const ChannelWebhookSettings = ({
                                             <Button
                                                 size="sm"
                                                 variant="ghost"
-                                                onClick={(): void =>
+                                                onClick={(): void => {
                                                     handleCopy(
                                                         webhook.id,
                                                         webhook.token,
-                                                    )
-                                                }
+                                                    );
+                                                }}
                                             >
                                                 {copiedWebhookId ===
                                                 webhook.id ? (
@@ -237,12 +237,21 @@ export const ChannelWebhookSettings = ({
                         )}
                     </div>
                 </>
+            ) : (
+                <div className="rounded-lg border border-border-subtle bg-bg-secondary p-6">
+                    <Text variant="muted">
+                        You need the Manage Webhooks permission to view and
+                        manage webhooks for this channel.
+                    </Text>
+                </div>
             )}
-            {pendingDeleteWebhookId && (
+            {pendingDeleteWebhookId ? (
                 <Modal
                     isOpen
                     title="Delete Webhook"
-                    onClose={(): void => setPendingDeleteWebhookId(null)}
+                    onClose={(): void => {
+                        setPendingDeleteWebhookId(null);
+                    }}
                 >
                     <div className="flex flex-col gap-4 p-4">
                         <Text as="p" variant="muted">
@@ -252,9 +261,9 @@ export const ChannelWebhookSettings = ({
                         <div className="flex justify-end gap-2">
                             <Button
                                 variant="ghost"
-                                onClick={(): void =>
-                                    setPendingDeleteWebhookId(null)
-                                }
+                                onClick={(): void => {
+                                    setPendingDeleteWebhookId(null);
+                                }}
                             >
                                 Cancel
                             </Button>
@@ -268,7 +277,7 @@ export const ChannelWebhookSettings = ({
                         </div>
                     </div>
                 </Modal>
-            )}
+            ) : null}
         </div>
     );
 };

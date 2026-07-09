@@ -10,41 +10,45 @@ import { Box } from '@/ui/components/layout/Box';
 
 import { StatusModal } from './StatusModal';
 
+const StatusEmoji = ({
+    statusEmoji,
+}: {
+    statusEmoji: string;
+}): React.ReactNode => {
+    if (statusEmoji === '') return null;
+
+    const isCustomEmoji = /^[0-9a-fA-F]{24}$/.test(statusEmoji);
+    if (isCustomEmoji) {
+        return (
+            <ParsedEmoji
+                nonInteractive
+                className="mr-1 h-4 w-4"
+                emojiId={statusEmoji}
+            />
+        );
+    }
+
+    return <ParsedUnicodeEmoji className="mr-1" content={statusEmoji} />;
+};
+
 export const MiniProfile = () => {
     const { data: user } = useMe();
     const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
 
     const presence = useAppSelector(
-        (state) => state.presence.users[user?.id || ''],
+        (state) => state.presence.users[user?.id ?? ''],
     );
     const backendInstanceId = useAppSelector(
         (state): string | null => state.presence.backendInstanceId,
     );
-    const presenceStatus = presence?.status || 'offline';
+    const presenceStatus = presence?.status ?? 'offline';
 
     const customStatus = user?.customStatus;
-    const statusText = customStatus?.text || '';
-    const statusEmoji = customStatus?.emoji || '';
+    const statusText = customStatus?.text ?? '';
+    const statusEmoji = customStatus?.emoji ?? '';
 
     const handleStatusClick = (): void => {
         setIsStatusModalOpen(true);
-    };
-
-    const renderStatusEmoji = (): React.ReactNode => {
-        if (!statusEmoji) return null;
-
-        const isCustomEmoji = /^[0-9a-fA-F]{24}$/.test(statusEmoji);
-        if (isCustomEmoji) {
-            return (
-                <ParsedEmoji
-                    nonInteractive
-                    className="mr-1 h-4 w-4"
-                    emojiId={statusEmoji}
-                />
-            );
-        }
-
-        return <ParsedUnicodeEmoji className="mr-1" content={statusEmoji} />;
     };
 
     if (!user) return null;
@@ -72,29 +76,29 @@ export const MiniProfile = () => {
                         disableGlow={user.settings?.disableCustomUsernameGlow}
                         user={user}
                     >
-                        {user.displayName || user.username}
+                        {user.displayName ?? user.username}
                     </StyledUserName>
                     <Box
                         className="text-header-secondary flex cursor-pointer items-center truncate text-xs leading-tight opacity-70 transition-opacity hover:opacity-100"
                         onClick={handleStatusClick}
                     >
-                        {statusEmoji || statusText ? (
+                        {statusEmoji !== '' || statusText !== '' ? (
                             <>
-                                {renderStatusEmoji()}
+                                <StatusEmoji statusEmoji={statusEmoji} />
                                 <span className="truncate">{statusText}</span>
                             </>
                         ) : (
                             'Set specific status'
                         )}
                     </Box>
-                    {backendInstanceId && (
+                    {backendInstanceId ? (
                         <Box
                             className="text-header-secondary mt-1 max-w-[150px] truncate text-[10px] opacity-40 hover:opacity-100"
                             title={`Backend Instance: ${backendInstanceId}`}
                         >
                             Instance: {backendInstanceId}
                         </Box>
-                    )}
+                    ) : null}
                 </Box>
             </Box>
 
@@ -102,7 +106,9 @@ export const MiniProfile = () => {
                 initialEmoji={statusEmoji}
                 initialText={statusText}
                 isOpen={isStatusModalOpen}
-                onClose={(): void => setIsStatusModalOpen(false)}
+                onClose={(): void => {
+                    setIsStatusModalOpen(false);
+                }}
             />
         </Box>
     );

@@ -7,18 +7,21 @@ describe('DosFileSystem', (): void => {
         localStorage.clear();
     });
 
-    it('starts at C:\\ and persists entries to localStorage', (): void => {
-        const fs = new DosFileSystem();
+    it(
+        String.raw`starts at C:\ and persists entries to localStorage`,
+        (): void => {
+            const fs = new DosFileSystem();
 
-        fs.makeDirectory('APPS');
-        fs.writeFile('APPS\\HELLO.TXT', 'hello');
+            fs.makeDirectory('APPS');
+            fs.writeFile(String.raw`APPS\HELLO.TXT`, 'hello');
 
-        const reloaded = new DosFileSystem();
-        reloaded.changeDirectory('APPS');
+            const reloaded = new DosFileSystem();
+            reloaded.changeDirectory('APPS');
 
-        expect(reloaded.getCwd()).toBe('C:\\APPS');
-        expect(reloaded.readFile('HELLO.TXT')).toBe('hello');
-    });
+            expect(reloaded.getCwd()).toBe(String.raw`C:\APPS`);
+            expect(reloaded.readFile('HELLO.TXT')).toBe('hello');
+        },
+    );
 
     it('enforces 8.3 names', (): void => {
         const fs = new DosFileSystem();
@@ -51,18 +54,16 @@ describe('DosFileSystem', (): void => {
         const fs = new DosFileSystem();
 
         fs.writeFile('LOCK.TXT', 'locked');
-        expect(fs.setAttributes('LOCK.TXT', ['+R'])[0].attributes).toContain(
-            'R',
-        );
+        const locked = fs.setAttributes('LOCK.TXT', ['+R'])[0];
+        expect(locked?.attributes).toContain('R');
         expect((): number => fs.delete('LOCK.TXT')).toThrow(
             'Access is denied.',
         );
         expect(() => fs.writeFile('LOCK.TXT', 'changed')).toThrow(
             'Access is denied.',
         );
-        expect(
-            fs.setAttributes('LOCK.TXT', ['-R'])[0].attributes,
-        ).not.toContain('R');
+        const unlocked = fs.setAttributes('LOCK.TXT', ['-R'])[0];
+        expect(unlocked?.attributes).not.toContain('R');
         expect(fs.delete('LOCK.TXT')).toBe(1);
     });
 });

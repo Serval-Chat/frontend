@@ -32,34 +32,33 @@ const presenceSlice = createSlice({
         setOnlineUsers: (
             state,
             action: PayloadAction<
-                Array<{
+                {
                     userId: string;
                     username: string;
                     status?: { text: string; emoji?: string | null } | null;
-                }>
+                }[]
             >,
         ): void => {
             const incomingIds = new Set(action.payload.map((u) => u.userId));
 
             for (const uid of Object.keys(state.users)) {
-                if (
-                    !incomingIds.has(uid) &&
-                    state.users[uid].status === 'online'
-                ) {
-                    state.users[uid].status = 'offline';
-                    state.users[uid].customStatus = null;
+                const user = state.users[uid];
+                if (user && !incomingIds.has(uid) && user.status === 'online') {
+                    user.status = 'offline';
+
+                    user.customStatus = null;
                 }
             }
 
             // Add/update everyone the server says is online.
-            action.payload.forEach((user): void => {
+            for (const user of action.payload) {
                 state.users[user.userId] = {
                     userId: user.userId,
                     username: user.username,
                     status: 'online',
-                    customStatus: user.status || null,
+                    customStatus: user.status ?? null,
                 };
-            });
+            }
         },
         setUserOnline: (
             state,
@@ -73,16 +72,18 @@ const presenceSlice = createSlice({
                 userId: action.payload.userId,
                 username: action.payload.username,
                 status: 'online',
-                customStatus: action.payload.status || null,
+                customStatus: action.payload.status ?? null,
             };
         },
         setUserOffline: (
             state,
             action: PayloadAction<{ userId: string; username: string }>,
         ): void => {
-            if (state.users[action.payload.userId]) {
-                state.users[action.payload.userId].status = 'offline';
-                state.users[action.payload.userId].customStatus = null;
+            const existing = state.users[action.payload.userId];
+            if (existing) {
+                existing.status = 'offline';
+
+                existing.customStatus = null;
             } else {
                 state.users[action.payload.userId] = {
                     userId: action.payload.userId,
@@ -100,9 +101,9 @@ const presenceSlice = createSlice({
                 status: { text: string; emoji?: string | null } | null;
             }>,
         ): void => {
-            if (state.users[action.payload.userId]) {
-                state.users[action.payload.userId].customStatus =
-                    action.payload.status;
+            const existing = state.users[action.payload.userId];
+            if (existing) {
+                existing.customStatus = action.payload.status;
             } else {
                 state.users[action.payload.userId] = {
                     userId: action.payload.userId,
@@ -119,12 +120,11 @@ const presenceSlice = createSlice({
             }>,
         ): void => {
             // Find users by username and update their custom status
-            Object.values(state.users).forEach((user): void => {
+            for (const user of Object.values(state.users)) {
                 if (user.username === action.payload.username) {
-                    state.users[user.userId].customStatus =
-                        action.payload.customStatus;
+                    user.customStatus = action.payload.customStatus;
                 }
-            });
+            }
         },
     },
 });

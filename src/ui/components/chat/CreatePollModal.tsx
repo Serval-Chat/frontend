@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useReducer, useRef, useState } from 'react';
 
 import { Plus, Smile, Trash2 } from 'lucide-react';
 import { createPortal } from 'react-dom';
@@ -15,6 +15,7 @@ import { Text } from '@/ui/components/common/Text';
 import { Toggle } from '@/ui/components/common/Toggle';
 import { Box } from '@/ui/components/layout/Box';
 import { APP_LOCALE } from '@/utils/locale';
+import { mergeReducer } from '@/utils/mergeReducer';
 
 const EmojiPicker = React.lazy(() =>
     import('@/ui/components/emoji/EmojiPicker').then((m) => ({
@@ -58,22 +59,277 @@ interface CreatePollModalProps {
     }) => void;
 }
 
+const PollOptionsEditor = ({
+    options,
+    activeEmojiOption,
+    pickerCoords,
+    customCategories,
+    triggerRefs,
+    emojiPickerRef,
+    onSetActiveEmojiOption,
+    onOptionChange,
+    onRemoveOption,
+    onAddOption,
+    onEmojiSelect,
+}: {
+    options: PollOptionInput[];
+    activeEmojiOption: string | null;
+    pickerCoords: { top: number; left: number };
+    customCategories: ReturnType<typeof useCustomEmojis>['customCategories'];
+    triggerRefs: React.RefObject<Record<string, HTMLButtonElement | null>>;
+    emojiPickerRef: React.RefObject<HTMLDivElement | null>;
+    onSetActiveEmojiOption: (id: string | null) => void;
+    onOptionChange: (id: string, text: string) => void;
+    onRemoveOption: (id: string) => void;
+    onAddOption: () => void;
+    onEmojiSelect: (
+        id: string,
+        emoji: string,
+        type: 'unicode' | 'custom',
+        emojiId?: string,
+    ) => void;
+}) => (
+    <Box>
+        <Text className="mb-2 text-sm font-semibold text-foreground">
+            Options
+        </Text>
+        <Box className="relative flex flex-col gap-2">
+            {options.map((opt, index) => (
+                <Box className="relative flex items-center gap-2" key={opt.id}>
+                    <Button
+                        className="h-10 w-10 shrink-0 p-0 text-muted-foreground hover:bg-white/5 hover:text-foreground"
+                        ref={(el): void => {
+                            triggerRefs.current[opt.id] = el;
+                        }}
+                        size="sm"
+                        variant="ghost"
+                        onClick={(): void => {
+                            onSetActiveEmojiOption(
+                                activeEmojiOption === opt.id ? null : opt.id,
+                            );
+                        }}
+                    >
+                        {opt.emoji ? (
+                            <Box className="flex items-center justify-center">
+                                {opt.emojiType === 'custom' && opt.emojiId ? (
+                                    <ParsedEmoji
+                                        className="h-6 w-6"
+                                        emojiId={opt.emojiId}
+                                    />
+                                ) : (
+                                    <ParsedUnicodeEmoji
+                                        className="text-xl"
+                                        content={opt.emoji}
+                                    />
+                                )}
+                            </Box>
+                        ) : (
+                            <Smile size={18} />
+                        )}
+                    </Button>
+                    <Input
+                        maxLength={192}
+                        placeholder={`Option ${index + 1}`}
+                        value={opt.text}
+                        onChange={(e): void => {
+                            onOptionChange(opt.id, e.target.value);
+                        }}
+                    />
+                    {options.length > 2 ? (
+                        <Button
+                            className="h-10 w-10 shrink-0 p-0 text-muted-foreground hover:bg-danger/20 hover:text-danger"
+                            size="sm"
+                            variant="ghost"
+                            onClick={(): void => {
+                                onRemoveOption(opt.id);
+                            }}
+                        >
+                            <Trash2 size={18} />
+                        </Button>
+                    ) : null}
+                </Box>
+            ))}
+
+            {activeEmojiOption
+                ? createPortal(
+                      <Box
+                          className="fixed z-[10000]"
+                          ref={emojiPickerRef}
+                          style={{
+                              top: pickerCoords.top,
+                              left: pickerCoords.left,
+                          }}
+                      >
+                          <React.Suspense
+                              fallback={
+                                  <div className="h-64 w-64 rounded-lg bg-bg-secondary" />
+                              }
+                          >
+                              <EmojiPicker
+                                  customCategories={customCategories}
+                                  onCustomEmojiSelect={(emoji): void => {
+                                      onEmojiSelect(
+                                          activeEmojiOption,
+                                          emoji.name,
+                                          'custom',
+                                          emoji.id,
+                                      );
+                                      onSetActiveEmojiOption(null);
+                                  }}
+                                  onEmojiSelect={(emoji): void => {
+                                      onEmojiSelect(
+                                          activeEmojiOption,
+                                          emoji,
+                                          'unicode',
+                                      );
+                                      onSetActiveEmojiOption(null);
+                                  }}
+                              />
+                          </React.Suspense>
+                      </Box>,
+                      document.body,
+                  )
+                : null}
+
+            {options.length < 10 ? (
+                <Button
+                    className="bg-bg-tertiary mt-2 w-full justify-start text-muted-foreground hover:bg-bg-subtle hover:text-foreground"
+                    variant="ghost"
+                    onClick={onAddOption}
+                >
+                    <Plus className="mr-2" size={18} />
+                    Add Option
+                </Button>
+            ) : null}
+        </Box>
+    </Box>
+);
+
+const PollDurationSection = ({
+    durationValue,
+    durationUnit,
+    maxDurationValue,
+    expiryPreview,
+    onDurationValueChange,
+    onDurationUnitChange,
+}: {
+    durationValue: number;
+    durationUnit: 'minutes' | 'hours' | 'days';
+    maxDurationValue: number;
+    expiryPreview: string;
+    onDurationValueChange: (v: number) => void;
+    onDurationUnitChange: (u: 'minutes' | 'hours' | 'days') => void;
+}) => (
+    <Box className="flex flex-col gap-2">
+        <Text className="text-sm font-semibold text-foreground">
+            Poll Duration
+        </Text>
+        <Box className="mb-2 flex flex-wrap gap-2">
+            {POLL_DURATION_PRESETS.map((p) => (
+                <Button
+                    className={
+                        durationValue === p.val && durationUnit === p.unit
+                            ? ''
+                            : 'bg-white/5'
+                    }
+                    key={p.label}
+                    size="sm"
+                    variant={
+                        durationValue === p.val && durationUnit === p.unit
+                            ? 'primary'
+                            : 'ghost'
+                    }
+                    onClick={(): void => {
+                        onDurationValueChange(p.val);
+                        onDurationUnitChange(p.unit);
+                    }}
+                >
+                    {p.label}
+                </Button>
+            ))}
+        </Box>
+        <Box className="flex items-center gap-2">
+            <Input
+                className="w-24"
+                max={maxDurationValue}
+                min={1}
+                type="number"
+                value={durationValue}
+                onChange={(e): void => {
+                    onDurationValueChange(Number(e.target.value));
+                }}
+            />
+            <select
+                className="bg-bg-tertiary h-10 cursor-pointer rounded-md border border-border-subtle px-3 py-2 text-sm text-foreground transition-colors hover:border-primary/30 focus:ring-2 focus:ring-primary/50 focus:outline-none"
+                value={durationUnit}
+                onChange={(e): void => {
+                    onDurationUnitChange(
+                        e.target.value as 'minutes' | 'hours' | 'days',
+                    );
+                }}
+            >
+                <option value="minutes">Minutes</option>
+                <option value="hours">Hours</option>
+                <option value="days">Days</option>
+            </select>
+        </Box>
+        <Box className="mt-2">
+            <Slider
+                max={maxDurationValue}
+                min={durationUnit === 'minutes' ? 5 : 1}
+                value={durationValue}
+                onValueChange={onDurationValueChange}
+            />
+        </Box>
+        <Text className="mt-0.5 text-[10px] text-muted-foreground">
+            Poll closes:{' '}
+            <span className="font-medium text-foreground/70">
+                {expiryPreview}
+            </span>
+        </Text>
+    </Box>
+);
+
 export const CreatePollModal = ({
     isOpen,
     onClose,
     onSubmit,
 }: CreatePollModalProps) => {
+    // Already reset via the isOpen-transition guard below on every reopen
     const [syncedIsOpen, setSyncedIsOpen] = useState(isOpen);
-    const [title, setTitle] = useState('');
-    const [options, setOptions] = useState<PollOptionInput[]>([
-        { id: '1', text: '' },
-        { id: '2', text: '' },
-    ]);
-    const [multiSelect, setMultiSelect] = useState(false);
-    const [durationValue, setDurationValue] = useState(1);
-    const [durationUnit, setDurationUnit] = useState<
-        'minutes' | 'hours' | 'days'
-    >('hours');
+    interface PollForm {
+        title: string;
+        options: PollOptionInput[];
+        multiSelect: boolean;
+        durationValue: number;
+        durationUnit: 'minutes' | 'hours' | 'days';
+    }
+    const [form, patchForm] = useReducer(mergeReducer<PollForm>, {
+        title: '',
+        options: [
+            { id: '1', text: '' },
+            { id: '2', text: '' },
+        ],
+        multiSelect: false,
+        durationValue: 1,
+        durationUnit: 'hours',
+    });
+    const { title, options, multiSelect, durationValue, durationUnit } = form;
+    const setTitle = (v: string): void => {
+        patchForm({ title: v });
+    };
+    const setOptions = (v: PollOptionInput[]): void => {
+        patchForm({ options: v });
+    };
+    const setMultiSelect = (v: boolean): void => {
+        patchForm({ multiSelect: v });
+    };
+    const setDurationValue = (v: number): void => {
+        patchForm({ durationValue: v });
+    };
+    const setDurationUnit = (v: 'minutes' | 'hours' | 'days'): void => {
+        patchForm({ durationUnit: v });
+    };
     const [previewBaseTime] = useState((): number => Date.now());
 
     const [activeEmojiOption, setActiveEmojiOption] = useState<string | null>(
@@ -130,15 +386,15 @@ export const CreatePollModal = ({
             };
 
             window.addEventListener('scroll', handleScroll, true);
-            window.addEventListener('resize', (): void =>
-                updatePickerPosition(activeEmojiOption),
-            );
+            window.addEventListener('resize', (): void => {
+                updatePickerPosition(activeEmojiOption);
+            });
 
             return (): void => {
                 window.removeEventListener('scroll', handleScroll, true);
-                window.removeEventListener('resize', (): void =>
-                    updatePickerPosition(activeEmojiOption),
-                );
+                window.removeEventListener('resize', (): void => {
+                    updatePickerPosition(activeEmojiOption);
+                });
             };
         }
     }, [activeEmojiOption]);
@@ -261,134 +517,25 @@ export const CreatePollModal = ({
                         maxLength={192}
                         placeholder="Ask a question..."
                         value={title}
-                        onChange={(e): void => setTitle(e.target.value)}
+                        onChange={(e): void => {
+                            setTitle(e.target.value);
+                        }}
                     />
                 </Box>
 
-                <Box>
-                    <Text className="mb-2 text-sm font-semibold text-foreground">
-                        Options
-                    </Text>
-                    <Box className="relative flex flex-col gap-2">
-                        {options.map((opt, index) => (
-                            <Box
-                                className="relative flex items-center gap-2"
-                                key={opt.id}
-                            >
-                                <Button
-                                    className="h-10 w-10 shrink-0 p-0 text-muted-foreground hover:bg-white/5 hover:text-foreground"
-                                    ref={(el): void => {
-                                        triggerRefs.current[opt.id] = el;
-                                    }}
-                                    size="sm"
-                                    variant="ghost"
-                                    onClick={(): void =>
-                                        setActiveEmojiOption(
-                                            activeEmojiOption === opt.id
-                                                ? null
-                                                : opt.id,
-                                        )
-                                    }
-                                >
-                                    {opt.emoji ? (
-                                        <Box className="flex items-center justify-center">
-                                            {opt.emojiType === 'custom' &&
-                                            opt.emojiId ? (
-                                                <ParsedEmoji
-                                                    className="h-6 w-6"
-                                                    emojiId={opt.emojiId}
-                                                />
-                                            ) : (
-                                                <ParsedUnicodeEmoji
-                                                    className="text-xl"
-                                                    content={opt.emoji}
-                                                />
-                                            )}
-                                        </Box>
-                                    ) : (
-                                        <Smile size={18} />
-                                    )}
-                                </Button>
-                                <Input
-                                    maxLength={192}
-                                    placeholder={`Option ${index + 1}`}
-                                    value={opt.text}
-                                    onChange={(e): void =>
-                                        handleOptionChange(
-                                            opt.id,
-                                            e.target.value,
-                                        )
-                                    }
-                                />
-                                {options.length > 2 && (
-                                    <Button
-                                        className="h-10 w-10 shrink-0 p-0 text-muted-foreground hover:bg-danger/20 hover:text-danger"
-                                        size="sm"
-                                        variant="ghost"
-                                        onClick={(): void =>
-                                            handleRemoveOption(opt.id)
-                                        }
-                                    >
-                                        <Trash2 size={18} />
-                                    </Button>
-                                )}
-                            </Box>
-                        ))}
-
-                        {activeEmojiOption &&
-                            createPortal(
-                                <Box
-                                    className="fixed z-[10000]"
-                                    ref={emojiPickerRef}
-                                    style={{
-                                        top: pickerCoords.top,
-                                        left: pickerCoords.left,
-                                    }}
-                                >
-                                    <React.Suspense
-                                        fallback={
-                                            <div className="h-64 w-64 rounded-lg bg-bg-secondary" />
-                                        }
-                                    >
-                                        <EmojiPicker
-                                            customCategories={customCategories}
-                                            onCustomEmojiSelect={(
-                                                emoji,
-                                            ): void => {
-                                                handleEmojiSelect(
-                                                    activeEmojiOption,
-                                                    emoji.name,
-                                                    'custom',
-                                                    emoji.id,
-                                                );
-                                                setActiveEmojiOption(null);
-                                            }}
-                                            onEmojiSelect={(emoji): void => {
-                                                handleEmojiSelect(
-                                                    activeEmojiOption,
-                                                    emoji,
-                                                    'unicode',
-                                                );
-                                                setActiveEmojiOption(null);
-                                            }}
-                                        />
-                                    </React.Suspense>
-                                </Box>,
-                                document.body,
-                            )}
-
-                        {options.length < 10 && (
-                            <Button
-                                className="bg-bg-tertiary mt-2 w-full justify-start text-muted-foreground hover:bg-bg-subtle hover:text-foreground"
-                                variant="ghost"
-                                onClick={handleAddOption}
-                            >
-                                <Plus className="mr-2" size={18} />
-                                Add Option
-                            </Button>
-                        )}
-                    </Box>
-                </Box>
+                <PollOptionsEditor
+                    activeEmojiOption={activeEmojiOption}
+                    customCategories={customCategories}
+                    emojiPickerRef={emojiPickerRef}
+                    options={options}
+                    pickerCoords={pickerCoords}
+                    triggerRefs={triggerRefs}
+                    onAddOption={handleAddOption}
+                    onEmojiSelect={handleEmojiSelect}
+                    onOptionChange={handleOptionChange}
+                    onRemoveOption={handleRemoveOption}
+                    onSetActiveEmojiOption={setActiveEmojiOption}
+                />
 
                 <Box className="flex items-center justify-between">
                     <Text className="text-sm font-semibold text-foreground">
@@ -400,79 +547,14 @@ export const CreatePollModal = ({
                     />
                 </Box>
 
-                <Box className="flex flex-col gap-2">
-                    <Text className="text-sm font-semibold text-foreground">
-                        Poll Duration
-                    </Text>
-                    <Box className="mb-2 flex flex-wrap gap-2">
-                        {POLL_DURATION_PRESETS.map((p) => (
-                            <Button
-                                className={
-                                    durationValue === p.val &&
-                                    durationUnit === p.unit
-                                        ? ''
-                                        : 'bg-white/5'
-                                }
-                                key={p.label}
-                                size="sm"
-                                variant={
-                                    durationValue === p.val &&
-                                    durationUnit === p.unit
-                                        ? 'primary'
-                                        : 'ghost'
-                                }
-                                onClick={(): void => {
-                                    setDurationValue(p.val);
-                                    setDurationUnit(p.unit);
-                                }}
-                            >
-                                {p.label}
-                            </Button>
-                        ))}
-                    </Box>
-                    <Box className="flex items-center gap-2">
-                        <Input
-                            className="w-24"
-                            max={maxDurationValue}
-                            min={1}
-                            type="number"
-                            value={durationValue}
-                            onChange={(e): void =>
-                                setDurationValue(Number(e.target.value))
-                            }
-                        />
-                        <select
-                            className="bg-bg-tertiary h-10 cursor-pointer rounded-md border border-border-subtle px-3 py-2 text-sm text-foreground transition-colors hover:border-primary/30 focus:ring-2 focus:ring-primary/50 focus:outline-none"
-                            value={durationUnit}
-                            onChange={(e): void =>
-                                setDurationUnit(
-                                    e.target.value as
-                                        | 'minutes'
-                                        | 'hours'
-                                        | 'days',
-                                )
-                            }
-                        >
-                            <option value="minutes">Minutes</option>
-                            <option value="hours">Hours</option>
-                            <option value="days">Days</option>
-                        </select>
-                    </Box>
-                    <Box className="mt-2">
-                        <Slider
-                            max={maxDurationValue}
-                            min={durationUnit === 'minutes' ? 5 : 1}
-                            value={durationValue}
-                            onValueChange={setDurationValue}
-                        />
-                    </Box>
-                    <Text className="mt-0.5 text-[10px] text-muted-foreground">
-                        Poll closes:{' '}
-                        <span className="font-medium text-foreground/70">
-                            {expiryPreview}
-                        </span>
-                    </Text>
-                </Box>
+                <PollDurationSection
+                    durationUnit={durationUnit}
+                    durationValue={durationValue}
+                    expiryPreview={expiryPreview}
+                    maxDurationValue={maxDurationValue}
+                    onDurationUnitChange={setDurationUnit}
+                    onDurationValueChange={setDurationValue}
+                />
 
                 <Box className="mt-4 flex justify-end gap-2">
                     <Button variant="ghost" onClick={onClose}>

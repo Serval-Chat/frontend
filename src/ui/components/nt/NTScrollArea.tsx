@@ -69,7 +69,9 @@ export const NTScrollArea = ({
         const viewport = viewportRef.current;
         if (!viewport) return;
 
-        const handler = (): void => updateMetricsRef.current();
+        const handler = (): void => {
+            updateMetricsRef.current();
+        };
 
         const resizeObserver = new ResizeObserver(handler);
         resizeObserver.observe(viewport);
@@ -141,12 +143,15 @@ export const NTScrollArea = ({
             };
 
             const handlePointerUp = (): void => {
-                window.removeEventListener('pointermove', handlePointerMove);
-                window.removeEventListener('pointerup', handlePointerUp);
+                globalThis.removeEventListener(
+                    'pointermove',
+                    handlePointerMove,
+                );
+                globalThis.removeEventListener('pointerup', handlePointerUp);
             };
 
-            window.addEventListener('pointermove', handlePointerMove);
-            window.addEventListener('pointerup', handlePointerUp);
+            globalThis.addEventListener('pointermove', handlePointerMove);
+            globalThis.addEventListener('pointerup', handlePointerUp);
         },
         [metrics],
     );
@@ -213,7 +218,7 @@ export const NTScrollArea = ({
                 {children}
             </div>
 
-            {hasVertical && verticalThumb && (
+            {hasVertical && verticalThumb ? (
                 <div
                     aria-hidden="true"
                     className="nt-scroll-area__bar nt-scroll-area__bar--vertical"
@@ -223,14 +228,18 @@ export const NTScrollArea = ({
                         aria-label="Scroll up"
                         className="nt-scroll-area__button nt-scroll-area__button--up"
                         type="button"
-                        onClick={(): void => scrollBy(0, -SCROLL_STEP)}
+                        onClick={(): void => {
+                            scrollBy(0, -SCROLL_STEP);
+                        }}
                     />
                     <div className="nt-scroll-area__track" />
                     <button
                         aria-label="Scroll down"
                         className="nt-scroll-area__button nt-scroll-area__button--down"
                         type="button"
-                        onClick={(): void => scrollBy(0, SCROLL_STEP)}
+                        onClick={(): void => {
+                            scrollBy(0, SCROLL_STEP);
+                        }}
                     />
                     <div
                         className="nt-scroll-area__thumb nt-scroll-area__thumb--vertical"
@@ -239,14 +248,14 @@ export const NTScrollArea = ({
                             height: verticalThumb.size,
                             top: verticalThumb.start,
                         }}
-                        onPointerDown={(event): void =>
-                            startDrag('vertical', event)
-                        }
+                        onPointerDown={(event): void => {
+                            startDrag('vertical', event);
+                        }}
                     />
                 </div>
-            )}
+            ) : null}
 
-            {hasHorizontal && horizontalThumb && (
+            {hasHorizontal && horizontalThumb ? (
                 <div
                     aria-hidden="true"
                     className="nt-scroll-area__bar nt-scroll-area__bar--horizontal"
@@ -256,14 +265,18 @@ export const NTScrollArea = ({
                         aria-label="Scroll left"
                         className="nt-scroll-area__button nt-scroll-area__button--left"
                         type="button"
-                        onClick={(): void => scrollBy(-SCROLL_STEP, 0)}
+                        onClick={(): void => {
+                            scrollBy(-SCROLL_STEP, 0);
+                        }}
                     />
                     <div className="nt-scroll-area__track" />
                     <button
                         aria-label="Scroll right"
                         className="nt-scroll-area__button nt-scroll-area__button--right"
                         type="button"
-                        onClick={(): void => scrollBy(SCROLL_STEP, 0)}
+                        onClick={(): void => {
+                            scrollBy(SCROLL_STEP, 0);
+                        }}
                     />
                     <div
                         className="nt-scroll-area__thumb nt-scroll-area__thumb--horizontal"
@@ -272,16 +285,16 @@ export const NTScrollArea = ({
                             left: horizontalThumb.start,
                             width: horizontalThumb.size,
                         }}
-                        onPointerDown={(event): void =>
-                            startDrag('horizontal', event)
-                        }
+                        onPointerDown={(event): void => {
+                            startDrag('horizontal', event);
+                        }}
                     />
                 </div>
-            )}
+            ) : null}
 
-            {hasVertical && hasHorizontal && (
+            {hasVertical && hasHorizontal ? (
                 <div aria-hidden="true" className="nt-scroll-area__corner" />
-            )}
+            ) : null}
         </div>
     );
 };

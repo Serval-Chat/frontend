@@ -45,17 +45,19 @@ export const MessageActions = React.memo(
         reactRef,
     }: MessageActionsProps) => (
         <Box className="flex items-center gap-1 rounded border border-white/5 bg-bg-secondary px-1 py-1 shadow-xl max-md:hidden">
-            {onReplyToMessage && (
+            {onReplyToMessage ? (
                 <Button
                     className="h-8 w-8 rounded p-1.5 text-muted-foreground transition-colors hover:bg-white/5 hover:text-foreground"
                     size="sm"
                     title="Reply"
                     variant="ghost"
-                    onClick={(): void => onReplyToMessage(message)}
+                    onClick={(): void => {
+                        onReplyToMessage(message);
+                    }}
                 >
                     <CornerUpLeft size={18} />
                 </Button>
-            )}
+            ) : null}
             <Button
                 className={cn(
                     'h-8 w-8 rounded p-1.5 text-muted-foreground transition-colors hover:bg-white/5 hover:text-foreground',
@@ -70,7 +72,7 @@ export const MessageActions = React.memo(
                 <SmilePlus size={18} />
             </Button>
 
-            {canEdit && (
+            {canEdit ? (
                 <Button
                     className="h-8 w-8 rounded p-1.5 text-muted-foreground transition-colors hover:bg-white/5 hover:text-foreground"
                     size="sm"
@@ -80,9 +82,9 @@ export const MessageActions = React.memo(
                 >
                     <Edit size={18} />
                 </Button>
-            )}
+            ) : null}
 
-            {canPin && message.serverId && message.channelId && (
+            {canPin && message.serverId && message.channelId ? (
                 <>
                     <Button
                         className={cn(
@@ -127,9 +129,9 @@ export const MessageActions = React.memo(
                         />
                     </Button>
                 </>
-            )}
+            ) : null}
 
-            {canDelete && (
+            {canDelete ? (
                 <Button
                     className="h-8 w-8 rounded p-1.5 text-muted-foreground transition-colors hover:bg-danger/20 hover:text-danger"
                     size="sm"
@@ -139,7 +141,7 @@ export const MessageActions = React.memo(
                 >
                     <Trash2 size={18} />
                 </Button>
-            )}
+            ) : null}
         </Box>
     ),
 );

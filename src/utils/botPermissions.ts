@@ -2,7 +2,7 @@ import { BOT_PERMISSION_KEYS } from '@/types/bot';
 import type { BotPermissionKey, BotPermissions } from '@/types/bot';
 
 export const BOT_PERMISSION_BITS: Record<BotPermissionKey, number> = {
-    readMessages: 1 << 0,
+    readMessages: Math.trunc(1),
     sendMessages: 1 << 1,
     manageMessages: 1 << 2,
     readUsers: 1 << 3,

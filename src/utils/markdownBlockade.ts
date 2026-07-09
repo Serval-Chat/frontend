@@ -59,14 +59,10 @@ const ruleMatchesSender = (
 ): boolean => {
     if (rule.targetType === 'everyone') return true;
     if (rule.targetType === 'user') return rule.targetId === senderId;
-    if (rule.targetType === 'role') {
-        return (
-            senderMember?.roles.includes(rule.targetId) === true ||
-            senderRoles?.some((role): boolean => role.id === rule.targetId) ===
-                true
-        );
-    }
-    return false;
+    return (
+        senderMember?.roles.includes(rule.targetId) === true ||
+        senderRoles?.some((role): boolean => role.id === rule.targetId) === true
+    );
 };
 
 const getRuleSpecificity = (
@@ -176,9 +172,7 @@ export const getBlockedMarkdownFeatures = (params: {
 
         for (const rule of mostSpecificRules) {
             if (highestSpecificity > 0) {
-                rule.features.forEach(
-                    (feature): Set<ParserFeature> => blocked.add(feature),
-                );
+                for (const feature of rule.features) blocked.add(feature);
             }
         }
     }
@@ -200,5 +194,5 @@ export const formatBlockedMarkdownFeatures = (
 ): string =>
     features
         .map((feature): string => featureLabels.get(feature) ?? feature)
-        .sort((a, b): number => a.localeCompare(b))
+        .toSorted((a, b): number => a.localeCompare(b))
         .join(', ');

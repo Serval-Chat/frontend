@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
 import { useChangeLogin } from '@/api/auth/auth.queries';
-import { type ApiError } from '@/api/types';
+import type { ApiError } from '@/api/types';
 import { useMe } from '@/api/users/users.queries';
 import { Button } from '@/ui/components/common/Button';
 import { Input } from '@/ui/components/common/Input';
@@ -107,13 +107,15 @@ export const ChangeLoginModal = ({
                             id="new-login"
                             type="text"
                             value={newLogin}
-                            onChange={(e): void => setNewLogin(e.target.value)}
+                            onChange={(e): void => {
+                                setNewLogin(e.target.value);
+                            }}
                         />
-                        {errors.newLogin && (
+                        {errors.newLogin ? (
                             <Text className="text-status-error" size="xs">
                                 {errors.newLogin}
                             </Text>
-                        )}
+                        ) : null}
                     </Box>
 
                     <Box className="space-y-2">
@@ -127,13 +129,15 @@ export const ChangeLoginModal = ({
                             id="password"
                             type="password"
                             value={password}
-                            onChange={(e): void => setPassword(e.target.value)}
+                            onChange={(e): void => {
+                                setPassword(e.target.value);
+                            }}
                         />
-                        {errors.password && (
+                        {errors.password ? (
                             <Text className="text-status-error" size="xs">
                                 {errors.password}
                             </Text>
-                        )}
+                        ) : null}
                         <Text size="xs" variant="muted">
                             Enter your current password to confirm this change.
                         </Text>

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-import { type Channel } from '@/api/servers/servers.types';
+import type { Channel } from '@/api/servers/servers.types';
 import { SettingsContentPane } from '@/ui/components/common/settings/SettingsContentPane';
 import { SettingsModalLayout } from '@/ui/components/common/settings/SettingsModalLayout';
 import { ChannelSettingsSidebar } from '@/ui/components/servers/settings/ChannelSettingsSidebar';
@@ -63,7 +63,9 @@ export const ChannelSettingsModal = ({
                 />
             }
             onClose={onClose}
-            onMobileBackClick={(): void => setIsMobileSidebarOpen(true)}
+            onMobileBackClick={(): void => {
+                setIsMobileSidebarOpen(true);
+            }}
         >
             <React.Suspense fallback={null}>
                 {activeSection === 'overview' ? (

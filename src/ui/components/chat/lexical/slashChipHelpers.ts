@@ -1,10 +1,53 @@
-import { $getRoot, $isParagraphNode, type LexicalEditor } from 'lexical';
+import {
+    $getRoot,
+    $isParagraphNode,
+    type LexicalEditor,
+    type LexicalNode,
+    createCommand,
+} from 'lexical';
 
 import type { SlashCommand } from '@/api/interactions/interactions.api';
 
-import { $isSlashArgChipNode } from './SlashArgChipNode';
-import { $isSlashCommandChipNode } from './SlashCommandChipNode';
+// type-only: SlashArgChipNode.ts and SlashCommandChipNode.ts each import their
+// Component counterpart (for decorate()), and the Components import the type
+// guards below. Importing the node classes as values here would complete the
+// cycle; `getType()` string checks let this stay type-only instead.
+import type { SlashArgChipNode } from './SlashArgChipNode';
+import type { SlashCommandChipNode } from './SlashCommandChipNode';
 import { validateSlashCommand } from './slashCommands';
+
+export const SLASH_ARG_INPUT_ATTR = 'data-slash-arg-idx';
+
+export function focusSlashArgInput(editor: LexicalEditor, index: number): void {
+    const root = editor.getRootElement();
+    if (!root) return;
+    const input = root.querySelector<HTMLInputElement>(
+        `[${SLASH_ARG_INPUT_ATTR}="${index}"]`,
+    );
+    if (input) {
+        input.focus();
+        const len = input.value.length;
+        input.setSelectionRange(len, len);
+    }
+}
+
+export function $isSlashArgChipNode(
+    node: LexicalNode | null | undefined,
+): node is SlashArgChipNode {
+    return node?.getType() === 'slash-arg-chip';
+}
+
+/**
+ * dispatch this command to cancel the active slash command and clear all chips.
+ * The handler is registered in LexicalSlashCommandPlugin to avoid circular deps.
+ */
+export const CANCEL_SLASH_COMMAND = createCommand<void>('CANCEL_SLASH_COMMAND');
+
+export function $isSlashCommandChipNode(
+    node: LexicalNode | null | undefined,
+): node is SlashCommandChipNode {
+    return node?.getType() === 'slash-command-chip';
+}
 
 /**
  * Must be called inside `editor.update()`.

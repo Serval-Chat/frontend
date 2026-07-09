@@ -9,54 +9,72 @@ interface AnsiSegment {
 
 function getStandardColor(code: number): string {
     switch (code) {
-        case 0:
+        case 0: {
             return '#000000';
-        case 1:
+        }
+        case 1: {
             return '#ff5555';
-        case 2:
+        }
+        case 2: {
             return '#55ff55';
-        case 3:
+        }
+        case 3: {
             return '#ffff55';
-        case 4:
+        }
+        case 4: {
             return '#5555ff';
-        case 5:
+        }
+        case 5: {
             return '#ff55ff';
-        case 6:
+        }
+        case 6: {
             return '#55ffff';
-        case 7:
+        }
+        case 7: {
             return '#bbbbbb';
-        default:
+        }
+        default: {
             return '';
+        }
     }
 }
 
 function getBrightColor(code: number): string {
     switch (code) {
-        case 0:
+        case 0: {
             return '#555555';
-        case 1:
+        }
+        case 1: {
             return '#ff5555';
-        case 2:
+        }
+        case 2: {
             return '#55ff55';
-        case 3:
+        }
+        case 3: {
             return '#ffff55';
-        case 4:
+        }
+        case 4: {
             return '#5555ff';
-        case 5:
+        }
+        case 5: {
             return '#ff55ff';
-        case 6:
+        }
+        case 6: {
             return '#55ffff';
-        case 7:
+        }
+        case 7: {
             return '#ffffff';
-        default:
+        }
+        default: {
             return '';
+        }
     }
 }
 
 export function parseAnsi(text: string): React.ReactNode[] {
     const segments: AnsiSegment[] = [];
     // eslint-disable-next-line no-control-regex
-    const ansiRegex = /\u001b\[([0-9;]*)([mK])/g;
+    const ansiRegex = /\u001B\[([0-9;]*)([mK])/g;
 
     let lastIndex = 0;
     let currentColor: string | undefined = undefined;
@@ -73,7 +91,7 @@ export function parseAnsi(text: string): React.ReactNode[] {
             let segmentText = text.substring(lastIndex, matchIndex);
             const crIndex = segmentText.lastIndexOf('\r');
             if (crIndex !== -1) {
-                segmentText = segmentText.substring(crIndex + 1);
+                segmentText = segmentText.slice(Math.max(0, crIndex + 1));
             }
             if (segmentText.length > 0) {
                 segments.push({
@@ -98,48 +116,67 @@ export function parseAnsi(text: string): React.ReactNode[] {
                 let idx = 0;
                 while (idx < parts.length) {
                     const code = parts[idx];
-                    if (code === 0) {
-                        currentColor = undefined;
-                        currentBgColor = undefined;
-                        inverse = false;
+                    if (code === undefined) {
                         idx++;
-                    } else if (code === 7) {
-                        inverse = true;
-                        idx++;
-                    } else if (code === 27) {
-                        inverse = false;
-                        idx++;
-                    } else if (
-                        code === 38 &&
-                        parts[idx + 1] === 2 &&
-                        idx + 4 < parts.length
-                    ) {
-                        const r = parts[idx + 2];
-                        const g = parts[idx + 3];
-                        const b = parts[idx + 4];
-                        currentColor = `rgb(${r},${g},${b})`;
-                        idx += 5;
-                    } else if (
-                        code === 48 &&
-                        parts[idx + 1] === 2 &&
-                        idx + 4 < parts.length
-                    ) {
-                        const r = parts[idx + 2];
-                        const g = parts[idx + 3];
-                        const b = parts[idx + 4];
-                        currentBgColor = `rgb(${r},${g},${b})`;
-                        idx += 5;
-                    } else {
-                        if (code >= 30 && code <= 37) {
-                            currentColor = getStandardColor(code - 30);
-                        } else if (code >= 90 && code <= 97) {
-                            currentColor = getBrightColor(code - 90);
-                        } else if (code >= 40 && code <= 47) {
-                            currentBgColor = getStandardColor(code - 40);
-                        } else if (code >= 100 && code <= 107) {
-                            currentBgColor = getBrightColor(code - 100);
+                        continue;
+                    }
+                    switch (code) {
+                        case 0: {
+                            currentColor = undefined;
+                            currentBgColor = undefined;
+                            inverse = false;
+                            idx++;
+
+                            break;
                         }
-                        idx++;
+                        case 7: {
+                            inverse = true;
+                            idx++;
+
+                            break;
+                        }
+                        case 27: {
+                            inverse = false;
+                            idx++;
+
+                            break;
+                        }
+                        default: {
+                            if (
+                                code === 38 &&
+                                parts[idx + 1] === 2 &&
+                                idx + 4 < parts.length
+                            ) {
+                                const r = parts[idx + 2];
+                                const g = parts[idx + 3];
+                                const b = parts[idx + 4];
+                                currentColor = `rgb(${r},${g},${b})`;
+                                idx += 5;
+                            } else if (
+                                code === 48 &&
+                                parts[idx + 1] === 2 &&
+                                idx + 4 < parts.length
+                            ) {
+                                const r = parts[idx + 2];
+                                const g = parts[idx + 3];
+                                const b = parts[idx + 4];
+                                currentBgColor = `rgb(${r},${g},${b})`;
+                                idx += 5;
+                            } else {
+                                if (code >= 30 && code <= 37) {
+                                    currentColor = getStandardColor(code - 30);
+                                } else if (code >= 90 && code <= 97) {
+                                    currentColor = getBrightColor(code - 90);
+                                } else if (code >= 40 && code <= 47) {
+                                    currentBgColor = getStandardColor(
+                                        code - 40,
+                                    );
+                                } else if (code >= 100 && code <= 107) {
+                                    currentBgColor = getBrightColor(code - 100);
+                                }
+                                idx++;
+                            }
+                        }
                     }
                 }
             }
@@ -149,10 +186,10 @@ export function parseAnsi(text: string): React.ReactNode[] {
     }
 
     if (lastIndex < text.length) {
-        let segmentText = text.substring(lastIndex);
+        let segmentText = text.slice(Math.max(0, lastIndex));
         const crIndex = segmentText.lastIndexOf('\r');
         if (crIndex !== -1) {
-            segmentText = segmentText.substring(crIndex + 1);
+            segmentText = segmentText.slice(Math.max(0, crIndex + 1));
         }
         if (segmentText.length > 0) {
             segments.push({

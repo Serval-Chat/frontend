@@ -34,20 +34,18 @@ const normalizePermissions = (permissions: unknown) => {
     const p = permissions as Record<string, unknown>;
     const normalized: Partial<AdminPermissions> = {};
 
-    (Object.keys(defaults) as (keyof AdminPermissions)[]).forEach(
-        (key): void => {
-            normalized[key] = p[key] === true;
-        },
-    );
+    for (const key of Object.keys(defaults) as (keyof AdminPermissions)[]) {
+        normalized[key] = p[key] === true;
+    }
 
     return normalized as AdminPermissions;
 };
 
 export const useAdminUsers = (
-    search: string = '',
-    page: number = 0,
+    search = '',
+    page = 0,
     limit: number = ADMIN_CONSTANTS.DEFAULT_PAGE_SIZE,
-): UseQueryResult<AdminUser[], Error> =>
+): UseQueryResult<AdminUser[]> =>
     useQuery<AdminUser[]>({
         queryKey: ['admin-users', search, page, limit],
         queryFn: async () => {
@@ -71,7 +69,7 @@ export const useAdminUsers = (
 
 export const useAdminUserDetail = (
     userId: string | null,
-): UseQueryResult<AdminExtendedUser, Error> =>
+): UseQueryResult<AdminExtendedUser> =>
     useQuery<AdminExtendedUser>({
         queryKey: ['admin-user-detail', userId],
         queryFn: async () => {

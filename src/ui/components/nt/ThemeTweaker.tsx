@@ -31,17 +31,19 @@ export const ThemeTweaker = () => {
     const handlePrevious = (): void => {
         const nextIndex =
             currentIndex <= 0 ? THEMES.length - 1 : currentIndex - 1;
-        setTheme(THEMES[nextIndex].id as Theme);
+        const nextTheme = THEMES[nextIndex];
+        if (nextTheme) setTheme(nextTheme.id as Theme);
     };
 
     const handleNext = (): void => {
         const nextIndex =
             currentIndex >= THEMES.length - 1 ? 0 : currentIndex + 1;
-        setTheme(THEMES[nextIndex].id as Theme);
+        const nextTheme = THEMES[nextIndex];
+        if (nextTheme) setTheme(nextTheme.id as Theme);
     };
 
     const currentThemeLabel =
-        THEMES[currentIndex >= 0 ? currentIndex : 0].label;
+        THEMES[Math.max(currentIndex, 0)]?.label ?? THEMES[0].label;
 
     return (
         <Window

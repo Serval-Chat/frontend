@@ -75,8 +75,7 @@ export function useMessageData(
 
         const myMember = fullMemberMap?.get(myId);
         if (
-            myMember &&
-            myMember.roles.some((roleId): boolean =>
+            myMember?.roles.some((roleId): boolean =>
                 message.text.includes(`<roleid:'${roleId}'>`),
             )
         ) {
@@ -88,13 +87,12 @@ export function useMessageData(
 
     const interactionUser = React.useMemo((): User | undefined => {
         if (!message.interaction?.user?.id || !fullMemberMap) return undefined;
-        const member = fullMemberMap.get(message.interaction!.user!.id);
+        const member = fullMemberMap.get(message.interaction.user.id);
         if (!member) return undefined;
         return {
             ...member.user,
             id: member.userId,
-            username:
-                member.user.username || message.interaction!.user.username,
+            username: member.user.username || message.interaction.user.username,
             displayName: member.user.displayName,
             nickname: member.nickname,
             profilePicture: member.user.profilePicture,
@@ -107,13 +105,13 @@ export function useMessageData(
     const interactionRole = React.useMemo((): Role | undefined => {
         if (!message.interaction?.user?.id || !fullMemberMap || !roleMap)
             return undefined;
-        const member = fullMemberMap.get(message.interaction!.user!.id);
-        if (!member || !member.roles.length) return undefined;
+        const member = fullMemberMap.get(message.interaction.user.id);
+        if (!member?.roles.length) return undefined;
 
         const roles = member.roles
             .map((id): Role | undefined => roleMap.get(id))
             .filter((r): r is Role => !!r);
-        if (!roles.length) return undefined;
+        if (roles.length === 0) return undefined;
 
         const maxPosition = Math.max(...roles.map((r): number => r.position));
         return roles.find((r): boolean => r.position === maxPosition);

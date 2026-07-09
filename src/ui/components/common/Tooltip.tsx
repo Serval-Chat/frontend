@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import { AnimatePresence, m } from 'framer-motion';
 import { createPortal } from 'react-dom';
@@ -32,19 +32,23 @@ const TOOLTIP_ANIMATE_VARIANTS = {
 
 const useTooltipsEnabled = (): boolean => {
     const [isEnabled, setIsEnabled] = useState((): boolean => {
-        if (typeof window === 'undefined') return false;
-        return window.matchMedia(TOOLTIP_MEDIA_QUERY).matches;
+        if (globalThis.window === undefined) return false;
+        return globalThis.matchMedia(TOOLTIP_MEDIA_QUERY).matches;
     });
 
     React.useEffect((): (() => void) | undefined => {
-        if (typeof window === 'undefined') return undefined;
+        if (globalThis.window === undefined) return undefined;
 
-        const query = window.matchMedia(TOOLTIP_MEDIA_QUERY);
-        const handleChange = (): void => setIsEnabled(query.matches);
+        const query = globalThis.matchMedia(TOOLTIP_MEDIA_QUERY);
+        const handleChange = (): void => {
+            setIsEnabled(query.matches);
+        };
 
         query.addEventListener('change', handleChange);
 
-        return (): void => query.removeEventListener('change', handleChange);
+        return (): void => {
+            query.removeEventListener('change', handleChange);
+        };
     }, []);
 
     return isEnabled;
@@ -83,26 +87,30 @@ function resolvePosition(
         let y = 0;
 
         switch (pos) {
-            case 'right':
+            case 'right': {
                 x = rect.right + GAP;
                 y = rect.top + rect.height / 2;
                 if (x + TOOLTIP_ESTIMATED_W > vw) continue;
                 break;
-            case 'left':
+            }
+            case 'left': {
                 x = rect.left - GAP;
                 y = rect.top + rect.height / 2;
                 if (x - TOOLTIP_ESTIMATED_W < 0) continue;
                 break;
-            case 'top':
+            }
+            case 'top': {
                 x = rect.left + rect.width / 2;
                 y = rect.top - GAP;
                 if (y - TOOLTIP_ESTIMATED_H < 0) continue;
                 break;
-            case 'bottom':
+            }
+            case 'bottom': {
                 x = rect.left + rect.width / 2;
                 y = rect.bottom + GAP;
                 if (y + TOOLTIP_ESTIMATED_H > vh) continue;
                 break;
+            }
         }
 
         return { pos, x, y };
@@ -128,7 +136,11 @@ export const Tooltip = ({
     const tooltipsEnabled = useTooltipsEnabled();
     const [isVisible, setIsVisible] = useState(false);
     const [coords, setCoords] = useState({ x: 0, y: 0 });
+    // seeded from the prop only as an initial value before the first DOM
+    // measurement; kept in sync thereafter by updatePosition() and the
+    // isVisible-triggered effect below, so it never goes stale.
     const [effectivePosition, setEffectivePosition] =
+        // react-doctor-disable-next-line react-doctor/no-derived-useState
         useState<TooltipPosition>(position);
     const triggerRef = useRef<HTMLDivElement>(null);
     const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -140,6 +152,14 @@ export const Tooltip = ({
         setEffectivePosition(pos);
         setCoords({ x, y });
     }, [position]);
+
+    // recompute if `position` changes while already visible, so effectivePosition
+    // (seeded from the initial prop, since resolving it needs a DOM measurement
+    // that can't happen during render) never shows a stale value.
+    useEffect((): void => {
+        // react-doctor-disable-next-line react-doctor/no-derived-state, react-doctor/no-event-handler, react-doctor/no-chain-state-updates
+        if (isVisible) updatePosition();
+    }, [isVisible, updatePosition]);
 
     const handleMouseEnter = (): void => {
         if (!tooltipsEnabled) return;
@@ -175,7 +195,9 @@ export const Tooltip = ({
     React.useLayoutEffect((): (() => void) | undefined => {
         if (showTooltip) {
             updatePosition();
-            const hide = (): void => setIsVisible(false);
+            const hide = (): void => {
+                setIsVisible(false);
+            };
             window.addEventListener('scroll', hide, true);
             window.addEventListener('resize', hide);
             return (): void => {
@@ -199,45 +221,55 @@ export const Tooltip = ({
             >
                 {children}
             </div>
-            {tooltipsEnabled &&
-                createPortal(
-                    <AnimatePresence>
-                        {showTooltip && (
-                            <m.div
-                                animate={
-                                    TOOLTIP_ANIMATE_VARIANTS[effectivePosition]
-                                }
-                                className={cn(
-                                    'pointer-events-none fixed z-[var(--z-index-tooltip)] rounded-lg bg-[#111214] px-3 py-1.5 text-[13px] font-bold whitespace-nowrap text-[#f2f3f5] shadow-2xl',
-                                    'before:absolute before:border-[6px] before:border-transparent before:content-[""]',
-                                    effectivePosition === 'right' &&
-                                        'before:top-1/2 before:right-full before:-mr-[1px] before:-translate-y-1/2 before:border-r-[#111214]',
-                                    effectivePosition === 'top' &&
-                                        'before:top-full before:left-1/2 before:-mt-[1px] before:-translate-x-1/2 before:border-t-[#111214]',
-                                    effectivePosition === 'bottom' &&
-                                        'before:bottom-full before:left-1/2 before:-mb-[1px] before:-translate-x-1/2 before:border-b-[#111214]',
-                                    effectivePosition === 'left' &&
-                                        'before:top-1/2 before:left-full before:-ml-[1px] before:-translate-y-1/2 before:border-l-[#111214]',
-                                    className,
-                                )}
-                                exit={
-                                    TOOLTIP_INITIAL_VARIANTS[effectivePosition]
-                                }
-                                initial={
-                                    TOOLTIP_INITIAL_VARIANTS[effectivePosition]
-                                }
-                                style={{
-                                    top: coords.y,
-                                    left: coords.x,
-                                }}
-                                transition={{ duration: 0.1, ease: 'easeOut' }}
-                            >
-                                {content}
-                            </m.div>
-                        )}
-                    </AnimatePresence>,
-                    document.body,
-                )}
+            {tooltipsEnabled
+                ? createPortal(
+                      <AnimatePresence>
+                          {showTooltip ? (
+                              <m.div
+                                  animate={
+                                      TOOLTIP_ANIMATE_VARIANTS[
+                                          effectivePosition
+                                      ]
+                                  }
+                                  className={cn(
+                                      'pointer-events-none fixed z-[var(--z-index-tooltip)] rounded-lg bg-[#111214] px-3 py-1.5 text-[13px] font-bold whitespace-nowrap text-[#f2f3f5] shadow-2xl',
+                                      'before:absolute before:border-[6px] before:border-transparent before:content-[""]',
+                                      effectivePosition === 'right' &&
+                                          'before:top-1/2 before:right-full before:-mr-[1px] before:-translate-y-1/2 before:border-r-[#111214]',
+                                      effectivePosition === 'top' &&
+                                          'before:top-full before:left-1/2 before:-mt-[1px] before:-translate-x-1/2 before:border-t-[#111214]',
+                                      effectivePosition === 'bottom' &&
+                                          'before:bottom-full before:left-1/2 before:-mb-[1px] before:-translate-x-1/2 before:border-b-[#111214]',
+                                      effectivePosition === 'left' &&
+                                          'before:top-1/2 before:left-full before:-ml-[1px] before:-translate-y-1/2 before:border-l-[#111214]',
+                                      className,
+                                  )}
+                                  exit={
+                                      TOOLTIP_INITIAL_VARIANTS[
+                                          effectivePosition
+                                      ]
+                                  }
+                                  initial={
+                                      TOOLTIP_INITIAL_VARIANTS[
+                                          effectivePosition
+                                      ]
+                                  }
+                                  style={{
+                                      top: coords.y,
+                                      left: coords.x,
+                                  }}
+                                  transition={{
+                                      duration: 0.1,
+                                      ease: 'easeOut',
+                                  }}
+                              >
+                                  {content}
+                              </m.div>
+                          ) : null}
+                      </AnimatePresence>,
+                      document.body,
+                  )
+                : null}
         </>
     );
 };

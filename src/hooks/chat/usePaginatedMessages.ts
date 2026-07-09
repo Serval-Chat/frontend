@@ -1,22 +1,20 @@
 import React from 'react';
 
-import {
-    type FetchNextPageOptions,
-    type InfiniteData,
-    type InfiniteQueryObserverResult,
+import type {
+    FetchNextPageOptions,
+    InfiniteData,
+    InfiniteQueryObserverResult,
 } from '@tanstack/react-query';
 
 import { useChannelMessages, useUserMessages } from '@/api/chat/chat.queries';
 import type { ChatMessage } from '@/api/chat/chat.types';
 
 interface PaginatedMessagesResult {
-    rawMessagesData: InfiniteData<ChatMessage[], unknown> | undefined;
+    rawMessagesData: InfiniteData<ChatMessage[]> | undefined;
     isLoading: boolean;
     fetchNextPage: (
         options?: FetchNextPageOptions,
-    ) => Promise<
-        InfiniteQueryObserverResult<InfiniteData<ChatMessage[], unknown>, Error>
-    >;
+    ) => Promise<InfiniteQueryObserverResult<InfiniteData<ChatMessage[]>>>;
     hasNextPage: boolean;
     isFetchingNextPage: boolean;
     isViewingOlderMessages: boolean;

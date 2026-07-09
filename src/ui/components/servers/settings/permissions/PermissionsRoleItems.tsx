@@ -59,16 +59,20 @@ export const AddRoleDropdown = ({
                 size="sm"
                 title="Add Role Override"
                 variant="ghost"
-                onClick={(): void => setIsOpen((prev): boolean => !prev)}
+                onClick={(): void => {
+                    setIsOpen((prev): boolean => !prev);
+                }}
             />
-            {isOpen && (
+            {isOpen ? (
                 <>
                     <button
                         aria-label="Close menu"
                         className="fixed inset-0 z-40 border-0 bg-transparent p-0"
                         tabIndex={-1}
                         type="button"
-                        onClick={(): void => setIsOpen(false)}
+                        onClick={(): void => {
+                            setIsOpen(false);
+                        }}
                         onKeyDown={(e): void => {
                             if (e.key === 'Escape' || e.key === 'Enter')
                                 setIsOpen(false);
@@ -101,7 +105,7 @@ export const AddRoleDropdown = ({
                         </div>
                     </div>
                 </>
-            )}
+            ) : null}
         </div>
     );
 };

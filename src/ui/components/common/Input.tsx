@@ -142,16 +142,20 @@ const Input = ({
             }}
             onMouseEnter={
                 isNumber && !disabled
-                    ? () => setStepperVisible(true)
+                    ? () => {
+                          setStepperVisible(true);
+                      }
                     : undefined
             }
             onMouseLeave={
                 isNumber && !disabled
-                    ? () => setStepperVisible(false)
+                    ? () => {
+                          setStepperVisible(false);
+                      }
                     : undefined
             }
         >
-            {icon && (
+            {icon ? (
                 <span
                     style={{
                         pointerEvents: 'none',
@@ -164,7 +168,7 @@ const Input = ({
                 >
                     {icon}
                 </span>
-            )}
+            ) : null}
             <input
                 disabled={disabled || undefined}
                 ref={internalRef}
@@ -189,7 +193,7 @@ const Input = ({
                 type={type}
                 {...props}
             />
-            {isNumber && !disabled && (
+            {isNumber && !disabled ? (
                 <div
                     style={{
                         position: 'absolute',
@@ -216,7 +220,7 @@ const Input = ({
                         <ChevronDown size={14} />
                     </button>
                 </div>
-            )}
+            ) : null}
         </div>
     );
 };

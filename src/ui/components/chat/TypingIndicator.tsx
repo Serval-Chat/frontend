@@ -5,7 +5,7 @@ import { Box } from '@/ui/components/layout/Box';
 import { cn } from '@/utils/cn';
 
 interface TypingIndicatorProps {
-    typingUsers: Array<{ userId: string; username: string }>;
+    typingUsers: { userId: string; username: string }[];
     cooldown?: number;
     isSlowModeEnabled?: boolean;
     canBypassSlowMode?: boolean;
@@ -33,14 +33,15 @@ export const TypingIndicator = ({
     const showSlowModeInfo = isSlowModeEnabled || hasCooldown;
 
     const getTypingText = (): string => {
-        if (!isTyping) {
+        const [first, second] = typingUsers;
+        if (!isTyping || !first) {
             return '';
         } else if (typingUsers.length === 1) {
-            return `${typingUsers[0].username} is typing...`;
-        } else if (typingUsers.length === 2) {
-            return `${typingUsers[0].username} and ${typingUsers[1].username} are typing...`;
+            return `${first.username} is typing...`;
+        } else if (typingUsers.length === 2 && second) {
+            return `${first.username} and ${second.username} are typing...`;
         } else {
-            return `${typingUsers[0].username} and ${typingUsers.length - 1} others are typing...`;
+            return `${first.username} and ${typingUsers.length - 1} others are typing...`;
         }
     };
 
@@ -67,11 +68,11 @@ export const TypingIndicator = ({
                 {getTypingText()}
             </Text>
 
-            {showSlowModeInfo && (
+            {showSlowModeInfo ? (
                 <Text className="font-medium text-primary" size="xs">
                     {getSlowModeText()}
                 </Text>
-            )}
+            ) : null}
         </Box>
     );
 };

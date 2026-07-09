@@ -17,15 +17,13 @@ import type { ServerMember } from '@/api/servers/servers.types';
 import { Box } from '@/ui/components/layout/Box';
 import { cn } from '@/utils/cn';
 
+import { $createSlashArgChipNode } from './SlashArgChipNode';
+import { $createSlashCommandChipNode } from './SlashCommandChipNode';
 import {
-    $createSlashArgChipNode,
-    focusSlashArgInput,
-} from './SlashArgChipNode';
-import {
-    $createSlashCommandChipNode,
     CANCEL_SLASH_COMMAND,
-} from './SlashCommandChipNode';
-import { clearSlashChips } from './slashChipHelpers';
+    clearSlashChips,
+    focusSlashArgInput,
+} from './slashChipHelpers';
 
 class SlashCommandOption extends MenuOption {
     type: 'command' | 'user';
@@ -86,7 +84,7 @@ const MenuWrapper = ({
             const anchorElement = anchorElementRef.current;
             if (
                 !anchorElement ||
-                !window.matchMedia('(max-width: 768px)').matches
+                !globalThis.matchMedia('(max-width: 768px)').matches
             ) {
                 setMobileMenuStyle(undefined);
                 return;
@@ -147,7 +145,9 @@ const MenuWrapper = ({
                                 : 'hover:bg-white/5',
                         )}
                         key={option.key}
-                        onClick={(): void => selectOptionAndCleanUp(option)}
+                        onClick={(): void => {
+                            selectOptionAndCleanUp(option);
+                        }}
                     >
                         <span
                             className={cn(
@@ -178,13 +178,13 @@ interface LexicalSlashCommandPluginProps {
     commands: SlashCommand[];
     members?: ServerMember[];
     enabled: boolean;
-    onOpenChange?: (isOpen: boolean) => void;
+    isOpenRef?: React.MutableRefObject<boolean>;
 }
 
 export const LexicalSlashCommandPlugin = ({
     commands,
     enabled,
-    onOpenChange,
+    isOpenRef,
 }: LexicalSlashCommandPluginProps) => {
     const [editor] = useLexicalComposerContext();
     const [queryString, setQueryString] = useState<string | null>(null);
@@ -194,7 +194,9 @@ export const LexicalSlashCommandPlugin = ({
             editor.registerCommand(
                 CANCEL_SLASH_COMMAND,
                 (): true => {
-                    editor.update((): void => clearSlashChips());
+                    editor.update((): void => {
+                        clearSlashChips();
+                    });
                     return true;
                 },
                 COMMAND_PRIORITY_EDITOR,
@@ -221,14 +223,20 @@ export const LexicalSlashCommandPlugin = ({
     const isOpen = enabled && queryString !== null && options.length > 0;
 
     React.useEffect((): void => {
-        onOpenChange?.(isOpen);
-    }, [isOpen, onOpenChange]);
+        // false positive: queryString is set by Lexical's own onQueryChange
+        // callback below (an external subscription), not a handler in this
+        // component, so there's no single event handler to move this ref sync into.
+        // react-doctor-disable-next-line react-doctor/no-event-handler
+        if (isOpenRef) {
+            isOpenRef.current = isOpen;
+        }
+    }, [isOpen, isOpenRef]);
 
     const matchTrigger = useCallback(
         (text: string) => {
             if (!enabled) return null;
 
-            const commandMatch = text.match(/^\/([a-zA-Z0-9_-]{0,50})$/);
+            const commandMatch = /^\/([a-zA-Z0-9_-]{0,50})$/.exec(text);
             if (commandMatch) {
                 return {
                     leadOffset: 0,
@@ -281,7 +289,9 @@ export const LexicalSlashCommandPlugin = ({
                 selection.insertNodes(nodes);
 
                 if (cmdOptions.length > 0) {
-                    setTimeout((): void => focusSlashArgInput(editor, 0), 60);
+                    setTimeout((): void => {
+                        focusSlashArgInput(editor, 0);
+                    }, 60);
                 }
 
                 closeMenu();

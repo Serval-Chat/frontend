@@ -1,4 +1,4 @@
-import { type ReactNode } from 'react';
+import type { ReactNode } from 'react';
 
 import {
     Navigate,
@@ -51,74 +51,78 @@ const AdminServerDetailWrapper = (): ReactNode => {
     );
 };
 
+interface AdminContentProps {
+    navigate: ReturnType<typeof useNavigate>;
+}
+
+const AdminContent = ({ navigate }: AdminContentProps): ReactNode => (
+    <Routes>
+        <Route element={<Navigate replace to="overview" />} path="/" />
+        <Route element={<AdminOverview />} path="overview" />
+
+        <Route
+            element={
+                <AdminIAM
+                    onViewUser={(id): undefined =>
+                        void navigate(`/admin/users/${id}`)
+                    }
+                />
+            }
+            path="users"
+        />
+        <Route element={<AdminUserDetailWrapper />} path="users/:userId" />
+
+        <Route
+            element={
+                <AdminServers
+                    onViewServer={(id): undefined =>
+                        void navigate(`/admin/servers/${id}`)
+                    }
+                />
+            }
+            path="servers"
+        />
+        <Route
+            element={
+                <AdminAwaitingReview
+                    onViewServer={(id): undefined =>
+                        void navigate(`/admin/servers/${id}`)
+                    }
+                />
+            }
+            path="servers/review"
+        />
+        <Route
+            element={<AdminServerDetailWrapper />}
+            path="servers/:serverId"
+        />
+
+        <Route element={<AdminAuditLogs />} path="logs" />
+        <Route element={<AdminBadges />} path="badges" />
+        <Route element={<AdminInvites />} path="invites" />
+        <Route element={<AdminSettings />} path="settings" />
+
+        <Route element={<AdminBansAndMutes />} path="bans" />
+
+        <Route
+            element={
+                <div className="flex h-64 flex-col items-center justify-center rounded-2xl border border-dashed border-border-subtle text-muted-foreground">
+                    <Text as="p" size="lg" weight="medium">
+                        Coming Soon
+                    </Text>
+                    <Text as="p" size="sm">
+                        This management module is under development.
+                    </Text>
+                </div>
+            }
+            path="*"
+        />
+    </Routes>
+);
+
 export const Admin = (): ReactNode => {
     const location = useLocation();
     const navigate = useNavigate();
-
-    const renderContent = (): ReactNode => (
-        <Routes>
-            <Route element={<Navigate replace to="overview" />} path="/" />
-            <Route element={<AdminOverview />} path="overview" />
-
-            <Route
-                element={
-                    <AdminIAM
-                        onViewUser={(id): undefined =>
-                            void navigate(`/admin/users/${id}`)
-                        }
-                    />
-                }
-                path="users"
-            />
-            <Route element={<AdminUserDetailWrapper />} path="users/:userId" />
-
-            <Route
-                element={
-                    <AdminServers
-                        onViewServer={(id): undefined =>
-                            void navigate(`/admin/servers/${id}`)
-                        }
-                    />
-                }
-                path="servers"
-            />
-            <Route
-                element={
-                    <AdminAwaitingReview
-                        onViewServer={(id): undefined =>
-                            void navigate(`/admin/servers/${id}`)
-                        }
-                    />
-                }
-                path="servers/review"
-            />
-            <Route
-                element={<AdminServerDetailWrapper />}
-                path="servers/:serverId"
-            />
-
-            <Route element={<AdminAuditLogs />} path="logs" />
-            <Route element={<AdminBadges />} path="badges" />
-            <Route element={<AdminInvites />} path="invites" />
-            <Route element={<AdminSettings />} path="settings" />
-
-            <Route element={<AdminBansAndMutes />} path="bans" />
-
-            <Route
-                element={
-                    <div className="flex h-64 flex-col items-center justify-center rounded-2xl border border-dashed border-border-subtle text-muted-foreground">
-                        <Text as="p" size="lg" weight="medium">
-                            Coming Soon
-                        </Text>
-                        <Text as="p" size="sm">
-                            This management module is under development.
-                        </Text>
-                    </div>
-                }
-                path="*"
-            />
-        </Routes>
-    );
 
     const getTitle = (): string => {
         const path = location.pathname;
@@ -140,7 +144,7 @@ export const Admin = (): ReactNode => {
 
     return (
         <AdminLayout sidebar={<AdminSidebar />} title={getTitle()}>
-            {renderContent()}
+            <AdminContent navigate={navigate} />
         </AdminLayout>
     );
 };

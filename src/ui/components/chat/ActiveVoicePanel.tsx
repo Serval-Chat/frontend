@@ -47,15 +47,19 @@ export const ActiveVoicePanel = () => {
 
     const getSignalIcon = (): { icon: typeof Signal; color: string } => {
         switch (connectionQuality) {
-            case 'excellent':
+            case 'excellent': {
                 return { icon: SignalHigh, color: 'text-success' };
-            case 'good':
+            }
+            case 'good': {
                 return { icon: SignalMedium, color: 'text-warning' };
-            case 'poor':
+            }
+            case 'poor': {
                 return { icon: SignalLow, color: 'text-destructive' };
+            }
             case 'unknown':
-            default:
+            default: {
                 return { icon: Signal, color: 'text-muted-foreground' };
+            }
         }
     };
 
@@ -74,7 +78,7 @@ export const ActiveVoicePanel = () => {
                         </span>
                     </div>
                     <span className="mt-1 cursor-pointer truncate text-xs font-semibold text-muted-foreground hover:underline">
-                        {server?.name || ''} / {channel?.name || ''}
+                        {server?.name ?? ''} / {channel?.name ?? ''}
                     </span>
                 </div>
                 <div className="flex items-center gap-0.5 pl-2">

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 
+import DOMPurify from 'dompurify';
 import mermaid from 'mermaid';
 
 import { useTheme } from '@/providers/ThemeProvider';
@@ -11,15 +12,15 @@ interface MermaidChartProps {
 const DEFAULT_FONT = "'Noto Sans', system-ui, -apple-system, sans-serif";
 
 const resolveThemeVariables = (): Record<string, string> => {
-    if (typeof window === 'undefined') return {};
+    if (globalThis.window === undefined) return {};
 
     const style = getComputedStyle(document.documentElement);
 
     const getVar = (name: string, fallback: string): string => {
         let value = style.getPropertyValue(name).trim();
         if (value.startsWith('var(')) {
-            const match = value.match(/var\((--[^)]+)\)/);
-            if (match) {
+            const match = /var\((--[^)]+)\)/.exec(value);
+            if (match?.[1]) {
                 value = style.getPropertyValue(match[1]).trim();
             }
         }
@@ -89,18 +90,18 @@ export const MermaidChart = ({ content }: MermaidChartProps) => {
                     startOnLoad: false,
                     theme: 'base',
                     themeVariables: resolveThemeVariables(),
-                    securityLevel: 'loose',
+                    securityLevel: 'strict',
                 });
 
-                const id = `mermaid-${Math.random().toString(36).substring(2, 9)}`;
+                const id = `mermaid-${Math.random().toString(36).slice(2, 9)}`;
                 const { svg } = await mermaid.render(id, content);
                 setSvgContent(svg);
                 setError(null);
-            } catch (err: unknown) {
-                console.error('Mermaid render error:', err);
+            } catch (error_: unknown) {
+                console.error('Mermaid render error:', error_);
                 setError(
-                    err instanceof Error
-                        ? err.message
+                    error_ instanceof Error
+                        ? error_.message
                         : 'Failed to render chart',
                 );
             }
@@ -131,7 +132,14 @@ export const MermaidChart = ({ content }: MermaidChartProps) => {
     return (
         <div
             className="mermaid-chart-container my-2 flex items-center justify-center overflow-x-auto overflow-y-hidden rounded-lg border border-border-subtle bg-bg-secondary p-6 shadow-sm transition-all hover:border-primary/40 [&>svg]:h-auto [&>svg]:max-w-full"
-            dangerouslySetInnerHTML={{ __html: svgContent }}
+            // Mermaid's 'strict' securityLevel already sanitizes internally, but
+            // that trust boundary isn't visible here, so sanitize again at the sink.
+            // react-doctor-disable-next-line react-doctor/no-danger -- SVG string from mermaid.render is DOMPurify-sanitized (svg profile) at the sink; there is no non-dangerouslySetInnerHTML way to mount a generated SVG string.
+            dangerouslySetInnerHTML={{
+                __html: DOMPurify.sanitize(svgContent, {
+                    USE_PROFILES: { svg: true, svgFilters: true },
+                }),
+            }}
             ref={containerRef}
         />
     );

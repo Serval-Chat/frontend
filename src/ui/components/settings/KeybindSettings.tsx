@@ -86,18 +86,21 @@ export const KeybindSettings = () => {
                 return;
             }
 
-            setDraft((current): { [x: string]: KeybindBinding | null } => ({
-                ...current,
-                [recordingAction]: normalizeBinding(
-                    KeybindManager.fromEvent(event),
-                ),
-            }));
+            setDraft(
+                (current): Record<string, KeybindBinding | null> => ({
+                    ...current,
+                    [recordingAction]: normalizeBinding(
+                        KeybindManager.fromEvent(event),
+                    ),
+                }),
+            );
             setRecordingAction(null);
         };
 
-        window.addEventListener('keydown', handleKeyDown, true);
-        return (): void =>
-            window.removeEventListener('keydown', handleKeyDown, true);
+        globalThis.addEventListener('keydown', handleKeyDown, true);
+        return (): void => {
+            globalThis.removeEventListener('keydown', handleKeyDown, true);
+        };
     }, [recordingAction]);
 
     const hasChanges = React.useMemo(
@@ -119,7 +122,7 @@ export const KeybindSettings = () => {
     };
 
     const handleResetToDefault = (actionId: KeybindActionId): void => {
-        setDraft((current): { [x: string]: KeybindBinding | null } => {
+        setDraft((current): Record<string, KeybindBinding | null> => {
             const next = { ...current };
             delete next[actionId];
             return next;
@@ -127,10 +130,12 @@ export const KeybindSettings = () => {
     };
 
     const handleClear = (actionId: KeybindActionId): void => {
-        setDraft((current): { [x: string]: KeybindBinding | null } => ({
-            ...current,
-            [actionId]: null,
-        }));
+        setDraft(
+            (current): Record<string, KeybindBinding | null> => ({
+                ...current,
+                [actionId]: null,
+            }),
+        );
     };
 
     if (isLoading) {
@@ -178,7 +183,7 @@ export const KeybindSettings = () => {
                                 <Text size="sm" variant="muted">
                                     {action.description}
                                 </Text>
-                                {collisions.length > 0 && (
+                                {collisions.length > 0 ? (
                                     <div className="flex items-center gap-1.5 text-xs text-danger">
                                         <AlertTriangle size={12} />
                                         <Text size="xs" variant="danger">
@@ -186,7 +191,7 @@ export const KeybindSettings = () => {
                                             {collisions.join(', ')}
                                         </Text>
                                     </div>
-                                )}
+                                ) : null}
                             </div>
 
                             <div className="flex flex-wrap items-center gap-2">
@@ -199,9 +204,9 @@ export const KeybindSettings = () => {
                                               ? 'danger'
                                               : 'ghost'
                                     }
-                                    onClick={(): void =>
-                                        setRecordingAction(action.id)
-                                    }
+                                    onClick={(): void => {
+                                        setRecordingAction(action.id);
+                                    }}
                                 >
                                     {isRecording ? (
                                         'Press keys...'
@@ -215,9 +220,9 @@ export const KeybindSettings = () => {
                                     icon={RotateCcw}
                                     title="Reset to default"
                                     variant="ghost"
-                                    onClick={(): void =>
-                                        handleResetToDefault(action.id)
-                                    }
+                                    onClick={(): void => {
+                                        handleResetToDefault(action.id);
+                                    }}
                                 >
                                     Reset
                                 </Button>
@@ -225,7 +230,9 @@ export const KeybindSettings = () => {
                                     icon={X}
                                     title="Clear keybind"
                                     variant="ghost"
-                                    onClick={(): void => handleClear(action.id)}
+                                    onClick={(): void => {
+                                        handleClear(action.id);
+                                    }}
                                 >
                                     Clear
                                 </Button>

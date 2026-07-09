@@ -24,7 +24,7 @@ export const LoadingOverlay = ({
 }: LoadingOverlayProps) => {
     const content = (
         <AnimatePresence>
-            {isOpen && (
+            {isOpen ? (
                 <m.div
                     animate={{ opacity: 1 }}
                     className={cn(
@@ -49,14 +49,14 @@ export const LoadingOverlay = ({
                             />
                             <div className="absolute inset-0 animate-ping rounded-full border border-primary/20" />
                         </div>
-                        {message && (
+                        {message ? (
                             <span className="text-sm font-black tracking-[0.2em] text-white uppercase drop-shadow-md">
                                 {message}
                             </span>
-                        )}
+                        ) : null}
                     </m.div>
                 </m.div>
-            )}
+            ) : null}
         </AnimatePresence>
     );
 

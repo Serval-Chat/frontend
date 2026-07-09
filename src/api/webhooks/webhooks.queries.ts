@@ -9,7 +9,7 @@ import {
 import { createWebhook, deleteWebhook, getWebhooks } from './webhooks.api';
 import type { CreateWebhookRequest, Webhook } from './webhooks.types';
 
-export const webhookKeys = {
+const webhookKeys = {
     all: ['webhooks'] as const,
     list: (
         serverId: string,
@@ -21,7 +21,7 @@ export const webhookKeys = {
 export const useWebhooks = (
     serverId: string,
     channelId: string,
-): UseQueryResult<Webhook[], Error> =>
+): UseQueryResult<Webhook[]> =>
     useQuery({
         queryKey: webhookKeys.list(serverId, channelId),
         queryFn: (): Promise<Webhook[]> => getWebhooks(serverId, channelId),

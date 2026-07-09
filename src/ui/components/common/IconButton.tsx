@@ -39,15 +39,19 @@ export const IconButton = ({
                 ...style,
             }}
             variant={variant ?? 'nav'}
-            onMouseEnter={() => setHovered(true)}
-            onMouseLeave={() => setHovered(false)}
+            onMouseEnter={() => {
+                setHovered(true);
+            }}
+            onMouseLeave={() => {
+                setHovered(false);
+            }}
             // eslint-disable-next-line react/jsx-props-no-spreading
             {...props}
         >
             <Icon size={iconSize} />
-            {badgeCount !== undefined && badgeCount > 0 && (
+            {badgeCount !== undefined && badgeCount > 0 ? (
                 <Badge count={badgeCount} />
-            )}
+            ) : null}
         </Button>
     );
 };

@@ -28,7 +28,7 @@ export const useSmartPosition = ({
         if (!isOpen || !elementRef.current) return;
 
         const elementRect = elementRef.current.getBoundingClientRect();
-        const { innerWidth, innerHeight } = window;
+        const { innerWidth, innerHeight } = globalThis;
 
         let x = 0;
         let y = 0;
@@ -80,8 +80,12 @@ export const useSmartPosition = ({
         if (isOpen) {
             updatePositionRef.current();
 
-            const resizeHandler = (): void => updatePositionRef.current();
-            const scrollHandler = (): void => updatePositionRef.current();
+            const resizeHandler = (): void => {
+                updatePositionRef.current();
+            };
+            const scrollHandler = (): void => {
+                updatePositionRef.current();
+            };
 
             window.addEventListener('resize', resizeHandler);
             window.addEventListener('scroll', scrollHandler, true);

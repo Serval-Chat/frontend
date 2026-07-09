@@ -68,7 +68,9 @@ export const SettingsSidebar = ({
                     justify="start"
                     key={section.id}
                     variant={isActive ? 'normal' : 'ghost'}
-                    onClick={(): void => setActiveSection(section.id)}
+                    onClick={(): void => {
+                        setActiveSection(section.id);
+                    }}
                 >
                     <span className="flex items-center gap-2.5">
                         <Icon size={18} />

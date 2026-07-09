@@ -37,112 +37,121 @@ function getAdmonitionTheme(admonitionType: string): {
     switch (admonitionType) {
         case 'warning':
         case 'caution':
-        case 'attention':
+        case 'attention': {
             return {
                 border: 'border-caution',
                 bg: 'bg-caution-muted/40',
                 titleColor: 'text-caution-muted-text',
                 icon: AlertTriangle,
             };
+        }
 
-        case 'bug':
+        case 'bug': {
             return {
                 border: 'border-danger',
                 bg: 'bg-danger-muted/40',
                 titleColor: 'text-danger-muted-text',
                 icon: Bug,
             };
+        }
 
         case 'danger':
         case 'error':
-        case 'failure':
+        case 'failure': {
             return {
                 border: 'border-danger',
                 bg: 'bg-danger-muted/40',
                 titleColor: 'text-danger-muted-text',
                 icon: XCircle,
             };
+        }
 
-        case 'success':
+        case 'success': {
             return {
                 border: 'border-success',
                 bg: 'bg-success-muted/40',
                 titleColor: 'text-success-muted-text',
                 icon: Zap,
             };
+        }
 
         case 'tip':
-        case 'hint':
+        case 'hint': {
             return {
                 border: 'border-success',
                 bg: 'bg-success-muted/40',
                 titleColor: 'text-success-muted-text',
                 icon: CheckCircle,
             };
+        }
 
         case 'question':
         case 'help':
-        case 'faq':
+        case 'faq': {
             return {
                 border: 'border-primary',
                 bg: 'bg-primary-muted/40',
                 titleColor: 'text-primary-muted-text',
                 icon: HelpCircle,
             };
+        }
 
-        case 'todo':
+        case 'todo': {
             return {
                 border: 'border-primary',
                 bg: 'bg-primary-muted/40',
                 titleColor: 'text-primary-muted-text',
                 icon: ListTodo,
             };
+        }
 
         case 'quote':
-        case 'cite':
+        case 'cite': {
             return {
                 border: 'border-primary',
                 bg: 'bg-primary-muted/40',
                 titleColor: 'text-primary-muted-text',
                 icon: Quote,
             };
+        }
 
-        case 'example':
+        case 'example': {
             return {
                 border: 'border-primary',
                 bg: 'bg-primary-muted/40',
                 titleColor: 'text-primary-muted-text',
                 icon: Code,
             };
+        }
 
         case 'abstract':
         case 'summary':
-        case 'tldr':
+        case 'tldr': {
             return {
                 border: 'border-success',
                 bg: 'bg-success-muted/40',
                 titleColor: 'text-success-muted-text',
                 icon: FileText,
             };
+        }
 
-        case 'seealso':
+        case 'seealso': {
             return {
                 border: 'border-success',
                 bg: 'bg-success-muted/40',
                 titleColor: 'text-success-muted-text',
                 icon: BookOpen,
             };
+        }
 
-        case 'note':
-        case 'info':
-        case 'important':
-        default:
+        default: {
             return {
                 border: 'border-primary',
                 bg: 'bg-primary-muted/40',
                 titleColor: 'text-primary-muted-text',
                 icon: Info,
             };
+        }
     }
 }
 
@@ -167,11 +176,11 @@ export const Admonition = ({ node, isNested, children }: AdmonitionProps) => {
                 <theme.icon size={16} />
             </span>
             <span>{displayTitle}</span>
-            {node.collapsible && (
+            {node.collapsible ? (
                 <span className="ml-auto text-xs leading-none opacity-60">
                     ▾
                 </span>
-            )}
+            ) : null}
         </div>
     );
 
@@ -189,7 +198,7 @@ export const Admonition = ({ node, isNested, children }: AdmonitionProps) => {
                 open={node.defaultOpen !== false}
             >
                 <summary className="cursor-pointer list-none">{header}</summary>
-                {children && <div className="mt-1.5">{children}</div>}
+                {children ? <div className="mt-1.5">{children}</div> : null}
             </details>
         );
     }
@@ -197,7 +206,7 @@ export const Admonition = ({ node, isNested, children }: AdmonitionProps) => {
     return (
         <div className={containerClass}>
             {header}
-            {children && <div className="mt-1.5">{children}</div>}
+            {children ? <div className="mt-1.5">{children}</div> : null}
         </div>
     );
 };

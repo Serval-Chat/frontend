@@ -78,21 +78,6 @@ export const shadow = {
     '2xl': '0 25px 50px -12px rgb(0 0 0 / 0.5)',
 } as const;
 
-export const zIndex = {
-    negative: -1,
-    base: 0,
-    content: 10,
-    dropdown: 1000,
-    sticky: 1010,
-    fixed: 1020,
-    backdrop: 1030,
-    modal: 1040,
-    popover: 1050,
-    toast: 1060,
-    tooltip: 1070,
-    top: 9999,
-} as const;
-
 export const lineHeight = {
     none: 1,
     tight: 1.25,

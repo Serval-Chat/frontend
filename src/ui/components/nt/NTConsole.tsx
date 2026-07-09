@@ -1,4 +1,10 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, {
+    useCallback,
+    useEffect,
+    useReducer,
+    useRef,
+    useState,
+} from 'react';
 
 import {
     type ConsoleProgram,
@@ -11,75 +17,19 @@ import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { toggleConsole } from '@/store/slices/debugOptionsSlice';
 import { NTScrollArea } from '@/ui/components/nt/NTScrollArea';
 import { Window } from '@/ui/components/nt/Window';
+import { mergeReducer } from '@/utils/mergeReducer';
 
 const MEASURE_COLUMNS = 80;
 const SIZE_GUARD_PX = 1;
 
-export const NTConsole = () => {
-    const dispatch = useAppDispatch();
-    const isOpen = useAppSelector(
-        (state): boolean => state.debugOptions.isConsoleOpen,
-    );
-    const [terminal] = useState(
-        (): Terminal =>
-            new Terminal({
-                initialLines: [
-                    'Serchat(R) Console NT(TM)',
-                    '(C) Copyright 1985-1996 Serchat Corp.',
-                    '',
-                ],
-            }),
-    );
-    const [filesystem] = useState((): DosFileSystem => new DosFileSystem());
-
-    const [history, setHistory] = useState(() => terminal.snapshot());
-    const [currentInput, setCurrentInput] = useState<string>('');
-    const commandHistoryRef = useRef<string[]>([]);
-    const historyIndexRef = useRef<number>(-1);
-    const [isCommandRunning, setIsCommandRunning] = useState<boolean>(false);
-    const [activeProgram, setActiveProgram] = useState<ConsoleProgram | null>(
-        null,
-    );
-    const [cwd, setCwd] = useState((): string => filesystem.getCwd());
-    const activeProgramRef = useRef<ConsoleProgram | null>(null);
-
-    const consoleRef = useRef<HTMLDivElement>(null);
-    const inputRef = useRef<HTMLInputElement>(null);
-    const measureRef = useRef<HTMLSpanElement>(null);
-
-    useEffect((): void => {
-        terminal.attach(setHistory);
-    }, [terminal]);
-
-    useEffect((): void => {
-        activeProgramRef.current = activeProgram;
-    }, [activeProgram]);
-
-    useEffect((): (() => void) | undefined => {
-        if (isOpen) {
-            const timer = setTimeout((): void => {
-                inputRef.current?.focus();
-            }, 50);
-            return (): void => clearTimeout(timer);
-        }
-    }, [isOpen]);
-
-    useEffect((): (() => void) | undefined => {
-        if (!isOpen) return;
-
-        const handleFocus = (): void => {
-            if (
-                document.activeElement !== inputRef.current &&
-                (!isCommandRunning || activeProgramRef.current)
-            ) {
-                inputRef.current?.focus();
-            }
-        };
-
-        const interval = setInterval(handleFocus, 100);
-        return (): void => clearInterval(interval);
-    }, [isOpen, isCommandRunning]);
-
+/** keeps the terminal's column/row size in sync with the console element size. */
+const useNtTerminalAutosize = (
+    isOpen: boolean,
+    terminal: Terminal,
+    consoleRef: React.RefObject<HTMLDivElement | null>,
+    measureRef: React.RefObject<HTMLSpanElement | null>,
+    activeProgramRef: React.RefObject<ConsoleProgram | null>,
+): void => {
     useEffect((): (() => void) | undefined => {
         if (!isOpen || !consoleRef.current) return;
 
@@ -92,11 +42,13 @@ export const NTConsole = () => {
             const measure = measureRef.current;
             if (!element || !measure) return;
 
-            const style = window.getComputedStyle(element);
+            const style = globalThis.getComputedStyle(element);
             const horizontalPadding =
-                parseFloat(style.paddingLeft) + parseFloat(style.paddingRight);
+                Number.parseFloat(style.paddingLeft) +
+                Number.parseFloat(style.paddingRight);
             const verticalPadding =
-                parseFloat(style.paddingTop) + parseFloat(style.paddingBottom);
+                Number.parseFloat(style.paddingTop) +
+                Number.parseFloat(style.paddingBottom);
             const measureRect = measure.getBoundingClientRect();
             const charWidth = measureRect.width / MEASURE_COLUMNS;
             const lineHeight = measureRect.height;
@@ -133,8 +85,120 @@ export const NTConsole = () => {
         if (measureRef.current) {
             resizeObserver.observe(measureRef.current);
         }
-        return (): void => resizeObserver.disconnect();
-    }, [isOpen, terminal]);
+        return (): void => {
+            resizeObserver.disconnect();
+        };
+    }, [isOpen, terminal, consoleRef, measureRef, activeProgramRef]);
+};
+
+export const NTConsole = () => {
+    const dispatch = useAppDispatch();
+    const isOpen = useAppSelector(
+        (state): boolean => state.debugOptions.isConsoleOpen,
+    );
+    const [terminal] = useState(
+        (): Terminal =>
+            new Terminal({
+                initialLines: [
+                    'Serchat(R) Console NT(TM)',
+                    '(C) Copyright 1985-1996 Serchat Corp.',
+                    '',
+                ],
+            }),
+    );
+    const [filesystem] = useState((): DosFileSystem => new DosFileSystem());
+
+    interface ConsoleState {
+        history: ReturnType<Terminal['snapshot']>;
+        currentInput: string;
+        isCommandRunning: boolean;
+        activeProgram: ConsoleProgram | null;
+        cwd: string;
+    }
+    const [state, patch] = useReducer(mergeReducer<ConsoleState>, {
+        history: terminal.snapshot(),
+        currentInput: '',
+        isCommandRunning: false,
+        activeProgram: null,
+        cwd: filesystem.getCwd(),
+    });
+    const { history, currentInput, isCommandRunning, activeProgram, cwd } =
+        state;
+    type Snapshot = ReturnType<Terminal['snapshot']>;
+    const setHistory = useCallback(
+        (v: Snapshot | ((prev: Snapshot) => Snapshot)): void => {
+            patch(
+                typeof v === 'function'
+                    ? (s): Partial<ConsoleState> => ({ history: v(s.history) })
+                    : { history: v },
+            );
+        },
+        [],
+    );
+    const setCurrentInput = (v: string): void => {
+        patch({ currentInput: v });
+    };
+    const setIsCommandRunning = (v: boolean): void => {
+        patch({ isCommandRunning: v });
+    };
+    const setActiveProgram = (v: ConsoleProgram | null): void => {
+        patch({ activeProgram: v });
+    };
+    const setCwd = (v: string): void => {
+        patch({ cwd: v });
+    };
+    const commandHistoryRef = useRef<string[]>([]);
+    const historyIndexRef = useRef<number>(-1);
+    const activeProgramRef = useRef<ConsoleProgram | null>(null);
+
+    const consoleRef = useRef<HTMLDivElement>(null);
+    const inputRef = useRef<HTMLInputElement>(null);
+    const measureRef = useRef<HTMLSpanElement>(null);
+
+    useEffect((): void => {
+        terminal.attach(setHistory);
+    }, [terminal, setHistory]);
+
+    useEffect((): void => {
+        activeProgramRef.current = activeProgram;
+    }, [activeProgram]);
+
+    useEffect((): (() => void) | undefined => {
+        if (isOpen) {
+            const timer = setTimeout((): void => {
+                inputRef.current?.focus();
+            }, 50);
+            return (): void => {
+                clearTimeout(timer);
+            };
+        }
+    }, [isOpen]);
+
+    useEffect((): (() => void) | undefined => {
+        if (!isOpen) return;
+
+        const handleFocus = (): void => {
+            if (
+                document.activeElement !== inputRef.current &&
+                (!isCommandRunning || activeProgramRef.current)
+            ) {
+                inputRef.current?.focus();
+            }
+        };
+
+        const interval = setInterval(handleFocus, 100);
+        return (): void => {
+            clearInterval(interval);
+        };
+    }, [isOpen, isCommandRunning]);
+
+    useNtTerminalAutosize(
+        isOpen,
+        terminal,
+        consoleRef,
+        measureRef,
+        activeProgramRef,
+    );
 
     useEffect((): void => {
         const viewport = consoleRef.current?.querySelector(
@@ -146,7 +210,7 @@ export const NTConsole = () => {
     }, [history]);
 
     const handleConsoleClick = (): void => {
-        const selection = window.getSelection();
+        const selection = globalThis.getSelection();
         if (!selection || selection.toString() === '') {
             inputRef.current?.focus();
         }
@@ -185,8 +249,12 @@ export const NTConsole = () => {
                     program.start();
                 },
                 terminal,
-                writeLine: (line: string): void => terminal.puts(line),
-                clearScreen: (): void => terminal.clear(),
+                writeLine: (line: string): void => {
+                    terminal.puts(line);
+                },
+                clearScreen: (): void => {
+                    terminal.clear();
+                },
             });
 
             if (result.clear) {
@@ -206,7 +274,9 @@ export const NTConsole = () => {
                 altKey: e.altKey,
                 ctrlKey: e.ctrlKey,
                 key: e.key,
-                preventDefault: (): void => e.preventDefault(),
+                preventDefault: (): void => {
+                    e.preventDefault();
+                },
             });
             return;
         }
@@ -216,32 +286,45 @@ export const NTConsole = () => {
             return;
         }
 
-        if (e.key === 'Enter') {
-            executeCommand(currentInput);
-            setCurrentInput('');
-        } else if (e.key === 'ArrowUp') {
-            e.preventDefault();
-            if (commandHistoryRef.current.length === 0) return;
-
-            const newIndex =
-                historyIndexRef.current === -1
-                    ? commandHistoryRef.current.length - 1
-                    : Math.max(0, historyIndexRef.current - 1);
-
-            historyIndexRef.current = newIndex;
-            setCurrentInput(commandHistoryRef.current[newIndex]);
-        } else if (e.key === 'ArrowDown') {
-            e.preventDefault();
-            if (historyIndexRef.current === -1) return;
-
-            const newIndex = historyIndexRef.current + 1;
-            if (newIndex >= commandHistoryRef.current.length) {
-                historyIndexRef.current = -1;
+        switch (e.key) {
+            case 'Enter': {
+                executeCommand(currentInput);
                 setCurrentInput('');
-            } else {
-                historyIndexRef.current = newIndex;
-                setCurrentInput(commandHistoryRef.current[newIndex]);
+
+                break;
             }
+            case 'ArrowUp': {
+                e.preventDefault();
+                if (commandHistoryRef.current.length === 0) return;
+
+                const newIndex =
+                    historyIndexRef.current === -1
+                        ? commandHistoryRef.current.length - 1
+                        : Math.max(0, historyIndexRef.current - 1);
+
+                historyIndexRef.current = newIndex;
+                setCurrentInput(commandHistoryRef.current[newIndex] ?? '');
+
+                break;
+            }
+            case 'ArrowDown': {
+                e.preventDefault();
+                if (historyIndexRef.current === -1) return;
+
+                const newIndex = historyIndexRef.current + 1;
+                if (newIndex >= commandHistoryRef.current.length) {
+                    historyIndexRef.current = -1;
+                    setCurrentInput('');
+                } else {
+                    historyIndexRef.current = newIndex;
+                    setCurrentInput(
+                        commandHistoryRef.current[newIndex] ?? '',
+                    );
+                }
+
+                break;
+            }
+            // no default
         }
     };
 
@@ -260,6 +343,10 @@ export const NTConsole = () => {
                 type: 'debugOptions/toggleConsole';
             } => dispatch(toggleConsole())}
         >
+            {/* false positive: can't be a real <button> - it wraps the terminal's
+            actual <input> below, and interactive content (an input) isn't allowed
+            inside a native <button> per the HTML spec. */}
+            {/* react-doctor-disable-next-line react-doctor/prefer-tag-over-role */}
             <div
                 aria-label="Terminal console"
                 className="flex min-h-0 flex-1 flex-col bg-black font-mono text-[11px] leading-[13px] text-[#c0c0c0]"
@@ -308,7 +395,7 @@ export const NTConsole = () => {
                         </div>
                     ))}
 
-                    {!isCommandRunning && !activeProgram && (
+                    {!isCommandRunning && !activeProgram ? (
                         <div className="flex flex-wrap items-center select-none">
                             <span>{cwd}&gt;</span>
                             <span className="whitespace-pre select-text">
@@ -316,7 +403,7 @@ export const NTConsole = () => {
                             </span>
                             <span className="nt-cursor" />
                         </div>
-                    )}
+                    ) : null}
 
                     <input
                         aria-label="Terminal input"
@@ -325,7 +412,9 @@ export const NTConsole = () => {
                         ref={inputRef}
                         type="text"
                         value={currentInput}
-                        onChange={(e): void => setCurrentInput(e.target.value)}
+                        onChange={(e): void => {
+                            setCurrentInput(e.target.value);
+                        }}
                         onKeyDown={handleKeyDown}
                     />
                 </NTScrollArea>

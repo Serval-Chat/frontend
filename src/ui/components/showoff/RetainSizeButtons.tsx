@@ -7,7 +7,7 @@ import { Stack } from '@/ui/components/layout/Stack';
 import { DemoSection } from './DemoSection';
 import { SHOWOFF_SECTIONS } from './config';
 
-export function RetainSizeButtons(): ReactNode {
+export const RetainSizeButtons = (): ReactNode => {
     const flashButtons = useFlashGroup({
         normal: { initial: 'Normal Retain', flash: 'Clicked!' },
         caution: { initial: 'Caution Retain', flash: 'Clicked!' },
@@ -36,4 +36,4 @@ export function RetainSizeButtons(): ReactNode {
             </Stack>
         </DemoSection>
     );
-}
+};

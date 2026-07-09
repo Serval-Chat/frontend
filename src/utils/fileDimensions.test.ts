@@ -33,7 +33,8 @@ describe('readMediaDimensions', (): void => {
             (): undefined => undefined,
         );
 
-        const originalCreateElement = document.createElement.bind(document);
+        const originalCreateElement = (tagName: string): HTMLElement =>
+            document.createElement(tagName);
         vi.spyOn(document, 'createElement').mockImplementation(
             (tagName): HTMLElement => {
                 if (tagName !== 'video') return originalCreateElement(tagName);
@@ -46,11 +47,26 @@ describe('readMediaDimensions', (): void => {
                     onerror: null as (() => void) | null,
                     onloadedmetadata: null as (() => void) | null,
                     preload: '',
+                    addEventListener: vi.fn(function (
+                        this: any,
+                        event: string,
+                        handler: any,
+                    ) {
+                        this[`on${event}`] = handler;
+                    }),
+                    removeEventListener: vi.fn(function (
+                        this: any,
+                        event: string,
+                        handler: any,
+                    ) {
+                        if (this[`on${event}`] === handler) {
+                            this[`on${event}`] = null;
+                        }
+                    }),
                     set src(_value: string) {
-                        setTimeout(
-                            (): void | undefined => this.onloadedmetadata?.(),
-                            0,
-                        );
+                        setTimeout((): void => {
+                            this.onloadedmetadata?.();
+                        }, 0);
                     },
                 };
 

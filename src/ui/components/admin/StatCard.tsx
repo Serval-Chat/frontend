@@ -1,4 +1,4 @@
-import { type ReactNode } from 'react';
+import type { ReactNode } from 'react';
 
 import { ADMIN_UI_CONFIG } from '@/constants/admin';
 import { Heading } from '@/ui/components/common/Heading';

@@ -46,12 +46,12 @@ describe('BlockingSettings', (): void => {
         vi.mocked(blocksQueries.useBlocks).mockReturnValue({
             data: [],
             isLoading: false,
-        } as any as UseQueryResult<blocksQueries.BlockRelationship[], Error>);
+        } as any as UseQueryResult<blocksQueries.BlockRelationship[]>);
 
         vi.mocked(blocksQueries.useBlockProfiles).mockReturnValue({
             data: [{ id: 'default-profile-id', name: 'Default', flags: 0 }],
             isLoading: false,
-        } as any as UseQueryResult<blocksQueries.BlockProfile[], Error>);
+        } as any as UseQueryResult<blocksQueries.BlockProfile[]>);
 
         vi.mocked(blocksQueries.useUpsertBlock).mockReturnValue({
             mutate: mockUpsertBlock,
@@ -101,10 +101,7 @@ describe('BlockingSettings', (): void => {
                     },
                 ],
                 isLoading: false,
-            } as any as UseQueryResult<
-                blocksQueries.BlockRelationship[],
-                Error
-            >);
+            } as any as UseQueryResult<blocksQueries.BlockRelationship[]>);
 
             renderComponent();
 
@@ -126,10 +123,7 @@ describe('BlockingSettings', (): void => {
                     },
                 ],
                 isLoading: false,
-            } as any as UseQueryResult<
-                blocksQueries.BlockRelationship[],
-                Error
-            >);
+            } as any as UseQueryResult<blocksQueries.BlockRelationship[]>);
 
             renderComponent();
 
@@ -156,10 +150,7 @@ describe('BlockingSettings', (): void => {
                     },
                 ],
                 isLoading: false,
-            } as any as UseQueryResult<
-                blocksQueries.BlockRelationship[],
-                Error
-            >);
+            } as any as UseQueryResult<blocksQueries.BlockRelationship[]>);
 
             renderComponent();
 
@@ -210,9 +201,7 @@ describe('BlockingSettings', (): void => {
             const renameBtn = screen.getByTitle('Rename Profile');
             fireEvent.click(renameBtn);
 
-            const input = screen.getByTitle(
-                'Rename Profile',
-            ) as HTMLInputElement;
+            const input = screen.getByTitle('Rename Profile') as HTMLInputElement;
             expect(input.value).toBe('Default');
 
             fireEvent.change(input, { target: { value: 'Strict' } });
@@ -231,7 +220,7 @@ describe('BlockingSettings', (): void => {
                     { id: 'p2', name: 'Profile 2', flags: 0 },
                 ],
                 isLoading: false,
-            } as any as UseQueryResult<blocksQueries.BlockProfile[], Error>);
+            } as any as UseQueryResult<blocksQueries.BlockProfile[]>);
 
             renderComponent();
             fireEvent.click(screen.getByText('Block Profiles'));
@@ -239,7 +228,7 @@ describe('BlockingSettings', (): void => {
             const deleteBtns = screen.getAllByTitle('Delete Profile');
             expect(deleteBtns).toHaveLength(2);
 
-            fireEvent.click(deleteBtns[0]);
+            fireEvent.click(deleteBtns[0]!);
 
             expect(mockDeleteProfile).toHaveBeenCalledWith('p1');
         });

@@ -78,7 +78,9 @@ export const ForgotPassword = () => {
                             placeholder="Email"
                             type="email"
                             value={email}
-                            onChange={(e): void => setEmail(e.target.value)}
+                            onChange={(e): void => {
+                                setEmail(e.target.value);
+                            }}
                         />
                     </InputWrapper>
                     <Button
@@ -91,12 +93,12 @@ export const ForgotPassword = () => {
                     </Button>
                 </form>
 
-                {status && (
+                {status ? (
                     <StatusMessage
                         message={status.message}
                         type={status.type}
                     />
-                )}
+                ) : null}
 
                 <Box className="mt-md text-center">
                     <Link to="/login">Back to Login</Link>

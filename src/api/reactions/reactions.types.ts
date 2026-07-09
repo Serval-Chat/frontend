@@ -1,18 +1,18 @@
 import type { MessageReaction } from '@/api/chat/chat.types';
 
-export const EmojiType = {
+const EmojiType = {
     UNICODE: 'unicode',
     CUSTOM: 'custom',
 } as const;
 
-export type EmojiType = (typeof EmojiType)[keyof typeof EmojiType];
+type EmojiType = (typeof EmojiType)[keyof typeof EmojiType];
 
-export const ReactionScope = {
+const ReactionScope = {
     ME: 'me',
     ALL: 'all',
 } as const;
 
-export type ReactionScope = (typeof ReactionScope)[keyof typeof ReactionScope];
+type ReactionScope = (typeof ReactionScope)[keyof typeof ReactionScope];
 
 export interface AddReactionRequest {
     emoji: string;

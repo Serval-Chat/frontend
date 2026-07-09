@@ -2,7 +2,6 @@ import type { PayloadAction } from '@reduxjs/toolkit';
 import { createSlice } from '@reduxjs/toolkit';
 
 import type { BlockProfile } from '@/api/blocks/blocks.queries';
-import type { RootState } from '@/store';
 
 export interface BlockingState {
     blocks: Record<string, number>;
@@ -28,7 +27,7 @@ const blockingSlice = createSlice({
             state.blocks[action.payload.targetUserId] = action.payload.flags;
         },
         removeBlock(state, action: PayloadAction<string>): void {
-            delete state.blocks[action.payload];
+            Reflect.deleteProperty(state.blocks, action.payload);
         },
         setProfiles(state, action: PayloadAction<BlockProfile[]>): void {
             state.profiles = action.payload;
@@ -39,8 +38,3 @@ const blockingSlice = createSlice({
 export const { setBlocks, addBlock, removeBlock, setProfiles } =
     blockingSlice.actions;
 export const blockingReducer = blockingSlice.reducer;
-
-export const selectBlockFlagsForUser =
-    (userId: string): ((state: RootState) => number) =>
-    (state: RootState): number =>
-        state.blocking.blocks[userId] ?? 0;

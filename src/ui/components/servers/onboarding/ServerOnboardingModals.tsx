@@ -32,7 +32,7 @@ import { ChannelIcon } from '@/ui/components/servers/ChannelIcon';
 import { cn } from '@/utils/cn';
 
 const sortByPosition = <T extends { position: number }>(items: T[]): T[] =>
-    items.slice().sort((a, b): number => a.position - b.position);
+    [...items].sort((a, b): number => a.position - b.position);
 
 const channelIcon = (channel: Channel): React.ReactNode => (
     <ChannelIcon
@@ -61,7 +61,7 @@ function drawChannelSplines(
     svg: SVGSVGElement,
     stage: HTMLElement,
     categoryEl: HTMLElement | null,
-    channelEls: Array<HTMLElement | null>,
+    channelEls: (HTMLElement | null)[],
 ): void {
     const categoryRect = categoryEl?.getBoundingClientRect();
     if (!categoryRect) {
@@ -154,7 +154,9 @@ export const RolePicker = ({
                         )}
                         key={role.id}
                         type="button"
-                        onClick={(): void => toggleRole(role.id)}
+                        onClick={(): void => {
+                            toggleRole(role.id);
+                        }}
                     >
                         <div className="flex items-center gap-2">
                             <RoleDot role={role} />
@@ -169,7 +171,7 @@ export const RolePicker = ({
                                 {role.name}
                             </span>
                         </div>
-                        {role.description && (
+                        {role.description ? (
                             <p
                                 className={cn(
                                     'line-clamp-2 text-xs leading-relaxed',
@@ -180,7 +182,7 @@ export const RolePicker = ({
                             >
                                 {role.description}
                             </p>
-                        )}
+                        ) : null}
                     </button>
                 );
             })}
@@ -222,7 +224,9 @@ export const ServerSelfRolesModal = ({
 
     const handleSave = (): void => {
         updateSelfRoles.mutate(selectedRoleIds, {
-            onSuccess: (): void => onClose(),
+            onSuccess: (): void => {
+                onClose();
+            },
         });
     };
 
@@ -280,7 +284,7 @@ export const ChannelPreferenceGroup = ({
     const stageRef = useRef<HTMLDivElement>(null);
     const svgRef = useRef<SVGSVGElement>(null);
     const categoryRef = useRef<HTMLButtonElement>(null);
-    const channelRefs = useRef<Array<HTMLButtonElement | null>>([]);
+    const channelRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
     const redraw = useCallback((): void => {
         if (!svgRef.current || !stageRef.current || !isOpen) return;
@@ -297,8 +301,8 @@ export const ChannelPreferenceGroup = ({
         let secondFrame = 0;
 
         const drawAfterLayout = (): void => {
-            frame = window.requestAnimationFrame((): void => {
-                secondFrame = window.requestAnimationFrame(redraw);
+            frame = globalThis.requestAnimationFrame((): void => {
+                secondFrame = globalThis.requestAnimationFrame(redraw);
             });
         };
 
@@ -313,8 +317,8 @@ export const ChannelPreferenceGroup = ({
         if (categoryRef.current) obs.observe(categoryRef.current);
 
         return (): void => {
-            window.cancelAnimationFrame(frame);
-            window.cancelAnimationFrame(secondFrame);
+            globalThis.cancelAnimationFrame(frame);
+            globalThis.cancelAnimationFrame(secondFrame);
             obs.disconnect();
         };
     }, [redraw, channels.length]);
@@ -381,12 +385,12 @@ export const ChannelPreferenceGroup = ({
                     <span className="min-w-0 flex-1 truncate">
                         {category?.name ?? 'Uncategorized'}
                     </span>
-                    {isCategoryHidden && (
+                    {isCategoryHidden ? (
                         <EyeOff className="shrink-0" size={15} />
-                    )}
+                    ) : null}
                 </Button>
 
-                {isOpen && (
+                {isOpen ? (
                     <div className="mt-1 space-y-1 pl-8">
                         {channels.map((channel, index) => {
                             const isHidden = hiddenChannels.has(channel.id);
@@ -406,25 +410,25 @@ export const ChannelPreferenceGroup = ({
                                     }}
                                     type="button"
                                     variant="ghost"
-                                    onClick={(): void =>
-                                        onToggleChannel(channel.id)
-                                    }
+                                    onClick={(): void => {
+                                        onToggleChannel(channel.id);
+                                    }}
                                 >
                                     {channelIcon(channel)}
                                     <span className="min-w-0 flex-1 truncate">
                                         {channel.name}
                                     </span>
-                                    {isHidden && (
+                                    {isHidden ? (
                                         <EyeOff
                                             className="shrink-0"
                                             size={15}
                                         />
-                                    )}
+                                    ) : null}
                                 </Button>
                             );
                         })}
                     </div>
-                )}
+                ) : null}
             </div>
         </div>
     );
@@ -490,7 +494,11 @@ export const ChannelPreferencesModal = ({
     const handleSave = (): void => {
         updatePreferences.mutate(
             { hiddenChannelIds, hiddenCategoryIds },
-            { onSuccess: (): void => onClose() },
+            {
+                onSuccess: (): void => {
+                    onClose();
+                },
+            },
         );
     };
 
@@ -522,20 +530,20 @@ export const ChannelPreferencesModal = ({
                                     hiddenCategories={hiddenCategories}
                                     hiddenChannels={hiddenChannels}
                                     key={group.category?.id ?? 'uncategorized'}
-                                    onToggleCategory={(categoryId): void =>
+                                    onToggleCategory={(categoryId): void => {
                                         toggleId(
                                             categoryId,
                                             hiddenCategories,
                                             setHiddenCategoryIds,
-                                        )
-                                    }
-                                    onToggleChannel={(channelId): void =>
+                                        );
+                                    }}
+                                    onToggleChannel={(channelId): void => {
                                         toggleId(
                                             channelId,
                                             hiddenChannels,
                                             setHiddenChannelIds,
-                                        )
-                                    }
+                                        );
+                                    }}
                                 />
                             ))}
                         </div>
@@ -562,6 +570,166 @@ export const ChannelPreferencesModal = ({
 interface ServerOnboardingModalProps {
     serverId: string;
 }
+
+const OnboardingRulesStep = ({
+    rulesList,
+    accepted,
+    isAccepting,
+    onAcceptedChange,
+    onAccept,
+}: {
+    rulesList: string[];
+    accepted: boolean;
+    isAccepting: boolean;
+    onAcceptedChange: (v: boolean) => void;
+    onAccept: () => void;
+}) => (
+    <div className="space-y-6">
+        <div>
+            <Heading className="mb-1" level={2} variant="sub">
+                Server Guidelines
+            </Heading>
+            <Text as="p" size="sm" variant="muted">
+                Please review and agree to the rules before entering the server.
+            </Text>
+        </div>
+
+        {rulesList.length === 0 ? (
+            <div className="rounded-xl border border-dashed border-border-subtle bg-bg-secondary/20 p-6 text-center">
+                <Text as="p" size="sm" variant="muted">
+                    No guidelines have been configured.
+                </Text>
+            </div>
+        ) : (
+            <div className="custom-scrollbar max-h-[55vh] space-y-4 overflow-y-auto pr-2">
+                {rulesList.map((rule, idx) => (
+                    <div
+                        className="hover:border-border flex gap-4 rounded-xl border border-border-subtle bg-bg-secondary/40 p-4 transition-colors duration-200"
+                        key={`rule-${rule}`}
+                    >
+                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary">
+                            {idx + 1}
+                        </div>
+                        <div className="flex-1 pt-0.5">
+                            <Text className="text-sm leading-relaxed text-foreground">
+                                {rule}
+                            </Text>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        )}
+
+        <div className="flex flex-col gap-4 border-t border-border-subtle pt-6">
+            <label
+                className={cn(
+                    'flex cursor-pointer items-center gap-4 rounded-xl border p-4 transition-all duration-200',
+                    accepted
+                        ? 'border-primary bg-primary/5'
+                        : 'hover:border-border border-border-subtle hover:bg-white/5',
+                )}
+            >
+                <input
+                    checked={accepted}
+                    className="sr-only"
+                    type="checkbox"
+                    onChange={(e): void => {
+                        onAcceptedChange(e.target.checked);
+                    }}
+                />
+                <span
+                    className={cn(
+                        'flex h-5 w-5 shrink-0 items-center justify-center rounded-md border-2 transition-all duration-200',
+                        accepted
+                            ? 'border-primary bg-primary'
+                            : 'border-border-subtle bg-transparent',
+                    )}
+                >
+                    {accepted ? (
+                        <svg
+                            className="h-3 w-3 text-white"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth={3}
+                            viewBox="0 0 12 12"
+                        >
+                            <polyline points="1.5,6 4.5,9 10.5,3" />
+                        </svg>
+                    ) : null}
+                </span>
+                <Text className="text-sm font-medium text-foreground">
+                    I have read and agree to all server rules
+                </Text>
+            </label>
+            <div className="flex justify-end">
+                <Button
+                    className="w-full px-6 py-2.5 sm:w-auto"
+                    disabled={!accepted}
+                    loading={isAccepting}
+                    variant="primary"
+                    onClick={onAccept}
+                >
+                    I've read and agree to rules
+                </Button>
+            </div>
+        </div>
+    </div>
+);
+
+const OnboardingWelcomeStep = ({
+    welcomeChannels,
+    isCompleting,
+    onSelectChannel,
+    onFinish,
+}: {
+    welcomeChannels: Parameters<typeof channelIcon>[0][];
+    isCompleting: boolean;
+    onSelectChannel: (channelId: string) => void;
+    onFinish: () => void;
+}) => (
+    <div className="space-y-6">
+        <div>
+            <Heading className="mb-1" level={2} variant="sub">
+                You’re In
+            </Heading>
+            <Text as="p" size="sm" variant="muted">
+                Start with one of these channels, or jump to the server landing
+                channel.
+            </Text>
+        </div>
+        {welcomeChannels.length > 0 ? (
+            <div className="custom-scrollbar grid max-h-[55vh] gap-3 overflow-y-auto pr-2 sm:grid-cols-2">
+                {welcomeChannels.map((channel) => (
+                    <Button
+                        className="justify-start rounded-xl border border-border-subtle bg-bg-secondary/40 px-4 py-3 text-left shadow-none transition-all duration-200 hover:border-primary hover:bg-bg-secondary/80"
+                        justify="start"
+                        key={channel.id}
+                        type="button"
+                        variant="normal"
+                        onClick={(): void => {
+                            onSelectChannel(channel.id);
+                        }}
+                    >
+                        {channelIcon(channel)}
+                        <span className="truncate text-sm font-semibold">
+                            {channel.name}
+                        </span>
+                    </Button>
+                ))}
+            </div>
+        ) : null}
+        <div className="flex justify-end border-t border-border-subtle pt-6">
+            <Button
+                className="w-full px-6 py-2.5 sm:w-auto"
+                loading={isCompleting}
+                variant="primary"
+                onClick={onFinish}
+            >
+                Enter Server
+            </Button>
+        </div>
+    </div>
+);
 
 export const ServerOnboardingModal = ({
     serverId,
@@ -638,13 +806,17 @@ export const ServerOnboardingModal = ({
 
     const handleAcceptRules = (): void => {
         acceptRules.mutate(undefined, {
-            onSuccess: (): void => setStep(roleStepOrWelcome),
+            onSuccess: (): void => {
+                setStep(roleStepOrWelcome);
+            },
         });
     };
 
     const handleRolesNext = (): void => {
         updateSelfRoles.mutate(selectedRoleIds, {
-            onSuccess: (): void => setStep('welcome'),
+            onSuccess: (): void => {
+                setStep('welcome');
+            },
         });
     };
 
@@ -742,7 +914,7 @@ export const ServerOnboardingModal = ({
                                         </div>
 
                                         {/* Connector line between steps */}
-                                        {i < steps.length - 1 && (
+                                        {i < steps.length - 1 ? (
                                             <div className="relative mx-3 mb-5 h-0.5 w-24 overflow-hidden rounded-full bg-border-subtle sm:w-32">
                                                 <div
                                                     className="absolute inset-y-0 left-0 bg-primary transition-all duration-500 ease-out"
@@ -754,113 +926,24 @@ export const ServerOnboardingModal = ({
                                                     }}
                                                 />
                                             </div>
-                                        )}
+                                        ) : null}
                                     </React.Fragment>
                                 );
                             })}
                         </div>
                     </div>
 
-                    {step === 'rules' && (
-                        <div className="space-y-6">
-                            <div>
-                                <Heading
-                                    className="mb-1"
-                                    level={2}
-                                    variant="sub"
-                                >
-                                    Server Guidelines
-                                </Heading>
-                                <Text as="p" size="sm" variant="muted">
-                                    Please review and agree to the rules before
-                                    entering the server.
-                                </Text>
-                            </div>
+                    {step === 'rules' ? (
+                        <OnboardingRulesStep
+                            accepted={accepted}
+                            isAccepting={acceptRules.isPending}
+                            rulesList={rulesList}
+                            onAccept={handleAcceptRules}
+                            onAcceptedChange={setAccepted}
+                        />
+                    ) : null}
 
-                            {rulesList.length === 0 ? (
-                                <div className="rounded-xl border border-dashed border-border-subtle bg-bg-secondary/20 p-6 text-center">
-                                    <Text as="p" size="sm" variant="muted">
-                                        No guidelines have been configured.
-                                    </Text>
-                                </div>
-                            ) : (
-                                <div className="custom-scrollbar max-h-[55vh] space-y-4 overflow-y-auto pr-2">
-                                    {rulesList.map((rule, idx) => (
-                                        <div
-                                            className="hover:border-border flex gap-4 rounded-xl border border-border-subtle bg-bg-secondary/40 p-4 transition-colors duration-200"
-                                            key={`rule-${rule}`}
-                                        >
-                                            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary">
-                                                {idx + 1}
-                                            </div>
-                                            <div className="flex-1 pt-0.5">
-                                                <Text className="text-sm leading-relaxed text-foreground">
-                                                    {rule}
-                                                </Text>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-
-                            <div className="flex flex-col gap-4 border-t border-border-subtle pt-6">
-                                <label
-                                    className={cn(
-                                        'flex cursor-pointer items-center gap-4 rounded-xl border p-4 transition-all duration-200',
-                                        accepted
-                                            ? 'border-primary bg-primary/5'
-                                            : 'hover:border-border border-border-subtle hover:bg-white/5',
-                                    )}
-                                >
-                                    <input
-                                        checked={accepted}
-                                        className="sr-only"
-                                        type="checkbox"
-                                        onChange={(e): void =>
-                                            setAccepted(e.target.checked)
-                                        }
-                                    />
-                                    <span
-                                        className={cn(
-                                            'flex h-5 w-5 shrink-0 items-center justify-center rounded-md border-2 transition-all duration-200',
-                                            accepted
-                                                ? 'border-primary bg-primary'
-                                                : 'border-border-subtle bg-transparent',
-                                        )}
-                                    >
-                                        {accepted && (
-                                            <svg
-                                                className="h-3 w-3 text-white"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                strokeWidth={3}
-                                                viewBox="0 0 12 12"
-                                            >
-                                                <polyline points="1.5,6 4.5,9 10.5,3" />
-                                            </svg>
-                                        )}
-                                    </span>
-                                    <Text className="text-sm font-medium text-foreground">
-                                        I have read and agree to all server
-                                        rules
-                                    </Text>
-                                </label>
-                                <div className="flex justify-end">
-                                    <Button
-                                        className="w-full px-6 py-2.5 sm:w-auto"
-                                        disabled={!accepted}
-                                        loading={acceptRules.isPending}
-                                        variant="primary"
-                                        onClick={handleAcceptRules}
-                                    >
-                                        I've read and agree to rules
-                                    </Button>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-                    {step === 'roles' && (
+                    {step === 'roles' ? (
                         <div className="space-y-6">
                             <div>
                                 <Heading
@@ -897,63 +980,21 @@ export const ServerOnboardingModal = ({
                                 </Button>
                             </div>
                         </div>
-                    )}
+                    ) : null}
 
-                    {step === 'welcome' && (
-                        <div className="space-y-6">
-                            <div>
-                                <Heading
-                                    className="mb-1"
-                                    level={2}
-                                    variant="sub"
-                                >
-                                    You’re In
-                                </Heading>
-                                <Text as="p" size="sm" variant="muted">
-                                    Start with one of these channels, or jump to
-                                    the server landing channel.
-                                </Text>
-                            </div>
-                            {welcomeChannels.length > 0 && (
-                                <div className="custom-scrollbar grid max-h-[55vh] gap-3 overflow-y-auto pr-2 sm:grid-cols-2">
-                                    {welcomeChannels.map((channel) => (
-                                        <Button
-                                            className="justify-start rounded-xl border border-border-subtle bg-bg-secondary/40 px-4 py-3 text-left shadow-none transition-all duration-200 hover:border-primary hover:bg-bg-secondary/80"
-                                            justify="start"
-                                            key={channel.id}
-                                            type="button"
-                                            variant="normal"
-                                            onClick={(): void => {
-                                                dispatch(
-                                                    setSelectedChannelId(
-                                                        channel.id,
-                                                    ),
-                                                );
-                                                void navigate(
-                                                    `/chat/@server/${serverId}/channel/${channel.id}`,
-                                                );
-                                            }}
-                                        >
-                                            {channelIcon(channel)}
-                                            <span className="truncate text-sm font-semibold">
-                                                {channel.name}
-                                            </span>
-                                        </Button>
-                                    ))}
-                                </div>
-                            )}
-                            <div className="flex justify-end border-t border-border-subtle pt-6">
-                                <Button
-                                    className="w-full px-6 py-2.5 sm:w-auto"
-                                    loading={completeOnboarding.isPending}
-                                    variant="primary"
-                                    onClick={handleFinish}
-                                >
-                                    Enter Server
-                                </Button>
-                            </div>
-                        </div>
-                    )}
+                    {step === 'welcome' ? (
+                        <OnboardingWelcomeStep
+                            isCompleting={completeOnboarding.isPending}
+                            welcomeChannels={welcomeChannels}
+                            onFinish={handleFinish}
+                            onSelectChannel={(channelId): void => {
+                                dispatch(setSelectedChannelId(channelId));
+                                void navigate(
+                                    `/chat/@server/${serverId}/channel/${channelId}`,
+                                );
+                            }}
+                        />
+                    ) : null}
                 </div>
             )}
         </Modal>

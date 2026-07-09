@@ -21,7 +21,7 @@ const ColorSwatch = ({ name, variable, description }: ColorSwatchProps) => (
             <Text as="span" className="font-mono" size="xs" variant="muted">
                 {variable}
             </Text>
-            {description && (
+            {description ? (
                 <Text
                     as="span"
                     className="mt-1 italic"
@@ -30,7 +30,7 @@ const ColorSwatch = ({ name, variable, description }: ColorSwatchProps) => (
                 >
                     {description}
                 </Text>
-            )}
+            ) : null}
         </div>
     </div>
 );

@@ -59,14 +59,11 @@ const filterItems = (items: ContextMenuItem[]): ContextMenuItem[] => {
     for (const item of items) {
         if (item.type !== 'divider') {
             result.push(item);
-        } else if (
-            result.length > 0 &&
-            result[result.length - 1].type !== 'divider'
-        ) {
+        } else if (result.at(-1) && result.at(-1)?.type !== 'divider') {
             result.push(item);
         }
     }
-    if (result.length > 0 && result[result.length - 1].type === 'divider') {
+    if (result.at(-1)?.type === 'divider') {
         result.pop();
     }
     return result;
@@ -103,7 +100,7 @@ export const ContextMenu = ({
 
         if (items.length === 0) return;
 
-        window.dispatchEvent(
+        globalThis.dispatchEvent(
             new CustomEvent<number>(CONTEXT_MENU_OPEN_EVENT, {
                 detail: menuIdRef.current,
             }),
@@ -148,6 +145,9 @@ export const ContextMenu = ({
         return (): void => {
             document.removeEventListener('mousedown', handleClickOutside);
         };
+        // closeMenu is a useCallback with an empty dep array (permanently
+        // stable identity), so it can never actually cause a re-subscribe here.
+        // react-doctor-disable-next-line react-doctor/prefer-use-effect-event
     }, [isOpen, closeMenu]);
 
     useEffect((): (() => void) => {
@@ -158,10 +158,13 @@ export const ContextMenu = ({
             }
         };
 
-        window.addEventListener(CONTEXT_MENU_OPEN_EVENT, handleAnotherMenuOpen);
+        globalThis.addEventListener(
+            CONTEXT_MENU_OPEN_EVENT,
+            handleAnotherMenuOpen,
+        );
 
         return (): void => {
-            window.removeEventListener(
+            globalThis.removeEventListener(
                 CONTEXT_MENU_OPEN_EVENT,
                 handleAnotherMenuOpen,
             );
@@ -179,45 +182,46 @@ export const ContextMenu = ({
                 {children}
             </Box>
 
-            {isOpen &&
-                createPortal(
-                    <AnimatePresence>
-                        <m.div
-                            animate={{ opacity: 1, scale: 1, y: 0 }}
-                            className="context-menu-portal min-w-[220px] overflow-hidden rounded-lg border border-border-subtle bg-background py-2 shadow-lg backdrop-blur-md"
-                            exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                            initial={{ opacity: 0, scale: 0.95, y: -10 }}
-                            ref={menuRef}
-                            style={{
-                                position: 'fixed',
-                                top: position.y,
-                                left: position.x,
-                                zIndex: 'var(--z-index-top)',
-                                boxShadow:
-                                    '0 10px 30px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 190, 0, 0.1)',
-                            }}
-                            transition={{ duration: 0.15, ease: 'easeOut' }}
-                        >
-                            {filteredItems.map((item, index) => (
-                                <ContextMenuItemRenderer
-                                    closeMenu={closeMenu}
-                                    item={item}
-                                    key={
-                                        item.id ??
-                                        (item.type === 'divider'
-                                            ? `divider-${index}`
-                                            : item.type === 'custom'
-                                              ? `custom-${index}`
-                                              : typeof item.label === 'string'
-                                                ? `item-${item.label}`
-                                                : `index-${index}`)
-                                    }
-                                />
-                            ))}
-                        </m.div>
-                    </AnimatePresence>,
-                    document.body,
-                )}
+            {isOpen
+                ? createPortal(
+                      <AnimatePresence>
+                          <m.div
+                              animate={{ opacity: 1, scale: 1, y: 0 }}
+                              className="context-menu-portal min-w-[220px] overflow-hidden rounded-lg border border-border-subtle bg-background py-2 shadow-lg backdrop-blur-md"
+                              exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                              initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                              ref={menuRef}
+                              style={{
+                                  position: 'fixed',
+                                  top: position.y,
+                                  left: position.x,
+                                  zIndex: 'var(--z-index-top)',
+                                  boxShadow:
+                                      '0 10px 30px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 190, 0, 0.1)',
+                              }}
+                              transition={{ duration: 0.15, ease: 'easeOut' }}
+                          >
+                              {filteredItems.map((item, index) => (
+                                  <ContextMenuItemRenderer
+                                      closeMenu={closeMenu}
+                                      item={item}
+                                      key={
+                                          item.id ??
+                                          (item.type === 'divider'
+                                              ? `divider-${index}`
+                                              : item.type === 'custom'
+                                                ? `custom-${index}`
+                                                : typeof item.label === 'string'
+                                                  ? `item-${item.label}`
+                                                  : `index-${index}`)
+                                      }
+                                  />
+                              ))}
+                          </m.div>
+                      </AnimatePresence>,
+                      document.body,
+                  )
+                : null}
         </>
     );
 };
@@ -306,7 +310,9 @@ const ContextMenuItemRenderer = ({ item, closeMenu }: ContextMenuItemProps) => {
                     }}
                 >
                     <div className="flex items-center">
-                        {item.icon && <item.icon className="mr-3 h-4 w-4" />}
+                        {item.icon ? (
+                            <item.icon className="mr-3 h-4 w-4" />
+                        ) : null}
                         <span className="font-medium">{item.label}</span>
                     </div>
                     <svg
@@ -329,7 +335,7 @@ const ContextMenuItemRenderer = ({ item, closeMenu }: ContextMenuItemProps) => {
 
                 {/* Submenu Portal */}
                 <AnimatePresence>
-                    {isSubmenuOpen && (
+                    {isSubmenuOpen ? (
                         <SubMenu
                             closeAll={closeMenu}
                             isOpen={isSubmenuOpen}
@@ -338,7 +344,7 @@ const ContextMenuItemRenderer = ({ item, closeMenu }: ContextMenuItemProps) => {
                             onMouseEnter={handleSubMenuMouseEnter}
                             onMouseLeave={handleMouseLeave}
                         />
-                    )}
+                    ) : null}
                 </AnimatePresence>
             </div>
         );
@@ -349,20 +355,26 @@ const ContextMenuItemRenderer = ({ item, closeMenu }: ContextMenuItemProps) => {
     // Determine text color based on variant
     const getTextColorClass = (): string => {
         switch (item.variant) {
-            case 'danger':
+            case 'danger': {
                 return 'text-danger hover:brightness-110';
-            case 'caution':
+            }
+            case 'caution': {
                 return 'text-caution hover:brightness-110';
-            case 'success':
+            }
+            case 'success': {
                 return 'text-success hover:brightness-110';
-            case 'primary':
+            }
+            case 'primary': {
                 return 'text-primary hover:brightness-110';
-            case 'ghost':
+            }
+            case 'ghost': {
                 return 'opacity-50 cursor-not-allowed';
+            }
             case 'normal':
             case undefined:
-            default:
+            default: {
                 return 'text-foreground hover:brightness-110';
+            }
         }
     };
 
@@ -395,10 +407,14 @@ const ContextMenuItemRenderer = ({ item, closeMenu }: ContextMenuItemProps) => {
                 }
             }}
         >
-            {Icon && <Icon className="mr-3 h-4 w-4" />}
-            {!Icon && item.indent !== false && <div className="mr-3 h-4 w-4" />}
+            {Icon ? <Icon className="mr-3 h-4 w-4" /> : null}
+            {!Icon && item.indent !== false ? (
+                <div className="mr-3 h-4 w-4" />
+            ) : null}
             <span className="flex-1 font-medium">{item.label}</span>
-            {item.rightIcon && <item.rightIcon className="ml-2 h-4 w-4" />}
+            {item.rightIcon ? (
+                <item.rightIcon className="ml-2 h-4 w-4" />
+            ) : null}
         </button>
     );
 };

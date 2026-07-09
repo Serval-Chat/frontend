@@ -54,7 +54,9 @@ export const Mention = ({ userId, serverId, size = 'sm' }: MentionProps) => {
                 as="span"
                 className="inline-flex cursor-pointer items-baseline rounded bg-[var(--mention-bg,var(--primary-muted))] px-1.5 py-[4px] font-medium text-[var(--mention-text,var(--primary))] transition-colors select-none hover:bg-[var(--mention-bg-hover,var(--primary-muted))]"
                 ref={triggerRef}
-                onClick={(): void => setIsPopupOpen(true)}
+                onClick={(): void => {
+                    setIsPopupOpen(true);
+                }}
             >
                 <Text as="span" className="leading-none" size={size}>
                     @{displayName}
@@ -66,7 +68,9 @@ export const Mention = ({ userId, serverId, size = 'sm' }: MentionProps) => {
                 serverId={serverId}
                 triggerRef={triggerRef}
                 userId={userId}
-                onClose={(): void => setIsPopupOpen(false)}
+                onClose={(): void => {
+                    setIsPopupOpen(false);
+                }}
             />
         </>
     );

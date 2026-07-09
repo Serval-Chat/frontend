@@ -26,18 +26,21 @@ export const BlockUserModal = ({
     profiles,
 }: BlockUserModalProps) => {
     const [selectedProfileId, setSelectedProfileId] = useState<string>(
-        (): string => profiles[0]?.id || '',
+        (): string => profiles[0]?.id ?? '',
     );
 
     if (
         profiles.length > 0 &&
         !profiles.some((p): boolean => p.id === selectedProfileId)
     ) {
-        setSelectedProfileId(profiles[0].id);
+        const firstProfile = profiles[0];
+        if (firstProfile) {
+            setSelectedProfileId(firstProfile.id);
+        }
     }
 
     const handleConfirm = (): void => {
-        if (selectedProfileId) {
+        if (selectedProfileId !== '') {
             onConfirm(selectedProfileId);
             onClose();
         }
@@ -74,9 +77,9 @@ export const BlockUserModal = ({
                         className="w-full rounded-md border border-white/10 bg-bg-secondary px-3 py-2 text-sm text-foreground outline-none focus:border-primary"
                         id="block-profile-select"
                         value={selectedProfileId}
-                        onChange={(e): void =>
-                            setSelectedProfileId(e.target.value)
-                        }
+                        onChange={(e): void => {
+                            setSelectedProfileId(e.target.value);
+                        }}
                     >
                         {profiles.map((p) => (
                             <option key={p.id} value={p.id}>
@@ -91,7 +94,7 @@ export const BlockUserModal = ({
                         Cancel
                     </Button>
                     <Button
-                        disabled={!selectedProfileId}
+                        disabled={selectedProfileId === ''}
                         variant="danger"
                         onClick={handleConfirm}
                     >

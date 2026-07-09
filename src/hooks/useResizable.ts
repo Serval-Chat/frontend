@@ -36,7 +36,7 @@ export const useResizable = ({
     const [width, setWidth] = useState((): number => {
         const stored = localStorage.getItem(storageKey);
         if (stored) {
-            const parsed = parseInt(stored, 10);
+            const parsed = Number.parseInt(stored, 10);
             if (!isNaN(parsed) && parsed >= minWidth && parsed <= maxWidth) {
                 return parsed;
             }
@@ -74,18 +74,17 @@ export const useResizable = ({
             const delta = e.clientX - startXRef.current;
             let newWidth: number;
 
-            if (side === 'left') {
-                newWidth = startWidthRef.current + delta;
-            } else {
-                newWidth = startWidthRef.current - delta;
-            }
+            newWidth =
+                side === 'left'
+                    ? startWidthRef.current + delta
+                    : startWidthRef.current - delta;
 
             newWidth = Math.max(minWidth, Math.min(maxWidth, newWidth));
             pendingWidthRef.current = newWidth;
             currentWidthRef.current = newWidth;
 
             if (frameRef.current !== null) return;
-            frameRef.current = window.requestAnimationFrame((): void => {
+            frameRef.current = globalThis.requestAnimationFrame((): void => {
                 frameRef.current = null;
                 setWidth(pendingWidthRef.current);
             });
@@ -95,7 +94,7 @@ export const useResizable = ({
 
     const handleMouseUp = useCallback((): void => {
         if (frameRef.current !== null) {
-            window.cancelAnimationFrame(frameRef.current);
+            globalThis.cancelAnimationFrame(frameRef.current);
             frameRef.current = null;
             setWidth(pendingWidthRef.current);
         }
@@ -114,22 +113,25 @@ export const useResizable = ({
     });
 
     useEffect((): (() => void) => {
-        const moveHandler = (e: MouseEvent): void =>
+        const moveHandler = (e: MouseEvent): void => {
             handleMouseMoveRef.current(e);
-        const upHandler = (): void => handleMouseUpRef.current();
+        };
+        const upHandler = (): void => {
+            handleMouseUpRef.current();
+        };
 
         if (isResizing) {
-            window.addEventListener('mousemove', moveHandler);
-            window.addEventListener('mouseup', upHandler);
+            globalThis.addEventListener('mousemove', moveHandler);
+            globalThis.addEventListener('mouseup', upHandler);
         }
 
         return (): void => {
             if (frameRef.current !== null) {
-                window.cancelAnimationFrame(frameRef.current);
+                globalThis.cancelAnimationFrame(frameRef.current);
                 frameRef.current = null;
             }
-            window.removeEventListener('mousemove', moveHandler);
-            window.removeEventListener('mouseup', upHandler);
+            globalThis.removeEventListener('mousemove', moveHandler);
+            globalThis.removeEventListener('mouseup', upHandler);
         };
     }, [isResizing]);
 

@@ -63,13 +63,15 @@ export const useRegisterForm = (): RegisterFormResult => {
     const validateField = (name: string, value: string): void => {
         let error = '';
         switch (name) {
-            case 'login':
+            case 'login': {
                 error = validateLogin(value);
                 break;
-            case 'username':
+            }
+            case 'username': {
                 error = validateUsername(value);
                 break;
-            case 'password':
+            }
+            case 'password': {
                 error = validatePassword(value);
                 if (confirmPassword && value !== confirmPassword) {
                     setErrors((prev) => ({
@@ -82,14 +84,17 @@ export const useRegisterForm = (): RegisterFormResult => {
                     setErrors((prev) => ({ ...prev, confirmPassword: '' }));
                 }
                 break;
-            case 'confirmPassword':
+            }
+            case 'confirmPassword': {
                 if (value !== password) {
                     error = 'Passwords do not match';
                 }
                 break;
-            case 'inviteToken':
+            }
+            case 'inviteToken': {
                 error = validateInviteToken(value);
                 break;
+            }
         }
         setErrors((prev) => ({ ...prev, [name]: error }));
     };
@@ -126,7 +131,7 @@ export const useRegisterForm = (): RegisterFormResult => {
         !!confirmPassword &&
         !!inviteToken &&
         password === confirmPassword &&
-        !Object.values(errors).some((e) => e);
+        !Object.values(errors).some(Boolean);
 
     const handleSubmit = async (e: React.FormEvent): Promise<void> => {
         e.preventDefault();
@@ -143,8 +148,8 @@ export const useRegisterForm = (): RegisterFormResult => {
         currentErrors.inviteToken = validateInviteToken(inviteToken);
 
         if (
-            Object.values(currentErrors).some((e) => e) ||
-            Object.values(errors).some((e) => e)
+            Object.values(currentErrors).some(Boolean) ||
+            Object.values(errors).some(Boolean)
         ) {
             setErrors({ ...errors, ...currentErrors });
             setStatus({

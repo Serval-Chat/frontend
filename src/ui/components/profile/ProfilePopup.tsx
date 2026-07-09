@@ -44,7 +44,7 @@ interface ProfilePopupProps {
 export const ProfilePopup = (props: ProfilePopupProps): React.ReactPortal =>
     createPortal(
         <AnimatePresence>
-            {props.isOpen && (
+            {props.isOpen ? (
                 <ProfilePopupContent
                     adminView={props.adminView}
                     disableColors={props.disableColors}
@@ -64,7 +64,7 @@ export const ProfilePopup = (props: ProfilePopupProps): React.ReactPortal =>
                     userId={props.userId}
                     onClose={props.onClose}
                 />
-            )}
+            ) : null}
         </AnimatePresence>,
         document.body,
     );
@@ -93,13 +93,13 @@ const ProfilePopupContent = ({
         enabled: !disableFetch && !adminView,
     });
     const { data: adminData } = useAdminUserDetail(adminView ? userId : null);
-    const { data: members } = useMembers(serverId || null, {
+    const { data: members } = useMembers(serverId ?? null, {
         enabled: !!serverId,
     });
-    const { data: serverRoles } = useRoles(serverId || null, {
+    const { data: serverRoles } = useRoles(serverId ?? null, {
         enabled: !!serverId,
     });
-    const { data: serverDetails } = useServerDetails(serverId || null, {
+    const { data: serverDetails } = useServerDetails(serverId ?? null, {
         enabled: !!serverId,
     });
 
@@ -116,13 +116,13 @@ const ProfilePopupContent = ({
 
     const roleMap = React.useMemo((): Map<string, Role> => {
         const map = new Map<string, Role>();
-        serverRoles?.forEach((r): Map<string, Role> => map.set(r.id, r));
+        if (serverRoles) for (const r of serverRoles) map.set(r.id, r);
         return map;
     }, [serverRoles]);
 
     const resolvedRole = React.useMemo((): Role | undefined => {
         if (role) return role;
-        if (!member || !roleMap.size || !serverRoles) return undefined;
+        if (!member || roleMap.size === 0 || !serverRoles) return undefined;
         const memberRoleIds = [...member.roles];
         const everyoneRole = serverRoles.find(
             (r): boolean => r.name === '@everyone',
@@ -135,7 +135,7 @@ const ProfilePopupContent = ({
 
     const resolvedIconRole = React.useMemo((): Role | undefined => {
         if (iconRole) return iconRole;
-        if (!member || !roleMap.size || !serverRoles) return undefined;
+        if (!member || roleMap.size === 0 || !serverRoles) return undefined;
         const memberRoleIds = [...member.roles];
         const everyoneRole = serverRoles.find(
             (r): boolean => r.name === '@everyone',
@@ -146,9 +146,9 @@ const ProfilePopupContent = ({
         return getHighestRoleWithIconForMember(memberRoleIds, roleMap);
     }, [iconRole, member, roleMap, serverRoles]);
 
-    const finalJoinedAt = joinedAt || member?.joinedAt;
+    const finalJoinedAt = joinedAt ?? member?.joinedAt;
 
-    const user = adminData || fetchedUser || providedUser;
+    const user = adminData ?? fetchedUser ?? providedUser;
 
     // Presence data
     const presence = useAppSelector((state) => state.presence.users[userId]);
@@ -168,13 +168,14 @@ const ProfilePopupContent = ({
     );
     const myRoles = serverRoles?.filter(
         (r): boolean =>
-            myMember?.roles.includes(r.id) || r.name === '@everyone',
+            (myMember?.roles.includes(r.id) ?? false) || r.name === '@everyone',
     );
     const canManageRoles =
         isOwner ||
         (myRoles?.some(
             (r): boolean | undefined =>
-                r.permissions?.administrator || r.permissions?.manageRoles,
+                (r.permissions?.administrator ?? false) ||
+                (r.permissions?.manageRoles ?? false),
         ) ??
             false);
 
@@ -212,11 +213,13 @@ const ProfilePopupContent = ({
         const handleKeyDown = (event: KeyboardEvent): void => {
             if (event.key === 'Escape') onClose();
         };
-        window.addEventListener('keydown', handleKeyDown);
-        return (): void => window.removeEventListener('keydown', handleKeyDown);
+        globalThis.addEventListener('keydown', handleKeyDown);
+        return (): void => {
+            globalThis.removeEventListener('keydown', handleKeyDown);
+        };
     }, [onClose]);
 
-    if (!user && !userId) return null;
+    if (!user && userId === '') return null;
 
     return (
         <Box className="pointer-events-none fixed inset-0 z-[9999]">
@@ -243,18 +246,19 @@ const ProfilePopupContent = ({
                         emoji: presenceCustomEmoji,
                     }}
                     disableColors={
-                        disableColors ||
+                        (disableColors ?? false) ||
                         serverDetails?.disableUsernameGlowAndCustomColor
                     }
                     disableCustomFonts={
-                        disableCustomFonts || serverDetails?.disableCustomFonts
+                        (disableCustomFonts ?? false) ||
+                        serverDetails?.disableCustomFonts
                     }
                     disableGlow={
-                        disableGlow ||
+                        (disableGlow ?? false) ||
                         serverDetails?.disableUsernameGlowAndCustomColor
                     }
                     disableGlowAndColors={
-                        disableGlowAndColors ||
+                        (disableGlowAndColors ?? false) ||
                         serverDetails?.disableUsernameGlowAndCustomColor
                     }
                     iconRole={resolvedIconRole}

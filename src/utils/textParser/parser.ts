@@ -34,19 +34,19 @@ const getBaseUrlPattern = (): string => {
     let alternativeUrls: string[] = [];
     try {
         alternativeUrls = JSON.parse(alternativeUrlsStr);
-    } catch (e) {
-        console.warn('Failed to parse VITE_ALTERNATIVE_URLS:', e);
+    } catch (error) {
+        console.warn('Failed to parse VITE_ALTERNATIVE_URLS:', error);
     }
 
     const defaultDomains = [
-        'https?://(?:rolling\\.)?catfla\\.re',
+        String.raw`https?://(?:rolling\.)?catfla\.re`,
         'https?://localhost:(?:5173|8001)',
     ];
 
-    if (typeof window !== 'undefined' && window.location.hostname) {
-        const escapedHostname = window.location.hostname.replace(
+    if (globalThis.window !== undefined && globalThis.location.hostname) {
+        const escapedHostname = globalThis.location.hostname.replaceAll(
             /[.*+?^${}()|[\]\\]/g,
-            '\\$&',
+            String.raw`\$&`,
         );
         const pattern = `https?://${escapedHostname}(?::\\d+)?`;
         if (!defaultDomains.includes(pattern)) {
@@ -55,7 +55,9 @@ const getBaseUrlPattern = (): string => {
     }
 
     const escapedAlts = alternativeUrls.map((url): string =>
-        url.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\/$/, ''),
+        url
+            .replaceAll(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`)
+            .replace(/\/$/, ''),
     );
 
     cachedBaseUrlPattern = `(?:${[...defaultDomains, ...escapedAlts].join('|')})`;
@@ -213,9 +215,9 @@ export const ParserPresets = {
     },
 } as const;
 
-export class TextParser {
+class TextParser {
     private text: string;
-    private index: number = 0;
+    private index = 0;
     private options: ParserOptions;
     private featureSet: ReadonlySet<ParserFeatureType>;
 
@@ -234,13 +236,13 @@ export class TextParser {
         let currentText = '';
 
         while (this.index < this.text.length) {
-            const char = this.text[this.index];
+            const char = this.text.charAt(this.index);
             const charCode = char.charCodeAt(0);
 
             if (char === '\\' && this.index + 1 < this.text.length) {
                 currentText = this.flushText(nodes, currentText);
 
-                const escapedChar = this.text[this.index + 1];
+                const escapedChar = this.text.charAt(this.index + 1);
 
                 nodes.push({ type: 'text', content: escapedChar });
 
@@ -636,7 +638,7 @@ export class TextParser {
             if (
                 char === '|' &&
                 this.has(ParserFeature.TABLE) &&
-                (this.index === 0 || this.text[this.index - 1] === '\n')
+                (this.index === 0 || this.text.charAt(this.index - 1) === '\n')
             ) {
                 const tableNode = this.tryParseTable();
                 if (tableNode) {
@@ -691,7 +693,7 @@ export class TextParser {
                 char === ':' &&
                 this.has(ParserFeature.ADMONITION) &&
                 this.peek(':::') &&
-                (this.index === 0 || this.text[this.index - 1] === '\n')
+                (this.index === 0 || this.text.charAt(this.index - 1) === '\n')
             ) {
                 const mystNode = this.tryParseMystAdmonition();
                 if (mystNode) {
@@ -712,7 +714,7 @@ export class TextParser {
                 char === '>' &&
                 (this.has(ParserFeature.BLOCKQUOTE) ||
                     this.has(ParserFeature.ADMONITION)) &&
-                (this.index === 0 || this.text[this.index - 1] === '\n')
+                (this.index === 0 || this.text.charAt(this.index - 1) === '\n')
             ) {
                 const blockquoteNode = this.tryParseBlockquote();
                 if (blockquoteNode) {
@@ -764,8 +766,11 @@ export class TextParser {
         this.index += 7; // skip '<emoji:'
         let emojiId = '';
 
-        while (this.index < this.text.length && this.text[this.index] !== '>') {
-            const c = this.text[this.index];
+        while (
+            this.index < this.text.length &&
+            this.text.charAt(this.index) !== '>'
+        ) {
+            const c = this.text.charAt(this.index);
             if (
                 (c >= 'a' && c <= 'z') ||
                 (c >= 'A' && c <= 'Z') ||
@@ -783,7 +788,7 @@ export class TextParser {
 
         if (
             this.index < this.text.length &&
-            this.text[this.index] === '>' &&
+            this.text.charAt(this.index) === '>' &&
             emojiId
         ) {
             this.index++; // skip '>'
@@ -799,13 +804,13 @@ export class TextParser {
         this.index += 3; // skip '<t:'
 
         let rawTimestamp = '';
-        if (this.text[this.index] === '-') {
+        if (this.text.charAt(this.index) === '-') {
             rawTimestamp += '-';
             this.index++;
         }
 
         while (this.index < this.text.length) {
-            const c = this.text[this.index];
+            const c = this.text.charAt(this.index);
             if (c >= '0' && c <= '9') {
                 rawTimestamp += c;
                 this.index++;
@@ -820,8 +825,8 @@ export class TextParser {
         }
 
         let flag: 't' | 'T' | 'd' | 'D' | 'f' | 'F' | 'R' | undefined;
-        if (this.text[this.index] === ':') {
-            const rawFlag = this.text[this.index + 1];
+        if (this.text.charAt(this.index) === ':') {
+            const rawFlag = this.text.charAt(this.index + 1);
             if (
                 rawFlag === 't' ||
                 rawFlag === 'T' ||
@@ -839,7 +844,7 @@ export class TextParser {
             }
         }
 
-        if (this.text[this.index] !== '>') {
+        if (this.text.charAt(this.index) !== '>') {
             this.index = start;
             return null;
         }
@@ -858,7 +863,7 @@ export class TextParser {
 
         while (
             this.index < this.text.length &&
-            this.text[this.index] === '*' &&
+            this.text.charAt(this.index) === '*' &&
             starCount < 3
         ) {
             starCount++;
@@ -888,13 +893,13 @@ export class TextParser {
             if (this.peek(closingSequence)) {
                 if (
                     starCount < 3 &&
-                    this.text[this.index + starCount] === '*'
+                    this.text.charAt(this.index + starCount) === '*'
                 ) {
                     while (
                         this.index < this.text.length &&
-                        this.text[this.index] === '*'
+                        this.text.charAt(this.index) === '*'
                     ) {
-                        content += this.text[this.index];
+                        content += this.text.charAt(this.index);
                         this.index++;
                     }
                     continue;
@@ -902,7 +907,7 @@ export class TextParser {
                 foundClosing = true;
                 break;
             }
-            content += this.text[this.index];
+            content += this.text.charAt(this.index);
             this.index++;
         }
 
@@ -922,7 +927,7 @@ export class TextParser {
     }
 
     private tryParseHeading(): ASTNode | null {
-        if (this.index > 0 && this.text[this.index - 1] !== '\n') {
+        if (this.index > 0 && this.text.charAt(this.index - 1) !== '\n') {
             return null;
         }
 
@@ -933,15 +938,15 @@ export class TextParser {
             let content = '';
             while (
                 this.index < this.text.length &&
-                this.text[this.index] !== '\n'
+                this.text.charAt(this.index) !== '\n'
             ) {
-                content += this.text[this.index];
+                content += this.text.charAt(this.index);
                 this.index++;
             }
             if (content.trim()) {
                 if (
                     this.index < this.text.length &&
-                    this.text[this.index] === '\n'
+                    this.text.charAt(this.index) === '\n'
                 ) {
                     this.index++;
                 }
@@ -958,15 +963,15 @@ export class TextParser {
             let content = '';
             while (
                 this.index < this.text.length &&
-                this.text[this.index] !== '\n'
+                this.text.charAt(this.index) !== '\n'
             ) {
-                content += this.text[this.index];
+                content += this.text.charAt(this.index);
                 this.index++;
             }
             if (content.trim()) {
                 if (
                     this.index < this.text.length &&
-                    this.text[this.index] === '\n'
+                    this.text.charAt(this.index) === '\n'
                 ) {
                     this.index++;
                 }
@@ -983,15 +988,15 @@ export class TextParser {
             let content = '';
             while (
                 this.index < this.text.length &&
-                this.text[this.index] !== '\n'
+                this.text.charAt(this.index) !== '\n'
             ) {
-                content += this.text[this.index];
+                content += this.text.charAt(this.index);
                 this.index++;
             }
             if (content.trim()) {
                 if (
                     this.index < this.text.length &&
-                    this.text[this.index] === '\n'
+                    this.text.charAt(this.index) === '\n'
                 ) {
                     this.index++;
                 }
@@ -1008,15 +1013,15 @@ export class TextParser {
             let content = '';
             while (
                 this.index < this.text.length &&
-                this.text[this.index] !== '\n'
+                this.text.charAt(this.index) !== '\n'
             ) {
-                content += this.text[this.index];
+                content += this.text.charAt(this.index);
                 this.index++;
             }
             if (content.trim()) {
                 if (
                     this.index < this.text.length &&
-                    this.text[this.index] === '\n'
+                    this.text.charAt(this.index) === '\n'
                 ) {
                     this.index++;
                 }
@@ -1046,7 +1051,7 @@ export class TextParser {
                 foundClosing = true;
                 break;
             }
-            content += this.text[this.index];
+            content += this.text.charAt(this.index);
             this.index++;
         }
 
@@ -1071,18 +1076,18 @@ export class TextParser {
 
             while (
                 this.index < this.text.length &&
-                this.text[this.index] !== '\n' &&
-                this.text[this.index] !== ' '
+                this.text.charAt(this.index) !== '\n' &&
+                this.text.charAt(this.index) !== ' '
             ) {
-                language += this.text[this.index];
+                language += this.text.charAt(this.index);
                 this.index++;
             }
 
             // Skip space/newline after language
             if (
                 this.index < this.text.length &&
-                (this.text[this.index] === '\n' ||
-                    this.text[this.index] === ' ')
+                (this.text.charAt(this.index) === '\n' ||
+                    this.text.charAt(this.index) === ' ')
             ) {
                 this.index++;
             }
@@ -1095,7 +1100,7 @@ export class TextParser {
                     foundClosing = true;
                     break;
                 }
-                content += this.text[this.index];
+                content += this.text.charAt(this.index);
                 this.index++;
             }
 
@@ -1128,11 +1133,11 @@ export class TextParser {
             let foundClosing = false;
 
             while (this.index < this.text.length) {
-                if (this.text[this.index] === '`') {
+                if (this.text.charAt(this.index) === '`') {
                     foundClosing = true;
                     break;
                 }
-                content += this.text[this.index];
+                content += this.text.charAt(this.index);
                 this.index++;
             }
 
@@ -1155,7 +1160,7 @@ export class TextParser {
             let depth = 1;
 
             while (this.index < this.text.length) {
-                const c = this.text[this.index];
+                const c = this.text.charAt(this.index);
                 if (c === '(') depth++;
                 if (c === ')') depth--;
 
@@ -1185,16 +1190,16 @@ export class TextParser {
 
             while (
                 this.index < this.text.length &&
-                this.text[this.index] !== "'"
+                this.text.charAt(this.index) !== "'"
             ) {
-                userId += this.text[this.index];
+                userId += this.text.charAt(this.index);
                 this.index++;
             }
 
             if (
                 this.index + 2 <= this.text.length &&
-                this.text[this.index] === "'" &&
-                this.text[this.index + 1] === '>' &&
+                this.text.charAt(this.index) === "'" &&
+                this.text.charAt(this.index + 1) === '>' &&
                 userId
             ) {
                 this.index += 2; // Skip '>
@@ -1215,16 +1220,16 @@ export class TextParser {
 
             while (
                 this.index < this.text.length &&
-                this.text[this.index] !== "'"
+                this.text.charAt(this.index) !== "'"
             ) {
-                roleId += this.text[this.index];
+                roleId += this.text.charAt(this.index);
                 this.index++;
             }
 
             if (
                 this.index + 2 <= this.text.length &&
-                this.text[this.index] === "'" &&
-                this.text[this.index + 1] === '>' &&
+                this.text.charAt(this.index) === "'" &&
+                this.text.charAt(this.index + 1) === '>' &&
                 roleId
             ) {
                 this.index += 2; // Skip '>
@@ -1247,7 +1252,9 @@ export class TextParser {
 
         if (match) {
             const url = match[0];
-            const code = match[1];
+            // capture group 1 is a mandatory (non-optional) group, so it is
+            // always defined when the overall match succeeds.
+            const code = match[1]!;
             this.index += url.length;
             return { type: 'invite', code, url };
         }
@@ -1263,7 +1270,7 @@ export class TextParser {
 
         // Continue until we find '>' or whitespace
         while (this.index < this.text.length) {
-            const c = this.text[this.index];
+            const c = this.text.charAt(this.index);
             if (c === '>') {
                 // Found closing bracket
                 this.index++; // skip '>'
@@ -1299,7 +1306,7 @@ export class TextParser {
 
         // Continue until whitespace or end of string
         while (this.index < this.text.length) {
-            const c = this.text[this.index];
+            const c = this.text.charAt(this.index);
             if (c === ' ' || c === '\n' || c === '\t' || c === '\r') {
                 break;
             }
@@ -1310,10 +1317,11 @@ export class TextParser {
         if (url !== '') {
             const klipyRegex =
                 /^https?:\/\/(?:www\.)?klipy\.com\/(?:g|gifs|stickers)\/([a-zA-Z0-9_-]+)/;
-            const klipyMatch = url.match(klipyRegex);
+            const klipyMatch = klipyRegex.exec(url);
 
             if (klipyMatch && this.has(ParserFeature.KLIPY)) {
-                return { type: 'klipy', klipyId: klipyMatch[1], url };
+                // capture group 1 is mandatory, always defined on match.
+                return { type: 'klipy', klipyId: klipyMatch[1]!, url };
             }
 
             return { type: 'link', url, text: url };
@@ -1328,15 +1336,16 @@ export class TextParser {
         let url = '';
 
         while (this.index < this.text.length) {
-            const c = this.text[this.index];
+            const c = this.text.charAt(this.index);
             if (c === ' ' || c === '\n' || c === '\t' || c === '\r') break;
             url += c;
             this.index++;
         }
 
-        const match = url.match(/\/decorations\/(\d{17,20})\/?$/);
+        const match = /\/decorations\/(\d{17,20})\/?$/.exec(url);
         if (match) {
-            return { type: 'decoration', decorationId: match[1] };
+            // capture group 1 is mandatory, always defined on match.
+            return { type: 'decoration', decorationId: match[1]! };
         }
 
         this.index = start;
@@ -1347,24 +1356,25 @@ export class TextParser {
         const start = this.index;
 
         // Must be at start of line
-        if (this.index > 0 && this.text[this.index - 1] !== '\n') {
+        if (this.index > 0 && this.text.charAt(this.index - 1) !== '\n') {
             return null;
         }
 
         const remaining = this.text.slice(this.index);
-        const match = remaining.match(/^( *)(-?\d+)\. /);
+        const match = /^( *)(-?\d+)\. /.exec(remaining);
         if (!match) return null;
 
-        const indentation = match[1].length;
-        const number = match[2];
+        // Both capture groups are mandatory, always defined on match.
+        const indentation = match[1]!.length;
+        const number = match[2]!;
         this.index += match[0].length;
 
         let content = '';
         while (
             this.index < this.text.length &&
-            this.text[this.index] !== '\n'
+            this.text.charAt(this.index) !== '\n'
         ) {
-            content += this.text[this.index];
+            content += this.text.charAt(this.index);
             this.index++;
         }
 
@@ -1384,23 +1394,24 @@ export class TextParser {
     private tryParseUnorderedList(): ASTNode | null {
         const start = this.index;
 
-        if (this.index > 0 && this.text[this.index - 1] !== '\n') {
+        if (this.index > 0 && this.text.charAt(this.index - 1) !== '\n') {
             return null;
         }
 
         const remaining = this.text.slice(this.index);
-        const match = remaining.match(/^( *)([*\-+]) /);
+        const match = /^( *)([*\-+]) /.exec(remaining);
         if (!match) return null;
 
-        const indentation = match[1].length;
+        // capture group 1 is mandatory, always defined on match.
+        const indentation = match[1]!.length;
         this.index += match[0].length;
 
         let content = '';
         while (
             this.index < this.text.length &&
-            this.text[this.index] !== '\n'
+            this.text.charAt(this.index) !== '\n'
         ) {
-            content += this.text[this.index];
+            content += this.text.charAt(this.index);
             this.index++;
         }
 
@@ -1419,24 +1430,25 @@ export class TextParser {
     private tryParseChecklist(): ASTNode | null {
         const start = this.index;
 
-        if (this.index > 0 && this.text[this.index - 1] !== '\n') {
+        if (this.index > 0 && this.text.charAt(this.index - 1) !== '\n') {
             return null;
         }
 
         const remaining = this.text.slice(this.index);
-        const match = remaining.match(/^( *)[-*+] \[([ xX])\] /);
+        const match = /^( *)[-*+] \[([ xX])\] /.exec(remaining);
         if (!match) return null;
 
-        const indentation = match[1].length;
-        const checked = match[2].toLowerCase() === 'x';
+        // Both capture groups are mandatory, always defined on match.
+        const indentation = match[1]!.length;
+        const checked = match[2]!.toLowerCase() === 'x';
         this.index += match[0].length;
 
         let content = '';
         while (
             this.index < this.text.length &&
-            this.text[this.index] !== '\n'
+            this.text.charAt(this.index) !== '\n'
         ) {
-            content += this.text[this.index];
+            content += this.text.charAt(this.index);
             this.index++;
         }
 
@@ -1457,20 +1469,23 @@ export class TextParser {
         const start = this.index;
 
         // Must be at start of line
-        if (this.index > 0 && this.text[this.index - 1] !== '\n') {
+        if (this.index > 0 && this.text.charAt(this.index - 1) !== '\n') {
             return null;
         }
 
         // Try to parse the header row
-        if (this.text[this.index] !== '|') {
+        if (this.text.charAt(this.index) !== '|') {
             return null;
         }
 
         // Parse header row
         let headerLine = '';
         let tempIndex = this.index;
-        while (tempIndex < this.text.length && this.text[tempIndex] !== '\n') {
-            headerLine += this.text[tempIndex];
+        while (
+            tempIndex < this.text.length &&
+            this.text.charAt(tempIndex) !== '\n'
+        ) {
+            headerLine += this.text.charAt(tempIndex);
             tempIndex++;
         }
 
@@ -1488,8 +1503,11 @@ export class TextParser {
         tempIndex++; // Skip newline
         let separatorLine = '';
         const separatorStart = tempIndex;
-        while (tempIndex < this.text.length && this.text[tempIndex] !== '\n') {
-            separatorLine += this.text[tempIndex];
+        while (
+            tempIndex < this.text.length &&
+            this.text.charAt(tempIndex) !== '\n'
+        ) {
+            separatorLine += this.text.charAt(tempIndex);
             tempIndex++;
         }
 
@@ -1530,7 +1548,10 @@ export class TextParser {
 
         // Now we know it's a valid table, move past header and separator
         this.index = separatorStart + separatorLine.length;
-        if (this.index < this.text.length && this.text[this.index] === '\n') {
+        if (
+            this.index < this.text.length &&
+            this.text.charAt(this.index) === '\n'
+        ) {
             this.index++;
         }
 
@@ -1538,16 +1559,16 @@ export class TextParser {
         const rows: (string | ASTNode[])[][] = [];
         while (this.index < this.text.length) {
             const lineStart = this.index;
-            if (this.text[this.index] !== '|') {
+            if (this.text.charAt(this.index) !== '|') {
                 break;
             }
 
             let rowLine = '';
             while (
                 this.index < this.text.length &&
-                this.text[this.index] !== '\n'
+                this.text.charAt(this.index) !== '\n'
             ) {
-                rowLine += this.text[this.index];
+                rowLine += this.text.charAt(this.index);
                 this.index++;
             }
 
@@ -1617,7 +1638,7 @@ export class TextParser {
 
             if (
                 this.index < this.text.length &&
-                this.text[this.index] === '\n'
+                this.text.charAt(this.index) === '\n'
             ) {
                 this.index++;
             } else {
@@ -1640,12 +1661,12 @@ export class TextParser {
 
     private tryParseNamedLink(): ASTNode | null {
         const start = this.index;
-        if (this.text[this.index] === '[') {
+        if (this.text.charAt(this.index) === '[') {
             this.index++;
             let label = '';
             let depth = 1;
             while (this.index < this.text.length) {
-                const c = this.text[this.index];
+                const c = this.text.charAt(this.index);
                 if (c === '[') depth++;
                 if (c === ']') depth--;
                 if (depth === 0) break;
@@ -1658,7 +1679,7 @@ export class TextParser {
                 let url = '';
                 let urlDepth = 1;
                 while (this.index < this.text.length) {
-                    const c = this.text[this.index];
+                    const c = this.text.charAt(this.index);
                     if (c === '(') urlDepth++;
                     if (c === ')') urlDepth--;
                     if (urlDepth === 0) break;
@@ -1694,8 +1715,9 @@ export class TextParser {
             };
         }
         const nodes = parseText(content, options);
-        if (nodes.length === 1 && nodes[0].type === 'text') {
-            return nodes[0].content;
+        // nodes.length === 1 guarantees nodes[0] is defined.
+        if (nodes.length === 1 && nodes[0]!.type === 'text') {
+            return nodes[0]!.content;
         }
         return nodes;
     }
@@ -1751,13 +1773,13 @@ export class TextParser {
                     const afterClose = this.index + 2;
                     if (
                         afterClose >= this.text.length ||
-                        this.text[afterClose] === '\n'
+                        this.text.charAt(afterClose) === '\n'
                     ) {
                         foundClosing = true;
                         break;
                     }
                 }
-                content += this.text[this.index];
+                content += this.text.charAt(this.index);
                 this.index++;
             }
 
@@ -1780,7 +1802,7 @@ export class TextParser {
                     foundClosing = true;
                     break;
                 }
-                content += this.text[this.index];
+                content += this.text.charAt(this.index);
                 this.index++;
             }
 
@@ -1799,7 +1821,7 @@ export class TextParser {
         const start = this.index;
 
         // Must be at start of line
-        if (this.index > 0 && this.text[this.index - 1] !== '\n') {
+        if (this.index > 0 && this.text.charAt(this.index - 1) !== '\n') {
             return null;
         }
 
@@ -1808,7 +1830,7 @@ export class TextParser {
 
         // Count dashes and trailing spaces
         while (tempIndex < this.text.length) {
-            const c = this.text[tempIndex];
+            const c = this.text.charAt(tempIndex);
             if (c === '-') {
                 dashCount++;
             } else if (c !== ' ' && c !== '\t' && c !== '\r') {
@@ -1820,12 +1842,13 @@ export class TextParser {
         // Must be 3 dashes, and the line must ends after
         if (
             dashCount === 3 &&
-            (tempIndex >= this.text.length || this.text[tempIndex] === '\n')
+            (tempIndex >= this.text.length ||
+                this.text.charAt(tempIndex) === '\n')
         ) {
             this.index = tempIndex;
             if (
                 this.index < this.text.length &&
-                this.text[this.index] === '\n'
+                this.text.charAt(this.index) === '\n'
             ) {
                 this.index++;
             }
@@ -1848,7 +1871,7 @@ export class TextParser {
                 foundClosing = true;
                 break;
             }
-            content += this.text[this.index];
+            content += this.text.charAt(this.index);
             this.index++;
         }
 
@@ -1876,7 +1899,7 @@ export class TextParser {
                 foundClosing = true;
                 break;
             }
-            content += this.text[this.index];
+            content += this.text.charAt(this.index);
             this.index++;
         }
 
@@ -1904,7 +1927,7 @@ export class TextParser {
                 foundClosing = true;
                 break;
             }
-            content += this.text[this.index];
+            content += this.text.charAt(this.index);
             this.index++;
         }
 
@@ -1932,7 +1955,7 @@ export class TextParser {
                 foundClosing = true;
                 break;
             }
-            content += this.text[this.index];
+            content += this.text.charAt(this.index);
             this.index++;
         }
 
@@ -1960,7 +1983,7 @@ export class TextParser {
                 foundClosing = true;
                 break;
             }
-            content += this.text[this.index];
+            content += this.text.charAt(this.index);
             this.index++;
         }
 
@@ -1988,7 +2011,7 @@ export class TextParser {
                 foundClosing = true;
                 break;
             }
-            content += this.text[this.index];
+            content += this.text.charAt(this.index);
             this.index++;
         }
 
@@ -2014,7 +2037,7 @@ export class TextParser {
         let foundClosing = false;
 
         while (this.index < this.text.length) {
-            const char = this.text[this.index];
+            const char = this.text.charAt(this.index);
             if (char === '^') {
                 foundClosing = true;
                 break;
@@ -2064,14 +2087,14 @@ export class TextParser {
         let foundClosing = false;
 
         while (this.index < this.text.length) {
-            if (this.text[this.index] === '~') {
+            if (this.text.charAt(this.index) === '~') {
                 foundClosing = true;
                 break;
             }
-            if (this.text[this.index] === '\n') {
+            if (this.text.charAt(this.index) === '\n') {
                 break; // No multiline subscript
             }
-            content += this.text[this.index];
+            content += this.text.charAt(this.index);
             this.index++;
         }
 
@@ -2099,7 +2122,7 @@ export class TextParser {
                 foundClosing = true;
                 break;
             }
-            content += this.text[this.index];
+            content += this.text.charAt(this.index);
             this.index++;
         }
 
@@ -2127,7 +2150,7 @@ export class TextParser {
                 foundClosing = true;
                 break;
             }
-            content += this.text[this.index];
+            content += this.text.charAt(this.index);
             this.index++;
         }
 
@@ -2155,7 +2178,7 @@ export class TextParser {
                 foundClosing = true;
                 break;
             }
-            content += this.text[this.index];
+            content += this.text.charAt(this.index);
             this.index++;
         }
 
@@ -2192,7 +2215,7 @@ export class TextParser {
             while (tempIndex < this.text.length) {
                 if (
                     tempIndex > this.index &&
-                    this.text[tempIndex - 1] !== '\n'
+                    this.text.charAt(tempIndex - 1) !== '\n'
                 ) {
                     break;
                 }
@@ -2200,21 +2223,21 @@ export class TextParser {
                 if (this.text.startsWith('>', tempIndex)) {
                     tempIndex++; // Skip >
                     // Optional space
-                    if (this.text[tempIndex] === ' ') {
+                    if (this.text.charAt(tempIndex) === ' ') {
                         tempIndex++;
                     }
 
                     let lineContent = '';
                     while (
                         tempIndex < this.text.length &&
-                        this.text[tempIndex] !== '\n'
+                        this.text.charAt(tempIndex) !== '\n'
                     ) {
-                        lineContent += this.text[tempIndex];
+                        lineContent += this.text.charAt(tempIndex);
                         tempIndex++;
                     }
                     lines.push(lineContent);
 
-                    if (this.text[tempIndex] === '\n') {
+                    if (this.text.charAt(tempIndex) === '\n') {
                         tempIndex++;
                     }
                 } else {
@@ -2225,7 +2248,7 @@ export class TextParser {
             if (lines.length > 0) {
                 // Check for GitHub/Obsidian admonition
                 if (this.has(ParserFeature.ADMONITION)) {
-                    const firstLine = lines[0];
+                    const firstLine = lines[0] ?? '';
                     let parsedType = '';
                     let parsedFoldModifier = '';
                     let parsedTitle = '';
@@ -2236,7 +2259,7 @@ export class TextParser {
 
                         // Parse characters for type [a-zA-Z]
                         while (i < firstLine.length) {
-                            const c = firstLine[i];
+                            const c = firstLine.charAt(i);
                             if (
                                 (c >= 'a' && c <= 'z') ||
                                 (c >= 'A' && c <= 'Z')
@@ -2252,7 +2275,7 @@ export class TextParser {
                         if (
                             parsedType.length > 0 &&
                             i < firstLine.length &&
-                            firstLine[i] === ']'
+                            firstLine.charAt(i) === ']'
                         ) {
                             i++; // skip ']'
                             isValidAdmonition = true;
@@ -2260,15 +2283,18 @@ export class TextParser {
                             // Parse optional fold modifier '+' or '-'
                             if (
                                 i < firstLine.length &&
-                                (firstLine[i] === '+' || firstLine[i] === '-')
+                                (firstLine.charAt(i) === '+' ||
+                                    firstLine.charAt(i) === '-')
                             ) {
-                                parsedFoldModifier = firstLine[i];
+                                parsedFoldModifier = firstLine.charAt(i);
                                 i++;
                             }
 
                             // Parse optional title
                             if (i < firstLine.length) {
-                                parsedTitle = firstLine.substring(i).trim();
+                                parsedTitle = firstLine
+                                    .slice(Math.max(0, i))
+                                    .trim();
                             }
                         }
                     }
@@ -2346,12 +2372,12 @@ export class TextParser {
 
                             const node: ASTNode = {
                                 type: 'admonition',
-                                style: style as 'github' | 'obsidian',
+                                style: style!,
                                 admonitionType: rawType,
                                 title:
-                                    titleRemainder !== ''
-                                        ? titleRemainder
-                                        : undefined,
+                                    titleRemainder === ''
+                                        ? undefined
+                                        : titleRemainder,
                                 collapsible:
                                     style === 'obsidian' && foldModifier !== ''
                                         ? true
@@ -2397,10 +2423,10 @@ export class TextParser {
         let rawType = '';
         while (
             this.index < this.text.length &&
-            this.text[this.index] !== ' ' &&
-            this.text[this.index] !== '\n'
+            this.text.charAt(this.index) !== ' ' &&
+            this.text.charAt(this.index) !== '\n'
         ) {
-            rawType += this.text[this.index];
+            rawType += this.text.charAt(this.index);
             this.index++;
         }
 
@@ -2414,20 +2440,26 @@ export class TextParser {
         }
 
         let title: string | undefined;
-        if (this.index < this.text.length && this.text[this.index] === ' ') {
+        if (
+            this.index < this.text.length &&
+            this.text.charAt(this.index) === ' '
+        ) {
             this.index++; // skip space
             let titleText = '';
             while (
                 this.index < this.text.length &&
-                this.text[this.index] !== '\n'
+                this.text.charAt(this.index) !== '\n'
             ) {
-                titleText += this.text[this.index];
+                titleText += this.text.charAt(this.index);
                 this.index++;
             }
             title = titleText.trim() || undefined;
         }
 
-        if (this.index < this.text.length && this.text[this.index] === '\n') {
+        if (
+            this.index < this.text.length &&
+            this.text.charAt(this.index) === '\n'
+        ) {
             this.index++;
         }
 
@@ -2438,18 +2470,18 @@ export class TextParser {
             // Check for closing ::: on its own line
             if (
                 this.peek(':::') &&
-                (this.index === 0 || this.text[this.index - 1] === '\n')
+                (this.index === 0 || this.text.charAt(this.index - 1) === '\n')
             ) {
                 const afterClose = this.index + 3;
                 if (
                     afterClose >= this.text.length ||
-                    this.text[afterClose] === '\n'
+                    this.text.charAt(afterClose) === '\n'
                 ) {
                     foundClosing = true;
                     break;
                 }
             }
-            bodyText += this.text[this.index];
+            bodyText += this.text.charAt(this.index);
             this.index++;
         }
 
@@ -2459,7 +2491,10 @@ export class TextParser {
         }
 
         this.index += 3; // skip closing ':::'
-        if (this.index < this.text.length && this.text[this.index] === '\n') {
+        if (
+            this.index < this.text.length &&
+            this.text.charAt(this.index) === '\n'
+        ) {
             this.index++;
         }
 

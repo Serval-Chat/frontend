@@ -141,7 +141,9 @@ export const GifPlayer = ({ klipyId, url, onResize }: GifPlayerProps) => {
                 decoding="async"
                 fallbackSrc={metadata.previewUrl}
                 loading="lazy"
-                paused={limitedAnimations && metadata.contentType === 'gif'}
+                paused={
+                    limitedAnimations ? metadata.contentType === 'gif' : false
+                }
                 src={metadata.url}
                 style={{
                     width: '100%',

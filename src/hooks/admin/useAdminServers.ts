@@ -16,8 +16,8 @@ import type {
 } from '@/types/admin';
 
 export const useAdminServers = (
-    search: string = '',
-    page: number = 0,
+    search = '',
+    page = 0,
     limit: number = ADMIN_CONSTANTS.DEFAULT_PAGE_SIZE,
 ): UseQueryResult<AdminServerListItem[]> =>
     useQuery({
@@ -188,7 +188,7 @@ export const useUnverifyServer = (): UseMutationResult<
 };
 
 export const useAdminAwaitingReviewServers = (
-    page: number = 0,
+    page = 0,
     limit: number = ADMIN_CONSTANTS.DEFAULT_PAGE_SIZE,
 ): UseQueryResult<{ items: AdminServerListItem[]; total: number }> =>
     useQuery({
@@ -199,24 +199,3 @@ export const useAdminAwaitingReviewServers = (
                 offset: page * limit,
             }),
     });
-
-export const useDeclineVerification = (): UseMutationResult<
-    { message: string },
-    Error,
-    string
-> => {
-    const queryClient = useQueryClient();
-    return useMutation({
-        mutationFn: (serverId: string): Promise<{ message: string }> =>
-            adminServersApi.declineVerification(serverId),
-        onSuccess: (_data, serverId): void => {
-            void queryClient.invalidateQueries({
-                queryKey: ['admin-servers-awaiting-review'],
-            });
-            void queryClient.invalidateQueries({ queryKey: ['admin-servers'] });
-            void queryClient.invalidateQueries({
-                queryKey: ['admin-server-detail', serverId],
-            });
-        },
-    });
-};

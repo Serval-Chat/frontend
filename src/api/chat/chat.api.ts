@@ -6,7 +6,20 @@ import type {
     SearchFilters,
 } from './chat.types';
 
-const normalizeMessage = (message: ChatMessage): ChatMessage => ({
+type NormalizableMessageKeys =
+    | 'embeds'
+    | 'attachments'
+    | 'reactions'
+    | 'isEdited'
+    | 'isPinned'
+    | 'isSticky'
+    | 'isWebhook'
+    | 'senderIsBot';
+
+type IncomingChatMessage = Omit<ChatMessage, NormalizableMessageKeys> &
+    Partial<Pick<ChatMessage, NormalizableMessageKeys>>;
+
+const normalizeMessage = (message: IncomingChatMessage): ChatMessage => ({
     ...message,
     stickerId: message.stickerId ?? null,
     poll: message.poll ?? null,
@@ -23,12 +36,16 @@ const normalizeMessage = (message: ChatMessage): ChatMessage => ({
 
 const unwrapMessages = (data: unknown): ChatMessage[] => {
     if (Array.isArray(data))
-        return (data as ChatMessage[]).map(normalizeMessage);
-    if (data && typeof data === 'object') {
+        return (data as IncomingChatMessage[]).map((message) =>
+            normalizeMessage(message),
+        );
+    if (typeof data === 'object' && data !== null) {
         for (const key of ['messages', 'data']) {
             const value = (data as Record<string, unknown>)[key];
             if (Array.isArray(value))
-                return (value as ChatMessage[]).map(normalizeMessage);
+                return (value as IncomingChatMessage[]).map((message) =>
+                    normalizeMessage(message),
+                );
         }
     }
     return [];
@@ -40,7 +57,7 @@ export const chatApi = {
      */
     getUserMessages: async (
         userId: string,
-        limit: number = 50,
+        limit = 50,
         before?: string,
         after?: string,
     ): Promise<ChatMessage[]> => {
@@ -56,7 +73,7 @@ export const chatApi = {
     getChannelMessages: async (
         serverId: string,
         channelId: string,
-        limit: number = 50,
+        limit = 50,
         before?: string,
         around?: string,
         after?: string,

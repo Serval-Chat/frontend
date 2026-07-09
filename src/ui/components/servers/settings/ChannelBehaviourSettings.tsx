@@ -31,9 +31,9 @@ export const ChannelBehaviourSettings = ({
                 isPending={isPending}
                 rules={channel.markdownBlockadeRules}
                 serverId={channel.serverId}
-                onSave={(markdownBlockadeRules): void =>
-                    updateChannel({ markdownBlockadeRules })
-                }
+                onSave={(markdownBlockadeRules): void => {
+                    updateChannel({ markdownBlockadeRules });
+                }}
             />
         </div>
     );

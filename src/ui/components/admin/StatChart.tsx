@@ -130,7 +130,7 @@ export const StatChart = ({
         hour: i,
         value,
     }));
-    const gradId = `grad-${title.replace(/\s+/g, '-').toLowerCase()}`;
+    const gradId = `grad-${title.replaceAll(/\s+/g, '-').toLowerCase()}`;
     const xTickFormatter = makeXTickFormatter(range, data.length);
 
     return (

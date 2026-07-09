@@ -2,7 +2,12 @@ import type { ReactDoctorConfig } from 'react-doctor/api';
 
 export default {
     rules: {
-        // False positive: our only iframe has already proper sandbox attributes 
         'react-doctor/iframe-missing-sandbox': 'off',
+    },
+    ignore: {
+        files: [
+            'src/api/generated/**',
+            'public/docs/**',
+        ],
     },
 } satisfies ReactDoctorConfig;

@@ -86,7 +86,7 @@ async function processStaticImage(
         const img = new Image();
         const url = URL.createObjectURL(file);
 
-        img.onload = (): void => {
+        img.addEventListener('load', (): void => {
             try {
                 if (crop) {
                     validateCrop(crop, img.width, img.height);
@@ -147,14 +147,16 @@ async function processStaticImage(
                 );
             } catch (error) {
                 URL.revokeObjectURL(url);
-                reject(error);
+                reject(
+                    error instanceof Error ? error : new Error(String(error)),
+                );
             }
-        };
+        });
 
-        img.onerror = (): void => {
+        img.addEventListener('error', (): void => {
             URL.revokeObjectURL(url);
             reject(new Error('Failed to load image for processing'));
-        };
+        });
 
         img.src = url;
     });
@@ -300,15 +302,15 @@ async function getImageDimensions(file: File): Promise<ImageSize> {
     return new Promise((resolve, reject): void => {
         const img = new Image();
         const url = URL.createObjectURL(file);
-        img.onload = (): void => {
+        img.addEventListener('load', (): void => {
             const dims = { width: img.width, height: img.height };
             URL.revokeObjectURL(url);
             resolve(dims);
-        };
-        img.onerror = (): void => {
+        });
+        img.addEventListener('error', (): void => {
             URL.revokeObjectURL(url);
             reject(new Error('Failed to read image dimensions'));
-        };
+        });
         img.src = url;
     });
 }
@@ -335,12 +337,9 @@ export async function processImage(
     const isGif = file.type === 'image/gif';
 
     if (!crop) {
-        let dims: ImageSize;
-        if (isGif) {
-            dims = await getGifDimensions(file);
-        } else {
-            dims = await getImageDimensions(file);
-        }
+        const dims: ImageSize = await (isGif
+            ? getGifDimensions(file)
+            : getImageDimensions(file));
 
         const withinBounds = dims.width <= maxWidth && dims.height <= maxHeight;
 
@@ -349,23 +348,18 @@ export async function processImage(
         }
     }
 
-    let processed: File;
-    if (isGif) {
-        processed = await processGif(file, { maxWidth, maxHeight, crop });
-    } else {
-        processed = await processStaticImage(file, {
-            maxWidth,
-            maxHeight,
-            crop,
-        });
-    }
+    const processed: File = await (isGif
+        ? processGif(file, { maxWidth, maxHeight, crop })
+        : processStaticImage(file, {
+              maxWidth,
+              maxHeight,
+              crop,
+          }));
 
-    if (!crop && isGif) {
-        if (processed.size > file.size) {
-            const dims = await getGifDimensions(file);
-            if (dims.width <= maxWidth && dims.height <= maxHeight) {
-                return file;
-            }
+    if (!crop && isGif && processed.size > file.size) {
+        const dims = await getGifDimensions(file);
+        if (dims.width <= maxWidth && dims.height <= maxHeight) {
+            return file;
         }
     }
 
@@ -388,20 +382,21 @@ export async function processProfileImage(
     const isServerBanner = type === 'server-banner';
     const isSticker = type === 'sticker';
 
-    const maxWidth = isAvatar
-        ? 256
-        : isServerBanner
-          ? 960
-          : isSticker
-            ? STICKER_MAX_WIDTH
-            : 1136;
-    const maxHeight = isAvatar
-        ? 256
-        : isServerBanner
-          ? 540
-          : isSticker
-            ? STICKER_MAX_HEIGHT
-            : 400;
+    let maxWidth: number;
+    let maxHeight: number;
+    if (isAvatar) {
+        maxWidth = 256;
+        maxHeight = 256;
+    } else if (isServerBanner) {
+        maxWidth = 960;
+        maxHeight = 540;
+    } else if (isSticker) {
+        maxWidth = STICKER_MAX_WIDTH;
+        maxHeight = STICKER_MAX_HEIGHT;
+    } else {
+        maxWidth = 1136;
+        maxHeight = 400;
+    }
 
     if (isSticker && file.type === 'image/gif') {
         return processStaticImage(file, { maxWidth, maxHeight, crop });

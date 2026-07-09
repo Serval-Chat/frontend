@@ -23,7 +23,9 @@ function lineify(nodes: AstNode[]): AstNode[][] {
     const lines: AstNode[][] = [[]];
 
     function pushToLines(node: AstNode): void {
-        lines[lines.length - 1].push(node);
+        // lines starts as [[]] and is only ever pushed to (never popped/emptied),
+        // so it always has at least one element and .at(-1) is always defined.
+        lines.at(-1)!.push(node);
     }
 
     function process(nodes: AstNode[], parentWrapper?: AstNode): void {
@@ -31,13 +33,13 @@ function lineify(nodes: AstNode[]): AstNode[][] {
             if (node.type === 'text' && node.value) {
                 const textParts = node.value.split('\n');
 
-                for (let i = 0; i < textParts.length; i++) {
+                for (const [i, textPart] of textParts.entries()) {
                     if (i > 0) lines.push([]);
 
-                    if (textParts[i]) {
+                    if (textPart) {
                         const textNode: AstNode = {
                             type: 'text',
-                            value: textParts[i],
+                            value: textPart,
                         };
                         if (parentWrapper) {
                             pushToLines({
@@ -59,7 +61,7 @@ function lineify(nodes: AstNode[]): AstNode[][] {
     return lines;
 }
 
-self.onmessage = (e: MessageEvent): void => {
+globalThis.onmessage = (e: MessageEvent): void => {
     const { content, language } = e.data;
 
     try {
@@ -71,8 +73,8 @@ self.onmessage = (e: MessageEvent): void => {
 
         const lines = lineify(result.children);
         self.postMessage(lines);
-    } catch (err) {
-        console.error('Worker highlight error:', err);
+    } catch (error) {
+        console.error('Worker highlight error:', error);
         const lines = content
             .split('\n')
             .map((line: string): { type: string; value: string }[] => [

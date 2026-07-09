@@ -31,20 +31,7 @@ export const StandingSettings = () => {
                 Account Standing
             </Heading>
 
-            {!hasWarnings ? (
-                <div className="flex flex-col items-center rounded-lg border border-success/20 bg-success/10 p-8 text-center">
-                    <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-success/20">
-                        <CheckCircle className="text-success" size={32} />
-                    </div>
-                    <Heading level={4} variant="sub">
-                        Your account is in good standing
-                    </Heading>
-                    <Text className="max-w-md" variant="muted">
-                        Thank you for following the community guidelines! You
-                        have no active warnings or restrictions on your account.
-                    </Text>
-                </div>
-            ) : (
+            {hasWarnings ? (
                 <div className="space-y-6">
                     <div className="flex items-start gap-4 rounded-lg border border-caution/20 bg-caution/10 p-4">
                         <ShieldAlert
@@ -116,9 +103,9 @@ export const StandingSettings = () => {
                                                 loading={isPending}
                                                 size="sm"
                                                 variant="danger"
-                                                onClick={(): void =>
-                                                    acknowledge(warning.id)
-                                                }
+                                                onClick={(): void => {
+                                                    acknowledge(warning.id);
+                                                }}
                                             >
                                                 Acknowledge
                                             </Button>
@@ -128,6 +115,19 @@ export const StandingSettings = () => {
                             </div>
                         ))}
                     </div>
+                </div>
+            ) : (
+                <div className="flex flex-col items-center rounded-lg border border-success/20 bg-success/10 p-8 text-center">
+                    <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-success/20">
+                        <CheckCircle className="text-success" size={32} />
+                    </div>
+                    <Heading level={4} variant="sub">
+                        Your account is in good standing
+                    </Heading>
+                    <Text className="max-w-md" variant="muted">
+                        Thank you for following the community guidelines! You
+                        have no active warnings or restrictions on your account.
+                    </Text>
                 </div>
             )}
 

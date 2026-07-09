@@ -35,10 +35,10 @@ export const PollVotersModal = ({
 
     const allVoterIds = useMemo((): string[] => {
         const ids = new Set<string>();
-        poll.options?.forEach((opt): void =>
-            opt.votes?.forEach((id): Set<string> => ids.add(id)),
-        );
-        return Array.from(ids);
+        if (poll.options)
+            for (const opt of poll.options)
+                if (opt.votes) for (const id of opt.votes) ids.add(id);
+        return [...ids];
     }, [poll.options]);
 
     const { data: users, isLoading } = useUsers(isOpen ? allVoterIds : []);
@@ -85,10 +85,12 @@ export const PollVotersModal = ({
                             )}
                             key={option.id}
                             type="button"
-                            onClick={(): void => setSelectedOptionId(option.id)}
+                            onClick={(): void => {
+                                setSelectedOptionId(option.id);
+                            }}
                         >
                             <Box className="flex min-w-0 items-center gap-2">
-                                {option.emoji && (
+                                {option.emoji ? (
                                     <Box className="flex shrink-0 items-center justify-center">
                                         {option.emojiType === 'custom' &&
                                         option.emojiId ? (
@@ -103,7 +105,7 @@ export const PollVotersModal = ({
                                             />
                                         )}
                                     </Box>
-                                )}
+                                ) : null}
                                 <span
                                     className={cn(
                                         'truncate text-sm font-medium',
@@ -140,7 +142,7 @@ export const PollVotersModal = ({
                                     roles?.filter((r): boolean | undefined =>
                                         member?.roles.includes(r.id),
                                     ) || [];
-                                const sortedRoles = userRoles.slice();
+                                const sortedRoles = [...userRoles];
                                 sortedRoles.sort(
                                     (a, b): number => b.position - a.position,
                                 );

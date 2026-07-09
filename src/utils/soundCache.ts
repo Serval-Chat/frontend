@@ -19,24 +19,6 @@ export async function cacheSound(url: string): Promise<void> {
 }
 
 /**
- * Gets a cached sound URL. If it's in the Cache API, it returns the URL.
- * The browser will serve it from the cache if available.
- */
-export async function getSoundUrl(url: string): Promise<string> {
-    if (typeof caches === 'undefined') return url;
-
-    const cache = await caches.open(cacheName);
-    const response = await cache.match(url);
-
-    if (response) {
-        const blob = await response.blob();
-        return URL.createObjectURL(blob);
-    }
-
-    return url;
-}
-
-/**
  * Clears old sounds from the cache that are no longer needed.
  */
 export async function pruneSoundCache(keepUrls: string[]): Promise<void> {
@@ -48,7 +30,7 @@ export async function pruneSoundCache(keepUrls: string[]): Promise<void> {
 
     await Promise.all(
         keys.flatMap((request): Promise<boolean>[] =>
-            !keepUrlSet.has(request.url) ? [cache.delete(request)] : [],
+            keepUrlSet.has(request.url) ? [] : [cache.delete(request)],
         ),
     );
 }

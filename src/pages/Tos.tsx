@@ -1,6 +1,6 @@
-import { type ReactNode, useEffect, useState } from 'react';
+import type { ReactNode } from 'react';
 
-import type { JSX } from 'react/jsx-runtime';
+import { useQuery } from '@tanstack/react-query';
 
 import { ParsedText } from '@/ui/components/common/ParsedText';
 import { Box } from '@/ui/components/layout/Box';
@@ -15,30 +15,27 @@ function extractLastUpdated(raw: string): {
     ts: number | null;
     content: string;
 } {
-    const match = raw.match(LAST_UPDATED_RE);
+    const match = LAST_UPDATED_RE.exec(raw);
     if (!match) return { ts: null, content: raw };
     return {
-        ts: parseInt(match[1], 10),
+        ts: Number.parseInt(match[1]!, 10),
         content: raw.replace(LAST_UPDATED_RE, ''),
     };
 }
 
 export const Tos = (): ReactNode => {
-    const [raw, setRaw] = useState<string | null>(null);
-    const [error, setError] = useState(false);
-
-    useEffect((): void => {
-        fetch('/tos.md')
-            .then((res): Promise<string> => {
-                if (!res.ok) throw new Error('Failed to fetch');
-                return res.text();
-            })
-            .then(setRaw)
-            .catch((): void => setError(true));
-    }, []);
+    const { data: raw, isError: error } = useQuery({
+        queryKey: ['tos'],
+        queryFn: async (): Promise<string> => {
+            const res = await fetch('/tos.md');
+            if (!res.ok) throw new Error('Failed to fetch');
+            return res.text();
+        },
+        staleTime: Infinity,
+    });
 
     const { ts, content } =
-        raw !== null ? extractLastUpdated(raw) : { ts: null, content: '' };
+        raw === undefined ? { ts: null, content: '' } : extractLastUpdated(raw);
     const nodes = content ? parseText(content, ParserPresets.MESSAGE) : [];
 
     const lastUpdated = ts
@@ -58,22 +55,22 @@ export const Tos = (): ReactNode => {
                     <h1 className="text-3xl font-extrabold tracking-tight text-foreground">
                         Terms of Service
                     </h1>
-                    {lastUpdated && (
+                    {lastUpdated ? (
                         <p className="mt-1 text-sm text-muted-foreground">
                             Last updated: {lastUpdated}
                         </p>
-                    )}
+                    ) : null}
                 </div>
 
                 {error ? (
                     <p className="text-danger">
                         Failed to load Terms of Service.
                     </p>
-                ) : raw === null ? (
+                ) : raw === undefined ? (
                     <div className="space-y-3">
                         {/* eslint-disable react/no-array-index-key */}
                         {Array.from({ length: 10 }).map(
-                            (_, i): JSX.Element => (
+                            (_, i): ReactNode => (
                                 <div
                                     className="h-4 animate-pulse rounded bg-bg-subtle"
                                     key={String(i)}

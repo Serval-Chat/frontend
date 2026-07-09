@@ -24,11 +24,14 @@ export const LexicalEmojiPlugin = (): null => {
 
                 let targetNode = node;
                 if (startIndex > 0) {
-                    [, targetNode] = node.splitText(startIndex);
+                    const [, splitNode] = node.splitText(startIndex);
+                    if (!splitNode) return;
+                    targetNode = splitNode;
                 }
                 const [emojiNode, nextNode] = targetNode.splitText(
                     endIndex - startIndex,
                 );
+                if (!emojiNode) return;
 
                 const chipNode = $createChipNode('unicode-emoji', {
                     id: emoji,

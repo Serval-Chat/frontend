@@ -18,14 +18,14 @@ export const isInternalUrl = (url: string | undefined): boolean => {
 
     try {
         const parsedUrl = new URL(url);
-        const currentOrigin =
-            typeof window !== 'undefined' ? window.location.origin : '';
+        const currentOrigin = globalThis.location.origin;
         const configuredApiBaseUrl = getConfiguredApiBaseUrl();
         const browserApiBaseUrl = getBrowserApiBaseUrl();
 
-        if (currentOrigin && parsedUrl.origin === currentOrigin) return true;
+        if (currentOrigin !== '' && parsedUrl.origin === currentOrigin)
+            return true;
 
-        if (configuredApiBaseUrl) {
+        if (configuredApiBaseUrl !== '') {
             try {
                 if (parsedUrl.origin === new URL(configuredApiBaseUrl).origin)
                     return true;
@@ -35,7 +35,7 @@ export const isInternalUrl = (url: string | undefined): boolean => {
             if (url.startsWith(configuredApiBaseUrl)) return true;
         }
 
-        if (browserApiBaseUrl && url.startsWith(browserApiBaseUrl)) {
+        if (browserApiBaseUrl !== '' && url.startsWith(browserApiBaseUrl)) {
             return true;
         }
 
@@ -51,6 +51,10 @@ export const getSafeUrl = (url: string | undefined): string | undefined => {
     if (!url) return undefined;
     if (isInternalUrl(url)) return url;
 
-    const baseUrl = getBrowserApiBaseUrl() || getConfiguredApiBaseUrl() || '';
+    const browserApiBaseUrl = getBrowserApiBaseUrl();
+    const baseUrl =
+        browserApiBaseUrl === ''
+            ? getConfiguredApiBaseUrl()
+            : browserApiBaseUrl;
     return `${baseUrl}/api/v1/embed/proxy?url=${encodeURIComponent(url)}`;
 };

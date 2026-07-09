@@ -48,8 +48,7 @@ export const useUpdateAdminBadge = () => {
 export const useDeleteAdminBadge = (): UseMutationResult<
     void,
     Error,
-    { badgeId: string },
-    unknown
+    { badgeId: string }
 > => {
     const queryClient = useQueryClient();
 
@@ -65,8 +64,7 @@ export const useDeleteAdminBadge = (): UseMutationResult<
 export const useAssignBadgeToUser = (): UseMutationResult<
     { message: string },
     Error,
-    { userId: string; badgeId: string },
-    unknown
+    { userId: string; badgeId: string }
 > => {
     const queryClient = useQueryClient();
 
@@ -87,8 +85,7 @@ export const useAssignBadgeToUser = (): UseMutationResult<
 export const useRemoveBadgeFromUser = (): UseMutationResult<
     void,
     Error,
-    { userId: string; badgeId: string },
-    unknown
+    { userId: string; badgeId: string }
 > => {
     const queryClient = useQueryClient();
 

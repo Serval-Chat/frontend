@@ -14,8 +14,6 @@ import type {
 import type { ButtonComponent, Embed } from '@/types/embed';
 import type { JsonValue } from '@/types/json';
 
-export type { Category, Channel, Server, ServerBanner };
-
 /**
  * @description WebSocket envelope structure for all messages.
  */
@@ -206,7 +204,7 @@ export interface IMessageServerEmbedsUpdated {
  * @description Presence sync.
  */
 export interface IPresenceSyncEvent {
-    online: Array<{
+    online: {
         userId: string;
         username: string;
         status?: {
@@ -215,7 +213,7 @@ export interface IPresenceSyncEvent {
             expiresAt: string | null;
             updatedAt: string;
         } | null;
-    }>;
+    }[];
 }
 
 /**
@@ -683,11 +681,11 @@ export interface IUserUpdatedEvent {
               }
         )[];
     };
-    connections?: Array<{
+    connections?: {
         id: string;
         type: 'Website';
         value: string;
-    }>;
+    }[];
     activeMute?: {
         reason: string;
         expirationTimestamp?: string | Date | null;
@@ -706,3 +704,10 @@ export interface IDisplayNameUpdatedEvent {
 }
 
 export type WsEventType = (typeof WsEvents)[keyof typeof WsEvents];
+
+export {
+    type Category,
+    type Channel,
+    type Server,
+    type ServerBanner,
+} from '@/api/servers/servers.types';

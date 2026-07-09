@@ -19,10 +19,10 @@ export const Box = ({
     ref,
     ...props
 }: BoxProps) => {
-    const Component = Tag as React.ElementType;
+    const Component = Tag;
     return (
         <Component
-            className={cn(className as string)}
+            className={cn(className)}
             ref={ref}
             // eslint-disable-next-line react/jsx-props-no-spreading
             {...props}

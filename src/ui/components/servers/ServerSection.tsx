@@ -141,7 +141,7 @@ export const ServerSection = () => {
 
     return (
         <div
-            className="no-scrollbar custom-scrollbar flex h-full w-full flex-col overflow-y-auto"
+            className="custom-scrollbar flex h-full w-full flex-col overflow-y-auto"
             ref={scrollRef}
         >
             <ServerBanner
@@ -159,7 +159,7 @@ export const ServerSection = () => {
                     <div className="shrink-0 border-b border-border-subtle px-2 py-2">
                         <div className="ml-3">
                             {(onboarding?.onboarding.selfAssignableRoleIds
-                                .length ?? 0) > 0 && (
+                                .length ?? 0) > 0 ? (
                                 <ChannelItem
                                     iconComponent={Shield}
                                     name="Roles"
@@ -170,7 +170,7 @@ export const ServerSection = () => {
                                         );
                                     }}
                                 />
-                            )}
+                            ) : null}
                             <ChannelItem
                                 iconComponent={Hash}
                                 name="Channels & Categories"

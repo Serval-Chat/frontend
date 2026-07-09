@@ -14,7 +14,7 @@ describe('wsMessages', (): void => {
     it('sendMessageServer should cap noEmbedsUrls at 25', (): void => {
         const noEmbedsUrls = Array.from(
             { length: 26 },
-            (_, index): string => `https://example.com/${index}`,
+            (_, index): string => `https://example.com/${String(index)}`,
         );
 
         wsMessages.sendMessageServer(

@@ -18,7 +18,14 @@ export const RenameFolderModal = ({
     currentName,
     onRename,
 }: RenameFolderModalProps) => {
+    // react-doctor-disable-next-line react-doctor/no-derived-useState
     const [name, setName] = useState(currentName);
+    const [syncedIsOpen, setSyncedIsOpen] = useState(isOpen);
+
+    if (isOpen !== syncedIsOpen) {
+        setSyncedIsOpen(isOpen);
+        if (isOpen) setName(currentName);
+    }
 
     const handleSubmit = (e: React.FormEvent): void => {
         e.preventDefault();
@@ -49,7 +56,9 @@ export const RenameFolderModal = ({
                             id="folder-name"
                             placeholder="Enter folder name"
                             value={name}
-                            onChange={(e): void => setName(e.target.value)}
+                            onChange={(e): void => {
+                                setName(e.target.value);
+                            }}
                         />
                     </Box>
 

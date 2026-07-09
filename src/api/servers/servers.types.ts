@@ -1,9 +1,9 @@
 import type { User } from '@/api/users/users.types';
 import type { ParserFeature } from '@/utils/textParser/types';
 
-export type ServerBannerType = 'color' | 'image' | 'gif';
+type ServerBannerType = 'color' | 'image' | 'gif';
 
-export const ServerBannerType = {
+const ServerBannerType = {
     COLOR: 'color' as const,
     IMAGE: 'image' as const,
     GIF: 'gif' as const,

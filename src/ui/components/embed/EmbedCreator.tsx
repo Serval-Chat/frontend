@@ -15,15 +15,14 @@ import { Toggle } from '@/ui/components/common/Toggle';
 import { cn } from '@/utils/cn';
 
 const hexToDecimal = (hex: string): number =>
-    parseInt(hex.replace('#', ''), 16);
+    Number.parseInt(hex.replace('#', ''), 16);
 
 const decimalToHex = (n: number | undefined): string => {
     if (n === undefined) return '#5865f2';
     return `#${n.toString(16).padStart(6, '0')}`;
 };
 
-const cloneEmbeds = (embeds: Embed[]): Embed[] =>
-    JSON.parse(JSON.stringify(embeds)) as Embed[];
+const cloneEmbeds = (embeds: Embed[]): Embed[] => structuredClone(embeds);
 
 interface SectionProps {
     title: string;
@@ -51,7 +50,7 @@ const Section = ({
             >
                 <span className="flex items-center gap-2 text-sm font-semibold text-foreground">
                     {title}
-                    {badge !== undefined && (
+                    {badge === undefined ? null : (
                         <span className="rounded-full bg-bg-secondary px-2 py-0.5 text-xs text-muted-foreground">
                             {badge}
                         </span>
@@ -64,11 +63,11 @@ const Section = ({
                 )}
             </button>
 
-            {open && (
+            {open ? (
                 <div className="border-t border-border-subtle px-4 pt-3 pb-4">
                     {children}
                 </div>
-            )}
+            ) : null}
         </div>
     );
 };
@@ -86,7 +85,7 @@ const Field = ({ label, hint, children, className }: FieldProps): ReactNode => (
             {label}
         </label>
         {children}
-        {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
+        {hint ? <p className="text-xs text-muted-foreground">{hint}</p> : null}
     </div>
 );
 
@@ -432,7 +431,7 @@ const EmbedEditor = ({
                     />
                 </Section>
 
-                {total > 1 && (
+                {total > 1 ? (
                     <Button
                         className="mt-1 w-full"
                         size="sm"
@@ -442,7 +441,7 @@ const EmbedEditor = ({
                         <Trash2 size={14} />
                         Remove embed {index + 1}
                     </Button>
-                )}
+                ) : null}
             </div>
         </Section>
     );
@@ -530,7 +529,7 @@ export const EmbedCreator = ({
         if ((value.embeds?.length ?? 0) >= 10) return;
         set('embeds', [
             ...(value.embeds ?? []),
-            { type: 'rich' as const, color: 0x5865f2 },
+            { type: 'rich' as const, color: 0x58_65_f2 },
         ]);
     };
 
@@ -644,12 +643,12 @@ export const EmbedCreator = ({
                     />
                 ))}
 
-                {(!value.embeds || value.embeds.length === 0) && (
+                {!value.embeds || value.embeds.length === 0 ? (
                     <div className="rounded-lg border border-dashed border-border-subtle py-6 text-center text-sm text-muted-foreground">
                         No embeds yet. Click &ldquo;Add embed&rdquo; to get
                         started.
                     </div>
-                )}
+                ) : null}
             </div>
 
             <Section defaultOpen={false} title="Poll">
@@ -660,7 +659,7 @@ export const EmbedCreator = ({
                         onCheckedChange={togglePoll}
                     />
 
-                    {hasPoll && value.poll && (
+                    {hasPoll && value.poll ? (
                         <>
                             <Field label="Question">
                                 <Input
@@ -725,7 +724,7 @@ export const EmbedCreator = ({
                                 </Field>
                             </div>
                         </>
-                    )}
+                    ) : null}
                 </div>
             </Section>
 

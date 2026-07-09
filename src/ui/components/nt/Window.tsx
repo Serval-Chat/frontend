@@ -13,6 +13,88 @@ export interface WindowProps {
     minHeight?: number;
 }
 
+const resizeHandles = [
+    {
+        dir: 'n',
+        style: { top: 0, left: 4, right: 4, height: 4, cursor: 'n-resize' },
+    },
+    {
+        dir: 's',
+        style: {
+            bottom: 0,
+            left: 4,
+            right: 4,
+            height: 4,
+            cursor: 's-resize',
+        },
+    },
+    {
+        dir: 'w',
+        style: { top: 4, bottom: 4, left: 0, width: 4, cursor: 'w-resize' },
+    },
+    {
+        dir: 'e',
+        style: {
+            top: 4,
+            bottom: 4,
+            right: 0,
+            width: 4,
+            cursor: 'e-resize',
+        },
+    },
+    {
+        dir: 'nw',
+        style: {
+            top: 0,
+            left: 0,
+            width: 4,
+            height: 4,
+            cursor: 'nw-resize',
+        },
+    },
+    {
+        dir: 'ne',
+        style: {
+            top: 0,
+            right: 0,
+            width: 4,
+            height: 4,
+            cursor: 'ne-resize',
+        },
+    },
+    {
+        dir: 'sw',
+        style: {
+            bottom: 0,
+            left: 0,
+            width: 4,
+            height: 4,
+            cursor: 'sw-resize',
+        },
+    },
+    {
+        dir: 'se',
+        style: {
+            bottom: 0,
+            right: 0,
+            width: 4,
+            height: 4,
+            cursor: 'se-resize',
+        },
+    },
+];
+
+const windowFrameBaseStyle: React.CSSProperties = {
+    overflow: 'hidden',
+    backgroundColor: '#c0c0c0',
+    borderTop: '2px solid #dfdfdf',
+    borderLeft: '2px solid #dfdfdf',
+    borderRight: '2px solid #000000',
+    borderBottom: '2px solid #000000',
+    boxShadow: 'inset 1px 1px #ffffff, inset -1px -1px #808080',
+    padding: '2px',
+};
+
 export const Window = ({
     title,
     onClose,
@@ -141,95 +223,17 @@ export const Window = ({
         setPosition({ x: newX, y: newY });
     };
 
-    const resizeHandles = [
-        {
-            dir: 'n',
-            style: { top: 0, left: 4, right: 4, height: 4, cursor: 'n-resize' },
-        },
-        {
-            dir: 's',
-            style: {
-                bottom: 0,
-                left: 4,
-                right: 4,
-                height: 4,
-                cursor: 's-resize',
-            },
-        },
-        {
-            dir: 'w',
-            style: { top: 4, bottom: 4, left: 0, width: 4, cursor: 'w-resize' },
-        },
-        {
-            dir: 'e',
-            style: {
-                top: 4,
-                bottom: 4,
-                right: 0,
-                width: 4,
-                cursor: 'e-resize',
-            },
-        },
-        {
-            dir: 'nw',
-            style: {
-                top: 0,
-                left: 0,
-                width: 4,
-                height: 4,
-                cursor: 'nw-resize',
-            },
-        },
-        {
-            dir: 'ne',
-            style: {
-                top: 0,
-                right: 0,
-                width: 4,
-                height: 4,
-                cursor: 'ne-resize',
-            },
-        },
-        {
-            dir: 'sw',
-            style: {
-                bottom: 0,
-                left: 0,
-                width: 4,
-                height: 4,
-                cursor: 'sw-resize',
-            },
-        },
-        {
-            dir: 'se',
-            style: {
-                bottom: 0,
-                right: 0,
-                width: 4,
-                height: 4,
-                cursor: 'se-resize',
-            },
-        },
-    ];
-
     return (
         <div
             className="nt-window fixed z-top flex flex-col text-black"
             style={{
+                ...windowFrameBaseStyle,
                 left: position.x,
                 top: position.y,
                 width: size.width,
                 height: size.height,
                 minWidth,
                 minHeight,
-                overflow: 'hidden',
-                backgroundColor: '#c0c0c0',
-                borderTop: '2px solid #dfdfdf',
-                borderLeft: '2px solid #dfdfdf',
-                borderRight: '2px solid #000000',
-                borderBottom: '2px solid #000000',
-                boxShadow: 'inset 1px 1px #ffffff, inset -1px -1px #808080',
-                padding: '2px',
             }}
         >
             {resizeHandles.map((handle) => (
@@ -241,7 +245,9 @@ export const Window = ({
                         ...handle.style,
                     }}
                     onPointerCancel={handlePointerUp}
-                    onPointerDown={(e): void => handleResizeDown(e, handle.dir)}
+                    onPointerDown={(e): void => {
+                        handleResizeDown(e, handle.dir);
+                    }}
                     onPointerMove={handleResizeMove}
                     onPointerUp={handlePointerUp}
                 />
@@ -260,13 +266,13 @@ export const Window = ({
                 onPointerUp={handlePointerUp}
             >
                 <span className="flex items-center gap-1 truncate text-[11px] leading-[13px]">
-                    {icon && (
+                    {icon ? (
                         <img
                             alt=""
                             className="mr-0.5 h-4 w-4 shrink-0"
                             src={icon}
                         />
-                    )}
+                    ) : null}
                     {title}
                 </span>
 
@@ -277,7 +283,9 @@ export const Window = ({
                         e.stopPropagation();
                         onClose();
                     }}
-                    onPointerDown={(e): void => e.stopPropagation()}
+                    onPointerDown={(e): void => {
+                        e.stopPropagation();
+                    }}
                 >
                     <span className="block group-active:translate-x-px group-active:translate-y-px">
                         <img

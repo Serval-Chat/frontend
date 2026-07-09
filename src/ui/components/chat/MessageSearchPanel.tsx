@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';
@@ -33,10 +33,8 @@ import { getAllowedMessageFeatures } from '@/utils/markdownBlockade';
 import { ParserPresets, parseText } from '@/utils/textParser/parser';
 
 import { SearchFilterNode } from './lexical/SearchFilterNode';
-import {
-    SearchFilterPlugin,
-    insertSearchToken,
-} from './lexical/SearchFilterPlugin';
+import { SearchFilterPlugin } from './lexical/SearchFilterPlugin';
+import { insertSearchToken } from './lexical/searchTokenUtils';
 
 const PAGE_SIZE = 25;
 
@@ -47,23 +45,25 @@ const handleSearchKeyDown = (e: {
     if (e.key === 'Enter') e.preventDefault();
 };
 
+const searchContentEditableStyle: React.CSSProperties = {
+    padding: '6px 10px 6px 32px',
+    borderRadius: radius.md,
+    border: `1px solid ${colors.borderSubtle}`,
+    backgroundColor: colors.bgSubtle,
+    color: colors.foreground,
+    fontSize: '0.8rem',
+    lineHeight: '1.5',
+    minHeight: '32px',
+    maxHeight: '80px',
+    overflowY: 'auto',
+    cursor: 'text',
+    wordBreak: 'break-word',
+};
+
 const SEARCH_CONTENT_EDITABLE = (
     <ContentEditable
         className="outline-none focus-visible:ring-1 focus-visible:ring-primary/50"
-        style={{
-            padding: '6px 10px 6px 32px',
-            borderRadius: radius.md,
-            border: `1px solid ${colors.borderSubtle}`,
-            backgroundColor: colors.bgSubtle,
-            color: colors.foreground,
-            fontSize: '0.8rem',
-            lineHeight: '1.5',
-            minHeight: '32px',
-            maxHeight: '80px',
-            overflowY: 'auto',
-            cursor: 'text',
-            wordBreak: 'break-word',
-        }}
+        style={searchContentEditableStyle}
         onKeyDown={handleSearchKeyDown}
     />
 );
@@ -71,8 +71,66 @@ const SEARCH_CONTENT_EDITABLE = (
 const SEARCH_BOX_CONFIG = {
     namespace: 'MessageSearch',
     nodes: [SearchFilterNode],
-    onError: (e: Error) => console.error('[SearchBox]', e),
+    onError: (e: Error) => {
+        console.error('[SearchBox]', e);
+    },
     theme: {},
+};
+
+const navButtonStyle = (enabled: boolean): React.CSSProperties => ({
+    width: 28,
+    height: 28,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: radius.md,
+    border: 'none',
+    background: 'transparent',
+    color: enabled ? colors.foreground : colors.mutedForeground,
+    cursor: enabled ? 'pointer' : 'default',
+    opacity: enabled ? 1 : 0.35,
+    flexShrink: 0,
+});
+
+const searchPlaceholderStyle: React.CSSProperties = {
+    position: 'absolute',
+    left: 32,
+    top: '50%',
+    transform: 'translateY(-50%)',
+    color: colors.placeholder,
+    fontSize: '0.8rem',
+    pointerEvents: 'none',
+    userSelect: 'none',
+    whiteSpace: 'nowrap',
+};
+
+const closeSearchButtonStyle: React.CSSProperties = {
+    width: 28,
+    height: 28,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: radius.md,
+    border: 'none',
+    background: 'transparent',
+    color: colors.mutedForeground,
+    cursor: 'pointer',
+    flexShrink: 0,
+};
+
+const searchChipButtonStyle: React.CSSProperties = {
+    display: 'inline-flex',
+    alignItems: 'center',
+    padding: '3px 10px',
+    borderRadius: radius.full,
+    border: `1px solid ${colors.borderSubtle}`,
+    background: 'transparent',
+    color: colors.foreground,
+    fontSize: '0.75rem',
+    fontFamily: 'monospace',
+    cursor: 'pointer',
+    transition: 'background-color 0.12s, border-color 0.12s',
+    whiteSpace: 'nowrap',
 };
 
 interface MessageSearchPanelProps {
@@ -293,7 +351,9 @@ export function SearchResultItem({
                 padding: 0,
             }}
             type="button"
-            onClick={() => onNavigate(hit.id)}
+            onClick={() => {
+                onNavigate(hit.id);
+            }}
         >
             <div className="flex items-start gap-1 px-4 py-0.5">
                 <div className="mt-1 flex w-12 shrink-0 justify-center">
@@ -312,21 +372,21 @@ export function SearchResultItem({
                         disableGlow={disableGlow}
                         disableGlowAndColors={disableGlowAndColors}
                         iconRole={iconRole}
-                        isWebhook={hit.isWebhook && !user.isBot}
+                        isWebhook={hit.isWebhook ? !user.isBot : undefined}
                         role={role}
                         timestamp={hit.createdAt}
                         user={user}
                     />
                     <div className="search-highlight text-sm leading-relaxed wrap-break-word whitespace-pre-wrap text-foreground">
-                        {hit.text && (
+                        {hit.text ? (
                             <ParsedText
                                 highlightQuery={query}
                                 nodes={nodes}
                                 serverId={hit.serverId}
                                 wrap="preWrap"
                             />
-                        )}
-                        {hit.embeds && hit.embeds.length > 0 && (
+                        ) : null}
+                        {hit.embeds && hit.embeds.length > 0 ? (
                             <EmbedRenderer
                                 channelId={hit.channelId}
                                 messageId={hit.id}
@@ -338,20 +398,136 @@ export function SearchResultItem({
                                 serverId={hit.serverId}
                                 variant="chat"
                             />
-                        )}
-                        {sticker && (
+                        ) : null}
+                        {sticker ? (
                             <img
                                 alt={sticker.name}
                                 className="mt-1 max-w-50"
                                 src={resolveApiUrl(sticker.imageUrl) ?? ''}
                             />
-                        )}
+                        ) : null}
                     </div>
                 </div>
             </div>
         </button>
     );
 }
+
+const SearchFilterShortcuts = ({
+    mode,
+    onAppend,
+}: {
+    mode: MessageSearchPanelProps['mode'];
+    onAppend: (token: string) => void;
+}) => (
+    <div style={{ padding: '20px 16px' }}>
+        <Text size="xs" variant="muted">
+            Filter shortcuts - click to add:
+        </Text>
+        {[
+            {
+                label: 'Who',
+                chips: [
+                    { token: 'from:', label: 'from: user' },
+                    { token: 'mentions:', label: 'mentions: user' },
+                ],
+            },
+            {
+                label: 'Has',
+                chips: [
+                    { token: 'has:file ', label: 'has: file' },
+                    { token: 'has:embed ', label: 'has: embed' },
+                    { token: 'has:link ', label: 'has: link' },
+                ],
+            },
+            {
+                label: 'State',
+                chips: [
+                    { token: 'pinned:true ', label: 'pinned: true' },
+                    { token: 'pinned:false ', label: 'pinned: false' },
+                ],
+            },
+            {
+                label: 'Author',
+                chips: [
+                    { token: 'type:user ', label: 'type: user' },
+                    { token: 'type:bot ', label: 'type: bot' },
+                    { token: 'type:webhook ', label: 'type: webhook' },
+                ],
+            },
+            {
+                label: 'Date',
+                chips: [
+                    { token: 'before:', label: 'before: date' },
+                    { token: 'after:', label: 'after: date' },
+                ],
+            },
+            {
+                label: 'Match',
+                chips: [{ token: 'strict:', label: 'strict: word' }],
+            },
+            ...(mode === 'channel'
+                ? [
+                      {
+                          label: 'Channel',
+                          chips: [
+                              { token: 'in:', label: 'in: channel' },
+                              { token: 'inc:', label: 'inc: category' },
+                          ],
+                      },
+                  ]
+                : []),
+        ].map(({ label, chips }) => (
+            <div key={label} style={{ marginTop: 14 }}>
+                <Text
+                    size="xs"
+                    style={
+                        {
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.06em',
+                            fontSize: '0.65rem',
+                            marginBottom: 6,
+                            display: 'block',
+                        } as React.CSSProperties
+                    }
+                    variant="muted"
+                >
+                    {label}
+                </Text>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                    {chips.map(({ token, label: chipLabel }) => (
+                        <button
+                            key={token}
+                            style={searchChipButtonStyle}
+                            type="button"
+                            onClick={() => {
+                                onAppend(token);
+                            }}
+                            onMouseEnter={(e) => {
+                                (
+                                    e.currentTarget as HTMLButtonElement
+                                ).style.backgroundColor = colors.bgSubtle;
+                                (
+                                    e.currentTarget as HTMLButtonElement
+                                ).style.borderColor = colors.mutedForeground;
+                            }}
+                            onMouseLeave={(e) => {
+                                (
+                                    e.currentTarget as HTMLButtonElement
+                                ).style.backgroundColor = 'transparent';
+                                (
+                                    e.currentTarget as HTMLButtonElement
+                                ).style.borderColor = colors.borderSubtle;
+                            }}
+                        >
+                            {chipLabel}
+                        </button>
+                    ))}
+                </div>
+            </div>
+        ))}
+    </div>
+);
 
 export function MessageSearchPanel({
     mode,
@@ -370,7 +546,6 @@ export function MessageSearchPanel({
     });
     const [pageState, setPageState] = useState({ page: 0, forKey: '' });
     const lexicalEditorRef = useRef<LexicalEditor | null>(null);
-    const focusTimerRef = useRef<number>(0);
 
     const { data: allChannels = [] } = useChannels(serverId ?? null, {
         enabled: mode === 'channel',
@@ -424,9 +599,6 @@ export function MessageSearchPanel({
         setPageState({ page: 0, forKey: committedKey });
     }
 
-    // cleanup focus timer on unmount
-    useEffect(() => () => window.clearTimeout(focusTimerRef.current), []);
-
     const { data, isFetching, isError } = useMessageSearch({
         mode,
         otherUserId,
@@ -446,35 +618,12 @@ export function MessageSearchPanel({
     const canGoPrev = page > 0;
     const canGoNext = totalPages > 0 && page < totalPages - 1;
 
-    const navButtonStyle = (enabled: boolean): React.CSSProperties => ({
-        width: 28,
-        height: 28,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        borderRadius: radius.md,
-        border: 'none',
-        background: 'transparent',
-        color: enabled ? colors.foreground : colors.mutedForeground,
-        cursor: enabled ? 'pointer' : 'default',
-        opacity: enabled ? 1 : 0.35,
-        flexShrink: 0,
-    });
-
     const handleSearchChange = useCallback(
         (state: { q: string; filters: SearchFilters }) => {
             setLiveState(state);
         },
         [],
     );
-
-    const handleEditorReady = useCallback((editor: LexicalEditor) => {
-        lexicalEditorRef.current = editor;
-        window.clearTimeout(focusTimerRef.current);
-        focusTimerRef.current = window.setTimeout(() => {
-            lexicalEditorRef.current?.focus();
-        }, 80);
-    }, []);
 
     function appendToEditor(token: string) {
         if (!lexicalEditorRef.current) return;
@@ -524,19 +673,7 @@ export function MessageSearchPanel({
                                 ErrorBoundary={LexicalErrorBoundary}
                                 contentEditable={SEARCH_CONTENT_EDITABLE}
                                 placeholder={
-                                    <span
-                                        style={{
-                                            position: 'absolute',
-                                            left: 32,
-                                            top: '50%',
-                                            transform: 'translateY(-50%)',
-                                            color: colors.placeholder,
-                                            fontSize: '0.8rem',
-                                            pointerEvents: 'none',
-                                            userSelect: 'none',
-                                            whiteSpace: 'nowrap',
-                                        }}
-                                    >
+                                    <span style={searchPlaceholderStyle}>
                                         Search... (e.g. from:alice in:general)
                                     </span>
                                 }
@@ -547,28 +684,16 @@ export function MessageSearchPanel({
                         <SearchFilterPlugin
                             categories={allCategories}
                             channels={allChannels}
+                            editorRef={lexicalEditorRef}
                             members={members ?? []}
                             onChange={handleSearchChange}
-                            onEditorReady={handleEditorReady}
                         />
                     </LexicalComposer>
                 </div>
 
                 <button
                     aria-label="Close search"
-                    style={{
-                        width: 28,
-                        height: 28,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        borderRadius: radius.md,
-                        border: 'none',
-                        background: 'transparent',
-                        color: colors.mutedForeground,
-                        cursor: 'pointer',
-                        flexShrink: 0,
-                    }}
+                    style={closeSearchButtonStyle}
                     type="button"
                     onClick={onClose}
                 >
@@ -577,7 +702,7 @@ export function MessageSearchPanel({
             </div>
 
             {/* results count */}
-            {hasInput && !isSearching && data && data.total > 0 && (
+            {hasInput && !isSearching && data && data.total > 0 ? (
                 <div
                     style={{
                         padding: '5px 16px 4px',
@@ -586,210 +711,68 @@ export function MessageSearchPanel({
                     }}
                 >
                     <Text size="xs" variant="muted">
-                        {data.total} result{data.total !== 1 ? 's' : ''}
-                        {totalPages > 1 &&
-                            `  -  page ${page + 1} of ${totalPages}`}
+                        {data.total} result{data.total === 1 ? '' : 's'}
+                        {totalPages > 1
+                            ? `  -  page ${page + 1} of ${totalPages}`
+                            : null}
                     </Text>
                 </div>
-            )}
+            ) : null}
 
             {/* scrollable results */}
             <div style={{ flex: 1, overflowY: 'auto', minHeight: 0 }}>
-                {!hasInput ? (
-                    <div style={{ padding: '20px 16px' }}>
-                        <Text size="xs" variant="muted">
-                            Filter shortcuts - click to add:
-                        </Text>
-                        {[
-                            {
-                                label: 'Who',
-                                chips: [
-                                    { token: 'from:', label: 'from: user' },
-                                    {
-                                        token: 'mentions:',
-                                        label: 'mentions: user',
-                                    },
-                                ],
-                            },
-                            {
-                                label: 'Has',
-                                chips: [
-                                    { token: 'has:file ', label: 'has: file' },
-                                    {
-                                        token: 'has:embed ',
-                                        label: 'has: embed',
-                                    },
-                                    { token: 'has:link ', label: 'has: link' },
-                                ],
-                            },
-                            {
-                                label: 'State',
-                                chips: [
-                                    {
-                                        token: 'pinned:true ',
-                                        label: 'pinned: true',
-                                    },
-                                    {
-                                        token: 'pinned:false ',
-                                        label: 'pinned: false',
-                                    },
-                                ],
-                            },
-                            {
-                                label: 'Author',
-                                chips: [
-                                    {
-                                        token: 'type:user ',
-                                        label: 'type: user',
-                                    },
-                                    { token: 'type:bot ', label: 'type: bot' },
-                                    {
-                                        token: 'type:webhook ',
-                                        label: 'type: webhook',
-                                    },
-                                ],
-                            },
-                            {
-                                label: 'Date',
-                                chips: [
-                                    { token: 'before:', label: 'before: date' },
-                                    { token: 'after:', label: 'after: date' },
-                                ],
-                            },
-                            {
-                                label: 'Match',
-                                chips: [
-                                    { token: 'strict:', label: 'strict: word' },
-                                ],
-                            },
-                            ...(mode === 'channel'
-                                ? [
-                                      {
-                                          label: 'Channel',
-                                          chips: [
-                                              {
-                                                  token: 'in:',
-                                                  label: 'in: channel',
-                                              },
-                                              {
-                                                  token: 'inc:',
-                                                  label: 'inc: category',
-                                              },
-                                          ],
-                                      },
-                                  ]
-                                : []),
-                        ].map(({ label, chips }) => (
-                            <div key={label} style={{ marginTop: 14 }}>
-                                <Text
-                                    size="xs"
-                                    style={
-                                        {
-                                            textTransform: 'uppercase',
-                                            letterSpacing: '0.06em',
-                                            fontSize: '0.65rem',
-                                            marginBottom: 6,
-                                            display: 'block',
-                                        } as React.CSSProperties
-                                    }
-                                    variant="muted"
-                                >
-                                    {label}
-                                </Text>
-                                <div
-                                    style={{
-                                        display: 'flex',
-                                        flexWrap: 'wrap',
-                                        gap: 6,
-                                    }}
-                                >
-                                    {chips.map(
-                                        ({ token, label: chipLabel }) => (
-                                            <button
-                                                key={token}
-                                                style={{
-                                                    display: 'inline-flex',
-                                                    alignItems: 'center',
-                                                    padding: '3px 10px',
-                                                    borderRadius: radius.full,
-                                                    border: `1px solid ${colors.borderSubtle}`,
-                                                    background: 'transparent',
-                                                    color: colors.foreground,
-                                                    fontSize: '0.75rem',
-                                                    fontFamily: 'monospace',
-                                                    cursor: 'pointer',
-                                                    transition:
-                                                        'background-color 0.12s, border-color 0.12s',
-                                                    whiteSpace: 'nowrap',
-                                                }}
-                                                type="button"
-                                                onClick={() =>
-                                                    appendToEditor(token)
-                                                }
-                                                onMouseEnter={(e) => {
-                                                    (
-                                                        e.currentTarget as HTMLButtonElement
-                                                    ).style.backgroundColor =
-                                                        colors.bgSubtle;
-                                                    (
-                                                        e.currentTarget as HTMLButtonElement
-                                                    ).style.borderColor =
-                                                        colors.mutedForeground;
-                                                }}
-                                                onMouseLeave={(e) => {
-                                                    (
-                                                        e.currentTarget as HTMLButtonElement
-                                                    ).style.backgroundColor =
-                                                        'transparent';
-                                                    (
-                                                        e.currentTarget as HTMLButtonElement
-                                                    ).style.borderColor =
-                                                        colors.borderSubtle;
-                                                }}
-                                            >
-                                                {chipLabel}
-                                            </button>
-                                        ),
-                                    )}
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                ) : isSearching ? (
-                    <SkeletonRows />
-                ) : isError ? (
-                    <div style={{ padding: '28px 16px', textAlign: 'center' }}>
-                        <Text size="sm" variant="muted">
-                            Search is unavailable right now.
-                        </Text>
-                    </div>
-                ) : !data || data.hits.length === 0 ? (
-                    <div style={{ padding: '28px 16px', textAlign: 'center' }}>
-                        <Text size="sm" variant="muted">
-                            No messages found.
-                        </Text>
-                    </div>
+                {hasInput ? (
+                    isSearching ? (
+                        <SkeletonRows />
+                    ) : isError ? (
+                        <div
+                            style={{
+                                padding: '28px 16px',
+                                textAlign: 'center',
+                            }}
+                        >
+                            <Text size="sm" variant="muted">
+                                Search is unavailable right now.
+                            </Text>
+                        </div>
+                    ) : !data || data.hits.length === 0 ? (
+                        <div
+                            style={{
+                                padding: '28px 16px',
+                                textAlign: 'center',
+                            }}
+                        >
+                            <Text size="sm" variant="muted">
+                                No messages found.
+                            </Text>
+                        </div>
+                    ) : (
+                        data.hits.map((hit) => (
+                            <SearchResultItem
+                                disableColors={disableColors}
+                                disableCustomFonts={disableCustomFonts}
+                                disableGlow={disableGlow}
+                                disableGlowAndColors={disableGlowAndColors}
+                                fullMemberMap={fullMemberMap}
+                                highestRoleMap={highestRoleMap}
+                                hit={hit}
+                                iconRoleMap={iconRoleMap}
+                                key={hit.id}
+                                query={debouncedQ}
+                                onNavigate={onNavigateToMessage}
+                            />
+                        ))
+                    )
                 ) : (
-                    data.hits.map((hit) => (
-                        <SearchResultItem
-                            disableColors={disableColors}
-                            disableCustomFonts={disableCustomFonts}
-                            disableGlow={disableGlow}
-                            disableGlowAndColors={disableGlowAndColors}
-                            fullMemberMap={fullMemberMap}
-                            highestRoleMap={highestRoleMap}
-                            hit={hit}
-                            iconRoleMap={iconRoleMap}
-                            key={hit.id}
-                            query={debouncedQ}
-                            onNavigate={onNavigateToMessage}
-                        />
-                    ))
+                    <SearchFilterShortcuts
+                        mode={mode}
+                        onAppend={appendToEditor}
+                    />
                 )}
             </div>
 
             {/* pagination controls */}
-            {hasInput && !isSearching && totalPages > 1 && (
+            {hasInput && !isSearching && totalPages > 1 ? (
                 <div
                     style={{
                         borderTop: `1px solid ${colors.borderSubtle}`,
@@ -804,12 +787,12 @@ export function MessageSearchPanel({
                         disabled={!canGoPrev}
                         style={navButtonStyle(canGoPrev)}
                         type="button"
-                        onClick={() =>
+                        onClick={() => {
                             setPageState({
                                 page: page - 1,
                                 forKey: committedKey,
-                            })
-                        }
+                            });
+                        }}
                     >
                         <ChevronLeft size={16} />
                     </button>
@@ -820,17 +803,17 @@ export function MessageSearchPanel({
                         disabled={!canGoNext}
                         style={navButtonStyle(canGoNext)}
                         type="button"
-                        onClick={() =>
+                        onClick={() => {
                             setPageState({
                                 page: page + 1,
                                 forKey: committedKey,
-                            })
-                        }
+                            });
+                        }}
                     >
                         <ChevronRight size={16} />
                     </button>
                 </div>
-            )}
+            ) : null}
         </div>
     );
 }

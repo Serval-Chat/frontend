@@ -29,7 +29,7 @@ const createStorageMock = (): Partial<Storage> & {
     };
 };
 
-if (typeof window !== 'undefined') {
+if (globalThis.window !== undefined) {
     const localStorageMock = createStorageMock();
     const sessionStorageMock = createStorageMock();
 
@@ -41,3 +41,22 @@ if (typeof window !== 'undefined') {
         sessionStorageMock.clear();
     });
 }
+
+vi.mock('idb-keyval', () => {
+    const store = new Map<IDBValidKey, unknown>();
+    return {
+        get: vi.fn((key) => Promise.resolve(store.get(key))),
+        set: vi.fn((key, value) => {
+            store.set(key, value);
+            return Promise.resolve();
+        }),
+        del: vi.fn((key) => {
+            store.delete(key);
+            return Promise.resolve();
+        }),
+        clear: vi.fn(() => {
+            store.clear();
+            return Promise.resolve();
+        }),
+    };
+});

@@ -75,5 +75,30 @@ export const WebSocketProvider = ({
         };
     }, [isAuthenticated]);
 
+    // A dropped network link (unplugged ethernet/wifi, sleep/resume) can leave a
+    // half-open socket that never fires `onclose`, so nothing reconnects on its
+    // own. When the browser tells us the network is back or the tab is visible
+    // again, verify the connection and reconnect if it has gone stale.
+    useEffect((): undefined | (() => void) => {
+        if (!isAuthenticated) return undefined;
+
+        const handleOnline = (): void => {
+            wsClient.reconnectIfNeeded();
+        };
+        const handleVisibility = (): void => {
+            if (document.visibilityState === 'visible') {
+                wsClient.reconnectIfNeeded();
+            }
+        };
+
+        globalThis.addEventListener('online', handleOnline);
+        document.addEventListener('visibilitychange', handleVisibility);
+
+        return (): void => {
+            globalThis.removeEventListener('online', handleOnline);
+            document.removeEventListener('visibilitychange', handleVisibility);
+        };
+    }, [isAuthenticated]);
+
     return children;
 };

@@ -15,8 +15,6 @@ import {
     blocksApi,
 } from './blocks.api';
 
-export type { BlockProfile, BlockRelationship };
-
 export const BLOCKS_QUERY_KEYS = {
     profiles: ['blocks', 'profiles'] as const,
     list: ['blocks', 'list'] as const,
@@ -24,7 +22,7 @@ export const BLOCKS_QUERY_KEYS = {
 
 export const useBlockProfiles = (
     options: { enabled?: boolean } = {},
-): UseQueryResult<BlockProfile[], Error> =>
+): UseQueryResult<BlockProfile[]> =>
     useQuery({
         queryKey: BLOCKS_QUERY_KEYS.profiles,
         queryFn: blocksApi.getProfiles,
@@ -48,7 +46,12 @@ export const useCreateBlockProfile = (): UseMutationResult<
             showToast('Block profile created', 'success');
         },
         onError: (error: Error): void => {
-            showToast(error.message || 'Failed to create profile', 'error');
+            showToast(
+                error.message === ''
+                    ? 'Failed to create profile'
+                    : error.message,
+                'error',
+            );
         },
     });
 };
@@ -82,7 +85,12 @@ export const useUpdateBlockProfile = (): UseMutationResult<
             showToast('Block profile updated', 'success');
         },
         onError: (error: Error): void => {
-            showToast(error.message || 'Failed to update profile', 'error');
+            showToast(
+                error.message === ''
+                    ? 'Failed to update profile'
+                    : error.message,
+                'error',
+            );
         },
     });
 };
@@ -110,14 +118,19 @@ export const useDeleteBlockProfile = (): UseMutationResult<
             showToast('Block profile deleted', 'success');
         },
         onError: (error: Error): void => {
-            showToast(error.message || 'Failed to delete profile', 'error');
+            showToast(
+                error.message === ''
+                    ? 'Failed to delete profile'
+                    : error.message,
+                'error',
+            );
         },
     });
 };
 
 export const useBlocks = (
     options: { enabled?: boolean } = {},
-): UseQueryResult<BlockRelationship[], Error> =>
+): UseQueryResult<BlockRelationship[]> =>
     useQuery({
         queryKey: BLOCKS_QUERY_KEYS.list,
         queryFn: blocksApi.getBlocks,
@@ -151,7 +164,10 @@ export const useUpsertBlock = (): UseMutationResult<
             showToast('User blocked', 'success');
         },
         onError: (error: Error): void => {
-            showToast(error.message || 'Failed to block user', 'error');
+            showToast(
+                error.message === '' ? 'Failed to block user' : error.message,
+                'error',
+            );
         },
     });
 };
@@ -172,7 +188,12 @@ export const useRemoveBlock = (): UseMutationResult<void, Error, string> => {
             showToast('User unblocked', 'success');
         },
         onError: (error: Error): void => {
-            showToast(error.message || 'Failed to unblock user', 'error');
+            showToast(
+                error.message === '' ? 'Failed to unblock user' : error.message,
+                'error',
+            );
         },
     });
 };
+
+export { type BlockProfile, type BlockRelationship } from './blocks.api';

@@ -78,7 +78,9 @@ export const DropdownWithSearch = ({
         };
     }, [isOpen]);
 
-    const handleToggle = (): void => setIsOpen(!isOpen);
+    const handleToggle = (): void => {
+        setIsOpen(!isOpen);
+    };
 
     const handleSelect = (optionId: string | null): void => {
         onChange(optionId);
@@ -93,14 +95,14 @@ export const DropdownWithSearch = ({
 
     return (
         <Box className={cn('relative w-full', className)} ref={containerRef}>
-            {label && (
+            {label ? (
                 <Text
                     as="label"
                     className="mb-2 block text-xs font-bold tracking-wider text-muted-foreground uppercase"
                 >
                     {label}
                 </Text>
-            )}
+            ) : null}
 
             <Button
                 fullWidth
@@ -114,17 +116,17 @@ export const DropdownWithSearch = ({
                 onClick={handleToggle}
             >
                 <div className="flex items-center gap-3 truncate">
-                    {selectedOption?.icon && (
+                    {selectedOption?.icon ? (
                         <div className="flex-shrink-0">
                             {selectedOption.icon}
                         </div>
-                    )}
+                    ) : null}
                     <span
                         className={cn(
                             'truncate',
-                            !selectedOption
-                                ? 'text-muted-foreground'
-                                : 'text-foreground',
+                            selectedOption
+                                ? 'text-foreground'
+                                : 'text-muted-foreground',
                         )}
                     >
                         {selectedOption
@@ -135,7 +137,7 @@ export const DropdownWithSearch = ({
                 </div>
 
                 <div className="ml-2 flex flex-shrink-0 items-center gap-1">
-                    {allowClear && value && (
+                    {allowClear && value ? (
                         <button
                             className="flex h-6 w-6 cursor-pointer items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-bg-subtle"
                             type="button"
@@ -148,7 +150,7 @@ export const DropdownWithSearch = ({
                         >
                             <X size={14} />
                         </button>
-                    )}
+                    ) : null}
                     <ChevronDown
                         className={cn(
                             'text-muted-foreground transition-transform duration-200',
@@ -160,7 +162,7 @@ export const DropdownWithSearch = ({
             </Button>
 
             <AnimatePresence>
-                {isOpen && (
+                {isOpen ? (
                     <m.div
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         className="absolute z-[var(--z-index-popover)] mt-2 w-full overflow-hidden rounded-xl border border-border-subtle bg-background shadow-2xl backdrop-blur-md"
@@ -170,21 +172,15 @@ export const DropdownWithSearch = ({
                         transition={{ duration: 0.15, ease: 'easeOut' }}
                     >
                         <div className="border-b border-border-subtle bg-background/50 p-2 backdrop-blur-sm">
-                            <div className="relative">
-                                <Search
-                                    className="absolute top-1/2 left-3 -translate-y-1/2 text-muted-foreground"
-                                    size={14}
-                                />
-                                <Input
-                                    className="pl-9"
-                                    placeholder={searchPlaceholder}
-                                    size="sm"
-                                    value={searchQuery}
-                                    onChange={(e): void =>
-                                        setSearchQuery(e.target.value)
-                                    }
-                                />
-                            </div>
+                            <Input
+                                icon={<Search size={14} />}
+                                placeholder={searchPlaceholder}
+                                size="sm"
+                                value={searchQuery}
+                                onChange={(e): void => {
+                                    setSearchQuery(e.target.value);
+                                }}
+                            />
                         </div>
 
                         <div className="custom-scrollbar max-h-60 overflow-y-auto p-1">
@@ -202,34 +198,34 @@ export const DropdownWithSearch = ({
                                         key={option.id || option.label}
                                         size="md"
                                         variant="ghost"
-                                        onClick={(): void =>
-                                            handleSelect(option.id)
-                                        }
+                                        onClick={(): void => {
+                                            handleSelect(option.id);
+                                        }}
                                     >
                                         <div className="flex items-center gap-3 overflow-hidden">
-                                            {option.icon && (
+                                            {option.icon ? (
                                                 <div className="flex-shrink-0">
                                                     {option.icon}
                                                 </div>
-                                            )}
+                                            ) : null}
                                             <div className="flex min-w-0 flex-col">
                                                 <span className="truncate text-sm font-medium">
                                                     {option.displayLabel ||
                                                         option.label}
                                                 </span>
-                                                {option.description && (
+                                                {option.description ? (
                                                     <span className="truncate text-[10px] opacity-70">
                                                         {option.description}
                                                     </span>
-                                                )}
+                                                ) : null}
                                             </div>
                                         </div>
-                                        {option.id === value && (
+                                        {option.id === value ? (
                                             <Check
                                                 className="ml-2 flex-shrink-0"
                                                 size={14}
                                             />
-                                        )}
+                                        ) : null}
                                     </Button>
                                 ))
                             ) : (
@@ -244,7 +240,7 @@ export const DropdownWithSearch = ({
                             )}
                         </div>
                     </m.div>
-                )}
+                ) : null}
             </AnimatePresence>
         </Box>
     );

@@ -50,6 +50,127 @@ interface ServerFolderProps {
     pickedServerId?: string | null;
 }
 
+const FolderExpandedList = ({
+    folder,
+    folderServers,
+    disableReorder,
+    isMobileReordering,
+    pickedServerId,
+    activeServerId,
+    unreadServers,
+    onConfirmServerPosition,
+    onServerClick,
+    onStartReorderServer,
+    onReorderServers,
+}: {
+    folder: IServerFolder;
+    folderServers: Server[];
+    disableReorder: boolean;
+    isMobileReordering: boolean;
+    pickedServerId: string | null;
+    activeServerId?: string;
+    unreadServers: Record<string, { hasUnread: boolean; pingCount: number }>;
+    onConfirmServerPosition?: (folderId: string, index: number) => void;
+    onServerClick: (serverId: string) => void;
+    onStartReorderServer?: (serverId: string, folderId: string) => void;
+    onReorderServers: (servers: Server[]) => void;
+}) => (
+    <m.div
+        animate={{ height: 'auto', opacity: 1 }}
+        className="relative flex w-full flex-col items-center gap-2 overflow-hidden py-1.5"
+        exit={{ height: 0, opacity: 0 }}
+        initial={{ height: 0, opacity: 0 }}
+    >
+        <div
+            className="pointer-events-none absolute inset-y-0 left-1/2 w-14 -translate-x-1/2 rounded-2xl"
+            style={{ backgroundColor: folder.color + '15' }}
+        />
+
+        {disableReorder ? (
+            <div className="flex w-full touch-pan-y flex-col items-center gap-2">
+                {isMobileReordering &&
+                pickedServerId &&
+                onConfirmServerPosition ? (
+                    <MobileFolderDropTarget
+                        onConfirm={(): void => {
+                            onConfirmServerPosition(folder.id, 0);
+                        }}
+                    />
+                ) : null}
+                {folderServers.map((server, index) => {
+                    const unreadStatus = unreadServers[server.id];
+                    return (
+                        <React.Fragment key={server.id}>
+                            <div
+                                className={cn(
+                                    'w-full',
+                                    pickedServerId === server.id &&
+                                        'opacity-40',
+                                )}
+                            >
+                                <ServerItem
+                                    isActive={activeServerId === server.id}
+                                    isUnread={unreadStatus?.hasUnread}
+                                    pingCount={unreadStatus?.pingCount}
+                                    server={server}
+                                    onClick={(): void => {
+                                        onServerClick(server.id);
+                                    }}
+                                    onStartReorder={
+                                        onStartReorderServer
+                                            ? (): void => {
+                                                  onStartReorderServer(
+                                                      server.id,
+                                                      folder.id,
+                                                  );
+                                              }
+                                            : undefined
+                                    }
+                                />
+                            </div>
+                            {isMobileReordering &&
+                            pickedServerId &&
+                            onConfirmServerPosition ? (
+                                <MobileFolderDropTarget
+                                    onConfirm={(): void => {
+                                        onConfirmServerPosition(
+                                            folder.id,
+                                            index + 1,
+                                        );
+                                    }}
+                                />
+                            ) : null}
+                        </React.Fragment>
+                    );
+                })}
+            </div>
+        ) : (
+            <Reorder.Group
+                axis="y"
+                className="flex w-full flex-col items-center gap-2"
+                values={folderServers}
+                onReorder={onReorderServers}
+            >
+                {folderServers.map((server) => {
+                    const unreadStatus = unreadServers[server.id];
+                    return (
+                        <FolderServerItem
+                            isActive={activeServerId === server.id}
+                            isUnread={unreadStatus?.hasUnread}
+                            key={server.id}
+                            pingCount={unreadStatus?.pingCount}
+                            server={server}
+                            onClick={(): void => {
+                                onServerClick(server.id);
+                            }}
+                        />
+                    );
+                })}
+            </Reorder.Group>
+        )}
+    </m.div>
+);
+
 export const ServerFolder = ({
     folder,
     servers,
@@ -89,13 +210,14 @@ export const ServerFolder = ({
     const hasUnread = React.useMemo(
         (): boolean =>
             folder.serverIds.some(
-                (id): boolean => unreadServers[id]?.hasUnread,
+                (id): boolean => unreadServers[id]?.hasUnread ?? false,
             ),
         [folder.serverIds, unreadServers],
     );
     const hasActiveServer = React.useMemo(
         (): boolean =>
-            folder.serverIds.some((id): boolean => id === activeServerId),
+            activeServerId !== undefined &&
+            folder.serverIds.includes(activeServerId),
         [folder.serverIds, activeServerId],
     );
 
@@ -235,23 +357,33 @@ export const ServerFolder = ({
             items: [
                 {
                     label: 'Blue',
-                    onClick: (): void => handleSetColor('#5865f2'),
+                    onClick: (): void => {
+                        handleSetColor('#5865f2');
+                    },
                 },
                 {
                     label: 'Green',
-                    onClick: (): void => handleSetColor('#23a559'),
+                    onClick: (): void => {
+                        handleSetColor('#23a559');
+                    },
                 },
                 {
                     label: 'Yellow',
-                    onClick: (): void => handleSetColor('#fee75c'),
+                    onClick: (): void => {
+                        handleSetColor('#fee75c');
+                    },
                 },
                 {
                     label: 'Fuchsia',
-                    onClick: (): void => handleSetColor('#eb459e'),
+                    onClick: (): void => {
+                        handleSetColor('#eb459e');
+                    },
                 },
                 {
                     label: 'Red',
-                    onClick: (): void => handleSetColor('#ed4245'),
+                    onClick: (): void => {
+                        handleSetColor('#ed4245');
+                    },
                 },
             ],
         },
@@ -336,11 +468,11 @@ export const ServerFolder = ({
                                 )}
                             </div>
 
-                            {totalPings > 0 && (
+                            {totalPings > 0 ? (
                                 <div className="absolute -right-1 -bottom-1 flex h-5 min-w-[20px] items-center justify-center rounded-lg bg-red-500 text-[11px] font-bold text-white ring-[2px] ring-background">
                                     {totalPings > 99 ? '99+' : totalPings}
                                 </div>
-                            )}
+                            ) : null}
                         </m.button>
                     </Tooltip>
                 </ContextMenu>
@@ -349,121 +481,28 @@ export const ServerFolder = ({
             <RenameFolderModal
                 currentName={folder.name}
                 isOpen={isRenameModalOpen}
-                onClose={(): void => setIsRenameModalOpen(false)}
+                onClose={(): void => {
+                    setIsRenameModalOpen(false);
+                }}
                 onRename={onRenameConfirm}
             />
 
             <AnimatePresence>
-                {isOpen && (
-                    <m.div
-                        animate={{ height: 'auto', opacity: 1 }}
-                        className="relative flex w-full flex-col items-center gap-2 overflow-hidden py-1.5"
-                        exit={{ height: 0, opacity: 0 }}
-                        initial={{ height: 0, opacity: 0 }}
-                    >
-                        <div
-                            className="pointer-events-none absolute inset-y-0 left-1/2 w-14 -translate-x-1/2 rounded-2xl"
-                            style={{ backgroundColor: folder.color + '15' }}
-                        />
-
-                        {disableReorder ? (
-                            <div className="flex w-full touch-pan-y flex-col items-center gap-2">
-                                {isMobileReordering &&
-                                    pickedServerId &&
-                                    onConfirmServerPosition && (
-                                        <MobileFolderDropTarget
-                                            onConfirm={(): void =>
-                                                onConfirmServerPosition(
-                                                    folder.id,
-                                                    0,
-                                                )
-                                            }
-                                        />
-                                    )}
-                                {folderServers.map((server, index) => {
-                                    const unreadStatus =
-                                        unreadServers[server.id];
-                                    return (
-                                        <React.Fragment key={server.id}>
-                                            <div
-                                                className={cn(
-                                                    'w-full',
-                                                    pickedServerId ===
-                                                        server.id &&
-                                                        'opacity-40',
-                                                )}
-                                            >
-                                                <ServerItem
-                                                    isActive={
-                                                        activeServerId ===
-                                                        server.id
-                                                    }
-                                                    isUnread={
-                                                        unreadStatus?.hasUnread
-                                                    }
-                                                    pingCount={
-                                                        unreadStatus?.pingCount
-                                                    }
-                                                    server={server}
-                                                    onClick={(): void =>
-                                                        onServerClick(server.id)
-                                                    }
-                                                    onStartReorder={
-                                                        onStartReorderServer
-                                                            ? (): void =>
-                                                                  onStartReorderServer(
-                                                                      server.id,
-                                                                      folder.id,
-                                                                  )
-                                                            : undefined
-                                                    }
-                                                />
-                                            </div>
-                                            {isMobileReordering &&
-                                                pickedServerId &&
-                                                onConfirmServerPosition && (
-                                                    <MobileFolderDropTarget
-                                                        onConfirm={(): void =>
-                                                            onConfirmServerPosition(
-                                                                folder.id,
-                                                                index + 1,
-                                                            )
-                                                        }
-                                                    />
-                                                )}
-                                        </React.Fragment>
-                                    );
-                                })}
-                            </div>
-                        ) : (
-                            <Reorder.Group
-                                axis="y"
-                                className="flex w-full flex-col items-center gap-2"
-                                values={folderServers}
-                                onReorder={handleReorderServers}
-                            >
-                                {folderServers.map((server) => {
-                                    const unreadStatus =
-                                        unreadServers[server.id];
-                                    return (
-                                        <FolderServerItem
-                                            isActive={
-                                                activeServerId === server.id
-                                            }
-                                            isUnread={unreadStatus?.hasUnread}
-                                            key={server.id}
-                                            pingCount={unreadStatus?.pingCount}
-                                            server={server}
-                                            onClick={(): void =>
-                                                onServerClick(server.id)
-                                            }
-                                        />
-                                    );
-                                })}
-                            </Reorder.Group>
-                        )}
-                    </m.div>
-                )}
+                {isOpen ? (
+                    <FolderExpandedList
+                        activeServerId={activeServerId}
+                        disableReorder={disableReorder}
+                        folder={folder}
+                        folderServers={folderServers}
+                        isMobileReordering={isMobileReordering}
+                        pickedServerId={pickedServerId}
+                        unreadServers={unreadServers}
+                        onConfirmServerPosition={onConfirmServerPosition}
+                        onReorderServers={handleReorderServers}
+                        onServerClick={onServerClick}
+                        onStartReorderServer={onStartReorderServer}
+                    />
+                ) : null}
             </AnimatePresence>
         </div>
     );

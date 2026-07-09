@@ -39,9 +39,9 @@ export const CreateCategoryModal = ({
                 name: name.trim(),
             });
             handleClose();
-        } catch (err) {
+        } catch (error_) {
             setError('Failed to create category. Please try again.');
-            console.error('Create category error:', err);
+            console.error('Create category error:', error_);
         } finally {
             setIsLoading(false);
         }
@@ -62,7 +62,9 @@ export const CreateCategoryModal = ({
                     <Input
                         placeholder="New Category"
                         value={name}
-                        onChange={(e): void => setName(e.target.value)}
+                        onChange={(e): void => {
+                            setName(e.target.value);
+                        }}
                         onKeyDown={(e): void => {
                             if (e.key === 'Enter' && name.trim()) {
                                 void handleCreate();
@@ -71,11 +73,11 @@ export const CreateCategoryModal = ({
                     />
                 </div>
 
-                {error && (
+                {error ? (
                     <Text size="xs" variant="danger">
                         {error}
                     </Text>
-                )}
+                ) : null}
 
                 <div className="flex justify-end gap-3 pt-2">
                     <Button

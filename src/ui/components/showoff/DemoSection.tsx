@@ -8,17 +8,15 @@ interface DemoSectionProps {
     children: React.ReactNode;
 }
 
-export function DemoSection({
+export const DemoSection = ({
     id,
     title,
     children,
-}: DemoSectionProps): React.ReactNode {
-    return (
-        <section className="p-md font-sans" id={id}>
-            <Heading level={2} variant="sub">
-                {title}
-            </Heading>
-            {children}
-        </section>
-    );
-}
+}: DemoSectionProps): React.ReactNode => (
+    <section className="p-md font-sans" id={id}>
+        <Heading level={2} variant="sub">
+            {title}
+        </Heading>
+        {children}
+    </section>
+);

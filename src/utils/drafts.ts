@@ -1,4 +1,4 @@
-export const getDraftKey = (
+const getDraftKey = (
     userId?: string | null,
     serverId?: string | null,
     channelId?: string | null,

@@ -85,7 +85,7 @@ export const NTSlider = ({
 }: NTSliderProps) => (
     <div className={cn('flex flex-col gap-1', className)}>
         <style>{NT_SLIDER_STYLES}</style>
-        {label && (
+        {label ? (
             <div className="flex justify-between">
                 <span className="font-nt text-[11px] font-bold text-black">
                     {label}
@@ -94,7 +94,7 @@ export const NTSlider = ({
                     {value}
                 </span>
             </div>
-        )}
+        ) : null}
         <input
             className="nt-slider"
             max={max}

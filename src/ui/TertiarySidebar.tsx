@@ -60,7 +60,9 @@ export const TertiarySidebar = ({
             const timeoutId = setTimeout((): void => {
                 searchInputRef.current?.focus();
             }, 100);
-            return (): void => clearTimeout(timeoutId);
+            return (): void => {
+                clearTimeout(timeoutId);
+            };
         }
     }, [isSearchOpen]);
 
@@ -106,7 +108,7 @@ export const TertiarySidebar = ({
                 className="custom-scrollbar flex min-h-0 flex-1 flex-col overflow-x-hidden overflow-y-auto"
                 ref={scrollContainerRef}
             >
-                {(selectedServerId || showMobileMemberList) && (
+                {selectedServerId || showMobileMemberList ? (
                     <div
                         className={cn(
                             'flex h-12 shrink-0 items-center justify-between px-3',
@@ -117,7 +119,7 @@ export const TertiarySidebar = ({
                             Members
                         </span>
                         <div className="flex items-center gap-1">
-                            {selectedServerId && (
+                            {selectedServerId ? (
                                 <button
                                     aria-label="Toggle search"
                                     className={cn(
@@ -132,8 +134,8 @@ export const TertiarySidebar = ({
                                 >
                                     <Search className="h-4 w-4" />
                                 </button>
-                            )}
-                            {showMobileMemberList && (
+                            ) : null}
+                            {showMobileMemberList ? (
                                 <button
                                     aria-label="Close member list"
                                     className="p-1 text-muted-foreground transition-colors hover:text-foreground md:hidden"
@@ -149,13 +151,13 @@ export const TertiarySidebar = ({
                                 >
                                     <X className="h-4 w-4" />
                                 </button>
-                            )}
+                            ) : null}
                         </div>
                     </div>
-                )}
+                ) : null}
 
                 <AnimatePresence>
-                    {isSearchOpen && selectedServerId && (
+                    {isSearchOpen && selectedServerId ? (
                         <m.div
                             animate={{ height: 'auto', opacity: 1 }}
                             className="pride-glass shrink-0 overflow-hidden border-b border-border-subtle bg-bg-subtle/50"
@@ -168,23 +170,23 @@ export const TertiarySidebar = ({
                                     placeholder="Search (supports regex /pattern/)..."
                                     ref={searchInputRef}
                                     value={searchQuery}
-                                    onChange={(e): void =>
-                                        setSearchQuery(e.target.value)
-                                    }
+                                    onChange={(e): void => {
+                                        setSearchQuery(e.target.value);
+                                    }}
                                 />
                             </div>
                         </m.div>
-                    )}
+                    ) : null}
                 </AnimatePresence>
 
                 <Box className="flex min-w-0 flex-col gap-4 p-3">
                     {/* DM Context */}
-                    {selectedFriendId && friend && me && (
+                    {selectedFriendId && friend && me ? (
                         <DMSidebarSection friend={friend} me={me} />
-                    )}
+                    ) : null}
 
                     {/* Server Context */}
-                    {selectedServerId && (
+                    {selectedServerId ? (
                         <ServerSidebarSection
                             isLoading={isLoadingMembers}
                             memberIconRoleMap={memberIconRoleMap}
@@ -195,7 +197,7 @@ export const TertiarySidebar = ({
                             searchQuery={searchQuery}
                             serverDetails={serverDetails}
                         />
-                    )}
+                    ) : null}
                 </Box>
             </Box>
         </Box>

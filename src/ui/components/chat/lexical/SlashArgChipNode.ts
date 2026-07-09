@@ -3,27 +3,11 @@ import React from 'react';
 import {
     DecoratorNode,
     type LexicalEditor,
-    type LexicalNode,
     type NodeKey,
     type SerializedLexicalNode,
 } from 'lexical';
 
 import { SlashArgChipComponent } from './SlashArgChipComponent';
-
-export const SLASH_ARG_INPUT_ATTR = 'data-slash-arg-idx';
-
-export function focusSlashArgInput(editor: LexicalEditor, index: number): void {
-    const root = editor.getRootElement();
-    if (!root) return;
-    const input = root.querySelector(
-        `[${SLASH_ARG_INPUT_ATTR}="${index}"]`,
-    ) as HTMLInputElement | null;
-    if (input) {
-        input.focus();
-        const len = input.value.length;
-        input.setSelectionRange(len, len);
-    }
-}
 
 export type SerializedSlashArgChipNode = SerializedLexicalNode & {
     argName: string;
@@ -151,10 +135,4 @@ export function $createSlashArgChipNode(
     isLast: boolean,
 ): SlashArgChipNode {
     return new SlashArgChipNode(argName, argIndex, required, '', isLast);
-}
-
-export function $isSlashArgChipNode(
-    node: LexicalNode | null | undefined,
-): node is SlashArgChipNode {
-    return node instanceof SlashArgChipNode;
 }

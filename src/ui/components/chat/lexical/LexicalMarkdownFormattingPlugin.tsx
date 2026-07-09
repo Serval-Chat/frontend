@@ -29,7 +29,8 @@ const TRANSFORMERS: TextFormatTransformer[] = [
 
 const TRANSFORMERS_BY_TRIGGER: Record<string, TextFormatTransformer[]> = {};
 for (const t of TRANSFORMERS) {
-    const trigger = t.tag[t.tag.length - 1];
+    const trigger = t.tag.at(-1);
+    if (trigger === undefined) continue;
     (TRANSFORMERS_BY_TRIGGER[trigger] ??= []).push(t);
 }
 
@@ -71,6 +72,7 @@ function $applyVisualFormatting(
     const text = anchorNode.getTextContent();
     const closeTagEndIndex = anchorOffset - 1;
     const closeChar = text[closeTagEndIndex];
+    if (closeChar === undefined) return false;
     const matchers = TRANSFORMERS_BY_TRIGGER[closeChar];
     if (!matchers) return false;
 
@@ -122,19 +124,21 @@ function $applyVisualFormatting(
 
         if (after) newNodes.push($createTextNode(after));
 
-        anchorNode.replace(newNodes[0]);
-        let cur = newNodes[0];
+        // newNodes always has at least 3 entries: the open delimiter, the
+        // content node, and the close delimiter are pushed unconditionally
+        // above, so index 0 and the indices used below are always in range.
+        anchorNode.replace(newNodes[0]!);
+        let cur = newNodes[0]!;
         for (let i = 1; i < newNodes.length; i++) {
-            cur.insertAfter(newNodes[i]);
-            cur = newNodes[i];
+            const next = newNodes[i]!;
+            cur.insertAfter(next);
+            cur = next;
         }
 
         // Place cursor after closing delimiter
         const closingDelimIdx = newNodes.length - (after ? 2 : 1);
-        const closingDelimNode = newNodes[closingDelimIdx];
-        const focusNode = after
-            ? newNodes[newNodes.length - 1]
-            : closingDelimNode;
+        const closingDelimNode = newNodes[closingDelimIdx]!;
+        const focusNode = after ? newNodes.at(-1)! : closingDelimNode;
         const focusOffset = after ? 0 : tag.length;
         focusNode.select(focusOffset, focusOffset);
 

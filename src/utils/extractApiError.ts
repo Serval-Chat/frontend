@@ -1,17 +1,25 @@
 import { AxiosError } from 'axios';
 
+interface ApiErrorData {
+    message?: string | string[];
+}
+
 export function extractApiError(
     error: unknown,
     defaultMessage?: string,
 ): string {
     if (error instanceof AxiosError) {
-        if (error.response?.data?.message) {
-            const apiMessage = error.response.data.message;
-            return Array.isArray(apiMessage) ? apiMessage[0] : apiMessage;
+        const data = error.response?.data as ApiErrorData | undefined;
+        if (data?.message !== undefined) {
+            const apiMessage = data.message;
+            if (Array.isArray(apiMessage)) {
+                return apiMessage[0] ?? defaultMessage ?? 'An error occurred';
+            }
+            return apiMessage;
         }
 
-        if (error.response?.status) {
-            const status = error.response.status;
+        const status = error.response?.status;
+        if (status !== undefined) {
             if (status === 400)
                 return 'Invalid request. Please check your input.';
             if (status === 401) return 'You need to be logged in to do this.';
@@ -25,10 +33,10 @@ export function extractApiError(
         }
     }
 
-    const message = (error as Error)?.message;
-    if (message && !message.includes('status code')) {
+    const message = error instanceof Error ? error.message : '';
+    if (message !== '' && !message.includes('status code')) {
         return message;
     }
 
-    return defaultMessage || 'An error occurred';
+    return defaultMessage ?? 'An error occurred';
 }

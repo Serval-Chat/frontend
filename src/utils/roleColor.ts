@@ -9,6 +9,7 @@ interface RgbColor {
 }
 
 const DEFAULT_ROLE_COLOR = '#99aab5';
+const DEFAULT_ROLE_RGB: RgbColor = { r: 153, g: 170, b: 181 };
 const DARK_GLYPH_COLOR = '#111827';
 const LIGHT_GLYPH_COLOR = '#ffffff';
 const DARK_GLYPH_RGB = { r: 17, g: 24, b: 39 };
@@ -45,15 +46,16 @@ export const parseCssColor = (color: string): RgbColor | null => {
 
     if (hex) {
         return {
-            r: parseInt(hex.slice(0, 2), 16),
-            g: parseInt(hex.slice(2, 4), 16),
-            b: parseInt(hex.slice(4, 6), 16),
+            r: Number.parseInt(hex.slice(0, 2), 16),
+            g: Number.parseInt(hex.slice(2, 4), 16),
+            b: Number.parseInt(hex.slice(4, 6), 16),
         };
     }
 
-    const rgbMatch = trimmed.match(
-        /^rgba?\(\s*([\d.]+)(?:\s*,\s*|\s+)([\d.]+)(?:\s*,\s*|\s+)([\d.]+)/i,
-    );
+    const rgbMatch =
+        /^rgba?\(\s*([\d.]+)(?:\s*,\s*|\s+)([\d.]+)(?:\s*,\s*|\s+)([\d.]+)/i.exec(
+            trimmed,
+        );
 
     if (!rgbMatch) return null;
 
@@ -74,7 +76,7 @@ const relativeLuminance = ({ r, g, b }: RgbColor): number => {
     const toLinear = (channel: number): number => {
         const normalized = channel / 255;
 
-        return normalized <= 0.03928
+        return normalized <= 0.039_28
             ? normalized / 12.92
             : ((normalized + 0.055) / 1.055) ** 2.4;
     };
@@ -109,8 +111,8 @@ const getRoleColorStops = (role?: Role): string[] => {
         return role.colors;
     }
 
-    if (role.colors && role.colors.length === 1) {
-        return [role.colors[0]];
+    if (role.colors?.length === 1) {
+        return [role.colors[0] ?? DEFAULT_ROLE_COLOR];
     }
 
     if (role.startColor && role.endColor) {
@@ -125,15 +127,17 @@ const getRoleColorStops = (role?: Role): string[] => {
 };
 
 const sampleStops = (colors: RgbColor[], position: number): RgbColor => {
-    if (colors.length === 0) return { r: 153, g: 170, b: 181 };
-    if (colors.length === 1) return colors[0];
+    if (colors.length === 0) return DEFAULT_ROLE_RGB;
+    if (colors.length === 1) return colors[0] ?? DEFAULT_ROLE_RGB;
 
     const scaledPosition = clamp(position) * (colors.length - 1);
     const leftIndex = Math.floor(scaledPosition);
     const rightIndex = Math.min(colors.length - 1, leftIndex + 1);
     const segmentPosition = scaledPosition - leftIndex;
+    const left = colors[leftIndex] ?? DEFAULT_ROLE_RGB;
+    const right = colors[rightIndex] ?? DEFAULT_ROLE_RGB;
 
-    return mixRgb(colors[leftIndex], colors[rightIndex], segmentPosition);
+    return mixRgb(left, right, segmentPosition);
 };
 
 export const getRoleBackgroundColorAt = (
@@ -142,10 +146,10 @@ export const getRoleBackgroundColorAt = (
 ): RgbColor => {
     const stops = getRoleColorStops(role)
         .map(parseCssColor)
-        .filter((color): color is RgbColor => Boolean(color));
+        .filter((color): color is RgbColor => color !== null);
 
     if (!role || stops.length === 0) {
-        return parseCssColor(DEFAULT_ROLE_COLOR) as RgbColor;
+        return parseCssColor(DEFAULT_ROLE_COLOR)!;
     }
 
     const repeat =
@@ -204,7 +208,7 @@ export const getRoleStyle = (role?: Role): React.CSSProperties => {
                 ', ',
             )})`;
         }
-    } else if (role.colors && role.colors.length === 1) {
+    } else if (role.colors?.length === 1) {
         style.backgroundColor = role.colors[0];
     } else if (role.startColor && role.endColor) {
         if (role.startColor === role.endColor) {

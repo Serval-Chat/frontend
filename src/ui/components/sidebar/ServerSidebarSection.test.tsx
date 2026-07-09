@@ -50,12 +50,12 @@ vi.mock('@/ui/components/common/UserItem', async () => {
                     >
                         {user?.displayName || user?.username}
                     </button>
-                    {showProfile && (
+                    {showProfile ? (
                         <div
                             data-testid="profile-popup"
                             data-userid={userId || id}
                         />
-                    )}
+                    ) : null}
                 </div>
             );
         },
@@ -143,10 +143,10 @@ describe('ServerSidebarSection', (): void => {
     ];
 
     const memberRoleMap = new Map<string, Role>();
-    memberRoleMap.set('u1', mockRoles[0]);
-    memberRoleMap.set('u2', mockRoles[1]);
-    memberRoleMap.set('u3', mockRoles[0]);
-    memberRoleMap.set('u4', mockRoles[2]);
+    memberRoleMap.set('u1', mockRoles[0]!);
+    memberRoleMap.set('u2', mockRoles[1]!);
+    memberRoleMap.set('u3', mockRoles[0]!);
+    memberRoleMap.set('u4', mockRoles[2]!);
 
     const applySelectorState = ({
         presenceMap = {},
@@ -252,8 +252,8 @@ describe('ServerSidebarSection', (): void => {
         );
 
         const adminItems = screen.getAllByTestId(/user-item-u[13]/);
-        expect(adminItems[0].getAttribute('data-testid')).toBe('user-item-u1'); // Alice Display
-        expect(adminItems[1].getAttribute('data-testid')).toBe('user-item-u3'); // Bob
+        expect(adminItems[0]!.dataset.testid).toBe('user-item-u1'); // Alice Display
+        expect(adminItems[1]!.dataset.testid).toBe('user-item-u3'); // Bob
     });
 
     it('moves a user to Offline group when they go offline', async (): Promise<void> => {
@@ -269,7 +269,7 @@ describe('ServerSidebarSection', (): void => {
                 isLoading={false}
                 memberIconRoleMap={new Map()}
                 memberRoleMap={memberRoleMap}
-                members={[mockMembers[0]]} // Only Alice
+                members={[mockMembers[0]!]} // Only Alice
                 roles={mockRoles}
                 scrollRef={mockScrollRef as any}
             />,
@@ -290,7 +290,7 @@ describe('ServerSidebarSection', (): void => {
                 isLoading={false}
                 memberIconRoleMap={new Map()}
                 memberRoleMap={memberRoleMap}
-                members={[mockMembers[0]]}
+                members={[mockMembers[0]!]}
                 roles={mockRoles}
                 scrollRef={mockScrollRef as any}
             />,
@@ -313,7 +313,7 @@ describe('ServerSidebarSection', (): void => {
                 isLoading={false}
                 memberIconRoleMap={new Map()}
                 memberRoleMap={memberRoleMap}
-                members={[mockMembers[3]]}
+                members={[mockMembers[3]!]}
                 roles={mockRoles}
                 scrollRef={mockScrollRef as any}
             />,
@@ -533,7 +533,7 @@ describe('ServerSidebarSection', (): void => {
         );
 
         const popup = screen.queryByTestId('profile-popup');
-        expect(popup?.getAttribute('data-userid')).not.toBe('u-bob');
+        expect(popup?.dataset.userid).not.toBe('u-bob');
     });
 
     it('renders a static member list fallback when the virtualizer has not measured rows yet', (): void => {
@@ -549,7 +549,7 @@ describe('ServerSidebarSection', (): void => {
                 isLoading={false}
                 memberIconRoleMap={new Map()}
                 memberRoleMap={new Map()}
-                members={[mockMembers[0]]}
+                members={[mockMembers[0]!]}
                 roles={mockRoles}
                 scrollRef={{ current: null }}
             />,

@@ -5,6 +5,6 @@ if (import.meta.env.VITE_ENABLE_SENTRY === 'true') {
         dsn: 'http://DsFPVF8dTaad5DWTwafHWxUh@localhost:5151/895435507996517',
         debug: import.meta.env.DEV,
         integrations: [Sentry.browserTracingIntegration()],
-        tracesSampleRate: 1.0,
+        tracesSampleRate: 1,
     });
 }

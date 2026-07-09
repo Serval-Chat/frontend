@@ -49,7 +49,9 @@ export const FriendRequestItem = ({
                     disabled={isRejecting}
                     loading={isAccepting}
                     variant="normal"
-                    onClick={(): void => accept(requestId)}
+                    onClick={(): void => {
+                        accept(requestId);
+                    }}
                 >
                     <Check className="h-4 w-4" />
                 </Button>
@@ -58,7 +60,9 @@ export const FriendRequestItem = ({
                     disabled={isAccepting}
                     loading={isRejecting}
                     variant="normal"
-                    onClick={(): void => reject(requestId)}
+                    onClick={(): void => {
+                        reject(requestId);
+                    }}
                 >
                     <X className="h-4 w-4" />
                 </Button>

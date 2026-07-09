@@ -12,7 +12,7 @@ import type { AdminNote } from '@/types/admin';
 export const useAdminNotes = (
     targetId: string,
     targetType: 'Server' | 'User',
-): UseQueryResult<AdminNote[], Error> =>
+): UseQueryResult<AdminNote[]> =>
     useQuery<AdminNote[]>({
         queryKey: ['admin-notes', targetType, targetId],
         queryFn: (): Promise<AdminNote[]> =>

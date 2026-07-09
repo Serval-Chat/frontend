@@ -57,9 +57,9 @@ const BotBannerHeader = ({
             height={140}
             usernameGradient={usernameGradient}
         />
-        {loading && (
+        {loading ? (
             <Skeleton className="absolute inset-0 h-full w-full rounded-t-lg" />
-        )}
+        ) : null}
 
         <div className="absolute bottom-0 left-1/2 z-content -translate-x-1/2 translate-y-1/2">
             {loading ? (
@@ -132,6 +132,112 @@ const SuccessCard = ({
     );
 };
 
+interface SelectableServer {
+    id: string;
+    name: string;
+    icon?: string | null;
+}
+
+const ServerSelectDropdown = ({
+    servers,
+    selectedServer,
+    selectedServerId,
+    dropdownOpen,
+    serversLoading,
+    onToggle,
+    onSelect,
+}: {
+    servers: SelectableServer[];
+    selectedServer: SelectableServer | undefined;
+    selectedServerId: string;
+    dropdownOpen: boolean;
+    serversLoading: boolean;
+    onToggle: () => void;
+    onSelect: (serverId: string) => void;
+}) => (
+    <div className="relative">
+        <button
+            className={cn(
+                'flex w-full items-center justify-between gap-3 rounded-lg border border-border-subtle bg-bg-secondary/30 px-3.5 py-2.5 text-left transition-colors hover:bg-bg-secondary/50',
+                dropdownOpen && 'border-primary/40 bg-bg-secondary/50',
+            )}
+            type="button"
+            onClick={onToggle}
+        >
+            {selectedServer ? (
+                <div className="flex items-center gap-2.5">
+                    {selectedServer.icon ? (
+                        <img
+                            alt={selectedServer.name}
+                            className="h-6 w-6 rounded-full object-cover"
+                            src={selectedServer.icon}
+                        />
+                    ) : (
+                        <div className="flex h-6 w-6 items-center justify-center rounded-full bg-bg-secondary text-[10px] font-bold">
+                            {selectedServer.name.charAt(0).toUpperCase()}
+                        </div>
+                    )}
+                    <Text as="span" size="sm" weight="bold">
+                        {selectedServer.name}
+                    </Text>
+                </div>
+            ) : (
+                <Text as="span" size="sm" variant="muted">
+                    {serversLoading
+                        ? 'Loading…'
+                        : servers.length === 0
+                          ? 'No servers available'
+                          : 'Select a server'}
+                </Text>
+            )}
+            <ChevronDown
+                className={cn(
+                    'shrink-0 text-muted-foreground transition-transform duration-200',
+                    dropdownOpen && 'rotate-180',
+                )}
+                size={15}
+            />
+        </button>
+
+        {dropdownOpen && servers.length > 0 ? (
+            <div className="absolute top-full left-0 z-[200] mt-1 w-full overflow-hidden rounded-lg border border-border-subtle bg-background shadow-xl">
+                <div className="custom-scrollbar max-h-52 overflow-y-auto">
+                    {servers.map((server) => (
+                        <button
+                            className={cn(
+                                'flex w-full items-center gap-2.5 px-3.5 py-2.5 text-left text-sm transition-colors hover:bg-bg-secondary/50',
+                                selectedServerId === server.id &&
+                                    'bg-primary/10',
+                            )}
+                            key={server.id}
+                            type="button"
+                            onClick={(): void => {
+                                onSelect(server.id);
+                            }}
+                        >
+                            {server.icon ? (
+                                <img
+                                    alt={server.name}
+                                    className="h-6 w-6 rounded-full object-cover"
+                                    src={server.icon}
+                                />
+                            ) : (
+                                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-bg-secondary text-[10px] font-bold">
+                                    {server.name.charAt(0).toUpperCase()}
+                                </div>
+                            )}
+                            <span className="flex-1">{server.name}</span>
+                            {selectedServerId === server.id ? (
+                                <Check className="text-primary" size={13} />
+                            ) : null}
+                        </button>
+                    ))}
+                </div>
+            </div>
+        ) : null}
+    </div>
+);
+
 export const BotAuthorize = (): ReactNode => {
     const [searchParams] = useSearchParams();
     const { showToast } = useToast();
@@ -159,7 +265,7 @@ export const BotAuthorize = (): ReactNode => {
 
     const permissionsBitmask = searchParams.get('permissions');
     const urlPermissions = permissionsBitmask
-        ? bitmaskToPermissions(parseInt(permissionsBitmask, 10))
+        ? bitmaskToPermissions(Number.parseInt(permissionsBitmask, 10))
         : null;
 
     const botName = botInfo?.displayName ?? botInfo?.username ?? '';
@@ -186,15 +292,16 @@ export const BotAuthorize = (): ReactNode => {
                 clientId,
                 serverId: selectedServerId,
                 permissions: permissionsBitmask
-                    ? parseInt(permissionsBitmask, 10)
+                    ? Number.parseInt(permissionsBitmask, 10)
                     : undefined,
             },
             {
                 onSuccess: ({ serverName, serverId }): void => {
                     setSuccess({ serverName, serverId });
                 },
-                onError: (e): void =>
-                    showToast(e.message || 'Authorization failed', 'error'),
+                onError: (e): void => {
+                    showToast(e.message || 'Authorization failed', 'error');
+                },
             },
         );
     };
@@ -260,16 +367,16 @@ export const BotAuthorize = (): ReactNode => {
                             </MutedText>
                         )}
 
-                        {!showSkeleton && botInfo?.bio && (
+                        {!showSkeleton && botInfo?.bio ? (
                             <Text
                                 as="p"
                                 className="max-w-xs text-sm text-muted-foreground"
                             >
                                 {botInfo.bio}
                             </Text>
-                        )}
+                        ) : null}
 
-                        {!showSkeleton && requestedPerms.length > 0 && (
+                        {!showSkeleton && requestedPerms.length > 0 ? (
                             <>
                                 <Divider />
                                 <div className="w-full text-left">
@@ -303,7 +410,7 @@ export const BotAuthorize = (): ReactNode => {
                                     </div>
                                 </div>
                             </>
-                        )}
+                        ) : null}
 
                         <Divider />
 
@@ -315,7 +422,22 @@ export const BotAuthorize = (): ReactNode => {
                                 Add to server
                             </Text>
 
-                            {!user ? (
+                            {user ? (
+                                <ServerSelectDropdown
+                                    dropdownOpen={dropdownOpen}
+                                    selectedServer={selectedServer}
+                                    selectedServerId={selectedServerId}
+                                    servers={manageableServers}
+                                    serversLoading={serversLoading}
+                                    onSelect={(id): void => {
+                                        setSelectedServerId(id);
+                                        setDropdownOpen(false);
+                                    }}
+                                    onToggle={(): void => {
+                                        setDropdownOpen((o): boolean => !o);
+                                    }}
+                                />
+                            ) : (
                                 <div className="flex items-start gap-2.5 rounded-lg border border-caution/20 bg-caution/5 px-3.5 py-3 text-left text-sm">
                                     <AlertTriangle
                                         className="mt-0.5 shrink-0 text-caution"
@@ -332,138 +454,17 @@ export const BotAuthorize = (): ReactNode => {
                                         to add this bot.
                                     </span>
                                 </div>
-                            ) : (
-                                <div className="relative">
-                                    <button
-                                        className={cn(
-                                            'flex w-full items-center justify-between gap-3 rounded-lg border border-border-subtle bg-bg-secondary/30 px-3.5 py-2.5 text-left transition-colors hover:bg-bg-secondary/50',
-                                            dropdownOpen &&
-                                                'border-primary/40 bg-bg-secondary/50',
-                                        )}
-                                        type="button"
-                                        onClick={(): void =>
-                                            setDropdownOpen((o): boolean => !o)
-                                        }
-                                    >
-                                        {selectedServer ? (
-                                            <div className="flex items-center gap-2.5">
-                                                {selectedServer.icon ? (
-                                                    <img
-                                                        alt={
-                                                            selectedServer.name
-                                                        }
-                                                        className="h-6 w-6 rounded-full object-cover"
-                                                        src={
-                                                            selectedServer.icon
-                                                        }
-                                                    />
-                                                ) : (
-                                                    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-bg-secondary text-[10px] font-bold">
-                                                        {selectedServer.name[0].toUpperCase()}
-                                                    </div>
-                                                )}
-                                                <Text
-                                                    as="span"
-                                                    size="sm"
-                                                    weight="bold"
-                                                >
-                                                    {selectedServer.name}
-                                                </Text>
-                                            </div>
-                                        ) : (
-                                            <Text
-                                                as="span"
-                                                size="sm"
-                                                variant="muted"
-                                            >
-                                                {serversLoading
-                                                    ? 'Loading…'
-                                                    : manageableServers.length ===
-                                                        0
-                                                      ? 'No servers available'
-                                                      : 'Select a server'}
-                                            </Text>
-                                        )}
-                                        <ChevronDown
-                                            className={cn(
-                                                'shrink-0 text-muted-foreground transition-transform duration-200',
-                                                dropdownOpen && 'rotate-180',
-                                            )}
-                                            size={15}
-                                        />
-                                    </button>
-
-                                    {dropdownOpen &&
-                                        manageableServers.length > 0 && (
-                                            <div className="absolute top-full left-0 z-[200] mt-1 w-full overflow-hidden rounded-lg border border-border-subtle bg-background shadow-xl">
-                                                <div className="custom-scrollbar max-h-52 overflow-y-auto">
-                                                    {manageableServers.map(
-                                                        (server) => (
-                                                            <button
-                                                                className={cn(
-                                                                    'flex w-full items-center gap-2.5 px-3.5 py-2.5 text-left text-sm transition-colors hover:bg-bg-secondary/50',
-                                                                    selectedServerId ===
-                                                                        server.id &&
-                                                                        'bg-primary/10',
-                                                                )}
-                                                                key={server.id}
-                                                                type="button"
-                                                                onClick={(): void => {
-                                                                    setSelectedServerId(
-                                                                        server.id,
-                                                                    );
-                                                                    setDropdownOpen(
-                                                                        false,
-                                                                    );
-                                                                }}
-                                                            >
-                                                                {server.icon ? (
-                                                                    <img
-                                                                        alt={
-                                                                            server.name
-                                                                        }
-                                                                        className="h-6 w-6 rounded-full object-cover"
-                                                                        src={
-                                                                            server.icon
-                                                                        }
-                                                                    />
-                                                                ) : (
-                                                                    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-bg-secondary text-[10px] font-bold">
-                                                                        {server.name[0].toUpperCase()}
-                                                                    </div>
-                                                                )}
-                                                                <span className="flex-1">
-                                                                    {
-                                                                        server.name
-                                                                    }
-                                                                </span>
-                                                                {selectedServerId ===
-                                                                    server.id && (
-                                                                    <Check
-                                                                        className="text-primary"
-                                                                        size={
-                                                                            13
-                                                                        }
-                                                                    />
-                                                                )}
-                                                            </button>
-                                                        ),
-                                                    )}
-                                                </div>
-                                            </div>
-                                        )}
-                                </div>
                             )}
                         </div>
 
-                        {user && (
+                        {user ? (
                             <MutedText className="text-xs">
                                 Authorizing as{' '}
                                 <strong className="text-foreground">
                                     @{user.username}
                                 </strong>
                             </MutedText>
-                        )}
+                        ) : null}
 
                         {showSkeleton ? (
                             <Skeleton className="h-10 w-full rounded-md" />

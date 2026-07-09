@@ -12,6 +12,46 @@ export interface ToggleProps extends Omit<
     style?: React.CSSProperties;
 }
 
+const labelBaseStyle: React.CSSProperties = {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+};
+
+const trackBaseStyle: React.CSSProperties = {
+    position: 'relative',
+    display: 'inline-flex',
+    height: '1.5rem',
+    width: '2.75rem',
+    alignItems: 'center',
+    borderRadius: radius.full,
+    transition: 'background-color 0.2s',
+    flexShrink: 0,
+};
+
+const inputStyle: React.CSSProperties = {
+    position: 'absolute',
+    width: '1px',
+    height: '1px',
+    padding: 0,
+    margin: '-1px',
+    overflow: 'hidden',
+    clip: 'rect(0,0,0,0)',
+    whiteSpace: 'nowrap',
+    border: 0,
+};
+
+const thumbBaseStyle: React.CSSProperties = {
+    display: 'inline-block',
+    height: '1.25rem',
+    width: '1.25rem',
+    borderRadius: radius.full,
+    backgroundColor: colors.white,
+    boxShadow: '0 1px 2px 0 rgb(0 0 0 / 0.3)',
+    transition: 'transform 0.2s',
+    flexShrink: 0,
+};
+
 export const Toggle = ({
     disabled,
     checked,
@@ -30,64 +70,38 @@ export const Toggle = ({
     return (
         <label
             style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '0.5rem',
+                ...labelBaseStyle,
                 cursor: disabled ? 'not-allowed' : 'pointer',
                 ...style,
             }}
         >
             <span
                 style={{
-                    position: 'relative',
-                    display: 'inline-flex',
-                    height: '1.5rem',
-                    width: '2.75rem',
-                    alignItems: 'center',
-                    borderRadius: radius.full,
-                    transition: 'background-color 0.2s',
+                    ...trackBaseStyle,
                     backgroundColor: checked
                         ? colors.primary
                         : colors.bgSecondary,
                     opacity: disabled ? 0.5 : 1,
                     cursor: disabled ? 'not-allowed' : 'pointer',
-                    flexShrink: 0,
                 }}
             >
                 <input
                     checked={checked}
                     disabled={disabled}
                     ref={ref}
-                    style={{
-                        position: 'absolute',
-                        width: '1px',
-                        height: '1px',
-                        padding: 0,
-                        margin: '-1px',
-                        overflow: 'hidden',
-                        clip: 'rect(0,0,0,0)',
-                        whiteSpace: 'nowrap',
-                        border: 0,
-                    }}
+                    style={inputStyle}
                     type="checkbox"
                     onChange={handleChange}
                     {...props}
                 />
                 <span
                     style={{
-                        display: 'inline-block',
-                        height: '1.25rem',
-                        width: '1.25rem',
-                        borderRadius: radius.full,
-                        backgroundColor: colors.white,
-                        boxShadow: '0 1px 2px 0 rgb(0 0 0 / 0.3)',
-                        transition: 'transform 0.2s',
+                        ...thumbBaseStyle,
                         transform: `translateX(${checked ? '1.375rem' : '0.125rem'})`,
-                        flexShrink: 0,
                     }}
                 />
             </span>
-            {label && (
+            {label ? (
                 <span
                     style={{
                         fontSize: fontSize.sm,
@@ -97,7 +111,7 @@ export const Toggle = ({
                 >
                     {label}
                 </span>
-            )}
+            ) : null}
         </label>
     );
 };

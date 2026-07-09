@@ -12,7 +12,7 @@ describe('sed utilities', () => {
             expect(isSedCommand('s/foo/bar/ig')).toBe(true);
             expect(isSedCommand('s/foo//')).toBe(true);
             expect(isSedCommand('s/foo//g')).toBe(true);
-            expect(isSedCommand('s/foo\\/baz/bar/')).toBe(true);
+            expect(isSedCommand(String.raw`s/foo\/baz/bar/`)).toBe(true);
         });
 
         it('should distinguish s/foo/ (valid, empty replacement) from s/foo (invalid, no second delimiter)', () => {
@@ -61,9 +61,9 @@ describe('sed utilities', () => {
         });
 
         it('should support regular expressions in search', () => {
-            expect(applySedCommand('abc 123 def', 's/\\d+/numbers/')).toBe(
-                'abc numbers def',
-            );
+            expect(
+                applySedCommand('abc 123 def', String.raw`s/\d+/numbers/`),
+            ).toBe('abc numbers def');
         });
 
         it('should fallback to original message if regex is invalid', () => {
@@ -71,7 +71,7 @@ describe('sed utilities', () => {
         });
 
         it('should handle escaped slashes in search and replacement', () => {
-            expect(applySedCommand('hello/world', 's/\\//-/')).toBe(
+            expect(applySedCommand('hello/world', String.raw`s/\//-/`)).toBe(
                 'hello-world',
             );
         });
@@ -80,7 +80,7 @@ describe('sed utilities', () => {
             expect(
                 applySedCommand(
                     '/bin/bash',
-                    's/\\/bin\\/bash/\\/usr\\/bin\\/zsh/',
+                    String.raw`s/\/bin\/bash/\/usr\/bin\/zsh/`,
                 ),
             ).toBe('/usr/bin/zsh');
         });

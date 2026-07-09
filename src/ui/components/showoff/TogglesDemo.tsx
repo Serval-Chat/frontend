@@ -8,7 +8,7 @@ import { DemoItem } from './DemoItem';
 import { DemoSection } from './DemoSection';
 import { SHOWOFF_SECTIONS } from './config';
 
-export function TogglesDemo(): ReactNode {
+export const TogglesDemo = (): ReactNode => {
     const [normalChecked, setNormalChecked] = useState(false);
     const [labelChecked, setLabelChecked] = useState(true);
     const [disabledChecked, setDisabledChecked] = useState(true);
@@ -40,4 +40,4 @@ export function TogglesDemo(): ReactNode {
             </Stack>
         </DemoSection>
     );
-}
+};

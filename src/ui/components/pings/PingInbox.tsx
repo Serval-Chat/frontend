@@ -68,14 +68,14 @@ export const PingInbox = ({ onClose }: PingInboxProps) => {
                     <Text leading="none" size="sm" weight="bold">
                         Inbox
                     </Text>
-                    {pings.length > 0 && (
+                    {pings.length > 0 ? (
                         <div className="flex h-4 items-center justify-center rounded-full bg-primary px-1.5 text-[10px] font-bold text-foreground-inverse">
                             {pings.length}
                         </div>
-                    )}
+                    ) : null}
                 </div>
                 <div className="flex items-center gap-0.5">
-                    {pings.length > 0 && (
+                    {pings.length > 0 ? (
                         <IconButton
                             className="h-8 w-8 p-0"
                             icon={CheckCheck}
@@ -83,9 +83,11 @@ export const PingInbox = ({ onClose }: PingInboxProps) => {
                             size="sm"
                             title="Clear all"
                             variant="ghost"
-                            onClick={(): void => setIsClearModalOpen(true)}
+                            onClick={(): void => {
+                                setIsClearModalOpen(true);
+                            }}
                         />
-                    )}
+                    ) : null}
                     <IconButton
                         className="h-8 w-8 p-0"
                         icon={X}
@@ -104,7 +106,9 @@ export const PingInbox = ({ onClose }: PingInboxProps) => {
                     size="sm"
                     value={searchQuery}
                     variant="secondary"
-                    onChange={(e): void => setSearchQuery(e.target.value)}
+                    onChange={(e): void => {
+                        setSearchQuery(e.target.value);
+                    }}
                 />
             </div>
 
@@ -124,7 +128,9 @@ export const PingInbox = ({ onClose }: PingInboxProps) => {
                         <PingItem
                             key={ping.id}
                             ping={ping}
-                            onClick={(): void => handlePingClick(ping)}
+                            onClick={(): void => {
+                                handlePingClick(ping);
+                            }}
                         />
                     ))
                 ) : (
@@ -143,7 +149,9 @@ export const PingInbox = ({ onClose }: PingInboxProps) => {
 
             <ClearPingsModal
                 isOpen={isClearModalOpen}
-                onClose={(): void => setIsClearModalOpen(false)}
+                onClose={(): void => {
+                    setIsClearModalOpen(false);
+                }}
                 onConfirm={clearAll}
             />
         </Box>

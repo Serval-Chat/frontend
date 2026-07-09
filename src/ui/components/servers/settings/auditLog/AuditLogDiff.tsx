@@ -9,12 +9,12 @@ interface AuditLogDiffProps {
     changes: IAuditLogChange[];
 }
 
-function flattenChange(change: IAuditLogChange): Array<{
+function flattenChange(change: IAuditLogChange): {
     field: string;
     before: string | React.ReactNode;
     after: string | React.ReactNode;
     isColor?: boolean;
-}> {
+}[] {
     if (
         change.field === 'permissions' &&
         change.before !== null &&
@@ -26,20 +26,20 @@ function flattenChange(change: IAuditLogChange): Array<{
     ) {
         const before = change.before as Record<string, boolean>;
         const after = change.after as Record<string, boolean>;
-        const allKeys = Array.from(
-            new Set([...Object.keys(before), ...Object.keys(after)]),
-        );
+        const allKeys = [
+            ...new Set([...Object.keys(before), ...Object.keys(after)]),
+        ];
         const rows = allKeys.flatMap(
             (k): { field: string; before: string; after: string }[] =>
-                before[k] !== after[k]
-                    ? [
+                before[k] === after[k]
+                    ? []
+                    : [
                           {
                               field: k,
                               before: formatBool(before[k]),
                               after: formatBool(after[k]),
                           },
-                      ]
-                    : [],
+                      ],
         );
         if (rows.length === 0) return [];
         return rows;
@@ -168,7 +168,9 @@ export const AuditLogDiff = ({ changes }: AuditLogDiffProps) => {
             <button
                 className="hover:text-text flex items-center gap-1 text-xs text-text-muted"
                 type="button"
-                onClick={(): void => setExpanded(!expanded)}
+                onClick={(): void => {
+                    setExpanded(!expanded);
+                }}
             >
                 {expanded ? (
                     <ChevronDown className="h-3 w-3" />
@@ -180,7 +182,7 @@ export const AuditLogDiff = ({ changes }: AuditLogDiffProps) => {
                     : `Show ${rows.length} Change${rows.length === 1 ? '' : 's'}`}
             </button>
 
-            {expanded && (
+            {expanded ? (
                 <div className="bg-bg-surface mt-2 rounded-md p-3">
                     {/* Header */}
                     <div className="mb-2 grid grid-cols-3 gap-2 border-b border-border-subtle pb-1 text-xs font-semibold text-text-muted">
@@ -212,7 +214,7 @@ export const AuditLogDiff = ({ changes }: AuditLogDiffProps) => {
                         ))}
                     </div>
                 </div>
-            )}
+            ) : null}
         </div>
     );
 };

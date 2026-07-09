@@ -29,13 +29,17 @@ function drawSpot(
     }
 
     ctx.beginPath();
-    const pPrev = pts[s.nPts - 1];
-    const pFirst = pts[0];
+    // pts has exactly s.nPts elements (built by the loop above), and nPts is
+    // always >= 6 (see nPts generation in applyServalBackground), so indices
+    // 0 and nPts-1 are always in bounds.
+    const pPrev = pts[s.nPts - 1]!;
+    const pFirst = pts[0]!;
     ctx.moveTo((pPrev.x + pFirst.x) / 2, (pPrev.y + pFirst.y) / 2);
 
     for (let i = 0; i < s.nPts; i++) {
-        const pCurr = pts[i];
-        const pNext = pts[(i + 1) % s.nPts];
+        // i and (i + 1) % s.nPts are both in [0, s.nPts), matching pts.length.
+        const pCurr = pts[i]!;
+        const pNext = pts[(i + 1) % s.nPts]!;
         const midX = (pCurr.x + pNext.x) / 2;
         const midY = (pCurr.y + pNext.y) / 2;
         ctx.quadraticCurveTo(pCurr.x, pCurr.y, midX, midY);
@@ -51,8 +55,8 @@ function drawSpot(
 function createRandom(seed = 1): () => number {
     let state = seed >>> 0;
     return (): number => {
-        state = (state * 1664525 + 1013904223) >>> 0;
-        return state / 0x100000000;
+        state = (state * 1_664_525 + 1_013_904_223) >>> 0;
+        return state / 0x1_00_00_00_00;
     };
 }
 
@@ -72,23 +76,29 @@ function relaxSpots(
             for (let j = 0; j < spots.length; j++) {
                 if (i === j) continue;
 
-                let dx = spots[i].x - spots[j].x;
-                let dy = spots[i].y - spots[j].y;
+                // i and j both range over [0, spots.length), so indexing is
+                // always in bounds.
+                const si = spots[i]!;
+                const sj = spots[j]!;
+
+                let dx = si.x - sj.x;
+                let dy = si.y - sj.y;
                 if (Math.abs(dx) > w / 2) dx -= Math.sign(dx) * w;
                 if (Math.abs(dy) > h / 2) dy -= Math.sign(dy) * h;
 
                 const distSq = dx * dx + dy * dy + 1;
                 const dist = Math.sqrt(distSq);
 
-                const charge = (spots[i].rx + spots[j].rx) * 60;
+                const charge = (si.rx + sj.rx) * 60;
                 const force = charge / distSq;
 
                 fx += (dx / dist) * force;
                 fy += (dy / dist) * force;
             }
 
-            spots[i].x = (((spots[i].x + fx * step) % w) + w) % w;
-            spots[i].y = (((spots[i].y + fy * step) % h) + h) % h;
+            const si = spots[i]!;
+            si.x = (((si.x + fx * step) % w) + w) % w;
+            si.y = (((si.y + fy * step) % h) + h) % h;
         }
     }
 }
@@ -125,7 +135,7 @@ export function applyServalBackground(
 
     const n =
         opts.spotCount ??
-        Math.min(260, Math.max(24, Math.round((virtualW * virtualH) / 16000)));
+        Math.min(260, Math.max(24, Math.round((virtualW * virtualH) / 16_000)));
 
     const spots: Spot[] = Array.from({ length: n }, () => {
         const rx = 7 + random() * 14;

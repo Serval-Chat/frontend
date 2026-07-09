@@ -96,7 +96,7 @@ export const WsDebugger = () => {
                                         </div>
                                     </td>
                                     <td className="min-w-0 p-1 align-top text-gray-700">
-                                        {hasPayload && (
+                                        {hasPayload ? (
                                             <details className="min-w-0">
                                                 <summary
                                                     className="block max-h-12 cursor-pointer overflow-hidden text-[10px] [overflow-wrap:anywhere] whitespace-normal text-gray-700"
@@ -118,7 +118,7 @@ export const WsDebugger = () => {
                                                     </SyntaxHighlighter>
                                                 </NTScrollArea>
                                             </details>
-                                        )}
+                                        ) : null}
                                     </td>
                                 </tr>
                             );

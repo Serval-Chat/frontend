@@ -150,7 +150,7 @@ export const MessageContent = React.memo(
                     isDeleted ? 'text-danger' : 'text-foreground',
                 )}
             >
-                {text && (
+                {text ? (
                     <ParsedText
                         largeEmojis={isEmojiOnly}
                         nodes={nodes}
@@ -159,9 +159,9 @@ export const MessageContent = React.memo(
                         wrap="preWrap"
                         onResize={onResize}
                     />
-                )}
-                {((embeds && embeds.length > 0) ||
-                    (components && components.length > 0)) && (
+                ) : null}
+                {(embeds && embeds.length > 0) ||
+                (components && components.length > 0) ? (
                     <EmbedRenderer
                         channelId={channelId}
                         invocationId={invocationId}
@@ -174,7 +174,7 @@ export const MessageContent = React.memo(
                         variant="chat"
                         onResize={onResize}
                     />
-                )}
+                ) : null}
 
                 {attachments?.map((attachment) => (
                     <FileEmbed
@@ -184,22 +184,22 @@ export const MessageContent = React.memo(
                     />
                 ))}
 
-                {poll && (
+                {poll ? (
                     <Poll
                         channelId={channelId}
                         messageId={messageId || 'unknown'}
                         poll={poll}
                         serverId={serverId}
                     />
-                )}
+                ) : null}
 
-                {sticker && (
+                {sticker ? (
                     <div className="mt-1 flex max-w-[240px] flex-col gap-1">
                         <Tooltip content={sticker.name} position="top">
                             <button
                                 className="cursor-pointer border-none bg-transparent p-0 transition-opacity outline-none hover:opacity-90 active:opacity-80"
                                 type="button"
-                                onClick={(e): void =>
+                                onClick={(e): void => {
                                     showStickerInfo(
                                         {
                                             id: sticker.id,
@@ -208,15 +208,18 @@ export const MessageContent = React.memo(
                                             serverId: sticker.serverId,
                                         },
                                         e,
-                                    )
-                                }
+                                    );
+                                }}
                             >
                                 <PausedAnimatedImage
                                     alt={sticker.name}
                                     className="h-auto max-w-full select-none"
                                     paused={
-                                        limitedAnimations &&
-                                        isAnimatedImageUrl(sticker.imageUrl)
+                                        limitedAnimations
+                                            ? isAnimatedImageUrl(
+                                                  sticker.imageUrl,
+                                              )
+                                            : false
                                     }
                                     src={resolveApiUrl(sticker.imageUrl) || ''}
                                     onLoad={onResize}
@@ -224,16 +227,16 @@ export const MessageContent = React.memo(
                             </button>
                         </Tooltip>
                     </div>
-                )}
+                ) : null}
 
-                {selectedSticker && infoBoxPosition && (
+                {selectedSticker && infoBoxPosition ? (
                     <StickerInfoBox
                         position={infoBoxPosition}
                         server={server}
                         sticker={selectedSticker}
                         onClose={closeInfoBox}
                     />
-                )}
+                ) : null}
             </Box>
         );
     },

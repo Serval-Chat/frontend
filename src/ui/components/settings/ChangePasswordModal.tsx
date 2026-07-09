@@ -96,15 +96,15 @@ export const ChangePasswordModal = ({
                             name="current-password"
                             type="password"
                             value={currentPassword}
-                            onChange={(e): void =>
-                                setCurrentPassword(e.target.value)
-                            }
+                            onChange={(e): void => {
+                                setCurrentPassword(e.target.value);
+                            }}
                         />
-                        {errors.current && (
+                        {errors.current ? (
                             <Text className="text-status-error" size="xs">
                                 {errors.current}
                             </Text>
-                        )}
+                        ) : null}
                     </Box>
 
                     <Box className="space-y-2">
@@ -120,15 +120,15 @@ export const ChangePasswordModal = ({
                             name="new-password"
                             type="password"
                             value={newPassword}
-                            onChange={(e): void =>
-                                setNewPassword(e.target.value)
-                            }
+                            onChange={(e): void => {
+                                setNewPassword(e.target.value);
+                            }}
                         />
-                        {errors.new && (
+                        {errors.new ? (
                             <Text className="text-status-error" size="xs">
                                 {errors.new}
                             </Text>
-                        )}
+                        ) : null}
                     </Box>
 
                     <Box className="space-y-2">
@@ -144,15 +144,15 @@ export const ChangePasswordModal = ({
                             name="confirm-password"
                             type="password"
                             value={confirmPassword}
-                            onChange={(e): void =>
-                                setConfirmPassword(e.target.value)
-                            }
+                            onChange={(e): void => {
+                                setConfirmPassword(e.target.value);
+                            }}
                         />
-                        {errors.confirm && (
+                        {errors.confirm ? (
                             <Text className="text-status-error" size="xs">
                                 {errors.confirm}
                             </Text>
-                        )}
+                        ) : null}
                     </Box>
                 </Box>
 

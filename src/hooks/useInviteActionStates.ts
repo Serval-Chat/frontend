@@ -27,7 +27,9 @@ export const useInviteActionStates = (): UseInviteActionStatesResult => {
         }
     };
 
-    const reset = (): void => setStates({});
+    const reset = (): void => {
+        setStates({});
+    };
 
     return { states, send, reset };
 };

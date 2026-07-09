@@ -63,7 +63,9 @@ export const BanUserModal = ({
                         id="ban-reason"
                         placeholder="e.g. Breaking server rules, spamming..."
                         value={reason}
-                        onChange={(e): void => setReason(e.target.value)}
+                        onChange={(e): void => {
+                            setReason(e.target.value);
+                        }}
                     />
                 </Box>
 

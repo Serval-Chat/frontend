@@ -13,17 +13,19 @@ vi.mock('@/ui/utils/iconMap', () => ({
     },
 }));
 
-vi.mock('@/ui/components/common/ParsedEmoji', () => ({
-    ParsedEmoji: ({ emojiId }: { emojiId: string }) => (
+vi.mock('@/ui/components/common/ParsedEmoji', () => {
+    const ParsedEmoji = ({ emojiId }: { emojiId: string }) => (
         <span data-testid="custom-channel-emoji">{emojiId}</span>
-    ),
-}));
+    );
+    return { ParsedEmoji };
+});
 
-vi.mock('@/ui/components/common/ParsedUnicodeEmoji', () => ({
-    ParsedUnicodeEmoji: ({ content }: { content: string }) => (
+vi.mock('@/ui/components/common/ParsedUnicodeEmoji', () => {
+    const ParsedUnicodeEmoji = ({ content }: { content: string }) => (
         <span data-testid="unicode-channel-emoji">{content}</span>
-    ),
-}));
+    );
+    return { ParsedUnicodeEmoji };
+});
 
 describe('ChannelIcon', (): void => {
     it('renders configured custom channel icons', (): void => {

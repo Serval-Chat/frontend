@@ -49,16 +49,16 @@ describe('TextParser', (): void => {
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
             { type: 'text', content: 'Meet at ' },
-            { type: 'timestamp', timestamp: 1543424460, flag: 'F' },
+            { type: 'timestamp', timestamp: 1_543_424_460, flag: 'F' },
             { type: 'text', content: ' or ' },
-            { type: 'timestamp', timestamp: 1543424460, flag: 'R' },
+            { type: 'timestamp', timestamp: 1_543_424_460, flag: 'R' },
         ]);
     });
 
     it('should parse timestamps without a format flag', (): void => {
         const nodes = parseText('<t:-123456789>', ParserPresets.MESSAGE);
         expect(nodes).toEqual([
-            { type: 'timestamp', timestamp: -123456789, flag: undefined },
+            { type: 'timestamp', timestamp: -123_456_789, flag: undefined },
         ]);
     });
 
@@ -814,7 +814,7 @@ describe('TextParser', (): void => {
         ]);
     });
 
-    it('should parse display LaTeX with $\\n...\\n$', (): void => {
+    it(String.raw`should parse display LaTeX with $\n...\n$`, (): void => {
         const text = '$\nE = mc^2\n$';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([{ type: 'latex', content: 'E = mc^2' }]);
@@ -854,22 +854,25 @@ describe('TextParser', (): void => {
         });
     });
 
-    it('should handle escaped markdown characters like \\* and \\|', (): void => {
-        const text = 'Hello \\*not bold\\* and \\|\\|not spoiler\\|\\|';
-        const nodes = parseText(text, ParserPresets.MESSAGE);
-        expect(nodes).toEqual([
-            { type: 'text', content: 'Hello ' },
-            { type: 'text', content: '*' },
-            { type: 'text', content: 'not bold' },
-            { type: 'text', content: '*' },
-            { type: 'text', content: ' and ' },
-            { type: 'text', content: '|' },
-            { type: 'text', content: '|' },
-            { type: 'text', content: 'not spoiler' },
-            { type: 'text', content: '|' },
-            { type: 'text', content: '|' },
-        ]);
-    });
+    it(
+        String.raw`should handle escaped markdown characters like \* and \|`,
+        (): void => {
+            const text = String.raw`Hello \*not bold\* and \|\|not spoiler\|\|`;
+            const nodes = parseText(text, ParserPresets.MESSAGE);
+            expect(nodes).toEqual([
+                { type: 'text', content: 'Hello ' },
+                { type: 'text', content: '*' },
+                { type: 'text', content: 'not bold' },
+                { type: 'text', content: '*' },
+                { type: 'text', content: ' and ' },
+                { type: 'text', content: '|' },
+                { type: 'text', content: '|' },
+                { type: 'text', content: 'not spoiler' },
+                { type: 'text', content: '|' },
+                { type: 'text', content: '|' },
+            ]);
+        },
+    );
 
     it('should handle escaped markdown characters like \\` and \\\\', (): void => {
         const text = 'Escaped \\`code\\` and backslash \\\\';
@@ -1210,7 +1213,7 @@ describe('TextParser', (): void => {
     });
 
     it('should handle escaped blockquote', (): void => {
-        const text = '\\> Not a quote';
+        const text = String.raw`\> Not a quote`;
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
             { type: 'text', content: '>' },

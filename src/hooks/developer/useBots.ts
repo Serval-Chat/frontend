@@ -12,20 +12,20 @@ import type {
 
 export const usePublicBotInfo = (
     clientId: string,
-): UseQueryResult<PublicBotInfo, Error> =>
+): UseQueryResult<PublicBotInfo> =>
     useQuery<PublicBotInfo>({
         queryKey: ['bot-public', clientId],
         queryFn: (): Promise<PublicBotInfo> => botsApi.getPublicInfo(clientId),
         enabled: !!clientId,
     });
 
-export const useBots = (): UseQueryResult<Bot[], Error> =>
+export const useBots = (): UseQueryResult<Bot[]> =>
     useQuery<Bot[]>({
         queryKey: ['dev-bots'],
         queryFn: (): Promise<Bot[]> => botsApi.list(),
     });
 
-export const useBot = (clientId: string): UseQueryResult<Bot, Error> =>
+export const useBot = (clientId: string): UseQueryResult<Bot> =>
     useQuery<Bot>({
         queryKey: ['dev-bot', clientId],
         queryFn: (): Promise<Bot> => botsApi.get(clientId),
@@ -149,15 +149,22 @@ export const useResetBotToken = (): UseMutationResult<
     { token: string },
     Error,
     { clientId: string }
-> =>
-    useMutation({
+> => {
+    const queryClient = useQueryClient();
+    return useMutation({
         mutationFn: ({ clientId }): Promise<{ token: string }> =>
             botsApi.resetToken(clientId),
+        onSuccess: (_, { clientId }): void => {
+            void queryClient.invalidateQueries({
+                queryKey: ['dev-bot', clientId],
+            });
+        },
     });
+};
 
 export const useBotServers = (
     clientId: string,
-): UseQueryResult<{ count: number }, Error> =>
+): UseQueryResult<{ count: number }> =>
     useQuery<{ count: number }>({
         queryKey: ['dev-bot-servers', clientId],
         queryFn: (): Promise<{ count: number }> => botsApi.getServers(clientId),

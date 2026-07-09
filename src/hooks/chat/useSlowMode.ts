@@ -27,7 +27,7 @@ export function useSlowMode(
             const now = Date.now();
             const remaining = Math.ceil((nextAllowedAt - now) / 1000);
             setCooldown((prev): number => {
-                const newVal = remaining > 0 ? remaining : 0;
+                const newVal = Math.max(remaining, 0);
                 return prev === newVal ? prev : newVal;
             });
         };

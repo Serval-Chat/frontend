@@ -22,8 +22,8 @@ const DURATIONS = [
     { label: '5 Minutes', value: 300 },
     { label: '10 Minutes', value: 600 },
     { label: '1 Hour', value: 3600 },
-    { label: '1 Day', value: 86400 },
-    { label: '1 Week', value: 604800 },
+    { label: '1 Day', value: 86_400 },
+    { label: '1 Week', value: 604_800 },
 ];
 
 export const TimeoutUserModal = ({
@@ -77,9 +77,9 @@ export const TimeoutUserModal = ({
                                 )}
                                 key={d.value}
                                 type="button"
-                                onClick={(): void =>
-                                    setSelectedDuration(d.value)
-                                }
+                                onClick={(): void => {
+                                    setSelectedDuration(d.value);
+                                }}
                             >
                                 {d.label}
                             </button>
@@ -99,7 +99,9 @@ export const TimeoutUserModal = ({
                         id="timeout-reason"
                         placeholder="e.g. Spamming, inappropriate behavior..."
                         value={reason}
-                        onChange={(e): void => setReason(e.target.value)}
+                        onChange={(e): void => {
+                            setReason(e.target.value);
+                        }}
                     />
                 </Box>
 

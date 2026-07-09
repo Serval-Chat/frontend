@@ -9,7 +9,10 @@ import { Text } from '@/ui/components/common/Text';
 
 import { DemoSection } from './DemoSection';
 
-const MOCK_USERS: Record<string, User> = {
+const MOCK_USERS: Record<
+    'catflare' | 'hexagon' | 'evalyn' | 'mintsuki',
+    User
+> = {
     catflare: {
         id: 'u1',
         login: 'catflare',
@@ -135,14 +138,14 @@ const MOCK_MESSAGES: ProcessedChatMessage[] = [
     demoMessage({
         id: '0',
         text: 'Hello everyone! I hope you guys like Serchat uwu',
-        createdAt: new Date(Date.now() - 3600000).toISOString(),
+        createdAt: new Date(Date.now() - 3_600_000).toISOString(),
         user: MOCK_USERS.catflare,
         senderId: MOCK_USERS.catflare.id,
     }),
     demoMessage({
         id: '1',
         text: 'Yas! I love this place',
-        createdAt: new Date(Date.now() - 3550000).toISOString(),
+        createdAt: new Date(Date.now() - 3_550_000).toISOString(),
         user: MOCK_USERS.hexagon,
         senderId: MOCK_USERS.hexagon.id,
         replyTo: {
@@ -154,7 +157,7 @@ const MOCK_MESSAGES: ProcessedChatMessage[] = [
     demoMessage({
         id: '2',
         text: "Please fix this bug. I can't change default role for my members!",
-        createdAt: new Date(Date.now() - 3500000).toISOString(),
+        createdAt: new Date(Date.now() - 3_500_000).toISOString(),
         user: MOCK_USERS.evalyn,
         senderId: MOCK_USERS.evalyn.id,
         reactions: [
@@ -169,14 +172,14 @@ const MOCK_MESSAGES: ProcessedChatMessage[] = [
     demoMessage({
         id: '3',
         text: 'I forgot my password. Could you plz reset it thx',
-        createdAt: new Date(Date.now() - 3450000).toISOString(),
+        createdAt: new Date(Date.now() - 3_450_000).toISOString(),
         user: MOCK_USERS.mintsuki,
         senderId: MOCK_USERS.mintsuki.id,
     }),
     demoMessage({
         id: '4',
         text: 'Eh fine but I got no reset password feature :sob:',
-        createdAt: new Date(Date.now() - 3400000).toISOString(),
+        createdAt: new Date(Date.now() - 3_400_000).toISOString(),
         user: MOCK_USERS.catflare,
         senderId: MOCK_USERS.catflare.id,
         replyTo: {
@@ -188,7 +191,7 @@ const MOCK_MESSAGES: ProcessedChatMessage[] = [
     demoMessage({
         id: '5',
         text: 'Anyways @everyone I have to reload the server. New update incoming :333',
-        createdAt: new Date(Date.now() - 3350000).toISOString(),
+        createdAt: new Date(Date.now() - 3_350_000).toISOString(),
         user: MOCK_USERS.catflare,
         senderId: MOCK_USERS.catflare.id,
     }),
@@ -204,7 +207,7 @@ const MOCK_MESSAGES: ProcessedChatMessage[] = [
             '    return 0;\n' +
             '}\n' +
             '```',
-        createdAt: new Date(Date.now() - 3250000).toISOString(),
+        createdAt: new Date(Date.now() - 3_250_000).toISOString(),
         user: MOCK_USERS.evalyn,
         senderId: MOCK_USERS.evalyn.id,
     }),

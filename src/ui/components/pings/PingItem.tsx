@@ -25,7 +25,7 @@ export const PingItem = ({ ping, onClick }: PingItemProps) => {
 
     const handleDelete = (e: React.MouseEvent): void => {
         e.stopPropagation();
-        void deletePing(ping.id);
+        deletePing(ping.id);
     };
 
     let snippet = '';
@@ -65,7 +65,7 @@ export const PingItem = ({ ping, onClick }: PingItemProps) => {
                 />
             </div>
 
-            {server && (
+            {server ? (
                 <div className="mb-1 flex items-center gap-1.5 truncate text-[10px] font-medium text-primary">
                     <ServerIcon
                         className="pointer-events-none shrink-0"
@@ -76,7 +76,7 @@ export const PingItem = ({ ping, onClick }: PingItemProps) => {
                         {ping.sender} mentioned you in {server.name}
                     </span>
                 </div>
-            )}
+            ) : null}
 
             <div className="line-clamp-3 overflow-hidden text-sm text-foreground opacity-90">
                 <MessageContent text={snippet} />

@@ -1,6 +1,6 @@
 import type React from 'react';
 
-export const customSyntaxTheme: { [key: string]: React.CSSProperties } = {
+export const customSyntaxTheme: Record<string, React.CSSProperties> = {
     'code[class*="language-"]': {
         color: 'var(--syntax-variable)',
         background: 'none',

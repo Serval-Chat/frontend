@@ -13,16 +13,16 @@ export interface ChecklistGroupProps {
     renderContent: (node: ChecklistNode) => React.ReactNode;
 }
 
-function buildPairs(nodes: ChecklistNode[]): Array<[number, number]> {
-    const pairs: Array<[number, number]> = [];
+function buildPairs(nodes: ChecklistNode[]): [number, number][] {
+    const pairs: [number, number][] = [];
     const depthMap = new Map<number, number>();
 
-    for (let i = 0; i < nodes.length; i++) {
-        const d = nodes[i].depth ?? 0;
+    for (const [i, node] of nodes.entries()) {
+        const d = node.depth ?? 0;
         const parentIdx = d > 0 ? depthMap.get(d - 1) : undefined;
         if (parentIdx !== undefined) pairs.push([parentIdx, i]);
         depthMap.set(d, i);
-        const keys = Array.from(depthMap.keys());
+        const keys = [...depthMap.keys()];
         for (const k of keys) {
             if (k > d) depthMap.delete(k);
         }
@@ -36,8 +36,8 @@ const CORNER_R = 6;
 function drawSplines(
     svg: SVGSVGElement,
     stage: HTMLElement,
-    boxEls: Array<HTMLElement | null>,
-    pairs: Array<[number, number]>,
+    boxEls: (HTMLElement | null)[],
+    pairs: [number, number][],
 ): void {
     const sr = stage.getBoundingClientRect();
     const pathEls: SVGPathElement[] = [];
@@ -82,7 +82,7 @@ export const ChecklistGroup = ({
 }: ChecklistGroupProps) => {
     const stageRef = useRef<HTMLDivElement>(null);
     const svgRef = useRef<SVGSVGElement>(null);
-    const boxEls = useRef<Array<HTMLElement | null>>([]);
+    const boxEls = useRef<(HTMLElement | null)[]>([]);
 
     const pairs = useMemo((): [number, number][] => buildPairs(nodes), [nodes]);
 
@@ -165,7 +165,12 @@ const ChecklistRow = ({
             className="flex items-center gap-2.5 py-[3px]"
             style={{ paddingLeft: `${depth * INDENT_PX}px` }}
         >
-            <div className="shrink-0" ref={(el): void => setBoxRef(idx, el)}>
+            <div
+                className="shrink-0"
+                ref={(el): void => {
+                    setBoxRef(idx, el);
+                }}
+            >
                 <m.div
                     animate={checked ? 'checked' : 'unchecked'}
                     className={cn(
@@ -218,6 +223,12 @@ const ChecklistRow = ({
                         : 'text-foreground',
                 )}
             >
+                {/* renderContent is a render-prop invoked directly (not used as a JSX
+                    element type), so its identity changing between renders can't cause
+                    a remount - using it as `<renderContent />` would actually be the
+                    unsafe change, since the only caller (ParsedText) passes a fresh
+                    inline arrow every render. */}
+                {/* react-doctor-disable-next-line react-doctor/no-render-in-render */}
                 {renderContent(node)}
             </span>
         </div>

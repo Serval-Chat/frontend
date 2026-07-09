@@ -34,6 +34,14 @@ export const resolveWebhookUser = (msg: ChatMessage): User | undefined => {
 };
 
 /**
+ * whether a resolved user is a synthetic webhook author. {@link resolveWebhookUser}
+ * assigns these a `webhook-<messageId>` id; they are not real accounts, so
+ * profile actions (messaging, friend requests, etc.) do not apply to them.
+ */
+export const isWebhookUser = (user?: { id?: string } | null): boolean =>
+    typeof user?.id === 'string' && user.id.startsWith('webhook-');
+
+/**
  * Finds the highest role for a member based on position.
  */
 export const getHighestRoleForMember = (
@@ -43,12 +51,12 @@ export const getHighestRoleForMember = (
     if (!roleIds || roleIds.length === 0) return undefined;
 
     let highestRole: Role | undefined = undefined;
-    roleIds.forEach((roleId): void => {
+    for (const roleId of roleIds) {
         const role = roleMap.get(roleId);
         if (role && (!highestRole || role.position > highestRole.position)) {
             highestRole = role;
         }
-    });
+    }
 
     return highestRole;
 };
@@ -63,7 +71,7 @@ export const getHighestColorRoleForMember = (
     if (!roleIds || roleIds.length === 0) return undefined;
 
     let highestRole: Role | undefined = undefined;
-    roleIds.forEach((roleId): void => {
+    for (const roleId of roleIds) {
         const role = roleMap.get(roleId);
         const isDefaultColor = (c: string): boolean =>
             c.toLowerCase() === '#99aab5';
@@ -78,7 +86,7 @@ export const getHighestColorRoleForMember = (
         ) {
             highestRole = role;
         }
-    });
+    }
 
     return highestRole;
 };
@@ -93,16 +101,15 @@ export const getHighestRoleWithIconForMember = (
     if (!roleIds || roleIds.length === 0) return undefined;
 
     let highestRole: Role | undefined = undefined;
-    roleIds.forEach((roleId): void => {
+    for (const roleId of roleIds) {
         const role = roleMap.get(roleId);
         if (
-            role &&
-            role.icon &&
+            role?.icon &&
             (!highestRole || role.position > highestRole.position)
         ) {
             highestRole = role;
         }
-    });
+    }
 
     return highestRole;
 };
@@ -249,8 +256,8 @@ export const resolveReplyTo = (
             if (selectedFriendId) {
                 replyTo.user =
                     replySenderId === currentUser?.id
-                        ? (currentUser as User)
-                        : (friendUser as User);
+                        ? currentUser
+                        : friendUser!;
             } else if (selectedServerId) {
                 replyTo.user =
                     serverMemberMap.get(replySenderId) || replyTo.user;

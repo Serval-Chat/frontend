@@ -8,7 +8,7 @@ import {
 import { wsClient } from '@/ws/client';
 import { type IMentionEvent, type IMessageDm, WsEvents } from '@/ws/events';
 
-const isTauri = (): boolean => '__TAURI_INTERNALS__' in window;
+const isTauri = (): boolean => '__TAURI_INTERNALS__' in globalThis;
 
 export async function initTauriNotifications(
     queryClient: QueryClient,
@@ -30,7 +30,7 @@ export async function initTauriNotifications(
             WsEvents.MESSAGE_DM,
             (payload): void => {
                 const me = queryClient.getQueryData<{ id: string }>(['me']);
-                if (me && payload.senderId === me.id) return;
+                if (payload.senderId === me?.id) return;
 
                 sendNotification({
                     title: payload.senderUsername,
@@ -43,7 +43,7 @@ export async function initTauriNotifications(
             WsEvents.MENTION,
             (payload): void => {
                 const me = queryClient.getQueryData<{ id: string }>(['me']);
-                if (me && payload.senderId === me.id) return;
+                if (payload.senderId === me?.id) return;
 
                 const isReaction = payload.type === 'reaction';
 

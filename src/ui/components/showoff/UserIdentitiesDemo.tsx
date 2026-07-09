@@ -20,167 +20,165 @@ const ALL_FONTS: UsernameFont[] = [
     'Workbench',
 ];
 
-export const UserIdentitiesDemo = () => {
-    // Mock users
-    const mockUsers: Record<string, User> = {
-        normal: {
-            id: '1',
-            username: 'NormalUser',
-            login: 'normal',
-            createdAt: new Date(),
-        } as User,
-        glowing: {
-            id: '2',
-            username: 'Glowing',
-            login: 'glow',
-            usernameGlow: { enabled: true, color: '#3b82f6' },
-            createdAt: new Date(),
-        } as User,
-        gradient: {
-            id: '3',
-            username: 'Gayass',
-            login: 'rainbow',
-            usernameGradient: {
-                enabled: true,
-                colors: ['#ef4444', '#f59e0b', '#10b981', '#3b82f6'],
-                angle: 90,
-            },
-            createdAt: new Date(),
-        } as User,
-        fancy: {
-            id: '4',
-            username: 'Average british person',
-            login: 'fancy',
-            usernameFont: 'Pacifico' as User['usernameFont'],
-            usernameGradient: {
-                enabled: true,
-                colors: ['#ff00ff', '#00ffff'],
-                angle: 45,
-            },
-            usernameGlow: { enabled: true, color: '#ffffff' },
-            createdAt: new Date(),
-        } as User,
-    };
-
-    return (
-        <DemoSection
-            id={SHOWOFF_SECTIONS.userIdentities}
-            title="User Identities & Avatars"
-        >
-            <DemoItem id="avatar-sizes" title="Avatar Sizes">
-                <div className="flex items-end gap-6">
-                    <div className="flex flex-col items-center gap-2">
-                        <UserProfilePicture
-                            size="sm"
-                            src="https://catfla.re/images/servals/serval-1.jpg"
-                            status="online"
-                            username="Small"
-                        />
-                        <span className="text-foreground-muted text-xs">
-                            sm (32px)
-                        </span>
-                    </div>
-                    <div className="flex flex-col items-center gap-2">
-                        <UserProfilePicture
-                            size="md"
-                            src="https://catfla.re/images/servals/serval-2.jpg"
-                            status="offline"
-                            username="Medium"
-                        />
-                        <span className="text-foreground-muted text-xs">
-                            md (40px)
-                        </span>
-                    </div>
-                    <div className="flex flex-col items-center gap-2">
-                        <UserProfilePicture
-                            size="lg"
-                            src="https://catfla.re/images/servals/serval-3.jpg"
-                            status="online"
-                            username="Large"
-                        />
-                        <span className="text-foreground-muted text-xs">
-                            lg (48px)
-                        </span>
-                    </div>
-                </div>
-            </DemoItem>
-
-            <DemoItem
-                id="avatar-placeholders"
-                title="Avatar Placeholders (Initials)"
-            >
-                <div className="flex gap-4">
-                    <UserProfilePicture size="md" username="Antigravity" />
-                    <UserProfilePicture size="md" username="John Doe" />
-                    <UserProfilePicture size="md" username="System Admin" />
-                </div>
-            </DemoItem>
-
-            <DemoItem id="styled-usernames" title="Styled Usernames">
-                <div className="flex flex-col gap-4">
-                    <div className="flex items-center gap-2">
-                        <span className="text-foreground-muted w-24 text-sm">
-                            Default:
-                        </span>
-                        <StyledUserName user={mockUsers.normal}>
-                            NormalUser
-                        </StyledUserName>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <span className="text-foreground-muted w-24 text-sm">
-                            Glow:
-                        </span>
-                        <StyledUserName user={mockUsers.glowing}>
-                            {mockUsers.glowing.username}
-                        </StyledUserName>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <span className="text-foreground-muted w-24 text-sm">
-                            Gradient:
-                        </span>
-                        <StyledUserName user={mockUsers.gradient}>
-                            {mockUsers.gradient.username}
-                        </StyledUserName>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <span className="text-foreground-muted w-24 text-sm">
-                            The Full Lux:
-                        </span>
-                        <StyledUserName user={mockUsers.fancy}>
-                            {mockUsers.fancy.username}
-                        </StyledUserName>
-                    </div>
-                </div>
-            </DemoItem>
-
-            <DemoItem id="all-fonts" title="All Username Fonts">
-                <div className="flex flex-col gap-4">
-                    {ALL_FONTS.map((font) => (
-                        <div className="flex items-center gap-2" key={font}>
-                            <span className="text-foreground-muted w-32 text-sm">
-                                {font}:
-                            </span>
-                            <StyledUserName
-                                user={
-                                    {
-                                        id: `font-${font}`,
-                                        username:
-                                            font === 'default'
-                                                ? 'Default font (Inter)'
-                                                : font,
-                                        login: `font-${font}`,
-                                        usernameFont: font,
-                                    } as User
-                                }
-                            >
-                                {font === 'default'
-                                    ? 'Default font (Inter)'
-                                    : font}
-                            </StyledUserName>
-                        </div>
-                    ))}
-                </div>
-            </DemoItem>
-        </DemoSection>
-    );
+const mockUsers: Record<
+    'normal' | 'glowing' | 'gradient' | 'fancy',
+    User
+> = {
+    normal: {
+        id: '1',
+        username: 'NormalUser',
+        login: 'normal',
+        createdAt: new Date(),
+    } as User,
+    glowing: {
+        id: '2',
+        username: 'Glowing',
+        login: 'glow',
+        usernameGlow: { enabled: true, color: '#3b82f6' },
+        createdAt: new Date(),
+    } as User,
+    gradient: {
+        id: '3',
+        username: 'Gayass',
+        login: 'rainbow',
+        usernameGradient: {
+            enabled: true,
+            colors: ['#ef4444', '#f59e0b', '#10b981', '#3b82f6'],
+            angle: 90,
+        },
+        createdAt: new Date(),
+    } as User,
+    fancy: {
+        id: '4',
+        username: 'Average british person',
+        login: 'fancy',
+        usernameFont: 'Pacifico' as User['usernameFont'],
+        usernameGradient: {
+            enabled: true,
+            colors: ['#ff00ff', '#00ffff'],
+            angle: 45,
+        },
+        usernameGlow: { enabled: true, color: '#ffffff' },
+        createdAt: new Date(),
+    } as User,
 };
+
+export const UserIdentitiesDemo = () => (
+    <DemoSection
+        id={SHOWOFF_SECTIONS.userIdentities}
+        title="User Identities & Avatars"
+    >
+        <DemoItem id="avatar-sizes" title="Avatar Sizes">
+            <div className="flex items-end gap-6">
+                <div className="flex flex-col items-center gap-2">
+                    <UserProfilePicture
+                        size="sm"
+                        src="https://catfla.re/images/servals/serval-1.jpg"
+                        status="online"
+                        username="Small"
+                    />
+                    <span className="text-foreground-muted text-xs">
+                        sm (32px)
+                    </span>
+                </div>
+                <div className="flex flex-col items-center gap-2">
+                    <UserProfilePicture
+                        size="md"
+                        src="https://catfla.re/images/servals/serval-2.jpg"
+                        status="offline"
+                        username="Medium"
+                    />
+                    <span className="text-foreground-muted text-xs">
+                        md (40px)
+                    </span>
+                </div>
+                <div className="flex flex-col items-center gap-2">
+                    <UserProfilePicture
+                        size="lg"
+                        src="https://catfla.re/images/servals/serval-3.jpg"
+                        status="online"
+                        username="Large"
+                    />
+                    <span className="text-foreground-muted text-xs">
+                        lg (48px)
+                    </span>
+                </div>
+            </div>
+        </DemoItem>
+
+        <DemoItem
+            id="avatar-placeholders"
+            title="Avatar Placeholders (Initials)"
+        >
+            <div className="flex gap-4">
+                <UserProfilePicture size="md" username="Antigravity" />
+                <UserProfilePicture size="md" username="John Doe" />
+                <UserProfilePicture size="md" username="System Admin" />
+            </div>
+        </DemoItem>
+
+        <DemoItem id="styled-usernames" title="Styled Usernames">
+            <div className="flex flex-col gap-4">
+                <div className="flex items-center gap-2">
+                    <span className="text-foreground-muted w-24 text-sm">
+                        Default:
+                    </span>
+                    <StyledUserName user={mockUsers.normal}>
+                        NormalUser
+                    </StyledUserName>
+                </div>
+                <div className="flex items-center gap-2">
+                    <span className="text-foreground-muted w-24 text-sm">
+                        Glow:
+                    </span>
+                    <StyledUserName user={mockUsers.glowing}>
+                        {mockUsers.glowing.username}
+                    </StyledUserName>
+                </div>
+                <div className="flex items-center gap-2">
+                    <span className="text-foreground-muted w-24 text-sm">
+                        Gradient:
+                    </span>
+                    <StyledUserName user={mockUsers.gradient}>
+                        {mockUsers.gradient.username}
+                    </StyledUserName>
+                </div>
+                <div className="flex items-center gap-2">
+                    <span className="text-foreground-muted w-24 text-sm">
+                        The Full Lux:
+                    </span>
+                    <StyledUserName user={mockUsers.fancy}>
+                        {mockUsers.fancy.username}
+                    </StyledUserName>
+                </div>
+            </div>
+        </DemoItem>
+
+        <DemoItem id="all-fonts" title="All Username Fonts">
+            <div className="flex flex-col gap-4">
+                {ALL_FONTS.map((font) => (
+                    <div className="flex items-center gap-2" key={font}>
+                        <span className="text-foreground-muted w-32 text-sm">
+                            {font}:
+                        </span>
+                        <StyledUserName
+                            user={
+                                {
+                                    id: `font-${font}`,
+                                    username:
+                                        font === 'default'
+                                            ? 'Default font (Inter)'
+                                            : font,
+                                    login: `font-${font}`,
+                                    usernameFont: font,
+                                } as User
+                            }
+                        >
+                            {font === 'default' ? 'Default font (Inter)' : font}
+                        </StyledUserName>
+                    </div>
+                ))}
+            </div>
+        </DemoItem>
+    </DemoSection>
+);

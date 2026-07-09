@@ -8,7 +8,7 @@ export const useAutoHighlight = (sectionIds: string[]): void => {
     const lastHighlightedHash = useRef<string | null>(null);
 
     useEffect((): (() => void) | undefined => {
-        const hash = location.hash.substring(1);
+        const hash = location.hash.slice(1);
 
         // only highlight if this is a new hash
         if (

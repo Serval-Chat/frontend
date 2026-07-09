@@ -25,8 +25,8 @@ interface PollProps {
 function formatTimeLeft(ms: number): string {
     if (ms <= 0) return 'Ended';
     const totalSeconds = Math.floor(ms / 1000);
-    const days = Math.floor(totalSeconds / 86400);
-    const hours = Math.floor((totalSeconds % 86400) / 3600);
+    const days = Math.floor(totalSeconds / 86_400);
+    const hours = Math.floor((totalSeconds % 86_400) / 3600);
     const minutes = Math.floor((totalSeconds % 3600) / 60);
     const seconds = totalSeconds % 60;
     if (days > 0) return `${days}d ${hours}h left`;
@@ -45,31 +45,35 @@ export const Poll = ({ poll, messageId, serverId, channelId }: PollProps) => {
         ? new Date(poll.expiresAt).getTime()
         : null;
     const isExpired = expiresAt !== null && now >= expiresAt;
-    const timeLeftMs = expiresAt !== null ? Math.max(0, expiresAt - now) : null;
+    const timeLeftMs = expiresAt === null ? null : Math.max(0, expiresAt - now);
 
     useEffect((): (() => void) | undefined => {
         if (isExpired || expiresAt === null) return;
-        const interval = setInterval((): void => setNow(Date.now()), 1000);
-        return (): void => clearInterval(interval);
+        const interval = setInterval((): void => {
+            setNow(Date.now());
+        }, 1000);
+        return (): void => {
+            clearInterval(interval);
+        };
     }, [isExpired, expiresAt]);
 
     const totalVotes = useMemo((): number => {
         let count = 0;
         if (!poll?.options) return 0;
-        poll.options.forEach((opt): void => {
+        for (const opt of poll.options) {
             count += opt.votes?.length || 0;
-        });
+        }
         return count;
     }, [poll.options]);
 
     const myVotes = useMemo((): Set<string> => {
         const votes = new Set<string>();
         if (!me || !poll?.options) return votes;
-        poll.options.forEach((opt): void => {
+        for (const opt of poll.options) {
             if (opt.votes?.includes(me.id)) {
                 votes.add(opt.id);
             }
-        });
+        }
         return votes;
     }, [poll.options, me]);
 
@@ -95,18 +99,15 @@ export const Poll = ({ poll, messageId, serverId, channelId }: PollProps) => {
     }, [isExpired, poll.options, totalVotes]);
 
     const { mutate: votePoll, isPending } = useMutation({
-        mutationFn: async (optionIds: string[]) => {
-            if (serverId && channelId) {
-                return chatApi.votePollServer(
-                    serverId,
-                    channelId,
-                    messageId,
-                    optionIds,
-                );
-            } else {
-                return chatApi.votePollDm(messageId, optionIds);
-            }
-        },
+        mutationFn: async (optionIds: string[]) =>
+            serverId && channelId
+                ? chatApi.votePollServer(
+                      serverId,
+                      channelId,
+                      messageId,
+                      optionIds,
+                  )
+                : chatApi.votePollDm(messageId, optionIds),
         onSuccess: () => {
             void queryClient.invalidateQueries({
                 queryKey: ['chat', 'messages'],
@@ -131,7 +132,7 @@ export const Poll = ({ poll, messageId, serverId, channelId }: PollProps) => {
                 newVotes.add(optionId);
             }
         }
-        votePoll(Array.from(newVotes));
+        votePoll([...newVotes]);
     };
 
     const showVotersButton = totalVotes > 0 || isExpired;
@@ -147,19 +148,19 @@ export const Poll = ({ poll, messageId, serverId, channelId }: PollProps) => {
                     <Text className="text-[10px] font-bold tracking-widest text-muted-foreground uppercase opacity-50">
                         Poll
                     </Text>
-                    {isExpired && (
+                    {isExpired ? (
                         <span className="inline-flex items-center gap-1 rounded-full bg-danger/15 px-2 py-0.5 text-[9px] font-bold tracking-widest text-danger uppercase">
                             Ended
                         </span>
-                    )}
+                    ) : null}
                 </Box>
                 <Box className="flex items-center gap-2">
-                    {poll.multiSelect && !isExpired && (
+                    {poll.multiSelect && !isExpired ? (
                         <Text className="text-[10px] font-medium tracking-wider text-primary/70 uppercase">
                             Multiple Choice
                         </Text>
-                    )}
-                    {timeLeftMs !== null && !isExpired && (
+                    ) : null}
+                    {timeLeftMs !== null && !isExpired ? (
                         <Box className="flex items-center gap-1 text-[10px] font-medium text-muted-foreground">
                             <Clock size={10} />
                             <span
@@ -170,7 +171,7 @@ export const Poll = ({ poll, messageId, serverId, channelId }: PollProps) => {
                                 {formatTimeLeft(timeLeftMs)}
                             </span>
                         </Box>
-                    )}
+                    ) : null}
                 </Box>
             </Box>
 
@@ -210,7 +211,7 @@ export const Poll = ({ poll, messageId, serverId, channelId }: PollProps) => {
                                 }
                             >
                                 {/* Progress bar */}
-                                {totalVotes > 0 && (
+                                {totalVotes > 0 ? (
                                     <Box
                                         className={cn(
                                             'absolute inset-y-0 left-0 transition-all duration-500 ease-in-out',
@@ -220,7 +221,7 @@ export const Poll = ({ poll, messageId, serverId, channelId }: PollProps) => {
                                         )}
                                         style={{ width: `${percentage}%` }}
                                     />
-                                )}
+                                ) : null}
 
                                 <Box className="relative z-10 flex items-center gap-2">
                                     {isExpired ? (
@@ -234,7 +235,7 @@ export const Poll = ({ poll, messageId, serverId, channelId }: PollProps) => {
                                     ) : (
                                         <Box className="h-4 w-4 shrink-0 rounded-full border border-muted-foreground/50" />
                                     )}
-                                    {option.emoji && (
+                                    {option.emoji ? (
                                         <Box className="flex items-center justify-center">
                                             {option.emojiType === 'custom' &&
                                             option.emojiId ? (
@@ -249,7 +250,7 @@ export const Poll = ({ poll, messageId, serverId, channelId }: PollProps) => {
                                                 />
                                             )}
                                         </Box>
-                                    )}
+                                    ) : null}
                                     <Text
                                         className={cn(
                                             'text-sm font-medium',
@@ -263,11 +264,11 @@ export const Poll = ({ poll, messageId, serverId, channelId }: PollProps) => {
                                 </Box>
 
                                 <Box className="relative z-10 flex items-center gap-2">
-                                    {totalVotes > 0 && (
+                                    {totalVotes > 0 ? (
                                         <Text className="text-xs font-semibold text-foreground">
                                             {Math.round(percentage)}%
                                         </Text>
-                                    )}
+                                    ) : null}
                                     <Text className="text-xs text-muted-foreground">
                                         {voteCount}
                                     </Text>
@@ -285,9 +286,9 @@ export const Poll = ({ poll, messageId, serverId, channelId }: PollProps) => {
             {/* Footer row */}
             <Box className="mt-1 flex items-center justify-between">
                 <Text className="text-[10px] text-muted-foreground">
-                    {totalVotes} vote{totalVotes !== 1 ? 's' : ''}
-                    {!isExpired && expiresAt !== null && ' · closes '}
-                    {!isExpired && expiresAt !== null && (
+                    {totalVotes} vote{totalVotes === 1 ? '' : 's'}
+                    {!isExpired && expiresAt !== null ? ' · closes ' : null}
+                    {!isExpired && expiresAt !== null ? (
                         <span
                             title={new Date(expiresAt).toLocaleString(
                                 APP_LOCALE,
@@ -303,26 +304,30 @@ export const Poll = ({ poll, messageId, serverId, channelId }: PollProps) => {
                                 },
                             )}
                         </span>
-                    )}
+                    ) : null}
                 </Text>
 
-                {showVotersButton && (
+                {showVotersButton ? (
                     <button
                         className="flex items-center gap-1.5 rounded-md border border-border-subtle px-2.5 py-1 text-[10px] font-bold tracking-widest text-muted-foreground uppercase transition-all hover:bg-white/5 hover:text-foreground active:scale-[0.98]"
                         type="button"
-                        onClick={(): void => setIsVotersModalOpen(true)}
+                        onClick={(): void => {
+                            setIsVotersModalOpen(true);
+                        }}
                     >
                         <Users size={10} />
                         View voters
                     </button>
-                )}
+                ) : null}
             </Box>
 
             <PollVotersModal
                 isOpen={isVotersModalOpen}
                 poll={poll}
                 serverId={serverId}
-                onClose={(): void => setIsVotersModalOpen(false)}
+                onClose={(): void => {
+                    setIsVotersModalOpen(false);
+                }}
             />
         </Box>
     );

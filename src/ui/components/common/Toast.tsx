@@ -43,8 +43,7 @@ export const ToastProvider = ({ children }: { children: React.ReactNode }) => {
     const showToast = useCallback(
         (message: string, type: ToastType = 'info'): void => {
             const id =
-                Math.random().toString(36).substring(7) +
-                Date.now().toString(36);
+                Math.random().toString(36).slice(7) + Date.now().toString(36);
             setToasts((prev): Toast[] => [...prev, { id, message, type }]);
 
             setTimeout((): void => {
@@ -70,7 +69,9 @@ export const ToastProvider = ({ children }: { children: React.ReactNode }) => {
                         <ToastItem
                             key={toast.id}
                             toast={toast}
-                            onClose={(): void => removeToast(toast.id)}
+                            onClose={(): void => {
+                                removeToast(toast.id);
+                            }}
                         />
                     ))}
                 </AnimatePresence>

@@ -39,7 +39,7 @@ export const helpCommand: ConCommandReactor = {
     match: (_argc, argv): boolean => argv[0]?.toLowerCase() === 'help',
     execute: (argc, argv) => {
         if (argc > 1) {
-            const cmd = argv[1].toLowerCase();
+            const cmd = (argv[1] ?? '').toLowerCase();
             if (cmd === 'userctl') {
                 return {
                     mutateTo: 'userctl /?',

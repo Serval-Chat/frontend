@@ -23,9 +23,9 @@ export const AdminServerPreview = ({
         className={`flex w-full flex-col overflow-hidden rounded-2xl border border-border-subtle bg-background shadow-2xl sm:w-[340px] ${className || ''}`}
     >
         <Box className="relative h-[120px] w-full shrink-0 overflow-hidden bg-bg-secondary/30">
-            {server.banner?.value && (
+            {server.banner?.value ? (
                 <ServerBannerMedia alt="Server Banner" banner={server.banner} />
-            )}
+            ) : null}
         </Box>
 
         <Box className="relative z-content -mt-[50px] px-4">
@@ -37,13 +37,13 @@ export const AdminServerPreview = ({
         <Box className="p-4 pt-2">
             <Box className="mb-4">
                 <div className="flex items-center gap-2">
-                    {server.verified && (
+                    {server.verified ? (
                         <BadgeCheck
                             className="shrink-0 text-primary"
                             size={24}
                             strokeWidth={2.5}
                         />
-                    )}
+                    ) : null}
                     <Heading
                         className="w-full truncate text-xl leading-tight font-bold"
                         level={2}
@@ -55,11 +55,11 @@ export const AdminServerPreview = ({
                     {server.id}
                 </Box>
                 <div className="mt-2 flex flex-wrap items-center gap-2">
-                    {server.deletedAt && (
+                    {server.deletedAt ? (
                         <Box className="inline-flex items-center rounded-full bg-danger/10 px-2.5 py-0.5 text-[10px] font-black tracking-widest text-danger uppercase ring-1 ring-danger/20">
                             Deleted
                         </Box>
-                    )}
+                    ) : null}
                 </div>
             </Box>
 
@@ -109,7 +109,7 @@ export const AdminServerPreview = ({
                 </Box>
             </Box>
 
-            {server.tags && server.tags.length > 0 && (
+            {server.tags && server.tags.length > 0 ? (
                 <>
                     <Box className="my-3 h-px w-full bg-divider" />
                     <Box>
@@ -131,7 +131,7 @@ export const AdminServerPreview = ({
                         </div>
                     </Box>
                 </>
-            )}
+            ) : null}
         </Box>
     </div>
 );

@@ -1,4 +1,4 @@
-import { type ReactNode } from 'react';
+import type { ReactNode } from 'react';
 
 import { AlertTriangle, RefreshCcw, ShieldAlert, WifiOff } from 'lucide-react';
 
@@ -103,7 +103,7 @@ export const AdminErrorDisplay = ({
                 </div>
             </div>
 
-            {reset && (
+            {reset ? (
                 <Button
                     className="mt-8 rounded-xl px-6 py-2.5 transition-all hover:scale-105 active:scale-95"
                     variant="primary"
@@ -112,7 +112,7 @@ export const AdminErrorDisplay = ({
                     <RefreshCcw size={16} />
                     Try Again
                 </Button>
-            )}
+            ) : null}
         </div>
     );
 };

@@ -32,9 +32,9 @@ export const CategoryBehaviourSettings = ({
                 isPending={isPending}
                 rules={category.markdownBlockadeRules}
                 serverId={category.serverId}
-                onSave={(markdownBlockadeRules): void =>
-                    updateCategory({ markdownBlockadeRules })
-                }
+                onSave={(markdownBlockadeRules): void => {
+                    updateCategory({ markdownBlockadeRules });
+                }}
             />
         </div>
     );

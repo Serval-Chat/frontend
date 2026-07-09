@@ -75,8 +75,9 @@ const ButtonComponent = ({
 
         updateDimensions();
         window.addEventListener('resize', updateDimensions);
-        return (): void =>
+        return (): void => {
             window.removeEventListener('resize', updateDimensions);
+        };
     }, [loading, retainSize, children]);
 
     const variantStyleSet = buttonVariantStyles[variant];
@@ -84,7 +85,7 @@ const ButtonComponent = ({
 
     const computedStyle: React.CSSProperties = {
         ...buttonBaseStyle,
-        ...(variant !== 'nav' ? buttonSizeStyles[size] : {}),
+        ...(variant === 'nav' ? {} : buttonSizeStyles[size]),
         ...variantStyleSet.base,
         ...(isActive ? variantStyleSet.hover : {}),
         ...(square ? buttonSquareSizeStyles[size] : {}),
@@ -106,20 +107,24 @@ const ButtonComponent = ({
             ref={buttonRef}
             style={computedStyle}
             type="button"
-            onMouseEnter={() => setHovered(true)}
-            onMouseLeave={() => setHovered(false)}
+            onMouseEnter={() => {
+                setHovered(true);
+            }}
+            onMouseLeave={() => {
+                setHovered(false);
+            }}
             {...props}
         >
             <span style={{ display: 'contents', opacity: loading ? 0 : 1 }}>
-                {Icon && iconPosition === 'left' && (
+                {Icon && iconPosition === 'left' ? (
                     <Icon size={iconSize} style={{ flexShrink: 0 }} />
-                )}
+                ) : null}
                 {children}
-                {Icon && iconPosition === 'right' && (
+                {Icon && iconPosition === 'right' ? (
                     <Icon size={iconSize} style={{ flexShrink: 0 }} />
-                )}
+                ) : null}
             </span>
-            {loading && (
+            {loading ? (
                 <span
                     style={{
                         position: 'absolute',
@@ -131,7 +136,7 @@ const ButtonComponent = ({
                 >
                     <BouncingDots color="currentColor" size={4} />
                 </span>
-            )}
+            ) : null}
         </button>
     );
 };

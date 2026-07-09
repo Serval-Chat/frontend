@@ -1,4 +1,8 @@
-import { type UseMutationResult, useMutation } from '@tanstack/react-query';
+import {
+    type UseMutationResult,
+    useMutation,
+    useQueryClient,
+} from '@tanstack/react-query';
 
 import { setAuthToken } from '@/utils/authToken';
 
@@ -8,58 +12,34 @@ import type {
     ChangeLoginResponse,
     ChangePasswordRequest,
     ChangePasswordResponse,
-    LoginRequest,
-    LoginResponse,
-    RegisterRequest,
-    RegisterResponse,
 } from './auth.types';
-
-export const useLogin = (): UseMutationResult<
-    LoginResponse,
-    Error,
-    LoginRequest
-> =>
-    useMutation({
-        mutationFn: authApi.login,
-        onSuccess: async (data): Promise<void> => {
-            if (data.token) {
-                await setAuthToken(data.token);
-            }
-        },
-    });
-
-export const useRegister = (): UseMutationResult<
-    RegisterResponse,
-    Error,
-    RegisterRequest
-> =>
-    useMutation({
-        mutationFn: authApi.register,
-        onSuccess: async (data): Promise<void> => {
-            await setAuthToken(data.token);
-        },
-    });
 
 export const useChangePassword = (): UseMutationResult<
     ChangePasswordResponse,
     Error,
     ChangePasswordRequest
-> =>
-    useMutation({
+> => {
+    const queryClient = useQueryClient();
+    return useMutation({
         mutationFn: authApi.changePassword,
         onSuccess: async (data): Promise<void> => {
             await setAuthToken(data.token);
+            await queryClient.invalidateQueries({ queryKey: ['me'] });
         },
     });
+};
 
 export const useChangeLogin = (): UseMutationResult<
     ChangeLoginResponse,
     Error,
     ChangeLoginRequest
-> =>
-    useMutation({
+> => {
+    const queryClient = useQueryClient();
+    return useMutation({
         mutationFn: authApi.changeLogin,
         onSuccess: async (data): Promise<void> => {
             await setAuthToken(data.token);
+            await queryClient.invalidateQueries({ queryKey: ['me'] });
         },
     });
+};

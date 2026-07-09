@@ -68,7 +68,9 @@ describe('useUserById', (): void => {
             wrapper: makeWrapper(),
         });
 
-        await waitFor((): void => expect(result.current.isLoading).toBe(false));
+        await waitFor((): void => {
+            expect(result.current.isLoading).toBe(false);
+        });
         expect(usersApi.getById).not.toHaveBeenCalled();
         consoleSpy.mockRestore();
     });
@@ -84,7 +86,9 @@ describe('useUserById', (): void => {
             { wrapper: makeWrapper() },
         );
 
-        await waitFor((): void => expect(result.current.isSuccess).toBe(true));
+        await waitFor((): void => {
+            expect(result.current.isSuccess).toBe(true);
+        });
         expect(usersApi.getById).toHaveBeenCalledWith('0327554478565752832');
     });
 });
@@ -134,10 +138,10 @@ describe('useUpdateStyle', (): void => {
             });
         });
 
-        await waitFor((): void =>
+        await waitFor((): void => {
             expect(
                 queryClient.getQueryData<User>(['me'])?.usernameGlow?.enabled,
-            ).toBe(false),
-        );
+            ).toBe(false);
+        });
     });
 });

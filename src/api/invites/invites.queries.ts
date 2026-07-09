@@ -14,7 +14,7 @@ import type {
     ServerInvite,
 } from './invites.types';
 
-export const inviteKeys = {
+const inviteKeys = {
     all: ['invites'] as const,
     details: (code: string): readonly ['invites', 'details', string] =>
         [...inviteKeys.all, 'details', code] as const,
@@ -25,7 +25,7 @@ export const inviteKeys = {
 export const useInviteDetails = (
     code: string,
     options: { enabled?: boolean } = {},
-): UseQueryResult<InviteDetails, Error> =>
+): UseQueryResult<InviteDetails> =>
     useQuery({
         queryKey: inviteKeys.details(code),
         queryFn: (): Promise<InviteDetails> =>
@@ -35,7 +35,7 @@ export const useInviteDetails = (
 
 export const useServerInvites = (
     serverId: string,
-): UseQueryResult<ServerInvite[], Error> =>
+): UseQueryResult<ServerInvite[]> =>
     useQuery({
         queryKey: inviteKeys.serverInvites(serverId),
         queryFn: (): Promise<ServerInvite[]> =>

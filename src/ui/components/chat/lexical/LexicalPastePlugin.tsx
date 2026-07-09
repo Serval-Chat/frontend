@@ -28,7 +28,7 @@ export const LexicalPastePlugin = ({
                     const files: File[] = [];
 
                     if (clipboardData.files && clipboardData.files.length > 0) {
-                        for (const file of Array.from(clipboardData.files)) {
+                        for (const file of clipboardData.files) {
                             if (file.type.startsWith('image/')) {
                                 files.push(file);
                             }
@@ -36,7 +36,7 @@ export const LexicalPastePlugin = ({
                     }
 
                     if (files.length === 0 && clipboardData.items) {
-                        for (const item of Array.from(clipboardData.items)) {
+                        for (const item of clipboardData.items) {
                             if (
                                 item.kind === 'file' &&
                                 item.type.startsWith('image/')

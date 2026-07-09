@@ -1,9 +1,7 @@
-import React, { useState } from 'react';
-import { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { useQueryClient } from '@tanstack/react-query';
-import { ShieldAlert } from 'lucide-react';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { ChevronDown, ChevronUp, ShieldAlert } from 'lucide-react';
 
 import { useServerAuditLog } from '@/api/auditLog/auditLog.queries';
 import type {
@@ -123,11 +121,9 @@ export const AuditLogSettings = ({ serverId }: AuditLogSettingsProps) => {
                                 variant="ghost"
                                 onClick={(): void => {
                                     setGlobalExpandState(null);
-                                    setTimeout(
-                                        (): void =>
-                                            setGlobalExpandState('expanded'),
-                                        0,
-                                    );
+                                    setTimeout((): void => {
+                                        setGlobalExpandState('expanded');
+                                    }, 0);
                                 }}
                             >
                                 <ChevronDown className="mr-1.5 h-3.5 w-3.5" />
@@ -138,11 +134,9 @@ export const AuditLogSettings = ({ serverId }: AuditLogSettingsProps) => {
                                 variant="ghost"
                                 onClick={(): void => {
                                     setGlobalExpandState(null);
-                                    setTimeout(
-                                        (): void =>
-                                            setGlobalExpandState('collapsed'),
-                                        0,
-                                    );
+                                    setTimeout((): void => {
+                                        setGlobalExpandState('collapsed');
+                                    }, 0);
                                 }}
                             >
                                 <ChevronUp className="mr-1.5 h-3.5 w-3.5" />
@@ -162,7 +156,7 @@ export const AuditLogSettings = ({ serverId }: AuditLogSettingsProps) => {
                         ))}
                     </div>
 
-                    {hasNextPage && (
+                    {hasNextPage ? (
                         <div className="flex justify-center pt-4">
                             <Button
                                 disabled={isFetchingNextPage}
@@ -174,7 +168,7 @@ export const AuditLogSettings = ({ serverId }: AuditLogSettingsProps) => {
                                     : 'Load More'}
                             </Button>
                         </div>
-                    )}
+                    ) : null}
                 </div>
             )}
         </div>

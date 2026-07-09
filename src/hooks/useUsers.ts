@@ -4,7 +4,7 @@ import type { UseQueryResult } from '@tanstack/react-query';
 import { usersApi } from '@/api/users/users.api';
 import type { User } from '@/api/users/users.types';
 
-export const USERS_QUERY_KEYS = {
+const USERS_QUERY_KEYS = {
     all: ['users'] as const,
     bulk: (ids: string[]): readonly ['users', 'bulk', string[]] =>
         [...USERS_QUERY_KEYS.all, 'bulk', ids] as const,

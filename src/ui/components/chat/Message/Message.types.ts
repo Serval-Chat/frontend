@@ -7,8 +7,6 @@ import type {
 import type { User } from '@/api/users/users.types';
 import type { ProcessedChatMessage } from '@/types/chat.ui';
 
-export type { Role, RolePermissions, Server, ServerMember };
-
 export interface MessageProps {
     message: ProcessedChatMessage;
     user: User;
@@ -33,3 +31,10 @@ export interface MessageProps {
     disableActions?: boolean;
     onResize?: () => void;
 }
+
+export {
+    type Role,
+    type RolePermissions,
+    type Server,
+    type ServerMember,
+} from '@/api/servers/servers.types';

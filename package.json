@@ -6,14 +6,15 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "lint": "eslint . --cache",
+    "lint": "eslint . --cache --max-warnings=0",
     "preview": "vite preview",
     "prepare": "husky",
     "format": "prettier --write src/",
     "test": "vitest",
     "lint:fix": "eslint . --fix --cache",
     "knip": "knip",
-    "tauri": "tauri"
+    "tauri": "tauri",
+    "doctor": "npx react-doctor@latest"
   },
   "lint-staged": {
     "src/**/*.{ts,tsx,js,jsx}": [
@@ -36,10 +37,11 @@
     "@tauri-apps/plugin-notification": "^2.3.3",
     "@tauri-apps/plugin-os": "^2.3.2",
     "@types/date-fns": "^2.5.3",
-    "axios": "^1.13.2",
+    "axios": "^1.16.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
+    "dompurify": "^3.4.11",
     "email-validator": "^2.0.4",
     "emoji-datasource-apple": "^16.0.0",
     "framer-motion": "^12.23.26",
@@ -89,18 +91,18 @@
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.4.24",
     "eslint-plugin-tailwindcss": "^4.0.0-beta.0",
+    "eslint-plugin-unicorn": "^61.0.2",
     "globals": "^16.5.0",
     "husky": "^9.1.7",
     "jsdom": "^27.4.0",
     "lint-staged": "^16.2.7",
     "prettier": "^3.7.4",
     "react-doctor": "^0.3.0",
-    "react-scan": "^0.5.6",
     "tailwindcss": "^4.1.18",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.46.4",
     "vite": "npm:rolldown-vite@7.2.5",
-    "vitest": "^4.0.16"
+    "vitest": "^4.1.9"
   },
   "overrides": {
     "vite": "npm:rolldown-vite@7.2.5"

@@ -91,13 +91,13 @@ export const Login = () => {
                                 }
                                 type="text"
                                 value={twoFactorCode}
-                                onChange={(e): void =>
+                                onChange={(e): void => {
                                     setTwoFactorCode(
                                         e.target.value
                                             .toUpperCase()
-                                            .replace(/\s+/g, ''),
-                                    )
-                                }
+                                            .replaceAll(/\s+/g, ''),
+                                    );
+                                }}
                             />
                         ) : (
                             <Input
@@ -107,13 +107,13 @@ export const Login = () => {
                                 placeholder="E-mail"
                                 type="text"
                                 value={loginInput}
-                                onChange={(e): void =>
-                                    setLoginInput(e.target.value)
-                                }
+                                onChange={(e): void => {
+                                    setLoginInput(e.target.value);
+                                }}
                             />
                         )}
                     </InputWrapper>
-                    {!requiresTwoFactor && (
+                    {requiresTwoFactor ? null : (
                         <>
                             <InputWrapper>
                                 <div className="relative">
@@ -126,9 +126,9 @@ export const Login = () => {
                                             showPassword ? 'text' : 'password'
                                         }
                                         value={password}
-                                        onChange={(e): void =>
-                                            setPassword(e.target.value)
-                                        }
+                                        onChange={(e): void => {
+                                            setPassword(e.target.value);
+                                        }}
                                     />
                                     <button
                                         aria-label={
@@ -143,9 +143,9 @@ export const Login = () => {
                                                 : 'Show password'
                                         }
                                         type="button"
-                                        onClick={(): void =>
-                                            setShowPassword(!showPassword)
-                                        }
+                                        onClick={(): void => {
+                                            setShowPassword(!showPassword);
+                                        }}
                                     >
                                         {showPassword ? (
                                             <EyeOff size={18} />
@@ -161,9 +161,9 @@ export const Login = () => {
                                         checked={rememberMe}
                                         className="border-border/50 h-4 w-4 rounded bg-background/50 text-primary focus:ring-primary"
                                         type="checkbox"
-                                        onChange={(e): void =>
-                                            setRememberMe(e.target.checked)
-                                        }
+                                        onChange={(e): void => {
+                                            setRememberMe(e.target.checked);
+                                        }}
                                     />
                                     <Text className="text-muted-foreground select-none">
                                         Remember Me
@@ -178,16 +178,16 @@ export const Login = () => {
                             </div>
                         </>
                     )}
-                    {requiresTwoFactor && (
+                    {requiresTwoFactor ? (
                         <div className="flex items-center justify-between text-sm">
                             <button
                                 className="text-primary hover:underline"
                                 type="button"
-                                onClick={(): void =>
+                                onClick={(): void => {
                                     setUseBackupCode(
                                         (current): boolean => !current,
-                                    )
-                                }
+                                    );
+                                }}
                             >
                                 {useBackupCode
                                     ? 'Use authenticator code'
@@ -201,7 +201,7 @@ export const Login = () => {
                                 Back
                             </button>
                         </div>
-                    )}
+                    ) : null}
                     <Button
                         className="flex w-full items-center justify-center gap-2 py-sm text-lg font-semibold"
                         disabled={!isFormValid || isLoading}

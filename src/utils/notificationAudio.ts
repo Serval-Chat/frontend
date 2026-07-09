@@ -3,7 +3,7 @@ const buffers = new Map<string, AudioBuffer>();
 
 function getContext(): AudioContext | null {
     if (typeof AudioContext === 'undefined') return null;
-    if (!ctx) ctx = new AudioContext();
+    ctx ??= new AudioContext();
     return ctx;
 }
 

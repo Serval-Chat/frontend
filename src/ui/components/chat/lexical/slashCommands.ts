@@ -29,7 +29,8 @@ export function parseSlashInput(input: string): ParsedSlashInput | null {
     if (tokens.length === 0) return null;
 
     return {
-        commandName: tokens[0].toLowerCase(),
+        // tokens.length === 0 was checked above, so tokens[0] is always defined here.
+        commandName: tokens[0]!.toLowerCase(),
         args: tokens.slice(1),
     };
 }
@@ -66,10 +67,12 @@ export function validateSlashCommand(
     const namedArgs = new Map<string, string>();
     const positionalArgs: string[] = [];
     for (const arg of parsed.args) {
-        const namedMatch = arg.match(/^([a-zA-Z0-9_-]+)\s*[:=](.*)$/);
+        const namedMatch = /^([a-zA-Z0-9_-]+)\s*[:=](.*)$/.exec(arg);
         if (namedMatch) {
-            const name = namedMatch[1].toLowerCase();
-            const value = namedMatch[2].trim();
+            // both capture groups are mandatory in the regex, so a successful
+            // match guarantees they are defined.
+            const name = namedMatch[1]!.toLowerCase();
+            const value = namedMatch[2]!.trim();
             namedArgs.set(name, value);
         } else {
             positionalArgs.push(arg);
@@ -79,13 +82,12 @@ export function validateSlashCommand(
     const options: { name: string; value: InteractionValue }[] = [];
     let positionalIndex = 0;
 
-    for (let i = 0; i < definitions.length; i += 1) {
-        const definition = definitions[i];
+    for (const definition of definitions) {
         const namedValue = namedArgs.get(definition.name.toLowerCase());
         const rawArg =
-            namedValue !== undefined
-                ? namedValue
-                : positionalArgs[positionalIndex];
+            namedValue === undefined
+                ? positionalArgs[positionalIndex]
+                : namedValue;
 
         if (namedValue === undefined && rawArg !== undefined) {
             positionalIndex += 1;
@@ -150,14 +152,16 @@ function normalizeUserId(value: string): string | null {
     const trimmed = value.trim();
     if (!trimmed) return null;
 
-    const lexicalMention = trimmed.match(/^<userid:'([^']+)'>$/);
+    const lexicalMention = /^<userid:'([^']+)'>$/.exec(trimmed);
     if (lexicalMention) {
-        return lexicalMention[1];
+        // the capture group is mandatory in the regex, so a match guarantees it.
+        return lexicalMention[1]!;
     }
 
-    const discordMention = trimmed.match(/^<@!?([^>]+)>$/);
+    const discordMention = /^<@!?([^>]+)>$/.exec(trimmed);
     if (discordMention) {
-        return discordMention[1];
+        // the capture group is mandatory in the regex, so a match guarantees it.
+        return discordMention[1]!;
     }
 
     return trimmed;
@@ -169,7 +173,8 @@ function tokenize(input: string): string[] {
     let quote: '"' | "'" | null = null;
 
     for (let i = 0; i < input.length; i += 1) {
-        const char = input[i];
+        // i is always in range per the loop condition.
+        const char = input[i]!;
 
         if (quote) {
             if (char === '\\' && i + 1 < input.length) {

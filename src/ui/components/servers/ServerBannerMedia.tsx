@@ -41,8 +41,10 @@ export const ServerBannerMedia = ({
                         imageClassName,
                     )}
                     paused={
-                        limitedAnimations &&
-                        (banner.type === 'gif' || isAnimatedImageUrl(bannerUrl))
+                        limitedAnimations
+                            ? banner.type === 'gif' ||
+                              isAnimatedImageUrl(bannerUrl)
+                            : false
                     }
                     src={bannerUrl}
                 />

@@ -20,11 +20,15 @@ export const downloadImage = async (
     if (!response.ok) throw new Error('Download failed');
 
     const buffer = await response.arrayBuffer();
-    const extension = src.split('.').pop()?.split('?')[0] || 'png';
-    const filename = `${alt.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_${Date.now()}.${extension}`;
+    const rawExtension = src.split('.').pop()?.split('?')[0];
+    const extension =
+        rawExtension !== undefined && rawExtension !== ''
+            ? rawExtension
+            : 'png';
+    const filename = `${alt.replaceAll(/[^a-z0-9]/gi, '_').toLowerCase()}_${String(Date.now())}.${extension}`;
 
     // Using warn to suppress linter but still allow mobile debugging output since console.log is banned
-    console.warn('Platform: ', platform);
+    console.warn('Platform:', platform);
 
     const os = platform();
     const dir =
@@ -36,8 +40,8 @@ export const downloadImage = async (
             await invoke('plugin:mediascan|scanFile', {
                 path: `${dir}/${filename}`,
             });
-        } catch (e) {
-            console.error('Failed to trigger media scan:', e);
+        } catch (error) {
+            console.error('Failed to trigger media scan:', error);
         }
     }
     console.warn('Downloaded to:', `${dir}/${filename}`);

@@ -89,15 +89,19 @@ export const LIMIT = 50;
  */
 export const useUserMessages = (
     userId: string | null,
-): UseInfiniteQueryResult<InfiniteData<ChatMessage[]>, Error> =>
+): UseInfiniteQueryResult<InfiniteData<ChatMessage[]>> =>
     useInfiniteQuery({
         queryKey: CHAT_QUERY_KEYS.userMessages(userId),
-        queryFn: ({ pageParam }): Promise<ChatMessage[]> =>
-            chatApi.getUserMessages(userId!, LIMIT, pageParam),
+        queryFn: ({ pageParam }): Promise<ChatMessage[]> => {
+            if (userId === null) {
+                throw new Error('userId is required');
+            }
+            return chatApi.getUserMessages(userId, LIMIT, pageParam);
+        },
         initialPageParam: undefined as string | undefined,
         getNextPageParam: (lastPage): string | undefined => {
             if (lastPage.length < LIMIT) return undefined;
-            return lastPage[0].id;
+            return lastPage[0]?.id;
         },
         enabled: !!userId,
     });
@@ -109,39 +113,45 @@ export const useChannelMessages = (
     serverId: string | null,
     channelId: string | null,
     around?: string | null,
-): UseInfiniteQueryResult<InfiniteData<ChatMessage[]>, Error> =>
-    useInfiniteQuery({
+): UseInfiniteQueryResult<InfiniteData<ChatMessage[]>> => {
+    const targetAround =
+        typeof around === 'string' && around.length > 0 ? around : null;
+    return useInfiniteQuery({
         queryKey: CHAT_QUERY_KEYS.channelMessages(
             serverId,
             channelId,
-            around || null,
+            targetAround,
         ),
         queryFn: ({ pageParam }): Promise<ChatMessage[]> => {
-            if (around && !pageParam) {
+            if (serverId === null || channelId === null) {
+                throw new Error('serverId and channelId are required');
+            }
+            if (targetAround && !pageParam) {
                 return chatApi.getChannelMessages(
-                    serverId!,
-                    channelId!,
+                    serverId,
+                    channelId,
                     LIMIT * 2,
                     undefined,
-                    around,
+                    targetAround,
                 );
             }
             return chatApi.getChannelMessages(
-                serverId!,
-                channelId!,
+                serverId,
+                channelId,
                 LIMIT,
-                pageParam as string | undefined,
+                pageParam,
             );
         },
         initialPageParam: undefined as string | undefined,
         getNextPageParam: (lastPage): string | undefined => {
             if (lastPage.length < LIMIT) return undefined;
-            return lastPage[0].id;
+            return lastPage[0]?.id;
         },
         enabled: !!serverId && !!channelId,
         staleTime: Infinity,
         gcTime: 30 * 60 * 1000,
     });
+};
 
 /**
  * @description Hook to delete a message
@@ -492,7 +502,7 @@ function filtersToKey(f: SearchFilters): string {
     const entries = Object.entries(f).filter(([, v]) => v !== undefined);
     if (entries.length === 0) return '';
     return JSON.stringify(
-        Object.fromEntries(entries.sort(([a], [b]) => a.localeCompare(b))),
+        Object.fromEntries(entries.toSorted(([a], [b]) => a.localeCompare(b))),
     );
 }
 
@@ -519,7 +529,7 @@ export const useMessageSearch = ({
     query: string;
     page?: number;
     filters?: SearchFilters;
-}): UseQueryResult<MessageSearchResponse, Error> =>
+}): UseQueryResult<MessageSearchResponse> =>
     useQuery({
         queryKey: CHAT_QUERY_KEYS.messageSearch(
             mode,
@@ -530,25 +540,33 @@ export const useMessageSearch = ({
             page,
             filtersToKey(filters),
         ),
-        queryFn: (): Promise<MessageSearchResponse> =>
-            mode === 'dm'
-                ? chatApi.searchDmMessages(
-                      otherUserId!,
-                      query,
-                      SEARCH_PAGE_SIZE,
-                      page * SEARCH_PAGE_SIZE,
-                      filters,
-                  )
-                : chatApi.searchChannelMessages(
-                      serverId!,
-                      channelId!,
-                      query,
-                      SEARCH_PAGE_SIZE,
-                      page * SEARCH_PAGE_SIZE,
-                      filters,
-                  ),
+        queryFn: (): Promise<MessageSearchResponse> => {
+            if (mode === 'dm') {
+                if (otherUserId === undefined) {
+                    throw new Error('otherUserId is required');
+                }
+                return chatApi.searchDmMessages(
+                    otherUserId,
+                    query,
+                    SEARCH_PAGE_SIZE,
+                    page * SEARCH_PAGE_SIZE,
+                    filters,
+                );
+            }
+            if (serverId === undefined || channelId === undefined) {
+                throw new Error('serverId and channelId are required');
+            }
+            return chatApi.searchChannelMessages(
+                serverId,
+                channelId,
+                query,
+                SEARCH_PAGE_SIZE,
+                page * SEARCH_PAGE_SIZE,
+                filters,
+            );
+        },
         enabled:
-            (query.length >= 1 || hasActiveFilters(filters)) &&
+            (query.length > 0 || hasActiveFilters(filters)) &&
             (mode === 'dm' ? !!otherUserId : !!serverId && !!channelId),
         staleTime: 30_000,
     });
@@ -559,10 +577,14 @@ export const useMessageSearch = ({
 export const usePinnedMessages = (
     serverId: string | null,
     channelId: string | null,
-): UseQueryResult<ChatMessage[], Error> =>
+): UseQueryResult<ChatMessage[]> =>
     useQuery({
         queryKey: [...CHAT_QUERY_KEYS.channelPins(channelId), serverId],
-        queryFn: (): Promise<ChatMessage[]> =>
-            chatApi.getPinnedMessages(serverId!, channelId!),
+        queryFn: (): Promise<ChatMessage[]> => {
+            if (serverId === null || channelId === null) {
+                throw new Error('serverId and channelId are required');
+            }
+            return chatApi.getPinnedMessages(serverId, channelId);
+        },
         enabled: !!serverId && !!channelId,
     });

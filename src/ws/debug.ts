@@ -14,7 +14,7 @@ let events: DebugWsEvent[] = [];
 const listeners = new Set<() => void>();
 
 const notify = (): void => {
-    listeners.forEach((l): void => l());
+    for (const l of listeners) l();
 };
 
 export const addWsDebugEvent = (
@@ -22,7 +22,7 @@ export const addWsDebugEvent = (
 ): void => {
     const newEvent: DebugWsEvent = {
         ...event,
-        id: Math.random().toString(36).substring(2, 11),
+        id: Math.random().toString(36).slice(2, 11),
         timestamp: Date.now(),
     };
 
@@ -30,16 +30,13 @@ export const addWsDebugEvent = (
     notify();
 };
 
-export const clearWsDebugEvents = (): void => {
-    events = [];
-    notify();
-};
-
 export const useWsDebugEvents = (): DebugWsEvent[] => {
     const [currentEvents, setCurrentEvents] = useState<DebugWsEvent[]>(events);
 
     useEffect((): (() => void) => {
-        const listener = (): void => setCurrentEvents([...events]);
+        const listener = (): void => {
+            setCurrentEvents([...events]);
+        };
         listeners.add(listener);
         return (): void => {
             listeners.delete(listener);
@@ -53,7 +50,7 @@ let isWindowOpen =
     localStorage.getItem('serchat:debug-window') === 'true';
 
 export const toggleWsDebugWindow = (force?: boolean): void => {
-    isWindowOpen = force !== undefined ? force : !isWindowOpen;
+    isWindowOpen = force ?? !isWindowOpen;
     localStorage.setItem('serchat:debug-window', String(isWindowOpen));
     notify();
 };
@@ -62,7 +59,9 @@ export const useWsDebugWindowOpen = (): boolean => {
     const [open, setOpen] = useState(isWindowOpen);
 
     useEffect((): (() => void) => {
-        const listener = (): void => setOpen(isWindowOpen);
+        const listener = (): void => {
+            setOpen(isWindowOpen);
+        };
         listeners.add(listener);
         return (): void => {
             listeners.delete(listener);

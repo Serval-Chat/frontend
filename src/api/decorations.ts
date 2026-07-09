@@ -8,12 +8,9 @@ export interface Decoration {
     createdAt: string;
 }
 
-export const getDecorationUrl = (
-    id: string,
-    baseSize: number = 128,
-): string => {
+export const getDecorationUrl = (id: string, baseSize = 128): string => {
     const pixelRatio =
-        typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1;
+        globalThis.window === undefined ? 1 : window.devicePixelRatio || 1;
     const finalSize = Math.round(baseSize * 1.25 * pixelRatio);
     return `/api/v1/decorations/file/${id}?size=${finalSize}`;
 };

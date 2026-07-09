@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useReducer } from 'react';
 
 import { Eye } from 'lucide-react';
 
@@ -8,66 +8,88 @@ import { SettingsFloatingBar } from '@/ui/components/common/SettingsFloatingBar'
 import { Text } from '@/ui/components/common/Text';
 import { Toggle } from '@/ui/components/common/Toggle';
 
+// the 5 local overrides all reset together (on Save success and on Reset),
+// so they're one reducer instead of 5 separately-set useState calls.
+interface LocalOverrides {
+    disableFonts: boolean | null;
+    disableColors: boolean | null;
+    disableGlow: boolean | null;
+    limitedAnimations: boolean | null;
+    showUsersPronouns: boolean | null;
+}
+
+const initialOverrides: LocalOverrides = {
+    disableFonts: null,
+    disableColors: null,
+    disableGlow: null,
+    limitedAnimations: null,
+    showUsersPronouns: null,
+};
+
+type LocalOverridesAction =
+    | { type: 'set'; field: keyof LocalOverrides; value: boolean }
+    | { type: 'reset' };
+
+function localOverridesReducer(
+    state: LocalOverrides,
+    action: LocalOverridesAction,
+): LocalOverrides {
+    switch (action.type) {
+        case 'set': {
+            return { ...state, [action.field]: action.value };
+        }
+        case 'reset': {
+            return initialOverrides;
+        }
+        default: {
+            return state;
+        }
+    }
+}
+
 export const AccessibilitySettings = () => {
     const { data: user, isLoading } = useMe();
     const { mutate: updateSettings, isPending: isSaving } = useUpdateSettings();
 
-    const [localDisableFonts, setLocalDisableFonts] = useState<boolean | null>(
-        null,
+    const [local, dispatchLocal] = useReducer(
+        localOverridesReducer,
+        initialOverrides,
     );
-    const [localDisableColors, setLocalDisableColors] = useState<
-        boolean | null
-    >(null);
-    const [localDisableGlow, setLocalDisableGlow] = useState<boolean | null>(
-        null,
-    );
-    const [localLimitedAnimations, setLocalLimitedAnimations] = useState<
-        boolean | null
-    >(null);
-    const [localShowUsersPronouns, setLocalShowUsersPronouns] = useState<
-        boolean | null
-    >(null);
 
     const disableCustomFonts =
-        localDisableFonts !== null
-            ? localDisableFonts
-            : user?.settings?.disableCustomUsernameFonts || false;
+        local.disableFonts ??
+        user?.settings?.disableCustomUsernameFonts ??
+        false;
 
     const disableCustomColors =
-        localDisableColors !== null
-            ? localDisableColors
-            : user?.settings?.disableCustomUsernameColors || false;
+        local.disableColors ??
+        user?.settings?.disableCustomUsernameColors ??
+        false;
 
     const disableCustomGlow =
-        localDisableGlow !== null
-            ? localDisableGlow
-            : user?.settings?.disableCustomUsernameGlow || false;
+        local.disableGlow ?? user?.settings?.disableCustomUsernameGlow ?? false;
 
     const limitedAnimations =
-        localLimitedAnimations !== null
-            ? localLimitedAnimations
-            : user?.settings?.limitedAnimations || false;
+        local.limitedAnimations ?? user?.settings?.limitedAnimations ?? false;
 
     const showUsersPronouns =
-        localShowUsersPronouns !== null
-            ? localShowUsersPronouns
-            : (user?.settings?.showUsersPronouns ?? false);
+        local.showUsersPronouns ?? user?.settings?.showUsersPronouns ?? false;
 
     const hasChanges =
-        (localDisableFonts !== null &&
-            localDisableFonts !==
-                (user?.settings?.disableCustomUsernameFonts || false)) ||
-        (localDisableColors !== null &&
-            localDisableColors !==
-                (user?.settings?.disableCustomUsernameColors || false)) ||
-        (localDisableGlow !== null &&
-            localDisableGlow !==
-                (user?.settings?.disableCustomUsernameGlow || false)) ||
-        (localLimitedAnimations !== null &&
-            localLimitedAnimations !==
-                (user?.settings?.limitedAnimations || false)) ||
-        (localShowUsersPronouns !== null &&
-            localShowUsersPronouns !==
+        (local.disableFonts !== null &&
+            local.disableFonts !==
+                (user?.settings?.disableCustomUsernameFonts ?? false)) ||
+        (local.disableColors !== null &&
+            local.disableColors !==
+                (user?.settings?.disableCustomUsernameColors ?? false)) ||
+        (local.disableGlow !== null &&
+            local.disableGlow !==
+                (user?.settings?.disableCustomUsernameGlow ?? false)) ||
+        (local.limitedAnimations !== null &&
+            local.limitedAnimations !==
+                (user?.settings?.limitedAnimations ?? false)) ||
+        (local.showUsersPronouns !== null &&
+            local.showUsersPronouns !==
                 (user?.settings?.showUsersPronouns ?? false));
 
     const handleSave = (): void => {
@@ -81,22 +103,14 @@ export const AccessibilitySettings = () => {
             },
             {
                 onSuccess: (): void => {
-                    setLocalDisableFonts(null);
-                    setLocalDisableColors(null);
-                    setLocalDisableGlow(null);
-                    setLocalLimitedAnimations(null);
-                    setLocalShowUsersPronouns(null);
+                    dispatchLocal({ type: 'reset' });
                 },
             },
         );
     };
 
     const handleReset = (): void => {
-        setLocalDisableFonts(null);
-        setLocalDisableColors(null);
-        setLocalDisableGlow(null);
-        setLocalLimitedAnimations(null);
-        setLocalShowUsersPronouns(null);
+        dispatchLocal({ type: 'reset' });
     };
 
     if (isLoading) {
@@ -147,7 +161,13 @@ export const AccessibilitySettings = () => {
                                 </div>
                                 <Toggle
                                     checked={disableCustomFonts}
-                                    onCheckedChange={setLocalDisableFonts}
+                                    onCheckedChange={(value): void => {
+                                        dispatchLocal({
+                                            type: 'set',
+                                            field: 'disableFonts',
+                                            value,
+                                        });
+                                    }}
                                 />
                             </div>
 
@@ -172,7 +192,13 @@ export const AccessibilitySettings = () => {
                                 </div>
                                 <Toggle
                                     checked={disableCustomColors}
-                                    onCheckedChange={setLocalDisableColors}
+                                    onCheckedChange={(value): void => {
+                                        dispatchLocal({
+                                            type: 'set',
+                                            field: 'disableColors',
+                                            value,
+                                        });
+                                    }}
                                 />
                             </div>
 
@@ -195,7 +221,13 @@ export const AccessibilitySettings = () => {
                                 </div>
                                 <Toggle
                                     checked={disableCustomGlow}
-                                    onCheckedChange={setLocalDisableGlow}
+                                    onCheckedChange={(value): void => {
+                                        dispatchLocal({
+                                            type: 'set',
+                                            field: 'disableGlow',
+                                            value,
+                                        });
+                                    }}
                                 />
                             </div>
 
@@ -219,7 +251,13 @@ export const AccessibilitySettings = () => {
                                 </div>
                                 <Toggle
                                     checked={limitedAnimations}
-                                    onCheckedChange={setLocalLimitedAnimations}
+                                    onCheckedChange={(value): void => {
+                                        dispatchLocal({
+                                            type: 'set',
+                                            field: 'limitedAnimations',
+                                            value,
+                                        });
+                                    }}
                                 />
                             </div>
 
@@ -244,7 +282,13 @@ export const AccessibilitySettings = () => {
                                 </div>
                                 <Toggle
                                     checked={showUsersPronouns}
-                                    onCheckedChange={setLocalShowUsersPronouns}
+                                    onCheckedChange={(value): void => {
+                                        dispatchLocal({
+                                            type: 'set',
+                                            field: 'showUsersPronouns',
+                                            value,
+                                        });
+                                    }}
                                 />
                             </div>
                         </div>

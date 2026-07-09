@@ -10,8 +10,7 @@ import type { NotificationSound, User } from '@/api/users/users.types';
 export const useUploadNotificationSound = (): UseMutationResult<
     NotificationSound,
     Error,
-    File,
-    unknown
+    File
 > => {
     const queryClient = useQueryClient();
 
@@ -55,8 +54,7 @@ export const useUploadNotificationSound = (): UseMutationResult<
 export const useDeleteNotificationSound = (): UseMutationResult<
     string,
     Error,
-    string,
-    unknown
+    string
 > => {
     const queryClient = useQueryClient();
 

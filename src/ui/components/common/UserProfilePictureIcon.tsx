@@ -57,7 +57,7 @@ export const UserProfilePictureIcon = ({
     }
     const imgFailed = imgState.forUrl === iconUrl ? imgState.failed : false;
 
-    const letter = (username || '?')[0].toUpperCase();
+    const letter = (username || '?')[0]?.toUpperCase() ?? '?';
 
     return (
         <Box
@@ -72,11 +72,15 @@ export const UserProfilePictureIcon = ({
                 <PausedAnimatedImage
                     alt={username}
                     className="h-full w-full object-cover"
-                    paused={limitedAnimations && isAnimatedImageUrl(iconUrl)}
-                    src={iconUrl}
-                    onError={() =>
-                        setImgState({ failed: true, forUrl: iconUrl })
+                    paused={
+                        limitedAnimations
+                            ? isAnimatedImageUrl(iconUrl)
+                            : false
                     }
+                    src={iconUrl}
+                    onError={() => {
+                        setImgState({ failed: true, forUrl: iconUrl });
+                    }}
                 />
             ) : (
                 <span className="text-(--avatar-fallback-text)">{letter}</span>

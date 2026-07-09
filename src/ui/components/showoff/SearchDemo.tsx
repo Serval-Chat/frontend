@@ -124,18 +124,18 @@ const DM_MESSAGES: MockMessage[] = [
     },
 ];
 
-function HighlightedText({
+const HighlightedText = ({
     text,
     query,
 }: {
     text: string;
     query: string;
-}): ReactNode {
-    if (!query.trim()) return text;
+}): ReactNode => {
+    if (query.trim().length === 0) return text;
 
-    const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const escaped = query.replaceAll(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`);
     const rawParts = text.split(new RegExp(`(${escaped})`, 'gi'));
-    const partsWithKeys: Array<{ part: string; key: number }> = [];
+    const partsWithKeys: { part: string; key: number }[] = [];
     let pos = 0;
     for (const part of rawParts) {
         partsWithKeys.push({ part, key: pos });
@@ -164,7 +164,7 @@ function HighlightedText({
             )}
         </>
     );
-}
+};
 
 interface ResultCardProps {
     message: MockMessage;
@@ -231,27 +231,41 @@ interface MockChatHeaderProps {
     onToggleSearch: () => void;
 }
 
+const iconBtnStyle = (active: boolean): CSSProperties => ({
+    width: 36,
+    height: 36,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: radius.md,
+    border: 'none',
+    background: active ? colors.bgSubtle : 'transparent',
+    color: active ? colors.foreground : colors.mutedForeground,
+    cursor: 'pointer',
+    transition: 'background-color 0.12s, color 0.12s',
+    flexShrink: 0,
+});
+
+const closeSearchButtonStyle: CSSProperties = {
+    width: 28,
+    height: 28,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: radius.md,
+    border: 'none',
+    background: 'transparent',
+    color: colors.mutedForeground,
+    cursor: 'pointer',
+    flexShrink: 0,
+};
+
 function MockChatHeader({
     icon,
     name,
     isSearchOpen,
     onToggleSearch,
 }: MockChatHeaderProps): ReactNode {
-    const iconBtnStyle = (active: boolean): CSSProperties => ({
-        width: 36,
-        height: 36,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        borderRadius: radius.md,
-        border: 'none',
-        background: active ? colors.bgSubtle : 'transparent',
-        color: active ? colors.foreground : colors.mutedForeground,
-        cursor: 'pointer',
-        transition: 'background-color 0.12s, color 0.12s',
-        flexShrink: 0,
-    });
-
     return (
         <div
             style={{
@@ -354,24 +368,14 @@ function SearchPanel({ messages, onClose }: SearchPanelProps): ReactNode {
                         ref={inputRef}
                         size="sm"
                         value={query}
-                        onChange={(e) => setQuery(e.target.value)}
+                        onChange={(e) => {
+                            setQuery(e.target.value);
+                        }}
                     />
                 </div>
                 <button
                     aria-label="Close search"
-                    style={{
-                        width: 28,
-                        height: 28,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        borderRadius: radius.md,
-                        border: 'none',
-                        background: 'transparent',
-                        color: colors.mutedForeground,
-                        cursor: 'pointer',
-                        flexShrink: 0,
-                    }}
+                    style={closeSearchButtonStyle}
                     type="button"
                     onClick={onClose}
                 >
@@ -380,7 +384,7 @@ function SearchPanel({ messages, onClose }: SearchPanelProps): ReactNode {
             </div>
 
             {/* results */}
-            {hasQuery && (
+            {hasQuery ? (
                 <div style={{ maxHeight: 480, overflowY: 'auto' }}>
                     {isSearching ? (
                         [0, 1, 2].map((i) => (
@@ -481,7 +485,7 @@ function SearchPanel({ messages, onClose }: SearchPanelProps): ReactNode {
                             >
                                 <Text size="xs" variant="muted">
                                     {results.length} result
-                                    {results.length !== 1 ? 's' : ''}
+                                    {results.length === 1 ? '' : 's'}
                                 </Text>
                             </div>
                             {results.map((msg) => (
@@ -494,7 +498,7 @@ function SearchPanel({ messages, onClose }: SearchPanelProps): ReactNode {
                         </>
                     )}
                 </div>
-            )}
+            ) : null}
         </m.div>
     );
 }
@@ -528,15 +532,19 @@ function ChatSearchPreview({
                 icon={icon}
                 isSearchOpen={open}
                 name={name}
-                onToggleSearch={() => setOpen((v) => !v)}
+                onToggleSearch={() => {
+                    setOpen((v) => !v);
+                }}
             />
             <AnimatePresence>
-                {open && (
+                {open ? (
                     <SearchPanel
                         messages={messages}
-                        onClose={() => setOpen(false)}
+                        onClose={() => {
+                            setOpen(false);
+                        }}
                     />
-                )}
+                ) : null}
             </AnimatePresence>
             {/* fake message list placeholder, hidden while search is open */}
             <div

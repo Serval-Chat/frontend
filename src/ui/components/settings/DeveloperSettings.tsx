@@ -67,7 +67,9 @@ export const DeveloperSettings = () => {
                     </div>
                     <Button
                         variant={isWsWindowOpen ? 'danger' : 'primary'}
-                        onClick={(): void => toggleWsDebugWindow()}
+                        onClick={(): void => {
+                            toggleWsDebugWindow();
+                        }}
                     >
                         {isWsWindowOpen ? 'Close Window' : 'Launch Window'}
                     </Button>

@@ -46,14 +46,16 @@ const InviteBannerHeader = ({
                     !hasBanner && 'bg-bg-secondary',
                 )}
             >
-                {hasBanner && (
+                {hasBanner ? (
                     <>
                         <ServerBannerMedia alt={name} banner={banner} />
                         <div className="absolute inset-0 bg-black/30" />
                     </>
-                )}
+                ) : null}
 
-                {loading && <Skeleton className="h-full w-full rounded-none" />}
+                {loading ? (
+                    <Skeleton className="h-full w-full rounded-none" />
+                ) : null}
             </div>
 
             {/* Server icon */}
@@ -141,12 +143,12 @@ export const Invite = () => {
                                 className="flex items-center justify-center gap-2 text-xl leading-tight"
                                 variant="page"
                             >
-                                {data?.server.verified && (
+                                {data?.server.verified ? (
                                     <BadgeCheck
                                         className="shrink-0 text-primary"
                                         size={20}
                                     />
-                                )}
+                                ) : null}
                                 {data?.server.name}
                             </Heading>
                         )}
@@ -163,30 +165,27 @@ export const Invite = () => {
 
                         {/* Server Tags */}
                         {!showSkeleton &&
-                            data?.server.tags &&
-                            data.server.tags.length > 0 && (
-                                <div className="flex flex-wrap justify-center gap-1.5 pt-0.5">
-                                    {data.server.tags.map((tag) => (
-                                        <span
-                                            className="inline-flex items-center gap-1 rounded-full border border-primary/20 bg-primary/10 px-2 py-0.5 text-[9px] font-bold text-primary"
-                                            key={tag}
-                                        >
-                                            <Tag
-                                                className="opacity-60"
-                                                size={10}
-                                            />
-                                            {tag}
-                                        </span>
-                                    ))}
-                                </div>
-                            )}
+                        data?.server.tags &&
+                        data.server.tags.length > 0 ? (
+                            <div className="flex flex-wrap justify-center gap-1.5 pt-0.5">
+                                {data.server.tags.map((tag) => (
+                                    <span
+                                        className="inline-flex items-center gap-1 rounded-full border border-primary/20 bg-primary/10 px-2 py-0.5 text-[9px] font-bold text-primary"
+                                        key={tag}
+                                    >
+                                        <Tag className="opacity-60" size={10} />
+                                        {tag}
+                                    </span>
+                                ))}
+                            </div>
+                        ) : null}
 
                         <Divider />
 
                         {/* Invite meta info */}
-                        {!showSkeleton && data && (
+                        {!showSkeleton && data ? (
                             <div className="flex flex-wrap justify-center gap-x-lg gap-y-xs text-xs text-muted-foreground">
-                                {data.maxUses != null && (
+                                {data.maxUses == null ? null : (
                                     <span className="flex items-center gap-1">
                                         {data.uses} /{' '}
                                         {data.maxUses === 0 ? (
@@ -200,7 +199,7 @@ export const Invite = () => {
                                         uses
                                     </span>
                                 )}
-                                {data.expiresAt && (
+                                {data.expiresAt ? (
                                     <span>
                                         Expires{' '}
                                         {new Date(
@@ -211,11 +210,11 @@ export const Invite = () => {
                                             year: 'numeric',
                                         })}
                                     </span>
-                                )}
+                                ) : null}
                             </div>
-                        )}
+                        ) : null}
 
-                        {joinError && (
+                        {joinError ? (
                             <Text
                                 as="p"
                                 className="text-sm text-danger-muted-text"
@@ -228,7 +227,7 @@ export const Invite = () => {
                                     joinError.message ||
                                     'Failed to join server'}
                             </Text>
-                        )}
+                        ) : null}
 
                         {/* CTA */}
                         {showSkeleton ? (

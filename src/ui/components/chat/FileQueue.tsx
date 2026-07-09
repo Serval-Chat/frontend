@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 
 import { Check, Eye, EyeOff, X } from 'lucide-react';
 
-import { type QueuedFile } from '@/hooks/chat/useFileQueue';
+import type { QueuedFile } from '@/hooks/chat/useFileQueue';
 import { Button } from '@/ui/components/common/Button';
 import { Text } from '@/ui/components/common/Text';
 import { Box } from '@/ui/components/layout/Box';
@@ -26,8 +26,12 @@ export const FileQueue = ({
                 <FileQueueItem
                     file={file}
                     key={file.id}
-                    onRemove={(): void => onRemove(file.id)}
-                    onToggleSpoiler={(): void => onToggleSpoiler(file.id)}
+                    onRemove={(): void => {
+                        onRemove(file.id);
+                    }}
+                    onToggleSpoiler={(): void => {
+                        onToggleSpoiler(file.id);
+                    }}
                 />
             ))}
         </Box>
@@ -81,9 +85,9 @@ const FileQueueItem = ({
                 </div>
             )}
 
-            {file.status === 'idle' && (
+            {file.status === 'idle' ? (
                 <div className="absolute inset-0 flex items-center justify-center gap-1 bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
-                    {isImage && (
+                    {isImage ? (
                         <Button
                             className="h-8 w-8 border-none bg-black/60 p-0 hover:bg-black/80"
                             size="sm"
@@ -99,7 +103,7 @@ const FileQueueItem = ({
                                 <Eye size={14} />
                             )}
                         </Button>
-                    )}
+                    ) : null}
                     <Button
                         className="h-8 w-8 border-none bg-black/60 p-0 text-red-400 hover:bg-black/80 hover:text-red-300"
                         size="sm"
@@ -112,38 +116,38 @@ const FileQueueItem = ({
                         <X size={14} />
                     </Button>
                 </div>
-            )}
+            ) : null}
 
             {/* Uploading indicator */}
-            {file.status === 'uploading' && (
+            {file.status === 'uploading' ? (
                 <div className="absolute inset-x-2 bottom-2 h-1 overflow-hidden rounded-full bg-white/20">
                     <div
                         className="h-full bg-primary transition-all duration-300"
                         style={{ width: `${file.progress}%` }}
                     />
                 </div>
-            )}
+            ) : null}
 
             {/* Completed indicator */}
-            {file.status === 'completed' && (
+            {file.status === 'completed' ? (
                 <div className="absolute top-1 right-1 rounded-full bg-green-500 p-0.5">
                     <Check className="text-white" size={10} />
                 </div>
-            )}
+            ) : null}
 
             {/* Error indicator */}
-            {file.status === 'error' && (
+            {file.status === 'error' ? (
                 <div className="absolute inset-0 flex items-center justify-center bg-red-500/20">
                     <X className="text-red-500" size={20} />
                 </div>
-            )}
+            ) : null}
 
             {/* Spoiler indicator tag */}
-            {file.isSpoiler && (
+            {file.isSpoiler ? (
                 <div className="pointer-events-none absolute top-1 left-1 rounded bg-black/60 px-1 text-[10px] font-bold tracking-wider text-white uppercase backdrop-blur-sm">
                     Spoiler
                 </div>
-            )}
+            ) : null}
         </Box>
     );
 };

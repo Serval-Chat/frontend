@@ -43,7 +43,7 @@ export const EmojiInfoBox = ({
 
     const content = (
         <>
-            {onClose && (
+            {onClose ? (
                 <button
                     aria-label="Close emoji info"
                     className="fixed inset-0 z-[1060]"
@@ -60,7 +60,7 @@ export const EmojiInfoBox = ({
                         }
                     }}
                 />
-            )}
+            ) : null}
             <m.div
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 className={cn(

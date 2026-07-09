@@ -43,7 +43,7 @@ export const StickerInfoBox = ({
 
     const content = (
         <>
-            {onClose && (
+            {onClose ? (
                 <button
                     aria-label="Close sticker info"
                     className="fixed inset-0 z-[1060]"
@@ -60,7 +60,7 @@ export const StickerInfoBox = ({
                         }
                     }}
                 />
-            )}
+            ) : null}
             <m.div
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 className={cn(

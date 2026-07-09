@@ -4,7 +4,9 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { LexicalPastePlugin } from './LexicalPastePlugin';
 
 const insertText = vi.fn();
-const update = vi.fn((callback: () => void): void => callback());
+const update = vi.fn((callback: () => void): void => {
+    callback();
+});
 let pasteHandler: ((event: ClipboardEvent) => boolean) | undefined;
 
 vi.mock('@lexical/react/LexicalComposerContext', () => ({
@@ -37,7 +39,9 @@ describe('LexicalPastePlugin', (): void => {
 
         render(<LexicalPastePlugin onPasteFiles={vi.fn()} />);
 
-        await waitFor((): void => expect(pasteHandler).toBeDefined());
+        await waitFor((): void => {
+            expect(pasteHandler).toBeDefined();
+        });
 
         const handled = pasteHandler?.({
             clipboardData: {

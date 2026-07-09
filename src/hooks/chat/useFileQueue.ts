@@ -20,7 +20,7 @@ export function useFileQueue(): {
     const [files, setFiles] = useState<QueuedFile[]>([]);
 
     const addFiles = useCallback((newFiles: FileList | File[]): void => {
-        const fileArray = Array.from(newFiles);
+        const fileArray = [...newFiles];
         const queuedFiles: QueuedFile[] = fileArray.map(
             (
                 file,
@@ -32,7 +32,7 @@ export function useFileQueue(): {
                 status: 'idle';
             } => ({
                 id:
-                    Math.random().toString(36).substring(7) +
+                    Math.random().toString(36).slice(7) +
                     Date.now().toString(36),
                 file,
                 isSpoiler: false,

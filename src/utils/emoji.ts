@@ -26,35 +26,30 @@ export interface EmojiData {
 }
 
 // Group emojis by category
-export const groupedEmojis = (emojiData as EmojiData[]).reduce(
-    (acc, emoji): Record<string, EmojiData[]> => {
-        if (!emoji.has_img_apple) return acc;
+export const groupedEmojis: Record<string, EmojiData[]> = {};
+for (const emoji of emojiData as EmojiData[]) {
+    if (!emoji.has_img_apple) continue;
+    (groupedEmojis[emoji.category] ??= []).push(emoji);
+}
 
-        if (!acc[emoji.category]) {
-            acc[emoji.category] = [];
-        }
-        acc[emoji.category].push(emoji);
-        return acc;
+export const categories = Object.keys(groupedEmojis).toSorted(
+    (a, b): number => {
+        const order = [
+            'Smileys & Emotion',
+            'People & Body',
+            'Animals & Nature',
+            'Food & Drink',
+            'Travel & Places',
+            'Activities',
+            'Objects',
+            'Symbols',
+            'Symbols',
+            'Flags',
+            'Component',
+        ];
+        return order.indexOf(a) - order.indexOf(b);
     },
-    {} as Record<string, EmojiData[]>,
 );
-
-export const categories = Object.keys(groupedEmojis).sort((a, b): number => {
-    const order = [
-        'Smileys & Emotion',
-        'People & Body',
-        'Animals & Nature',
-        'Food & Drink',
-        'Travel & Places',
-        'Activities',
-        'Objects',
-        'Symbols',
-        'Symbols',
-        'Flags',
-        'Component',
-    ];
-    return order.indexOf(a) - order.indexOf(b);
-});
 
 export const categoryIconMap: Record<string, EmojiData | undefined> = {
     'Smileys & Emotion': (emojiData as EmojiData[]).find(
@@ -123,8 +118,8 @@ export const getSpriteStyle = (emoji?: EmojiData): React.CSSProperties => {
     return {
         backgroundImage:
             'image-set(url(/emoji-sheet.webp) type("image/webp"), url(/emoji-sheet.png) type("image/png"))',
-        backgroundPosition: `${(emoji.sheet_x / (TOTAL_COLS - 1)) * 100}% ${(emoji.sheet_y / (TOTAL_ROWS - 1)) * 100}%`,
-        backgroundSize: `${TOTAL_COLS * 100}% ${TOTAL_ROWS * 100}%`,
+        backgroundPosition: `${String((emoji.sheet_x / (TOTAL_COLS - 1)) * 100)}% ${String((emoji.sheet_y / (TOTAL_ROWS - 1)) * 100)}%`,
+        backgroundSize: `${String(TOTAL_COLS * 100)}% ${String(TOTAL_ROWS * 100)}%`,
         width: '100%',
         height: '100%',
         display: 'block',
@@ -133,28 +128,28 @@ export const getSpriteStyle = (emoji?: EmojiData): React.CSSProperties => {
 
 export const getUnicode = (emoji: EmojiData): string =>
     String.fromCodePoint(
-        ...emoji.unified.split('-').map((u): number => parseInt(u, 16)),
+        ...emoji.unified.split('-').map((u): number => Number.parseInt(u, 16)),
     );
 
 // Map of unicode character to EmojiData
 export const emojiMap = new Map<string, EmojiData>();
 const emojiUnicodeList: string[] = [];
 
-(emojiData as EmojiData[]).forEach((emoji): void => {
-    if (!emoji.has_img_apple) return;
+for (const emoji of emojiData as EmojiData[]) {
+    if (!emoji.has_img_apple) continue;
     const unicode = getUnicode(emoji);
     emojiMap.set(unicode, emoji);
     emojiUnicodeList.push(unicode);
-});
+}
 
 // Sort by length descending
 emojiUnicodeList.sort((a, b): number => b.length - a.length);
 
 // Escape special regex characters
 const escapeRegex = (string: string): string =>
-    string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    string.replaceAll(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`);
 
 // Create a regex that matches any of the emojis
 export const emojiRegex = new RegExp(
-    `(${emojiUnicodeList.map(escapeRegex).join('|')})`,
+    `(${emojiUnicodeList.map((unicode): string => escapeRegex(unicode)).join('|')})`,
 );

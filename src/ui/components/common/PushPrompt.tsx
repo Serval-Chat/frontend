@@ -7,21 +7,25 @@ import { Button } from '@/ui/components/common/Button';
 import { Heading } from '@/ui/components/common/Heading';
 import { Text } from '@/ui/components/common/Text';
 
-const isTauri = (): boolean => '__TAURI_INTERNALS__' in window;
+const isTauri = (): boolean => '__TAURI_INTERNALS__' in globalThis;
 
 export const PushPrompt = () => {
     const [isVisible, setIsVisible] = useState(false);
     const [isGranting, setIsGranting] = useState(false);
 
     useEffect((): (() => void) | undefined => {
-        if (isTauri() || !('Notification' in window)) return;
+        if (isTauri() || !('Notification' in globalThis)) return;
 
         if (Notification.permission === 'default') {
             const isDismissed =
                 localStorage.getItem('push_prompt_dismissed') === 'true';
             if (!isDismissed) {
-                const timer = setTimeout((): void => setIsVisible(true), 1500);
-                return (): void => clearTimeout(timer);
+                const timer = setTimeout((): void => {
+                    setIsVisible(true);
+                }, 1500);
+                return (): void => {
+                    clearTimeout(timer);
+                };
             }
         }
     }, []);
@@ -36,10 +40,10 @@ export const PushPrompt = () => {
         try {
             await setupWebPush();
             setIsVisible(false);
-        } catch (err) {
+        } catch (error) {
             console.error(
                 'Failed to setup push notifications from prompt',
-                err,
+                error,
             );
         } finally {
             setIsGranting(false);

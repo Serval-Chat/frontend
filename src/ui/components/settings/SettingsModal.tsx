@@ -171,9 +171,9 @@ export const SettingsModal = ({
                                     className="text-muted-foreground hover:bg-bg-subtle hover:text-foreground"
                                     icon={ChevronLeft}
                                     iconSize={24}
-                                    onClick={(): void =>
-                                        setIsMobileSidebarOpen(true)
-                                    }
+                                    onClick={(): void => {
+                                        setIsMobileSidebarOpen(true);
+                                    }}
                                 />
                             </div>
                             <Heading
@@ -202,36 +202,36 @@ export const SettingsModal = ({
                             <React.Suspense
                                 fallback={<SettingsSectionLoading />}
                             >
-                                {activeSection === 'account' && (
+                                {activeSection === 'account' ? (
                                     <AccountSettings />
-                                )}
-                                {activeSection === 'appearance' && (
+                                ) : null}
+                                {activeSection === 'appearance' ? (
                                     <AppearanceSettings />
-                                )}
-                                {activeSection === 'accessibility' && (
+                                ) : null}
+                                {activeSection === 'accessibility' ? (
                                     <AccessibilitySettings />
-                                )}
-                                {activeSection === 'privacy' && (
+                                ) : null}
+                                {activeSection === 'privacy' ? (
                                     <PrivacySettings />
-                                )}
-                                {activeSection === 'blocking' && (
+                                ) : null}
+                                {activeSection === 'blocking' ? (
                                     <BlockingSettings />
-                                )}
-                                {activeSection === 'standing' && (
+                                ) : null}
+                                {activeSection === 'standing' ? (
                                     <StandingSettings />
-                                )}
-                                {activeSection === 'notifications' && (
+                                ) : null}
+                                {activeSection === 'notifications' ? (
                                     <NotificationSettings />
-                                )}
-                                {activeSection === 'keybinds' && (
+                                ) : null}
+                                {activeSection === 'keybinds' ? (
                                     <KeybindSettings />
-                                )}
-                                {activeSection === 'developer' && (
+                                ) : null}
+                                {activeSection === 'developer' ? (
                                     <DeveloperSettings />
-                                )}
-                                {activeSection === 'decorations' && (
+                                ) : null}
+                                {activeSection === 'decorations' ? (
                                     <AvatarDecorationsSettings />
-                                )}
+                                ) : null}
                             </React.Suspense>
                         )}
                     </div>

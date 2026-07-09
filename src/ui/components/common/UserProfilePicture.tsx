@@ -51,8 +51,12 @@ export const UserProfilePicture = ({
                 onClick && 'cursor-pointer',
                 className,
             )}
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
+            onMouseEnter={() => {
+                setIsHovered(true);
+            }}
+            onMouseLeave={() => {
+                setIsHovered(false);
+            }}
         >
             <UserProfilePictureIcon
                 size={size}
@@ -60,7 +64,7 @@ export const UserProfilePicture = ({
                 username={username}
                 onClick={onClick}
             />
-            {decorationId && (
+            {decorationId ? (
                 <PausedAnimatedImage
                     alt=""
                     className="pointer-events-none absolute inset-0 z-10 h-full w-full scale-125 object-cover"
@@ -70,8 +74,8 @@ export const UserProfilePicture = ({
                         DECORATION_SIZE_PX[size] ?? 128,
                     )}
                 />
-            )}
-            {!noIndicator && (
+            ) : null}
+            {noIndicator ? null : (
                 <UserProfileStatusIndicator size={size} status={status} />
             )}
         </Box>

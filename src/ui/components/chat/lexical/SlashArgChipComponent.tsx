@@ -8,7 +8,7 @@ import {
     $isSlashArgChipNode,
     SLASH_ARG_INPUT_ATTR,
     focusSlashArgInput,
-} from './SlashArgChipNode';
+} from './slashChipHelpers';
 
 export interface SlashArgChipProps {
     argName: string;
@@ -37,7 +37,9 @@ export const SlashArgChipComponent = ({
                 (): void | undefined => inputRef.current?.focus(),
                 30,
             );
-            return (): void => clearTimeout(id);
+            return (): void => {
+                clearTimeout(id);
+            };
         }
     }, [argIndex]);
 
@@ -70,12 +72,12 @@ export const SlashArgChipComponent = ({
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
             e.stopPropagation();
-            if (!isLast) {
-                focusSlashArgInput(editor, argIndex + 1);
-            } else {
+            if (isLast) {
                 const root = editor.getRootElement();
                 if (root) root.focus();
                 editor.dispatchCommand(KEY_ENTER_COMMAND, e.nativeEvent);
+            } else {
+                focusSlashArgInput(editor, argIndex + 1);
             }
             return;
         }
@@ -110,7 +112,7 @@ export const SlashArgChipComponent = ({
             >
                 <span className="shrink-0 text-xs font-medium text-muted-foreground">
                     {argName}
-                    {required && <span className="text-danger">*</span>}
+                    {required ? <span className="text-danger">*</span> : null}
                     :&nbsp;
                 </span>
                 <span className="relative inline-grid">

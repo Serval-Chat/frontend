@@ -82,13 +82,13 @@ export const InAppNotificationProvider = ({
             });
         };
 
-        window.addEventListener(
+        globalThis.addEventListener(
             IN_APP_NOTIFICATION_EVENT,
             handleInAppNotification,
         );
 
         return (): void => {
-            window.removeEventListener(
+            globalThis.removeEventListener(
                 IN_APP_NOTIFICATION_EVENT,
                 handleInAppNotification,
             );
@@ -98,11 +98,13 @@ export const InAppNotificationProvider = ({
     React.useEffect((): (() => void) | undefined => {
         if (!activeNotification) return undefined;
 
-        const timeoutId = window.setTimeout((): void => {
+        const timeoutId = globalThis.setTimeout((): void => {
             showNextNotification();
         }, NOTIFICATION_TIMEOUT_MS);
 
-        return (): void => window.clearTimeout(timeoutId);
+        return (): void => {
+            globalThis.clearTimeout(timeoutId);
+        };
     }, [activeNotification, showNextNotification]);
 
     return (
@@ -110,13 +112,13 @@ export const InAppNotificationProvider = ({
             {children}
             <Box className="pointer-events-none fixed top-[calc(0.75rem+env(safe-area-inset-top))] right-3 left-3 z-[var(--z-index-toast)] flex items-start justify-center md:right-auto md:left-1/2 md:w-[min(520px,calc(100vw-2rem))] md:-translate-x-1/2">
                 <AnimatePresence mode="wait">
-                    {activeNotification && (
+                    {activeNotification ? (
                         <InAppNotificationCard
                             key={activeNotification.id}
                             notification={activeNotification}
                             onClose={showNextNotification}
                         />
-                    )}
+                    ) : null}
                 </AnimatePresence>
             </Box>
         </>
@@ -147,7 +149,7 @@ const InAppNotificationCard = ({
             <div
                 className={`flex items-center gap-2 px-3 py-1${hasHeader ? ' border-b border-border-subtle' : ''}`}
             >
-                {notification.serverName && (
+                {notification.serverName ? (
                     <ServerIcon
                         className="pointer-events-none shrink-0"
                         server={{
@@ -156,9 +158,9 @@ const InAppNotificationCard = ({
                         }}
                         size="xxs"
                     />
-                )}
+                ) : null}
                 <div className="min-w-0 flex-1">
-                    {title && (
+                    {title ? (
                         <Text
                             className="text-foreground"
                             size="sm"
@@ -166,7 +168,7 @@ const InAppNotificationCard = ({
                         >
                             {title}
                         </Text>
-                    )}
+                    ) : null}
                 </div>
                 <Button
                     aria-label="Close notification"

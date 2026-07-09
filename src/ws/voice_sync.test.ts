@@ -1,4 +1,4 @@
-import type { Dispatch, UnknownAction } from '@reduxjs/toolkit';
+import type { Dispatch } from '@reduxjs/toolkit';
 import { QueryClient } from '@tanstack/react-query';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -21,6 +21,8 @@ interface MockWebSocket {
     onmessage: ((ev: MessageEvent) => void) | null;
     onerror: ((ev: Event) => void) | null;
     onclose: ((ev: CloseEvent) => void) | null;
+    addEventListener: ReturnType<typeof vi.fn>;
+    removeEventListener: ReturnType<typeof vi.fn>;
 }
 
 function emitWsEvent(
@@ -41,7 +43,7 @@ describe('Voice Synchronization WS Handlers', (): void => {
     let mockWs: MockWebSocket;
     let queryClient: QueryClient;
     let mockDispatch: ReturnType<typeof vi.fn>;
-    let dispatch: Dispatch<UnknownAction>;
+    let dispatch: Dispatch;
     let cleanup: () => void;
 
     beforeEach((): void => {
@@ -56,17 +58,27 @@ describe('Voice Synchronization WS Handlers', (): void => {
             onmessage: null,
             onerror: null,
             onclose: null,
+            addEventListener: vi.fn((event: string, handler: any) => {
+                (mockWs as any)[`on${event}`] = handler;
+            }),
+            removeEventListener: vi.fn((event: string, handler: any) => {
+                if ((mockWs as any)[`on${event}`] === handler) {
+                    (mockWs as any)[`on${event}`] = null;
+                }
+            }),
         };
 
-        class WebSocketMock {
-            static CONNECTING = 0;
-            static OPEN = 1;
-            static CLOSING = 2;
-            static CLOSED = 3;
-            constructor() {
-                return mockWs as any as WebSocket;
-            }
+        function WebSocketMock(): MockWebSocket {
+            return mockWs;
         }
+
+        Object.assign(WebSocketMock, {
+            CONNECTING: 0,
+            OPEN: 1,
+            CLOSING: 2,
+            CLOSED: 3,
+        });
+
         vi.stubGlobal('WebSocket', WebSocketMock);
 
         wsClient.connect('test-token');
@@ -76,7 +88,7 @@ describe('Voice Synchronization WS Handlers', (): void => {
         });
 
         mockDispatch = vi.fn();
-        dispatch = mockDispatch as any as Dispatch<UnknownAction>;
+        dispatch = mockDispatch as any as Dispatch;
 
         cleanup = setupGlobalWsHandlers(queryClient, dispatch);
     });

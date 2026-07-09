@@ -9,18 +9,21 @@ interface RGB {
 function parseToRgb(colorStr: string): RGB | null {
     const cleaned = colorStr.trim().toLowerCase();
     if (cleaned.startsWith('#')) {
-        const hex = cleaned.substring(1);
+        const hex = cleaned.slice(1);
         if (hex.length === 3) {
+            const r = hex.charAt(0);
+            const g = hex.charAt(1);
+            const b = hex.charAt(2);
             return {
-                r: parseInt(hex[0] + hex[0], 16),
-                g: parseInt(hex[1] + hex[1], 16),
-                b: parseInt(hex[2] + hex[2], 16),
+                r: Number.parseInt(r + r, 16),
+                g: Number.parseInt(g + g, 16),
+                b: Number.parseInt(b + b, 16),
             };
         } else if (hex.length === 6) {
             return {
-                r: parseInt(hex.substring(0, 2), 16),
-                g: parseInt(hex.substring(2, 4), 16),
-                b: parseInt(hex.substring(4, 6), 16),
+                r: Number.parseInt(hex.slice(0, 2), 16),
+                g: Number.parseInt(hex.slice(2, 4), 16),
+                b: Number.parseInt(hex.slice(4, 6), 16),
             };
         }
     } else if (cleaned.startsWith('rgb')) {
@@ -61,35 +64,37 @@ export function getAnsiDisplayName(user: User): string {
         if (rgbList.length > 0) {
             if (rgbList.length === 1 || name.length <= 1) {
                 const c = rgbList[0];
-                return `\u001b[38;2;${c.r};${c.g};${c.b}m${name}\u001b[0m`;
-            }
+                if (c) {
+                    return `\u001B[38;2;${c.r};${c.g};${c.b}m${name}\u001B[0m`;
+                }
+            } else {
+                let result = '';
+                const len = name.length;
+                for (let i = 0; i < len; i++) {
+                    const char = name[i];
+                    const t = i / (len - 1);
+                    const scaledT = t * (rgbList.length - 1);
+                    const idx = Math.floor(scaledT);
+                    const nextIdx = Math.min(idx + 1, rgbList.length - 1);
+                    const localT = scaledT - idx;
 
-            let result = '';
-            const len = name.length;
-            for (let i = 0; i < len; i++) {
-                const char = name[i];
-                const t = i / (len - 1);
-                const scaledT = t * (rgbList.length - 1);
-                const idx = Math.floor(scaledT);
-                const nextIdx = Math.min(idx + 1, rgbList.length - 1);
-                const localT = scaledT - idx;
-
-                const c = interpolateRgb(
-                    rgbList[idx],
-                    rgbList[nextIdx],
-                    localT,
-                );
-                result += `\u001b[38;2;${c.r};${c.g};${c.b}m${char}`;
+                    const from = rgbList[idx];
+                    const to = rgbList[nextIdx];
+                    if (from && to) {
+                        const c = interpolateRgb(from, to, localT);
+                        result += `\u001B[38;2;${c.r};${c.g};${c.b}m${char}`;
+                    }
+                }
+                result += '\u001B[0m';
+                return result;
             }
-            result += '\u001b[0m';
-            return result;
         }
     }
 
     if (user.usernameGlow?.enabled && user.usernameGlow.color) {
         const c = parseToRgb(user.usernameGlow.color);
         if (c) {
-            return `\u001b[38;2;${c.r};${c.g};${c.b}m${name}\u001b[0m`;
+            return `\u001B[38;2;${c.r};${c.g};${c.b}m${name}\u001B[0m`;
         }
     }
 
@@ -107,5 +112,5 @@ export function getAnsiColoredBadge(
     if (!colorStr) return badgeName;
     const c = parseToRgb(colorStr);
     if (!c) return badgeName;
-    return `\u001b[38;2;${c.r};${c.g};${c.b}m${badgeName}\u001b[0m`;
+    return `\u001B[38;2;${c.r};${c.g};${c.b}m${badgeName}\u001B[0m`;
 }

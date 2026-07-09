@@ -25,27 +25,39 @@ describe('WsClient', (): void => {
 
         sockets = [];
 
-        const createMockWebSocket = (): MockWebSocket => ({
-            send: vi.fn(),
-            close: vi.fn(),
-            readyState: 0, // CONNECTING
-            onopen: null,
-            onmessage: null,
-            onerror: null,
-            onclose: null,
-        });
+        const createMockWebSocket = (): MockWebSocket => {
+            const mock = {
+                send: vi.fn(),
+                close: vi.fn(),
+                readyState: 0, // CONNECTING
+                onopen: null,
+                onmessage: null,
+                onerror: null,
+                onclose: null,
+                addEventListener: vi.fn((event: string, handler: any) => {
+                    (mock as any)[`on${event}`] = handler;
+                }),
+                removeEventListener: vi.fn((event: string, handler: any) => {
+                    if ((mock as any)[`on${event}`] === handler) {
+                        (mock as any)[`on${event}`] = null;
+                    }
+                }),
+            };
+            return mock as unknown as MockWebSocket;
+        };
 
-        class WebSocketMock {
-            static CONNECTING = 0;
-            static OPEN = 1;
-            static CLOSING = 2;
-            static CLOSED = 3;
-            constructor() {
-                mockWebSocket = createMockWebSocket();
-                sockets.push(mockWebSocket);
-                return mockWebSocket as any as WebSocket;
-            }
+        function WebSocketMock(): MockWebSocket {
+            mockWebSocket = createMockWebSocket();
+            sockets.push(mockWebSocket);
+            return mockWebSocket;
         }
+
+        Object.assign(WebSocketMock, {
+            CONNECTING: 0,
+            OPEN: 1,
+            CLOSING: 2,
+            CLOSED: 3,
+        });
 
         vi.stubGlobal('WebSocket', WebSocketMock);
 
@@ -118,7 +130,7 @@ describe('WsClient', (): void => {
         wsClient.disconnect();
         firstSocket.onclose?.({ code: 1000, reason: 'logout' } as CloseEvent);
 
-        vi.advanceTimersByTime(30000);
+        vi.advanceTimersByTime(30_000);
 
         expect(sockets).toHaveLength(1);
     });
@@ -131,7 +143,7 @@ describe('WsClient', (): void => {
         expect(sockets).toHaveLength(2);
         firstSocket.onclose?.({ code: 1000, reason: 'replaced' } as CloseEvent);
 
-        vi.advanceTimersByTime(30000);
+        vi.advanceTimersByTime(30_000);
 
         expect(sockets).toHaveLength(2);
     });
@@ -149,5 +161,88 @@ describe('WsClient', (): void => {
         vi.advanceTimersByTime(1000);
 
         expect(sockets).toHaveLength(2);
+    });
+
+    const openAndAuthenticate = (): void => {
+        mockWebSocket.readyState = 1; // OPEN
+        mockWebSocket.onopen?.({} as Event);
+        mockWebSocket.onmessage?.({
+            data: JSON.stringify({
+                event: { type: 'authenticated', payload: {} },
+                meta: { ts: Date.now() },
+            }),
+        } as MessageEvent);
+    };
+
+    it('forces a reconnect when a ping goes unanswered (dead half-open socket)', (): void => {
+        openAndAuthenticate();
+        expect(sockets).toHaveLength(1);
+
+        // The heartbeat interval fires and arms the pong timeout...
+        vi.advanceTimersByTime(30_000);
+        // ...but no pong (or any inbound traffic) arrives before it elapses.
+        vi.advanceTimersByTime(10_000);
+
+        expect(sockets).toHaveLength(2);
+    });
+
+    it('does not reconnect when traffic arrives before the heartbeat times out', (): void => {
+        openAndAuthenticate();
+
+        vi.advanceTimersByTime(30_000); // ping sent, pong timeout armed
+
+        mockWebSocket.onmessage?.({
+            data: JSON.stringify({
+                event: { type: 'pong', payload: {} },
+                meta: { ts: Date.now() },
+            }),
+        } as MessageEvent);
+
+        vi.advanceTimersByTime(10_000); // the heartbeat window elapses harmlessly
+
+        expect(sockets).toHaveLength(1);
+    });
+
+    it('reconnectIfNeeded reconnects immediately after the socket closed', (): void => {
+        mockWebSocket.onclose?.({
+            code: 1006,
+            reason: 'network lost',
+        } as CloseEvent);
+        expect(wsClient.getStatus()).toBe('disconnected');
+
+        // Network came back: reconnect now instead of waiting for backoff.
+        wsClient.reconnectIfNeeded();
+
+        expect(sockets).toHaveLength(2);
+    });
+
+    it('reconnectIfNeeded pings a healthy socket to verify liveness instead of reconnecting', (): void => {
+        openAndAuthenticate();
+        mockWebSocket.send.mockClear();
+
+        wsClient.reconnectIfNeeded();
+
+        expect(sockets).toHaveLength(1);
+        expect(mockWebSocket.send).toHaveBeenCalled();
+    });
+
+    it('notifies status listeners as the connection transitions', (): void => {
+        const states: string[] = [];
+        const unsubscribe = wsClient.onStatusChange((state): void => {
+            states.push(state);
+        });
+
+        openAndAuthenticate();
+
+        expect(states).toEqual(['connected', 'authenticated']);
+
+        mockWebSocket.onclose?.({
+            code: 1006,
+            reason: 'network lost',
+        } as CloseEvent);
+
+        expect(states).toContain('disconnected');
+
+        unsubscribe();
     });
 });

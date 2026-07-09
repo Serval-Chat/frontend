@@ -15,8 +15,7 @@ import {
 } from 'lucide-react';
 
 import { useMe } from '@/api/users/users.queries';
-import { ROLE_PRESETS } from '@/constants/admin';
-import { ADMIN_CONSTANTS } from '@/constants/admin';
+import { ADMIN_CONSTANTS, ROLE_PRESETS } from '@/constants/admin';
 import {
     useAdminUsers,
     useUpdateUserPermissions,
@@ -75,6 +74,10 @@ const PermissionEditor = ({
     user: AdminUser;
     onClose: () => void;
 }): ReactNode => {
+    // Deliberately editable draft, not a stale-prop-copy bug: the only caller
+    // renders this behind `key={editingUser.id}`, so a different user forces a
+    // full remount (fresh initial state) instead of leaving stale permissions.
+    // react-doctor-disable-next-line react-doctor/no-derived-useState
     const [permissions, setPermissions] = useState<AdminPermissions>(
         user.permissions,
     );
@@ -128,7 +131,9 @@ const PermissionEditor = ({
                         className="flex-1 rounded-md py-1 text-xs font-bold transition-colors"
                         disabled={!canEdit}
                         variant="ghost"
-                        onClick={(): void => setRole('user')}
+                        onClick={(): void => {
+                            setRole('user');
+                        }}
                     >
                         User
                     </Button>
@@ -136,7 +141,9 @@ const PermissionEditor = ({
                         className="flex-1 rounded-md py-1 text-xs font-bold text-caution transition-colors"
                         disabled={!canEdit}
                         variant="ghost"
-                        onClick={(): void => setRole('moderator')}
+                        onClick={(): void => {
+                            setRole('moderator');
+                        }}
                     >
                         Moderator
                     </Button>
@@ -144,7 +151,9 @@ const PermissionEditor = ({
                         className="flex-1 rounded-md py-1 text-xs font-bold text-danger transition-colors"
                         disabled={!canEdit}
                         variant="ghost"
-                        onClick={(): void => setRole('admin')}
+                        onClick={(): void => {
+                            setRole('admin');
+                        }}
                     >
                         Admin
                     </Button>
@@ -164,7 +173,7 @@ const PermissionEditor = ({
                             <div className="flex flex-col">
                                 <span className="text-sm font-medium">
                                     {key
-                                        .replace(/([A-Z])/g, ' $1')
+                                        .replaceAll(/([A-Z])/g, ' $1')
                                         .replace(/^./, (str): string =>
                                             str.toUpperCase(),
                                         )}
@@ -175,7 +184,9 @@ const PermissionEditor = ({
                             </div>
                             <Toggle
                                 checked={permissions[key]}
-                                onChange={(): void => togglePermission(key)}
+                                onChange={(): void => {
+                                    togglePermission(key);
+                                }}
                             />
                         </div>
                     ))}
@@ -185,7 +196,7 @@ const PermissionEditor = ({
                     <Button variant="ghost" onClick={onClose}>
                         Cancel
                     </Button>
-                    {!canEdit && (
+                    {canEdit ? null : (
                         <span className="mr-2 self-center text-xs text-danger">
                             You do not have permission to edit users.
                         </span>
@@ -203,7 +214,7 @@ const PermissionEditor = ({
             </div>
 
             {/* Confirmation Modal */}
-            {showConfirm && (
+            {showConfirm ? (
                 <div className="animate-in fade-in fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm duration-200">
                     <div className="animate-in zoom-in-95 w-full max-w-md scale-100 rounded-2xl border border-border-subtle bg-background p-6 shadow-2xl duration-200">
                         <div className="text-warning mb-4 flex items-center gap-3">
@@ -217,17 +228,19 @@ const PermissionEditor = ({
                             </span>
                             ?
                             {permissions.adminAccess &&
-                                !user.permissions.adminAccess && (
-                                    <span className="mt-2 block font-bold text-danger">
-                                        Warning: You are granting Super Admin
-                                        access!
-                                    </span>
-                                )}
+                            !user.permissions.adminAccess ? (
+                                <span className="mt-2 block font-bold text-danger">
+                                    Warning: You are granting Super Admin
+                                    access!
+                                </span>
+                            ) : null}
                         </Text>
                         <div className="flex justify-end gap-3">
                             <Button
                                 variant="ghost"
-                                onClick={(): void => setShowConfirm(false)}
+                                onClick={(): void => {
+                                    setShowConfirm(false);
+                                }}
                             >
                                 Cancel
                             </Button>
@@ -242,7 +255,7 @@ const PermissionEditor = ({
                         </div>
                     </div>
                 </div>
-            )}
+            ) : null}
             {/* Loading State Overlay */}
             <LoadingOverlay
                 isOpen={isPending}
@@ -254,28 +267,39 @@ const PermissionEditor = ({
 
 const getPermissionDescription = (key: string): string => {
     switch (key) {
-        case 'adminAccess':
+        case 'adminAccess': {
             return 'Full super-admin access bypassing checks';
-        case 'viewUsers':
+        }
+        case 'viewUsers': {
             return 'Can list and search all users';
-        case 'manageUsers':
+        }
+        case 'manageUsers': {
             return 'Can edit profiles and delete users';
-        case 'manageBadges':
+        }
+        case 'manageBadges': {
             return 'Allows creating, editing, and deleting platform badges';
-        case 'banUsers':
+        }
+        case 'banUsers': {
             return 'Can ban users from the platform';
-        case 'viewBans':
+        }
+        case 'viewBans': {
             return 'Allows viewing active and historical platform bans';
-        case 'warnUsers':
+        }
+        case 'warnUsers': {
             return 'Allows issuing formal warnings to users';
-        case 'viewLogs':
+        }
+        case 'viewLogs': {
             return 'Allows viewing granular administrative audit logs';
-        case 'manageServer':
+        }
+        case 'manageServer': {
             return 'Allows management and oversight of all user-created servers';
-        case 'manageInvites':
+        }
+        case 'manageInvites': {
             return 'Allows managing and revoking invite codes';
-        default:
+        }
+        default: {
             return 'Grants access to this feature';
+        }
     }
 };
 
@@ -295,7 +319,9 @@ export const AdminIAM = ({
             setDebouncedSearch(searchTerm);
             setPage(0);
         }, ADMIN_CONSTANTS.SEARCH_DEBOUNCE_MS);
-        return (): void => clearTimeout(timer);
+        return (): void => {
+            clearTimeout(timer);
+        };
     }, [searchTerm]);
 
     const { data: users, isLoading } = useAdminUsers(
@@ -335,7 +361,9 @@ export const AdminIAM = ({
                         type="text"
                         value={searchTerm}
                         variant="admin"
-                        onChange={(e): void => setSearchTerm(e.target.value)}
+                        onChange={(e): void => {
+                            setSearchTerm(e.target.value);
+                        }}
                     />
                 </div>
             </div>
@@ -378,13 +406,13 @@ export const AdminIAM = ({
                                                 @{user.username}
                                             </span>
                                         </div>
-                                        {user.permissions.adminAccess && (
+                                        {user.permissions.adminAccess ? (
                                             <ShieldAlert
                                                 className="ml-1 shrink-0 text-danger"
                                                 size={14}
                                             />
-                                        )}
-                                        {user.muteActive && (
+                                        ) : null}
+                                        {user.muteActive ? (
                                             <span
                                                 className="ml-1 inline-flex shrink-0 items-center gap-1 rounded-full bg-caution/10 px-2 py-0.5 text-[10px] font-bold text-caution uppercase"
                                                 title={
@@ -396,7 +424,7 @@ export const AdminIAM = ({
                                                 <VolumeX size={12} />
                                                 Muted
                                             </span>
-                                        )}
+                                        ) : null}
                                     </div>
                                 </TableCell>
 
@@ -408,7 +436,7 @@ export const AdminIAM = ({
                                                 ? 'bg-danger/10 text-danger'
                                                 : Object.values(
                                                         user.permissions,
-                                                    ).some((v) => v)
+                                                    ).some(Boolean)
                                                   ? 'bg-caution/10 text-caution'
                                                   : 'bg-bg-secondary text-muted-foreground',
                                         )}
@@ -417,7 +445,7 @@ export const AdminIAM = ({
                                             ? 'Super Admin'
                                             : Object.values(
                                                     user.permissions,
-                                                ).some((v) => v)
+                                                ).some(Boolean)
                                               ? 'Staff'
                                               : 'User'}
                                     </div>
@@ -435,9 +463,9 @@ export const AdminIAM = ({
                                             size="sm"
                                             title="View Full Details"
                                             variant="ghost"
-                                            onClick={(): void =>
-                                                onViewUser(user.id)
-                                            }
+                                            onClick={(): void => {
+                                                onViewUser(user.id);
+                                            }}
                                         >
                                             <Eye size={16} />
                                         </Button>
@@ -445,9 +473,9 @@ export const AdminIAM = ({
                                             size="sm"
                                             title="Edit Permissions"
                                             variant="ghost"
-                                            onClick={(): void =>
-                                                setEditingUser(user)
-                                            }
+                                            onClick={(): void => {
+                                                setEditingUser(user);
+                                            }}
                                         >
                                             <Edit2 size={16} />
                                         </Button>
@@ -481,14 +509,14 @@ export const AdminIAM = ({
             </Table>
 
             {/* Pagination Controls */}
-            {!isLoading && users && (users.length > 0 || page > 0) && (
+            {!isLoading && users && (users.length > 0 || page > 0) ? (
                 <div className="flex items-center justify-between rounded-xl border border-border-subtle bg-bg-subtle px-4 py-2">
                     <Button
                         disabled={page === 0}
                         variant="ghost"
-                        onClick={(): void =>
-                            setPage((p): number => Math.max(0, p - 1))
-                        }
+                        onClick={(): void => {
+                            setPage((p): number => Math.max(0, p - 1));
+                        }}
                     >
                         <ChevronLeft size={16} />
                         Previous
@@ -499,21 +527,26 @@ export const AdminIAM = ({
                     <Button
                         disabled={users.length < LIMIT}
                         variant="ghost"
-                        onClick={(): void => setPage((p): number => p + 1)}
+                        onClick={(): void => {
+                            setPage((p): number => p + 1);
+                        }}
                     >
                         Next
                         <ChevronRight size={16} />
                     </Button>
                 </div>
-            )}
+            ) : null}
 
             {/* Permission Editor Modal */}
-            {editingUser && (
+            {editingUser ? (
                 <PermissionEditor
+                    key={editingUser.id}
                     user={editingUser}
-                    onClose={(): void => setEditingUser(null)}
+                    onClose={(): void => {
+                        setEditingUser(null);
+                    }}
                 />
-            )}
+            ) : null}
         </div>
     );
 };

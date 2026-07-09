@@ -6,8 +6,8 @@ export interface TableColumn<T> {
 
 function getVisualLength(str: string): number {
     // eslint-disable-next-line no-control-regex
-    const ansiRegex = /\u001b\[[0-9;]*m/g;
-    return str.replace(ansiRegex, '').length;
+    const ansiRegex = /\u001B\[[0-9;]*m/g;
+    return str.replaceAll(ansiRegex, '').length;
 }
 
 function padString(
@@ -47,7 +47,7 @@ export function formatTable<T>(
 
     const headerRow = columns
         .map((col, idx): string => {
-            const width = colWidths[idx];
+            const width = colWidths[idx] ?? 0;
             return padString(col.header, width, col.align);
         })
         .join(paddingStr);
@@ -60,7 +60,7 @@ export function formatTable<T>(
     const dataRows = data.map((item): string =>
         columns
             .map((col, idx): string => {
-                const width = colWidths[idx];
+                const width = colWidths[idx] ?? 0;
                 const val =
                     typeof col.key === 'function'
                         ? col.key(item)

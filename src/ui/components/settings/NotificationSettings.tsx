@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
 
-import { type AxiosError } from 'axios';
+import type { AxiosError } from 'axios';
 import { Bell, Loader2, Music, Play, Plus, Square, Trash2 } from 'lucide-react';
 
 import {
@@ -17,6 +17,63 @@ import { useToast } from '@/ui/components/common/Toast';
 import { Toggle } from '@/ui/components/common/Toggle';
 import { Box } from '@/ui/components/layout/Box';
 import { cacheSound, pruneSoundCache } from '@/utils/soundCache';
+
+const NotificationSoundItem = ({
+    sound,
+    isEnabled,
+    isPlaying,
+    progress,
+    onToggle,
+    onPlay,
+    onDelete,
+}: {
+    sound: { id: string; name: string; url: string };
+    isEnabled: boolean;
+    isPlaying: boolean;
+    progress: number;
+    onToggle: () => void;
+    onPlay: () => void;
+    onDelete: () => void;
+}) => (
+    <Box
+        className={`flex items-center justify-between rounded-lg border p-3 transition-all ${
+            isEnabled
+                ? 'border-primary/50 bg-primary/5'
+                : 'border-border-subtle bg-bg-subtle'
+        }`}
+    >
+        <Box className="relative flex flex-1 items-center justify-between">
+            {isPlaying ? (
+                <div
+                    className="absolute bottom-[-12px] left-[-12px] h-[2px] bg-primary"
+                    style={{ width: `calc(${progress}% + 24px)` }}
+                />
+            ) : null}
+            <Box className="flex items-center gap-3">
+                <Toggle checked={isEnabled} onCheckedChange={onToggle} />
+                <Music className="text-muted-foreground" size={16} />
+                <Text size="sm" weight="medium">
+                    {sound.name}
+                </Text>
+            </Box>
+            <Box className="flex items-center gap-2">
+                <IconButton
+                    icon={isPlaying ? Square : Play}
+                    size="sm"
+                    variant="ghost"
+                    onClick={onPlay}
+                />
+                <IconButton
+                    className="text-danger hover:bg-danger/10"
+                    icon={Trash2}
+                    size="sm"
+                    variant="ghost"
+                    onClick={onDelete}
+                />
+            </Box>
+        </Box>
+    </Box>
+);
 
 export const NotificationSettings = () => {
     const { showToast } = useToast();
@@ -72,9 +129,9 @@ export const NotificationSettings = () => {
     );
 
     const useDefault =
-        localUseDefault !== null
-            ? localUseDefault
-            : user?.settings?.useDefaultSounds !== false;
+        localUseDefault === null
+            ? user?.settings?.useDefaultSounds !== false
+            : localUseDefault;
     const customSounds = user?.settings?.notificationSounds || [];
 
     const isSoundEnabled = (id: string): boolean => {
@@ -94,10 +151,7 @@ export const NotificationSettings = () => {
                 id: s.id,
                 name: s.name,
                 url: s.url,
-                enabled:
-                    localEnabledMap[s.id] !== undefined
-                        ? localEnabledMap[s.id]
-                        : s.enabled,
+                enabled: localEnabledMap[s.id] ?? s.enabled,
             }),
         );
 
@@ -162,16 +216,16 @@ export const NotificationSettings = () => {
         setPlayingId(id);
         setProgress(0);
 
-        audio.onplay = (): void => {
+        audio.addEventListener('play', (): void => {
             animationFrameRef.current = requestAnimationFrame(updateProgress);
-        };
+        });
 
-        audio.onended = (): void => {
+        audio.addEventListener('ended', (): void => {
             if (animationFrameRef.current)
                 cancelAnimationFrame(animationFrameRef.current);
             setPlayingId(null);
             setProgress(0);
-        };
+        });
 
         void audio.play().catch((): void => {
             setPlayingId(null);
@@ -179,10 +233,12 @@ export const NotificationSettings = () => {
     };
 
     const toggleSound = (id: string): void => {
-        setLocalEnabledMap((prev): { [x: string]: boolean } => ({
-            ...prev,
-            [id]: !isSoundEnabled(id),
-        }));
+        setLocalEnabledMap(
+            (prev): Record<string, boolean> => ({
+                ...prev,
+                [id]: !isSoundEnabled(id),
+            }),
+        );
     };
 
     if (isLoading) {
@@ -269,68 +325,22 @@ export const NotificationSettings = () => {
                             </Box>
                         ) : (
                             customSounds.map((sound) => (
-                                <Box
-                                    className={`flex items-center justify-between rounded-lg border p-3 transition-all ${
-                                        isSoundEnabled(sound.id)
-                                            ? 'border-primary/50 bg-primary/5'
-                                            : 'border-border-subtle bg-bg-subtle'
-                                    }`}
+                                <NotificationSoundItem
+                                    isEnabled={isSoundEnabled(sound.id)}
+                                    isPlaying={playingId === sound.id}
                                     key={sound.id}
-                                >
-                                    <Box className="relative flex flex-1 items-center justify-between">
-                                        {playingId === sound.id && (
-                                            <div
-                                                className="absolute bottom-[-12px] left-[-12px] h-[2px] bg-primary"
-                                                style={{
-                                                    width: `calc(${progress}% + 24px)`,
-                                                }}
-                                            />
-                                        )}
-                                        <Box className="flex items-center gap-3">
-                                            <Toggle
-                                                checked={isSoundEnabled(
-                                                    sound.id,
-                                                )}
-                                                onCheckedChange={(): void =>
-                                                    toggleSound(sound.id)
-                                                }
-                                            />
-                                            <Music
-                                                className="text-muted-foreground"
-                                                size={16}
-                                            />
-                                            <Text size="sm" weight="medium">
-                                                {sound.name}
-                                            </Text>
-                                        </Box>
-                                        <Box className="flex items-center gap-2">
-                                            <IconButton
-                                                icon={
-                                                    playingId === sound.id
-                                                        ? Square
-                                                        : Play
-                                                }
-                                                size="sm"
-                                                variant="ghost"
-                                                onClick={(): void =>
-                                                    playPreview(
-                                                        sound.id,
-                                                        sound.url,
-                                                    )
-                                                }
-                                            />
-                                            <IconButton
-                                                className="text-danger hover:bg-danger/10"
-                                                icon={Trash2}
-                                                size="sm"
-                                                variant="ghost"
-                                                onClick={(): void =>
-                                                    deleteSound(sound.id)
-                                                }
-                                            />
-                                        </Box>
-                                    </Box>
-                                </Box>
+                                    progress={progress}
+                                    sound={sound}
+                                    onDelete={(): void => {
+                                        deleteSound(sound.id);
+                                    }}
+                                    onPlay={(): void => {
+                                        playPreview(sound.id, sound.url);
+                                    }}
+                                    onToggle={(): void => {
+                                        toggleSound(sound.id);
+                                    }}
+                                />
                             ))
                         )}
                     </Box>

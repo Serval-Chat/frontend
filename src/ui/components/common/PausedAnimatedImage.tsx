@@ -22,6 +22,9 @@ export const PausedAnimatedImage = ({
     const [firstFrameDrawn, setFirstFrameDrawn] = React.useState(false);
     const [failedToLoad, setFailedToLoad] = React.useState(false);
 
+    // binary GIF-frame decode tied to canvas drawing, not server state -
+    // already race-safe via the `cancelled` guard below.
+    // react-doctor-disable-next-line react-doctor/no-fetch-in-effect, react-doctor/no-effect-event-handler
     React.useEffect(() => {
         if (!src || !paused) return;
 
@@ -91,11 +94,13 @@ export const PausedAnimatedImage = ({
                 className={className}
                 src={isGif === false && failedToLoad ? fallbackSrc || src : src}
                 style={{ ...style, display: showImg ? undefined : 'none' }}
-                onError={() => setFailedToLoad(true)}
+                onError={() => {
+                    setFailedToLoad(true);
+                }}
                 onLoad={onLoad}
                 {...props}
             />
-            {paused && isGif === true && (
+            {paused && isGif === true ? (
                 <canvas
                     aria-label={alt}
                     className={className}
@@ -106,7 +111,7 @@ export const PausedAnimatedImage = ({
                         display: firstFrameDrawn ? undefined : 'none',
                     }}
                 />
-            )}
+            ) : null}
         </>
     );
 };

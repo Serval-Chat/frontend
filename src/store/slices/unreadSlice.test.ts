@@ -37,7 +37,7 @@ describe('unreadSlice', (): void => {
                 initialState,
                 setServerUnread({ serverId: 'srv1', unread: true }),
             );
-            expect(state.unreadServers['srv1']).toEqual({
+            expect(state.unreadServers.srv1).toEqual({
                 hasUnread: true,
                 pingCount: 0,
             });
@@ -54,7 +54,7 @@ describe('unreadSlice', (): void => {
                 existing,
                 setServerUnread({ serverId: 'srv1', unread: true }),
             );
-            expect(state.unreadServers['srv1']).toEqual({
+            expect(state.unreadServers.srv1).toEqual({
                 hasUnread: true,
                 pingCount: 5, // unchanged
             });
@@ -67,7 +67,7 @@ describe('unreadSlice', (): void => {
                 initialState,
                 setServerPingCount({ serverId: 'srv1', count: 7 }),
             );
-            expect(state.unreadServers['srv1'].pingCount).toBe(7);
+            expect(state.unreadServers.srv1?.pingCount).toBe(7);
         });
 
         it('overwrites an existing ping count', (): void => {
@@ -79,7 +79,7 @@ describe('unreadSlice', (): void => {
                 existing,
                 setServerPingCount({ serverId: 'srv1', count: 1 }),
             );
-            expect(state.unreadServers['srv1'].pingCount).toBe(1);
+            expect(state.unreadServers.srv1?.pingCount).toBe(1);
         });
     });
 
@@ -89,7 +89,7 @@ describe('unreadSlice', (): void => {
                 initialState,
                 incrementServerPing({ serverId: 'srv1' }),
             );
-            expect(state.unreadServers['srv1']).toEqual({
+            expect(state.unreadServers.srv1).toEqual({
                 hasUnread: false,
                 pingCount: 1,
             });
@@ -108,7 +108,7 @@ describe('unreadSlice', (): void => {
                 state,
                 incrementServerPing({ serverId: 'srv1' }),
             );
-            expect(state.unreadServers['srv1'].pingCount).toBe(3);
+            expect(state.unreadServers.srv1?.pingCount).toBe(3);
         });
 
         it('does not double-count when the same dispatch is made once', (): void => {
@@ -116,7 +116,7 @@ describe('unreadSlice', (): void => {
                 initialState,
                 incrementServerPing({ serverId: 'srv1' }),
             );
-            expect(state.unreadServers['srv1'].pingCount).toBe(1);
+            expect(state.unreadServers.srv1?.pingCount).toBe(1);
         });
     });
 
@@ -130,7 +130,7 @@ describe('unreadSlice', (): void => {
                 existing,
                 decrementServerPing({ serverId: 'srv1' }),
             );
-            expect(state.unreadServers['srv1'].pingCount).toBe(2);
+            expect(state.unreadServers.srv1?.pingCount).toBe(2);
         });
 
         it('does not go below 0', (): void => {
@@ -142,7 +142,7 @@ describe('unreadSlice', (): void => {
                 existing,
                 decrementServerPing({ serverId: 'srv1' }),
             );
-            expect(state.unreadServers['srv1'].pingCount).toBe(0);
+            expect(state.unreadServers.srv1?.pingCount).toBe(0);
         });
 
         it('does nothing for an unknown server', (): void => {
@@ -150,7 +150,7 @@ describe('unreadSlice', (): void => {
                 initialState,
                 decrementServerPing({ serverId: 'unknown' }),
             );
-            expect(state.unreadServers['unknown']).toBeUndefined();
+            expect(state.unreadServers.unknown).toBeUndefined();
         });
     });
 
@@ -170,7 +170,7 @@ describe('unreadSlice', (): void => {
                 initialState,
                 setDmUnread({ userId: 'user1', count: 5 }),
             );
-            expect(state.unreadDms['user1']).toBe(5);
+            expect(state.unreadDms.user1).toBe(5);
         });
 
         it('receiving the same DM_UNREAD_UPDATED count twice does not double-count', (): void => {
@@ -182,7 +182,7 @@ describe('unreadSlice', (): void => {
                 state,
                 setDmUnread({ userId: 'user1', count: 1 }),
             );
-            expect(state.unreadDms['user1']).toBe(1);
+            expect(state.unreadDms.user1).toBe(1);
         });
 
         it('clears DM ping when count is set to 0', (): void => {
@@ -194,7 +194,7 @@ describe('unreadSlice', (): void => {
                 state,
                 setDmUnread({ userId: 'user1', count: 0 }),
             );
-            expect(state.unreadDms['user1']).toBe(0);
+            expect(state.unreadDms.user1).toBe(0);
         });
 
         it('clears DM unread badge after read acknowledgement (count → 0)', (): void => {
@@ -206,7 +206,7 @@ describe('unreadSlice', (): void => {
                 withPing,
                 setDmUnread({ userId: 'user1', count: 0 }),
             );
-            expect(state.unreadDms['user1']).toBe(0);
+            expect(state.unreadDms.user1).toBe(0);
         });
     });
 
@@ -220,8 +220,8 @@ describe('unreadSlice', (): void => {
                 serverState,
                 setDmUnread({ userId: 'user1', count: 3 }),
             );
-            expect(state.unreadServers['srv1'].pingCount).toBe(2);
-            expect(state.unreadDms['user1']).toBe(3);
+            expect(state.unreadServers.srv1?.pingCount).toBe(2);
+            expect(state.unreadDms.user1).toBe(3);
         });
 
         it('a server ping increment does not affect DM unread counts', (): void => {
@@ -233,8 +233,8 @@ describe('unreadSlice', (): void => {
                 dmState,
                 incrementServerPing({ serverId: 'srv1' }),
             );
-            expect(state.unreadDms['user1']).toBe(2);
-            expect(state.unreadServers['srv1'].pingCount).toBe(1);
+            expect(state.unreadDms.user1).toBe(2);
+            expect(state.unreadServers.srv1?.pingCount).toBe(1);
         });
     });
 });

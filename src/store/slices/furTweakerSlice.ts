@@ -14,7 +14,7 @@ const initialState: FurTweakerState = {
     isOpen: false,
     spotCount: 0,
     opacity: 0.1,
-    seed: 8675309,
+    seed: 8_675_309,
     base: '#f9e4c7',
     spotColor: 'rgb(54, 37, 0)',
 };

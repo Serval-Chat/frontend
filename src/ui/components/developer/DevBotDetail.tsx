@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useMemo, useReducer, useRef, useState } from 'react';
 
 import {
     ArrowLeft,
@@ -33,6 +33,7 @@ import {
     BOT_PERMISSION_LABELS,
     permissionsToBitmask,
 } from '@/utils/botPermissions';
+import { mergeReducer } from '@/utils/mergeReducer';
 
 interface DevBotDetailProps {
     clientId: string;
@@ -53,7 +54,9 @@ const PermissionRow = ({
             checked={value}
             className="h-4 w-4 accent-primary"
             type="checkbox"
-            onChange={(e): void => onChange(e.target.checked)}
+            onChange={(e): void => {
+                onChange(e.target.checked);
+            }}
         />
         <span className="text-sm text-foreground">{label}</span>
     </label>
@@ -84,7 +87,9 @@ const CopyButton = ({
     const handleCopy = (): void => {
         void navigator.clipboard.writeText(value);
         setCopied(true);
-        setTimeout((): void => setCopied(false), 2000);
+        setTimeout((): void => {
+            setCopied(false);
+        }, 2000);
     };
 
     return (
@@ -100,6 +105,229 @@ const CopyButton = ({
         </Button>
     );
 };
+
+const BotAboutSection = ({
+    name,
+    description,
+    bannerColor,
+    serversCount,
+    hasChanges,
+    isSaving,
+    onNameChange,
+    onDescriptionChange,
+    onBannerColorChange,
+    onSave,
+}: {
+    name: string;
+    description: string;
+    bannerColor: string;
+    serversCount?: number;
+    hasChanges: boolean;
+    isSaving: boolean;
+    onNameChange: (v: string) => void;
+    onDescriptionChange: (v: string) => void;
+    onBannerColorChange: (v: string) => void;
+    onSave: () => void;
+}) => (
+    <Section title="About Bot">
+        <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-1">
+                <label
+                    className="text-sm font-medium text-foreground"
+                    htmlFor="bot-name"
+                >
+                    Name
+                </label>
+                <Input
+                    id="bot-name"
+                    maxLength={32}
+                    value={name}
+                    onChange={(e): void => {
+                        onNameChange(e.target.value);
+                    }}
+                />
+            </div>
+
+            <div className="flex flex-col gap-1">
+                <label
+                    className="text-sm font-medium text-foreground"
+                    htmlFor="bot-desc"
+                >
+                    Description
+                </label>
+                <TextArea
+                    autoResize
+                    className="min-h-25"
+                    id="bot-desc"
+                    maxLength={500}
+                    value={description}
+                    onChange={(e): void => {
+                        onDescriptionChange(e.target.value);
+                    }}
+                />
+            </div>
+
+            <div className="flex flex-col gap-1">
+                <label
+                    className="text-sm font-medium text-foreground"
+                    htmlFor="bot-banner-color"
+                >
+                    Banner Color (Hex)
+                </label>
+                <div className="flex items-center gap-2">
+                    <Input
+                        className="w-32"
+                        id="bot-banner-color"
+                        placeholder="#5865F2"
+                        value={bannerColor}
+                        onChange={(e): void => {
+                            onBannerColorChange(e.target.value);
+                        }}
+                    />
+                    {bannerColor ? (
+                        <div
+                            className="h-8 w-8 rounded-md border border-border-subtle"
+                            style={{ backgroundColor: bannerColor }}
+                        />
+                    ) : null}
+                </div>
+            </div>
+
+            <div className="flex items-center justify-between">
+                {serversCount === undefined ? null : (
+                    <div className="flex items-center gap-2">
+                        <Text as="p" size="sm" variant="muted">
+                            Servers:
+                        </Text>
+                        <Text className="font-bold text-foreground" size="sm">
+                            {serversCount}
+                        </Text>
+                    </div>
+                )}
+                {hasChanges ? (
+                    <Button
+                        className="self-end"
+                        loading={isSaving}
+                        variant="primary"
+                        onClick={onSave}
+                    >
+                        Save Changes
+                    </Button>
+                ) : null}
+            </div>
+        </div>
+    </Section>
+);
+
+const BotConfigSections = ({
+    clientId,
+    token,
+    permissions,
+    isResetting,
+    onResetToken,
+    onPermissionsChange,
+}: {
+    clientId: string;
+    token: string | null;
+    permissions: BotPermissions;
+    isResetting: boolean;
+    onResetToken: () => void;
+    onPermissionsChange: (key: BotPermissionKey, value: boolean) => void;
+}) => (
+    <>
+        <Section title="Credentials">
+            <div className="flex flex-col gap-3">
+                <div className="flex flex-col gap-1">
+                    <Text as="p" size="sm" variant="muted">
+                        Client ID
+                    </Text>
+                    <div className="flex gap-2">
+                        <code className="flex-1 rounded-md bg-bg-subtle px-3 py-2 font-mono text-sm text-foreground">
+                            {clientId}
+                        </code>
+                        <CopyButton text="Copy" value={clientId} />
+                    </div>
+                </div>
+                {token ? (
+                    <div className="flex flex-col gap-1">
+                        <Text as="p" size="sm" variant="muted">
+                            Bot Token - copy now, it won&apos;t be shown again
+                        </Text>
+                        <div className="flex gap-2">
+                            <code className="flex-1 rounded-md bg-caution/10 px-3 py-2 font-mono text-sm break-all text-caution">
+                                {token}
+                            </code>
+                            <CopyButton text="Copy" value={token} />
+                        </div>
+                        <div className="flex items-center gap-2 rounded-md bg-success/10 px-3 py-2 text-sm text-success">
+                            <CheckCircle size={14} />
+                            Previous token invalidated. Any active sessions have
+                            been revoked.
+                        </div>
+                    </div>
+                ) : null}
+                <div className="flex flex-wrap gap-2">
+                    <Button
+                        icon={RefreshCw}
+                        loading={isResetting}
+                        variant="normal"
+                        onClick={onResetToken}
+                    >
+                        Reset Bot Token
+                    </Button>
+                </div>
+            </div>
+        </Section>
+
+        <Section title="OAuth2">
+            <div className="flex flex-col gap-3">
+                <div className="flex flex-col gap-1">
+                    <Text as="p" size="sm" variant="muted">
+                        Invite Link
+                    </Text>
+                    <div className="flex gap-2">
+                        <Input
+                            readOnly
+                            className="flex-1 font-mono text-sm"
+                            value={`${globalThis.location.origin}/authorize?client_id=${clientId}${permissions ? `&permissions=${permissionsToBitmask(permissions)}` : ''}`}
+                            onClick={(e): void => {
+                                (e.target as HTMLInputElement).select();
+                            }}
+                        />
+                        <CopyButton
+                            text="Copy"
+                            value={`${globalThis.location.origin}/authorize?client_id=${clientId}${permissions ? `&permissions=${permissionsToBitmask(permissions)}` : ''}`}
+                        />
+                    </div>
+                </div>
+            </div>
+        </Section>
+
+        <Section title="Permissions">
+            <div className="flex flex-col gap-5">
+                {BOT_PERMISSION_GROUPS.map((group) => (
+                    <div className="flex flex-col gap-2" key={group.title}>
+                        <p className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">
+                            {group.title}
+                        </p>
+                        <div className="grid grid-cols-1 gap-1 sm:grid-cols-2">
+                            {group.keys.map((key: BotPermissionKey) => (
+                                <PermissionRow
+                                    key={key}
+                                    label={BOT_PERMISSION_LABELS[key]}
+                                    value={permissions[key] ?? false}
+                                    onChange={(v): void => {
+                                        onPermissionsChange(key, v);
+                                    }}
+                                />
+                            ))}
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </Section>
+    </>
+);
 
 export const DevBotDetail = ({
     clientId,
@@ -135,19 +363,57 @@ export const DevBotDetail = ({
     const avatarInputRef = useRef<HTMLInputElement>(null);
     const bannerInputRef = useRef<HTMLInputElement>(null);
 
-    const [name, setName] = useState('');
-    const [description, setDescription] = useState('');
-    const [permissions, setPermissions] = useState<BotPermissions | null>(null);
-    const [bannerColor, setBannerColor] = useState('');
-
-    const [cropFile, setCropFile] = useState<File | null>(null);
-    const [cropType, setCropType] = useState<'avatar' | 'banner'>('avatar');
+    interface BotForm {
+        name: string;
+        description: string;
+        permissions: BotPermissions | null;
+        bannerColor: string;
+        cropFile: File | null;
+        cropType: 'avatar' | 'banner';
+    }
+    const [form, patchForm] = useReducer(mergeReducer<BotForm>, {
+        name: '',
+        description: '',
+        permissions: null,
+        bannerColor: '',
+        cropFile: null,
+        cropType: 'avatar',
+    });
+    const { name, description, permissions, bannerColor, cropFile, cropType } =
+        form;
+    const setName = (v: string): void => {
+        patchForm({ name: v });
+    };
+    const setDescription = (v: string): void => {
+        patchForm({ description: v });
+    };
+    const setPermissions = (
+        v:
+            | BotPermissions
+            | null
+            | ((prev: BotPermissions | null) => BotPermissions | null),
+    ): void => {
+        patchForm(
+            typeof v === 'function'
+                ? (s): Partial<BotForm> => ({ permissions: v(s.permissions) })
+                : { permissions: v },
+        );
+    };
+    const setBannerColor = (v: string): void => {
+        patchForm({ bannerColor: v });
+    };
+    const setCropFile = (v: File | null): void => {
+        patchForm({ cropFile: v });
+    };
+    const setCropType = (v: 'avatar' | 'banner'): void => {
+        patchForm({ cropType: v });
+    };
 
     const [token, setToken] = useState<string | null>(null);
     const [showDelete, setShowDelete] = useState(false);
 
     const botUserKey = bot && user ? `${bot.id}:${user.id}` : null;
-    const [syncedBotUserKey, setSyncedBotUserKey] = React.useState(botUserKey);
+    const [syncedBotUserKey, setSyncedBotUserKey] = useState(botUserKey);
     if (botUserKey !== syncedBotUserKey && bot && user) {
         setSyncedBotUserKey(botUserKey);
         setName(user.displayName ?? user.username ?? '');
@@ -202,7 +468,14 @@ export const DevBotDetail = ({
     };
 
     const handleDelete = (): void => {
-        deleteBot.mutate({ clientId }, { onSuccess: (): void => onBack() });
+        deleteBot.mutate(
+            { clientId },
+            {
+                onSuccess: (): void => {
+                    onBack();
+                },
+            },
+        );
     };
 
     const handleCropConfirm = (file: File): void => {
@@ -239,206 +512,39 @@ export const DevBotDetail = ({
                     Back to bots
                 </button>
 
-                <Section title="About Bot">
-                    <div className="flex flex-col gap-4">
-                        <div className="flex flex-col gap-1">
-                            <label
-                                className="text-sm font-medium text-foreground"
-                                htmlFor="bot-name"
-                            >
-                                Name
-                            </label>
-                            <Input
-                                id="bot-name"
-                                maxLength={32}
-                                value={name}
-                                onChange={(e): void => setName(e.target.value)}
-                            />
-                        </div>
+                <BotAboutSection
+                    bannerColor={bannerColor}
+                    description={description}
+                    hasChanges={!!hasChanges}
+                    isSaving={
+                        updateBot.isPending || updatePermissions.isPending
+                    }
+                    name={name}
+                    serversCount={servers?.count}
+                    onBannerColorChange={setBannerColor}
+                    onDescriptionChange={setDescription}
+                    onNameChange={setName}
+                    onSave={handleSaveProfile}
+                />
 
-                        <div className="flex flex-col gap-1">
-                            <label
-                                className="text-sm font-medium text-foreground"
-                                htmlFor="bot-desc"
-                            >
-                                Description
-                            </label>
-                            <TextArea
-                                autoResize
-                                className="min-h-25"
-                                id="bot-desc"
-                                maxLength={500}
-                                value={description}
-                                onChange={(e): void =>
-                                    setDescription(e.target.value)
-                                }
-                            />
-                        </div>
-
-                        <div className="flex flex-col gap-1">
-                            <label
-                                className="text-sm font-medium text-foreground"
-                                htmlFor="bot-banner-color"
-                            >
-                                Banner Color (Hex)
-                            </label>
-                            <div className="flex items-center gap-2">
-                                <Input
-                                    className="w-32"
-                                    id="bot-banner-color"
-                                    placeholder="#5865F2"
-                                    value={bannerColor}
-                                    onChange={(e): void =>
-                                        setBannerColor(e.target.value)
-                                    }
-                                />
-                                {bannerColor && (
-                                    <div
-                                        className="h-8 w-8 rounded-md border border-border-subtle"
-                                        style={{ backgroundColor: bannerColor }}
-                                    />
-                                )}
-                            </div>
-                        </div>
-
-                        <div className="flex items-center justify-between">
-                            {servers && (
-                                <div className="flex items-center gap-2">
-                                    <Text as="p" size="sm" variant="muted">
-                                        Servers:
-                                    </Text>
-                                    <Text
-                                        className="font-bold text-foreground"
-                                        size="sm"
-                                    >
-                                        {servers.count}
-                                    </Text>
-                                </div>
-                            )}
-                            {hasChanges && (
-                                <Button
-                                    className="self-end"
-                                    loading={
-                                        updateBot.isPending ||
-                                        updatePermissions.isPending
-                                    }
-                                    variant="primary"
-                                    onClick={handleSaveProfile}
-                                >
-                                    Save Changes
-                                </Button>
-                            )}
-                        </div>
-                    </div>
-                </Section>
-
-                <Section title="Credentials">
-                    <div className="flex flex-col gap-3">
-                        <div className="flex flex-col gap-1">
-                            <Text as="p" size="sm" variant="muted">
-                                Client ID
-                            </Text>
-                            <div className="flex gap-2">
-                                <code className="flex-1 rounded-md bg-bg-subtle px-3 py-2 font-mono text-sm text-foreground">
-                                    {clientId}
-                                </code>
-                                <CopyButton text="Copy" value={clientId} />
-                            </div>
-                        </div>
-                        {token && (
-                            <div className="flex flex-col gap-1">
-                                <Text as="p" size="sm" variant="muted">
-                                    Bot Token - copy now, it won&apos;t be shown
-                                    again
-                                </Text>
-                                <div className="flex gap-2">
-                                    <code className="flex-1 rounded-md bg-caution/10 px-3 py-2 font-mono text-sm break-all text-caution">
-                                        {token}
-                                    </code>
-                                    <CopyButton text="Copy" value={token} />
-                                </div>
-                                <div className="flex items-center gap-2 rounded-md bg-success/10 px-3 py-2 text-sm text-success">
-                                    <CheckCircle size={14} />
-                                    Previous token invalidated. Any active
-                                    sessions have been revoked.
-                                </div>
-                            </div>
-                        )}
-                        <div className="flex flex-wrap gap-2">
-                            <Button
-                                icon={RefreshCw}
-                                loading={resetToken.isPending}
-                                variant="normal"
-                                onClick={handleResetToken}
-                            >
-                                Reset Bot Token
-                            </Button>
-                        </div>
-                    </div>
-                </Section>
-
-                <Section title="OAuth2">
-                    <div className="flex flex-col gap-3">
-                        <div className="flex flex-col gap-1">
-                            <Text as="p" size="sm" variant="muted">
-                                Invite Link
-                            </Text>
-                            <div className="flex gap-2">
-                                <Input
-                                    readOnly
-                                    className="flex-1 font-mono text-sm"
-                                    value={`${window.location.origin}/authorize?client_id=${clientId}${permissions ? `&permissions=${permissionsToBitmask(permissions)}` : ''}`}
-                                    onClick={(e): void => {
-                                        (e.target as HTMLInputElement).select();
-                                    }}
-                                />
-                                <CopyButton
-                                    text="Copy"
-                                    value={`${window.location.origin}/authorize?client_id=${clientId}${permissions ? `&permissions=${permissionsToBitmask(permissions)}` : ''}`}
-                                />
-                            </div>
-                        </div>
-                    </div>
-                </Section>
-
-                <Section title="Permissions">
-                    <div className="flex flex-col gap-5">
-                        {BOT_PERMISSION_GROUPS.map((group) => (
-                            <div
-                                className="flex flex-col gap-2"
-                                key={group.title}
-                            >
-                                <p className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">
-                                    {group.title}
-                                </p>
-                                <div className="grid grid-cols-1 gap-1 sm:grid-cols-2">
-                                    {group.keys.map((key: BotPermissionKey) => (
-                                        <PermissionRow
-                                            key={key}
-                                            label={BOT_PERMISSION_LABELS[key]}
-                                            value={permissions[key] ?? false}
-                                            onChange={(v): void =>
-                                                setPermissions(
-                                                    (prev) =>
-                                                        prev && {
-                                                            ...prev,
-                                                            [key]: v,
-                                                        },
-                                                )
-                                            }
-                                        />
-                                    ))}
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </Section>
+                <BotConfigSections
+                    clientId={clientId}
+                    isResetting={resetToken.isPending}
+                    permissions={permissions}
+                    token={token}
+                    onPermissionsChange={(key, v): void => {
+                        setPermissions((prev) => prev && { ...prev, [key]: v });
+                    }}
+                    onResetToken={handleResetToken}
+                />
 
                 <Section title="Danger Zone">
                     <Button
                         icon={Trash2}
                         variant="danger"
-                        onClick={(): void => setShowDelete(true)}
+                        onClick={(): void => {
+                            setShowDelete(true);
+                        }}
                     >
                         Delete Bot
                     </Button>
@@ -503,15 +609,19 @@ export const DevBotDetail = ({
                 imageFile={cropFile}
                 isOpen={!!cropFile}
                 type={cropType}
-                onClose={(): void => setCropFile(null)}
+                onClose={(): void => {
+                    setCropFile(null);
+                }}
                 onConfirm={handleCropConfirm}
             />
 
-            {showDelete && (
+            {showDelete ? (
                 <Modal
                     isOpen={showDelete}
                     title="Delete Bot"
-                    onClose={(): void => setShowDelete(false)}
+                    onClose={(): void => {
+                        setShowDelete(false);
+                    }}
                 >
                     <div className="flex flex-col gap-4 p-4">
                         <Text as="p" variant="muted">
@@ -521,7 +631,9 @@ export const DevBotDetail = ({
                         <div className="flex justify-end gap-2">
                             <Button
                                 variant="ghost"
-                                onClick={(): void => setShowDelete(false)}
+                                onClick={(): void => {
+                                    setShowDelete(false);
+                                }}
                             >
                                 Cancel
                             </Button>
@@ -535,7 +647,7 @@ export const DevBotDetail = ({
                         </div>
                     </div>
                 </Modal>
-            )}
+            ) : null}
         </div>
     );
 };

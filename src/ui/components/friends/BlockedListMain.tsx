@@ -77,15 +77,17 @@ export const BlockedListMain = () => {
                         placeholder="Search username"
                         type="text"
                         value={search}
-                        onChange={(e): void => setSearch(e.target.value)}
+                        onChange={(e): void => {
+                            setSearch(e.target.value);
+                        }}
                     />
                 </Box>
             </Box>
-            {filteredBlocks.length === 0 && search && (
+            {filteredBlocks.length === 0 && search ? (
                 <Box className="flex h-32 flex-col items-center justify-center text-center">
                     <MutedText>No blocked users found for "{search}"</MutedText>
                 </Box>
-            )}
+            ) : null}
             <Box className="flex flex-col gap-1">
                 {filteredBlocks.map((block) => (
                     <Box
@@ -99,7 +101,9 @@ export const BlockedListMain = () => {
                         <Box
                             className="flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-md bg-bg-secondary text-danger transition-colors hover:bg-danger hover:text-white"
                             title="Unblock"
-                            onClick={(): void => unblock(block.targetUserId)}
+                            onClick={(): void => {
+                                unblock(block.targetUserId);
+                            }}
                         >
                             <UserX size={18} />
                         </Box>

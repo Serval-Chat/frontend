@@ -71,11 +71,11 @@ const getMediaBoxStyle = (
 export const FileEmbed = ({ url, attachment, onResize }: FileEmbedProps) => {
     const limitedAnimations = useLimitedAnimations();
     const attachmentUrl =
-        attachment !== undefined
-            ? `/api/v1/files/download/${encodeURIComponent(attachment.attachmentId)}${attachment.spoiler === true ? '#spoiler' : ''}`
-            : undefined;
+        attachment === undefined
+            ? undefined
+            : `/api/v1/files/download/${encodeURIComponent(attachment.attachmentId)}${attachment.spoiler === true ? '#spoiler' : ''}`;
     const resolvedUrl = attachmentUrl ?? url;
-    const baseUrl = (resolvedUrl ?? '').split('#')[0];
+    const baseUrl = (resolvedUrl ?? '').split('#')[0] ?? '';
     const isLocal =
         attachment !== undefined || (baseUrl !== '' && isInternalUrl(baseUrl));
     const filename =
@@ -162,16 +162,17 @@ export const FileEmbed = ({ url, attachment, onResize }: FileEmbedProps) => {
                         height={mediaDimensions.height}
                         loading="eager"
                         paused={
-                            limitedAnimations &&
-                            (mimeType === 'image/gif' ||
-                                isAnimatedImageUrl(displayUrl))
+                            limitedAnimations
+                                ? mimeType === 'image/gif' ||
+                                  isAnimatedImageUrl(displayUrl)
+                                : false
                         }
-                        src={displayUrl!}
+                        src={displayUrl}
                         style={{ aspectRatio: mediaBoxStyle.aspectRatio }}
                         width={mediaDimensions.width}
                         onLoad={onResize}
                     />
-                    {isSpoiler && !isRevealed && (
+                    {isSpoiler && !isRevealed ? (
                         <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-background">
                             <div className="flex items-center gap-2 rounded-full border border-border-subtle bg-bg-secondary px-3 py-1.5">
                                 <EyeOff
@@ -187,8 +188,8 @@ export const FileEmbed = ({ url, attachment, onResize }: FileEmbedProps) => {
                                 </Text>
                             </div>
                         </div>
-                    )}
-                    {isSpoiler && isRevealed && (
+                    ) : null}
+                    {isSpoiler && isRevealed ? (
                         <Button
                             className="absolute top-2 right-2 h-7 w-7 rounded-full bg-black/40 p-0 text-white opacity-0 backdrop-blur-md transition-opacity group-hover:opacity-100"
                             size="sm"
@@ -200,13 +201,15 @@ export const FileEmbed = ({ url, attachment, onResize }: FileEmbedProps) => {
                         >
                             <EyeOff size={14} />
                         </Button>
-                    )}
+                    ) : null}
                 </Box>
                 <ImageLightbox
                     alt={displayName || 'Image'}
                     isOpen={isLightboxOpen}
                     src={displayUrl!}
-                    onClose={(): void => setIsLightboxOpen(false)}
+                    onClose={(): void => {
+                        setIsLightboxOpen(false);
+                    }}
                 />
             </>
         );
@@ -254,7 +257,7 @@ export const FileEmbed = ({ url, attachment, onResize }: FileEmbedProps) => {
                             className="h-full max-h-[min(450px,70vh)] w-full object-contain"
                             height={mediaDimensions.height}
                             preload="metadata"
-                            src={displayUrl!}
+                            src={displayUrl}
                             style={{ aspectRatio: mediaBoxStyle.aspectRatio }}
                             width={mediaDimensions.width}
                             onLoadedData={onResize}
@@ -262,7 +265,7 @@ export const FileEmbed = ({ url, attachment, onResize }: FileEmbedProps) => {
                         >
                             <track kind="captions" />
                         </video>
-                        {isSpoiler && isRevealed && (
+                        {isSpoiler && isRevealed ? (
                             <Button
                                 className="absolute top-2 right-2 h-7 w-7 rounded-full bg-black/40 p-0 text-white opacity-0 backdrop-blur-md transition-opacity group-hover:opacity-100"
                                 size="sm"
@@ -274,7 +277,7 @@ export const FileEmbed = ({ url, attachment, onResize }: FileEmbedProps) => {
                             >
                                 <EyeOff size={14} />
                             </Button>
-                        )}
+                        ) : null}
                     </>
                 )}
             </Box>
@@ -443,7 +446,9 @@ const CodeEmbed = ({
                             className="h-7 w-7 p-0 hover:bg-white/5"
                             size="sm"
                             variant="ghost"
-                            onClick={(): void => setShowFull(true)}
+                            onClick={(): void => {
+                                setShowFull(true);
+                            }}
                         >
                             <Maximize2
                                 className="text-muted-foreground"
@@ -476,31 +481,35 @@ const CodeEmbed = ({
                         </code>
                     </pre>
 
-                    {isTruncated && (
+                    {isTruncated ? (
                         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-bg-secondary to-transparent" />
-                    )}
+                    ) : null}
                 </div>
 
-                {isTruncated && (
+                {isTruncated ? (
                     <div className="flex justify-center border-t border-border-subtle/30 bg-bg-primary/30 px-3 py-2">
                         <Button
                             className="flex items-center gap-1.5 border-none bg-transparent text-[11px] font-bold text-primary shadow-none transition-colors hover:text-primary-hover"
                             size="sm"
                             variant="ghost"
-                            onClick={(): void => setShowFull(true)}
+                            onClick={(): void => {
+                                setShowFull(true);
+                            }}
                         >
                             <Maximize2 size={12} />
                             Show whole
                         </Button>
                     </div>
-                )}
+                ) : null}
             </Box>
 
             <CodeModal
                 content={content || ''}
                 isOpen={showFull}
                 language={extension}
-                onClose={(): void => setShowFull(false)}
+                onClose={(): void => {
+                    setShowFull(false);
+                }}
             />
         </>
     );

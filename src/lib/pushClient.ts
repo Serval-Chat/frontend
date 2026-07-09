@@ -1,36 +1,37 @@
 import { apiClient } from '@/api/client';
 import { getAuthToken } from '@/utils/authToken';
 
-const isTauri = (): boolean => '__TAURI_INTERNALS__' in window;
+const isTauri = (): boolean => '__TAURI_INTERNALS__' in globalThis;
 
 function urlBase64ToUint8Array(base64: string): Uint8Array {
     const padding = '='.repeat((4 - (base64.length % 4)) % 4);
-    const b64 = (base64 + padding).replace(/-/g, '+').replace(/_/g, '/');
+    const b64 = (base64 + padding).replaceAll('-', '+').replaceAll('_', '/');
     const raw = atob(b64);
     return Uint8Array.from([...raw].map((c): number => c.charCodeAt(0)));
 }
 
 function uint8ArrayToBase64Url(bytes: Uint8Array): string {
     return btoa(String.fromCharCode(...bytes))
-        .replace(/\+/g, '-')
-        .replace(/\//g, '_')
+        .replaceAll('+', '-')
+        .replaceAll('/', '_')
         .replace(/=+$/, '');
 }
 
 export async function syncWebPush(): Promise<void> {
-    if (isTauri() || !('Notification' in window)) return;
+    if (isTauri() || !('Notification' in globalThis)) return;
     if (Notification.permission === 'granted') {
         try {
             await setupWebPush();
-        } catch (err) {
-            console.error('[WebPush] Error during silent sync:', err);
+        } catch (error) {
+            console.error('[WebPush] Error during silent sync:', error);
         }
     }
 }
 
 export async function setupWebPush(): Promise<void> {
     if (isTauri()) return; // tauri handles its own notifications
-    if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+    if (!('serviceWorker' in navigator) || !('PushManager' in globalThis))
+        return;
 
     const permission = await Notification.requestPermission();
     if (permission !== 'granted') return;
@@ -69,15 +70,16 @@ export async function teardownWebPush(): Promise<void> {
     if (getAuthToken()) {
         try {
             await apiClient.delete('/api/v1/push/unsubscribe');
-        } catch (err) {
-            console.error('[WebPush] Error unsubscribing backend layer', err);
+        } catch (error) {
+            console.error('[WebPush] Error unsubscribing backend layer', error);
         }
     }
 }
 
 export async function checkAndMigrateVapid(): Promise<void> {
     if (isTauri()) return;
-    if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+    if (!('serviceWorker' in navigator) || !('PushManager' in globalThis))
+        return;
 
     const reg = await navigator.serviceWorker.getRegistration('/');
     if (!reg) return;

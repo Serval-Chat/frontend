@@ -1,6 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { AnimatePresence, animate, useMotionValue } from 'framer-motion';
+import {
+    AnimatePresence,
+    type MotionValue,
+    animate,
+    useMotionValue,
+} from 'framer-motion';
 import { m } from 'framer-motion';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 
@@ -22,10 +27,92 @@ import { Box } from '@/ui/components/layout/Box';
 import { MainContent } from '@/ui/components/layout/MainContent';
 
 const isMobileViewport = (): boolean =>
-    typeof window !== 'undefined' &&
-    window.matchMedia('(max-width: 767px)').matches;
+    globalThis.window !== undefined &&
+    globalThis.matchMedia('(max-width: 767px)').matches;
 
 const SPRING = { type: 'spring', stiffness: 300, damping: 35 } as const;
+
+const DesktopChatLayout = ({
+    isSplitViewActive,
+    showDesktopMemberList,
+    selectedFriendId,
+    selectedServerId,
+}: {
+    isSplitViewActive: boolean;
+    showDesktopMemberList: boolean;
+    selectedFriendId: string | null;
+    selectedServerId: string | null;
+}) => (
+    <Box className="chat-background fixed inset-0 flex w-full overflow-hidden overscroll-none">
+        <Outlet />
+        <PrimaryNavBar />
+        <SecondaryNavBar />
+        <MainContent />
+        <AnimatePresence>
+            {!isSplitViewActive &&
+            showDesktopMemberList &&
+            !!(selectedFriendId || selectedServerId) ? (
+                <m.div
+                    animate={{
+                        width: Number.parseInt(
+                            localStorage.getItem('tertiary-sidebar-width') ??
+                                '240',
+                            10,
+                        ),
+                        opacity: 1,
+                    }}
+                    className="h-full overflow-hidden"
+                    exit={{ width: 0, opacity: 0 }}
+                    initial={{ width: 0, opacity: 0 }}
+                    key="desktop-member-list"
+                    transition={transitions.sidebar}
+                >
+                    <TertiarySidebar />
+                </m.div>
+            ) : null}
+        </AnimatePresence>
+    </Box>
+);
+
+const MobileChatLayout = ({
+    swipeRef,
+    x,
+    visualViewportBounds,
+    isSplitViewActive,
+}: {
+    swipeRef: ReturnType<typeof useSwipeGesture>['ref'];
+    x: MotionValue<number>;
+    visualViewportBounds: { top: number; height: number };
+    isSplitViewActive: boolean;
+}) => (
+    <Box
+        className="chat-background fixed right-0 left-0 w-full overflow-hidden overscroll-none"
+        ref={swipeRef}
+        style={{
+            top: visualViewportBounds.top,
+            height: visualViewportBounds.height,
+        }}
+    >
+        <Outlet />
+        <MobileSwipeContext.Provider value>
+            <m.div className="flex h-full" style={{ x, width: '200vw' }}>
+                {/* Panel 0: List (PrimaryNavBar + SecondaryNavBar) */}
+                <div className="flex h-full w-screen shrink-0 overflow-hidden">
+                    <PrimaryNavBar />
+                    <div className="h-full min-w-0 flex-1">
+                        <SecondaryNavBar />
+                    </div>
+                </div>
+                {/* Panel 1: Chat (MainContent) */}
+                <div className="flex h-full w-screen shrink-0 flex-col overflow-hidden">
+                    <MainContent />
+                </div>
+            </m.div>
+        </MobileSwipeContext.Provider>
+        {/* TertiarySidebar: fixed overlay, slides in from right independently */}
+        {isSplitViewActive ? null : <TertiarySidebar />}
+    </Box>
+);
 
 /**
  * @description Chat page with smooth swipe gesture navigation on mobile.
@@ -66,16 +153,19 @@ export const Chat = () => {
     const [visualViewportBounds, setVisualViewportBounds] = useState({
         top: 0,
         height:
-            typeof window !== 'undefined'
-                ? window.visualViewport?.height || window.innerHeight
-                : 0,
+            globalThis.window === undefined
+                ? 0
+                : window.visualViewport?.height || window.innerHeight,
     });
     useEffect((): (() => void) => {
-        const mq = window.matchMedia('(max-width: 767px)');
-        const onChange = (e: MediaQueryListEvent): void =>
+        const mq = globalThis.matchMedia('(max-width: 767px)');
+        const onChange = (e: MediaQueryListEvent): void => {
             setIsMobile(e.matches);
+        };
         mq.addEventListener('change', onChange);
-        return (): void => mq.removeEventListener('change', onChange);
+        return (): void => {
+            mq.removeEventListener('change', onChange);
+        };
     }, []);
 
     useEffect((): (() => void) | undefined => {
@@ -266,74 +356,21 @@ export const Chat = () => {
 
     if (!isMobile) {
         return (
-            <Box className="chat-background fixed inset-0 flex w-full overflow-hidden overscroll-none">
-                <Outlet />
-                <PrimaryNavBar />
-                <SecondaryNavBar />
-                <MainContent />
-                <AnimatePresence>
-                    {!isSplitViewActive &&
-                        showDesktopMemberList &&
-                        !!(selectedFriendId || selectedServerId) && (
-                            <m.div
-                                animate={{
-                                    width: parseInt(
-                                        localStorage.getItem(
-                                            'tertiary-sidebar-width',
-                                        ) ?? '240',
-                                        10,
-                                    ),
-                                    opacity: 1,
-                                }}
-                                className="h-full overflow-hidden"
-                                exit={{ width: 0, opacity: 0 }}
-                                initial={{ width: 0, opacity: 0 }}
-                                key="desktop-member-list"
-                                transition={transitions.sidebar}
-                            >
-                                <TertiarySidebar />
-                            </m.div>
-                        )}
-                </AnimatePresence>
-            </Box>
+            <DesktopChatLayout
+                isSplitViewActive={isSplitViewActive}
+                selectedFriendId={selectedFriendId}
+                selectedServerId={selectedServerId}
+                showDesktopMemberList={showDesktopMemberList}
+            />
         );
     }
 
     return (
-        <Box
-            className="chat-background fixed right-0 left-0 w-full overflow-hidden overscroll-none"
-            ref={swipeRef}
-            style={{
-                top: visualViewportBounds.top,
-                height: visualViewportBounds.height,
-            }}
-        >
-            <Outlet />
-            <MobileSwipeContext.Provider value>
-                <m.div
-                    className="flex h-full"
-                    style={{
-                        x,
-                        width: '200vw',
-                    }}
-                >
-                    {/* Panel 0: List (PrimaryNavBar + SecondaryNavBar) */}
-                    <div className="flex h-full w-screen shrink-0 overflow-hidden">
-                        <PrimaryNavBar />
-                        <div className="h-full min-w-0 flex-1">
-                            <SecondaryNavBar />
-                        </div>
-                    </div>
-
-                    {/* Panel 1: Chat (MainContent) */}
-                    <div className="flex h-full w-screen shrink-0 flex-col overflow-hidden">
-                        <MainContent />
-                    </div>
-                </m.div>
-            </MobileSwipeContext.Provider>
-
-            {/* TertiarySidebar: fixed overlay, slides in from right independently */}
-            {!isSplitViewActive && <TertiarySidebar />}
-        </Box>
+        <MobileChatLayout
+            isSplitViewActive={isSplitViewActive}
+            swipeRef={swipeRef}
+            visualViewportBounds={visualViewportBounds}
+            x={x}
+        />
     );
 };

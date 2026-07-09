@@ -9,7 +9,7 @@ export type StatsRange = '24h' | '7d' | '30d' | 'all';
 
 export const useAdminStats = (
     range: StatsRange = '24h',
-): UseQueryResult<AdminStats, Error> =>
+): UseQueryResult<AdminStats> =>
     useQuery<AdminStats>({
         queryKey: ['admin-stats', range],
         queryFn: async (): Promise<AdminStats> => {

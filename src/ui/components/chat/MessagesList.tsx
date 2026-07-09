@@ -19,8 +19,7 @@ import type {
     ServerMember,
 } from '@/api/servers/servers.types';
 import type { User } from '@/api/users/users.types';
-import { useAppDispatch } from '@/store/hooks';
-import { useAppSelector } from '@/store/hooks';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { setTargetMessageId } from '@/store/slices/navSlice';
 import { BlockFlags } from '@/types/blocks';
 import type { ProcessedChatMessage } from '@/types/chat.ui';
@@ -121,7 +120,9 @@ export const MessagesList = React.memo(
                 const t = setTimeout((): void => {
                     loadMoreCooldownRef.current = false;
                 }, 100);
-                return (): void => clearTimeout(t);
+                return (): void => {
+                    clearTimeout(t);
+                };
             }
         }, [isLoadingMore]);
 
@@ -133,6 +134,26 @@ export const MessagesList = React.memo(
         useEffect((): void => {
             onAtBottomChangeRef.current?.(isAtBottom);
         }, [isAtBottom]);
+
+        // the list is kept invisible until its initial anchor has settled, so
+        // the estimate -> real-measurement height corrections that happen right
+        // after a channel switch never show up as visible jitter.
+        const [hasSettled, setHasSettled] = useState(false);
+        const hasSettledRef = useRef(false);
+        const settleRafRef = useRef<number | null>(null);
+        const settleFailsafeRef = useRef<ReturnType<typeof setTimeout> | null>(
+            null,
+        );
+
+        const reveal = useCallback((): void => {
+            if (settleFailsafeRef.current !== null) {
+                clearTimeout(settleFailsafeRef.current);
+                settleFailsafeRef.current = null;
+            }
+            if (hasSettledRef.current) return;
+            hasSettledRef.current = true;
+            setHasSettled(true);
+        }, []);
 
         type VirtualItemData =
             | { type: 'message'; message: ProcessedChatMessage }
@@ -159,12 +180,13 @@ export const MessagesList = React.memo(
                 items.push({
                     type: 'blocked-group',
                     messages: [...currentBlockedGroup],
-                    id: `blocked-${currentBlockedGroup[0].id}`,
+                    // safe: guarded by the length === 0 early-return above.
+                    id: `blocked-${currentBlockedGroup[0]!.id}`,
                 });
                 currentBlockedGroup = [];
             };
 
-            messages.forEach((msg): void => {
+            for (const msg of messages) {
                 const senderBlocks = blocks[msg.senderId] || 0;
                 const isSenderBlocked = !!(
                     senderBlocks & BlockFlags.HIDE_MESSAGES
@@ -183,7 +205,7 @@ export const MessagesList = React.memo(
                     flushBlockedGroup();
                     items.push({ type: 'message', message: msg });
                 }
-            });
+            }
 
             flushBlockedGroup();
 
@@ -296,10 +318,11 @@ export const MessagesList = React.memo(
                 if (container && isAtBottomRef.current) {
                     rowVirtualizer.scrollToIndex(
                         virtualItemsRef.current.length - 1,
-                        {
-                            align: 'end',
-                        },
+                        { align: 'end' },
                     );
+                    // clamp to the true DOM bottom in case late measurements
+                    // (images/embeds) grew the list past the estimated offset.
+                    container.scrollTop = container.scrollHeight;
                 }
             });
         }, [rowVirtualizer]);
@@ -413,27 +436,123 @@ export const MessagesList = React.memo(
 
         const prevFirstMessageIdRef = useRef<string | null>(null);
         const prevLastItemKeyRef = useRef<string | number | null>(null);
+        const prevActiveHighlightRef = useRef<string | null | undefined>(
+            activeHighlightId,
+        );
+
+        // keeps the viewport anchored to the newest message before every paint,
+        // so opening a channel lands straight at the bottom (no scroll-through
+        // of older messages) and stays pinned while async content settles.
+        const pinToBottom = useCallback((): void => {
+            const container = scrollContainerRef.current;
+            if (!container) return;
+            rowVirtualizer.scrollToIndex(virtualItemsRef.current.length - 1, {
+                align: 'end',
+            });
+            container.scrollTop = container.scrollHeight;
+            isAtBottomRef.current = true;
+            setIsAtBottom(true);
+        }, [rowVirtualizer]);
+
+        // holds the list hidden and pinned to the bottom until its measured
+        // height stops changing for a couple of frames (or a short cap), then
+        // reveals it - so the initial measurement pass is never seen.
+        const startSettle = useCallback((): void => {
+            if (hasSettledRef.current || settleRafRef.current !== null) return;
+            // guarantee the list is never left hidden, even if the rAF loop is
+            // interrupted for any reason.
+            if (settleFailsafeRef.current === null) {
+                settleFailsafeRef.current = setTimeout((): void => {
+                    settleFailsafeRef.current = null;
+                    reveal();
+                }, 1000);
+            }
+            let lastHeight = -1;
+            let stableFrames = 0;
+            let frames = 0;
+            const tick = (): void => {
+                const container = scrollContainerRef.current;
+                if (!container) {
+                    settleRafRef.current = null;
+                    reveal();
+                    return;
+                }
+                if (isAtBottomRef.current) {
+                    rowVirtualizer.scrollToIndex(
+                        virtualItemsRef.current.length - 1,
+                        { align: 'end' },
+                    );
+                    container.scrollTop = container.scrollHeight;
+                }
+                const height = container.scrollHeight;
+                stableFrames = height === lastHeight ? stableFrames + 1 : 0;
+                lastHeight = height;
+                frames += 1;
+                if (stableFrames >= 2 || frames >= 12) {
+                    settleRafRef.current = null;
+                    reveal();
+                    return;
+                }
+                settleRafRef.current = requestAnimationFrame(tick);
+            };
+            settleRafRef.current = requestAnimationFrame(tick);
+        }, [rowVirtualizer, reveal]);
+
+        useEffect(
+            (): (() => void) => (): void => {
+                if (settleRafRef.current !== null) {
+                    cancelAnimationFrame(settleRafRef.current);
+                    settleRafRef.current = null;
+                }
+                if (settleFailsafeRef.current !== null) {
+                    clearTimeout(settleFailsafeRef.current);
+                    settleFailsafeRef.current = null;
+                }
+            },
+            [],
+        );
+
+        // drives the reveal. Once content is present (and not opened on a target
+        // message) run the settle -> reveal cycle; otherwise reveal at once.
+        // Lives in a passive effect rather than the one-shot initial-anchor
+        // branch so it re-fires after StrictMode's mount/unmount/mount cycle
+        // (where refs persist and that branch would be skipped the second time).
+        useEffect((): void => {
+            if (hasSettledRef.current || isLoading) return;
+            if (messages.length === 0 || activeHighlightId) {
+                reveal();
+                return;
+            }
+            startSettle();
+        }, [
+            isLoading,
+            messages.length,
+            activeHighlightId,
+            startSettle,
+            reveal,
+        ]);
 
         useLayoutEffect((): void => {
             const container = scrollContainerRef.current;
-            if (!container || virtualItems.length === 0) return;
+            if (!container || isLoading || virtualItems.length === 0) return;
 
             const firstMessage = virtualItems.find(
                 (item): boolean => item.type === 'message',
             ) as { message: { id: string } } | undefined;
             const firstMessageId = firstMessage?.message.id ?? null;
-            const isPrepending =
-                prevFirstMessageIdRef.current !== null &&
-                firstMessageId !== null &&
-                firstMessageId !== prevFirstMessageIdRef.current;
-
-            prevFirstMessageIdRef.current = firstMessageId;
+            const hasContent = virtualItems.some(
+                (item): boolean =>
+                    item.type === 'message' || item.type === 'blocked-group',
+            );
 
             const lastItem =
                 [...virtualItems]
                     .reverse()
                     .find((item): boolean => item.type !== 'spacer') ??
-                virtualItems[virtualItems.length - 1];
+                virtualItems.at(-1);
+            // virtualItems.length === 0 already returned above, so there is
+            // always at least one item here.
+            if (!lastItem) return;
             const lastItemKey =
                 lastItem.type === 'message'
                     ? lastItem.message.id
@@ -442,6 +561,44 @@ export const MessagesList = React.memo(
                       : lastItem.type;
             const newScrollHeight = container.scrollHeight;
 
+            // detect the transition out of "viewing a linked/older message"
+            // (e.g. the user hit "Jump to latest") so we re-anchor to bottom.
+            const leftHighlightMode =
+                !!prevActiveHighlightRef.current && !activeHighlightId;
+            prevActiveHighlightRef.current = activeHighlightId;
+
+            // 1. first paint with real content for this conversation: land
+            //    directly on the newest message, before the browser paints.
+            if (!didApplyInitialScrollRef.current && hasContent) {
+                didApplyInitialScrollRef.current = true;
+                prevFirstMessageIdRef.current = firstMessageId;
+                prevLastItemKeyRef.current = lastItemKey;
+                lastScrollHeightRef.current = newScrollHeight;
+
+                if (activeHighlightId) {
+                    // opened on a target message: the highlight effect brings it
+                    // into view; we are not pinned to the bottom.
+                    isAtBottomRef.current = false;
+                    setIsAtBottom(false);
+                } else {
+                    pinToBottom();
+                }
+                // the reveal (settle vs. show-immediately) is driven by a
+                // separate passive effect so it survives StrictMode's double
+                // mount, where this one-shot branch would not run again.
+                return;
+            }
+
+            const isPrepending =
+                prevFirstMessageIdRef.current !== null &&
+                firstMessageId !== null &&
+                firstMessageId !== prevFirstMessageIdRef.current &&
+                !leftHighlightMode;
+
+            prevFirstMessageIdRef.current = firstMessageId;
+
+            // 2. older history loaded at the top: hold the current viewport
+            //    steady by compensating for the newly-added height.
             if (isPrepending && lastScrollHeightRef.current !== 0) {
                 const heightDiff =
                     newScrollHeight - lastScrollHeightRef.current;
@@ -453,35 +610,40 @@ export const MessagesList = React.memo(
                     });
                 }
                 lastScrollHeightRef.current = newScrollHeight;
+                prevLastItemKeyRef.current = lastItemKey;
                 return;
             }
 
-            if (isAtBottom) {
-                if (!didApplyInitialScrollRef.current) {
-                    didApplyInitialScrollRef.current = true;
-                    isAtBottomRef.current = true;
-                    lastScrollHeightRef.current = newScrollHeight;
-                    prevLastItemKeyRef.current = lastItemKey;
-                    return;
-                }
+            // 3. returned to the latest messages after viewing older ones.
+            if (leftHighlightMode) {
+                prevLastItemKeyRef.current = lastItemKey;
+                lastScrollHeightRef.current = newScrollHeight;
+                pinToBottom();
+                return;
+            }
 
-                if (prevLastItemKeyRef.current === lastItemKey) {
-                    lastScrollHeightRef.current = newScrollHeight;
-                    return;
-                }
-
+            // 4. pinned to the bottom: follow new messages and any height growth
+            //    from late measurements / loading embeds without flashing.
+            if (isAtBottomRef.current) {
                 rowVirtualizer.scrollToIndex(virtualItems.length - 1, {
                     align: 'end',
                 });
-                isAtBottomRef.current = true;
-                lastScrollHeightRef.current = newScrollHeight;
+                container.scrollTop = container.scrollHeight;
+                lastScrollHeightRef.current = container.scrollHeight;
                 prevLastItemKeyRef.current = lastItemKey;
                 return;
             }
 
             lastScrollHeightRef.current = newScrollHeight;
             prevLastItemKeyRef.current = lastItemKey;
-        }, [virtualItems, totalSize, isAtBottom, rowVirtualizer]);
+        }, [
+            virtualItems,
+            totalSize,
+            isLoading,
+            activeHighlightId,
+            rowVirtualizer,
+            pinToBottom,
+        ]);
 
         const lastScrolledIdRef = useRef<string | null>(null);
 
@@ -529,15 +691,16 @@ export const MessagesList = React.memo(
         );
 
         return (
-            <Box
-                className="custom-scrollbar relative flex min-h-0 flex-1 flex-col overflow-y-auto pt-4"
-                ref={scrollContainerRef}
-                style={{ overflowAnchor: 'none' }}
-                onScroll={handleScroll}
-            >
-                {isLoading ? (
-                    <ChatSkeleton />
-                ) : (
+            <Box className="relative flex min-h-0 flex-1 flex-col">
+                <Box
+                    className="custom-scrollbar flex min-h-0 flex-1 flex-col overflow-y-auto pt-4"
+                    ref={scrollContainerRef}
+                    style={{
+                        overflowAnchor: 'none',
+                        opacity: hasSettled ? 1 : 0,
+                    }}
+                    onScroll={handleScroll}
+                >
                     <Box
                         className="relative w-full"
                         style={{
@@ -546,6 +709,11 @@ export const MessagesList = React.memo(
                     >
                         {rowVirtualizer.getVirtualItems().map((virtualRow) => {
                             const item = virtualItems[virtualRow.index];
+                            if (!item) return null;
+                            const prevItem =
+                                virtualRow.index > 0
+                                    ? virtualItems[virtualRow.index - 1]
+                                    : undefined;
                             return (
                                 <div
                                     data-index={virtualRow.index}
@@ -559,7 +727,7 @@ export const MessagesList = React.memo(
                                         transform: `translateY(${virtualRow.start}px)`,
                                     }}
                                 >
-                                    {item.type === 'loader-older' && (
+                                    {item.type === 'loader-older' ? (
                                         <Box className="flex justify-center py-4">
                                             {isLoadingMore ? (
                                                 <LoadingSpinner size="sm" />
@@ -574,9 +742,9 @@ export const MessagesList = React.memo(
                                                 </Button>
                                             )}
                                         </Box>
-                                    )}
+                                    ) : null}
 
-                                    {item.type === 'message' && (
+                                    {item.type === 'message' ? (
                                         <MessageItem
                                             disableColors={disableColors}
                                             disableCustomFonts={
@@ -596,18 +764,8 @@ export const MessagesList = React.memo(
                                             me={me}
                                             message={item.message}
                                             prevMessage={
-                                                virtualRow.index > 0 &&
-                                                virtualItems[
-                                                    virtualRow.index - 1
-                                                ].type === 'message'
-                                                    ? (
-                                                          virtualItems[
-                                                              virtualRow.index -
-                                                                  1
-                                                          ] as {
-                                                              message: ProcessedChatMessage;
-                                                          }
-                                                      ).message
+                                                prevItem?.type === 'message'
+                                                    ? prevItem.message
                                                     : undefined
                                             }
                                             role={item.message.role}
@@ -623,15 +781,15 @@ export const MessagesList = React.memo(
                                             onReplyToMessage={onReplyToMessage}
                                             onResize={requestMeasure}
                                         />
-                                    )}
+                                    ) : null}
 
-                                    {item.type === 'blocked-group' && (
+                                    {item.type === 'blocked-group' ? (
                                         <Box className="my-1 px-4 py-2">
                                             <Box
                                                 className="text-foreground-muted flex cursor-pointer items-center gap-2 text-xs font-medium transition-colors hover:text-foreground"
-                                                onClick={(): void =>
-                                                    toggleGroup(item.id)
-                                                }
+                                                onClick={(): void => {
+                                                    toggleGroup(item.id);
+                                                }}
                                             >
                                                 {expandedGroups.has(item.id) ? (
                                                     <ChevronDown size={14} />
@@ -644,7 +802,7 @@ export const MessagesList = React.memo(
                                                         : `${item.messages.length} messages from blocked users`}
                                                 </Text>
                                             </Box>
-                                            {expandedGroups.has(item.id) && (
+                                            {expandedGroups.has(item.id) ? (
                                                 <Box className="mt-2 ml-1.5 border-l border-white/5 pl-2">
                                                     {item.messages.map(
                                                         (msg, mIdx) => (
@@ -715,11 +873,11 @@ export const MessagesList = React.memo(
                                                         ),
                                                     )}
                                                 </Box>
-                                            )}
+                                            ) : null}
                                         </Box>
-                                    )}
+                                    ) : null}
 
-                                    {item.type === 'loader-newer' && (
+                                    {item.type === 'loader-newer' ? (
                                         <Box className="flex justify-center py-4">
                                             {isLoadingMoreNewer ? (
                                                 <LoadingSpinner size="sm" />
@@ -734,14 +892,19 @@ export const MessagesList = React.memo(
                                                 </Button>
                                             )}
                                         </Box>
-                                    )}
+                                    ) : null}
 
-                                    {item.type === 'spacer' && (
+                                    {item.type === 'spacer' ? (
                                         <VerticalSpacer verticalSpace={22} />
-                                    )}
+                                    ) : null}
                                 </div>
                             );
                         })}
+                    </Box>
+                </Box>
+                {hasSettled ? null : (
+                    <Box className="pointer-events-none absolute inset-0 overflow-hidden">
+                        <ChatSkeleton />
                     </Box>
                 )}
             </Box>

@@ -1,4 +1,4 @@
-import { type ReactNode } from 'react';
+import type { ReactNode } from 'react';
 
 import { AlertTriangle } from 'lucide-react';
 import { ErrorBoundary } from 'react-error-boundary';

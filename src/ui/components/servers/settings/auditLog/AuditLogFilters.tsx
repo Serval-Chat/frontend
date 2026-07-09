@@ -100,52 +100,68 @@ const getActionIcon = (action: string): React.ReactNode | undefined => {
         case 'create_channel':
         case 'create_category':
         case 'role_created':
-        case 'role_create':
+        case 'role_create': {
             return <PlusCircle className="h-4 w-4 text-green-500" />;
+        }
         case 'edit_channel':
         case 'edit_category':
         case 'role_edited':
         case 'role_update':
         case 'update_server':
         case 'role_icon_updated':
-        case 'edit_message':
+        case 'edit_message': {
             return <Edit2 className="h-4 w-4 text-yellow-500" />;
+        }
         case 'delete_channel':
         case 'delete_category':
         case 'role_removed':
         case 'role_delete':
         case 'delete_message':
         case 'reactions_removed':
-        case 'reaction_clear':
+        case 'reaction_clear': {
             return <Trash2 className="h-4 w-4 text-red-500" />;
-        case 'user_kick':
+        }
+        case 'user_kick': {
             return <UserMinus className="h-4 w-4 text-orange-500" />;
-        case 'user_ban':
+        }
+        case 'user_ban': {
             return <UserX className="h-4 w-4 text-red-500" />;
+        }
         case 'user_unban':
         case 'user_join':
-        case 'member_join':
+        case 'member_join': {
             return <UserPlus className="h-4 w-4 text-green-500" />;
-        case 'user_leave':
+        }
+        case 'user_leave': {
             return <UserMinus className="h-4 w-4 text-orange-500" />;
-        case 'owner_changed':
+        }
+        case 'owner_changed': {
             return <Crown className="h-4 w-4 text-yellow-400" />;
-        case 'role_given':
+        }
+        case 'role_given': {
             return <ShieldAlert className="h-4 w-4 text-blue-500" />;
-        case 'emoji_create':
+        }
+        case 'emoji_create': {
             return <Smile className="h-4 w-4 text-green-500" />;
-        case 'emoji_delete':
+        }
+        case 'emoji_delete': {
             return <Smile className="h-4 w-4 text-red-500" />;
-        case 'invite_create':
+        }
+        case 'invite_create': {
             return <Link className="h-4 w-4 text-green-500" />;
-        case 'invite_delete':
+        }
+        case 'invite_delete': {
             return <Link className="h-4 w-4 text-red-500" />;
-        case 'roles_reordered':
+        }
+        case 'roles_reordered': {
             return <Repeat className="h-4 w-4 text-yellow-500" />;
-        case '':
+        }
+        case '': {
             return undefined;
-        default:
+        }
+        default: {
             return <Settings className="h-4 w-4 text-gray-500" />;
+        }
     }
 };
 
@@ -255,20 +271,18 @@ export const AuditLogFilters = ({
                     >
                         Reason
                     </label>
-                    <div className="relative">
-                        <Input
-                            className="h-10 pl-9"
-                            id="audit-filter-reason"
-                            placeholder="Search in reason..."
-                            value={filters.reason || ''}
-                            onChange={handleReasonChange}
-                        />
-                        <Search className="absolute top-2.5 left-3 h-4 w-4 text-text-muted" />
-                    </div>
+                    <Input
+                        className="h-10"
+                        icon={<Search className="h-4 w-4" />}
+                        id="audit-filter-reason"
+                        placeholder="Search in reason..."
+                        value={filters.reason || ''}
+                        onChange={handleReasonChange}
+                    />
                 </div>
             </div>
 
-            {hasActiveFilters && (
+            {hasActiveFilters ? (
                 <div className="flex justify-end">
                     <Button
                         className="hover:text-text text-text-muted"
@@ -280,7 +294,7 @@ export const AuditLogFilters = ({
                         Clear Filters
                     </Button>
                 </div>
-            )}
+            ) : null}
         </div>
     );
 };

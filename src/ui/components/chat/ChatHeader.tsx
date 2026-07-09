@@ -23,14 +23,20 @@ import { cn } from '@/utils/cn';
 
 import { PinsDrawer } from './PinsDrawer';
 
+interface ChatHeaderMemberListProps {
+    /** Whether the member list panel is currently open. Falls back to redux nav state when omitted. */
+    isOpen?: boolean;
+    /** Hides the member list toggle button entirely (e.g. it's already shown elsewhere). */
+    hideButton?: boolean;
+    onToggle?: () => void;
+}
+
 interface ChatHeaderProps {
     selectedFriendId: string | null;
     friendUser?: User;
     selectedChannel?: Channel;
     onTogglePins?: () => void;
-    onToggleMemberList?: () => void;
-    isMemberListOpen?: boolean;
-    hideMemberListButton?: boolean;
+    memberList?: ChatHeaderMemberListProps;
     showPins?: boolean;
     actions?: React.ReactNode;
     isSearchOpen?: boolean;
@@ -45,9 +51,7 @@ export const ChatHeader = ({
     friendUser,
     selectedChannel,
     onTogglePins,
-    onToggleMemberList,
-    isMemberListOpen,
-    hideMemberListButton,
+    memberList,
     showPins,
     actions,
     isSearchOpen,
@@ -84,12 +88,14 @@ export const ChatHeader = ({
         const key = `serchat_pins_last_viewed_${me.id}_${selectedChannelId}`;
         const update = (): void => {
             const saved = localStorage.getItem(key);
-            setLastViewedAt(saved ? parseInt(saved, 10) : 0);
+            setLastViewedAt(saved ? Number.parseInt(saved, 10) : 0);
         };
 
         update();
-        window.addEventListener('storage', update);
-        return (): void => window.removeEventListener('storage', update);
+        globalThis.addEventListener('storage', update);
+        return (): void => {
+            globalThis.removeEventListener('storage', update);
+        };
     }, [me?.id, selectedChannelId]);
 
     const hasUnreadPins = React.useMemo((): boolean => {
@@ -104,7 +110,7 @@ export const ChatHeader = ({
     const hasStatus = !!selectedFriendId && !!friendUser?.customStatus?.text;
     const showSecondary = hasDescription || hasStatus;
     const memberListOpen =
-        isMemberListOpen ??
+        memberList?.isOpen ??
         (window.innerWidth >= 768
             ? showDesktopMemberList
             : showMobileMemberList);
@@ -115,7 +121,7 @@ export const ChatHeader = ({
             void navigate('/chat/@me');
         } else if (selectedChannelId) {
             dispatch(setSelectedChannelId(null));
-            void navigate(`/chat/@server/${selectedServerId}`);
+            void navigate(`/chat/@server/${String(selectedServerId)}`);
         }
     };
 
@@ -145,7 +151,7 @@ export const ChatHeader = ({
                                 ? ICON_MAP[selectedChannel.icon]
                                 : null;
                             const Icon =
-                                CustomIcon ||
+                                CustomIcon ??
                                 (selectedChannel?.type === 'voice'
                                     ? Volume2
                                     : Hash);
@@ -156,18 +162,18 @@ export const ChatHeader = ({
                 <Box className="flex min-w-0 flex-1 flex-col gap-0.5">
                     <Box className="truncate text-[15px] leading-5 font-semibold text-foreground">
                         {selectedFriendId
-                            ? friendUser?.displayName ||
-                              friendUser?.username ||
-                              '...'
-                            : selectedChannel?.name || 'No Channel'}
+                            ? (friendUser?.displayName ??
+                              friendUser?.username ??
+                              '...')
+                            : (selectedChannel?.name ?? 'No Channel')}
                     </Box>
-                    {hasDescription && (
+                    {hasDescription ? (
                         <m.button
                             className="w-full text-left focus:outline-none"
                             type="button"
-                            onClick={(): void =>
-                                setDescExpanded((v): boolean => !v)
-                            }
+                            onClick={(): void => {
+                                setDescExpanded((v): boolean => !v);
+                            }}
                         >
                             <m.div
                                 animate={
@@ -191,23 +197,23 @@ export const ChatHeader = ({
                                             : 'truncate'
                                     }`}
                                 >
-                                    {selectedChannel!.description}
+                                    {selectedChannel.description}
                                 </span>
                             </m.div>
                         </m.button>
-                    )}
-                    {hasStatus && (
+                    ) : null}
+                    {hasStatus ? (
                         <Text className="text-foreground-muted truncate text-xs">
                             {friendUser?.customStatus?.text}
                         </Text>
-                    )}
+                    ) : null}
                 </Box>
             </Box>
 
             {/* Icons Area */}
             <Box className="ml-2 flex shrink-0 items-center gap-1 pt-2">
                 {actions}
-                {(selectedChannel || selectedFriendId) && onToggleSearch && (
+                {(selectedChannel || selectedFriendId) && onToggleSearch ? (
                     <button
                         aria-label={
                             isSearchOpen ? 'Close search' : 'Search messages'
@@ -223,8 +229,8 @@ export const ChatHeader = ({
                     >
                         <Search className="h-5 w-5" />
                     </button>
-                )}
-                {selectedChannel && !selectedFriendId && (
+                ) : null}
+                {selectedChannel && !selectedFriendId ? (
                     <>
                         <button
                             aria-label="Pinned Messages"
@@ -239,50 +245,51 @@ export const ChatHeader = ({
                             onClick={onTogglePins}
                         >
                             <Pin className="h-5 w-5" />
-                            {hasUnreadPins && (
+                            {hasUnreadPins ? (
                                 <Box className="absolute right-1.5 bottom-1.5 h-2 w-2 rounded-full border border-[var(--bg-chat-header)] bg-red-500" />
-                            )}
+                            ) : null}
                         </button>
 
                         <AnimatePresence>
                             {showPins &&
-                                selectedServerId &&
-                                selectedChannelId && (
-                                    <PinsDrawer
-                                        anchorRef={pinButtonRef}
-                                        channelId={selectedChannelId}
-                                        serverId={selectedServerId}
-                                        onClose={onTogglePins!}
-                                    />
-                                )}
+                            selectedServerId &&
+                            selectedChannelId &&
+                            onTogglePins != null ? (
+                                <PinsDrawer
+                                    anchorRef={pinButtonRef}
+                                    channelId={selectedChannelId}
+                                    serverId={selectedServerId}
+                                    onClose={onTogglePins}
+                                />
+                            ) : null}
                         </AnimatePresence>
                     </>
-                )}
-                {!hideMemberListButton &&
-                    (selectedChannel || selectedFriendId) && (
-                        <button
-                            aria-label="Toggle member list"
-                            className={cn(
-                                'p-2 transition-colors',
-                                memberListOpen
-                                    ? 'text-foreground'
-                                    : 'text-foreground-muted hover:text-foreground',
-                            )}
-                            type="button"
-                            onClick={
-                                onToggleMemberList ??
-                                ((): void => {
-                                    if (window.innerWidth >= 768) {
-                                        dispatch(toggleDesktopMemberList());
-                                    } else {
-                                        dispatch(toggleMobileMemberList());
-                                    }
-                                })
-                            }
-                        >
-                            <Users className="h-5 w-5" />
-                        </button>
-                    )}
+                ) : null}
+                {!memberList?.hideButton &&
+                (selectedChannel || selectedFriendId) ? (
+                    <button
+                        aria-label="Toggle member list"
+                        className={cn(
+                            'p-2 transition-colors',
+                            memberListOpen
+                                ? 'text-foreground'
+                                : 'text-foreground-muted hover:text-foreground',
+                        )}
+                        type="button"
+                        onClick={
+                            memberList?.onToggle ??
+                            ((): void => {
+                                if (window.innerWidth >= 768) {
+                                    dispatch(toggleDesktopMemberList());
+                                } else {
+                                    dispatch(toggleMobileMemberList());
+                                }
+                            })
+                        }
+                    >
+                        <Users className="h-5 w-5" />
+                    </button>
+                ) : null}
                 <button
                     aria-label="Back to contacts"
                     className="text-foreground-muted p-2 transition-colors hover:text-foreground md:hidden"

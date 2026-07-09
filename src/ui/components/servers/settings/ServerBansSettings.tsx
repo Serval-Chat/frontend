@@ -32,7 +32,7 @@ export const ServerBansSettings = ({ serverId }: ServerBansSettingsProps) => {
         useUnbanMember(serverId);
 
     const handleUnban = (userId: string, username: string): void => {
-        if (window.confirm(`Are you sure you want to unban ${username}?`)) {
+        if (globalThis.confirm(`Are you sure you want to unban ${username}?`)) {
             unbanMember(userId, {
                 onSuccess: (): void => {
                     showToast(`${username} has been unbanned.`, 'success');
@@ -140,13 +140,13 @@ export const ServerBansSettings = ({ serverId }: ServerBansSettingsProps) => {
                                             size="sm"
                                             title="Unban"
                                             variant="ghost"
-                                            onClick={(): void =>
+                                            onClick={(): void => {
                                                 handleUnban(
                                                     String(ban.userId),
                                                     ban.user?.username ||
                                                         'this user',
-                                                )
-                                            }
+                                                );
+                                            }}
                                         >
                                             <Trash2 className="text-status-error h-4 w-4" />
                                             <span className="text-status-error ml-2">

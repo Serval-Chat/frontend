@@ -1,7 +1,6 @@
 import React, { useCallback, useRef, useState } from 'react';
 
 import { useQueryClient } from '@tanstack/react-query';
-import JSZip from 'jszip';
 import { Loader2, Plus, Trash2 } from 'lucide-react';
 
 import {
@@ -10,6 +9,7 @@ import {
     useServerEmojis,
     useUploadEmoji,
 } from '@/api/servers/servers.queries';
+import { useBulkAssetUpload } from '@/hooks/useBulkAssetUpload';
 import { useWebSocket } from '@/hooks/ws/useWebSocket';
 import { BulkUploadModal } from '@/ui/components/common/BulkUploadModal';
 import { Button } from '@/ui/components/common/Button';
@@ -18,12 +18,61 @@ import { Input } from '@/ui/components/common/Input';
 import { Text } from '@/ui/components/common/Text';
 import { ImageCropModal } from '@/ui/components/settings/ImageCropModal';
 import { resolveApiUrl } from '@/utils/apiUrl';
-import { convertToWebp } from '@/utils/convertToWebp';
 import { WsEvents } from '@/ws';
 
 interface ServerEmojiSettingsProps {
     serverId: string;
 }
+
+const EmojiGridItem = ({
+    emoji,
+    isHovered,
+    onHover,
+    onLeave,
+    onDelete,
+}: {
+    emoji: { id: string; name: string; imageUrl: string };
+    isHovered: boolean;
+    onHover: () => void;
+    onLeave: () => void;
+    onDelete: () => void;
+}) => (
+    <div
+        className="group relative aspect-square overflow-hidden rounded-lg border border-border-subtle bg-bg-subtle transition-all hover:border-primary"
+        onMouseEnter={onHover}
+        onMouseLeave={onLeave}
+    >
+        <div className="flex h-full w-full items-center justify-center p-2">
+            <img
+                alt={emoji.name}
+                className="max-h-full max-w-full object-contain"
+                src={resolveApiUrl(emoji.imageUrl) || ''}
+            />
+        </div>
+        {isHovered ? (
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-black/60 p-2">
+                <Text
+                    align="center"
+                    leading="tight"
+                    size="xs"
+                    variant="inverse"
+                    weight="medium"
+                    wrap="breakAll"
+                >
+                    :{emoji.name}:
+                </Text>
+                <Button
+                    aria-label="Delete emoji"
+                    size="sm"
+                    variant="danger"
+                    onClick={onDelete}
+                >
+                    <Trash2 className="h-3 w-3" />
+                </Button>
+            </div>
+        ) : null}
+    </div>
+);
 
 export const ServerEmojiSettings = ({ serverId }: ServerEmojiSettingsProps) => {
     const queryClient = useQueryClient();
@@ -40,15 +89,21 @@ export const ServerEmojiSettings = ({ serverId }: ServerEmojiSettingsProps) => {
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [isCropModalOpen, setIsCropModalOpen] = useState(false);
     const [hoveredEmojiId, setHoveredEmojiId] = useState<string | null>(null);
-    const [isBulkUploading, setIsBulkUploading] = useState(false);
-    const [isCancelling, setIsCancelling] = useState(false);
-    const isCancelledRef = useRef(false);
-    const uploadedIdsRef = useRef<string[]>([]);
-    const [bulkStatus, setBulkStatus] = useState({
-        total: 0,
-        uploaded: 0,
-        errors: 0,
-        isOpen: false,
+    const {
+        isBulkUploading,
+        isCancelling,
+        bulkStatus,
+        handleBulkFileSelect,
+        handleCancelBulk,
+        closeBulkStatus,
+    } = useBulkAssetUpload({
+        uploadAsync: uploadEmojiAsync,
+        deleteAsync: deleteEmojiAsync,
+        toName: (fileName): string =>
+            (fileName.split('.')[0] ?? '').replaceAll(
+                /[^a-zA-Z0-9_-]/g,
+                '_',
+            ),
     });
     const fileInputRef = useRef<HTMLInputElement>(null);
     const bulkFileInputRef = useRef<HTMLInputElement>(null);
@@ -81,9 +136,10 @@ export const ServerEmojiSettings = ({ serverId }: ServerEmojiSettingsProps) => {
             setIsCropModalOpen(true);
 
             if (!emojiName) {
-                const name = file.name
-                    .split('.')[0]
-                    .replace(/[^a-zA-Z0-9_-]/g, '_');
+                const name = (file.name.split('.')[0] ?? file.name).replaceAll(
+                    /[^a-zA-Z0-9_-]/g,
+                    '_',
+                );
                 setEmojiName(name);
             }
         }
@@ -107,135 +163,6 @@ export const ServerEmojiSettings = ({ serverId }: ServerEmojiSettingsProps) => {
 
     const handleUploadClick = (): void => {
         fileInputRef.current?.click();
-    };
-
-    const handleBulkFileSelect = async (
-        event: React.ChangeEvent<HTMLInputElement>,
-    ): Promise<void> => {
-        const file = event.target.files?.[0];
-        if (!file) return;
-
-        if (bulkFileInputRef.current) {
-            bulkFileInputRef.current.value = '';
-        }
-
-        try {
-            const zip = new JSZip();
-            const loadedZip = await zip.loadAsync(file);
-
-            const validFiles = Object.entries(loadedZip.files).filter(
-                ([relativePath, zipEntry]): boolean => {
-                    if (zipEntry.dir) return false;
-                    const isImage = relativePath.match(
-                        /\.(png|jpg|jpeg|webp|gif)$/i,
-                    );
-                    if (!isImage) return false;
-                    const fileName = zipEntry.name.split('/').pop() || '';
-                    if (fileName.startsWith('.')) return false;
-                    return true;
-                },
-            );
-
-            if (validFiles.length === 0) return;
-
-            setBulkStatus({
-                total: validFiles.length,
-                uploaded: 0,
-                errors: 0,
-                isOpen: true,
-            });
-
-            setIsBulkUploading(true);
-            isCancelledRef.current = false;
-            uploadedIdsRef.current = [];
-
-            for (const [, zipEntry] of validFiles) {
-                if (isCancelledRef.current) break;
-
-                const fileName = zipEntry.name.split('/').pop() || '';
-                const name = fileName
-                    .split('.')[0]
-                    .replace(/[^a-zA-Z0-9_-]/g, '_');
-
-                const blob = await zipEntry.async('blob');
-                try {
-                    let fileToUpload: File;
-                    if (fileName.toLowerCase().endsWith('.gif')) {
-                        fileToUpload = new File([blob], fileName, {
-                            type: 'image/gif',
-                        });
-                    } else {
-                        fileToUpload = await convertToWebp(blob, fileName);
-                    }
-                    const newEmoji = await uploadEmojiAsync({
-                        name,
-                        file: fileToUpload,
-                    });
-                    uploadedIdsRef.current.push(newEmoji.id);
-                    setBulkStatus(
-                        (
-                            prev,
-                        ): {
-                            uploaded: number;
-                            total: number;
-                            errors: number;
-                            isOpen: boolean;
-                        } => ({
-                            ...prev,
-                            uploaded: prev.uploaded + 1,
-                        }),
-                    );
-                } catch (err) {
-                    console.error(`Failed to process ${fileName}:`, err);
-                    setBulkStatus(
-                        (
-                            prev,
-                        ): {
-                            errors: number;
-                            total: number;
-                            uploaded: number;
-                            isOpen: boolean;
-                        } => ({
-                            ...prev,
-                            errors: prev.errors + 1,
-                        }),
-                    );
-                }
-            }
-        } catch (err) {
-            console.error('Failed to process zip file', err);
-        } finally {
-            setIsBulkUploading(false);
-        }
-    };
-
-    const handleCancelBulk = async (): Promise<void> => {
-        isCancelledRef.current = true;
-        setIsCancelling(true);
-
-        const idsToDelete = [...uploadedIdsRef.current];
-        await Promise.all(
-            idsToDelete.map(async (id): Promise<void> => {
-                try {
-                    await deleteEmojiAsync(id);
-                } catch (err) {
-                    console.error(`Failed to delete emoji ${id}:`, err);
-                }
-            }),
-        );
-
-        uploadedIdsRef.current = [];
-        setIsCancelling(false);
-        setBulkStatus(
-            (
-                prev,
-            ): {
-                isOpen: false;
-                total: number;
-                uploaded: number;
-                errors: number;
-            } => ({ ...prev, isOpen: false }),
-        );
     };
 
     return (
@@ -262,7 +189,9 @@ export const ServerEmojiSettings = ({ serverId }: ServerEmojiSettingsProps) => {
                         maxLength={32}
                         placeholder="cool_doge"
                         value={emojiName}
-                        onChange={(e): void => setEmojiName(e.target.value)}
+                        onChange={(e): void => {
+                            setEmojiName(e.target.value);
+                        }}
                     />
                     <Text size="xs" variant="muted">
                         Only alphanumeric characters, underscores, and dashes.
@@ -346,50 +275,20 @@ export const ServerEmojiSettings = ({ serverId }: ServerEmojiSettingsProps) => {
 
                         {/* Emoji Grid */}
                         {emojis.map((emoji) => (
-                            <div
-                                className="group relative aspect-square overflow-hidden rounded-lg border border-border-subtle bg-bg-subtle transition-all hover:border-primary"
+                            <EmojiGridItem
+                                emoji={emoji}
+                                isHovered={hoveredEmojiId === emoji.id}
                                 key={emoji.id}
-                                onMouseEnter={(): void =>
-                                    setHoveredEmojiId(emoji.id)
-                                }
-                                onMouseLeave={(): void =>
-                                    setHoveredEmojiId(null)
-                                }
-                            >
-                                <div className="flex h-full w-full items-center justify-center p-2">
-                                    <img
-                                        alt={emoji.name}
-                                        className="max-h-full max-w-full object-contain"
-                                        src={
-                                            resolveApiUrl(emoji.imageUrl) || ''
-                                        }
-                                    />
-                                </div>
-                                {hoveredEmojiId === emoji.id && (
-                                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-black/60 p-2">
-                                        <Text
-                                            align="center"
-                                            leading="tight"
-                                            size="xs"
-                                            variant="inverse"
-                                            weight="medium"
-                                            wrap="breakAll"
-                                        >
-                                            :{emoji.name}:
-                                        </Text>
-                                        <Button
-                                            aria-label="Delete emoji"
-                                            size="sm"
-                                            variant="danger"
-                                            onClick={(): void =>
-                                                deleteEmoji(emoji.id)
-                                            }
-                                        >
-                                            <Trash2 className="h-3 w-3" />
-                                        </Button>
-                                    </div>
-                                )}
-                            </div>
+                                onDelete={(): void => {
+                                    deleteEmoji(emoji.id);
+                                }}
+                                onHover={(): void => {
+                                    setHoveredEmojiId(emoji.id);
+                                }}
+                                onLeave={(): void => {
+                                    setHoveredEmojiId(null);
+                                }}
+                            />
                         ))}
                     </div>
                 )}
@@ -414,18 +313,7 @@ export const ServerEmojiSettings = ({ serverId }: ServerEmojiSettingsProps) => {
                 total={bulkStatus.total}
                 uploaded={bulkStatus.uploaded}
                 onCancel={(): undefined => void handleCancelBulk()}
-                onClose={(): void =>
-                    setBulkStatus(
-                        (
-                            prev,
-                        ): {
-                            isOpen: false;
-                            total: number;
-                            uploaded: number;
-                            errors: number;
-                        } => ({ ...prev, isOpen: false }),
-                    )
-                }
+                onClose={closeBulkStatus}
             />
         </div>
     );

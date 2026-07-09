@@ -125,7 +125,7 @@ export function useChatWS(
         (queryKey: readonly unknown[], newMessage: ChatMessage): void => {
             queryClient.setQueryData<InfiniteData<ChatMessage[]>>(
                 queryKey,
-                (oldData): InfiniteData<ChatMessage[], unknown> | undefined => {
+                (oldData): InfiniteData<ChatMessage[]> | undefined => {
                     if (!oldData) return oldData;
 
                     const firstPage = oldData.pages[0] || [];
@@ -980,11 +980,9 @@ function updateMessageReactions(
             r.emoji === payload.emoji && r.emojiType === payload.emojiType,
     );
 
-    if (isRemoval) {
-        return removeReaction(msg, reactions, existingIdx, payload.userId);
-    } else {
-        return addReaction(msg, reactions, existingIdx, payload);
-    }
+    return isRemoval
+        ? removeReaction(msg, reactions, existingIdx, payload.userId)
+        : addReaction(msg, reactions, existingIdx, payload);
 }
 
 function removeReaction(
@@ -995,7 +993,9 @@ function removeReaction(
 ): ChatMessage {
     if (existingIdx === -1) return msg;
 
-    const reaction = reactions[existingIdx];
+    // existingIdx came from reactions.findIndex(...) and was just checked
+    // against -1, so it is a valid index into `reactions`.
+    const reaction = reactions[existingIdx]!;
     const userIndex = reaction.users.indexOf(userId);
     if (userIndex === -1) return msg;
 
@@ -1020,8 +1020,18 @@ function addReaction(
     existingIdx: number,
     payload: IReactionEventPayload,
 ): ChatMessage {
-    if (existingIdx !== -1) {
-        const reaction = reactions[existingIdx];
+    if (existingIdx === -1) {
+        reactions.push({
+            emoji: payload.emoji,
+            emojiType: payload.emojiType,
+            emojiId: payload.emojiId!,
+            count: 1,
+            users: [payload.userId],
+        });
+    } else {
+        // existingIdx !== -1 here, and it came from
+        // reactions.findIndex(...), so it is a valid index.
+        const reaction = reactions[existingIdx]!;
         if (reaction.users.includes(payload.userId)) return msg;
 
         reactions[existingIdx] = {
@@ -1029,14 +1039,6 @@ function addReaction(
             users: [...reaction.users, payload.userId],
             count: reaction.count + 1,
         };
-    } else {
-        reactions.push({
-            emoji: payload.emoji,
-            emojiType: payload.emojiType as 'unicode' | 'custom',
-            emojiId: payload.emojiId as string,
-            count: 1,
-            users: [payload.userId],
-        });
     }
 
     return { ...msg, reactions };

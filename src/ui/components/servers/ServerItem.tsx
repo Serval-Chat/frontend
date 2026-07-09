@@ -104,7 +104,9 @@ export const ServerItem = React.memo(
             contextMenuItems.push({
                 label: 'Mark as Read',
                 icon: Check,
-                onClick: (): void => markAsRead(server.id),
+                onClick: (): void => {
+                    markAsRead(server.id);
+                },
             });
         }
 
@@ -112,7 +114,9 @@ export const ServerItem = React.memo(
             contextMenuItems.push({
                 label: 'Invite Friends',
                 icon: UserPlus,
-                onClick: (): void => setIsInviteModalOpen(true),
+                onClick: (): void => {
+                    setIsInviteModalOpen(true);
+                },
             });
         }
 
@@ -120,7 +124,9 @@ export const ServerItem = React.memo(
             contextMenuItems.push({
                 label: 'Server Settings',
                 icon: Settings,
-                onClick: (): void => setIsSettingsOpen(true),
+                onClick: (): void => {
+                    setIsSettingsOpen(true);
+                },
             });
         }
 
@@ -132,7 +138,7 @@ export const ServerItem = React.memo(
         const handleCreateFolder = (): void => {
             if (!me) return;
             const currentOrder = me.serverSettings?.order || [];
-            const newFolderId = Math.random().toString(36).substring(2, 9);
+            const newFolderId = Math.random().toString(36).slice(2, 9);
             const newFolder: IServerFolder = {
                 id: newFolderId,
                 name: 'New Folder',
@@ -144,10 +150,10 @@ export const ServerItem = React.memo(
                 (id): boolean => id !== server.id,
             );
             const serverIndex = currentOrder.indexOf(server.id);
-            if (serverIndex !== -1) {
-                newOrder.splice(serverIndex, 0, newFolder);
-            } else {
+            if (serverIndex === -1) {
                 newOrder.push(newFolder);
+            } else {
+                newOrder.splice(serverIndex, 0, newFolder);
             }
 
             updateSettings({ order: newOrder });
@@ -178,12 +184,14 @@ export const ServerItem = React.memo(
             updateSettings({ order: newOrder });
         };
 
-        contextMenuItems.push({ type: 'divider' });
-        contextMenuItems.push({
-            label: 'Create Folder',
-            icon: FolderPlus,
-            onClick: handleCreateFolder,
-        });
+        contextMenuItems.push(
+            { type: 'divider' },
+            {
+                label: 'Create Folder',
+                icon: FolderPlus,
+                onClick: handleCreateFolder,
+            },
+        );
 
         if (folders.length > 0) {
             contextMenuItems.push({
@@ -193,29 +201,37 @@ export const ServerItem = React.memo(
                 items: folders.map(
                     (f): { label: string; onClick: () => void } => ({
                         label: f.name,
-                        onClick: (): void => handleAddToFolder(f.id),
+                        onClick: (): void => {
+                            handleAddToFolder(f.id);
+                        },
                     }),
                 ),
             });
         }
 
-        contextMenuItems.push({ type: 'divider' });
-        contextMenuItems.push({
-            label: 'Copy Server ID',
-            icon: Copy,
-            onClick: (): void => {
-                void navigator.clipboard.writeText(server.id);
+        contextMenuItems.push(
+            { type: 'divider' },
+            {
+                label: 'Copy Server ID',
+                icon: Copy,
+                onClick: (): void => {
+                    void navigator.clipboard.writeText(server.id);
+                },
             },
-        });
+        );
 
         if (!isOwner) {
-            contextMenuItems.push({ type: 'divider' });
-            contextMenuItems.push({
-                label: 'Leave Server',
-                icon: LogOut,
-                variant: 'danger',
-                onClick: (): void => setIsLeaveModalOpen(true),
-            });
+            contextMenuItems.push(
+                { type: 'divider' },
+                {
+                    label: 'Leave Server',
+                    icon: LogOut,
+                    variant: 'danger',
+                    onClick: (): void => {
+                        setIsLeaveModalOpen(true);
+                    },
+                },
+            );
         }
 
         const queryClient = useQueryClient();
@@ -345,37 +361,43 @@ export const ServerItem = React.memo(
                     )}
                 </div>
 
-                {isSettingsOpen && (
+                {isSettingsOpen ? (
                     <React.Suspense fallback={null}>
                         <ServerSettingsModal
                             isOpen={isSettingsOpen}
                             serverId={server.id}
-                            onClose={(): void => setIsSettingsOpen(false)}
+                            onClose={(): void => {
+                                setIsSettingsOpen(false);
+                            }}
                         />
                     </React.Suspense>
-                )}
+                ) : null}
 
-                {isLeaveModalOpen && (
+                {isLeaveModalOpen ? (
                     <React.Suspense fallback={null}>
                         <LeaveServerModal
                             isOpen={isLeaveModalOpen}
                             serverId={server.id}
                             serverName={server.name}
-                            onClose={(): void => setIsLeaveModalOpen(false)}
+                            onClose={(): void => {
+                                setIsLeaveModalOpen(false);
+                            }}
                         />
                     </React.Suspense>
-                )}
+                ) : null}
 
-                {isInviteModalOpen && (
+                {isInviteModalOpen ? (
                     <React.Suspense fallback={null}>
                         <InviteFriendsModal
                             isOpen={isInviteModalOpen}
                             serverId={server.id}
                             serverName={server.name}
-                            onClose={(): void => setIsInviteModalOpen(false)}
+                            onClose={(): void => {
+                                setIsInviteModalOpen(false);
+                            }}
                         />
                     </React.Suspense>
-                )}
+                ) : null}
             </>
         );
     },

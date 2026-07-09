@@ -42,7 +42,9 @@ export const ServerRolesPage = () => {
     const handleSave = (): void => {
         if (!serverId) return;
         updateSelfRoles.mutate(selectedRoleIds, {
-            onSuccess: (): void => setHasUnsavedChanges(false),
+            onSuccess: (): void => {
+                setHasUnsavedChanges(false);
+            },
         });
     };
 

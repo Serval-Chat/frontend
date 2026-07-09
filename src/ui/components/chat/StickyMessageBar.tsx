@@ -127,9 +127,9 @@ export const StickyMessageBar = ({
         <Box
             className={cn(
                 'group pride-glass relative flex flex-col bg-[var(--bg-secondary)]',
-                viewState !== 'hidden'
-                    ? 'border-b border-[var(--divider)]'
-                    : '',
+                viewState === 'hidden'
+                    ? ''
+                    : 'border-b border-[var(--divider)]',
             )}
         >
             <Box
@@ -160,7 +160,7 @@ export const StickyMessageBar = ({
                     />
                 </Box>
 
-                {viewState === 'expanded' && (
+                {viewState === 'expanded' ? (
                     <Box className="flex shrink-0 items-center self-center px-4">
                         <Button
                             className="h-7 border border-[var(--divider)] px-3 text-[10px] font-bold tracking-widest text-[var(--primary)] uppercase"
@@ -174,9 +174,9 @@ export const StickyMessageBar = ({
                             Jump
                         </Button>
                     </Box>
-                )}
+                ) : null}
 
-                {viewState === 'compact' && (
+                {viewState === 'compact' ? (
                     <Box
                         className="pointer-events-none absolute right-0 bottom-0 left-0 z-10 h-8"
                         style={{
@@ -184,7 +184,7 @@ export const StickyMessageBar = ({
                                 'linear-gradient(transparent, var(--bg-secondary))',
                         }}
                     />
-                )}
+                ) : null}
             </Box>
 
             <Box
@@ -196,7 +196,7 @@ export const StickyMessageBar = ({
                 )}
             >
                 <Box className="pride-glass flex items-center justify-center overflow-hidden rounded-b-sm border-x border-b border-[var(--divider)] bg-[var(--bg-secondary)]">
-                    {(viewState === 'compact' || viewState === 'hidden') && (
+                    {viewState === 'compact' || viewState === 'hidden' ? (
                         <button
                             className="flex h-3 w-5 items-center justify-center text-muted-foreground transition-colors hover:bg-white/5 hover:text-foreground"
                             type="button"
@@ -204,8 +204,8 @@ export const StickyMessageBar = ({
                         >
                             <ChevronDown size={10} />
                         </button>
-                    )}
-                    {(viewState === 'compact' || viewState === 'expanded') && (
+                    ) : null}
+                    {viewState === 'compact' || viewState === 'expanded' ? (
                         <button
                             className="flex h-3 w-5 items-center justify-center text-muted-foreground transition-colors hover:bg-white/5 hover:text-foreground"
                             type="button"
@@ -213,7 +213,7 @@ export const StickyMessageBar = ({
                         >
                             <ChevronUp size={10} />
                         </button>
-                    )}
+                    ) : null}
                 </Box>
             </Box>
         </Box>

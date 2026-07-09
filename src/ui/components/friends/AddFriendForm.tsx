@@ -33,7 +33,9 @@ export const AddFriendForm = ({
             onSuccess: (): void => {
                 setUsername('');
                 setStatus({ type: 'success', message: 'Friend request sent!' });
-                setTimeout((): void => setStatus(undefined), 3000);
+                setTimeout((): void => {
+                    setStatus(undefined);
+                }, 3000);
             },
             onError: (): void => {
                 setStatus({ type: 'error', message: 'Unknown error :p' });
@@ -72,7 +74,7 @@ export const AddFriendForm = ({
                 />
             </Box>
 
-            {status && (
+            {status ? (
                 <Box
                     className={cn(
                         'animate-in fade-in slide-in-from-top-1 absolute top-full left-0 mt-1 rounded px-2 py-1 text-xs font-medium whitespace-nowrap shadow-lg',
@@ -83,7 +85,7 @@ export const AddFriendForm = ({
                 >
                     {status.message}
                 </Box>
-            )}
+            ) : null}
         </Box>
     );
 };

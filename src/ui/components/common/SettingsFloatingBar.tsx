@@ -38,7 +38,7 @@ export const SettingsFloatingBar = ({
     isFixed = true,
 }: SettingsFloatingBarProps) => (
     <AnimatePresence>
-        {isVisible && (
+        {isVisible ? (
             <m.div
                 animate={{ y: 0, opacity: 1 }}
                 aria-live="polite"
@@ -99,6 +99,6 @@ export const SettingsFloatingBar = ({
                     </div>
                 </div>
             </m.div>
-        )}
+        ) : null}
     </AnimatePresence>
 );

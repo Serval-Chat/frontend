@@ -1,4 +1,4 @@
-import { type ReactNode, useRef, useState } from 'react';
+import { type ReactNode, useReducer, useRef, useState } from 'react';
 
 import {
     ChevronDown,
@@ -28,11 +28,205 @@ import { useToast } from '@/ui/components/common/Toast';
 import { UserProfilePicture } from '@/ui/components/common/UserProfilePicture';
 import { cn } from '@/utils/cn';
 import { APP_LOCALE } from '@/utils/locale';
+import { mergeReducer } from '@/utils/mergeReducer';
 
 interface AdminNotesSectionProps {
     targetId: string;
     targetType: 'Server' | 'User';
 }
+
+type AdminNote = NonNullable<ReturnType<typeof useAdminNotes>['data']>[number];
+
+const AdminNoteItem = ({
+    note,
+    isHistoryExpanded,
+    onToggleHistory,
+    onEdit,
+    onDelete,
+}: {
+    note: AdminNote;
+    isHistoryExpanded: boolean;
+    onToggleHistory: () => void;
+    onEdit: () => void;
+    onDelete: () => void;
+}) => {
+    const isDeleted = !!note.deletedAt;
+    return (
+        <div
+            className={cn(
+                'group relative rounded-2xl border p-4 transition-all',
+                isDeleted
+                    ? 'border-border-subtle bg-bg-secondary/30 opacity-80 grayscale-[0.5]'
+                    : 'border-border-subtle bg-bg-subtle hover:border-primary/30',
+            )}
+        >
+            <div className="mb-3 flex items-start justify-between gap-4">
+                <div className="flex items-center gap-3">
+                    <UserProfilePicture
+                        size="sm"
+                        src={note.adminId.profilePicture || undefined}
+                        username={note.adminId.username}
+                    />
+                    <div className="flex flex-col">
+                        <div className="flex items-center gap-2">
+                            <Text size="sm" weight="bold">
+                                {note.adminId.displayName ||
+                                    note.adminId.username}
+                            </Text>
+                            {isDeleted ? (
+                                <div className="flex items-center gap-1 rounded bg-danger/10 px-1.5 py-0.5 text-[10px] font-bold tracking-tight text-danger uppercase">
+                                    <XCircle size={10} />
+                                    Deleted
+                                </div>
+                            ) : null}
+                            {note.history.length > 0 && !isDeleted ? (
+                                <button
+                                    className="bg-info/10 text-info hover:bg-info/20 flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-bold tracking-tight uppercase transition-colors"
+                                    type="button"
+                                    onClick={onToggleHistory}
+                                >
+                                    <History size={10} />
+                                    Edited
+                                    <ChevronDown
+                                        className={cn(
+                                            'transition-transform',
+                                            isHistoryExpanded && 'rotate-180',
+                                        )}
+                                        size={10}
+                                    />
+                                </button>
+                            ) : null}
+                        </div>
+                        <Text size="xs" variant="muted">
+                            {new Date(note.createdAt).toLocaleString(
+                                APP_LOCALE,
+                            )}
+                        </Text>
+                    </div>
+                </div>
+
+                {isDeleted ? null : (
+                    <div className="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+                        <Button size="sm" variant="ghost" onClick={onEdit}>
+                            <Edit2 size={12} />
+                        </Button>
+                        <Button
+                            className="text-danger hover:bg-danger/10 hover:text-danger"
+                            size="sm"
+                            variant="ghost"
+                            onClick={onDelete}
+                        >
+                            <Trash2 size={12} />
+                        </Button>
+                    </div>
+                )}
+            </div>
+
+            <div className="prose prose-sm prose-invert max-w-none">
+                <Text className="leading-relaxed whitespace-pre-wrap">
+                    {note.content}
+                </Text>
+            </div>
+
+            {isHistoryExpanded && note.history.length > 0 ? (
+                <div className="border-info/20 bg-info/5 animate-in fade-in slide-in-from-top-2 mt-4 space-y-3 rounded-xl border p-3 duration-200">
+                    <div className="text-info flex items-center gap-2 text-[10px] font-bold tracking-widest uppercase">
+                        <History size={12} />
+                        Note Revision History
+                    </div>
+                    <div className="space-y-4">
+                        {[...note.history].reverse().map((history) => (
+                            <div
+                                className="border-info/20 relative border-l-2 py-1 pl-4"
+                                key={history.editedAt.toString()}
+                            >
+                                <div className="mb-2 flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                        <UserProfilePicture
+                                            size="xs"
+                                            src={
+                                                history.editorId
+                                                    .profilePicture || undefined
+                                            }
+                                            username={history.editorId.username}
+                                        />
+                                        <Text size="xs" weight="bold">
+                                            {history.editorId.displayName ||
+                                                history.editorId.username}
+                                        </Text>
+                                    </div>
+                                    <div className="flex items-center gap-1 text-muted-foreground">
+                                        <Clock size={10} />
+                                        <Text size="xs">
+                                            {new Date(
+                                                history.editedAt,
+                                            ).toLocaleString(APP_LOCALE)}
+                                        </Text>
+                                    </div>
+                                </div>
+                                <Text
+                                    className="whitespace-pre-wrap text-muted-foreground italic"
+                                    size="xs"
+                                >
+                                    {history.content}
+                                </Text>
+                            </div>
+                        ))}
+                        <div className="border-info/20 relative border-l-2 py-1 pl-4">
+                            <div className="mb-1 flex items-center justify-between">
+                                <div className="flex items-center gap-2 opacity-50">
+                                    <User size={12} />
+                                    <Text size="xs" weight="bold">
+                                        Original Creator
+                                    </Text>
+                                </div>
+                                <div className="flex items-center gap-1 text-muted-foreground opacity-50">
+                                    <Clock size={10} />
+                                    <Text size="xs">
+                                        {new Date(
+                                            note.createdAt,
+                                        ).toLocaleString(APP_LOCALE)}
+                                    </Text>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            ) : null}
+
+            {isDeleted ? (
+                <div className="mt-4 rounded-xl border border-danger/20 bg-danger/5 p-3">
+                    <div className="mb-1 flex items-center justify-between text-[10px] font-bold tracking-widest text-danger uppercase">
+                        <span>Deletion Record</span>
+                        <span>
+                            {new Date(note.deletedAt!).toLocaleDateString(
+                                APP_LOCALE,
+                            )}
+                        </span>
+                    </div>
+                    <Text className="text-danger/80 italic" size="xs">
+                        Reason: {note.deleteReason}
+                    </Text>
+                    <div className="mt-2 flex items-center gap-1.5">
+                        <Text size="xs" variant="muted">
+                            Removed by
+                        </Text>
+                        <UserProfilePicture
+                            size="xs"
+                            src={note.deletedBy?.profilePicture || undefined}
+                            username={note.deletedBy?.username || 'Unknown'}
+                        />
+                        <Text size="xs" weight="bold">
+                            {note.deletedBy?.displayName ||
+                                note.deletedBy?.username ||
+                                'System'}
+                        </Text>
+                    </div>
+                </div>
+            ) : null}
+        </div>
+    );
+};
 
 export const AdminNotesSection = ({
     targetId,
@@ -44,16 +238,56 @@ export const AdminNotesSection = ({
     const { mutate: deleteNote, isPending: isDeleting } = useDeleteAdminNote();
     const { showToast } = useToast();
 
-    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-
-    const [noteContent, setNoteContent] = useState('');
-    const [deleteReason, setDeleteReason] = useState('');
+    interface NotesUi {
+        isAddModalOpen: boolean;
+        isEditModalOpen: boolean;
+        isDeleteModalOpen: boolean;
+        noteContent: string;
+        deleteReason: string;
+    }
+    const [ui, patchUi] = useReducer(mergeReducer<NotesUi>, {
+        isAddModalOpen: false,
+        isEditModalOpen: false,
+        isDeleteModalOpen: false,
+        noteContent: '',
+        deleteReason: '',
+    });
+    const {
+        isAddModalOpen,
+        isEditModalOpen,
+        isDeleteModalOpen,
+        noteContent,
+        deleteReason,
+    } = ui;
+    const setIsAddModalOpen = (v: boolean): void => {
+        patchUi({ isAddModalOpen: v });
+    };
+    const setIsEditModalOpen = (v: boolean): void => {
+        patchUi({ isEditModalOpen: v });
+    };
+    const setIsDeleteModalOpen = (v: boolean): void => {
+        patchUi({ isDeleteModalOpen: v });
+    };
+    const setNoteContent = (v: string): void => {
+        patchUi({ noteContent: v });
+    };
+    const setDeleteReason = (v: string): void => {
+        patchUi({ deleteReason: v });
+    };
     const activeNoteIdRef = useRef<string | null>(null);
     const [expandedHistoryIds, setExpandedHistoryIds] = useState<Set<string>>(
         new Set(),
     );
+
+    const openEditModal = (note: AdminNote): void => {
+        activeNoteIdRef.current = note.id;
+        setNoteContent(note.content);
+        setIsEditModalOpen(true);
+    };
+    const openDeleteModal = (note: AdminNote): void => {
+        activeNoteIdRef.current = note.id;
+        setIsDeleteModalOpen(true);
+    };
 
     const toggleHistory = (noteId: string): void => {
         const next = new Set(expandedHistoryIds);
@@ -75,7 +309,9 @@ export const AdminNotesSection = ({
                     setIsAddModalOpen(false);
                     setNoteContent('');
                 },
-                onError: (e): void => showToast(e.message, 'error'),
+                onError: (e): void => {
+                    showToast(e.message, 'error');
+                },
             },
         );
     };
@@ -91,7 +327,9 @@ export const AdminNotesSection = ({
                     setNoteContent('');
                     activeNoteIdRef.current = null;
                 },
-                onError: (e): void => showToast(e.message, 'error'),
+                onError: (e): void => {
+                    showToast(e.message, 'error');
+                },
             },
         );
     };
@@ -107,7 +345,9 @@ export const AdminNotesSection = ({
                     setDeleteReason('');
                     activeNoteIdRef.current = null;
                 },
-                onError: (e): void => showToast(e.message, 'error'),
+                onError: (e): void => {
+                    showToast(e.message, 'error');
+                },
             },
         );
     };
@@ -133,7 +373,9 @@ export const AdminNotesSection = ({
                 <Button
                     size="sm"
                     variant="normal"
-                    onClick={(): void => setIsAddModalOpen(true)}
+                    onClick={(): void => {
+                        setIsAddModalOpen(true);
+                    }}
                 >
                     <Plus className="mr-2" size={14} />
                     Add Note
@@ -147,255 +389,22 @@ export const AdminNotesSection = ({
                         <Text variant="muted">No internal notes yet.</Text>
                     </div>
                 ) : (
-                    notes.map((note) => {
-                        const isDeleted = !!note.deletedAt;
-                        return (
-                            <div
-                                className={cn(
-                                    'group relative rounded-2xl border p-4 transition-all',
-                                    isDeleted
-                                        ? 'border-border-subtle bg-bg-secondary/30 opacity-80 grayscale-[0.5]'
-                                        : 'border-border-subtle bg-bg-subtle hover:border-primary/30',
-                                )}
-                                key={note.id}
-                            >
-                                <div className="mb-3 flex items-start justify-between gap-4">
-                                    <div className="flex items-center gap-3">
-                                        <UserProfilePicture
-                                            size="sm"
-                                            src={
-                                                note.adminId.profilePicture ||
-                                                undefined
-                                            }
-                                            username={note.adminId.username}
-                                        />
-                                        <div className="flex flex-col">
-                                            <div className="flex items-center gap-2">
-                                                <Text size="sm" weight="bold">
-                                                    {note.adminId.displayName ||
-                                                        note.adminId.username}
-                                                </Text>
-                                                {isDeleted && (
-                                                    <div className="flex items-center gap-1 rounded bg-danger/10 px-1.5 py-0.5 text-[10px] font-bold tracking-tight text-danger uppercase">
-                                                        <XCircle size={10} />
-                                                        Deleted
-                                                    </div>
-                                                )}
-                                                {note.history.length > 0 &&
-                                                    !isDeleted && (
-                                                        <button
-                                                            className="bg-info/10 text-info hover:bg-info/20 flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-bold tracking-tight uppercase transition-colors"
-                                                            type="button"
-                                                            onClick={(): void =>
-                                                                toggleHistory(
-                                                                    note.id,
-                                                                )
-                                                            }
-                                                        >
-                                                            <History
-                                                                size={10}
-                                                            />
-                                                            Edited
-                                                            <ChevronDown
-                                                                className={cn(
-                                                                    'transition-transform',
-                                                                    expandedHistoryIds.has(
-                                                                        note.id,
-                                                                    ) &&
-                                                                        'rotate-180',
-                                                                )}
-                                                                size={10}
-                                                            />
-                                                        </button>
-                                                    )}
-                                            </div>
-                                            <Text size="xs" variant="muted">
-                                                {new Date(
-                                                    note.createdAt,
-                                                ).toLocaleString(APP_LOCALE)}
-                                            </Text>
-                                        </div>
-                                    </div>
-
-                                    {!isDeleted && (
-                                        <div className="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
-                                            <Button
-                                                size="sm"
-                                                variant="ghost"
-                                                onClick={(): void => {
-                                                    activeNoteIdRef.current =
-                                                        note.id;
-                                                    setNoteContent(
-                                                        note.content,
-                                                    );
-                                                    setIsEditModalOpen(true);
-                                                }}
-                                            >
-                                                <Edit2 size={12} />
-                                            </Button>
-                                            <Button
-                                                className="text-danger hover:bg-danger/10 hover:text-danger"
-                                                size="sm"
-                                                variant="ghost"
-                                                onClick={(): void => {
-                                                    activeNoteIdRef.current =
-                                                        note.id;
-                                                    setIsDeleteModalOpen(true);
-                                                }}
-                                            >
-                                                <Trash2 size={12} />
-                                            </Button>
-                                        </div>
-                                    )}
-                                </div>
-
-                                <div className="prose prose-sm prose-invert max-w-none">
-                                    <Text className="leading-relaxed whitespace-pre-wrap">
-                                        {note.content}
-                                    </Text>
-                                </div>
-
-                                {expandedHistoryIds.has(note.id) &&
-                                    note.history.length > 0 && (
-                                        <div className="border-info/20 bg-info/5 animate-in fade-in slide-in-from-top-2 mt-4 space-y-3 rounded-xl border p-3 duration-200">
-                                            <div className="text-info flex items-center gap-2 text-[10px] font-bold tracking-widest uppercase">
-                                                <History size={12} />
-                                                Note Revision History
-                                            </div>
-                                            <div className="space-y-4">
-                                                {note.history
-                                                    .slice()
-                                                    .reverse()
-                                                    .map((history) => (
-                                                        <div
-                                                            className="border-info/20 relative border-l-2 py-1 pl-4"
-                                                            key={history.editedAt.toString()}
-                                                        >
-                                                            <div className="mb-2 flex items-center justify-between">
-                                                                <div className="flex items-center gap-2">
-                                                                    <UserProfilePicture
-                                                                        size="xs"
-                                                                        src={
-                                                                            history
-                                                                                .editorId
-                                                                                .profilePicture ||
-                                                                            undefined
-                                                                        }
-                                                                        username={
-                                                                            history
-                                                                                .editorId
-                                                                                .username
-                                                                        }
-                                                                    />
-                                                                    <Text
-                                                                        size="xs"
-                                                                        weight="bold"
-                                                                    >
-                                                                        {history
-                                                                            .editorId
-                                                                            .displayName ||
-                                                                            history
-                                                                                .editorId
-                                                                                .username}
-                                                                    </Text>
-                                                                </div>
-                                                                <div className="flex items-center gap-1 text-muted-foreground">
-                                                                    <Clock
-                                                                        size={
-                                                                            10
-                                                                        }
-                                                                    />
-                                                                    <Text size="xs">
-                                                                        {new Date(
-                                                                            history.editedAt,
-                                                                        ).toLocaleString(
-                                                                            APP_LOCALE,
-                                                                        )}
-                                                                    </Text>
-                                                                </div>
-                                                            </div>
-                                                            <Text
-                                                                className="whitespace-pre-wrap text-muted-foreground italic"
-                                                                size="xs"
-                                                            >
-                                                                {
-                                                                    history.content
-                                                                }
-                                                            </Text>
-                                                        </div>
-                                                    ))}
-                                                <div className="border-info/20 relative border-l-2 py-1 pl-4">
-                                                    <div className="mb-1 flex items-center justify-between">
-                                                        <div className="flex items-center gap-2 opacity-50">
-                                                            <User size={12} />
-                                                            <Text
-                                                                size="xs"
-                                                                weight="bold"
-                                                            >
-                                                                Original Creator
-                                                            </Text>
-                                                        </div>
-                                                        <div className="flex items-center gap-1 text-muted-foreground opacity-50">
-                                                            <Clock size={10} />
-                                                            <Text size="xs">
-                                                                {new Date(
-                                                                    note.createdAt,
-                                                                ).toLocaleString(
-                                                                    APP_LOCALE,
-                                                                )}
-                                                            </Text>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    )}
-
-                                {isDeleted && (
-                                    <div className="mt-4 rounded-xl border border-danger/20 bg-danger/5 p-3">
-                                        <div className="mb-1 flex items-center justify-between text-[10px] font-bold tracking-widest text-danger uppercase">
-                                            <span>Deletion Record</span>
-                                            <span>
-                                                {new Date(
-                                                    note.deletedAt!,
-                                                ).toLocaleDateString(
-                                                    APP_LOCALE,
-                                                )}
-                                            </span>
-                                        </div>
-                                        <Text
-                                            className="text-danger/80 italic"
-                                            size="xs"
-                                        >
-                                            Reason: {note.deleteReason}
-                                        </Text>
-                                        <div className="mt-2 flex items-center gap-1.5">
-                                            <Text size="xs" variant="muted">
-                                                Removed by
-                                            </Text>
-                                            <UserProfilePicture
-                                                size="xs"
-                                                src={
-                                                    note.deletedBy
-                                                        ?.profilePicture ||
-                                                    undefined
-                                                }
-                                                username={
-                                                    note.deletedBy?.username ||
-                                                    'Unknown'
-                                                }
-                                            />
-                                            <Text size="xs" weight="bold">
-                                                {note.deletedBy?.displayName ||
-                                                    note.deletedBy?.username ||
-                                                    'System'}
-                                            </Text>
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                        );
-                    })
+                    notes.map((note) => (
+                        <AdminNoteItem
+                            isHistoryExpanded={expandedHistoryIds.has(note.id)}
+                            key={note.id}
+                            note={note}
+                            onDelete={(): void => {
+                                openDeleteModal(note);
+                            }}
+                            onEdit={(): void => {
+                                openEditModal(note);
+                            }}
+                            onToggleHistory={(): void => {
+                                toggleHistory(note.id);
+                            }}
+                        />
+                    ))
                 )}
             </div>
 
@@ -413,12 +422,16 @@ export const AdminNotesSection = ({
                         placeholder="Write notes here"
                         rows={5}
                         value={noteContent}
-                        onChange={(e): void => setNoteContent(e.target.value)}
+                        onChange={(e): void => {
+                            setNoteContent(e.target.value);
+                        }}
                     />
                     <div className="flex justify-end gap-3">
                         <Button
                             variant="ghost"
-                            onClick={(): void => setIsAddModalOpen(false)}
+                            onClick={(): void => {
+                                setIsAddModalOpen(false);
+                            }}
                         >
                             Cancel
                         </Button>
@@ -447,12 +460,16 @@ export const AdminNotesSection = ({
                         placeholder="Update your signalling..."
                         rows={5}
                         value={noteContent}
-                        onChange={(e): void => setNoteContent(e.target.value)}
+                        onChange={(e): void => {
+                            setNoteContent(e.target.value);
+                        }}
                     />
                     <div className="flex justify-end gap-3">
                         <Button
                             variant="ghost"
-                            onClick={(): void => setIsEditModalOpen(false)}
+                            onClick={(): void => {
+                                setIsEditModalOpen(false);
+                            }}
                         >
                             Cancel
                         </Button>
@@ -491,12 +508,16 @@ export const AdminNotesSection = ({
                         placeholder="Reason for deletion is REQUIRED..."
                         rows={3}
                         value={deleteReason}
-                        onChange={(e): void => setDeleteReason(e.target.value)}
+                        onChange={(e): void => {
+                            setDeleteReason(e.target.value);
+                        }}
                     />
                     <div className="flex justify-end gap-3">
                         <Button
                             variant="ghost"
-                            onClick={(): void => setIsDeleteModalOpen(false)}
+                            onClick={(): void => {
+                                setIsDeleteModalOpen(false);
+                            }}
                         >
                             Cancel
                         </Button>

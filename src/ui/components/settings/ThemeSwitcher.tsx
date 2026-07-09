@@ -37,16 +37,17 @@ const extractThemeVariables = (
     const styles: Record<string, string> = {};
     const css = customTheme.sourceCss || customTheme.css;
 
-    THEME_VARIABLES.forEach((variable): void => {
-        const escapedVariable = variable.replace('--', '\\-\\-');
-        const match = css.match(
-            new RegExp(`${escapedVariable}\\s*:\\s*([^;}{]+)`, 'i'),
-        );
+    for (const variable of THEME_VARIABLES) {
+        const escapedVariable = variable.replace('--', String.raw`\-\-`);
+        const match = new RegExp(
+            `${escapedVariable}\\s*:\\s*([^;}{]+)`,
+            'i',
+        ).exec(css);
 
         if (match?.[1]) {
             styles[variable] = match[1].trim();
         }
-    });
+    }
 
     return styles as React.CSSProperties;
 };
@@ -151,7 +152,9 @@ export const ThemeSwitcher = ({
                     key={t.id}
                     label={t.label}
                     variant={variant}
-                    onClick={(): void => setTheme(t.id)}
+                    onClick={(): void => {
+                        setTheme(t.id);
+                    }}
                 />
             ))}
             {customThemes.map((t) => (
@@ -166,7 +169,9 @@ export const ThemeSwitcher = ({
                     }
                     style={extractThemeVariables(t)}
                     variant={variant}
-                    onClick={(): void => setTheme(`custom:${t.id}`)}
+                    onClick={(): void => {
+                        setTheme(`custom:${t.id}`);
+                    }}
                 />
             ))}
         </div>

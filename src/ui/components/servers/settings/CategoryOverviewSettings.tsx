@@ -6,7 +6,7 @@ import {
     useDeleteCategory,
     useUpdateCategory,
 } from '@/api/servers/servers.queries';
-import { type Category } from '@/api/servers/servers.types';
+import type { Category } from '@/api/servers/servers.types';
 import { Button } from '@/ui/components/common/Button';
 import { Heading } from '@/ui/components/common/Heading';
 import { Input } from '@/ui/components/common/Input';
@@ -23,7 +23,10 @@ export const CategoryOverviewSettings = ({
     category,
     onDeleted,
 }: CategoryOverviewSettingsProps) => {
+    // Reset on every category.id change by the render-time guard further down.
+    // react-doctor-disable-next-line react-doctor/no-derived-useState
     const [name, setName] = useState(category.name);
+    // react-doctor-disable-next-line react-doctor/no-derived-useState
     const [originalName, setOriginalName] = useState(category.name);
 
     const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
@@ -91,7 +94,9 @@ export const CategoryOverviewSettings = ({
                         id="category-name"
                         placeholder="new-category"
                         value={name}
-                        onChange={(e): void => setName(e.target.value)}
+                        onChange={(e): void => {
+                            setName(e.target.value);
+                        }}
                     />
                 </div>
             </div>
@@ -119,7 +124,9 @@ export const CategoryOverviewSettings = ({
                         <Button
                             className="min-w-[120px]"
                             variant="danger"
-                            onClick={(): void => setIsDeleteConfirmOpen(true)}
+                            onClick={(): void => {
+                                setIsDeleteConfirmOpen(true);
+                            }}
                         >
                             <Trash2 className="mr-2 h-4 w-4" />
                             Delete Category
@@ -140,7 +147,9 @@ export const CategoryOverviewSettings = ({
                 className="max-w-md"
                 isOpen={isDeleteConfirmOpen}
                 title="Delete Category"
-                onClose={(): void => setIsDeleteConfirmOpen(false)}
+                onClose={(): void => {
+                    setIsDeleteConfirmOpen(false);
+                }}
             >
                 <div className="space-y-6">
                     <div className="border-status-error bg-status-error-bg text-status-error rounded-md border p-4 text-sm">
@@ -152,7 +161,9 @@ export const CategoryOverviewSettings = ({
                     <div className="-mx-6 -mb-6 flex justify-end gap-3 bg-bg-secondary p-6 pt-4">
                         <Button
                             variant="ghost"
-                            onClick={(): void => setIsDeleteConfirmOpen(false)}
+                            onClick={(): void => {
+                                setIsDeleteConfirmOpen(false);
+                            }}
                         >
                             Cancel
                         </Button>

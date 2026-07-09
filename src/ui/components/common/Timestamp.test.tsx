@@ -8,7 +8,7 @@ describe('Timestamp', (): void => {
         vi.useFakeTimers();
         vi.setSystemTime(new Date('2026-05-28T00:00:00.000Z'));
 
-        render(<Timestamp flag="R" timestamp={123456789} />);
+        render(<Timestamp flag="R" timestamp={123_456_789} />);
 
         expect(screen.getByText('52 years ago')).toBeDefined();
 

@@ -51,12 +51,12 @@ export const Modal = ({
         };
 
         if (isOpen) {
-            window.addEventListener('keydown', handleKeyDown);
+            globalThis.addEventListener('keydown', handleKeyDown);
             document.body.style.overflow = 'hidden';
         }
 
         return (): void => {
-            window.removeEventListener('keydown', handleKeyDown);
+            globalThis.removeEventListener('keydown', handleKeyDown);
             document.body.style.overflow = '';
         };
     }, [isOpen]);
@@ -65,7 +65,7 @@ export const Modal = ({
 
     return createPortal(
         <AnimatePresence>
-            {isOpen && (
+            {isOpen ? (
                 <div
                     className={cn(
                         'fixed inset-0 z-modal flex items-center justify-center',
@@ -123,14 +123,14 @@ export const Modal = ({
                             stiffness: 300,
                         }}
                     >
-                        {(title || showCloseButton) && (
+                        {title || showCloseButton ? (
                             <div className="flex shrink-0 items-center justify-between border-b border-border-subtle bg-bg-subtle px-6 py-4">
-                                {title && (
+                                {title ? (
                                     <h2 className="text-lg font-bold text-foreground">
                                         {title}
                                     </h2>
-                                )}
-                                {showCloseButton && (
+                                ) : null}
+                                {showCloseButton ? (
                                     <Button
                                         className="h-8 w-8 min-w-0 rounded-md border-none p-1 text-muted-foreground shadow-none transition-colors hover:bg-white/10 hover:text-foreground"
                                         size="sm"
@@ -139,9 +139,9 @@ export const Modal = ({
                                     >
                                         <X size={20} />
                                     </Button>
-                                )}
+                                ) : null}
                             </div>
-                        )}
+                        ) : null}
                         <div
                             className={cn(
                                 'custom-scrollbar flex-1 overflow-y-auto',
@@ -152,7 +152,7 @@ export const Modal = ({
                         </div>
                     </m.div>
                 </div>
-            )}
+            ) : null}
         </AnimatePresence>,
         document.body,
     );

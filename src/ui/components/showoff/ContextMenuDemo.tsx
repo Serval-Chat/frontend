@@ -14,37 +14,49 @@ export const ContextMenuDemo = () => {
         {
             label: 'Primary Action',
             icon: Star,
-            onClick: (): void => console.log('Primary clicked'),
+            onClick: (): void => {
+                console.log('Primary clicked');
+            },
             variant: 'primary',
         },
         {
             label: 'Success Action',
             icon: Star,
-            onClick: (): void => console.log('Success clicked'),
+            onClick: (): void => {
+                console.log('Success clicked');
+            },
             variant: 'success',
         },
         { type: 'divider' },
         {
             label: 'Example element 1',
             icon: Edit,
-            onClick: (): void => console.log('Edit clicked'),
+            onClick: (): void => {
+                console.log('Edit clicked');
+            },
         },
         {
             label: 'Example element 2',
             icon: Copy,
-            onClick: (): void => console.log('Copy clicked'),
+            onClick: (): void => {
+                console.log('Copy clicked');
+            },
         },
         { type: 'divider' },
         {
             label: 'Caution Action',
             icon: Info,
-            onClick: (): void => console.log('Caution clicked'),
+            onClick: (): void => {
+                console.log('Caution clicked');
+            },
             variant: 'caution',
         },
         {
             label: 'Danger Action',
             icon: Trash,
-            onClick: (): void => console.log('Delete clicked'),
+            onClick: (): void => {
+                console.log('Delete clicked');
+            },
             variant: 'danger',
         },
     ];

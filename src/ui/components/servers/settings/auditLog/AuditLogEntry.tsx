@@ -44,93 +44,107 @@ const getActionDetails = (
         case 'create_channel':
         case 'create_category':
         case 'role_created':
-        case 'role_create':
+        case 'role_create': {
             return {
                 icon: PlusCircle,
                 color: 'text-green-500',
                 bg: 'bg-green-500/10',
             };
+        }
         case 'edit_channel':
         case 'edit_category':
         case 'role_edited':
         case 'role_update':
         case 'update_server':
         case 'role_icon_updated':
-        case 'edit_message':
+        case 'edit_message': {
             return {
                 icon: Edit2,
                 color: 'text-yellow-500',
                 bg: 'bg-yellow-500/10',
             };
+        }
         case 'delete_channel':
         case 'delete_category':
         case 'role_removed':
         case 'role_delete':
         case 'delete_message':
         case 'reactions_removed':
-        case 'reaction_clear':
+        case 'reaction_clear': {
             return { icon: Trash2, color: 'text-red-500', bg: 'bg-red-500/10' };
-        case 'user_kick':
+        }
+        case 'user_kick': {
             return {
                 icon: UserMinus,
                 color: 'text-orange-500',
                 bg: 'bg-orange-500/10',
             };
-        case 'user_ban':
+        }
+        case 'user_ban': {
             return { icon: UserX, color: 'text-red-500', bg: 'bg-red-500/10' };
-        case 'user_unban':
+        }
+        case 'user_unban': {
             return {
                 icon: UserPlus,
                 color: 'text-green-500',
                 bg: 'bg-green-500/10',
             };
+        }
         case 'user_join':
-        case 'member_join':
+        case 'member_join': {
             return {
                 icon: UserPlus,
                 color: 'text-green-500',
                 bg: 'bg-green-500/10',
             };
-        case 'user_leave':
+        }
+        case 'user_leave': {
             return {
                 icon: UserMinus,
                 color: 'text-orange-500',
                 bg: 'bg-orange-500/10',
             };
-        case 'owner_changed':
+        }
+        case 'owner_changed': {
             return {
                 icon: Crown,
                 color: 'text-yellow-400',
                 bg: 'bg-yellow-400/10',
             };
-        case 'role_given':
+        }
+        case 'role_given': {
             return {
                 icon: ShieldAlert,
                 color: 'text-blue-500',
                 bg: 'bg-blue-500/10',
             };
+        }
         case 'emoji_create':
-        case 'emoji_delete':
+        case 'emoji_delete': {
             return {
                 icon: Smile,
                 color: 'text-purple-500',
                 bg: 'bg-purple-500/10',
             };
+        }
         case 'invite_create':
-        case 'invite_delete':
+        case 'invite_delete': {
             return { icon: Link, color: 'text-cyan-500', bg: 'bg-cyan-500/10' };
-        case 'roles_reordered':
+        }
+        case 'roles_reordered': {
             return {
                 icon: Repeat,
                 color: 'text-yellow-500',
                 bg: 'bg-yellow-500/10',
             };
-        default:
+        }
+        default: {
             return {
                 icon: Settings,
                 color: 'text-gray-500',
                 bg: 'bg-gray-500/10',
             };
+        }
     }
 };
 
@@ -139,6 +153,399 @@ const formatActionName = (action: string): string =>
         .split('_')
         .map((word): string => word.charAt(0).toUpperCase() + word.slice(1))
         .join(' ');
+
+const UserWithAvatar = ({
+    username,
+    avatarUrl,
+    userId,
+    onClick,
+}: {
+    username: string;
+    avatarUrl?: string;
+    userId?: string;
+    onClick?: (e: React.MouseEvent) => void;
+}): React.ReactNode => {
+    const content = (
+        <>
+            <UserProfilePicture
+                noIndicator
+                size="xs"
+                src={avatarUrl}
+                username={username}
+            />
+            {`@${username}`}
+        </>
+    );
+
+    if (!userId) {
+        return (
+            <span className="relative top-[-1px] inline-flex items-center gap-1.5 align-middle mix-blend-plus-lighter">
+                {content}
+            </span>
+        );
+    }
+
+    return (
+        <button
+            className="relative top-[-1px] inline-flex cursor-pointer items-center gap-1.5 border-0 bg-transparent p-0 align-middle mix-blend-plus-lighter hover:underline"
+            type="button"
+            onClick={onClick}
+        >
+            {content}
+        </button>
+    );
+};
+
+const asNonEmptyString = (value: unknown): string | undefined =>
+    typeof value === 'string' && value !== '' ? value : undefined;
+
+const getAuditTargetDisplay = ({
+    entry,
+    onProfileClick,
+}: {
+    entry: IAuditLogEntry;
+    onProfileClick: (id: string) => (e: React.MouseEvent) => void;
+}): React.ReactNode => {
+    if (entry.action === 'role_given' || entry.action === 'role_removed') {
+        const roleNameValue = asNonEmptyString(entry.metadata?.roleName);
+        const roleName =
+            roleNameValue === undefined ? 'a role' : `role "${roleNameValue}"`;
+        const userNode = entry.target?.username ? (
+            <UserWithAvatar
+                avatarUrl={entry.target.avatarUrl}
+                userId={entry.target.id}
+                username={entry.target.username}
+                onClick={
+                    entry.target.id
+                        ? onProfileClick(entry.target.id)
+                        : undefined
+                }
+            />
+        ) : entry.target?.name ? (
+            ` @${entry.target.name}`
+        ) : (
+            ''
+        );
+        const preposition = entry.action === 'role_given' ? 'to ' : 'from ';
+        return (
+            <span className="inline-flex items-center gap-1">
+                {roleName}
+                {userNode ? (
+                    <>
+                        {` ${preposition}`}
+                        {userNode}
+                    </>
+                ) : (
+                    ''
+                )}
+            </span>
+        );
+    }
+
+    if (
+        entry.action === 'delete_message' ||
+        entry.action === 'edit_message' ||
+        entry.action === 'pin_message' ||
+        entry.action === 'unpin_message' ||
+        entry.action === 'sticky_message' ||
+        entry.action === 'unsticky_message'
+    ) {
+        const author = entry.target?.username ? (
+            <>
+                <UserWithAvatar
+                    avatarUrl={entry.target.avatarUrl}
+                    userId={entry.target.id}
+                    username={entry.target.username}
+                    onClick={
+                        entry.target.id
+                            ? onProfileClick(entry.target.id)
+                            : undefined
+                    }
+                />
+                's
+            </>
+        ) : (
+            'a'
+        );
+        const channel = entry.metadata?.channelName
+            ? `#${entry.metadata.channelName}`
+            : entry.metadata?.channelId
+              ? `channel ${entry.metadata.channelId}`
+              : 'a channel';
+        return (
+            <span className="inline-flex items-center gap-1">
+                {author} message in {channel}
+            </span>
+        );
+    }
+
+    if (entry.action === 'emoji_create' || entry.action === 'emoji_delete') {
+        return entry.metadata?.emojiName
+            ? `emoji :${entry.metadata.emojiName}:`
+            : 'an emoji';
+    }
+
+    if (entry.action === 'invite_create' || entry.action === 'invite_delete') {
+        return entry.metadata?.code
+            ? `invite ${String(entry.metadata.code)}`
+            : 'an invite';
+    }
+
+    if (entry.action === 'member_join') {
+        const code = entry.metadata?.inviteCode
+            ? ` via ${String(entry.metadata.inviteCode)}`
+            : '';
+        return entry.target?.username ? (
+            <span className="inline-flex items-center gap-1">
+                server{code} as{' '}
+                <UserWithAvatar
+                    avatarUrl={entry.target.avatarUrl}
+                    userId={entry.target.id}
+                    username={entry.target.username}
+                    onClick={
+                        entry.target.id
+                            ? onProfileClick(entry.target.id)
+                            : undefined
+                    }
+                />
+            </span>
+        ) : (
+            `server${code}`
+        );
+    }
+
+    if (entry.action === 'roles_reordered') return 'role order';
+    if (entry.action === 'owner_changed') {
+        return entry.target?.username ? (
+            <UserWithAvatar
+                avatarUrl={entry.target.avatarUrl}
+                userId={entry.target.id}
+                username={entry.target.username}
+                onClick={
+                    entry.target.id
+                        ? onProfileClick(entry.target.id)
+                        : undefined
+                }
+            />
+        ) : (
+            'new owner'
+        );
+    }
+
+    if (entry.target?.name) {
+        if (entry.targetType === 'channel')
+            return `channel "#${entry.target.name}"`;
+        if (entry.targetType === 'role') return `role "${entry.target.name}"`;
+        if (entry.targetType === 'category')
+            return `category "${entry.target.name}"`;
+        if (entry.targetType === 'user')
+            return (
+                <span className="inline-flex items-center gap-1">
+                    user{' '}
+                    <UserWithAvatar
+                        avatarUrl={entry.target.avatarUrl}
+                        userId={entry.target.id}
+                        username={entry.target.name}
+                        onClick={
+                            entry.target.id
+                                ? onProfileClick(entry.target.id)
+                                : undefined
+                        }
+                    />
+                </span>
+            );
+        return `target "${entry.target.name}"`;
+    }
+
+    if (entry.metadata?.channelName)
+        return `channel "#${entry.metadata.channelName}"`;
+    if (entry.metadata?.roleName) return `role "${entry.metadata.roleName}"`;
+    if (entry.metadata?.categoryName)
+        return `category "${entry.metadata.categoryName}"`;
+
+    if (entry.target?.username)
+        return (
+            <UserWithAvatar
+                avatarUrl={entry.target.avatarUrl}
+                userId={entry.target.id}
+                username={entry.target.username}
+                onClick={
+                    entry.target.id
+                        ? onProfileClick(entry.target.id)
+                        : undefined
+                }
+            />
+        );
+
+    if (entry.targetType === 'server') return 'the server';
+
+    if (entry.metadata?.channelId) return `channel ${entry.metadata.channelId}`;
+    if (entry.targetId) return `ID: ${entry.targetId}`;
+
+    return 'the server';
+};
+
+const RoleReorderVisualizer = ({
+    oldOrder,
+    newOrder,
+    roles,
+}: {
+    oldOrder: string[];
+    newOrder: string[];
+    roles: Role[] | undefined;
+}): React.ReactNode => {
+    const ITEM_HEIGHT_PX = 28;
+    const SVG_WIDTH_PX = 50;
+
+    const renderRoleItem = (
+        roleName: string,
+        indicator?: React.ReactNode,
+    ): React.ReactNode => {
+        const role = roles?.find((r): boolean => r.name === roleName);
+        const style = getRoleStyle(role);
+
+        return (
+            <li
+                className={`mb-1.5 flex items-center truncate rounded px-2 text-sm shadow-sm transition-all ${role ? 'font-medium text-white' : 'bg-bg-base border border-border-subtle text-text-muted'}`}
+                key={String(roleName)}
+                style={{
+                    height: ITEM_HEIGHT_PX,
+                    ...(role ? style : {}),
+                }}
+                title={String(roleName)}
+            >
+                <AtSign className="mr-1 shrink-0" size={14} />
+                <span className="truncate">{String(roleName)}</span>
+                {indicator ? (
+                    <div className="ml-auto flex items-center pl-2">
+                        {indicator}
+                    </div>
+                ) : null}
+            </li>
+        );
+    };
+
+    return (
+        <div className="relative mt-4 flex items-start gap-2 overflow-x-auto pb-2 opacity-90">
+            {/* Left List */}
+            <div className="min-w-[120px] flex-1">
+                <div className="mb-2 text-xs font-medium tracking-wider text-text-muted uppercase">
+                    Previous
+                </div>
+                <ul className="flex flex-col" style={{ padding: 0, margin: 0 }}>
+                    {oldOrder.map(
+                        (roleName): React.ReactNode =>
+                            renderRoleItem(String(roleName)),
+                    )}
+                </ul>
+            </div>
+
+            {/* Middle SVG Canvas */}
+            <div
+                className="hidden flex-none pt-6 sm:block"
+                style={{ width: SVG_WIDTH_PX }}
+            >
+                <svg
+                    height={oldOrder.length * (ITEM_HEIGHT_PX + 6)}
+                    style={{ overflow: 'visible' }}
+                    width={SVG_WIDTH_PX}
+                >
+                    <defs>
+                        <marker
+                            id="arrowhead-moved"
+                            markerHeight="8"
+                            markerUnits="userSpaceOnUse"
+                            markerWidth="8"
+                            orient="auto"
+                            refX="0"
+                            refY="4"
+                        >
+                            <polygon fill="#3b82f6" points="0 0, 8 4, 0 8" />
+                        </marker>
+                        <marker
+                            id="arrowhead-static"
+                            markerHeight="8"
+                            markerUnits="userSpaceOnUse"
+                            markerWidth="8"
+                            orient="auto"
+                            refX="0"
+                            refY="4"
+                        >
+                            <polygon
+                                fill="#52525b"
+                                opacity="0.5"
+                                points="0 0, 8 4, 0 8"
+                            />
+                        </marker>
+                    </defs>
+                    {oldOrder.map((roleName, i) => {
+                        const j = newOrder.indexOf(roleName);
+                        if (j === -1) return null;
+
+                        const gap = 6;
+                        const y1 =
+                            i * (ITEM_HEIGHT_PX + gap) + ITEM_HEIGHT_PX / 2;
+                        const y2 =
+                            j * (ITEM_HEIGHT_PX + gap) + ITEM_HEIGHT_PX / 2;
+
+                        const isMoved = i !== j;
+                        const strokeColor = isMoved ? '#3b82f6' : '#52525b';
+                        const opacity = isMoved ? 1 : 0.3;
+                        const marker = isMoved
+                            ? 'url(#arrowhead-moved)'
+                            : 'url(#arrowhead-static)';
+
+                        const endX = SVG_WIDTH_PX - 8;
+                        const d = `M 0 ${y1} C ${SVG_WIDTH_PX / 2} ${y1}, ${SVG_WIDTH_PX / 2} ${y2}, ${endX} ${y2}`;
+
+                        return (
+                            <path
+                                className="transition-all duration-300"
+                                d={d}
+                                fill="none"
+                                key={`path-${roleName}`}
+                                markerEnd={marker}
+                                opacity={opacity}
+                                stroke={strokeColor}
+                                strokeWidth="1.5"
+                            />
+                        );
+                    })}
+                </svg>
+            </div>
+
+            {/* Right List */}
+            <div className="min-w-[140px] flex-1">
+                <div className="mb-2 text-xs font-medium tracking-wider text-text-muted uppercase">
+                    New
+                </div>
+                <ul className="flex flex-col" style={{ padding: 0, margin: 0 }}>
+                    {newOrder.map((roleName): React.ReactNode => {
+                        const oldIndex = oldOrder.indexOf(String(roleName));
+                        const newIndex = newOrder.indexOf(String(roleName));
+                        const diff = oldIndex === -1 ? 0 : oldIndex - newIndex;
+                        let indicator = null;
+                        if (diff > 0) {
+                            indicator = (
+                                <span className="rounded bg-black/20 px-1 text-xs font-bold text-green-300">
+                                    ↑ {diff}
+                                </span>
+                            );
+                        } else if (diff < 0) {
+                            indicator = (
+                                <span className="rounded bg-black/20 px-1 text-xs font-bold text-red-300">
+                                    ↓ {Math.abs(diff)}
+                                </span>
+                            );
+                        }
+
+                        return renderRoleItem(String(roleName), indicator);
+                    })}
+                </ul>
+            </div>
+        </div>
+    );
+};
 
 export const AuditLogEntry = ({
     entry,
@@ -196,363 +603,10 @@ export const AuditLogEntry = ({
         .sort((a, b): number => b.position - a.position)
         .find((r): string | undefined => r.icon);
 
-    const getTargetDisplay = (): React.ReactNode => {
-        const renderUserWithAvatar = (
-            username: string,
-            avatarUrl?: string,
-            userId?: string,
-        ): React.ReactNode => {
-            const content = (
-                <>
-                    <UserProfilePicture
-                        noIndicator
-                        size="xs"
-                        src={avatarUrl}
-                        username={username}
-                    />
-                    {`@${username}`}
-                </>
-            );
-
-            if (!userId) {
-                return (
-                    <span className="relative top-[-1px] inline-flex items-center gap-1.5 align-middle mix-blend-plus-lighter">
-                        {content}
-                    </span>
-                );
-            }
-
-            return (
-                <button
-                    className="relative top-[-1px] inline-flex cursor-pointer items-center gap-1.5 border-0 bg-transparent p-0 align-middle mix-blend-plus-lighter hover:underline"
-                    type="button"
-                    onClick={handleProfileClick(userId)}
-                >
-                    {content}
-                </button>
-            );
-        };
-
-        if (entry.action === 'role_given' || entry.action === 'role_removed') {
-            const roleName = entry.metadata?.roleName
-                ? `role "${String(entry.metadata.roleName)}"`
-                : 'a role';
-            const userNode = entry.target?.username
-                ? renderUserWithAvatar(
-                      entry.target.username,
-                      entry.target.avatarUrl,
-                      entry.target.id,
-                  )
-                : entry.target?.name
-                  ? ` @${entry.target.name}`
-                  : '';
-            const preposition = entry.action === 'role_given' ? 'to ' : 'from ';
-            return (
-                <span className="inline-flex items-center gap-1">
-                    {roleName}
-                    {userNode ? (
-                        <>
-                            {` ${preposition}`}
-                            {userNode}
-                        </>
-                    ) : (
-                        ''
-                    )}
-                </span>
-            );
-        }
-
-        if (
-            entry.action === 'delete_message' ||
-            entry.action === 'edit_message' ||
-            entry.action === 'pin_message' ||
-            entry.action === 'unpin_message' ||
-            entry.action === 'sticky_message' ||
-            entry.action === 'unsticky_message'
-        ) {
-            const author = entry.target?.username ? (
-                <>
-                    {renderUserWithAvatar(
-                        entry.target.username,
-                        entry.target.avatarUrl,
-                        entry.target.id,
-                    )}
-                    's
-                </>
-            ) : (
-                'a'
-            );
-            const channel = entry.metadata?.channelName
-                ? `#${entry.metadata.channelName}`
-                : entry.metadata?.channelId
-                  ? `channel ${entry.metadata.channelId}`
-                  : 'a channel';
-            return (
-                <span className="inline-flex items-center gap-1">
-                    {author} message in {channel}
-                </span>
-            );
-        }
-
-        if (
-            entry.action === 'emoji_create' ||
-            entry.action === 'emoji_delete'
-        ) {
-            return entry.metadata?.emojiName
-                ? `emoji :${entry.metadata.emojiName}:`
-                : 'an emoji';
-        }
-
-        if (
-            entry.action === 'invite_create' ||
-            entry.action === 'invite_delete'
-        ) {
-            return entry.metadata?.code
-                ? `invite ${String(entry.metadata.code)}`
-                : 'an invite';
-        }
-
-        if (entry.action === 'member_join') {
-            const code = entry.metadata?.inviteCode
-                ? ` via ${String(entry.metadata.inviteCode)}`
-                : '';
-            return entry.target?.username ? (
-                <span className="inline-flex items-center gap-1">
-                    server{code} as{' '}
-                    {renderUserWithAvatar(
-                        entry.target.username,
-                        entry.target.avatarUrl,
-                        entry.target.id,
-                    )}
-                </span>
-            ) : (
-                `server${code}`
-            );
-        }
-
-        if (entry.action === 'roles_reordered') return 'role order';
-        if (entry.action === 'owner_changed') {
-            return entry.target?.username
-                ? renderUserWithAvatar(
-                      entry.target.username,
-                      entry.target.avatarUrl,
-                      entry.target.id,
-                  )
-                : 'new owner';
-        }
-
-        if (entry.target?.name) {
-            if (entry.targetType === 'channel')
-                return `channel "#${entry.target.name}"`;
-            if (entry.targetType === 'role')
-                return `role "${entry.target.name}"`;
-            if (entry.targetType === 'category')
-                return `category "${entry.target.name}"`;
-            if (entry.targetType === 'user')
-                return (
-                    <span className="inline-flex items-center gap-1">
-                        user{' '}
-                        {renderUserWithAvatar(
-                            entry.target.name,
-                            entry.target.avatarUrl,
-                            entry.target.id,
-                        )}
-                    </span>
-                );
-            return `target "${entry.target.name}"`;
-        }
-
-        if (entry.metadata?.channelName)
-            return `channel "#${entry.metadata.channelName}"`;
-        if (entry.metadata?.roleName)
-            return `role "${entry.metadata.roleName}"`;
-        if (entry.metadata?.categoryName)
-            return `category "${entry.metadata.categoryName}"`;
-
-        if (entry.target?.username)
-            return renderUserWithAvatar(
-                entry.target.username,
-                entry.target.avatarUrl,
-                entry.target.id,
-            );
-
-        if (entry.targetType === 'server') return 'the server';
-
-        if (entry.metadata?.channelId)
-            return `channel ${entry.metadata.channelId}`;
-        if (entry.targetId) return `ID: ${entry.targetId}`;
-
-        return 'the server';
-    };
-
-    const targetDisplay = getTargetDisplay();
-
-    const renderRoleReorderVisualizer = (
-        oldOrder: string[],
-        newOrder: string[],
-    ): React.ReactNode => {
-        const ITEM_HEIGHT_PX = 28;
-        const SVG_WIDTH_PX = 50;
-
-        const renderRoleItem = (
-            roleName: string,
-            indicator?: React.ReactNode,
-        ): React.ReactNode => {
-            const role = roles?.find((r): boolean => r.name === roleName);
-            const style = getRoleStyle(role);
-
-            return (
-                <li
-                    className={`mb-1.5 flex items-center truncate rounded px-2 text-sm shadow-sm transition-all ${role ? 'font-medium text-white' : 'bg-bg-base border border-border-subtle text-text-muted'}`}
-                    key={String(roleName)}
-                    style={{
-                        height: ITEM_HEIGHT_PX,
-                        ...(role ? style : {}),
-                    }}
-                    title={String(roleName)}
-                >
-                    <AtSign className="mr-1 shrink-0" size={14} />
-                    <span className="truncate">{String(roleName)}</span>
-                    {indicator && (
-                        <div className="ml-auto flex items-center pl-2">
-                            {indicator}
-                        </div>
-                    )}
-                </li>
-            );
-        };
-
-        return (
-            <div className="relative mt-4 flex items-start gap-2 overflow-x-auto pb-2 opacity-90">
-                {/* Left List */}
-                <div className="min-w-[120px] flex-1">
-                    <div className="mb-2 text-xs font-medium tracking-wider text-text-muted uppercase">
-                        Previous
-                    </div>
-                    <ul
-                        className="flex flex-col"
-                        style={{ padding: 0, margin: 0 }}
-                    >
-                        {oldOrder.map(
-                            (roleName): React.ReactNode =>
-                                renderRoleItem(String(roleName)),
-                        )}
-                    </ul>
-                </div>
-
-                {/* Middle SVG Canvas */}
-                <div
-                    className="hidden flex-none pt-6 sm:block"
-                    style={{ width: SVG_WIDTH_PX }}
-                >
-                    <svg
-                        height={oldOrder.length * (ITEM_HEIGHT_PX + 6)}
-                        style={{ overflow: 'visible' }}
-                        width={SVG_WIDTH_PX}
-                    >
-                        <defs>
-                            <marker
-                                id="arrowhead-moved"
-                                markerHeight="8"
-                                markerUnits="userSpaceOnUse"
-                                markerWidth="8"
-                                orient="auto"
-                                refX="0"
-                                refY="4"
-                            >
-                                <polygon
-                                    fill="#3b82f6"
-                                    points="0 0, 8 4, 0 8"
-                                />
-                            </marker>
-                            <marker
-                                id="arrowhead-static"
-                                markerHeight="8"
-                                markerUnits="userSpaceOnUse"
-                                markerWidth="8"
-                                orient="auto"
-                                refX="0"
-                                refY="4"
-                            >
-                                <polygon
-                                    fill="#52525b"
-                                    opacity="0.5"
-                                    points="0 0, 8 4, 0 8"
-                                />
-                            </marker>
-                        </defs>
-                        {oldOrder.map((roleName, i) => {
-                            const j = newOrder.indexOf(roleName);
-                            if (j === -1) return null;
-
-                            const gap = 6;
-                            const y1 =
-                                i * (ITEM_HEIGHT_PX + gap) + ITEM_HEIGHT_PX / 2;
-                            const y2 =
-                                j * (ITEM_HEIGHT_PX + gap) + ITEM_HEIGHT_PX / 2;
-
-                            const isMoved = i !== j;
-                            const strokeColor = isMoved ? '#3b82f6' : '#52525b';
-                            const opacity = isMoved ? 1 : 0.3;
-                            const marker = isMoved
-                                ? 'url(#arrowhead-moved)'
-                                : 'url(#arrowhead-static)';
-
-                            const endX = SVG_WIDTH_PX - 8;
-                            const d = `M 0 ${y1} C ${SVG_WIDTH_PX / 2} ${y1}, ${SVG_WIDTH_PX / 2} ${y2}, ${endX} ${y2}`;
-
-                            return (
-                                <path
-                                    className="transition-all duration-300"
-                                    d={d}
-                                    fill="none"
-                                    key={`path-${roleName}`}
-                                    markerEnd={marker}
-                                    opacity={opacity}
-                                    stroke={strokeColor}
-                                    strokeWidth="1.5"
-                                />
-                            );
-                        })}
-                    </svg>
-                </div>
-
-                {/* Right List */}
-                <div className="min-w-[140px] flex-1">
-                    <div className="mb-2 text-xs font-medium tracking-wider text-text-muted uppercase">
-                        New
-                    </div>
-                    <ul
-                        className="flex flex-col"
-                        style={{ padding: 0, margin: 0 }}
-                    >
-                        {newOrder.map((roleName): React.ReactNode => {
-                            const oldIndex = oldOrder.indexOf(String(roleName));
-                            const newIndex = newOrder.indexOf(String(roleName));
-                            const diff =
-                                oldIndex !== -1 ? oldIndex - newIndex : 0;
-                            let indicator = null;
-                            if (diff > 0) {
-                                indicator = (
-                                    <span className="rounded bg-black/20 px-1 text-xs font-bold text-green-300">
-                                        ↑ {diff}
-                                    </span>
-                                );
-                            } else if (diff < 0) {
-                                indicator = (
-                                    <span className="rounded bg-black/20 px-1 text-xs font-bold text-red-300">
-                                        ↓ {Math.abs(diff)}
-                                    </span>
-                                );
-                            }
-
-                            return renderRoleItem(String(roleName), indicator);
-                        })}
-                    </ul>
-                </div>
-            </div>
-        );
-    };
+    const targetDisplay = getAuditTargetDisplay({
+        entry,
+        onProfileClick: handleProfileClick,
+    });
 
     return (
         <div className="bg-bg-surface flex items-center gap-4 rounded-lg border border-border-subtle p-4 transition-colors hover:bg-bg-subtle">
@@ -606,92 +660,88 @@ export const AuditLogEntry = ({
                     </Tooltip>
                 </div>
 
-                {entry.reason && (
+                {entry.reason ? (
                     <Text className="mt-2 italic" size="sm" variant="muted">
                         Reason: {entry.reason}
                     </Text>
-                )}
+                ) : null}
 
-                {Boolean(entry.metadata?.messageText) && (
+                {entry.metadata?.messageText ? (
                     <div className="bg-bg-base mt-2 rounded border-l-2 border-red-500/50 p-2 text-sm break-words whitespace-pre-wrap text-text-muted">
-                        {String(entry.metadata!.messageText)}
+                        {String(entry.metadata.messageText)}
                     </div>
-                )}
+                ) : null}
 
                 {entry.action !== 'roles_reordered' &&
-                    entry.changes &&
-                    entry.changes.length > 0 && (
-                        <AuditLogDiff changes={entry.changes} />
-                    )}
+                entry.changes &&
+                entry.changes.length > 0 ? (
+                    <AuditLogDiff changes={entry.changes} />
+                ) : null}
 
                 {entry.action === 'roles_reordered' &&
-                    Array.isArray(entry.metadata?.roleOrder) && (
-                        <div className="mt-2 text-sm">
-                            <button
-                                className="hover:text-text flex items-center gap-1 text-xs text-text-muted"
-                                type="button"
-                                onClick={(): void =>
-                                    setExpandedRoles(!expandedRoles)
-                                }
-                            >
-                                {expandedRoles ? (
-                                    <ChevronDown className="h-3 w-3" />
-                                ) : (
-                                    <ChevronRight className="h-3 w-3" />
-                                )}
-                                {expandedRoles
-                                    ? 'Hide Order Changes'
-                                    : 'Show Order Changes'}
-                            </button>
-                            {expandedRoles && (
-                                <div className="bg-bg-surface mt-2 rounded-md p-3">
-                                    {entry.metadata.oldRoleOrder &&
-                                    Array.isArray(
-                                        entry.metadata.oldRoleOrder,
-                                    ) ? (
-                                        renderRoleReorderVisualizer(
-                                            entry.metadata
-                                                .oldRoleOrder as string[],
-                                            entry.metadata
-                                                .roleOrder as string[],
-                                        )
-                                    ) : (
-                                        <>
-                                            <div className="mb-2 text-xs font-medium text-text-muted">
-                                                New Order (Highest to Lowest):
-                                            </div>
-                                            <ol className="ml-1 list-inside list-decimal space-y-0.5 text-text-muted">
-                                                {(
-                                                    entry.metadata
-                                                        .roleOrder as string[]
-                                                ).map((roleName) => (
-                                                    <li
-                                                        key={`role-${roleName}`}
-                                                    >
-                                                        {String(roleName)}
-                                                    </li>
-                                                ))}
-                                            </ol>
-                                        </>
-                                    )}
-                                </div>
+                Array.isArray(entry.metadata?.roleOrder) ? (
+                    <div className="mt-2 text-sm">
+                        <button
+                            className="hover:text-text flex items-center gap-1 text-xs text-text-muted"
+                            type="button"
+                            onClick={(): void => {
+                                setExpandedRoles(!expandedRoles);
+                            }}
+                        >
+                            {expandedRoles ? (
+                                <ChevronDown className="h-3 w-3" />
+                            ) : (
+                                <ChevronRight className="h-3 w-3" />
                             )}
-                        </div>
-                    )}
+                            {expandedRoles
+                                ? 'Hide Order Changes'
+                                : 'Show Order Changes'}
+                        </button>
+                        {expandedRoles ? (
+                            <div className="bg-bg-surface mt-2 rounded-md p-3">
+                                {entry.metadata.oldRoleOrder &&
+                                Array.isArray(entry.metadata.oldRoleOrder) ? (
+                                    <RoleReorderVisualizer
+                                        newOrder={
+                                            entry.metadata.roleOrder as string[]
+                                        }
+                                        oldOrder={
+                                            entry.metadata
+                                                .oldRoleOrder as string[]
+                                        }
+                                        roles={roles}
+                                    />
+                                ) : (
+                                    <>
+                                        <div className="mb-2 text-xs font-medium text-text-muted">
+                                            New Order (Highest to Lowest):
+                                        </div>
+                                        <ol className="ml-1 list-inside list-decimal space-y-0.5 text-text-muted">
+                                            {(
+                                                entry.metadata
+                                                    .roleOrder as string[]
+                                            ).map((roleName) => (
+                                                <li key={`role-${roleName}`}>
+                                                    {String(roleName)}
+                                                </li>
+                                            ))}
+                                        </ol>
+                                    </>
+                                )}
+                            </div>
+                        ) : null}
+                    </div>
+                ) : null}
 
-                {!!(
-                    entry.metadata?.uses !== undefined ||
-                    entry.metadata?.inviteUses !== undefined ||
-                    entry.metadata?.maxUses !== undefined ||
-                    entry.metadata?.inviteMaxUses !== undefined ||
-                    entry.metadata?.expiresAt ||
-                    entry.metadata?.inviteExpiresAt
-                ) && (
+                {entry.metadata?.uses !== undefined ||
+                entry.metadata?.inviteUses !== undefined ||
+                entry.metadata?.maxUses !== undefined ||
+                entry.metadata?.inviteMaxUses !== undefined ||
+                entry.metadata?.expiresAt ||
+                entry.metadata?.inviteExpiresAt ? (
                     <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 border-t border-border-subtle pt-2 text-sm text-text-muted">
-                        {!!(
-                            entry.metadata?.uses !== undefined ||
-                            entry.metadata?.inviteUses !== undefined
-                        ) && (
+                        {entry.metadata?.uses !== undefined ||
+                        entry.metadata?.inviteUses !== undefined ? (
                             <Text size="sm">
                                 Uses:{' '}
                                 <span className="text-text-base">
@@ -703,11 +753,9 @@ export const AuditLogEntry = ({
                                     }
                                 </span>
                             </Text>
-                        )}
-                        {!!(
-                            entry.metadata?.maxUses !== undefined ||
-                            entry.metadata?.inviteMaxUses !== undefined
-                        ) && (
+                        ) : null}
+                        {entry.metadata?.maxUses !== undefined ||
+                        entry.metadata?.inviteMaxUses !== undefined ? (
                             <Text size="sm">
                                 Max Uses:{' '}
                                 <span className="text-text-base">
@@ -722,11 +770,9 @@ export const AuditLogEntry = ({
                                         : 'Infinite'}
                                 </span>
                             </Text>
-                        )}
-                        {!!(
-                            entry.metadata?.expiresAt ||
-                            entry.metadata?.inviteExpiresAt
-                        ) && (
+                        ) : null}
+                        {entry.metadata?.expiresAt ||
+                        entry.metadata?.inviteExpiresAt ? (
                             <Text size="sm">
                                 Expires:{' '}
                                 <span className="text-text-base">
@@ -738,12 +784,12 @@ export const AuditLogEntry = ({
                                     ).toLocaleString(APP_LOCALE)}
                                 </span>
                             </Text>
-                        )}
+                        ) : null}
                     </div>
-                )}
+                ) : null}
             </div>
 
-            {profileState && (
+            {profileState ? (
                 <ProfilePopup
                     iconRole={topRoleWithIcon}
                     isOpen={!!profileState}
@@ -753,9 +799,11 @@ export const AuditLogEntry = ({
                     roles={currentMemberRoles}
                     serverId={serverId}
                     userId={profileState.id}
-                    onClose={(): void => setProfileState(null)}
+                    onClose={(): void => {
+                        setProfileState(null);
+                    }}
                 />
-            )}
+            ) : null}
         </div>
     );
 };

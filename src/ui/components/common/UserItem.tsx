@@ -1,4 +1,4 @@
-import React, { type JSX, useCallback, useMemo } from 'react';
+import React, { type ReactNode, useCallback, useMemo } from 'react';
 
 import { createSelector } from '@reduxjs/toolkit';
 import {
@@ -128,7 +128,7 @@ const ServerDataInjector = React.memo(
     }: {
         serverId: string;
         children: (data: ServerData) => React.ReactNode;
-    }): JSX.Element => {
+    }): ReactNode => {
         const { mutate: addRole, isPending: isAdding } =
             useAddRoleToMember(serverId);
         const { mutate: removeRole, isPending: isRemoving } =
@@ -200,7 +200,7 @@ const UserItemInner = React.memo(
         initialPresenceStatus,
         hideUnread,
         showPinIcon,
-    }: UserItemProps & { serverData: ServerData | null }): JSX.Element => {
+    }: UserItemProps & { serverData: ServerData | null }): ReactNode => {
         const dispatch = useAppDispatch();
         const navigate = useNavigate();
 
@@ -241,11 +241,13 @@ const UserItemInner = React.memo(
         );
 
         React.useEffect((): (() => void) => {
-            const handleResize = (): void =>
+            const handleResize = (): void => {
                 setIsMobile(window.innerWidth < 768);
+            };
             window.addEventListener('resize', handleResize);
-            return (): void =>
+            return (): void => {
                 window.removeEventListener('resize', handleResize);
+            };
         }, []);
 
         const { data: fetchedUser } = useUserById(userId, {
@@ -336,10 +338,12 @@ const UserItemInner = React.memo(
             ),
         );
         const userVolume = useAppSelector(
-            (state): number => state.voice.userVolumes[userId],
+            (state): number | undefined => state.voice.userVolumes[userId],
         );
         const userVoiceState = useAppSelector(
-            (state): { isMuted: boolean; isDeafened: boolean } =>
+            (
+                state,
+            ): { isMuted: boolean; isDeafened: boolean } | undefined =>
                 state.voice.voiceUserStates[userId],
             shallowEqual,
         );
@@ -347,7 +351,8 @@ const UserItemInner = React.memo(
             (state): number => state.unread.unreadDms[userId] || 0,
         );
         const storePresenceStatus = useAppSelector(
-            (state): UserPresenceStatus => state.presence.users[userId]?.status,
+            (state): UserPresenceStatus | undefined =>
+                state.presence.users[userId]?.status,
         );
         const storePresenceCustomText = useAppSelector(
             (state): string | undefined =>
@@ -465,71 +470,80 @@ const UserItemInner = React.memo(
             items.push({
                 label: 'Show Profile',
                 icon: UserIcon,
-                onClick: (): void => setShowProfile(true),
+                onClick: (): void => {
+                    setShowProfile(true);
+                },
             });
 
             // Group 1: DM Actions
             if (isFriend) {
-                items.push({ type: 'divider' });
-                items.push({
-                    label: 'Open DMs',
-                    icon: MessageSquare,
-                    onClick: (): void => {
-                        void navigate(`/chat/@user/${userId}`);
+                items.push(
+                    { type: 'divider' },
+                    {
+                        label: 'Open DMs',
+                        icon: MessageSquare,
+                        onClick: (): void => {
+                            void navigate(`/chat/@user/${userId}`);
+                        },
                     },
-                });
+                );
                 if (canInviteToAnyServer) {
                     items.push({
                         label: 'Invite to Server',
                         icon: UserPlus,
-                        onClick: (): void => setIsInviteToServerModalOpen(true),
+                        onClick: (): void => {
+                            setIsInviteToServerModalOpen(true);
+                        },
                     });
                 }
-                items.push({
-                    label: 'Add to Split View',
-                    type: 'submenu',
-                    icon: PanelsLeftRight,
-                    items: [
-                        {
-                            label: isMobile ? 'Top Pane' : 'Left Side',
-                            icon: isMobile ? PanelTopOpen : PanelLeftOpen,
-                            onClick: (): void => {
-                                dispatch(
-                                    setSplitViewPane({
-                                        side: 'left',
-                                        conversation: {
-                                            type: 'dm',
-                                            friendId: userId,
-                                        },
-                                    }),
-                                );
+                items.push(
+                    {
+                        label: 'Add to Split View',
+                        type: 'submenu',
+                        icon: PanelsLeftRight,
+                        items: [
+                            {
+                                label: isMobile ? 'Top Pane' : 'Left Side',
+                                icon: isMobile ? PanelTopOpen : PanelLeftOpen,
+                                onClick: (): void => {
+                                    dispatch(
+                                        setSplitViewPane({
+                                            side: 'left',
+                                            conversation: {
+                                                type: 'dm',
+                                                friendId: userId,
+                                            },
+                                        }),
+                                    );
+                                },
                             },
-                        },
-                        {
-                            label: isMobile ? 'Bottom Pane' : 'Right Side',
-                            icon: isMobile ? PanelBottomOpen : PanelRightOpen,
-                            onClick: (): void => {
-                                dispatch(
-                                    setSplitViewPane({
-                                        side: 'right',
-                                        conversation: {
-                                            type: 'dm',
-                                            friendId: userId,
-                                        },
-                                    }),
-                                );
+                            {
+                                label: isMobile ? 'Bottom Pane' : 'Right Side',
+                                icon: isMobile
+                                    ? PanelBottomOpen
+                                    : PanelRightOpen,
+                                onClick: (): void => {
+                                    dispatch(
+                                        setSplitViewPane({
+                                            side: 'right',
+                                            conversation: {
+                                                type: 'dm',
+                                                friendId: userId,
+                                            },
+                                        }),
+                                    );
+                                },
                             },
-                        },
-                    ],
-                });
-
-                items.push({
-                    label: isPinnedFriend ? 'Unpin DM' : 'Pin DM',
-                    icon: isPinnedFriend ? PinOff : Pin,
-                    onClick: (): void => {
-                        togglePinFriend(userId);
+                        ],
                     },
-                });
+                    {
+                        label: isPinnedFriend ? 'Unpin DM' : 'Pin DM',
+                        icon: isPinnedFriend ? PinOff : Pin,
+                        onClick: (): void => {
+                            togglePinFriend(userId);
+                        },
+                    },
+                );
 
                 if (hasUnread) {
                     items.push({
@@ -557,7 +571,7 @@ const UserItemInner = React.memo(
                                 </div>
                                 <span>
                                     {Math.round(
-                                        (isNaN(volume) ? 1.0 : volume) * 100,
+                                        (isNaN(volume) ? 1 : volume) * 100,
                                     )}
                                     %
                                 </span>
@@ -574,7 +588,9 @@ const UserItemInner = React.memo(
                                     dispatch(
                                         setUserVolume({
                                             userId,
-                                            volume: parseFloat(e.target.value),
+                                            volume: Number.parseFloat(
+                                                e.target.value,
+                                            ),
                                         }),
                                     );
                                 }}
@@ -591,14 +607,18 @@ const UserItemInner = React.memo(
                     items.push({
                         label: 'Remove Friend',
                         icon: UserMinus,
-                        onClick: (): void => removeFriend(userId),
+                        onClick: (): void => {
+                            removeFriend(userId);
+                        },
                         variant: 'danger',
                     });
                 } else if (!userProfile?.isBot) {
                     items.push({
                         label: 'Add Friend',
                         icon: UserPlus,
-                        onClick: (): void => sendFriendRequest(username),
+                        onClick: (): void => {
+                            sendFriendRequest(username);
+                        },
                     });
                 }
 
@@ -609,7 +629,9 @@ const UserItemInner = React.memo(
                     items.push({
                         label: 'Unblock User',
                         icon: Shield,
-                        onClick: (): void => removeBlock(userId),
+                        onClick: (): void => {
+                            removeBlock(userId);
+                        },
                     });
                 } else {
                     items.push({
@@ -634,7 +656,10 @@ const UserItemInner = React.memo(
                                     } catch {
                                         // Ignore
                                     }
-                                } else if (profiles.length === 1) {
+                                } else if (
+                                    profiles.length === 1 &&
+                                    profiles[0]
+                                ) {
                                     upsertBlock({
                                         targetUserId: userId,
                                         profileId: profiles[0].id,
@@ -706,11 +731,11 @@ const UserItemInner = React.memo(
                                       preventClose: true,
                                       rightIcon: hasRole ? Check : undefined,
                                       type: 'action',
-                                      variant: !canManageThisRole
-                                          ? 'ghost'
-                                          : isAdding || isRemoving
-                                            ? 'ghost'
-                                            : 'normal',
+                                      variant: canManageThisRole
+                                          ? isAdding || isRemoving
+                                              ? 'ghost'
+                                              : 'normal'
+                                          : 'ghost',
                                   };
                               })
                             : [
@@ -933,14 +958,14 @@ const UserItemInner = React.memo(
                                 >
                                     {displayName || username}
                                 </StyledUserName>
-                                {userProfile?.isBot && (
+                                {userProfile?.isBot ? (
                                     <BotTag className="h-4" />
-                                )}
+                                ) : null}
                             </Box>
 
-                            {(presenceCustomText || presenceCustomEmoji) && (
+                            {presenceCustomText || presenceCustomEmoji ? (
                                 <div className="flex min-w-0 items-center gap-1">
-                                    {presenceCustomEmoji && (
+                                    {presenceCustomEmoji ? (
                                         <span className="flex shrink-0 items-center">
                                             {/^[0-9a-fA-F]{24}$/.test(
                                                 presenceCustomEmoji,
@@ -961,46 +986,46 @@ const UserItemInner = React.memo(
                                                 />
                                             )}
                                         </span>
-                                    )}
-                                    {presenceCustomText && (
+                                    ) : null}
+                                    {presenceCustomText ? (
                                         <MarqueeText
                                             className="text-foreground-muted min-w-0 flex-1 text-xs"
                                             speed={40}
                                         >
                                             {presenceCustomText}
                                         </MarqueeText>
-                                    )}
+                                    ) : null}
                                 </div>
-                            )}
+                            ) : null}
                         </Box>
 
                         <Box className="ml-auto flex shrink-0 items-center gap-1.5">
-                            {showPinIcon && isPinnedFriend && (
+                            {showPinIcon && isPinnedFriend ? (
                                 <Pin className="h-4 w-4 shrink-0 text-muted-foreground" />
-                            )}
+                            ) : null}
 
-                            {hasUnread && !userVoiceChannelId && (
+                            {hasUnread && !userVoiceChannelId ? (
                                 <Box className="flex h-4 min-w-[16px] items-center justify-center rounded-full bg-danger px-1 text-[10px] font-bold text-white shadow-sm">
                                     {unreadCount}
                                 </Box>
-                            )}
+                            ) : null}
 
-                            {userVoiceChannelId && (
+                            {userVoiceChannelId ? (
                                 <>
-                                    {userVoiceState?.isMuted && (
+                                    {userVoiceState?.isMuted ? (
                                         <MicOff
                                             className="text-destructive"
                                             size={14}
                                         />
-                                    )}
-                                    {userVoiceState?.isDeafened && (
+                                    ) : null}
+                                    {userVoiceState?.isDeafened ? (
                                         <HeadphoneOff
                                             className="text-destructive"
                                             size={14}
                                         />
-                                    )}
+                                    ) : null}
                                 </>
-                            )}
+                            ) : null}
                         </Box>
                     </Box>
                 </ContextMenu>
@@ -1030,72 +1055,86 @@ const UserItemInner = React.memo(
                     triggerRef={itemRef}
                     user={userProfile || undefined}
                     userId={userId}
-                    onClose={(): void => setShowProfile(false)}
+                    onClose={(): void => {
+                        setShowProfile(false);
+                    }}
                 />
 
-                {isKickModalOpen && (
+                {isKickModalOpen ? (
                     <KickUserModal
                         isOpen={isKickModalOpen}
                         userAvatar={userProfile?.profilePicture}
                         username={username}
-                        onClose={(): void => setIsKickModalOpen(false)}
-                        onConfirm={(): void => kickMember(userId)}
+                        onClose={(): void => {
+                            setIsKickModalOpen(false);
+                        }}
+                        onConfirm={(): void => {
+                            kickMember(userId);
+                        }}
                     />
-                )}
+                ) : null}
 
-                {isBanModalOpen && (
+                {isBanModalOpen ? (
                     <BanUserModal
                         isOpen={isBanModalOpen}
                         userAvatar={userProfile?.profilePicture}
                         username={username}
-                        onClose={(): void => setIsBanModalOpen(false)}
-                        onConfirm={(reason): void =>
-                            banMember({ userId, reason })
-                        }
+                        onClose={(): void => {
+                            setIsBanModalOpen(false);
+                        }}
+                        onConfirm={(reason): void => {
+                            banMember({ userId, reason });
+                        }}
                     />
-                )}
+                ) : null}
 
-                {isBlockModalOpen && (
+                {isBlockModalOpen ? (
                     <BlockUserModal
                         isOpen={isBlockModalOpen}
                         profiles={blockProfiles || []}
                         userAvatar={userProfile?.profilePicture}
                         username={username}
-                        onClose={(): void => setIsBlockModalOpen(false)}
-                        onConfirm={(profileId): void =>
-                            upsertBlock({ targetUserId: userId, profileId })
-                        }
+                        onClose={(): void => {
+                            setIsBlockModalOpen(false);
+                        }}
+                        onConfirm={(profileId): void => {
+                            upsertBlock({ targetUserId: userId, profileId });
+                        }}
                     />
-                )}
+                ) : null}
 
-                {isTimeoutModalOpen && (
+                {isTimeoutModalOpen ? (
                     <TimeoutUserModal
                         isOpen={isTimeoutModalOpen}
                         userAvatar={userProfile?.profilePicture}
                         username={username}
-                        onClose={(): void => setIsTimeoutModalOpen(false)}
-                        onConfirm={(duration, reason): void =>
-                            timeoutMember({ userId, duration, reason })
-                        }
+                        onClose={(): void => {
+                            setIsTimeoutModalOpen(false);
+                        }}
+                        onConfirm={(duration, reason): void => {
+                            timeoutMember({ userId, duration, reason });
+                        }}
                     />
-                )}
+                ) : null}
                 <CodeModal
                     content={colorResolverReport ?? ''}
                     isOpen={!!colorResolverReport}
                     language="json"
-                    onClose={(): void => setColorResolverReport(null)}
+                    onClose={(): void => {
+                        setColorResolverReport(null);
+                    }}
                 />
 
-                {isInviteToServerModalOpen && (
+                {isInviteToServerModalOpen ? (
                     <InviteToServerModal
                         isOpen={isInviteToServerModalOpen}
                         userId={userId}
                         username={displayName || username}
-                        onClose={(): void =>
-                            setIsInviteToServerModalOpen(false)
-                        }
+                        onClose={(): void => {
+                            setIsInviteToServerModalOpen(false);
+                        }}
                     />
-                )}
+                ) : null}
             </>
         );
     },
@@ -1103,7 +1142,7 @@ const UserItemInner = React.memo(
 
 UserItemInner.displayName = 'UserItemInner';
 
-export const UserItem = React.memo((props: UserItemProps): JSX.Element => {
+export const UserItem = React.memo((props: UserItemProps): ReactNode => {
     const isServerContext = !!props.serverId;
     const serverId =
         props.serverId ||
@@ -1115,7 +1154,7 @@ export const UserItem = React.memo((props: UserItemProps): JSX.Element => {
     if (isServerContext && sid) {
         return (
             <ServerDataInjector serverId={sid}>
-                {(serverData): JSX.Element => (
+                {(serverData): ReactNode => (
                     <UserItemInner
                         allRoles={props.allRoles}
                         className={props.className}

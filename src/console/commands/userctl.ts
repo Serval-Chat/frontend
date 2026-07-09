@@ -77,7 +77,7 @@ export const userctlCommand: ConCommandReactor = {
         );
 
         if (filterArg) {
-            const fieldsStr = filterArg.substring('/filter:'.length);
+            const fieldsStr = filterArg.slice('/filter:'.length);
             if (!fieldsStr) {
                 return {
                     output: [
@@ -170,19 +170,21 @@ export const userctlCommand: ConCommandReactor = {
             const columns = selectedFields.map(
                 (field): { header: string; key: (u: User) => string } => {
                     switch (field) {
-                        case 'uname':
+                        case 'uname': {
                             return {
-                                header: '\u001b[96mUsername\u001b[0m',
+                                header: '\u001B[96mUsername\u001B[0m',
                                 key: (u: User): string => getAnsiUsername(u),
                             };
-                        case 'pronouns':
+                        }
+                        case 'pronouns': {
                             return {
-                                header: '\u001b[96mPronouns\u001b[0m',
+                                header: '\u001B[96mPronouns\u001B[0m',
                                 key: (u: User): string => u.pronouns || '',
                             };
-                        case 'badges':
+                        }
+                        case 'badges': {
                             return {
-                                header: '\u001b[96mBadges\u001b[0m',
+                                header: '\u001B[96mBadges\u001B[0m',
                                 key: (u: User): string =>
                                     u.badges && u.badges.length > 0
                                         ? u.badges
@@ -195,35 +197,41 @@ export const userctlCommand: ConCommandReactor = {
                                               .join(', ')
                                         : '',
                             };
-                        case 'dname':
+                        }
+                        case 'dname': {
                             return {
-                                header: '\u001b[96mDisplay Name\u001b[0m',
+                                header: '\u001B[96mDisplay Name\u001B[0m',
                                 key: (u: User): string => getAnsiDisplayName(u),
                             };
-                        case 'bio':
+                        }
+                        case 'bio': {
                             return {
-                                header: '\u001b[96mBio\u001b[0m',
+                                header: '\u001B[96mBio\u001B[0m',
                                 key: (u: User): string => u.bio || '',
                             };
-                        case 'unamefnt':
+                        }
+                        case 'unamefnt': {
                             return {
-                                header: '\u001b[96mFont\u001b[0m',
+                                header: '\u001B[96mFont\u001B[0m',
                                 key: (u: User) => u.usernameFont || '',
                             };
-                        case 'webconn':
+                        }
+                        case 'webconn': {
                             return {
-                                header: '\u001b[96mConnections\u001b[0m',
+                                header: '\u001B[96mConnections\u001B[0m',
                                 key: (u: User): string =>
                                     u.connections
                                         ?.map((c): string => c.value)
                                         .join(', ') || '',
                             };
+                        }
 
-                        default:
+                        default: {
                             return {
                                 header: '',
                                 key: (): string => '',
                             };
+                        }
                     }
                 },
             );
@@ -236,7 +244,7 @@ export const userctlCommand: ConCommandReactor = {
                         const visualVal = val
                             ? String(val)
                                   // eslint-disable-next-line no-control-regex
-                                  .replace(/\u001b\[[0-9;]*m/g, '')
+                                  .replaceAll(/\u001B\[[0-9;]*m/g, '')
                                   .trim()
                             : '';
                         return visualVal !== '';
@@ -249,7 +257,7 @@ export const userctlCommand: ConCommandReactor = {
                         const visualVal = val
                             ? String(val)
                                   // eslint-disable-next-line no-control-regex
-                                  .replace(/\u001b\[[0-9;]*m/g, '')
+                                  .replaceAll(/\u001B\[[0-9;]*m/g, '')
                                   .trim()
                             : '';
                         return visualVal !== '';

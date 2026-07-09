@@ -32,7 +32,7 @@ export const BulkUploadModal = ({
         <Modal
             className="max-w-md"
             isOpen={isOpen}
-            showCloseButton={isFinished && !isCancelling}
+            showCloseButton={isFinished ? !isCancelling : false}
             title={title}
             onClose={isFinished ? onClose : (): void => {}}
         >
@@ -102,7 +102,7 @@ export const BulkUploadModal = ({
                 </div>
 
                 <div className="flex justify-end gap-3 pt-2">
-                    {!isFinished && !isCancelling && onCancel && (
+                    {!isFinished && !isCancelling && onCancel ? (
                         <Button
                             className="min-w-[100px]"
                             variant="danger"
@@ -110,14 +110,14 @@ export const BulkUploadModal = ({
                         >
                             Cancel
                         </Button>
-                    )}
-                    {isCancelling && (
+                    ) : null}
+                    {isCancelling ? (
                         <div className="flex items-center gap-2 pr-2 text-sm text-muted-foreground">
                             <Loader2 className="h-4 w-4 animate-spin" />
                             Cleaning up...
                         </div>
-                    )}
-                    {isFinished && !isCancelling && (
+                    ) : null}
+                    {isFinished && !isCancelling ? (
                         <Button
                             className="min-w-[100px]"
                             variant="primary"
@@ -125,7 +125,7 @@ export const BulkUploadModal = ({
                         >
                             Finish
                         </Button>
-                    )}
+                    ) : null}
                 </div>
             </div>
         </Modal>

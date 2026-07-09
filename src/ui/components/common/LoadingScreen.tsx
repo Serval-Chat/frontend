@@ -27,7 +27,9 @@ export const LoadingScreen = ({
     type = 'loading',
     isVisible = true,
 }: LoadingScreenProps) => {
-    const [randomMessage, setRandomMessage] = useState(MESSAGES[0]);
+    const [randomMessage, setRandomMessage] = useState<string>(
+        MESSAGES[0] ?? '',
+    );
 
     useEffect((): (() => void) | undefined => {
         if (type === 'loading' && !message) {
@@ -36,12 +38,15 @@ export const LoadingScreen = ({
                     const filtered = MESSAGES.filter(
                         (m): boolean => m !== prev,
                     );
-                    return filtered[
-                        Math.floor(Math.random() * filtered.length)
-                    ];
+                    return (
+                        filtered[Math.floor(Math.random() * filtered.length)] ??
+                        prev
+                    );
                 });
             }, 3000);
-            return (): void => clearInterval(interval);
+            return (): void => {
+                clearInterval(interval);
+            };
         }
     }, [type, message]);
 
@@ -55,7 +60,7 @@ export const LoadingScreen = ({
 
     return (
         <AnimatePresence>
-            {isVisible && (
+            {isVisible ? (
                 <m.div
                     animate={{ opacity: 1 }}
                     className={cn(
@@ -119,7 +124,7 @@ export const LoadingScreen = ({
                         />
                     </div>
                 </m.div>
-            )}
+            ) : null}
         </AnimatePresence>
     );
 };

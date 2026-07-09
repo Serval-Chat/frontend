@@ -65,10 +65,11 @@ const voiceSlice = createSlice({
             action: PayloadAction<{ channelId: string; userId: string }>,
         ): void => {
             const { channelId, userId } = action.payload;
-            if (state.voiceParticipants[channelId]) {
-                state.voiceParticipants[channelId] = state.voiceParticipants[
-                    channelId
-                ].filter((id): boolean => id !== userId);
+            const participants = state.voiceParticipants[channelId];
+            if (participants) {
+                state.voiceParticipants[channelId] = participants.filter(
+                    (id): boolean => id !== userId,
+                );
             }
         },
         clearUserFromAllVoiceChannels: (
@@ -77,9 +78,12 @@ const voiceSlice = createSlice({
         ): void => {
             const userId = action.payload;
             for (const channelId in state.voiceParticipants) {
-                state.voiceParticipants[channelId] = state.voiceParticipants[
-                    channelId
-                ].filter((id): boolean => id !== userId);
+                const participants = state.voiceParticipants[channelId];
+                if (participants) {
+                    state.voiceParticipants[channelId] = participants.filter(
+                        (id): boolean => id !== userId,
+                    );
+                }
             }
         },
         setSpeakingUsers: (state, action: PayloadAction<string[]>): void => {

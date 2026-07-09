@@ -41,6 +41,233 @@ import { UserProfilePicture } from '@/ui/components/common/UserProfilePicture';
 import { ServerIcon } from '@/ui/components/servers/ServerIcon';
 import { cn } from '@/utils/cn';
 
+const formatScore = (score?: number): string =>
+    score === undefined ? '0.00' : score.toFixed(2);
+
+const formatDate = (value?: string | Date | null): string => {
+    if (value === undefined || value === null) return 'Never';
+    return new Date(value).toLocaleString();
+};
+
+type AdminServerRowData = NonNullable<
+    ReturnType<typeof useAdminServers>['data']
+>[number];
+
+const AdminServerRow = ({
+    server,
+    isSettingOverride,
+    isDeleting,
+    isRestoring,
+    onViewServer,
+    onSetOverride,
+    onDelete,
+    onRestore,
+}: {
+    server: AdminServerRowData;
+    isSettingOverride: boolean;
+    isDeleting: boolean;
+    isRestoring: boolean;
+    onViewServer: (serverId: string) => void;
+    onSetOverride: (args: {
+        serverId: string;
+        override: 'verified' | 'unverified' | null;
+    }) => void;
+    onDelete: (serverId: string, serverName: string) => void;
+    onRestore: (serverId: string) => void;
+}) => (
+    <TableRow>
+        <TableCell className="min-w-0">
+            <div className="flex items-center gap-3 overflow-hidden">
+                <ServerIcon server={server as unknown as Server} size="sm" />
+                <div className="flex max-w-[150px] min-w-0 flex-col truncate md:max-w-[250px]">
+                    <div className="flex min-w-0 items-center gap-1.5">
+                        {server.verified ? (
+                            <BadgeCheck
+                                className="shrink-0 text-primary"
+                                size={16}
+                                strokeWidth={2.5}
+                            />
+                        ) : null}
+                        <span className="truncate font-bold text-foreground">
+                            {server.name}
+                        </span>
+                    </div>
+                    <span className="font-mono text-[10px] text-muted-foreground opacity-60">
+                        {server.id}
+                    </span>
+                </div>
+            </div>
+        </TableCell>
+
+        <TableCell monospace>{formatScore(server.verificationScore)}</TableCell>
+
+        <TableCell>
+            <div className="flex flex-wrap items-center gap-1.5">
+                <div
+                    className={cn(
+                        'inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-bold tracking-wider uppercase',
+                        server.verificationEligible
+                            ? 'bg-primary/10 text-primary'
+                            : 'bg-danger/10 text-danger',
+                    )}
+                >
+                    {server.verificationEligible ? 'Yes' : 'No'}
+                </div>
+            </div>
+        </TableCell>
+
+        <TableCell>
+            <div className="flex flex-wrap items-center gap-1.5">
+                <div
+                    className={cn(
+                        'inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-bold tracking-wider uppercase',
+                        server.verified
+                            ? 'bg-primary/10 text-primary'
+                            : 'bg-bg-tertiary text-muted-foreground',
+                    )}
+                >
+                    {server.verified ? 'Yes' : 'No'}
+                </div>
+                {server.verificationOverride ? (
+                    <div className="bg-warning/10 text-warning inline-flex rounded-full px-2.5 py-0.5 text-[10px] font-bold tracking-wider uppercase">
+                        Override
+                    </div>
+                ) : null}
+            </div>
+        </TableCell>
+
+        <TableCell className="max-w-[220px]">
+            {server.verificationEligible ? (
+                <Text size="xs" variant="muted">
+                    -
+                </Text>
+            ) : (
+                <span className="line-clamp-2 text-xs text-muted-foreground">
+                    {server.verificationFailureReasons?.join(', ') ||
+                        'Not computed'}
+                </span>
+            )}
+        </TableCell>
+
+        <TableCell className="min-w-0">
+            {server.owner ? (
+                <div className="flex min-w-0 items-center gap-3 space-x-0">
+                    <UserProfilePicture
+                        size="sm"
+                        src={server.owner.profilePicture}
+                        username={server.owner.username}
+                    />
+                    <div className="flex min-w-0 flex-col truncate">
+                        <span className="truncate text-sm font-medium">
+                            {server.owner.displayName || server.owner.username}
+                        </span>
+                        <span className="truncate text-[10px] text-muted-foreground">
+                            @{server.owner.username}
+                        </span>
+                    </div>
+                </div>
+            ) : (
+                <Text className="italic" color="danger" size="xs">
+                    Unknown Owner
+                </Text>
+            )}
+        </TableCell>
+
+        <TableCell>
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Users className="opacity-40" size={14} />
+                <span className="font-bold">{server.memberCount}</span>
+            </div>
+        </TableCell>
+
+        <TableCell align="right" className="shrink-0">
+            <div className="flex shrink-0 justify-end gap-1">
+                <Button
+                    size="sm"
+                    title="View Server Details"
+                    variant="ghost"
+                    onClick={(): void => {
+                        onViewServer(server.id);
+                    }}
+                >
+                    <Eye size={16} />
+                </Button>
+                <Button
+                    disabled={isSettingOverride}
+                    size="sm"
+                    title="Force Verified"
+                    variant="ghost"
+                    onClick={(): void => {
+                        onSetOverride({
+                            serverId: server.id,
+                            override: 'verified',
+                        });
+                    }}
+                >
+                    <ShieldCheck size={16} />
+                </Button>
+                <Button
+                    disabled={isSettingOverride}
+                    size="sm"
+                    title="Force Unverified"
+                    variant="ghost"
+                    onClick={(): void => {
+                        onSetOverride({
+                            serverId: server.id,
+                            override: 'unverified',
+                        });
+                    }}
+                >
+                    <ShieldOff size={16} />
+                </Button>
+                {server.verificationOverride ? (
+                    <Button
+                        disabled={isSettingOverride}
+                        size="sm"
+                        title="Clear Verification Override"
+                        variant="ghost"
+                        onClick={(): void => {
+                            onSetOverride({
+                                serverId: server.id,
+                                override: null,
+                            });
+                        }}
+                    >
+                        <XCircle size={16} />
+                    </Button>
+                ) : null}
+                {server.deletedAt ? (
+                    <Button
+                        className="text-primary hover:bg-primary/10"
+                        disabled={isRestoring}
+                        size="sm"
+                        title="Restore Server"
+                        variant="ghost"
+                        onClick={(): void => {
+                            onRestore(server.id);
+                        }}
+                    >
+                        <RotateCcw size={16} />
+                    </Button>
+                ) : (
+                    <Button
+                        className="text-danger hover:bg-danger/10"
+                        disabled={isDeleting}
+                        size="sm"
+                        title="Delete Server"
+                        variant="ghost"
+                        onClick={(): void => {
+                            onDelete(server.id, server.name);
+                        }}
+                    >
+                        <Trash2 size={16} />
+                    </Button>
+                )}
+            </div>
+        </TableCell>
+    </TableRow>
+);
+
 export const AdminServers = ({
     onViewServer,
 }: {
@@ -56,7 +283,9 @@ export const AdminServers = ({
             setDebouncedSearch(searchTerm);
             setPage(0);
         }, ADMIN_CONSTANTS.SEARCH_DEBOUNCE_MS);
-        return (): void => clearTimeout(timer);
+        return (): void => {
+            clearTimeout(timer);
+        };
     }, [searchTerm]);
 
     const { data: servers, isLoading } = useAdminServers(
@@ -85,14 +314,6 @@ export const AdminServers = ({
 
     const handleRestore = (serverId: string): void => {
         restoreServer(serverId);
-    };
-
-    const formatScore = (score?: number): string =>
-        score === undefined ? '0.00' : score.toFixed(2);
-
-    const formatDate = (value?: string | Date | null): string => {
-        if (value === undefined || value === null) return 'Never';
-        return new Date(value).toLocaleString();
     };
 
     return (
@@ -126,7 +347,9 @@ export const AdminServers = ({
                         type="text"
                         value={searchTerm}
                         variant="admin"
-                        onChange={(e): void => setSearchTerm(e.target.value)}
+                        onChange={(e): void => {
+                            setSearchTerm(e.target.value);
+                        }}
                     />
                 </div>
                 <Button
@@ -135,7 +358,9 @@ export const AdminServers = ({
                     icon={Play}
                     loading={isRunningVerification}
                     size="sm"
-                    onClick={(): void => runVerificationNow()}
+                    onClick={(): void => {
+                        runVerificationNow();
+                    }}
                 >
                     Run now
                 </Button>
@@ -229,220 +454,17 @@ export const AdminServers = ({
                         </TableRow>
                     ) : servers && servers.length > 0 ? (
                         servers.map((server) => (
-                            <TableRow key={server.id}>
-                                <TableCell className="min-w-0">
-                                    <div className="flex items-center gap-3 overflow-hidden">
-                                        <ServerIcon
-                                            server={server as unknown as Server}
-                                            size="sm"
-                                        />
-                                        <div className="flex max-w-[150px] min-w-0 flex-col truncate md:max-w-[250px]">
-                                            <div className="flex min-w-0 items-center gap-1.5">
-                                                {server.verified && (
-                                                    <BadgeCheck
-                                                        className="shrink-0 text-primary"
-                                                        size={16}
-                                                        strokeWidth={2.5}
-                                                    />
-                                                )}
-                                                <span className="truncate font-bold text-foreground">
-                                                    {server.name}
-                                                </span>
-                                            </div>
-                                            <span className="font-mono text-[10px] text-muted-foreground opacity-60">
-                                                {server.id}
-                                            </span>
-                                        </div>
-                                    </div>
-                                </TableCell>
-
-                                <TableCell monospace>
-                                    {formatScore(server.verificationScore)}
-                                </TableCell>
-
-                                <TableCell>
-                                    <div className="flex flex-wrap items-center gap-1.5">
-                                        <div
-                                            className={cn(
-                                                'inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-bold tracking-wider uppercase',
-                                                server.verificationEligible
-                                                    ? 'bg-primary/10 text-primary'
-                                                    : 'bg-danger/10 text-danger',
-                                            )}
-                                        >
-                                            {server.verificationEligible
-                                                ? 'Yes'
-                                                : 'No'}
-                                        </div>
-                                    </div>
-                                </TableCell>
-
-                                <TableCell>
-                                    <div className="flex flex-wrap items-center gap-1.5">
-                                        <div
-                                            className={cn(
-                                                'inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-bold tracking-wider uppercase',
-                                                server.verified
-                                                    ? 'bg-primary/10 text-primary'
-                                                    : 'bg-bg-tertiary text-muted-foreground',
-                                            )}
-                                        >
-                                            {server.verified ? 'Yes' : 'No'}
-                                        </div>
-                                        {server.verificationOverride && (
-                                            <div className="bg-warning/10 text-warning inline-flex rounded-full px-2.5 py-0.5 text-[10px] font-bold tracking-wider uppercase">
-                                                Override
-                                            </div>
-                                        )}
-                                    </div>
-                                </TableCell>
-
-                                <TableCell className="max-w-[220px]">
-                                    {server.verificationEligible ? (
-                                        <Text size="xs" variant="muted">
-                                            -
-                                        </Text>
-                                    ) : (
-                                        <span className="line-clamp-2 text-xs text-muted-foreground">
-                                            {server.verificationFailureReasons?.join(
-                                                ', ',
-                                            ) || 'Not computed'}
-                                        </span>
-                                    )}
-                                </TableCell>
-
-                                <TableCell className="min-w-0">
-                                    {server.owner ? (
-                                        <div className="flex min-w-0 items-center gap-3 space-x-0">
-                                            <UserProfilePicture
-                                                size="sm"
-                                                src={
-                                                    server.owner.profilePicture
-                                                }
-                                                username={server.owner.username}
-                                            />
-                                            <div className="flex min-w-0 flex-col truncate">
-                                                <span className="truncate text-sm font-medium">
-                                                    {server.owner.displayName ||
-                                                        server.owner.username}
-                                                </span>
-                                                <span className="truncate text-[10px] text-muted-foreground">
-                                                    @{server.owner.username}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    ) : (
-                                        <Text
-                                            className="italic"
-                                            color="danger"
-                                            size="xs"
-                                        >
-                                            Unknown Owner
-                                        </Text>
-                                    )}
-                                </TableCell>
-
-                                <TableCell>
-                                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                        <Users
-                                            className="opacity-40"
-                                            size={14}
-                                        />
-                                        <span className="font-bold">
-                                            {server.memberCount}
-                                        </span>
-                                    </div>
-                                </TableCell>
-
-                                <TableCell align="right" className="shrink-0">
-                                    <div className="flex shrink-0 justify-end gap-1">
-                                        <Button
-                                            size="sm"
-                                            title="View Server Details"
-                                            variant="ghost"
-                                            onClick={(): void =>
-                                                onViewServer(server.id)
-                                            }
-                                        >
-                                            <Eye size={16} />
-                                        </Button>
-                                        <Button
-                                            disabled={isSettingOverride}
-                                            size="sm"
-                                            title="Force Verified"
-                                            variant="ghost"
-                                            onClick={(): void =>
-                                                setVerificationOverride({
-                                                    serverId: server.id,
-                                                    override: 'verified',
-                                                })
-                                            }
-                                        >
-                                            <ShieldCheck size={16} />
-                                        </Button>
-                                        <Button
-                                            disabled={isSettingOverride}
-                                            size="sm"
-                                            title="Force Unverified"
-                                            variant="ghost"
-                                            onClick={(): void =>
-                                                setVerificationOverride({
-                                                    serverId: server.id,
-                                                    override: 'unverified',
-                                                })
-                                            }
-                                        >
-                                            <ShieldOff size={16} />
-                                        </Button>
-                                        {server.verificationOverride && (
-                                            <Button
-                                                disabled={isSettingOverride}
-                                                size="sm"
-                                                title="Clear Verification Override"
-                                                variant="ghost"
-                                                onClick={(): void =>
-                                                    setVerificationOverride({
-                                                        serverId: server.id,
-                                                        override: null,
-                                                    })
-                                                }
-                                            >
-                                                <XCircle size={16} />
-                                            </Button>
-                                        )}
-                                        {server.deletedAt ? (
-                                            <Button
-                                                className="text-primary hover:bg-primary/10"
-                                                disabled={isRestoring}
-                                                size="sm"
-                                                title="Restore Server"
-                                                variant="ghost"
-                                                onClick={(): void =>
-                                                    handleRestore(server.id)
-                                                }
-                                            >
-                                                <RotateCcw size={16} />
-                                            </Button>
-                                        ) : (
-                                            <Button
-                                                className="text-danger hover:bg-danger/10"
-                                                disabled={isDeleting}
-                                                size="sm"
-                                                title="Delete Server"
-                                                variant="ghost"
-                                                onClick={(): void =>
-                                                    handleDelete(
-                                                        server.id,
-                                                        server.name,
-                                                    )
-                                                }
-                                            >
-                                                <Trash2 size={16} />
-                                            </Button>
-                                        )}
-                                    </div>
-                                </TableCell>
-                            </TableRow>
+                            <AdminServerRow
+                                isDeleting={isDeleting}
+                                isRestoring={isRestoring}
+                                isSettingOverride={isSettingOverride}
+                                key={server.id}
+                                server={server}
+                                onDelete={handleDelete}
+                                onRestore={handleRestore}
+                                onSetOverride={setVerificationOverride}
+                                onViewServer={onViewServer}
+                            />
                         ))
                     ) : (
                         <TableRow>
@@ -471,14 +493,14 @@ export const AdminServers = ({
             </Table>
 
             {/* Pagination Controls */}
-            {!isLoading && servers && (servers.length > 0 || page > 0) && (
+            {!isLoading && servers && (servers.length > 0 || page > 0) ? (
                 <div className="flex items-center justify-between rounded-xl border border-border-subtle bg-bg-subtle px-4 py-2">
                     <Button
                         disabled={page === 0}
                         variant="ghost"
-                        onClick={(): void =>
-                            setPage((p): number => Math.max(0, p - 1))
-                        }
+                        onClick={(): void => {
+                            setPage((p): number => Math.max(0, p - 1));
+                        }}
                     >
                         Previous
                     </Button>
@@ -488,12 +510,14 @@ export const AdminServers = ({
                     <Button
                         disabled={servers.length < LIMIT}
                         variant="ghost"
-                        onClick={(): void => setPage((p): number => p + 1)}
+                        onClick={(): void => {
+                            setPage((p): number => p + 1);
+                        }}
                     >
                         Next
                     </Button>
                 </div>
-            )}
+            ) : null}
         </div>
     );
 };

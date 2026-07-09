@@ -9,7 +9,7 @@ export interface AdminUserShort {
     displayName?: string;
 }
 
-export const useAdminList = (): UseQueryResult<AdminUserShort[], Error> =>
+export const useAdminList = (): UseQueryResult<AdminUserShort[]> =>
     useQuery<AdminUserShort[]>({
         queryKey: ['admin-list'],
         queryFn: async (): Promise<AdminUserShort[]> => {

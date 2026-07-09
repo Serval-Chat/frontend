@@ -8,18 +8,14 @@ import {
 
 import {
     type AdminBan,
-    type AdminBanHistoryItem,
-    type AdminBansDiagnostic,
     type AdminMute,
     adminBansApi,
 } from '@/api/admin/bans.api';
 import { useToast } from '@/ui/components/common/Toast';
 import { extractApiError } from '@/utils/extractApiError';
 
-export const adminBansKeys = {
+const adminBansKeys = {
     all: ['admin', 'bans'] as const,
-    diagnostic: (): readonly ['admin', 'bans', 'diagnostic'] =>
-        [...adminBansKeys.all, 'diagnostic'] as const,
     list: (
         limit: number,
         offset: number,
@@ -40,20 +36,10 @@ export const adminBansKeys = {
         [...adminBansKeys.all, 'user', userId, 'mutes'] as const,
 };
 
-export const useAdminBansDiagnostic = (): UseQueryResult<
-    AdminBansDiagnostic,
-    Error
-> =>
-    useQuery({
-        queryKey: adminBansKeys.diagnostic(),
-        queryFn: (): Promise<AdminBansDiagnostic> =>
-            adminBansApi.getBansDiagnostic(),
-    });
-
 export const useAdminBansList = (
-    limit: number = 50,
-    offset: number = 0,
-): UseQueryResult<AdminBan[], Error> =>
+    limit = 50,
+    offset = 0,
+): UseQueryResult<AdminBan[]> =>
     useQuery({
         queryKey: adminBansKeys.list(limit, offset),
         queryFn: (): Promise<AdminBan[]> =>
@@ -61,33 +47,13 @@ export const useAdminBansList = (
     });
 
 export const useAdminMutesList = (
-    limit: number = 50,
-    offset: number = 0,
-): UseQueryResult<AdminMute[], Error> =>
+    limit = 50,
+    offset = 0,
+): UseQueryResult<AdminMute[]> =>
     useQuery({
         queryKey: adminBansKeys.mutesList(limit, offset),
         queryFn: (): Promise<AdminMute[]> =>
             adminBansApi.listMutes(limit, offset),
-    });
-
-export const useAdminUserBans = (
-    userId: string | undefined,
-): UseQueryResult<AdminBanHistoryItem[], Error> =>
-    useQuery({
-        queryKey: adminBansKeys.userBans(userId!),
-        queryFn: (): Promise<AdminBanHistoryItem[]> =>
-            adminBansApi.getUserBans(userId!),
-        enabled: !!userId,
-    });
-
-export const useAdminUserMutes = (
-    userId: string | undefined,
-): UseQueryResult<AdminBanHistoryItem[], Error> =>
-    useQuery({
-        queryKey: adminBansKeys.userMutes(userId!),
-        queryFn: (): Promise<AdminBanHistoryItem[]> =>
-            adminBansApi.getUserMutes(userId!),
-        enabled: !!userId,
     });
 
 export const useAdminBanUser = (): UseMutationResult<

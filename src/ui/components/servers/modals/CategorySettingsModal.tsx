@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-import { type Category } from '@/api/servers/servers.types';
+import type { Category } from '@/api/servers/servers.types';
 import { SettingsContentPane } from '@/ui/components/common/settings/SettingsContentPane';
 import { SettingsModalLayout } from '@/ui/components/common/settings/SettingsModalLayout';
 import { CategorySettingsSidebar } from '@/ui/components/servers/settings/CategorySettingsSidebar';
@@ -57,7 +57,9 @@ export const CategorySettingsModal = ({
                 />
             }
             onClose={onClose}
-            onMobileBackClick={(): void => setIsMobileSidebarOpen(true)}
+            onMobileBackClick={(): void => {
+                setIsMobileSidebarOpen(true);
+            }}
         >
             <React.Suspense fallback={null}>
                 {activeSection === 'overview' ? (

@@ -1,6 +1,11 @@
 import { fireEvent, render, screen } from '@testing-library/react';
-import { MemoryRouter, Route, Routes } from 'react-router-dom';
-import { Link, useLocation } from 'react-router-dom';
+import {
+    Link,
+    MemoryRouter,
+    Route,
+    Routes,
+    useLocation,
+} from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { Admin } from './Admin';
@@ -57,7 +62,9 @@ vi.mock('@/ui/components/admin/AdminIAM', () => ({
             <button
                 data-testid="view-user-btn"
                 type="button"
-                onClick={(): void => onViewUser('user-42')}
+                onClick={(): void => {
+                    onViewUser('user-42');
+                }}
             >
                 View user
             </button>
@@ -102,7 +109,9 @@ vi.mock('@/ui/components/admin/AdminServers', () => ({
         <div data-testid="admin-servers">
             <button
                 data-testid="view-server-btn"
-                onClick={(): void => onViewServer('server-1')}
+                onClick={(): void => {
+                    onViewServer('server-1');
+                }}
             >
                 View
             </button>

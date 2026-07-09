@@ -65,7 +65,9 @@ export const CodeBlock = ({
         e.stopPropagation();
         void navigator.clipboard.writeText(content);
         setIsCopied(true);
-        setTimeout((): void => setIsCopied(false), 2000);
+        setTimeout((): void => {
+            setIsCopied(false);
+        }, 2000);
     };
 
     const handleOpenFullScreen = (e: React.MouseEvent): void => {
@@ -74,7 +76,7 @@ export const CodeBlock = ({
     };
 
     const handleContainerClick = (): void => {
-        const selection = window.getSelection();
+        const selection = globalThis.getSelection();
         if (selection && selection.toString().length > 0) {
             return;
         }
@@ -91,18 +93,7 @@ export const CodeBlock = ({
 
     return (
         <>
-            <div
-                aria-label="View code block"
-                className="group relative my-2 cursor-pointer overflow-hidden rounded-lg border border-border-subtle bg-background shadow-sm"
-                role="button"
-                tabIndex={0}
-                onClick={handleContainerClick}
-                onKeyDown={(e): void => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                        setIsModalOpen(true);
-                    }
-                }}
-            >
+            <div className="group relative my-2 overflow-hidden rounded-lg border border-border-subtle bg-background shadow-sm">
                 <div className="flex items-center justify-between border-b border-border-subtle bg-bg-subtle px-3 py-2">
                     <span className="text-[10px] font-black tracking-wider text-primary uppercase">
                         {language || 'text'}
@@ -138,7 +129,12 @@ export const CodeBlock = ({
                         </Button>
                     </div>
                 </div>
-                <div className="custom-scrollbar overflow-hidden bg-bg-secondary/50 p-0 font-mono text-sm">
+                <button
+                    aria-label="View code block"
+                    className="custom-scrollbar block w-full cursor-pointer overflow-hidden border-0 bg-bg-secondary/50 p-0 text-left font-mono text-sm"
+                    type="button"
+                    onClick={handleContainerClick}
+                >
                     <pre className="m-0 overflow-x-auto bg-transparent p-4 text-sm leading-6 whitespace-pre-wrap">
                         {(highlightedLines || lines).map((line, index) => (
                             <div
@@ -153,23 +149,27 @@ export const CodeBlock = ({
                                     {Array.isArray(line) ? (
                                         <>
                                             <AstRenderer nodes={line} />
-                                            {line.length === 0 && '\u200b'}
+                                            {line.length === 0
+                                                ? '\u200B'
+                                                : null}
                                         </>
                                     ) : (
-                                        line || '\u200b'
+                                        line || '\u200B'
                                     )}
                                 </code>
                             </div>
                         ))}
                     </pre>
-                </div>
+                </button>
             </div>
 
             <CodeModal
                 content={content}
                 isOpen={isModalOpen}
                 language={language}
-                onClose={(): void => setIsModalOpen(false)}
+                onClose={(): void => {
+                    setIsModalOpen(false);
+                }}
             />
         </>
     );

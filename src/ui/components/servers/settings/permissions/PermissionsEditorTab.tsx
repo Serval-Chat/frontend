@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useReducer } from 'react';
 
 import { ChevronLeft } from 'lucide-react';
 
@@ -13,7 +13,9 @@ import type { Role } from '@/api/servers/servers.types';
 import { Heading } from '@/ui/components/common/Heading';
 import { SettingsFloatingBar } from '@/ui/components/common/SettingsFloatingBar';
 import { Text } from '@/ui/components/common/Text';
+import { mergeReducer } from '@/utils/mergeReducer';
 
+import { AddRoleDropdown } from './AddRoleDropdown';
 import { PermissionOverrideSwitch } from './PermissionOverrideSwitch';
 import {
     EditorLayout,
@@ -22,7 +24,7 @@ import {
     RolesSidebar,
     SectionLabel,
 } from './PermissionsLayout';
-import { AddRoleDropdown, RoleListItem } from './PermissionsRoleItems';
+import { RoleListItem } from './RoleListItem';
 
 interface PermissionsEditorTabProps {
     serverId: string;
@@ -31,14 +33,14 @@ interface PermissionsEditorTabProps {
 }
 
 type Overrides = Record<string, Record<string, boolean>>;
-type PermissionGroup = {
+interface PermissionGroup {
     label: string;
     permissions: {
         key: string;
         label: string;
         description: string;
     }[];
-};
+}
 
 const getPermissionGroups = (
     targetType: PermissionsEditorTabProps['targetType'],
@@ -218,14 +220,59 @@ export const PermissionsEditorTab = ({
     const isSaving =
         updateChannelPerms.isPending || updateCategoryPerms.isPending;
 
-    const [selectedRoleId, setSelectedRoleId] = useState<string | null>(null);
-    const [localOverrides, setLocalOverrides] = useState<Overrides>({});
-    const [hasChanges, setHasChanges] = useState(false);
-    const [isMobileListOpen, setIsMobileListOpen] = useState(true);
-
-    const [syncedPermissions, setSyncedPermissions] =
-        useState(initialPermissions);
-    const [syncedRoles, setSyncedRoles] = useState(roles);
+    interface PermissionsTabState {
+        selectedRoleId: string | null;
+        localOverrides: Overrides;
+        hasChanges: boolean;
+        isMobileListOpen: boolean;
+        syncedPermissions: typeof initialPermissions;
+        syncedRoles: typeof roles;
+    }
+    const [permState, patchPermState] = useReducer(
+        mergeReducer<PermissionsTabState>,
+        {
+            selectedRoleId: null,
+            localOverrides: {},
+            hasChanges: false,
+            isMobileListOpen: true,
+            syncedPermissions: initialPermissions,
+            syncedRoles: roles,
+        },
+    );
+    const {
+        selectedRoleId,
+        localOverrides,
+        hasChanges,
+        isMobileListOpen,
+        syncedPermissions,
+        syncedRoles,
+    } = permState;
+    const setSelectedRoleId = (v: string | null): void => {
+        patchPermState({ selectedRoleId: v });
+    };
+    const setLocalOverrides = (
+        v: Overrides | ((prev: Overrides) => Overrides),
+    ): void => {
+        patchPermState(
+            typeof v === 'function'
+                ? (s): Partial<PermissionsTabState> => ({
+                      localOverrides: v(s.localOverrides),
+                  })
+                : { localOverrides: v },
+        );
+    };
+    const setHasChanges = (v: boolean): void => {
+        patchPermState({ hasChanges: v });
+    };
+    const setIsMobileListOpen = (v: boolean): void => {
+        patchPermState({ isMobileListOpen: v });
+    };
+    const setSyncedPermissions = (v: typeof initialPermissions): void => {
+        patchPermState({ syncedPermissions: v });
+    };
+    const setSyncedRoles = (v: typeof roles): void => {
+        patchPermState({ syncedRoles: v });
+    };
 
     if (initialPermissions !== syncedPermissions || roles !== syncedRoles) {
         setSyncedPermissions(initialPermissions);
@@ -246,7 +293,7 @@ export const PermissionsEditorTab = ({
         if (role.name === '@everyone') return true;
         if (selectedRoleId === role.id) return true;
         const overrides = localOverrides[role.id];
-        return overrides && Object.keys(overrides).length > 0;
+        return !!overrides && Object.keys(overrides).length > 0;
     });
 
     const availableRolesToAdd = roles.filter(
@@ -259,7 +306,7 @@ export const PermissionsEditorTab = ({
         key: string,
         value: boolean | undefined,
     ): void => {
-        setLocalOverrides((prev): { [x: string]: Record<string, boolean> } => {
+        setLocalOverrides((prev): Record<string, Record<string, boolean>> => {
             const next = { ...prev };
             if (!next[roleId]) next[roleId] = {};
 
@@ -285,11 +332,9 @@ export const PermissionsEditorTab = ({
 
     const handleSave = async (): Promise<void> => {
         try {
-            if (targetType === 'channel') {
-                await updateChannelPerms.mutateAsync(localOverrides);
-            } else {
-                await updateCategoryPerms.mutateAsync(localOverrides);
-            }
+            await (targetType === 'channel'
+                ? updateChannelPerms.mutateAsync(localOverrides)
+                : updateCategoryPerms.mutateAsync(localOverrides));
             setHasChanges(false);
         } catch (error) {
             console.error('Failed to save permissions', error);
@@ -316,12 +361,14 @@ export const PermissionsEditorTab = ({
         <EditorLayout>
             <EditorPanel isMobileListOpen={isMobileListOpen}>
                 {/* Mobile Back Header */}
-                {!isMobileListOpen && (
+                {isMobileListOpen ? null : (
                     <div className="sticky top-0 z-20 mx-[-2rem] mb-4 flex w-full shrink-0 items-center border-b border-border-subtle bg-background px-4 px-[2rem] py-4 md:hidden">
                         <button
                             className="flex items-center gap-1 font-medium text-muted-foreground transition-colors hover:text-foreground"
                             type="button"
-                            onClick={(): void => setIsMobileListOpen(true)}
+                            onClick={(): void => {
+                                setIsMobileListOpen(true);
+                            }}
                         >
                             <ChevronLeft size={20} />
                             Back
@@ -362,13 +409,13 @@ export const PermissionsEditorTab = ({
                                                         perm.key
                                                     ]
                                                 }
-                                                onChange={(val): void =>
+                                                onChange={(val): void => {
                                                     handlePermissionChange(
                                                         selectedRole.id,
                                                         perm.key,
                                                         val,
-                                                    )
-                                                }
+                                                    );
+                                                }}
                                             />
                                         ))}
                                     </div>

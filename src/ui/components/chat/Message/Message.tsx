@@ -160,7 +160,9 @@ export const Message = React.memo(
             [addReaction, message.id, message.serverId, message.channelId],
         );
 
-        useClickAway(pickerRef, (): void => setShowPicker(false));
+        useClickAway(pickerRef, (): void => {
+            setShowPicker(false);
+        });
 
         useEvent('editLastMessage', (event: CustomEvent): void => {
             const { messageId } = event.detail;
@@ -304,7 +306,7 @@ export const Message = React.memo(
 
         const allServerRoles = React.useMemo(
             (): Role[] | undefined =>
-                roleMap ? Array.from(roleMap.values()) : undefined,
+                roleMap ? [...roleMap.values()] : undefined,
             [roleMap],
         );
 
@@ -354,16 +356,18 @@ export const Message = React.memo(
             canManageRoles,
             isOwner,
             myHighestRolePosition,
-            onAddRole: (roleId): void =>
-                addRole({ userId: message.senderId, roleId }),
-            onRemoveRole: (roleId): void =>
-                removeRole({ userId: message.senderId, roleId }),
+            onAddRole: (roleId): void => {
+                addRole({ userId: message.senderId, roleId });
+            },
+            onRemoveRole: (roleId): void => {
+                removeRole({ userId: message.senderId, roleId });
+            },
         });
 
         const isMobile = React.useMemo(
             (): boolean =>
-                typeof window !== 'undefined' &&
-                window.matchMedia('(pointer: coarse)').matches,
+                globalThis.window !== undefined &&
+                globalThis.matchMedia('(pointer: coarse)').matches,
             [],
         );
 
@@ -375,7 +379,7 @@ export const Message = React.memo(
                         minute: '2-digit',
                         hour12: !(me?.settings?.use24HourTime ?? false),
                     })
-                    .split(' ')[0],
+                    .split(' ')[0] ?? '',
             [message.createdAt, me?.settings?.use24HourTime],
         );
         const pickerCoords = useSmartPosition({
@@ -388,7 +392,7 @@ export const Message = React.memo(
 
         const messageContent = (
             <>
-                {isGroupStart && message.replyTo && (
+                {isGroupStart && message.replyTo ? (
                     <ReplyPreview
                         attachments={message.replyTo.attachments}
                         disableColors={isColorsDisabled}
@@ -403,24 +407,24 @@ export const Message = React.memo(
                         user={message.replyTo.user}
                         onClick={onReplyClick}
                     />
-                )}
+                ) : null}
 
                 {isGroupStart &&
-                    message.interaction?.command?.trim() &&
-                    message.interaction.user && (
-                        <InteractionHeader
-                            command={message.interaction.command}
-                            disableColors={isColorsDisabled}
-                            disableCustomFonts={isFontsDisabled}
-                            disableGlow={isGlowDisabled}
-                            disableGlowAndColors={disableGlowAndColors}
-                            isDeleted={!!message.deletedAt}
-                            options={message.interaction.options}
-                            resolvedUser={interactionUser}
-                            role={interactionRole}
-                            user={message.interaction.user}
-                        />
-                    )}
+                message.interaction?.command?.trim() &&
+                message.interaction.user ? (
+                    <InteractionHeader
+                        command={message.interaction.command}
+                        disableColors={isColorsDisabled}
+                        disableCustomFonts={isFontsDisabled}
+                        disableGlow={isGlowDisabled}
+                        disableGlowAndColors={disableGlowAndColors}
+                        isDeleted={!!message.deletedAt}
+                        options={message.interaction.options}
+                        resolvedUser={interactionUser}
+                        role={interactionRole}
+                        user={message.interaction.user}
+                    />
+                ) : null}
 
                 <Box className="flex items-start gap-1">
                     <Box
@@ -498,15 +502,15 @@ export const Message = React.memo(
                             serverId={message.serverId}
                             onAddClick={handleAddReactionClick}
                         />
-                        {message.isEphemeral && (
+                        {message.isEphemeral ? (
                             <Text className="mt-1 flex items-center gap-1 text-[11px] text-text-muted italic">
                                 Only you can see this
                             </Text>
-                        )}
+                        ) : null}
                     </Box>
                 </Box>
 
-                {!disableActions && (
+                {disableActions ? null : (
                     <Box
                         className={cn(
                             'absolute top-0 right-4 z-[var(--z-index-effect-md)] -translate-y-1/2 opacity-0 transition-all group-hover:opacity-100',
@@ -589,7 +593,9 @@ export const Message = React.memo(
                     content={colorResolverReport ?? ''}
                     isOpen={!!colorResolverReport}
                     language="json"
-                    onClose={(): void => setColorResolverReport(null)}
+                    onClose={(): void => {
+                        setColorResolverReport(null);
+                    }}
                 />
             </Box>
         );

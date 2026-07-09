@@ -87,7 +87,9 @@ const PinnedMessageItem = ({
     return (
         <Box
             className="group relative cursor-pointer overflow-hidden rounded-lg border border-[var(--divider)] bg-[var(--bg-subtle)] transition-colors hover:bg-[var(--bg-subtle-hover)]"
-            onClick={(): void => onJump(pin.id)}
+            onClick={(): void => {
+                onJump(pin.id);
+            }}
         >
             <Box className="pointer-events-none pb-2">
                 <Message
@@ -144,22 +146,27 @@ export const PinsDrawer = ({
         if (me?.id && channelId) {
             const key = `serchat_pins_last_viewed_${me.id}_${channelId}`;
             localStorage.setItem(key, Date.now().toString());
-            window.dispatchEvent(new Event('storage'));
+            globalThis.dispatchEvent(new Event('storage'));
         }
     }, [me?.id, channelId]);
 
     const [width, setWidth] = useState((): number => {
         const saved = localStorage.getItem('pins-drawer-width');
-        return saved ? Math.min(Math.max(parseInt(saved, 10), 300), 800) : 400;
+        return saved
+            ? Math.min(Math.max(Number.parseInt(saved, 10), 300), 800)
+            : 400;
     });
 
     const [coords, setCoords] = useState<{ top: number; right: number } | null>(
         null,
     );
 
+    // getBoundingClientRect() needs the anchor to be mounted/painted first, so
+    // this genuinely can't be computed inline during render.
     useEffect((): void => {
         if (anchorRef?.current) {
             const rect = anchorRef.current.getBoundingClientRect();
+            // react-doctor-disable-next-line react-doctor/no-derived-state
             setCoords({
                 top: rect.bottom + 8,
                 right: window.innerWidth - rect.right,

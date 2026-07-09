@@ -32,7 +32,7 @@ export const useEmojiInfo = ({
         enabled: enabled && !!emojiId,
     });
 
-    const serverQuery = useQuery<Server, Error>({
+    const serverQuery = useQuery<Server>({
         queryKey: SERVERS_QUERY_KEYS.details(serverId!),
         queryFn: async (): Promise<Server> => {
             try {

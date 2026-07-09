@@ -18,34 +18,26 @@ export function useFlashText(
     const flash = useCallback((): void => {
         clearTimeout(timeoutRef.current);
         setText(flashText);
-        timeoutRef.current = setTimeout(
-            (): void => setText(initialRef.current),
-            duration,
-        );
+        timeoutRef.current = setTimeout((): void => {
+            setText(initialRef.current);
+        }, duration);
     }, [flashText, duration]);
 
     useEffect(
-        (): (() => void) => (): void => clearTimeout(timeoutRef.current),
+        (): (() => void) => (): void => {
+            clearTimeout(timeoutRef.current);
+        },
         [],
     );
 
     return [text, flash] as const;
 }
 
-export function useFlash(
-    text: string,
-    flash: string,
-    duration: number = 2500,
-): { label: string; trigger: () => void; isFlashing: boolean } {
-    const [label, trigger] = useFlashText(text, flash, duration);
-    return { label, trigger, isFlashing: label === flash };
-}
-
-type FlashConfig = {
+interface FlashConfig {
     initial: string;
     flash: string;
     duration?: number;
-};
+}
 
 export function useFlashGroup<T extends string>(
     configs: Record<T, FlashConfig>,
@@ -70,7 +62,7 @@ export function useFlashGroup<T extends string>(
         }
 
         setFlashing(
-            (prev): Partial<Record<T, boolean>> & { [x: string]: boolean } => ({
+            (prev): Partial<Record<T, boolean>> & Record<string, boolean> => ({
                 ...prev,
                 [key]: true,
             }),
@@ -80,7 +72,7 @@ export function useFlashGroup<T extends string>(
             setFlashing(
                 (
                     prev,
-                ): Partial<Record<T, boolean>> & { [x: string]: boolean } => ({
+                ): Partial<Record<T, boolean>> & Record<string, boolean> => ({
                     ...prev,
                     [key]: false,
                 }),
@@ -101,7 +93,10 @@ export function useFlashGroup<T extends string>(
         T,
         { label: string; trigger: () => void; isFlashing: boolean }
     > => {
-        const res = {} as Record<T, ReturnType<typeof useFlash>>;
+        const res = {} as Record<
+            T,
+            { label: string; trigger: () => void; isFlashing: boolean }
+        >;
         for (const key in configs) {
             const k = key as T;
             const cfg = configs[k];
@@ -109,7 +104,9 @@ export function useFlashGroup<T extends string>(
             const label = isFlashing ? cfg.flash : cfg.initial;
             res[k] = {
                 label,
-                trigger: (): void => trigger(k),
+                trigger: (): void => {
+                    trigger(k);
+                },
                 isFlashing,
             };
         }

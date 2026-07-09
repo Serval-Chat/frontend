@@ -108,18 +108,22 @@ const FLAG_GROUPS = [
     },
 ];
 
-export const BlockingSettings = () => {
-    const [view, setView] = useState<'users' | 'profiles'>('users');
-
-    const { data: blocks, isLoading: isBlocksLoading } = useBlocks();
-    const { data: profiles, isLoading: isProfilesLoading } = useBlockProfiles();
-
-    const { mutate: upsertBlock } = useUpsertBlock();
-    const { mutate: removeBlock } = useRemoveBlock();
-    const { mutate: createProfile } = useCreateBlockProfile();
-    const { mutate: updateProfile } = useUpdateBlockProfile();
-    const { mutate: deleteProfile } = useDeleteBlockProfile();
-
+const BlockProfilesView = ({
+    profiles,
+    isLoading,
+    onCreateProfile,
+    onUpdateProfile,
+    onDeleteProfile,
+}: {
+    profiles: BlockProfile[] | undefined;
+    isLoading: boolean;
+    onCreateProfile: () => void;
+    onUpdateProfile: (args: {
+        id: string;
+        data: { flags?: number; name?: string };
+    }) => void;
+    onDeleteProfile: (id: string) => void;
+}) => {
     const [editingProfileId, setEditingProfileId] = useState<string | null>(
         null,
     );
@@ -127,32 +131,15 @@ export const BlockingSettings = () => {
         null,
     );
     const [renameValue, setRenameValue] = useState('');
-    const [searchQuery, setSearchQuery] = useState('');
-    const renameInputRef = React.useRef<HTMLInputElement>(null);
-
-    React.useEffect((): void => {
-        if (renamingProfileId) {
-            renameInputRef.current?.focus();
-        }
-    }, [renamingProfileId]);
 
     const handleToggleFlag = (
         profileId: string,
         currentFlags: number,
         flag: number,
     ): void => {
-        const newFlags = currentFlags ^ flag;
-        updateProfile({ id: profileId, data: { flags: newFlags } });
-    };
-
-    const handleCreateProfile = (): void => {
-        createProfile({
-            name: 'New Profile ' + (profiles?.length ? profiles.length + 1 : 1),
-            flags:
-                BlockFlags.BLOCK_REACTIONS |
-                BlockFlags.HIDE_MESSAGES |
-                BlockFlags.HIDE_MY_PRESENCE |
-                BlockFlags.HIDE_THEIR_PRESENCE,
+        onUpdateProfile({
+            id: profileId,
+            data: { flags: currentFlags ^ flag },
         });
     };
 
@@ -162,148 +149,16 @@ export const BlockingSettings = () => {
     };
 
     const handleSaveRename = (profileId: string): void => {
-        if (renameValue.trim()) {
-            updateProfile({
+        if (renameValue.trim() !== '') {
+            onUpdateProfile({
                 id: profileId,
                 data: { name: renameValue.trim() },
             });
         }
         setRenamingProfileId(null);
     };
-    const renderUsersView = (): React.JSX.Element => (
-        <Box className="flex flex-col gap-6">
-            <Box className="flex flex-col gap-4">
-                <Box className="flex items-center justify-between">
-                    <Text
-                        className="tracking-wider uppercase"
-                        color="muted"
-                        size="xs"
-                        weight="semibold"
-                    >
-                        Blocked Users ({blocks?.length || 0})
-                    </Text>
 
-                    <Box className="relative w-64">
-                        <Search
-                            className="absolute top-1/2 left-3 -translate-y-1/2 text-[var(--settings-search-icon)]"
-                            size={14}
-                        />
-                        <input
-                            aria-label="Search blocked users"
-                            className="w-full rounded-md border border-[var(--settings-search-border)] bg-[var(--settings-search-bg)] py-1.5 pr-3 pl-9 text-xs text-foreground transition-all outline-none placeholder:text-[var(--settings-search-placeholder)] focus:border-primary/50 focus:bg-[var(--settings-search-bg-focus)]"
-                            placeholder="Search blocked users..."
-                            value={searchQuery}
-                            onChange={(e): void =>
-                                setSearchQuery(e.target.value)
-                            }
-                        />
-                        {searchQuery && (
-                            <button
-                                className="absolute top-1/2 right-2 -translate-y-1/2 text-[var(--settings-search-icon)] hover:text-foreground"
-                                type="button"
-                                onClick={(): void => setSearchQuery('')}
-                            >
-                                <X size={12} />
-                            </button>
-                        )}
-                    </Box>
-                </Box>
-
-                {isBlocksLoading ? (
-                    <Box className="flex justify-center p-8">
-                        <LoadingSpinner />
-                    </Box>
-                ) : !Array.isArray(blocks) || blocks.length === 0 ? (
-                    <Box className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-white/10 bg-white/[0.02] p-12">
-                        <Shield className="mb-4 text-white/20" size={48} />
-                        <Text color="muted">
-                            You haven't blocked anyone yet.
-                        </Text>
-                    </Box>
-                ) : (
-                    <Box className="grid gap-3">
-                        {(() => {
-                            const filtered = blocks.filter(
-                                (b: { targetUsername?: string }): boolean =>
-                                    (b.targetUsername || '')
-                                        .toLowerCase()
-                                        .includes(searchQuery.toLowerCase()),
-                            );
-
-                            if (filtered.length === 0 && searchQuery) {
-                                return (
-                                    <Box className="flex flex-col items-center justify-center rounded-xl border border-white/5 bg-white/[0.01] p-10">
-                                        <Text color="muted" size="sm">
-                                            No blocked users matching "
-                                            {searchQuery}"
-                                        </Text>
-                                    </Box>
-                                );
-                            }
-
-                            return filtered.map(
-                                (block: {
-                                    targetUserId: string;
-                                    targetUsername: string;
-                                    profileId: string;
-                                    flags: number;
-                                }) => (
-                                    <Box
-                                        className="flex items-center justify-between rounded-xl border border-[var(--settings-edit-card-border)] bg-[var(--settings-edit-card-bg)] p-3 transition-colors hover:border-[var(--settings-edit-card-border-hover)]"
-                                        key={block.targetUserId}
-                                    >
-                                        <UserItem
-                                            noFetch
-                                            userId={block.targetUserId}
-                                        />
-                                        <Box className="flex items-center gap-3">
-                                            <select
-                                                className="rounded-md border border-[var(--settings-edit-control-border)] bg-[var(--settings-edit-control-bg)] px-2 py-1 text-xs text-foreground outline-none focus:border-primary"
-                                                title="Assigned Block Profile"
-                                                value={block.profileId}
-                                                onChange={(e): void =>
-                                                    upsertBlock({
-                                                        targetUserId:
-                                                            block.targetUserId,
-                                                        profileId:
-                                                            e.target.value,
-                                                    })
-                                                }
-                                            >
-                                                {profiles?.map((p) => (
-                                                    <option
-                                                        key={p.id}
-                                                        value={p.id}
-                                                    >
-                                                        {p.name}
-                                                    </option>
-                                                ))}
-                                            </select>
-
-                                            <IconButton
-                                                className="text-destructive hover:bg-destructive/10"
-                                                icon={UserMinus}
-                                                size="sm"
-                                                title="Unblock"
-                                                variant="ghost"
-                                                onClick={(): void =>
-                                                    removeBlock(
-                                                        block.targetUserId,
-                                                    )
-                                                }
-                                            />
-                                        </Box>
-                                    </Box>
-                                ),
-                            );
-                        })()}
-                    </Box>
-                )}
-            </Box>
-        </Box>
-    );
-
-    const renderProfilesView = (): React.JSX.Element => (
+    return (
         <Box className="flex flex-col gap-6">
             <Box className="flex items-center justify-between">
                 <Text
@@ -312,19 +167,15 @@ export const BlockingSettings = () => {
                     size="xs"
                     weight="semibold"
                 >
-                    Configured Profiles ({profiles?.length || 0})
+                    Configured Profiles ({profiles?.length ?? 0})
                 </Text>
-                <Button
-                    size="sm"
-                    variant="primary"
-                    onClick={handleCreateProfile}
-                >
+                <Button size="sm" variant="primary" onClick={onCreateProfile}>
                     <Plus className="mr-2" size={16} />
                     Create Profile
                 </Button>
             </Box>
 
-            {isProfilesLoading ? (
+            {isLoading ? (
                 <Box className="flex justify-center p-8">
                     <LoadingSpinner />
                 </Box>
@@ -353,12 +204,12 @@ export const BlockingSettings = () => {
                                         <input
                                             aria-label="Rename block profile"
                                             className="rounded border border-primary/50 bg-[var(--settings-edit-control-bg)] px-2 py-1 text-sm outline-none"
-                                            ref={renameInputRef}
+                                            ref={(node): void => node?.focus()}
                                             title="Rename Profile"
                                             value={renameValue}
-                                            onChange={(e): void =>
-                                                setRenameValue(e.target.value)
-                                            }
+                                            onChange={(e): void => {
+                                                setRenameValue(e.target.value);
+                                            }}
                                             onKeyDown={(e): void => {
                                                 if (e.key === 'Enter')
                                                     handleSaveRename(
@@ -372,17 +223,17 @@ export const BlockingSettings = () => {
                                             icon={Check}
                                             size="sm"
                                             variant="primary"
-                                            onClick={(): void =>
-                                                handleSaveRename(profile.id)
-                                            }
+                                            onClick={(): void => {
+                                                handleSaveRename(profile.id);
+                                            }}
                                         />
                                         <IconButton
                                             icon={X}
                                             size="sm"
                                             variant="ghost"
-                                            onClick={(): void =>
-                                                setRenamingProfileId(null)
-                                            }
+                                            onClick={(): void => {
+                                                setRenamingProfileId(null);
+                                            }}
                                         />
                                     </Box>
                                 ) : (
@@ -396,9 +247,9 @@ export const BlockingSettings = () => {
                                             size="sm"
                                             title="Rename Profile"
                                             variant="ghost"
-                                            onClick={(): void =>
-                                                handleStartRename(profile)
-                                            }
+                                            onClick={(): void => {
+                                                handleStartRename(profile);
+                                            }}
                                         />
                                     </Box>
                                 )}
@@ -414,13 +265,13 @@ export const BlockingSettings = () => {
                                         size="sm"
                                         title="Edit Profile Flags"
                                         variant="ghost"
-                                        onClick={(): void =>
+                                        onClick={(): void => {
                                             setEditingProfileId(
                                                 editingProfileId === profile.id
                                                     ? null
                                                     : profile.id,
-                                            )
-                                        }
+                                            );
+                                        }}
                                     />
                                     <IconButton
                                         className="text-destructive hover:bg-destructive/10"
@@ -429,14 +280,14 @@ export const BlockingSettings = () => {
                                         size="sm"
                                         title="Delete Profile"
                                         variant="ghost"
-                                        onClick={(): void =>
-                                            deleteProfile(profile.id)
-                                        }
+                                        onClick={(): void => {
+                                            onDeleteProfile(profile.id);
+                                        }}
                                     />
                                 </Box>
                             </Box>
 
-                            {editingProfileId === profile.id && (
+                            {editingProfileId === profile.id ? (
                                 <Box className="border-t border-[var(--settings-edit-card-border)] bg-[var(--settings-edit-bg)] p-4">
                                     <Box className="flex flex-col">
                                         {FLAG_GROUPS.map((group, idx) => (
@@ -478,30 +329,28 @@ export const BlockingSettings = () => {
                                                                     )}
                                                                     key={flag}
                                                                     type="button"
-                                                                    onClick={(): void =>
+                                                                    onClick={(): void => {
                                                                         handleToggleFlag(
                                                                             profile.id,
                                                                             profile.flags,
                                                                             flag,
-                                                                        )
-                                                                    }
+                                                                        );
+                                                                    }}
                                                                 >
-                                                                    {Icon && (
-                                                                        <Box
-                                                                            className={cn(
-                                                                                'rounded-md p-1.5 transition-colors',
-                                                                                isActive
-                                                                                    ? 'bg-primary/20'
-                                                                                    : 'bg-white/5 group-hover:bg-white/10',
-                                                                            )}
-                                                                        >
-                                                                            <Icon
-                                                                                size={
-                                                                                    14
-                                                                                }
-                                                                            />
-                                                                        </Box>
-                                                                    )}
+                                                                    <Box
+                                                                        className={cn(
+                                                                            'rounded-md p-1.5 transition-colors',
+                                                                            isActive
+                                                                                ? 'bg-primary/20'
+                                                                                : 'bg-white/5 group-hover:bg-white/10',
+                                                                        )}
+                                                                    >
+                                                                        <Icon
+                                                                            size={
+                                                                                14
+                                                                            }
+                                                                        />
+                                                                    </Box>
                                                                     <Text
                                                                         className="flex-1 leading-tight font-medium"
                                                                         size="sm"
@@ -516,9 +365,9 @@ export const BlockingSettings = () => {
                                                                                 : 'border-white/20',
                                                                         )}
                                                                     >
-                                                                        {isActive && (
+                                                                        {isActive ? (
                                                                             <Box className="h-1.5 w-1.5 rounded-full bg-white" />
-                                                                        )}
+                                                                        ) : null}
                                                                     </Box>
                                                                 </button>
                                                             );
@@ -540,11 +389,172 @@ export const BlockingSettings = () => {
                                         </Text>
                                     </Box>
                                 </Box>
-                            )}
+                            ) : null}
                         </Box>
                     ))}
                 </Box>
             )}
+        </Box>
+    );
+};
+
+export const BlockingSettings = () => {
+    const [view, setView] = useState<'users' | 'profiles'>('users');
+
+    const { data: blocks, isLoading: isBlocksLoading } = useBlocks();
+    const { data: profiles, isLoading: isProfilesLoading } = useBlockProfiles();
+
+    const { mutate: upsertBlock } = useUpsertBlock();
+    const { mutate: removeBlock } = useRemoveBlock();
+    const { mutate: createProfile } = useCreateBlockProfile();
+    const { mutate: updateProfile } = useUpdateBlockProfile();
+    const { mutate: deleteProfile } = useDeleteBlockProfile();
+
+    const [searchQuery, setSearchQuery] = useState('');
+
+    const handleCreateProfile = (): void => {
+        createProfile({
+            name: `New Profile ${String((profiles?.length ?? 0) + 1)}`,
+            flags:
+                BlockFlags.BLOCK_REACTIONS |
+                BlockFlags.HIDE_MESSAGES |
+                BlockFlags.HIDE_MY_PRESENCE |
+                BlockFlags.HIDE_THEIR_PRESENCE,
+        });
+    };
+
+    const renderUsersView = (): React.JSX.Element => (
+        <Box className="flex flex-col gap-6">
+            <Box className="flex flex-col gap-4">
+                <Box className="flex items-center justify-between">
+                    <Text
+                        className="tracking-wider uppercase"
+                        color="muted"
+                        size="xs"
+                        weight="semibold"
+                    >
+                        Blocked Users ({blocks?.length ?? 0})
+                    </Text>
+
+                    <Box className="relative w-64">
+                        <Search
+                            className="absolute top-1/2 left-3 -translate-y-1/2 text-[var(--settings-search-icon)]"
+                            size={14}
+                        />
+                        <input
+                            aria-label="Search blocked users"
+                            className="w-full rounded-md border border-[var(--settings-search-border)] bg-[var(--settings-search-bg)] py-1.5 pr-3 pl-9 text-xs text-foreground transition-all outline-none placeholder:text-[var(--settings-search-placeholder)] focus:border-primary/50 focus:bg-[var(--settings-search-bg-focus)]"
+                            placeholder="Search blocked users..."
+                            value={searchQuery}
+                            onChange={(e): void => {
+                                setSearchQuery(e.target.value);
+                            }}
+                        />
+                        {searchQuery === '' ? null : (
+                            <button
+                                className="absolute top-1/2 right-2 -translate-y-1/2 text-[var(--settings-search-icon)] hover:text-foreground"
+                                type="button"
+                                onClick={(): void => {
+                                    setSearchQuery('');
+                                }}
+                            >
+                                <X size={12} />
+                            </button>
+                        )}
+                    </Box>
+                </Box>
+
+                {isBlocksLoading ? (
+                    <Box className="flex justify-center p-8">
+                        <LoadingSpinner />
+                    </Box>
+                ) : !Array.isArray(blocks) || blocks.length === 0 ? (
+                    <Box className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-white/10 bg-white/[0.02] p-12">
+                        <Shield className="mb-4 text-white/20" size={48} />
+                        <Text color="muted">
+                            You haven't blocked anyone yet.
+                        </Text>
+                    </Box>
+                ) : (
+                    <Box className="grid gap-3">
+                        {(() => {
+                            const filtered = blocks.filter(
+                                (b: { targetUsername?: string }): boolean =>
+                                    (b.targetUsername ?? '')
+                                        .toLowerCase()
+                                        .includes(searchQuery.toLowerCase()),
+                            );
+
+                            if (filtered.length === 0 && searchQuery !== '') {
+                                return (
+                                    <Box className="flex flex-col items-center justify-center rounded-xl border border-white/5 bg-white/[0.01] p-10">
+                                        <Text color="muted" size="sm">
+                                            No blocked users matching "
+                                            {searchQuery}"
+                                        </Text>
+                                    </Box>
+                                );
+                            }
+
+                            return filtered.map(
+                                (block: {
+                                    targetUserId: string;
+                                    targetUsername: string;
+                                    profileId: string;
+                                    flags: number;
+                                }) => (
+                                    <Box
+                                        className="flex items-center justify-between rounded-xl border border-[var(--settings-edit-card-border)] bg-[var(--settings-edit-card-bg)] p-3 transition-colors hover:border-[var(--settings-edit-card-border-hover)]"
+                                        key={block.targetUserId}
+                                    >
+                                        <UserItem
+                                            noFetch
+                                            userId={block.targetUserId}
+                                        />
+                                        <Box className="flex items-center gap-3">
+                                            <select
+                                                className="rounded-md border border-[var(--settings-edit-control-border)] bg-[var(--settings-edit-control-bg)] px-2 py-1 text-xs text-foreground outline-none focus:border-primary"
+                                                title="Assigned Block Profile"
+                                                value={block.profileId}
+                                                onChange={(e): void => {
+                                                    upsertBlock({
+                                                        targetUserId:
+                                                            block.targetUserId,
+                                                        profileId:
+                                                            e.target.value,
+                                                    });
+                                                }}
+                                            >
+                                                {profiles?.map((p) => (
+                                                    <option
+                                                        key={p.id}
+                                                        value={p.id}
+                                                    >
+                                                        {p.name}
+                                                    </option>
+                                                ))}
+                                            </select>
+
+                                            <IconButton
+                                                className="text-destructive hover:bg-destructive/10"
+                                                icon={UserMinus}
+                                                size="sm"
+                                                title="Unblock"
+                                                variant="ghost"
+                                                onClick={(): void => {
+                                                    removeBlock(
+                                                        block.targetUserId,
+                                                    );
+                                                }}
+                                            />
+                                        </Box>
+                                    </Box>
+                                ),
+                            );
+                        })()}
+                    </Box>
+                )}
+            </Box>
         </Box>
     );
 
@@ -564,20 +574,34 @@ export const BlockingSettings = () => {
                 <Button
                     size="sm"
                     variant={view === 'users' ? 'primary' : 'ghost'}
-                    onClick={(): void => setView('users')}
+                    onClick={(): void => {
+                        setView('users');
+                    }}
                 >
                     Blocked Users
                 </Button>
                 <Button
                     size="sm"
                     variant={view === 'profiles' ? 'primary' : 'ghost'}
-                    onClick={(): void => setView('profiles')}
+                    onClick={(): void => {
+                        setView('profiles');
+                    }}
                 >
                     Block Profiles
                 </Button>
             </Box>
 
-            {view === 'users' ? renderUsersView() : renderProfilesView()}
+            {view === 'users' ? (
+                renderUsersView()
+            ) : (
+                <BlockProfilesView
+                    isLoading={isProfilesLoading}
+                    profiles={profiles}
+                    onCreateProfile={handleCreateProfile}
+                    onDeleteProfile={deleteProfile}
+                    onUpdateProfile={updateProfile}
+                />
+            )}
         </Box>
     );
 };

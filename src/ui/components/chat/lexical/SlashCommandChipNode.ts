@@ -3,19 +3,11 @@ import React from 'react';
 import {
     DecoratorNode,
     type LexicalEditor,
-    type LexicalNode,
     type NodeKey,
     type SerializedLexicalNode,
-    createCommand,
 } from 'lexical';
 
 import { SlashCommandChipComponent } from './SlashCommandChipComponent';
-
-/**
- * Dispatch this command to cancel the active slash command and clear all chips.
- * The handler is registered in LexicalSlashCommandPlugin to avoid circular deps.
- */
-export const CANCEL_SLASH_COMMAND = createCommand<void>('CANCEL_SLASH_COMMAND');
 
 export type SerializedSlashCommandChipNode = SerializedLexicalNode & {
     commandName: string;
@@ -100,10 +92,4 @@ export function $createSlashCommandChipNode(
     commandId?: string,
 ): SlashCommandChipNode {
     return new SlashCommandChipNode(commandName, commandId);
-}
-
-export function $isSlashCommandChipNode(
-    node: LexicalNode | null | undefined,
-): node is SlashCommandChipNode {
-    return node instanceof SlashCommandChipNode;
 }

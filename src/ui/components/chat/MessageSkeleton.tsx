@@ -16,7 +16,7 @@ export const MessageSkeleton = ({ isCompact }: MessageSkeletonProps) => {
                 isCompact ? 'py-0.5' : 'py-2',
             )}
         >
-            {!isCompact && (
+            {isCompact ? null : (
                 <Skeleton
                     className="shrink-0 rounded-full"
                     height={40}
@@ -24,9 +24,9 @@ export const MessageSkeleton = ({ isCompact }: MessageSkeletonProps) => {
                     width={40}
                 />
             )}
-            {isCompact && <div className="w-10 shrink-0" />}
+            {isCompact ? <div className="w-10 shrink-0" /> : null}
             <div className="flex flex-1 flex-col gap-2">
-                {!isCompact && (
+                {isCompact ? null : (
                     <div className="flex items-center gap-2">
                         <Skeleton height={14} variant="text" width="100px" />
                         <Skeleton height={10} variant="text" width="50px" />

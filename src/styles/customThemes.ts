@@ -34,7 +34,7 @@ const preprocessCustomThemeCss = (
 ): string =>
     css
         .replaceAll(CUSTOM_THEME_SCOPE_PLACEHOLDER, scopeAttribute)
-        .replace(CUSTOM_THEME_SCOPE_PATTERN, scopeAttribute);
+        .replaceAll(CUSTOM_THEME_SCOPE_PATTERN, scopeAttribute);
 
 const restoreCustomThemeCss = (css: string, scopeAttribute: string): string =>
     css.replaceAll(scopeAttribute, CUSTOM_THEME_SCOPE_PLACEHOLDER);
@@ -54,30 +54,30 @@ const extractThemeMetadata = (
         {};
 
     // Match the first comment block
-    const commentMatch = css.match(/\/\*[\s\S]*?\*\//);
+    const commentMatch = /\/\*[\s\S]*?\*\//.exec(css);
     if (!commentMatch) return metadata;
 
     const comment = commentMatch[0];
 
     // Extract @name
-    const nameMatch = comment.match(/@name\s+(.+)/);
+    const nameMatch = /@name\s+(.+)/.exec(comment);
     if (nameMatch) {
-        metadata.name = nameMatch[1].trim();
+        metadata.name = nameMatch[1]!.trim();
     }
 
     // Extract @author
-    const authorMatch = comment.match(/@author\s+(.+)/);
+    const authorMatch = /@author\s+(.+)/.exec(comment);
     if (authorMatch) {
-        metadata.author = authorMatch[1].trim();
+        metadata.author = authorMatch[1]!.trim();
     }
 
     // Extract @description (can be multiline)
-    const descMatch = comment.match(/@description\s+([\s\S]+?)(?=@\w+|$|\*\/)/);
+    const descMatch = /@description\s+([\s\S]+?)(?=@\w+|$|\*\/)/.exec(comment);
     if (descMatch) {
-        metadata.description = descMatch[1]
+        metadata.description = descMatch[1]!
             .trim()
-            .replace(/\s+/g, ' ')
-            .replace(/\*\//g, '');
+            .replaceAll(/\s+/g, ' ')
+            .replaceAll('*/', '');
     }
 
     return metadata;
@@ -134,7 +134,7 @@ export const writeCustomThemes = (themes: CustomThemeFile[]): void => {
     localStorage.setItem(CUSTOM_THEMES_STORAGE_KEY, JSON.stringify(themes));
 };
 
-export const createCustomThemeId = (): string =>
+const createCustomThemeId = (): string =>
     `theme-${Date.now().toString(36)}-${Math.random()
         .toString(36)
         .slice(2, 8)}`;

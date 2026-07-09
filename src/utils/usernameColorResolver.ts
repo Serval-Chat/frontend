@@ -87,8 +87,17 @@ export const resolveUsernameColor = ({
         if (role.colors && role.colors.length > 0) {
             const uniqueColors = new Set(role.colors);
             if (uniqueColors.size === 1) {
-                const color = role.colors[0];
-                if (!isDefaultRoleColor(color)) {
+                const color = role.colors[0] ?? DEFAULT_ROLE_COLOR;
+                if (isDefaultRoleColor(color)) {
+                    fallbackColor = color;
+                    pushStep(
+                        steps,
+                        'role.colors',
+                        `fallback ${color}`,
+                        'Role colors only contained the default role color, so user custom colors may still override it.',
+                        { colors: role.colors },
+                    );
+                } else {
                     solidColor = color;
                     colorSource = 'role';
                     pushStep(
@@ -96,15 +105,6 @@ export const resolveUsernameColor = ({
                         'role.colors',
                         `solid ${color}`,
                         'Role colors contained one non-default unique color.',
-                        { colors: role.colors },
-                    );
-                } else {
-                    fallbackColor = color;
-                    pushStep(
-                        steps,
-                        'role.colors',
-                        `fallback ${color}`,
-                        'Role colors only contained the default role color, so user custom colors may still override it.',
                         { colors: role.colors },
                     );
                 }
@@ -135,7 +135,19 @@ export const resolveUsernameColor = ({
             }
         } else if (role.startColor && role.endColor) {
             if (role.startColor === role.endColor) {
-                if (!isDefaultRoleColor(role.startColor)) {
+                if (isDefaultRoleColor(role.startColor)) {
+                    fallbackColor = role.startColor;
+                    pushStep(
+                        steps,
+                        'role.startColor/endColor',
+                        `fallback ${role.startColor}`,
+                        'Role start and end colors matched the default role color, so user custom colors may still override it.',
+                        {
+                            startColor: role.startColor,
+                            endColor: role.endColor,
+                        },
+                    );
+                } else {
                     solidColor = role.startColor;
                     colorSource = 'role';
                     pushStep(
@@ -143,18 +155,6 @@ export const resolveUsernameColor = ({
                         'role.startColor/endColor',
                         `solid ${role.startColor}`,
                         'Role start and end colors matched and were not the default color.',
-                        {
-                            startColor: role.startColor,
-                            endColor: role.endColor,
-                        },
-                    );
-                } else {
-                    fallbackColor = role.startColor;
-                    pushStep(
-                        steps,
-                        'role.startColor/endColor',
-                        `fallback ${role.startColor}`,
-                        'Role start and end colors matched the default role color, so user custom colors may still override it.',
                         {
                             startColor: role.startColor,
                             endColor: role.endColor,
@@ -177,7 +177,16 @@ export const resolveUsernameColor = ({
                 );
             }
         } else if (role.color) {
-            if (!isDefaultRoleColor(role.color)) {
+            if (isDefaultRoleColor(role.color)) {
+                fallbackColor = role.color;
+                pushStep(
+                    steps,
+                    'role.color',
+                    `fallback ${role.color}`,
+                    'Role color was the default role color, so user custom colors may still override it.',
+                    { color: role.color },
+                );
+            } else {
                 solidColor = role.color;
                 colorSource = 'role';
                 pushStep(
@@ -185,15 +194,6 @@ export const resolveUsernameColor = ({
                     'role.color',
                     `solid ${role.color}`,
                     'Role color was set and was not the default color.',
-                    { color: role.color },
-                );
-            } else {
-                fallbackColor = role.color;
-                pushStep(
-                    steps,
-                    'role.color',
-                    `fallback ${role.color}`,
-                    'Role color was the default role color, so user custom colors may still override it.',
                     { color: role.color },
                 );
             }
@@ -224,7 +224,7 @@ export const resolveUsernameColor = ({
         const { colors, angle, repeating } = user.usernameGradient;
         if (colors.length > 0) {
             if (colors.length === 1) {
-                solidColor = colors[0];
+                solidColor = colors[0] ?? '';
                 colorSource = 'user';
                 pushStep(
                     steps,

@@ -20,7 +20,7 @@ export const ResetPassword = () => {
     const { hash } = location;
     const token = useMemo((): string => {
         if (!hash) return '';
-        const params = new URLSearchParams(hash.substring(1));
+        const params = new URLSearchParams(hash.slice(1));
         return params.get('token') ?? '';
     }, [hash]);
     const [newPassword, setNewPassword] = useState('');
@@ -123,9 +123,9 @@ export const ResetPassword = () => {
                             placeholder="New Password"
                             type="password"
                             value={newPassword}
-                            onChange={(e): void =>
-                                setNewPassword(e.target.value)
-                            }
+                            onChange={(e): void => {
+                                setNewPassword(e.target.value);
+                            }}
                         />
                     </InputWrapper>
                     <InputWrapper>
@@ -138,9 +138,9 @@ export const ResetPassword = () => {
                             placeholder="Confirm New Password"
                             type="password"
                             value={confirmPassword}
-                            onChange={(e): void =>
-                                setConfirmPassword(e.target.value)
-                            }
+                            onChange={(e): void => {
+                                setConfirmPassword(e.target.value);
+                            }}
                         />
                     </InputWrapper>
                     <Button
@@ -153,12 +153,12 @@ export const ResetPassword = () => {
                     </Button>
                 </form>
 
-                {status && (
+                {status ? (
                     <StatusMessage
                         message={status.message}
                         type={status.type}
                     />
-                )}
+                ) : null}
             </FormContent>
         </Box>
     );

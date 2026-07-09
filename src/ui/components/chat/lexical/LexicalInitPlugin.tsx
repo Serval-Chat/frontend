@@ -33,8 +33,8 @@ export const LexicalInitPlugin = ({
 
             const parts = initialText.split(tokenRegex);
 
-            parts.forEach((part): void => {
-                if (!part) return;
+            for (const part of parts) {
+                if (!part) continue;
 
                 if (part === '<everyone>') {
                     p.append($createChipNode('everyone', { id: 'everyone' }));
@@ -55,16 +55,16 @@ export const LexicalInitPlugin = ({
                     p.append($createChipNode('emoji', { id }));
                 } else {
                     const lines = part.split('\n');
-                    lines.forEach((line, i): void => {
+                    for (const [i, line] of lines.entries()) {
                         if (line) {
                             p.append($createTextNode(line));
                         }
                         if (i < lines.length - 1) {
                             p.append($createLineBreakNode());
                         }
-                    });
+                    }
                 }
-            });
+            }
 
             root.append(p);
         });

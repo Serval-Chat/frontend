@@ -99,13 +99,16 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
     const remoteFamily = user?.settings?.customFontFamily;
 
     const customFontUrl =
-        remoteUrl !== undefined ? (remoteUrl ?? '') : localFontUrl;
+        remoteUrl === undefined ? localFontUrl : (remoteUrl ?? '');
     const customFontFamily =
-        remoteFamily !== undefined ? (remoteFamily ?? '') : localFontFamily;
+        remoteFamily === undefined ? localFontFamily : (remoteFamily ?? '');
 
-    const setCustomFontUrl = (url: string): void => setLocalFontUrl(url);
-    const setCustomFontFamily = (family: string): void =>
+    const setCustomFontUrl = (url: string): void => {
+        setLocalFontUrl(url);
+    };
+    const setCustomFontFamily = (family: string): void => {
         setLocalFontFamily(family);
+    };
 
     const setTheme = useCallback(
         (nextTheme: Theme): void => {
@@ -142,10 +145,10 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
         const selectedCustomTheme = customThemes.find(
             (customTheme): boolean => customTheme.id === customThemeId,
         );
-        customThemes.forEach((customTheme): void => {
+        for (const customTheme of customThemes) {
             root.removeAttribute(customTheme.scopeAttribute);
-        });
-        root.removeAttribute('data-custom-theme');
+        }
+        delete root.dataset.customTheme;
 
         let style = document.getElementById(
             CUSTOM_THEME_STYLE_ID,
@@ -155,7 +158,7 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
             if (!style) {
                 style = document.createElement('style');
                 style.id = CUSTOM_THEME_STYLE_ID;
-                document.head.appendChild(style);
+                document.head.append(style);
             }
             style.textContent = selectedCustomTheme.css;
             root.setAttribute(selectedCustomTheme.scopeAttribute, '');
@@ -216,10 +219,10 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
                 link.id = linkId;
                 link.rel = 'stylesheet';
                 link.media = 'print';
-                link.onload = (): void => {
+                link.addEventListener('load', (): void => {
                     if (link) link.media = 'all';
-                };
-                document.head.appendChild(link);
+                });
+                document.head.append(link);
             }
             if (link.getAttribute('href') !== customFontUrl) {
                 link.href = customFontUrl;

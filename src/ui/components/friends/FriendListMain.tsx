@@ -1,7 +1,6 @@
 import React from 'react';
 
-import { MessageSquare, Search } from 'lucide-react';
-import { CheckCircle } from 'lucide-react';
+import { CheckCircle, MessageSquare, Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 import { useFriendProfiles } from '@/api/friends/friends.queries';
@@ -68,9 +67,9 @@ const FriendProfileRow = React.memo(
                         <StyledUserName className="truncate" user={friend}>
                             {displayName}
                         </StyledUserName>
-                        {(customText || customEmoji) && (
+                        {customText || customEmoji ? (
                             <Box className="flex min-w-0 items-center gap-1">
-                                {customEmoji && (
+                                {customEmoji ? (
                                     <span className="flex shrink-0 items-center">
                                         {/^[0-9a-fA-F]{24}$/.test(
                                             customEmoji,
@@ -86,14 +85,14 @@ const FriendProfileRow = React.memo(
                                             />
                                         )}
                                     </span>
-                                )}
-                                {customText && (
+                                ) : null}
+                                {customText ? (
                                     <Text className="text-foreground-muted truncate text-xs">
                                         {customText}
                                     </Text>
-                                )}
+                                ) : null}
                             </Box>
-                        )}
+                        ) : null}
                     </Box>
                 </button>
                 <button
@@ -142,7 +141,7 @@ export const FriendListMain = React.memo(() => {
 
     const groupedFriends = React.useMemo(() => {
         const groups: Record<string, typeof friends> = {};
-        sortedFriends.forEach((friend): void => {
+        for (const friend of sortedFriends) {
             const name = (friend.displayName || friend.username).toUpperCase();
             let firstChar = name.charAt(0);
             if (!/[A-Z]/.test(firstChar)) {
@@ -152,7 +151,7 @@ export const FriendListMain = React.memo(() => {
                 groups[firstChar] = [];
             }
             groups[firstChar]?.push(friend);
-        });
+        }
         return groups;
     }, [sortedFriends]);
 
@@ -221,15 +220,17 @@ export const FriendListMain = React.memo(() => {
                         placeholder="Search username"
                         type="text"
                         value={search}
-                        onChange={(e): void => setSearch(e.target.value)}
+                        onChange={(e): void => {
+                            setSearch(e.target.value);
+                        }}
                     />
                 </Box>
             </Box>
-            {groupKeys.length === 0 && search && (
+            {groupKeys.length === 0 && search ? (
                 <Box className="flex h-32 flex-col items-center justify-center text-center">
                     <MutedText>No friends found for "{search}"</MutedText>
                 </Box>
-            )}
+            ) : null}
             {groupKeys.map((key) => (
                 <Box className="flex flex-col gap-1" key={key}>
                     <Box className="flex items-center gap-2 px-3 pt-2 pb-1">

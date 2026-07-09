@@ -18,7 +18,9 @@ const CopyTokenButton = ({ value }: { value: string }): ReactNode => {
     const handleCopy = (): void => {
         void navigator.clipboard.writeText(value);
         setCopied(true);
-        setTimeout((): void => setCopied(false), 2000);
+        setTimeout((): void => {
+            setCopied(false);
+        }, 2000);
     };
     return (
         <Button
@@ -90,7 +92,9 @@ const CreateBotModal = ({ onClose }: { onClose: () => void }): ReactNode => {
                         id="bot-name"
                         placeholder="My Awesome Bot"
                         value={name}
-                        onChange={(e): void => setName(e.target.value)}
+                        onChange={(e): void => {
+                            setName(e.target.value);
+                        }}
                         onKeyDown={(e): void => {
                             if (e.key === 'Enter') handleSubmit();
                         }}
@@ -160,14 +164,16 @@ export const DevBots = ({ onViewBot }: DevBotsProps): ReactNode => {
         <div className="flex flex-col gap-4">
             <div className="flex items-center justify-between">
                 <p className="text-sm text-muted-foreground">
-                    {bots?.length ?? 0} bot{bots?.length !== 1 ? 's' : ''}{' '}
+                    {bots?.length ?? 0} bot{bots?.length === 1 ? '' : 's'}{' '}
                     registered
                 </p>
                 <Button
                     icon={Plus}
                     size="sm"
                     variant="primary"
-                    onClick={(): void => setShowCreate(true)}
+                    onClick={(): void => {
+                        setShowCreate(true);
+                    }}
                 >
                     New Bot
                 </Button>
@@ -188,7 +194,9 @@ export const DevBots = ({ onViewBot }: DevBotsProps): ReactNode => {
                         <BotCard
                             bot={bot}
                             key={bot.clientId}
-                            onView={(): void => onViewBot(bot.clientId)}
+                            onView={(): void => {
+                                onViewBot(bot.clientId);
+                            }}
                         />
                     ))}
                 </div>
@@ -201,9 +209,13 @@ export const DevBots = ({ onViewBot }: DevBotsProps): ReactNode => {
                 </div>
             )}
 
-            {showCreate && (
-                <CreateBotModal onClose={(): void => setShowCreate(false)} />
-            )}
+            {showCreate ? (
+                <CreateBotModal
+                    onClose={(): void => {
+                        setShowCreate(false);
+                    }}
+                />
+            ) : null}
         </div>
     );
 };

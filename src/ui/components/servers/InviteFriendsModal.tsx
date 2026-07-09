@@ -52,12 +52,12 @@ export const InviteFriendsModal = ({
             if (!inviteRef.current) {
                 inviteRef.current = createInvite({});
             }
-            const activeInvite = await inviteRef.current.catch((err) => {
+            const activeInvite = await inviteRef.current.catch((error) => {
                 inviteRef.current = null;
-                throw err;
+                throw error;
             });
 
-            const url = `${window.location.origin}/invite/${
+            const url = `${globalThis.location.origin}/invite/${
                 activeInvite.customPath || activeInvite.code
             }`;
             wsMessages.sendMessageDm(friendId, url);
@@ -77,14 +77,16 @@ export const InviteFriendsModal = ({
             onClose={handleClose}
         >
             <div className="space-y-3 py-2">
-                {friends.length > 0 && (
+                {friends.length > 0 ? (
                     <Input
                         icon={<Search className="h-4 w-4" />}
                         placeholder="Search friends..."
                         value={searchQuery}
-                        onChange={(e): void => setSearchQuery(e.target.value)}
+                        onChange={(e): void => {
+                            setSearchQuery(e.target.value);
+                        }}
                     />
-                )}
+                ) : null}
 
                 {isLoading ? (
                     <div className="flex justify-center py-8">

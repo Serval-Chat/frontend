@@ -15,12 +15,12 @@ export const useAuth = (): { isAuthenticated: boolean } => {
             setIsAuthenticated(hasAuthToken());
         };
 
-        window.addEventListener('auth-change', handleAuthChange);
-        window.addEventListener('storage', handleAuthChange);
+        globalThis.addEventListener('auth-change', handleAuthChange);
+        globalThis.addEventListener('storage', handleAuthChange);
 
         return (): void => {
-            window.removeEventListener('auth-change', handleAuthChange);
-            window.removeEventListener('storage', handleAuthChange);
+            globalThis.removeEventListener('auth-change', handleAuthChange);
+            globalThis.removeEventListener('storage', handleAuthChange);
         };
     }, []);
 

@@ -34,7 +34,7 @@ const FriendRequestNavItem = (): React.ReactNode => {
     return (
         <button
             className={cn(
-                'group mb-4 flex w-full items-center gap-3 rounded-md px-2 py-1.5 transition-all duration-200',
+                'group mb-4 flex w-full items-center gap-3 rounded-md px-2 py-1.5 transition-colors duration-200',
                 isActive
                     ? 'bg-bg-tertiary text-foreground'
                     : 'text-foreground-muted hover:bg-bg-subtle hover:text-foreground',
@@ -48,11 +48,11 @@ const FriendRequestNavItem = (): React.ReactNode => {
             <Text className="flex-1 text-left font-medium" size="sm">
                 Friends
             </Text>
-            {requests && requests.length > 0 && (
+            {requests && requests.length > 0 ? (
                 <Box className="rounded-full bg-danger px-2 py-0.5 text-[10px] font-bold text-white">
                     {requests.length}
                 </Box>
-            )}
+            ) : null}
         </button>
     );
 };

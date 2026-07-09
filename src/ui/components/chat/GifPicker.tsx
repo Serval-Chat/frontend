@@ -34,6 +34,60 @@ const MIN_HEIGHT = 400;
 const MAX_WIDTH = 600;
 const MAX_HEIGHT = 800;
 
+const GifPickerItem = ({
+    gif,
+    tab,
+    isFavorited,
+    onSelect,
+    onToggleFavorite,
+}: {
+    gif: GifItem;
+    tab: 'trending' | 'stickers' | 'favorites';
+    isFavorited: boolean;
+    onSelect: (url: string) => void;
+    onToggleFavorite: (e: React.MouseEvent, gif: GifItem) => void;
+}) => {
+    const klipyId = String(gif.klipyId || gif.id);
+    const slug = gif.slug;
+    const contentType = gif.contentType || 'gif';
+    const url = slug
+        ? `https://klipy.com/${contentType === 'sticker' ? 'stickers' : 'gifs'}/${slug}`
+        : gif.url || `https://klipy.com/g/${klipyId}`;
+    const previewUrl =
+        gif.previewUrl || gif.file?.sm?.gif?.url || gif.file?.xs?.gif?.url;
+    const width = gif.width || gif.file?.sm?.gif?.width || 200;
+    const height = gif.height || gif.file?.sm?.gif?.height || 150;
+
+    return (
+        <Box
+            className="group relative inline-block w-full cursor-pointer break-inside-avoid overflow-hidden rounded-md bg-bg-secondary hover:ring-2 hover:ring-primary"
+            style={{ aspectRatio: `${width}/${height}` }}
+            onClick={(): void => {
+                onSelect(url);
+            }}
+        >
+            <img
+                alt="Klipy Content"
+                className={cn(
+                    'h-full w-full',
+                    tab === 'stickers' ? 'object-contain p-1' : 'object-cover',
+                )}
+                loading="lazy"
+                src={previewUrl}
+            />
+            <Box className="absolute inset-0 bg-black/20 opacity-0 transition-opacity group-hover:opacity-100" />
+            <div className="absolute top-1 right-1 opacity-0 transition-opacity group-hover:opacity-100">
+                <GifStarButton
+                    isFavorited={isFavorited}
+                    onClick={(e): undefined => {
+                        onToggleFavorite(e, gif);
+                    }}
+                />
+            </div>
+        </Box>
+    );
+};
+
 export const GifPicker = ({ onSelect, onClose }: GifPickerProps) => {
     const [search, setSearch] = useState('');
     const [tab, setTab] = useState<'trending' | 'stickers' | 'favorites'>(
@@ -50,8 +104,8 @@ export const GifPicker = ({ onSelect, onClose }: GifPickerProps) => {
         if (saved) {
             try {
                 return JSON.parse(saved);
-            } catch (e) {
-                console.error('Failed to parse saved GifPicker size:', e);
+            } catch (error) {
+                console.error('Failed to parse saved GifPicker size:', error);
             }
         }
         return { width: 350, height: 450 };
@@ -101,12 +155,12 @@ export const GifPicker = ({ onSelect, onClose }: GifPickerProps) => {
             }
         };
 
-        window.addEventListener('mousemove', handleMouseMove);
-        window.addEventListener('mouseup', handleMouseUp);
+        globalThis.addEventListener('mousemove', handleMouseMove);
+        globalThis.addEventListener('mouseup', handleMouseUp);
 
         return (): void => {
-            window.removeEventListener('mousemove', handleMouseMove);
-            window.removeEventListener('mouseup', handleMouseUp);
+            globalThis.removeEventListener('mousemove', handleMouseMove);
+            globalThis.removeEventListener('mouseup', handleMouseUp);
         };
     }, [size]);
 
@@ -186,8 +240,8 @@ export const GifPicker = ({ onSelect, onClose }: GifPickerProps) => {
             void queryClient.invalidateQueries({
                 queryKey: ['gif-picker'],
             });
-        } catch (err) {
-            console.error('Failed to toggle favorite:', err);
+        } catch (error) {
+            console.error('Failed to toggle favorite:', error);
         }
     };
 
@@ -218,7 +272,9 @@ export const GifPicker = ({ onSelect, onClose }: GifPickerProps) => {
                         className="gap-1.5 px-3 text-xs"
                         size="sm"
                         variant={tab === 'trending' ? 'primary' : 'ghost'}
-                        onClick={(): void => setTab('trending')}
+                        onClick={(): void => {
+                            setTab('trending');
+                        }}
                     >
                         <TrendingUp className="h-3.5 w-3.5 shrink-0" />
                         Trending
@@ -227,7 +283,9 @@ export const GifPicker = ({ onSelect, onClose }: GifPickerProps) => {
                         className="gap-1.5 px-3 text-xs"
                         size="sm"
                         variant={tab === 'favorites' ? 'primary' : 'ghost'}
-                        onClick={(): void => setTab('favorites')}
+                        onClick={(): void => {
+                            setTab('favorites');
+                        }}
                     >
                         <Star className="h-3.5 w-3.5 shrink-0" />
                         Favorites
@@ -236,7 +294,9 @@ export const GifPicker = ({ onSelect, onClose }: GifPickerProps) => {
                         className="gap-1.5 px-3 text-xs"
                         size="sm"
                         variant={tab === 'stickers' ? 'primary' : 'ghost'}
-                        onClick={(): void => setTab('stickers')}
+                        onClick={(): void => {
+                            setTab('stickers');
+                        }}
                     >
                         <Sticker className="h-3.5 w-3.5 shrink-0" />
                         Stickers
@@ -276,59 +336,20 @@ export const GifPicker = ({ onSelect, onClose }: GifPickerProps) => {
                                       : 2,
                         }}
                     >
-                        {gifs.map((gif) => {
-                            const klipyId = String(gif.klipyId || gif.id);
-                            const slug = gif.slug;
-                            const contentType = gif.contentType || 'gif';
-                            const url = slug
-                                ? `https://klipy.com/${contentType === 'sticker' ? 'stickers' : 'gifs'}/${slug}`
-                                : gif.url || `https://klipy.com/g/${klipyId}`;
-                            const previewUrl =
-                                gif.previewUrl ||
-                                gif.file?.sm?.gif?.url ||
-                                gif.file?.xs?.gif?.url;
-                            const width =
-                                gif.width || gif.file?.sm?.gif?.width || 200;
-                            const height =
-                                gif.height || gif.file?.sm?.gif?.height || 150;
-
-                            return (
-                                <Box
-                                    className="group relative inline-block w-full cursor-pointer break-inside-avoid overflow-hidden rounded-md bg-bg-secondary hover:ring-2 hover:ring-primary"
-                                    key={klipyId}
-                                    style={{
-                                        aspectRatio: `${width}/${height}`,
-                                    }}
-                                    onClick={(): void => onSelect(url)}
-                                >
-                                    <img
-                                        alt="Klipy Content"
-                                        className={cn(
-                                            'h-full w-full',
-                                            tab === 'stickers'
-                                                ? 'object-contain p-1'
-                                                : 'object-cover',
-                                        )}
-                                        loading="lazy"
-                                        src={previewUrl}
-                                    />
-                                    <Box className="absolute inset-0 bg-black/20 opacity-0 transition-opacity group-hover:opacity-100" />
-                                    <div className="absolute top-1 right-1 opacity-0 transition-opacity group-hover:opacity-100">
-                                        <GifStarButton
-                                            isFavorited={favoritedIds.has(
-                                                klipyId!,
-                                            )}
-                                            onClick={(e): undefined =>
-                                                void handleToggleFavorite(
-                                                    e,
-                                                    gif,
-                                                )
-                                            }
-                                        />
-                                    </div>
-                                </Box>
-                            );
-                        })}
+                        {gifs.map((gif) => (
+                            <GifPickerItem
+                                gif={gif}
+                                isFavorited={favoritedIds.has(
+                                    String(gif.klipyId || gif.id),
+                                )}
+                                key={String(gif.klipyId || gif.id)}
+                                tab={tab}
+                                onSelect={onSelect}
+                                onToggleFavorite={(e, g): void =>
+                                    void handleToggleFavorite(e, g)
+                                }
+                            />
+                        ))}
                     </Box>
                 ) : (
                     <Box className="flex h-full items-center justify-center text-sm text-muted-foreground">

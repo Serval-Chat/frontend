@@ -24,11 +24,11 @@ describe('useSwipeGesture', (): void => {
 
     beforeEach((): void => {
         el = document.createElement('div');
-        document.body.appendChild(el);
+        document.body.append(el);
     });
 
     afterEach((): void => {
-        document.body.removeChild(el);
+        el.remove();
         vi.restoreAllMocks();
     });
 

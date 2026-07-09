@@ -52,8 +52,8 @@ export const AuthenticatedLayout = (): ReactNode => {
         enabled: isHomeRoute,
     });
 
-    const serverIdMatch = location.pathname.match(/@server\/([^/]+)/);
-    const serverId = serverIdMatch ? serverIdMatch[1] : null;
+    const serverIdMatch = /@server\/([^/]+)/.exec(location.pathname);
+    const serverId = serverIdMatch ? (serverIdMatch[1] ?? null) : null;
 
     const isServerRoute = location.pathname.includes('/@server/');
     useMembers(serverId, {
@@ -86,8 +86,12 @@ export const AuthenticatedLayout = (): ReactNode => {
 
     React.useEffect((): (() => void) | undefined => {
         if (!isConnecting) return undefined;
-        const timeout = setTimeout((): void => setShowReconnecting(true), 1500);
-        return (): void => clearTimeout(timeout);
+        const timeout = setTimeout((): void => {
+            setShowReconnecting(true);
+        }, 1500);
+        return (): void => {
+            clearTimeout(timeout);
+        };
     }, [isConnecting]);
 
     React.useEffect((): void => {
@@ -137,7 +141,7 @@ export const AuthenticatedLayout = (): ReactNode => {
 
     return (
         <WebSocketProvider>
-            {(status === 'offline' || showReconnecting) && (
+            {status === 'offline' || showReconnecting ? (
                 <LoadingScreen
                     message={
                         status === 'offline'
@@ -146,14 +150,14 @@ export const AuthenticatedLayout = (): ReactNode => {
                     }
                     type={status === 'offline' ? 'offline' : 'reconnecting'}
                 />
-            )}
+            ) : null}
             <BlockSyncProvider />
             <PushPrompt />
-            {isDebugWindowOpen && (
+            {isDebugWindowOpen ? (
                 <React.Suspense fallback={null}>
                     <WsDebugger />
                 </React.Suspense>
-            )}
+            ) : null}
             <FurTweaker />
             <ThemeTweaker />
             <NTConsole />

@@ -30,13 +30,17 @@ export const AdminBansAndMutes = (): ReactNode => {
             <div className="flex gap-4 border-b border-border-subtle pb-4">
                 <Button
                     variant={activeTab === 'bans' ? 'primary' : 'normal'}
-                    onClick={(): void => setActiveTab('bans')}
+                    onClick={(): void => {
+                        setActiveTab('bans');
+                    }}
                 >
                     Active Bans
                 </Button>
                 <Button
                     variant={activeTab === 'mutes' ? 'primary' : 'normal'}
-                    onClick={(): void => setActiveTab('mutes')}
+                    onClick={(): void => {
+                        setActiveTab('mutes');
+                    }}
                 >
                     Active Mutes
                 </Button>
@@ -123,7 +127,9 @@ const BansList = (): ReactNode => {
                                 disabled={isUnbanning}
                                 size="sm"
                                 variant="danger"
-                                onClick={(): void => unbanUser(ban.userId)}
+                                onClick={(): void => {
+                                    unbanUser(ban.userId);
+                                }}
                             >
                                 Unban
                             </Button>
@@ -209,7 +215,9 @@ const MutesList = (): ReactNode => {
                                 disabled={isUnmuting}
                                 size="sm"
                                 variant="danger"
-                                onClick={(): void => unmuteUser(mute.userId)}
+                                onClick={(): void => {
+                                    unmuteUser(mute.userId);
+                                }}
                             >
                                 Unmute
                             </Button>

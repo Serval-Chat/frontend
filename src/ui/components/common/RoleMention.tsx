@@ -34,7 +34,7 @@ const splitGraphemes = (value: string): string[] => {
         }
     ).Segmenter;
 
-    if (!Segmenter) return Array.from(value);
+    if (!Segmenter) return [...value];
 
     return Array.from(
         new Segmenter('en', { granularity: 'grapheme' }).segment(value),
@@ -155,7 +155,7 @@ export const RoleMention = ({ roleId, size = 'sm' }: RoleMentionProps) => {
                 return;
             }
 
-            const computedStyle = window.getComputedStyle(textElement);
+            const computedStyle = globalThis.getComputedStyle(textElement);
             const canvas =
                 measureCanvasRef.current ??
                 (measureCanvasRef.current = document.createElement('canvas'));
@@ -187,13 +187,15 @@ export const RoleMention = ({ roleId, size = 'sm' }: RoleMentionProps) => {
 
         updateGlyphPositions();
 
-        if (!window.ResizeObserver) return undefined;
+        if (!globalThis.ResizeObserver) return undefined;
 
         const observer = new ResizeObserver(updateGlyphPositions);
         observer.observe(rootElement);
         observer.observe(textElement);
 
-        return (): void => observer.disconnect();
+        return (): void => {
+            observer.disconnect();
+        };
     }, [glyphs]);
 
     const glyphTextStyles = React.useMemo(

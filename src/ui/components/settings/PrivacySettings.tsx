@@ -87,9 +87,9 @@ export const PrivacySettings = () => {
                         description="Only people you follow or are friends with can view your full profile."
                         disabled={isPending}
                         label="Private Profile"
-                        onCheckedChange={(v): void =>
-                            handleToggle('privateProfile', v)
-                        }
+                        onCheckedChange={(v): void => {
+                            handleToggle('privateProfile', v);
+                        }}
                     />
                 </div>
 
@@ -106,45 +106,45 @@ export const PrivacySettings = () => {
                             description="Your display name will not be shown to others."
                             disabled={isPending}
                             label="Make Display Name Private"
-                            onCheckedChange={(v): void =>
-                                handleToggle('hideDisplayName', v)
-                            }
+                            onCheckedChange={(v): void => {
+                                handleToggle('hideDisplayName', v);
+                            }}
                         />
                         <PrivacyToggleRow
                             checked={ps.hidePronouns}
                             description="Your pronouns will not be shown to others."
                             disabled={isPending}
                             label="Make Pronouns Private"
-                            onCheckedChange={(v): void =>
-                                handleToggle('hidePronouns', v)
-                            }
+                            onCheckedChange={(v): void => {
+                                handleToggle('hidePronouns', v);
+                            }}
                         />
                         <PrivacyToggleRow
                             checked={ps.hideBio}
                             description="Your bio will not be shown to others."
                             disabled={isPending}
                             label="Make Bio Private"
-                            onCheckedChange={(v): void =>
-                                handleToggle('hideBio', v)
-                            }
+                            onCheckedChange={(v): void => {
+                                handleToggle('hideBio', v);
+                            }}
                         />
                         <PrivacyToggleRow
                             checked={ps.hideStatus}
                             description="Your custom status will not be shown to others."
                             disabled={isPending}
                             label="Make Status Private"
-                            onCheckedChange={(v): void =>
-                                handleToggle('hideStatus', v)
-                            }
+                            onCheckedChange={(v): void => {
+                                handleToggle('hideStatus', v);
+                            }}
                         />
                         <PrivacyToggleRow
                             checked={ps.hideConnections}
                             description="Your linked websites and connections will not be shown to others."
                             disabled={isPending}
                             label="Make Connections Private"
-                            onCheckedChange={(v): void =>
-                                handleToggle('hideConnections', v)
-                            }
+                            onCheckedChange={(v): void => {
+                                handleToggle('hideConnections', v);
+                            }}
                         />
                     </div>
                 </div>

@@ -36,11 +36,11 @@ export const FeatureTile = ({
             >
                 {title}
             </Heading>
-            {description && (
+            {description ? (
                 <Text as="p" size="sm" variant="muted">
                     {description}
                 </Text>
-            )}
+            ) : null}
         </div>
     </Box>
 );

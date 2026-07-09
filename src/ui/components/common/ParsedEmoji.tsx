@@ -53,7 +53,7 @@ export const ParsedEmoji = ({
 
         const observer = new IntersectionObserver(
             ([entry]): void => {
-                if (entry.isIntersecting) {
+                if (entry?.isIntersecting) {
                     setInView(true);
                     observer.disconnect(); // Only need to fetch once
                 }
@@ -65,7 +65,9 @@ export const ParsedEmoji = ({
             observer.observe(containerRef.current);
         }
 
-        return (): void => observer.disconnect();
+        return (): void => {
+            observer.disconnect();
+        };
     }, [inView]);
 
     const { data: emoji, isLoading } = useEmoji(emojiId, {
@@ -124,7 +126,7 @@ export const ParsedEmoji = ({
                         isLarge ? 'h-16 w-16' : 'h-[1.5em] w-[1.5em]',
                         className,
                     )}
-                    onClick={(e: React.MouseEvent): void =>
+                    onClick={(e: React.MouseEvent): void => {
                         showEmojiInfo(
                             {
                                 id: emoji.id,
@@ -133,8 +135,8 @@ export const ParsedEmoji = ({
                                 serverId: emoji.serverId,
                             },
                             e,
-                        )
-                    }
+                        );
+                    }}
                 >
                     <img
                         alt={emoji.name || 'emoji'}
@@ -150,14 +152,14 @@ export const ParsedEmoji = ({
                 </Box>
             </Tooltip>
 
-            {selectedEmoji && infoBoxPosition && (
+            {selectedEmoji && infoBoxPosition ? (
                 <EmojiInfoBox
                     emoji={selectedEmoji}
                     position={infoBoxPosition}
                     server={server}
                     onClose={closeInfoBox}
                 />
-            )}
+            ) : null}
         </>
     );
 };

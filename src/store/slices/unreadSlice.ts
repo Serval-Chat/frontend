@@ -15,7 +15,7 @@ const initialState: UnreadState = {
     unreadDms: {},
 };
 
-export const unreadSlice = createSlice({
+const unreadSlice = createSlice({
     name: 'unread',
     initialState,
     reducers: {
@@ -29,41 +29,42 @@ export const unreadSlice = createSlice({
             state,
             action: PayloadAction<{ serverId: string; unread: boolean }>,
         ): void => {
-            if (!state.unreadServers[action.payload.serverId]) {
+            const existing = state.unreadServers[action.payload.serverId];
+            if (existing) {
+                existing.hasUnread = action.payload.unread;
+            } else {
                 state.unreadServers[action.payload.serverId] = {
                     hasUnread: action.payload.unread,
                     pingCount: 0,
                 };
-            } else {
-                state.unreadServers[action.payload.serverId].hasUnread =
-                    action.payload.unread;
             }
         },
         setServerPingCount: (
             state,
             action: PayloadAction<{ serverId: string; count: number }>,
         ): void => {
-            if (!state.unreadServers[action.payload.serverId]) {
+            const existing = state.unreadServers[action.payload.serverId];
+            if (existing) {
+                existing.pingCount = action.payload.count;
+            } else {
                 state.unreadServers[action.payload.serverId] = {
                     hasUnread: false,
                     pingCount: action.payload.count,
                 };
-            } else {
-                state.unreadServers[action.payload.serverId].pingCount =
-                    action.payload.count;
             }
         },
         incrementServerPing: (
             state,
             action: PayloadAction<{ serverId: string }>,
         ): void => {
-            if (!state.unreadServers[action.payload.serverId]) {
+            const existing = state.unreadServers[action.payload.serverId];
+            if (existing) {
+                existing.pingCount += 1;
+            } else {
                 state.unreadServers[action.payload.serverId] = {
                     hasUnread: false,
                     pingCount: 1,
                 };
-            } else {
-                state.unreadServers[action.payload.serverId].pingCount += 1;
             }
         },
         decrementServerPing: (

@@ -24,7 +24,7 @@ interface StyledUserNameProps {
 
 const glowIntensity = 0.7;
 
-export const SUPPORTED_USERNAME_FONTS = [
+const SUPPORTED_USERNAME_FONTS = [
     'default',
     'Audiowide',
     'Bebas Neue',
@@ -66,7 +66,7 @@ const loadedUsernameFonts = new Set<string>();
 const loadUsernameFont = (font: string): void => {
     const href =
         FONT_IMPORTS[font as keyof typeof FONT_IMPORTS] ||
-        `https://fonts.googleapis.com/css2?family=${encodeURIComponent(font).replace(/%20/g, '+')}&display=swap`;
+        `https://fonts.googleapis.com/css2?family=${encodeURIComponent(font).replaceAll('%20', '+')}&display=swap`;
 
     if (loadedUsernameFonts.has(href)) return;
 
@@ -81,7 +81,7 @@ const loadUsernameFont = (font: string): void => {
     link.dataset.usernameFont = 'true';
     link.rel = 'stylesheet';
     link.href = href;
-    document.head.appendChild(link);
+    document.head.append(link);
 };
 
 export const StyledUserName = React.memo(
@@ -208,7 +208,7 @@ export const StyledUserName = React.memo(
                         key={`char-${char}-${i}`}
                         style={charStyle}
                     >
-                        {hasGlow && (
+                        {hasGlow ? (
                             <>
                                 {/* Inner intense glow */}
                                 <span
@@ -262,7 +262,7 @@ export const StyledUserName = React.memo(
                                     {char}
                                 </span>
                             </>
-                        )}
+                        ) : null}
                         {char}
                     </span>
                 );
@@ -287,17 +287,17 @@ export const StyledUserName = React.memo(
                 style={containerStyle}
             >
                 {content}
-                {showIcon && (iconRole?.icon || role?.icon) && (
+                {showIcon && (iconRole?.icon || role?.icon) ? (
                     <img
                         alt=""
                         className="ml-1.5 h-4 w-4 object-contain"
                         src={
                             resolveApiUrl(
-                                `/api/v1/servers/${(iconRole || (role as Role)).serverId}/roles/icon/${iconRole?.icon || role?.icon}`,
+                                `/api/v1/servers/${(iconRole || role!).serverId}/roles/icon/${iconRole?.icon || role?.icon}`,
                             ) || ''
                         }
                     />
-                )}
+                ) : null}
             </Text>
         );
     },

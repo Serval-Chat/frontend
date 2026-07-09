@@ -89,7 +89,9 @@ describe('usePublicBotInfo', (): void => {
         const { result } = renderHook(() => usePublicBotInfo('abc123'), {
             wrapper: makeWrapper(),
         });
-        await waitFor((): void => expect(result.current.isSuccess).toBe(true));
+        await waitFor((): void => {
+            expect(result.current.isSuccess).toBe(true);
+        });
         expect(result.current.data).toEqual(mockPublicInfo);
         expect(botsApi.getPublicInfo).toHaveBeenCalledWith('abc123');
     });
@@ -109,7 +111,9 @@ describe('usePublicBotInfo', (): void => {
         const { result } = renderHook(() => usePublicBotInfo('badid'), {
             wrapper: makeWrapper(),
         });
-        await waitFor((): void => expect(result.current.isError).toBe(true));
+        await waitFor((): void => {
+            expect(result.current.isError).toBe(true);
+        });
         expect(result.current.error?.message).toBe('Not found');
     });
 });
@@ -122,9 +126,11 @@ describe('useBots', (): void => {
         const { result } = renderHook(() => useBots(), {
             wrapper: makeWrapper(),
         });
-        await waitFor((): void => expect(result.current.isSuccess).toBe(true));
+        await waitFor((): void => {
+            expect(result.current.isSuccess).toBe(true);
+        });
         expect(result.current.data).toHaveLength(1);
-        expect(result.current.data![0].clientId).toBe('abc123');
+        expect(result.current.data![0]!.clientId).toBe('abc123');
     });
 
     it('returns empty array when user has no bots', async (): Promise<void> => {
@@ -132,7 +138,9 @@ describe('useBots', (): void => {
         const { result } = renderHook(() => useBots(), {
             wrapper: makeWrapper(),
         });
-        await waitFor((): void => expect(result.current.isSuccess).toBe(true));
+        await waitFor((): void => {
+            expect(result.current.isSuccess).toBe(true);
+        });
         expect(result.current.data).toEqual([]);
     });
 });
@@ -151,7 +159,9 @@ describe('useCreateBot', (): void => {
             result.current.mutate({ name: 'My Bot' });
         });
 
-        await waitFor((): void => expect(result.current.isSuccess).toBe(true));
+        await waitFor((): void => {
+            expect(result.current.isSuccess).toBe(true);
+        });
         expect(result.current.data).toEqual(response);
         expect(botsApi.create).toHaveBeenCalledWith({ name: 'My Bot' });
     });
@@ -168,7 +178,9 @@ describe('useCreateBot', (): void => {
             result.current.mutate({ name: 'Bot' });
         });
 
-        await waitFor((): void => expect(result.current.isError).toBe(true));
+        await waitFor((): void => {
+            expect(result.current.isError).toBe(true);
+        });
         expect(result.current.error?.message).toBe('Maximum 25 bots per user');
     });
 });
@@ -187,7 +199,9 @@ describe('useAuthorizeBot', (): void => {
             result.current.mutate({ clientId: 'abc123', serverId: 'srv1' });
         });
 
-        await waitFor((): void => expect(result.current.isSuccess).toBe(true));
+        await waitFor((): void => {
+            expect(result.current.isSuccess).toBe(true);
+        });
         expect(botsApi.authorize).toHaveBeenCalledWith(
             'abc123',
             'srv1',
@@ -208,7 +222,9 @@ describe('useAuthorizeBot', (): void => {
             result.current.mutate({ clientId: 'abc123', serverId: 'srv1' });
         });
 
-        await waitFor((): void => expect(result.current.isError).toBe(true));
+        await waitFor((): void => {
+            expect(result.current.isError).toBe(true);
+        });
         expect(result.current.error?.message).toBe(
             'Bot is already in this server',
         );
@@ -219,7 +235,7 @@ describe('useDeleteBot', (): void => {
     beforeEach(() => vi.clearAllMocks());
 
     it('calls delete api with clientId', async (): Promise<void> => {
-        vi.mocked(botsApi.delete).mockResolvedValue(undefined);
+        vi.mocked(botsApi.delete).mockResolvedValue();
         const { result } = renderHook(() => useDeleteBot(), {
             wrapper: makeWrapper(),
         });
@@ -228,7 +244,9 @@ describe('useDeleteBot', (): void => {
             result.current.mutate({ clientId: 'abc123' });
         });
 
-        await waitFor((): void => expect(result.current.isSuccess).toBe(true));
+        await waitFor((): void => {
+            expect(result.current.isSuccess).toBe(true);
+        });
         expect(botsApi.delete).toHaveBeenCalledWith('abc123');
     });
 });

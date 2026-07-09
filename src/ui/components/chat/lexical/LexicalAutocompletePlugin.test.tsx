@@ -16,16 +16,16 @@ const createMatchTrigger =
         matchingString: string;
         replaceableString: string;
     } | null => {
-        const completeEmojiMatch = text.match(/(^|\s):([^@#\s:]+):$/);
+        const completeEmojiMatch = /(^|\s):([^@#\s:]+):$/.exec(text);
         if (completeEmojiMatch !== null) {
-            const emojiName = completeEmojiMatch[2].toLowerCase();
+            // The capture group is mandatory in the regex, so a match
+            // guarantees it.
+            const emojiName = completeEmojiMatch[2]!.toLowerCase();
 
             const matchingUnicodeEmojis = allEmojis.filter(
                 (emoji) =>
                     emoji.short_name === emojiName ||
-                    emoji.short_names.some(
-                        (name: string): boolean => name === emojiName,
-                    ),
+                    emoji.short_names.includes(emojiName),
             );
 
             const matchingCustomEmojis = serverEmojis.filter(
@@ -40,17 +40,20 @@ const createMatchTrigger =
             }
         }
 
-        const match = text.match(/(^|\s)([@:#])([^@#\s]{0,20})$/);
+        const match = /(^|\s)([@:#])([^@#\s]{0,20})$/.exec(text);
         if (match !== null) {
-            const triggerChar = match[2];
-            const matchingString = match[3];
+            // All three capture groups are mandatory in the regex, so a
+            // match guarantees they are present.
+            const leadGroup = match[1]!;
+            const triggerChar = match[2]!;
+            const matchingString = match[3]!;
 
             if (triggerChar === ':' && matchingString.length < 2) {
                 return null;
             }
 
             return {
-                leadOffset: match.index! + match[1].length,
+                leadOffset: match.index + leadGroup.length,
                 matchingString: matchingString,
                 replaceableString: triggerChar + matchingString,
             };
@@ -93,13 +96,11 @@ describe('Emoji Autocomplete Logic', (): void => {
         const matchingEmojis = availableEmojis.filter(
             (emoji): boolean =>
                 emoji.short_name === emojiName ||
-                emoji.short_names.some(
-                    (name: string): boolean => name === emojiName,
-                ),
+                emoji.short_names.includes(emojiName),
         );
 
         expect(matchingEmojis).toHaveLength(1);
-        expect(matchingEmojis[0].short_name).toBe('sob');
+        expect(matchingEmojis[0]!.short_name).toBe('sob');
     });
 
     it('should not auto-select when multiple matches exist', (): void => {
@@ -132,13 +133,11 @@ describe('Emoji Autocomplete Logic', (): void => {
         const matchingEmojis = availableEmojis.filter(
             (emoji): boolean =>
                 emoji.short_name === emojiName ||
-                emoji.short_names.some(
-                    (name: string): boolean => name === emojiName,
-                ),
+                emoji.short_names.includes(emojiName),
         );
 
         expect(matchingEmojis).toHaveLength(1);
-        expect(matchingEmojis[0].short_name).toBe('sob');
+        expect(matchingEmojis[0]!.short_name).toBe('sob');
 
         expect(matchingEmojis.length === 1).toBe(true);
     });
@@ -169,7 +168,7 @@ describe('Emoji Autocomplete Logic', (): void => {
         );
 
         expect(matchingCustomEmojis).toHaveLength(1);
-        expect(matchingCustomEmojis[0].name).toBe('pepega');
+        expect(matchingCustomEmojis[0]!.name).toBe('pepega');
     });
 });
 

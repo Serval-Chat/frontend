@@ -142,7 +142,7 @@ export const useDiscoveryServers = (params: {
     tags?: string[];
     limit?: number;
     cursor?: string;
-}): UseQueryResult<DiscoveryServersResponse, Error> => {
+}): UseQueryResult<DiscoveryServersResponse> => {
     const cacheKey = getDiscoveryCacheKey(params);
     return useQuery({
         queryKey: SERVERS_QUERY_KEYS.discovery(cacheKey, params),
@@ -158,7 +158,7 @@ export const useDiscoveryServers = (params: {
 
 export const useServerDiscoveryStatus = (
     serverId: string | null,
-): UseQueryResult<ServerDiscoveryStatus, Error> =>
+): UseQueryResult<ServerDiscoveryStatus> =>
     useQuery({
         queryKey: SERVERS_QUERY_KEYS.discoveryStatus(serverId),
         queryFn: (): Promise<ServerDiscoveryStatus> =>
@@ -166,7 +166,7 @@ export const useServerDiscoveryStatus = (
         enabled: !!serverId && isValidId(serverId) && hasAuthToken(),
     });
 
-export const useServers = (): UseQueryResult<Server[], Error> => {
+export const useServers = (): UseQueryResult<Server[]> => {
     const queryClient = useQueryClient();
     return useQuery({
         queryKey: SERVERS_QUERY_KEYS.list,
@@ -185,8 +185,7 @@ export const useServers = (): UseQueryResult<Server[], Error> => {
 };
 
 export const useUnreadStatus = (): UseQueryResult<
-    Record<string, { hasUnread: boolean; pingCount: number }>,
-    Error
+    Record<string, { hasUnread: boolean; pingCount: number }>
 > => {
     const dispatch = useDispatch();
     const query = useQuery({
@@ -209,20 +208,17 @@ export const useUnreadStatus = (): UseQueryResult<
 export const useExportChannelState = (
     serverId: string,
     channelId: string,
-): UseQueryResult<
-    {
-        state: 'available' | 'in_progress' | 'cooling_down';
-        lastExportAt?: string;
-        nextExportAt?: string;
-    },
-    Error
-> =>
+): UseQueryResult<{
+    state: 'available' | 'in_progress' | 'cooling_down';
+    lastExportAt?: string;
+    nextExportAt?: string;
+}> =>
     useQuery({
         queryKey: ['servers', 'export_state', serverId, channelId],
         queryFn: () => serversApi.getExportState(serverId, channelId),
         enabled: !!serverId && !!channelId,
-        refetchInterval: (query): false | 10000 =>
-            query.state.data?.state === 'in_progress' ? 10000 : false,
+        refetchInterval: (query): false | 10_000 =>
+            query.state.data?.state === 'in_progress' ? 10_000 : false,
     });
 
 export const useRequestExportChannel = (
@@ -305,7 +301,7 @@ export const useJoinServer = (): UseMutationResult<
 export const useServerDetails = (
     serverId: string | null,
     options: { enabled?: boolean } = {},
-): UseQueryResult<Server, Error> =>
+): UseQueryResult<Server> =>
     useQuery({
         queryKey: SERVERS_QUERY_KEYS.details(serverId),
         queryFn: (): Promise<Server> => serversApi.getServerDetails(serverId!),
@@ -320,7 +316,7 @@ export const useServerDetails = (
 export const useChannels = (
     serverId: string | null,
     options: { enabled?: boolean } = {},
-): UseQueryResult<Channel[], Error> =>
+): UseQueryResult<Channel[]> =>
     useQuery({
         queryKey: SERVERS_QUERY_KEYS.channels(serverId),
         queryFn: (): Promise<Channel[]> => serversApi.getChannels(serverId!),
@@ -335,7 +331,7 @@ export const useChannels = (
 export const useCategories = (
     serverId: string | null,
     options: { enabled?: boolean } = {},
-): UseQueryResult<Category[], Error> =>
+): UseQueryResult<Category[]> =>
     useQuery({
         queryKey: SERVERS_QUERY_KEYS.categories(serverId),
         queryFn: (): Promise<Category[]> => serversApi.getCategories(serverId!),
@@ -350,7 +346,7 @@ export const useCategories = (
 export const useMembers = (
     serverId: string | null,
     options: { enabled?: boolean } = {},
-): UseQueryResult<ServerMember[], Error> =>
+): UseQueryResult<ServerMember[]> =>
     useQuery({
         queryKey: SERVERS_QUERY_KEYS.members(serverId),
         queryFn: (): Promise<ServerMember[]> =>
@@ -366,7 +362,7 @@ export const useMembers = (
 export const useRoles = (
     serverId: string | null,
     options: { enabled?: boolean } = {},
-): UseQueryResult<Role[], Error> =>
+): UseQueryResult<Role[]> =>
     useQuery({
         queryKey: SERVERS_QUERY_KEYS.roles(serverId),
         queryFn: (): Promise<Role[]> => serversApi.getRoles(serverId!),
@@ -381,7 +377,7 @@ export const useRoles = (
 export const useOnboardingSettings = (
     serverId: string | null,
     options: { enabled?: boolean } = {},
-): UseQueryResult<ServerOnboardingSettings, Error> =>
+): UseQueryResult<ServerOnboardingSettings> =>
     useQuery({
         queryKey: SERVERS_QUERY_KEYS.onboardingSettings(serverId),
         queryFn: (): Promise<ServerOnboardingSettings> =>
@@ -424,7 +420,7 @@ export const useUpdateOnboardingSettings = (
 export const useOnboarding = (
     serverId: string | null,
     options: { enabled?: boolean } = {},
-): UseQueryResult<ServerOnboardingState, Error> =>
+): UseQueryResult<ServerOnboardingState> =>
     useQuery({
         queryKey: SERVERS_QUERY_KEYS.onboarding(serverId),
         queryFn: (): Promise<ServerOnboardingState> =>
@@ -512,7 +508,7 @@ export const useCompleteOnboarding = (
 
 export const useServerEmojis = (
     serverId: string | null,
-): UseQueryResult<Emoji[], Error> =>
+): UseQueryResult<Emoji[]> =>
     useQuery({
         queryKey: SERVERS_QUERY_KEYS.emojis(serverId),
         queryFn: (): Promise<Emoji[]> => serversApi.getEmojis(serverId!),
@@ -521,7 +517,7 @@ export const useServerEmojis = (
 
 export const useAllServerEmojis = (options?: {
     enabled?: boolean;
-}): UseQueryResult<Emoji[], Error> =>
+}): UseQueryResult<Emoji[]> =>
     useQuery({
         queryKey: ['servers', 'emojis', 'all'],
         queryFn: (): Promise<Emoji[]> => serversApi.getAllServerEmojis(),
@@ -579,7 +575,7 @@ export const useDeleteEmoji = (
 
 export const useServerStickers = (
     serverId: string | null,
-): UseQueryResult<Sticker[], Error> =>
+): UseQueryResult<Sticker[]> =>
     useQuery({
         queryKey: SERVERS_QUERY_KEYS.stickers(serverId),
         queryFn: (): Promise<Sticker[]> => serversApi.getStickers(serverId!),
@@ -588,7 +584,7 @@ export const useServerStickers = (
 
 export const useAllStickers = (options?: {
     enabled?: boolean;
-}): UseQueryResult<Sticker[], Error> =>
+}): UseQueryResult<Sticker[]> =>
     useQuery({
         queryKey: ['stickers', 'all'],
         queryFn: (): Promise<Sticker[]> => serversApi.getAllStickers(),
@@ -657,9 +653,7 @@ export const useDeleteSticker = (
     });
 };
 
-export const useSticker = (
-    stickerId: string | null,
-): UseQueryResult<Sticker, Error> =>
+export const useSticker = (stickerId: string | null): UseQueryResult<Sticker> =>
     useQuery({
         queryKey: ['stickers', stickerId],
         queryFn: async (): Promise<Sticker> => {
@@ -733,7 +727,7 @@ export const useUpdateServerBanner = (
 
 export const useVoiceStates = (
     serverId: string | null,
-): UseQueryResult<Record<string, string[]>, Error> => {
+): UseQueryResult<Record<string, string[]>> => {
     const dispatch = useDispatch();
     const query = useQuery({
         queryKey: SERVERS_QUERY_KEYS.voiceStates(serverId),
@@ -744,9 +738,9 @@ export const useVoiceStates = (
 
     useEffect((): void => {
         if (query.data) {
-            Object.entries(query.data).forEach(([channelId, userIds]): void => {
+            for (const [channelId, userIds] of Object.entries(query.data)) {
                 dispatch(setVoiceParticipants({ channelId, userIds }));
-            });
+            }
         }
     }, [query.data, dispatch]);
 
@@ -757,7 +751,7 @@ export const useChannelPermissions = (
     serverId: string,
     channelId: string,
     options?: { enabled?: boolean },
-): UseQueryResult<Record<string, Record<string, boolean>>, Error> =>
+): UseQueryResult<Record<string, Record<string, boolean>>> =>
     useQuery({
         queryKey: ['servers', 'channel_permissions', serverId, channelId],
         queryFn: (): Promise<{
@@ -814,7 +808,7 @@ export const useCategoryPermissions = (
     serverId: string,
     categoryId: string,
     options?: { enabled?: boolean },
-): UseQueryResult<Record<string, Record<string, boolean>>, Error> =>
+): UseQueryResult<Record<string, Record<string, boolean>>> =>
     useQuery({
         queryKey: ['servers', 'category_permissions', serverId, categoryId],
         queryFn: (): Promise<{
@@ -1260,7 +1254,7 @@ export const useRemoveRoleFromMember = (
 
 export const useServerBans = (
     serverId: string | null,
-): UseQueryResult<ServerBan[], Error> =>
+): UseQueryResult<ServerBan[]> =>
     useQuery({
         queryKey: SERVERS_QUERY_KEYS.bans(serverId),
         queryFn: (): Promise<ServerBan[]> => serversApi.getBans(serverId!),

@@ -9,7 +9,7 @@ export const resolveApiUrl = (path: string | undefined): string | null => {
     if (path.startsWith('http')) {
         const apiBaseUrl = getConfiguredApiBaseUrl();
 
-        if (apiBaseUrl && path.startsWith(apiBaseUrl)) {
+        if (apiBaseUrl !== '' && path.startsWith(apiBaseUrl)) {
             return path;
         }
 

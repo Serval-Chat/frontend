@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef } from 'react';
 
 import { ArrowLeft, CheckCircle } from 'lucide-react';
 
@@ -29,9 +29,9 @@ export const FriendRequestList = () => {
     >('pending');
 
     const requestCount = requests?.length ?? 0;
-    const [syncedRequestCount, setSyncedRequestCount] = useState(requestCount);
-    if (requestCount !== syncedRequestCount) {
-        setSyncedRequestCount(requestCount);
+    const syncedRequestCountRef = useRef(requestCount);
+    if (requestCount !== syncedRequestCountRef.current) {
+        syncedRequestCountRef.current = requestCount;
         if (!isLoading && requestCount === 0 && view === 'pending') {
             setView('all');
         }
@@ -110,7 +110,9 @@ export const FriendRequestList = () => {
                                     : 'text-foreground-muted hover:bg-bg-tertiary hover:text-foreground',
                             )}
                             type="button"
-                            onClick={(): void => setView('all')}
+                            onClick={(): void => {
+                                setView('all');
+                            }}
                         >
                             All
                         </button>
@@ -122,14 +124,16 @@ export const FriendRequestList = () => {
                                     : 'text-foreground-muted hover:bg-bg-tertiary hover:text-foreground',
                             )}
                             type="button"
-                            onClick={(): void => setView('pending')}
+                            onClick={(): void => {
+                                setView('pending');
+                            }}
                         >
                             Pending
-                            {requests && requests.length > 0 && (
+                            {requests && requests.length > 0 ? (
                                 <Box className="absolute -top-1 -right-1 flex h-4 min-w-[1rem] items-center justify-center rounded-full bg-danger px-1 text-[10px] font-bold text-white shadow-sm">
                                     {requests.length}
                                 </Box>
-                            )}
+                            ) : null}
                         </button>
                         <button
                             className={cn(
@@ -139,14 +143,16 @@ export const FriendRequestList = () => {
                                     : 'text-foreground-muted hover:bg-bg-tertiary hover:text-foreground',
                             )}
                             type="button"
-                            onClick={(): void => setView('sent')}
+                            onClick={(): void => {
+                                setView('sent');
+                            }}
                         >
                             Sent
-                            {sentRequests && sentRequests.length > 0 && (
+                            {sentRequests && sentRequests.length > 0 ? (
                                 <Box className="absolute -top-1 -right-1 flex h-4 min-w-[1rem] items-center justify-center rounded-full border border-bg-secondary bg-primary px-1 text-[10px] font-bold text-white shadow-sm">
                                     {sentRequests.length}
                                 </Box>
-                            )}
+                            ) : null}
                         </button>
 
                         <button
@@ -157,7 +163,9 @@ export const FriendRequestList = () => {
                                     : 'text-foreground-muted hover:bg-bg-tertiary hover:text-foreground',
                             )}
                             type="button"
-                            onClick={(): void => setView('blocked')}
+                            onClick={(): void => {
+                                setView('blocked');
+                            }}
                         >
                             Blocked
                         </button>
@@ -170,7 +178,9 @@ export const FriendRequestList = () => {
                                     : 'bg-success/20 text-success hover:bg-success hover:text-white',
                             )}
                             type="button"
-                            onClick={(): void => setView('add')}
+                            onClick={(): void => {
+                                setView('add');
+                            }}
                         >
                             Add friend
                         </button>

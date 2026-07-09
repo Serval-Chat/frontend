@@ -20,7 +20,7 @@ export const useAdminAuditLogs = (
         limit: ADMIN_CONSTANTS.MAX_AUDIT_LOGS_PAGE_SIZE,
         offset: 0,
     },
-): UseQueryResult<AuditLog[], Error> =>
+): UseQueryResult<AuditLog[]> =>
     useQuery<AuditLog[]>({
         queryKey: ['admin-audit-logs', filters],
         queryFn: async (): Promise<AuditLog[]> => {

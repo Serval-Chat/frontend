@@ -99,11 +99,11 @@ describe('Register Page Integration', (): void => {
         const toggleBtns = screen.getAllByLabelText('Show password');
         expect(toggleBtns).toHaveLength(2);
 
-        fireEvent.click(toggleBtns[0]);
+        fireEvent.click(toggleBtns[0]!);
         expect(passwordInput).toHaveAttribute('type', 'text');
         expect(confirmPasswordInput).toHaveAttribute('type', 'password');
 
-        fireEvent.click(toggleBtns[1]);
+        fireEvent.click(toggleBtns[1]!);
         expect(passwordInput).toHaveAttribute('type', 'text');
         expect(confirmPasswordInput).toHaveAttribute('type', 'text');
     });

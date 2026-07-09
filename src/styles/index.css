@@ -49,6 +49,21 @@
         animation-delay: 0ms !important;
         animation-iteration-count: 1 !important;
     }
+
+    /* respect the OS-level motion preference (WCAG 2.3.3), independent of the
+       in-app "limited animations" setting above. */
+    @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+            scroll-behavior: auto !important;
+            transition-duration: 0.001ms !important;
+            transition-delay: 0ms !important;
+            animation-duration: 0.001ms !important;
+            animation-delay: 0ms !important;
+            animation-iteration-count: 1 !important;
+        }
+    }
 }
 
 @layer utilities {

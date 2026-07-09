@@ -93,11 +93,11 @@ vi.mock('./ContextMenu', () => ({
         items,
     }: {
         children: ReactNode;
-        items: Array<{
+        items: {
             label?: string;
             type?: string;
             onClick?: () => void;
-        }>;
+        }[];
     }) => (
         <div>
             {children}

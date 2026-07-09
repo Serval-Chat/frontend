@@ -244,31 +244,32 @@ const SplitViewPane = ({
                         type: 'nav/toggleMobileMemberListForSplitView';
                     } => dispatch(toggleMobileMemberListForSplitView(side))}
                 />
-                {isMobileMemberListOpen &&
-                    createPortal(
-                        <div className="fixed inset-0 z-[var(--z-index-top)] md:hidden">
-                            <TertiarySidebar
-                                ignoreUrlMatch
-                                selectedFriendId={null}
-                                selectedServerId={
-                                    conversation.type === 'channel'
-                                        ? conversation.serverId
-                                        : null
-                                }
-                                onMobileClose={(): {
-                                    payload: SplitViewSide;
-                                    type: 'nav/toggleMobileMemberListForSplitView';
-                                } =>
-                                    dispatch(
-                                        toggleMobileMemberListForSplitView(
-                                            side,
-                                        ),
-                                    )
-                                }
-                            />
-                        </div>,
-                        document.body,
-                    )}
+                {isMobileMemberListOpen
+                    ? createPortal(
+                          <div className="fixed inset-0 z-[var(--z-index-top)] md:hidden">
+                              <TertiarySidebar
+                                  ignoreUrlMatch
+                                  selectedFriendId={null}
+                                  selectedServerId={
+                                      conversation.type === 'channel'
+                                          ? conversation.serverId
+                                          : null
+                                  }
+                                  onMobileClose={(): {
+                                      payload: SplitViewSide;
+                                      type: 'nav/toggleMobileMemberListForSplitView';
+                                  } =>
+                                      dispatch(
+                                          toggleMobileMemberListForSplitView(
+                                              side,
+                                          ),
+                                      )
+                                  }
+                              />
+                          </div>,
+                          document.body,
+                      )
+                    : null}
             </ProxyProvider>
         </Box>
     );

@@ -164,7 +164,9 @@ export const ServerSettingsModal = ({
             const timer = setTimeout(() => {
                 setActiveSection(defaultSection);
             }, 0);
-            return () => clearTimeout(timer);
+            return () => {
+                clearTimeout(timer);
+            };
         }
     }, [isOpen, activeSectionIsHidden, defaultSection]);
 
@@ -207,14 +209,14 @@ export const ServerSettingsModal = ({
                     )}
                 >
                     {/* Mobile Back Header */}
-                    {!isMobileSidebarOpen && (
+                    {isMobileSidebarOpen ? null : (
                         <div className="sticky top-0 z-40 flex shrink-0 items-center border-b border-border-subtle bg-background px-4 py-3 md:hidden">
                             <button
                                 className="flex items-center gap-1 font-medium text-muted-foreground transition-colors hover:text-foreground"
                                 type="button"
-                                onClick={(): void =>
-                                    setIsMobileSidebarOpen(true)
-                                }
+                                onClick={(): void => {
+                                    setIsMobileSidebarOpen(true);
+                                }}
                             >
                                 <ChevronLeft size={20} />
                                 Back
@@ -258,41 +260,41 @@ export const ServerSettingsModal = ({
                             )}
                         >
                             <React.Suspense fallback={null}>
-                                {activeSection === 'overview' && (
+                                {activeSection === 'overview' ? (
                                     <ServerOverviewSettings
                                         serverId={serverId}
                                     />
-                                )}
-                                {activeSection === 'roles' && (
+                                ) : null}
+                                {activeSection === 'roles' ? (
                                     <ServerRoleSettings serverId={serverId} />
-                                )}
-                                {activeSection === 'onboarding' && (
+                                ) : null}
+                                {activeSection === 'onboarding' ? (
                                     <ServerOnboardingSettings
                                         serverId={serverId}
                                     />
-                                )}
-                                {activeSection === 'emojis' && (
+                                ) : null}
+                                {activeSection === 'emojis' ? (
                                     <ServerEmojiSettings serverId={serverId} />
-                                )}
-                                {activeSection === 'stickers' && (
+                                ) : null}
+                                {activeSection === 'stickers' ? (
                                     <ServerStickerSettings
                                         serverId={serverId}
                                     />
-                                )}
-                                {activeSection === 'invites' && (
+                                ) : null}
+                                {activeSection === 'invites' ? (
                                     <ServerInviteSettings serverId={serverId} />
-                                )}
-                                {activeSection === 'behaviour' && (
+                                ) : null}
+                                {activeSection === 'behaviour' ? (
                                     <ServerBehaviourSettings
                                         serverId={serverId}
                                     />
-                                )}
-                                {activeSection === 'bans' && (
+                                ) : null}
+                                {activeSection === 'bans' ? (
                                     <ServerBansSettings serverId={serverId} />
-                                )}
-                                {activeSection === 'audit-log' && (
+                                ) : null}
+                                {activeSection === 'audit-log' ? (
                                     <AuditLogSettings serverId={serverId} />
-                                )}
+                                ) : null}
                             </React.Suspense>
                         </div>
                     </div>

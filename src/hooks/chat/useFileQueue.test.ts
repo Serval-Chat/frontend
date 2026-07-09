@@ -20,9 +20,9 @@ describe('useFileQueue', (): void => {
         });
 
         expect(result.current.files).toHaveLength(1);
-        expect(result.current.files[0].file).toBe(file1);
-        expect(result.current.files[0].status).toBe('idle');
-        expect(result.current.files[0].progress).toBe(0);
+        expect(result.current.files[0]!.file).toBe(file1);
+        expect(result.current.files[0]!.status).toBe('idle');
+        expect(result.current.files[0]!.progress).toBe(0);
     });
 
     it('should update file status', (): void => {
@@ -33,13 +33,13 @@ describe('useFileQueue', (): void => {
             result.current.addFiles([file]);
         });
 
-        const id = result.current.files[0].id;
+        const id = result.current.files[0]!.id;
 
         act((): void => {
             result.current.updateFileStatus(id, 'uploading');
         });
 
-        expect(result.current.files[0].status).toBe('uploading');
+        expect(result.current.files[0]!.status).toBe('uploading');
     });
 
     it('should update file progress', (): void => {
@@ -50,13 +50,13 @@ describe('useFileQueue', (): void => {
             result.current.addFiles([file]);
         });
 
-        const id = result.current.files[0].id;
+        const id = result.current.files[0]!.id;
 
         act((): void => {
             result.current.updateFileProgress(id, 50);
         });
 
-        expect(result.current.files[0].progress).toBe(50);
+        expect(result.current.files[0]!.progress).toBe(50);
     });
 
     it('should toggle spoiler status', (): void => {
@@ -67,13 +67,13 @@ describe('useFileQueue', (): void => {
             result.current.addFiles([file]);
         });
 
-        const id = result.current.files[0].id;
+        const id = result.current.files[0]!.id;
 
         act((): void => {
             result.current.toggleSpoiler(id);
         });
 
-        expect(result.current.files[0].isSpoiler).toBe(true);
+        expect(result.current.files[0]!.isSpoiler).toBe(true);
     });
 
     it('should remove a file from the queue', (): void => {
@@ -84,7 +84,7 @@ describe('useFileQueue', (): void => {
             result.current.addFiles([file]);
         });
 
-        const id = result.current.files[0].id;
+        const id = result.current.files[0]!.id;
 
         act((): void => {
             result.current.removeFile(id);

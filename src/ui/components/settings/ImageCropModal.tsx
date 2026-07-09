@@ -67,17 +67,22 @@ export const ImageCropModal = ({
 
     const getTitle = (): string => {
         switch (type) {
-            case 'avatar':
+            case 'avatar': {
                 return 'Crop your profile picture';
-            case 'emoji':
+            }
+            case 'emoji': {
                 return 'Crop your emoji';
-            case 'role-icon':
+            }
+            case 'role-icon': {
                 return 'Crop your role icon';
-            case 'sticker':
+            }
+            case 'sticker': {
                 return 'Crop your sticker';
+            }
             case 'server-banner':
-            case 'banner':
+            case 'banner': {
                 return 'Crop your banner';
+            }
         }
     };
 
@@ -114,7 +119,7 @@ export const ImageCropModal = ({
                             variant="primary"
                             onClick={handleConfirmClick}
                         >
-                            {!isProcessing && (
+                            {isProcessing ? null : (
                                 <Check className="mr-2 h-4 w-4" />
                             )}
                             Apply Crop

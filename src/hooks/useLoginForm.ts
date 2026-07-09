@@ -55,7 +55,9 @@ export const useLoginForm = (): LoginFormResult => {
     const [useBackupCode, setUseBackupCode] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [banInfo, setBanInfo] = useState<BanInfo | null>(null);
-    const resetBan = (): void => setBanInfo(null);
+    const resetBan = (): void => {
+        setBanInfo(null);
+    };
     const navigate = useNavigate();
     const queryClient = useQueryClient();
 
@@ -91,7 +93,14 @@ export const useLoginForm = (): LoginFormResult => {
 
         try {
             let data;
-            if (!requiresTwoFactor) {
+            if (requiresTwoFactor) {
+                data = await authApi.verifyTwoFactor({
+                    tempToken,
+                    ...(useBackupCode
+                        ? { backupCode: twoFactorCode }
+                        : { code: twoFactorCode }),
+                });
+            } else {
                 data = await authApi.login({ login: loginInput, password });
                 if (data.two_factor_required && data.temp_token) {
                     setRequiresTwoFactor(true);
@@ -104,13 +113,6 @@ export const useLoginForm = (): LoginFormResult => {
                     setIsLoading(false);
                     return;
                 }
-            } else {
-                data = await authApi.verifyTwoFactor({
-                    tempToken,
-                    ...(useBackupCode
-                        ? { backupCode: twoFactorCode }
-                        : { code: twoFactorCode }),
-                });
             }
 
             if (!data?.token) {

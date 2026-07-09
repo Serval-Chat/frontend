@@ -11,11 +11,11 @@ export const progressCommand: ConCommandReactor = {
             return { output: ['Error: terminal not available'] };
         }
 
-        const reset = '\u001b[0m';
-        const green = '\u001b[32m';
-        const yellow = '\u001b[33m';
-        const red = '\u001b[31m';
-        const bold = '\u001b[1m';
+        const reset = '\u001B[0m';
+        const green = '\u001B[32m';
+        const yellow = '\u001B[33m';
+        const red = '\u001B[31m';
+        const bold = '\u001B[1m';
 
         for (let i = 0; i <= 100; i += 2) {
             const width = Math.max(
@@ -31,7 +31,7 @@ export const progressCommand: ConCommandReactor = {
 
             const bar = `[${color}${bold}${'█'.repeat(filled)}${reset}${'░'.repeat(empty)}] ${bold}${i}%${reset}`;
 
-            terminal.write(`\r\u001b[0K${bar}`);
+            terminal.write(`\r\u001B[0K${bar}`);
 
             await new Promise(
                 (resolve): NodeJS.Timeout => setTimeout(resolve, 50),

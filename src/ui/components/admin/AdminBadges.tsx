@@ -1,5 +1,5 @@
-import { type ReactNode } from 'react';
-import { useEffect, useMemo, useState } from 'react';
+import type { ReactNode } from 'react';
+import { useEffect, useMemo, useReducer, useState } from 'react';
 
 import { Check, Edit2, Plus, Search, Trash2, UserPlus } from 'lucide-react';
 
@@ -35,6 +35,7 @@ import { UserProfilePicture } from '@/ui/components/common/UserProfilePicture';
 import { Box } from '@/ui/components/layout/Box';
 import { Stack } from '@/ui/components/layout/Stack';
 import { ICON_MAP } from '@/ui/utils/iconMap';
+import { mergeReducer } from '@/utils/mergeReducer';
 
 const AssignBadgeModal = ({
     badge,
@@ -51,7 +52,9 @@ const AssignBadgeModal = ({
         const timer = setTimeout((): void => {
             setDebouncedSearch(searchTerm);
         }, ADMIN_CONSTANTS.SEARCH_DEBOUNCE_MS);
-        return (): void => clearTimeout(timer);
+        return (): void => {
+            clearTimeout(timer);
+        };
     }, [searchTerm]);
 
     const { data: users, isLoading } = useAdminUsers(debouncedSearch, 0, 10);
@@ -65,7 +68,10 @@ const AssignBadgeModal = ({
                     showToast('Badge assigned successfully', 'success');
                 },
                 onError: (e): void => {
-                    showToast(e.message || 'Failed to assign badge', 'error');
+                    showToast(
+                        e.message === '' ? 'Failed to assign badge' : e.message,
+                        'error',
+                    );
                 },
             },
         );
@@ -100,7 +106,9 @@ const AssignBadgeModal = ({
                         size="admin"
                         value={searchTerm}
                         variant="admin"
-                        onChange={(e): void => setSearchTerm(e.target.value)}
+                        onChange={(e): void => {
+                            setSearchTerm(e.target.value);
+                        }}
                     />
                 </Box>
 
@@ -133,12 +141,12 @@ const AssignBadgeModal = ({
                                                     {
                                                         ...user,
                                                         profilePicture:
-                                                            user.profilePicture ||
+                                                            user.profilePicture ??
                                                             undefined,
                                                     } as unknown as User
                                                 }
                                             >
-                                                {user.displayName ||
+                                                {user.displayName ??
                                                     user.username}
                                             </StyledUserName>
                                             <Text
@@ -153,22 +161,19 @@ const AssignBadgeModal = ({
                                     <Button
                                         disabled={
                                             isPending ||
-                                            (user.badges &&
-                                                user.badges.includes(badge.id))
+                                            user.badges.includes(badge.id)
                                         }
                                         size="sm"
                                         variant={
-                                            user.badges &&
                                             user.badges.includes(badge.id)
                                                 ? 'ghost'
                                                 : 'primary'
                                         }
-                                        onClick={(): void =>
-                                            handleAssign(user.id)
-                                        }
+                                        onClick={(): void => {
+                                            handleAssign(user.id);
+                                        }}
                                     >
-                                        {user.badges &&
-                                        user.badges.includes(badge.id) ? (
+                                        {user.badges.includes(badge.id) ? (
                                             <>
                                                 <Check size={14} /> Assigned
                                             </>
@@ -183,9 +188,9 @@ const AssignBadgeModal = ({
                         ) : (
                             <Box className="flex h-40 flex-col items-center justify-center gap-2 text-muted-foreground">
                                 <Text size="xs">
-                                    {searchTerm
-                                        ? 'No matching users identified'
-                                        : 'Awaiting search query...'}
+                                    {searchTerm === ''
+                                        ? 'Awaiting search query...'
+                                        : 'No matching users identified'}
                                 </Text>
                             </Box>
                         )}
@@ -212,11 +217,36 @@ const BadgeEditor = ({
     const isEdit = !!badge;
     const { showToast } = useToast();
 
-    const [id, setId] = useState(badge?.id ?? '');
-    const [name, setName] = useState(badge?.name ?? '');
-    const [description, setDescription] = useState(badge?.description ?? '');
-    const [icon, setIcon] = useState(badge?.icon ?? 'shield');
-    const [color, setColor] = useState(badge?.color ?? '#3b82f6');
+    interface BadgeDraft {
+        id: string;
+        name: string;
+        description: string;
+        icon: string;
+        color: string;
+    }
+    const [draft, patchDraft] = useReducer(mergeReducer<BadgeDraft>, {
+        id: badge?.id ?? '',
+        name: badge?.name ?? '',
+        description: badge?.description ?? '',
+        icon: badge?.icon ?? 'shield',
+        color: badge?.color ?? '#3b82f6',
+    });
+    const { id, name, description, icon, color } = draft;
+    const setId = (v: string): void => {
+        patchDraft({ id: v });
+    };
+    const setName = (v: string): void => {
+        patchDraft({ name: v });
+    };
+    const setDescription = (v: string): void => {
+        patchDraft({ description: v });
+    };
+    const setIcon = (v: string): void => {
+        patchDraft({ icon: v });
+    };
+    const setColor = (v: string): void => {
+        patchDraft({ color: v });
+    };
 
     const { mutate: createBadge, isPending: isCreating } =
         useCreateAdminBadge();
@@ -228,9 +258,9 @@ const BadgeEditor = ({
     const iconOptions = useMemo(
         () =>
             Object.keys(ICON_MAP)
-                .sort()
+                .toSorted()
                 .map((key) => {
-                    const IconComponent = ICON_MAP[key];
+                    const IconComponent = ICON_MAP[key]!;
                     return {
                         id: key,
                         label: key,
@@ -245,27 +275,32 @@ const BadgeEditor = ({
         [],
     );
 
-    const selectedIcon = icon && ICON_MAP[icon] ? icon : null;
+    const selectedIcon =
+        icon !== '' && ICON_MAP[icon] !== undefined ? icon : null;
 
     const previewBadge: Badge = useMemo(
         () => ({
-            id: id || 'id',
-            name: name || 'Name',
-            description: description || '',
-            icon: icon || 'shield',
-            color: color || '#3b82f6',
+            id: id === '' ? 'id' : id,
+            name: name === '' ? 'Name' : name,
+            description,
+            icon: icon === '' ? 'shield' : icon,
+            color: color === '' ? '#3b82f6' : color,
             createdAt: badge?.createdAt ?? new Date().toISOString(),
         }),
         [badge?.createdAt, color, description, icon, id, name],
     );
 
     const handleSave = (): void => {
-        if (!name.trim() || !description.trim() || !icon.trim()) {
+        if (
+            name.trim() === '' ||
+            description.trim() === '' ||
+            icon.trim() === ''
+        ) {
             showToast('name, description, and icon are required', 'error');
             return;
         }
 
-        if (!isEdit && !id.trim()) {
+        if (!isEdit && id.trim() === '') {
             showToast('id is required', 'error');
             return;
         }
@@ -273,7 +308,7 @@ const BadgeEditor = ({
         if (isEdit) {
             updateBadge(
                 {
-                    badgeId: badge!.id,
+                    badgeId: badge.id,
                     patch: {
                         name,
                         description,
@@ -288,7 +323,9 @@ const BadgeEditor = ({
                     },
                     onError: (e): void => {
                         showToast(
-                            e.message || 'Failed to update badge',
+                            e.message === ''
+                                ? 'Failed to update badge'
+                                : e.message,
                             'error',
                         );
                     },
@@ -320,7 +357,7 @@ const BadgeEditor = ({
     return (
         <Modal
             isOpen
-            title={isEdit ? `Edit Badge: ${badge!.id}` : 'Create Badge'}
+            title={isEdit ? `Edit Badge: ${badge.id}` : 'Create Badge'}
             onClose={onClose}
         >
             <div className="space-y-5">
@@ -347,7 +384,9 @@ const BadgeEditor = ({
                             size="admin"
                             value={id}
                             variant="admin"
-                            onChange={(e): void => setId(e.target.value)}
+                            onChange={(e): void => {
+                                setId(e.target.value);
+                            }}
                         />
                     </div>
 
@@ -363,7 +402,9 @@ const BadgeEditor = ({
                             size="admin"
                             value={name}
                             variant="admin"
-                            onChange={(e): void => setName(e.target.value)}
+                            onChange={(e): void => {
+                                setName(e.target.value);
+                            }}
                         />
                     </div>
                 </div>
@@ -381,7 +422,9 @@ const BadgeEditor = ({
                             placeholder="Select icon"
                             searchPlaceholder="Search icons..."
                             value={selectedIcon}
-                            onChange={(value): void => setIcon(value ?? '')}
+                            onChange={(value): void => {
+                                setIcon(value ?? '');
+                            }}
                         />
                     </div>
 
@@ -397,7 +440,9 @@ const BadgeEditor = ({
                             size="admin"
                             value={color}
                             variant="admin"
-                            onChange={(e): void => setColor(e.target.value)}
+                            onChange={(e): void => {
+                                setColor(e.target.value);
+                            }}
                         />
                     </div>
                 </div>
@@ -412,7 +457,9 @@ const BadgeEditor = ({
                     <TextArea
                         placeholder="Shown on hover"
                         value={description}
-                        onChange={(e): void => setDescription(e.target.value)}
+                        onChange={(e): void => {
+                            setDescription(e.target.value);
+                        }}
                     />
                 </div>
 
@@ -536,7 +583,7 @@ export const AdminBadges = (): ReactNode => {
                                             variant="ghost"
                                             onClick={(): void => {
                                                 const confirmed =
-                                                    window.confirm(
+                                                    globalThis.confirm(
                                                         `Delete badge ${badgeItem.id}?`,
                                                     );
                                                 if (!confirmed) return;
@@ -544,17 +591,19 @@ export const AdminBadges = (): ReactNode => {
                                                 deleteBadge(
                                                     { badgeId: badgeItem.id },
                                                     {
-                                                        onSuccess: (): void =>
+                                                        onSuccess: (): void => {
                                                             showToast(
                                                                 'Badge deleted',
                                                                 'success',
-                                                            ),
-                                                        onError: (e): void =>
+                                                            );
+                                                        },
+                                                        onError: (e): void => {
                                                             showToast(
                                                                 e.message ||
                                                                     'Failed to delete badge',
                                                                 'error',
-                                                            ),
+                                                            );
+                                                        },
                                                     },
                                                 );
                                             }}
@@ -577,19 +626,23 @@ export const AdminBadges = (): ReactNode => {
                 </TableBody>
             </Table>
 
-            {editorOpen && (
+            {editorOpen ? (
                 <BadgeEditor
                     badge={editingBadge}
-                    onClose={(): void => setEditorOpen(false)}
+                    onClose={(): void => {
+                        setEditorOpen(false);
+                    }}
                 />
-            )}
+            ) : null}
 
-            {assigningBadge && (
+            {assigningBadge ? (
                 <AssignBadgeModal
                     badge={assigningBadge}
-                    onClose={(): void => setAssigningBadge(null)}
+                    onClose={(): void => {
+                        setAssigningBadge(null);
+                    }}
                 />
-            )}
+            ) : null}
         </div>
     );
 };

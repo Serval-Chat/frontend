@@ -61,7 +61,7 @@ export const ServerIcon = React.memo(
 
         const initials = server.name
             .split(' ')
-            .map((word: string): string => word[0])
+            .map((word: string): string => word[0] ?? '')
             .join('')
             .slice(0, 3)
             .toUpperCase();
@@ -91,17 +91,9 @@ export const ServerIcon = React.memo(
                     className={cn(
                         'flex h-full w-full items-center justify-center overflow-hidden bg-bg-secondary transition-all duration-200',
                         isActive
-                            ? ACTIVE_ROUNDED_CLASSES[
-                                  size as keyof typeof ACTIVE_ROUNDED_CLASSES
-                              ]
-                            : `${
-                                  ROUNDED_CLASSES[
-                                      size as keyof typeof ROUNDED_CLASSES
-                                  ]
-                              } group-hover:${
-                                  ACTIVE_ROUNDED_CLASSES[
-                                      size as keyof typeof ACTIVE_ROUNDED_CLASSES
-                                  ]
+                            ? ACTIVE_ROUNDED_CLASSES[size]
+                            : `${ROUNDED_CLASSES[size]} group-hover:${
+                                  ACTIVE_ROUNDED_CLASSES[size]
                               }`,
                     )}
                 >
@@ -113,7 +105,9 @@ export const ServerIcon = React.memo(
                             draggable="false"
                             loading="lazy"
                             paused={
-                                limitedAnimations && isAnimatedImageUrl(iconUrl)
+                                limitedAnimations
+                                    ? isAnimatedImageUrl(iconUrl)
+                                    : false
                             }
                             src={iconUrl}
                         />
@@ -121,9 +115,9 @@ export const ServerIcon = React.memo(
                         <span className="font-bold">{initials}</span>
                     )}
                 </div>
-                {badgeCount !== undefined && badgeCount > 0 && (
+                {badgeCount !== undefined && badgeCount > 0 ? (
                     <Badge count={badgeCount} />
-                )}
+                ) : null}
             </m.div>
         );
     },

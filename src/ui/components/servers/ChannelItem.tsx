@@ -66,7 +66,7 @@ export const ChannelItem = React.memo(
         onMouseEnter,
     }: ChannelItemProps) => {
         const channelClasses = cn(
-            'group flex w-full items-center justify-between rounded-md border-none px-2 py-1.5 shadow-none transition-all',
+            'group flex w-full items-center justify-between rounded-md border-none px-2 py-1.5 shadow-none transition-colors',
             disabled
                 ? 'cursor-not-allowed opacity-50'
                 : 'cursor-pointer hover:bg-white/5',
@@ -120,9 +120,9 @@ export const ChannelItem = React.memo(
                             >
                                 {name}
                             </span>
-                            {disabled && type === 'voice' && (
+                            {disabled && type === 'voice' ? (
                                 <Settings className="ml-1 h-3 w-3 text-muted-foreground" />
-                            )}
+                            ) : null}
                             {pingCount
                                 ? pingCount > 0 && (
                                       <div className="ml-1.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-danger px-1.5 text-[10px] leading-none font-bold text-white">
@@ -131,7 +131,7 @@ export const ChannelItem = React.memo(
                                   )
                                 : null}
                         </div>
-                        {onSettingsClick && (
+                        {onSettingsClick ? (
                             <IconButton
                                 className="ml-1 shrink-0 p-0.5 opacity-0 transition-opacity group-hover:opacity-100"
                                 icon={Settings}
@@ -143,21 +143,18 @@ export const ChannelItem = React.memo(
                                     onSettingsClick(e);
                                 }}
                             />
-                        )}
+                        ) : null}
                     </div>
                 </m.div>
                 {type === 'voice' &&
-                    connectedUserIds &&
-                    connectedUserIds.length > 0 && (
-                        <div className="mt-0.5 mr-2 mb-1 ml-6 flex flex-col space-y-0.5">
-                            {connectedUserIds.map((userId) => (
-                                <VoiceParticipant
-                                    key={userId}
-                                    userId={userId}
-                                />
-                            ))}
-                        </div>
-                    )}
+                connectedUserIds &&
+                connectedUserIds.length > 0 ? (
+                    <div className="mt-0.5 mr-2 mb-1 ml-6 flex flex-col space-y-0.5">
+                        {connectedUserIds.map((userId) => (
+                            <VoiceParticipant key={userId} userId={userId} />
+                        ))}
+                    </div>
+                ) : null}
             </div>
         );
     },
@@ -195,40 +192,45 @@ export const VoiceParticipant = React.memo(({ userId }: { userId: string }) => {
 
     if (!isMe) {
         const volume = userVolumes[userId] ?? 1;
-        items.push({
-            type: 'custom',
-            content: (
-                <div className="flex min-w-[180px] flex-col gap-2 p-1">
-                    <div className="flex items-center justify-between text-xs font-bold tracking-wider text-muted-foreground uppercase">
-                        <div className="flex items-center gap-1.5">
-                            <Volume2 size={12} />
-                            User Volume
+        items.push(
+            {
+                type: 'custom',
+                content: (
+                    <div className="flex min-w-[180px] flex-col gap-2 p-1">
+                        <div className="flex items-center justify-between text-xs font-bold tracking-wider text-muted-foreground uppercase">
+                            <div className="flex items-center gap-1.5">
+                                <Volume2 size={12} />
+                                User Volume
+                            </div>
+                            <span>
+                                {Math.round((isNaN(volume) ? 1 : volume) * 100)}
+                                %
+                            </span>
                         </div>
-                        <span>
-                            {Math.round((isNaN(volume) ? 1.0 : volume) * 100)}%
-                        </span>
+                        <input
+                            aria-label="Volume"
+                            className="w-full cursor-pointer accent-primary"
+                            max="2"
+                            min="0"
+                            step="0.01"
+                            type="range"
+                            value={volume}
+                            onChange={(e): void => {
+                                dispatch(
+                                    setUserVolume({
+                                        userId,
+                                        volume: Number.parseFloat(
+                                            e.target.value,
+                                        ),
+                                    }),
+                                );
+                            }}
+                        />
                     </div>
-                    <input
-                        aria-label="Volume"
-                        className="w-full cursor-pointer accent-primary"
-                        max="2"
-                        min="0"
-                        step="0.01"
-                        type="range"
-                        value={volume}
-                        onChange={(e): void => {
-                            dispatch(
-                                setUserVolume({
-                                    userId,
-                                    volume: parseFloat(e.target.value),
-                                }),
-                            );
-                        }}
-                    />
-                </div>
-            ),
-        });
-        items.push({ type: 'divider' });
+                ),
+            },
+            { type: 'divider' },
+        );
     }
 
     items.push({
@@ -273,19 +275,19 @@ export const VoiceParticipant = React.memo(({ userId }: { userId: string }) => {
                 <span className="flex-1 truncate text-xs font-medium text-muted-foreground">
                     {user.displayName || user.username}
                 </span>
-                {userState && (userState.isMuted || userState.isDeafened) && (
+                {userState && (userState.isMuted || userState.isDeafened) ? (
                     <div className="mr-1 ml-auto flex shrink-0 items-center gap-1">
-                        {userState.isMuted && (
+                        {userState.isMuted ? (
                             <MicOff className="text-destructive" size={10} />
-                        )}
-                        {userState.isDeafened && (
+                        ) : null}
+                        {userState.isDeafened ? (
                             <HeadphoneOff
                                 className="text-destructive"
                                 size={10}
                             />
-                        )}
+                        ) : null}
                     </div>
-                )}
+                ) : null}
             </div>
         </ContextMenu>
     );

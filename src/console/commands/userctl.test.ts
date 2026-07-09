@@ -197,7 +197,7 @@ describe('userctl command', (): void => {
     });
 
     it('queries friends with badges and colors them', async (): Promise<void> => {
-        mockUsers['1'].badges = [
+        mockUsers['1']!.badges = [
             {
                 id: 'early_supporter',
                 name: 'Early Supporter',
@@ -216,7 +216,7 @@ describe('userctl command', (): void => {
         expect(result.output).toBeDefined();
         const outputStr = result.output?.join('\n') || '';
         expect(outputStr).toContain(
-            '\u001b[38;2;255;85;85mEarly Supporter\u001b[0m',
+            '\u001B[38;2;255;85;85mEarly Supporter\u001B[0m',
         );
         expect(usersApi.getById).toHaveBeenCalledTimes(3);
     });

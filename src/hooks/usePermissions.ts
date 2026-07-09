@@ -29,7 +29,7 @@ const startTimeInterval = (): void => {
     if (intervalId !== null) return;
     intervalId = setInterval((): void => {
         globalNow = Date.now();
-        timeListeners.forEach((l): void => l());
+        for (const l of timeListeners) l();
     }, 1000);
 };
 
@@ -78,25 +78,28 @@ export const usePermissions = (
 
     const memberByUserId = useMemo(() => {
         const map = new Map<string, NonNullable<typeof members>[number]>();
-        members?.forEach((serverMember): void => {
-            map.set(serverMember.userId, serverMember);
-        });
+        if (members)
+            for (const serverMember of members) {
+                map.set(serverMember.userId, serverMember);
+            }
         return map;
     }, [members]);
 
     const channelById = useMemo(() => {
         const map = new Map<string, NonNullable<typeof channels>[number]>();
-        channels?.forEach((channel): void => {
-            map.set(channel.id, channel);
-        });
+        if (channels)
+            for (const channel of channels) {
+                map.set(channel.id, channel);
+            }
         return map;
     }, [channels]);
 
     const categoryById = useMemo(() => {
         const map = new Map<string, NonNullable<typeof categories>[number]>();
-        categories?.forEach((category): void => {
-            map.set(category.id, category);
-        });
+        if (categories)
+            for (const category of categories) {
+                map.set(category.id, category);
+            }
         return map;
     }, [categories]);
 
@@ -168,9 +171,9 @@ export const usePermissions = (
             currentUser?.id &&
             server.ownerId === currentUser.id
         ) {
-            Object.keys(perms).forEach((key): void => {
+            for (const key of Object.keys(perms)) {
                 perms[key as keyof RolePermissions] = true;
-            });
+            }
             return perms;
         }
 
@@ -194,9 +197,9 @@ export const usePermissions = (
                 (r): boolean | undefined => r.permissions?.administrator,
             )
         ) {
-            Object.keys(perms).forEach((key): void => {
+            for (const key of Object.keys(perms)) {
                 perms[key as keyof RolePermissions] = true;
-            });
+            }
             return perms;
         }
 
@@ -210,7 +213,7 @@ export const usePermissions = (
 
                 for (const role of userRoles) {
                     const roleOver = overrides[role.id];
-                    if (roleOver && roleOver[permKey] === true) {
+                    if (roleOver?.[permKey] === true) {
                         return true;
                     }
                 }
@@ -218,21 +221,21 @@ export const usePermissions = (
                 const everyoneId = everyoneRole?.id;
                 const everyoneOver =
                     (everyoneId ? overrides[everyoneId] : undefined) ??
-                    overrides['everyone'];
+                    overrides.everyone;
 
-                if (everyoneOver && everyoneOver[permKey] === true) {
+                if (everyoneOver?.[permKey] === true) {
                     return true;
                 }
 
                 let hasExplicitDeny = false;
                 for (const role of userRoles) {
                     const roleOver = overrides[role.id];
-                    if (roleOver && roleOver[permKey] === false) {
+                    if (roleOver?.[permKey] === false) {
                         hasExplicitDeny = true;
                     }
                 }
 
-                if (everyoneOver && everyoneOver[permKey] === false) {
+                if (everyoneOver?.[permKey] === false) {
                     hasExplicitDeny = true;
                 }
 
@@ -275,41 +278,38 @@ export const usePermissions = (
             return false;
         };
 
-        Object.keys(perms).forEach((key): void => {
+        for (const key of Object.keys(perms)) {
             perms[key as keyof RolePermissions] = evaluatePermission(
                 key as keyof RolePermissions,
             );
-        });
+        }
 
         if (!perms.viewChannels || !perms.viewCategories) {
             perms.sendMessages = false;
         }
 
-        if (!perms.viewChannels && channelId) {
-            if (import.meta.env.DEV) {
-                console.warn(
-                    `[usePermissions] viewChannels=false for channel ${channelId} (server ${serverId})`,
-                    {
-                        channelPermissions:
-                            channelById.get(channelId)?.permissions,
-                        userRoles: userRoles.map(
-                            (
-                                r,
-                            ): {
-                                id: string;
-                                name: string;
-                                position: number;
-                            } => ({
-                                id: r.id,
-                                name: r.name,
-                                position: r.position,
-                            }),
-                        ),
-                        everyonePermissions: everyoneRole?.permissions,
-                        computedPerms: perms,
-                    },
-                );
-            }
+        if (!perms.viewChannels && channelId && import.meta.env.DEV) {
+            console.warn(
+                `[usePermissions] viewChannels=false for channel ${channelId} (server ${serverId})`,
+                {
+                    channelPermissions: channelById.get(channelId)?.permissions,
+                    userRoles: userRoles.map(
+                        (
+                            r,
+                        ): {
+                            id: string;
+                            name: string;
+                            position: number;
+                        } => ({
+                            id: r.id,
+                            name: r.name,
+                            position: r.position,
+                        }),
+                    ),
+                    everyonePermissions: everyoneRole?.permissions,
+                    computedPerms: perms,
+                },
+            );
         }
         return perms;
     }, [

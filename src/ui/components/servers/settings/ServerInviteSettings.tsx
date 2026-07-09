@@ -27,6 +27,12 @@ interface ServerInviteSettingsProps {
     serverId: string;
 }
 
+const formatExpiry = (expiresAt?: string): string => {
+    if (!expiresAt) return 'Never';
+    const date = new Date(expiresAt);
+    return date.toLocaleString(APP_LOCALE);
+};
+
 export const ServerInviteSettings = ({
     serverId,
 }: ServerInviteSettingsProps) => {
@@ -62,7 +68,7 @@ export const ServerInviteSettings = ({
     };
 
     const handleCopy = (code: string): void => {
-        const url = `${window.location.origin}/invite/${code}`;
+        const url = `${globalThis.location.origin}/invite/${code}`;
         void navigator.clipboard.writeText(url);
         showToast('Invite link copied to clipboard!', 'success');
     };
@@ -76,12 +82,6 @@ export const ServerInviteSettings = ({
                 showToast('Failed to delete invite.', 'error');
             },
         });
-    };
-
-    const formatExpiry = (expiresAt?: string): string => {
-        if (!expiresAt) return 'Never';
-        const date = new Date(expiresAt);
-        return date.toLocaleString(APP_LOCALE);
     };
 
     if (isLoading) {
@@ -119,9 +119,9 @@ export const ServerInviteSettings = ({
                             id="custom-path"
                             placeholder="e.g. awesome-server"
                             value={customPath}
-                            onChange={(e): void =>
-                                setCustomPath(e.target.value)
-                            }
+                            onChange={(e): void => {
+                                setCustomPath(e.target.value);
+                            }}
                         />
                         <Text size="xs" variant="muted">
                             Optional. Leave empty for random code.
@@ -140,9 +140,11 @@ export const ServerInviteSettings = ({
                             min={0}
                             type="number"
                             value={maxUses}
-                            onChange={(e): void =>
-                                setMaxUses(parseInt(e.target.value) || 0)
-                            }
+                            onChange={(e): void => {
+                                setMaxUses(
+                                    Number.parseInt(e.target.value) || 0,
+                                );
+                            }}
                         />
                         <Text size="xs" variant="muted">
                             0 for unlimited uses.
@@ -160,17 +162,17 @@ export const ServerInviteSettings = ({
                             className="border-input-border bg-input-bg h-10 w-full rounded-md border px-3 text-sm transition-all focus:ring-2 focus:ring-primary focus:outline-none"
                             id="expires-in"
                             value={expiresIn}
-                            onChange={(e): void =>
-                                setExpiresIn(parseInt(e.target.value))
-                            }
+                            onChange={(e): void => {
+                                setExpiresIn(Number.parseInt(e.target.value));
+                            }}
                         >
                             <option value={0}>Never</option>
                             <option value={1800}>30 Minutes</option>
                             <option value={3600}>1 Hour</option>
-                            <option value={21600}>6 Hours</option>
-                            <option value={43200}>12 Hours</option>
-                            <option value={86400}>24 Hours</option>
-                            <option value={604800}>7 Days</option>
+                            <option value={21_600}>6 Hours</option>
+                            <option value={43_200}>12 Hours</option>
+                            <option value={86_400}>24 Hours</option>
+                            <option value={604_800}>7 Days</option>
                         </select>
                     </div>
                 </div>
@@ -236,12 +238,12 @@ export const ServerInviteSettings = ({
                                                 size="sm"
                                                 title="Copy Link"
                                                 variant="ghost"
-                                                onClick={(): void =>
+                                                onClick={(): void => {
                                                     handleCopy(
                                                         invite.customPath ||
                                                             invite.code,
-                                                    )
-                                                }
+                                                    );
+                                                }}
                                             >
                                                 <Copy className="h-4 w-4" />
                                             </Button>
@@ -249,9 +251,9 @@ export const ServerInviteSettings = ({
                                                 size="sm"
                                                 title="Delete"
                                                 variant="ghost"
-                                                onClick={(): void =>
-                                                    handleDelete(invite.id)
-                                                }
+                                                onClick={(): void => {
+                                                    handleDelete(invite.id);
+                                                }}
                                             >
                                                 <Trash2 className="text-status-error h-4 w-4" />
                                             </Button>

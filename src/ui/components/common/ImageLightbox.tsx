@@ -33,10 +33,10 @@ export const ImageLightbox = ({
         const handleKey = (e: KeyboardEvent): void => {
             if (e.key === 'Escape') onCloseEvent();
         };
-        window.addEventListener('keydown', handleKey);
+        globalThis.addEventListener('keydown', handleKey);
         document.body.style.overflow = 'hidden';
         return (): void => {
-            window.removeEventListener('keydown', handleKey);
+            globalThis.removeEventListener('keydown', handleKey);
             document.body.style.overflow = '';
         };
     }, [isOpen]);
@@ -54,17 +54,17 @@ export const ImageLightbox = ({
         if (isTauri()) {
             try {
                 await downloadImage(src, alt);
-            } catch (err) {
-                console.error('Tauri download error:', err);
+            } catch (error) {
+                console.error('Tauri download error:', error);
                 window.open(src, '_blank');
             }
         } else {
             const link = document.createElement('a');
             link.href = src;
             link.download = alt || 'image';
-            document.body.appendChild(link);
+            document.body.append(link);
             link.click();
-            document.body.removeChild(link);
+            link.remove();
         }
     };
 
@@ -72,7 +72,7 @@ export const ImageLightbox = ({
 
     return createPortal(
         <AnimatePresence>
-            {isOpen && (
+            {isOpen ? (
                 <div className="fixed inset-0 z-top flex flex-col">
                     {/* Backdrop */}
                     <m.div
@@ -174,7 +174,7 @@ export const ImageLightbox = ({
                         />
                     </button>
                 </div>
-            )}
+            ) : null}
         </AnimatePresence>,
         document.body,
     );

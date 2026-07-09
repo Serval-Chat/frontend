@@ -62,12 +62,15 @@ interface ParsedTextProps {
 }
 
 const escapeRegExp = (s: string): string =>
-    s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    s.replaceAll(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`);
 
-const renderHighlighted = (
-    text: string,
-    query: string | undefined,
-): React.ReactNode => {
+const HighlightedText = ({
+    text,
+    query,
+}: {
+    text: string;
+    query: string | undefined;
+}): React.ReactNode => {
     const trimmed = query?.trim();
     if (!trimmed) return text;
     const parts = text.split(new RegExp(`(${escapeRegExp(trimmed)})`, 'gi'));
@@ -163,8 +166,8 @@ export const ParsedText = React.memo<ParsedTextProps>(
             const groups: GroupedNode[] = [];
             for (const node of displayNodes) {
                 if (node.type === 'checklist') {
-                    const last = groups[groups.length - 1];
-                    if (last !== undefined && last.type === '_cl_group') {
+                    const last = groups.at(-1);
+                    if (last?.type === '_cl_group') {
                         last.items.push(node);
                     } else {
                         groups.push({ type: '_cl_group', items: [node] });
@@ -237,9 +240,9 @@ export const ParsedText = React.memo<ParsedTextProps>(
                             />
                         );
                     }
-                    const node = item as ASTNode;
+                    const node = item;
                     switch (node.type) {
-                        case 'text':
+                        case 'text': {
                             return (
                                 <Text
                                     key={idx}
@@ -247,14 +250,15 @@ export const ParsedText = React.memo<ParsedTextProps>(
                                     variant={variant}
                                     wrap={wrap}
                                 >
-                                    {renderHighlighted(
-                                        node.content,
-                                        highlightQuery,
-                                    )}
+                                    <HighlightedText
+                                        query={highlightQuery}
+                                        text={node.content}
+                                    />
                                 </Text>
                             );
+                        }
 
-                        case 'bold':
+                        case 'bold': {
                             return (
                                 <Text
                                     key={idx}
@@ -273,8 +277,9 @@ export const ParsedText = React.memo<ParsedTextProps>(
                                     )}
                                 </Text>
                             );
+                        }
 
-                        case 'italic':
+                        case 'italic': {
                             return (
                                 <Text
                                     fontStyle="italic"
@@ -293,8 +298,9 @@ export const ParsedText = React.memo<ParsedTextProps>(
                                     )}
                                 </Text>
                             );
+                        }
 
-                        case 'bold_italic':
+                        case 'bold_italic': {
                             return (
                                 <Text
                                     fontStyle="italic"
@@ -314,8 +320,9 @@ export const ParsedText = React.memo<ParsedTextProps>(
                                     )}
                                 </Text>
                             );
+                        }
 
-                        case 'underline':
+                        case 'underline': {
                             return (
                                 <Text
                                     decoration="underline"
@@ -334,8 +341,9 @@ export const ParsedText = React.memo<ParsedTextProps>(
                                     )}
                                 </Text>
                             );
+                        }
 
-                        case 'curly_underline':
+                        case 'curly_underline': {
                             return (
                                 <Text
                                     className="curly-underline"
@@ -354,8 +362,9 @@ export const ParsedText = React.memo<ParsedTextProps>(
                                     )}
                                 </Text>
                             );
+                        }
 
-                        case 'jagged_underline':
+                        case 'jagged_underline': {
                             return (
                                 <Text
                                     className="jagged-underline"
@@ -374,8 +383,9 @@ export const ParsedText = React.memo<ParsedTextProps>(
                                     )}
                                 </Text>
                             );
+                        }
 
-                        case 'double_underline':
+                        case 'double_underline': {
                             return (
                                 <Text
                                     className="double-underline"
@@ -394,8 +404,9 @@ export const ParsedText = React.memo<ParsedTextProps>(
                                     )}
                                 </Text>
                             );
+                        }
 
-                        case 'double_curly_underline':
+                        case 'double_curly_underline': {
                             return (
                                 <Text
                                     className="double-curly-underline"
@@ -414,8 +425,9 @@ export const ParsedText = React.memo<ParsedTextProps>(
                                     )}
                                 </Text>
                             );
+                        }
 
-                        case 'dashed_underline':
+                        case 'dashed_underline': {
                             return (
                                 <Text
                                     className="dashed-underline"
@@ -434,8 +446,9 @@ export const ParsedText = React.memo<ParsedTextProps>(
                                     )}
                                 </Text>
                             );
+                        }
 
-                        case 'dotted_underline':
+                        case 'dotted_underline': {
                             return (
                                 <Text
                                     className="dotted-underline"
@@ -454,8 +467,9 @@ export const ParsedText = React.memo<ParsedTextProps>(
                                     )}
                                 </Text>
                             );
+                        }
 
-                        case 'rhythm_underline':
+                        case 'rhythm_underline': {
                             return (
                                 <Text
                                     className="rhythm-underline"
@@ -474,8 +488,9 @@ export const ParsedText = React.memo<ParsedTextProps>(
                                     )}
                                 </Text>
                             );
+                        }
 
-                        case 'superscript':
+                        case 'superscript': {
                             return (
                                 <sup key={idx}>
                                     {typeof node.content === 'string' ? (
@@ -488,8 +503,9 @@ export const ParsedText = React.memo<ParsedTextProps>(
                                     )}
                                 </sup>
                             );
+                        }
 
-                        case 'subscript':
+                        case 'subscript': {
                             return (
                                 <sub key={idx}>
                                     {typeof node.content === 'string' ? (
@@ -502,8 +518,9 @@ export const ParsedText = React.memo<ParsedTextProps>(
                                     )}
                                 </sub>
                             );
+                        }
 
-                        case 'stacked_script':
+                        case 'stacked_script': {
                             return (
                                 <span className="stacked-script" key={idx}>
                                     <sup className="stacked-sup">
@@ -528,8 +545,9 @@ export const ParsedText = React.memo<ParsedTextProps>(
                                     </sub>
                                 </span>
                             );
+                        }
 
-                        case 'strikethrough':
+                        case 'strikethrough': {
                             return (
                                 <Text
                                     decoration="strike"
@@ -548,8 +566,9 @@ export const ParsedText = React.memo<ParsedTextProps>(
                                     )}
                                 </Text>
                             );
+                        }
 
-                        case 'emoji':
+                        case 'emoji': {
                             return (
                                 <ParsedEmoji
                                     emojiId={node.emojiId}
@@ -557,8 +576,9 @@ export const ParsedText = React.memo<ParsedTextProps>(
                                     key={idx}
                                 />
                             );
+                        }
 
-                        case 'unicode_emoji':
+                        case 'unicode_emoji': {
                             return (
                                 <ParsedUnicodeEmoji
                                     content={node.content}
@@ -566,8 +586,9 @@ export const ParsedText = React.memo<ParsedTextProps>(
                                     key={idx}
                                 />
                             );
+                        }
 
-                        case 'link':
+                        case 'link': {
                             return (
                                 <Link href={node.url} key={idx} size={size}>
                                     {typeof node.text === 'string' ? (
@@ -582,8 +603,9 @@ export const ParsedText = React.memo<ParsedTextProps>(
                                     )}
                                 </Link>
                             );
+                        }
 
-                        case 'h1':
+                        case 'h1': {
                             return (
                                 <Heading key={idx} level={1} variant="chat-h1">
                                     {typeof node.content === 'string' ? (
@@ -596,8 +618,9 @@ export const ParsedText = React.memo<ParsedTextProps>(
                                     )}
                                 </Heading>
                             );
+                        }
 
-                        case 'h2':
+                        case 'h2': {
                             return (
                                 <Heading key={idx} level={2} variant="chat-h2">
                                     {typeof node.content === 'string' ? (
@@ -610,8 +633,9 @@ export const ParsedText = React.memo<ParsedTextProps>(
                                     )}
                                 </Heading>
                             );
+                        }
 
-                        case 'h3':
+                        case 'h3': {
                             return (
                                 <Heading key={idx} level={3} variant="chat-h3">
                                     {typeof node.content === 'string' ? (
@@ -624,8 +648,9 @@ export const ParsedText = React.memo<ParsedTextProps>(
                                     )}
                                 </Heading>
                             );
+                        }
 
-                        case 'subtext':
+                        case 'subtext': {
                             return (
                                 <Text
                                     key={idx}
@@ -643,8 +668,9 @@ export const ParsedText = React.memo<ParsedTextProps>(
                                     )}
                                 </Text>
                             );
+                        }
 
-                        case 'spoiler':
+                        case 'spoiler': {
                             return (
                                 <Spoiler key={idx}>
                                     {typeof node.content === 'string' ? (
@@ -657,8 +683,9 @@ export const ParsedText = React.memo<ParsedTextProps>(
                                     )}
                                 </Spoiler>
                             );
+                        }
 
-                        case 'inline_code':
+                        case 'inline_code': {
                             return (
                                 <code
                                     className="rounded bg-bg-secondary px-1 py-0.5 font-mono text-sm"
@@ -667,8 +694,9 @@ export const ParsedText = React.memo<ParsedTextProps>(
                                     {node.content}
                                 </code>
                             );
+                        }
 
-                        case 'code_block':
+                        case 'code_block': {
                             if (condenseCodeBlocks) {
                                 return (
                                     <Text
@@ -697,8 +725,9 @@ export const ParsedText = React.memo<ParsedTextProps>(
                                     />
                                 </React.Suspense>
                             );
+                        }
 
-                        case 'mermaid':
+                        case 'mermaid': {
                             if (condenseCodeBlocks) {
                                 return (
                                     <Text
@@ -724,8 +753,9 @@ export const ParsedText = React.memo<ParsedTextProps>(
                                     <MermaidChart content={node.content} />
                                 </React.Suspense>
                             );
+                        }
 
-                        case 'invite':
+                        case 'invite': {
                             if (condenseInvites) {
                                 return (
                                     <Link href={node.url} key={idx} size={size}>
@@ -740,8 +770,9 @@ export const ParsedText = React.memo<ParsedTextProps>(
                                     url={node.url}
                                 />
                             );
+                        }
 
-                        case 'file':
+                        case 'file': {
                             return (
                                 <FileEmbed
                                     key={idx}
@@ -749,8 +780,9 @@ export const ParsedText = React.memo<ParsedTextProps>(
                                     onResize={onResize}
                                 />
                             );
+                        }
 
-                        case 'mention':
+                        case 'mention': {
                             return (
                                 <Mention
                                     key={idx}
@@ -759,8 +791,9 @@ export const ParsedText = React.memo<ParsedTextProps>(
                                     userId={node.userId}
                                 />
                             );
+                        }
 
-                        case 'role_mention':
+                        case 'role_mention': {
                             return (
                                 <RoleMention
                                     key={idx}
@@ -768,8 +801,9 @@ export const ParsedText = React.memo<ParsedTextProps>(
                                     size={size}
                                 />
                             );
+                        }
 
-                        case 'channel_link':
+                        case 'channel_link': {
                             return (
                                 <ChannelLink
                                     channelId={node.channelId}
@@ -778,8 +812,9 @@ export const ParsedText = React.memo<ParsedTextProps>(
                                     serverId={node.serverId}
                                 />
                             );
+                        }
 
-                        case 'everyone':
+                        case 'everyone': {
                             return (
                                 <Box
                                     as="span"
@@ -796,8 +831,9 @@ export const ParsedText = React.memo<ParsedTextProps>(
                                     </Text>
                                 </Box>
                             );
+                        }
 
-                        case 'timestamp':
+                        case 'timestamp': {
                             return (
                                 <Timestamp
                                     flag={node.flag}
@@ -805,11 +841,13 @@ export const ParsedText = React.memo<ParsedTextProps>(
                                     timestamp={node.timestamp}
                                 />
                             );
+                        }
 
-                        case 'checklist':
+                        case 'checklist': {
                             return null;
+                        }
 
-                        case 'unordered_list':
+                        case 'unordered_list': {
                             return (
                                 <Box
                                     className="flex items-baseline gap-2"
@@ -844,8 +882,9 @@ export const ParsedText = React.memo<ParsedTextProps>(
                                     </Box>
                                 </Box>
                             );
+                        }
 
-                        case 'ordered_list':
+                        case 'ordered_list': {
                             return (
                                 <Box
                                     className="flex items-baseline gap-1.5"
@@ -880,8 +919,9 @@ export const ParsedText = React.memo<ParsedTextProps>(
                                     </Box>
                                 </Box>
                             );
+                        }
 
-                        case 'table':
+                        case 'table': {
                             return (
                                 <Table fullWidth={false} key={idx}>
                                     <TableHeader>
@@ -924,8 +964,9 @@ export const ParsedText = React.memo<ParsedTextProps>(
                                     </TableBody>
                                 </Table>
                             );
+                        }
 
-                        case 'latex':
+                        case 'latex': {
                             return (
                                 <React.Suspense
                                     fallback={
@@ -941,8 +982,9 @@ export const ParsedText = React.memo<ParsedTextProps>(
                                     />
                                 </React.Suspense>
                             );
+                        }
 
-                        case 'inline_latex':
+                        case 'inline_latex': {
                             return (
                                 <React.Suspense
                                     fallback={
@@ -955,13 +997,15 @@ export const ParsedText = React.memo<ParsedTextProps>(
                                     <LatexRenderer content={node.content} />
                                 </React.Suspense>
                             );
+                        }
 
-                        case 'thematic_break':
+                        case 'thematic_break': {
                             return (
                                 <Divider fullWidth className="my-2" key={idx} />
                             );
+                        }
 
-                        case 'blockquote':
+                        case 'blockquote': {
                             return (
                                 <div
                                     className={cn(
@@ -986,8 +1030,9 @@ export const ParsedText = React.memo<ParsedTextProps>(
                                     )}
                                 </div>
                             );
+                        }
 
-                        case 'admonition':
+                        case 'admonition': {
                             return (
                                 <Admonition
                                     isNested={isNested}
@@ -1010,8 +1055,9 @@ export const ParsedText = React.memo<ParsedTextProps>(
                                     ) : null}
                                 </Admonition>
                             );
+                        }
 
-                        case 'klipy':
+                        case 'klipy': {
                             return (
                                 <GifPlayer
                                     key={idx}
@@ -1020,27 +1066,30 @@ export const ParsedText = React.memo<ParsedTextProps>(
                                     onResize={onResize}
                                 />
                             );
+                        }
 
-                        case 'decoration':
+                        case 'decoration': {
                             return (
                                 <DecorationEmbed
                                     decorationId={node.decorationId}
                                     key={idx}
                                 />
                             );
+                        }
 
-                        default:
+                        default: {
                             return null;
+                        }
                     }
                 })}
                 {condenseFiles &&
-                    fileNodesCount > 0 &&
-                    !hasVisibleContent &&
-                    !isNested && (
-                        <span className="ml-1 text-[11px] italic opacity-80">
-                            Attachments: {fileNodesCount}
-                        </span>
-                    )}
+                fileNodesCount > 0 &&
+                !hasVisibleContent &&
+                !isNested ? (
+                    <span className="ml-1 text-[11px] italic opacity-80">
+                        Attachments: {fileNodesCount}
+                    </span>
+                ) : null}
             </span>
         );
     },

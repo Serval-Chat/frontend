@@ -48,6 +48,162 @@ interface AdminServerDetailProps {
     onViewUser: (userId: string) => void;
 }
 
+type AdminServerData = NonNullable<
+    ReturnType<typeof useAdminServerDetail>['data']
+>;
+
+const ServerModerationControls = ({
+    server,
+    isVerifying,
+    isUnverifying,
+    isRestoring,
+    isDeleting,
+    onToggleVerification,
+    onRestore,
+    onDelete,
+}: {
+    server: AdminServerData;
+    isVerifying: boolean;
+    isUnverifying: boolean;
+    isRestoring: boolean;
+    isDeleting: boolean;
+    onToggleVerification: () => void;
+    onRestore: () => void;
+    onDelete: () => void;
+}) => (
+    <Box className="rounded-xl border border-border-subtle bg-bg-subtle p-4">
+        <Stack className="mb-3 items-center gap-2" direction="row">
+            <Info className="text-primary" size={14} />
+            <Heading level={4} variant="admin-sub">
+                Moderation Controls
+            </Heading>
+        </Stack>
+        <Box className="flex flex-col gap-2 pt-2">
+            {/* Verification Toggle */}
+            <Button
+                className={
+                    server.verified
+                        ? 'hover:bg-info/10 hover:text-info w-full gap-2 rounded-lg text-xs'
+                        : 'w-full gap-2 rounded-lg text-xs hover:bg-primary/10 hover:text-primary'
+                }
+                loading={isVerifying || isUnverifying}
+                variant="ghost"
+                onClick={onToggleVerification}
+            >
+                {server.verified ? (
+                    <>
+                        <ShieldCheck className="text-info" size={14} />
+                        Remove Verified Badge
+                    </>
+                ) : (
+                    <>
+                        <BadgeCheck
+                            className={
+                                server.verificationRequested
+                                    ? 'text-warning'
+                                    : 'text-primary'
+                            }
+                            size={14}
+                        />
+                        {server.verificationRequested
+                            ? 'Approve Verification Request'
+                            : 'Grant Verified Badge'}
+                    </>
+                )}
+            </Button>
+
+            {/* Delete/Restore Toggle */}
+            {server.deletedAt ? (
+                <Button
+                    className="w-full gap-2 rounded-lg text-xs"
+                    loading={isRestoring}
+                    variant="primary"
+                    onClick={onRestore}
+                >
+                    <RefreshCw size={14} />
+                    Restore Server
+                </Button>
+            ) : (
+                <Button
+                    className="w-full gap-2 rounded-xl bg-danger/10 text-danger hover:bg-danger/10 hover:text-danger"
+                    loading={isDeleting}
+                    variant="ghost"
+                    onClick={onDelete}
+                >
+                    <Trash2 size={16} />
+                    Soft Delete Server
+                </Button>
+            )}
+        </Box>
+    </Box>
+);
+
+const ServerInvitesCard = ({
+    invites,
+    isLoadingInvites,
+    isDeletingInvite,
+    onRevokeInvite,
+}: {
+    invites: ReturnType<typeof useAdminServerInvites>['data'];
+    isLoadingInvites: boolean;
+    isDeletingInvite: boolean;
+    onRevokeInvite: (inviteId: string) => void;
+}) => (
+    <Box className="rounded-xl border border-border-subtle bg-bg-subtle p-4">
+        <Stack className="mb-3 items-center gap-2" direction="row">
+            <Link2 className="text-primary" size={14} />
+            <Heading level={4} variant="admin-sub">
+                Active Invites ({invites?.length || 0})
+            </Heading>
+        </Stack>
+        <Box className="pt-2">
+            {isLoadingInvites ? (
+                <Text className="text-xs" variant="muted">
+                    Loading invites...
+                </Text>
+            ) : invites && invites.length > 0 ? (
+                <div className="custom-scrollbar max-h-[200px] space-y-1.5 overflow-y-auto pr-1">
+                    {invites.map((invite) => (
+                        <div
+                            className="flex items-center justify-between rounded-lg border border-border-subtle/50 bg-bg-secondary/30 p-2"
+                            key={invite.id}
+                        >
+                            <div className="flex flex-col">
+                                <span className="font-mono text-xs leading-tight font-bold">
+                                    {invite.customPath || invite.code}
+                                </span>
+                                <span className="text-[9px] font-medium text-muted-foreground uppercase">
+                                    {invite.uses} / {invite.maxUses || '∞'} Uses
+                                    • Exp:{' '}
+                                    {invite.expiresAt
+                                        ? new Date(
+                                              invite.expiresAt,
+                                          ).toLocaleDateString(APP_LOCALE)
+                                        : 'Never'}
+                                </span>
+                            </div>
+                            <Button
+                                className="h-6 w-6 p-0 text-danger hover:bg-danger/10"
+                                disabled={isDeletingInvite}
+                                variant="ghost"
+                                onClick={(): void => {
+                                    onRevokeInvite(invite.id);
+                                }}
+                            >
+                                <Trash2 size={12} />
+                            </Button>
+                        </div>
+                    ))}
+                </div>
+            ) : (
+                <Text className="text-xs" variant="muted">
+                    No active invites found.
+                </Text>
+            )}
+        </Box>
+    </Box>
+);
+
 export const AdminServerDetail = ({
     serverId,
     onBack,
@@ -108,68 +264,79 @@ export const AdminServerDetail = ({
 
     const handleDelete = (): void => {
         if (
-            !window.confirm(`Are you sure you want to delete "${server.name}"?`)
+            !globalThis.confirm(
+                `Are you sure you want to delete "${server.name}"?`,
+            )
         )
             return;
         deleteServer(serverId, {
-            onSuccess: (): void =>
-                showToast('Server soft-deleted successfully', 'success'),
-            onError: (err): void =>
-                showToast(err.message || 'Failed to delete server', 'error'),
+            onSuccess: (): void => {
+                showToast('Server soft-deleted successfully', 'success');
+            },
+            onError: (err): void => {
+                showToast(err.message || 'Failed to delete server', 'error');
+            },
         });
     };
 
     const handleRestore = (): void => {
         restoreServer(serverId, {
-            onSuccess: (): void =>
-                showToast('Server restored successfully', 'success'),
-            onError: (err): void =>
-                showToast(err.message || 'Failed to restore server', 'error'),
+            onSuccess: (): void => {
+                showToast('Server restored successfully', 'success');
+            },
+            onError: (err): void => {
+                showToast(err.message || 'Failed to restore server', 'error');
+            },
         });
     };
 
     const handleRevokeInvite = (inviteId: string): void => {
-        if (!window.confirm('Are you sure you want to revoke this invite?'))
+        if (!globalThis.confirm('Are you sure you want to revoke this invite?'))
             return;
         deleteInvite(inviteId, {
-            onSuccess: (): void =>
-                showToast('Invite revoked successfully', 'success'),
-            onError: (err): void =>
-                showToast(err.message || 'Failed to revoke invite', 'error'),
+            onSuccess: (): void => {
+                showToast('Invite revoked successfully', 'success');
+            },
+            onError: (err): void => {
+                showToast(err.message || 'Failed to revoke invite', 'error');
+            },
         });
     };
 
     const handleToggleVerification = (): void => {
         if (server.verified) {
             if (
-                !window.confirm(
+                !globalThis.confirm(
                     'Are you sure you want to remove the verification badge?',
                 )
             )
                 return;
             unverifyServer(serverId, {
-                onSuccess: (): void =>
-                    showToast('Verification badge removed', 'success'),
-                onError: (err): void =>
-                    showToast(err.message || 'Failed to remove badge', 'error'),
+                onSuccess: (): void => {
+                    showToast('Verification badge removed', 'success');
+                },
+                onError: (err): void => {
+                    showToast(err.message || 'Failed to remove badge', 'error');
+                },
             });
         } else {
-            if (!server.verificationRequested) {
-                if (
-                    !window.confirm(
-                        'This server has NOT requested verification. Are you sure you want to force-verify it?',
-                    )
+            if (
+                !server.verificationRequested &&
+                !globalThis.confirm(
+                    'This server has NOT requested verification. Are you sure you want to force-verify it?',
                 )
-                    return;
-            }
+            )
+                return;
             verifyServer(serverId, {
-                onSuccess: (): void =>
-                    showToast('Server verified successfully', 'success'),
-                onError: (err): void =>
+                onSuccess: (): void => {
+                    showToast('Server verified successfully', 'success');
+                },
+                onError: (err): void => {
                     showToast(
                         err.message || 'Failed to verify server',
                         'error',
-                    ),
+                    );
+                },
             });
         }
     };
@@ -232,7 +399,7 @@ export const AdminServerDetail = ({
                     </Box>
 
                     {/* Owner Card */}
-                    {server.owner && (
+                    {server.owner ? (
                         <Box className="rounded-xl border border-border-subtle bg-bg-subtle p-4">
                             <Heading
                                 className="mb-3"
@@ -266,153 +433,36 @@ export const AdminServerDetail = ({
                                 <Button
                                     className="gap-2 rounded-lg text-xs"
                                     variant="normal"
-                                    onClick={(): void =>
-                                        onViewUser(server.owner!.id)
-                                    }
+                                    onClick={(): void => {
+                                        onViewUser(server.owner!.id);
+                                    }}
                                 >
                                     <Eye size={14} />
                                     View Details
                                 </Button>
                             </Box>
                         </Box>
-                    )}
+                    ) : null}
 
                     {/* Server Actions */}
-                    <Box className="rounded-xl border border-border-subtle bg-bg-subtle p-4">
-                        <Stack
-                            className="mb-3 items-center gap-2"
-                            direction="row"
-                        >
-                            <Info className="text-primary" size={14} />
-                            <Heading level={4} variant="admin-sub">
-                                Moderation Controls
-                            </Heading>
-                        </Stack>
-                        <Box className="flex flex-col gap-2 pt-2">
-                            {/* Verification Toggle */}
-                            <Button
-                                className={
-                                    server.verified
-                                        ? 'hover:bg-info/10 hover:text-info w-full gap-2 rounded-lg text-xs'
-                                        : 'w-full gap-2 rounded-lg text-xs hover:bg-primary/10 hover:text-primary'
-                                }
-                                loading={isVerifying || isUnverifying}
-                                variant="ghost"
-                                onClick={handleToggleVerification}
-                            >
-                                {server.verified ? (
-                                    <>
-                                        <ShieldCheck
-                                            className="text-info"
-                                            size={14}
-                                        />
-                                        Remove Verified Badge
-                                    </>
-                                ) : (
-                                    <>
-                                        <BadgeCheck
-                                            className={
-                                                server.verificationRequested
-                                                    ? 'text-warning'
-                                                    : 'text-primary'
-                                            }
-                                            size={14}
-                                        />
-                                        {server.verificationRequested
-                                            ? 'Approve Verification Request'
-                                            : 'Grant Verified Badge'}
-                                    </>
-                                )}
-                            </Button>
-
-                            {/* Delete/Restore Toggle */}
-                            {server.deletedAt ? (
-                                <Button
-                                    className="w-full gap-2 rounded-lg text-xs"
-                                    loading={isRestoring}
-                                    variant="primary"
-                                    onClick={handleRestore}
-                                >
-                                    <RefreshCw size={14} />
-                                    Restore Server
-                                </Button>
-                            ) : (
-                                <Button
-                                    className="w-full gap-2 rounded-xl bg-danger/10 text-danger hover:bg-danger/10 hover:text-danger"
-                                    loading={isDeleting}
-                                    variant="ghost"
-                                    onClick={handleDelete}
-                                >
-                                    <Trash2 size={16} />
-                                    Soft Delete Server
-                                </Button>
-                            )}
-                        </Box>
-                    </Box>
+                    <ServerModerationControls
+                        isDeleting={isDeleting}
+                        isRestoring={isRestoring}
+                        isUnverifying={isUnverifying}
+                        isVerifying={isVerifying}
+                        server={server}
+                        onDelete={handleDelete}
+                        onRestore={handleRestore}
+                        onToggleVerification={handleToggleVerification}
+                    />
 
                     {/* Server Invites */}
-                    <Box className="rounded-xl border border-border-subtle bg-bg-subtle p-4">
-                        <Stack
-                            className="mb-3 items-center gap-2"
-                            direction="row"
-                        >
-                            <Link2 className="text-primary" size={14} />
-                            <Heading level={4} variant="admin-sub">
-                                Active Invites ({invites?.length || 0})
-                            </Heading>
-                        </Stack>
-                        <Box className="pt-2">
-                            {isLoadingInvites ? (
-                                <Text className="text-xs" variant="muted">
-                                    Loading invites...
-                                </Text>
-                            ) : invites && invites.length > 0 ? (
-                                <div className="custom-scrollbar max-h-[200px] space-y-1.5 overflow-y-auto pr-1">
-                                    {invites.map((invite) => (
-                                        <div
-                                            className="flex items-center justify-between rounded-lg border border-border-subtle/50 bg-bg-secondary/30 p-2"
-                                            key={invite.id}
-                                        >
-                                            <div className="flex flex-col">
-                                                <span className="font-mono text-xs leading-tight font-bold">
-                                                    {invite.customPath ||
-                                                        invite.code}
-                                                </span>
-                                                <span className="text-[9px] font-medium text-muted-foreground uppercase">
-                                                    {invite.uses} /{' '}
-                                                    {invite.maxUses || '∞'} Uses
-                                                    • Exp:{' '}
-                                                    {invite.expiresAt
-                                                        ? new Date(
-                                                              invite.expiresAt,
-                                                          ).toLocaleDateString(
-                                                              APP_LOCALE,
-                                                          )
-                                                        : 'Never'}
-                                                </span>
-                                            </div>
-                                            <Button
-                                                className="h-6 w-6 p-0 text-danger hover:bg-danger/10"
-                                                disabled={isDeletingInvite}
-                                                variant="ghost"
-                                                onClick={(): void =>
-                                                    handleRevokeInvite(
-                                                        invite.id,
-                                                    )
-                                                }
-                                            >
-                                                <Trash2 size={12} />
-                                            </Button>
-                                        </div>
-                                    ))}
-                                </div>
-                            ) : (
-                                <Text className="text-xs" variant="muted">
-                                    No active invites found.
-                                </Text>
-                            )}
-                        </Box>
-                    </Box>
+                    <ServerInvitesCard
+                        invites={invites}
+                        isDeletingInvite={isDeletingInvite}
+                        isLoadingInvites={isLoadingInvites}
+                        onRevokeInvite={handleRevokeInvite}
+                    />
 
                     {/* Admin Notes */}
                     <Box className="rounded-xl border border-border-subtle bg-bg-subtle p-6">

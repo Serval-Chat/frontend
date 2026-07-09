@@ -65,8 +65,12 @@ export const DecorationEmbed = ({ decorationId }: DecorationEmbedProps) => {
     return (
         <div
             className="mt-2 flex w-72 max-w-full flex-col gap-3 rounded-xl border border-border-subtle bg-bg-subtle p-4"
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
+            onMouseEnter={() => {
+                setIsHovered(true);
+            }}
+            onMouseLeave={() => {
+                setIsHovered(false);
+            }}
         >
             <div className="flex items-center gap-4">
                 <div className="relative h-16 w-16 shrink-0">
@@ -108,7 +112,9 @@ export const DecorationEmbed = ({ decorationId }: DecorationEmbedProps) => {
                 icon={isActive ? Check : undefined}
                 size="sm"
                 variant={isActive ? 'ghost' : 'primary'}
-                onClick={() => applyMutation.mutate(decoration.id)}
+                onClick={() => {
+                    applyMutation.mutate(decoration.id);
+                }}
             >
                 {isActive
                     ? 'Active'

@@ -148,7 +148,7 @@ export const Reactions = React.memo(
             ],
         );
 
-        if (!reactions.length && !showPicker) return null;
+        if (reactions.length === 0 && !showPicker) return null;
 
         const filteredReactions = reactions.flatMap((r) => {
             const filteredUsers = r.users.filter((uid): boolean => {
@@ -184,7 +184,9 @@ export const Reactions = React.memo(
                                     ? `${reaction.count} reactions`
                                     : undefined
                             }
-                            onClick={(): void => handleReactionClick(reaction)}
+                            onClick={(): void => {
+                                handleReactionClick(reaction);
+                            }}
                         >
                             <Text className="text-base leading-none">
                                 {reaction.emojiType === 'custom' ? (
@@ -270,12 +272,14 @@ export const Reactions = React.memo(
                         size="sm"
                         title="Add Reaction"
                         variant="ghost"
-                        onClick={(): void => setShowPicker(!showPicker)}
+                        onClick={(): void => {
+                            setShowPicker(!showPicker);
+                        }}
                     >
                         <SmilePlus size={16} />
                     </Button>
 
-                    {showPicker && (
+                    {showPicker ? (
                         <div
                             className="absolute bottom-full left-0 z-[var(--z-index-popover)] pb-2"
                             ref={pickerRef}
@@ -286,7 +290,7 @@ export const Reactions = React.memo(
                                 onEmojiSelect={handleEmojiSelect}
                             />
                         </div>
-                    )}
+                    ) : null}
                 </Box>
 
                 <ReactionVotersModal
@@ -294,7 +298,9 @@ export const Reactions = React.memo(
                     isOpen={isVotersModalOpen}
                     reactions={filteredReactions}
                     serverId={serverId}
-                    onClose={(): void => setIsVotersModalOpen(false)}
+                    onClose={(): void => {
+                        setIsVotersModalOpen(false);
+                    }}
                 />
             </Box>
         );

@@ -129,7 +129,9 @@ export const WebsiteConnectionsSettings = () => {
                     placeholder="ser.chat"
                     type="text"
                     value={website}
-                    onChange={(event): void => setWebsite(event.target.value)}
+                    onChange={(event): void => {
+                        setWebsite(event.target.value);
+                    }}
                     onKeyDown={(event): void => {
                         if (event.key === 'Enter') handleCreate();
                     }}
@@ -146,7 +148,7 @@ export const WebsiteConnectionsSettings = () => {
                 </Button>
             </div>
 
-            {instructions && (
+            {instructions ? (
                 <div className="space-y-3 rounded-md border border-border-subtle bg-bg-subtle p-4">
                     <Text size="sm" weight="bold">
                         Verify ownership with either DNS or HTTPS.
@@ -198,17 +200,17 @@ export const WebsiteConnectionsSettings = () => {
                             size="sm"
                             type="button"
                             variant="normal"
-                            onClick={(): void =>
-                                handleVerify(instructions.connectionId)
-                            }
+                            onClick={(): void => {
+                                handleVerify(instructions.connectionId);
+                            }}
                         >
                             Verify
                         </Button>
                     </div>
                 </div>
-            )}
+            ) : null}
 
-            {pendingConnections.length > 0 && (
+            {pendingConnections.length > 0 ? (
                 <ConnectionList
                     connections={pendingConnections}
                     isRemoving={isRemoving}
@@ -217,9 +219,9 @@ export const WebsiteConnectionsSettings = () => {
                     onRemove={handleRemove}
                     onVerify={handleVerify}
                 />
-            )}
+            ) : null}
 
-            {verifiedConnections.length > 0 && (
+            {verifiedConnections.length > 0 ? (
                 <ConnectionList
                     connections={verifiedConnections}
                     isRemoving={isRemoving}
@@ -227,7 +229,7 @@ export const WebsiteConnectionsSettings = () => {
                     statusLabel="Verified"
                     onRemove={handleRemove}
                 />
-            )}
+            ) : null}
         </div>
     );
 };
@@ -259,12 +261,12 @@ const VerificationRow = ({ label, value, onCopy }: VerificationRowProps) => (
 );
 
 interface ConnectionListProps {
-    connections: Array<{
+    connections: {
         id: string;
         type: 'Website';
         value: string;
         status?: 'pending' | 'verified';
-    }>;
+    }[];
     statusLabel: string;
     isRemoving: boolean;
     isVerifying: boolean;
@@ -305,24 +307,28 @@ const ConnectionList = ({
                     )}
                 </div>
                 <div className="flex shrink-0 items-center gap-2">
-                    {connection.status === 'pending' && onVerify && (
+                    {connection.status === 'pending' && onVerify ? (
                         <Button
                             loading={isVerifying}
                             size="sm"
                             type="button"
                             variant="normal"
-                            onClick={(): void => onVerify(connection.id)}
+                            onClick={(): void => {
+                                onVerify(connection.id);
+                            }}
                         >
                             Verify
                         </Button>
-                    )}
+                    ) : null}
                     <Button
                         icon={Trash2}
                         loading={isRemoving}
                         size="sm"
                         type="button"
                         variant="ghost"
-                        onClick={(): void => onRemove(connection.id)}
+                        onClick={(): void => {
+                            onRemove(connection.id);
+                        }}
                     >
                         Remove
                     </Button>

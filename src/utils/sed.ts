@@ -7,15 +7,19 @@ export const applySedCommand = (
     originalMessage: string,
     sedCommand: string,
 ): string => {
-    const match = sedCommand.match(SED_REGEX);
+    const match = SED_REGEX.exec(sedCommand);
     if (!match) {
         return originalMessage;
     }
 
     const [, searchPattern, replacement, flags] = match;
 
-    const unescapedSearch = searchPattern.replace(/\\\//g, '/');
-    const unescapedReplacement = replacement.replace(/\\\//g, '/');
+    if (searchPattern === undefined || replacement === undefined) {
+        return originalMessage;
+    }
+
+    const unescapedSearch = searchPattern.replaceAll(String.raw`\/`, '/');
+    const unescapedReplacement = replacement.replaceAll(String.raw`\/`, '/');
 
     try {
         const regex = new RegExp(unescapedSearch, flags);

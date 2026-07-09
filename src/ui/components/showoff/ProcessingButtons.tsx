@@ -7,7 +7,7 @@ import { Stack } from '@/ui/components/layout/Stack';
 import { DemoSection } from './DemoSection';
 import { BUTTON_VARIANTS, SHOWOFF_SECTIONS } from './config';
 
-export function ProcessingButtons(): ReactNode {
+export const ProcessingButtons = (): ReactNode => {
     const processingButtons = useFlashGroup({
         normal: { initial: 'Normal Processing', flash: 'Loading' },
         primary: { initial: 'Primary Processing', flash: 'Loading' },
@@ -25,27 +25,15 @@ export function ProcessingButtons(): ReactNode {
                 {BUTTON_VARIANTS.map(({ id, type }) => (
                     <div className="p-xs" id={`${id}-processing`} key={id}>
                         <Button
-                            loading={
-                                processingButtons[
-                                    id as keyof typeof processingButtons
-                                ].isFlashing
-                            }
+                            loading={processingButtons[id].isFlashing}
                             variant={type}
-                            onClick={
-                                processingButtons[
-                                    id as keyof typeof processingButtons
-                                ].trigger
-                            }
+                            onClick={processingButtons[id].trigger}
                         >
-                            {
-                                processingButtons[
-                                    id as keyof typeof processingButtons
-                                ].label
-                            }
+                            {processingButtons[id].label}
                         </Button>
                     </div>
                 ))}
             </Stack>
         </DemoSection>
     );
-}
+};

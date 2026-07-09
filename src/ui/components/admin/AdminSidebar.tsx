@@ -1,4 +1,4 @@
-import { type ReactNode } from 'react';
+import type { ReactNode } from 'react';
 
 import {
     BadgeCheck,
@@ -82,7 +82,7 @@ export const AdminSidebar = (): ReactNode => {
                         label="Servers"
                         to="/admin/servers"
                     />
-                    {isServersOpen && (
+                    {isServersOpen ? (
                         <div className="animate-in slide-in-from-top-1 fade-in ml-9 duration-200">
                             <Link
                                 className={cn(
@@ -106,7 +106,7 @@ export const AdminSidebar = (): ReactNode => {
                                 Awaiting Review
                             </Link>
                         </div>
-                    )}
+                    ) : null}
                 </div>
 
                 <SidebarItem

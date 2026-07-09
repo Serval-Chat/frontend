@@ -191,6 +191,6 @@ export class KeybindManager {
         if (code.startsWith('Key')) return code.slice(3).toUpperCase();
         if (code.startsWith('Digit')) return code.slice(5);
         if (code.startsWith('Numpad')) return `Numpad ${code.slice(6)}`;
-        return code.replace(/([a-z])([A-Z])/g, '$1 $2');
+        return code.replaceAll(/([a-z])([A-Z])/g, '$1 $2');
     }
 }

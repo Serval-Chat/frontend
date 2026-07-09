@@ -16,6 +16,16 @@ import { Modal } from '@/ui/components/common/Modal';
 import { Text } from '@/ui/components/common/Text';
 import { useToast } from '@/ui/components/common/Toast';
 
+const handleExportAll = (): void => {
+    const url = adminInvitesApi.getExportInvitesUrl();
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'invites.txt';
+    document.body.append(a);
+    a.click();
+    a.remove();
+};
+
 export const AdminInvites = (): ReactNode => {
     const { data: invites, isLoading, error } = useAdminInvites();
     const { mutate: createInvite, isPending: isCreating } =
@@ -40,7 +50,7 @@ export const AdminInvites = (): ReactNode => {
     };
 
     const handleBatchCreate = (): void => {
-        const count = parseInt(batchCount, 10);
+        const count = Number.parseInt(batchCount, 10);
         if (isNaN(count) || count <= 0 || count > 1000) {
             showToast('Please enter a count between 1 and 1000', 'error');
             return;
@@ -63,9 +73,9 @@ export const AdminInvites = (): ReactNode => {
                     const a = document.createElement('a');
                     a.href = url;
                     a.download = `new_invites_${new Date().toISOString().split('T')[0]}.txt`;
-                    document.body.appendChild(a);
+                    document.body.append(a);
                     a.click();
-                    document.body.removeChild(a);
+                    a.remove();
                     URL.revokeObjectURL(url);
                 },
                 onError: (e: Error): void => {
@@ -73,16 +83,6 @@ export const AdminInvites = (): ReactNode => {
                 },
             },
         );
-    };
-
-    const handleExportAll = (): void => {
-        const url = adminInvitesApi.getExportInvitesUrl();
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'invites.txt';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
     };
 
     return (
@@ -107,7 +107,9 @@ export const AdminInvites = (): ReactNode => {
                     <Button
                         disabled={isCreating || isBatchCreating}
                         variant="normal"
-                        onClick={(): void => setIsBatchModalOpen(true)}
+                        onClick={(): void => {
+                            setIsBatchModalOpen(true);
+                        }}
                     >
                         <Layers size={16} /> Batch Generate
                     </Button>
@@ -125,7 +127,9 @@ export const AdminInvites = (): ReactNode => {
             <Modal
                 isOpen={isBatchModalOpen}
                 title="Batch Generate Invites"
-                onClose={(): void => setIsBatchModalOpen(false)}
+                onClose={(): void => {
+                    setIsBatchModalOpen(false);
+                }}
             >
                 <div className="space-y-4 py-2">
                     <Text as="p" size="sm" variant="muted">
@@ -140,9 +144,9 @@ export const AdminInvites = (): ReactNode => {
                             placeholder="Count (1-1000)"
                             type="number"
                             value={batchCount}
-                            onChange={(e): void =>
-                                setBatchCount(e.target.value)
-                            }
+                            onChange={(e): void => {
+                                setBatchCount(e.target.value);
+                            }}
                             onKeyDown={(e): void => {
                                 if (e.key === 'Enter') handleBatchCreate();
                             }}
@@ -151,7 +155,9 @@ export const AdminInvites = (): ReactNode => {
                     <div className="flex justify-end gap-2 pt-2">
                         <Button
                             variant="ghost"
-                            onClick={(): void => setIsBatchModalOpen(false)}
+                            onClick={(): void => {
+                                setIsBatchModalOpen(false);
+                            }}
                         >
                             Cancel
                         </Button>
@@ -169,7 +175,9 @@ export const AdminInvites = (): ReactNode => {
             <Modal
                 isOpen={!!generatedToken}
                 title="Invite Created"
-                onClose={(): void => setGeneratedToken(null)}
+                onClose={(): void => {
+                    setGeneratedToken(null);
+                }}
             >
                 <div className="space-y-4 py-4">
                     <Text as="p" weight="medium">
@@ -202,7 +210,9 @@ export const AdminInvites = (): ReactNode => {
                     <div className="flex justify-end pt-2">
                         <Button
                             variant="primary"
-                            onClick={(): void => setGeneratedToken(null)}
+                            onClick={(): void => {
+                                setGeneratedToken(null);
+                            }}
                         >
                             Done
                         </Button>
@@ -235,7 +245,7 @@ export const AdminInvites = (): ReactNode => {
                                 You can generate more or export the full list
                                 below.
                             </Text>
-                            {!invites?.length && !isLoading && (
+                            {!invites?.length && !isLoading ? (
                                 <div className="mt-8 flex flex-col items-center gap-4">
                                     <div className="h-1 w-12 rounded-full bg-border-subtle" />
                                     <Text as="p" size="xs" variant="muted">
@@ -243,7 +253,7 @@ export const AdminInvites = (): ReactNode => {
                                         generating one!
                                     </Text>
                                 </div>
-                            )}
+                            ) : null}
                         </>
                     )}
                 </div>

@@ -8,6 +8,26 @@ interface BadgeProps {
     style?: React.CSSProperties;
 }
 
+const badgeStyle: React.CSSProperties = {
+    position: 'absolute',
+    right: '-4px',
+    bottom: '-4px',
+    display: 'flex',
+    minWidth: '20px',
+    height: '20px',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: '10px',
+    paddingInline: '4px',
+    fontSize: '12px',
+    fontWeight: '700',
+    boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.4)',
+    outline: `2.5px solid ${colors.background}`,
+    backgroundColor: colors.unreadBadgeBg,
+    color: colors.unreadBadgeText,
+    transition: 'background-color 0.2s, color 0.2s, outline 0.2s',
+};
+
 export const Badge = ({
     count,
     maxCount = 99,
@@ -19,29 +39,7 @@ export const Badge = ({
     const displayCount = count > maxCount ? `${maxCount}+` : count;
 
     return (
-        <div
-            className={cn(className)}
-            style={{
-                position: 'absolute',
-                right: '-4px',
-                bottom: '-4px',
-                display: 'flex',
-                minWidth: '20px',
-                height: '20px',
-                alignItems: 'center',
-                justifyContent: 'center',
-                borderRadius: '10px',
-                paddingInline: '4px',
-                fontSize: '12px',
-                fontWeight: '700',
-                boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.4)',
-                outline: `2.5px solid ${colors.background}`,
-                backgroundColor: colors.unreadBadgeBg,
-                color: colors.unreadBadgeText,
-                transition: 'background-color 0.2s, color 0.2s, outline 0.2s',
-                ...style,
-            }}
-        >
+        <div className={cn(className)} style={{ ...badgeStyle, ...style }}>
             {displayCount}
         </div>
     );

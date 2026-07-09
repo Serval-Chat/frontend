@@ -77,13 +77,13 @@ export const StickerPicker = ({
                                         icon: cat.icon,
                                     }}
                                     size="xs"
-                                    onClick={(): void =>
-                                        setActiveCategoryId(cat.id)
-                                    }
+                                    onClick={(): void => {
+                                        setActiveCategoryId(cat.id);
+                                    }}
                                 />
-                                {isActive && (
+                                {isActive ? (
                                     <div className="absolute top-1/2 -left-3.5 h-6 w-1.5 -translate-y-1/2 rounded-full bg-primary shadow-[0_0_8px_rgba(var(--primary),0.5)]" />
-                                )}
+                                ) : null}
                             </Box>
                         );
                     })}
@@ -115,14 +115,14 @@ export const StickerPicker = ({
                                                     <Button
                                                         className="group relative aspect-square h-auto w-full p-2 hover:bg-bg-subtle"
                                                         variant="ghost"
-                                                        onClick={(): void =>
+                                                        onClick={(): void => {
                                                             onStickerSelect(
                                                                 sticker,
-                                                            )
-                                                        }
+                                                            );
+                                                        }}
                                                         onContextMenu={(
                                                             e,
-                                                        ): void =>
+                                                        ): void => {
                                                             showStickerInfo(
                                                                 {
                                                                     id: sticker.id,
@@ -132,8 +132,8 @@ export const StickerPicker = ({
                                                                         sticker.serverId,
                                                                 },
                                                                 e,
-                                                            )
-                                                        }
+                                                            );
+                                                        }}
                                                     >
                                                         <img
                                                             alt={sticker.name}
@@ -168,14 +168,14 @@ export const StickerPicker = ({
                 </Box>
             </div>
 
-            {selectedSticker && infoBoxPosition && (
+            {selectedSticker && infoBoxPosition ? (
                 <StickerInfoBox
                     position={infoBoxPosition}
                     server={server}
                     sticker={selectedSticker}
                     onClose={closeInfoBox}
                 />
-            )}
+            ) : null}
         </div>
     );
 };

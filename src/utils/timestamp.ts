@@ -5,7 +5,7 @@ import { APP_LOCALE } from './locale';
  */
 export function formatTimestamp(
     isoString: string,
-    use24HourTime: boolean = false,
+    use24HourTime = false,
 ): string {
     const messageDate = new Date(isoString);
     const now = new Date();
@@ -43,9 +43,9 @@ export function formatTimestamp(
         month: 'short',
         day: 'numeric',
         year:
-            messageDate.getFullYear() !== now.getFullYear()
-                ? 'numeric'
-                : undefined,
+            messageDate.getFullYear() === now.getFullYear()
+                ? undefined
+                : 'numeric',
     });
 }
 

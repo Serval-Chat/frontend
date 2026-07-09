@@ -68,8 +68,8 @@ describe('MessagesList Scroll Behavior', (): void => {
         vi.mocked(useAppSelector).mockReturnValue({}); // default blocks
 
         requestAnimationFrameMock = vi.fn((cb) => cb());
-        window.requestAnimationFrame =
-            requestAnimationFrameMock as any as typeof window.requestAnimationFrame;
+        globalThis.requestAnimationFrame =
+            requestAnimationFrameMock as any as typeof globalThis.requestAnimationFrame;
     });
 
     const mockMessages: ProcessedChatMessage[] = [
@@ -121,17 +121,19 @@ describe('MessagesList Scroll Behavior', (): void => {
         expect(mockScrollToIndex).toHaveBeenCalledWith(1, { align: 'center' });
     });
 
-    it('starts cached message lists at the bottom without a corrective scroll', (): void => {
+    it('anchors a fresh (non-target) message list to the newest message on open', (): void => {
+        // [msg-1, msg-2, spacer] -> last index is 2
         render(<MessagesList hasMore={false} messages={mockMessages} />);
 
-        const options = vi.mocked(useVirtualizer).mock.calls[0][0] as {
+        const options = vi.mocked(useVirtualizer).mock.calls[0]![0] as {
             initialOffset: () => number;
         };
 
+        // initialOffset gives the first frame a bottom bias...
         expect(options.initialOffset()).toBe(Number.MAX_SAFE_INTEGER);
-        expect(mockScrollToIndex).not.toHaveBeenCalledWith(2, {
-            align: 'end',
-        });
+        // ...and we explicitly anchor to the newest message before paint so
+        // dynamic row heights can't leave us scrolled up in older messages.
+        expect(mockScrollToIndex).toHaveBeenCalledWith(2, { align: 'end' });
     });
 
     it('starts targeted message lists at the top so highlight scrolling can center the target', (): void => {
@@ -143,7 +145,7 @@ describe('MessagesList Scroll Behavior', (): void => {
             />,
         );
 
-        const options = vi.mocked(useVirtualizer).mock.calls[0][0] as {
+        const options = vi.mocked(useVirtualizer).mock.calls[0]![0] as {
             initialOffset: () => number;
         };
 
@@ -178,7 +180,7 @@ describe('MessagesList Scroll Behavior', (): void => {
 
         const newMessages = [
             ...mockMessages,
-            { ...mockMessages[0], id: 'msg-3' },
+            { ...mockMessages[0]!, id: 'msg-3' },
         ];
         rerender(
             <MessagesList
@@ -198,7 +200,7 @@ describe('MessagesList Scroll Behavior', (): void => {
             <MessagesList hasMore={false} messages={mockMessages} />,
         );
 
-        getAllByText('resize')[0].click();
+        getAllByText('resize')[0]!.click();
 
         expect(requestAnimationFrameMock).toHaveBeenCalled();
     });
@@ -214,7 +216,7 @@ describe('MessagesList Scroll Behavior', (): void => {
         );
         const newMessages = [
             ...mockMessages,
-            { ...mockMessages[0], id: 'msg-3', text: 'New Message' },
+            { ...mockMessages[0]!, id: 'msg-3', text: 'New Message' },
         ];
 
         rerender(

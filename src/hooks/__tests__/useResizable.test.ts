@@ -47,11 +47,13 @@ describe('useResizable', (): void => {
         act((): void => {
             // Move mouse to 150 (delta +50)
             const moveEvent = new MouseEvent('mousemove', { clientX: 150 });
-            window.dispatchEvent(moveEvent);
+            globalThis.dispatchEvent(moveEvent);
         });
 
         // 240 + 50 = 290
-        await waitFor((): void => expect(result.current.width).toBe(290));
+        await waitFor((): void => {
+            expect(result.current.width).toBe(290);
+        });
     });
 
     it('should update width on mouse move when resizing (side: right)', async (): Promise<void> => {
@@ -71,10 +73,12 @@ describe('useResizable', (): void => {
             // Move mouse to 950 (delta -50)
             // side: 'right' -> newWidth = startWidth - delta = 240 - (-50) = 290
             const moveEvent = new MouseEvent('mousemove', { clientX: 950 });
-            window.dispatchEvent(moveEvent);
+            globalThis.dispatchEvent(moveEvent);
         });
 
-        await waitFor((): void => expect(result.current.width).toBe(290));
+        await waitFor((): void => {
+            expect(result.current.width).toBe(290);
+        });
     });
 
     it('should respect minWidth and maxWidth during resizing', async (): Promise<void> => {
@@ -90,16 +94,20 @@ describe('useResizable', (): void => {
         // Test minWidth (200)
         act((): void => {
             const moveEvent = new MouseEvent('mousemove', { clientX: 50 });
-            window.dispatchEvent(moveEvent);
+            globalThis.dispatchEvent(moveEvent);
         });
-        await waitFor((): void => expect(result.current.width).toBe(200));
+        await waitFor((): void => {
+            expect(result.current.width).toBe(200);
+        });
 
         // Test maxWidth (400)
         act((): void => {
             const moveEvent = new MouseEvent('mousemove', { clientX: 500 });
-            window.dispatchEvent(moveEvent);
+            globalThis.dispatchEvent(moveEvent);
         });
-        await waitFor((): void => expect(result.current.width).toBe(400));
+        await waitFor((): void => {
+            expect(result.current.width).toBe(400);
+        });
     });
 
     it('should save to localStorage ONLY on mouseup', async (): Promise<void> => {
@@ -114,18 +122,18 @@ describe('useResizable', (): void => {
 
         act((): void => {
             const moveEvent = new MouseEvent('mousemove', { clientX: 150 });
-            window.dispatchEvent(moveEvent);
+            globalThis.dispatchEvent(moveEvent);
         });
 
         expect(localStorage.getItem('test-resizable')).toBeNull();
 
         act((): void => {
             const upEvent = new MouseEvent('mouseup');
-            window.dispatchEvent(upEvent);
+            globalThis.dispatchEvent(upEvent);
         });
 
-        await waitFor((): void =>
-            expect(localStorage.getItem('test-resizable')).toBe('290'),
-        );
+        await waitFor((): void => {
+            expect(localStorage.getItem('test-resizable')).toBe('290');
+        });
     });
 });

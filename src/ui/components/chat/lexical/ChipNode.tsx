@@ -79,20 +79,27 @@ export class ChipNode extends DecoratorNode<React.ReactNode> {
 
     getTextContent(): string {
         switch (this.__chipType) {
-            case 'user':
+            case 'user': {
                 return `@${this.__payload.label || this.__payload.id}`;
-            case 'role':
+            }
+            case 'role': {
                 return `@${this.__payload.label || this.__payload.id}`;
-            case 'everyone':
+            }
+            case 'everyone': {
                 return '@everyone';
-            case 'channel':
+            }
+            case 'channel': {
                 return `#${this.__payload.label || this.__payload.id}`;
-            case 'emoji':
+            }
+            case 'emoji': {
                 return `:${this.__payload.label || this.__payload.id}:`;
-            case 'unicode-emoji':
+            }
+            case 'unicode-emoji': {
                 return this.__payload.id;
-            default:
+            }
+            default: {
                 return '';
+            }
         }
     }
 
@@ -119,18 +126,20 @@ export class ChipNode extends DecoratorNode<React.ReactNode> {
 
     private renderContent(): React.ReactNode {
         switch (this.__chipType) {
-            case 'user':
+            case 'user': {
                 return (
                     <Mention
                         serverId={this.__payload.serverId}
                         userId={this.__payload.id}
                     />
                 );
+            }
 
-            case 'role':
+            case 'role': {
                 return <RoleMention roleId={this.__payload.id} />;
+            }
 
-            case 'everyone':
+            case 'everyone': {
                 return (
                     <span
                         className="mx-0.5 inline-flex items-baseline rounded bg-[var(--everyone-mention-bg,var(--primary))] px-1.5 py-[4px] text-[0.9em] font-medium text-[var(--everyone-mention-text,#ffffff)] shadow-sm"
@@ -139,16 +148,18 @@ export class ChipNode extends DecoratorNode<React.ReactNode> {
                         @everyone
                     </span>
                 );
+            }
 
-            case 'channel':
+            case 'channel': {
                 return (
                     <ChannelLink
                         channelId={this.__payload.id}
                         serverId={this.__payload.serverId || ''}
                     />
                 );
+            }
 
-            case 'emoji':
+            case 'emoji': {
                 return (
                     <ParsedEmoji
                         emojiId={this.__payload.id}
@@ -161,12 +172,15 @@ export class ChipNode extends DecoratorNode<React.ReactNode> {
                         }}
                     />
                 );
+            }
 
-            case 'unicode-emoji':
+            case 'unicode-emoji': {
                 return <ParsedUnicodeEmoji content={this.__payload.id} />;
+            }
 
-            default:
+            default: {
                 return null;
+            }
         }
     }
 }

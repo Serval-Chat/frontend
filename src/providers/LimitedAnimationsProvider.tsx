@@ -23,9 +23,7 @@ export const LimitedAnimationsProvider = ({
 
     return (
         <LimitedAnimationsContext.Provider value={limitedAnimations}>
-            <MotionConfig
-                reducedMotion={limitedAnimations ? 'always' : 'never'}
-            >
+            <MotionConfig reducedMotion={limitedAnimations ? 'always' : 'user'}>
                 {children}
             </MotionConfig>
         </LimitedAnimationsContext.Provider>

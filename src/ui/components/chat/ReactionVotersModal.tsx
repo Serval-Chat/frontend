@@ -6,6 +6,8 @@ import {
     useRoles,
     useServerDetails,
 } from '@/api/servers/servers.queries';
+import { useMe } from '@/api/users/users.queries';
+import type { User } from '@/api/users/users.types';
 import { useUsers } from '@/hooks/useUsers';
 import { LoadingSpinner } from '@/ui/components/common/LoadingSpinner';
 import { Modal } from '@/ui/components/common/Modal';
@@ -48,13 +50,15 @@ export const ReactionVotersModal = ({
 
     const allVoterIds = useMemo((): string[] => {
         const ids = new Set<string>();
-        reactions.forEach((reaction): void =>
-            reaction.users.forEach((id): Set<string> => ids.add(id)),
-        );
-        return Array.from(ids);
+        for (const reaction of reactions)
+            for (const id of reaction.users) ids.add(id);
+        return [...ids];
     }, [reactions]);
 
-    const { data: users, isLoading } = useUsers(isOpen ? allVoterIds : []);
+    const { data: fetchedUsers, isLoading } = useUsers(
+        isOpen ? allVoterIds : [],
+    );
+    const { data: me } = useMe();
     const { data: members } = useMembers(serverId || null, {
         enabled: isOpen && !!serverId,
     });
@@ -65,14 +69,42 @@ export const ReactionVotersModal = ({
         enabled: isOpen && !!serverId,
     });
 
-    const votersForSelected = useMemo(() => {
-        if (!users) return [];
-        const selectedReaction = reactions.find(
-            (r): boolean => r.emoji === selectedEmoji,
-        );
-        const voterIds = selectedReaction?.users || [];
-        return users.filter((u): boolean => voterIds.includes(u.id));
-    }, [users, reactions, selectedEmoji]);
+    // resolve reactor user objects from every source already loaded (server
+    // members + the current user), then supplement with the bulk profile fetch.
+    // This keeps the list populated even if that request is slow or unavailable.
+    const usersById = useMemo((): Map<string, User> => {
+        const map = new Map<string, User>();
+        if (members)
+            for (const member of members) {
+                if (member.user) map.set(member.userId, member.user);
+            }
+        if (me) map.set(me.id, me);
+        if (fetchedUsers)
+            for (const user of fetchedUsers) {
+                map.set(user.id, user);
+            }
+        return map;
+    }, [members, me, fetchedUsers]);
+
+    const selectedReaction = useMemo(
+        () => reactions.find((r): boolean => r.emoji === selectedEmoji),
+        [reactions, selectedEmoji],
+    );
+    const voterIds = selectedReaction?.users ?? [];
+
+    const votersForSelected = useMemo(
+        (): User[] =>
+            (selectedReaction?.users ?? []).map(
+                (id): User =>
+                    usersById.get(id) ??
+                    ({ id, username: 'Unknown User' } as User),
+            ),
+        [usersById, selectedReaction],
+    );
+
+    // only block on the fetch while some reactor is still unresolved.
+    const showLoading =
+        isLoading && voterIds.some((id): boolean => !usersById.has(id));
 
     return (
         <Modal
@@ -94,9 +126,9 @@ export const ReactionVotersModal = ({
                             )}
                             key={reaction.emoji}
                             type="button"
-                            onClick={(): void =>
-                                setSelectedEmoji(reaction.emoji)
-                            }
+                            onClick={(): void => {
+                                setSelectedEmoji(reaction.emoji);
+                            }}
                         >
                             <Box className="flex min-w-0 items-center gap-2">
                                 <Box className="flex shrink-0 items-center justify-center">
@@ -152,7 +184,7 @@ export const ReactionVotersModal = ({
                 </Box>
 
                 <Box className="flex flex-1 flex-col gap-1 overflow-y-auto p-4">
-                    {isLoading ? (
+                    {showLoading ? (
                         <Box className="flex h-full items-center justify-center">
                             <LoadingSpinner size="lg" />
                         </Box>
@@ -169,7 +201,7 @@ export const ReactionVotersModal = ({
                                     roles?.filter((r): boolean | undefined =>
                                         member?.roles.includes(r.id),
                                     ) || [];
-                                const sortedRoles = userRoles.slice();
+                                const sortedRoles = [...userRoles];
                                 sortedRoles.sort(
                                     (a, b): number => b.position - a.position,
                                 );

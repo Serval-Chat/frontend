@@ -62,7 +62,7 @@ const canMemberViewChannel = ({
     if (serverDetails.ownerId === member.userId) return true;
 
     const roleMap = new Map<string, Role>();
-    roles.forEach((role): Map<string, Role> => roleMap.set(role.id, role));
+    for (const role of roles) roleMap.set(role.id, role);
 
     const userRoles = member.roles
         .map((roleId): Role | undefined => roleMap.get(roleId))
@@ -161,17 +161,17 @@ export const useTertiarySidebarData = (
             !!(state.nav.splitView.left || state.nav.splitView.right),
     );
     const selectedFriendId =
-        options.selectedFriendId !== undefined
-            ? options.selectedFriendId
-            : storeSelectedFriendId;
+        options.selectedFriendId === undefined
+            ? storeSelectedFriendId
+            : options.selectedFriendId;
     const selectedServerId =
-        options.selectedServerId !== undefined
-            ? options.selectedServerId
-            : storeSelectedServerId;
+        options.selectedServerId === undefined
+            ? storeSelectedServerId
+            : options.selectedServerId;
     const selectedChannelId =
-        options.selectedChannelId !== undefined
-            ? options.selectedChannelId
-            : storeSelectedChannelId;
+        options.selectedChannelId === undefined
+            ? storeSelectedChannelId
+            : options.selectedChannelId;
     const isServerContextReady =
         !!selectedServerId &&
         (options.ignoreUrlMatch ||
@@ -246,11 +246,11 @@ export const useTertiarySidebarData = (
             return { memberRoleMap: mrMap, memberIconRoleMap: mirMap };
 
         const roleMap = new Map<string, Role>();
-        roles.forEach((r): Map<string, Role> => roleMap.set(r.id, r));
+        for (const r of roles) roleMap.set(r.id, r);
 
         const everyoneRole = roles.find((r): boolean => r.name === '@everyone');
 
-        visibleMembers.forEach((m): void => {
+        for (const m of visibleMembers) {
             const memberRoleIds = m.roles ? [...m.roles] : [];
             if (everyoneRole && !memberRoleIds.includes(everyoneRole.id)) {
                 memberRoleIds.push(everyoneRole.id);
@@ -271,7 +271,7 @@ export const useTertiarySidebarData = (
             if (iconRole) {
                 mirMap.set(m.userId, iconRole);
             }
-        });
+        }
 
         return { memberRoleMap: mrMap, memberIconRoleMap: mirMap };
     }, [visibleMembers, roles]);

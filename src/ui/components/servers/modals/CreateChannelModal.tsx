@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useReducer, useState } from 'react';
 
 import { Hash, Link, Volume2 } from 'lucide-react';
 
@@ -48,35 +48,87 @@ const CHANNEL_TYPES: {
     },
 ];
 
+// name/channelType/linkUrl/emoji/emojiType/error all reset together when the
+// modal closes, so they're one reducer instead of 6 separately-set useState
+// calls. isEmojiPickerOpen/isLoading are independent and stay as useState.
+interface FormState {
+    name: string;
+    channelType: ChannelType;
+    linkUrl: string;
+    emoji: string;
+    emojiType: 'custom' | 'unicode' | undefined;
+    error: string | null;
+}
+
+const initialFormState: FormState = {
+    name: '',
+    channelType: 'text',
+    linkUrl: '',
+    emoji: '',
+    emojiType: undefined,
+    error: null,
+};
+
+type FormAction =
+    | { type: 'setName'; value: string }
+    | { type: 'setChannelType'; value: ChannelType }
+    | { type: 'setLinkUrl'; value: string }
+    | { type: 'setEmoji'; emoji: string; emojiType: 'custom' | 'unicode' }
+    | { type: 'clearEmoji' }
+    | { type: 'setError'; message: string | null }
+    | { type: 'reset' };
+
+function formReducer(state: FormState, action: FormAction): FormState {
+    switch (action.type) {
+        case 'setName': {
+            return { ...state, name: action.value };
+        }
+        case 'setChannelType': {
+            return { ...state, channelType: action.value };
+        }
+        case 'setLinkUrl': {
+            return { ...state, linkUrl: action.value };
+        }
+        case 'setEmoji': {
+            return {
+                ...state,
+                emoji: action.emoji,
+                emojiType: action.emojiType,
+            };
+        }
+        case 'clearEmoji': {
+            return { ...state, emoji: '', emojiType: undefined };
+        }
+        case 'setError': {
+            return { ...state, error: action.message };
+        }
+        case 'reset': {
+            return initialFormState;
+        }
+        default: {
+            return state;
+        }
+    }
+}
+
 export const CreateChannelModal = ({
     isOpen,
     onClose,
     serverId,
     categoryId,
 }: CreateChannelModalProps) => {
-    const [name, setName] = useState('');
-    const [channelType, setChannelType] = useState<ChannelType>('text');
-    const [linkUrl, setLinkUrl] = useState('');
-    const [emoji, setEmoji] = useState('');
-    const [emojiType, setEmojiType] = useState<
-        'custom' | 'unicode' | undefined
-    >(undefined);
+    const [form, dispatchForm] = useReducer(formReducer, initialFormState);
+    const { name, channelType, linkUrl, emoji, emojiType, error } = form;
     const [isEmojiPickerOpen, setIsEmojiPickerOpen] = useState(false);
     const emojiTriggerRef = React.useRef<HTMLButtonElement>(null);
     const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
 
     const { customCategories } = useCustomEmojis();
 
     const handleClose = (): void => {
         if (isLoading) return;
         onClose();
-        setName('');
-        setLinkUrl('');
-        setEmoji('');
-        setEmojiType(undefined);
-        setChannelType('text');
-        setError(null);
+        dispatchForm({ type: 'reset' });
     };
 
     const handleCreate = async (): Promise<void> => {
@@ -84,21 +136,26 @@ export const CreateChannelModal = ({
 
         if (channelType === 'link') {
             if (!linkUrl.trim()) {
-                setError('URL is required for Link channels.');
+                dispatchForm({
+                    type: 'setError',
+                    message: 'URL is required for Link channels.',
+                });
                 return;
             }
             try {
                 new URL(linkUrl.trim());
             } catch {
-                setError(
-                    'Please enter a valid URL (e.g., https://example.com).',
-                );
+                dispatchForm({
+                    type: 'setError',
+                    message:
+                        'Please enter a valid URL (e.g., https://example.com).',
+                });
                 return;
             }
         }
 
         setIsLoading(true);
-        setError(null);
+        dispatchForm({ type: 'setError', message: null });
 
         try {
             await serversApi.createChannel(serverId, {
@@ -110,9 +167,12 @@ export const CreateChannelModal = ({
                 ...(channelType === 'link' ? { link: linkUrl.trim() } : {}),
             });
             handleClose();
-        } catch (err) {
-            setError('Failed to create channel. Please try again.');
-            console.error('Create channel error:', err);
+        } catch (error_) {
+            dispatchForm({
+                type: 'setError',
+                message: 'Failed to create channel. Please try again.',
+            });
+            console.error('Create channel error:', error_);
         } finally {
             setIsLoading(false);
         }
@@ -142,7 +202,12 @@ export const CreateChannelModal = ({
                                     )}
                                     key={type}
                                     type="button"
-                                    onClick={(): void => setChannelType(type)}
+                                    onClick={(): void => {
+                                        dispatchForm({
+                                            type: 'setChannelType',
+                                            value: type,
+                                        });
+                                    }}
                                 >
                                     <Icon
                                         className={cn(
@@ -186,7 +251,12 @@ export const CreateChannelModal = ({
                     <Input
                         placeholder="new-channel"
                         value={name}
-                        onChange={(e): void => setName(e.target.value)}
+                        onChange={(e): void => {
+                            dispatchForm({
+                                type: 'setName',
+                                value: e.target.value,
+                            });
+                        }}
                         onKeyDown={(e): void => {
                             if (e.key === 'Enter' && name.trim()) {
                                 void handleCreate();
@@ -195,7 +265,7 @@ export const CreateChannelModal = ({
                     />
                 </div>
 
-                {channelType === 'link' && (
+                {channelType === 'link' ? (
                     <div className="space-y-2">
                         <Text
                             size="xs"
@@ -208,7 +278,12 @@ export const CreateChannelModal = ({
                         <Input
                             placeholder="https://example.com"
                             value={linkUrl}
-                            onChange={(e): void => setLinkUrl(e.target.value)}
+                            onChange={(e): void => {
+                                dispatchForm({
+                                    type: 'setLinkUrl',
+                                    value: e.target.value,
+                                });
+                            }}
                             onKeyDown={(e): void => {
                                 if (
                                     e.key === 'Enter' &&
@@ -220,7 +295,7 @@ export const CreateChannelModal = ({
                             }}
                         />
                     </div>
-                )}
+                ) : null}
 
                 <div className="space-y-2">
                     <Text
@@ -237,9 +312,9 @@ export const CreateChannelModal = ({
                             ref={emojiTriggerRef}
                             type="button"
                             variant="ghost"
-                            onClick={(): void =>
-                                setIsEmojiPickerOpen(!isEmojiPickerOpen)
-                            }
+                            onClick={(): void => {
+                                setIsEmojiPickerOpen(!isEmojiPickerOpen);
+                            }}
                         >
                             {emoji && emojiType ? (
                                 <div className="h-10 w-10">
@@ -261,47 +336,54 @@ export const CreateChannelModal = ({
                                 </Text>
                             )}
                         </Button>
-                        {emoji && (
+                        {emoji ? (
                             <Button
                                 size="sm"
                                 type="button"
                                 variant="ghost"
                                 onClick={(): void => {
-                                    setEmoji('');
-                                    setEmojiType(undefined);
+                                    dispatchForm({ type: 'clearEmoji' });
                                 }}
                             >
                                 Clear
                             </Button>
-                        )}
+                        ) : null}
                     </div>
 
                     <Popover
                         isOpen={isEmojiPickerOpen}
                         triggerRef={emojiTriggerRef}
-                        onClose={(): void => setIsEmojiPickerOpen(false)}
+                        onClose={(): void => {
+                            setIsEmojiPickerOpen(false);
+                        }}
                     >
                         <EmojiPicker
                             customCategories={customCategories}
                             onCustomEmojiSelect={(e): void => {
-                                setEmoji(e.id);
-                                setEmojiType('custom');
+                                dispatchForm({
+                                    type: 'setEmoji',
+                                    emoji: e.id,
+                                    emojiType: 'custom',
+                                });
                                 setIsEmojiPickerOpen(false);
                             }}
                             onEmojiSelect={(e): void => {
-                                setEmoji(e);
-                                setEmojiType('unicode');
+                                dispatchForm({
+                                    type: 'setEmoji',
+                                    emoji: e,
+                                    emojiType: 'unicode',
+                                });
                                 setIsEmojiPickerOpen(false);
                             }}
                         />
                     </Popover>
                 </div>
 
-                {error && (
+                {error ? (
                     <Text size="xs" variant="danger">
                         {error}
                     </Text>
-                )}
+                ) : null}
 
                 <div className="flex justify-end gap-3 pt-2">
                     <Button

@@ -92,9 +92,13 @@ export const RoleNavbar = ({
                             isActive={selectedRoleId === role.id}
                             key={role.id}
                             role={role}
-                            onDelete={(): void => onDeleteRole(role.id)}
+                            onDelete={(): void => {
+                                onDeleteRole(role.id);
+                            }}
                             onDragEnd={(): void => {}}
-                            onSelect={(): void => onSelectRole(role.id)}
+                            onSelect={(): void => {
+                                onSelectRole(role.id);
+                            }}
                         />
                     ))}
                 </Reorder.Group>
@@ -166,7 +170,9 @@ const RoleItem = ({
             >
                 <div
                     className="cursor-grab p-0.5 opacity-0 transition-opacity group-hover:opacity-100 active:cursor-grabbing"
-                    onPointerDown={(e): void => controls.start(e)}
+                    onPointerDown={(e): void => {
+                        controls.start(e);
+                    }}
                 >
                     <GripVertical size={12} />
                 </div>

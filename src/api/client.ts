@@ -9,7 +9,7 @@ import { getAuthToken, removeAuthToken } from '@/utils/authToken';
 import { tauriAdapter } from './tauriAdapter';
 
 const isTauri = (): boolean =>
-    typeof window !== 'undefined' && '__TAURI__' in window;
+    'window' in globalThis && '__TAURI__' in globalThis;
 
 // serialize arrays as repeated keys (inChannel=a&inChannel=b) so NestJS
 // whitelist validation doesn't choke on bracket notation (inChannel[]=a).
@@ -31,7 +31,7 @@ const serializeParams = (params: Record<string, unknown>): string => {
 
 export const apiClient = axios.create({
     baseURL: getBrowserApiBaseUrl(),
-    timeout: 30000,
+    timeout: 30_000,
     withCredentials: true,
     adapter: isTauri() ? tauriAdapter : undefined,
     paramsSerializer: serializeParams,
@@ -67,6 +67,6 @@ apiClient.interceptors.response.use(
         if (error.response?.status === 401) {
             await removeAuthToken();
         }
-        return Promise.reject(error);
+        throw error;
     },
 );

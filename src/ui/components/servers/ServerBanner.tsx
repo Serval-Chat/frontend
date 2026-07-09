@@ -23,7 +23,7 @@ export const ServerBanner = ({
 }: ServerBannerProps) => (
     <div className="group relative z-content w-full shrink-0 overflow-hidden bg-bg-secondary shadow-[0_2px_10px_0_rgba(0,0,0,0.4)]">
         {/* Banner (Image or Color) */}
-        {banner && !loading && (
+        {banner && !loading ? (
             <div className="relative h-[135px] w-full shrink-0 overflow-hidden">
                 <ServerBannerMedia
                     alt={name}
@@ -32,15 +32,15 @@ export const ServerBanner = ({
                 />
                 <div className="absolute inset-0 bg-black/30" />
             </div>
-        )}
+        ) : null}
 
         <div
             className={cn(
                 'relative z-content flex h-12 items-center gap-1.5 px-4',
-                banner && 'absolute bottom-0',
+                banner && 'absolute inset-x-0 bottom-0',
             )}
         >
-            {verified && (
+            {verified ? (
                 <BadgeCheck
                     className={cn(
                         'shrink-0',
@@ -53,10 +53,10 @@ export const ServerBanner = ({
                     size={18}
                     strokeWidth={2.5}
                 />
-            )}
+            ) : null}
             <Text
                 className={cn(
-                    'truncate text-[15px] drop-shadow-lg transition-colors',
+                    'min-w-0 flex-1 truncate text-[15px] drop-shadow-lg transition-colors',
                     loading
                         ? 'text-muted-foreground'
                         : banner

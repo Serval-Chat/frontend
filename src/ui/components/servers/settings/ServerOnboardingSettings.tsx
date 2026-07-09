@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useReducer } from 'react';
 
 import { Plus, Trash2 } from 'lucide-react';
 
@@ -9,7 +9,12 @@ import {
     useRoles,
     useUpdateOnboardingSettings,
 } from '@/api/servers/servers.queries';
-import type { Category, Channel, Role } from '@/api/servers/servers.types';
+import type {
+    Category,
+    Channel,
+    ServerOnboardingSettings as OnboardingSettingsData,
+    Role,
+} from '@/api/servers/servers.types';
 import { Button } from '@/ui/components/common/Button';
 import { DropdownWithSearch } from '@/ui/components/common/DropdownWithSearch';
 import { Heading } from '@/ui/components/common/Heading';
@@ -82,7 +87,9 @@ const RoleSelectGrid = ({
                         )}
                         key={role.id}
                         type="button"
-                        onClick={(): void => toggleRole(role.id)}
+                        onClick={(): void => {
+                            toggleRole(role.id);
+                        }}
                     >
                         <div className="flex items-center gap-2">
                             <RoleDot role={role} />
@@ -97,7 +104,7 @@ const RoleSelectGrid = ({
                                 {role.name}
                             </span>
                         </div>
-                        {role.description && (
+                        {role.description ? (
                             <p
                                 className={cn(
                                     'line-clamp-2 text-xs leading-relaxed',
@@ -108,7 +115,7 @@ const RoleSelectGrid = ({
                             >
                                 {role.description}
                             </p>
-                        )}
+                        ) : null}
                     </button>
                 );
             })}
@@ -175,11 +182,11 @@ const WelcomeChannelGrid = ({
                     className="space-y-2"
                     key={group.category?.id ?? 'uncategorized'}
                 >
-                    {group.category && (
+                    {group.category ? (
                         <Text className="px-1 text-xs font-bold tracking-wider text-muted-foreground/70 uppercase">
                             {group.category.name}
                         </Text>
-                    )}
+                    ) : null}
                     <div className="grid gap-2 sm:grid-cols-2">
                         {group.channels.map((channel) => {
                             const isSelected = selected.has(channel.id);
@@ -191,14 +198,16 @@ const WelcomeChannelGrid = ({
                                             ? 'border-primary bg-primary/10 text-primary'
                                             : 'bg-bg-subtle text-muted-foreground hover:text-foreground',
                                     )}
-                                    disabled={!isSelected && selected.size >= 8}
+                                    disabled={
+                                        isSelected ? false : selected.size >= 8
+                                    }
                                     justify="start"
                                     key={channel.id}
                                     type="button"
                                     variant="normal"
-                                    onClick={(): void =>
-                                        toggleChannel(channel.id)
-                                    }
+                                    onClick={(): void => {
+                                        toggleChannel(channel.id);
+                                    }}
                                 >
                                     {channelIcon(channel)}
                                     <span className="truncate">
@@ -214,6 +223,126 @@ const WelcomeChannelGrid = ({
     );
 };
 
+const computeBaseline = (
+    data: OnboardingSettingsData,
+    parsedRules: string[],
+): string =>
+    JSON.stringify({
+        ...data,
+        guidelines: parsedRules,
+        selfAssignableRoleIds: toStringArray(data.selfAssignableRoleIds),
+        welcomeChannelIds: toStringArray(data.welcomeChannelIds),
+    });
+
+// enabled/rules/selfAssignableRoleIds/landingChannelId/welcomeChannelIds/
+// baseline/syncedSettings all update together (though not identically - see
+// each action below) on server sync, Reset, and Save success, so they're one
+// reducer instead of 7 separately-set useState calls.
+interface OnboardingFormState {
+    enabled: boolean;
+    rules: string[];
+    selfAssignableRoleIds: string[];
+    landingChannelId: string | null;
+    welcomeChannelIds: string[];
+    baseline: string;
+    syncedSettings: OnboardingSettingsData | undefined;
+}
+
+const initialOnboardingFormState: OnboardingFormState = {
+    enabled: false,
+    rules: [],
+    selfAssignableRoleIds: [],
+    landingChannelId: null,
+    welcomeChannelIds: [],
+    baseline: '',
+    syncedSettings: undefined,
+};
+
+type OnboardingFormAction =
+    | {
+          type: 'syncFromSettings';
+          settings: OnboardingSettingsData | undefined;
+      }
+    | { type: 'reset'; settings: OnboardingSettingsData }
+    | { type: 'saveSuccess'; next: OnboardingSettingsData }
+    | { type: 'setEnabled'; value: boolean }
+    | { type: 'setRules'; value: string[] }
+    | { type: 'setSelfAssignableRoleIds'; value: string[] }
+    | { type: 'setLandingChannelId'; value: string | null }
+    | { type: 'setWelcomeChannelIds'; value: string[] };
+
+function onboardingFormReducer(
+    state: OnboardingFormState,
+    action: OnboardingFormAction,
+): OnboardingFormState {
+    switch (action.type) {
+        case 'syncFromSettings': {
+            if (!action.settings) {
+                return { ...state, syncedSettings: action.settings };
+            }
+            const parsedRules = toStringArray(action.settings.guidelines);
+            return {
+                ...state,
+                syncedSettings: action.settings,
+                enabled: action.settings.enabled,
+                rules: parsedRules,
+                selfAssignableRoleIds: toStringArray(
+                    action.settings.selfAssignableRoleIds,
+                ),
+                landingChannelId: action.settings.landingChannelId ?? null,
+                welcomeChannelIds: toStringArray(
+                    action.settings.welcomeChannelIds,
+                ),
+                baseline: computeBaseline(action.settings, parsedRules),
+            };
+        }
+        case 'reset': {
+            return {
+                ...state,
+                enabled: action.settings.enabled,
+                rules: toStringArray(action.settings.guidelines),
+                selfAssignableRoleIds: toStringArray(
+                    action.settings.selfAssignableRoleIds,
+                ),
+                landingChannelId: action.settings.landingChannelId ?? null,
+                welcomeChannelIds: toStringArray(
+                    action.settings.welcomeChannelIds,
+                ),
+            };
+        }
+        case 'saveSuccess': {
+            const parsedRules = toStringArray(action.next.guidelines);
+            return {
+                ...state,
+                rules: parsedRules,
+                selfAssignableRoleIds: toStringArray(
+                    action.next.selfAssignableRoleIds,
+                ),
+                welcomeChannelIds: toStringArray(action.next.welcomeChannelIds),
+                baseline: computeBaseline(action.next, parsedRules),
+            };
+        }
+        case 'setEnabled': {
+            return { ...state, enabled: action.value };
+        }
+        case 'setRules': {
+            return { ...state, rules: action.value };
+        }
+        case 'setSelfAssignableRoleIds': {
+            return { ...state, selfAssignableRoleIds: action.value };
+        }
+        case 'setLandingChannelId': {
+            return { ...state, landingChannelId: action.value };
+        }
+        case 'setWelcomeChannelIds': {
+            return { ...state, welcomeChannelIds: action.value };
+        }
+        default: {
+            return state;
+        }
+    }
+}
+
 export const ServerOnboardingSettings = ({
     serverId,
 }: ServerOnboardingSettingsProps) => {
@@ -225,42 +354,22 @@ export const ServerOnboardingSettings = ({
     const { data: categories } = useCategories(serverId);
     const updateSettings = useUpdateOnboardingSettings(serverId);
 
-    const [enabled, setEnabled] = useState(false);
-    const [rules, setRules] = useState<string[]>([]);
-    const [selfAssignableRoleIds, setSelfAssignableRoleIds] = useState<
-        string[]
-    >([]);
-    const [landingChannelId, setLandingChannelId] = useState<string | null>(
-        null,
+    const [form, dispatchForm] = useReducer(
+        onboardingFormReducer,
+        initialOnboardingFormState,
     );
-    const [welcomeChannelIds, setWelcomeChannelIds] = useState<string[]>([]);
-    const [baseline, setBaseline] = useState<string>('');
-    const [syncedSettings, setSyncedSettings] = useState(settings);
+    const {
+        enabled,
+        rules,
+        selfAssignableRoleIds,
+        landingChannelId,
+        welcomeChannelIds,
+        baseline,
+        syncedSettings,
+    } = form;
 
     if (settings !== syncedSettings) {
-        setSyncedSettings(settings);
-        if (settings) {
-            setEnabled(settings.enabled);
-            const parsedRules = toStringArray(settings.guidelines);
-            setRules(parsedRules);
-            setSelfAssignableRoleIds(
-                toStringArray(settings.selfAssignableRoleIds),
-            );
-            setLandingChannelId(settings.landingChannelId ?? null);
-            setWelcomeChannelIds(toStringArray(settings.welcomeChannelIds));
-            setBaseline(
-                JSON.stringify({
-                    ...settings,
-                    guidelines: parsedRules,
-                    selfAssignableRoleIds: toStringArray(
-                        settings.selfAssignableRoleIds,
-                    ),
-                    welcomeChannelIds: toStringArray(
-                        settings.welcomeChannelIds,
-                    ),
-                }),
-            );
-        }
+        dispatchForm({ type: 'syncFromSettings', settings });
     }
 
     const channelOptions = useMemo(
@@ -302,34 +411,13 @@ export const ServerOnboardingSettings = ({
 
     const handleReset = (): void => {
         if (!settings) return;
-        setEnabled(settings.enabled);
-        setRules(toStringArray(settings.guidelines));
-        setSelfAssignableRoleIds(toStringArray(settings.selfAssignableRoleIds));
-        setLandingChannelId(settings.landingChannelId ?? null);
-        setWelcomeChannelIds(toStringArray(settings.welcomeChannelIds));
+        dispatchForm({ type: 'reset', settings });
     };
 
     const handleSave = (): void => {
         updateSettings.mutate(current, {
             onSuccess: (next): void => {
-                const parsedRules = toStringArray(next.guidelines);
-                setRules(parsedRules);
-                setSelfAssignableRoleIds(
-                    toStringArray(next.selfAssignableRoleIds),
-                );
-                setWelcomeChannelIds(toStringArray(next.welcomeChannelIds));
-                setBaseline(
-                    JSON.stringify({
-                        ...next,
-                        guidelines: parsedRules,
-                        selfAssignableRoleIds: toStringArray(
-                            next.selfAssignableRoleIds,
-                        ),
-                        welcomeChannelIds: toStringArray(
-                            next.welcomeChannelIds,
-                        ),
-                    }),
-                );
+                dispatchForm({ type: 'saveSuccess', next });
             },
         });
     };
@@ -366,7 +454,12 @@ export const ServerOnboardingSettings = ({
                         onboarding once.
                     </Text>
                 </div>
-                <Toggle checked={enabled} onCheckedChange={setEnabled} />
+                <Toggle
+                    checked={enabled}
+                    onCheckedChange={(value): void => {
+                        dispatchForm({ type: 'setEnabled', value });
+                    }}
+                />
             </div>
 
             <div className="space-y-4">
@@ -375,7 +468,7 @@ export const ServerOnboardingSettings = ({
                         Server Guidelines (Rules)
                     </Text>
                     <span className="text-xs text-muted-foreground">
-                        {rules.length} rule{rules.length !== 1 && 's'}
+                        {rules.length} rule{rules.length === 1 ? null : 's'}
                     </span>
                 </div>
 
@@ -405,7 +498,10 @@ export const ServerOnboardingSettings = ({
                                         onChange={(e): void => {
                                             const next = [...rules];
                                             next[idx] = e.target.value;
-                                            setRules(next);
+                                            dispatchForm({
+                                                type: 'setRules',
+                                                value: next,
+                                            });
                                         }}
                                         onKeyDown={(e): void => {
                                             if (
@@ -415,7 +511,10 @@ export const ServerOnboardingSettings = ({
                                                 e.preventDefault();
                                                 const next = [...rules];
                                                 next.splice(idx + 1, 0, '');
-                                                setRules(next);
+                                                dispatchForm({
+                                                    type: 'setRules',
+                                                    value: next,
+                                                });
                                                 setTimeout((): void => {
                                                     document
                                                         .getElementById(
@@ -435,7 +534,10 @@ export const ServerOnboardingSettings = ({
                                         const next = rules.filter(
                                             (_, i): boolean => i !== idx,
                                         );
-                                        setRules(next);
+                                        dispatchForm({
+                                            type: 'setRules',
+                                            value: next,
+                                        });
                                     }}
                                 >
                                     <Trash2 size={15} />
@@ -449,7 +551,10 @@ export const ServerOnboardingSettings = ({
                     className="flex w-full items-center justify-center rounded-lg border border-dashed border-border-subtle py-2.5 text-muted-foreground transition-all hover:border-primary/50 hover:bg-primary/5 hover:text-foreground"
                     variant="ghost"
                     onClick={(): void => {
-                        setRules([...rules, '']);
+                        dispatchForm({
+                            type: 'setRules',
+                            value: [...rules, ''],
+                        });
                         setTimeout((): void => {
                             document
                                 .getElementById(`rule-input-${rules.length}`)
@@ -468,7 +573,12 @@ export const ServerOnboardingSettings = ({
                 <RoleSelectGrid
                     roles={roles}
                     selectedIds={selfAssignableRoleIds}
-                    onChange={setSelfAssignableRoleIds}
+                    onChange={(value): void => {
+                        dispatchForm({
+                            type: 'setSelfAssignableRoleIds',
+                            value,
+                        });
+                    }}
                 />
             </div>
 
@@ -483,7 +593,9 @@ export const ServerOnboardingSettings = ({
                     placeholder="Select a channel..."
                     searchPlaceholder="Search channels..."
                     value={landingChannelId}
-                    onChange={setLandingChannelId}
+                    onChange={(value): void => {
+                        dispatchForm({ type: 'setLandingChannelId', value });
+                    }}
                 />
             </div>
 
@@ -500,7 +612,9 @@ export const ServerOnboardingSettings = ({
                     categories={categories ?? []}
                     channels={channels ?? []}
                     selectedIds={welcomeChannelIds}
-                    onChange={setWelcomeChannelIds}
+                    onChange={(value): void => {
+                        dispatchForm({ type: 'setWelcomeChannelIds', value });
+                    }}
                 />
             </div>
 

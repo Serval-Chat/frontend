@@ -8,8 +8,10 @@ import {
 
 import { $isChipNode } from '@/ui/components/chat/lexical/ChipNode';
 
-import { $isSlashArgChipNode } from './SlashArgChipNode';
-import { $isSlashCommandChipNode } from './SlashCommandChipNode';
+import {
+    $isSlashArgChipNode,
+    $isSlashCommandChipNode,
+} from './slashChipHelpers';
 
 export function $getRawMessageText(): string {
     let rawText = '';
@@ -75,24 +77,30 @@ export function $getRawMessageText(): string {
             const type = node.getChipType();
             const payload = node.getPayload();
             switch (type) {
-                case 'user':
+                case 'user': {
                     rawText += `<userid:'${payload.id}'>`;
                     break;
-                case 'role':
+                }
+                case 'role': {
                     rawText += `<roleid:'${payload.id}'>`;
                     break;
-                case 'emoji':
+                }
+                case 'emoji': {
                     rawText += `<emoji:${payload.id}>`;
                     break;
-                case 'everyone':
+                }
+                case 'everyone': {
                     rawText += '<everyone>';
                     break;
-                case 'channel':
-                    rawText += `${window.location.origin}/chat/@server/${payload.serverId}/channel/${payload.id}`;
+                }
+                case 'channel': {
+                    rawText += `${globalThis.location.origin}/chat/@server/${payload.serverId}/channel/${payload.id}`;
                     break;
-                case 'unicode-emoji':
+                }
+                case 'unicode-emoji': {
                     rawText += payload.id;
                     break;
+                }
             }
         }
 

@@ -29,7 +29,7 @@ export interface CustomEmojiCategory {
     id: string;
     name: string;
     icon?: string;
-    emojis: Array<{ id: string; name: string; url: string; serverId?: string }>;
+    emojis: { id: string; name: string; url: string; serverId?: string }[];
 }
 
 interface EmojiPickerProps {
@@ -62,6 +62,212 @@ type RowItem =
           isCustom: boolean;
           id: string;
       };
+
+const buildEmojiRows = ({
+    customCategories,
+    columnCount,
+    width,
+    height,
+    searchQuery,
+}: {
+    customCategories: CustomEmojiCategory[];
+    columnCount: number;
+    width: number;
+    height: number;
+    searchQuery: string;
+}): RowItem[] => {
+    const rows: RowItem[] = [];
+    if (columnCount <= 0 || width <= 0 || height <= 0) return rows;
+
+    const normalizedQuery = searchQuery.trim().toLowerCase();
+
+    for (const cat of customCategories) {
+        const emojis = normalizedQuery
+            ? cat.emojis.filter((e): boolean =>
+                  e.name.toLowerCase().includes(normalizedQuery),
+              )
+            : cat.emojis;
+
+        if (emojis.length === 0) continue;
+
+        rows.push({
+            type: 'header',
+            id: cat.id,
+            name: cat.name,
+            icon: cat.icon,
+            isCustom: true,
+        });
+        const count = emojis.length;
+        for (let i = 0; i < count; i += columnCount) {
+            rows.push({
+                type: 'row',
+                emojis: emojis.slice(i, i + columnCount),
+                isCustom: true,
+                id: cat.id,
+            });
+        }
+    }
+
+    for (const catId of categories) {
+        const emojis = groupedEmojis[catId] || [];
+        const filteredEmojis = normalizedQuery
+            ? emojis.filter((e): boolean => {
+                  const matchName = e.name
+                      ?.toLowerCase()
+                      .includes(normalizedQuery);
+                  const matchShortName = e.short_name
+                      ?.toLowerCase()
+                      .includes(normalizedQuery);
+                  const matchShortNames = e.short_names?.some((sn): boolean =>
+                      sn.toLowerCase().includes(normalizedQuery),
+                  );
+                  return matchName || matchShortName || matchShortNames;
+              })
+            : emojis;
+
+        if (filteredEmojis.length === 0) continue;
+
+        rows.push({
+            type: 'header',
+            id: catId,
+            name: catId,
+            isCustom: false,
+            standardIcon: categoryIconMap[catId],
+        });
+        const count = filteredEmojis.length;
+        for (let i = 0; i < count; i += columnCount) {
+            rows.push({
+                type: 'row',
+                emojis: filteredEmojis.slice(i, i + columnCount),
+                isCustom: false,
+                id: catId,
+            });
+        }
+    }
+    return rows;
+};
+
+const EmojiPickerRow = ({
+    row,
+    style,
+    onEmojiSelect,
+    onCustomEmojiSelect,
+    onShowInfo,
+}: {
+    row: RowItem;
+    style: React.CSSProperties;
+    onEmojiSelect: (emoji: string) => void;
+    onCustomEmojiSelect?: (emoji: {
+        id: string;
+        name: string;
+        url: string;
+    }) => void;
+    onShowInfo: (
+        custom: { id: string; name: string; url: string },
+        e: React.MouseEvent,
+    ) => void;
+}) => {
+    if (row.type === 'header') {
+        return (
+            <Box
+                className="z-[var(--z-index-effect-md)] flex items-center gap-2 border-b border-divider/50 bg-background/95 px-3 py-1 backdrop-blur-sm"
+                style={style}
+            >
+                {row.isCustom ? (
+                    <ServerIcon
+                        className="!cursor-default !rounded-sm"
+                        server={{ name: row.name, icon: row.icon }}
+                        size="xs"
+                    />
+                ) : (
+                    <div className="flex h-4 w-4 items-center justify-center overflow-hidden">
+                        {row.standardIcon ? (
+                            <ParsedUnicodeEmoji
+                                className="inline-block h-[22px] w-[22px] flex-shrink-0"
+                                content={getUnicode(row.standardIcon)}
+                            />
+                        ) : (
+                            <Text size="xs">?</Text>
+                        )}
+                    </div>
+                )}
+                <Text className="truncate text-[10px] font-bold tracking-widest text-muted-foreground uppercase">
+                    {row.name}
+                </Text>
+            </Box>
+        );
+    }
+
+    return (
+        <Box
+            className="flex flex-nowrap gap-0.5 overflow-hidden p-1"
+            style={style}
+        >
+            {row.emojis.map((emoji) => {
+                if (emoji && typeof emoji === 'object' && 'unified' in emoji) {
+                    const unicode = getUnicode(emoji);
+                    return (
+                        <Tooltip
+                            content={`:${emoji.short_name}:`}
+                            key={emoji.unified}
+                            position="top"
+                        >
+                            <Button
+                                className="h-10 w-10 shrink-0 rounded-md transition-colors hover:bg-bg-subtle"
+                                variant="ghost"
+                                onClick={(): void => {
+                                    onEmojiSelect(unicode);
+                                }}
+                            >
+                                <ParsedUnicodeEmoji
+                                    className="h-8 w-8"
+                                    content={unicode}
+                                />
+                            </Button>
+                        </Tooltip>
+                    );
+                }
+                if (
+                    emoji &&
+                    typeof emoji === 'object' &&
+                    'id' in emoji &&
+                    'url' in emoji
+                ) {
+                    const custom = emoji as {
+                        id: string;
+                        name: string;
+                        url: string;
+                    };
+                    return (
+                        <Tooltip
+                            content={`:${custom.name}:`}
+                            key={custom.id}
+                            position="top"
+                        >
+                            <Button
+                                className="h-10 w-10 shrink-0 rounded-md transition-colors hover:bg-bg-subtle"
+                                variant="ghost"
+                                onClick={(): void | undefined =>
+                                    onCustomEmojiSelect?.(custom)
+                                }
+                                onContextMenu={(e): void => {
+                                    onShowInfo(custom, e);
+                                }}
+                            >
+                                <img
+                                    alt={custom.name}
+                                    className="h-8 w-8 object-contain"
+                                    src={resolveApiUrl(custom.url) || ''}
+                                />
+                            </Button>
+                        </Tooltip>
+                    );
+                }
+                return null;
+            })}
+        </Box>
+    );
+};
 
 const EmojiPickerContent = ({
     width,
@@ -100,88 +306,27 @@ const EmojiPickerContent = ({
         return Math.max(1, Math.floor((listAreaWidth - 16) / 42));
     }, [listAreaWidth, width]);
 
-    const flatRows = useMemo((): RowItem[] => {
-        const rows: RowItem[] = [];
-        if (columnCount <= 0 || width <= 0 || height <= 0) return rows;
-
-        const normalizedQuery = searchQuery.trim().toLowerCase();
-
-        customCategories.forEach((cat): void => {
-            const emojis = normalizedQuery
-                ? cat.emojis.filter((e): boolean =>
-                      e.name.toLowerCase().includes(normalizedQuery),
-                  )
-                : cat.emojis;
-
-            if (emojis.length === 0) return;
-
-            rows.push({
-                type: 'header',
-                id: cat.id,
-                name: cat.name,
-                icon: cat.icon,
-                isCustom: true,
-            });
-            const count = emojis.length;
-            for (let i = 0; i < count; i += columnCount) {
-                rows.push({
-                    type: 'row',
-                    emojis: emojis.slice(i, i + columnCount),
-                    isCustom: true,
-                    id: cat.id,
-                });
-            }
-        });
-
-        categories.forEach((catId): void => {
-            const emojis = groupedEmojis[catId] || [];
-            const filteredEmojis = normalizedQuery
-                ? emojis.filter((e): boolean => {
-                      const matchName = e.name
-                          ?.toLowerCase()
-                          .includes(normalizedQuery);
-                      const matchShortName = e.short_name
-                          ?.toLowerCase()
-                          .includes(normalizedQuery);
-                      const matchShortNames = e.short_names?.some(
-                          (sn): boolean =>
-                              sn.toLowerCase().includes(normalizedQuery),
-                      );
-                      return matchName || matchShortName || matchShortNames;
-                  })
-                : emojis;
-
-            if (filteredEmojis.length === 0) return;
-
-            rows.push({
-                type: 'header',
-                id: catId,
-                name: catId,
-                isCustom: false,
-                standardIcon: categoryIconMap[catId],
-            });
-            const count = filteredEmojis.length;
-            for (let i = 0; i < count; i += columnCount) {
-                rows.push({
-                    type: 'row',
-                    emojis: filteredEmojis.slice(i, i + columnCount),
-                    isCustom: false,
-                    id: catId,
-                });
-            }
-        });
-        return rows;
-    }, [customCategories, columnCount, width, height, searchQuery]);
+    const flatRows = useMemo(
+        (): RowItem[] =>
+            buildEmojiRows({
+                customCategories,
+                columnCount,
+                width,
+                height,
+                searchQuery,
+            }),
+        [customCategories, columnCount, width, height, searchQuery],
+    );
 
     const categoryOffsets = useMemo((): Record<string, number> => {
         const offsets: Record<string, number> = {};
         if (width <= 0 || height <= 0) return offsets;
         let currentOffset = 0;
-        flatRows.forEach((row): void => {
+        for (const row of flatRows) {
             if (row.type === 'header' && !offsets[row.id])
                 offsets[row.id] = currentOffset;
             currentOffset += row.type === 'header' ? HEADER_HEIGHT : ROW_HEIGHT;
-        });
+        }
         return offsets;
     }, [flatRows, width, height]);
 
@@ -281,111 +426,14 @@ const EmojiPickerContent = ({
             const row = flatRows[index];
             if (!row) return null;
 
-            if (row.type === 'header') {
-                return (
-                    <Box
-                        className="z-[var(--z-index-effect-md)] flex items-center gap-2 border-b border-divider/50 bg-background/95 px-3 py-1 backdrop-blur-sm"
-                        style={style}
-                    >
-                        {row.isCustom ? (
-                            <ServerIcon
-                                className="!cursor-default !rounded-sm"
-                                server={{ name: row.name, icon: row.icon }}
-                                size="xs"
-                            />
-                        ) : (
-                            <div className="flex h-4 w-4 items-center justify-center overflow-hidden">
-                                {row.standardIcon ? (
-                                    <ParsedUnicodeEmoji
-                                        className="inline-block h-[22px] w-[22px] flex-shrink-0"
-                                        content={getUnicode(row.standardIcon)}
-                                    />
-                                ) : (
-                                    <Text size="xs">?</Text>
-                                )}
-                            </div>
-                        )}
-                        <Text className="truncate text-[10px] font-bold tracking-widest text-muted-foreground uppercase">
-                            {row.name}
-                        </Text>
-                    </Box>
-                );
-            }
-
             return (
-                <Box
-                    className="flex flex-nowrap gap-0.5 overflow-hidden p-1"
+                <EmojiPickerRow
+                    row={row}
                     style={style}
-                >
-                    {row.emojis.map((emoji) => {
-                        if (
-                            emoji &&
-                            typeof emoji === 'object' &&
-                            'unified' in emoji
-                        ) {
-                            const unicode = getUnicode(emoji as EmojiData);
-                            return (
-                                <Tooltip
-                                    content={`:${(emoji as EmojiData).short_name}:`}
-                                    key={(emoji as EmojiData).unified}
-                                    position="top"
-                                >
-                                    <Button
-                                        className="h-10 w-10 shrink-0 rounded-md transition-colors hover:bg-bg-subtle"
-                                        variant="ghost"
-                                        onClick={(): void =>
-                                            onEmojiSelect(unicode)
-                                        }
-                                    >
-                                        <ParsedUnicodeEmoji
-                                            className="h-8 w-8"
-                                            content={unicode}
-                                        />
-                                    </Button>
-                                </Tooltip>
-                            );
-                        }
-                        if (
-                            emoji &&
-                            typeof emoji === 'object' &&
-                            'id' in emoji &&
-                            'url' in emoji
-                        ) {
-                            const custom = emoji as {
-                                id: string;
-                                name: string;
-                                url: string;
-                            };
-                            return (
-                                <Tooltip
-                                    content={`:${custom.name}:`}
-                                    key={custom.id}
-                                    position="top"
-                                >
-                                    <Button
-                                        className="h-10 w-10 shrink-0 rounded-md transition-colors hover:bg-bg-subtle"
-                                        variant="ghost"
-                                        onClick={(): void | undefined =>
-                                            onCustomEmojiSelect?.(custom)
-                                        }
-                                        onContextMenu={(e): void =>
-                                            showEmojiInfo(custom, e)
-                                        }
-                                    >
-                                        <img
-                                            alt={custom.name}
-                                            className="h-8 w-8 object-contain"
-                                            src={
-                                                resolveApiUrl(custom.url) || ''
-                                            }
-                                        />
-                                    </Button>
-                                </Tooltip>
-                            );
-                        }
-                        return null;
-                    })}
-                </Box>
+                    onCustomEmojiSelect={onCustomEmojiSelect}
+                    onEmojiSelect={onEmojiSelect}
+                    onShowInfo={showEmojiInfo}
+                />
             );
         },
         [flatRows, onEmojiSelect, onCustomEmojiSelect, showEmojiInfo],
@@ -412,13 +460,13 @@ const EmojiPickerContent = ({
                                     >[0]['server']
                                 }
                                 size="xs"
-                                onClick={(): void =>
-                                    handleCategoryClick(cat.id)
-                                }
+                                onClick={(): void => {
+                                    handleCategoryClick(cat.id);
+                                }}
                             />
-                            {isActive && (
+                            {isActive ? (
                                 <div className="absolute top-1/2 -left-3.5 h-6 w-1.5 -translate-y-1/2 rounded-full bg-primary shadow-[0_0_8px_rgba(var(--primary),0.5)]" />
-                            )}
+                            ) : null}
                         </Box>
                     ) : (
                         <Button
@@ -431,21 +479,23 @@ const EmojiPickerContent = ({
                             key={cat.id}
                             title={cat.name}
                             variant="nav"
-                            onClick={(): void => handleCategoryClick(cat.id)}
+                            onClick={(): void => {
+                                handleCategoryClick(cat.id);
+                            }}
                         >
                             <div className="flex h-8 w-8 items-center justify-center overflow-hidden p-1">
-                                {categoryIconMap[cat.id] && (
+                                {categoryIconMap[cat.id] ? (
                                     <ParsedUnicodeEmoji
                                         className="inline-block h-[24px] w-[24px] flex-shrink-0"
                                         content={getUnicode(
                                             categoryIconMap[cat.id]!,
                                         )}
                                     />
-                                )}
+                                ) : null}
                             </div>
-                            {isActive && (
+                            {isActive ? (
                                 <div className="absolute top-1/2 -left-3.5 h-6 w-1.5 -translate-y-1/2 rounded-full bg-primary shadow-[0_0_8px_rgba(var(--primary),0.5)]" />
-                            )}
+                            ) : null}
                         </Button>
                     );
                 })}
@@ -453,31 +503,16 @@ const EmojiPickerContent = ({
 
             <Box className="relative flex min-w-0 flex-1 flex-col bg-background">
                 <Box className="sticky top-0 z-[var(--z-index-content)] flex flex-col border-b border-divider/30 bg-background/80 px-3 py-1.5 backdrop-blur-md">
-                    <Box className="mb-2 w-full">
+                    <Box className="w-full">
                         <Input
                             className="h-8 text-sm"
                             icon={<Search size={14} />}
                             placeholder="Search emojis..."
                             value={searchQuery}
-                            onChange={(e): void =>
-                                setSearchQuery(e.target.value)
-                            }
+                            onChange={(e): void => {
+                                setSearchQuery(e.target.value);
+                            }}
                         />
-                    </Box>
-                    <Box className="flex h-[20px] items-center justify-between">
-                        <Text className="text-[9px] font-bold tracking-[0.2em] text-muted-foreground/70 uppercase">
-                            {searchQuery
-                                ? 'Search Results'
-                                : (
-                                      flatRows.find(
-                                          (r) =>
-                                              r.type === 'header' &&
-                                              r.id === resolvedActiveCategoryId,
-                                      ) as
-                                          | (RowItem & { type: 'header' })
-                                          | undefined
-                                  )?.name || 'Emojis'}
-                        </Text>
                     </Box>
                 </Box>
 
@@ -488,29 +523,29 @@ const EmojiPickerContent = ({
                     rowCount={flatRows.length}
                     rowHeight={getRowHeight}
                     rowProps={{}}
-                    style={{ height: height - 72, width: listAreaWidth }}
+                    style={{ height: height - 44, width: listAreaWidth }}
                     onRowsRendered={({
                         startIndex,
                     }: {
                         startIndex: number;
-                    }): void =>
-                        handleItemsRendered({ visibleStartIndex: startIndex })
-                    }
-                    onScroll={(e: React.UIEvent<HTMLDivElement>): void =>
+                    }): void => {
+                        handleItemsRendered({ visibleStartIndex: startIndex });
+                    }}
+                    onScroll={(e: React.UIEvent<HTMLDivElement>): void => {
                         handleScroll({
                             scrollOffset: e.currentTarget.scrollTop,
-                        })
-                    }
+                        });
+                    }}
                 />
 
-                {selectedEmoji && infoBoxPosition && (
+                {selectedEmoji && infoBoxPosition ? (
                     <EmojiInfoBox
                         emoji={selectedEmoji}
                         position={infoBoxPosition}
                         server={server}
                         onClose={closeInfoBox}
                     />
-                )}
+                ) : null}
             </Box>
         </div>
     );
@@ -546,7 +581,7 @@ export const EmojiPicker = ({
             ref={containerRef}
             transition={{ duration: 0.2, ease: 'easeOut' }}
         >
-            {width > 0 && height > 0 && (
+            {width > 0 && height > 0 ? (
                 <EmojiPickerContent
                     customCategories={customCategories}
                     height={height}
@@ -554,7 +589,7 @@ export const EmojiPicker = ({
                     onCustomEmojiSelect={onCustomEmojiSelect}
                     onEmojiSelect={onEmojiSelect}
                 />
-            )}
+            ) : null}
         </m.div>
     );
 };

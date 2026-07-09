@@ -29,7 +29,7 @@ export const auditLogApi = {
 
         const cleanParams = Object.fromEntries(
             Object.entries(rawParams).filter(
-                ([_, v]): boolean => v !== undefined && v !== null && v !== '',
+                ([_, v]): boolean => v !== undefined && v !== '',
             ),
         );
 

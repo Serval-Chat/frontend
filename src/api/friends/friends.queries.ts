@@ -23,7 +23,7 @@ export const FRIEND_PROFILES_QUERY_KEY = ['friend-profiles'] as const;
 
 export const useFriends = (
     options: { enabled?: boolean } = {},
-): UseQueryResult<Friend[], Error> =>
+): UseQueryResult<Friend[]> =>
     useQuery({
         queryKey: FRIENDS_QUERY_KEY,
         queryFn: friendsApi.getFriends,
@@ -32,7 +32,7 @@ export const useFriends = (
 
 export const useFriendProfiles = (
     options: { enabled?: boolean } = {},
-): UseQueryResult<User[], Error> => {
+): UseQueryResult<User[]> => {
     const queryClient = useQueryClient();
     return useQuery({
         queryKey: FRIEND_PROFILES_QUERY_KEY,
@@ -66,14 +66,14 @@ export const useSendFriendRequest = (): UseMutationResult<
     });
 };
 
-export const useIncomingRequests = (): UseQueryResult<FriendRequest[], Error> =>
+export const useIncomingRequests = (): UseQueryResult<FriendRequest[]> =>
     useQuery({
         queryKey: [...FRIEND_REQUESTS_QUERY_KEY, 'incoming'],
         queryFn: friendsApi.getIncomingRequests,
         enabled: hasAuthToken(),
     });
 
-export const useOutgoingRequests = (): UseQueryResult<FriendRequest[], Error> =>
+export const useOutgoingRequests = (): UseQueryResult<FriendRequest[]> =>
     useQuery({
         queryKey: [...FRIEND_REQUESTS_QUERY_KEY, 'outgoing'],
         queryFn: friendsApi.getOutgoingRequests,
@@ -162,18 +162,19 @@ export const useTogglePinFriend = (): UseMutationResult<
     return useMutation({
         mutationFn: friendsApi.togglePinFriend,
         onSuccess: ({ friendId, isPinned }): void => {
-            [FRIENDS_QUERY_KEY, FRIEND_PROFILES_QUERY_KEY].forEach(
-                (queryKey): void => {
-                    queryClient.setQueriesData<Friend[]>(
-                        { queryKey },
-                        (old): Friend[] | undefined =>
-                            old?.map(
-                                (f): Friend =>
-                                    f.id === friendId ? { ...f, isPinned } : f,
-                            ),
-                    );
-                },
-            );
+            for (const queryKey of [
+                FRIENDS_QUERY_KEY,
+                FRIEND_PROFILES_QUERY_KEY,
+            ]) {
+                queryClient.setQueriesData<Friend[]>(
+                    { queryKey },
+                    (old): Friend[] | undefined =>
+                        old?.map(
+                            (f): Friend =>
+                                f.id === friendId ? { ...f, isPinned } : f,
+                        ),
+                );
+            }
         },
     });
 };

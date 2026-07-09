@@ -84,13 +84,13 @@ export class Terminal {
 
     public putc(char: string): void {
         if (char.length === 0) return;
-        this.write(char[0]);
+        this.write(char.charAt(0));
     }
 
     public write(text: string): void {
         for (let i = 0; i < text.length; i++) {
-            const char = text[i];
-            if (char === '\u001b') {
+            const char = text.charAt(i);
+            if (char === '\u001B') {
                 const consumed = this.consumeAnsiSequence(text.slice(i));
                 if (consumed > 0) {
                     i += consumed - 1;
@@ -114,15 +114,17 @@ export class Terminal {
 
     private writeChar(char: string): void {
         switch (char) {
-            case '\n':
+            case '\n': {
                 this.cursorRow++;
                 this.cursorColumn = 0;
                 this.ensureLine(this.cursorRow);
                 return;
-            case '\r':
+            }
+            case '\r': {
                 this.cursorColumn = 0;
                 return;
-            case '\b':
+            }
+            case '\b': {
                 if (this.cursorColumn > 0) {
                     this.cursorColumn--;
                     const line = this.currentLine();
@@ -131,14 +133,20 @@ export class Terminal {
                         line.text.slice(this.cursorColumn + 1);
                 }
                 return;
-            default:
+            }
+            default: {
                 this.writePrintableChar(char);
+            }
         }
     }
 
     private currentLine(): TerminalLine {
         this.ensureLine(this.cursorRow);
-        return this.lines[this.cursorRow];
+        const line = this.lines[this.cursorRow];
+        if (!line) {
+            throw new Error('Terminal line missing after ensureLine.');
+        }
+        return line;
     }
 
     private ensureLine(row: number): void {
@@ -173,7 +181,7 @@ export class Terminal {
     private consumeAnsiSequence(sequence: string): number {
         const csi = CSI_PATTERN.exec(sequence);
         if (csi) {
-            this.applyCsi(csi[1], csi[2]);
+            this.applyCsi(csi[1] ?? '', csi[2] ?? '');
             return csi[0].length;
         }
 
@@ -191,38 +199,44 @@ export class Terminal {
             .replace(/^\?/, '')
             .split(';')
             .filter(Boolean)
-            .map((value): number => Number(value));
+            .map(Number);
 
         switch (command) {
-            case 'A':
+            case 'A': {
                 this.cursorRow = Math.max(0, this.cursorRow - (values[0] || 1));
                 break;
-            case 'B':
+            }
+            case 'B': {
                 this.cursorRow += values[0] || 1;
                 this.ensureLine(this.cursorRow);
                 break;
-            case 'C':
+            }
+            case 'C': {
                 this.cursorColumn += values[0] || 1;
                 break;
-            case 'D':
+            }
+            case 'D': {
                 this.cursorColumn = Math.max(
                     0,
                     this.cursorColumn - (values[0] || 1),
                 );
                 break;
+            }
             case 'H':
-            case 'f':
+            case 'f': {
                 this.cursorRow = Math.max(0, (values[0] || 1) - 1);
                 this.cursorColumn = Math.max(0, (values[1] || 1) - 1);
                 this.ensureLine(this.cursorRow);
                 break;
-            case 'J':
+            }
+            case 'J': {
                 if ((values[0] || 0) === 2) {
                     this.lines = [];
                     this.cursorRow = 0;
                     this.cursorColumn = 0;
                 }
                 break;
+            }
             case 'K': {
                 const line = this.currentLine();
                 if ((values[0] || 0) === 2) {

@@ -8,7 +8,7 @@ const DEFAULT_PAYLOAD: MessagePayload = {
     embeds: [
         {
             type: 'rich',
-            color: 0x5865f2,
+            color: 0x58_65_f2,
             title: 'My first embed',
             description:
                 'Edit this embed using the form on the left. The preview updates in real time.',

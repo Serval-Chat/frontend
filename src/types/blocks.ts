@@ -1,5 +1,5 @@
 export const BlockFlags = {
-    BLOCK_REACTIONS: 1 << 0,
+    BLOCK_REACTIONS: Math.trunc(1),
     HIDE_FROM_MEMBER_LIST: 1 << 1,
     HIDE_FROM_MENTIONS: 1 << 2,
     HIDE_MY_PRESENCE: 1 << 4,

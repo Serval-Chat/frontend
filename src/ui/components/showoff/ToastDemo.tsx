@@ -7,7 +7,7 @@ import { Stack } from '@/ui/components/layout/Stack';
 import { DemoSection } from './DemoSection';
 import { SHOWOFF_SECTIONS } from './config';
 
-export function ToastDemo(): ReactNode {
+export const ToastDemo = (): ReactNode => {
     const { showToast } = useToast();
 
     return (
@@ -15,29 +15,29 @@ export function ToastDemo(): ReactNode {
             <Stack wrap direction="row" gap="xs">
                 <Button
                     variant="success"
-                    onClick={(): void =>
-                        showToast('Success toast example!', 'success')
-                    }
+                    onClick={(): void => {
+                        showToast('Success toast example!', 'success');
+                    }}
                 >
                     Show Success Toast
                 </Button>
                 <Button
                     variant="danger"
-                    onClick={(): void =>
-                        showToast('Error toast example!', 'error')
-                    }
+                    onClick={(): void => {
+                        showToast('Error toast example!', 'error');
+                    }}
                 >
                     Show Error Toast
                 </Button>
                 <Button
                     variant="primary"
-                    onClick={(): void =>
-                        showToast('Info toast example!', 'info')
-                    }
+                    onClick={(): void => {
+                        showToast('Info toast example!', 'info');
+                    }}
                 >
                     Show Info Toast
                 </Button>
             </Stack>
         </DemoSection>
     );
-}
+};

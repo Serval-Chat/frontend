@@ -98,8 +98,8 @@ describe('MessagesList Highlight Logic', (): void => {
         vi.mocked(useAppDispatch).mockReturnValue(mockDispatch);
         vi.mocked(useAppSelector).mockReturnValue({}); // default blocks
 
-        window.HTMLElement.prototype.scrollIntoView = vi.fn();
-        window.requestAnimationFrame = vi.fn((cb) => cb());
+        globalThis.HTMLElement.prototype.scrollIntoView = vi.fn();
+        globalThis.requestAnimationFrame = vi.fn((cb) => cb());
     });
 
     it('clears highlight and dispatches null after timeout', async (): Promise<void> => {
@@ -117,13 +117,13 @@ describe('MessagesList Highlight Logic', (): void => {
         const { getByTestId, rerender } = renderer!;
 
         const msg2 = getByTestId('msg-2');
-        expect(msg2.getAttribute('data-highlighted')).toBe('true');
+        expect(msg2.dataset.highlighted).toBe('true');
 
         act((): void => {
             vi.advanceTimersByTime(2000);
         });
 
-        expect(msg2.getAttribute('data-highlighted')).toBe('false');
+        expect(msg2.dataset.highlighted).toBe('false');
 
         expect(mockDispatch).toHaveBeenCalledWith(
             expect.objectContaining({
@@ -142,7 +142,7 @@ describe('MessagesList Highlight Logic', (): void => {
             );
         });
 
-        expect(msg2.getAttribute('data-highlighted')).toBe('false');
+        expect(msg2.dataset.highlighted).toBe('false');
     });
 
     it('does not re-highlight on re-render if messages change but activeHighlightId is the same', async (): Promise<void> => {
@@ -158,16 +158,12 @@ describe('MessagesList Highlight Logic', (): void => {
         });
 
         const { getByTestId, rerender } = renderer!;
-        expect(getByTestId('msg-2').getAttribute('data-highlighted')).toBe(
-            'true',
-        );
+        expect(getByTestId('msg-2').dataset.highlighted).toBe('true');
 
         act((): void => {
             vi.advanceTimersByTime(1000);
         });
-        expect(getByTestId('msg-2').getAttribute('data-highlighted')).toBe(
-            'true',
-        );
+        expect(getByTestId('msg-2').dataset.highlighted).toBe('true');
         const newMessages = [
             ...mockMessages,
             { id: '3', text: 'Msg 3' } as any as ProcessedChatMessage,
@@ -182,17 +178,13 @@ describe('MessagesList Highlight Logic', (): void => {
             );
         });
 
-        expect(getByTestId('msg-2').getAttribute('data-highlighted')).toBe(
-            'true',
-        );
+        expect(getByTestId('msg-2').dataset.highlighted).toBe('true');
 
         act((): void => {
             vi.advanceTimersByTime(1000);
         });
 
-        expect(getByTestId('msg-2').getAttribute('data-highlighted')).toBe(
-            'false',
-        );
+        expect(getByTestId('msg-2').dataset.highlighted).toBe('false');
     });
 
     it('clears highlight and dispatches null on unmount if timer was active', (): void => {

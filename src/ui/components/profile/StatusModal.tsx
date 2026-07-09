@@ -25,6 +25,26 @@ interface StatusModalProps {
 const isCustomEmoji = (emoji: string): boolean =>
     /^[0-9a-fA-F]{24}$/.test(emoji);
 
+const EmojiPreview = ({
+    statusEmoji,
+}: {
+    statusEmoji: string;
+}): React.ReactNode => {
+    if (statusEmoji === '') return <Smile size={20} />;
+
+    if (isCustomEmoji(statusEmoji)) {
+        return (
+            <ParsedEmoji
+                nonInteractive
+                className="h-5 w-5"
+                emojiId={statusEmoji}
+            />
+        );
+    }
+
+    return <ParsedUnicodeEmoji className="text-xl" content={statusEmoji} />;
+};
+
 export const StatusModal = ({
     isOpen,
     onClose,
@@ -55,21 +75,25 @@ export const StatusModal = ({
     });
 
     const handleSave = (): void => {
-        if (statusText.trim() || statusEmoji) {
+        if (statusText.trim() !== '' || statusEmoji !== '') {
             updateStatus(
                 {
                     text: statusText.trim(),
-                    emoji: statusEmoji || undefined,
+                    emoji: statusEmoji === '' ? undefined : statusEmoji,
                 },
                 {
-                    onSuccess: (): void => onClose(),
+                    onSuccess: (): void => {
+                        onClose();
+                    },
                 },
             );
         } else {
             updateStatus(
                 { clear: true },
                 {
-                    onSuccess: (): void => onClose(),
+                    onSuccess: (): void => {
+                        onClose();
+                    },
                 },
             );
         }
@@ -100,22 +124,6 @@ export const StatusModal = ({
         inputRef.current?.focus();
     };
 
-    const renderEmojiPreview = (): React.ReactNode => {
-        if (!statusEmoji) return <Smile size={20} />;
-
-        if (isCustomEmoji(statusEmoji)) {
-            return (
-                <ParsedEmoji
-                    nonInteractive
-                    className="h-5 w-5"
-                    emojiId={statusEmoji}
-                />
-            );
-        }
-
-        return <ParsedUnicodeEmoji className="text-xl" content={statusEmoji} />;
-    };
-
     return (
         <Modal
             className="max-w-md"
@@ -130,33 +138,34 @@ export const StatusModal = ({
                             className="h-8 w-8 min-w-0 p-1"
                             ref={triggerRef}
                             variant="ghost"
-                            onClick={(): void =>
-                                setShowEmojiPicker(!showEmojiPicker)
-                            }
+                            onClick={(): void => {
+                                setShowEmojiPicker(!showEmojiPicker);
+                            }}
                         >
-                            {renderEmojiPreview()}
+                            <EmojiPreview statusEmoji={statusEmoji} />
                         </Button>
 
-                        {showEmojiPicker &&
-                            createPortal(
-                                <Box
-                                    className="fixed z-[var(--z-index-top)] shadow-2xl"
-                                    ref={emojiPickerRef}
-                                    style={{
-                                        top: position.y,
-                                        left: position.x,
-                                    }}
-                                >
-                                    <EmojiPicker
-                                        customCategories={customCategories}
-                                        onCustomEmojiSelect={
-                                            handleCustomEmojiSelect
-                                        }
-                                        onEmojiSelect={handleEmojiSelect}
-                                    />
-                                </Box>,
-                                document.body,
-                            )}
+                        {showEmojiPicker
+                            ? createPortal(
+                                  <Box
+                                      className="fixed z-[var(--z-index-top)] shadow-2xl"
+                                      ref={emojiPickerRef}
+                                      style={{
+                                          top: position.y,
+                                          left: position.x,
+                                      }}
+                                  >
+                                      <EmojiPicker
+                                          customCategories={customCategories}
+                                          onCustomEmojiSelect={
+                                              handleCustomEmojiSelect
+                                          }
+                                          onEmojiSelect={handleEmojiSelect}
+                                      />
+                                  </Box>,
+                                  document.body,
+                              )
+                            : null}
                     </Box>
                     <Input
                         className="h-9 flex-1 border-none bg-transparent focus:ring-0"
@@ -164,14 +173,16 @@ export const StatusModal = ({
                         placeholder="What's happening?"
                         ref={inputRef}
                         value={statusText}
-                        onChange={(e): void => setStatusText(e.target.value)}
+                        onChange={(e): void => {
+                            setStatusText(e.target.value);
+                        }}
                         onKeyDown={(e): void => {
                             if (e.key === 'Enter') {
                                 handleSave();
                             }
                         }}
                     />
-                    {(statusText || statusEmoji) && (
+                    {statusText !== '' || statusEmoji !== '' ? (
                         <Button
                             className="h-8 w-8 min-w-0 p-1 text-muted-foreground hover:text-foreground"
                             variant="ghost"
@@ -182,7 +193,7 @@ export const StatusModal = ({
                         >
                             <X size={16} />
                         </Button>
-                    )}
+                    ) : null}
                 </Box>
 
                 <Box className="flex items-center justify-between gap-3">

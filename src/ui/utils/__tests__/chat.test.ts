@@ -5,6 +5,7 @@ import type { Role } from '@/api/servers/servers.types';
 import {
     getHighestColorRoleForMember,
     getHighestRoleForMember,
+    isWebhookUser,
     resolveWebhookUser,
 } from '@/ui/utils/chat';
 
@@ -171,6 +172,31 @@ describe('chat utils', (): void => {
             expect(user?.profilePicture).toBe(
                 '/api/v1/embed/proxy?url=https%3A%2F%2Fexample.com%2Favatar.png',
             );
+        });
+    });
+
+    describe('isWebhookUser', (): void => {
+        it('detects synthetic webhook users by their id prefix', (): void => {
+            expect(isWebhookUser({ id: 'webhook-msg2' })).toBe(true);
+            expect(
+                isWebhookUser(
+                    resolveWebhookUser({
+                        id: 'msg2',
+                        isWebhook: true,
+                        webhookUsername: 'Bridge Bot',
+                        createdAt: '2026-05-17T12:00:00Z',
+                    } as ChatMessage),
+                ),
+            ).toBe(true);
+        });
+
+        it('returns false for real users and missing ids', (): void => {
+            expect(isWebhookUser({ id: '507f1f77bcf86cd799439011' })).toBe(
+                false,
+            );
+            expect(isWebhookUser({})).toBe(false);
+            expect(isWebhookUser()).toBe(false);
+            expect(isWebhookUser(null)).toBe(false);
         });
     });
 });

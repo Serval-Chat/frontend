@@ -19,7 +19,6 @@ import {
     MARKDOWN_FEATURE_OPTIONS,
     formatBlockedMarkdownFeatures,
 } from '@/utils/markdownBlockade';
-import type { ParserFeature } from '@/utils/textParser/types';
 
 interface MarkdownBlockadeSettingsProps {
     rules?: MarkdownBlockadeRule[];
@@ -66,7 +65,7 @@ const parseTargetValue = (
     if (!value || value === 'everyone') {
         return { targetType: 'everyone', targetId: 'everyone' };
     }
-    const [targetType, targetId] = value.split(':', 2);
+    const [targetType, targetId = ''] = value.split(':', 2);
     if (targetType === 'user' || targetType === 'role') {
         return { targetType, targetId };
     }
@@ -167,18 +166,18 @@ export const MarkdownBlockadeSettings = ({
                                 placeholder="Select target"
                                 searchPlaceholder="Search targets..."
                                 value={ruleTargetValue(rule)}
-                                onChange={(value): void =>
+                                onChange={(value): void => {
                                     updateRule(index, (current) => ({
                                         ...current,
                                         ...parseTargetValue(value),
-                                    }))
-                                }
+                                    }));
+                                }}
                             />
                             <Button
                                 aria-label="Remove disallowed markdown feature rule"
                                 type="button"
                                 variant="ghost"
-                                onClick={(): void =>
+                                onClick={(): void => {
                                     setDraftRules(
                                         (
                                             current,
@@ -186,8 +185,8 @@ export const MarkdownBlockadeSettings = ({
                                             current.filter(
                                                 (_, i): boolean => i !== index,
                                             ),
-                                    )
-                                }
+                                    );
+                                }}
                             >
                                 <Trash2 size={16} />
                             </Button>
@@ -204,7 +203,7 @@ export const MarkdownBlockadeSettings = ({
                                         checked={rule.features.includes(
                                             feature.id,
                                         )}
-                                        onCheckedChange={(checked): void =>
+                                        onCheckedChange={(checked): void => {
                                             updateRule(index, (current) => ({
                                                 ...current,
                                                 features: checked
@@ -217,21 +216,19 @@ export const MarkdownBlockadeSettings = ({
                                                               item !==
                                                               feature.id,
                                                       ),
-                                            }))
-                                        }
+                                            }));
+                                        }}
                                     />
                                 </label>
                             ))}
                         </div>
 
-                        {rule.features.length > 0 && (
+                        {rule.features.length > 0 ? (
                             <Text size="xs" variant="muted">
                                 Disallowed:{' '}
-                                {formatBlockedMarkdownFeatures(
-                                    rule.features as ParserFeature[],
-                                )}
+                                {formatBlockedMarkdownFeatures(rule.features)}
                             </Text>
-                        )}
+                        ) : null}
                     </div>
                 ))}
             </div>
@@ -240,12 +237,12 @@ export const MarkdownBlockadeSettings = ({
                 icon={Plus}
                 type="button"
                 variant="normal"
-                onClick={(): void =>
+                onClick={(): void => {
                     setDraftRules((current): DraftMarkdownBlockadeRule[] => [
                         ...current,
                         makeDraftRule(),
-                    ])
-                }
+                    ]);
+                }}
             >
                 Add disallowed features
             </Button>
@@ -253,7 +250,9 @@ export const MarkdownBlockadeSettings = ({
             <SettingsFloatingBar
                 isPending={isPending}
                 isVisible={hasChanges}
-                onReset={(): void => setDraftRules(originalRules)}
+                onReset={(): void => {
+                    setDraftRules(originalRules);
+                }}
                 onSave={handleSave}
             />
         </div>

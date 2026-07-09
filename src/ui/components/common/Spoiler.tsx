@@ -24,7 +24,9 @@ export const Spoiler = ({ children, className }: SpoilerProps) => {
                     : 'bg-spoiler select-none hover:opacity-80',
                 className,
             )}
-            onClick={(): void => setIsRevealed(true)}
+            onClick={(): void => {
+                setIsRevealed(true);
+            }}
         >
             <Box
                 as="span"

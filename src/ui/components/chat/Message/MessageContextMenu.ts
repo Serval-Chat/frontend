@@ -50,7 +50,7 @@ interface ContextMenuParams {
     onRemoveRole?: (roleId: string) => void;
 }
 
-export function buildContextMenuItems({
+function buildContextMenuItems({
     message,
     user,
     isMessageSender,
@@ -79,17 +79,19 @@ export function buildContextMenuItems({
     const items: ContextMenuItem[] = [];
 
     if (message.serverId && message.channelId) {
-        items.push({
-            label: 'Copy Message Link',
-            icon: Copy,
-            onClick: (): void => {
-                const link = `/chat/@server/${message.serverId}/channel/${message.channelId}/message/${message.id}`;
-                void navigator.clipboard.writeText(
-                    `${window.location.origin}${link}`,
-                );
+        items.push(
+            {
+                label: 'Copy Message Link',
+                icon: Copy,
+                onClick: (): void => {
+                    const link = `/chat/@server/${message.serverId}/channel/${message.channelId}/message/${message.id}`;
+                    void navigator.clipboard.writeText(
+                        `${globalThis.location.origin}${link}`,
+                    );
+                },
             },
-        });
-        items.push({ type: 'divider' });
+            { type: 'divider' },
+        );
     }
 
     if (message.text) {
@@ -121,13 +123,17 @@ export function buildContextMenuItems({
                 label: 'Remove Friend',
                 icon: UserMinus,
                 variant: 'danger',
-                onClick: (): void => onRemoveFriend(message.senderId),
+                onClick: (): void => {
+                    onRemoveFriend(message.senderId);
+                },
             });
         } else if (!user?.isBot) {
             items.push({
                 label: 'Add Friend',
                 icon: UserPlus,
-                onClick: (): void => onAddFriend(user.username),
+                onClick: (): void => {
+                    onAddFriend(user.username);
+                },
             });
         }
     }
@@ -136,7 +142,9 @@ export function buildContextMenuItems({
         items.unshift({
             label: 'Reply',
             icon: CornerUpLeft,
-            onClick: (): void => onReplyToMessage(message),
+            onClick: (): void => {
+                onReplyToMessage(message);
+            },
         });
     }
 
@@ -147,12 +155,14 @@ export function buildContextMenuItems({
     });
 
     if (showColorResolverDebug && onShowColorResolverOrder) {
-        items.push({ type: 'divider' });
-        items.push({
-            label: 'Show color resolver order',
-            icon: ListTree,
-            onClick: onShowColorResolverOrder,
-        });
+        items.push(
+            { type: 'divider' },
+            {
+                label: 'Show color resolver order',
+                icon: ListTree,
+                onClick: onShowColorResolverOrder,
+            },
+        );
     }
 
     if (canEdit) {
@@ -164,27 +174,31 @@ export function buildContextMenuItems({
     }
 
     if (canPin && message.serverId && message.channelId) {
-        items.push({ type: 'divider' });
-        items.push({
-            label: message.isPinned ? 'Unpin Message' : 'Pin Message',
-            icon: Pin,
-            onClick: onTogglePin,
-        });
-        items.push({
-            label: message.isSticky ? 'Unsticky Message' : 'Sticky Message',
-            icon: StickyNote,
-            onClick: onToggleSticky,
-        });
+        items.push(
+            { type: 'divider' },
+            {
+                label: message.isPinned ? 'Unpin Message' : 'Pin Message',
+                icon: Pin,
+                onClick: onTogglePin,
+            },
+            {
+                label: message.isSticky ? 'Unsticky Message' : 'Sticky Message',
+                icon: StickyNote,
+                onClick: onToggleSticky,
+            },
+        );
     }
 
     if (canDelete) {
-        items.push({ type: 'divider' });
-        items.push({
-            label: 'Delete Message',
-            icon: Trash2,
-            variant: 'danger',
-            onClick: onDelete,
-        });
+        items.push(
+            { type: 'divider' },
+            {
+                label: 'Delete Message',
+                icon: Trash2,
+                variant: 'danger',
+                onClick: onDelete,
+            },
+        );
     }
 
     if (
@@ -243,7 +257,7 @@ export function buildContextMenuItems({
                                   }
                               },
                               rightIcon: hasRole ? Check : undefined,
-                              variant: !canManageThisRole ? 'ghost' : 'normal',
+                              variant: canManageThisRole ? 'normal' : 'ghost',
                               preventClose: true,
                           };
                       })

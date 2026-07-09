@@ -24,7 +24,7 @@ export const ConfirmLinkModal = ({
         isOpen={isOpen}
         showCloseButton={false}
         title="External Link"
-        zIndex={10000}
+        zIndex={10_000}
         onClose={onClose}
     >
         <div className="space-y-6">

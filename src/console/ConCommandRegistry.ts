@@ -92,7 +92,7 @@ export class ConCommandRegistry {
                 const defaultReactor = this.reactors.find(
                     (r): boolean => r.default !== undefined,
                 );
-                if (defaultReactor && defaultReactor.default) {
+                if (defaultReactor?.default) {
                     result = await defaultReactor.default(argc, argv, context);
                     handled = true;
                 }

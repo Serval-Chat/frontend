@@ -69,21 +69,21 @@ export const MessageHeader = React.memo(
                         {user.nickname || user.displayName || user.username}
                     </StyledUserName>
                 </Box>
-                {user.isBot && <BotTag className="h-4" />}
-                {isWebhook && !user.isBot && (
+                {user.isBot ? <BotTag className="h-4" /> : null}
+                {isWebhook && !user.isBot ? (
                     <BotTag className="h-4" label="WEBHOOK" />
-                )}
-                {showUsersPronouns && user.pronouns && (
+                ) : null}
+                {showUsersPronouns && user.pronouns ? (
                     <Text className="self-center text-xs text-text-muted">
                         ({user.pronouns})
                     </Text>
-                )}
+                ) : null}
 
                 <Text className="self-center text-[10px] font-medium tracking-wider text-text-muted uppercase">
                     {formatTimestamp(timestamp, use24HourTime)}
                 </Text>
 
-                {isEdited && (
+                {isEdited ? (
                     <Text className="self-center text-[10px] font-medium text-text-muted italic">
                         (edited
                         {editedAt
@@ -91,7 +91,7 @@ export const MessageHeader = React.memo(
                             : ''}
                         )
                     </Text>
-                )}
+                ) : null}
             </Box>
         );
     },

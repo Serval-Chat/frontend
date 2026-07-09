@@ -86,7 +86,7 @@ export const AutocompleteSuggestion = ({
             const anchorElement = anchorElementRef?.current;
             if (
                 !anchorElement ||
-                !window.matchMedia('(max-width: 768px)').matches
+                !globalThis.matchMedia('(max-width: 768px)').matches
             ) {
                 setMobileMenuStyle(undefined);
                 return;
@@ -152,7 +152,7 @@ export const AutocompleteSuggestion = ({
                             onSelect(suggestion);
                         }}
                     >
-                        {suggestion.type === 'user' && (
+                        {suggestion.type === 'user' ? (
                             <>
                                 <UserProfilePicture
                                     size="sm"
@@ -169,12 +169,12 @@ export const AutocompleteSuggestion = ({
                                                 : 'text-foreground',
                                         )}
                                     >
-                                        {suggestion.nickname ||
-                                            suggestion.user.displayName ||
+                                        {suggestion.nickname ??
+                                            suggestion.user.displayName ??
                                             suggestion.user.username}
                                     </span>
-                                    {(suggestion.nickname ||
-                                        suggestion.user.displayName) && (
+                                    {suggestion.nickname ||
+                                    suggestion.user.displayName ? (
                                         <span className="truncate text-xs text-muted-foreground">
                                             {suggestion.user.username.startsWith(
                                                 '@',
@@ -182,11 +182,11 @@ export const AutocompleteSuggestion = ({
                                                 ? suggestion.user.username
                                                 : `@${suggestion.user.username}`}
                                         </span>
-                                    )}
+                                    ) : null}
                                 </Box>
                             </>
-                        )}
-                        {suggestion.type === 'role' && (
+                        ) : null}
+                        {suggestion.type === 'role' ? (
                             <>
                                 <Box
                                     className="h-4 w-4 shrink-0 rounded-full border border-white/10"
@@ -205,8 +205,8 @@ export const AutocompleteSuggestion = ({
                                         : `@${suggestion.role.name}`}
                                 </span>
                             </>
-                        )}
-                        {suggestion.type === 'emoji' && (
+                        ) : null}
+                        {suggestion.type === 'emoji' ? (
                             <>
                                 <Box className="h-6 w-6 shrink-0">
                                     <div
@@ -224,8 +224,8 @@ export const AutocompleteSuggestion = ({
                                     :{suggestion.emoji.short_name}:
                                 </span>
                             </>
-                        )}
-                        {suggestion.type === 'server-emoji' && (
+                        ) : null}
+                        {suggestion.type === 'server-emoji' ? (
                             <>
                                 <Box className="h-6 w-6 shrink-0">
                                     <img
@@ -249,8 +249,8 @@ export const AutocompleteSuggestion = ({
                                     :{suggestion.emoji.name}:
                                 </span>
                             </>
-                        )}
-                        {suggestion.type === 'channel' && (
+                        ) : null}
+                        {suggestion.type === 'channel' ? (
                             <>
                                 <Box className="flex h-5 w-5 shrink-0 items-center justify-center text-muted-foreground">
                                     {(() => {
@@ -277,8 +277,8 @@ export const AutocompleteSuggestion = ({
                                     {suggestion.channel.name}
                                 </span>
                             </>
-                        )}
-                        {suggestion.type === 'everyone' && (
+                        ) : null}
+                        {suggestion.type === 'everyone' ? (
                             <>
                                 <Box className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-primary">
                                     <span className="text-[10px] font-bold text-white">
@@ -296,7 +296,7 @@ export const AutocompleteSuggestion = ({
                                     @everyone
                                 </span>
                             </>
-                        )}
+                        ) : null}
                     </Box>
                 ))}
             </Box>
@@ -306,17 +306,23 @@ export const AutocompleteSuggestion = ({
 
 const getSuggestionKey = (suggestion: Suggestion): string => {
     switch (suggestion.type) {
-        case 'user':
+        case 'user': {
             return `user-${suggestion.user.id}`;
-        case 'role':
+        }
+        case 'role': {
             return `role-${suggestion.role.id}`;
-        case 'emoji':
+        }
+        case 'emoji': {
             return `emoji-${suggestion.emoji.short_name}`;
-        case 'server-emoji':
+        }
+        case 'server-emoji': {
             return `server-emoji-${suggestion.emoji.id}`;
-        case 'everyone':
+        }
+        case 'everyone': {
             return 'everyone';
-        case 'channel':
+        }
+        case 'channel': {
             return `channel-${suggestion.channel.id}`;
+        }
     }
 };

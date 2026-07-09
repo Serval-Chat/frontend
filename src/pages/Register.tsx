@@ -65,10 +65,12 @@ export const Register = () => {
                             placeholder="E-mail"
                             type="email"
                             value={login}
-                            onChange={(e): void => setLogin(e.target.value)}
+                            onChange={(e): void => {
+                                setLogin(e.target.value);
+                            }}
                         />
                         <AnimatePresence>
-                            {errors.login && (
+                            {errors.login ? (
                                 <m.small
                                     animate={{ opacity: 1, height: 'auto' }}
                                     className="mt-1 block h-0 overflow-hidden text-xs text-red-400"
@@ -77,7 +79,7 @@ export const Register = () => {
                                 >
                                     {errors.login}
                                 </m.small>
-                            )}
+                            ) : null}
                         </AnimatePresence>
                     </InputWrapper>
                     <InputWrapper>
@@ -88,10 +90,12 @@ export const Register = () => {
                             placeholder="Username (display name)"
                             type="text"
                             value={username}
-                            onChange={(e): void => setUsername(e.target.value)}
+                            onChange={(e): void => {
+                                setUsername(e.target.value);
+                            }}
                         />
                         <AnimatePresence>
-                            {errors.username && (
+                            {errors.username ? (
                                 <m.small
                                     animate={{ opacity: 1, height: 'auto' }}
                                     className="mt-1 block h-0 overflow-hidden text-xs text-red-400"
@@ -100,7 +104,7 @@ export const Register = () => {
                                 >
                                     {errors.username}
                                 </m.small>
-                            )}
+                            ) : null}
                         </AnimatePresence>
                     </InputWrapper>
                     <InputWrapper>
@@ -112,9 +116,9 @@ export const Register = () => {
                                 placeholder="Password"
                                 type={showPassword ? 'text' : 'password'}
                                 value={password}
-                                onChange={(e): void =>
-                                    setPassword(e.target.value)
-                                }
+                                onChange={(e): void => {
+                                    setPassword(e.target.value);
+                                }}
                             />
                             <button
                                 aria-label={
@@ -129,9 +133,9 @@ export const Register = () => {
                                         : 'Show password'
                                 }
                                 type="button"
-                                onClick={(): void =>
-                                    setShowPassword(!showPassword)
-                                }
+                                onClick={(): void => {
+                                    setShowPassword(!showPassword);
+                                }}
                             >
                                 {showPassword ? (
                                     <EyeOff size={18} />
@@ -141,7 +145,7 @@ export const Register = () => {
                             </button>
                         </div>
                         <AnimatePresence>
-                            {errors.password && (
+                            {errors.password ? (
                                 <m.small
                                     animate={{ opacity: 1, height: 'auto' }}
                                     className="mt-1 block h-0 overflow-hidden text-xs text-red-400"
@@ -150,7 +154,7 @@ export const Register = () => {
                                 >
                                     {errors.password}
                                 </m.small>
-                            )}
+                            ) : null}
                         </AnimatePresence>
                     </InputWrapper>
                     <InputWrapper>
@@ -162,9 +166,9 @@ export const Register = () => {
                                 placeholder="Confirm Password"
                                 type={showConfirmPassword ? 'text' : 'password'}
                                 value={confirmPassword}
-                                onChange={(e): void =>
-                                    setConfirmPassword(e.target.value)
-                                }
+                                onChange={(e): void => {
+                                    setConfirmPassword(e.target.value);
+                                }}
                             />
                             <button
                                 aria-label={
@@ -179,9 +183,11 @@ export const Register = () => {
                                         : 'Show password'
                                 }
                                 type="button"
-                                onClick={(): void =>
-                                    setShowConfirmPassword(!showConfirmPassword)
-                                }
+                                onClick={(): void => {
+                                    setShowConfirmPassword(
+                                        !showConfirmPassword,
+                                    );
+                                }}
                             >
                                 {showConfirmPassword ? (
                                     <EyeOff size={18} />
@@ -191,7 +197,7 @@ export const Register = () => {
                             </button>
                         </div>
                         <AnimatePresence>
-                            {errors.confirmPassword && (
+                            {errors.confirmPassword ? (
                                 <m.small
                                     animate={{ opacity: 1, height: 'auto' }}
                                     className="mt-1 block h-0 overflow-hidden text-xs text-red-400"
@@ -200,7 +206,7 @@ export const Register = () => {
                                 >
                                     {errors.confirmPassword}
                                 </m.small>
-                            )}
+                            ) : null}
                         </AnimatePresence>
                     </InputWrapper>
                     <InputWrapper>
@@ -213,12 +219,12 @@ export const Register = () => {
                             spellCheck={false}
                             type="text"
                             value={inviteToken}
-                            onChange={(e): void =>
-                                setInviteToken(e.target.value)
-                            }
+                            onChange={(e): void => {
+                                setInviteToken(e.target.value);
+                            }}
                         />
                         <AnimatePresence>
-                            {errors.inviteToken && (
+                            {errors.inviteToken ? (
                                 <m.small
                                     animate={{ opacity: 1, height: 'auto' }}
                                     className="mt-1 block h-0 overflow-hidden text-xs text-red-400"
@@ -227,7 +233,7 @@ export const Register = () => {
                                 >
                                     {errors.inviteToken}
                                 </m.small>
-                            )}
+                            ) : null}
                         </AnimatePresence>
                     </InputWrapper>
                     <Button

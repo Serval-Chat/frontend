@@ -2,7 +2,7 @@ export const convertToWebp = (blob: Blob, fileName: string): Promise<File> =>
     new Promise((resolve, reject): void => {
         const url = URL.createObjectURL(blob);
         const img = new Image();
-        img.onload = (): void => {
+        img.addEventListener('load', (): void => {
             const canvas = document.createElement('canvas');
             canvas.width = img.width;
             canvas.height = img.height;
@@ -25,10 +25,10 @@ export const convertToWebp = (blob: Blob, fileName: string): Promise<File> =>
                 }
                 URL.revokeObjectURL(url);
             }, 'image/webp');
-        };
-        img.onerror = (): void => {
+        });
+        img.addEventListener('error', (): void => {
             URL.revokeObjectURL(url);
             reject(new Error('Failed to load image'));
-        };
+        });
         img.src = url;
     });

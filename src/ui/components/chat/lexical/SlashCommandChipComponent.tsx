@@ -1,8 +1,8 @@
 import React from 'react';
 
-import { type LexicalEditor } from 'lexical';
+import type { LexicalEditor } from 'lexical';
 
-import { CANCEL_SLASH_COMMAND } from './SlashCommandChipNode';
+import { CANCEL_SLASH_COMMAND } from './slashChipHelpers';
 
 export interface SlashCommandChipProps {
     commandName: string;

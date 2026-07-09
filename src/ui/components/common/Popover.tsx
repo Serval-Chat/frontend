@@ -71,7 +71,7 @@ export const Popover = ({
 
     return createPortal(
         <AnimatePresence>
-            {isOpen && (
+            {isOpen ? (
                 <m.div
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     className={cn(
@@ -89,7 +89,7 @@ export const Popover = ({
                 >
                     {children}
                 </m.div>
-            )}
+            ) : null}
         </AnimatePresence>,
         document.body,
     );

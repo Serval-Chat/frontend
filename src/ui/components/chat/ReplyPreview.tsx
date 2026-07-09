@@ -57,7 +57,7 @@ const truncateText = (text: string, length: number): string => {
 };
 
 const getSingleLineHeight = (element: HTMLElement): number => {
-    const styles = window.getComputedStyle(element);
+    const styles = globalThis.getComputedStyle(element);
     const lineHeight = Number.parseFloat(styles.lineHeight);
 
     if (Number.isFinite(lineHeight)) {
@@ -70,16 +70,16 @@ const getSingleLineHeight = (element: HTMLElement): number => {
 
 const flattenReplyText = (text: string): string =>
     text
-        .replace(/```[\s\S]*?```/g, ' Code block ')
-        .replace(/`([^`]+)`/g, '$1')
-        .replace(/!\[([^\]]*)\]\([^)]+\)/g, '$1')
-        .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
-        .replace(/^#{1,6}\s+/gm, '')
-        .replace(/^[-*_]{3,}\s*$/gm, ' ')
-        .replace(/^\s*(?:[-*+]|\d+[.)])\s+/gm, '')
-        .replace(/^>\s?/gm, '')
-        .replace(/[*_~|]/g, '')
-        .replace(/\s+/g, ' ')
+        .replaceAll(/```[\s\S]*?```/g, ' Code block ')
+        .replaceAll(/`([^`]+)`/g, '$1')
+        .replaceAll(/!\[([^\]]*)\]\([^)]+\)/g, '$1')
+        .replaceAll(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+        .replaceAll(/^#{1,6}\s+/gm, '')
+        .replaceAll(/^[-*_]{3,}\s*$/gm, ' ')
+        .replaceAll(/^\s*(?:[-*+]|\d+[.)])\s+/gm, '')
+        .replaceAll(/^>\s?/gm, '')
+        .replaceAll(/[*_~|]/g, '')
+        .replaceAll(/\s+/g, ' ')
         .trim();
 
 const MeasuredReplyText = React.memo(({ text }: MeasuredReplyTextProps) => {
@@ -125,8 +125,10 @@ const MeasuredReplyText = React.memo(({ text }: MeasuredReplyTextProps) => {
     }, [flattenedText, visibleText]);
 
     useLayoutEffect((): (() => void) => {
-        const frame = window.requestAnimationFrame(measure);
-        return (): void => window.cancelAnimationFrame(frame);
+        const frame = globalThis.requestAnimationFrame(measure);
+        return (): void => {
+            globalThis.cancelAnimationFrame(frame);
+        };
     }, [measure]);
 
     useLayoutEffect((): (() => void) | undefined => {
@@ -144,7 +146,9 @@ const MeasuredReplyText = React.memo(({ text }: MeasuredReplyTextProps) => {
         });
         observer.observe(observedElement);
 
-        return (): void => observer.disconnect();
+        return (): void => {
+            observer.disconnect();
+        };
     }, [flattenedText]);
 
     return (
@@ -218,29 +222,31 @@ export const ReplyPreview = React.memo(
                     >
                         {user.nickname || user.displayName || user.username}
                     </StyledUserName>
-                    {user.isBot && (
+                    {user.isBot ? (
                         <BotTag className="h-3.5 shrink-0 px-1 text-[8px]" />
-                    )}
-                    {isWebhook && (
+                    ) : null}
+                    {isWebhook ? (
                         <BotTag
                             className="h-3.5 shrink-0 px-1 text-[8px]"
                             label="WEBHOOK"
                         />
-                    )}
+                    ) : null}
                     <Text
                         as="span"
                         className="block h-5 min-w-0 flex-1 truncate text-xs leading-5 font-medium text-text-muted"
                     >
-                        {command && !text && (
+                        {command && !text ? (
                             <span className="mr-1 opacity-70">
                                 used{' '}
                                 <span className="text-primary">/{command}</span>
                             </span>
-                        )}
-                        {!command && !text && hasAttachments && (
+                        ) : null}
+                        {!command && !text && hasAttachments ? (
                             <span className="opacity-70">Attachment(-s)</span>
-                        )}
-                        {text && <MeasuredReplyText key={text} text={text} />}
+                        ) : null}
+                        {text ? (
+                            <MeasuredReplyText key={text} text={text} />
+                        ) : null}
                     </Text>
                 </Box>
             </Box>

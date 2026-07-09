@@ -68,7 +68,7 @@ export const FurTweaker = () => {
 
                         <NTSlider
                             label="Pattern Seed"
-                            max={9999999}
+                            max={9_999_999}
                             min={0}
                             step={1}
                             value={seed}
@@ -82,7 +82,11 @@ export const FurTweaker = () => {
 
                         <div className="mt-auto flex justify-center pt-4">
                             <NTButton
+                                // inside a click handler, not evaluated during
+                                // render - and this is a client-only SPA
+                                // (createRoot, no hydrateRoot/SSR) anyway.
                                 onClick={(): void => {
+                                    // react-doctor-disable-next-line react-doctor/rendering-hydration-mismatch-time
                                     dispatch(setFurSeed(Date.now()));
                                 }}
                             >

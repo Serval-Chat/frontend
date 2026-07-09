@@ -65,8 +65,8 @@ describe('presenceSlice', (): void => {
             existingState,
             setUserOffline({ userId: '1', username: 'alice' }),
         );
-        expect(state.users['1'].status).toBe('offline');
-        expect(state.users['1'].customStatus).toBeNull();
+        expect(state.users['1']?.status).toBe('offline');
+        expect(state.users['1']?.customStatus).toBeNull();
     });
 
     it('should handle setUserOffline for unknown user', (): void => {
@@ -107,7 +107,7 @@ describe('presenceSlice', (): void => {
                 customStatus: { text: 'Eating' },
             }),
         );
-        expect(state.users['1'].customStatus).toEqual({ text: 'Eating' });
-        expect(state.users['2'].customStatus).toBeNull();
+        expect(state.users['1']?.customStatus).toEqual({ text: 'Eating' });
+        expect(state.users['2']?.customStatus).toBeNull();
     });
 });

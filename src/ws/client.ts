@@ -12,6 +12,14 @@ type EventHandler<T = unknown> = (
     meta: IWsEnvelope['meta'],
 ) => void;
 
+export type WsConnectionState =
+    | 'disconnected'
+    | 'connecting'
+    | 'connected'
+    | 'authenticated';
+
+type StatusListener = (state: WsConnectionState) => void;
+
 interface IWsErrorPayload {
     code: string;
     details: { message: string; [key: string]: unknown };
@@ -23,33 +31,36 @@ interface IWsErrorPayload {
 class WsClient {
     private socket: WebSocket | null = null;
     private url: string;
-    private handlers: Map<string, Set<EventHandler<unknown>>> = new Map();
+    private handlers = new Map<string, Set<EventHandler>>();
     private reconnectAttempts = 0;
     private maxReconnectAttempts = 10;
     private reconnectDelay = 1000;
-    private pingInterval: number | null = null;
-    private reconnectTimeout: number | null = null;
+    private pingInterval: ReturnType<typeof setInterval> | null = null;
+    private pongTimeout: ReturnType<typeof setTimeout> | null = null;
+    private heartbeatTimeoutMs = 10_000;
+    private reconnectTimeout: ReturnType<typeof setTimeout> | null = null;
     private token: string | null = null;
     private messageQueue: string[] = [];
     private maxQueuedMessages = 100;
     private isAuthenticated = false;
     private connectionId = 0;
-    private state:
-        | 'disconnected'
-        | 'connecting'
-        | 'connected'
-        | 'authenticated' = 'disconnected';
+    private state: WsConnectionState = 'disconnected';
+    private statusListeners = new Set<StatusListener>();
+    private socketListeners: {
+        open: () => void;
+        message: (event: MessageEvent) => void;
+        error: (event: Event) => void;
+        close: (event: CloseEvent) => void;
+    } | null = null;
 
     constructor() {
-        let baseUrl = import.meta.env.VITE_WS_BASE_URL;
-
-        if (!baseUrl && typeof window !== 'undefined') {
-            baseUrl = window.location.origin.replace(/^http/, 'ws');
-        }
+        let baseUrl = import.meta.env.VITE_WS_BASE_URL as string | undefined;
 
         if (!baseUrl) {
-            baseUrl = 'ws://localhost:8001';
+            baseUrl = globalThis.location.origin.replace(/^http/, 'ws');
         }
+
+        baseUrl ??= 'ws://localhost:8001';
 
         this.url = baseUrl.replace(/\/$/, '') + '/ws';
     }
@@ -57,12 +68,32 @@ class WsClient {
     /**
      * Get the current state.
      */
-    public getStatus():
-        | 'disconnected'
-        | 'connecting'
-        | 'connected'
-        | 'authenticated' {
+    public getStatus(): WsConnectionState {
         return this.state;
+    }
+
+    /**
+     * Subscribe to connection-state transitions. The listener fires on every
+     * change (connecting → connected → authenticated, and back to disconnected),
+     * so the UI can reflect the real socket state instead of inferring it.
+     */
+    public onStatusChange(listener: StatusListener): () => void {
+        this.statusListeners.add(listener);
+        return (): void => {
+            this.statusListeners.delete(listener);
+        };
+    }
+
+    private setState(next: WsConnectionState): void {
+        if (this.state === next) return;
+        this.state = next;
+        for (const listener of this.statusListeners) {
+            try {
+                listener(next);
+            } catch (error) {
+                console.error('[WS] Error in status listener:', error);
+            }
+        }
     }
 
     /**
@@ -70,7 +101,7 @@ class WsClient {
      */
     public connect(token?: string): void {
         this.clearReconnectTimeout();
-        const nextToken = token || null;
+        const nextToken = token ?? null;
         if (
             this.socket &&
             (this.socket.readyState === WebSocket.OPEN ||
@@ -85,18 +116,31 @@ class WsClient {
         if (this.socket?.readyState === WebSocket.OPEN) return;
 
         console.log('[WS] Connecting to:', this.url);
-        this.state = 'connecting';
+        this.setState('connecting');
         const connectionId = ++this.connectionId;
         const socket = new WebSocket(this.url);
         this.socket = socket;
 
-        socket.onopen = (): void => this.handleOpen(socket, connectionId);
-        socket.onmessage = (event): void =>
-            this.handleMessage(event, socket, connectionId);
-        socket.onerror = (event): void =>
-            this.handleError(event, socket, connectionId);
-        socket.onclose = (event): void =>
-            this.handleClose(event, socket, connectionId);
+        const listeners = {
+            open: (): void => {
+                this.handleOpen(socket, connectionId);
+            },
+            message: (event: MessageEvent): void => {
+                this.handleMessage(event, socket, connectionId);
+            },
+            error: (event: Event): void => {
+                this.handleError(event, socket, connectionId);
+            },
+            close: (event: CloseEvent): void => {
+                this.handleClose(event, socket, connectionId);
+            },
+        };
+        this.socketListeners = listeners;
+
+        socket.addEventListener('open', listeners.open);
+        socket.addEventListener('message', listeners.message);
+        socket.addEventListener('error', listeners.error);
+        socket.addEventListener('close', listeners.close);
     }
 
     /**
@@ -109,7 +153,7 @@ class WsClient {
         this.isAuthenticated = false;
         this.reconnectAttempts = 0;
         this.closeSocket();
-        this.state = 'disconnected';
+        this.setState('disconnected');
         this.token = null;
     }
 
@@ -119,7 +163,7 @@ class WsClient {
     public send(type: string, payload: unknown = {}, replyTo?: string): void {
         const envelope: IWsEnvelope = {
             id: uuidv4(),
-            event: { type, payload: payload as unknown as JsonValue },
+            event: { type, payload: payload as JsonValue },
             meta: {
                 ts: Date.now(),
                 replyTo,
@@ -161,13 +205,16 @@ class WsClient {
      * Subscribe to an event.
      */
     public on<T = unknown>(type: string, handler: EventHandler<T>): () => void {
-        if (!this.handlers.has(type)) {
-            this.handlers.set(type, new Set());
+        let set = this.handlers.get(type);
+        if (!set) {
+            set = new Set();
+            this.handlers.set(type, set);
         }
-        const set = this.handlers.get(type)!;
-        set.add(handler as EventHandler<unknown>);
+        set.add(handler as EventHandler);
 
-        return (): void => this.off(type, handler);
+        return (): void => {
+            this.off(type, handler);
+        };
     }
 
     /**
@@ -176,7 +223,7 @@ class WsClient {
     public off<T = unknown>(type: string, handler: EventHandler<T>): void {
         const typeHandlers = this.handlers.get(type);
         if (typeHandlers) {
-            typeHandlers.delete(handler as EventHandler<unknown>);
+            typeHandlers.delete(handler as EventHandler);
             if (typeHandlers.size === 0) {
                 this.handlers.delete(type);
             }
@@ -187,7 +234,7 @@ class WsClient {
         if (!this.isCurrentSocket(socket, connectionId)) return;
 
         console.log('[WS] Connection established');
-        this.state = 'connected';
+        this.setState('connected');
         this.reconnectAttempts = 0;
         this.startPing();
 
@@ -205,8 +252,12 @@ class WsClient {
     ): void {
         if (!this.isCurrentSocket(socket, connectionId)) return;
 
+        // Any inbound traffic proves the connection is still alive, so cancel
+        // the pending heartbeat timeout (this covers pongs and every other event).
+        this.clearPongTimeout();
+
         try {
-            const envelope: IWsEnvelope = JSON.parse(event.data);
+            const envelope = JSON.parse(event.data as string) as IWsEnvelope;
             const { type, payload } = envelope.event;
             const { meta } = envelope;
 
@@ -214,7 +265,7 @@ class WsClient {
 
             if (type === WsEvents.AUTHENTICATED) {
                 this.isAuthenticated = true;
-                this.state = 'authenticated';
+                this.setState('authenticated');
                 this.flushQueue();
             }
 
@@ -260,21 +311,22 @@ class WsClient {
         }
     }
 
-    private emit<T = unknown>(
+    private emit(
         type: string,
-        payload: T,
-        meta: IWsEnvelope['meta'] = { ts: Date.now() },
+        payload: unknown,
+        meta?: IWsEnvelope['meta'],
     ): void {
+        const resolvedMeta = meta ?? { ts: Date.now() };
         const typeHandlers = this.handlers.get(type);
 
         if (typeHandlers) {
-            [...typeHandlers].forEach((handler): void => {
+            for (const handler of typeHandlers) {
                 try {
-                    handler(payload, meta);
+                    handler(payload, resolvedMeta);
                 } catch (error) {
                     console.error(`[WS] Error in handler for ${type}:`, error);
                 }
-            });
+            }
         }
     }
 
@@ -302,7 +354,7 @@ class WsClient {
         console.log('[WS] Connection closed:', event.reason);
         this.stopPing();
         this.isAuthenticated = false;
-        this.state = 'disconnected';
+        this.setState('disconnected');
         this.socket = null;
         this.emit(WsEvents.DISCONNECTED, {
             code: event.code,
@@ -312,12 +364,12 @@ class WsClient {
         if (this.reconnectAttempts < this.maxReconnectAttempts) {
             const delay = Math.min(
                 this.reconnectDelay * Math.pow(2, this.reconnectAttempts),
-                30000,
+                30_000,
             );
             console.log(
-                `[WS] Reconnecting in ${delay}ms... (Attempt ${this.reconnectAttempts + 1})`,
+                `[WS] Reconnecting in ${String(delay)}ms... (Attempt ${String(this.reconnectAttempts + 1)})`,
             );
-            this.reconnectTimeout = window.setTimeout((): void => {
+            this.reconnectTimeout = globalThis.setTimeout((): void => {
                 this.reconnectTimeout = null;
                 this.reconnectAttempts++;
                 this.connect(this.token ?? undefined);
@@ -331,7 +383,7 @@ class WsClient {
 
     private clearReconnectTimeout(): void {
         if (this.reconnectTimeout !== null) {
-            window.clearTimeout(this.reconnectTimeout);
+            globalThis.clearTimeout(this.reconnectTimeout);
             this.reconnectTimeout = null;
         }
     }
@@ -339,10 +391,22 @@ class WsClient {
     private closeSocket(): void {
         if (!this.socket) return;
 
-        this.socket.onopen = null;
-        this.socket.onmessage = null;
-        this.socket.onerror = null;
-        this.socket.onclose = null;
+        if (this.socketListeners) {
+            this.socket.removeEventListener('open', this.socketListeners.open);
+            this.socket.removeEventListener(
+                'message',
+                this.socketListeners.message,
+            );
+            this.socket.removeEventListener(
+                'error',
+                this.socketListeners.error,
+            );
+            this.socket.removeEventListener(
+                'close',
+                this.socketListeners.close,
+            );
+            this.socketListeners = null;
+        }
         this.socket.close();
         this.socket = null;
     }
@@ -354,16 +418,84 @@ class WsClient {
 
     private startPing(): void {
         this.stopPing();
-        this.pingInterval = window.setInterval((): void => {
+        this.pingInterval = globalThis.setInterval((): void => {
+            if (this.socket?.readyState !== WebSocket.OPEN) return;
             this.send(WsEvents.PING);
-        }, 30000);
+            this.expectPong();
+        }, 30_000);
     }
 
     private stopPing(): void {
-        if (this.pingInterval) {
+        if (this.pingInterval !== null) {
             clearInterval(this.pingInterval);
             this.pingInterval = null;
         }
+        this.clearPongTimeout();
+    }
+
+    /**
+     * Arm a timeout after sending a ping. If no traffic arrives before it fires,
+     * the connection is considered dead (e.g. a half-open socket left behind by a
+     * dropped network link) and we force a reconnect. Any inbound message clears
+     * this via {@link handleMessage}.
+     */
+    private expectPong(): void {
+        this.clearPongTimeout();
+        this.pongTimeout = globalThis.setTimeout((): void => {
+            this.pongTimeout = null;
+            console.warn('[WS] Heartbeat timed out, forcing reconnect');
+            this.forceReconnect();
+        }, this.heartbeatTimeoutMs);
+    }
+
+    private clearPongTimeout(): void {
+        if (this.pongTimeout !== null) {
+            globalThis.clearTimeout(this.pongTimeout);
+            this.pongTimeout = null;
+        }
+    }
+
+    /**
+     * Tear down the current socket without waiting for its `onclose` (which may
+     * never fire on a half-open connection) and immediately reconnect.
+     */
+    private forceReconnect(): void {
+        if (!this.token) return;
+
+        this.stopPing();
+        this.isAuthenticated = false;
+        this.closeSocket();
+        this.setState('disconnected');
+        this.emit(WsEvents.DISCONNECTED, {
+            code: 0,
+            reason: 'heartbeat-timeout',
+        });
+        this.reconnectAttempts = 0;
+        this.connect(this.token);
+    }
+
+    /**
+     * Re-establish the connection if it is not healthy. Intended to be called
+     * when the browser reports the network is back (`online`) or the tab becomes
+     * visible again. If the socket still looks open, we ping it to confirm it is
+     * actually alive rather than trusting a possibly stale `readyState`.
+     */
+    public reconnectIfNeeded(): void {
+        if (!this.token) return;
+
+        if (
+            this.socket?.readyState === WebSocket.OPEN &&
+            this.isAuthenticated
+        ) {
+            this.send(WsEvents.PING);
+            this.expectPong();
+            return;
+        }
+
+        if (this.socket?.readyState === WebSocket.CONNECTING) return;
+
+        this.reconnectAttempts = 0;
+        this.connect(this.token);
     }
 }
 

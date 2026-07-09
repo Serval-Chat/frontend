@@ -24,10 +24,10 @@ export const BannedScreen = ({
     const expiry = formatExpiry(expirationTimestamp);
 
     const handleLogout = (): void => {
-        if (onLogout !== undefined) {
-            onLogout();
-        } else {
+        if (onLogout === undefined) {
             void removeAuthToken();
+        } else {
+            onLogout();
         }
     };
 

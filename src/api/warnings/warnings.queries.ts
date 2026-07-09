@@ -11,7 +11,7 @@ import type { Warning } from './warnings.types';
 
 export const useMyWarnings = (
     acknowledged?: boolean,
-): UseQueryResult<Warning[], Error> =>
+): UseQueryResult<Warning[]> =>
     useQuery({
         queryKey: ['warnings', { acknowledged }],
         queryFn: (): Promise<Warning[]> =>
@@ -35,7 +35,7 @@ export const useAcknowledgeWarning = (): UseMutationResult<
 
 export const useAdminUserWarnings = (
     userId: string,
-): UseQueryResult<Warning[], Error> =>
+): UseQueryResult<Warning[]> =>
     useQuery({
         queryKey: ['admin-user-warnings', userId],
         queryFn: (): Promise<Warning[]> => warningsApi.getUserWarnings(userId),

@@ -16,7 +16,7 @@ import { Box } from '@/ui/components/layout/Box';
 import { ChannelPreferenceGroup } from './ServerOnboardingModals';
 
 const sortByPosition = <T extends { position: number }>(items: T[]): T[] =>
-    items.slice().sort((a, b): number => a.position - b.position);
+    [...items].sort((a, b): number => a.position - b.position);
 
 export const ServerChannelsPage = () => {
     const { serverId } = useParams<{ serverId: string }>();
@@ -71,7 +71,11 @@ export const ServerChannelsPage = () => {
         if (!serverId) return;
         updatePreferences.mutate(
             { hiddenCategoryIds, hiddenChannelIds },
-            { onSuccess: (): void => setHasUnsavedChanges(false) },
+            {
+                onSuccess: (): void => {
+                    setHasUnsavedChanges(false);
+                },
+            },
         );
     };
 

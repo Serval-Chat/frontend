@@ -17,7 +17,7 @@ import { $getSlashChipState } from './slashChipHelpers';
 
 interface LexicalSubmitPluginProps {
     onSendMessage: (text: string) => boolean | Promise<boolean>;
-    isAutocompleteOpenRef?: React.MutableRefObject<boolean>;
+    isAutocompleteOpenRefs?: React.MutableRefObject<boolean>[];
 }
 
 const $getTextBeforeCursor = (): string | null => {
@@ -41,7 +41,7 @@ const $getTextBeforeCursor = (): string | null => {
 
 export const LexicalSubmitPlugin = ({
     onSendMessage,
-    isAutocompleteOpenRef,
+    isAutocompleteOpenRefs,
 }: LexicalSubmitPluginProps): null => {
     const [editor] = useLexicalComposerContext();
 
@@ -54,7 +54,11 @@ export const LexicalSubmitPlugin = ({
                         return false;
                     }
 
-                    if (isAutocompleteOpenRef?.current) {
+                    // false positive: this runs inside the real KEY_ENTER_COMMAND
+                    // handler registered below, not a useEffect reacting to a value
+                    // change, so there's no separate event handler to move it into.
+                    // react-doctor-disable-next-line react-doctor/no-event-handler
+                    if (isAutocompleteOpenRefs?.some((ref) => ref.current)) {
                         // The ref can be stale immediately after the user picks a
                         // slash command (React state hasn't propagated yet). If the
                         // editor is already in chip mode the autocomplete is
@@ -103,7 +107,7 @@ export const LexicalSubmitPlugin = ({
                 },
                 COMMAND_PRIORITY_LOW,
             ),
-        [editor, onSendMessage, isAutocompleteOpenRef],
+        [editor, onSendMessage, isAutocompleteOpenRefs],
     );
 
     return null;

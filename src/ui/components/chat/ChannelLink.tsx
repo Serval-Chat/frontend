@@ -31,24 +31,25 @@ export const ChannelLink = ({
         useServerDetails(serverId);
     const { data: channels, isLoading: channelsLoading } =
         useChannels(serverId);
-    const isCrossingServers = selectedServerId && selectedServerId !== serverId;
+    const isCrossingServers =
+        selectedServerId != null && selectedServerId !== serverId;
 
     const channel = useMemo(() => {
         if (!channels) return null;
-        return channels.find((ch): boolean => ch.id === channelId) || null;
+        return channels.find((ch): boolean => ch.id === channelId) ?? null;
     }, [channels, channelId]);
 
     const isLoading = serverLoading || channelsLoading;
     const displayName =
-        channel?.name || (isLoading ? '...' : 'unknown channel');
+        channel?.name ?? (isLoading ? '...' : 'unknown channel');
     const displayText = isCrossingServers
-        ? `${server?.name || '...'} > ${displayName}`
-        : `${displayName}`;
-    const channelType = channel?.type || 'text';
+        ? `${server?.name ?? '...'} > ${displayName}`
+        : displayName;
+    const channelType = channel?.type ?? 'text';
 
     // Get the channel icon
     const CustomIcon = channel?.icon ? ICON_MAP[channel.icon] : null;
-    const Icon = CustomIcon || (channelType === 'text' ? Hash : Volume2);
+    const Icon = CustomIcon ?? (channelType === 'text' ? Hash : Volume2);
 
     const handleClick = (): void => {
         if (server && channel) {

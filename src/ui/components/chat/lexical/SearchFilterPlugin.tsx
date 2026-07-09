@@ -1,15 +1,19 @@
-import { type CSSProperties, useCallback, useEffect, useState } from 'react';
+import {
+    type CSSProperties,
+    type MutableRefObject,
+    useCallback,
+    useEffect,
+    useReducer,
+    useState,
+} from 'react';
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import {
-    $createParagraphNode,
     $createTextNode,
     $getRoot,
-    $isParagraphNode,
     $isTextNode,
     ElementNode,
     type LexicalEditor,
-    type ParagraphNode,
     TextNode,
 } from 'lexical';
 import {
@@ -29,6 +33,7 @@ import type {
 } from '@/api/servers/servers.types';
 import { UserProfilePicture } from '@/ui/components/common/UserProfilePicture';
 import { colors, radius } from '@/ui/theme';
+import { mergeReducer } from '@/utils/mergeReducer';
 
 import {
     $createSearchFilterNode,
@@ -48,7 +53,7 @@ function makeFilterData(
 ): SearchFilterData | null {
     const negated = neg === '-';
     switch (key) {
-        case 'from':
+        case 'from': {
             return {
                 filterKey: negated ? 'notFromUser' : 'fromUser',
                 filterValue: val,
@@ -56,7 +61,8 @@ function makeFilterData(
                 display: val,
                 negated,
             };
-        case 'mentions':
+        }
+        case 'mentions': {
             return {
                 filterKey: negated ? 'notMentionsUser' : 'mentionsUser',
                 filterValue: val,
@@ -64,7 +70,8 @@ function makeFilterData(
                 display: val,
                 negated,
             };
-        case 'has':
+        }
+        case 'has': {
             if (val === 'file')
                 return {
                     filterKey: negated ? 'notHasFile' : 'hasFile',
@@ -90,7 +97,8 @@ function makeFilterData(
                     negated,
                 };
             return null;
-        case 'pinned':
+        }
+        case 'pinned': {
             return negated
                 ? {
                       filterKey: 'notIsPinned',
@@ -106,7 +114,8 @@ function makeFilterData(
                       display: val,
                       negated: false,
                   };
-        case 'type':
+        }
+        case 'type': {
             if (val === 'user' || val === 'bot' || val === 'webhook')
                 return {
                     filterKey: negated ? 'notAuthorType' : 'authorType',
@@ -116,7 +125,8 @@ function makeFilterData(
                     negated,
                 };
             return null;
-        case 'strict':
+        }
+        case 'strict': {
             return {
                 filterKey: negated ? 'notStrict' : 'strict',
                 filterValue: val,
@@ -124,7 +134,8 @@ function makeFilterData(
                 display: val,
                 negated,
             };
-        case 'before':
+        }
+        case 'before': {
             return negated
                 ? null
                 : {
@@ -134,7 +145,8 @@ function makeFilterData(
                       display: val,
                       negated: false,
                   };
-        case 'after':
+        }
+        case 'after': {
             return negated
                 ? null
                 : {
@@ -144,6 +156,7 @@ function makeFilterData(
                       display: val,
                       negated: false,
                   };
+        }
         case 'in': {
             if (negated) return null;
             const ch = channels.find((c) => c.id === val);
@@ -165,8 +178,9 @@ function makeFilterData(
                 negated,
             };
         }
-        default:
+        default: {
             return null;
+        }
     }
 }
 
@@ -214,8 +228,9 @@ function $getInPartial(): string | null {
         }
     }
     // match `in:partial` but NOT `inc:partial`
-    const m = parts.join('').match(/(?:^|\s)-?in:(\S*)$/i);
-    return m ? m[1].toLowerCase() : null;
+    const m = /(?:^|\s)-?in:(\S*)$/i.exec(parts.join(''));
+    // the capture group is mandatory in the regex, so a match guarantees it.
+    return m ? m[1]!.toLowerCase() : null;
 }
 
 function $getIncPartial(): string | null {
@@ -226,8 +241,9 @@ function $getIncPartial(): string | null {
             if ($isTextNode(node)) parts.push(node.getTextContent());
         }
     }
-    const m = parts.join('').match(/(?:^|\s)-?inc:(\S*)$/i);
-    return m ? m[1].toLowerCase() : null;
+    const m = /(?:^|\s)-?inc:(\S*)$/i.exec(parts.join(''));
+    // the capture group is mandatory in the regex, so a match guarantees it.
+    return m ? m[1]!.toLowerCase() : null;
 }
 
 function $getUserPartial(): { key: string; partial: string } | null {
@@ -238,9 +254,10 @@ function $getUserPartial(): { key: string; partial: string } | null {
             if ($isTextNode(node)) parts.push(node.getTextContent());
         }
     }
-    const m = parts.join('').match(/(?:^|\s)-?(from|mentions):(\S*)$/i);
+    const m = /(?:^|\s)-?(from|mentions):(\S*)$/i.exec(parts.join(''));
     if (!m) return null;
-    return { key: m[1].toLowerCase(), partial: m[2].toLowerCase() };
+    // both capture groups are mandatory in the regex, so a match guarantees them.
+    return { key: m[1]!.toLowerCase(), partial: m[2]!.toLowerCase() };
 }
 
 function $getDatePartial(): { key: string; partial: string } | null {
@@ -251,9 +268,10 @@ function $getDatePartial(): { key: string; partial: string } | null {
             if ($isTextNode(node)) parts.push(node.getTextContent());
         }
     }
-    const m = parts.join('').match(/(?:^|\s)(before|after):(\S*)$/i);
+    const m = /(?:^|\s)(before|after):(\S*)$/i.exec(parts.join(''));
     if (!m) return null;
-    return { key: m[1].toLowerCase(), partial: m[2] };
+    // both capture groups are mandatory in the regex, so a match guarantees them.
+    return { key: m[1]!.toLowerCase(), partial: m[2]! };
 }
 
 const MONTH_NAMES = [
@@ -293,6 +311,53 @@ const spinBtnStyle: CSSProperties = {
     userSelect: 'none',
 };
 
+const calendarDayButtonStyle: CSSProperties = {
+    padding: '4px 0',
+    borderRadius: 4,
+    border: 'none',
+    fontSize: '0.75rem',
+    cursor: 'pointer',
+    textAlign: 'center',
+};
+
+const confirmDateButtonStyle: CSSProperties = {
+    marginTop: 10,
+    width: '100%',
+    padding: '5px 0',
+    borderRadius: 4,
+    border: 'none',
+    fontSize: '0.8rem',
+    fontWeight: 600,
+};
+
+const dropdownStyle: CSSProperties = {
+    position: 'absolute',
+    top: '100%',
+    left: 0,
+    right: 0,
+    zIndex: 50,
+    marginTop: 4,
+    backgroundColor: colors.background,
+    border: `1px solid ${colors.borderSubtle}`,
+    borderRadius: radius.md,
+    overflow: 'hidden',
+    boxShadow: '0 4px 12px rgba(0,0,0,0.25)',
+};
+
+const itemStyle: CSSProperties = {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 6,
+    width: '100%',
+    padding: '6px 10px',
+    border: 'none',
+    background: 'transparent',
+    color: colors.foreground,
+    fontSize: '0.8rem',
+    cursor: 'pointer',
+    textAlign: 'left',
+};
+
 function TimeSpinner({
     value,
     max,
@@ -302,8 +367,12 @@ function TimeSpinner({
     max: number;
     onChange: (n: number) => void;
 }) {
-    const dec = () => onChange(value <= 0 ? max : value - 1);
-    const inc = () => onChange(value >= max ? 0 : value + 1);
+    const dec = () => {
+        onChange(value <= 0 ? max : value - 1);
+    };
+    const inc = () => {
+        onChange(value >= max ? 0 : value + 1);
+    };
     return (
         <div
             style={{
@@ -318,7 +387,9 @@ function TimeSpinner({
                 style={spinBtnStyle}
                 type="button"
                 onClick={dec}
-                onMouseDown={(e) => e.preventDefault()}
+                onMouseDown={(e) => {
+                    e.preventDefault();
+                }}
             >
                 <Minus size={12} />
             </button>
@@ -337,7 +408,9 @@ function TimeSpinner({
                 style={spinBtnStyle}
                 type="button"
                 onClick={inc}
-                onMouseDown={(e) => e.preventDefault()}
+                onMouseDown={(e) => {
+                    e.preventDefault();
+                }}
             >
                 <Plus size={12} />
             </button>
@@ -346,12 +419,49 @@ function TimeSpinner({
 }
 
 function DateTimePicker({ onConfirm }: { onConfirm: (iso: string) => void }) {
-    const [viewYear, setViewYear] = useState(() => new Date().getFullYear());
-    const [viewMonth, setViewMonth] = useState(() => new Date().getMonth());
-    const [selDay, setSelDay] = useState<number | null>(null);
-    const [hour, setHour] = useState(0);
-    const [minute, setMinute] = useState(0);
-    const [second, setSecond] = useState(0);
+    interface PickerState {
+        viewYear: number;
+        viewMonth: number;
+        selDay: number | null;
+        hour: number;
+        minute: number;
+        second: number;
+    }
+    const [picker, patchPicker] = useReducer(mergeReducer<PickerState>, {
+        viewYear: new Date().getFullYear(),
+        viewMonth: new Date().getMonth(),
+        selDay: null,
+        hour: 0,
+        minute: 0,
+        second: 0,
+    });
+    const { viewYear, viewMonth, selDay, hour, minute, second } = picker;
+    const setViewYear = (v: number | ((p: number) => number)): void => {
+        patchPicker(
+            typeof v === 'function'
+                ? (s): Partial<PickerState> => ({ viewYear: v(s.viewYear) })
+                : { viewYear: v },
+        );
+    };
+    const setViewMonth = (v: number | ((p: number) => number)): void => {
+        patchPicker(
+            typeof v === 'function'
+                ? (s): Partial<PickerState> => ({ viewMonth: v(s.viewMonth) })
+                : { viewMonth: v },
+        );
+    };
+    const setSelDay = (v: number | null): void => {
+        patchPicker({ selDay: v });
+    };
+    const setHour = (v: number): void => {
+        patchPicker({ hour: v });
+    };
+    const setMinute = (v: number): void => {
+        patchPicker({ minute: v });
+    };
+    const setSecond = (v: number): void => {
+        patchPicker({ second: v });
+    };
 
     const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
     const firstDow = new Date(viewYear, viewMonth, 1).getDay();
@@ -392,7 +502,9 @@ function DateTimePicker({ onConfirm }: { onConfirm: (iso: string) => void }) {
                     style={navBtnStyle}
                     type="button"
                     onClick={prevMonth}
-                    onMouseDown={(e) => e.preventDefault()}
+                    onMouseDown={(e) => {
+                        e.preventDefault();
+                    }}
                 >
                     <ChevronLeft size={14} />
                 </button>
@@ -409,7 +521,9 @@ function DateTimePicker({ onConfirm }: { onConfirm: (iso: string) => void }) {
                     style={navBtnStyle}
                     type="button"
                     onClick={nextMonth}
-                    onMouseDown={(e) => e.preventDefault()}
+                    onMouseDown={(e) => {
+                        e.preventDefault();
+                    }}
                 >
                     <ChevronRight size={14} />
                 </button>
@@ -459,20 +573,19 @@ function DateTimePicker({ onConfirm }: { onConfirm: (iso: string) => void }) {
                             <button
                                 key={d}
                                 style={{
-                                    padding: '4px 0',
-                                    borderRadius: 4,
-                                    border: 'none',
+                                    ...calendarDayButtonStyle,
                                     background: sel
                                         ? 'var(--primary)'
                                         : 'transparent',
                                     color: sel ? '#fff' : 'var(--foreground)',
-                                    fontSize: '0.75rem',
-                                    cursor: 'pointer',
-                                    textAlign: 'center',
                                 }}
                                 type="button"
-                                onClick={() => setSelDay(d)}
-                                onMouseDown={(e) => e.preventDefault()}
+                                onClick={() => {
+                                    setSelDay(d);
+                                }}
+                                onMouseDown={(e) => {
+                                    e.preventDefault();
+                                }}
                                 onMouseEnter={(e) => {
                                     if (!sel)
                                         (
@@ -522,21 +635,17 @@ function DateTimePicker({ onConfirm }: { onConfirm: (iso: string) => void }) {
             <button
                 disabled={selDay === null}
                 style={{
-                    marginTop: 10,
-                    width: '100%',
-                    padding: '5px 0',
-                    borderRadius: 4,
-                    border: 'none',
+                    ...confirmDateButtonStyle,
                     background:
-                        selDay !== null ? 'var(--primary)' : 'var(--bg-subtle)',
-                    color: selDay !== null ? '#fff' : 'var(--muted-foreground)',
-                    fontSize: '0.8rem',
-                    fontWeight: 600,
-                    cursor: selDay !== null ? 'pointer' : 'default',
+                        selDay === null ? 'var(--bg-subtle)' : 'var(--primary)',
+                    color: selDay === null ? 'var(--muted-foreground)' : '#fff',
+                    cursor: selDay === null ? 'default' : 'pointer',
                 }}
                 type="button"
                 onClick={handleConfirm}
-                onMouseDown={(e) => e.preventDefault()}
+                onMouseDown={(e) => {
+                    e.preventDefault();
+                }}
             >
                 Apply
             </button>
@@ -549,7 +658,130 @@ interface SearchFilterPluginProps {
     categories: Category[];
     members: ServerMember[];
     onChange: (state: { q: string; filters: SearchFilters }) => void;
-    onEditorReady: (editor: LexicalEditor) => void;
+    editorRef?: MutableRefObject<LexicalEditor | null>;
+}
+
+function SearchSuggestionsDropdown({
+    suggestions,
+    categorySuggestions,
+    userSuggestions,
+    showDatePicker,
+    onSelectSuggestion,
+    onSelectCategory,
+    onSelectUser,
+    onSelectDate,
+}: {
+    suggestions: Channel[];
+    categorySuggestions: Category[];
+    userSuggestions: ServerMember[];
+    showDatePicker: boolean;
+    onSelectSuggestion: (c: Channel) => void;
+    onSelectCategory: (c: Category) => void;
+    onSelectUser: (m: ServerMember) => void;
+    onSelectDate: (iso: string) => void;
+}) {
+    return (
+        <div style={dropdownStyle}>
+            {suggestions.map((c) => (
+                <button
+                    key={c.id}
+                    style={itemStyle}
+                    type="button"
+                    onMouseDown={(e) => {
+                        e.preventDefault();
+                        onSelectSuggestion(c);
+                    }}
+                    onMouseEnter={(e) => {
+                        (
+                            e.currentTarget as HTMLButtonElement
+                        ).style.backgroundColor = colors.bgSubtle;
+                    }}
+                    onMouseLeave={(e) => {
+                        (
+                            e.currentTarget as HTMLButtonElement
+                        ).style.backgroundColor = 'transparent';
+                    }}
+                >
+                    <Hash
+                        size={12}
+                        style={{ color: colors.mutedForeground, flexShrink: 0 }}
+                    />
+                    {c.name}
+                </button>
+            ))}
+            {categorySuggestions.map((c) => (
+                <button
+                    key={c.id}
+                    style={itemStyle}
+                    type="button"
+                    onMouseDown={(e) => {
+                        e.preventDefault();
+                        onSelectCategory(c);
+                    }}
+                    onMouseEnter={(e) => {
+                        (
+                            e.currentTarget as HTMLButtonElement
+                        ).style.backgroundColor = colors.bgSubtle;
+                    }}
+                    onMouseLeave={(e) => {
+                        (
+                            e.currentTarget as HTMLButtonElement
+                        ).style.backgroundColor = 'transparent';
+                    }}
+                >
+                    <FolderOpen
+                        size={12}
+                        style={{ color: colors.mutedForeground, flexShrink: 0 }}
+                    />
+                    {c.name}
+                </button>
+            ))}
+            {userSuggestions.map((m) => (
+                <button
+                    key={m.userId}
+                    style={itemStyle}
+                    type="button"
+                    onMouseDown={(e) => {
+                        e.preventDefault();
+                        onSelectUser(m);
+                    }}
+                    onMouseEnter={(e) => {
+                        (
+                            e.currentTarget as HTMLButtonElement
+                        ).style.backgroundColor = colors.bgSubtle;
+                    }}
+                    onMouseLeave={(e) => {
+                        (
+                            e.currentTarget as HTMLButtonElement
+                        ).style.backgroundColor = 'transparent';
+                    }}
+                >
+                    <UserProfilePicture
+                        noIndicator
+                        size="xs"
+                        src={m.user.profilePicture}
+                        username={m.user.username}
+                    />
+                    <span style={{ fontWeight: 500 }}>
+                        {m.nickname ?? m.user.displayName ?? m.user.username}
+                    </span>
+                    {m.nickname || m.user.displayName ? (
+                        <span
+                            style={{
+                                color: colors.mutedForeground,
+                                fontSize: '0.75rem',
+                            }}
+                        >
+                            @{m.user.username}
+                        </span>
+                    ) : null}
+                </button>
+            ))}
+            {showDatePicker ? (
+                <DateTimePicker onConfirm={onSelectDate} />
+            ) : null}
+        </div>
+    );
 }
 
 export function SearchFilterPlugin({
@@ -557,7 +789,7 @@ export function SearchFilterPlugin({
     categories,
     members,
     onChange,
-    onEditorReady,
+    editorRef,
 }: SearchFilterPluginProps) {
     const [editor] = useLexicalComposerContext();
     const [suggestions, setSuggestions] = useState<Channel[]>([]);
@@ -568,8 +800,22 @@ export function SearchFilterPlugin({
     const [showDatePicker, setShowDatePicker] = useState(false);
 
     useEffect(() => {
-        onEditorReady(editor);
-    }, [editor, onEditorReady]);
+        // false positive: editor comes from Lexical's own composer context (an
+        // external system), not a handler in this component, so there's no event
+        // handler to move this ref sync into.
+        // react-doctor-disable-next-line react-doctor/no-event-handler
+        if (editorRef) editorRef.current = editor;
+    }, [editor, editorRef]);
+
+    // focus shortly after mount once the search panel's open animation settles.
+    useEffect(() => {
+        const timer = globalThis.setTimeout(() => {
+            editor.focus();
+        }, 80);
+        return () => {
+            globalThis.clearTimeout(timer);
+        };
+    }, [editor]);
 
     // detect completed filter tokens (space-terminated) and replace with chip nodes
     useEffect(
@@ -579,7 +825,12 @@ export function SearchFilterPlugin({
                 const match = TOKEN_RE.exec(text);
                 if (!match) return;
 
-                const [, leading, neg, key, val] = match;
+                // all capture groups in TOKEN_RE are mandatory (none are
+                // optional groups), so a successful match guarantees them.
+                const leading = match[1]!;
+                const neg = match[2]!;
+                const key = match[3]!;
+                const val = match[4]!;
                 const data = makeFilterData(
                     neg,
                     key,
@@ -702,10 +953,12 @@ export function SearchFilterPlugin({
                     for (const node of child.getChildren()) {
                         if (!$isTextNode(node)) continue;
                         const text = node.getTextContent();
-                        const m = text.match(/((?:^|\s)-?in:)\S*$/i);
+                        const m = /((?:^|\s)-?in:)\S*$/i.exec(text);
                         if (m !== null) {
                             node.setTextContent(
-                                text.slice(0, m.index! + m[1].length) +
+                                // the capture group is mandatory in the regex,
+                                // so a match guarantees it.
+                                text.slice(0, m.index + m[1]!.length) +
                                     channel.id +
                                     ' ',
                             );
@@ -727,12 +980,14 @@ export function SearchFilterPlugin({
                     for (const node of child.getChildren()) {
                         if (!$isTextNode(node)) continue;
                         const text = node.getTextContent();
-                        const m = text.match(
-                            /((?:^|\s)-?(?:from|mentions):)\S*$/i,
+                        const m = /((?:^|\s)-?(?:from|mentions):)\S*$/i.exec(
+                            text,
                         );
                         if (m !== null) {
                             node.setTextContent(
-                                text.slice(0, m.index! + m[1].length) +
+                                // the capture group is mandatory in the regex,
+                                // so a match guarantees it.
+                                text.slice(0, m.index + m[1]!.length) +
                                     member.user.username +
                                     ' ',
                             );
@@ -754,12 +1009,12 @@ export function SearchFilterPlugin({
                     for (const node of child.getChildren()) {
                         if (!$isTextNode(node)) continue;
                         const text = node.getTextContent();
-                        const m = text.match(
-                            /((?:^|\s)(?:before|after):)\S*$/i,
-                        );
+                        const m = /((?:^|\s)(?:before|after):)\S*$/i.exec(text);
                         if (m !== null) {
                             node.setTextContent(
-                                text.slice(0, m.index! + m[1].length) +
+                                // the capture group is mandatory in the regex,
+                                // so a match guarantees it.
+                                text.slice(0, m.index + m[1]!.length) +
                                     value +
                                     ' ',
                             );
@@ -781,10 +1036,12 @@ export function SearchFilterPlugin({
                     for (const node of child.getChildren()) {
                         if (!$isTextNode(node)) continue;
                         const text = node.getTextContent();
-                        const m = text.match(/((?:^|\s)-?inc:)\S*$/i);
+                        const m = /((?:^|\s)-?inc:)\S*$/i.exec(text);
                         if (m !== null) {
                             node.setTextContent(
-                                text.slice(0, m.index! + m[1].length) +
+                                // the capture group is mandatory in the regex,
+                                // so a match guarantees it.
+                                text.slice(0, m.index + m[1]!.length) +
                                     category.id +
                                     ' ',
                             );
@@ -806,163 +1063,16 @@ export function SearchFilterPlugin({
     )
         return null;
 
-    const dropdownStyle: React.CSSProperties = {
-        position: 'absolute',
-        top: '100%',
-        left: 0,
-        right: 0,
-        zIndex: 50,
-        marginTop: 4,
-        backgroundColor: colors.background,
-        border: `1px solid ${colors.borderSubtle}`,
-        borderRadius: radius.md,
-        overflow: 'hidden',
-        boxShadow: '0 4px 12px rgba(0,0,0,0.25)',
-    };
-
-    const itemStyle: React.CSSProperties = {
-        display: 'flex',
-        alignItems: 'center',
-        gap: 6,
-        width: '100%',
-        padding: '6px 10px',
-        border: 'none',
-        background: 'transparent',
-        color: colors.foreground,
-        fontSize: '0.8rem',
-        cursor: 'pointer',
-        textAlign: 'left',
-    };
-
     return (
-        <div style={dropdownStyle}>
-            {suggestions.map((c) => (
-                <button
-                    key={c.id}
-                    style={itemStyle}
-                    type="button"
-                    onMouseDown={(e) => {
-                        e.preventDefault();
-                        selectSuggestion(c);
-                    }}
-                    onMouseEnter={(e) => {
-                        (
-                            e.currentTarget as HTMLButtonElement
-                        ).style.backgroundColor = colors.bgSubtle;
-                    }}
-                    onMouseLeave={(e) => {
-                        (
-                            e.currentTarget as HTMLButtonElement
-                        ).style.backgroundColor = 'transparent';
-                    }}
-                >
-                    <Hash
-                        size={12}
-                        style={{ color: colors.mutedForeground, flexShrink: 0 }}
-                    />
-                    {c.name}
-                </button>
-            ))}
-            {categorySuggestions.map((c) => (
-                <button
-                    key={c.id}
-                    style={itemStyle}
-                    type="button"
-                    onMouseDown={(e) => {
-                        e.preventDefault();
-                        selectCategorySuggestion(c);
-                    }}
-                    onMouseEnter={(e) => {
-                        (
-                            e.currentTarget as HTMLButtonElement
-                        ).style.backgroundColor = colors.bgSubtle;
-                    }}
-                    onMouseLeave={(e) => {
-                        (
-                            e.currentTarget as HTMLButtonElement
-                        ).style.backgroundColor = 'transparent';
-                    }}
-                >
-                    <FolderOpen
-                        size={12}
-                        style={{ color: colors.mutedForeground, flexShrink: 0 }}
-                    />
-                    {c.name}
-                </button>
-            ))}
-            {userSuggestions.map((m) => (
-                <button
-                    key={m.userId}
-                    style={itemStyle}
-                    type="button"
-                    onMouseDown={(e) => {
-                        e.preventDefault();
-                        selectUserSuggestion(m);
-                    }}
-                    onMouseEnter={(e) => {
-                        (
-                            e.currentTarget as HTMLButtonElement
-                        ).style.backgroundColor = colors.bgSubtle;
-                    }}
-                    onMouseLeave={(e) => {
-                        (
-                            e.currentTarget as HTMLButtonElement
-                        ).style.backgroundColor = 'transparent';
-                    }}
-                >
-                    <UserProfilePicture
-                        noIndicator
-                        size="xs"
-                        src={m.user.profilePicture}
-                        username={m.user.username}
-                    />
-                    <span style={{ fontWeight: 500 }}>
-                        {m.nickname ?? m.user.displayName ?? m.user.username}
-                    </span>
-                    {(m.nickname || m.user.displayName) && (
-                        <span
-                            style={{
-                                color: colors.mutedForeground,
-                                fontSize: '0.75rem',
-                            }}
-                        >
-                            @{m.user.username}
-                        </span>
-                    )}
-                </button>
-            ))}
-            {showDatePicker && (
-                <DateTimePicker onConfirm={selectDateSuggestion} />
-            )}
-        </div>
+        <SearchSuggestionsDropdown
+            categorySuggestions={categorySuggestions}
+            showDatePicker={showDatePicker}
+            suggestions={suggestions}
+            userSuggestions={userSuggestions}
+            onSelectCategory={selectCategorySuggestion}
+            onSelectDate={selectDateSuggestion}
+            onSelectSuggestion={selectSuggestion}
+            onSelectUser={selectUserSuggestion}
+        />
     );
-}
-
-// exported helper: insert a text token into the search editor from outside the Lexical context
-// eslint-disable-next-line react-refresh/only-export-components
-export function insertSearchToken(editor: LexicalEditor, token: string): void {
-    editor.update(() => {
-        const root = $getRoot();
-        let para: ParagraphNode;
-        const first = root.getFirstChild();
-        if ($isParagraphNode(first)) {
-            para = first;
-        } else {
-            para = $createParagraphNode();
-            root.append(para);
-        }
-        const children = para.getChildren();
-        const last = children[children.length - 1] ?? null;
-        if (last !== null && $isTextNode(last)) {
-            const t = last.getTextContent();
-            const next = (t.trimEnd() ? `${t.trimEnd()} ` : '') + token;
-            last.setTextContent(next);
-            last.select(next.length, next.length);
-        } else {
-            const textNode = $createTextNode(token);
-            para.append(textNode);
-            textNode.select(token.length, token.length);
-        }
-    });
-    editor.focus();
 }

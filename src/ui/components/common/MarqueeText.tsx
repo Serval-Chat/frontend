@@ -42,7 +42,9 @@ export const MarqueeText = ({
 
         const ro = new ResizeObserver(measure);
         if (containerRef.current) ro.observe(containerRef.current);
-        return (): void => ro.disconnect();
+        return (): void => {
+            ro.disconnect();
+        };
     }, [children, speed]);
 
     return (

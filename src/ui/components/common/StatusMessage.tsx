@@ -22,33 +22,37 @@ const typeStyles: Partial<Record<StatusType, React.CSSProperties>> = {
     },
 };
 
+const messageStyle: React.CSSProperties = {
+    display: 'flex',
+    minHeight: '2.5rem',
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: radius.md,
+    border: '1px solid',
+    paddingInline: '1rem',
+    paddingBlock: '0.5rem',
+    textAlign: 'center',
+    fontSize: fontSize.sm,
+    fontWeight: fontWeight.medium,
+};
+
 export const StatusMessage = ({ message, type, style }: StatusMessageProps) => (
     <AnimatePresence mode="wait">
-        {message && (
+        {message ? (
             <m.div
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
                 initial={{ opacity: 0, y: -10 }}
                 style={{
-                    display: 'flex',
-                    minHeight: '2.5rem',
-                    width: '100%',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    borderRadius: radius.md,
-                    border: '1px solid',
-                    paddingInline: '1rem',
-                    paddingBlock: '0.5rem',
-                    textAlign: 'center',
-                    fontSize: fontSize.sm,
-                    fontWeight: fontWeight.medium,
-                    ...(typeStyles[type] ?? {}),
+                    ...messageStyle,
+                    ...typeStyles[type],
                     ...style,
                 }}
                 transition={{ duration: 0.2 }}
             >
                 {message}
             </m.div>
-        )}
+        ) : null}
     </AnimatePresence>
 );

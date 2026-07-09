@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 
-import { wsClient } from '@/ws/client';
-import { WsEvents } from '@/ws/events';
+import { type WsConnectionState, wsClient } from '@/ws/client';
 
 interface ConnectivityState {
     status:
@@ -12,42 +11,58 @@ interface ConnectivityState {
         | 'authenticating';
 }
 
+const isBrowserOnline = (): boolean =>
+    typeof navigator === 'undefined' ? true : navigator.onLine;
+
+/**
+ * Map the raw WebSocket state plus the browser's network status onto the status
+ * the UI cares about. Driving this from the client's real state (rather than
+ * inferring from one-off events) keeps the reconnect banner in sync: it shows
+ * whenever the socket is not authenticated and hides the moment it is.
+ */
+const deriveStatus = (
+    wsState: WsConnectionState,
+    online: boolean,
+): ConnectivityState['status'] => {
+    if (!online) return 'offline';
+    switch (wsState) {
+        case 'authenticated': {
+            return 'online';
+        }
+        case 'connected': {
+            return 'authenticating';
+        }
+        case 'connecting': {
+            return 'connecting';
+        }
+        case 'disconnected': {
+            return 'reconnecting';
+        }
+    }
+};
+
 export function useConnectivity(): ConnectivityState {
     const [status, setStatus] = useState<ConnectivityState['status']>(
-        (): 'offline' | 'online' | 'connecting' => {
-            if (!navigator.onLine) return 'offline';
-            const wsStatus = wsClient.getStatus();
-            if (wsStatus === 'authenticated') return 'online';
-            if (wsStatus === 'connecting') return 'connecting';
-            return 'connecting';
-        },
+        (): ConnectivityState['status'] =>
+            deriveStatus(wsClient.getStatus(), isBrowserOnline()),
     );
 
     useEffect((): (() => void) => {
-        const handleOnline = (): void => setStatus('connecting');
-        const handleOffline = (): void => setStatus('offline');
+        const update = (): void => {
+            setStatus(deriveStatus(wsClient.getStatus(), isBrowserOnline()));
+        };
 
-        window.addEventListener('online', handleOnline);
-        window.addEventListener('offline', handleOffline);
+        const unsubscribe = wsClient.onStatusChange(update);
+        globalThis.addEventListener('online', update);
+        globalThis.addEventListener('offline', update);
 
-        const unsubscribeAuth = wsClient.on(
-            WsEvents.AUTHENTICATED,
-            (): void => {
-                setStatus('online');
-            },
-        );
-
-        const unsubscribeDisc = wsClient.on(WsEvents.DISCONNECTED, (): void => {
-            setStatus((prev): 'offline' | 'reconnecting' =>
-                prev === 'offline' ? 'offline' : 'reconnecting',
-            );
-        });
+        // Re-sync once in case the state changed between render and effect setup.
+        update();
 
         return (): void => {
-            window.removeEventListener('online', handleOnline);
-            window.removeEventListener('offline', handleOffline);
-            unsubscribeAuth();
-            unsubscribeDisc();
+            unsubscribe();
+            globalThis.removeEventListener('online', update);
+            globalThis.removeEventListener('offline', update);
         };
     }, []);
 

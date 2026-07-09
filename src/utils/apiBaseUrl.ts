@@ -1,9 +1,9 @@
 const LOCAL_API_HOSTS = new Set(['localhost', '127.0.0.1']);
 
 export const getConfiguredApiBaseUrl = (): string =>
-    (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '');
+    import.meta.env.VITE_API_BASE_URL.replace(/\/$/, '');
 
-export const isLocalDevApiBaseUrl = (baseUrl: string): boolean => {
+const isLocalDevApiBaseUrl = (baseUrl: string): boolean => {
     if (!import.meta.env.DEV || baseUrl === '') return false;
 
     try {

@@ -38,9 +38,9 @@ export const useProcessedMessages = (
                       : 0,
             );
         const messageById = new Map<string, ChatMessage>();
-        allMessages.forEach((message): void => {
+        for (const message of allMessages) {
             messageById.set(message.id.toString(), message);
-        });
+        }
 
         const result = allMessages.map((msg): ProcessedChatMessage => {
             let user: User | undefined = undefined;
@@ -55,12 +55,12 @@ export const useProcessedMessages = (
                 if (selectedFriendId) {
                     user =
                         msg.senderId === currentUser?.id
-                            ? (currentUser as User)
-                            : (friendUser as User);
+                            ? currentUser
+                            : friendUser!;
                 } else if (selectedServerId) {
-                    user = serverMemberMap.get(msg.senderId as string) as User;
-                    role = highestRoleMap.get(msg.senderId as string);
-                    iconRole = iconRoleMap.get(msg.senderId as string);
+                    user = serverMemberMap.get(msg.senderId)!;
+                    role = highestRoleMap.get(msg.senderId);
+                    iconRole = iconRoleMap.get(msg.senderId);
                 }
             }
 

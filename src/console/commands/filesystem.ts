@@ -64,7 +64,7 @@ const withError = (
     }
 };
 
-export const cdCommand: ConCommandReactor = {
+const cdCommand: ConCommandReactor = {
     match: (_argc, argv): boolean =>
         ['CD', 'CHDIR'].includes(commandName(argv)),
     execute: (_argc, argv, context): { output?: string[]; clear?: boolean } =>
@@ -76,7 +76,7 @@ export const cdCommand: ConCommandReactor = {
         }),
 };
 
-export const dirCommand: ConCommandReactor = {
+const dirCommand: ConCommandReactor = {
     match: (_argc, argv): boolean => commandName(argv) === 'DIR',
     execute: (_argc, argv, context): { output?: string[]; clear?: boolean } =>
         withError((): { output: string[] } => {
@@ -110,7 +110,7 @@ export const dirCommand: ConCommandReactor = {
         }),
 };
 
-export const mkdirCommand: ConCommandReactor = {
+const mkdirCommand: ConCommandReactor = {
     match: (_argc, argv): boolean =>
         ['MD', 'MKDIR'].includes(commandName(argv)),
     execute: (_argc, argv, context): { output?: string[]; clear?: boolean } =>
@@ -123,7 +123,7 @@ export const mkdirCommand: ConCommandReactor = {
         }),
 };
 
-export const rmdirCommand: ConCommandReactor = {
+const rmdirCommand: ConCommandReactor = {
     match: (_argc, argv): boolean =>
         ['RD', 'RMDIR'].includes(commandName(argv)),
     execute: (_argc, argv, context): { output?: string[]; clear?: boolean } =>
@@ -136,31 +136,31 @@ export const rmdirCommand: ConCommandReactor = {
         }),
 };
 
-export const copyCommand: ConCommandReactor = {
+const copyCommand: ConCommandReactor = {
     match: (_argc, argv): boolean => commandName(argv) === 'COPY',
     execute: (_argc, argv, context): { output?: string[]; clear?: boolean } =>
         withError((): { output: string[] } => {
             if (argv.length < 3)
                 throw new Error('The syntax of the command is incorrect.');
             const fs = requireFilesystem(context);
-            fs.copy(argv[1], argv[2]);
+            fs.copy(argv[1] ?? '', argv[2] ?? '');
             return { output: ['        1 file(s) copied.'] };
         }),
 };
 
-export const moveCommand: ConCommandReactor = {
+const moveCommand: ConCommandReactor = {
     match: (_argc, argv): boolean => commandName(argv) === 'MOVE',
     execute: (_argc, argv, context): { output?: string[]; clear?: boolean } =>
         withError((): { output: string[] } => {
             if (argv.length < 3)
                 throw new Error('The syntax of the command is incorrect.');
             const fs = requireFilesystem(context);
-            fs.move(argv[1], argv[2]);
+            fs.move(argv[1] ?? '', argv[2] ?? '');
             return { output: ['        1 file(s) moved.'] };
         }),
 };
 
-export const renameCommand: ConCommandReactor = {
+const renameCommand: ConCommandReactor = {
     match: (_argc, argv): boolean =>
         ['REN', 'RENAME'].includes(commandName(argv)),
     execute: (_argc, argv, context): { output?: string[]; clear?: boolean } =>
@@ -168,12 +168,12 @@ export const renameCommand: ConCommandReactor = {
             if (argv.length < 3)
                 throw new Error('The syntax of the command is incorrect.');
             const fs = requireFilesystem(context);
-            fs.rename(argv[1], argv[2]);
+            fs.rename(argv[1] ?? '', argv[2] ?? '');
             return {};
         }),
 };
 
-export const deleteCommand: ConCommandReactor = {
+const deleteCommand: ConCommandReactor = {
     match: (_argc, argv): boolean =>
         ['DEL', 'ERASE'].includes(commandName(argv)),
     execute: (_argc, argv, context): { output?: string[]; clear?: boolean } =>
@@ -186,7 +186,7 @@ export const deleteCommand: ConCommandReactor = {
         }),
 };
 
-export const typeCommand: ConCommandReactor = {
+const typeCommand: ConCommandReactor = {
     match: (_argc, argv): boolean => commandName(argv) === 'TYPE',
     execute: (_argc, argv, context): { output?: string[]; clear?: boolean } =>
         withError((): { output: string[] } => {
@@ -204,12 +204,12 @@ export const typeCommand: ConCommandReactor = {
         }),
 };
 
-export const moreCommand: ConCommandReactor = {
+const moreCommand: ConCommandReactor = {
     match: (_argc, argv): boolean => commandName(argv) === 'MORE',
     execute: typeCommand.execute,
 };
 
-export const attribCommand: ConCommandReactor = {
+const attribCommand: ConCommandReactor = {
     match: (_argc, argv): boolean => commandName(argv) === 'ATTRIB',
     execute: (_argc, argv, context): { output?: string[]; clear?: boolean } =>
         withError((): { output: string[] } => {

@@ -7,7 +7,7 @@ import { Stack } from '@/ui/components/layout/Stack';
 import { DemoSection } from './DemoSection';
 import { BUTTON_VARIANTS, SHOWOFF_SECTIONS } from './config';
 
-export function FlashButtons(): ReactNode {
+export const FlashButtons = (): ReactNode => {
     const flashButtons = useFlashGroup({
         normal: { initial: 'Normal Button', flash: 'Clicked!' },
         primary: { initial: 'Primary Button', flash: 'Clicked!' },
@@ -26,19 +26,13 @@ export function FlashButtons(): ReactNode {
                     <div className="p-xs" id={`${id}-flash`} key={id}>
                         <Button
                             variant={type}
-                            onClick={
-                                flashButtons[id as keyof typeof flashButtons]
-                                    .trigger
-                            }
+                            onClick={flashButtons[id].trigger}
                         >
-                            {
-                                flashButtons[id as keyof typeof flashButtons]
-                                    .label
-                            }
+                            {flashButtons[id].label}
                         </Button>
                     </div>
                 ))}
             </Stack>
         </DemoSection>
     );
-}
+};

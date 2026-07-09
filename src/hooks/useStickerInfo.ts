@@ -2,8 +2,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { serversApi } from '@/api/servers/servers.api';
 import type { Sticker } from '@/api/servers/servers.api';
-import { useSticker } from '@/api/servers/servers.queries';
-import { SERVERS_QUERY_KEYS } from '@/api/servers/servers.queries';
+import { SERVERS_QUERY_KEYS, useSticker } from '@/api/servers/servers.queries';
 import type { Server } from '@/api/servers/servers.types';
 
 interface UseStickerInfoProps {
@@ -32,7 +31,7 @@ export const useStickerInfo = ({
 
     const serverIdToUse = serverId || stickerQuery.data?.serverId;
 
-    const serverQuery = useQuery<Server, Error>({
+    const serverQuery = useQuery<Server>({
         queryKey: SERVERS_QUERY_KEYS.details(serverIdToUse!),
         queryFn: async (): Promise<Server> => {
             try {

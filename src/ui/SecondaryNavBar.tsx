@@ -70,8 +70,8 @@ export const SecondaryNavBar = () => {
             style={{ width: inSwipePanel ? undefined : `${width}px` }}
         >
             <Box className="relative flex min-h-0 flex-1 flex-col">
-                {navMode === 'friends' && <FriendsSection />}
-                {navMode === 'servers' && <ServerSection />}
+                {navMode === 'friends' ? <FriendsSection /> : null}
+                {navMode === 'servers' ? <ServerSection /> : null}
             </Box>
 
             <ActiveVoicePanel />

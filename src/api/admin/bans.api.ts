@@ -47,21 +47,15 @@ export const adminBansApi = {
         );
         return response.data;
     },
-    listBans: async (
-        limit: number = 50,
-        offset: number = 0,
-    ): Promise<AdminBan[]> => {
+    listBans: async (limit = 50, offset = 0): Promise<AdminBan[]> => {
         const response = await apiClient.get<AdminBan[]>(
-            `/api/v1/admin/bans?limit=${limit}&offset=${offset}`,
+            `/api/v1/admin/bans?limit=${String(limit)}&offset=${String(offset)}`,
         );
         return response.data;
     },
-    listMutes: async (
-        limit: number = 50,
-        offset: number = 0,
-    ): Promise<AdminMute[]> => {
+    listMutes: async (limit = 50, offset = 0): Promise<AdminMute[]> => {
         const response = await apiClient.get<AdminMute[]>(
-            `/api/v1/admin/mutes?limit=${limit}&offset=${offset}`,
+            `/api/v1/admin/mutes?limit=${String(limit)}&offset=${String(offset)}`,
         );
         return response.data;
     },

@@ -10,7 +10,7 @@
  * This lets us exercise the real handler logic without spinning up a full
  * React tree.
  */
-import type { Dispatch, UnknownAction } from '@reduxjs/toolkit';
+import type { Dispatch } from '@reduxjs/toolkit';
 import type { InfiniteData } from '@tanstack/react-query';
 import { QueryClient } from '@tanstack/react-query';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -47,6 +47,8 @@ interface MockWebSocket {
     onmessage: ((ev: MessageEvent) => void) | null;
     onerror: ((ev: Event) => void) | null;
     onclose: ((ev: CloseEvent) => void) | null;
+    addEventListener: ReturnType<typeof vi.fn>;
+    removeEventListener: ReturnType<typeof vi.fn>;
 }
 
 function emitWsEvent(
@@ -69,7 +71,7 @@ describe('setupGlobalWsHandlers - ping behaviour', (): void => {
     let mockWs: MockWebSocket;
     let queryClient: QueryClient;
     let mockDispatch: ReturnType<typeof vi.fn>;
-    let dispatch: Dispatch<UnknownAction>;
+    let dispatch: Dispatch;
     let cleanup: () => void;
 
     beforeEach((): void => {
@@ -85,17 +87,27 @@ describe('setupGlobalWsHandlers - ping behaviour', (): void => {
             onmessage: null,
             onerror: null,
             onclose: null,
+            addEventListener: vi.fn((event: string, handler: any) => {
+                (mockWs as any)[`on${event}`] = handler;
+            }),
+            removeEventListener: vi.fn((event: string, handler: any) => {
+                if ((mockWs as any)[`on${event}`] === handler) {
+                    (mockWs as any)[`on${event}`] = null;
+                }
+            }),
         };
 
-        class WebSocketMock {
-            static CONNECTING = 0;
-            static OPEN = 1;
-            static CLOSING = 2;
-            static CLOSED = 3;
-            constructor() {
-                return mockWs as any as WebSocket;
-            }
+        function WebSocketMock(): MockWebSocket {
+            return mockWs;
         }
+
+        Object.assign(WebSocketMock, {
+            CONNECTING: 0,
+            OPEN: 1,
+            CLOSING: 2,
+            CLOSED: 3,
+        });
+
         vi.stubGlobal('WebSocket', WebSocketMock);
 
         wsClient.connect('test-token');
@@ -105,7 +117,7 @@ describe('setupGlobalWsHandlers - ping behaviour', (): void => {
         });
 
         mockDispatch = vi.fn();
-        dispatch = mockDispatch as any as Dispatch<UnknownAction>;
+        dispatch = mockDispatch as any as Dispatch;
 
         cleanup = setupGlobalWsHandlers(queryClient, dispatch);
     });
@@ -147,7 +159,7 @@ describe('setupGlobalWsHandlers - ping behaviour', (): void => {
             }>(PINGS_KEY);
 
             expect(cached?.pings).toHaveLength(1);
-            expect(cached?.pings[0].id).toBe('msg-001');
+            expect(cached?.pings[0]?.id).toBe('msg-001');
 
             expect(dispatch).toHaveBeenCalledWith(
                 incrementServerPing({ serverId }),
@@ -429,7 +441,7 @@ describe('setupGlobalWsHandlers - ping behaviour', (): void => {
                 SERVERS_QUERY_KEYS.channels('server-1'),
             );
 
-            expect(cachedChannels?.[0].lastMessageAt).toBe(
+            expect(cachedChannels?.[0]?.lastMessageAt).toBe(
                 '2026-05-16T10:00:00.000Z',
             );
             expect(

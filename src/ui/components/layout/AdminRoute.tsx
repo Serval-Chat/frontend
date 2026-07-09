@@ -1,4 +1,4 @@
-import { type ReactNode } from 'react';
+import type { ReactNode } from 'react';
 
 import { Navigate, Outlet } from 'react-router-dom';
 
@@ -26,7 +26,7 @@ export const AdminRoute = (): ReactNode => {
     const hasAdminAccess =
         permissions &&
         (permissions.adminAccess === true ||
-            Object.values(permissions).some((val): boolean => val === true));
+            Object.values(permissions).includes(true));
 
     if (!hasAdminAccess) {
         console.warn(

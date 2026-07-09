@@ -44,12 +44,12 @@ export const InviteLinkSkeleton = ({
         className="my-2 flex w-80 flex-col overflow-hidden rounded-lg bg-bg-secondary transition-all"
         ref={containerRef}
     >
-        {hasBanner && (
+        {hasBanner ? (
             <Skeleton
                 className="h-20 w-full rounded-none"
                 variant="rectangular"
             />
-        )}
+        ) : null}
 
         <div className="flex flex-col gap-4 p-4">
             <Skeleton className="h-3 w-40" variant="text" />
@@ -65,7 +65,7 @@ export const InviteLinkSkeleton = ({
                 </div>
             </div>
 
-            {tagCount > 0 && (
+            {tagCount > 0 ? (
                 <div className="flex flex-wrap gap-1.5">
                     {INVITE_TAG_SKELETONS.slice(0, tagCount).map((tag) => (
                         <Skeleton
@@ -75,7 +75,7 @@ export const InviteLinkSkeleton = ({
                         />
                     ))}
                 </div>
-            )}
+            ) : null}
 
             <Skeleton className="h-8 w-full" variant="rectangular" />
         </div>
@@ -94,7 +94,7 @@ export const InviteLink = ({ code, url }: InviteLinkProps) => {
 
         const observer = new IntersectionObserver(
             ([entry]): void => {
-                if (entry.isIntersecting) {
+                if (entry?.isIntersecting) {
                     setInView(true);
                     observer.disconnect();
                 }
@@ -106,7 +106,9 @@ export const InviteLink = ({ code, url }: InviteLinkProps) => {
             observer.observe(containerRef.current);
         }
 
-        return (): void => observer.disconnect();
+        return (): void => {
+            observer.disconnect();
+        };
     }, [inView]);
 
     const {
@@ -128,7 +130,9 @@ export const InviteLink = ({ code, url }: InviteLinkProps) => {
     const handleCopy = (): void => {
         void navigator.clipboard.writeText(url);
         setCopied(true);
-        setTimeout((): void => setCopied(false), 1500);
+        setTimeout((): void => {
+            setCopied(false);
+        }, 1500);
         showToast('Copied the invite URL in to the clipboard!', 'success');
     };
 
@@ -185,7 +189,7 @@ export const InviteLink = ({ code, url }: InviteLinkProps) => {
             </div>
 
             {/* Banner */}
-            {bannerUrl && (
+            {bannerUrl ? (
                 <div className="h-20 w-full overflow-hidden bg-primary/10">
                     <img
                         alt=""
@@ -193,7 +197,7 @@ export const InviteLink = ({ code, url }: InviteLinkProps) => {
                         src={bannerUrl}
                     />
                 </div>
-            )}
+            ) : null}
 
             <div className="flex flex-col gap-4 p-4">
                 <Text
@@ -220,13 +224,13 @@ export const InviteLink = ({ code, url }: InviteLinkProps) => {
 
                     <div className="flex min-w-0 flex-col">
                         <div className="flex items-center gap-1.5">
-                            {invite.server.verified && (
+                            {invite.server.verified ? (
                                 <BadgeCheck
                                     className="shrink-0 text-primary"
                                     size={18}
                                     strokeWidth={2.5}
                                 />
-                            )}
+                            ) : null}
                             <Text className="truncate" size="lg" weight="bold">
                                 {invite.server.name}
                             </Text>
@@ -243,7 +247,7 @@ export const InviteLink = ({ code, url }: InviteLinkProps) => {
                     </div>
                 </div>
 
-                {invite.server.tags && invite.server.tags.length > 0 && (
+                {invite.server.tags && invite.server.tags.length > 0 ? (
                     <div className="flex flex-wrap gap-1.5">
                         {invite.server.tags.map((tag) => (
                             <div
@@ -255,7 +259,7 @@ export const InviteLink = ({ code, url }: InviteLinkProps) => {
                             </div>
                         ))}
                     </div>
-                )}
+                ) : null}
 
                 <Button
                     className="w-full"

@@ -82,11 +82,12 @@ const conversationsEqual = (
 
 const clearSplitView = (state: NavState): void => {
     state.splitView.left = null;
+
     state.splitView.right = null;
 };
 
 const isSplitViewActive = (state: NavState): boolean =>
-    !!(state.splitView.left || state.splitView.right);
+    !!(state.splitView.left ?? state.splitView.right);
 
 const placeConversationInSplitView = (
     state: NavState,
@@ -143,11 +144,15 @@ const navSlice = createSlice({
     reducers: {
         setNavMode: (state, action: PayloadAction<NavMode>): void => {
             state.navMode = action.payload;
+
             state.mobileHomeTab = 'friends';
+
             state.showMobileMemberList = false;
             if (action.payload === 'friends') {
                 state.selectedServerId = null;
+
                 state.selectedChannelId = null;
+
                 state.selectedFriendId = state.lastSelectedFriendId;
             } else {
                 state.selectedFriendId = null;
@@ -155,19 +160,25 @@ const navSlice = createSlice({
         },
         setSelectedServerId: (state, action: PayloadAction<string>): void => {
             state.navMode = 'servers';
+
             state.selectedServerId = action.payload;
+
             state.selectedFriendId = null;
 
             const lastChannel = state.lastOpenedChannelByServer[action.payload];
-            state.selectedChannelId = lastChannel || null;
+
+            state.selectedChannelId = lastChannel ?? null;
         },
         setSelectedFriendId: (
             state,
             action: PayloadAction<string | null>,
         ): void => {
             state.navMode = 'friends';
+
             state.selectedFriendId = action.payload;
+
             state.selectedServerId = null;
+
             state.selectedChannelId = null;
 
             if (action.payload) {
@@ -184,8 +195,11 @@ const navSlice = createSlice({
             action: PayloadAction<string | null>,
         ): void => {
             state.navMode = 'servers';
+
             state.selectedChannelId = action.payload;
+
             state.selectedFriendId = null;
+
             state.showMobileMemberList = false;
 
             if (state.selectedServerId && action.payload) {
@@ -212,7 +226,10 @@ const navSlice = createSlice({
             state,
             action: PayloadAction<string>,
         ): void => {
-            delete state.lastOpenedChannelByServer[action.payload];
+            Reflect.deleteProperty(
+                state.lastOpenedChannelByServer,
+                action.payload,
+            );
             saveLastChannels(state.lastOpenedChannelByServer);
         },
         setSplitViewPane: (
@@ -235,6 +252,7 @@ const navSlice = createSlice({
             }
 
             state.splitView[side] = conversation;
+
             state.targetMessageId = null;
         },
         clearSplitViewPane: (
@@ -245,7 +263,9 @@ const navSlice = createSlice({
         },
         closeSplitView: (state): void => {
             clearSplitView(state);
+
             state.showMobileMemberList = false;
+
             state.mobileMemberListSplitViewSide = null;
         },
         toggleMobileHomeTab: (state): void => {
@@ -260,6 +280,7 @@ const navSlice = createSlice({
         },
         toggleMobileMemberList: (state): void => {
             state.showMobileMemberList = !state.showMobileMemberList;
+
             state.mobileMemberListSplitViewSide = null;
         },
         toggleMobileMemberListForSplitView: (
@@ -271,11 +292,13 @@ const navSlice = createSlice({
                 state.mobileMemberListSplitViewSide === action.payload
             ) {
                 state.showMobileMemberList = false;
+
                 state.mobileMemberListSplitViewSide = null;
                 return;
             }
 
             state.showMobileMemberList = true;
+
             state.mobileMemberListSplitViewSide = action.payload;
         },
         toggleDesktopMemberList: (state): void => {
@@ -283,10 +306,10 @@ const navSlice = createSlice({
         },
         toggleFolder: (state, action: PayloadAction<string>): void => {
             const index = state.openedFolders.indexOf(action.payload);
-            if (index !== -1) {
-                state.openedFolders.splice(index, 1);
-            } else {
+            if (index === -1) {
                 state.openedFolders.push(action.payload);
+            } else {
+                state.openedFolders.splice(index, 1);
             }
         },
         openFolder: (state, action: PayloadAction<string>): void => {

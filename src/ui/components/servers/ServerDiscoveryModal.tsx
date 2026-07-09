@@ -61,10 +61,11 @@ const discoveryPaginationReducer = (
     action: DiscoveryPaginationAction,
 ): DiscoveryPaginationState => {
     switch (action.type) {
-        case 'reset':
+        case 'reset': {
             if (state.resetKey === action.resetKey) return state;
             return { resetKey: action.resetKey, items: [] };
-        case 'receive':
+        }
+        case 'receive': {
             if (state.resetKey !== action.resetKey) return state;
             return {
                 ...state,
@@ -73,10 +74,13 @@ const discoveryPaginationReducer = (
                         ? action.data
                         : mergeServers(state.items, action.data),
             };
-        case 'loadMore':
+        }
+        case 'loadMore': {
             return { ...state, cursor: action.cursor };
-        default:
+        }
+        default: {
             return state;
+        }
     }
 };
 
@@ -200,22 +204,24 @@ export const ServerDiscoveryModal = ({
                                 className="h-12 pr-12 pl-10 text-base"
                                 placeholder="Search by server name, description, or tag"
                                 value={search}
-                                onChange={(event): void =>
-                                    setSearch(event.target.value)
-                                }
+                                onChange={(event): void => {
+                                    setSearch(event.target.value);
+                                }}
                             />
-                            {search !== '' && (
+                            {search === '' ? null : (
                                 <button
                                     className="absolute top-1/2 right-3 rounded p-1 text-muted-foreground hover:bg-bg-secondary hover:text-foreground"
                                     type="button"
-                                    onClick={(): void => setSearch('')}
+                                    onClick={(): void => {
+                                        setSearch('');
+                                    }}
                                 >
                                     <X size={16} />
                                 </button>
                             )}
                         </div>
 
-                        {visibleTags.length > 0 && (
+                        {visibleTags.length > 0 ? (
                             <div className="flex flex-wrap gap-2">
                                 {visibleTags.map((tag) => {
                                     const selected = selectedTags.includes(tag);
@@ -228,7 +234,9 @@ export const ServerDiscoveryModal = ({
                                             }`}
                                             key={tag}
                                             type="button"
-                                            onClick={(): void => toggleTag(tag)}
+                                            onClick={(): void => {
+                                                toggleTag(tag);
+                                            }}
                                         >
                                             <Tag size={12} />
                                             {tag}
@@ -236,7 +244,7 @@ export const ServerDiscoveryModal = ({
                                     );
                                 })}
                             </div>
-                        )}
+                        ) : null}
                     </div>
                 </div>
 
@@ -264,8 +272,9 @@ export const ServerDiscoveryModal = ({
                                             server.id,
                                         )}
                                         isJoining={
-                                            isJoining &&
-                                            joiningServerId === server.id
+                                            isJoining
+                                                ? joiningServerId === server.id
+                                                : false
                                         }
                                         key={server.id}
                                         server={server}
@@ -276,7 +285,7 @@ export const ServerDiscoveryModal = ({
                             </div>
                         )}
 
-                        {data?.nextCursor && (
+                        {data?.nextCursor ? (
                             <div className="flex justify-center pt-6">
                                 <Button
                                     loading={isFetching}
@@ -293,7 +302,7 @@ export const ServerDiscoveryModal = ({
                                     Load More
                                 </Button>
                             </div>
-                        )}
+                        ) : null}
                     </div>
                 </div>
             </div>
@@ -319,7 +328,7 @@ const DiscoveryServerCard = ({
     const iconUrl = resolveApiUrl(server.icon);
     const initials = server.name
         .split(' ')
-        .map((word): string => word[0])
+        .map((word): string => word[0] ?? '')
         .join('')
         .slice(0, 3)
         .toUpperCase();
@@ -344,12 +353,12 @@ const DiscoveryServerCard = ({
             <div className="flex flex-1 flex-col gap-4 p-4 pt-10">
                 <div>
                     <div className="flex min-w-0 items-center gap-2">
-                        {server.verified && (
+                        {server.verified ? (
                             <BadgeCheck
                                 className="shrink-0 text-primary"
                                 size={18}
                             />
-                        )}
+                        ) : null}
                         <Text className="truncate" size="lg" weight="bold">
                             {server.name}
                         </Text>
@@ -370,7 +379,9 @@ const DiscoveryServerCard = ({
                             className="inline-flex items-center rounded-md bg-primary/10 px-2 py-0.5 text-[11px] font-bold text-primary hover:bg-primary/20"
                             key={tag}
                             type="button"
-                            onClick={(): void => onTagClick(tag)}
+                            onClick={(): void => {
+                                onTagClick(tag);
+                            }}
                         >
                             {tag}
                         </button>
@@ -380,9 +391,11 @@ const DiscoveryServerCard = ({
                 <div className="mt-auto">
                     <Button
                         className="w-full"
-                        loading={!isJoined && isJoining}
+                        loading={isJoined ? undefined : isJoining}
                         variant={isJoined ? 'normal' : 'primary'}
-                        onClick={(): void => onJoin(server)}
+                        onClick={(): void => {
+                            onJoin(server);
+                        }}
                     >
                         {isJoined ? 'Open Server' : 'Join Server'}
                     </Button>

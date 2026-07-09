@@ -42,15 +42,18 @@ vi.mock('@/api/servers/servers.queries', () => ({
     useServerDetails: vi.fn(),
 }));
 
-vi.mock('./ServerBanner', () => ({
-    ServerBanner: () => <div data-testid="server-banner" />,
-}));
-vi.mock('./ChannelList', () => ({
-    ChannelList: () => <div data-testid="channel-list" />,
-}));
-vi.mock('@/ui/components/common/LoadingSpinner', () => ({
-    LoadingSpinner: () => <div data-testid="loading-spinner" />,
-}));
+vi.mock('./ServerBanner', () => {
+    const ServerBanner = () => <div data-testid="server-banner" />;
+    return { ServerBanner };
+});
+vi.mock('./ChannelList', () => {
+    const ChannelList = () => <div data-testid="channel-list" />;
+    return { ChannelList };
+});
+vi.mock('@/ui/components/common/LoadingSpinner', () => {
+    const LoadingSpinner = () => <div data-testid="loading-spinner" />;
+    return { LoadingSpinner };
+});
 
 describe('ServerSection fallback logic', (): void => {
     const mockNavigate = vi.fn();

@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useReducer } from 'react';
 
 import {
     useRoles,
@@ -13,6 +13,7 @@ import { RoleDot } from '@/ui/components/common/RoleDot';
 import { SettingsFloatingBar } from '@/ui/components/common/SettingsFloatingBar';
 import { Text } from '@/ui/components/common/Text';
 import { Toggle } from '@/ui/components/common/Toggle';
+import { mergeReducer } from '@/utils/mergeReducer';
 
 import { MarkdownBlockadeSettings } from './MarkdownBlockadeSettings';
 
@@ -34,25 +35,49 @@ const ServerBehaviourSettingsForm = ({
     const { mutate: updateServer, isPending: isUpdating } =
         useUpdateServer(serverId);
 
-    const [selectedRoleId, setSelectedRoleId] = useState<string | null>(
-        server.defaultRoleId || null,
-    );
-    const [originalRoleId, setOriginalRoleId] = useState<string | null>(
-        server.defaultRoleId || null,
-    );
-    const [disableCustomFonts, setDisableCustomFonts] = useState(
-        server.disableCustomFonts || false,
-    );
-    const [originalFonts, setOriginalFonts] = useState(
-        server.disableCustomFonts || false,
-    );
-    const [
+    interface BehaviourState {
+        selectedRoleId: string | null;
+        originalRoleId: string | null;
+        disableCustomFonts: boolean;
+        originalFonts: boolean;
+        disableUsernameGlowAndCustomColor: boolean;
+        originalGlow: boolean;
+    }
+    const [state, patch] = useReducer(mergeReducer<BehaviourState>, {
+        selectedRoleId: server.defaultRoleId || null,
+        originalRoleId: server.defaultRoleId || null,
+        disableCustomFonts: server.disableCustomFonts || false,
+        originalFonts: server.disableCustomFonts || false,
+        disableUsernameGlowAndCustomColor:
+            server.disableUsernameGlowAndCustomColor || false,
+        originalGlow: server.disableUsernameGlowAndCustomColor || false,
+    });
+    const {
+        selectedRoleId,
+        originalRoleId,
+        disableCustomFonts,
+        originalFonts,
         disableUsernameGlowAndCustomColor,
-        setDisableUsernameGlowAndCustomColor,
-    ] = useState(server.disableUsernameGlowAndCustomColor || false);
-    const [originalGlow, setOriginalGlow] = useState(
-        server.disableUsernameGlowAndCustomColor || false,
-    );
+        originalGlow,
+    } = state;
+    const setSelectedRoleId = (v: string | null): void => {
+        patch({ selectedRoleId: v });
+    };
+    const setOriginalRoleId = (v: string | null): void => {
+        patch({ originalRoleId: v });
+    };
+    const setDisableCustomFonts = (v: boolean): void => {
+        patch({ disableCustomFonts: v });
+    };
+    const setOriginalFonts = (v: boolean): void => {
+        patch({ originalFonts: v });
+    };
+    const setDisableUsernameGlowAndCustomColor = (v: boolean): void => {
+        patch({ disableUsernameGlowAndCustomColor: v });
+    };
+    const setOriginalGlow = (v: boolean): void => {
+        patch({ originalGlow: v });
+    };
 
     const hasChanges =
         selectedRoleId !== originalRoleId ||
@@ -193,9 +218,9 @@ const ServerBehaviourSettingsForm = ({
                     isPending={isUpdating}
                     rules={server.markdownBlockadeRules}
                     serverId={serverId}
-                    onSave={(markdownBlockadeRules): void =>
-                        updateServer({ markdownBlockadeRules })
-                    }
+                    onSave={(markdownBlockadeRules): void => {
+                        updateServer({ markdownBlockadeRules });
+                    }}
                 />
             </div>
 

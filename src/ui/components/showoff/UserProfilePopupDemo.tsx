@@ -13,60 +13,60 @@ import { SHOWOFF_SECTIONS } from './config';
 
 const DEMO_CREATED_AT = new Date();
 
+const mockUser: User = {
+    id: 'mock-1',
+    username: 'catflare',
+    displayName: 'Catflare',
+    login: 'nekoflare',
+    profilePicture: 'https://catfla.re/images/servals/serval-1.jpg',
+    banner:
+        resolveApiUrl(
+            '/api/v1/profile/banner/19f0253d8960f45cc6e9193c3d34e2fb.gif',
+        ) ?? '',
+    bio: 'I love servals! They are so cute and big. \n\nWorking on Serchat, the most beautiful chat app.',
+    pronouns: 'she/her',
+    badges: [
+        {
+            id: 'early_supporter',
+            name: 'Early Supporter',
+            description: 'Supported the project in its early stages.',
+            icon: 'heart',
+            color: '#FF6B6B',
+            createdAt: new Date().toISOString(),
+        },
+        {
+            id: 'developer',
+            name: 'Developer',
+            description:
+                'Core developer of Serchat or other Serchat related things.',
+            icon: 'code_brackets',
+            color: '#FFA348',
+            createdAt: new Date().toISOString(),
+        },
+        {
+            id: 'serval_enthusiast',
+            name: 'Serval Enthusiast',
+            description: 'Really, really likes servals.',
+            icon: 'cat',
+            color: '#FFD93D',
+            createdAt: new Date().toISOString(),
+        },
+    ],
+    customStatus: {
+        text: 'Sleeping in a sunbeam...',
+        emoji: '🐱',
+    },
+    createdAt: new Date('2024-01-01'),
+    usernameGradient: {
+        enabled: true,
+        colors: ['#FFD700', '#FFA500'],
+        angle: 45,
+    },
+} as User;
+
 export const UserProfilePopupDemo = () => {
     const [isPopupOpen, setIsPopupOpen] = useState(false);
     const triggerRef = useRef<HTMLDivElement>(null);
-
-    const mockUser: User = {
-        id: 'mock-1',
-        username: 'catflare',
-        displayName: 'Catflare',
-        login: 'nekoflare',
-        profilePicture: 'https://catfla.re/images/servals/serval-1.jpg',
-        banner:
-            resolveApiUrl(
-                '/api/v1/profile/banner/19f0253d8960f45cc6e9193c3d34e2fb.gif',
-            ) || '',
-        bio: 'I love servals! They are so cute and big. \n\nWorking on Serchat, the most beautiful chat app.',
-        pronouns: 'she/her',
-        badges: [
-            {
-                id: 'early_supporter',
-                name: 'Early Supporter',
-                description: 'Supported the project in its early stages.',
-                icon: 'heart',
-                color: '#FF6B6B',
-                createdAt: new Date().toISOString(),
-            },
-            {
-                id: 'developer',
-                name: 'Developer',
-                description:
-                    'Core developer of Serchat or other Serchat related things.',
-                icon: 'code_brackets',
-                color: '#FFA348',
-                createdAt: new Date().toISOString(),
-            },
-            {
-                id: 'serval_enthusiast',
-                name: 'Serval Enthusiast',
-                description: 'Really, really likes servals.',
-                icon: 'cat',
-                color: '#FFD93D',
-                createdAt: new Date().toISOString(),
-            },
-        ],
-        customStatus: {
-            text: 'Sleeping in a sunbeam...',
-            emoji: '🐱',
-        },
-        createdAt: new Date('2024-01-01'),
-        usernameGradient: {
-            enabled: true,
-            colors: ['#FFD700', '#FFA500'],
-            angle: 45,
-        },
-    } as User;
 
     return (
         <DemoSection
@@ -83,7 +83,9 @@ export const UserProfilePopupDemo = () => {
                         <Button
                             className="w-fit rounded-md bg-primary px-4 py-2 font-semibold text-black transition-opacity hover:opacity-90"
                             variant="primary"
-                            onClick={(): void => setIsPopupOpen(true)}
+                            onClick={(): void => {
+                                setIsPopupOpen(true);
+                            }}
                         >
                             Show Mock Profile
                         </Button>
@@ -96,7 +98,9 @@ export const UserProfilePopupDemo = () => {
                         triggerRef={triggerRef}
                         user={mockUser}
                         userId={mockUser.id}
-                        onClose={(): void => setIsPopupOpen(false)}
+                        onClose={(): void => {
+                            setIsPopupOpen(false);
+                        }}
                     />
                 </div>
             </DemoItem>

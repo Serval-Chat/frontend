@@ -1,4 +1,4 @@
-import { type ReactNode } from 'react';
+import type { ReactNode } from 'react';
 
 import { Book, Bot, ExternalLink } from 'lucide-react';
 import { NavLink } from 'react-router-dom';

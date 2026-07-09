@@ -46,7 +46,7 @@ export class DosFileSystem {
 
         const resolved = this.resolvePath(target, { allowMissingLeaf: false });
         const entry = this.entries[resolved];
-        if (!entry || entry.type !== 'directory') {
+        if (entry?.type !== 'directory') {
             throw new Error('The system cannot find the path specified.');
         }
 
@@ -59,7 +59,7 @@ export class DosFileSystem {
         const pattern = pathPattern || '*';
         const resolved = this.resolvePattern(pattern);
         const directory = this.entries[resolved.directory];
-        if (!directory || directory.type !== 'directory') {
+        if (directory?.type !== 'directory') {
             throw new Error('The system cannot find the path specified.');
         }
 
@@ -85,10 +85,7 @@ export class DosFileSystem {
         }
 
         const parent = this.parentPath(resolved);
-        if (
-            !this.entries[parent] ||
-            this.entries[parent].type !== 'directory'
-        ) {
+        if (this.entries[parent]?.type !== 'directory') {
             throw new Error('The system cannot find the path specified.');
         }
 
@@ -101,7 +98,7 @@ export class DosFileSystem {
     public removeDirectory(path: string): void {
         const resolved = this.resolvePath(path, { allowMissingLeaf: false });
         const entry = this.entries[resolved];
-        if (!entry || entry.type !== 'directory') {
+        if (entry?.type !== 'directory') {
             throw new Error('The system cannot find the path specified.');
         }
         if (resolved === ROOT) {
@@ -125,7 +122,7 @@ export class DosFileSystem {
             allowMissingLeaf: false,
         });
         const sourceEntry = this.entries[sourcePath];
-        if (!sourceEntry || sourceEntry.type !== 'file') {
+        if (sourceEntry?.type !== 'file') {
             throw new Error('File not found.');
         }
 
@@ -135,10 +132,7 @@ export class DosFileSystem {
         );
         this.assertValidLeaf(destinationPath);
         const parent = this.parentPath(destinationPath);
-        if (
-            !this.entries[parent] ||
-            this.entries[parent].type !== 'directory'
-        ) {
+        if (this.entries[parent]?.type !== 'directory') {
             throw new Error('The system cannot find the path specified.');
         }
 
@@ -166,8 +160,7 @@ export class DosFileSystem {
             destination,
             entry.name,
         );
-        this.renameResolved(sourcePath, destinationPath);
-        return this.entries[destinationPath];
+        return this.renameResolved(sourcePath, destinationPath);
     }
 
     public rename(source: string, destinationName: string): DosEntry {
@@ -204,7 +197,7 @@ export class DosFileSystem {
     public readFile(path: string): string {
         const resolved = this.resolvePath(path, { allowMissingLeaf: false });
         const entry = this.entries[resolved];
-        if (!entry || entry.type !== 'file') {
+        if (entry?.type !== 'file') {
             throw new Error('The system cannot find the file specified.');
         }
         return entry.content ?? '';
@@ -232,7 +225,7 @@ export class DosFileSystem {
                 if (op === '+') attributes.add(attribute);
                 else attributes.delete(attribute);
             }
-            entry.attributes = [...attributes].toSorted() as DosAttribute[];
+            entry.attributes = [...attributes].toSorted();
             entry.modifiedAt = now();
         }
         this.save();
@@ -243,10 +236,7 @@ export class DosFileSystem {
         const resolved = this.resolvePath(path, { allowMissingLeaf: true });
         this.assertValidLeaf(resolved);
         const parent = this.parentPath(resolved);
-        if (
-            !this.entries[parent] ||
-            this.entries[parent].type !== 'directory'
-        ) {
+        if (this.entries[parent]?.type !== 'directory') {
             throw new Error('The system cannot find the path specified.');
         }
         if (this.entries[resolved]?.attributes.includes('R')) {
@@ -328,10 +318,7 @@ export class DosFileSystem {
             );
         }
         const parent = this.parentPath(destinationPath);
-        if (
-            !this.entries[parent] ||
-            this.entries[parent].type !== 'directory'
-        ) {
+        if (this.entries[parent]?.type !== 'directory') {
             throw new Error('The system cannot find the path specified.');
         }
 
@@ -373,7 +360,7 @@ export class DosFileSystem {
         const raw = input.trim();
         if (!raw || raw === '.') return base;
 
-        let working = raw.replace(/\//g, '\\');
+        let working = raw.replaceAll('/', '\\');
         if (/^[A-Za-z]:/.test(working)) {
             working = working.slice(2);
         }
@@ -429,9 +416,9 @@ export class DosFileSystem {
     private matchesPattern(name: string, pattern: string): boolean {
         if (pattern === '*.*') return true;
         const escaped = pattern
-            .replace(/[.+^${}()|[\]\\]/g, '\\$&')
-            .replace(/\*/g, '.*')
-            .replace(/\?/g, '.');
+            .replaceAll(/[.+^${}()|[\]\\]/g, String.raw`\$&`)
+            .replaceAll('*', '.*')
+            .replaceAll('?', '.');
         return new RegExp(`^${escaped}$`, 'i').test(name);
     }
 
@@ -462,10 +449,10 @@ export class DosFileSystem {
     }
 
     private leafName(path: string): string {
-        return path.split('\\').filter(Boolean).pop()?.toUpperCase() ?? '';
+        return path.split('\\').findLast(Boolean)?.toUpperCase() ?? '';
     }
 
     private displayPath(path: string): string {
-        return path.replace(/\//g, '\\').toUpperCase();
+        return path.replaceAll('/', '\\').toUpperCase();
     }
 }

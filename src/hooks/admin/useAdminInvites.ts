@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { adminInvitesApi } from '@/api/admin/invites.api';
 
-export const useAdminInvites = (): UseQueryResult<string[], Error> =>
+export const useAdminInvites = (): UseQueryResult<string[]> =>
     useQuery<string[]>({
         queryKey: ['admin-invites'],
         queryFn: (): Promise<string[]> => adminInvitesApi.getInvites(),
@@ -12,8 +12,7 @@ export const useAdminInvites = (): UseQueryResult<string[], Error> =>
 export const useCreateAdminInvite = (): UseMutationResult<
     { message: string; token: string },
     Error,
-    void,
-    unknown
+    void
 > => {
     const queryClient = useQueryClient();
 
@@ -26,27 +25,10 @@ export const useCreateAdminInvite = (): UseMutationResult<
     });
 };
 
-export const useDeleteAdminInvite = (): UseMutationResult<
-    void,
-    Error,
-    { token: string },
-    unknown
-> => {
-    const queryClient = useQueryClient();
-
-    return useMutation({
-        mutationFn: ({ token }): Promise<void> =>
-            adminInvitesApi.deleteInvite(token),
-        onSuccess: (): void => {
-            void queryClient.invalidateQueries({ queryKey: ['admin-invites'] });
-        },
-    });
-};
 export const useCreateBatchAdminInvites = (): UseMutationResult<
     { message: string; tokens: string[] },
     Error,
-    { count: number },
-    unknown
+    { count: number }
 > => {
     const queryClient = useQueryClient();
 

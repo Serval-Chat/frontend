@@ -18,6 +18,67 @@ interface ImageCropperProps {
 
 type HandleType = 'nw' | 'n' | 'ne' | 'w' | 'e' | 'sw' | 's' | 'se' | 'move';
 
+const getHandlePositions = (
+    selection: CropSelection,
+): { t: HandleType; x: number; y: number }[] => [
+    { t: 'nw', x: selection.x, y: selection.y },
+    { t: 'n', x: selection.x + selection.width / 2, y: selection.y },
+    { t: 'ne', x: selection.x + selection.width, y: selection.y },
+    { t: 'w', x: selection.x, y: selection.y + selection.height / 2 },
+    {
+        t: 'e',
+        x: selection.x + selection.width,
+        y: selection.y + selection.height / 2,
+    },
+    { t: 'sw', x: selection.x, y: selection.y + selection.height },
+    {
+        t: 's',
+        x: selection.x + selection.width / 2,
+        y: selection.y + selection.height,
+    },
+    {
+        t: 'se',
+        x: selection.x + selection.width,
+        y: selection.y + selection.height,
+    },
+];
+
+const drawCropCanvas = (
+    canvas: HTMLCanvasElement,
+    image: HTMLImageElement,
+    displaySize: { width: number; height: number },
+    selection: CropSelection,
+): void => {
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = displaySize.width * dpr;
+    canvas.height = displaySize.height * dpr;
+    ctx.scale(dpr, dpr);
+
+    ctx.drawImage(image, 0, 0, displaySize.width, displaySize.height);
+
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+    ctx.fillRect(0, 0, displaySize.width, displaySize.height);
+
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.fillRect(selection.x, selection.y, selection.width, selection.height);
+    ctx.globalCompositeOperation = 'source-over';
+
+    ctx.strokeStyle = '#3b82f6';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(selection.x, selection.y, selection.width, selection.height);
+
+    ctx.fillStyle = '#3b82f6';
+    const hs = 8;
+    for (const p of getHandlePositions(selection)) {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, hs / 2, 0, Math.PI * 2);
+        ctx.fill();
+    }
+};
+
 export const ImageCropper = ({
     imageFile,
     aspectRatio,
@@ -29,6 +90,11 @@ export const ImageCropper = ({
 
     const [image, setImage] = useState<HTMLImageElement | null>(null);
     const [displaySize, setDisplaySize] = useState({ width: 0, height: 0 });
+    // drawn imperatively into the <canvas> below (see the draw effect further
+    // down) rather than interpolated into JSX, so it IS rendered on screen even
+    // though the static "never shown" heuristic can't see that - switching this
+    // to a ref would stop the draw effect from re-running when it changes.
+    // react-doctor-disable-next-line react-doctor/rerender-state-only-in-handlers
     const [selection, setSelection] = useState<CropSelection>({
         x: 0,
         y: 0,
@@ -47,10 +113,10 @@ export const ImageCropper = ({
     useEffect((): void => {
         const img = new Image();
         const url = URL.createObjectURL(imageFile);
-        img.onload = (): void => {
+        img.addEventListener('load', (): void => {
             setImage(img);
             URL.revokeObjectURL(url);
-        };
+        });
         img.src = url;
     }, [imageFile]);
 
@@ -114,81 +180,15 @@ export const ImageCropper = ({
 
         handleResize();
         window.addEventListener('resize', handleResize);
-        return (): void => window.removeEventListener('resize', handleResize);
+        return (): void => {
+            window.removeEventListener('resize', handleResize);
+        };
     }, [updateDisplaySize]);
 
     // Draw canvas
     useEffect((): void => {
         if (!canvasRef.current || !image || displaySize.width === 0) return;
-
-        const canvas = canvasRef.current;
-        const ctx = canvas.getContext('2d');
-        if (!ctx) return;
-
-        // Set high DPI support
-        const dpr = window.devicePixelRatio || 1;
-        canvas.width = displaySize.width * dpr;
-        canvas.height = displaySize.height * dpr;
-        ctx.scale(dpr, dpr);
-
-        // Draw image
-        ctx.drawImage(image, 0, 0, displaySize.width, displaySize.height);
-
-        // Draw overlay
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-        ctx.fillRect(0, 0, displaySize.width, displaySize.height);
-
-        // Clear selection area
-        ctx.globalCompositeOperation = 'destination-out';
-        ctx.fillRect(
-            selection.x,
-            selection.y,
-            selection.width,
-            selection.height,
-        );
-        ctx.globalCompositeOperation = 'source-over';
-
-        // Draw selection border
-        ctx.strokeStyle = '#3b82f6';
-        ctx.lineWidth = 2;
-        ctx.strokeRect(
-            selection.x,
-            selection.y,
-            selection.width,
-            selection.height,
-        );
-
-        // Draw handles
-        ctx.fillStyle = '#3b82f6';
-        const hs = 8; // handle size
-        const positions = [
-            { t: 'nw', x: selection.x, y: selection.y },
-            { t: 'n', x: selection.x + selection.width / 2, y: selection.y },
-            { t: 'ne', x: selection.x + selection.width, y: selection.y },
-            { t: 'w', x: selection.x, y: selection.y + selection.height / 2 },
-            {
-                t: 'e',
-                x: selection.x + selection.width,
-                y: selection.y + selection.height / 2,
-            },
-            { t: 'sw', x: selection.x, y: selection.y + selection.height },
-            {
-                t: 's',
-                x: selection.x + selection.width / 2,
-                y: selection.y + selection.height,
-            },
-            {
-                t: 'se',
-                x: selection.x + selection.width,
-                y: selection.y + selection.height,
-            },
-        ];
-
-        positions.forEach((p): void => {
-            ctx.beginPath();
-            ctx.arc(p.x, p.y, hs / 2, 0, Math.PI * 2);
-            ctx.fill();
-        });
+        drawCropCanvas(canvasRef.current, image, displaySize, selection);
     }, [image, displaySize, selection]);
 
     const handleMouseDown = (e: React.MouseEvent): void => {
@@ -200,28 +200,7 @@ export const ImageCropper = ({
 
         // Check which handle was hit
         const hs = 20; // larger hit area for handles
-        const handles: { t: HandleType; x: number; y: number }[] = [
-            { t: 'nw', x: selection.x, y: selection.y },
-            { t: 'n', x: selection.x + selection.width / 2, y: selection.y },
-            { t: 'ne', x: selection.x + selection.width, y: selection.y },
-            { t: 'w', x: selection.x, y: selection.y + selection.height / 2 },
-            {
-                t: 'e',
-                x: selection.x + selection.width,
-                y: selection.y + selection.height / 2,
-            },
-            { t: 'sw', x: selection.x, y: selection.y + selection.height },
-            {
-                t: 's',
-                x: selection.x + selection.width / 2,
-                y: selection.y + selection.height,
-            },
-            {
-                t: 'se',
-                x: selection.x + selection.width,
-                y: selection.y + selection.height,
-            },
-        ];
+        const handles = getHandlePositions(selection);
 
         const hitHandle = handles.find(
             (h): boolean =>

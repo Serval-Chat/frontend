@@ -32,9 +32,9 @@ export const ProfileBanner = ({
     const limitedAnimations = useLimitedAnimations();
     const defaultColor = '#5865F2';
     const bannerColor =
-        propsBannerColor || usernameGradient?.colors?.[0] || defaultColor;
-    const bannerUrl = resolveApiUrl(banner || undefined) || '';
-    const shouldShowBanner = !!bannerUrl;
+        propsBannerColor ?? usernameGradient?.colors[0] ?? defaultColor;
+    const bannerUrl = resolveApiUrl(banner ?? undefined) ?? '';
+    const shouldShowBanner = bannerUrl !== '';
 
     return (
         <Box
@@ -49,20 +49,22 @@ export const ProfileBanner = ({
             }}
             onClick={onBannerClick}
         >
-            {shouldShowBanner && (
+            {shouldShowBanner ? (
                 <PausedAnimatedImage
                     alt={alt}
                     className="h-full w-full object-cover"
-                    paused={limitedAnimations && isAnimatedImageUrl(bannerUrl)}
+                    paused={
+                        limitedAnimations ? isAnimatedImageUrl(bannerUrl) : false
+                    }
                     src={bannerUrl}
                 />
-            )}
-            {onBannerClick && (
+            ) : null}
+            {onBannerClick ? (
                 <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/50 text-xs font-bold text-white uppercase opacity-0 transition-opacity duration-200 group-hover/banner:opacity-100">
                     <Camera size={24} />
                     <span>Change Banner</span>
                 </div>
-            )}
+            ) : null}
         </Box>
     );
 };

@@ -12,7 +12,7 @@ const queryClient = new QueryClient({
                 return failureCount < 2;
             },
             retryDelay: (attemptIndex): number =>
-                Math.min(1000 * 2 ** attemptIndex, 30000),
+                Math.min(1000 * 2 ** attemptIndex, 30_000),
             refetchOnWindowFocus: false,
             gcTime: 30 * 60 * 1000,
             staleTime: 10 * 60 * 1000,

@@ -1,6 +1,5 @@
-import { type Dispatch } from '@reduxjs/toolkit';
-import { type QueryClient } from '@tanstack/react-query';
-import type { InfiniteData } from '@tanstack/react-query';
+import type { Dispatch } from '@reduxjs/toolkit';
+import type { InfiniteData, QueryClient } from '@tanstack/react-query';
 
 import { chatApi } from '@/api/chat/chat.api';
 import { CHAT_QUERY_KEYS } from '@/api/chat/chat.queries';
@@ -148,7 +147,7 @@ const addMessageToInfiniteCache = (
 ): void => {
     queryClient.setQueryData<InfiniteData<ChatMessage[]>>(
         queryKey,
-        (oldData): InfiniteData<ChatMessage[], unknown> | undefined => {
+        (oldData): InfiniteData<ChatMessage[]> | undefined => {
             if (!oldData) return oldData;
 
             const firstPage = oldData.pages[0] || [];
@@ -263,7 +262,8 @@ const playNotificationSound = (queryClient: QueryClient): void => {
                     (enabledCustomSounds.length + (useDefault ? 1 : 0)),
             );
             if (randomIndex < enabledCustomSounds.length) {
-                soundUrl = enabledCustomSounds[randomIndex].url;
+                const sound = enabledCustomSounds[randomIndex];
+                if (sound) soundUrl = sound.url;
             } else {
                 if (soundQueue.length === 0) {
                     soundQueue = Array.from(
@@ -272,9 +272,12 @@ const playNotificationSound = (queryClient: QueryClient): void => {
                     );
                     for (let i = soundQueue.length - 1; i > 0; i--) {
                         const j = Math.floor(Math.random() * (i + 1));
+                        // i and j are always valid indices here: i is the
+                        // loop counter bounded by soundQueue.length, and j is
+                        // Math.floor(random * (i + 1)) which is in [0, i].
                         [soundQueue[i], soundQueue[j]] = [
-                            soundQueue[j],
-                            soundQueue[i],
+                            soundQueue[j]!,
+                            soundQueue[i]!,
                         ];
                     }
                 }
@@ -289,9 +292,12 @@ const playNotificationSound = (queryClient: QueryClient): void => {
                 );
                 for (let i = soundQueue.length - 1; i > 0; i--) {
                     const j = Math.floor(Math.random() * (i + 1));
+                    // i and j are always valid indices here: i is the loop
+                    // counter bounded by soundQueue.length, and j is
+                    // Math.floor(random * (i + 1)) which is in [0, i].
                     [soundQueue[i], soundQueue[j]] = [
-                        soundQueue[j],
-                        soundQueue[i],
+                        soundQueue[j]!,
+                        soundQueue[i]!,
                     ];
                 }
             }
@@ -306,7 +312,7 @@ const playNotificationSound = (queryClient: QueryClient): void => {
 };
 
 const normalizeNotificationText = (text: string | undefined): string => {
-    const normalized = (text ?? '').replace(/\s+/g, ' ').trim();
+    const normalized = (text ?? '').replaceAll(/\s+/g, ' ').trim();
     if (!normalized) return 'Sent an attachment or embed.';
     return normalized;
 };
@@ -525,9 +531,7 @@ const showDedupedInAppNotification = ({
     shownInAppNotificationIds.add(id);
 
     if (shownInAppNotificationIds.size > 200) {
-        const first = shownInAppNotificationIds.values().next().value as
-            | string
-            | undefined;
+        const first = shownInAppNotificationIds.values().next().value;
         if (first) shownInAppNotificationIds.delete(first);
     }
 
@@ -704,10 +708,10 @@ export const setupGlobalWsHandlers = (
                                     ? {
                                           ...channel,
                                           lastMessageAt:
-                                              payload.lastMessageAt !==
+                                              payload.lastMessageAt ===
                                               undefined
-                                                  ? payload.lastMessageAt
-                                                  : channel.lastMessageAt,
+                                                  ? channel.lastMessageAt
+                                                  : payload.lastMessageAt,
                                           lastReadAt:
                                               payload.lastReadAt ??
                                               channel.lastReadAt,
@@ -787,7 +791,7 @@ export const setupGlobalWsHandlers = (
                 if (!currentUser) return;
 
                 const dummyMessage: ChatMessage = {
-                    id: `ephemeral-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+                    id: `ephemeral-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
                     serverId: payload.serverId,
                     channelId: payload.channelId,
                     text: payload.text,
@@ -853,9 +857,7 @@ export const setupGlobalWsHandlers = (
                         queryClient,
                         'serverId' in payload.message &&
                             !!payload.message.serverId
-                            ? convertServerMessageToChatMessage(
-                                  payload.message as IMessageServer,
-                              )
+                            ? convertServerMessageToChatMessage(payload.message)
                             : convertDmToChatMessage(
                                   payload.message as IMessageDm,
                               ),
@@ -933,14 +935,14 @@ export const setupGlobalWsHandlers = (
                     if (!old) return old;
                     return {
                         ...old,
-                        ...(payload.settings !== undefined
-                            ? {
+                        ...(payload.settings === undefined
+                            ? {}
+                            : {
                                   settings: {
                                       ...old.settings,
                                       ...payload.settings,
                                   },
-                              }
-                            : {}),
+                              }),
                         ...(Object.prototype.hasOwnProperty.call(
                             payload,
                             'activeMute',
@@ -972,39 +974,35 @@ export const setupGlobalWsHandlers = (
     );
 
     const upsertFriendAtTop = (friend: Friend): void => {
-        [FRIENDS_QUERY_KEY, FRIEND_PROFILES_QUERY_KEY].forEach(
-            (queryKey): void => {
-                queryClient.setQueriesData<Friend[]>(
-                    { queryKey },
-                    (old): Friend[] | undefined => {
-                        if (!old) return old;
-                        return [
-                            friend,
-                            ...old.filter(
-                                (cachedFriend): boolean =>
-                                    cachedFriend.id !== friend.id,
-                            ),
-                        ];
-                    },
-                );
-            },
-        );
+        for (const queryKey of [FRIENDS_QUERY_KEY, FRIEND_PROFILES_QUERY_KEY]) {
+            queryClient.setQueriesData<Friend[]>(
+                { queryKey },
+                (old): Friend[] | undefined => {
+                    if (!old) return old;
+                    return [
+                        friend,
+                        ...old.filter(
+                            (cachedFriend): boolean =>
+                                cachedFriend.id !== friend.id,
+                        ),
+                    ];
+                },
+            );
+        }
     };
 
     const removeFriendFromCaches = (friendId: string): void => {
-        [FRIENDS_QUERY_KEY, FRIEND_PROFILES_QUERY_KEY].forEach(
-            (queryKey): void => {
-                queryClient.setQueriesData<Friend[]>(
-                    { queryKey },
-                    (old): Friend[] | undefined => {
-                        if (!old) return old;
-                        return old.filter(
-                            (friend): boolean => friend.id !== friendId,
-                        );
-                    },
-                );
-            },
-        );
+        for (const queryKey of [FRIENDS_QUERY_KEY, FRIEND_PROFILES_QUERY_KEY]) {
+            queryClient.setQueriesData<Friend[]>(
+                { queryKey },
+                (old): Friend[] | undefined => {
+                    if (!old) return old;
+                    return old.filter(
+                        (friend): boolean => friend.id !== friendId,
+                    );
+                },
+            );
+        }
     };
 
     const upsertChannel = (channel: Channel): void => {
@@ -1067,23 +1065,24 @@ export const setupGlobalWsHandlers = (
         wsClient.on<{ friendId: string; isPinned: boolean }>(
             WsEvents.FRIEND_PIN_UPDATED,
             (payload): void => {
-                [FRIENDS_QUERY_KEY, FRIEND_PROFILES_QUERY_KEY].forEach(
-                    (queryKey): void => {
-                        queryClient.setQueriesData<Friend[]>(
-                            { queryKey },
-                            (old): Friend[] | undefined =>
-                                old?.map(
-                                    (f): Friend =>
-                                        f.id === payload.friendId
-                                            ? {
-                                                  ...f,
-                                                  isPinned: payload.isPinned,
-                                              }
-                                            : f,
-                                ),
-                        );
-                    },
-                );
+                for (const queryKey of [
+                    FRIENDS_QUERY_KEY,
+                    FRIEND_PROFILES_QUERY_KEY,
+                ]) {
+                    queryClient.setQueriesData<Friend[]>(
+                        { queryKey },
+                        (old): Friend[] | undefined =>
+                            old?.map(
+                                (f): Friend =>
+                                    f.id === payload.friendId
+                                        ? {
+                                              ...f,
+                                              isPinned: payload.isPinned,
+                                          }
+                                        : f,
+                            ),
+                    );
+                }
             },
         ),
     );
@@ -1185,17 +1184,17 @@ export const setupGlobalWsHandlers = (
                     }),
                 );
                 if (payload.voiceStates) {
-                    Object.entries(payload.voiceStates).forEach(
-                        ([userId, state]): void => {
-                            dispatch(
-                                setVoiceUserState({
-                                    userId,
-                                    isMuted: state.isMuted,
-                                    isDeafened: state.isDeafened,
-                                }),
-                            );
-                        },
-                    );
+                    for (const [userId, state] of Object.entries(
+                        payload.voiceStates,
+                    )) {
+                        dispatch(
+                            setVoiceUserState({
+                                userId,
+                                isMuted: state.isMuted,
+                                isDeafened: state.isDeafened,
+                            }),
+                        );
+                    }
                 }
             },
         ),
@@ -1236,7 +1235,7 @@ export const setupGlobalWsHandlers = (
                     }),
                 );
 
-                if (currentUser && payload.username === currentUser.username) {
+                if (payload.username === currentUser?.username) {
                     queryClient.setQueryData<User>(['me'], (old) => {
                         if (!old) return old;
                         return {
@@ -1432,7 +1431,7 @@ export const setupGlobalWsHandlers = (
             WsEvents.USER_BANNER_UPDATED,
             (payload): void => {
                 void queryClient.invalidateQueries({ queryKey: ['user'] });
-                if (currentUser && payload.username === currentUser.username) {
+                if (payload.username === currentUser?.username) {
                     void queryClient.invalidateQueries({ queryKey: ['me'] });
                 }
 
@@ -1463,7 +1462,7 @@ export const setupGlobalWsHandlers = (
             WsEvents.DISPLAY_NAME_UPDATED,
             (payload): void => {
                 void queryClient.invalidateQueries({ queryKey: ['user'] });
-                if (currentUser && payload.username === currentUser.username) {
+                if (payload.username === currentUser?.username) {
                     void queryClient.invalidateQueries({ queryKey: ['me'] });
                 }
 
@@ -1540,7 +1539,7 @@ export const setupGlobalWsHandlers = (
                 void queryClient.invalidateQueries({
                     queryKey: SERVERS_QUERY_KEYS.members(payload.serverId),
                 });
-                if (currentUser && payload.userId === currentUser.id) {
+                if (payload.userId === currentUser?.id) {
                     void queryClient.invalidateQueries({ queryKey: ['me'] });
                     void queryClient.invalidateQueries({
                         queryKey: SERVERS_QUERY_KEYS.onboarding(
@@ -1556,7 +1555,7 @@ export const setupGlobalWsHandlers = (
         wsClient.on<IMemberAddedEvent>(
             WsEvents.MEMBER_ADDED,
             (payload): void => {
-                if (currentUser && payload.userId === currentUser.id) {
+                if (payload.userId === currentUser?.id) {
                     void queryClient.invalidateQueries({
                         queryKey: SERVERS_QUERY_KEYS.list,
                     });
@@ -1774,11 +1773,11 @@ export const setupGlobalWsHandlers = (
             WsEvents.SERVER_JOINED,
             (payload): void => {
                 if (payload.voiceStates) {
-                    Object.entries(
-                        payload.voiceStates as Record<string, string[]>,
-                    ).forEach(([channelId, userIds]): void => {
+                    for (const [channelId, userIds] of Object.entries(
+                        payload.voiceStates,
+                    )) {
                         dispatch(setVoiceParticipants({ channelId, userIds }));
-                    });
+                    }
                 }
             },
         ),
@@ -1877,7 +1876,7 @@ export const setupGlobalWsHandlers = (
                 void queryClient.invalidateQueries({
                     queryKey: SERVERS_QUERY_KEYS.members(payload.serverId),
                 });
-                if (currentUser && payload.userId === currentUser.id) {
+                if (payload.userId === currentUser?.id) {
                     void queryClient.invalidateQueries({
                         queryKey: SERVERS_QUERY_KEYS.list,
                     });
@@ -1915,9 +1914,9 @@ export const setupGlobalWsHandlers = (
                 payload.serverId,
                 payload.channelId,
             );
-            const currentData = queryClient.getQueryData(queryKey) as
-                | InfiniteData<ChatMessage[]>
-                | undefined;
+            const currentData = queryClient.getQueryData<
+                InfiniteData<ChatMessage[]>
+            >(queryKey);
 
             if (currentData?.pages) {
                 queryClient.setQueryData(queryKey, {
@@ -1958,10 +1957,10 @@ export const setupGlobalWsHandlers = (
             const queryKey1 = CHAT_QUERY_KEYS.userMessages(payload.senderId);
             const queryKey2 = CHAT_QUERY_KEYS.userMessages(payload.receiverId);
 
-            [queryKey1, queryKey2].forEach((queryKey): void => {
-                const currentData = queryClient.getQueryData(queryKey) as
-                    | InfiniteData<ChatMessage[]>
-                    | undefined;
+            for (const queryKey of [queryKey1, queryKey2]) {
+                const currentData = queryClient.getQueryData<
+                    InfiniteData<ChatMessage[]>
+                >(queryKey);
                 if (currentData?.pages) {
                     queryClient.setQueryData(queryKey, {
                         ...currentData,
@@ -1984,7 +1983,7 @@ export const setupGlobalWsHandlers = (
                         ),
                     });
                 }
-            });
+            }
         }),
     );
 
@@ -1997,7 +1996,7 @@ export const setupGlobalWsHandlers = (
     );
 
     return (): void => {
-        cleanups.forEach((cleanup): void => cleanup());
+        for (const cleanup of cleanups) cleanup();
     };
 };
 

@@ -54,7 +54,7 @@ const setMeta = (
 
     if (!element && createElement) {
         element = createElement();
-        document.head.appendChild(element);
+        document.head.append(element);
     }
 
     element?.setAttribute(attribute, value);

@@ -13,7 +13,9 @@ const resolveUrl = (
 
     const base =
         baseURL ||
-        (typeof window !== 'undefined' ? window.location.origin : undefined);
+        (globalThis.window === undefined
+            ? undefined
+            : globalThis.location.origin);
 
     return base ? new URL(url, base).toString() : url;
 };
@@ -22,22 +24,22 @@ const appendSearchParams = (url: string, params: unknown): string => {
     if (!params || typeof params !== 'object') return url;
 
     const searchParams = new URLSearchParams();
-    Object.entries(params as Record<string, unknown>).forEach(
-        ([key, value]): void => {
-            if (value === undefined || value === null) return;
+    for (const [key, value] of Object.entries(
+        params as Record<string, unknown>,
+    )) {
+        if (value === undefined || value === null) continue;
 
-            if (Array.isArray(value)) {
-                value.forEach((item): void => {
-                    if (item !== undefined && item !== null) {
-                        searchParams.append(key, String(item));
-                    }
-                });
-                return;
+        if (Array.isArray(value)) {
+            for (const item of value) {
+                if (item !== undefined && item !== null) {
+                    searchParams.append(key, String(item));
+                }
             }
+            continue;
+        }
 
-            searchParams.append(key, String(value));
-        },
-    );
+        searchParams.append(key, String(value));
+    }
 
     const queryParams = searchParams.toString();
     return queryParams

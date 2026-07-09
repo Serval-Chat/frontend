@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useReducer } from 'react';
 
 import { AnimatePresence, m } from 'framer-motion';
 import { Bell, Compass, Home, Plus, Settings, Telescope } from 'lucide-react';
@@ -58,6 +58,27 @@ const SettingsModalLoading = () => (
     </Box>
 );
 
+interface NavOverlayState {
+    showCreateServer: boolean;
+    showJoinServer: boolean;
+    showDiscovery: boolean;
+    showInbox: boolean;
+    settingsSectionOverride: string | null;
+}
+
+const INITIAL_NAV_OVERLAY: NavOverlayState = {
+    showCreateServer: false,
+    showJoinServer: false,
+    showDiscovery: false,
+    showInbox: false,
+    settingsSectionOverride: null,
+};
+
+const navOverlayReducer = (
+    state: NavOverlayState,
+    patch: Partial<NavOverlayState>,
+): NavOverlayState => ({ ...state, ...patch });
+
 export const PrimaryNavBar = () => {
     const { navMode, selectedFriendId, selectedChannelId } =
         useAppShallowSelector((state) => ({
@@ -78,13 +99,32 @@ export const PrimaryNavBar = () => {
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
     const location = useLocation();
-    const [showCreateServer, setShowCreateServer] = useState(false);
-    const [showJoinServer, setShowJoinServer] = useState(false);
-    const [showDiscovery, setShowDiscovery] = useState(false);
-    const [showInbox, setShowInbox] = useState(false);
-    const [settingsSectionOverride, setSettingsSectionOverride] = useState<
-        string | null
-    >(null);
+    const [overlay, patchOverlay] = useReducer(
+        navOverlayReducer,
+        INITIAL_NAV_OVERLAY,
+    );
+    const {
+        showCreateServer,
+        showJoinServer,
+        showDiscovery,
+        showInbox,
+        settingsSectionOverride,
+    } = overlay;
+    const setShowCreateServer = (v: boolean): void => {
+        patchOverlay({ showCreateServer: v });
+    };
+    const setShowJoinServer = (v: boolean): void => {
+        patchOverlay({ showJoinServer: v });
+    };
+    const setShowDiscovery = (v: boolean): void => {
+        patchOverlay({ showDiscovery: v });
+    };
+    const setShowInbox = (v: boolean): void => {
+        patchOverlay({ showInbox: v });
+    };
+    const setSettingsSectionOverride = (v: string | null): void => {
+        patchOverlay({ settingsSectionOverride: v });
+    };
 
     const showSettings = location.pathname.startsWith('/chat/@setting');
     const inSwipePanel = useMobileSwipeContext();
@@ -147,7 +187,9 @@ export const PrimaryNavBar = () => {
                     <IconButton
                         className="bg-bg-subtle text-green-500 hover:bg-bg-subtle-hover hover:text-green-400"
                         icon={Plus}
-                        onClick={(): void => setShowCreateServer(true)}
+                        onClick={(): void => {
+                            setShowCreateServer(true);
+                        }}
                     />
                 </Tooltip>
             </Box>
@@ -157,7 +199,9 @@ export const PrimaryNavBar = () => {
                     <IconButton
                         className="bg-bg-subtle text-text-subtle hover:bg-bg-subtle-hover hover:text-text-normal"
                         icon={Compass}
-                        onClick={(): void => setShowJoinServer(true)}
+                        onClick={(): void => {
+                            setShowJoinServer(true);
+                        }}
                     />
                 </Tooltip>
             </Box>
@@ -168,7 +212,9 @@ export const PrimaryNavBar = () => {
                         className="bg-bg-subtle text-text-subtle hover:bg-bg-subtle-hover hover:text-text-normal"
                         icon={Telescope}
                         isActive={showDiscovery}
-                        onClick={(): void => setShowDiscovery(true)}
+                        onClick={(): void => {
+                            setShowDiscovery(true);
+                        }}
                     />
                 </Tooltip>
             </Box>
@@ -181,12 +227,14 @@ export const PrimaryNavBar = () => {
                         badgeCount={pingCount}
                         icon={Bell}
                         isActive={showInbox}
-                        onClick={(): void => setShowInbox(!showInbox)}
+                        onClick={(): void => {
+                            setShowInbox(!showInbox);
+                        }}
                     />
                 </Tooltip>
 
                 <AnimatePresence>
-                    {showInbox && (
+                    {showInbox ? (
                         <m.div
                             animate={{ opacity: 1, x: 0, scale: 1 }}
                             className="absolute bottom-0 left-[calc(100%+12px)] z-[var(--z-index-popover)] origin-bottom-left"
@@ -196,11 +244,13 @@ export const PrimaryNavBar = () => {
                         >
                             <React.Suspense fallback={null}>
                                 <PingInbox
-                                    onClose={(): void => setShowInbox(false)}
+                                    onClose={(): void => {
+                                        setShowInbox(false);
+                                    }}
                                 />
                             </React.Suspense>
                         </m.div>
-                    )}
+                    ) : null}
                 </AnimatePresence>
             </Box>
 
@@ -210,7 +260,7 @@ export const PrimaryNavBar = () => {
                 </Tooltip>
             </Box>
 
-            {showSettings && (
+            {showSettings ? (
                 <React.Suspense fallback={<SettingsModalLoading />}>
                     <SettingsModal
                         isOpen={showSettings}
@@ -218,35 +268,41 @@ export const PrimaryNavBar = () => {
                         onClose={handleCloseSettings}
                     />
                 </React.Suspense>
-            )}
-            {showCreateServer && (
+            ) : null}
+            {showCreateServer ? (
                 <React.Suspense fallback={null}>
                     <CreateServerModal
                         isOpen={showCreateServer}
-                        onClose={(): void => setShowCreateServer(false)}
+                        onClose={(): void => {
+                            setShowCreateServer(false);
+                        }}
                         onSwitchToJoin={(): void => {
                             setShowCreateServer(false);
                             setShowJoinServer(true);
                         }}
                     />
                 </React.Suspense>
-            )}
-            {showJoinServer && (
+            ) : null}
+            {showJoinServer ? (
                 <React.Suspense fallback={null}>
                     <JoinServerModal
                         isOpen={showJoinServer}
-                        onClose={(): void => setShowJoinServer(false)}
+                        onClose={(): void => {
+                            setShowJoinServer(false);
+                        }}
                     />
                 </React.Suspense>
-            )}
-            {showDiscovery && (
+            ) : null}
+            {showDiscovery ? (
                 <React.Suspense fallback={null}>
                     <ServerDiscoveryModal
                         isOpen={showDiscovery}
-                        onClose={(): void => setShowDiscovery(false)}
+                        onClose={(): void => {
+                            setShowDiscovery(false);
+                        }}
                     />
                 </React.Suspense>
-            )}
+            ) : null}
         </Box>
     );
 };

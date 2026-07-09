@@ -51,7 +51,7 @@ export const Link = ({
         return (
             <RouterLink
                 className={cn(baseClass, sizeClass, className)}
-                to={to!}
+                to={to}
                 onClick={onClick}
                 // eslint-disable-next-line react/jsx-props-no-spreading
                 {...(props as Omit<
@@ -77,9 +77,9 @@ export const Link = ({
             try {
                 const parsed = new URL(targetUrl);
                 const currentHostname =
-                    typeof window !== 'undefined'
-                        ? window.location.hostname
-                        : '';
+                    globalThis.window === undefined
+                        ? ''
+                        : globalThis.location.hostname;
 
                 if (
                     (currentHostname && parsed.hostname === currentHostname) ||
@@ -128,14 +128,16 @@ export const Link = ({
                 {children}
             </a>
 
-            {isExternal && (
+            {isExternal ? (
                 <ConfirmLinkModal
                     isOpen={isModalOpen}
                     url={targetUrl}
-                    onClose={(): void => setIsModalOpen(false)}
+                    onClose={(): void => {
+                        setIsModalOpen(false);
+                    }}
                     onConfirm={handleConfirm}
                 />
-            )}
+            ) : null}
         </>
     );
 };

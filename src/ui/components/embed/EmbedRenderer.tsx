@@ -136,7 +136,9 @@ const EmbedImage = memo(
                         className,
                     )}
                     type="button"
-                    onClick={(): void => setIsLightboxOpen(true)}
+                    onClick={(): void => {
+                        setIsLightboxOpen(true);
+                    }}
                 >
                     <img
                         alt={alt}
@@ -152,7 +154,9 @@ const EmbedImage = memo(
                     alt={alt}
                     isOpen={isLightboxOpen}
                     src={src}
-                    onClose={(): void => setIsLightboxOpen(false)}
+                    onClose={(): void => {
+                        setIsLightboxOpen(false);
+                    }}
                 />
             </>
         );
@@ -207,7 +211,10 @@ const EmbedCard = memo(
             fields: typeof embed.fields;
             inline: boolean;
         }[] => {
-            type FieldRow = { fields: typeof embed.fields; inline: boolean };
+            interface FieldRow {
+                fields: typeof embed.fields;
+                inline: boolean;
+            }
             const rows: FieldRow[] = [];
             if (embed.fields) {
                 let currentRow: NonNullable<typeof embed.fields> = [];
@@ -288,7 +295,7 @@ const EmbedCard = memo(
                             </p>
 
                             {/* Title */}
-                            {embed.title && (
+                            {embed.title ? (
                                 <p
                                     className={cn(
                                         'mb-0.5 text-sm font-semibold',
@@ -308,10 +315,10 @@ const EmbedCard = memo(
                                         embed.title
                                     )}
                                 </p>
-                            )}
+                            ) : null}
 
                             {/* Author / channel */}
-                            {embed.author?.name && (
+                            {embed.author?.name ? (
                                 <p
                                     className={cn(
                                         'mb-2 text-xs',
@@ -331,7 +338,7 @@ const EmbedCard = memo(
                                         embed.author.name
                                     )}
                                 </p>
-                            )}
+                            ) : null}
                         </div>
 
                         <div
@@ -413,7 +420,7 @@ const EmbedCard = memo(
                     )}
                 >
                     {/* Provider */}
-                    {embed.provider?.name && (
+                    {embed.provider?.name ? (
                         <p
                             className={cn(
                                 'mb-0.5 text-xs',
@@ -449,12 +456,12 @@ const EmbedCard = memo(
                                 />
                             )}
                         </p>
-                    )}
+                    ) : null}
 
                     {/* Author */}
-                    {embed.author?.name && (
+                    {embed.author?.name ? (
                         <div className="mb-2 flex items-center gap-2">
-                            {embed.author.icon_url && (
+                            {embed.author.icon_url ? (
                                 <img
                                     alt=""
                                     className="h-6 w-6 rounded-full object-cover"
@@ -462,7 +469,7 @@ const EmbedCard = memo(
                                     loading="eager"
                                     src={authorIconUrl}
                                 />
-                            )}
+                            ) : null}
                             <span
                                 className={cn(
                                     'text-sm font-semibold',
@@ -501,13 +508,13 @@ const EmbedCard = memo(
                                 )}
                             </span>
                         </div>
-                    )}
+                    ) : null}
 
                     {/* Title + thumbnail side-by-side */}
                     <div className="flex items-start gap-4">
                         <div className="flex-1">
                             {/* Title */}
-                            {embed.title && (
+                            {embed.title ? (
                                 <p
                                     className={cn(
                                         'mb-1 text-base font-semibold',
@@ -549,10 +556,10 @@ const EmbedCard = memo(
                                         />
                                     )}
                                 </p>
-                            )}
+                            ) : null}
 
                             {/* Description */}
-                            {embed.description && (
+                            {embed.description ? (
                                 <div
                                     className="mb-2 text-sm leading-relaxed"
                                     style={{ display: 'flow-root' }}
@@ -569,10 +576,10 @@ const EmbedCard = memo(
                                         onResize={onResize}
                                     />
                                 </div>
-                            )}
+                            ) : null}
 
                             {/* Fields */}
-                            {fieldRows.length > 0 && (
+                            {fieldRows.length > 0 ? (
                                 <div className="mt-2 flex flex-col gap-2">
                                     {fieldRows.map((row) => (
                                         <div
@@ -643,11 +650,11 @@ const EmbedCard = memo(
                                         </div>
                                     ))}
                                 </div>
-                            )}
+                            ) : null}
                         </div>
 
                         {/* Thumbnail */}
-                        {embed.thumbnail?.url && (
+                        {embed.thumbnail?.url ? (
                             <EmbedImage
                                 alt={embed.title || 'Thumbnail'}
                                 className="ml-auto block shrink-0"
@@ -658,11 +665,11 @@ const EmbedCard = memo(
                                 src={thumbnailUrl}
                                 onResize={onResize}
                             />
-                        )}
+                        ) : null}
                     </div>
 
                     {/* Large image */}
-                    {embed.image?.url && (
+                    {embed.image?.url ? (
                         <EmbedImage
                             alt={embed.title || 'Image'}
                             className="mt-3 block"
@@ -673,12 +680,12 @@ const EmbedCard = memo(
                             src={imageUrl}
                             onResize={onResize}
                         />
-                    )}
+                    ) : null}
 
                     {/* Footer */}
-                    {(embed.footer?.text ?? embed.timestamp) && (
+                    {(embed.footer?.text ?? embed.timestamp) ? (
                         <div className="mt-3 flex items-center gap-2">
-                            {embed.footer?.icon_url && (
+                            {embed.footer?.icon_url ? (
                                 <img
                                     alt=""
                                     className={cn(
@@ -689,7 +696,7 @@ const EmbedCard = memo(
                                     loading="eager"
                                     src={footerIconUrl}
                                 />
-                            )}
+                            ) : null}
                             <div
                                 className={cn(
                                     'text-xs',
@@ -710,7 +717,7 @@ const EmbedCard = memo(
                                 />
                             </div>
                         </div>
-                    )}
+                    ) : null}
                 </div>
             </div>
         );
@@ -875,7 +882,7 @@ export const EmbedRenderer = ({
                 return;
             }
 
-            const buttonKey = `${button.custom_id}`;
+            const buttonKey = button.custom_id;
             setPendingButtonKey(buttonKey);
             try {
                 await interactionsApi.createComponentInteraction({
@@ -941,7 +948,7 @@ export const EmbedRenderer = ({
             )}
         >
             {/* Message content */}
-            {payload.content && (
+            {payload.content ? (
                 <div
                     className="mb-1 text-sm leading-relaxed"
                     style={{ display: 'flow-root' }}
@@ -955,7 +962,7 @@ export const EmbedRenderer = ({
                         onResize={onResize}
                     />
                 </div>
-            )}
+            ) : null}
 
             {/* Embeds */}
             {payload.embeds?.map((embed) => (
@@ -984,7 +991,7 @@ export const EmbedRenderer = ({
             />
 
             {/* Poll preview */}
-            {shouldRenderPollPreview && payload.poll && (
+            {shouldRenderPollPreview && payload.poll ? (
                 <div
                     className={cn(
                         'mt-2 max-w-[520px] overflow-hidden rounded-lg border border-border-subtle bg-embed-bg',
@@ -996,15 +1003,15 @@ export const EmbedRenderer = ({
                         <span className="mb-1 inline-flex items-center gap-1.5 rounded-full border border-border-subtle bg-bg-subtle px-2.5 py-0.5 text-[10px] font-semibold tracking-widest text-muted-foreground uppercase">
                             Poll
                         </span>
-                        {payload.poll.question.trim() && (
+                        {payload.poll.question.trim() ? (
                             <p className="mt-2 text-base leading-snug font-semibold text-foreground">
                                 {payload.poll.question}
                             </p>
-                        )}
+                        ) : null}
                     </div>
 
                     {/* Answers */}
-                    {visiblePollAnswers.length > 0 && (
+                    {visiblePollAnswers.length > 0 ? (
                         <ul className="flex flex-col gap-1.5 px-4 pb-3">
                             {visiblePollAnswers.map((answer) => (
                                 <li key={`answer-${answer.text}`}>
@@ -1015,9 +1022,9 @@ export const EmbedRenderer = ({
                                         <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2 border-border-subtle">
                                             <span className="h-1.5 w-1.5 rounded-full" />
                                         </span>
-                                        {answer.emoji?.name && (
+                                        {answer.emoji?.name ? (
                                             <span>{answer.emoji.name}</span>
-                                        )}
+                                        ) : null}
                                         <span className="flex-1">
                                             {answer.text}
                                         </span>
@@ -1025,24 +1032,24 @@ export const EmbedRenderer = ({
                                 </li>
                             ))}
                         </ul>
-                    )}
+                    ) : null}
 
                     {/* Footer meta */}
                     <div className="flex flex-wrap items-center gap-2 border-t border-border-subtle px-4 py-2.5">
                         <span className="text-xs text-muted-foreground">
                             {payload.poll.duration}h
                         </span>
-                        {payload.poll.allow_multiselect && (
+                        {payload.poll.allow_multiselect ? (
                             <span className="rounded-full bg-bg-subtle px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
                                 Can select multiple
                             </span>
-                        )}
+                        ) : null}
                         <span className="ml-auto text-[10px] text-muted-foreground">
                             0 votes · poll not started
                         </span>
                     </div>
                 </div>
-            )}
+            ) : null}
         </div>
     );
 };

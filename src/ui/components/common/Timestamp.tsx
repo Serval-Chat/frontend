@@ -91,7 +91,7 @@ const formatTimestamp = (
 
     switch (flag) {
         case undefined:
-        case 'f':
+        case 'f': {
             return date.toLocaleString(APP_LOCALE, {
                 day: 'numeric',
                 month: 'long',
@@ -99,30 +99,35 @@ const formatTimestamp = (
                 hour: 'numeric',
                 minute: '2-digit',
             });
-        case 't':
+        }
+        case 't': {
             return date.toLocaleTimeString(APP_LOCALE, {
                 hour: 'numeric',
                 minute: '2-digit',
             });
-        case 'T':
+        }
+        case 'T': {
             return date.toLocaleTimeString(APP_LOCALE, {
                 hour: 'numeric',
                 minute: '2-digit',
                 second: '2-digit',
             });
-        case 'd':
+        }
+        case 'd': {
             return date.toLocaleDateString(APP_LOCALE, {
                 day: 'numeric',
                 month: 'numeric',
                 year: 'numeric',
             });
-        case 'D':
+        }
+        case 'D': {
             return date.toLocaleDateString(APP_LOCALE, {
                 day: 'numeric',
                 month: 'long',
                 year: 'numeric',
             });
-        case 'F':
+        }
+        case 'F': {
             return date.toLocaleString(APP_LOCALE, {
                 weekday: 'long',
                 day: 'numeric',
@@ -131,8 +136,10 @@ const formatTimestamp = (
                 hour: 'numeric',
                 minute: '2-digit',
             });
-        case 'R':
+        }
+        case 'R': {
             return formatRelativeTime(date, now);
+        }
     }
 };
 
@@ -153,11 +160,12 @@ export const Timestamp = ({ timestamp, flag }: TimestampProps) => {
     React.useEffect((): (() => void) | undefined => {
         if (flag !== 'R') return undefined;
 
-        const interval = window.setInterval(
-            (): void => setNow(Date.now()),
-            30_000,
-        );
-        return (): void => window.clearInterval(interval);
+        const interval = globalThis.setInterval((): void => {
+            setNow(Date.now());
+        }, 30_000);
+        return (): void => {
+            globalThis.clearInterval(interval);
+        };
     }, [flag]);
 
     return (

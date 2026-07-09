@@ -66,9 +66,9 @@ export const FriendList = () => {
                         isActive={selectedFriendId === String(friend.id)}
                         key={String(friend.id)}
                         userId={String(friend.id)}
-                        onClick={(): void =>
-                            handleFriendClick(String(friend.id))
-                        }
+                        onClick={(): void => {
+                            handleFriendClick(String(friend.id));
+                        }}
                     />
                 ))
             )}

@@ -16,7 +16,7 @@ import type {
     UserSettings,
 } from './users.types';
 
-export const useMe = (): UseQueryResult<User, Error> =>
+export const useMe = (): UseQueryResult<User> =>
     useQuery({
         queryKey: ['me'],
         queryFn: usersApi.getMe,
@@ -28,7 +28,7 @@ const isValidUserId = (id: string): boolean => /^\d{19}$/.test(id);
 export const useUserById = (
     id: string,
     options: { enabled?: boolean } = {},
-): UseQueryResult<User, Error> =>
+): UseQueryResult<User> =>
     useQuery({
         queryKey: ['user', id],
         queryFn: (): Promise<User> => usersApi.getById(id),

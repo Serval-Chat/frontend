@@ -36,25 +36,38 @@ interface LogEntryProps {
     log: AuditLog;
 }
 
+// Make it human readable
+const formatActionType = (type: string): string =>
+    type
+        .split('_')
+        .map((word): string => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+
+const formatLogUser = (
+    user: AuditLog['actorId'] | AuditLog['targetUserId'],
+): string => {
+    if (user === undefined || user === '') return 'Unknown';
+    if (typeof user === 'string') return user;
+    if (user.username !== '') return user.username;
+    if (user.id !== '') return user.id;
+    return 'Unknown';
+};
+
+const getActionBadgeClass = (actionType: string): string => {
+    const lower = actionType.toLowerCase();
+    if (lower.includes('delete') || lower.includes('ban')) {
+        return 'bg-danger/10 text-danger';
+    }
+    if (lower.includes('warn')) {
+        return 'bg-caution/10 text-caution';
+    }
+    return 'bg-primary/10 text-primary';
+};
+
 const LogEntry = ({ log }: LogEntryProps): ReactNode => {
     const [isExpanded, setIsExpanded] = useState(false);
     const hasData =
         log.additionalData && Object.keys(log.additionalData).length > 0;
-
-    // Make it human readable
-    const formatActionType = (type: string): string =>
-        type
-            .split('_')
-            .map((word): string => word.charAt(0).toUpperCase() + word.slice(1))
-            .join(' ');
-
-    const renderUser = (
-        user: AuditLog['actorId'] | AuditLog['targetUserId'],
-    ): string => {
-        if (!user) return 'Unknown';
-        if (typeof user === 'string') return user;
-        return user.username || user.id || 'Unknown';
-    };
 
     const date = new Date(log.timestamp);
 
@@ -66,9 +79,11 @@ const LogEntry = ({ log }: LogEntryProps): ReactNode => {
                     !hasData && 'cursor-default',
                     isExpanded && 'bg-bg-secondary',
                 )}
-                onClick={(): false | void | undefined =>
-                    hasData && setIsExpanded(!isExpanded)
-                }
+                onClick={(): void => {
+                    if (hasData) {
+                        setIsExpanded(!isExpanded);
+                    }
+                }}
             >
                 {/* Timestamp */}
                 <TableCell>
@@ -101,7 +116,7 @@ const LogEntry = ({ log }: LogEntryProps): ReactNode => {
                             }
                             weight="medium"
                         >
-                            {renderUser(log.actorId)}
+                            {formatLogUser(log.actorId)}
                         </Text>
                     </div>
                 </TableCell>
@@ -112,17 +127,7 @@ const LogEntry = ({ log }: LogEntryProps): ReactNode => {
                         <div
                             className={cn(
                                 'rounded-full px-2.5 py-0.5 text-xs font-bold tracking-wider whitespace-nowrap uppercase',
-                                log.actionType.toLowerCase().includes('delete')
-                                    ? 'bg-danger/10 text-danger'
-                                    : log.actionType
-                                            .toLowerCase()
-                                            .includes('ban')
-                                      ? 'bg-danger/10 text-danger'
-                                      : log.actionType
-                                              .toLowerCase()
-                                              .includes('warn')
-                                        ? 'bg-caution/10 text-caution'
-                                        : 'bg-primary/10 text-primary',
+                                getActionBadgeClass(log.actionType),
                             )}
                         >
                             {formatActionType(log.actionType)}
@@ -133,7 +138,8 @@ const LogEntry = ({ log }: LogEntryProps): ReactNode => {
                 {/* Target */}
                 <TableCell>
                     <div className="flex items-center gap-2 overflow-hidden text-sm text-muted-foreground">
-                        {log.targetUserId ? (
+                        {log.targetUserId !== undefined &&
+                        log.targetUserId !== '' ? (
                             <>
                                 <Text
                                     as="span"
@@ -152,7 +158,7 @@ const LogEntry = ({ log }: LogEntryProps): ReactNode => {
                                             : log.targetUserId
                                     }
                                 >
-                                    {renderUser(log.targetUserId)}
+                                    {formatLogUser(log.targetUserId)}
                                 </Text>
                             </>
                         ) : (
@@ -170,18 +176,19 @@ const LogEntry = ({ log }: LogEntryProps): ReactNode => {
                 {/* Expand Toggle */}
                 <TableCell align="right">
                     <div className="flex justify-end text-muted-foreground">
-                        {hasData &&
-                            (isExpanded ? (
+                        {hasData ? (
+                            isExpanded ? (
                                 <ChevronUp size={18} />
                             ) : (
                                 <ChevronDown size={18} />
-                            ))}
+                            )
+                        ) : null}
                     </div>
                 </TableCell>
             </TableRow>
 
             {/* Expanded Content */}
-            {isExpanded && hasData && (
+            {isExpanded && hasData ? (
                 <TableRow className="bg-bg-secondary hover:bg-bg-secondary">
                     <TableCell colSpan={5}>
                         <div className="animate-in fade-in slide-in-from-top-2 px-6 py-4 duration-300">
@@ -208,7 +215,7 @@ const LogEntry = ({ log }: LogEntryProps): ReactNode => {
                         </div>
                     </TableCell>
                 </TableRow>
-            )}
+            ) : null}
         </>
     );
 };
@@ -262,12 +269,12 @@ export const AdminAuditLogs = (): ReactNode => {
                             className="transition-focus w-full cursor-pointer appearance-none rounded-xl border border-border-subtle bg-background py-2.5 pr-10 pl-4 text-sm outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10"
                             id="admin-select"
                             value={filters.actorId}
-                            onChange={(e): void =>
+                            onChange={(e): void => {
                                 setFilters((prev) => ({
                                     ...prev,
                                     actorId: e.target.value,
-                                }))
-                            }
+                                }));
+                            }}
                         >
                             <option value="">All Administrators</option>
                             {admins?.map((admin) => (
@@ -297,12 +304,12 @@ export const AdminAuditLogs = (): ReactNode => {
                             className="transition-focus w-full cursor-pointer appearance-none rounded-xl border border-border-subtle bg-background py-2.5 pr-10 pl-4 text-sm outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10"
                             id="action-select"
                             value={filters.actionType}
-                            onChange={(e): void =>
+                            onChange={(e): void => {
                                 setFilters((prev) => ({
                                     ...prev,
                                     actionType: e.target.value,
-                                }))
-                            }
+                                }));
+                            }}
                         >
                             <option value="">All Actions</option>
                             <option value="ban_user">Ban User</option>
@@ -339,12 +346,12 @@ export const AdminAuditLogs = (): ReactNode => {
                         variant="admin"
                         onChange={(
                             e: React.ChangeEvent<HTMLInputElement>,
-                        ): void =>
+                        ): void => {
                             setFilters((prev) => ({
                                 ...prev,
                                 targetUserId: e.target.value,
-                            }))
-                        }
+                            }));
+                        }}
                     />
                 </div>
             </div>
@@ -388,7 +395,7 @@ export const AdminAuditLogs = (): ReactNode => {
             </Table>
 
             {/* Pagination Placeholder */}
-            {logs.length > 0 && (
+            {logs.length > 0 ? (
                 <div className="flex items-center justify-between rounded-2xl border border-border-subtle bg-bg-subtle px-6 py-4">
                     <Text as="span" size="xs" variant="muted">
                         Showing latest {logs.length} entries
@@ -398,43 +405,34 @@ export const AdminAuditLogs = (): ReactNode => {
                             disabled={filters.offset === 0}
                             size="sm"
                             variant="normal"
-                            onClick={(): void =>
+                            onClick={(): void => {
                                 setFilters((prev) => ({
                                     ...prev,
                                     offset: Math.max(
                                         0,
-                                        (prev.offset || 0) -
-                                            (prev.limit ||
-                                                ADMIN_CONSTANTS.MAX_AUDIT_LOGS_PAGE_SIZE),
+                                        prev.offset - prev.limit,
                                     ),
-                                }))
-                            }
+                                }));
+                            }}
                         >
                             Previous
                         </Button>
                         <Button
-                            disabled={
-                                logs.length <
-                                (filters.limit ||
-                                    ADMIN_CONSTANTS.MAX_AUDIT_LOGS_PAGE_SIZE)
-                            }
+                            disabled={logs.length < filters.limit}
                             size="sm"
                             variant="normal"
-                            onClick={(): void =>
+                            onClick={(): void => {
                                 setFilters((prev) => ({
                                     ...prev,
-                                    offset:
-                                        (prev.offset || 0) +
-                                        (prev.limit ||
-                                            ADMIN_CONSTANTS.MAX_AUDIT_LOGS_PAGE_SIZE),
-                                }))
-                            }
+                                    offset: prev.offset + prev.limit,
+                                }));
+                            }}
                         >
                             Next
                         </Button>
                     </div>
                 </div>
-            )}
+            ) : null}
         </div>
     );
 };

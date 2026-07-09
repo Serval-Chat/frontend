@@ -75,9 +75,9 @@ const hueToRgb = (h: number): [number, number, number] => {
 };
 
 const renderGame = (state: GameState): string => {
-    let output = '\x1b[1;32mSnek Game\x1b[0m\n';
-    output += '\x1b[1;36m' + '='.repeat(BOARD_WIDTH) + '\x1b[0m\n';
-    output += `\x1b[1;33mScore: ${state.score}\x1b[0m\n\n`;
+    let output = '\u001B[1;32mSnek Game\u001B[0m\n';
+    output += '\u001B[1;36m' + '='.repeat(BOARD_WIDTH) + '\u001B[0m\n';
+    output += `\u001B[1;33mScore: ${state.score}\u001B[0m\n\n`;
 
     for (let y = 0; y < BOARD_HEIGHT; y++) {
         for (let x = 0; x < BOARD_WIDTH; x++) {
@@ -88,11 +88,11 @@ const renderGame = (state: GameState): string => {
             const isHead = state.snake[0]?.x === x && state.snake[0]?.y === y;
 
             if (isHead) {
-                output += '\x1b[1;32m@\x1b[0m';
+                output += '\u001B[1;32m@\u001B[0m';
             } else if (isSnake) {
-                output += '\x1b[32mo\x1b[0m';
+                output += '\u001B[32mo\u001B[0m';
             } else if (isFood) {
-                output += '\x1b[1;31m*\x1b[0m';
+                output += '\u001B[1;31m*\u001B[0m';
             } else {
                 const hue =
                     (Math.sin(x * 0.4 + frameCount * 0.12) +
@@ -101,19 +101,19 @@ const renderGame = (state: GameState): string => {
                         60 +
                     180;
                 const [r, g, b] = hueToRgb(hue);
-                output += `\x1b[38;2;${r};${g};${b}m.\x1b[0m`;
+                output += `\u001B[38;2;${r};${g};${b}m.\u001B[0m`;
             }
         }
         output += '\n';
     }
 
     output += '\n';
-    output += '\x1b[1;36m' + '='.repeat(BOARD_WIDTH) + '\x1b[0m\n';
-    output += '\x1b[1;37mArrow Keys: Move | Q: Quit\x1b[0m\n';
+    output += '\u001B[1;36m' + '='.repeat(BOARD_WIDTH) + '\u001B[0m\n';
+    output += '\u001B[1;37mArrow Keys: Move | Q: Quit\u001B[0m\n';
 
     if (state.gameOver) {
-        output += '\n\x1b[1;31mGAME OVER!\x1b[0m\n';
-        output += `\x1b[1;33mFinal Score: ${state.score}\x1b[0m\n`;
+        output += '\n\u001B[1;31mGAME OVER!\u001B[0m\n';
+        output += `\u001B[1;33mFinal Score: ${state.score}\u001B[0m\n`;
     }
 
     return output;
@@ -136,9 +136,14 @@ const moveSnake = (state: GameState): GameState => {
         // discard invalid (180°) inputs and try the next buffered one
     }
 
+    const currentHead = state.snake[0];
+    if (!currentHead) {
+        return state;
+    }
+
     const head = {
-        x: state.snake[0].x + currentDirection.x,
-        y: state.snake[0].y + currentDirection.y,
+        x: currentHead.x + currentDirection.x,
+        y: currentHead.y + currentDirection.y,
     };
 
     if (
@@ -203,7 +208,7 @@ const stopGame = (): void => {
         gameInterval = null;
     }
     if (keyListener) {
-        window.removeEventListener('keydown', keyListener);
+        globalThis.removeEventListener('keydown', keyListener);
         keyListener = null;
     }
 };
@@ -231,73 +236,66 @@ export const snakeCommand: ConCommandReactor = {
             if (!gameState || gameState.gameOver) return;
 
             switch (e.key) {
-                case 'ArrowUp':
+                case 'ArrowUp': {
                     e.preventDefault();
                     if (gameState.directionBuffer.length < 3) {
                         const lastBuffered =
-                            gameState.directionBuffer.length > 0
-                                ? gameState.directionBuffer[
-                                      gameState.directionBuffer.length - 1
-                                  ]
-                                : gameState.direction;
+                            gameState.directionBuffer.at(-1) ??
+                            gameState.direction;
                         if (!(lastBuffered.x === 0 && lastBuffered.y === 1)) {
                             gameState.directionBuffer.push({ x: 0, y: -1 });
                         }
                     }
                     break;
-                case 'ArrowDown':
+                }
+                case 'ArrowDown': {
                     e.preventDefault();
                     if (gameState.directionBuffer.length < 3) {
                         const lastBuffered =
-                            gameState.directionBuffer.length > 0
-                                ? gameState.directionBuffer[
-                                      gameState.directionBuffer.length - 1
-                                  ]
-                                : gameState.direction;
+                            gameState.directionBuffer.at(-1) ??
+                            gameState.direction;
                         if (!(lastBuffered.x === 0 && lastBuffered.y === -1)) {
                             gameState.directionBuffer.push({ x: 0, y: 1 });
                         }
                     }
                     break;
-                case 'ArrowLeft':
+                }
+                case 'ArrowLeft': {
                     e.preventDefault();
                     if (gameState.directionBuffer.length < 3) {
                         const lastBuffered =
-                            gameState.directionBuffer.length > 0
-                                ? gameState.directionBuffer[
-                                      gameState.directionBuffer.length - 1
-                                  ]
-                                : gameState.direction;
+                            gameState.directionBuffer.at(-1) ??
+                            gameState.direction;
                         if (!(lastBuffered.x === 1 && lastBuffered.y === 0)) {
                             gameState.directionBuffer.push({ x: -1, y: 0 });
                         }
                     }
                     break;
-                case 'ArrowRight':
+                }
+                case 'ArrowRight': {
                     e.preventDefault();
                     if (gameState.directionBuffer.length < 3) {
                         const lastBuffered =
-                            gameState.directionBuffer.length > 0
-                                ? gameState.directionBuffer[
-                                      gameState.directionBuffer.length - 1
-                                  ]
-                                : gameState.direction;
+                            gameState.directionBuffer.at(-1) ??
+                            gameState.direction;
                         if (!(lastBuffered.x === -1 && lastBuffered.y === 0)) {
                             gameState.directionBuffer.push({ x: 1, y: 0 });
                         }
                     }
                     break;
+                }
                 case 'q':
-                case 'Q':
+                case 'Q': {
                     stopGame();
                     gameState = null;
                     context.writeLine?.('\nGame exited.');
                     e.preventDefault();
                     break;
+                }
             }
         };
 
-        window.addEventListener('keydown', keyListener);
+        globalThis.addEventListener('keydown', keyListener);
 
         // Game loop
         gameInterval = setInterval((): void => {

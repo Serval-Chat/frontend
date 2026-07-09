@@ -5,10 +5,10 @@ import type {
 import type { DosFileSystem } from '@/console/DosFileSystem';
 import type { Terminal } from '@/console/Terminal';
 
-const RESET = '\u001b[0m';
-const CURSOR = '\u001b[30;107m';
-const TITLE = '\u001b[30;47m';
-const STATUS = '\u001b[37;44m';
+const RESET = '\u001B[0m';
+const CURSOR = '\u001B[30;107m';
+const TITLE = '\u001B[30;47m';
+const STATUS = '\u001B[37;44m';
 
 const clamp = (value: number, min: number, max: number): number =>
     Math.max(min, Math.min(max, value));
@@ -76,55 +76,70 @@ export class DosEditorProgram implements ConsoleProgram {
         }
 
         switch (event.key) {
-            case 'ArrowUp':
+            case 'ArrowUp': {
                 this.moveVertical(-1);
                 break;
-            case 'ArrowDown':
+            }
+            case 'ArrowDown': {
                 this.moveVertical(1);
                 break;
-            case 'ArrowLeft':
+            }
+            case 'ArrowLeft': {
                 this.moveLeft();
                 break;
-            case 'ArrowRight':
+            }
+            case 'ArrowRight': {
                 this.moveRight();
                 break;
-            case 'Home':
+            }
+            case 'Home': {
                 this.cursorColumn = 0;
                 this.preferredColumn = this.cursorColumn;
                 break;
-            case 'End':
+            }
+            case 'End': {
                 this.cursorColumn = this.currentLine().length;
                 this.preferredColumn = this.cursorColumn;
                 break;
-            case 'PageUp':
+            }
+            case 'PageUp': {
                 this.moveVertical(-this.visibleRows());
                 break;
-            case 'PageDown':
+            }
+            case 'PageDown': {
                 this.moveVertical(this.visibleRows());
                 break;
-            case 'Enter':
+            }
+            case 'Enter': {
                 this.insertNewLine();
                 break;
-            case 'Backspace':
+            }
+            case 'Backspace': {
                 this.backspace();
                 break;
-            case 'Delete':
+            }
+            case 'Delete': {
                 this.deleteForward();
                 break;
-            case 'Escape':
+            }
+            case 'Escape': {
                 this.exit();
                 break;
-            case 'F10':
+            }
+            case 'F10': {
                 this.exit();
                 break;
-            case 'F1':
+            }
+            case 'F1': {
                 this.statusMessage =
                     'Arrows move  Enter splits  Backspace/Delete remove  Ctrl+S saves  F10/Ctrl+W exits';
                 break;
-            default:
+            }
+            default: {
                 if (event.key.length === 1 && !event.ctrlKey && !event.altKey) {
                     this.insertText(event.key);
                 }
+            }
         }
 
         this.ensureCursorVisible();
@@ -139,8 +154,9 @@ export class DosEditorProgram implements ConsoleProgram {
                 line.slice(this.cursorColumn);
             this.cursorColumn--;
         } else if (this.cursorRow > 0) {
-            const previousLength = this.lines[this.cursorRow - 1].length;
-            this.lines[this.cursorRow - 1] += this.currentLine();
+            const previousLine = this.lines[this.cursorRow - 1] ?? '';
+            const previousLength = previousLine.length;
+            this.lines[this.cursorRow - 1] = previousLine + this.currentLine();
             this.lines.splice(this.cursorRow, 1);
             this.cursorRow--;
             this.cursorColumn = previousLength;
@@ -160,7 +176,9 @@ export class DosEditorProgram implements ConsoleProgram {
                 line.slice(this.cursorColumn + 1);
             this.markDirty();
         } else if (this.cursorRow < this.lines.length - 1) {
-            this.lines[this.cursorRow] += this.lines[this.cursorRow + 1];
+            this.lines[this.cursorRow] =
+                (this.lines[this.cursorRow] ?? '') +
+                (this.lines[this.cursorRow + 1] ?? '');
             this.lines.splice(this.cursorRow + 1, 1);
             this.markDirty();
         }
@@ -177,7 +195,7 @@ export class DosEditorProgram implements ConsoleProgram {
     }
 
     private finish(): void {
-        this.terminal.write('\u001b[2J\u001b[H');
+        this.terminal.write('\u001B[2J\u001B[H');
         this.onExit();
     }
 
@@ -265,7 +283,7 @@ export class DosEditorProgram implements ConsoleProgram {
         const bodyRows = Math.max(1, height - 3);
 
         this.ensureCursorVisible();
-        this.terminal.write('\u001b[2J\u001b[H');
+        this.terminal.write('\u001B[2J\u001B[H');
         this.writeAt(
             1,
             1,
@@ -347,6 +365,6 @@ export class DosEditorProgram implements ConsoleProgram {
     }
 
     private writeAt(row: number, column: number, text: string): void {
-        this.terminal.write(`\u001b[${row};${column}H${text}`);
+        this.terminal.write(`\u001B[${row};${column}H${text}`);
     }
 }

@@ -15,7 +15,7 @@ export const COMMANDS_QUERY_KEYS = {
 
 export const useServerCommands = (
     serverId: string | null,
-): UseQueryResult<SlashCommand[], Error> =>
+): UseQueryResult<SlashCommand[]> =>
     useQuery({
         queryKey: COMMANDS_QUERY_KEYS.serverCommands(serverId),
         queryFn: (): Promise<SlashCommand[]> =>

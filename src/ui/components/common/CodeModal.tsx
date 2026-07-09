@@ -139,7 +139,7 @@ export const CodeModal = memo(
                                     }}
                                 >
                                     <AstRenderer nodes={lineNodes} />
-                                    {lineNodes.length === 0 && '\u200b'}
+                                    {lineNodes.length === 0 ? '\u200B' : null}
                                 </div>
                             </div>
                         ))}

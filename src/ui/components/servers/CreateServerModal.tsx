@@ -43,7 +43,7 @@ export const CreateServerModal = ({
     return (
         <>
             <Modal
-                isOpen={isOpen && !showConfirm}
+                isOpen={isOpen ? !showConfirm : false}
                 title="Create a Server"
                 onClose={onClose}
             >
@@ -63,7 +63,9 @@ export const CreateServerModal = ({
                             id="server-name"
                             placeholder="My Awesome Server"
                             value={name}
-                            onChange={(e): void => setName(e.target.value)}
+                            onChange={(e): void => {
+                                setName(e.target.value);
+                            }}
                         />
                         <Text as="p" size="xs" variant="muted">
                             By creating a server, you agree to our Community
@@ -88,9 +90,11 @@ export const CreateServerModal = ({
             </Modal>
 
             <Modal
-                isOpen={isOpen && showConfirm}
+                isOpen={isOpen ? showConfirm : false}
                 title="Create a Server?"
-                onClose={(): void => setShowConfirm(false)}
+                onClose={(): void => {
+                    setShowConfirm(false);
+                }}
             >
                 <div className="flex flex-col gap-4">
                     <Text>
@@ -100,11 +104,13 @@ export const CreateServerModal = ({
                     <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:justify-end">
                         <Button
                             variant="ghost"
-                            onClick={(): void => setShowConfirm(false)}
+                            onClick={(): void => {
+                                setShowConfirm(false);
+                            }}
                         >
                             Cancel
                         </Button>
-                        {onSwitchToJoin && (
+                        {onSwitchToJoin ? (
                             <Button
                                 variant="normal"
                                 onClick={(): void => {
@@ -114,7 +120,7 @@ export const CreateServerModal = ({
                             >
                                 Join Server instead
                             </Button>
-                        )}
+                        ) : null}
                         <Button
                             loading={isPending}
                             variant="primary"

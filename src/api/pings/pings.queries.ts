@@ -27,7 +27,7 @@ export const PINGS_KEYS = {
     all: ['pings'] as const,
 };
 
-export const usePings = (): UseQueryResult<GetPingsResponse, Error> =>
+export const usePings = (): UseQueryResult<GetPingsResponse> =>
     useQuery({
         queryKey: PINGS_KEYS.all,
         queryFn: pingsApi.getPings,
@@ -120,9 +120,9 @@ export function useClearChannelPings(): UseMutationResult<
             // Update Redux state
             if (serverId) {
                 const currentCount =
-                    queryClient.getQueryData<{
-                        [serverId: string]: { pingCount: number };
-                    }>(SERVERS_QUERY_KEYS.unread())?.[serverId]?.pingCount || 0;
+                    queryClient.getQueryData<
+                        Record<string, { pingCount: number }>
+                    >(SERVERS_QUERY_KEYS.unread())?.[serverId]?.pingCount || 0;
 
                 dispatch(
                     setServerPingCount({

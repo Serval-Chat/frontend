@@ -2,7 +2,6 @@ import React, { useCallback, useMemo, useRef, useState } from 'react';
 
 import { ClearEditorPlugin } from '@lexical/react/LexicalClearEditorPlugin';
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';
 import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary';
 import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
@@ -47,18 +46,6 @@ const EmojiPicker = React.lazy(() =>
     })),
 );
 
-const EditorBridge = ({
-    onReady,
-}: {
-    onReady: (e: LexicalEditor) => void;
-}): React.ReactNode => {
-    const [editor] = useLexicalComposerContext();
-    React.useEffect((): void => {
-        onReady(editor);
-    }, [editor, onReady]);
-    return null;
-};
-
 interface MessageEditProps {
     messageId: string;
     initialText: string;
@@ -68,6 +55,100 @@ interface MessageEditProps {
     onCancel: () => void;
     onSuccess?: () => void;
 }
+
+const MessageEditActions = ({
+    isPending,
+    showEmojiPicker,
+    hasChanged,
+    onToggleEmoji,
+    onCancel,
+    onSave,
+}: {
+    isPending: boolean;
+    showEmojiPicker: boolean;
+    hasChanged: boolean;
+    onToggleEmoji: () => void;
+    onCancel: () => void;
+    onSave: () => void;
+}) => (
+    <Box className="absolute right-2 bottom-2 flex gap-1">
+        <Button
+            className={cn(
+                'h-6 w-6 rounded p-0 transition-colors',
+                'text-muted-foreground hover:bg-white/5 hover:text-foreground',
+                showEmojiPicker && 'bg-white/10 text-foreground',
+            )}
+            disabled={isPending}
+            size="sm"
+            title="Add Emoji"
+            variant="ghost"
+            onClick={onToggleEmoji}
+        >
+            <Smile size={14} />
+        </Button>
+
+        <Button
+            className={cn(
+                'h-6 w-6 rounded p-0 transition-colors',
+                'text-muted-foreground hover:bg-danger/20 hover:text-danger',
+            )}
+            disabled={isPending}
+            size="sm"
+            title="Cancel (Escape)"
+            variant="ghost"
+            onClick={onCancel}
+        >
+            <X size={14} />
+        </Button>
+
+        <Button
+            className={cn(
+                'h-6 w-6 rounded p-0 transition-colors',
+                hasChanged
+                    ? 'text-muted-foreground hover:bg-success/20 hover:text-success'
+                    : 'cursor-not-allowed opacity-50',
+            )}
+            disabled={isPending || !hasChanged}
+            size="sm"
+            title="Save (Enter)"
+            variant="ghost"
+            onClick={onSave}
+        >
+            <Check size={14} />
+        </Button>
+    </Box>
+);
+
+const MessageEditEmojiPopup = ({
+    pickerRef,
+    customCategories,
+    onEmojiSelect,
+    onCustomEmojiSelect,
+}: {
+    pickerRef: React.RefObject<HTMLDivElement | null>;
+    customCategories: ReturnType<typeof useCustomEmojis>['customCategories'];
+    onEmojiSelect: (emoji: string) => void;
+    onCustomEmojiSelect: (emoji: { id: string; name: string }) => void;
+}) => (
+    <Box
+        className="absolute right-0 bottom-full z-[var(--z-index-popover)] mb-2"
+        ref={pickerRef}
+    >
+        <React.Suspense
+            fallback={
+                <div className="flex h-[400px] w-[320px] items-center justify-center rounded-lg border border-border-subtle bg-bg-primary text-muted-foreground shadow-xl">
+                    Loading emojis...
+                </div>
+            }
+        >
+            <EmojiPicker
+                customCategories={customCategories}
+                onCustomEmojiSelect={onCustomEmojiSelect}
+                onEmojiSelect={onEmojiSelect}
+            />
+        </React.Suspense>
+    </Box>
+);
 
 export const MessageEdit = ({
     messageId,
@@ -119,10 +200,16 @@ export const MessageEdit = ({
     );
 
     const isAutocompleteOpenRef = useRef<boolean>(false);
+    const isAutocompleteOpenRefs = useMemo(
+        (): [React.MutableRefObject<boolean>] => [isAutocompleteOpenRef],
+        [],
+    );
     const editorInstanceRef = useRef<LexicalEditor | null>(null);
 
     React.useEffect((): (() => void) => {
-        const handleResize = (): void => setIsMobile(window.innerWidth <= 768);
+        const handleResize = (): void => {
+            setIsMobile(window.innerWidth <= 768);
+        };
         window.addEventListener('resize', handleResize);
 
         const handleGlobalKeyDown = (e: KeyboardEvent): void => {
@@ -143,7 +230,7 @@ export const MessageEdit = ({
             }
         };
 
-        window.addEventListener('keydown', handleGlobalKeyDown);
+        globalThis.addEventListener('keydown', handleGlobalKeyDown);
 
         if (editorInstanceRef.current) {
             setTimeout((): void => {
@@ -153,7 +240,7 @@ export const MessageEdit = ({
 
         return (): void => {
             window.removeEventListener('resize', handleResize);
-            window.removeEventListener('keydown', handleGlobalKeyDown);
+            globalThis.removeEventListener('keydown', handleGlobalKeyDown);
         };
     }, [keybindManager]);
 
@@ -259,7 +346,9 @@ export const MessageEdit = ({
     const initialConfig = {
         namespace: 'MessageEdit',
         nodes: [ChipNode],
-        onError: (error: Error): void => console.error(error),
+        onError: (error: Error): void => {
+            console.error(error);
+        },
         theme: {
             paragraph: 'mb-0',
             text: {
@@ -275,11 +364,6 @@ export const MessageEdit = ({
         <Box className="relative w-full">
             <div className="relative flex min-h-[60px] flex-1 cursor-text items-start rounded-md border border-border-subtle bg-bg-secondary transition-all duration-200 focus-within:border-primary/30 focus-within:ring-2 focus-within:ring-primary/20 focus-within:outline-none">
                 <LexicalComposer initialConfig={initialConfig}>
-                    <EditorBridge
-                        onReady={(e): void => {
-                            editorInstanceRef.current = e;
-                        }}
-                    />
                     <LexicalInitPlugin initialText={initialText} />
                     <RichTextPlugin
                         ErrorBoundary={LexicalErrorBoundary}
@@ -295,7 +379,7 @@ export const MessageEdit = ({
                     <LexicalMarkdownFormattingPlugin />
                     <LexicalEmojiPlugin />
                     <LexicalSubmitPlugin
-                        isAutocompleteOpenRef={isAutocompleteOpenRef}
+                        isAutocompleteOpenRefs={isAutocompleteOpenRefs}
                         onSendMessage={(msg): true => {
                             if (!isMobile) handleSubmit(msg);
                             return true;
@@ -304,18 +388,15 @@ export const MessageEdit = ({
                     <LexicalAutocompletePlugin
                         channels={channels}
                         friends={friendUsers}
+                        isOpenRef={isAutocompleteOpenRef}
                         members={members}
                         roles={roles}
                         serverEmojis={allServerEmojis}
                         serverId={serverId}
-                        onOpenChange={(isOpen): void => {
-                            isAutocompleteOpenRef.current = isOpen;
-                        }}
                     />
                     <OnChangePlugin
                         onChange={(editorState, editor): void => {
-                            if (!editorInstanceRef.current)
-                                editorInstanceRef.current = editor;
+                            editorInstanceRef.current = editor;
                             editorState.read((): void => {
                                 setText($getRawMessageText());
                             });
@@ -324,73 +405,27 @@ export const MessageEdit = ({
                 </LexicalComposer>
             </div>
 
-            <Box className="absolute right-2 bottom-2 flex gap-1">
-                <Button
-                    className={cn(
-                        'h-6 w-6 rounded p-0 transition-colors',
-                        'text-muted-foreground hover:bg-white/5 hover:text-foreground',
-                        showEmojiPicker && 'bg-white/10 text-foreground',
-                    )}
-                    disabled={isPending}
-                    size="sm"
-                    title="Add Emoji"
-                    variant="ghost"
-                    onClick={(): void => setShowEmojiPicker(!showEmojiPicker)}
-                >
-                    <Smile size={14} />
-                </Button>
+            <MessageEditActions
+                hasChanged={hasChanged}
+                isPending={isPending}
+                showEmojiPicker={showEmojiPicker}
+                onCancel={onCancel}
+                onSave={(): void => {
+                    handleSubmit();
+                }}
+                onToggleEmoji={(): void => {
+                    setShowEmojiPicker(!showEmojiPicker);
+                }}
+            />
 
-                <Button
-                    className={cn(
-                        'h-6 w-6 rounded p-0 transition-colors',
-                        'text-muted-foreground hover:bg-danger/20 hover:text-danger',
-                    )}
-                    disabled={isPending}
-                    size="sm"
-                    title="Cancel (Escape)"
-                    variant="ghost"
-                    onClick={onCancel}
-                >
-                    <X size={14} />
-                </Button>
-
-                <Button
-                    className={cn(
-                        'h-6 w-6 rounded p-0 transition-colors',
-                        hasChanged
-                            ? 'text-muted-foreground hover:bg-success/20 hover:text-success'
-                            : 'cursor-not-allowed opacity-50',
-                    )}
-                    disabled={isPending || !hasChanged}
-                    size="sm"
-                    title="Save (Enter)"
-                    variant="ghost"
-                    onClick={(): void => handleSubmit()}
-                >
-                    <Check size={14} />
-                </Button>
-            </Box>
-
-            {showEmojiPicker && (
-                <Box
-                    className="absolute right-0 bottom-full z-[var(--z-index-popover)] mb-2"
-                    ref={emojiPickerRef}
-                >
-                    <React.Suspense
-                        fallback={
-                            <div className="flex h-[400px] w-[320px] items-center justify-center rounded-lg border border-border-subtle bg-bg-primary text-muted-foreground shadow-xl">
-                                Loading emojis...
-                            </div>
-                        }
-                    >
-                        <EmojiPicker
-                            customCategories={customCategories}
-                            onCustomEmojiSelect={handleCustomEmojiSelect}
-                            onEmojiSelect={handleEmojiSelect}
-                        />
-                    </React.Suspense>
-                </Box>
-            )}
+            {showEmojiPicker ? (
+                <MessageEditEmojiPopup
+                    customCategories={customCategories}
+                    pickerRef={emojiPickerRef}
+                    onCustomEmojiSelect={handleCustomEmojiSelect}
+                    onEmojiSelect={handleEmojiSelect}
+                />
+            ) : null}
         </Box>
     );
 };
