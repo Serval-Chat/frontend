@@ -96,12 +96,8 @@ const AssignBadgeModal = ({
                 </Box>
 
                 <Box className="relative">
-                    <Search
-                        className="absolute top-1/2 left-4 -translate-y-1/2 text-muted-foreground/50"
-                        size={18}
-                    />
                     <Input
-                        className="pl-12"
+                        icon={<Search size={18} />}
                         placeholder="Search for a user..."
                         size="admin"
                         value={searchTerm}

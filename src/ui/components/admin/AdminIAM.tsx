@@ -350,12 +350,8 @@ export const AdminIAM = ({
             {/* Toolbar */}
             <div className="flex items-center gap-4 rounded-lg border border-border-subtle bg-bg-subtle p-3">
                 <div className="relative flex-1">
-                    <Search
-                        className="absolute top-1/2 left-3 -translate-y-1/2 text-muted-foreground"
-                        size={16}
-                    />
                     <Input
-                        className="pl-10"
+                        icon={<Search size={16} />}
                         placeholder="Search users by username or ID..."
                         size="admin"
                         type="text"

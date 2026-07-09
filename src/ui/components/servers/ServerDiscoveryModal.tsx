@@ -196,13 +196,11 @@ export const ServerDiscoveryModal = ({
                 <div className="border-b border-border-subtle bg-bg-subtle/60 px-4 py-4 md:px-8">
                     <div className="mx-auto flex max-w-6xl flex-col gap-4">
                         <div className="relative">
-                            <Search
-                                className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground"
-                                size={16}
-                            />
                             <Input
-                                className="h-12 pr-12 pl-10 text-base"
+                                icon={<Search size={16} />}
                                 placeholder="Search by server name, description, or tag"
+                                size="lg"
+                                style={{ paddingRight: '2.75rem' }}
                                 value={search}
                                 onChange={(event): void => {
                                     setSearch(event.target.value);
