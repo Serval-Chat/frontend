@@ -8,6 +8,7 @@ import { StyledUserName } from '@/ui/components/common/StyledUserName';
 import { UserProfilePicture } from '@/ui/components/common/UserProfilePicture';
 import { Box } from '@/ui/components/layout/Box';
 
+import { isCustomEmojiId } from '@/utils/validation';
 import { StatusModal } from './StatusModal';
 
 const StatusEmoji = ({
@@ -17,7 +18,7 @@ const StatusEmoji = ({
 }): React.ReactNode => {
     if (statusEmoji === '') return null;
 
-    const isCustomEmoji = /^[0-9a-fA-F]{24}$/.test(statusEmoji);
+    const isCustomEmoji = isCustomEmojiId(statusEmoji);
     if (isCustomEmoji) {
         return (
             <ParsedEmoji

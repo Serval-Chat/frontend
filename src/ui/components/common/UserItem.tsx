@@ -58,6 +58,7 @@ import { setSplitViewPane } from '@/store/slices/navSlice';
 import type { UserPresenceStatus } from '@/store/slices/presenceSlice';
 import { setUserVolume } from '@/store/slices/voiceSlice';
 import { Box } from '@/ui/components/layout/Box';
+import { isCustomEmojiId } from '@/utils/validation';
 import { ProfilePopup } from '@/ui/components/profile/ProfilePopup';
 import { BlockUserModal } from '@/ui/components/profile/modals/BlockUserModal';
 import { InviteToServerModal } from '@/ui/components/servers/InviteToServerModal';
@@ -967,7 +968,7 @@ const UserItemInner = React.memo(
                                 <div className="flex min-w-0 items-center gap-1">
                                     {presenceCustomEmoji ? (
                                         <span className="flex shrink-0 items-center">
-                                            {/^[0-9a-fA-F]{24}$/.test(
+                                            {isCustomEmojiId(
                                                 presenceCustomEmoji,
                                             ) ? (
                                                 <ParsedEmoji

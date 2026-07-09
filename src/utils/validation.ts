@@ -41,3 +41,8 @@ export const isValidSnowflakeId = (id: string | undefined): boolean => {
     if (!id) return false;
     return /^\d{19}$/.test(id);
 };
+
+export const isCustomEmojiId = (id: string | undefined): boolean => {
+    if (!id) return false;
+    return /^(?:[0-9a-fA-F]{24}|\d{17,20})$/.test(id);
+};

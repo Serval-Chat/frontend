@@ -17,6 +17,7 @@ import { UserProfilePicture } from '@/ui/components/common/UserProfilePicture';
 import type { UserStatus } from '@/ui/components/common/UserProfileStatusIndicator';
 import { Box } from '@/ui/components/layout/Box';
 import { cn } from '@/utils/cn';
+import { isCustomEmojiId } from '@/utils/validation';
 
 const FriendProfileRow = React.memo(
     ({
@@ -71,7 +72,7 @@ const FriendProfileRow = React.memo(
                             <Box className="flex min-w-0 items-center gap-1">
                                 {customEmoji ? (
                                     <span className="flex shrink-0 items-center">
-                                        {/^[0-9a-fA-F]{24}$/.test(
+                                        {isCustomEmojiId(
                                             customEmoji,
                                         ) ? (
                                             <ParsedEmoji

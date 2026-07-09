@@ -51,6 +51,7 @@ import { resolveApiUrl } from '@/utils/apiUrl';
 import { cn } from '@/utils/cn';
 import { APP_LOCALE } from '@/utils/locale';
 import { ParserPresets, parseText } from '@/utils/textParser/parser';
+import { isCustomEmojiId } from '@/utils/validation';
 
 interface UserProfileCardProps {
     user?: User | Partial<User>;
@@ -389,7 +390,7 @@ const ProfileCardDetails = ({
             <Box className="mb-4 flex min-w-0 items-start gap-2 text-xs text-muted-foreground">
                 {finalCustomEmoji ? (
                     <Box className="flex shrink-0 items-center">
-                        {/^[0-9a-fA-F]{24}$/.test(finalCustomEmoji) ? (
+                        {isCustomEmojiId(finalCustomEmoji) ? (
                             <ParsedEmoji
                                 nonInteractive
                                 className="h-4 w-4"

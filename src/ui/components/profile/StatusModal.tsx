@@ -14,6 +14,7 @@ import { ParsedEmoji } from '@/ui/components/common/ParsedEmoji';
 import { ParsedUnicodeEmoji } from '@/ui/components/common/ParsedUnicodeEmoji';
 import { EmojiPicker } from '@/ui/components/emoji/EmojiPicker';
 import { Box } from '@/ui/components/layout/Box';
+import { isCustomEmojiId } from '@/utils/validation';
 
 interface StatusModalProps {
     isOpen: boolean;
@@ -22,8 +23,7 @@ interface StatusModalProps {
     initialEmoji?: string;
 }
 
-const isCustomEmoji = (emoji: string): boolean =>
-    /^[0-9a-fA-F]{24}$/.test(emoji);
+const isCustomEmoji = (emoji: string): boolean => isCustomEmojiId(emoji);
 
 const EmojiPreview = ({
     statusEmoji,
