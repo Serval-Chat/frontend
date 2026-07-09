@@ -1,5 +1,6 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 
+import { AutoFocusPlugin } from '@lexical/react/LexicalAutoFocusPlugin';
 import { ClearEditorPlugin } from '@lexical/react/LexicalClearEditorPlugin';
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';
@@ -232,12 +233,6 @@ export const MessageEdit = ({
 
         globalThis.addEventListener('keydown', handleGlobalKeyDown);
 
-        if (editorInstanceRef.current) {
-            setTimeout((): void => {
-                editorInstanceRef.current?.focus();
-            }, 0);
-        }
-
         return (): void => {
             window.removeEventListener('resize', handleResize);
             globalThis.removeEventListener('keydown', handleGlobalKeyDown);
@@ -365,6 +360,7 @@ export const MessageEdit = ({
             <div className="relative flex min-h-[60px] flex-1 cursor-text items-start rounded-md border border-border-subtle bg-bg-secondary transition-all duration-200 focus-within:border-primary/30 focus-within:ring-2 focus-within:ring-primary/20 focus-within:outline-none">
                 <LexicalComposer initialConfig={initialConfig}>
                     <LexicalInitPlugin initialText={initialText} />
+                    <AutoFocusPlugin defaultSelection="rootEnd" />
                     <RichTextPlugin
                         ErrorBoundary={LexicalErrorBoundary}
                         contentEditable={contentEditableElement}
