@@ -10,7 +10,8 @@ VITE_ALTERNATIVE_URLS=["localhost:5173"]'
 
 PROD_ENV='VITE_API_BASE_URL=https://rolling.catfla.re/
 VITE_WS_BASE_URL=wss://rolling.catfla.re/
-VITE_LIVEKIT_URL=https://rtc.catfla.re/'
+VITE_LIVEKIT_URL=https://rtc.catfla.re/
+VITE_TURNSTILE_SITE_KEY=0x4AAAAAADyycnGvy_9SJcya'
 
 write_dev_backup() {
   printf '%s\n' "$DEV_ENV" > .env.dev
