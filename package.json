@@ -27,6 +27,7 @@
   },
   "dependencies": {
     "@lexical/react": "^0.41.0",
+    "@marsidev/react-turnstile": "^1.5.3",
     "@reduxjs/toolkit": "^2.11.2",
     "@sentry/react": "^10.56.0",
     "@tailwindcss/vite": "^4.1.18",

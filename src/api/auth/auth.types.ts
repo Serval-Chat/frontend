@@ -1,6 +1,7 @@
 export interface LoginRequest {
     login: string;
     password: string;
+    cfTurnstileResponse: string;
 }
 
 export interface LoginResponse {
@@ -38,6 +39,7 @@ export interface RegisterRequest {
     username: string;
     password: string;
     invite: string;
+    cfTurnstileResponse: string;
 }
 
 export interface RegisterResponse {

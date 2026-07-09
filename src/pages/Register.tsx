@@ -1,5 +1,6 @@
 import { useState } from 'react';
 
+import { Turnstile } from '@marsidev/react-turnstile';
 import { AnimatePresence, m } from 'framer-motion';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
 
@@ -34,6 +35,7 @@ export const Register = () => {
         isLoading,
         isFormValid,
         handleSubmit,
+        setTurnstileToken,
     } = useRegisterForm();
 
     const [showPassword, setShowPassword] = useState(false);
@@ -236,6 +238,12 @@ export const Register = () => {
                             ) : null}
                         </AnimatePresence>
                     </InputWrapper>
+                    <div className="flex justify-center">
+                        <Turnstile
+                            siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY || ''}
+                            onSuccess={setTurnstileToken}
+                        />
+                    </div>
                     <Button
                         className="flex h-12 w-full items-center justify-center gap-2 py-sm text-lg font-semibold"
                         disabled={isLoading || !isFormValid}

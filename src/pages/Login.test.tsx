@@ -55,7 +55,7 @@ describe('Login Page Integration', (): void => {
         sessionStorage.clear();
     });
 
-    it('requires both email and password to enable the submit button', (): void => {
+    it('requires both email and password to enable the submit button', async (): Promise<void> => {
         renderWithProviders();
         const button = screen.getByRole('button', { name: /There we go!/i });
         expect(button).toBeDisabled();
@@ -68,7 +68,10 @@ describe('Login Page Integration', (): void => {
         fireEvent.change(screen.getByPlaceholderText('Password'), {
             target: { value: 'password123' },
         });
-        expect(button).not.toBeDisabled();
+        // Turnstile mock fires onSuccess asynchronously, so wait
+        await waitFor((): void => {
+            expect(button).not.toBeDisabled();
+        });
     });
 
     it('submits on enter key if fields are valid', async (): Promise<void> => {
@@ -79,7 +82,7 @@ describe('Login Page Integration', (): void => {
         renderWithProviders();
 
         fireEvent.change(screen.getByPlaceholderText('E-mail'), {
-            target: { value: 'test@example.com' },
+            target: { value: 'testuser@example.com' },
         });
         fireEvent.change(screen.getByPlaceholderText('Password'), {
             target: { value: 'password123' },
@@ -90,8 +93,9 @@ describe('Login Page Integration', (): void => {
 
         await waitFor((): void => {
             expect(authApi.login).toHaveBeenCalledWith({
-                login: 'test@example.com',
+                login: 'testuser@example.com',
                 password: 'password123',
+                cfTurnstileResponse: 'mock-turnstile-token',
             });
         });
     });
@@ -114,6 +118,7 @@ describe('Login Page Integration', (): void => {
         });
 
         const button = screen.getByRole('button', { name: /There we go!/i });
+        await waitFor(() => expect(button).not.toBeDisabled());
         fireEvent.click(button);
 
         expect(button).toBeDisabled();

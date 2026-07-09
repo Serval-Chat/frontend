@@ -1,4 +1,5 @@
 import '@testing-library/jest-dom';
+import React from 'react';
 import { beforeEach, vi } from 'vitest';
 
 const createStorageMock = (): Partial<Storage> & {
@@ -60,3 +61,15 @@ vi.mock('idb-keyval', () => {
         }),
     };
 });
+
+vi.mock('@marsidev/react-turnstile', () => {
+    return {
+        Turnstile: ({ onSuccess }: any) => {
+            React.useEffect(() => {
+                if (onSuccess) onSuccess('mock-turnstile-token');
+            }, [onSuccess]);
+            return React.createElement('div', { id: 'cf-turnstile' });
+        },
+    };
+});
+

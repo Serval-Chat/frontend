@@ -7,4 +7,5 @@ export type RegisterRequestDTO = {
     username: string;
     password: string;
     invite: string;
+    cfTurnstileResponse: string;
 };

@@ -43,6 +43,8 @@ interface RegisterFormResult {
     isLoading: boolean;
     isFormValid: boolean;
     handleSubmit: (e: React.FormEvent) => Promise<void>;
+    turnstileToken: string;
+    setTurnstileToken: React.Dispatch<React.SetStateAction<string>>;
 }
 
 export const useRegisterForm = (): RegisterFormResult => {
@@ -57,6 +59,7 @@ export const useRegisterForm = (): RegisterFormResult => {
     });
     const [errors, setErrors] = useState<ValidationErrors>({});
     const [isLoading, setIsLoading] = useState(false);
+    const [turnstileToken, setTurnstileToken] = useState('');
 
     const navigate = useNavigate();
 
@@ -130,6 +133,7 @@ export const useRegisterForm = (): RegisterFormResult => {
         !!password &&
         !!confirmPassword &&
         !!inviteToken &&
+        !!turnstileToken &&
         password === confirmPassword &&
         !Object.values(errors).some(Boolean);
 
@@ -166,6 +170,7 @@ export const useRegisterForm = (): RegisterFormResult => {
                 username,
                 password,
                 invite: inviteToken.trim(),
+                cfTurnstileResponse: turnstileToken,
             });
             await setAuthToken(data.token);
 
@@ -209,5 +214,7 @@ export const useRegisterForm = (): RegisterFormResult => {
         isLoading,
         isFormValid,
         handleSubmit,
+        turnstileToken,
+        setTurnstileToken,
     };
 };

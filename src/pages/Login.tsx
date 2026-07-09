@@ -1,5 +1,6 @@
 import { useState } from 'react';
 
+import { Turnstile } from '@marsidev/react-turnstile';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import { Link, Navigate } from 'react-router-dom';
 
@@ -42,6 +43,7 @@ export const Login = () => {
         isFormValid,
         banInfo,
         resetBan,
+        setTurnstileToken,
     } = useLoginForm();
     const [showPassword, setShowPassword] = useState(false);
 
@@ -202,6 +204,14 @@ export const Login = () => {
                             </button>
                         </div>
                     ) : null}
+                    {!requiresTwoFactor && (
+                        <div className="flex justify-center">
+                            <Turnstile
+                                siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY || ''}
+                                onSuccess={setTurnstileToken}
+                            />
+                        </div>
+                    )}
                     <Button
                         className="flex w-full items-center justify-center gap-2 py-sm text-lg font-semibold"
                         disabled={!isFormValid || isLoading}

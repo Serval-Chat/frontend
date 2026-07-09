@@ -133,6 +133,7 @@ describe('Register Page Integration', (): void => {
         });
 
         const button = screen.getByRole('button', { name: /Register/i });
+        await waitFor(() => expect(button).not.toBeDisabled());
         fireEvent.click(button);
 
         expect(button).toBeDisabled();
@@ -143,6 +144,7 @@ describe('Register Page Integration', (): void => {
                 username: 'cat123',
                 password: 'password123',
                 invite: 'token123',
+                cfTurnstileResponse: 'mock-turnstile-token',
             });
             expect(setAuthTokenSpy).toHaveBeenCalledWith('mock-token');
             expect(screen.getByTestId('location-display')).toHaveTextContent(

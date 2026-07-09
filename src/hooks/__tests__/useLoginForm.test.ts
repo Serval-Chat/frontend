@@ -69,6 +69,7 @@ describe('useLoginForm', (): void => {
         expect(authApi.login).toHaveBeenCalledWith({
             login: 'testuser',
             password: 'password123',
+            cfTurnstileResponse: '',
         });
         expect(result.current.status.type).not.toBe('error');
     });

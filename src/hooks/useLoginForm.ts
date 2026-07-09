@@ -39,6 +39,8 @@ interface LoginFormResult {
     isFormValid: boolean;
     banInfo: BanInfo | null;
     resetBan: () => void;
+    turnstileToken: string;
+    setTurnstileToken: React.Dispatch<React.SetStateAction<string>>;
 }
 
 export const useLoginForm = (): LoginFormResult => {
@@ -55,6 +57,7 @@ export const useLoginForm = (): LoginFormResult => {
     const [useBackupCode, setUseBackupCode] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [banInfo, setBanInfo] = useState<BanInfo | null>(null);
+    const [turnstileToken, setTurnstileToken] = useState('');
     const resetBan = (): void => {
         setBanInfo(null);
     };
@@ -70,7 +73,7 @@ export const useLoginForm = (): LoginFormResult => {
 
     const isFormValid = requiresTwoFactor
         ? twoFactorCode.trim().length > 0
-        : !!loginInput && !!password;
+        : !!loginInput && !!password && !!turnstileToken;
 
     const handleSubmit = async (e: React.FormEvent): Promise<void> => {
         e.preventDefault();
@@ -101,7 +104,7 @@ export const useLoginForm = (): LoginFormResult => {
                         : { code: twoFactorCode }),
                 });
             } else {
-                data = await authApi.login({ login: loginInput, password });
+                data = await authApi.login({ login: loginInput, password, cfTurnstileResponse: turnstileToken });
                 if (data.two_factor_required && data.temp_token) {
                     setRequiresTwoFactor(true);
                     setTempToken(data.temp_token);
@@ -183,5 +186,7 @@ export const useLoginForm = (): LoginFormResult => {
         isFormValid,
         banInfo,
         resetBan,
+        turnstileToken,
+        setTurnstileToken,
     };
 };
