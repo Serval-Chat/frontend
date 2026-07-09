@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';
@@ -103,6 +103,16 @@ const searchPlaceholderStyle: React.CSSProperties = {
     userSelect: 'none',
     whiteSpace: 'nowrap',
 };
+
+const measurePlaceholderStyle: React.CSSProperties = {
+    ...searchPlaceholderStyle,
+    left: 0,
+    visibility: 'hidden',
+};
+
+const SEARCH_PLACEHOLDER_FULL = 'Search... (e.g. from:alice in:general)';
+const SEARCH_PLACEHOLDER_SHORT = 'Search...';
+const SEARCH_PLACEHOLDER_LEFT_INSET = 32;
 
 const closeSearchButtonStyle: React.CSSProperties = {
     width: 28,
@@ -546,6 +556,27 @@ export function MessageSearchPanel({
     });
     const [pageState, setPageState] = useState({ page: 0, forKey: '' });
     const lexicalEditorRef = useRef<LexicalEditor | null>(null);
+    const editorWrapperRef = useRef<HTMLDivElement>(null);
+    const placeholderMeasureRef = useRef<HTMLSpanElement>(null);
+    const [placeholderTooWide, setPlaceholderTooWide] = useState(false);
+
+    useEffect(() => {
+        const wrapper = editorWrapperRef.current;
+        const measure = placeholderMeasureRef.current;
+        if (!wrapper || !measure) return;
+
+        const checkFit = (): void => {
+            const availableWidth =
+                wrapper.clientWidth - SEARCH_PLACEHOLDER_LEFT_INSET;
+            setPlaceholderTooWide(measure.scrollWidth > availableWidth);
+        };
+
+        checkFit();
+
+        const observer = new ResizeObserver(checkFit);
+        observer.observe(wrapper);
+        return () => observer.disconnect();
+    }, []);
 
     const { data: allChannels = [] } = useChannels(serverId ?? null, {
         enabled: mode === 'channel',
@@ -652,7 +683,17 @@ export function MessageSearchPanel({
                 }}
             >
                 {/* editor wrapper, position context for dropdown + icon */}
-                <div style={{ flex: 1, position: 'relative' }}>
+                <div
+                    ref={editorWrapperRef}
+                    style={{ flex: 1, position: 'relative' }}
+                >
+                    {/* offscreen twin of the full placeholder, used only to measure whether it fits */}
+                    <span
+                        ref={placeholderMeasureRef}
+                        style={measurePlaceholderStyle}
+                    >
+                        {SEARCH_PLACEHOLDER_FULL}
+                    </span>
                     <Search
                         size={14}
                         style={{
@@ -674,7 +715,9 @@ export function MessageSearchPanel({
                                 contentEditable={SEARCH_CONTENT_EDITABLE}
                                 placeholder={
                                     <span style={searchPlaceholderStyle}>
-                                        Search... (e.g. from:alice in:general)
+                                        {placeholderTooWide
+                                            ? SEARCH_PLACEHOLDER_SHORT
+                                            : SEARCH_PLACEHOLDER_FULL}
                                     </span>
                                 }
                             />
