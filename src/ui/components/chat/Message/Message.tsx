@@ -482,6 +482,7 @@ export const Message = React.memo(
                                 embeds={message.embeds}
                                 invocationId={message.invocationId}
                                 isDeleted={!!message.deletedAt}
+                                isEdited={message.isEdited && !isGroupStart}
                                 isEphemeral={message.isEphemeral}
                                 messageId={message.id}
                                 poll={message.poll}

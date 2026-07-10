@@ -12,6 +12,7 @@ import { useLimitedAnimations } from '@/providers/limitedAnimationsContext';
 import type { ButtonComponent, Embed } from '@/types/embed';
 import { ParsedText } from '@/ui/components/common/ParsedText';
 import { PausedAnimatedImage } from '@/ui/components/common/PausedAnimatedImage';
+import { Text } from '@/ui/components/common/Text';
 import { Tooltip } from '@/ui/components/common/Tooltip';
 import { EmbedRenderer } from '@/ui/components/embed/EmbedRenderer';
 import { StickerInfoBox } from '@/ui/components/emoji/StickerInfoBox';
@@ -37,6 +38,7 @@ interface MessageContentProps {
     attachments?: MessageAttachment[];
     poll?: MessagePoll | null;
     isDeleted?: boolean;
+    isEdited?: boolean;
     messageId?: string;
     channelId?: string;
     serverDetails?: Server;
@@ -58,6 +60,7 @@ export const MessageContent = React.memo(
         attachments,
         poll,
         isDeleted,
+        isEdited,
         messageId,
         channelId,
         serverDetails,
@@ -151,14 +154,21 @@ export const MessageContent = React.memo(
                 )}
             >
                 {text ? (
-                    <ParsedText
-                        largeEmojis={isEmojiOnly}
-                        nodes={nodes}
-                        serverId={serverId}
-                        variant={isDeleted ? 'danger' : 'default'}
-                        wrap="preWrap"
-                        onResize={onResize}
-                    />
+                    <>
+                        <ParsedText
+                            largeEmojis={isEmojiOnly}
+                            nodes={nodes}
+                            serverId={serverId}
+                            variant={isDeleted ? 'danger' : 'default'}
+                            wrap="preWrap"
+                            onResize={onResize}
+                        />
+                        {isEdited ? (
+                            <Text className="ml-1 text-[10px] font-medium text-text-muted italic">
+                                (edited)
+                            </Text>
+                        ) : null}
+                    </>
                 ) : null}
                 {(embeds && embeds.length > 0) ||
                 (components && components.length > 0) ? (
