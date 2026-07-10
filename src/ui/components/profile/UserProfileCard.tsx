@@ -16,7 +16,11 @@ import {
 import { useNavigate } from 'react-router-dom';
 
 import {
+    useAcceptFriendRequest,
+    useCancelFriendRequest,
     useFriends,
+    useIncomingRequests,
+    useOutgoingRequests,
     useRemoveFriend,
     useSendFriendRequest,
 } from '@/api/friends/friends.queries';
@@ -638,24 +642,30 @@ const ProfileCardRoles = ({
     );
 };
 
+type FriendRelationshipStatus = 'friend' | 'incoming' | 'outgoing' | 'none';
+
 const ProfileCardActions = ({
     user,
     currentUserId,
     hasCustomColors,
     cardOnDark,
-    isFriend,
+    friendStatus,
     onMessage,
     onAddFriend,
     onRemoveFriend,
+    onAcceptFriend,
+    onCancelFriendRequest,
 }: {
     user?: User | Partial<User>;
     currentUserId?: string;
     hasCustomColors: boolean;
     cardOnDark: boolean;
-    isFriend: boolean;
+    friendStatus: FriendRelationshipStatus;
     onMessage: () => void;
     onAddFriend: () => void;
     onRemoveFriend: () => void;
+    onAcceptFriend: () => void;
+    onCancelFriendRequest: () => void;
 }): React.ReactNode => {
     if (currentUserId === user?.id || user?.isBot || isWebhookUser(user)) {
         return null;
@@ -675,16 +685,18 @@ const ProfileCardActions = ({
 
     return (
         <Box className="mt-4 flex gap-2">
-            <Button
-                className="flex-1 gap-2"
-                size="sm"
-                style={customButtonStyle}
-                onClick={onMessage}
-            >
-                <MessageSquare size={14} />
-                Message
-            </Button>
-            {isFriend ? (
+            {friendStatus === 'friend' ? (
+                <Button
+                    className="flex-1 gap-2"
+                    size="sm"
+                    style={customButtonStyle}
+                    onClick={onMessage}
+                >
+                    <MessageSquare size={14} />
+                    Message
+                </Button>
+            ) : null}
+            {friendStatus === 'friend' ? (
                 <Button
                     className="gap-2"
                     size="sm"
@@ -693,16 +705,38 @@ const ProfileCardActions = ({
                 >
                     <UserMinus size={14} />
                 </Button>
+            ) : friendStatus === 'incoming' ? (
+                <Button
+                    className="flex-1 gap-2"
+                    size="sm"
+                    style={customButtonStyle}
+                    variant="normal"
+                    onClick={onAcceptFriend}
+                >
+                    <Check size={14} />
+                    Accept Friend Request
+                </Button>
+            ) : friendStatus === 'outgoing' ? (
+                <Button
+                    className="flex-1 gap-2"
+                    size="sm"
+                    style={customButtonStyle}
+                    variant="normal"
+                    onClick={onCancelFriendRequest}
+                >
+                    <X size={14} />
+                    Cancel Friend Request
+                </Button>
             ) : (
                 <Button
-                    className="gap-2"
+                    className="flex-1 gap-2"
                     size="sm"
                     style={customButtonStyle}
                     variant="normal"
                     onClick={onAddFriend}
                 >
                     <UserPlus size={14} />
-                    Add Friend
+                    Send Friend Request
                 </Button>
             )}
         </Box>
@@ -737,8 +771,12 @@ export const UserProfileCard = ({
     const { data: currentUser } = useMe();
     const navigate = useNavigate();
     const { data: friends } = useFriends();
+    const { data: incomingRequests } = useIncomingRequests();
+    const { data: outgoingRequests } = useOutgoingRequests();
     const { mutate: sendFriendRequest } = useSendFriendRequest();
     const { mutate: removeFriend } = useRemoveFriend();
+    const { mutate: acceptFriendRequest } = useAcceptFriendRequest();
+    const { mutate: cancelFriendRequest } = useCancelFriendRequest();
 
     const { mutate: addRole } = useAddRoleToMember(serverId || '');
     const { mutate: removeRole } = useRemoveRoleFromMember(serverId || '');
@@ -785,6 +823,21 @@ export const UserProfileCard = ({
 
     const isOwnProfile = currentUser?.id === user?.id;
     const ps = user?.privacySettings;
+
+    const incomingRequest = incomingRequests?.find(
+        (request): boolean => request.fromId === user?.id,
+    );
+    const outgoingRequest = outgoingRequests?.find(
+        (request): boolean => request.toId === user?.id,
+    );
+    const isFriend = !!friends?.some((f): boolean => f.id === user?.id);
+    const friendStatus: FriendRelationshipStatus = isFriend
+        ? 'friend'
+        : incomingRequest
+          ? 'incoming'
+          : outgoingRequest
+            ? 'outgoing'
+            : 'none';
 
     // Webhook authors are synthetic (see resolveWebhookUser) and are not server
     // members, so role management does not apply to them.
@@ -986,13 +1039,19 @@ export const UserProfileCard = ({
                 <ProfileCardActions
                     cardOnDark={cardOnDark}
                     currentUserId={currentUser?.id}
+                    friendStatus={friendStatus}
                     hasCustomColors={hasCustomColors}
-                    isFriend={
-                        !!friends?.some((f): boolean => f.id === user?.id)
-                    }
                     user={user}
+                    onAcceptFriend={(): void => {
+                        if (incomingRequest)
+                            acceptFriendRequest(incomingRequest.id);
+                    }}
                     onAddFriend={(): void => {
                         if (user?.username) sendFriendRequest(user.username);
+                    }}
+                    onCancelFriendRequest={(): void => {
+                        if (outgoingRequest)
+                            cancelFriendRequest(outgoingRequest.id);
                     }}
                     onMessage={(): void => {
                         if (user?.id) void navigate(`/chat/@user/${user.id}`);

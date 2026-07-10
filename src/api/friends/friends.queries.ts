@@ -58,7 +58,16 @@ export const useSendFriendRequest = (): UseMutationResult<
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: friendsApi.sendFriendRequest,
-        onSuccess: (): void => {
+        onSuccess: ({ request }): void => {
+            queryClient.setQueryData<FriendRequest[]>(
+                [...FRIEND_REQUESTS_QUERY_KEY, 'outgoing'],
+                (existing): FriendRequest[] =>
+                    existing?.some(
+                        (r): boolean => r.id === request.id,
+                    )
+                        ? existing
+                        : [...(existing ?? []), request],
+            );
             void queryClient.invalidateQueries({
                 queryKey: [...FRIEND_REQUESTS_QUERY_KEY, 'outgoing'],
             });
