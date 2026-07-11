@@ -147,7 +147,7 @@ export const AdminBadgesManagement = ({
                                     className="text-[9px]"
                                     variant="muted"
                                 >
-                                    {badge.id}
+                                    ID: {badge.id}
                                 </Text>
                             </div>
                             <button

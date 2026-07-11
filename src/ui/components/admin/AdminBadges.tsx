@@ -142,16 +142,8 @@ const AssignBadgeModal = ({
                                                     } as unknown as User
                                                 }
                                             >
-                                                {user.displayName ??
-                                                    user.username}
+                                                {user.username}
                                             </StyledUserName>
-                                            <Text
-                                                as="span"
-                                                className="opacity-50"
-                                                size="xs"
-                                            >
-                                                @{user.username}
-                                            </Text>
                                         </Stack>
                                     </Box>
                                     <Button

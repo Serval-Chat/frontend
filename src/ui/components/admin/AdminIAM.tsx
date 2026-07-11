@@ -395,11 +395,7 @@ export const AdminIAM = ({
                                         />
                                         <div className="flex max-w-[150px] min-w-0 flex-col truncate md:max-w-[250px]">
                                             <span className="truncate font-bold text-foreground">
-                                                {user.displayName ||
-                                                    user.username}
-                                            </span>
-                                            <span className="truncate text-[10px] text-muted-foreground opacity-60">
-                                                @{user.username}
+                                                {user.username}
                                             </span>
                                         </div>
                                         {user.permissions.adminAccess ? (

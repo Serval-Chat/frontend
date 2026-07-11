@@ -134,10 +134,7 @@ const AwaitingReviewRow = ({
                     />
                     <div className="flex min-w-0 flex-col truncate">
                         <span className="truncate text-sm font-medium">
-                            {server.owner.displayName ?? server.owner.username}
-                        </span>
-                        <span className="truncate text-[10px] text-muted-foreground">
-                            @{server.owner.username}
+                            {server.owner.username}
                         </span>
                     </div>
                 </div>

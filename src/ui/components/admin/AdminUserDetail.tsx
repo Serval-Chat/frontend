@@ -18,7 +18,6 @@ import {
     AdminAccountInformation,
     AdminAccountStatus,
     AdminServerMemberships,
-    AdminUserSummaryHeader,
     AdminWarningHistory,
 } from './AdminUserDetailSections';
 
@@ -99,10 +98,12 @@ export const AdminUserDetail = ({
                 <div className="flex flex-col overflow-hidden lg:col-span-1">
                     <div className="mb-3 flex items-center gap-2 text-xs font-black tracking-widest text-muted-foreground uppercase">
                         <Users size={12} />
-                        Public Profile View
+                        Complete Profile View
                     </div>
                     <div className="custom-scrollbar flex-1 overflow-y-auto pr-2">
                         <UserProfileCard
+                            adminView
+                            hideActions
                             presenceStatus="offline"
                             user={
                                 {
@@ -122,8 +123,6 @@ export const AdminUserDetail = ({
                         Administrative View
                     </div>
                     <div className="custom-scrollbar flex-1 space-y-4 overflow-y-auto pr-2">
-                        <AdminUserSummaryHeader adminData={adminData} />
-
                         <AdminAccountStatus
                             adminData={adminData}
                             isCurrentlyBanned={isCurrentlyBanned}

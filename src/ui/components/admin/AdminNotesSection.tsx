@@ -70,8 +70,7 @@ const AdminNoteItem = ({
                     <div className="flex flex-col">
                         <div className="flex items-center gap-2">
                             <Text size="sm" weight="bold">
-                                {note.adminId.displayName ||
-                                    note.adminId.username}
+                                {note.adminId.username}
                             </Text>
                             {isDeleted ? (
                                 <div className="flex items-center gap-1 rounded bg-danger/10 px-1.5 py-0.5 text-[10px] font-bold tracking-tight text-danger uppercase">
@@ -151,8 +150,7 @@ const AdminNoteItem = ({
                                             username={history.editorId.username}
                                         />
                                         <Text size="xs" weight="bold">
-                                            {history.editorId.displayName ||
-                                                history.editorId.username}
+                                            {history.editorId.username}
                                         </Text>
                                     </div>
                                     <div className="flex items-center gap-1 text-muted-foreground">
@@ -217,9 +215,7 @@ const AdminNoteItem = ({
                             username={note.deletedBy?.username || 'Unknown'}
                         />
                         <Text size="xs" weight="bold">
-                            {note.deletedBy?.displayName ||
-                                note.deletedBy?.username ||
-                                'System'}
+                            {note.deletedBy?.username || 'System'}
                         </Text>
                     </div>
                 </div>

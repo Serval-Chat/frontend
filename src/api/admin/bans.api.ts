@@ -1,10 +1,19 @@
 import { apiClient } from '@/api/client';
 
+export interface AdminUserRef {
+    id: string;
+    username: string;
+    displayName?: string;
+    profilePicture?: string;
+}
+
 export interface AdminBan {
     id: string;
     userId: string;
+    user?: AdminUserRef;
     reason: string;
     issuedBy: string;
+    issuedByUser?: AdminUserRef;
     expirationTimestamp: string;
     active: boolean;
     history?: AdminBanHistoryItem[];
@@ -13,8 +22,10 @@ export interface AdminBan {
 export interface AdminMute {
     id: string;
     userId: string;
+    user?: AdminUserRef;
     reason: string;
     issuedBy: string;
+    issuedByUser?: AdminUserRef;
     expirationTimestamp: string;
     active: boolean;
     history?: AdminBanHistoryItem[];

@@ -1,4 +1,12 @@
-import type { Badge } from '@/api/users/users.types';
+import type {
+    Badge,
+    CustomStatus,
+    PrivacySettings,
+    UsernameFont,
+    UsernameGlow,
+    UsernameGradient,
+    UserConnection,
+} from '@/api/users/users.types';
 
 export interface AdminStats {
     users: number;
@@ -13,11 +21,20 @@ export interface AdminStats {
     messagesSparkline: number[];
 }
 
+export interface AuditLogUserRef {
+    id: string;
+    username: string;
+    displayName?: string;
+    profilePicture?: string;
+}
+
 export interface AuditLog {
     id: string;
-    actorId: string | { id: string; username: string };
+    actorId: string;
+    actorIdUser?: AuditLogUserRef;
     actionType: string;
-    targetUserId?: string | { id: string; username: string };
+    targetUserId?: string;
+    targetUserIdUser?: AuditLogUserRef;
     additionalData?: Record<string, unknown>;
     timestamp: string | Date;
 }
@@ -70,6 +87,17 @@ export interface AdminExtendedUser extends AdminUser {
     deletedAt?: string | Date;
     deletedReason?: string;
     servers: AdminUserServer[];
+    decorationId?: string | null;
+    bannerColor?: string | null;
+    profilePrimaryColor?: string | null;
+    profileAccentColor?: string | null;
+    usernameFont?: UsernameFont;
+    usernameGradient?: UsernameGradient;
+    usernameGlow?: UsernameGlow;
+    customStatus?: CustomStatus | null;
+    connections?: UserConnection[];
+    isPrivate?: boolean;
+    privacySettings?: PrivacySettings;
 }
 export interface AdminServerOwner {
     id: string;

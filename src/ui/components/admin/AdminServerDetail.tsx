@@ -422,11 +422,7 @@ export const AdminServerDetail = ({
                                     />
                                     <Stack gap="none">
                                         <Text size="sm" weight="black">
-                                            {server.owner.displayName ||
-                                                server.owner.username}
-                                        </Text>
-                                        <Text size="xs" variant="muted">
-                                            @{server.owner.username}
+                                            {server.owner.username}
                                         </Text>
                                     </Stack>
                                 </Box>

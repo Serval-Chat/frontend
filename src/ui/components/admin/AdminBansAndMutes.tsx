@@ -3,6 +3,7 @@ import { type ReactNode, useState } from 'react';
 import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 
+import type { AdminUserRef } from '@/api/admin/bans.api';
 import {
     useAdminBansList,
     useAdminMutesList,
@@ -12,6 +13,16 @@ import {
 import { Button } from '@/ui/components/common/Button';
 import { LoadingSpinner } from '@/ui/components/common/LoadingSpinner';
 import { Text } from '@/ui/components/common/Text';
+
+const userLabel = (
+    ref: AdminUserRef | undefined,
+    rawId: string | undefined,
+    fallback: string,
+): string => {
+    if (ref) return ref.username;
+    if (rawId) return `${rawId.slice(0, 8)}...`;
+    return fallback;
+};
 
 export const AdminBansAndMutes = (): ReactNode => {
     const [activeTab, setActiveTab] = useState<'bans' | 'mutes'>('bans');
@@ -91,19 +102,22 @@ const BansList = (): ReactNode => {
                                         )
                                     }
                                 >
-                                    User ID:{' '}
-                                    {ban.userId
-                                        ? `${ban.userId.slice(0, 8)}...`
-                                        : 'Unknown'}
+                                    {userLabel(
+                                        ban.user,
+                                        ban.userId,
+                                        'Unknown',
+                                    )}
                                 </Text>
                                 <Text
                                     className="text-muted-foreground"
                                     size="sm"
                                 >
                                     Issued by:{' '}
-                                    {ban.issuedBy
-                                        ? `${ban.issuedBy.slice(0, 8)}...`
-                                        : 'System'}
+                                    {userLabel(
+                                        ban.issuedByUser,
+                                        ban.issuedBy,
+                                        'System',
+                                    )}
                                 </Text>
                             </div>
                         </div>
@@ -179,19 +193,22 @@ const MutesList = (): ReactNode => {
                                         )
                                     }
                                 >
-                                    User ID:{' '}
-                                    {mute.userId
-                                        ? `${mute.userId.slice(0, 8)}...`
-                                        : 'Unknown'}
+                                    {userLabel(
+                                        mute.user,
+                                        mute.userId,
+                                        'Unknown',
+                                    )}
                                 </Text>
                                 <Text
                                     className="text-muted-foreground"
                                     size="sm"
                                 >
                                     Issued by:{' '}
-                                    {mute.issuedBy
-                                        ? `${mute.issuedBy.slice(0, 8)}...`
-                                        : 'System'}
+                                    {userLabel(
+                                        mute.issuedByUser,
+                                        mute.issuedBy,
+                                        'System',
+                                    )}
                                 </Text>
                             </div>
                         </div>

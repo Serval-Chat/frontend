@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { FriendRequest } from '@/api/friends/friends.types';
@@ -185,5 +185,242 @@ describe('UserProfileCard friend request action', (): void => {
         render(<UserProfileCard user={userB} />);
 
         expect(screen.getByText('Message')).toBeInTheDocument();
+    });
+});
+
+describe('UserProfileCard admin "Complete Profile View" data', (): void => {
+    const adminViewedUser: User = {
+        id: 'user-c',
+        username: 'cat',
+        displayName: 'Catflare',
+        decorationId: 'decoration-1',
+        profilePrimaryColor: '#000000',
+        profileAccentColor: '#ff0000',
+        bannerColor: '#e66100',
+        customStatus: {
+            text: 'I love Serchat',
+            expiresAt: null,
+            updatedAt: new Date(),
+        },
+        connections: [
+            {
+                id: 'conn-1',
+                type: 'Website',
+                value: 'ser.chat',
+                status: 'verified',
+            },
+        ],
+        isPrivate: true,
+        privacySettings: {
+            privateProfile: true,
+            hideDisplayName: true,
+            hidePronouns: true,
+            hideConnections: true,
+            hideBio: true,
+            hideStatus: true,
+        },
+    } as User;
+
+    beforeEach((): void => {
+        vi.clearAllMocks();
+        meMock.mockReturnValue({ data: { id: 'user-a' } });
+        friendsMock.mockReturnValue({ data: [] });
+        incomingRequestsMock.mockReturnValue({ data: [] });
+        outgoingRequestsMock.mockReturnValue({ data: [] });
+
+        vi.stubGlobal(
+            'matchMedia',
+            vi.fn().mockImplementation((query: string) => ({
+                matches: false,
+                media: query,
+                addEventListener: vi.fn(),
+                removeEventListener: vi.fn(),
+            })),
+        );
+    });
+
+    it('renders the custom status, verified connections, decoration and profile colors, hides friend actions, and does not show the "may be hidden" badge since the payload already includes full privacySettings', (): void => {
+        const { container } = render(
+            <UserProfileCard hideActions user={adminViewedUser} />,
+        );
+
+        expect(
+            screen.queryByText('Send Friend Request'),
+        ).not.toBeInTheDocument();
+        expect(screen.queryByText('Message')).not.toBeInTheDocument();
+
+        expect(screen.getByText('I love Serchat')).toBeInTheDocument();
+        expect(screen.getByText('ser.chat')).toBeInTheDocument();
+
+        expect(
+            container.querySelector('img[src*="decoration-1"]'),
+        ).not.toBeNull();
+
+        const card = container.querySelector('.relative.isolate');
+        expect(card?.getAttribute('style')).toContain('#000000');
+
+        expect(
+            container.querySelector('[class*="bg-black/50"]'),
+        ).toBeNull();
+    });
+
+    it('shows the "may be hidden" privacy badge for a restricted view where the backend withheld privacySettings entirely', (): void => {
+        const restrictedView: User = {
+            id: 'user-e',
+            username: 'private-cat',
+            isPrivate: true,
+        } as User;
+
+        const { container } = render(
+            <UserProfileCard hideActions user={restrictedView} />,
+        );
+
+        expect(
+            container.querySelector('[class*="bg-black/50"]'),
+        ).not.toBeNull();
+    });
+
+    it('shows the third-person "User made this field private to others" hint (not "You made this field private") when viewing someone else\'s hidden field', async (): Promise<void> => {
+        vi.stubGlobal(
+            'matchMedia',
+            vi.fn().mockImplementation((query: string) => ({
+                matches: true,
+                media: query,
+                addEventListener: vi.fn(),
+                removeEventListener: vi.fn(),
+            })),
+        );
+
+        const userWithHiddenBio: User = {
+            id: 'user-d',
+            username: 'catd',
+            bio: 'hidden bio text',
+            isPrivate: false,
+            privacySettings: {
+                privateProfile: false,
+                hideDisplayName: false,
+                hidePronouns: false,
+                hideConnections: false,
+                hideBio: true,
+                hideStatus: false,
+            },
+        } as User;
+
+        const { container } = render(
+            <UserProfileCard hideActions user={userWithHiddenBio} />,
+        );
+
+        const trigger = container
+            .querySelector('.ml-1.shrink-0')
+            ?.closest('div');
+        expect(trigger).not.toBeNull();
+        fireEvent.mouseEnter(trigger as HTMLElement);
+
+        await waitFor(() => {
+            expect(
+                screen.getByText('User made this field private to others'),
+            ).toBeInTheDocument();
+        });
+        expect(
+            screen.queryByText('You made this field private'),
+        ).not.toBeInTheDocument();
+    });
+
+    it('shows the first-person "You made this field private" hint when viewing your own hidden field', async (): Promise<void> => {
+        vi.stubGlobal(
+            'matchMedia',
+            vi.fn().mockImplementation((query: string) => ({
+                matches: true,
+                media: query,
+                addEventListener: vi.fn(),
+                removeEventListener: vi.fn(),
+            })),
+        );
+        meMock.mockReturnValue({ data: { id: 'user-d' } });
+
+        const ownUserWithHiddenBio: User = {
+            id: 'user-d',
+            username: 'catd',
+            bio: 'hidden bio text',
+            isPrivate: false,
+            privacySettings: {
+                privateProfile: false,
+                hideDisplayName: false,
+                hidePronouns: false,
+                hideConnections: false,
+                hideBio: true,
+                hideStatus: false,
+            },
+        } as User;
+
+        const { container } = render(
+            <UserProfileCard hideActions user={ownUserWithHiddenBio} />,
+        );
+
+        const trigger = container
+            .querySelector('.ml-1.shrink-0')
+            ?.closest('div');
+        expect(trigger).not.toBeNull();
+        fireEvent.mouseEnter(trigger as HTMLElement);
+
+        await waitFor(() => {
+            expect(
+                screen.getByText('You made this field private'),
+            ).toBeInTheDocument();
+        });
+        expect(
+            screen.queryByText('User made this field private to others'),
+        ).not.toBeInTheDocument();
+    });
+
+    it('shows the third-person hint even for your own account when adminView is set, since the admin panel is an inspection tool, not your settings page', async (): Promise<void> => {
+        vi.stubGlobal(
+            'matchMedia',
+            vi.fn().mockImplementation((query: string) => ({
+                matches: true,
+                media: query,
+                addEventListener: vi.fn(),
+                removeEventListener: vi.fn(),
+            })),
+        );
+        meMock.mockReturnValue({ data: { id: 'user-d' } });
+
+        const ownUserWithHiddenBio: User = {
+            id: 'user-d',
+            username: 'catd',
+            bio: 'hidden bio text',
+            isPrivate: false,
+            privacySettings: {
+                privateProfile: false,
+                hideDisplayName: false,
+                hidePronouns: false,
+                hideConnections: false,
+                hideBio: true,
+                hideStatus: false,
+            },
+        } as User;
+
+        const { container } = render(
+            <UserProfileCard
+                adminView
+                hideActions
+                user={ownUserWithHiddenBio}
+            />,
+        );
+
+        const trigger = container
+            .querySelector('.ml-1.shrink-0')
+            ?.closest('div');
+        expect(trigger).not.toBeNull();
+        fireEvent.mouseEnter(trigger as HTMLElement);
+
+        await waitFor(() => {
+            expect(
+                screen.getByText('User made this field private to others'),
+            ).toBeInTheDocument();
+        });
+        expect(
+            screen.queryByText('You made this field private'),
+        ).not.toBeInTheDocument();
     });
 });

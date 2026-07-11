@@ -44,12 +44,11 @@ const formatActionType = (type: string): string =>
         .join(' ');
 
 const formatLogUser = (
-    user: AuditLog['actorId'] | AuditLog['targetUserId'],
+    rawId: string | undefined,
+    userRef: AuditLog['actorIdUser'] | AuditLog['targetUserIdUser'],
 ): string => {
-    if (user === undefined || user === '') return 'Unknown';
-    if (typeof user === 'string') return user;
-    if (user.username !== '') return user.username;
-    if (user.id !== '') return user.id;
+    if (userRef) return userRef.username;
+    if (rawId) return rawId;
     return 'Unknown';
 };
 
@@ -109,14 +108,10 @@ const LogEntry = ({ log }: LogEntryProps): ReactNode => {
                             as="span"
                             className="truncate"
                             size="sm"
-                            title={
-                                typeof log.actorId === 'object'
-                                    ? log.actorId.id
-                                    : log.actorId
-                            }
+                            title={log.actorId}
                             weight="medium"
                         >
-                            {formatLogUser(log.actorId)}
+                            {formatLogUser(log.actorId, log.actorIdUser)}
                         </Text>
                     </div>
                 </TableCell>
@@ -152,13 +147,12 @@ const LogEntry = ({ log }: LogEntryProps): ReactNode => {
                                     as="span"
                                     className="truncate"
                                     size="sm"
-                                    title={
-                                        typeof log.targetUserId === 'object'
-                                            ? log.targetUserId.id
-                                            : log.targetUserId
-                                    }
+                                    title={log.targetUserId}
                                 >
-                                    {formatLogUser(log.targetUserId)}
+                                    {formatLogUser(
+                                        log.targetUserId,
+                                        log.targetUserIdUser,
+                                    )}
                                 </Text>
                             </>
                         ) : (

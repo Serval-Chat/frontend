@@ -75,6 +75,8 @@ interface UserProfileCardProps {
     disableGlow?: boolean;
     adminData?: AdminExtendedUser;
     nickname?: string;
+    hideActions?: boolean;
+    adminView?: boolean;
 
     allServerRoles?: Role[];
     canManageRoles?: boolean;
@@ -86,11 +88,22 @@ interface UserProfileCardProps {
 
 const PrivateFieldHint = ({
     visible,
+    isOwnProfile,
+    adminView,
 }: {
     visible: boolean;
+    isOwnProfile: boolean;
+    adminView?: boolean;
 }): React.ReactNode =>
     visible ? (
-        <Tooltip content="You made this field private" position="top">
+        <Tooltip
+            content={
+                isOwnProfile && !adminView
+                    ? 'You made this field private'
+                    : 'User made this field private to others'
+            }
+            position="top"
+        >
             <HelpCircle
                 className="ml-1 shrink-0 text-muted-foreground/60"
                 size={12}
@@ -371,6 +384,7 @@ const ProfileCardAdminView = ({
 const ProfileCardDetails = ({
     user,
     isOwnProfile,
+    adminView,
     ps,
     finalCustomText,
     finalCustomEmoji,
@@ -381,6 +395,7 @@ const ProfileCardDetails = ({
 }: {
     user?: User | Partial<User>;
     isOwnProfile: boolean;
+    adminView?: boolean;
     ps?: User['privacySettings'];
     finalCustomText?: string;
     finalCustomEmoji?: string;
@@ -416,7 +431,9 @@ const ProfileCardDetails = ({
                 >
                     {finalCustomText}
                     <PrivateFieldHint
-                        visible={isOwnProfile ? ps?.hideStatus === true : false}
+                        adminView={adminView}
+                        isOwnProfile={isOwnProfile}
+                        visible={ps?.hideStatus === true}
                     />
                 </Text>
             </Box>
@@ -434,7 +451,9 @@ const ProfileCardDetails = ({
                         About Me
                     </Heading>
                     <PrivateFieldHint
-                        visible={isOwnProfile ? ps?.hideBio === true : false}
+                        adminView={adminView}
+                        isOwnProfile={isOwnProfile}
+                        visible={ps?.hideBio === true}
                     />
                 </div>
                 <Box className="text-[10px] leading-relaxed whitespace-pre-wrap text-foreground/90">
@@ -453,9 +472,9 @@ const ProfileCardDetails = ({
                         Connections
                     </Heading>
                     <PrivateFieldHint
-                        visible={
-                            isOwnProfile ? ps?.hideConnections === true : false
-                        }
+                        adminView={adminView}
+                        isOwnProfile={isOwnProfile}
+                        visible={ps?.hideConnections === true}
                     />
                 </div>
                 <Box className="flex flex-col gap-1.5">
@@ -650,6 +669,7 @@ const ProfileCardActions = ({
     hasCustomColors,
     cardOnDark,
     friendStatus,
+    hideActions,
     onMessage,
     onAddFriend,
     onRemoveFriend,
@@ -661,13 +681,19 @@ const ProfileCardActions = ({
     hasCustomColors: boolean;
     cardOnDark: boolean;
     friendStatus: FriendRelationshipStatus;
+    hideActions?: boolean;
     onMessage: () => void;
     onAddFriend: () => void;
     onRemoveFriend: () => void;
     onAcceptFriend: () => void;
     onCancelFriendRequest: () => void;
 }): React.ReactNode => {
-    if (currentUserId === user?.id || user?.isBot || isWebhookUser(user)) {
+    if (
+        hideActions ||
+        currentUserId === user?.id ||
+        user?.isBot ||
+        isWebhookUser(user)
+    ) {
         return null;
     }
 
@@ -767,6 +793,8 @@ export const UserProfileCard = ({
     serverId,
     userId: propUserId,
     nickname,
+    hideActions,
+    adminView,
 }: UserProfileCardProps) => {
     const { data: currentUser } = useMe();
     const navigate = useNavigate();
@@ -886,7 +914,9 @@ export const UserProfileCard = ({
                 usernameGradient={user?.usernameGradient}
                 onBannerClick={onBannerClick}
             />
-            {user?.isPrivate === true && currentUser?.id !== user?.id ? (
+            {user?.isPrivate === true &&
+            currentUser?.id !== user?.id &&
+            user?.privacySettings === undefined ? (
                 <div className="absolute top-3 right-3 z-10">
                     <Tooltip
                         content="This profile is private. Some fields may be hidden from you."
@@ -963,11 +993,9 @@ export const UserProfileCard = ({
                         </StyledUserName>
                         {user?.isBot ? <BotTag className="ml-0" /> : null}
                         <PrivateFieldHint
-                            visible={
-                                isOwnProfile
-                                    ? ps?.hideDisplayName === true
-                                    : false
-                            }
+                            adminView={adminView}
+                            isOwnProfile={isOwnProfile}
+                            visible={ps?.hideDisplayName === true}
                         />
                     </Box>
 
@@ -985,11 +1013,9 @@ export const UserProfileCard = ({
                                 <span>•</span>
                                 {user.pronouns}
                                 <PrivateFieldHint
-                                    visible={
-                                        isOwnProfile
-                                            ? ps?.hidePronouns === true
-                                            : false
-                                    }
+                                    adminView={adminView}
+                                    isOwnProfile={isOwnProfile}
+                                    visible={ps?.hidePronouns === true}
                                 />
                             </Text>
                         ) : null}
@@ -1009,6 +1035,7 @@ export const UserProfileCard = ({
                 </Box>
 
                 <ProfileCardDetails
+                    adminView={adminView}
                     bioNodes={bioNodes}
                     finalCustomEmoji={finalCustomEmoji}
                     finalCustomText={finalCustomText}
@@ -1041,6 +1068,7 @@ export const UserProfileCard = ({
                     currentUserId={currentUser?.id}
                     friendStatus={friendStatus}
                     hasCustomColors={hasCustomColors}
+                    hideActions={hideActions}
                     user={user}
                     onAcceptFriend={(): void => {
                         if (incomingRequest)

@@ -9,67 +9,13 @@ import {
 } from 'lucide-react';
 
 import type { Server } from '@/api/servers/servers.types';
-import type { User } from '@/api/users/users.types';
 import type { Warning } from '@/api/warnings/warnings.types';
 import type { AdminExtendedUser, AdminUserServer } from '@/types/admin';
 import { Heading } from '@/ui/components/common/Heading';
-import { StyledUserName } from '@/ui/components/common/StyledUserName';
 import { Text } from '@/ui/components/common/Text';
-import { UserProfilePicture } from '@/ui/components/common/UserProfilePicture';
 import { ServerIcon } from '@/ui/components/servers/ServerIcon';
-import { resolveApiUrl } from '@/utils/apiUrl';
 import { cn } from '@/utils/cn';
 import { APP_LOCALE } from '@/utils/locale';
-
-export const AdminUserSummaryHeader = ({
-    adminData,
-}: {
-    adminData: AdminExtendedUser;
-}): React.ReactNode => (
-    <div className="overflow-hidden rounded-2xl border border-border-subtle bg-bg-subtle">
-        <div className="relative h-24 w-full overflow-hidden">
-            <div
-                className="h-full w-full bg-cover bg-center"
-                style={{
-                    backgroundImage: adminData.banner
-                        ? `url(${resolveApiUrl(adminData.banner)})`
-                        : 'none',
-                    backgroundColor: adminData.banner
-                        ? 'transparent'
-                        : 'var(--color-bg-secondary)',
-                }}
-            />
-        </div>
-        <div className="px-6 pb-6">
-            <div className="relative -mt-12 mb-4">
-                <UserProfilePicture
-                    size="xl"
-                    src={
-                        resolveApiUrl(adminData.profilePicture || undefined) ||
-                        undefined
-                    }
-                    username={adminData.username}
-                />
-            </div>
-            <div className="flex flex-col">
-                <StyledUserName
-                    className="text-2xl"
-                    user={
-                        {
-                            ...adminData,
-                            profilePicture:
-                                adminData.profilePicture || undefined,
-                            banner: adminData.banner || undefined,
-                        } as unknown as User
-                    }
-                >
-                    {adminData.displayName || adminData.username}
-                </StyledUserName>
-                <Text variant="muted">@{adminData.username}</Text>
-            </div>
-        </div>
-    </div>
-);
 
 export const AdminAccountStatus = ({
     adminData,
@@ -86,8 +32,8 @@ export const AdminAccountStatus = ({
         <Heading className="mb-4" level={3} variant="admin-sub">
             Account Status
         </Heading>
-        <div className="grid grid-cols-2 gap-3">
-            <div className="rounded-lg border border-border-subtle bg-bg-secondary/50 p-3">
+        <div className="flex items-start gap-3">
+            <div className="flex aspect-square w-24 flex-col justify-center rounded-lg border border-border-subtle bg-bg-secondary/50 p-3">
                 <Text
                     as="span"
                     className="mb-1 block text-[10px] tracking-tight uppercase"
@@ -109,7 +55,7 @@ export const AdminAccountStatus = ({
                     {adminData.warningCount}
                 </Text>
             </div>
-            <div className="rounded-lg border border-border-subtle bg-bg-secondary/50 p-3">
+            <div className="flex aspect-square w-24 flex-col justify-center rounded-lg border border-border-subtle bg-bg-secondary/50 p-3">
                 <Text
                     as="span"
                     className="mb-1 block text-[10px] tracking-tight uppercase"
