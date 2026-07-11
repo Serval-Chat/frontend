@@ -223,7 +223,10 @@ export const ReplyPreview = React.memo(
                         {user.nickname || user.displayName || user.username}
                     </StyledUserName>
                     {user.isBot ? (
-                        <BotTag className="h-3.5 shrink-0 px-1 text-[8px]" />
+                        <BotTag
+                            className="h-3.5 shrink-0 px-1 text-[8px]"
+                            verified={user.botVerified}
+                        />
                     ) : null}
                     {isWebhook ? (
                         <BotTag

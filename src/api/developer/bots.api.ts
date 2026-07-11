@@ -56,6 +56,13 @@ export const botsApi = {
             .post<{ token: string }>(`/api/v1/bots/${clientId}/reset-token`, {})
             .then((r): { token: string } => r.data),
 
+    requestVerification: (clientId: string): Promise<{ message: string }> =>
+        apiClient
+            .post<{
+                message: string;
+            }>(`/api/v1/bots/${clientId}/verification-request`, {})
+            .then((r): { message: string } => r.data),
+
     authorize: (
         clientId: string,
         serverId: string,

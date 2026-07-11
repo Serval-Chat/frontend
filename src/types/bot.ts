@@ -41,6 +41,7 @@ export interface BotUser {
     banner?: string;
     bannerColor?: string;
     isBot: boolean;
+    botVerified: boolean;
     createdAt: string;
 }
 
@@ -53,6 +54,9 @@ export interface Bot {
     createdAt: string;
     updatedAt: string;
     user?: BotUser;
+    verified: boolean;
+    verificationRequested: boolean;
+    verificationOverride: 'verified' | 'unverified' | null;
 }
 
 export interface CreateBotPayload {
@@ -77,4 +81,5 @@ export interface PublicBotInfo {
     usernameGradient?: { colors: string[] };
     botPermissions: BotPermissions;
     serverCount: number;
+    verified: boolean;
 }

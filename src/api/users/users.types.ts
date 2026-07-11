@@ -92,6 +92,7 @@ export interface AdminPermissions {
     viewLogs?: boolean;
     manageServer?: boolean;
     manageInvites?: boolean;
+    manageBots?: boolean;
 }
 
 export interface PrivacySettings {
@@ -144,6 +145,7 @@ export interface User {
     username: string;
     nickname?: string | null;
     isBot?: boolean;
+    botVerified?: boolean;
     displayName?: string | null;
     profilePicture?: string;
     usernameFont?: UsernameFont;

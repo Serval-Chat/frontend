@@ -991,7 +991,12 @@ export const UserProfileCard = ({
                         >
                             {nickname || user?.displayName || user?.username}
                         </StyledUserName>
-                        {user?.isBot ? <BotTag className="ml-0" /> : null}
+                        {user?.isBot ? (
+                            <BotTag
+                                className="ml-0 h-4"
+                                verified={user.botVerified}
+                            />
+                        ) : null}
                         <PrivateFieldHint
                             adminView={adminView}
                             isOwnProfile={isOwnProfile}

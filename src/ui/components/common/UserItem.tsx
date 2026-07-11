@@ -960,7 +960,10 @@ const UserItemInner = React.memo(
                                     {displayName || username}
                                 </StyledUserName>
                                 {userProfile?.isBot ? (
-                                    <BotTag className="h-4" />
+                                    <BotTag
+                                        className="h-4"
+                                        verified={userProfile.botVerified}
+                                    />
                                 ) : null}
                             </Box>
 

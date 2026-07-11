@@ -20,6 +20,7 @@ const createDefaultPermissions = () => ({
     viewLogs: false,
     manageServer: false,
     manageInvites: false,
+    manageBots: false,
 });
 
 /**

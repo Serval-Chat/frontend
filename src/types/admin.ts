@@ -50,6 +50,7 @@ export interface AdminPermissions {
     viewLogs: boolean;
     manageServer: boolean;
     manageInvites: boolean;
+    manageBots: boolean;
 }
 
 export interface AdminUser {
@@ -129,6 +130,28 @@ export interface AdminServerListItem {
     discoveryEnabled: boolean;
     realMessageCount?: number;
     weightScore?: number;
+}
+
+export interface AdminBotOwner {
+    id: string;
+    username: string;
+    displayName: string | null;
+    profilePicture: string | null;
+}
+
+export interface AdminBotListItem {
+    id: string;
+    clientId: string;
+    username: string;
+    displayName: string | null;
+    profilePicture: string | null;
+    ownerId: string;
+    owner: AdminBotOwner | null;
+    serverCount: number;
+    createdAt: string | Date;
+    verified: boolean;
+    verificationOverride: 'verified' | 'unverified' | null;
+    verificationRequested: boolean;
 }
 
 export interface AdminServerVerificationStats {

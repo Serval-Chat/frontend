@@ -11,6 +11,7 @@ import {
     useCreateBot,
     useDeleteBot,
     usePublicBotInfo,
+    useRequestBotVerification,
 } from '@/hooks/developer/useBots';
 import type { Bot, PublicBotInfo } from '@/types/bot';
 
@@ -26,6 +27,7 @@ vi.mock('@/api/developer/bots.api', () => ({
         authorize: vi.fn(),
         getServers: vi.fn(),
         removeFromServer: vi.fn(),
+        requestVerification: vi.fn(),
     },
 }));
 
@@ -69,6 +71,7 @@ const mockPublicInfo: PublicBotInfo = {
     displayName: 'My Bot',
     botPermissions: mockPermissions,
     serverCount: 5,
+    verified: false,
 };
 
 const mockBot: Bot = {
@@ -79,6 +82,9 @@ const mockBot: Bot = {
     botPermissions: mockPermissions,
     createdAt: '2024-01-01T00:00:00Z',
     updatedAt: '2024-01-01T00:00:00Z',
+    verified: false,
+    verificationRequested: false,
+    verificationOverride: null,
 };
 
 describe('usePublicBotInfo', (): void => {
@@ -248,5 +254,48 @@ describe('useDeleteBot', (): void => {
             expect(result.current.isSuccess).toBe(true);
         });
         expect(botsApi.delete).toHaveBeenCalledWith('abc123');
+    });
+});
+
+describe('useRequestBotVerification', (): void => {
+    beforeEach(() => vi.clearAllMocks());
+
+    it('calls requestVerification api with clientId and returns the message', async (): Promise<void> => {
+        vi.mocked(botsApi.requestVerification).mockResolvedValue({
+            message: 'Verification requested',
+        });
+        const { result } = renderHook(() => useRequestBotVerification(), {
+            wrapper: makeWrapper(),
+        });
+
+        await act(async (): Promise<void> => {
+            result.current.mutate({ clientId: 'abc123' });
+        });
+
+        await waitFor((): void => {
+            expect(result.current.isSuccess).toBe(true);
+        });
+        expect(botsApi.requestVerification).toHaveBeenCalledWith('abc123');
+        expect(result.current.data).toEqual({
+            message: 'Verification requested',
+        });
+    });
+
+    it('surfaces errors when the caller is not the bot owner', async (): Promise<void> => {
+        vi.mocked(botsApi.requestVerification).mockRejectedValue(
+            new Error('Not your bot'),
+        );
+        const { result } = renderHook(() => useRequestBotVerification(), {
+            wrapper: makeWrapper(),
+        });
+
+        await act(async (): Promise<void> => {
+            result.current.mutate({ clientId: 'abc123' });
+        });
+
+        await waitFor((): void => {
+            expect(result.current.isError).toBe(true);
+        });
+        expect(result.current.error?.message).toBe('Not your bot');
     });
 });

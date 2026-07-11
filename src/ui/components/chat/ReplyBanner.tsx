@@ -46,7 +46,10 @@ export const ReplyBanner = ({
                 {replyingUser.displayName || replyingUser.username}
             </StyledUserName>
             {replyingUser.isBot ? (
-                <BotTag className="h-3.5 px-1 text-[8px]" />
+                <BotTag
+                    className="h-3.5 px-1 text-[8px]"
+                    verified={replyingUser.botVerified}
+                />
             ) : null}
             <Box className="flex items-center gap-1 truncate overflow-hidden text-xs whitespace-nowrap text-muted-foreground opacity-80">
                 {replyingTo.interaction && !replyingTo.text ? (

@@ -1,23 +1,26 @@
 import React from 'react';
 
+import { Check } from 'lucide-react';
+
 import { cn } from '@/utils/cn';
 
 interface BotTagProps {
     className?: string;
     label?: string;
+    verified?: boolean;
 }
 
 /**
  * @description A consistent BOT tag for identifying bot users in the UI.
  */
 export const BotTag = React.memo(
-    ({ className, label = 'BOT' }: BotTagProps) => {
+    ({ className, label = 'BOT', verified = false }: BotTagProps) => {
         const isWebhook = label === 'WEBHOOK';
 
         return (
             <span
                 className={cn(
-                    'ml-1 inline-flex items-center rounded px-1 py-0.5 text-[10px] leading-none font-bold uppercase select-none',
+                    'ml-1 inline-flex items-center gap-0.5 rounded px-1 py-0.5 text-[10px] leading-none font-bold uppercase select-none',
                     className,
                 )}
                 style={{
@@ -29,6 +32,9 @@ export const BotTag = React.memo(
                         : 'var(--bot-tag-text, #ffffff)',
                 }}
             >
+                {verified && !isWebhook ? (
+                    <Check aria-label="Verified bot" size={9} strokeWidth={3} />
+                ) : null}
                 {label}
             </span>
         );

@@ -69,7 +69,9 @@ export const MessageHeader = React.memo(
                         {user.nickname || user.displayName || user.username}
                     </StyledUserName>
                 </Box>
-                {user.isBot ? <BotTag className="h-4" /> : null}
+                {user.isBot ? (
+                    <BotTag className="h-4" verified={user.botVerified} />
+                ) : null}
                 {isWebhook && !user.isBot ? (
                     <BotTag className="h-4" label="WEBHOOK" />
                 ) : null}

@@ -52,6 +52,7 @@ const createDefaultPermissions = () => ({
     viewLogs: false,
     manageServer: false,
     manageInvites: false,
+    manageBots: false,
 });
 
 const PERMISSION_KEYS: (keyof AdminPermissions)[] = [
@@ -65,6 +66,7 @@ const PERMISSION_KEYS: (keyof AdminPermissions)[] = [
     'viewLogs',
     'manageServer',
     'manageInvites',
+    'manageBots',
 ];
 
 const PermissionEditor = ({
@@ -296,6 +298,9 @@ const getPermissionDescription = (key: string): string => {
         }
         case 'manageInvites': {
             return 'Allows managing and revoking invite codes';
+        }
+        case 'manageBots': {
+            return 'Allows reviewing and granting bot verification badges';
         }
         default: {
             return 'Grants access to this feature';

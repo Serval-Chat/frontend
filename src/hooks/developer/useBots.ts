@@ -162,6 +162,24 @@ export const useResetBotToken = (): UseMutationResult<
     });
 };
 
+export const useRequestBotVerification = (): UseMutationResult<
+    { message: string },
+    Error,
+    { clientId: string }
+> => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: ({ clientId }): Promise<{ message: string }> =>
+            botsApi.requestVerification(clientId),
+        onSuccess: (_, { clientId }): void => {
+            void queryClient.invalidateQueries({ queryKey: ['dev-bots'] });
+            void queryClient.invalidateQueries({
+                queryKey: ['dev-bot', clientId],
+            });
+        },
+    });
+};
+
 export const useBotServers = (
     clientId: string,
 ): UseQueryResult<{ count: number }> =>

@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import {
     BadgeCheck,
     BarChart3,
+    Bot,
     FileText,
     Server,
     Settings,
@@ -55,6 +56,7 @@ const SidebarItem = ({ icon, label, to }: SidebarItemProps): ReactNode => {
 export const AdminSidebar = (): ReactNode => {
     const location = useLocation();
     const isServersOpen = location.pathname.startsWith('/admin/servers');
+    const isBotsOpen = location.pathname.startsWith('/admin/bots');
 
     return (
         <aside className="fixed top-0 left-0 flex h-full w-64 flex-col border-r border-border-subtle bg-background/50 backdrop-blur-xl">
@@ -98,6 +100,38 @@ export const AdminSidebar = (): ReactNode => {
                                     className={
                                         location.pathname ===
                                         '/admin/servers/review'
+                                            ? 'text-primary'
+                                            : 'text-muted-foreground'
+                                    }
+                                    size={14}
+                                />
+                                Awaiting Review
+                            </Link>
+                        </div>
+                    ) : null}
+                </div>
+
+                <div className="space-y-1">
+                    <SidebarItem
+                        icon={<Bot size={18} />}
+                        label="Bots"
+                        to="/admin/bots"
+                    />
+                    {isBotsOpen ? (
+                        <div className="animate-in slide-in-from-top-1 fade-in ml-9 duration-200">
+                            <Link
+                                className={cn(
+                                    'flex w-full items-center gap-3 rounded-lg border-none px-3 py-1.5 text-xs font-medium transition-all duration-200 hover:no-underline',
+                                    location.pathname === '/admin/bots/review'
+                                        ? 'text-primary'
+                                        : 'text-muted-foreground hover:text-foreground',
+                                )}
+                                to="/admin/bots/review"
+                            >
+                                <BadgeCheck
+                                    className={
+                                        location.pathname ===
+                                        '/admin/bots/review'
                                             ? 'text-primary'
                                             : 'text-muted-foreground'
                                     }

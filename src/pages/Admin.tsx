@@ -13,6 +13,8 @@ import { AdminAuditLogs } from '@/ui/components/admin/AdminAuditLogs';
 import { AdminAwaitingReview } from '@/ui/components/admin/AdminAwaitingReview';
 import { AdminBadges } from '@/ui/components/admin/AdminBadges';
 import { AdminBansAndMutes } from '@/ui/components/admin/AdminBansAndMutes';
+import { AdminBots } from '@/ui/components/admin/AdminBots';
+import { AdminBotsAwaitingReview } from '@/ui/components/admin/AdminBotsAwaitingReview';
 import { AdminIAM } from '@/ui/components/admin/AdminIAM';
 import { AdminInvites } from '@/ui/components/admin/AdminInvites';
 import { AdminLayout } from '@/ui/components/admin/AdminLayout';
@@ -97,6 +99,9 @@ const AdminContent = ({ navigate }: AdminContentProps): ReactNode => (
             path="servers/:serverId"
         />
 
+        <Route element={<AdminBots />} path="bots" />
+        <Route element={<AdminBotsAwaitingReview />} path="bots/review" />
+
         <Route element={<AdminAuditLogs />} path="logs" />
         <Route element={<AdminBadges />} path="badges" />
         <Route element={<AdminInvites />} path="invites" />
@@ -133,6 +138,8 @@ export const Admin = (): ReactNode => {
         }
         if (path === '/admin/users') return 'User Management';
         if (path === '/admin/servers') return 'Server Moderation';
+        if (path === '/admin/bots/review') return 'Bot Verification Requests';
+        if (path === '/admin/bots') return 'Bot Moderation';
         if (path === '/admin/bans') return 'Bans & Mutes';
         if (path === '/admin/logs') return 'Audit Logs';
         if (path === '/admin/badges') return 'Badges';

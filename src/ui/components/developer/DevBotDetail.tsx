@@ -2,6 +2,7 @@ import React, { useMemo, useReducer, useRef, useState } from 'react';
 
 import {
     ArrowLeft,
+    BadgeCheck,
     Check,
     CheckCircle,
     Copy,
@@ -14,6 +15,7 @@ import {
     useBot,
     useBotServers,
     useDeleteBot,
+    useRequestBotVerification,
     useResetBotToken,
     useUpdateBot,
     useUpdateBotPermissions,
@@ -329,6 +331,53 @@ const BotConfigSections = ({
     </>
 );
 
+const BotVerificationSection = ({
+    verified,
+    verificationRequested,
+    isRequesting,
+    onRequest,
+}: {
+    verified: boolean;
+    verificationRequested: boolean;
+    isRequesting: boolean;
+    onRequest: () => void;
+}): React.ReactNode => (
+    <Section title="Verification">
+        <div className="flex items-center justify-between gap-4">
+            <div className="space-y-1">
+                <Text as="p" weight="bold">
+                    Verified Bot Badge
+                </Text>
+                <Text as="p" size="xs" variant="muted">
+                    Verified bots get a badge to tell everyone this bot is
+                    trustworthy and reviewed by staff.
+                </Text>
+            </div>
+            {verified ? (
+                <Text
+                    className="flex items-center gap-1.5 px-4 font-semibold text-primary"
+                    size="sm"
+                >
+                    <BadgeCheck size={16} /> Verified
+                </Text>
+            ) : verificationRequested ? (
+                <Text className="px-4 font-semibold" size="sm" variant="muted">
+                    Pending Review
+                </Text>
+            ) : (
+                <Button
+                    icon={BadgeCheck}
+                    loading={isRequesting}
+                    variant="primary"
+                    onClick={onRequest}
+                >
+                    Apply for verified bot badge
+                </Button>
+            )}
+        </div>
+    </Section>
+);
+
 export const DevBotDetail = ({
     clientId,
     onBack,
@@ -341,6 +390,7 @@ export const DevBotDetail = ({
     const uploadBanner = useUploadBotBanner();
     const resetToken = useResetBotToken();
     const deleteBot = useDeleteBot();
+    const requestVerification = useRequestBotVerification();
 
     const user = bot
         ? typeof bot.userId === 'object'
@@ -536,6 +586,15 @@ export const DevBotDetail = ({
                         setPermissions((prev) => prev && { ...prev, [key]: v });
                     }}
                     onResetToken={handleResetToken}
+                />
+
+                <BotVerificationSection
+                    isRequesting={requestVerification.isPending}
+                    verificationRequested={bot.verificationRequested}
+                    verified={bot.verified}
+                    onRequest={(): void => {
+                        requestVerification.mutate({ clientId });
+                    }}
                 />
 
                 <Section title="Danger Zone">

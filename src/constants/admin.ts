@@ -37,6 +37,7 @@ export const ROLE_PRESETS: Record<string, Partial<AdminPermissions>> = {
         viewLogs: true,
         manageServer: true,
         manageInvites: true,
+        manageBots: true,
     },
     moderator: {
         adminAccess: false,
@@ -49,6 +50,7 @@ export const ROLE_PRESETS: Record<string, Partial<AdminPermissions>> = {
         viewLogs: true,
         manageServer: false,
         manageInvites: false,
+        manageBots: false,
     },
     user: {
         adminAccess: false,
@@ -61,5 +63,6 @@ export const ROLE_PRESETS: Record<string, Partial<AdminPermissions>> = {
         viewLogs: false,
         manageServer: false,
         manageInvites: false,
+        manageBots: false,
     },
 };
