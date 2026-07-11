@@ -187,3 +187,48 @@ export const useTogglePinFriend = (): UseMutationResult<
         },
     });
 };
+
+export const useSetFriendNickname = (): UseMutationResult<
+    { friendId: string; nickname: string },
+    Error,
+    { friendId: string; nickname: string }
+> => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: ({ friendId, nickname }): Promise<{
+            friendId: string;
+            nickname: string;
+        }> => friendsApi.setFriendNickname(friendId, nickname),
+        onSuccess: ({ friendId, nickname }): void => {
+            queryClient.setQueriesData<Friend[]>(
+                { queryKey: FRIENDS_QUERY_KEY },
+                (old): Friend[] | undefined =>
+                    old?.map(
+                        (f): Friend =>
+                            f.id === friendId ? { ...f, nickname } : f,
+                    ),
+            );
+        },
+    });
+};
+
+export const useClearFriendNickname = (): UseMutationResult<
+    void,
+    Error,
+    string
+> => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: friendsApi.clearFriendNickname,
+        onSuccess: (_data, friendId): void => {
+            queryClient.setQueriesData<Friend[]>(
+                { queryKey: FRIENDS_QUERY_KEY },
+                (old): Friend[] | undefined =>
+                    old?.map(
+                        (f): Friend =>
+                            f.id === friendId ? { ...f, nickname: null } : f,
+                    ),
+            );
+        },
+    });
+};

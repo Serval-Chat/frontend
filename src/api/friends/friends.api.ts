@@ -75,4 +75,19 @@ export const friendsApi = {
         }>(`/api/v1/friends/${friendId}/pin`);
         return response.data;
     },
+
+    setFriendNickname: async (
+        friendId: string,
+        nickname: string,
+    ): Promise<{ friendId: string; nickname: string }> => {
+        const response = await apiClient.patch<{
+            friendId: string;
+            nickname: string;
+        }>(`/api/v1/friends/${friendId}/nickname`, { nickname });
+        return response.data;
+    },
+
+    clearFriendNickname: async (friendId: string): Promise<void> => {
+        await apiClient.delete(`/api/v1/friends/${friendId}/nickname`);
+    },
 };

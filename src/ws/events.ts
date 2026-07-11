@@ -561,6 +561,7 @@ export const WsEvents = {
     FRIEND_ADDED: 'friend_added',
     FRIEND_REMOVED: 'friend_removed',
     FRIEND_PIN_UPDATED: 'friend_pin_updated',
+    FRIEND_NICKNAME_UPDATED: 'friend_nickname_updated',
     INCOMING_REQUEST_ADDED: 'incoming_request_added',
     INCOMING_REQUEST_REMOVED: 'incoming_request_removed',
 

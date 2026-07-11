@@ -96,7 +96,7 @@ export const Message = React.memo(
         const [showProfile, setShowProfile] = React.useState(false);
         const [showPicker, setShowPicker] = React.useState(false);
         const [isEditing, setIsEditing] = React.useState(false);
-        const [isContextMenuOpen, setIsContextMenuOpen] = React.useState(false);
+        const [, setIsContextMenuOpen] = React.useState(false);
         const [colorResolverReport, setColorResolverReport] = React.useState<
             string | null
         >(null);
@@ -112,7 +112,7 @@ export const Message = React.memo(
         const { mutate: deleteMessage } = useDeleteMessage();
         const { mutate: togglePin } = useTogglePin();
         const { mutate: toggleSticky } = useToggleSticky();
-        const { data: friends } = useFriends({ enabled: isContextMenuOpen });
+        const { data: friends } = useFriends();
         const { mutate: sendFriendRequest } = useSendFriendRequest();
         const { mutate: removeFriend } = useRemoveFriend();
         const { customCategories } = useCustomEmojis({ enabled: showPicker });
@@ -256,6 +256,13 @@ export const Message = React.memo(
             [disableActions, message, onReplyToMessage],
         );
 
+        const localNickname = React.useMemo(
+            (): string | undefined =>
+                friends?.find((f): boolean => f.id === user.id)?.nickname ??
+                undefined,
+            [friends, user.id],
+        );
+
         const isColorsDisabled =
             disableColors ||
             me?.settings?.disableCustomUsernameColors ||
@@ -275,7 +282,10 @@ export const Message = React.memo(
                 buildUsernameColorResolverReport({
                     label: 'Message username',
                     renderedName:
-                        user.nickname || user.displayName || user.username,
+                        localNickname ||
+                        user.nickname ||
+                        user.displayName ||
+                        user.username,
                     user,
                     role: resolvedRole,
                     disableColors: isColorsDisabled,
@@ -293,6 +303,7 @@ export const Message = React.memo(
             );
         }, [
             user,
+            localNickname,
             resolvedRole,
             isColorsDisabled,
             isGlowDisabled,
@@ -458,6 +469,7 @@ export const Message = React.memo(
                             isEdited={message.isEdited}
                             isGroupStart={isGroupStart}
                             isWebhook={message.isWebhook}
+                            localNickname={localNickname}
                             role={resolvedRole}
                             showUsersPronouns={me?.settings?.showUsersPronouns}
                             timestamp={message.createdAt}

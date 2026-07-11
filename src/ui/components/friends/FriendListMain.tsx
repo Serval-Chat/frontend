@@ -3,7 +3,7 @@ import React from 'react';
 import { CheckCircle, MessageSquare, Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-import { useFriendProfiles } from '@/api/friends/friends.queries';
+import { useFriendProfiles, useFriends } from '@/api/friends/friends.queries';
 import type { User } from '@/api/users/users.types';
 import { useAppSelector } from '@/store/hooks';
 import { Heading } from '@/ui/components/common/Heading';
@@ -17,14 +17,17 @@ import { UserProfilePicture } from '@/ui/components/common/UserProfilePicture';
 import type { UserStatus } from '@/ui/components/common/UserProfileStatusIndicator';
 import { Box } from '@/ui/components/layout/Box';
 import { cn } from '@/utils/cn';
+import { resolveDisplayName } from '@/utils/displayName';
 import { isCustomEmojiId } from '@/utils/validation';
 
 const FriendProfileRow = React.memo(
     ({
         friend,
+        nickname,
         onOpenDm,
     }: {
         friend: User;
+        nickname?: string;
         onOpenDm: (friendId: string) => void;
     }) => {
         const userId = String(friend.id);
@@ -40,7 +43,9 @@ const FriendProfileRow = React.memo(
             (state): string | null | undefined =>
                 state.presence.users[userId]?.customStatus?.emoji,
         );
-        const displayName = friend.displayName || friend.username;
+        const displayName =
+            resolveDisplayName(nickname, friend.displayName, friend.username) ??
+            friend.username;
         const customText = presenceCustomText ?? friend.customStatus?.text;
         const customEmoji = presenceCustomEmoji ?? friend.customStatus?.emoji;
 
@@ -112,6 +117,7 @@ FriendProfileRow.displayName = 'FriendProfileRow';
 
 export const FriendListMain = React.memo(() => {
     const { data: friends, isLoading } = useFriendProfiles();
+    const { data: friendships } = useFriends();
     const navigate = useNavigate();
     const [search, setSearch] = React.useState('');
     const handleOpenDm = React.useCallback(
@@ -121,29 +127,49 @@ export const FriendListMain = React.memo(() => {
         [navigate],
     );
 
+    const nicknameById = React.useMemo((): Map<string, string> => {
+        const map = new Map<string, string>();
+        for (const f of friendships ?? []) {
+            if (f.nickname) map.set(f.id, f.nickname);
+        }
+        return map;
+    }, [friendships]);
+
+    const getDisplayName = React.useCallback(
+        (f: User): string =>
+            resolveDisplayName(
+                nicknameById.get(String(f.id)),
+                f.displayName,
+                f.username,
+            ) ?? f.username,
+        [nicknameById],
+    );
+
     const filteredFriends = React.useMemo(() => {
         if (!friends) return [];
         const query = search.toLowerCase();
         return friends.filter((f): boolean => {
-            const name = (f.displayName || f.username).toLowerCase();
-            return name.includes(query);
+            const name = getDisplayName(f).toLowerCase();
+            return (
+                name.includes(query) || f.username.toLowerCase().includes(query)
+            );
         });
-    }, [friends, search]);
+    }, [friends, search, getDisplayName]);
 
     const sortedFriends = React.useMemo(
         () =>
             filteredFriends.toSorted((a, b) => {
-                const nameA = (a.displayName || a.username).toLowerCase();
-                const nameB = (b.displayName || b.username).toLowerCase();
+                const nameA = getDisplayName(a).toLowerCase();
+                const nameB = getDisplayName(b).toLowerCase();
                 return nameA.localeCompare(nameB);
             }),
-        [filteredFriends],
+        [filteredFriends, getDisplayName],
     );
 
     const groupedFriends = React.useMemo(() => {
         const groups: Record<string, typeof friends> = {};
         for (const friend of sortedFriends) {
-            const name = (friend.displayName || friend.username).toUpperCase();
+            const name = getDisplayName(friend).toUpperCase();
             let firstChar = name.charAt(0);
             if (!/[A-Z]/.test(firstChar)) {
                 firstChar = '#';
@@ -154,7 +180,7 @@ export const FriendListMain = React.memo(() => {
             groups[firstChar]?.push(friend);
         }
         return groups;
-    }, [sortedFriends]);
+    }, [sortedFriends, getDisplayName]);
 
     const groupKeys = React.useMemo(
         () =>
@@ -244,6 +270,7 @@ export const FriendListMain = React.memo(() => {
                         <FriendProfileRow
                             friend={friend}
                             key={String(friend.id)}
+                            nickname={nicknameById.get(String(friend.id))}
                             onOpenDm={handleOpenDm}
                         />
                     ))}

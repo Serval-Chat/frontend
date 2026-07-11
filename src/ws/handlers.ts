@@ -1088,6 +1088,24 @@ export const setupGlobalWsHandlers = (
     );
 
     cleanups.push(
+        wsClient.on<{ friendId: string; nickname: string | null }>(
+            WsEvents.FRIEND_NICKNAME_UPDATED,
+            (payload): void => {
+                queryClient.setQueriesData<Friend[]>(
+                    { queryKey: FRIENDS_QUERY_KEY },
+                    (old): Friend[] | undefined =>
+                        old?.map(
+                            (f): Friend =>
+                                f.id === payload.friendId
+                                    ? { ...f, nickname: payload.nickname }
+                                    : f,
+                        ),
+                );
+            },
+        ),
+    );
+
+    cleanups.push(
         wsClient.on(WsEvents.INCOMING_REQUEST_ADDED, (): void => {
             void queryClient.invalidateQueries({ queryKey: FRIENDS_QUERY_KEY });
             void queryClient.invalidateQueries({

@@ -23,6 +23,7 @@ import {
     type Suggestion,
 } from '@/ui/components/common/AutocompleteSuggestion';
 import type { UserStatus } from '@/ui/components/common/UserProfileStatusIndicator';
+import { resolveDisplayName } from '@/utils/displayName';
 import { getUnicode, groupedEmojis } from '@/utils/emoji';
 import type { EmojiData } from '@/utils/emoji';
 
@@ -147,6 +148,13 @@ const buildAutocompleteOptions = ({
     const query = queryString.slice(1).toLowerCase();
 
     if (triggerChar === '@') {
+        const localNicknameByUserId = new Map<string, string>();
+        for (const friend of friends) {
+            if (friend?.nickname) {
+                localNicknameByUserId.set(friend.id, friend.nickname);
+            }
+        }
+
         const memberPriority = new Map<string, number>();
         const userSuggestions: Suggestion[] = [];
 
@@ -154,26 +162,38 @@ const buildAutocompleteOptions = ({
             const userBlocks = blocks[member.userId] || 0;
             if (userBlocks & BlockFlags.HIDE_FROM_MENTIONS) continue;
 
+            const localNickname = localNicknameByUserId.get(member.user.id);
             const username = member.user.username.toLowerCase();
             const displayName = member.user.displayName?.toLowerCase() || '';
             const nickname = member.nickname?.toLowerCase() || '';
+            const localNicknameLower = localNickname?.toLowerCase() || '';
 
+            const matchesLocalNickname =
+                localNicknameLower !== '' && localNicknameLower.includes(query);
             const matchesUsername = username.includes(query);
             const matchesDisplayName =
                 displayName !== '' && displayName.includes(query);
             const matchesNickname = nickname !== '' && nickname.includes(query);
 
-            if (matchesUsername || matchesDisplayName || matchesNickname) {
-                const priority = matchesNickname
+            if (
+                matchesLocalNickname ||
+                matchesUsername ||
+                matchesDisplayName ||
+                matchesNickname
+            ) {
+                const priority = matchesLocalNickname
                     ? 0
-                    : matchesDisplayName
+                    : matchesNickname
                       ? 1
-                      : 2;
+                      : matchesDisplayName
+                        ? 2
+                        : 3;
                 memberPriority.set(member.user.id, priority);
                 userSuggestions.push({
                     type: 'user',
                     user: member.user,
                     nickname: member.nickname,
+                    localNickname,
                     status:
                         presenceUsers[member.userId]?.status ??
                         (member.online ? 'online' : 'offline'),
@@ -188,21 +208,33 @@ const buildAutocompleteOptions = ({
                 const userBlocks = blocks[friend.id] || 0;
                 if (userBlocks & BlockFlags.HIDE_FROM_MENTIONS) continue;
 
+                const localNickname = localNicknameByUserId.get(friend.id);
+                const localNicknameLower = localNickname?.toLowerCase() || '';
                 const username = friend.username.toLowerCase();
                 const displayName = friend.displayName?.toLowerCase() || '';
+                const matchesLocalNickname =
+                    localNicknameLower !== '' &&
+                    localNicknameLower.includes(query);
                 const alreadyAdded = userSuggestions.some(
                     (s): boolean =>
                         s.type === 'user' && s.user.id === friend.id,
                 );
                 if (
                     !alreadyAdded &&
-                    (username.includes(query) || displayName.includes(query))
+                    (matchesLocalNickname ||
+                        username.includes(query) ||
+                        displayName.includes(query))
                 ) {
-                    const priority = displayName.includes(query) ? 0 : 1;
+                    const priority = matchesLocalNickname
+                        ? 0
+                        : displayName.includes(query)
+                          ? 1
+                          : 2;
                     memberPriority.set(friend.id, priority);
                     userSuggestions.push({
                         type: 'user',
                         user: friend,
+                        localNickname,
                         status: presenceUsers[friend.id]?.status,
                     });
                 }
@@ -486,9 +518,12 @@ export const LexicalAutocompletePlugin = ({
                         chipNode = $createChipNode('user', {
                             id: suggestion.user.id,
                             label:
-                                suggestion.nickname ||
-                                suggestion.user.displayName ||
-                                suggestion.user.username,
+                                resolveDisplayName(
+                                    suggestion.localNickname,
+                                    suggestion.nickname,
+                                    suggestion.user.displayName,
+                                    suggestion.user.username,
+                                ) ?? suggestion.user.username,
                             serverId,
                         });
 

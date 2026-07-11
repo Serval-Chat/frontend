@@ -17,6 +17,7 @@ import {
     Pin,
     PinOff,
     Shield,
+    Tag,
     User as UserIcon,
     UserMinus,
     UserPlus,
@@ -61,11 +62,13 @@ import { Box } from '@/ui/components/layout/Box';
 import { isCustomEmojiId } from '@/utils/validation';
 import { ProfilePopup } from '@/ui/components/profile/ProfilePopup';
 import { BlockUserModal } from '@/ui/components/profile/modals/BlockUserModal';
+import { NicknameModal } from '@/ui/components/profile/modals/NicknameModal';
 import { InviteToServerModal } from '@/ui/components/servers/InviteToServerModal';
 import { BanUserModal } from '@/ui/components/servers/modals/BanUserModal';
 import { KickUserModal } from '@/ui/components/servers/modals/KickUserModal';
 import { TimeoutUserModal } from '@/ui/components/servers/modals/TimeoutUserModal';
 import { cn } from '@/utils/cn';
+import { resolveDisplayName } from '@/utils/displayName';
 import { buildUsernameColorResolverReport } from '@/utils/usernameColorResolver';
 import { wsMessages } from '@/ws/messages';
 
@@ -234,6 +237,8 @@ const UserItemInner = React.memo(
         const [isBlockModalOpen, setIsBlockModalOpen] = React.useState(false);
         const [isInviteToServerModalOpen, setIsInviteToServerModalOpen] =
             React.useState(false);
+        const [isNicknameModalOpen, setIsNicknameModalOpen] =
+            React.useState(false);
         const [colorResolverReport, setColorResolverReport] = React.useState<
             string | null
         >(null);
@@ -276,6 +281,13 @@ const UserItemInner = React.memo(
         const [showProfile, setShowProfile] = React.useState(false);
         const itemRef = React.useRef<HTMLDivElement>(null);
 
+        const localNickname = useMemo(
+            (): string | undefined =>
+                friends?.find((f): boolean => f.id === userId)?.nickname ??
+                undefined,
+            [friends, userId],
+        );
+
         const {
             username,
             displayName,
@@ -285,11 +297,13 @@ const UserItemInner = React.memo(
         } = useMemo(
             () => ({
                 username: userProfile?.username || initialData?.username || '',
-                displayName:
-                    nickname ||
-                    userProfile?.nickname ||
-                    userProfile?.displayName ||
+                displayName: resolveDisplayName(
+                    localNickname,
+                    nickname,
+                    userProfile?.nickname,
+                    userProfile?.displayName,
                     initialData?.displayName,
+                ),
                 profilePicture:
                     userProfile?.profilePicture ||
                     initialData?.profilePicture ||
@@ -298,7 +312,7 @@ const UserItemInner = React.memo(
                 customStatus:
                     userProfile?.customStatus || initialData?.customStatus,
             }),
-            [initialData, nickname, userProfile],
+            [initialData, localNickname, nickname, userProfile],
         );
 
         const isFriend = useMemo(
@@ -544,6 +558,15 @@ const UserItemInner = React.memo(
                             togglePinFriend(userId);
                         },
                     },
+                    {
+                        label: localNickname
+                            ? 'Edit Nickname'
+                            : 'Add Friend Nickname',
+                        icon: Tag,
+                        onClick: (): void => {
+                            setIsNicknameModalOpen(true);
+                        },
+                    },
                 );
 
                 if (hasUnread) {
@@ -762,7 +785,10 @@ const UserItemInner = React.memo(
                         setColorResolverReport(
                             buildUsernameColorResolverReport({
                                 label: 'User item username',
-                                renderedName: displayName || username,
+                                renderedName: resolveDisplayName(
+                                    displayName,
+                                    username,
+                                ),
                                 user: userProfile,
                                 role,
                                 disableColors: resolvedDisableColors,
@@ -855,6 +881,8 @@ const UserItemInner = React.memo(
             removeBlock,
             setIsBlockModalOpen,
             setIsInviteToServerModalOpen,
+            localNickname,
+            setIsNicknameModalOpen,
             serverRoles,
             sid,
             canManageRoles,
@@ -927,7 +955,7 @@ const UserItemInner = React.memo(
                             size="sm"
                             src={profilePicture}
                             status={presenceStatus}
-                            username={displayName || username}
+                            username={resolveDisplayName(displayName, username) ?? username}
                             onClick={handleAvatarClick}
                         />
 
@@ -957,7 +985,7 @@ const UserItemInner = React.memo(
                                     role={role}
                                     user={userProfile}
                                 >
-                                    {displayName || username}
+                                    {resolveDisplayName(displayName, username)}
                                 </StyledUserName>
                                 {userProfile?.isBot ? (
                                     <BotTag
@@ -1133,9 +1161,21 @@ const UserItemInner = React.memo(
                     <InviteToServerModal
                         isOpen={isInviteToServerModalOpen}
                         userId={userId}
-                        username={displayName || username}
+                        username={resolveDisplayName(displayName, username) ?? username}
                         onClose={(): void => {
                             setIsInviteToServerModalOpen(false);
+                        }}
+                    />
+                ) : null}
+
+                {isNicknameModalOpen ? (
+                    <NicknameModal
+                        currentNickname={localNickname}
+                        friendId={userId}
+                        friendUsername={username}
+                        isOpen={isNicknameModalOpen}
+                        onClose={(): void => {
+                            setIsNicknameModalOpen(false);
                         }}
                     />
                 ) : null}

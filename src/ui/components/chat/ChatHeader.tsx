@@ -1,11 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
 
 import { AnimatePresence, m } from 'framer-motion';
-import { Hash, Pin, Search, Users, Volume2, X } from 'lucide-react';
+import { AtSign, Hash, Pin, Search, Users, Volume2, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 import { usePinnedMessages } from '@/api/chat/chat.queries';
 import type { ChatMessage } from '@/api/chat/chat.types';
+import { useFriends } from '@/api/friends/friends.queries';
 import type { Channel } from '@/api/servers/servers.types';
 import { useMe } from '@/api/users/users.queries';
 import type { User } from '@/api/users/users.types';
@@ -20,6 +21,7 @@ import { Text } from '@/ui/components/common/Text';
 import { Box } from '@/ui/components/layout/Box';
 import { ICON_MAP } from '@/ui/utils/iconMap';
 import { cn } from '@/utils/cn';
+import { resolveDisplayName } from '@/utils/displayName';
 
 import { PinsDrawer } from './PinsDrawer';
 
@@ -75,6 +77,10 @@ export const ChatHeader = ({
     const pinButtonRef = useRef<HTMLButtonElement>(null);
 
     const { data: me } = useMe();
+    const { data: friends } = useFriends();
+    const localNickname = friends?.find(
+        (f): boolean => f.id === selectedFriendId,
+    )?.nickname;
     const { data: pins } = usePinnedMessages(
         selectedServerId,
         selectedChannelId,
@@ -128,90 +134,93 @@ export const ChatHeader = ({
     return (
         <Box
             as="header"
-            className="pride-glass-strong z-50 flex shrink-0 items-start border-b border-white/5 bg-[var(--bg-chat-header)] px-4 backdrop-blur-sm"
+            className={cn(
+                'pride-glass-strong z-50 flex shrink-0 border-b border-white/5 bg-(--bg-chat-header) px-4 backdrop-blur-sm',
+                showSecondary ? 'items-start' : 'items-center',
+            )}
         >
             {/* Left: icon + name + description */}
             <Box
                 className={cn(
-                    'flex min-w-0 flex-1 gap-2 overflow-hidden py-3',
-                    showSecondary ? 'items-start' : 'items-center',
+                    'flex min-w-0 flex-1 flex-col gap-0.5 overflow-hidden py-3',
+                    showSecondary ? 'items-start' : 'justify-center',
                 )}
             >
-                <Box
-                    className={cn(
-                        'text-foreground-muted shrink-0',
-                        showSecondary && 'mt-0.5',
-                    )}
-                >
-                    {selectedFriendId ? (
-                        <Text className="text-xl">@</Text>
-                    ) : (
-                        (() => {
-                            const CustomIcon = selectedChannel?.icon
-                                ? ICON_MAP[selectedChannel.icon]
-                                : null;
-                            const Icon =
-                                CustomIcon ??
-                                (selectedChannel?.type === 'voice'
-                                    ? Volume2
-                                    : Hash);
-                            return <Icon className="h-5 w-5" />;
-                        })()
-                    )}
-                </Box>
-                <Box className="flex min-w-0 flex-1 flex-col gap-0.5">
-                    <Box className="truncate text-[15px] leading-5 font-semibold text-foreground">
+                <Box className="flex min-w-0 items-center gap-2">
+                    <Box className="text-foreground-muted flex h-5 w-5 shrink-0 items-center justify-center">
+                        {selectedFriendId ? (
+                            <AtSign className="h-5 w-5" />
+                        ) : (
+                            (() => {
+                                const CustomIcon = selectedChannel?.icon
+                                    ? ICON_MAP[selectedChannel.icon]
+                                    : null;
+                                const Icon =
+                                    CustomIcon ??
+                                    (selectedChannel?.type === 'voice'
+                                        ? Volume2
+                                        : Hash);
+                                return <Icon className="h-5 w-5" />;
+                            })()
+                        )}
+                    </Box>
+                    <Box className="min-w-0 flex-1 truncate text-[15px] leading-5 font-semibold text-foreground">
                         {selectedFriendId
-                            ? (friendUser?.displayName ??
-                              friendUser?.username ??
-                              '...')
+                            ? (resolveDisplayName(
+                                  localNickname,
+                                  friendUser?.displayName,
+                                  friendUser?.username,
+                              ) ?? '...')
                             : (selectedChannel?.name ?? 'No Channel')}
                     </Box>
-                    {hasDescription ? (
-                        <m.button
-                            className="w-full text-left focus:outline-none"
-                            type="button"
-                            onClick={(): void => {
-                                setDescExpanded((v): boolean => !v);
+                </Box>
+                {hasDescription ? (
+                    <m.button
+                        className="w-full text-left focus:outline-none"
+                        type="button"
+                        onClick={(): void => {
+                            setDescExpanded((v): boolean => !v);
+                        }}
+                    >
+                        <m.div
+                            animate={descExpanded ? 'expanded' : 'collapsed'}
+                            className="overflow-hidden"
+                            initial={false}
+                            transition={{
+                                duration: 0.2,
+                                ease: 'easeInOut',
+                            }}
+                            variants={{
+                                collapsed: { height: '1.25rem' },
+                                expanded: { height: 'auto' },
                             }}
                         >
-                            <m.div
-                                animate={
-                                    descExpanded ? 'expanded' : 'collapsed'
-                                }
-                                className="overflow-hidden"
-                                initial={false}
-                                transition={{
-                                    duration: 0.2,
-                                    ease: 'easeInOut',
-                                }}
-                                variants={{
-                                    collapsed: { height: '1.25rem' },
-                                    expanded: { height: 'auto' },
-                                }}
+                            <span
+                                className={`text-foreground-muted block text-xs break-words ${
+                                    descExpanded
+                                        ? 'pb-0.5 whitespace-pre-wrap'
+                                        : 'truncate'
+                                }`}
                             >
-                                <span
-                                    className={`text-foreground-muted block text-xs break-words ${
-                                        descExpanded
-                                            ? 'pb-0.5 whitespace-pre-wrap'
-                                            : 'truncate'
-                                    }`}
-                                >
-                                    {selectedChannel.description}
-                                </span>
-                            </m.div>
-                        </m.button>
-                    ) : null}
-                    {hasStatus ? (
-                        <Text className="text-foreground-muted truncate text-xs">
-                            {friendUser?.customStatus?.text}
-                        </Text>
-                    ) : null}
-                </Box>
+                                {selectedChannel.description}
+                            </span>
+                        </m.div>
+                    </m.button>
+                ) : null}
+                {hasStatus ? (
+                    <Text className="text-foreground-muted truncate text-xs">
+                        {friendUser?.customStatus?.text}
+                    </Text>
+                ) : null}
             </Box>
 
             {/* Icons Area */}
-            <Box className="ml-2 flex shrink-0 items-center gap-1 pt-2">
+            <Box
+                className={cn(
+                    'ml-2 flex shrink-0 items-center gap-1',
+                    showSecondary && 'pt-2',
+                )}
+            >
                 {actions}
                 {(selectedChannel || selectedFriendId) && onToggleSearch ? (
                     <button

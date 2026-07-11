@@ -11,6 +11,7 @@ export interface Friend {
     latestMessageAt?: string | null;
     isPinned?: boolean;
     isOnline?: boolean;
+    nickname?: string | null;
 }
 
 export interface FriendRequest {

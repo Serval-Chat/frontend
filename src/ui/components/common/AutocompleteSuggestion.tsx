@@ -11,6 +11,7 @@ import { Box } from '@/ui/components/layout/Box';
 import { ICON_MAP } from '@/ui/utils/iconMap';
 import { resolveApiUrl } from '@/utils/apiUrl';
 import { cn } from '@/utils/cn';
+import { resolveDisplayName } from '@/utils/displayName';
 import { getSpriteStyle } from '@/utils/emoji';
 import type { EmojiData } from '@/utils/emoji';
 import { getRoleStyle } from '@/utils/roleColor';
@@ -26,7 +27,10 @@ export type SuggestionType =
 export interface UserSuggestion {
     type: 'user';
     user: User;
+    /** Public per-server nickname (visible to everyone in that server). */
     nickname?: string;
+    /** Private local nickname the current user has set for this contact. */
+    localNickname?: string | null;
     status?: UserStatus;
 }
 
@@ -169,11 +173,15 @@ export const AutocompleteSuggestion = ({
                                                 : 'text-foreground',
                                         )}
                                     >
-                                        {suggestion.nickname ??
-                                            suggestion.user.displayName ??
-                                            suggestion.user.username}
+                                        {resolveDisplayName(
+                                            suggestion.localNickname,
+                                            suggestion.nickname,
+                                            suggestion.user.displayName,
+                                            suggestion.user.username,
+                                        )}
                                     </span>
-                                    {suggestion.nickname ||
+                                    {suggestion.localNickname ||
+                                    suggestion.nickname ||
                                     suggestion.user.displayName ? (
                                         <span className="truncate text-xs text-muted-foreground">
                                             {suggestion.user.username.startsWith(

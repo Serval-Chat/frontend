@@ -7,10 +7,12 @@ import { StyledUserName } from '@/ui/components/common/StyledUserName';
 import { Text } from '@/ui/components/common/Text';
 import { Box } from '@/ui/components/layout/Box';
 import { cn } from '@/utils/cn';
+import { resolveDisplayName } from '@/utils/displayName';
 import { formatTimestamp } from '@/utils/timestamp';
 
 interface MessageHeaderProps {
     user: User;
+    localNickname?: string | null;
     isWebhook?: boolean;
     role?: Role;
     iconRole?: Role;
@@ -30,6 +32,7 @@ interface MessageHeaderProps {
 export const MessageHeader = React.memo(
     ({
         user,
+        localNickname,
         isWebhook,
         role,
         iconRole,
@@ -66,7 +69,12 @@ export const MessageHeader = React.memo(
                         role={role}
                         user={user}
                     >
-                        {user.nickname || user.displayName || user.username}
+                        {resolveDisplayName(
+                            localNickname,
+                            user.nickname,
+                            user.displayName,
+                            user.username,
+                        )}
                     </StyledUserName>
                 </Box>
                 {user.isBot ? (
