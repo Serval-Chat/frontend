@@ -91,6 +91,7 @@ export const MermaidChart = ({ content }: MermaidChartProps) => {
                     theme: 'base',
                     themeVariables: resolveThemeVariables(),
                     securityLevel: 'strict',
+                    htmlLabels: false,
                 });
 
                 const id = `mermaid-${Math.random().toString(36).slice(2, 9)}`;
