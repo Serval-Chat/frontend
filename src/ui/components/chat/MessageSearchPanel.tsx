@@ -149,7 +149,10 @@ interface MessageSearchPanelProps {
     serverId?: string;
     channelId?: string;
     onClose: () => void;
-    onNavigateToMessage: (messageId: string) => void;
+    onNavigateToMessage: (
+        messageId: string,
+        location?: { serverId?: string; channelId?: string },
+    ) => void;
 }
 
 function SkeletonRows() {
@@ -248,7 +251,10 @@ export function SearchResultItem({
 }: {
     hit: SearchHit;
     query: string;
-    onNavigate: (id: string) => void;
+    onNavigate: (
+        id: string,
+        location?: { serverId?: string; channelId?: string },
+    ) => void;
     fullMemberMap?: Map<string, ServerMember>;
     highestRoleMap?: Map<string, Role>;
     iconRoleMap?: Map<string, Role>;
@@ -362,7 +368,10 @@ export function SearchResultItem({
             }}
             type="button"
             onClick={() => {
-                onNavigate(hit.id);
+                onNavigate(hit.id, {
+                    serverId: hit.serverId,
+                    channelId: hit.channelId,
+                });
             }}
         >
             <div className="flex items-start gap-1 px-4 py-0.5">

@@ -8,8 +8,8 @@ VITE_LIVEKIT_URL=http://127.0.0.1:17880
 VITE_MAX_MESSAGE_LENGTH=10000
 VITE_ALTERNATIVE_URLS=["localhost:5173"]'
 
-PROD_ENV='VITE_API_BASE_URL=https://rolling.catfla.re/
-VITE_WS_BASE_URL=wss://rolling.catfla.re/
+PROD_ENV='VITE_API_BASE_URL=https://ser.chat/
+VITE_WS_BASE_URL=wss://ser.chat/
 VITE_LIVEKIT_URL=https://rtc.catfla.re/
 VITE_TURNSTILE_SITE_KEY=0x4AAAAAADyycnGvy_9SJcya'
 

@@ -156,6 +156,9 @@ const ReorderRow = ({
 }: ReorderRowProps): React.ReactNode => (
     <Reorder.Item
         className="m-0 w-full p-0"
+        // read by the virtualizer's measureElement to map measurements back to
+        // rows; without it, dynamic channel-row heights break.
+        data-index={virtualRow ? virtualRow.index : undefined}
         dragListener={dragEnabled}
         layout={virtualRow ? undefined : 'position'}
         ref={virtualRow ? measureElement : undefined}

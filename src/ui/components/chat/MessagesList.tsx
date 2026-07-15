@@ -19,9 +19,9 @@ import type {
     ServerMember,
 } from '@/api/servers/servers.types';
 import type { User } from '@/api/users/users.types';
-import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { setTargetMessageId } from '@/store/slices/navSlice';
+import { useAppSelector } from '@/store/hooks';
 import { BlockFlags } from '@/types/blocks';
+import { jumpDebug } from '@/utils/jumpDebug';
 import type { ProcessedChatMessage } from '@/types/chat.ui';
 import { MessageItem } from '@/ui/components/chat/MessageItem';
 import { Button } from '@/ui/components/common/Button';
@@ -36,7 +36,7 @@ export interface MessagesListHandle {
     scrollToBottom: () => void;
 }
 
-interface MessagesListProps {
+export interface MessagesListProps {
     ref?: React.Ref<MessagesListHandle>;
     messages: ProcessedChatMessage[];
     onLoadMore?: () => void;
@@ -90,7 +90,6 @@ export const MessagesList = React.memo(
         userRolesMap,
         roleMap,
     }: MessagesListProps) => {
-        const dispatch = useAppDispatch();
         const blocks = useAppSelector(
             (state): Record<string, number> => state.blocking.blocks,
         );
@@ -102,6 +101,10 @@ export const MessagesList = React.memo(
         });
         const lastScrollHeightRef = useRef<number>(0);
         const isPrependingScrollRef = useRef(false);
+        // true only during a jump-to-message settle - unlike isPrependingScrollRef
+        // (also raised by the virtualizer's routine measurement adjustments),
+        // this never flips true on the settle's transient scroll positions.
+        const jumpSettlingRef = useRef(false);
         const loadMoreCooldownRef = useRef(false);
         const [highlightId, setInternalHighlightId] = useState<string | null>(
             null,
@@ -130,6 +133,13 @@ export const MessagesList = React.memo(
             new Set(),
         );
         const isAtBottomRef = useRef(isAtBottom);
+        // live mirror of activeHighlightId for the ref-only scroll callbacks: while
+        // a target is active we're browsing a historical window, so the
+        // follow-newest-message auto-pin must stay off.
+        const activeHighlightIdRef = useRef(activeHighlightId);
+        useLayoutEffect((): void => {
+            activeHighlightIdRef.current = activeHighlightId;
+        });
 
         useEffect((): void => {
             onAtBottomChangeRef.current?.(isAtBottom);
@@ -271,24 +281,27 @@ export const MessagesList = React.memo(
                 if (item.type === 'blocked-group') return 40;
 
                 if (item.type === 'message') {
-                    let estimated = 100;
+                    // keep estimates close to reality: over-estimating (the old
+                    // embed=350/attachment=400/cap=2000) pushes computed offsets
+                    // far from the truth, so scrollToIndex/jump-to-message miss.
+                    let estimated = 72;
 
                     if (item.message.text) {
                         estimated +=
-                            Math.floor(item.message.text.length / 50) * 20;
+                            Math.floor(item.message.text.length / 60) * 18;
                     }
                     if (item.message.embeds?.length) {
-                        estimated += item.message.embeds.length * 350;
+                        estimated += item.message.embeds.length * 140;
                     }
                     if (item.message.attachments?.length) {
-                        estimated += item.message.attachments.length * 400;
+                        estimated += item.message.attachments.length * 220;
                     }
                     if (item.message.poll) {
                         estimated +=
-                            150 + item.message.poll.options.length * 40;
+                            120 + item.message.poll.options.length * 32;
                     }
 
-                    return Math.min(estimated, 2000);
+                    return Math.min(estimated, 900);
                 }
 
                 return 100;
@@ -315,7 +328,16 @@ export const MessagesList = React.memo(
                 measureFrameRef.current = null;
 
                 const container = scrollContainerRef.current;
-                if (container && isAtBottomRef.current) {
+                if (
+                    container &&
+                    isAtBottomRef.current &&
+                    !jumpSettlingRef.current &&
+                    !activeHighlightIdRef.current
+                ) {
+                    jumpDebug('PIN requestMeasure', {
+                        scrollTop: container.scrollTop,
+                        scrollHeight: container.scrollHeight,
+                    });
                     rowVirtualizer.scrollToIndex(
                         virtualItemsRef.current.length - 1,
                         { align: 'end' },
@@ -378,14 +400,33 @@ export const MessagesList = React.memo(
 
         const handleScroll = useCallback((): void => {
             const container = scrollContainerRef.current;
-            if (!container || isPrependingScrollRef.current) return;
+            if (!container) return;
 
             const { scrollTop, scrollHeight, clientHeight } = container;
-            const nextIsAtBottom = scrollHeight - scrollTop - clientHeight < 5;
-            if (isAtBottomRef.current !== nextIsAtBottom) {
-                isAtBottomRef.current = nextIsAtBottom;
-                setIsAtBottom(nextIsAtBottom);
+            // Track the real at-bottom state even during the virtualizer's routine
+            // measurement scroll-adjustments (which also raise isPrependingScrollRef) -
+            // skipping it there would leave isAtBottomRef stale-true and let the
+            // pin-to-bottom paths yank the viewport mid-scroll. Suppressed only
+            // during a jump settle, whose transient positions aren't "at bottom".
+            if (!jumpSettlingRef.current) {
+                const nextIsAtBottom =
+                    scrollHeight - scrollTop - clientHeight < 5;
+                if (isAtBottomRef.current !== nextIsAtBottom) {
+                    jumpDebug('isAtBottom ->', {
+                        nextIsAtBottom,
+                        scrollTop,
+                        scrollHeight,
+                        clientHeight,
+                    });
+                    isAtBottomRef.current = nextIsAtBottom;
+                    setIsAtBottom(nextIsAtBottom);
+                }
             }
+
+            // ...but a programmatic scroll (prepend compensation, jump settle)
+            // must never be read as the user reaching the top and trigger a
+            // history load.
+            if (isPrependingScrollRef.current) return;
 
             if (scrollTop > 500) {
                 loadMoreCooldownRef.current = false;
@@ -439,6 +480,11 @@ export const MessagesList = React.memo(
         const prevActiveHighlightRef = useRef<string | null | undefined>(
             activeHighlightId,
         );
+        // the highlight id the settle loop has actually centred on. A jump is
+        // "in progress" until this catches up to activeHighlightId - used by the
+        // layout effect below to hold the viewport across the transient renders
+        // of a jump instead of misreading the fresh window as a prepend.
+        const lastScrolledIdRef = useRef<string | null>(null);
 
         // keeps the viewport anchored to the newest message before every paint,
         // so opening a channel lands straight at the bottom (no scroll-through
@@ -446,6 +492,7 @@ export const MessagesList = React.memo(
         const pinToBottom = useCallback((): void => {
             const container = scrollContainerRef.current;
             if (!container) return;
+            jumpDebug('PIN pinToBottom');
             rowVirtualizer.scrollToIndex(virtualItemsRef.current.length - 1, {
                 align: 'end',
             });
@@ -498,6 +545,147 @@ export const MessagesList = React.memo(
             settleRafRef.current = requestAnimationFrame(tick);
         }, [rowVirtualizer, reveal]);
 
+        // drives a jump to a target message and reveals the list once centred.
+        // Kept hidden (skeleton) for the whole settle so we can correct scrollTop
+        // against the element's *real* geometry each frame, rather than the
+        // virtualizer's estimate-based offset (which misses on big height
+        // estimates for embeds/attachments).
+        const settleToTarget = useCallback(
+            (targetId: string): void => {
+                if (settleRafRef.current !== null) {
+                    cancelAnimationFrame(settleRafRef.current);
+                    settleRafRef.current = null;
+                }
+                jumpSettlingRef.current = true;
+                jumpDebug('settle START', { targetId });
+                let stableFrames = 0;
+                let frames = 0;
+                let notRenderedFrames = 0;
+                const stop = (reason: string): void => {
+                    jumpDebug('settle STOP', {
+                        reason,
+                        frames,
+                        scrollTop: scrollContainerRef.current?.scrollTop,
+                    });
+                    if (settleRafRef.current !== null) {
+                        cancelAnimationFrame(settleRafRef.current);
+                        settleRafRef.current = null;
+                    }
+                    if (settleFailsafeRef.current !== null) {
+                        clearTimeout(settleFailsafeRef.current);
+                        settleFailsafeRef.current = null;
+                    }
+                    isPrependingScrollRef.current = false;
+                    jumpSettlingRef.current = false;
+                    // we parked on an older message, definitively not at the
+                    // bottom. Lock that in before the pin-to-bottom paths get a
+                    // chance to read a stale at-bottom flag post-reveal.
+                    isAtBottomRef.current = false;
+                    setIsAtBottom(false);
+                    reveal();
+                };
+                // one failsafe, owned by the settle: if it can't converge, give up
+                // cleanly via stop(), resetting all jump guards together. (A
+                // separate reveal-only failsafe used to fire mid-settle and
+                // un-freeze the guards while the loop was still fighting, letting
+                // the pin paths ride growing content to the bottom.)
+                if (settleFailsafeRef.current !== null) {
+                    clearTimeout(settleFailsafeRef.current);
+                }
+                settleFailsafeRef.current = setTimeout((): void => {
+                    stop('failsafe');
+                }, 4000);
+                const tick = (): void => {
+                    frames += 1;
+                    const container = scrollContainerRef.current;
+                    if (!container || frames >= 90) {
+                        stop(container ? 'frame-cap' : 'no-container');
+                        return;
+                    }
+                    const index = virtualItemsRef.current.findIndex(
+                        (item): boolean =>
+                            item.type === 'message' &&
+                            item.message.id === targetId,
+                    );
+                    if (index === -1) {
+                        // the fresh window hasn't loaded the target yet - keep
+                        // waiting rather than revealing on empty content.
+                        settleRafRef.current = requestAnimationFrame(tick);
+                        return;
+                    }
+                    // suppress handleScroll's at-bottom / load-older reactions
+                    // while we drive the scroll programmatically.
+                    isPrependingScrollRef.current = true;
+                    const node = container.querySelector(
+                        `[data-index="${index}"]`,
+                    );
+                    if (!(node instanceof HTMLElement)) {
+                        notRenderedFrames += 1;
+                        // first try the virtualizer's estimate-based hop to bring
+                        // the row into the rendered range...
+                        rowVirtualizer.scrollToIndex(index, { align: 'center' });
+                        // ...but if the row never renders (embed-heavy windows
+                        // over-estimate offsets and clamp toward the bottom), fall
+                        // back to an estimate-independent proportional jump: index
+                        // k of N sits at roughly k/N of the real measured height.
+                        if (notRenderedFrames >= 3) {
+                            const count = virtualItemsRef.current.length;
+                            // use rendered scrollHeight, not getTotalSize(): during
+                            // rapid measurement the virtualizer's total races ahead
+                            // of the DOM height, and scrolling past the real
+                            // scrollHeight just clamps to the bottom.
+                            const total = container.scrollHeight;
+                            const desired = Math.max(
+                                0,
+                                (index / Math.max(count, 1)) * total -
+                                    container.clientHeight / 2,
+                            );
+                            jumpDebug('settle proportional-fallback', {
+                                index,
+                                count,
+                                total,
+                                desired,
+                            });
+                            container.scrollTop = desired;
+                        }
+                        settleRafRef.current = requestAnimationFrame(tick);
+                        return;
+                    }
+                    notRenderedFrames = 0;
+                    const contRect = container.getBoundingClientRect();
+                    const nodeRect = node.getBoundingClientRect();
+                    // pixels we'd need to scroll to put the element's centre on
+                    // the viewport's centre.
+                    const delta =
+                        nodeRect.top -
+                        contRect.top -
+                        (container.clientHeight - nodeRect.height) / 2;
+                    if (Math.abs(delta) <= 1) {
+                        stableFrames += 1;
+                        if (stableFrames >= 3) {
+                            stop('centered');
+                            return;
+                        }
+                    } else {
+                        stableFrames = 0;
+                        container.scrollTop = Math.max(
+                            0,
+                            container.scrollTop + delta,
+                        );
+                    }
+                    jumpDebug('settle frame', {
+                        frames,
+                        index,
+                        delta: Math.round(delta),
+                        scrollTop: Math.round(container.scrollTop),
+                    });
+                    settleRafRef.current = requestAnimationFrame(tick);
+                };
+                settleRafRef.current = requestAnimationFrame(tick);
+            },
+            [rowVirtualizer, reveal],
+        );
+
         useEffect(
             (): (() => void) => (): void => {
                 if (settleRafRef.current !== null) {
@@ -519,7 +707,28 @@ export const MessagesList = React.memo(
         // (where refs persist and that branch would be skipped the second time).
         useEffect((): void => {
             if (hasSettledRef.current || isLoading) return;
-            if (messages.length === 0 || activeHighlightId) {
+            if (activeHighlightId) {
+                // jumping to a target: the reveal is driven by the target-settle
+                // loop once the target is centred (never reveal early on the
+                // window's transient empty state). Arm a failsafe so the list is
+                // never left hidden if the target never shows up.
+                if (settleFailsafeRef.current === null) {
+                    settleFailsafeRef.current = setTimeout((): void => {
+                        // reset the jump-suppression flags too: if the target
+                        // never shows up (e.g. a cross-channel hit whose window
+                        // doesn't contain it) settleToTarget never runs its own
+                        // cleanup, and leaving these raised would freeze
+                        // at-bottom detection and history loading for good.
+                        isPrependingScrollRef.current = false;
+                        jumpSettlingRef.current = false;
+                        settleFailsafeRef.current = null;
+                        reveal();
+                    }, 1500);
+                }
+                return;
+            }
+            if (messages.length === 0) {
+                // genuinely empty channel (no target): nothing to settle.
                 reveal();
                 return;
             }
@@ -563,9 +772,20 @@ export const MessagesList = React.memo(
 
             // detect the transition out of "viewing a linked/older message"
             // (e.g. the user hit "Jump to latest") so we re-anchor to bottom.
+            const prevActiveHighlight = prevActiveHighlightRef.current;
             const leftHighlightMode =
-                !!prevActiveHighlightRef.current && !activeHighlightId;
+                !!prevActiveHighlight && !activeHighlightId;
             prevActiveHighlightRef.current = activeHighlightId;
+
+            // a jump is "in progress" from the moment a target is set until the
+            // settle loop has centred on it, spanning every transient render in
+            // between. Keying this off the durable "settled id" (not a one-render
+            // prevActive != active edge) is what makes a *second* jump behave
+            // like the first - a one-render edge gets consumed on a stale render
+            // and the real window then looks like a prepend.
+            const jumpInProgress =
+                !!activeHighlightId &&
+                lastScrolledIdRef.current !== activeHighlightId;
 
             // 1. first paint with real content for this conversation: land
             //    directly on the newest message, before the browser paints.
@@ -593,9 +813,24 @@ export const MessagesList = React.memo(
                 prevFirstMessageIdRef.current !== null &&
                 firstMessageId !== null &&
                 firstMessageId !== prevFirstMessageIdRef.current &&
-                !leftHighlightMode;
+                !leftHighlightMode &&
+                !jumpInProgress;
 
             prevFirstMessageIdRef.current = firstMessageId;
+
+            // 1b. jump in progress: hold the viewport steady and drop the
+            //     at-bottom flag so no pin-to-bottom / prepend path fires. The
+            //     settle loop owns the scroll and centres the target once it is
+            //     in the DOM. Stays active across every render until centred.
+            if (jumpInProgress) {
+                if (isAtBottomRef.current) {
+                    isAtBottomRef.current = false;
+                    setIsAtBottom(false);
+                }
+                lastScrollHeightRef.current = newScrollHeight;
+                prevLastItemKeyRef.current = lastItemKey;
+                return;
+            }
 
             // 2. older history loaded at the top: hold the current viewport
             //    steady by compensating for the newly-added height.
@@ -623,8 +858,14 @@ export const MessagesList = React.memo(
             }
 
             // 4. pinned to the bottom: follow new messages and any height growth
-            //    from late measurements / loading embeds without flashing.
-            if (isAtBottomRef.current) {
+            //    from late measurements / loading embeds without flashing. Only
+            //    in the latest view - never while parked on a jump target, where
+            //    the window's bottom is not the newest message.
+            if (isAtBottomRef.current && !activeHighlightId) {
+                jumpDebug('PIN layout-branch4', {
+                    activeHighlightId,
+                    lastScrolled: lastScrolledIdRef.current,
+                });
                 rowVirtualizer.scrollToIndex(virtualItems.length - 1, {
                     align: 'end',
                 });
@@ -645,7 +886,22 @@ export const MessagesList = React.memo(
             pinToBottom,
         ]);
 
-        const lastScrolledIdRef = useRef<string | null>(null);
+        // hide the list the instant a jump begins (before the target window has
+        // even loaded), so the reload's empty flash and the subsequent settle
+        // are covered by the skeleton. settleToTarget reveals it once centred.
+        const jumpHiddenForRef = useRef<string | null>(null);
+        useEffect((): void => {
+            if (!activeHighlightId) {
+                jumpHiddenForRef.current = null;
+                return;
+            }
+            if (jumpHiddenForRef.current === activeHighlightId) return;
+            jumpHiddenForRef.current = activeHighlightId;
+            if (hasSettledRef.current) {
+                hasSettledRef.current = false;
+                setHasSettled(false);
+            }
+        }, [activeHighlightId]);
 
         useEffect((): void => {
             if (!activeHighlightId) {
@@ -662,33 +918,39 @@ export const MessagesList = React.memo(
                     item.type === 'message' &&
                     item.message.id === activeHighlightId,
             );
+            // wait until the targeted message is actually in the loaded window
+            // before centring on it - the fresh window may still be loading.
             if (index !== -1) {
-                rowVirtualizer.scrollToIndex(index, { align: 'center' });
                 lastScrolledIdRef.current = activeHighlightId;
+                // parked on a targeted (older) message now: make sure the
+                // stay-pinned-to-bottom paths don't drag us back down if we
+                // happened to be at the bottom when the jump started.
+                if (isAtBottomRef.current) {
+                    isAtBottomRef.current = false;
+                    setIsAtBottom(false);
+                }
+                // re-centre across measurement passes rather than once, so the
+                // target doesn't drift into empty space as rows settle to their
+                // real heights.
+                settleToTarget(activeHighlightId);
             }
-        }, [activeHighlightId, virtualItems, rowVirtualizer]);
+        }, [activeHighlightId, virtualItems, settleToTarget]);
 
         useEffect((): (() => void) | undefined => {
             if (!highlightId) return;
 
+            // fade only the highlight glow; targetMessageId is deliberately left
+            // in place so the viewport stays parked on the jumped-to message
+            // instead of snapping back to the latest page. It's reset elsewhere,
+            // on "Jump to latest" or a channel switch.
             const timer = setTimeout((): void => {
                 setInternalHighlightId(null);
-                dispatch(setTargetMessageId(null));
             }, 2000);
 
             return (): void => {
                 clearTimeout(timer);
             };
-        }, [highlightId, dispatch]);
-
-        useEffect(
-            (): (() => void) => (): void => {
-                if (activeHighlightId) {
-                    dispatch(setTargetMessageId(null));
-                }
-            },
-            [activeHighlightId, dispatch],
-        );
+        }, [highlightId]);
 
         return (
             <Box className="relative flex min-h-0 flex-1 flex-col">

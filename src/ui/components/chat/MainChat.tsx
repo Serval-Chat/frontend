@@ -24,6 +24,7 @@ import {
     MessagesList,
     type MessagesListHandle,
 } from '@/ui/components/chat/MessagesList';
+import { MessagesListNative } from '@/ui/components/chat/MessagesListNative';
 import { TypingIndicator } from '@/ui/components/chat/TypingIndicator';
 import { Button } from '@/ui/components/common/Button';
 import { Text } from '@/ui/components/common/Text';
@@ -52,6 +53,23 @@ interface MainChatUiState {
 }
 
 type ChatData = ReturnType<typeof useMainChatData>;
+
+// Prototype toggle: set `localStorage.nativeMessages = '1'` and reload to
+// swap in the non-virtualized MessagesListNative. Remove once a direction
+// is chosen.
+const useNativeMessages = ((): boolean => {
+    try {
+        return (
+            typeof localStorage !== 'undefined' &&
+            localStorage.getItem('nativeMessages') === '1'
+        );
+    } catch {
+        return false;
+    }
+})();
+const MessagesListComponent = useNativeMessages
+    ? MessagesListNative
+    : MessagesList;
 
 interface UsernameStyle {
     disableColors?: boolean;
@@ -178,7 +196,7 @@ const ChatMainColumn = ({
                     className="relative flex min-h-0 flex-1 flex-col"
                     ref={chatContainerRef}
                 >
-                    <MessagesList
+                    <MessagesListComponent
                         activeHighlightId={targetMessageId}
                         disableColors={usernameStyle.disableColors}
                         disableCustomFonts={usernameStyle.disableCustomFonts}
@@ -284,7 +302,10 @@ interface ChatSearchSidebarProps {
     serverId: string | null;
     friendId: string | null;
     onClose: () => void;
-    onNavigateToMessage: (messageId: string) => void;
+    onNavigateToMessage: (
+        messageId: string,
+        location?: { serverId?: string; channelId?: string },
+    ) => void;
 }
 
 const ChatSearchSidebar = ({

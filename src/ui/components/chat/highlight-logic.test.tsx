@@ -102,7 +102,7 @@ describe('MessagesList Highlight Logic', (): void => {
         globalThis.requestAnimationFrame = vi.fn((cb) => cb());
     });
 
-    it('clears highlight and dispatches null after timeout', async (): Promise<void> => {
+    it('fades the highlight after the timeout but keeps the target window loaded', async (): Promise<void> => {
         let renderer: ReturnType<typeof render> | undefined;
         act((): void => {
             renderer = render(
@@ -123,9 +123,13 @@ describe('MessagesList Highlight Logic', (): void => {
             vi.advanceTimersByTime(2000);
         });
 
+        // the glow fades...
         expect(msg2.dataset.highlighted).toBe('false');
 
-        expect(mockDispatch).toHaveBeenCalledWith(
+        // ...but the loaded window must NOT be cleared: clearing the target
+        // here would swap the query back to the latest page and snap the
+        // viewport off the jumped-to message.
+        expect(mockDispatch).not.toHaveBeenCalledWith(
             expect.objectContaining({
                 type: 'nav/setTargetMessageId',
                 payload: null,
@@ -187,7 +191,7 @@ describe('MessagesList Highlight Logic', (): void => {
         expect(getByTestId('msg-2').dataset.highlighted).toBe('false');
     });
 
-    it('clears highlight and dispatches null on unmount if timer was active', (): void => {
+    it('does not clear the target message on unmount', (): void => {
         let renderer: ReturnType<typeof render> | undefined;
         act((): void => {
             renderer = render(
@@ -204,7 +208,12 @@ describe('MessagesList Highlight Logic', (): void => {
         act((): void => {
             unmount();
         });
-        expect(mockDispatch).toHaveBeenCalledWith(
+
+        // clearing the target belongs to navigation (channel switch /
+        // "Jump to latest"), not to this component's lifecycle - unmounting on
+        // a re-render or a cross-channel jump must not clobber a freshly-set
+        // target.
+        expect(mockDispatch).not.toHaveBeenCalledWith(
             expect.objectContaining({
                 type: 'nav/setTargetMessageId',
                 payload: null,

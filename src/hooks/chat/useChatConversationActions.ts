@@ -6,6 +6,8 @@ import type { usePings } from '@/api/pings/pings.queries';
 import type { useAppDispatch } from '@/store/hooks';
 import { setTargetMessageId } from '@/store/slices/navSlice';
 import type { ProcessedChatMessage } from '@/types/chat.ui';
+import { jumpDebug } from '@/utils/jumpDebug';
+import { isValidSnowflakeId } from '@/utils/validation';
 import { wsMessages } from '@/ws';
 
 interface UseChatConversationActionsArgs {
@@ -56,11 +58,33 @@ export const useChatConversationActions = ({
     ]);
 
     const handleNavigateToMessage = useCallback(
-        (messageId: string): void => {
+        (
+            messageId: string,
+            location?: { serverId?: string; channelId?: string },
+        ): void => {
+            jumpDebug('nav navigateToMessage', {
+                messageId,
+                location,
+                selectedServerId,
+                selectedChannelId,
+                selectedFriendId,
+            });
             dispatch(setTargetMessageId(messageId));
-            if (selectedServerId && selectedChannelId) {
+            // a search hit can belong to a different channel than the one open
+            // (server-wide search). Navigate to the hit's own channel so the
+            // loaded window contains the target; fall back to the current
+            // channel if the location is missing or malformed.
+            const targetServerId =
+                location?.serverId && isValidSnowflakeId(location.serverId)
+                    ? location.serverId
+                    : selectedServerId;
+            const targetChannelId =
+                location?.channelId && isValidSnowflakeId(location.channelId)
+                    ? location.channelId
+                    : selectedChannelId;
+            if (targetServerId && targetChannelId) {
                 void navigate(
-                    `/chat/@server/${selectedServerId}/channel/${selectedChannelId}/message/${messageId}`,
+                    `/chat/@server/${targetServerId}/channel/${targetChannelId}/message/${messageId}`,
                 );
             } else if (selectedFriendId) {
                 void navigate(

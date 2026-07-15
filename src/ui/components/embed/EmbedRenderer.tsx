@@ -965,10 +965,15 @@ export const EmbedRenderer = ({
             ) : null}
 
             {/* Embeds */}
-            {payload.embeds?.map((embed) => (
+            {payload.embeds?.map((embed, embedIndex) => (
                 <div
                     className="flex flex-col items-start"
-                    key={getEmbedKey(embed)}
+                    // a message can carry duplicate embeds (same link posted twice,
+                    // bridged duplicates), so the content key alone can collide;
+                    // pair it with the index (embeds within a message are a fixed,
+                    // non-reordered list, so this is a safe disambiguator).
+                    // eslint-disable-next-line react/no-array-index-key
+                    key={`${getEmbedKey(embed)}-${embedIndex}`}
                 >
                     <EmbedCard
                         embed={embed}
