@@ -97,17 +97,15 @@ export const MessageComposerActions = ({
                         <GifPicker
                             onClose={onCloseGif}
                             onSelect={(url): void => {
-                                if (editor) {
-                                    void (async (): Promise<void> => {
-                                        const result = await onSendMessage(url);
-                                        if (result) {
-                                            editor.dispatchCommand(
-                                                CLEAR_EDITOR_COMMAND,
-                                                undefined,
-                                            );
-                                        }
-                                    })();
-                                }
+                                void (async (): Promise<void> => {
+                                    const result = await onSendMessage(url);
+                                    if (result && editor) {
+                                        editor.dispatchCommand(
+                                            CLEAR_EDITOR_COMMAND,
+                                            undefined,
+                                        );
+                                    }
+                                })();
                                 onCloseGif();
                             }}
                         />
