@@ -53,10 +53,14 @@ import {
 import type { Role, ServerMember } from '@/api/servers/servers.types';
 import { useMe, useUserById } from '@/api/users/users.queries';
 import type { User } from '@/api/users/users.types';
+import { useSelfStatus } from '@/hooks/useSelfStatus';
 import type { RootState } from '@/store';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { setSplitViewPane } from '@/store/slices/navSlice';
-import type { UserPresenceStatus } from '@/store/slices/presenceSlice';
+import type {
+    UserPresenceMode,
+    UserPresenceStatus,
+} from '@/store/slices/presenceSlice';
 import { setUserVolume } from '@/store/slices/voiceSlice';
 import { Box } from '@/ui/components/layout/Box';
 import { isCustomEmojiId } from '@/utils/validation';
@@ -229,6 +233,7 @@ const UserItemInner = React.memo(
         } = serverData || {};
 
         const { data: currentUser } = useMe();
+        const { status: selfStatus } = useSelfStatus();
 
         const [isKickModalOpen, setIsKickModalOpen] = React.useState(false);
         const [isBanModalOpen, setIsBanModalOpen] = React.useState(false);
@@ -368,6 +373,10 @@ const UserItemInner = React.memo(
         const storePresenceStatus = useAppSelector(
             (state): UserPresenceStatus | undefined =>
                 state.presence.users[userId]?.status,
+        );
+        const storePresenceMode = useAppSelector(
+            (state): UserPresenceMode | undefined =>
+                state.presence.users[userId]?.presenceStatus,
         );
         const storePresenceCustomText = useAppSelector(
             (state): string | undefined =>
@@ -913,8 +922,11 @@ const UserItemInner = React.memo(
             iconRole,
         ]);
 
-        const presenceStatus =
-            storePresenceStatus ?? initialPresenceStatus ?? 'offline';
+        const presenceStatus = isMe
+            ? selfStatus
+            : storePresenceStatus === 'online'
+              ? (storePresenceMode ?? 'online')
+              : (storePresenceStatus ?? initialPresenceStatus ?? 'offline');
         const presenceCustomText =
             storePresenceCustomText ?? customStatus?.text;
         const presenceCustomEmoji =

@@ -213,6 +213,7 @@ export interface IPresenceSyncEvent {
             expiresAt: string | null;
             updatedAt: string;
         } | null;
+        presenceStatus?: 'online' | 'idle' | 'dnd';
     }[];
 }
 
@@ -228,6 +229,7 @@ export interface IUserOnlineEvent {
         expiresAt: string | null;
         updatedAt: string;
     } | null;
+    presenceStatus?: 'online' | 'idle' | 'dnd';
 }
 
 /**
@@ -278,6 +280,22 @@ export interface IStatusUpdatedEvent {
         expiresAt: string | null;
         updatedAt: string;
     } | null;
+}
+
+/**
+ * @description Set presence status (online/idle/dnd).
+ */
+export interface ISetPresenceStatusEvent {
+    status: 'online' | 'idle' | 'dnd';
+}
+
+/**
+ * @description Presence status updated.
+ */
+export interface IPresenceStatusUpdatedEvent {
+    userId: string;
+    username: string;
+    presenceStatus: 'online' | 'idle' | 'dnd';
 }
 
 /**
@@ -554,6 +572,8 @@ export const WsEvents = {
     USER_OFFLINE: 'user_offline',
     SET_STATUS: 'set_status',
     STATUS_UPDATED: 'status_update',
+    SET_PRESENCE_STATUS: 'set_presence_status',
+    PRESENCE_STATUS_UPDATED: 'presence_status_updated',
     USER_JOINED_VOICE: 'user_joined_voice',
     USER_LEFT_VOICE: 'user_left_voice',
 

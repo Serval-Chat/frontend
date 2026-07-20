@@ -1,11 +1,13 @@
 import { type PayloadAction, createSlice } from '@reduxjs/toolkit';
 
 export type UserPresenceStatus = 'online' | 'offline';
+export type UserPresenceMode = 'online' | 'idle' | 'dnd';
 
 interface UserPresence {
     userId: string;
     username?: string;
     status: UserPresenceStatus;
+    presenceStatus?: UserPresenceMode;
     customStatus?: {
         text: string;
         emoji?: string | null;
@@ -36,6 +38,7 @@ const presenceSlice = createSlice({
                     userId: string;
                     username: string;
                     status?: { text: string; emoji?: string | null } | null;
+                    presenceStatus?: UserPresenceMode;
                 }[]
             >,
         ): void => {
@@ -56,6 +59,7 @@ const presenceSlice = createSlice({
                     userId: user.userId,
                     username: user.username,
                     status: 'online',
+                    presenceStatus: user.presenceStatus ?? 'online',
                     customStatus: user.status ?? null,
                 };
             }
@@ -66,12 +70,14 @@ const presenceSlice = createSlice({
                 userId: string;
                 username: string;
                 status?: { text: string; emoji?: string | null } | null;
+                presenceStatus?: UserPresenceMode;
             }>,
         ): void => {
             state.users[action.payload.userId] = {
                 userId: action.payload.userId,
                 username: action.payload.username,
                 status: 'online',
+                presenceStatus: action.payload.presenceStatus ?? 'online',
                 customStatus: action.payload.status ?? null,
             };
         },
@@ -112,6 +118,25 @@ const presenceSlice = createSlice({
                 };
             }
         },
+        updatePresenceStatus: (
+            state,
+            action: PayloadAction<{
+                userId: string;
+                presenceStatus: UserPresenceMode;
+            }>,
+        ): void => {
+            const existing = state.users[action.payload.userId];
+            if (existing) {
+                existing.presenceStatus = action.payload.presenceStatus;
+            } else {
+                state.users[action.payload.userId] = {
+                    userId: action.payload.userId,
+                    status: 'online',
+                    presenceStatus: action.payload.presenceStatus,
+                    customStatus: null,
+                };
+            }
+        },
         updateUserStatusByUsername: (
             state,
             action: PayloadAction<{
@@ -135,6 +160,7 @@ export const {
     setUserOnline,
     setUserOffline,
     updateUserStatus,
+    updatePresenceStatus,
     updateUserStatusByUsername,
 } = presenceSlice.actions;
 export const presenceReducer = presenceSlice.reducer;

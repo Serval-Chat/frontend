@@ -36,6 +36,7 @@ import {
     setOnlineUsers,
     setUserOffline,
     setUserOnline,
+    updatePresenceStatus,
     updateUserStatusByUsername,
 } from '@/store/slices/presenceSlice';
 import {
@@ -78,6 +79,7 @@ import {
     type IMessageServer,
     type IOwnershipTransferredEvent,
     type IPermissionsUpdatedEvent,
+    type IPresenceStatusUpdatedEvent,
     type IPresenceSyncEvent,
     type IRoleDeletedEvent,
     type IRoleEvent,
@@ -1389,6 +1391,30 @@ export const setupGlobalWsHandlers = (
     );
 
     cleanups.push(
+        wsClient.on<IPresenceStatusUpdatedEvent>(
+            WsEvents.PRESENCE_STATUS_UPDATED,
+            (payload): void => {
+                dispatch(
+                    updatePresenceStatus({
+                        userId: payload.userId,
+                        presenceStatus: payload.presenceStatus,
+                    }),
+                );
+
+                if (payload.userId === currentUser?.id) {
+                    queryClient.setQueryData<User>(['me'], (old) => {
+                        if (!old) return old;
+                        return {
+                            ...old,
+                            presenceStatus: payload.presenceStatus,
+                        };
+                    });
+                }
+            },
+        ),
+    );
+
+    cleanups.push(
         wsClient.on<IUserUpdatedEvent>(
             WsEvents.USER_UPDATED,
             (payload): void => {
@@ -1932,9 +1958,8 @@ export const setupGlobalWsHandlers = (
                 payload.serverId,
                 payload.channelId,
             );
-            const currentData = queryClient.getQueryData<
-                InfiniteData<ChatMessage[]>
-            >(queryKey);
+            const currentData =
+                queryClient.getQueryData<InfiniteData<ChatMessage[]>>(queryKey);
 
             if (currentData?.pages) {
                 queryClient.setQueryData(queryKey, {
@@ -1976,9 +2001,10 @@ export const setupGlobalWsHandlers = (
             const queryKey2 = CHAT_QUERY_KEYS.userMessages(payload.receiverId);
 
             for (const queryKey of [queryKey1, queryKey2]) {
-                const currentData = queryClient.getQueryData<
-                    InfiniteData<ChatMessage[]>
-                >(queryKey);
+                const currentData =
+                    queryClient.getQueryData<InfiniteData<ChatMessage[]>>(
+                        queryKey,
+                    );
                 if (currentData?.pages) {
                     queryClient.setQueryData(queryKey, {
                         ...currentData,

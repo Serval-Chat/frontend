@@ -9,6 +9,7 @@ import {
 } from '@/api/users/users.queries';
 import type { User } from '@/api/users/users.types';
 import { useCustomEmojis } from '@/hooks/useCustomEmojis';
+import { useSelfStatus } from '@/hooks/useSelfStatus';
 import { Heading } from '@/ui/components/common/Heading';
 import { Input } from '@/ui/components/common/Input';
 import { SettingsFloatingBar } from '@/ui/components/common/SettingsFloatingBar';
@@ -42,6 +43,7 @@ export const AccountProfileSection = ({
     avatarInputRef,
     bannerInputRef,
 }: AccountProfileSectionProps): React.ReactNode => {
+    const { status: selfStatus } = useSelfStatus();
     const { mutate: updateBio, isPending: isUpdatingBio } = useUpdateBio();
     const { mutate: updatePronouns, isPending: isUpdatingPronouns } =
         useUpdatePronouns();
@@ -156,7 +158,7 @@ export const AccountProfileSection = ({
                     Preview
                 </Heading>
                 <UserProfileCard
-                    presenceStatus="online"
+                    presenceStatus={selfStatus}
                     user={previewUser}
                     onAvatarClick={(): void => {
                         avatarInputRef.current?.click();

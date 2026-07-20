@@ -120,6 +120,13 @@ export const wsMessages = {
     },
 
     /**
+     * Set presence status (online/idle/dnd).
+     */
+    setPresenceStatus: (status: 'online' | 'idle' | 'dnd'): void => {
+        wsClient.send(WsEvents.SET_PRESENCE_STATUS, { status });
+    },
+
+    /**
      * Send typing indicator for DM.
      */
     sendTypingDm: (receiverId: string): void => {

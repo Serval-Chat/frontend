@@ -38,9 +38,18 @@ vi.mock('@/api/users/users.queries', () => ({
     useMe: () => meMock(),
 }));
 
+vi.mock('@tanstack/react-query', () => ({
+    useQueryClient: () => ({
+        setQueryData: vi.fn(),
+    }),
+}));
+
 vi.mock('@/store/hooks', () => ({
+    useAppDispatch: () => vi.fn(),
     useAppSelector: (selector: (state: unknown) => unknown) =>
-        selector({ presence: { users: {} } }),
+        selector({
+            presence: { users: {} },
+        }),
 }));
 
 describe('UserProfileCard friend request action', (): void => {

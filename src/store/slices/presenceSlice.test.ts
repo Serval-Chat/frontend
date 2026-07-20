@@ -24,12 +24,14 @@ describe('presenceSlice', (): void => {
             userId: '1',
             username: 'alice',
             status: 'online',
+            presenceStatus: 'online',
             customStatus: { text: 'Available' },
         });
         expect(state.users['2']).toEqual({
             userId: '2',
             username: 'bob',
             status: 'online',
+            presenceStatus: 'online',
             customStatus: null,
         });
     });
@@ -45,6 +47,7 @@ describe('presenceSlice', (): void => {
             userId: '1',
             username: 'alice',
             status: 'online',
+            presenceStatus: 'online',
             customStatus: { text: 'Coding' },
         });
     });

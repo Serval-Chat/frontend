@@ -47,6 +47,12 @@ vi.mock('@/api/users/users.queries', () => ({
     useUserById: (): { data: null } => ({ data: null }),
 }));
 
+vi.mock('@tanstack/react-query', () => ({
+    useQueryClient: () => ({
+        setQueryData: vi.fn(),
+    }),
+}));
+
 vi.mock('@/store/hooks', () => ({
     useAppDispatch: () => dispatchMock,
     useAppSelector: (selector: (state: unknown) => unknown) =>

@@ -31,6 +31,7 @@ import {
 import type { Role } from '@/api/servers/servers.types';
 import { useMe } from '@/api/users/users.queries';
 import type { User } from '@/api/users/users.types';
+import { useSelfStatus } from '@/hooks/useSelfStatus';
 import { useAppSelector } from '@/store/hooks';
 import type { AdminExtendedUser } from '@/types/admin';
 import { BotTag } from '@/ui/components/common/BotTag';
@@ -797,6 +798,7 @@ export const UserProfileCard = ({
     adminView,
 }: UserProfileCardProps) => {
     const { data: currentUser } = useMe();
+    const { status: selfStatus } = useSelfStatus();
     const navigate = useNavigate();
     const { data: friends } = useFriends();
     const { data: incomingRequests } = useIncomingRequests();
@@ -814,9 +816,11 @@ export const UserProfileCard = ({
         userId ? state.presence.users[userId] : undefined,
     );
 
-    const finalStatus = (presence?.status ??
-        propPresenceStatus ??
-        'offline') as UserStatus;
+    const finalStatus = (userId && userId === currentUser?.id
+        ? selfStatus
+        : presence?.status === 'online'
+          ? (presence.presenceStatus ?? 'online')
+          : (presence?.status ?? propPresenceStatus ?? 'offline')) as UserStatus;
     const finalCustomText =
         customStatus?.text ??
         presence?.customStatus?.text ??

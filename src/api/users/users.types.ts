@@ -153,6 +153,7 @@ export interface User {
     usernameGlow?: UsernameGlow;
     language?: string;
     customStatus?: CustomStatus | null;
+    presenceStatus?: 'online' | 'idle' | 'dnd';
     createdAt: Date;
     permissions?: AdminPermissions;
     deletedAt?: Date;

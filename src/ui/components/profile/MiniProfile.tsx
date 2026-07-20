@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 
 import { useMe } from '@/api/users/users.queries';
+import { useSelfStatus } from '@/hooks/useSelfStatus';
 import { useAppSelector } from '@/store/hooks';
 import { ParsedEmoji } from '@/ui/components/common/ParsedEmoji';
 import { ParsedUnicodeEmoji } from '@/ui/components/common/ParsedUnicodeEmoji';
@@ -10,6 +11,7 @@ import { Box } from '@/ui/components/layout/Box';
 
 import { isCustomEmojiId } from '@/utils/validation';
 import { StatusModal } from './StatusModal';
+import { StatusPicker } from './StatusPicker';
 
 const StatusEmoji = ({
     statusEmoji,
@@ -35,14 +37,13 @@ const StatusEmoji = ({
 export const MiniProfile = () => {
     const { data: user } = useMe();
     const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
+    const [isStatusPickerOpen, setIsStatusPickerOpen] = useState(false);
+    const avatarRef = useRef<HTMLElement>(null);
 
-    const presence = useAppSelector(
-        (state) => state.presence.users[user?.id ?? ''],
-    );
     const backendInstanceId = useAppSelector(
         (state): string | null => state.presence.backendInstanceId,
     );
-    const presenceStatus = presence?.status ?? 'offline';
+    const { status: displayStatus, setStatus } = useSelfStatus();
 
     const customStatus = user?.customStatus;
     const statusText = customStatus?.text ?? '';
@@ -52,19 +53,26 @@ export const MiniProfile = () => {
         setIsStatusModalOpen(true);
     };
 
+    const handleAvatarClick = (): void => {
+        setIsStatusPickerOpen((open) => !open);
+    };
+
     if (!user) return null;
 
     return (
         <Box className="pride-glass flex min-h-[60px] shrink-0 items-center justify-between border-t border-border-subtle bg-[var(--tertiary-bg)] px-2 pt-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))] md:h-[60px] md:py-2">
             <Box className="mr-2 flex min-w-0 flex-1 items-center">
-                <UserProfilePicture
-                    className="mr-2 shrink-0"
-                    decorationId={user.decorationId}
-                    size="sm"
-                    src={user.profilePicture}
-                    status={presenceStatus}
-                    username={user.username}
-                />
+                <Box ref={avatarRef}>
+                    <UserProfilePicture
+                        className="mr-2 shrink-0"
+                        decorationId={user.decorationId}
+                        size="sm"
+                        src={user.profilePicture}
+                        status={displayStatus}
+                        username={user.username}
+                        onClick={handleAvatarClick}
+                    />
+                </Box>
                 <Box className="flex min-w-0 flex-1 flex-col">
                     <StyledUserName
                         className="!text-header-primary text-sm leading-tight font-semibold"
@@ -110,6 +118,15 @@ export const MiniProfile = () => {
                 onClose={(): void => {
                     setIsStatusModalOpen(false);
                 }}
+            />
+            <StatusPicker
+                currentStatus={displayStatus}
+                isOpen={isStatusPickerOpen}
+                triggerRef={avatarRef}
+                onClose={(): void => {
+                    setIsStatusPickerOpen(false);
+                }}
+                onSelect={setStatus}
             />
         </Box>
     );
