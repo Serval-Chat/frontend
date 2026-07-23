@@ -71,6 +71,9 @@ const MessagesListComponent = useNativeMessages
     ? MessagesListNative
     : MessagesList;
 
+const dragHasFiles = (dataTransfer: DataTransfer): boolean =>
+    Array.from(dataTransfer.types).includes('Files');
+
 interface UsernameStyle {
     disableColors?: boolean;
     disableCustomFonts?: boolean;
@@ -499,7 +502,9 @@ export const MainChat = ({
     const handleDragOver = (e: React.DragEvent): void => {
         e.preventDefault();
         e.stopPropagation();
-        if (canSendMessages) patchUi({ isDragging: true });
+        if (canSendMessages && dragHasFiles(e.dataTransfer)) {
+            patchUi({ isDragging: true });
+        }
     };
 
     const handleDragLeave = (e: React.DragEvent): void => {

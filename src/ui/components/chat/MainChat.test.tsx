@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { render } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { useNavigate } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -9,6 +9,7 @@ import {
     usePings,
 } from '@/api/pings/pings.queries';
 import { useMe, useUserById } from '@/api/users/users.queries';
+import { useFileQueue } from '@/hooks/chat/useFileQueue';
 import * as Permissions from '@/hooks/usePermissions';
 import { useAppSelector } from '@/store/hooks';
 
@@ -109,7 +110,12 @@ vi.mock('@/ui/components/common/Text', () => ({
     ),
 }));
 vi.mock('@/ui/components/layout/Box', () => ({
-    Box: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+    Box: ({
+        children,
+        ...props
+    }: { children: React.ReactNode } & Record<string, unknown>) => (
+        <div {...props}>{children}</div>
+    ),
 }));
 
 const queryClient = new QueryClient({
@@ -240,5 +246,86 @@ describe('MainChat fallback logic', (): void => {
         );
 
         expect(mockNavigate).not.toHaveBeenCalled();
+    });
+});
+
+describe('drag and drop file detection', (): void => {
+    const mockNavigate = vi.fn();
+    const addFiles = vi.fn();
+
+    beforeEach((): void => {
+        vi.clearAllMocks();
+        vi.mocked(useNavigate).mockReturnValue(mockNavigate);
+        vi.mocked(useAppSelector).mockImplementation((selector) => {
+            const state = {
+                nav: { selectedServerId: 'server1', selectedChannelId: 'ch1' },
+                furTweaker: {},
+            };
+            return selector(state as never);
+        });
+        vi.mocked(useMe).mockReturnValue({ data: undefined } as never);
+        vi.mocked(useUserById).mockReturnValue({
+            data: undefined,
+            isError: false,
+        } as never);
+        vi.mocked(usePings).mockReturnValue({
+            data: { pings: [] },
+        } as never);
+        vi.mocked(useClearChannelPings).mockReturnValue({
+            mutate: vi.fn(),
+        } as never);
+        vi.mocked(useDeletePing).mockReturnValue({
+            mutate: vi.fn(),
+        } as never);
+        vi.mocked(Permissions.usePermissions).mockReturnValue({
+            hasPermission: (): true => true,
+            permissions: {} as never,
+            isOwner: false,
+            isLoading: false,
+            isTimedOut: false,
+            remainingTimeoutMs: 0,
+        });
+        vi.mocked(useFileQueue).mockReturnValue({ addFiles } as never);
+    });
+
+    const renderChat = (): HTMLElement => {
+        const { container } = render(
+            <QueryClientProvider client={queryClient}>
+                <MainChat />
+            </QueryClientProvider>,
+        );
+        const dropzone = container.querySelector('.chat-background');
+        if (!dropzone) throw new Error('drop zone not found');
+        return dropzone as HTMLElement;
+    };
+
+    it('does not show the file-upload overlay when plain text (e.g. a dragged server name) is dragged over the chat area', (): void => {
+        const dropzone = renderChat();
+
+        fireEvent.dragOver(dropzone, {
+            dataTransfer: { types: ['text/plain'], files: [] },
+        });
+
+        expect(screen.queryByText('Drop files to upload')).toBeNull();
+    });
+
+    it('still shows the file-upload overlay when an actual file is dragged over the chat area', (): void => {
+        const dropzone = renderChat();
+
+        fireEvent.dragOver(dropzone, {
+            dataTransfer: { types: ['Files'], files: [] },
+        });
+
+        expect(screen.getByText('Drop files to upload')).toBeDefined();
+    });
+
+    it('does not queue anything when a plain text drag is dropped on the chat area', (): void => {
+        const dropzone = renderChat();
+
+        fireEvent.drop(dropzone, {
+            dataTransfer: { types: ['text/plain'], files: [] },
+        });
+
+        expect(addFiles).not.toHaveBeenCalled();
     });
 });
