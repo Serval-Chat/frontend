@@ -10,4 +10,8 @@ export interface Warning {
     acknowledged: boolean;
     acknowledgedAt?: string;
     timestamp: string;
+    // Minutes after acknowledgment before this warning's record expires.
+    expiryDurationMinutes?: number;
+    // Only set once the warning has been acknowledged.
+    expiresAt?: string;
 }

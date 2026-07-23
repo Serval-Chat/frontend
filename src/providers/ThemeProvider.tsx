@@ -3,6 +3,7 @@ import React, {
     use,
     useCallback,
     useEffect,
+    useLayoutEffect,
     useMemo,
     useState,
 } from 'react';
@@ -129,7 +130,7 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
         [customThemes],
     );
 
-    useEffect((): void => {
+    useLayoutEffect((): void => {
         const root = document.documentElement;
         const builtInTheme = isBuiltInTheme(theme) ? theme : 'serval';
 

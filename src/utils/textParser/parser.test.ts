@@ -1212,6 +1212,12 @@ describe('TextParser', (): void => {
         expect(nodes).toEqual([{ type: 'text', content: 'Not a > quote' }]);
     });
 
+    it('should not parse a kaomoji like ">:3" as a blockquote', (): void => {
+        const text = '>:3';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([{ type: 'text', content: '>:3' }]);
+    });
+
     it('should handle escaped blockquote', (): void => {
         const text = String.raw`\> Not a quote`;
         const nodes = parseText(text, ParserPresets.MESSAGE);
@@ -1252,8 +1258,14 @@ describe('TextParser', (): void => {
         ]);
     });
 
-    it('should handle mixed nesting with no spaces', (): void => {
+    it('should require a space after each ">": no blockquote without one', (): void => {
         const text = '>>level 2';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([{ type: 'text', content: '>>level 2' }]);
+    });
+
+    it('should still nest when every ">" is followed by a space', (): void => {
+        const text = '> > level 2';
         const nodes = parseText(text, ParserPresets.MESSAGE);
         expect(nodes).toEqual([
             {

@@ -93,7 +93,7 @@
     --avatar-fallback-bg: color-mix(
         in srgb,
         var(--muted-foreground) 20%,
-        transparent
+        var(--background)
     );
     --avatar-fallback-text: var(--muted-foreground);
     --settings-search-bg: rgb(0 0 0 / 0.4);

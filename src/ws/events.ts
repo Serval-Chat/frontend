@@ -299,6 +299,21 @@ export interface IPresenceStatusUpdatedEvent {
 }
 
 /**
+ * @description Warning issued to the current user.
+ */
+export interface IWarningEvent {
+    id: string;
+    userId: string;
+    issuedBy: string;
+    message: string;
+    timestamp: string;
+    acknowledged: boolean;
+    acknowledgedAt?: string;
+    expiryDurationMinutes?: number;
+    expiresAt?: string;
+}
+
+/**
  * @description Member updated.
  */
 export interface IMemberUpdatedEvent {
@@ -605,6 +620,7 @@ export const WsEvents = {
     SERVER_BANNER_UPDATED: 'server_banner_updated',
     OWNERSHIP_TRANSFERRED: 'ownership_transferred',
     MEMBER_UPDATED: 'member_updated',
+    WARNING: 'warning',
     MEMBER_ADDED: 'member_added',
     MEMBER_REMOVED: 'member_removed',
     ROLE_CREATED: 'role_created',

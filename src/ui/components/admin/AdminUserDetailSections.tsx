@@ -4,6 +4,7 @@ import {
     CheckCircle,
     Clock,
     Server as ServerIconLucide,
+    Timer,
     VolumeX,
     XCircle,
 } from 'lucide-react';
@@ -15,6 +16,7 @@ import { Heading } from '@/ui/components/common/Heading';
 import { Text } from '@/ui/components/common/Text';
 import { ServerIcon } from '@/ui/components/servers/ServerIcon';
 import { cn } from '@/utils/cn';
+import { formatMinutesDuration } from '@/utils/duration';
 import { APP_LOCALE } from '@/utils/locale';
 
 export const AdminAccountStatus = ({
@@ -282,13 +284,42 @@ export const AdminWarningHistory = ({
                             {warning.acknowledgedAt ? (
                                 <>
                                     <div className="h-1 w-1 rounded-full bg-border-subtle" />
-                                    <div className="ml-auto flex items-center gap-1.5">
+                                    <div className="flex items-center gap-1.5">
                                         <Clock size={10} />
                                         <Text as="span">
                                             Ack:{' '}
                                             {new Date(
                                                 warning.acknowledgedAt,
                                             ).toLocaleDateString(APP_LOCALE)}
+                                        </Text>
+                                    </div>
+                                </>
+                            ) : null}
+                            {warning.expiresAt ? (
+                                <>
+                                    <div className="h-1 w-1 rounded-full bg-border-subtle" />
+                                    <div className="ml-auto flex items-center gap-1.5">
+                                        <Timer size={10} />
+                                        <Text as="span">
+                                            Expires:{' '}
+                                            {new Date(
+                                                warning.expiresAt,
+                                            ).toLocaleDateString(APP_LOCALE)}
+                                        </Text>
+                                    </div>
+                                </>
+                            ) : !warning.acknowledged &&
+                              warning.expiryDurationMinutes ? (
+                                <>
+                                    <div className="h-1 w-1 rounded-full bg-border-subtle" />
+                                    <div className="ml-auto flex items-center gap-1.5">
+                                        <Timer size={10} />
+                                        <Text as="span">
+                                            Expires{' '}
+                                            {formatMinutesDuration(
+                                                warning.expiryDurationMinutes,
+                                            )}{' '}
+                                            after ack
                                         </Text>
                                     </div>
                                 </>

@@ -1,7 +1,15 @@
 import { useState } from 'react';
 
-import { Ban, Hammer, ShieldAlert, Volume2, VolumeX } from 'lucide-react';
+import {
+    AlertTriangle,
+    Ban,
+    Hammer,
+    ShieldAlert,
+    Volume2,
+    VolumeX,
+} from 'lucide-react';
 
+import { useWarnUser } from '@/api/warnings/warnings.queries';
 import {
     useAdminBanUser,
     useAdminMuteUser,
@@ -146,6 +154,110 @@ const AdminMutePenaltyCard = ({
                             onClick={handleMuteUser}
                         >
                             {isMuting ? 'Muting...' : 'Confirm Mute'}
+                        </Button>
+                    </div>
+                </div>
+            ) : null}
+        </div>
+    );
+};
+
+const AdminWarnPenaltyCard = ({
+    userId,
+    isOpen,
+    onToggle,
+    onClose,
+}: PenaltyCardProps): React.ReactNode => {
+    const { showToast } = useToast();
+    const { mutate: warnUser, isPending: isWarning } = useWarnUser();
+    const [warnMessage, setWarnMessage] = useState('');
+    const [warnDuration, setWarnDuration] = useState(''); // blank = permanent
+
+    const handleWarnUser = (): void => {
+        if (!warnMessage.trim()) {
+            showToast('Warning message is required', 'error');
+            return;
+        }
+
+        let durationMin: number | undefined;
+        if (warnDuration.trim() !== '') {
+            durationMin = Number.parseInt(warnDuration, 10);
+            if (isNaN(durationMin) || durationMin <= 0) {
+                showToast(
+                    'Expiration must be a positive number of minutes, or left blank for a permanent warning',
+                    'error',
+                );
+                return;
+            }
+        }
+
+        warnUser(
+            { userId, message: warnMessage, duration: durationMin },
+            {
+                onSuccess: (): void => {
+                    onClose();
+                    setWarnMessage('');
+                    setWarnDuration('');
+                },
+            },
+        );
+    };
+
+    return (
+        <div className="rounded-xl border border-border-subtle bg-bg-secondary/30 p-4">
+            <div className="mb-3 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                    <AlertTriangle className="text-caution" size={18} />
+                    <Text size="sm" weight="bold">
+                        Warning
+                    </Text>
+                </div>
+
+                <Button size="sm" variant="caution" onClick={onToggle}>
+                    <AlertTriangle className="mr-1.5" size={14} />
+                    Warn User
+                </Button>
+            </div>
+
+            {isOpen ? (
+                <div className="mt-4 space-y-3 border-t border-border-subtle/50 pt-4">
+                    <InputWrapper>
+                        <Text className="mb-1 block" size="xs" weight="bold">
+                            Record Expires After Acknowledgment (Minutes)
+                        </Text>
+                        <Input
+                            placeholder="Leave blank to never expire"
+                            type="number"
+                            value={warnDuration}
+                            onChange={(e): void => {
+                                setWarnDuration(e.target.value);
+                            }}
+                        />
+                    </InputWrapper>
+                    <InputWrapper>
+                        <Text className="mb-1 block" size="xs" weight="bold">
+                            Warning Message
+                        </Text>
+                        <TextArea
+                            placeholder="Explain what rule was broken and what needs to change."
+                            rows={2}
+                            value={warnMessage}
+                            onChange={(e): void => {
+                                setWarnMessage(e.target.value);
+                            }}
+                        />
+                    </InputWrapper>
+                    <div className="flex justify-end gap-2 pt-1">
+                        <Button size="sm" variant="ghost" onClick={onClose}>
+                            Cancel
+                        </Button>
+                        <Button
+                            disabled={isWarning}
+                            size="sm"
+                            variant="caution"
+                            onClick={handleWarnUser}
+                        >
+                            {isWarning ? 'Issuing...' : 'Issue Warning'}
                         </Button>
                     </div>
                 </div>
@@ -300,7 +412,9 @@ export const AdminModerationControls = ({
     banUntilLabel,
     muteUntilLabel,
 }: AdminModerationControlsProps): React.ReactNode => {
-    const [openForm, setOpenForm] = useState<'mute' | 'ban' | null>(null);
+    const [openForm, setOpenForm] = useState<'mute' | 'warn' | 'ban' | null>(
+        null,
+    );
 
     return (
         <div className="rounded-2xl border border-border-subtle bg-bg-subtle p-6">
@@ -319,6 +433,17 @@ export const AdminModerationControls = ({
                     }}
                     onToggle={(): void => {
                         setOpenForm(openForm === 'mute' ? null : 'mute');
+                    }}
+                />
+
+                <AdminWarnPenaltyCard
+                    isOpen={openForm === 'warn'}
+                    userId={userId}
+                    onClose={(): void => {
+                        setOpenForm(null);
+                    }}
+                    onToggle={(): void => {
+                        setOpenForm(openForm === 'warn' ? null : 'warn');
                     }}
                 />
 

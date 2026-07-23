@@ -1,4 +1,4 @@
-import { render, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
 import { MermaidChart } from '@/ui/components/common/MermaidChart';
@@ -24,8 +24,8 @@ SVGElement.prototype.getBBox = (): DOMRect => ({
 SVGElement.prototype.getComputedTextLength = (): number => 50;
 
 describe('MermaidChart', (): void => {
-    it('renders a valid diagram to an SVG element', async (): Promise<void> => {
-        const { container } = render(
+    it('shows a click-to-view placeholder instead of rendering immediately', (): void => {
+        render(
             <MermaidChart
                 content={
                     'graph TD;\nA[Start] --> B{Decision};\nB -->|Yes| C[End];\nB -->|No| A;'
@@ -33,8 +33,87 @@ describe('MermaidChart', (): void => {
             />,
         );
 
+        expect(screen.getByText('Mermaid diagram')).toBeTruthy();
+        expect(screen.getByText('Click to view chart')).toBeTruthy();
+        expect(document.querySelector('.mermaid-chart-container')).toBeFalsy();
+    });
+
+    it('renders the diagram to an SVG element once the placeholder is clicked', async (): Promise<void> => {
+        render(
+            <MermaidChart
+                content={
+                    'graph TD;\nA[Start] --> B{Decision};\nB -->|Yes| C[End];\nB -->|No| A;'
+                }
+            />,
+        );
+
+        fireEvent.click(screen.getByText('Mermaid diagram'));
+
         await waitFor((): void => {
-            expect(container.querySelector('svg')).toBeTruthy();
+            expect(
+                document.querySelector('.mermaid-chart-container svg'),
+            ).toBeTruthy();
+        });
+    });
+
+    it('zooms in on wheel scroll and resets via the reset button', async (): Promise<void> => {
+        render(
+            <MermaidChart
+                content={
+                    'graph TD;\nA[Start] --> B{Decision};\nB -->|Yes| C[End];\nB -->|No| A;'
+                }
+            />,
+        );
+
+        fireEvent.click(screen.getByText('Mermaid diagram'));
+        await waitFor((): void => {
+            expect(
+                document.querySelector('.mermaid-chart-container svg'),
+            ).toBeTruthy();
+        });
+
+        await waitFor((): void => {
+            expect(screen.getByText('90%')).toBeTruthy();
+        });
+
+        fireEvent.wheel(screen.getByTestId('mermaid-canvas'), {
+            deltaY: -500,
+        });
+
+        await waitFor((): void => {
+            expect(screen.queryByText('90%')).toBeFalsy();
+        });
+
+        fireEvent.click(screen.getByLabelText('Reset view'));
+
+        await waitFor((): void => {
+            expect(screen.getByText('100%')).toBeTruthy();
+        });
+    });
+
+    it('computes an initial fit-to-screen zoom from the canvas and diagram size', async (): Promise<void> => {
+        render(
+            <MermaidChart
+                content={
+                    'graph TD;\nA[Start] --> B{Decision};\nB -->|Yes| C[End];\nB -->|No| A;'
+                }
+            />,
+        );
+
+        fireEvent.click(screen.getByText('Mermaid diagram'));
+
+        const canvas = await screen.findByTestId('mermaid-canvas');
+        Object.defineProperty(canvas, 'clientWidth', {
+            configurable: true,
+            value: 58,
+        });
+        Object.defineProperty(canvas, 'clientHeight', {
+            configurable: true,
+            value: 3600,
+        });
+
+        await waitFor((): void => {
+            expect(screen.getByText('45%')).toBeTruthy();
         });
     });
 

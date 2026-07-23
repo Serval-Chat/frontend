@@ -56,8 +56,9 @@ export const PushPrompt = () => {
         <div className="border-sidebar-border animate-in slide-in-from-bottom-5 fixed right-4 bottom-4 left-4 z-[9999] flex flex-col gap-3 rounded-lg border bg-background p-4 shadow-2xl md:right-auto md:w-80">
             <Button
                 aria-label="Dismiss banner"
-                className="text-primary-500 hover:text-primary-300 absolute top-2 right-2 p-1"
+                className="text-primary-500 hover:text-primary-300"
                 size="sm"
+                style={{ position: 'absolute', top: '0.5rem', right: '0.5rem' }}
                 variant="ghost"
                 onClick={handleDismiss}
             >

@@ -25,6 +25,7 @@ import { TertiarySidebar } from '@/ui/TertiarySidebar';
 import { transitions } from '@/ui/animations';
 import { Box } from '@/ui/components/layout/Box';
 import { MainContent } from '@/ui/components/layout/MainContent';
+import { UnacknowledgedWarningModal } from '@/ui/components/warnings/UnacknowledgedWarningModal';
 
 const isMobileViewport = (): boolean =>
     globalThis.window !== undefined &&
@@ -356,21 +357,27 @@ export const Chat = () => {
 
     if (!isMobile) {
         return (
-            <DesktopChatLayout
-                isSplitViewActive={isSplitViewActive}
-                selectedFriendId={selectedFriendId}
-                selectedServerId={selectedServerId}
-                showDesktopMemberList={showDesktopMemberList}
-            />
+            <>
+                <DesktopChatLayout
+                    isSplitViewActive={isSplitViewActive}
+                    selectedFriendId={selectedFriendId}
+                    selectedServerId={selectedServerId}
+                    showDesktopMemberList={showDesktopMemberList}
+                />
+                <UnacknowledgedWarningModal />
+            </>
         );
     }
 
     return (
-        <MobileChatLayout
-            isSplitViewActive={isSplitViewActive}
-            swipeRef={swipeRef}
-            visualViewportBounds={visualViewportBounds}
-            x={x}
-        />
+        <>
+            <MobileChatLayout
+                isSplitViewActive={isSplitViewActive}
+                swipeRef={swipeRef}
+                visualViewportBounds={visualViewportBounds}
+                x={x}
+            />
+            <UnacknowledgedWarningModal />
+        </>
     );
 };

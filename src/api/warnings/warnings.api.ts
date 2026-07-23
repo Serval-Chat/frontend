@@ -19,4 +19,16 @@ export const warningsApi = {
         apiClient
             .get<Warning[]>(`/api/v1/admin/users/${userId}/warnings`)
             .then((r): Warning[] => r.data),
+
+    warnUser: (
+        userId: string,
+        message: string,
+        duration?: number,
+    ): Promise<Warning> =>
+        apiClient
+            .post<Warning>(`/api/v1/admin/users/${userId}/warn`, {
+                message,
+                duration,
+            })
+            .then((r): Warning => r.data),
 };

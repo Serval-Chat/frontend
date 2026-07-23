@@ -97,6 +97,7 @@ import {
     type IUserUpdatedEvent,
     type IVoiceJoinedEvent,
     type IVoiceStateUpdatedEvent,
+    type IWarningEvent,
     type IWsAuthenticatedEvent,
     type IWsErrorEvent,
     WsEvents,
@@ -1574,6 +1575,12 @@ export const setupGlobalWsHandlers = (
                 );
             },
         ),
+    );
+
+    cleanups.push(
+        wsClient.on<IWarningEvent>(WsEvents.WARNING, (): void => {
+            void queryClient.invalidateQueries({ queryKey: ['warnings'] });
+        }),
     );
 
     cleanups.push(

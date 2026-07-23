@@ -2208,7 +2208,7 @@ class TextParser {
             } as ASTNode;
         }
 
-        if (this.peek('>')) {
+        if (this.peek('> ')) {
             const lines: string[] = [];
             let tempIndex = this.index;
 
@@ -2220,12 +2220,11 @@ class TextParser {
                     break;
                 }
 
-                if (this.text.startsWith('>', tempIndex)) {
-                    tempIndex++; // Skip >
-                    // Optional space
-                    if (this.text.charAt(tempIndex) === ' ') {
-                        tempIndex++;
-                    }
+                if (
+                    this.text.startsWith('>', tempIndex) &&
+                    this.text.charAt(tempIndex + 1) === ' '
+                ) {
+                    tempIndex += 2; // Skip "> "
 
                     let lineContent = '';
                     while (

@@ -6,6 +6,9 @@ import {
     useQueryClient,
 } from '@tanstack/react-query';
 
+import { useToast } from '@/ui/components/common/Toast';
+import { extractApiError } from '@/utils/extractApiError';
+
 import { warningsApi } from './warnings.api';
 import type { Warning } from './warnings.types';
 
@@ -41,3 +44,33 @@ export const useAdminUserWarnings = (
         queryFn: (): Promise<Warning[]> => warningsApi.getUserWarnings(userId),
         enabled: !!userId,
     });
+
+export const useWarnUser = (): UseMutationResult<
+    Warning,
+    Error,
+    { userId: string; message: string; duration?: number }
+> => {
+    const queryClient = useQueryClient();
+    const { showToast } = useToast();
+
+    return useMutation({
+        mutationFn: ({ userId, message, duration }): Promise<Warning> =>
+            warningsApi.warnUser(userId, message, duration),
+        onSuccess: (_, variables): void => {
+            void queryClient.invalidateQueries({
+                queryKey: ['admin-user-warnings', variables.userId],
+            });
+            void queryClient.invalidateQueries({
+                queryKey: ['admin-user-detail', variables.userId],
+            });
+            void queryClient.invalidateQueries({ queryKey: ['admin-users'] });
+            showToast('Warning issued successfully', 'success');
+        },
+        onError: (error): void => {
+            showToast(
+                extractApiError(error, 'Failed to issue warning'),
+                'error',
+            );
+        },
+    });
+};
