@@ -631,6 +631,9 @@ export const setupGlobalWsHandlers = (
                             userId: payload.user.id,
                             username: payload.user.username,
                             status: undefined,
+                            presenceStatus:
+                                queryClient.getQueryData<User>(['me'])
+                                    ?.presenceStatus,
                         }),
                     );
                     dispatch(setBackendInstanceId(payload.instanceId));
@@ -1142,6 +1145,9 @@ export const setupGlobalWsHandlers = (
                         userId: currentUser.id,
                         username: currentUser.username,
                         status: undefined,
+                        presenceStatus:
+                            queryClient.getQueryData<User>(['me'])
+                                ?.presenceStatus,
                     });
                 }
 

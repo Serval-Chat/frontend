@@ -1,4 +1,5 @@
 import type { MessageAttachment, OutgoingPoll } from '@/api/chat/chat.types';
+import type { PresenceStatus } from '@/types/presence';
 
 import { wsClient } from './client';
 import { WsEvents } from './events';
@@ -120,9 +121,9 @@ export const wsMessages = {
     },
 
     /**
-     * Set presence status (online/idle/dnd).
+     * Set presence status (online/idle/dnd/offline).
      */
-    setPresenceStatus: (status: 'online' | 'idle' | 'dnd'): void => {
+    setPresenceStatus: (status: PresenceStatus): void => {
         wsClient.send(WsEvents.SET_PRESENCE_STATUS, { status });
     },
 

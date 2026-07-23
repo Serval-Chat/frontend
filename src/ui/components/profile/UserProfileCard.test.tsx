@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { FriendRequest } from '@/api/friends/friends.types';
 import type { User } from '@/api/users/users.types';
+import type { ManualUserStatus } from '@/hooks/useSelfStatus';
 
 import { UserProfileCard } from './UserProfileCard';
 
@@ -14,6 +15,23 @@ const sendFriendRequestMock = vi.fn();
 const acceptFriendRequestMock = vi.fn();
 const cancelFriendRequestMock = vi.fn();
 const removeFriendMock = vi.fn();
+const useSelfStatusMock = vi.fn(
+    (): { status: ManualUserStatus; setStatus: () => void } => ({
+        status: 'online',
+        setStatus: vi.fn(),
+    }),
+);
+
+vi.mock('@/hooks/useSelfStatus', async () => {
+    const actual =
+        await vi.importActual<typeof import('@/hooks/useSelfStatus')>(
+            '@/hooks/useSelfStatus',
+        );
+    return {
+        ...actual,
+        useSelfStatus: () => useSelfStatusMock(),
+    };
+});
 
 vi.mock('react-router-dom', () => ({
     useNavigate: () => vi.fn(),
@@ -66,6 +84,10 @@ describe('UserProfileCard friend request action', (): void => {
         friendsMock.mockReturnValue({ data: [] });
         incomingRequestsMock.mockReturnValue({ data: [] });
         outgoingRequestsMock.mockReturnValue({ data: [] });
+        useSelfStatusMock.mockReturnValue({
+            status: 'online',
+            setStatus: vi.fn(),
+        });
     });
 
     it('shows "Send Friend Request" when there is no existing relationship', (): void => {
@@ -236,6 +258,10 @@ describe('UserProfileCard admin "Complete Profile View" data', (): void => {
         friendsMock.mockReturnValue({ data: [] });
         incomingRequestsMock.mockReturnValue({ data: [] });
         outgoingRequestsMock.mockReturnValue({ data: [] });
+        useSelfStatusMock.mockReturnValue({
+            status: 'online',
+            setStatus: vi.fn(),
+        });
 
         vi.stubGlobal(
             'matchMedia',
@@ -431,5 +457,31 @@ describe('UserProfileCard admin "Complete Profile View" data', (): void => {
         expect(
             screen.queryByText('You made this field private'),
         ).not.toBeInTheDocument();
+    });
+});
+
+describe('UserProfileCard self status display', (): void => {
+    beforeEach((): void => {
+        vi.clearAllMocks();
+        meMock.mockReturnValue({ data: { id: 'user-a' } });
+        friendsMock.mockReturnValue({ data: [] });
+        incomingRequestsMock.mockReturnValue({ data: [] });
+        outgoingRequestsMock.mockReturnValue({ data: [] });
+    });
+
+    it('shows the current user as offline on their own profile card when they set their status to offline/invisible, matching what others see', (): void => {
+        useSelfStatusMock.mockReturnValue({
+            status: 'offline',
+            setStatus: vi.fn(),
+        });
+        const ownUser: User = {
+            id: 'user-a',
+            username: 'alice',
+        } as User;
+
+        render(<UserProfileCard user={ownUser} />);
+
+        expect(screen.getByTitle('Offline')).toBeInTheDocument();
+        expect(screen.queryByTitle('Online')).not.toBeInTheDocument();
     });
 });

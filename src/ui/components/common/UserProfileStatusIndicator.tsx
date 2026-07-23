@@ -1,9 +1,10 @@
 import { Moon } from 'lucide-react';
 
 import { Box } from '@/ui/components/layout/Box';
+import type { PresenceStatus } from '@/types/presence';
 import { cn } from '@/utils/cn';
 
-export type UserStatus = 'online' | 'idle' | 'dnd' | 'offline';
+export type UserStatus = PresenceStatus;
 
 interface UserProfileStatusIndicatorProps {
     status: UserStatus;

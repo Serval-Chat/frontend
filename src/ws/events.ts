@@ -13,6 +13,7 @@ import type {
 } from '@/api/servers/servers.types';
 import type { ButtonComponent, Embed } from '@/types/embed';
 import type { JsonValue } from '@/types/json';
+import type { PresenceStatus } from '@/types/presence';
 
 /**
  * @description WebSocket envelope structure for all messages.
@@ -213,7 +214,7 @@ export interface IPresenceSyncEvent {
             expiresAt: string | null;
             updatedAt: string;
         } | null;
-        presenceStatus?: 'online' | 'idle' | 'dnd';
+        presenceStatus?: PresenceStatus;
     }[];
 }
 
@@ -229,7 +230,7 @@ export interface IUserOnlineEvent {
         expiresAt: string | null;
         updatedAt: string;
     } | null;
-    presenceStatus?: 'online' | 'idle' | 'dnd';
+    presenceStatus?: PresenceStatus;
 }
 
 /**
@@ -286,7 +287,7 @@ export interface IStatusUpdatedEvent {
  * @description Set presence status (online/idle/dnd).
  */
 export interface ISetPresenceStatusEvent {
-    status: 'online' | 'idle' | 'dnd';
+    status: PresenceStatus;
 }
 
 /**
@@ -295,7 +296,7 @@ export interface ISetPresenceStatusEvent {
 export interface IPresenceStatusUpdatedEvent {
     userId: string;
     username: string;
-    presenceStatus: 'online' | 'idle' | 'dnd';
+    presenceStatus: PresenceStatus;
 }
 
 /**

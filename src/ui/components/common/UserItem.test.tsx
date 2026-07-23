@@ -4,6 +4,7 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { User } from '@/api/users/users.types';
+import type { ManualUserStatus } from '@/hooks/useSelfStatus';
 
 import { UserItem } from './UserItem';
 
@@ -11,6 +12,23 @@ const dispatchMock = vi.fn();
 const sendFriendRequestMock = vi.fn();
 const navigateMock = vi.fn();
 const friendsMock = vi.fn(() => ({ data: [] as { id: string }[] }));
+const useSelfStatusMock = vi.fn(
+    (): { status: ManualUserStatus; setStatus: () => void } => ({
+        status: 'online',
+        setStatus: vi.fn(),
+    }),
+);
+
+vi.mock('@/hooks/useSelfStatus', async () => {
+    const actual =
+        await vi.importActual<typeof import('@/hooks/useSelfStatus')>(
+            '@/hooks/useSelfStatus',
+        );
+    return {
+        ...actual,
+        useSelfStatus: () => useSelfStatusMock(),
+    };
+});
 
 vi.mock('react-router-dom', () => ({
     useNavigate: () => navigateMock,
@@ -134,6 +152,10 @@ vi.mock('./ContextMenu', () => ({
 describe('UserItem', (): void => {
     beforeEach((): void => {
         vi.clearAllMocks();
+        useSelfStatusMock.mockReturnValue({
+            status: 'online',
+            setStatus: vi.fn(),
+        });
     });
 
     it('renders a bot tag for bot users', (): void => {
@@ -181,5 +203,34 @@ describe('UserItem', (): void => {
         fireEvent.click(screen.getByText('Open DMs'));
 
         expect(navigateMock).toHaveBeenCalledWith('/chat/@user/user-2');
+    });
+
+    it('shows the current user as offline in a member list when they set their own status to offline/invisible, matching what others see', (): void => {
+        useSelfStatusMock.mockReturnValue({
+            status: 'offline',
+            setStatus: vi.fn(),
+        });
+        const meUser: User = {
+            id: 'me',
+            username: 'me',
+            isBot: false,
+        } as User;
+
+        render(<UserItem noFetch user={meUser} userId="me" />);
+
+        expect(screen.getByTitle('Offline')).toBeInTheDocument();
+        expect(screen.queryByTitle('Online')).not.toBeInTheDocument();
+    });
+
+    it('still shows a non-self user as offline based on their real presence', (): void => {
+        const otherUser: User = {
+            id: 'user-2',
+            username: 'alice',
+            isBot: false,
+        } as User;
+
+        render(<UserItem noFetch user={otherUser} userId="user-2" />);
+
+        expect(screen.getByTitle('Offline')).toBeInTheDocument();
     });
 });

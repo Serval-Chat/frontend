@@ -24,7 +24,10 @@ export const buildMemberGroups = ({
     members?: ServerMember[];
     searchQuery?: string;
     roles?: Role[];
-    presenceMap: Record<string, { status?: string } | undefined>;
+    presenceMap: Record<
+        string,
+        { status?: string; presenceStatus?: string } | undefined
+    >;
     me: { id: string } | undefined;
     blocks: Record<string, number>;
 }): MemberGroup[] => {
@@ -44,7 +47,9 @@ export const buildMemberGroups = ({
                 : presence.status === 'online';
         const onlineFromMemberSnapshot = m.online ?? false;
         const effectiveOnline = onlineFromPresence ?? onlineFromMemberSnapshot;
-        const isOnline = !forceOffline && (effectiveOnline || isMeMember);
+        const isInvisible = presence?.presenceStatus === 'offline';
+        const isOnline =
+            !forceOffline && !isInvisible && (effectiveOnline || isMeMember);
 
         return [
             {

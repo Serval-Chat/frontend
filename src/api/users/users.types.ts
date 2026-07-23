@@ -1,3 +1,5 @@
+import type { PresenceStatus } from '@/types/presence';
+
 export type UsernameFont =
     | 'default'
     | 'Audiowide'
@@ -153,7 +155,7 @@ export interface User {
     usernameGlow?: UsernameGlow;
     language?: string;
     customStatus?: CustomStatus | null;
-    presenceStatus?: 'online' | 'idle' | 'dnd';
+    presenceStatus?: PresenceStatus;
     createdAt: Date;
     permissions?: AdminPermissions;
     deletedAt?: Date;

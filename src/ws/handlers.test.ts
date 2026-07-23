@@ -28,6 +28,7 @@ import { serversApi } from '@/api/servers/servers.api';
 import { SERVERS_QUERY_KEYS } from '@/api/servers/servers.queries';
 import type { Channel } from '@/api/servers/servers.types';
 import type { User } from '@/api/users/users.types';
+import { setUserOnline } from '@/store/slices/presenceSlice';
 import {
     decrementServerPing,
     incrementServerPing,
@@ -481,6 +482,32 @@ describe('setupGlobalWsHandlers - ping behaviour', (): void => {
             ).toBe(true);
             expect(queryClient.getQueryState(dmQueryKey)?.isInvalidated).toBe(
                 true,
+            );
+        });
+    });
+
+    describe('AUTHENTICATED event and the self manual presence status', (): void => {
+        it('preserves a manually-set offline (invisible) status across reconnect instead of resetting it to online', (): void => {
+            queryClient.setQueryData<User>(['me'], {
+                id: 'me',
+                login: 'me@example.com',
+                username: 'me',
+                createdAt: new Date(),
+                presenceStatus: 'offline',
+            });
+
+            emitWsEvent(mockWs, WsEvents.AUTHENTICATED, {
+                user: { id: 'me', username: 'me' },
+                instanceId: 'instance-1',
+            });
+
+            expect(dispatch).toHaveBeenCalledWith(
+                setUserOnline({
+                    userId: 'me',
+                    username: 'me',
+                    status: undefined,
+                    presenceStatus: 'offline',
+                }),
             );
         });
     });

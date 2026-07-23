@@ -19,6 +19,7 @@ const STATUS_OPTIONS: { value: ManualUserStatus; label: string }[] = [
     { value: 'online', label: 'Online' },
     { value: 'idle', label: 'Idle' },
     { value: 'dnd', label: 'Do Not Disturb' },
+    { value: 'offline', label: 'Offline' },
 ];
 
 export const StatusPicker = ({

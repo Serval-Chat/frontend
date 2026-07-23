@@ -1,7 +1,9 @@
 import { type PayloadAction, createSlice } from '@reduxjs/toolkit';
 
+import type { PresenceStatus } from '@/types/presence';
+
 export type UserPresenceStatus = 'online' | 'offline';
-export type UserPresenceMode = 'online' | 'idle' | 'dnd';
+export type UserPresenceMode = PresenceStatus;
 
 interface UserPresence {
     userId: string;
@@ -55,11 +57,15 @@ const presenceSlice = createSlice({
 
             // Add/update everyone the server says is online.
             for (const user of action.payload) {
+                const existing = state.users[user.userId];
                 state.users[user.userId] = {
                     userId: user.userId,
                     username: user.username,
                     status: 'online',
-                    presenceStatus: user.presenceStatus ?? 'online',
+                    presenceStatus:
+                        user.presenceStatus ??
+                        existing?.presenceStatus ??
+                        'online',
                     customStatus: user.status ?? null,
                 };
             }
@@ -73,11 +79,15 @@ const presenceSlice = createSlice({
                 presenceStatus?: UserPresenceMode;
             }>,
         ): void => {
+            const existing = state.users[action.payload.userId];
             state.users[action.payload.userId] = {
                 userId: action.payload.userId,
                 username: action.payload.username,
                 status: 'online',
-                presenceStatus: action.payload.presenceStatus ?? 'online',
+                presenceStatus:
+                    action.payload.presenceStatus ??
+                    existing?.presenceStatus ??
+                    'online',
                 customStatus: action.payload.status ?? null,
             };
         },
