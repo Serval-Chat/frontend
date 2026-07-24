@@ -43,25 +43,37 @@ interface EmojiPickerProps {
     className?: string;
 }
 
-const HEADER_HEIGHT = 40;
-const ROW_HEIGHT = 48;
-const SIDEBAR_WIDTH = 44;
+const PICKER_WIDTH = 620;
+const PICKER_HEIGHT = 500;
+
+const EMOJI_BUTTON_SIZE = 52;
+const EMOJI_ICON_SIZE = 42;
+
+const SIDEBAR_CATEGORY_SIZE = 29;
+const SIDEBAR_WIDTH = 48;
+
+const HEADER_HEIGHT = 32;
+const ROW_HEIGHT = 56;
+
+const SIDEBAR_CATEGORY_GAP = 'gap-2';
+const SIDEBAR_PADDING_Y = 'py-2.5';
+const HEADER_PADDING_Y = 'py-1';
 
 type RowItem =
     | {
-          type: 'header';
-          id: string;
-          name: string;
-          icon?: string;
-          isCustom: boolean;
-          standardIcon?: EmojiData;
-      }
+        type: 'header';
+        id: string;
+        name: string;
+        icon?: string;
+        isCustom: boolean;
+        standardIcon?: EmojiData;
+    }
     | {
-          type: 'row';
-          emojis: (EmojiData | { id: string; name: string; url: string })[];
-          isCustom: boolean;
-          id: string;
-      };
+        type: 'row';
+        emojis: (EmojiData | { id: string; name: string; url: string })[];
+        isCustom: boolean;
+        id: string;
+    };
 
 const buildEmojiRows = ({
     customCategories,
@@ -81,11 +93,11 @@ const buildEmojiRows = ({
 
     const normalizedQuery = searchQuery.trim().toLowerCase();
 
-    for (const cat of customCategories) {
+    for (const cat of [...customCategories].reverse()) {
         const emojis = normalizedQuery
             ? cat.emojis.filter((e): boolean =>
-                  e.name.toLowerCase().includes(normalizedQuery),
-              )
+                e.name.toLowerCase().includes(normalizedQuery),
+            )
             : cat.emojis;
 
         if (emojis.length === 0) continue;
@@ -112,17 +124,17 @@ const buildEmojiRows = ({
         const emojis = groupedEmojis[catId] || [];
         const filteredEmojis = normalizedQuery
             ? emojis.filter((e): boolean => {
-                  const matchName = e.name
-                      ?.toLowerCase()
-                      .includes(normalizedQuery);
-                  const matchShortName = e.short_name
-                      ?.toLowerCase()
-                      .includes(normalizedQuery);
-                  const matchShortNames = e.short_names?.some((sn): boolean =>
-                      sn.toLowerCase().includes(normalizedQuery),
-                  );
-                  return matchName || matchShortName || matchShortNames;
-              })
+                const matchName = e.name
+                    ?.toLowerCase()
+                    .includes(normalizedQuery);
+                const matchShortName = e.short_name
+                    ?.toLowerCase()
+                    .includes(normalizedQuery);
+                const matchShortNames = e.short_names?.some((sn): boolean =>
+                    sn.toLowerCase().includes(normalizedQuery),
+                );
+                return matchName || matchShortName || matchShortNames;
+            })
             : emojis;
 
         if (filteredEmojis.length === 0) continue;
@@ -170,7 +182,10 @@ const EmojiPickerRow = ({
     if (row.type === 'header') {
         return (
             <Box
-                className="z-[var(--z-index-effect-md)] flex items-center gap-2 border-b border-divider/50 bg-background/95 px-3 py-1 backdrop-blur-sm"
+                className={cn(
+                    'z-[var(--z-index-effect-md)] flex items-center gap-1.5 border-b border-divider/50 bg-background/95 px-3 backdrop-blur-sm',
+                    HEADER_PADDING_Y,
+                )}
                 style={style}
             >
                 {row.isCustom ? (
@@ -180,10 +195,10 @@ const EmojiPickerRow = ({
                         size="xs"
                     />
                 ) : (
-                    <div className="flex h-4 w-4 items-center justify-center overflow-hidden">
+                    <div className="flex h-4 w-4 items-center justify-center">
                         {row.standardIcon ? (
                             <ParsedUnicodeEmoji
-                                className="inline-block h-[22px] w-[22px] flex-shrink-0"
+                                className="inline-block h-[16px] w-[16px] flex-shrink-0 !top-0"
                                 content={getUnicode(row.standardIcon)}
                             />
                         ) : (
@@ -200,7 +215,7 @@ const EmojiPickerRow = ({
 
     return (
         <Box
-            className="flex flex-nowrap gap-0.5 overflow-hidden p-1"
+            className="flex flex-nowrap gap-0.5 overflow-hidden px-1 py-0.5"
             style={style}
         >
             {row.emojis.map((emoji) => {
@@ -213,14 +228,22 @@ const EmojiPickerRow = ({
                             position="top"
                         >
                             <Button
-                                className="h-10 w-10 shrink-0 rounded-md transition-colors hover:bg-bg-subtle"
+                                className="flex shrink-0 items-center justify-center rounded-md p-0 transition-colors hover:bg-bg-subtle"
+                                style={{
+                                    width: EMOJI_BUTTON_SIZE,
+                                    height: EMOJI_BUTTON_SIZE,
+                                }}
                                 variant="ghost"
                                 onClick={(): void => {
                                     onEmojiSelect(unicode);
                                 }}
                             >
                                 <ParsedUnicodeEmoji
-                                    className="h-8 w-8"
+                                    className="!top-0"
+                                    style={{
+                                        width: EMOJI_ICON_SIZE,
+                                        height: EMOJI_ICON_SIZE,
+                                    }}
                                     content={unicode}
                                 />
                             </Button>
@@ -245,7 +268,11 @@ const EmojiPickerRow = ({
                             position="top"
                         >
                             <Button
-                                className="h-10 w-10 shrink-0 rounded-md transition-colors hover:bg-bg-subtle"
+                                className="flex shrink-0 items-center justify-center rounded-md p-0 transition-colors hover:bg-bg-subtle"
+                                style={{
+                                    width: EMOJI_BUTTON_SIZE,
+                                    height: EMOJI_BUTTON_SIZE,
+                                }}
                                 variant="ghost"
                                 onClick={(): void | undefined =>
                                     onCustomEmojiSelect?.(custom)
@@ -256,7 +283,11 @@ const EmojiPickerRow = ({
                             >
                                 <img
                                     alt={custom.name}
-                                    className="h-8 w-8 object-contain"
+                                    className="object-contain"
+                                    style={{
+                                        width: EMOJI_ICON_SIZE,
+                                        height: EMOJI_ICON_SIZE,
+                                    }}
                                     src={resolveApiUrl(custom.url) || ''}
                                 />
                             </Button>
@@ -303,7 +334,7 @@ const EmojiPickerContent = ({
     const listAreaWidth = width - SIDEBAR_WIDTH;
     const columnCount = useMemo((): number => {
         if (width <= 0) return 1;
-        return Math.max(1, Math.floor((listAreaWidth - 16) / 42));
+        return Math.max(1, Math.floor((listAreaWidth - 16) / EMOJI_BUTTON_SIZE));
     }, [listAreaWidth, width]);
 
     const flatRows = useMemo(
@@ -391,7 +422,7 @@ const EmojiPickerContent = ({
 
     const displayCategories = useMemo(
         () => [
-            ...customCategories.map(
+            ...[...customCategories].reverse().map(
                 (
                     c,
                 ): {
@@ -443,13 +474,35 @@ const EmojiPickerContent = ({
 
     return (
         <div className="flex h-full w-full overflow-hidden">
-            <Box className="scrollbar-hide flex w-[44px] flex-shrink-0 flex-col items-center gap-2 overflow-y-auto border-r border-divider/50 bg-bg-subtle/50 py-3 shadow-inner">
+            {/* Emoji picker sidebar: renders custom server icons and standard category emoji buttons */}
+            <Box
+                className={cn(
+                    'scrollbar-hide flex flex-shrink-0 flex-col items-center overflow-y-auto border-r border-divider/50 bg-bg-subtle/50 shadow-inner',
+                    SIDEBAR_CATEGORY_GAP,
+                    SIDEBAR_PADDING_Y,
+                )}
+                style={{ width: SIDEBAR_WIDTH }}
+            >
                 {displayCategories.map((cat) => {
                     const isActive = resolvedActiveCategoryId === cat.id;
                     return cat.type === 'custom' ? (
-                        <Box className="relative flex-shrink-0" key={cat.id}>
+                        <Box
+                            className="relative flex flex-shrink-0 items-center justify-center"
+                            style={{
+                                width: SIDEBAR_CATEGORY_SIZE,
+                                height: SIDEBAR_CATEGORY_SIZE,
+                            }}
+                            key={cat.id}
+                        >
                             <ServerIcon
-                                className="!rounded-lg transition-transform"
+                                className={cn(
+                                    '!rounded-lg transition-transform',
+                                    isActive ? 'scale-110' : 'hover:scale-105',
+                                )}
+                                style={{
+                                    width: SIDEBAR_CATEGORY_SIZE,
+                                    height: SIDEBAR_CATEGORY_SIZE,
+                                }}
                                 isActive={isActive}
                                 server={
                                     {
@@ -465,38 +518,68 @@ const EmojiPickerContent = ({
                                 }}
                             />
                             {isActive ? (
-                                <div className="absolute top-1/2 -left-3.5 h-6 w-1.5 -translate-y-1/2 rounded-full bg-primary shadow-[0_0_8px_rgba(var(--primary),0.5)]" />
+                                <div
+                                    className="absolute top-1/2 -left-3.5 w-1.5 -translate-y-1/2 rounded-full bg-primary shadow-[0_0_8px_rgba(var(--primary),0.5)]"
+                                    style={{ height: SIDEBAR_CATEGORY_SIZE * 0.75 }}
+                                />
                             ) : null}
                         </Box>
                     ) : (
-                        <Button
-                            className={cn(
-                                'group relative h-9 w-9 flex-shrink-0 !bg-transparent',
-                                isActive
-                                    ? 'scale-110 !rounded-lg text-primary'
-                                    : 'text-muted-foreground hover:scale-105 hover:text-foreground',
-                            )}
-                            key={cat.id}
-                            title={cat.name}
-                            variant="nav"
-                            onClick={(): void => {
-                                handleCategoryClick(cat.id);
+                        <Box
+                            className="relative flex flex-shrink-0 items-center justify-center"
+                            style={{
+                                width: SIDEBAR_CATEGORY_SIZE,
+                                height: SIDEBAR_CATEGORY_SIZE,
                             }}
+                            key={cat.id}
                         >
-                            <div className="flex h-8 w-8 items-center justify-center overflow-hidden p-1">
-                                {categoryIconMap[cat.id] ? (
-                                    <ParsedUnicodeEmoji
-                                        className="inline-block h-[24px] w-[24px] flex-shrink-0"
-                                        content={getUnicode(
-                                            categoryIconMap[cat.id]!,
-                                        )}
-                                    />
-                                ) : null}
-                            </div>
+                            <Button
+                                className={cn(
+                                    'group relative flex-shrink-0 !bg-transparent p-0',
+                                    isActive
+                                        ? 'scale-110 text-primary'
+                                        : 'text-muted-foreground hover:scale-105 hover:text-foreground',
+                                )}
+                                style={{
+                                    width: SIDEBAR_CATEGORY_SIZE,
+                                    height: SIDEBAR_CATEGORY_SIZE,
+                                    minWidth: 0,
+                                    minHeight: 0,
+                                }}
+                                title={cat.name}
+                                variant="ghost"
+                                onClick={(): void => {
+                                    handleCategoryClick(cat.id);
+                                }}
+                            >
+                                <div
+                                    className="flex items-center justify-center"
+                                    style={{
+                                        width: SIDEBAR_CATEGORY_SIZE,
+                                        height: SIDEBAR_CATEGORY_SIZE,
+                                    }}
+                                >
+                                    {categoryIconMap[cat.id] ? (
+                                        <ParsedUnicodeEmoji
+                                            className="inline-block flex-shrink-0 !top-0"
+                                            style={{
+                                                width: SIDEBAR_CATEGORY_SIZE,
+                                                height: SIDEBAR_CATEGORY_SIZE,
+                                            }}
+                                            content={getUnicode(
+                                                categoryIconMap[cat.id]!,
+                                            )}
+                                        />
+                                    ) : null}
+                                </div>
+                            </Button>
                             {isActive ? (
-                                <div className="absolute top-1/2 -left-3.5 h-6 w-1.5 -translate-y-1/2 rounded-full bg-primary shadow-[0_0_8px_rgba(var(--primary),0.5)]" />
+                                <div
+                                    className="absolute top-1/2 -left-3.5 w-1.5 -translate-y-1/2 rounded-full bg-primary shadow-[0_0_8px_rgba(var(--primary),0.5)]"
+                                    style={{ height: SIDEBAR_CATEGORY_SIZE * 0.75 }}
+                                />
                             ) : null}
-                        </Button>
+                        </Box>
                     );
                 })}
             </Box>
@@ -574,11 +657,15 @@ export const EmojiPicker = ({
         <m.div
             animate={{ opacity: 1, scale: 1, y: 0 }}
             className={cn(
-                'relative flex h-[500px] w-[min(480px,calc(100vw-24px))] overflow-hidden rounded-xl border border-divider bg-background shadow-2xl',
+                'relative flex overflow-hidden rounded-xl border border-divider bg-background shadow-2xl',
                 className,
             )}
             initial={{ opacity: 0, scale: 0.95, y: 10 }}
             ref={containerRef}
+            style={{
+                width: `min(${PICKER_WIDTH}px, calc(100vw - 24px))`,
+                height: PICKER_HEIGHT,
+            }}
             transition={{ duration: 0.2, ease: 'easeOut' }}
         >
             {width > 0 && height > 0 ? (

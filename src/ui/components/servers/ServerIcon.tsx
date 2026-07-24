@@ -17,6 +17,7 @@ interface ServerIconProps {
     className?: string;
     size?: 'xxs' | 'xs' | 'sm' | 'md' | 'lg' | 'xl';
     badgeCount?: number;
+    style?: React.CSSProperties;
 }
 
 const SIZE_CLASSES = {
@@ -54,6 +55,7 @@ export const ServerIcon = React.memo(
         className,
         size = 'md',
         badgeCount,
+        style,
     }: ServerIconProps) => {
         const limitedAnimations = useLimitedAnimations();
         const iconUrl = resolveApiUrl(server.icon);
@@ -77,6 +79,7 @@ export const ServerIcon = React.memo(
                         SIZE_CLASSES.md,
                     className,
                 )}
+                style={style}
                 role="button"
                 tabIndex={0}
                 title={server.name}
