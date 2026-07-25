@@ -5,6 +5,7 @@ import { Check, X } from 'lucide-react';
 import { Button } from '@/ui/components/common/Button';
 import { Modal } from '@/ui/components/common/Modal';
 import { Text } from '@/ui/components/common/Text';
+import { useToast } from '@/ui/components/common/Toast';
 import type { CropSelection } from '@/utils/imageProcessor';
 
 import { ImageCropper } from './ImageCropper';
@@ -44,6 +45,8 @@ export const ImageCropModal = ({
                 ? 16 / 9
                 : 1136 / 400;
 
+    const { showToast } = useToast();
+
     const handleConfirm = async (): Promise<void> => {
         if (!crop) return;
 
@@ -56,6 +59,12 @@ export const ImageCropModal = ({
             onClose();
         } catch (error) {
             console.error('Failed to process image:', error);
+            showToast(
+                error instanceof Error
+                    ? error.message
+                    : 'Failed to process image. Please try a different file.',
+                'error',
+            );
         } finally {
             setIsProcessing(false);
         }

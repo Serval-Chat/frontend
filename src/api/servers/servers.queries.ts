@@ -693,6 +693,7 @@ export const useUpdateServerIcon = (
     serverId: string,
 ): UseMutationResult<string, Error, File> => {
     const queryClient = useQueryClient();
+    const { showToast } = useToast();
     return useMutation({
         mutationFn: (icon: File): Promise<string> =>
             serversApi.uploadServerIcon(serverId, icon),
@@ -703,6 +704,13 @@ export const useUpdateServerIcon = (
             void queryClient.invalidateQueries({
                 queryKey: SERVERS_QUERY_KEYS.list,
             });
+            showToast('Server icon updated', 'success');
+        },
+        onError: (error): void => {
+            showToast(
+                extractApiError(error, 'Failed to update server icon'),
+                'error',
+            );
         },
     });
 };
@@ -711,6 +719,7 @@ export const useUpdateServerBanner = (
     serverId: string,
 ): UseMutationResult<string, Error, File> => {
     const queryClient = useQueryClient();
+    const { showToast } = useToast();
     return useMutation({
         mutationFn: (banner: File): Promise<string> =>
             serversApi.uploadServerBanner(serverId, banner),
@@ -721,6 +730,13 @@ export const useUpdateServerBanner = (
             void queryClient.invalidateQueries({
                 queryKey: SERVERS_QUERY_KEYS.list,
             });
+            showToast('Server banner updated', 'success');
+        },
+        onError: (error): void => {
+            showToast(
+                extractApiError(error, 'Failed to update server banner'),
+                'error',
+            );
         },
     });
 };

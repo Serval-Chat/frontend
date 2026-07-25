@@ -1281,7 +1281,6 @@ describe('TextParser', (): void => {
             },
         ]);
     });
-    // ─── GitHub Admonitions ───────────────────────────────────────────────────────
 
     it('should parse GitHub-style NOTE admonition', (): void => {
         const text = '> [!NOTE]\n> This is a note.';
@@ -1487,8 +1486,6 @@ describe('TextParser', (): void => {
             content: '',
         });
     });
-
-    // ─── Obsidian Admonitions ─────────────────────────────────────────────────────
 
     it('should parse Obsidian-style NOTE admonition with no title', (): void => {
         const text = '> [!note]\n> This is a note.';

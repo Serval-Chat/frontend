@@ -345,6 +345,7 @@ export const ServerItem = React.memo(
                                 <ServerIcon
                                     badgeCount={pingCount}
                                     isActive={isActive}
+                                    isInServer={isActive}
                                     server={server}
                                     onClick={handleServerClick}
                                 />
@@ -354,6 +355,7 @@ export const ServerItem = React.memo(
                         <Tooltip content={server.name}>
                             <ServerIcon
                                 isActive={isActive}
+                                isInServer={isActive}
                                 server={server}
                                 onClick={onClick}
                             />

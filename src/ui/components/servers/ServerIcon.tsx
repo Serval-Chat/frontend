@@ -13,6 +13,8 @@ import { cn } from '@/utils/cn';
 interface ServerIconProps {
     server: Omit<Server, 'id' | 'ownerId'> | Server;
     isActive?: boolean;
+    isInServer?: boolean;
+    animateOnlyInServerOrHover?: boolean;
     onClick?: () => void;
     className?: string;
     size?: 'xxs' | 'xs' | 'sm' | 'md' | 'lg' | 'xl';
@@ -51,12 +53,15 @@ export const ServerIcon = React.memo(
     ({
         server,
         isActive,
+        isInServer,
+        animateOnlyInServerOrHover = true,
         onClick,
         className,
         size = 'md',
         badgeCount,
         style,
     }: ServerIconProps) => {
+        const [isHovered, setIsHovered] = React.useState(false);
         const limitedAnimations = useLimitedAnimations();
         const iconUrl = resolveApiUrl(server.icon);
         const shouldShowIcon = !!iconUrl;
@@ -67,6 +72,14 @@ export const ServerIcon = React.memo(
             .join('')
             .slice(0, 3)
             .toUpperCase();
+
+        const isAnimated = isAnimatedImageUrl(iconUrl);
+        const canAnimate = Boolean(isInServer) || isHovered;
+        const paused = limitedAnimations
+            ? isAnimated
+            : animateOnlyInServerOrHover
+              ? isAnimated && !canAnimate
+              : false;
 
         return (
             <m.div
@@ -83,6 +96,8 @@ export const ServerIcon = React.memo(
                 role="button"
                 tabIndex={0}
                 title={server.name}
+                onMouseEnter={() => setIsHovered(true)}
+                onMouseLeave={() => setIsHovered(false)}
                 onKeyDown={(e): void => {
                     if (onClick && (e.key === 'Enter' || e.key === ' ')) {
                         onClick();
@@ -107,11 +122,7 @@ export const ServerIcon = React.memo(
                             decoding="async"
                             draggable="false"
                             loading="lazy"
-                            paused={
-                                limitedAnimations
-                                    ? isAnimatedImageUrl(iconUrl)
-                                    : false
-                            }
+                            paused={paused}
                             src={iconUrl}
                         />
                     ) : (

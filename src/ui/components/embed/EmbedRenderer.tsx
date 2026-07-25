@@ -815,8 +815,6 @@ const EmbedButtons = memo(
 );
 EmbedButtons.displayName = 'EmbedButtons';
 
-// ─── main component ──────────────────────────────────────────────────────────
-
 export interface EmbedRendererProps {
     payload: MessagePayload;
     className?: string;

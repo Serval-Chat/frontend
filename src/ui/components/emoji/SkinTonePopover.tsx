@@ -9,13 +9,12 @@ import { getUnicode, getSpriteStyle } from '@/utils/emoji';
 import type { EmojiData } from '@/utils/emoji';
 import { cn } from '@/utils/cn';
 
-// The 5 skin-tone modifier keys as used in emoji-datasource-apple
 const SKIN_TONE_MODIFIERS = [
-    '1F3FB', // 🏻 Light
-    '1F3FC', // 🏼 Medium-Light
-    '1F3FD', // 🏽 Medium
-    '1F3FE', // 🏾 Medium-Dark
-    '1F3FF', // 🏿 Dark
+    '1F3FB', // Light
+    '1F3FC', // Medium-Light
+    '1F3FD', // Medium
+    '1F3FE', // Medium-Dark
+    '1F3FF', // Dark
 ] as const;
 
 interface SkinToneTarget {
@@ -46,7 +45,6 @@ export const SkinTonePopover = ({
         padding: 12,
     });
 
-    // Build the list of swatches: base (default/yellow) + 5 skin tones
     const swatches: { unicode: string; spriteData: { sheet_x: number; sheet_y: number } }[] = [
         {
             unicode: getUnicode(target.emoji),
@@ -67,7 +65,6 @@ export const SkinTonePopover = ({
     }
 
     const handlePointerDown = (e: React.MouseEvent | React.TouchEvent): void => {
-        // Prevent click-away hooks from firing on the parent picker
         e.stopPropagation();
         e.nativeEvent.stopPropagation();
         e.nativeEvent.stopImmediatePropagation();
@@ -75,7 +72,6 @@ export const SkinTonePopover = ({
 
     const content = (
         <div onMouseDown={handlePointerDown} onTouchStart={handlePointerDown}>
-            {/* Backdrop — dismiss on click or right-click */}
             <button
                 aria-label="Close skin tone picker"
                 className="fixed inset-0 z-[99998]"

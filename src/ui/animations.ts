@@ -1,7 +1,5 @@
 import type { Transition } from 'framer-motion';
 
-// ─── Transitions ─────────────────────────────────────────────────────────────
-
 export const transitions = {
     tooltip: { duration: 0.1, ease: 'easeOut' } satisfies Transition,
     fast: { duration: 0.15, ease: 'easeOut' } satisfies Transition,

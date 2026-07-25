@@ -6,6 +6,8 @@ import {
     useQueryClient,
 } from '@tanstack/react-query';
 
+import { useToast } from '@/ui/components/common/Toast';
+import { extractApiError } from '@/utils/extractApiError';
 import { hasAuthToken } from '@/utils/authToken';
 
 import { usersApi } from './users.api';
@@ -205,6 +207,7 @@ export const useUpdateProfilePicture = (): UseMutationResult<
     File
 > => {
     const queryClient = useQueryClient();
+    const { showToast } = useToast();
     return useMutation({
         mutationFn: usersApi.updateProfilePicture,
         onSuccess: (data): void => {
@@ -212,6 +215,13 @@ export const useUpdateProfilePicture = (): UseMutationResult<
                 old ? { ...old, profilePicture: data.profilePicture } : old,
             );
             void queryClient.invalidateQueries({ queryKey: ['me'] });
+            showToast('Profile picture updated', 'success');
+        },
+        onError: (error): void => {
+            showToast(
+                extractApiError(error, 'Failed to update profile picture'),
+                'error',
+            );
         },
     });
 };
@@ -247,6 +257,7 @@ export const useUpdateBanner = (): UseMutationResult<
     File
 > => {
     const queryClient = useQueryClient();
+    const { showToast } = useToast();
     return useMutation({
         mutationFn: usersApi.updateBanner,
         onSuccess: (data): void => {
@@ -254,6 +265,13 @@ export const useUpdateBanner = (): UseMutationResult<
                 old ? { ...old, banner: data.banner } : old,
             );
             void queryClient.invalidateQueries({ queryKey: ['me'] });
+            showToast('Profile banner updated', 'success');
+        },
+        onError: (error): void => {
+            showToast(
+                extractApiError(error, 'Failed to update profile banner'),
+                'error',
+            );
         },
     });
 };
