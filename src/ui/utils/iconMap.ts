@@ -68,3 +68,5 @@ export const ICON_MAP: Record<string, React.ElementType> = {
     bug: Bug,
     hammer: Hammer,
 };
+
+export type BadgeIcon = keyof typeof ICON_MAP;

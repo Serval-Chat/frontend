@@ -106,11 +106,15 @@ export interface PrivacySettings {
     hideStatus: boolean;
 }
 
+import type { BadgeIcon } from '@/ui/utils/iconMap';
+
+export type { BadgeIcon };
+
 export interface Badge {
     id: string;
     name: string;
     description: string;
-    icon: string;
+    icon: BadgeIcon;
     color: string;
     createdAt: string;
 }
