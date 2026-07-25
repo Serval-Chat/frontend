@@ -648,4 +648,17 @@ export const serversApi = {
             `/api/v1/servers/${serverId}/stickers/${stickerId}`,
         );
     },
+
+    /**
+     * Fetches the current typing indicators for a server channel.
+     */
+    getTypingIndicators: async (
+        serverId: string,
+        channelId: string,
+    ): Promise<{ typingUsers: { userId: string; username: string; expiresAt: string }[] }> => {
+        const response = await apiClient.get<{
+            typingUsers: { userId: string; username: string; expiresAt: string }[];
+        }>(`/api/v1/servers/${serverId}/channels/${channelId}/typing-indicators`);
+        return response.data;
+    },
 };

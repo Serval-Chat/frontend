@@ -135,6 +135,11 @@ export const SERVERS_QUERY_KEYS = {
         serverId: string | null,
     ): readonly ['servers', 'voice-states', string | null] =>
         ['servers', 'voice-states', serverId] as const,
+    typingIndicators: (
+        serverId: string | null,
+        channelId: string | null,
+    ): readonly ['servers', 'typing-indicators', string | null, string | null] =>
+        ['servers', 'typing-indicators', serverId, channelId] as const,
 };
 
 export const useDiscoveryServers = (params: {
@@ -762,6 +767,29 @@ export const useVoiceStates = (
 
     return query;
 };
+
+/**
+ * Fetches the snapshot of currently-typing users for a server channel.
+ */
+export const useTypingIndicators = (
+    serverId: string | null,
+    channelId: string | null,
+): UseQueryResult<{ userId: string; username: string; expiresAt: string }[]> =>
+    useQuery({
+        queryKey: SERVERS_QUERY_KEYS.typingIndicators(serverId, channelId),
+        queryFn: async () => {
+            const data = await serversApi.getTypingIndicators(
+                serverId!,
+                channelId!,
+            );
+            return data.typingUsers;
+        },
+        enabled: !!serverId && !!channelId && isValidId(serverId) && hasAuthToken(),
+        staleTime: 5_000,
+        gcTime: 10_000,
+        retry: false,
+        placeholderData: undefined,
+    });
 
 export const useChannelPermissions = (
     serverId: string,

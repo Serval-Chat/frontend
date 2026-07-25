@@ -40,9 +40,18 @@ vi.mock('@/hooks/ws/useTypingIndicator', () => ({
     useTypingIndicator: () => ({
         typingUsers: [],
         addTypingUser: vi.fn(),
+        hydrateTypingUsers: vi.fn(),
         clearTypingUsers: vi.fn(),
     }),
 }));
+
+vi.mock('@/api/servers/servers.queries', async (importOriginal) => {
+    const actual = await importOriginal<typeof import('@/api/servers/servers.queries')>();
+    return {
+        ...actual,
+        useTypingIndicators: () => ({ data: undefined }),
+    };
+});
 
 vi.mock('@/ws', () => ({
     WsEvents: {

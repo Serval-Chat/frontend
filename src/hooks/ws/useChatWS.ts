@@ -12,6 +12,7 @@ import type {
     OutgoingPoll,
 } from '@/api/chat/chat.types';
 import { SERVERS_QUERY_KEYS } from '@/api/servers/servers.queries';
+import { useTypingIndicators } from '@/api/servers/servers.queries';
 import type { Channel } from '@/api/servers/servers.types';
 import { useMe } from '@/api/users/users.queries';
 import type { InteractionValue } from '@/types/interactions';
@@ -47,7 +48,7 @@ export function useChatWS(
 ): ChatWSResult {
     const { data: user } = useMe();
     const queryClient = useQueryClient();
-    const { typingUsers, addTypingUser, clearTypingUsers } =
+    const { typingUsers, addTypingUser, hydrateTypingUsers, clearTypingUsers } =
         useTypingIndicator();
     const lastTypingSentRef = useRef<number>(0);
     const prevChannelRef = useRef<string | null>(null);
@@ -899,6 +900,16 @@ export function useChatWS(
     useEffect((): void => {
         clearTypingUsers();
     }, [selectedFriendId, selectedChannelId, clearTypingUsers]);
+
+    const { data: typingSnapshot } = useTypingIndicators(
+        selectedServerId ?? null,
+        selectedChannelId ?? null,
+    );
+
+    useEffect((): void => {
+        if (!typingSnapshot || typingSnapshot.length === 0) return;
+        hydrateTypingUsers(typingSnapshot, user?.id);
+    }, [typingSnapshot]);
 
     const sendMessage = useCallback(
         (
