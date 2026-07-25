@@ -909,7 +909,7 @@ export function useChatWS(
     useEffect((): void => {
         if (!typingSnapshot || typingSnapshot.length === 0) return;
         hydrateTypingUsers(typingSnapshot, user?.id);
-    }, [typingSnapshot]);
+    }, [typingSnapshot, hydrateTypingUsers, user?.id]);
 
     const sendMessage = useCallback(
         (

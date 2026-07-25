@@ -160,7 +160,6 @@ const StickerPickerRow = ({
                             height: STICKER_BUTTON_SIZE,
                         }}
                         variant="ghost"
-                        onMouseDown={(e): void => e.preventDefault()}
                         onClick={(): void => {
                             onStickerSelect(sticker);
                         }}
@@ -175,15 +174,16 @@ const StickerPickerRow = ({
                                 e,
                             );
                         }}
+                        onMouseDown={(e): void => e.preventDefault()}
                     >
                         <img
                             alt={sticker.name}
                             className="object-contain"
+                            src={resolveApiUrl(sticker.imageUrl) || ''}
                             style={{
                                 width: STICKER_ICON_SIZE,
                                 height: STICKER_ICON_SIZE,
                             }}
-                            src={resolveApiUrl(sticker.imageUrl) || ''}
                         />
                     </Button>
                 </Tooltip>
@@ -209,7 +209,9 @@ const StickerPickerContent = ({
         categories[0]?.id || '',
     );
     const activeCategoryIdRef = useRef(activeCategoryId);
-    activeCategoryIdRef.current = activeCategoryId;
+    React.useEffect(() => {
+        activeCategoryIdRef.current = activeCategoryId;
+    }, [activeCategoryId]);
     const isScrollingToRef = useRef(false);
     const [searchQuery, setSearchQuery] = useState('');
 
@@ -329,8 +331,8 @@ const StickerPickerContent = ({
                 <StickerPickerRow
                     row={row}
                     style={style}
-                    onStickerSelect={onStickerSelect}
                     onShowInfo={showStickerInfo}
+                    onStickerSelect={onStickerSelect}
                 />
             );
         },
@@ -364,21 +366,17 @@ const StickerPickerContent = ({
                     return (
                         <Box
                             className="relative flex flex-shrink-0 items-center justify-center"
+                            key={cat.id}
                             style={{
                                 width: SIDEBAR_CATEGORY_SIZE,
                                 height: SIDEBAR_CATEGORY_SIZE,
                             }}
-                            key={cat.id}
                         >
                             <ServerIcon
                                 className={cn(
                                     '!rounded-lg transition-transform',
                                     isActive ? 'scale-110' : 'hover:scale-105',
                                 )}
-                                style={{
-                                    width: SIDEBAR_CATEGORY_SIZE,
-                                    height: SIDEBAR_CATEGORY_SIZE,
-                                }}
                                 isActive={isActive}
                                 server={
                                     {
@@ -389,6 +387,10 @@ const StickerPickerContent = ({
                                     >[0]['server']
                                 }
                                 size="xs"
+                                style={{
+                                    width: SIDEBAR_CATEGORY_SIZE,
+                                    height: SIDEBAR_CATEGORY_SIZE,
+                                }}
                                 onClick={(): void => {
                                     handleCategoryClick(cat.id);
                                 }}

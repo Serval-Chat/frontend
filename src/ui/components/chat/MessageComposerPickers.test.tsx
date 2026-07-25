@@ -11,15 +11,15 @@ vi.mock('@/ui/components/emoji/EmojiPicker', () => {
     }) => (
         <>
             <button
-                type="button"
                 data-testid="pick-unicode"
+                type="button"
                 onClick={() => onEmojiSelect('😀')}
             >
                 pick-emoji
             </button>
             <button
-                type="button"
                 data-testid="pick-custom"
+                type="button"
                 onClick={() =>
                     onCustomEmojiSelect?.({
                         id: 'custom1',
@@ -53,8 +53,10 @@ const mockRangeSelection = {
     insertText: mockInsertText,
 };
 
+import type * as LexicalModule from 'lexical';
+
 vi.mock('lexical', async (importOriginal) => {
-    const actual = await importOriginal<typeof import('lexical')>();
+    const actual = await importOriginal<typeof LexicalModule>();
     return {
         ...actual,
         $getSelection: vi.fn(() => mockRangeSelection),
@@ -82,12 +84,12 @@ import type { LexicalEditor } from 'lexical';
 function renderPickers(editor: LexicalEditor) {
     return render(
         <MessageComposerPickers
-            editor={editor}
-            showEmojiPicker={true}
-            showStickerPicker={false}
+            showEmojiPicker
             customCategories={[]}
-            stickerCategories={[]}
+            editor={editor}
             sendMessage={vi.fn()}
+            showStickerPicker={false}
+            stickerCategories={[]}
             onClickAway={vi.fn()}
             onStickerSelected={vi.fn()}
         />,

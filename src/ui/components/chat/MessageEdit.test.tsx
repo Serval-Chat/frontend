@@ -46,9 +46,9 @@ describe('MessageEdit', () => {
         render(
             <QueryClientProvider client={queryClient}>
                 <MessageEdit
-                    messageId="msg1"
-                    initialText="Hello world"
                     channelId="chan1"
+                    initialText="Hello world"
+                    messageId="msg1"
                     serverId="srv1"
                     onCancel={() => {}}
                 />

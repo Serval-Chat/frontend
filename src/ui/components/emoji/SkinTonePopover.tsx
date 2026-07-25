@@ -71,7 +71,7 @@ export const SkinTonePopover = ({
     };
 
     const content = (
-        <div onMouseDown={handlePointerDown} onTouchStart={handlePointerDown}>
+        <div>
             <button
                 aria-label="Close skin tone picker"
                 className="fixed inset-0 z-[99998]"
@@ -81,6 +81,8 @@ export const SkinTonePopover = ({
                     e.preventDefault();
                     onClose();
                 }}
+                onMouseDown={handlePointerDown}
+                onTouchStart={handlePointerDown}
             />
 
             <m.div
@@ -94,27 +96,29 @@ export const SkinTonePopover = ({
                     top: `${smartPosition.y}px`,
                 }}
                 transition={{ duration: 0.15, ease: 'easeOut' }}
+                onMouseDown={handlePointerDown}
+                onTouchStart={handlePointerDown}
             >
                 {swatches.map((swatch, i) => (
                     <button
-                        key={i}
                         aria-label={`Skin tone ${i === 0 ? 'default' : i}`}
                         className={cn(
                             'relative flex shrink-0 cursor-pointer items-center justify-center rounded-xl transition-all duration-100',
-                            'hover:bg-bg-subtle hover:scale-110 active:scale-95',
+                            'hover:scale-110 hover:bg-bg-subtle active:scale-95',
                         )}
+                        key={swatch.unicode}
                         style={{ width: SWATCH_SIZE, height: SWATCH_SIZE }}
                         type="button"
+                        onClick={(): void => {
+                            onSelect(swatch.unicode);
+                            onClose();
+                        }}
                         onMouseDown={(e): void => {
                             e.preventDefault();
                             handlePointerDown(e);
                         }}
                         onTouchStart={(e): void => {
                             handlePointerDown(e);
-                        }}
-                        onClick={(): void => {
-                            onSelect(swatch.unicode);
-                            onClose();
                         }}
                     >
                         <span

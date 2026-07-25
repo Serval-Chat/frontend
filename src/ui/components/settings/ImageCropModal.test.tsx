@@ -50,7 +50,15 @@ describe('ImageCropModal – error feedback', () => {
             new Error('Invalid crop selection: out of bounds or zero size.'),
         );
 
-        render(<ImageCropModal {...defaultProps} />);
+        render(
+            <ImageCropModal
+                imageFile={defaultProps.imageFile}
+                isOpen={defaultProps.isOpen}
+                type={defaultProps.type}
+                onClose={defaultProps.onClose}
+                onConfirm={defaultProps.onConfirm}
+            />,
+        );
 
         const applyButton = screen.getByRole('button', { name: /apply crop/i });
         await act(async () => {
@@ -71,7 +79,15 @@ describe('ImageCropModal – error feedback', () => {
     it('shows a generic error toast when the thrown value has no message', async () => {
         mockProcessProfileImage.mockRejectedValue('oops');
 
-        render(<ImageCropModal {...defaultProps} />);
+        render(
+            <ImageCropModal
+                imageFile={defaultProps.imageFile}
+                isOpen={defaultProps.isOpen}
+                type={defaultProps.type}
+                onClose={defaultProps.onClose}
+                onConfirm={defaultProps.onConfirm}
+            />,
+        );
 
         const applyButton = screen.getByRole('button', { name: /apply crop/i });
         await act(async () => {
@@ -93,7 +109,15 @@ describe('ImageCropModal – error feedback', () => {
 
         mockProcessProfileImage.mockResolvedValue(processed);
 
-        render(<ImageCropModal {...defaultProps} />);
+        render(
+            <ImageCropModal
+                imageFile={defaultProps.imageFile}
+                isOpen={defaultProps.isOpen}
+                type={defaultProps.type}
+                onClose={defaultProps.onClose}
+                onConfirm={defaultProps.onConfirm}
+            />,
+        );
 
         const applyButton = screen.getByRole('button', { name: /apply crop/i });
         await act(async () => {

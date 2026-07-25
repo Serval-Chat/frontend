@@ -19,9 +19,11 @@ const useSelfStatusMock = vi.fn(
     }),
 );
 
+import type * as SelfStatusModule from '@/hooks/useSelfStatus';
+
 vi.mock('@/hooks/useSelfStatus', async () => {
     const actual =
-        await vi.importActual<typeof import('@/hooks/useSelfStatus')>(
+        await vi.importActual<typeof SelfStatusModule>(
             '@/hooks/useSelfStatus',
         );
     return {

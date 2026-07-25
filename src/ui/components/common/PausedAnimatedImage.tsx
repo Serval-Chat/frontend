@@ -7,6 +7,65 @@ interface PausedAnimatedImageProps extends React.ImgHTMLAttributes<HTMLImageElem
     paused: boolean;
 }
 
+interface DecodedGifFrame {
+    width: number;
+    height: number;
+    frame: {
+        patch: Uint8ClampedArray | Uint8Array | number[];
+        dims: {
+            width: number;
+            height: number;
+            left: number;
+            top: number;
+        };
+    };
+}
+
+const bufferCache = new Map<string, Promise<ArrayBuffer>>();
+const decodedFrameCache = new Map<string, Promise<DecodedGifFrame>>();
+
+const fetchGifBuffer = (src: string): Promise<ArrayBuffer> => {
+    const existing = bufferCache.get(src);
+    if (existing) return existing;
+
+    const promise = fetch(src)
+        .then((res) => {
+            if (!res.ok) {
+                bufferCache.delete(src);
+                throw new Error(`Failed to fetch image: ${res.status}`);
+            }
+            return res.arrayBuffer();
+        })
+        .catch((err) => {
+            bufferCache.delete(src);
+            throw err;
+        });
+    bufferCache.set(src, promise);
+    return promise;
+};
+
+const getDecodedGifFrame = (src: string): Promise<DecodedGifFrame> => {
+    const existing = decodedFrameCache.get(src);
+    if (existing) return existing;
+
+    const promise = (async () => {
+        const buffer = await fetchGifBuffer(src);
+        const gif = parseGIF(buffer);
+        const [frame] = decompressFrames(gif, true);
+        if (!frame) throw new Error('No frames in GIF');
+        return {
+            width: gif.lsd.width,
+            height: gif.lsd.height,
+            frame,
+        };
+    })().catch((err) => {
+        decodedFrameCache.delete(src);
+        throw err;
+    });
+    decodedFrameCache.set(src, promise);
+    return promise;
+};
+
 export const PausedAnimatedImage = ({
     fallbackSrc,
     paused,
@@ -22,8 +81,6 @@ export const PausedAnimatedImage = ({
     const [firstFrameDrawn, setFirstFrameDrawn] = React.useState(false);
     const [failedToLoad, setFailedToLoad] = React.useState(false);
 
-    // binary GIF-frame decode tied to canvas drawing, not server state -
-    // already race-safe via the `cancelled` guard below.
     // react-doctor-disable-next-line react-doctor/no-fetch-in-effect, react-doctor/no-effect-event-handler
     React.useEffect(() => {
         if (!src || !paused) return;
@@ -32,12 +89,7 @@ export const PausedAnimatedImage = ({
 
         const drawFirstFrame = async (): Promise<void> => {
             try {
-                const response = await fetch(src);
-                const buffer = await response.arrayBuffer();
-                if (cancelled) return;
-
-                const gif = parseGIF(buffer);
-                const [frame] = decompressFrames(gif, true);
+                const decoded = await getDecodedGifFrame(src);
                 if (cancelled) return;
 
                 setIsGif(true);
@@ -45,10 +97,11 @@ export const PausedAnimatedImage = ({
                 setTimeout(() => {
                     if (cancelled) return;
                     const canvas = canvasRef.current;
-                    if (!frame || !canvas) return;
+                    if (!canvas) return;
 
-                    canvas.width = gif.lsd.width;
-                    canvas.height = gif.lsd.height;
+                    const { width, height, frame } = decoded;
+                    canvas.width = width;
+                    canvas.height = height;
 
                     const context = canvas.getContext('2d');
                     if (!context) return;

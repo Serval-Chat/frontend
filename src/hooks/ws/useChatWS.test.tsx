@@ -45,8 +45,10 @@ vi.mock('@/hooks/ws/useTypingIndicator', () => ({
     }),
 }));
 
+import type * as ServerQueriesModule from '@/api/servers/servers.queries';
+
 vi.mock('@/api/servers/servers.queries', async (importOriginal) => {
-    const actual = await importOriginal<typeof import('@/api/servers/servers.queries')>();
+    const actual = await importOriginal<typeof ServerQueriesModule>();
     return {
         ...actual,
         useTypingIndicators: () => ({ data: undefined }),

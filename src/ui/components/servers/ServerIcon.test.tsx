@@ -11,7 +11,7 @@ vi.mock('@/providers/limitedAnimationsContext', () => ({
 
 vi.mock('@/ui/components/common/PausedAnimatedImage', () => ({
     PausedAnimatedImage: ({ paused, src, alt }: { paused: boolean; src: string; alt: string }) => (
-        <div data-testid="paused-animated-image" data-paused={paused} data-src={src} data-alt={alt} />
+        <div data-alt={alt} data-paused={paused} data-src={src} data-testid="paused-animated-image" />
     ),
 }));
 
@@ -26,19 +26,19 @@ describe('ServerIcon', () => {
     };
 
     it('renders paused GIF icon when not in server and not hovered', () => {
-        render(<ServerIcon animateOnlyInServerOrHover={true} isInServer={false} server={mockServer} />);
+        render(<ServerIcon animateOnlyInServerOrHover isInServer={false} server={mockServer} />);
         const img = screen.getByTestId('paused-animated-image');
         expect(img.getAttribute('data-paused')).toBe('true');
     });
 
     it('animates GIF icon when the server is currently active (selected)', () => {
-        render(<ServerIcon animateOnlyInServerOrHover={true} isInServer={true} server={mockServer} />);
+        render(<ServerIcon animateOnlyInServerOrHover isInServer server={mockServer} />);
         const img = screen.getByTestId('paused-animated-image');
         expect(img.getAttribute('data-paused')).toBe('false');
     });
 
     it('animates GIF icon when hovering over the server icon', () => {
-        render(<ServerIcon animateOnlyInServerOrHover={true} isInServer={false} server={mockServer} />);
+        render(<ServerIcon animateOnlyInServerOrHover isInServer={false} server={mockServer} />);
         const button = screen.getByRole('button');
         const img = screen.getByTestId('paused-animated-image');
         expect(img.getAttribute('data-paused')).toBe('true');
@@ -71,12 +71,18 @@ describe('ServerIcon – Limited Animations accessibility setting', () => {
         }));
         vi.doMock('@/ui/components/common/PausedAnimatedImage', () => ({
             PausedAnimatedImage: ({ paused, alt }: { paused: boolean; alt: string }) => (
-                <div data-testid="paused-animated-image" data-paused={paused} data-alt={alt} />
+                <div data-alt={alt} data-paused={paused} data-testid="paused-animated-image" />
             ),
         }));
         const { ServerIcon: LimitedServerIcon } = await import('./ServerIcon');
         const { render: r, screen: s, fireEvent: fe } = await import('@testing-library/react');
-        r(<LimitedServerIcon {...props} />);
+        r(
+            <LimitedServerIcon
+                animateOnlyInServerOrHover={props.animateOnlyInServerOrHover}
+                isInServer={props.isInServer}
+                server={props.server}
+            />,
+        );
         return { screen: s, fireEvent: fe };
     };
 

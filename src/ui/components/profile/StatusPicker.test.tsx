@@ -19,8 +19,8 @@ describe('StatusPicker', (): void => {
     it('renders all manual status options, including offline', (): void => {
         render(
             <StatusPicker
-                currentStatus="online"
                 isOpen
+                currentStatus="online"
                 triggerRef={{ current: null }}
                 onClose={vi.fn()}
                 onSelect={vi.fn()}
@@ -38,8 +38,8 @@ describe('StatusPicker', (): void => {
         const onClose = vi.fn();
         render(
             <StatusPicker
-                currentStatus="online"
                 isOpen
+                currentStatus="online"
                 triggerRef={{ current: null }}
                 onClose={onClose}
                 onSelect={onSelect}
@@ -55,8 +55,8 @@ describe('StatusPicker', (): void => {
     it('marks the offline option as selected only when it is the current status', (): void => {
         const { rerender } = render(
             <StatusPicker
-                currentStatus="online"
                 isOpen
+                currentStatus="online"
                 triggerRef={{ current: null }}
                 onClose={vi.fn()}
                 onSelect={vi.fn()}
@@ -69,8 +69,8 @@ describe('StatusPicker', (): void => {
 
         rerender(
             <StatusPicker
-                currentStatus="offline"
                 isOpen
+                currentStatus="offline"
                 triggerRef={{ current: null }}
                 onClose={vi.fn()}
                 onSelect={vi.fn()}

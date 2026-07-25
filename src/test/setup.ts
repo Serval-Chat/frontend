@@ -62,14 +62,12 @@ vi.mock('idb-keyval', () => {
     };
 });
 
-vi.mock('@marsidev/react-turnstile', () => {
-    return {
-        Turnstile: ({ onSuccess }: any) => {
+vi.mock('@marsidev/react-turnstile', () => ({
+        Turnstile: ({ onSuccess }: { onSuccess?: (token: string) => void }) => {
             React.useEffect(() => {
                 if (onSuccess) onSuccess('mock-turnstile-token');
             }, [onSuccess]);
             return React.createElement('div', { id: 'cf-turnstile' });
         },
-    };
-});
+    }));
 

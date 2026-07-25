@@ -116,7 +116,9 @@ export const MessageInput = ({
 
     const fileInputRef = useRef<HTMLInputElement>(null);
     const patchUiRef = useRef(patchUi);
-    patchUiRef.current = patchUi;
+    React.useEffect(() => {
+        patchUiRef.current = patchUi;
+    }, [patchUi]);
 
     const handleEditorChange = useCallback((nextEditor: LexicalEditor): void => {
         patchUiRef.current({ editor: nextEditor });

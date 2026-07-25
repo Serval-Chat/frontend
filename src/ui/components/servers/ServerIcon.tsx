@@ -92,17 +92,17 @@ export const ServerIcon = React.memo(
                         SIZE_CLASSES.md,
                     className,
                 )}
-                style={style}
                 role="button"
+                style={style}
                 tabIndex={0}
                 title={server.name}
-                onMouseEnter={() => setIsHovered(true)}
-                onMouseLeave={() => setIsHovered(false)}
                 onKeyDown={(e): void => {
                     if (onClick && (e.key === 'Enter' || e.key === ' ')) {
                         onClick();
                     }
                 }}
+                onMouseEnter={() => setIsHovered(true)}
+                onMouseLeave={() => setIsHovered(false)}
                 onTap={onClick}
             >
                 <div

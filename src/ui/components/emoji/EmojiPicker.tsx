@@ -204,7 +204,7 @@ const EmojiPickerRow = ({
                     <div className="flex h-4 w-4 items-center justify-center">
                         {row.standardIcon ? (
                             <ParsedUnicodeEmoji
-                                className="inline-block h-[16px] w-[16px] flex-shrink-0 !top-0"
+                                className="!top-0 inline-block h-[16px] w-[16px] flex-shrink-0"
                                 content={getUnicode(row.standardIcon)}
                             />
                         ) : (
@@ -240,7 +240,6 @@ const EmojiPickerRow = ({
                                     height: EMOJI_BUTTON_SIZE,
                                 }}
                                 variant="ghost"
-                                onMouseDown={(e): void => e.preventDefault()}
                                 onClick={(): void => {
                                     onEmojiSelect(unicode);
                                 }}
@@ -250,14 +249,15 @@ const EmojiPickerRow = ({
                                         onSkinToneRequest(emoji, e);
                                     }
                                 }}
+                                onMouseDown={(e): void => e.preventDefault()}
                             >
                                 <ParsedUnicodeEmoji
                                     className="!top-0"
+                                    content={unicode}
                                     style={{
                                         width: EMOJI_ICON_SIZE,
                                         height: EMOJI_ICON_SIZE,
                                     }}
-                                    content={unicode}
                                 />
                             </Button>
                         </Tooltip>
@@ -287,22 +287,22 @@ const EmojiPickerRow = ({
                                     height: EMOJI_BUTTON_SIZE,
                                 }}
                                 variant="ghost"
-                                onMouseDown={(e): void => e.preventDefault()}
                                 onClick={(): void | undefined =>
                                     onCustomEmojiSelect?.(custom)
                                 }
                                 onContextMenu={(e): void => {
                                     onShowInfo(custom, e);
                                 }}
+                                onMouseDown={(e): void => e.preventDefault()}
                             >
                                 <img
                                     alt={custom.name}
                                     className="object-contain"
+                                    src={resolveApiUrl(custom.url) || ''}
                                     style={{
                                         width: EMOJI_ICON_SIZE,
                                         height: EMOJI_ICON_SIZE,
                                     }}
-                                    src={resolveApiUrl(custom.url) || ''}
                                 />
                             </Button>
                         </Tooltip>
@@ -335,7 +335,9 @@ const EmojiPickerContent = ({
     const scrollOffsetRef = React.useRef<number>(0);
     const [activeCategoryId, setActiveCategoryId] = useState<string>('');
     const activeCategoryIdRef = useRef(activeCategoryId);
-    activeCategoryIdRef.current = activeCategoryId;
+    React.useEffect(() => {
+        activeCategoryIdRef.current = activeCategoryId;
+    }, [activeCategoryId]);
     const isScrollingToRef = useRef(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [skinToneTarget, setSkinToneTarget] = useState<{
@@ -530,21 +532,17 @@ const EmojiPickerContent = ({
                     return cat.type === 'custom' ? (
                         <Box
                             className="relative flex flex-shrink-0 items-center justify-center"
+                            key={cat.id}
                             style={{
                                 width: SIDEBAR_CATEGORY_SIZE,
                                 height: SIDEBAR_CATEGORY_SIZE,
                             }}
-                            key={cat.id}
                         >
                             <ServerIcon
                                 className={cn(
                                     '!rounded-lg transition-transform',
                                     isActive ? 'scale-110' : 'hover:scale-105',
                                 )}
-                                style={{
-                                    width: SIDEBAR_CATEGORY_SIZE,
-                                    height: SIDEBAR_CATEGORY_SIZE,
-                                }}
                                 isActive={isActive}
                                 server={
                                     {
@@ -555,6 +553,10 @@ const EmojiPickerContent = ({
                                     >[0]['server']
                                 }
                                 size="xs"
+                                style={{
+                                    width: SIDEBAR_CATEGORY_SIZE,
+                                    height: SIDEBAR_CATEGORY_SIZE,
+                                }}
                                 onClick={(): void => {
                                     handleCategoryClick(cat.id);
                                 }}
@@ -569,11 +571,11 @@ const EmojiPickerContent = ({
                     ) : (
                         <Box
                             className="relative flex flex-shrink-0 items-center justify-center"
+                            key={cat.id}
                             style={{
                                 width: SIDEBAR_CATEGORY_SIZE,
                                 height: SIDEBAR_CATEGORY_SIZE,
                             }}
-                            key={cat.id}
                         >
                             <Button
                                 className={cn(
@@ -603,14 +605,14 @@ const EmojiPickerContent = ({
                                 >
                                     {categoryIconMap[cat.id] ? (
                                         <ParsedUnicodeEmoji
-                                            className="inline-block flex-shrink-0 !top-0"
+                                            className="!top-0 inline-block flex-shrink-0"
+                                            content={getUnicode(
+                                                categoryIconMap[cat.id]!,
+                                            )}
                                             style={{
                                                 width: SIDEBAR_CATEGORY_SIZE,
                                                 height: SIDEBAR_CATEGORY_SIZE,
                                             }}
-                                            content={getUnicode(
-                                                categoryIconMap[cat.id]!,
-                                            )}
                                         />
                                     ) : null}
                                 </div>
