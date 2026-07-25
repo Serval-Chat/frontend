@@ -18,6 +18,8 @@ export const customSyntaxTheme: Record<string, React.CSSProperties> = {
         MozHyphens: 'none',
         msHyphens: 'none',
         hyphens: 'none',
+        fontVariantLigatures: 'contextual',
+        fontFeatureSettings: "'calt' 1, 'liga' 1",
     },
     'pre[class*="language-"]': {
         color: 'var(--syntax-variable)',
@@ -38,6 +40,8 @@ export const customSyntaxTheme: Record<string, React.CSSProperties> = {
         hyphens: 'none',
         margin: '0',
         overflow: 'auto',
+        fontVariantLigatures: 'contextual',
+        fontFeatureSettings: "'calt' 1, 'liga' 1",
     },
     comment: {
         color: 'var(--syntax-comment)',
