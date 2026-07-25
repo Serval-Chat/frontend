@@ -2,7 +2,7 @@ import React, { useCallback, useMemo, useRef, useState } from 'react';
 
 import { m } from 'framer-motion';
 import { Search } from 'lucide-react';
-import { useLockBodyScroll, useMeasure } from 'react-use';
+import { useLockBodyScroll } from 'react-use';
 import { List } from 'react-window';
 import type { ListImperativeAPI, RowComponentProps } from 'react-window';
 
@@ -322,6 +322,8 @@ const EmojiPickerContent = ({
     const listRef = React.useRef<ListImperativeAPI>(null);
     const scrollOffsetRef = React.useRef<number>(0);
     const [activeCategoryId, setActiveCategoryId] = useState<string>('');
+    const activeCategoryIdRef = useRef(activeCategoryId);
+    activeCategoryIdRef.current = activeCategoryId;
     const isScrollingToRef = useRef(false);
     const [searchQuery, setSearchQuery] = useState('');
 
@@ -408,11 +410,14 @@ const EmojiPickerContent = ({
         ({ visibleStartIndex }: { visibleStartIndex: number }): void => {
             if (isScrollingToRef.current) return;
             const firstVisibleRow = flatRows[visibleStartIndex];
-            if (firstVisibleRow && firstVisibleRow.id !== activeCategoryId) {
+            if (
+                firstVisibleRow &&
+                firstVisibleRow.id !== activeCategoryIdRef.current
+            ) {
                 setActiveCategoryId(firstVisibleRow.id);
             }
         },
-        [flatRows, activeCategoryId],
+        [flatRows],
     );
 
     const handleScroll = useCallback(
@@ -470,6 +475,13 @@ const EmojiPickerContent = ({
             );
         },
         [flatRows, onEmojiSelect, onCustomEmojiSelect, showEmojiInfo],
+    );
+
+    const onRowsRendered = useCallback(
+        ({ startIndex }: { startIndex: number }): void => {
+            handleItemsRendered({ visibleStartIndex: startIndex });
+        },
+        [handleItemsRendered],
     );
 
     if (width <= 0 || height <= 0) return null;
@@ -609,13 +621,7 @@ const EmojiPickerContent = ({
                     rowHeight={getRowHeight}
                     rowProps={{}}
                     style={{ height: height - 44, width: listAreaWidth }}
-                    onRowsRendered={({
-                        startIndex,
-                    }: {
-                        startIndex: number;
-                    }): void => {
-                        handleItemsRendered({ visibleStartIndex: startIndex });
-                    }}
+                    onRowsRendered={onRowsRendered}
                     onScroll={(e: React.UIEvent<HTMLDivElement>): void => {
                         handleScroll({
                             scrollOffset: e.currentTarget.scrollTop,
@@ -644,16 +650,27 @@ export const EmojiPicker = ({
     customCategories = EMPTY_CUSTOM_CATEGORIES,
     className,
 }: EmojiPickerProps) => {
-    const [containerRef, { width, height }] = useMeasure<HTMLDivElement>();
+    const [windowWidth, setWindowWidth] = useState<number>(
+        typeof window !== 'undefined' ? window.innerWidth : 1024,
+    );
 
     useLockBodyScroll(true);
 
     React.useEffect((): (() => void) => {
+        const handleResize = (): void => setWindowWidth(window.innerWidth);
+        window.addEventListener('resize', handleResize);
         document.body.classList.add('picker-open');
         return (): void => {
+            window.removeEventListener('resize', handleResize);
             document.body.classList.remove('picker-open');
         };
     }, []);
+
+    const width = Math.min(
+        PICKER_WIDTH,
+        Math.max(300, windowWidth - 24),
+    );
+    const height = PICKER_HEIGHT;
 
     return (
         <m.div
@@ -663,22 +680,19 @@ export const EmojiPicker = ({
                 className,
             )}
             initial={{ opacity: 0, scale: 0.95, y: 10 }}
-            ref={containerRef}
             style={{
                 width: `min(${PICKER_WIDTH}px, calc(100vw - 24px))`,
                 height: PICKER_HEIGHT,
             }}
             transition={{ duration: 0.2, ease: 'easeOut' }}
         >
-            {width > 0 && height > 0 ? (
-                <EmojiPickerContent
-                    customCategories={customCategories}
-                    height={height}
-                    width={width}
-                    onCustomEmojiSelect={onCustomEmojiSelect}
-                    onEmojiSelect={onEmojiSelect}
-                />
-            ) : null}
+            <EmojiPickerContent
+                customCategories={customCategories}
+                height={height}
+                width={width}
+                onCustomEmojiSelect={onCustomEmojiSelect}
+                onEmojiSelect={onEmojiSelect}
+            />
         </m.div>
     );
 };

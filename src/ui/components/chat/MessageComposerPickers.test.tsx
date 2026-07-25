@@ -39,9 +39,9 @@ vi.mock('@/ui/components/emoji/StickerPicker', () => ({
     StickerPicker: () => <div>sticker-picker</div>,
 }));
 
-const $createChipNodeMock = vi.fn(() => ({ __type: 'chip-mock' }));
+const $createChipNodeMock = vi.fn((..._args: unknown[]) => ({ __type: 'chip-mock' }));
 vi.mock('@/ui/components/chat/lexical/ChipNode', () => ({
-    $createChipNode: (...args: unknown[]) => $createChipNodeMock(...args),
+    $createChipNode: (type: unknown, data: unknown) => $createChipNodeMock(type, data),
 }));
 
 const mockInsertNodes = vi.fn();
@@ -63,8 +63,6 @@ vi.mock('lexical', async (importOriginal) => {
         ),
     };
 });
-
-import { $getSelection, $isRangeSelection } from 'lexical';
 
 function makeMockEditor() {
     return {

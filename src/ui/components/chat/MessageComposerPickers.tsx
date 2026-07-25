@@ -3,12 +3,9 @@ import React, { useCallback, useRef } from 'react';
 import { $getRoot, $getSelection, $isRangeSelection, type LexicalEditor } from 'lexical';
 import { useClickAway } from 'react-use';
 
-import type { CustomEmojiCategory } from '@/api/emojis/emojis.types';
-import type { StickerCategory } from '@/api/stickers/stickers.types';
 import { $createChipNode } from '@/ui/components/chat/lexical/ChipNode';
-import { EmojiPicker } from '@/ui/components/emoji/EmojiPicker';
-import { StickerPicker } from '@/ui/components/emoji/StickerPicker';
-import { Box } from '@/ui/components/layout/Box';
+import { EmojiPicker, type CustomEmojiCategory } from '@/ui/components/emoji/EmojiPicker';
+import { StickerPicker, type StickerCategory } from '@/ui/components/emoji/StickerPicker';
 
 interface MessageComposerPickersProps {
     editor: LexicalEditor | null;
@@ -108,7 +105,7 @@ export const MessageComposerPickers = ({
             {showStickerPicker ? (
                 <React.Suspense
                     fallback={
-                        <div className="flex h-[420px] w-[350px] items-center justify-center rounded-lg border border-border-subtle bg-bg-primary text-muted-foreground shadow-xl">
+                        <div className="flex h-[500px] w-[620px] max-w-[calc(100vw-24px)] items-center justify-center rounded-lg border border-border-subtle bg-bg-primary text-muted-foreground shadow-xl">
                             Loading stickers...
                         </div>
                     }

@@ -1,4 +1,4 @@
-import React, { useMemo, useReducer, useRef } from 'react';
+import React, { useCallback, useMemo, useReducer, useRef } from 'react';
 
 import type { LexicalEditor } from 'lexical';
 import { Plus } from 'lucide-react';
@@ -115,6 +115,13 @@ export const MessageInput = ({
     };
 
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const patchUiRef = useRef(patchUi);
+    patchUiRef.current = patchUi;
+
+    const handleEditorChange = useCallback((nextEditor: LexicalEditor): void => {
+        patchUiRef.current({ editor: nextEditor });
+    }, []);
+
     const { data: me } = useMe();
     const keybindManager = useKeybindManager(me?.settings?.keybinds);
 
@@ -319,9 +326,7 @@ export const MessageInput = ({
                     serverCommands={serverCommands}
                     serverEmojis={allServerEmojis}
                     slowMode={currentChannel?.slowMode}
-                    onEditorChange={(nextEditor): void => {
-                        patchUi({ editor: nextEditor });
-                    }}
+                    onEditorChange={handleEditorChange}
                     onHasTextChange={(value): void => {
                         patchUi({ hasText: value });
                     }}

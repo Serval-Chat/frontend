@@ -78,9 +78,9 @@ export const ChatHeader = ({
 
     const { data: me } = useMe();
     const { data: friends } = useFriends();
-    const localNickname = friends?.find(
-        (f): boolean => f.id === selectedFriendId,
-    )?.nickname;
+    const localNickname = Array.isArray(friends)
+        ? friends.find((f): boolean => f.id === selectedFriendId)?.nickname
+        : undefined;
     const { data: pins } = usePinnedMessages(
         selectedServerId,
         selectedChannelId,
