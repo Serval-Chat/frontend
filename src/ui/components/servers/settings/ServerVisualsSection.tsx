@@ -50,9 +50,9 @@ export const ServerVisualsSection = ({
                 <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
                     <Upload className="mb-1 h-6 w-6 text-white" />
                     <Text
+                        className="text-white"
                         size="2xs"
                         transform="uppercase"
-                        variant="inverse"
                         weight="bold"
                     >
                         Change Icon
@@ -95,9 +95,9 @@ export const ServerVisualsSection = ({
                 <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
                     <Upload className="mb-1 h-6 w-6 text-white" />
                     <Text
+                        className="text-white"
                         size="2xs"
                         transform="uppercase"
-                        variant="inverse"
                         weight="bold"
                     >
                         Change Banner

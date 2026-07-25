@@ -53,9 +53,9 @@ const EmojiGridItem = ({
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-black/60 p-2">
                 <Text
                     align="center"
+                    className="text-white"
                     leading="tight"
                     size="xs"
-                    variant="inverse"
                     weight="medium"
                     wrap="breakAll"
                 >
