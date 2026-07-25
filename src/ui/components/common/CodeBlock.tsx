@@ -135,7 +135,7 @@ export const CodeBlock = ({
                     type="button"
                     onClick={handleContainerClick}
                 >
-                    <pre className="m-0 overflow-x-auto bg-transparent p-4 text-sm leading-6 whitespace-pre-wrap">
+                    <pre className="m-0 overflow-x-auto bg-transparent text-sm leading-6 whitespace-pre-wrap">
                         {(highlightedLines || lines).map((line, index) => (
                             <div
                                 className="flex"

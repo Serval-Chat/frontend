@@ -115,7 +115,7 @@ export const CodeModal = memo(
                 onClose={onClose}
             >
                 <div className="custom-scrollbar flex h-full flex-col overflow-auto bg-background">
-                    <div className="flex-1 py-4 font-mono text-sm leading-6">
+                    <div className="flex-1 font-mono text-sm leading-6">
                         {codeLines.map((lineNodes, i) => (
                             <div
                                 className="group flex transition-colors hover:bg-white/5"
