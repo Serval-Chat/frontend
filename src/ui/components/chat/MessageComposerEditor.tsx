@@ -7,6 +7,7 @@ import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary';
 import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
 import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin';
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import type { LexicalEditor } from 'lexical';
 import { ArrowUp } from 'lucide-react';
 
@@ -25,6 +26,18 @@ import { SlashArgChipNode } from './lexical/SlashArgChipNode';
 import { SlashCommandChipNode } from './lexical/SlashCommandChipNode';
 import { $getRawMessageText } from './lexical/lexicalUtils';
 import { $getSlashChipState } from './lexical/slashChipHelpers';
+
+const LexicalEditorRefPlugin = ({
+    onEditorChange,
+}: {
+    onEditorChange: (editor: LexicalEditor) => void;
+}): null => {
+    const [editor] = useLexicalComposerContext();
+    React.useEffect((): void => {
+        onEditorChange(editor);
+    }, [editor, onEditorChange]);
+    return null;
+};
 
 const theme = {
     paragraph: 'mb-0',
@@ -226,6 +239,7 @@ export const MessageComposerEditor = ({
             )}
         >
             <LexicalComposer initialConfig={messageInputInitialConfig}>
+                <LexicalEditorRefPlugin onEditorChange={onEditorChange} />
                 <RichTextPlugin
                     ErrorBoundary={LexicalErrorBoundary}
                     // MessageInputContentEditable is wrapped in memo, so a fresh

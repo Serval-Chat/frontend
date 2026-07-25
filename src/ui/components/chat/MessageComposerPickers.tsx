@@ -1,22 +1,14 @@
 import React, { useCallback, useRef } from 'react';
 
-import { $getSelection, $isRangeSelection, type LexicalEditor } from 'lexical';
+import { $getRoot, $getSelection, $isRangeSelection, type LexicalEditor } from 'lexical';
 import { useClickAway } from 'react-use';
 
+import type { CustomEmojiCategory } from '@/api/emojis/emojis.types';
+import type { StickerCategory } from '@/api/stickers/stickers.types';
 import { $createChipNode } from '@/ui/components/chat/lexical/ChipNode';
-import type { CustomEmojiCategory } from '@/ui/components/emoji/EmojiPicker';
-import type { StickerCategory } from '@/ui/components/emoji/StickerPicker';
-
-const EmojiPicker = React.lazy(() =>
-    import('@/ui/components/emoji/EmojiPicker').then((m) => ({
-        default: m.EmojiPicker,
-    })),
-);
-const StickerPicker = React.lazy(() =>
-    import('@/ui/components/emoji/StickerPicker').then((m) => ({
-        default: m.StickerPicker,
-    })),
-);
+import { EmojiPicker } from '@/ui/components/emoji/EmojiPicker';
+import { StickerPicker } from '@/ui/components/emoji/StickerPicker';
+import { Box } from '@/ui/components/layout/Box';
 
 interface MessageComposerPickersProps {
     editor: LexicalEditor | null;
@@ -46,7 +38,10 @@ export const MessageComposerPickers = ({
     const handleCustomEmojiSelect = useCallback(
         (emoji: { id: string; name: string; url: string }): void => {
             editor?.update((): void => {
-                const selection = $getSelection();
+                let selection = $getSelection();
+                if (!$isRangeSelection(selection)) {
+                    selection = $getRoot().selectEnd();
+                }
                 if ($isRangeSelection(selection)) {
                     const chip = $createChipNode('emoji', {
                         id: emoji.id,
@@ -64,7 +59,10 @@ export const MessageComposerPickers = ({
     const handleEmojiSelect = useCallback(
         (emoji: string): void => {
             editor?.update((): void => {
-                const selection = $getSelection();
+                let selection = $getSelection();
+                if (!$isRangeSelection(selection)) {
+                    selection = $getRoot().selectEnd();
+                }
                 if ($isRangeSelection(selection)) {
                     selection.insertNodes([
                         $createChipNode('unicode-emoji', { id: emoji }),

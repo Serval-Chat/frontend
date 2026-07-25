@@ -3,14 +3,27 @@ import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { AutoFocusPlugin } from '@lexical/react/LexicalAutoFocusPlugin';
 import { ClearEditorPlugin } from '@lexical/react/LexicalClearEditorPlugin';
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';
 import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary';
 import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
 import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin';
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
-import { $getSelection, $isRangeSelection, type LexicalEditor } from 'lexical';
+import { $getRoot, $getSelection, $isRangeSelection, type LexicalEditor } from 'lexical';
 import { Check, Smile, X } from 'lucide-react';
 import { useClickAway } from 'react-use';
+
+const LexicalEditorRefPlugin = ({
+    onEditor,
+}: {
+    onEditor: (editor: LexicalEditor) => void;
+}): null => {
+    const [editor] = useLexicalComposerContext();
+    React.useEffect((): void => {
+        onEditor(editor);
+    }, [editor, onEditor]);
+    return null;
+};
 
 import {
     useEditChannelMessage,
@@ -247,12 +260,13 @@ export const MessageEdit = ({
     const handleEmojiSelect = useCallback((emoji: string): void => {
         if (editorInstanceRef.current) {
             editorInstanceRef.current.update((): void => {
-                const selection = $getSelection();
+                let selection = $getSelection();
+                if (!$isRangeSelection(selection)) {
+                    selection = $getRoot().selectEnd();
+                }
                 if ($isRangeSelection(selection)) {
                     selection.insertNodes([
-                        $createChipNode('unicode-emoji', {
-                            id: emoji,
-                        }),
+                        $createChipNode('unicode-emoji', { id: emoji }),
                     ]);
                 }
             });
@@ -265,9 +279,10 @@ export const MessageEdit = ({
         (emoji: { id: string; name: string }): void => {
             if (editorInstanceRef.current) {
                 editorInstanceRef.current.update((): void => {
-                    const selection = editorInstanceRef.current
-                        ?.getEditorState()
-                        .read(() => $getSelection());
+                    let selection = $getSelection();
+                    if (!$isRangeSelection(selection)) {
+                        selection = $getRoot().selectEnd();
+                    }
                     if ($isRangeSelection(selection)) {
                         selection.insertNodes([
                             $createChipNode('emoji', {
@@ -359,6 +374,11 @@ export const MessageEdit = ({
         <Box className="relative w-full">
             <div className="relative flex min-h-[60px] flex-1 cursor-text items-start rounded-md border border-border-subtle bg-bg-secondary transition-all duration-200 focus-within:border-primary/30 focus-within:ring-2 focus-within:ring-primary/20 focus-within:outline-none">
                 <LexicalComposer initialConfig={initialConfig}>
+                    <LexicalEditorRefPlugin
+                        onEditor={(editor): void => {
+                            editorInstanceRef.current = editor;
+                        }}
+                    />
                     <LexicalInitPlugin initialText={initialText} />
                     <AutoFocusPlugin defaultSelection="rootEnd" />
                     <RichTextPlugin

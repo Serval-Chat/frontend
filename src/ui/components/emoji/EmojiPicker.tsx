@@ -234,6 +234,7 @@ const EmojiPickerRow = ({
                                     height: EMOJI_BUTTON_SIZE,
                                 }}
                                 variant="ghost"
+                                onMouseDown={(e): void => e.preventDefault()}
                                 onClick={(): void => {
                                     onEmojiSelect(unicode);
                                 }}
@@ -274,6 +275,7 @@ const EmojiPickerRow = ({
                                     height: EMOJI_BUTTON_SIZE,
                                 }}
                                 variant="ghost"
+                                onMouseDown={(e): void => e.preventDefault()}
                                 onClick={(): void | undefined =>
                                     onCustomEmojiSelect?.(custom)
                                 }
