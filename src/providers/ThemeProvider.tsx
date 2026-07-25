@@ -237,7 +237,7 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
         if (customFontFamily) {
             document.documentElement.style.setProperty(
                 '--font-sans',
-                `"${customFontFamily}", system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif`,
+                `"${customFontFamily}", Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`,
             );
             localStorage.setItem('custom-font-family', customFontFamily);
         } else {
