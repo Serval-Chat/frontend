@@ -23,13 +23,44 @@ export interface EmojiData {
     has_img_google: boolean;
     has_img_twitter: boolean;
     has_img_facebook: boolean;
+    skin_variations?: Record<
+        string,
+        {
+            unified: string;
+            non_qualified: string | null;
+            image: string;
+            sheet_x: number;
+            sheet_y: number;
+            added_in: string;
+            has_img_apple: boolean;
+            has_img_google: boolean;
+            has_img_twitter: boolean;
+            has_img_facebook: boolean;
+        }
+    >;
+    obsoletes?: string;
+    obsoleted_by?: string;
 }
 
-// Group emojis by category
+// ─── Category grouping ────────────────────────────────────────────────────────
+// Skip the "Component" category – it only contains bare skin-tone modifier
+// codepoints (🏻–🏿) which are not standalone selectable emojis.
+
+const EXCLUDED_CATEGORIES = new Set(['Component']);
+
 export const groupedEmojis: Record<string, EmojiData[]> = {};
+
 for (const emoji of emojiData as EmojiData[]) {
     if (!emoji.has_img_apple) continue;
-    (groupedEmojis[emoji.category] ??= []).push(emoji);
+    if (EXCLUDED_CATEGORIES.has(emoji.category)) continue;
+    const bucket = (groupedEmojis[emoji.category] ??= []);
+    bucket.push(emoji);
+}
+
+// Sort each category by the datasource's canonical sort_order so emojis
+// appear in the correct, familiar order (😀 first, not 👁️‍🗨️).
+for (const bucket of Object.values(groupedEmojis)) {
+    bucket.sort((a, b): number => a.sort_order - b.sort_order);
 }
 
 export const categories = Object.keys(groupedEmojis).toSorted(
@@ -43,11 +74,12 @@ export const categories = Object.keys(groupedEmojis).toSorted(
             'Activities',
             'Objects',
             'Symbols',
-            'Symbols',
             'Flags',
-            'Component',
         ];
-        return order.indexOf(a) - order.indexOf(b);
+        const ai = order.indexOf(a);
+        const bi = order.indexOf(b);
+        // Any category not in the list goes to the end
+        return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);
     },
 );
 
@@ -101,19 +133,20 @@ export const categoryIconMap: Record<string, EmojiData | undefined> = {
                 e.short_name === 'flag-white' ||
                 e.short_name === 'triangular_flag_on_post'),
     ),
-    Component: (emojiData as EmojiData[]).find(
-        (e): boolean =>
-            e.has_img_apple &&
-            (e.short_name === 'gear' ||
-                e.short_name === 'wrench' ||
-                e.short_name === 'tools'),
-    ),
 };
+
+// ─── Sprite sheet ─────────────────────────────────────────────────────────────
+// emoji-datasource-apple ships a 62×62 sprite sheet (sheet_x/y are 0-indexed
+// 0–61). The backgroundPosition formula uses (val / (TOTAL - 1)) * 100% so
+// that 0 maps to 0% and 61 maps to 100%.
 
 const TOTAL_COLS = 62;
 const TOTAL_ROWS = 62;
 
-export const getSpriteStyle = (emoji?: EmojiData): React.CSSProperties => {
+export const getSpriteStyle = (emoji?: {
+    sheet_x: number;
+    sheet_y: number;
+}): React.CSSProperties => {
     if (!emoji) return {};
     return {
         backgroundImage:
@@ -126,23 +159,71 @@ export const getSpriteStyle = (emoji?: EmojiData): React.CSSProperties => {
     };
 };
 
-export const getUnicode = (emoji: EmojiData): string =>
+// ─── Unicode conversion ───────────────────────────────────────────────────────
+
+export const getUnicode = (emoji: { unified: string }): string =>
     String.fromCodePoint(
         ...emoji.unified.split('-').map((u): number => Number.parseInt(u, 16)),
     );
 
-// Map of unicode character to EmojiData
+// ─── Emoji map & regex ────────────────────────────────────────────────────────
+// The map must include skin-tone variants so that emoji sequences like 👋🏽
+// (wave + medium skin tone) are correctly recognised when typed in chat or
+// pasted from the OS picker.  We store a reference back to the *base* emoji's
+// data for the sprite coordinates (skin variant sheet positions differ from the
+// base, but we use the base here because the picker never inserts raw variants).
+//
+// For matching/recognition purposes we also register non_qualified sequences
+// (e.g. #⃣ without the U+FE0F variation selector) so they don't fall through
+// to a raw character render.
+
 export const emojiMap = new Map<string, EmojiData>();
 const emojiUnicodeList: string[] = [];
 
 for (const emoji of emojiData as EmojiData[]) {
     if (!emoji.has_img_apple) continue;
+
     const unicode = getUnicode(emoji);
-    emojiMap.set(unicode, emoji);
-    emojiUnicodeList.push(unicode);
+    if (!emojiMap.has(unicode)) {
+        emojiMap.set(unicode, emoji);
+        emojiUnicodeList.push(unicode);
+    }
+
+    // Register the non_qualified sequence as an alias for the same sprite
+    if (emoji.non_qualified) {
+        const nqUnicode = String.fromCodePoint(
+            ...emoji.non_qualified
+                .split('-')
+                .map((u): number => Number.parseInt(u, 16)),
+        );
+        if (!emojiMap.has(nqUnicode)) {
+            emojiMap.set(nqUnicode, emoji);
+            emojiUnicodeList.push(nqUnicode);
+        }
+    }
+
+    // Register every skin-tone variant so sequences like 👋🏽 are rendered
+    // using the Apple sprite sheet rather than the OS fallback font.
+    if (emoji.skin_variations) {
+        for (const sv of Object.values(emoji.skin_variations)) {
+            if (!sv.has_img_apple) continue;
+            const svUnicode = getUnicode(sv);
+            if (!emojiMap.has(svUnicode)) {
+                // Store a synthetic EmojiData with the variant's own sheet coords
+                emojiMap.set(svUnicode, {
+                    ...emoji,
+                    unified: sv.unified,
+                    sheet_x: sv.sheet_x,
+                    sheet_y: sv.sheet_y,
+                });
+                emojiUnicodeList.push(svUnicode);
+            }
+        }
+    }
 }
 
-// Sort by length descending
+// Sort by length descending so longer sequences (skin-tone variants, ZWJ
+// sequences) are matched before their shorter sub-sequences.
 emojiUnicodeList.sort((a, b): number => b.length - a.length);
 
 // Escape special regex characters

@@ -13,6 +13,7 @@ import { ParsedUnicodeEmoji } from '@/ui/components/common/ParsedUnicodeEmoji';
 import { Text } from '@/ui/components/common/Text';
 import { Tooltip } from '@/ui/components/common/Tooltip';
 import { EmojiInfoBox } from '@/ui/components/emoji/EmojiInfoBox';
+import { SkinTonePopover } from '@/ui/components/emoji/SkinTonePopover';
 import { Box } from '@/ui/components/layout/Box';
 import { ServerIcon } from '@/ui/components/servers/ServerIcon';
 import { resolveApiUrl } from '@/utils/apiUrl';
@@ -165,6 +166,7 @@ const EmojiPickerRow = ({
     onEmojiSelect,
     onCustomEmojiSelect,
     onShowInfo,
+    onSkinToneRequest,
 }: {
     row: RowItem;
     style: React.CSSProperties;
@@ -177,6 +179,10 @@ const EmojiPickerRow = ({
     onShowInfo: (
         custom: { id: string; name: string; url: string },
         e: React.MouseEvent,
+    ) => void;
+    onSkinToneRequest: (
+        emoji: EmojiData,
+        e: React.MouseEvent | React.TouchEvent,
     ) => void;
 }) => {
     if (row.type === 'header') {
@@ -237,6 +243,12 @@ const EmojiPickerRow = ({
                                 onMouseDown={(e): void => e.preventDefault()}
                                 onClick={(): void => {
                                     onEmojiSelect(unicode);
+                                }}
+                                onContextMenu={(e): void => {
+                                    if (emoji.skin_variations) {
+                                        e.preventDefault();
+                                        onSkinToneRequest(emoji, e);
+                                    }
                                 }}
                             >
                                 <ParsedUnicodeEmoji
@@ -326,6 +338,10 @@ const EmojiPickerContent = ({
     activeCategoryIdRef.current = activeCategoryId;
     const isScrollingToRef = useRef(false);
     const [searchQuery, setSearchQuery] = useState('');
+    const [skinToneTarget, setSkinToneTarget] = useState<{
+        emoji: EmojiData;
+        position: { x: number; y: number };
+    } | null>(null);
 
     const {
         selectedEmoji,
@@ -459,6 +475,17 @@ const EmojiPickerContent = ({
         activeCategoryId ??
         (width > 0 && height > 0 ? (displayCategories[0]?.id ?? null) : null);
 
+    const handleSkinToneRequest = useCallback(
+        (emoji: EmojiData, e: React.MouseEvent | React.TouchEvent): void => {
+            const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+            setSkinToneTarget({
+                emoji,
+                position: { x: rect.left, y: rect.top },
+            });
+        },
+        [],
+    );
+
     const Row = useCallback(
         ({ index, style }: RowComponentProps) => {
             const row = flatRows[index];
@@ -471,10 +498,11 @@ const EmojiPickerContent = ({
                     onCustomEmojiSelect={onCustomEmojiSelect}
                     onEmojiSelect={onEmojiSelect}
                     onShowInfo={showEmojiInfo}
+                    onSkinToneRequest={handleSkinToneRequest}
                 />
             );
         },
-        [flatRows, onEmojiSelect, onCustomEmojiSelect, showEmojiInfo],
+        [flatRows, onEmojiSelect, onCustomEmojiSelect, showEmojiInfo, handleSkinToneRequest],
     );
 
     const onRowsRendered = useCallback(
@@ -635,6 +663,14 @@ const EmojiPickerContent = ({
                         position={infoBoxPosition}
                         server={server}
                         onClose={closeInfoBox}
+                    />
+                ) : null}
+
+                {skinToneTarget ? (
+                    <SkinTonePopover
+                        target={skinToneTarget}
+                        onClose={(): void => setSkinToneTarget(null)}
+                        onSelect={onEmojiSelect}
                     />
                 ) : null}
             </Box>
