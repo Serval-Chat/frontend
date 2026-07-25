@@ -490,6 +490,19 @@ export interface IRolesReorderedEvent {
     senderId?: string;
 }
 
+export interface IEmojiCreatedEvent {
+    serverId: string;
+    emojiId?: string;
+    emoji?: unknown;
+    senderId?: string;
+}
+
+export interface IEmojiDeletedEvent {
+    serverId: string;
+    emojiId: string;
+    senderId?: string;
+}
+
 /**
  * @description Emoji updated.
  */
@@ -630,6 +643,8 @@ export const WsEvents = {
     ROLES_REORDERED: 'roles_reordered',
     CHANNEL_PERMISSIONS_UPDATED: 'channel_permissions_updated',
     CATEGORY_PERMISSIONS_UPDATED: 'category_permissions_updated',
+    EMOJI_CREATED: 'emoji_created',
+    EMOJI_DELETED: 'emoji_deleted',
     EMOJI_UPDATED: 'emoji_updated',
     STICKER_UPDATED: 'sticker_updated',
     MENTION: 'mention',

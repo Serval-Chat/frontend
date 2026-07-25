@@ -69,6 +69,8 @@ import {
     type IChannelsReorderedEvent,
     type ICommandsUpdatedEvent,
     type IDisplayNameUpdatedEvent,
+    type IEmojiCreatedEvent,
+    type IEmojiDeletedEvent,
     type IEmojiUpdatedEvent,
     type IInteractionResponseServerEvent,
     type IMemberAddedEvent,
@@ -1943,15 +1945,27 @@ export const setupGlobalWsHandlers = (
     );
 
     // Emoji events
+    const handleEmojiChange = (payload: { serverId: string; senderId?: string }): void => {
+        void queryClient.invalidateQueries({
+            queryKey: SERVERS_QUERY_KEYS.emojis(payload.serverId),
+        });
+        void queryClient.invalidateQueries({
+            queryKey: ['servers', 'emojis', 'all'],
+        });
+    };
+
     cleanups.push(
+        wsClient.on<IEmojiCreatedEvent>(
+            WsEvents.EMOJI_CREATED,
+            handleEmojiChange,
+        ),
+        wsClient.on<IEmojiDeletedEvent>(
+            WsEvents.EMOJI_DELETED,
+            handleEmojiChange,
+        ),
         wsClient.on<IEmojiUpdatedEvent>(
             WsEvents.EMOJI_UPDATED,
-            (payload): void => {
-                if (payload.senderId === currentUser?.id) return;
-                void queryClient.invalidateQueries({
-                    queryKey: SERVERS_QUERY_KEYS.emojis(payload.serverId),
-                });
-            },
+            handleEmojiChange,
         ),
     );
 

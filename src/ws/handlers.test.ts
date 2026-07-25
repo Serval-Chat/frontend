@@ -777,4 +777,64 @@ describe('setupGlobalWsHandlers - ping behaviour', (): void => {
             ).toEqual(['channel-old', 'channel-new', 'channel-late']);
         });
     });
+
+    describe('EMOJI events (EMOJI_CREATED, EMOJI_DELETED, EMOJI_UPDATED)', (): void => {
+        const serverId = 'server-emoji-1';
+
+        it('invalidates both server-specific and all-server emoji queries on EMOJI_CREATED', (): void => {
+            const serverKey = SERVERS_QUERY_KEYS.emojis(serverId);
+            const allKey = ['servers', 'emojis', 'all'];
+
+            queryClient.setQueryData(serverKey, []);
+            queryClient.setQueryData(allKey, []);
+
+            emitWsEvent(mockWs, WsEvents.EMOJI_CREATED, {
+                serverId,
+                emojiId: 'emoji-1',
+                senderId: 'other-user',
+            });
+
+            expect(queryClient.getQueryState(serverKey)?.isInvalidated).toBe(
+                true,
+            );
+            expect(queryClient.getQueryState(allKey)?.isInvalidated).toBe(true);
+        });
+
+        it('invalidates both server-specific and all-server emoji queries on EMOJI_DELETED', (): void => {
+            const serverKey = SERVERS_QUERY_KEYS.emojis(serverId);
+            const allKey = ['servers', 'emojis', 'all'];
+
+            queryClient.setQueryData(serverKey, []);
+            queryClient.setQueryData(allKey, []);
+
+            emitWsEvent(mockWs, WsEvents.EMOJI_DELETED, {
+                serverId,
+                emojiId: 'emoji-1',
+                senderId: 'other-user',
+            });
+
+            expect(queryClient.getQueryState(serverKey)?.isInvalidated).toBe(
+                true,
+            );
+            expect(queryClient.getQueryState(allKey)?.isInvalidated).toBe(true);
+        });
+
+        it('invalidates both server-specific and all-server emoji queries on EMOJI_UPDATED', (): void => {
+            const serverKey = SERVERS_QUERY_KEYS.emojis(serverId);
+            const allKey = ['servers', 'emojis', 'all'];
+
+            queryClient.setQueryData(serverKey, []);
+            queryClient.setQueryData(allKey, []);
+
+            emitWsEvent(mockWs, WsEvents.EMOJI_UPDATED, {
+                serverId,
+                senderId: 'other-user',
+            });
+
+            expect(queryClient.getQueryState(serverKey)?.isInvalidated).toBe(
+                true,
+            );
+            expect(queryClient.getQueryState(allKey)?.isInvalidated).toBe(true);
+        });
+    });
 });

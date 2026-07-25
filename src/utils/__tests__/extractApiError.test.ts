@@ -1,7 +1,7 @@
-import { AxiosError, AxiosHeaders, AxiosResponse } from 'axios';
+import { AxiosError, AxiosHeaders, type AxiosResponse } from 'axios';
 import { describe, expect, it } from 'vitest';
 
-import { extractApiError } from '../extractApiError';
+import { extractApiError } from '@/utils/extractApiError';
 
 describe('extractApiError', () => {
     it('returns custom message from data.message', () => {

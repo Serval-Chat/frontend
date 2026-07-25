@@ -33,6 +33,7 @@ export const ImageCropModal = ({
 }: ImageCropModalProps) => {
     const [crop, setCrop] = useState<CropSelection | null>(null);
     const [isProcessing, setIsProcessing] = useState(false);
+    const { showToast } = useToast();
 
     if (!imageFile) return null;
 
@@ -44,8 +45,6 @@ export const ImageCropModal = ({
               : type === 'server-banner'
                 ? 16 / 9
                 : 1136 / 400;
-
-    const { showToast } = useToast();
 
     const handleConfirm = async (): Promise<void> => {
         if (!crop) return;

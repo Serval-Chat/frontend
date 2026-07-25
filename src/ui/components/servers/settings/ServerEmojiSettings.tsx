@@ -108,19 +108,20 @@ export const ServerEmojiSettings = ({ serverId }: ServerEmojiSettingsProps) => {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const bulkFileInputRef = useRef<HTMLInputElement>(null);
 
-    useWebSocket(
-        WsEvents.EMOJI_UPDATED,
-        useCallback(
-            (payload: { serverId: string }): void => {
-                if (payload.serverId === serverId) {
-                    void queryClient.invalidateQueries({
-                        queryKey: SERVERS_QUERY_KEYS.emojis(serverId),
-                    });
-                }
-            },
-            [serverId, queryClient],
-        ),
+    const handleEmojiWs = useCallback(
+        (payload: { serverId: string }): void => {
+            if (payload.serverId === serverId) {
+                void queryClient.invalidateQueries({
+                    queryKey: SERVERS_QUERY_KEYS.emojis(serverId),
+                });
+            }
+        },
+        [serverId, queryClient],
     );
+
+    useWebSocket(WsEvents.EMOJI_CREATED, handleEmojiWs);
+    useWebSocket(WsEvents.EMOJI_DELETED, handleEmojiWs);
+    useWebSocket(WsEvents.EMOJI_UPDATED, handleEmojiWs);
 
     const handleFileSelect = (
         event: React.ChangeEvent<HTMLInputElement>,

@@ -536,7 +536,7 @@ export const useUploadEmoji = (
             serversApi.uploadEmoji(serverId, name, file),
         onSuccess: (): void => {
             void queryClient.invalidateQueries({
-                queryKey: SERVERS_QUERY_KEYS.emojis(serverId),
+                queryKey: ['servers', 'emojis'],
             });
             showToast('Emoji uploaded successfully', 'success');
         },
@@ -560,7 +560,7 @@ export const useDeleteEmoji = (
             serversApi.deleteEmoji(serverId, emojiId),
         onSuccess: (): void => {
             void queryClient.invalidateQueries({
-                queryKey: SERVERS_QUERY_KEYS.emojis(serverId),
+                queryKey: ['servers', 'emojis'],
             });
             showToast('Emoji deleted successfully', 'success');
         },
