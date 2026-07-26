@@ -13,6 +13,7 @@ import type { SlashCommand } from '@/api/interactions/interactions.api';
 import type { Channel } from '@/api/servers/servers.types';
 import type { QueuedFile } from '@/hooks/chat/useFileQueue';
 import type { ProcessedChatMessage } from '@/types/chat.ui';
+import { detectTokensInText } from '@/lib/tokenDetector';
 import { $getSlashChipState } from '@/ui/components/chat/lexical/slashChipHelpers';
 import { tryExecuteSlashCommand } from '@/ui/components/chat/lexical/slashCommandExecution';
 import { useToast } from '@/ui/components/common/Toast';
@@ -148,7 +149,7 @@ export const useMessageSend = ({
     }, [files, updateFileStatus, updateFileProgress, showToast]);
 
     const handleSendMessage = useCallback(
-        async (text: string): Promise<boolean> => {
+        async (text: string, bypassTokenWarning = false): Promise<boolean> => {
             if (isGloballyMuted) {
                 showToast(
                     'You are currently muted and cannot send messages.',
@@ -158,6 +159,11 @@ export const useMessageSend = ({
             }
 
             const trimmedText = text.trim();
+            const tokenResult = detectTokensInText(trimmedText);
+            if (tokenResult.containsToken && !bypassTokenWarning) {
+                return false;
+            }
+
             const hasSlashChips = editor
                 ? editor.getEditorState().read($getSlashChipState) !== null
                 : false;

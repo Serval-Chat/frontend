@@ -63,11 +63,6 @@ export const CodeBlock = ({
 
         const cached = getCachedHighlight(content, languageKey);
         if (cached) {
-            setHighlightedResult({
-                content,
-                language: languageKey,
-                lines: cached,
-            });
             return;
         }
 

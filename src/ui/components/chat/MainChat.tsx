@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 
 import type { Channel } from '@/api/servers/servers.types';
 import { useMe } from '@/api/users/users.queries';
+import type { User } from '@/api/users/users.types';
 import { useChatConversationActions } from '@/hooks/chat/useChatConversationActions';
 import { useChatDebugKeybinds } from '@/hooks/chat/useChatDebugKeybinds';
 import { useFileQueue } from '@/hooks/chat/useFileQueue';

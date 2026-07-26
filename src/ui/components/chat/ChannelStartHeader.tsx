@@ -13,10 +13,10 @@ export interface ChannelStartHeaderProps {
     friendUser?: User;
 }
 
-export const ChannelStartHeader: React.FC<ChannelStartHeaderProps> = ({
+export const ChannelStartHeader = ({
     channel,
     friendUser,
-}) => {
+}: ChannelStartHeaderProps): React.ReactNode => {
     if (friendUser) {
         const displayName =
             resolveDisplayName(

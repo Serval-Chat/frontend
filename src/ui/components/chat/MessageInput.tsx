@@ -24,7 +24,9 @@ import { MessageComposerActions } from './MessageComposerActions';
 import { MessageComposerEditor } from './MessageComposerEditor';
 import { MessageComposerOverlays } from './MessageComposerOverlays';
 import { ReplyBanner } from './ReplyBanner';
+import { TokenWarningPopover } from './TokenWarningPopover';
 import { getSlashPreview } from './messageInputSlashPreview';
+import { detectTokensInText } from '@/lib/tokenDetector';
 
 interface MessageInputProps {
     fileQueueResult: {
@@ -65,6 +67,7 @@ interface MessageInputUiState {
     isMobile: boolean;
     hasText: boolean;
     currentInputText: string;
+    showTokenWarning: boolean;
     slashChipState: {
         commandName: string;
         commandId?: string;
@@ -93,6 +96,7 @@ export const MessageInput = ({
         isMobile: globalThis.matchMedia('(max-width: 768px)').matches,
         hasText: false,
         currentInputText: '',
+        showTokenWarning: false,
         slashChipState: null,
     });
     const {
@@ -102,6 +106,7 @@ export const MessageInput = ({
         isMobile,
         hasText,
         currentInputText,
+        showTokenWarning,
         slashChipState,
     } = ui;
     const showEmojiPicker = activePanel === 'emoji';
@@ -205,6 +210,21 @@ export const MessageInput = ({
             editUserMessage,
         });
 
+    const interceptedSendMessage = useCallback(
+        async (text: string, bypassTokenWarning = false): Promise<boolean> => {
+            if (!bypassTokenWarning) {
+                const tokenResult = detectTokensInText(text);
+                if (tokenResult.containsToken) {
+                    patchUi({ showTokenWarning: true });
+                    return false;
+                }
+            }
+            patchUi({ showTokenWarning: false });
+            return handleSendMessage(text, bypassTokenWarning);
+        },
+        [handleSendMessage],
+    );
+
     const slashPreview = useMemo(
         () => getSlashPreview(currentInputText, serverCommands, slashChipState),
         [currentInputText, serverCommands, slashChipState],
@@ -270,6 +290,24 @@ export const MessageInput = ({
                 isSlowModeError && 'animate-shake !border-danger',
             )}
         >
+            {showTokenWarning ? (
+                <TokenWarningPopover
+                    onCancel={(): void => {
+                        patchUi({ showTokenWarning: false });
+                    }}
+                    onConfirm={(): void => {
+                        void (async (): Promise<void> => {
+                            const sent = await interceptedSendMessage(currentInputText, true);
+                            if (sent && editor) {
+                                const { CLEAR_EDITOR_COMMAND } = await import('lexical');
+                                editor.dispatchCommand(CLEAR_EDITOR_COMMAND, undefined);
+                                editor.focus();
+                            }
+                        })();
+                    }}
+                />
+            ) : null}
+
             <FileQueue
                 files={files}
                 onRemove={removeFile}
@@ -333,7 +371,7 @@ export const MessageInput = ({
                         patchUi({ hasText: value });
                     }}
                     onPasteFiles={addFiles}
-                    onSendMessage={handleSendMessage}
+                    onSendMessage={interceptedSendMessage}
                     onSlashChipChange={(chip): void => {
                         patchUi({ slashChipState: chip });
                     }}
@@ -359,7 +397,7 @@ export const MessageInput = ({
                     onOpenPoll={(): void => {
                         patchUi({ showPollModal: true, activePanel: null });
                     }}
-                    onSendMessage={handleSendMessage}
+                    onSendMessage={interceptedSendMessage}
                     onToggleEmoji={(): void => {
                         togglePanel('emoji');
                     }}
