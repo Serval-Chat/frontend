@@ -1,19 +1,31 @@
 import { useMemo } from 'react';
 
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { vs } from 'react-syntax-highlighter/dist/esm/styles/prism';
-
+import { highlightCode } from '@/lib/syntax-highlighter';
+import { AstRenderer } from '@/ui/components/common/CodeModal';
 import { NTScrollArea } from '@/ui/components/nt/NTScrollArea';
 import { NTTable } from '@/ui/components/nt/NTTable';
 import { Window } from '@/ui/components/nt/Window';
 import { APP_LOCALE } from '@/utils/locale';
 import { toggleWsDebugWindow, useWsDebugEvents } from '@/ws/debug';
 
+const WS_DEBUGGER_SYNTAX_THEME: Record<string, React.CSSProperties> = {
+    property: { color: '#001080', fontWeight: 600 },
+    string: { color: '#a31515' },
+    number: { color: '#098658' },
+    boolean: { color: '#0000ff', fontWeight: 'bold' },
+    punctuation: { color: '#333333' },
+    operator: { color: '#333333' },
+    null: { color: '#0000ff', fontWeight: 'bold' },
+};
+
 const PAYLOAD_STYLE = {
     backgroundColor: 'transparent',
     margin: 0,
     padding: '4px',
     fontSize: '10px',
+    fontFamily: 'monospace',
+    whiteSpace: 'pre-wrap',
+    wordBreak: 'break-all',
 } as const;
 
 const getPayloadText = (payload: unknown): string =>
@@ -72,6 +84,10 @@ export const WsDebugger = () => {
                                 ? getPayloadPreview(event.payload)
                                 : '';
 
+                            const astResult = hasPayload
+                                ? highlightCode(payloadText, 'json').flat()
+                                : [];
+
                             return (
                                 <tr
                                     className="border-b border-[#dfdfdf] text-[10px] hover:bg-[#ffffcc]"
@@ -105,17 +121,14 @@ export const WsDebugger = () => {
                                                     {payloadPreview}
                                                 </summary>
                                                 <NTScrollArea className="h-32 w-full border border-[#dfdfdf] border-r-[#808080] border-b-[#808080] bg-white shadow-[inset_1px_1px_#808080,inset_-1px_-1px_#ffffff]">
-                                                    <SyntaxHighlighter
-                                                        wrapLines
-                                                        wrapLongLines
-                                                        customStyle={
-                                                            PAYLOAD_STYLE
-                                                        }
-                                                        language="json"
-                                                        style={vs}
-                                                    >
-                                                        {payloadText}
-                                                    </SyntaxHighlighter>
+                                                    <pre style={PAYLOAD_STYLE}>
+                                                        <AstRenderer
+                                                            nodes={astResult}
+                                                            theme={
+                                                                WS_DEBUGGER_SYNTAX_THEME
+                                                            }
+                                                        />
+                                                    </pre>
                                                 </NTScrollArea>
                                             </details>
                                         ) : null}

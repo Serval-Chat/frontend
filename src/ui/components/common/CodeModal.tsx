@@ -1,6 +1,7 @@
 import React, { memo, useEffect, useState } from 'react';
 
 import { customSyntaxTheme } from '@/styles/syntax-theme';
+import { addToCache, getCachedHighlight } from '@/lib/syntax-highlighter';
 import SyntaxWorker from '@/workers/syntax.worker?worker';
 
 import { Modal } from './Modal';
@@ -22,54 +23,65 @@ export interface AstNode {
 
 const EMPTY_AST_NODES: AstNode[] = [];
 
-export const AstRenderer = memo(({ nodes }: { nodes: AstNode[] }) => (
-    <>
-        {nodes.map((node, i) => {
-            if (node.type === 'text') {
-                return (
-                    <React.Fragment
-                        // eslint-disable-next-line react/no-array-index-key
-                        key={`text-${i}-${node.value?.slice(0, 20)}`}
-                    >
-                        {node.value}
-                    </React.Fragment>
-                );
-            }
-            if (node.type === 'element' && node.tagName) {
-                const Tag = node.tagName as keyof React.JSX.IntrinsicElements;
-                const className = node.properties?.className?.join(' ');
+export const AstRenderer = memo(
+    ({
+        nodes,
+        theme = customSyntaxTheme,
+    }: {
+        nodes: AstNode[];
+        theme?: Record<string, React.CSSProperties>;
+    }) => (
+        <>
+            {nodes.map((node, i) => {
+                if (node.type === 'text') {
+                    return (
+                        <React.Fragment
+                            // eslint-disable-next-line react/no-array-index-key
+                            key={`text-${i}-${node.value?.slice(0, 20)}`}
+                        >
+                            {node.value}
+                        </React.Fragment>
+                    );
+                }
+                if (node.type === 'element' && node.tagName) {
+                    const Tag = node.tagName as keyof React.JSX.IntrinsicElements;
+                    const className = node.properties?.className?.join(' ');
 
-                let style = {};
-                if (node.properties?.className) {
-                    for (const cls of node.properties.className) {
-                        if (customSyntaxTheme[cls]) {
-                            style = { ...style, ...customSyntaxTheme[cls] };
-                        }
-                        const short = cls.replace('token ', '');
-                        if (customSyntaxTheme[short]) {
-                            style = {
-                                ...style,
-                                ...customSyntaxTheme[short],
-                            };
+                    let style = {};
+                    if (node.properties?.className) {
+                        for (const cls of node.properties.className) {
+                            if (theme[cls]) {
+                                style = { ...style, ...theme[cls] };
+                            }
+                            const short = cls.replace('token ', '');
+                            if (theme[short]) {
+                                style = {
+                                    ...style,
+                                    ...theme[short],
+                                };
+                            }
                         }
                     }
-                }
 
-                return (
-                    <Tag
-                        className={className}
-                        // eslint-disable-next-line react/no-array-index-key
-                        key={`element-${i}-${node.tagName}`}
-                        style={style}
-                    >
-                        <AstRenderer nodes={node.children || EMPTY_AST_NODES} />
-                    </Tag>
-                );
-            }
-            return null;
-        })}
-    </>
-));
+                    return (
+                        <Tag
+                            className={className}
+                            // eslint-disable-next-line react/no-array-index-key
+                            key={`element-${i}-${node.tagName}`}
+                            style={style}
+                        >
+                            <AstRenderer
+                                nodes={node.children || EMPTY_AST_NODES}
+                                theme={theme}
+                            />
+                        </Tag>
+                    );
+                }
+                return null;
+            })}
+        </>
+    ),
+);
 AstRenderer.displayName = 'AstRenderer';
 
 export const CodeModal = memo(
@@ -80,16 +92,26 @@ export const CodeModal = memo(
 
         useEffect((): (() => void) | undefined => {
             if (isOpen) {
+                const langKey = language.toLowerCase();
+
+                const cached = getCachedHighlight(content, langKey);
+                if (cached) {
+                    setHighlightedLines(cached);
+                    return;
+                }
+
                 const worker = new SyntaxWorker();
 
                 worker.onmessage = (e): void => {
-                    setHighlightedLines(e.data);
+                    const lines: AstNode[][] = e.data;
+                    addToCache(content, langKey, lines);
+                    setHighlightedLines(lines);
                     worker.terminate();
                 };
 
                 worker.postMessage({
                     content,
-                    language: language.toLowerCase(),
+                    language: langKey,
                 });
 
                 return (): void => {

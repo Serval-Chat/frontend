@@ -1,7 +1,9 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { Check, Copy, Maximize } from 'lucide-react';
+import { Check, Copy, ExternalLink, Maximize } from 'lucide-react';
 
+import { buildGodboltUrl, getGodboltLanguageId } from '@/lib/godbolt';
+import { addToCache, getCachedHighlight } from '@/lib/syntax-highlighter';
 import SyntaxWorker from '@/workers/syntax.worker?worker';
 
 import { Button } from './Button';
@@ -21,26 +23,63 @@ export const CodeBlock = ({
     language,
     inline = false,
 }: CodeBlockProps) => {
+    const languageKey = (language || 'text').toLowerCase();
     const [isCopied, setIsCopied] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [highlightedResult, setHighlightedResult] = useState<{
         content: string;
         language: string;
         lines: AstNode[][];
-    } | null>(null);
+    } | null>(() => {
+        if (inline) return null;
+        const cached = getCachedHighlight(content, languageKey);
+        if (cached) {
+            return {
+                content,
+                language: languageKey,
+                lines: cached,
+            };
+        }
+        return null;
+    });
     const lines = useMemo((): string[] => content.split('\n'), [content]);
-    const languageKey = (language || 'text').toLowerCase();
+
+    const godboltLanguageId = useMemo(
+        () => getGodboltLanguageId(language ?? ''),
+        [language],
+    );
+
+    const handleOpenGodbolt = useCallback(
+        (e: React.MouseEvent): void => {
+            e.stopPropagation();
+            if (!godboltLanguageId) return;
+            window.open(buildGodboltUrl(content, godboltLanguageId), '_blank', 'noopener,noreferrer');
+        },
+        [content, godboltLanguageId],
+    );
 
     useEffect((): (() => void) | undefined => {
         if (inline) return;
 
-        const worker = new SyntaxWorker();
-
-        worker.onmessage = (e): void => {
+        const cached = getCachedHighlight(content, languageKey);
+        if (cached) {
             setHighlightedResult({
                 content,
                 language: languageKey,
-                lines: e.data,
+                lines: cached,
+            });
+            return;
+        }
+
+        const worker = new SyntaxWorker();
+
+        worker.onmessage = (e): void => {
+            const lines: AstNode[][] = e.data;
+            addToCache(content, languageKey, lines);
+            setHighlightedResult({
+                content,
+                language: languageKey,
+                lines,
             });
             worker.terminate();
         };
@@ -99,6 +138,23 @@ export const CodeBlock = ({
                         {language || 'text'}
                     </span>
                     <div className="flex items-center gap-1">
+                        {godboltLanguageId !== null && (
+                            <>
+                                <Button
+                                    className="flex items-center gap-3 rounded-md border-none p-1.5 text-muted-foreground shadow-none transition-all hover:bg-[hsl(25,95%,53%)]/10 hover:text-[hsl(25,95%,53%)]"
+                                    size="sm"
+                                    title="Try in Godbolt"
+                                    variant="ghost"
+                                    onClick={handleOpenGodbolt}
+                                >
+                                    <ExternalLink size={14} />
+                                    <span className="text-[10px] font-bold">
+                                        TRY IN GODBOLT
+                                    </span>
+                                </Button>
+                                <div className="mx-1 h-3 w-[1px] bg-border-subtle" />
+                            </>
+                        )}
                         <Button
                             className="flex items-center gap-3 rounded-md border-none p-1.5 text-muted-foreground shadow-none transition-all hover:bg-primary/10 hover:text-primary"
                             size="sm"
