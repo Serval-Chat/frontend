@@ -1975,4 +1975,29 @@ describe('TextParser', (): void => {
             vi.unstubAllEnvs();
         });
     });
+
+    describe('Decoration Parsing', (): void => {
+        it('should parse decoration URLs as decoration nodes in MESSAGE preset', (): void => {
+            const text = 'https://rolling.catfla.re/decorations/123456789012345678';
+            const nodes = parseText(text, ParserPresets.MESSAGE);
+            expect(nodes).toEqual([
+                {
+                    type: 'decoration',
+                    decorationId: '123456789012345678',
+                },
+            ]);
+        });
+
+        it('should NOT embed decoration blocks in REPLY_PREVIEW preset', (): void => {
+            const text = 'https://rolling.catfla.re/decorations/123456789012345678';
+            const nodes = parseText(text, ParserPresets.REPLY_PREVIEW);
+            expect(nodes).toEqual([
+                {
+                    type: 'link',
+                    url: 'https://rolling.catfla.re/decorations/123456789012345678',
+                    text: 'https://rolling.catfla.re/decorations/123456789012345678',
+                },
+            ]);
+        });
+    });
 });

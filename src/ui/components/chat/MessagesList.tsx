@@ -13,6 +13,7 @@ import { useVirtualizer } from '@tanstack/react-virtual';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 
 import type {
+    Channel,
     Role,
     RolePermissions,
     Server,
@@ -23,6 +24,7 @@ import { useAppSelector } from '@/store/hooks';
 import { BlockFlags } from '@/types/blocks';
 import { jumpDebug } from '@/utils/jumpDebug';
 import type { ProcessedChatMessage } from '@/types/chat.ui';
+import { ChannelStartHeader } from '@/ui/components/chat/ChannelStartHeader';
 import { MessageItem } from '@/ui/components/chat/MessageItem';
 import { Button } from '@/ui/components/common/Button';
 import { LoadingSpinner } from '@/ui/components/common/LoadingSpinner';
@@ -56,6 +58,8 @@ export interface MessagesListProps {
     disableGlow?: boolean;
     me?: User;
     serverDetails?: Server;
+    selectedChannel?: Channel;
+    friendUser?: User;
     hasPermission?: (permission: keyof RolePermissions) => boolean;
     isOwner?: boolean;
     fullMemberMap?: Map<string, ServerMember>;
@@ -84,6 +88,8 @@ export const MessagesList = React.memo(
         disableGlow,
         me,
         serverDetails,
+        selectedChannel,
+        friendUser,
         hasPermission,
         isOwner,
         fullMemberMap,
@@ -166,12 +172,13 @@ export const MessagesList = React.memo(
         }, []);
 
         type VirtualItemData =
+            | { type: 'channel-start' }
             | { type: 'message'; message: ProcessedChatMessage }
             | {
-                  type: 'blocked-group';
-                  messages: ProcessedChatMessage[];
-                  id: string;
-              }
+                type: 'blocked-group';
+                messages: ProcessedChatMessage[];
+                id: string;
+            }
             | { type: 'loader-older' }
             | { type: 'loader-newer' }
             | { type: 'spacer' };
@@ -181,6 +188,8 @@ export const MessagesList = React.memo(
 
             if (hasMore) {
                 items.push({ type: 'loader-older' });
+            } else if (selectedChannel || friendUser) {
+                items.push({ type: 'channel-start' });
             }
 
             let currentBlockedGroup: ProcessedChatMessage[] = [];
@@ -226,7 +235,7 @@ export const MessagesList = React.memo(
             items.push({ type: 'spacer' });
 
             return items;
-        }, [messages, blocks, hasMore, hasMoreNewer]);
+        }, [messages, blocks, hasMore, hasMoreNewer, selectedChannel, friendUser]);
 
         const [, startTransitionGroup] = useTransition();
         const virtualItemsRef = useRef(virtualItems);
@@ -272,6 +281,7 @@ export const MessagesList = React.memo(
             estimateSize: useCallback((index: number): number => {
                 const item = virtualItemsRef.current[index];
                 if (!item) return 100;
+                if (item.type === 'channel-start') return 180;
                 if (
                     item.type === 'loader-older' ||
                     item.type === 'loader-newer'
@@ -638,7 +648,7 @@ export const MessagesList = React.memo(
                             const desired = Math.max(
                                 0,
                                 (index / Math.max(count, 1)) * total -
-                                    container.clientHeight / 2,
+                                container.clientHeight / 2,
                             );
                             jumpDebug('settle proportional-fallback', {
                                 index,
@@ -766,8 +776,8 @@ export const MessagesList = React.memo(
                 lastItem.type === 'message'
                     ? lastItem.message.id
                     : lastItem.type === 'blocked-group'
-                      ? lastItem.id
-                      : lastItem.type;
+                        ? lastItem.id
+                        : lastItem.type;
             const newScrollHeight = container.scrollHeight;
 
             // detect the transition out of "viewing a linked/older message"
@@ -989,6 +999,13 @@ export const MessagesList = React.memo(
                                         transform: `translateY(${virtualRow.start}px)`,
                                     }}
                                 >
+                                    {item.type === 'channel-start' ? (
+                                        <ChannelStartHeader
+                                            channel={selectedChannel}
+                                            friendUser={friendUser}
+                                        />
+                                    ) : null}
+
                                     {item.type === 'loader-older' ? (
                                         <Box className="flex justify-center py-4">
                                             {isLoadingMore ? (
@@ -1103,10 +1120,10 @@ export const MessagesList = React.memo(
                                                                 prevMessage={
                                                                     mIdx > 0
                                                                         ? item
-                                                                              .messages[
-                                                                              mIdx -
-                                                                                  1
-                                                                          ]
+                                                                            .messages[
+                                                                        mIdx -
+                                                                        1
+                                                                        ]
                                                                         : undefined
                                                                 }
                                                                 role={msg.role}

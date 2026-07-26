@@ -66,7 +66,7 @@ export const ReplyBanner = ({
                     condenseInvites
                     nodes={parseText(
                         replyingTo.text || '',
-                        ParserPresets.MESSAGE,
+                        ParserPresets.REPLY_PREVIEW,
                     )}
                     size="xs"
                     wrap="nowrap"

@@ -88,6 +88,7 @@ interface ChatMainColumnProps {
     selectedFriendId: string | null;
     isViewingOlderMessages: boolean;
     selectedChannel: Channel | undefined;
+    friendUser: User | undefined;
     chatContainerRef: React.RefObject<HTMLElement | null>;
     messagesListRef: React.RefObject<MessagesListHandle | null>;
     targetMessageId: string | null;
@@ -129,6 +130,7 @@ const ChatMainColumn = ({
     selectedFriendId,
     isViewingOlderMessages,
     selectedChannel,
+    friendUser,
     chatContainerRef,
     messagesListRef,
     targetMessageId,
@@ -207,6 +209,7 @@ const ChatMainColumn = ({
                         disableGlowAndColors={
                             usernameStyle.disableGlowAndColors
                         }
+                        friendUser={friendUser}
                         fullMemberMap={memberMaps.fullMemberMap}
                         hasMore={hasNextPage}
                         hasMoreNewer={isViewingOlderMessages}
@@ -219,6 +222,7 @@ const ChatMainColumn = ({
                         messages={messages}
                         ref={messagesListRef}
                         roleMap={memberMaps.roleMap}
+                        selectedChannel={selectedChannel}
                         serverDetails={serverDetails}
                         userRolesMap={memberMaps.userRolesMap}
                         onAtBottomChange={onAtBottomChange}
@@ -612,6 +616,7 @@ export const MainChat = ({
                     chatContainerRef={chatContainerRef}
                     cooldown={cooldown}
                     fileQueueResult={fileQueueResult}
+                    friendUser={friendUser}
                     hasNextPage={hasNextPage}
                     hasPermission={hasPermission}
                     isAtBottom={isAtBottom}

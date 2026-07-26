@@ -14,6 +14,7 @@ import { ChevronDown, ChevronRight } from 'lucide-react';
 import { useAppSelector } from '@/store/hooks';
 import { BlockFlags } from '@/types/blocks';
 import type { ProcessedChatMessage } from '@/types/chat.ui';
+import { ChannelStartHeader } from '@/ui/components/chat/ChannelStartHeader';
 import { MessageItem } from '@/ui/components/chat/MessageItem';
 import type {
     MessagesListHandle,
@@ -52,6 +53,8 @@ export const MessagesListNative = React.memo(
         disableGlow,
         me,
         serverDetails,
+        selectedChannel,
+        friendUser,
         hasPermission,
         isOwner,
         fullMemberMap,
@@ -130,6 +133,7 @@ export const MessagesListNative = React.memo(
         }, [isLoadingMore]);
 
         type RenderItem =
+            | { type: 'channel-start' }
             | { type: 'message'; message: ProcessedChatMessage }
             | {
                   type: 'blocked-group';
@@ -142,7 +146,11 @@ export const MessagesListNative = React.memo(
 
         const renderItems = useMemo((): RenderItem[] => {
             const items: RenderItem[] = [];
-            if (hasMore) items.push({ type: 'loader-older' });
+            if (hasMore) {
+                items.push({ type: 'loader-older' });
+            } else if (selectedChannel || friendUser) {
+                items.push({ type: 'channel-start' });
+            }
 
             let group: ProcessedChatMessage[] = [];
             const flush = (): void => {
@@ -178,7 +186,7 @@ export const MessagesListNative = React.memo(
             if (hasMoreNewer) items.push({ type: 'loader-newer' });
             items.push({ type: 'spacer' });
             return items;
-        }, [messages, blocks, hasMore, hasMoreNewer]);
+        }, [messages, blocks, hasMore, hasMoreNewer, selectedChannel, friendUser]);
 
         const firstMessageId = useMemo((): string | null => {
             const m = renderItems.find(
@@ -574,6 +582,16 @@ export const MessagesListNative = React.memo(
                         {renderItems.map((item, index) => {
                             const prevItem =
                                 index > 0 ? renderItems[index - 1] : undefined;
+
+                            if (item.type === 'channel-start') {
+                                return (
+                                    <ChannelStartHeader
+                                        channel={selectedChannel}
+                                        friendUser={friendUser}
+                                        key="channel-start"
+                                    />
+                                );
+                            }
 
                             if (item.type === 'loader-older') {
                                 return (
