@@ -45,7 +45,7 @@
     "dompurify": "^3.4.11",
     "email-validator": "^2.0.4",
     "emoji-datasource-apple": "^16.0.0",
-    "framer-motion": "^12.23.26",
+    "framer-motion": "^12.42.2",
     "gif.js": "^0.2.0",
     "gifuct-js": "^2.1.2",
     "idb-keyval": "^6.2.2",

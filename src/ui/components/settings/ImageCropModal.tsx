@@ -96,20 +96,21 @@ export const ImageCropModal = ({
 
     return (
         <Modal
+            mobileFullScreen
             className="w-[90vw] max-w-2xl"
             isOpen={isOpen}
             title={getTitle()}
             onClose={onClose}
         >
-            <div className="flex flex-col gap-6">
+            <div className="flex h-full flex-col gap-6">
                 <ImageCropper
                     aspectRatio={aspectRatio}
-                    className="h-[400px]"
+                    className="min-h-75 flex-1"
                     imageFile={imageFile}
                     onCropChange={setCrop}
                 />
 
-                <div className="flex items-center justify-between text-sm text-muted-foreground">
+                <div className="flex shrink-0 flex-col items-center justify-between gap-3 text-sm text-muted-foreground sm:flex-row">
                     <Text as="p">
                         Drag corners to resize and center to move the crop area.
                     </Text>

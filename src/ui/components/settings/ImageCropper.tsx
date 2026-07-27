@@ -18,6 +18,15 @@ interface ImageCropperProps {
 
 type HandleType = 'nw' | 'n' | 'ne' | 'w' | 'e' | 'sw' | 's' | 'se' | 'move';
 
+// Touch/pen input has much lower precision than a mouse cursor, so both the
+// drawn handle and its hit-test area need to be larger to stay tappable.
+// Computed lazily (never at module scope) so importing this module doesn't
+// touch `window.matchMedia`, which jsdom test environments don't implement.
+const getIsCoarsePointer = (): boolean =>
+    typeof window !== 'undefined' &&
+    typeof window.matchMedia === 'function' &&
+    window.matchMedia('(pointer: coarse)').matches;
+
 const getHandlePositions = (
     selection: CropSelection,
 ): { t: HandleType; x: number; y: number }[] => [
@@ -48,6 +57,7 @@ const drawCropCanvas = (
     image: HTMLImageElement,
     displaySize: { width: number; height: number },
     selection: CropSelection,
+    handleRadius: number,
 ): void => {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
@@ -71,10 +81,9 @@ const drawCropCanvas = (
     ctx.strokeRect(selection.x, selection.y, selection.width, selection.height);
 
     ctx.fillStyle = '#3b82f6';
-    const hs = 8;
     for (const p of getHandlePositions(selection)) {
         ctx.beginPath();
-        ctx.arc(p.x, p.y, hs / 2, 0, Math.PI * 2);
+        ctx.arc(p.x, p.y, handleRadius, 0, Math.PI * 2);
         ctx.fill();
     }
 };
@@ -103,6 +112,9 @@ export const ImageCropper = ({
     });
     const isDraggingRef = useRef(false);
     const [dragType, setDragType] = useState<HandleType | null>(null);
+    const [isCoarsePointer] = useState(getIsCoarsePointer);
+    const handleRadius = isCoarsePointer ? 12 : 4;
+    const handleHitRadius = isCoarsePointer ? 28 : 20;
     const dragStartRef = useRef({
         x: 0,
         y: 0,
@@ -188,57 +200,66 @@ export const ImageCropper = ({
     // Draw canvas
     useEffect((): void => {
         if (!canvasRef.current || !image || displaySize.width === 0) return;
-        drawCropCanvas(canvasRef.current, image, displaySize, selection);
-    }, [image, displaySize, selection]);
+        drawCropCanvas(
+            canvasRef.current,
+            image,
+            displaySize,
+            selection,
+            handleRadius,
+        );
+    }, [image, displaySize, selection, handleRadius]);
 
-    const handleMouseDown = (e: React.MouseEvent): void => {
+    const handlePointerDown = (e: React.PointerEvent): void => {
         const rect = canvasRef.current?.getBoundingClientRect();
         if (!rect) return;
 
-        const mouseX = e.clientX - rect.left;
-        const mouseY = e.clientY - rect.top;
+        const pointerX = e.clientX - rect.left;
+        const pointerY = e.clientY - rect.top;
 
         // Check which handle was hit
-        const hs = 20; // larger hit area for handles
         const handles = getHandlePositions(selection);
 
         const hitHandle = handles.find(
             (h): boolean =>
-                Math.abs(mouseX - h.x) < hs && Math.abs(mouseY - h.y) < hs,
+                Math.abs(pointerX - h.x) < handleHitRadius &&
+                Math.abs(pointerY - h.y) < handleHitRadius,
         );
 
         if (hitHandle) {
             setDragType(hitHandle.t);
         } else if (
-            mouseX >= selection.x &&
-            mouseX <= selection.x + selection.width &&
-            mouseY >= selection.y &&
-            mouseY <= selection.y + selection.height
+            pointerX >= selection.x &&
+            pointerX <= selection.x + selection.width &&
+            pointerY >= selection.y &&
+            pointerY <= selection.y + selection.height
         ) {
             setDragType('move');
         } else {
             return;
         }
 
+        e.preventDefault();
+        canvasRef.current?.setPointerCapture(e.pointerId);
+
         isDraggingRef.current = true;
         dragStartRef.current = {
-            x: mouseX,
-            y: mouseY,
+            x: pointerX,
+            y: pointerY,
             selection: { ...selection },
         };
     };
 
-    const handleMouseMove = (e: React.MouseEvent): void => {
+    const handlePointerMove = (e: React.PointerEvent): void => {
         if (!isDraggingRef.current || !dragType || !image) return;
 
         const rect = canvasRef.current?.getBoundingClientRect();
         if (!rect) return;
 
-        const mouseX = e.clientX - rect.left;
-        const mouseY = e.clientY - rect.top;
+        const pointerX = e.clientX - rect.left;
+        const pointerY = e.clientY - rect.top;
 
-        const dx = mouseX - dragStartRef.current.x;
-        const dy = mouseY - dragStartRef.current.y;
+        const dx = pointerX - dragStartRef.current.x;
+        const dy = pointerY - dragStartRef.current.y;
 
         const nextSel = { ...dragStartRef.current.selection };
 
@@ -327,7 +348,10 @@ export const ImageCropper = ({
         });
     };
 
-    const handleMouseUp = (): void => {
+    const handlePointerUp = (e: React.PointerEvent): void => {
+        if (canvasRef.current?.hasPointerCapture(e.pointerId)) {
+            canvasRef.current.releasePointerCapture(e.pointerId);
+        }
         isDraggingRef.current = false;
         setDragType(null);
     };
@@ -344,7 +368,7 @@ export const ImageCropper = ({
             {image ? (
                 <canvas
                     className={cn(
-                        'cursor-crosshair',
+                        'cursor-crosshair touch-none',
                         dragType === 'move' && 'cursor-move',
                         dragType?.includes('nw') && 'cursor-nw-resize',
                         dragType?.includes('ne') && 'cursor-ne-resize',
@@ -360,10 +384,10 @@ export const ImageCropper = ({
                         width: displaySize.width,
                         height: displaySize.height,
                     }}
-                    onMouseDown={handleMouseDown}
-                    onMouseLeave={handleMouseUp}
-                    onMouseMove={handleMouseMove}
-                    onMouseUp={handleMouseUp}
+                    onPointerCancel={handlePointerUp}
+                    onPointerDown={handlePointerDown}
+                    onPointerMove={handlePointerMove}
+                    onPointerUp={handlePointerUp}
                 />
             ) : (
                 <div className="text-muted-foreground">Loading image...</div>

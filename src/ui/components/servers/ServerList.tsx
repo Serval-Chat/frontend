@@ -287,14 +287,16 @@ export const ServerList = () => {
     }
 
     return (
-        <Reorder.Group
-            axis="y"
-            className="no-scrollbar flex w-full flex-1 flex-col items-center gap-3 overflow-y-auto pt-3"
-            values={items}
-            onReorder={handleReorder}
-        >
-            {renderedItems}
-        </Reorder.Group>
+        <div className="no-scrollbar flex w-full flex-1 flex-col overflow-y-auto">
+            <Reorder.Group
+                axis="y"
+                className="flex w-full flex-col items-center gap-3 pt-3"
+                values={items}
+                onReorder={handleReorder}
+            >
+                {renderedItems}
+            </Reorder.Group>
+        </div>
     );
 };
 
