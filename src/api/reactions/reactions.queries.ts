@@ -6,6 +6,7 @@ import {
 } from '@tanstack/react-query';
 
 import type { ChatMessage } from '@/api/chat/chat.types';
+import { useFrequentlyUsedEmojis } from '@/hooks/useFrequentlyUsedEmojis';
 
 import { reactionsApi } from './reactions.api';
 import type {
@@ -25,6 +26,7 @@ export const useAddReaction = (): UseMutationResult<
     }
 > => {
     const queryClient = useQueryClient();
+    const { recordUsage } = useFrequentlyUsedEmojis();
 
     return useMutation({
         mutationFn: async ({
@@ -47,6 +49,16 @@ export const useAddReaction = (): UseMutationResult<
                 );
             }
             return reactionsApi.addDmReaction(messageId, data);
+        },
+        onMutate: (variables): void => {
+            recordUsage({
+                emoji: variables.data.emoji,
+                emojiType:
+                    variables.data.emojiType === 'custom'
+                        ? 'custom'
+                        : 'unicode',
+                emojiId: variables.data.emojiId,
+            });
         },
         onSuccess: (response, variables): void => {
             const { messageId } = variables;

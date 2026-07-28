@@ -9,10 +9,20 @@ import {
     Trash2,
 } from 'lucide-react';
 
+import type { QuickReactionEmoji } from '@/hooks/useFrequentlyUsedEmojis';
 import type { ProcessedChatMessage } from '@/types/chat.ui';
 import { Button } from '@/ui/components/common/Button';
+import { ParsedUnicodeEmoji } from '@/ui/components/common/ParsedUnicodeEmoji';
+import { Tooltip } from '@/ui/components/common/Tooltip';
 import { Box } from '@/ui/components/layout/Box';
+import { resolveApiUrl } from '@/utils/apiUrl';
 import { cn } from '@/utils/cn';
+import { emojiMap } from '@/utils/emoji';
+
+const quickReactionLabel = (quickReaction: QuickReactionEmoji): string =>
+    quickReaction.emojiType === 'custom'
+        ? `:${quickReaction.name}:`
+        : `:${emojiMap.get(quickReaction.emoji)?.short_name ?? quickReaction.emoji}:`;
 
 interface MessageActionsProps {
     message: ProcessedChatMessage;
@@ -20,6 +30,8 @@ interface MessageActionsProps {
     canDelete: boolean;
     canPin: boolean;
     showPicker: boolean;
+    quickReactions?: QuickReactionEmoji[];
+    onQuickReact?: (emoji: QuickReactionEmoji) => void;
     onReplyToMessage?: (message: ProcessedChatMessage) => void;
     onTogglePicker: () => void;
     onEdit: () => void;
@@ -36,6 +48,8 @@ export const MessageActions = React.memo(
         canDelete,
         canPin,
         showPicker,
+        quickReactions,
+        onQuickReact,
         onReplyToMessage,
         onTogglePicker,
         onEdit,
@@ -44,7 +58,43 @@ export const MessageActions = React.memo(
         onToggleSticky,
         reactRef,
     }: MessageActionsProps) => (
-        <Box className="flex items-center gap-1 rounded border border-white/5 bg-bg-secondary px-1 py-1 shadow-xl max-md:hidden">
+        <Box className="flex items-center gap-1 rounded border border-white/5 bg-background px-1 py-1 shadow-xl max-md:hidden">
+            {quickReactions && quickReactions.length > 0
+                ? quickReactions.map((quickReaction) => (
+                      <Tooltip
+                          content={quickReactionLabel(quickReaction)}
+                          key={quickReaction.key}
+                          position="top"
+                      >
+                          <Button
+                              className="flex h-9 w-9 shrink-0 items-center justify-center rounded p-1 text-muted-foreground transition-colors hover:bg-white/5"
+                              size="sm"
+                              variant="ghost"
+                              onClick={(): void => {
+                                  onQuickReact?.(quickReaction);
+                              }}
+                          >
+                              {quickReaction.emojiType === 'custom' ? (
+                                  <img
+                                      alt={quickReaction.name}
+                                      className="h-7 w-7 object-contain"
+                                      src={
+                                          resolveApiUrl(
+                                              quickReaction.imageUrl,
+                                          ) || ''
+                                      }
+                                  />
+                              ) : (
+                                  <ParsedUnicodeEmoji
+                                      className="top-0! h-7 w-7"
+                                      content={quickReaction.emoji}
+                                  />
+                              )}
+                          </Button>
+                      </Tooltip>
+                  ))
+                : null}
+
             {onReplyToMessage ? (
                 <Button
                     className="h-8 w-8 rounded p-1.5 text-muted-foreground transition-colors hover:bg-white/5 hover:text-foreground"

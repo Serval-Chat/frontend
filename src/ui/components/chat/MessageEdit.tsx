@@ -38,12 +38,14 @@ import {
 import { useMe } from '@/api/users/users.queries';
 import type { User } from '@/api/users/users.types';
 import { useCustomEmojis } from '@/hooks/useCustomEmojis';
+import { useFrequentlyUsedEmojis } from '@/hooks/useFrequentlyUsedEmojis';
 import { useKeybindManager } from '@/keybinds/useKeybindManager';
 import {
     $createChipNode,
     ChipNode,
 } from '@/ui/components/chat/lexical/ChipNode';
 import { Button } from '@/ui/components/common/Button';
+import { isCustomEmojiEntry } from '@/ui/components/emoji/EmojiPicker';
 import { Box } from '@/ui/components/layout/Box';
 import { cn } from '@/utils/cn';
 
@@ -181,6 +183,14 @@ export const MessageEdit = ({
     const editChannelMessage = useEditChannelMessage();
     const editUserMessage = useEditUserMessage();
     const { customCategories } = useCustomEmojis({ enabled: true });
+    const { frequentlyUsedCategory, recordUsage } = useFrequentlyUsedEmojis();
+    const pickerCategories = useMemo(
+        () =>
+            frequentlyUsedCategory
+                ? [...customCategories, frequentlyUsedCategory]
+                : customCategories,
+        [customCategories, frequentlyUsedCategory],
+    );
     const { data: me } = useMe();
     const keybindManager = useKeybindManager(me?.settings?.keybinds);
 
@@ -201,7 +211,7 @@ export const MessageEdit = ({
     const allServerEmojis = React.useMemo(
         () =>
             customCategories.flatMap((cat) =>
-                cat.emojis.map((e) => ({
+                cat.emojis.filter(isCustomEmojiEntry).map((e) => ({
                     id: e.id,
                     name: e.name,
                     imageUrl: e.url,
@@ -273,7 +283,8 @@ export const MessageEdit = ({
             editorInstanceRef.current.focus();
         }
         setShowEmojiPicker(false);
-    }, []);
+        recordUsage({ emoji, emojiType: 'unicode' });
+    }, [recordUsage]);
 
     const handleCustomEmojiSelect = useCallback(
         (emoji: { id: string; name: string }): void => {
@@ -296,8 +307,13 @@ export const MessageEdit = ({
                 editorInstanceRef.current.focus();
             }
             setShowEmojiPicker(false);
+            recordUsage({
+                emoji: emoji.name,
+                emojiType: 'custom',
+                emojiId: emoji.id,
+            });
         },
-        [],
+        [recordUsage],
     );
 
     const handleSubmit = (overrideText?: string): void => {
@@ -436,7 +452,7 @@ export const MessageEdit = ({
 
             {showEmojiPicker ? (
                 <MessageEditEmojiPopup
-                    customCategories={customCategories}
+                    customCategories={pickerCategories}
                     pickerRef={emojiPickerRef}
                     onCustomEmojiSelect={handleCustomEmojiSelect}
                     onEmojiSelect={handleEmojiSelect}

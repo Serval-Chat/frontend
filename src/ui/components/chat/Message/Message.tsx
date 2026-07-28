@@ -18,6 +18,8 @@ import {
     useRemoveRoleFromMember,
 } from '@/api/servers/servers.queries';
 import { useCustomEmojis } from '@/hooks/useCustomEmojis';
+import type { QuickReactionEmoji } from '@/hooks/useFrequentlyUsedEmojis';
+import { useFrequentlyUsedEmojis } from '@/hooks/useFrequentlyUsedEmojis';
 import { useSmartPosition } from '@/hooks/useSmartPosition';
 import { useAppSelector } from '@/store/hooks';
 import { InteractionHeader } from '@/ui/components/chat/InteractionHeader';
@@ -116,6 +118,15 @@ export const Message = React.memo(
         const { mutate: sendFriendRequest } = useSendFriendRequest();
         const { mutate: removeFriend } = useRemoveFriend();
         const { customCategories } = useCustomEmojis({ enabled: showPicker });
+        const { quickReactions, frequentlyUsedCategory } =
+            useFrequentlyUsedEmojis();
+        const pickerCategories = React.useMemo(
+            () =>
+                frequentlyUsedCategory
+                    ? [...customCategories, frequentlyUsedCategory]
+                    : customCategories,
+            [customCategories, frequentlyUsedCategory],
+        );
 
         const { mutate: addRole } = useAddRoleToMember(message.serverId || '');
         const { mutate: removeRole } = useRemoveRoleFromMember(
@@ -156,6 +167,25 @@ export const Message = React.memo(
                     },
                 });
                 setShowPicker(false);
+            },
+            [addReaction, message.id, message.serverId, message.channelId],
+        );
+
+        const handleQuickReact = React.useCallback(
+            (emoji: QuickReactionEmoji): void => {
+                addReaction({
+                    messageId: message.id,
+                    serverId: message.serverId,
+                    channelId: message.channelId,
+                    data:
+                        emoji.emojiType === 'custom'
+                            ? {
+                                  emoji: emoji.name ?? emoji.emoji,
+                                  emojiType: 'custom',
+                                  emojiId: emoji.emojiId,
+                              }
+                            : { emoji: emoji.emoji, emojiType: 'unicode' },
+                });
             },
             [addReaction, message.id, message.serverId, message.channelId],
         );
@@ -535,10 +565,12 @@ export const Message = React.memo(
                             canEdit={canEdit}
                             canPin={canPin}
                             message={message}
+                            quickReactions={quickReactions}
                             reactRef={reactRef}
                             showPicker={showPicker}
                             onDelete={handleDelete}
                             onEdit={handleEdit}
+                            onQuickReact={handleQuickReact}
                             onReplyToMessage={onReplyToMessage}
                             onTogglePicker={handleTogglePicker}
                             onTogglePin={handleTogglePin}
@@ -547,7 +579,7 @@ export const Message = React.memo(
 
                         <MessageEmojiPicker
                             coords={pickerCoords}
-                            customCategories={customCategories}
+                            customCategories={pickerCategories}
                             isMobile={isMobile}
                             isOpen={showPicker}
                             pickerRef={pickerRef}

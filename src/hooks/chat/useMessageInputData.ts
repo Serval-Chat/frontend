@@ -21,6 +21,7 @@ import {
 } from '@/api/servers/servers.queries';
 import type { User } from '@/api/users/users.types';
 import { useCustomEmojis } from '@/hooks/useCustomEmojis';
+import { isCustomEmojiEntry } from '@/ui/components/emoji/EmojiPicker';
 import type { StickerCategory } from '@/ui/components/emoji/StickerPicker';
 
 interface UseMessageInputDataArgs {
@@ -106,7 +107,7 @@ export const useMessageInputData = ({
     const allServerEmojis = useMemo(
         () =>
             customCategories.flatMap((cat) =>
-                cat.emojis.map((e) => ({
+                cat.emojis.filter(isCustomEmojiEntry).map((e) => ({
                     id: e.id,
                     name: e.name,
                     imageUrl: e.url,

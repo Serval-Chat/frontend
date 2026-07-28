@@ -26,6 +26,14 @@ vi.mock('@/hooks/useCustomEmojis', () => ({
     useCustomEmojis: () => ({ customCategories: [] }),
 }));
 
+vi.mock('@/hooks/useFrequentlyUsedEmojis', () => ({
+    useFrequentlyUsedEmojis: () => ({
+        quickReactions: [],
+        frequentlyUsedCategory: null,
+        recordUsage: vi.fn(),
+    }),
+}));
+
 vi.mock('@/keybinds/useKeybindManager', () => ({
     useKeybindManager: () => ({
         matches: vi.fn(),

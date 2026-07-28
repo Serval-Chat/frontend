@@ -14,6 +14,7 @@ import { Heading } from '@/ui/components/common/Heading';
 import { Input } from '@/ui/components/common/Input';
 import { SettingsFloatingBar } from '@/ui/components/common/SettingsFloatingBar';
 import { Text } from '@/ui/components/common/Text';
+import { isCustomEmojiEntry } from '@/ui/components/emoji/EmojiPicker';
 import { UserProfileCard } from '@/ui/components/profile/UserProfileCard';
 import { mergeReducer } from '@/utils/mergeReducer';
 
@@ -63,7 +64,7 @@ export const AccountProfileSection = ({
     const allServerEmojis = useMemo(
         () =>
             customCategories.flatMap((cat) =>
-                cat.emojis.map((e) => ({
+                cat.emojis.filter(isCustomEmojiEntry).map((e) => ({
                     id: e.id,
                     name: e.name,
                     imageUrl: e.url,

@@ -39,6 +39,15 @@ vi.mock('@/ui/components/emoji/StickerPicker', () => ({
     StickerPicker: () => <div>sticker-picker</div>,
 }));
 
+const recordUsageMock = vi.fn();
+vi.mock('@/hooks/useFrequentlyUsedEmojis', () => ({
+    useFrequentlyUsedEmojis: () => ({
+        quickReactions: [],
+        frequentlyUsedCategory: null,
+        recordUsage: recordUsageMock,
+    }),
+}));
+
 const $createChipNodeMock = vi.fn((..._args: unknown[]) => ({ __type: 'chip-mock' }));
 vi.mock('@/ui/components/chat/lexical/ChipNode', () => ({
     $createChipNode: (type: unknown, data: unknown) => $createChipNodeMock(type, data),
@@ -119,6 +128,10 @@ describe('MessageComposerPickers – emoji insertion focus bug', () => {
 
         expect($createChipNodeMock).toHaveBeenCalledWith('unicode-emoji', { id: '😀' });
         expect(mockInsertNodes).toHaveBeenCalled();
+        expect(recordUsageMock).toHaveBeenCalledWith({
+            emoji: '😀',
+            emojiType: 'unicode',
+        });
     });
 
     it('inserts a unicode emoji when the editor was focused first (happy path)', async () => {
@@ -149,6 +162,11 @@ describe('MessageComposerPickers – emoji insertion focus bug', () => {
             imageUrl: '/parrot.gif',
         });
         expect(mockInsertNodes).toHaveBeenCalled();
+        expect(recordUsageMock).toHaveBeenCalledWith({
+            emoji: 'parrot',
+            emojiType: 'custom',
+            emojiId: 'custom1',
+        });
     });
 
     it('inserts a custom emoji when the editor was focused first (happy path)', async () => {

@@ -26,12 +26,23 @@ import {
     groupedEmojis,
 } from '@/utils/emoji';
 
+export interface CustomEmojiEntry {
+    id: string;
+    name: string;
+    url: string;
+    serverId?: string;
+}
+
 export interface CustomEmojiCategory {
     id: string;
     name: string;
     icon?: string;
-    emojis: { id: string; name: string; url: string; serverId?: string }[];
+    emojis: (EmojiData | CustomEmojiEntry)[];
 }
+
+export const isCustomEmojiEntry = (
+    emoji: EmojiData | CustomEmojiEntry,
+): emoji is CustomEmojiEntry => 'id' in emoji && 'url' in emoji;
 
 interface EmojiPickerProps {
     onEmojiSelect: (emoji: string) => void;

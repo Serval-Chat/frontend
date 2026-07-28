@@ -9,6 +9,7 @@ import {
 } from '@/api/reactions/reactions.queries';
 import { useMe } from '@/api/users/users.queries';
 import { useCustomEmojis } from '@/hooks/useCustomEmojis';
+import { useFrequentlyUsedEmojis } from '@/hooks/useFrequentlyUsedEmojis';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useAppSelector } from '@/store/hooks';
 import { BlockFlags } from '@/types/blocks';
@@ -49,6 +50,14 @@ export const Reactions = React.memo(
 
         const pickerRef = React.useRef<HTMLDivElement>(null);
         const { customCategories } = useCustomEmojis({ enabled: showPicker });
+        const { frequentlyUsedCategory } = useFrequentlyUsedEmojis();
+        const pickerCategories = React.useMemo(
+            () =>
+                frequentlyUsedCategory
+                    ? [...customCategories, frequentlyUsedCategory]
+                    : customCategories,
+            [customCategories, frequentlyUsedCategory],
+        );
         const { hasPermission } = usePermissions(
             serverId ?? null,
             channelId ?? null,
@@ -174,7 +183,7 @@ export const Reactions = React.memo(
                     const reactionElement = (
                         <Box
                             className={cn(
-                                'flex cursor-pointer items-center gap-1.5 rounded-md border px-1.5 py-0.5 transition-all select-none',
+                                'flex cursor-pointer items-center gap-1.5 rounded-md border px-2 py-1 transition-all select-none',
                                 hasReacted
                                     ? 'border-primary/30 bg-primary/10 text-primary'
                                     : 'border-border-subtle bg-bg-subtle text-muted-foreground hover:border-border-subtle/80 hover:bg-bg-subtle-hover',
@@ -193,7 +202,7 @@ export const Reactions = React.memo(
                                     reaction.emojiUrl ? (
                                         <img
                                             alt={reaction.emoji}
-                                            className="inline-block h-5 w-5 cursor-pointer object-contain align-middle"
+                                            className="inline-block h-6 w-6 cursor-pointer object-contain align-middle"
                                             src={
                                                 resolveApiUrl(
                                                     reaction.emojiUrl,
@@ -206,18 +215,18 @@ export const Reactions = React.memo(
                                         />
                                     ) : (
                                         <ParsedEmoji
-                                            className="inline-block h-5 w-5 align-middle"
+                                            className="inline-block h-6 w-6 align-middle"
                                             emojiId={reaction.emojiId}
                                         />
                                     )
                                 ) : (
                                     <ParsedUnicodeEmoji
-                                        className="!top-0 h-5 w-5"
+                                        className="!top-0 h-6 w-6"
                                         content={reaction.emoji}
                                     />
                                 )}
                             </Text>
-                            <Text className="font-semibold" size="xs">
+                            <Text className="font-semibold" size="sm">
                                 {reaction.count}
                             </Text>
                         </Box>
@@ -268,7 +277,7 @@ export const Reactions = React.memo(
 
                 <Box className="relative h-full">
                     <Button
-                        className="h-full min-h-[24px] border border-border-subtle bg-bg-subtle text-muted-foreground hover:border-border-subtle/80 hover:bg-bg-subtle-hover"
+                        className="h-full min-h-[32px] border border-border-subtle bg-bg-subtle text-muted-foreground hover:border-border-subtle/80 hover:bg-bg-subtle-hover"
                         size="sm"
                         title="Add Reaction"
                         variant="ghost"
@@ -276,7 +285,7 @@ export const Reactions = React.memo(
                             setShowPicker(!showPicker);
                         }}
                     >
-                        <SmilePlus size={16} />
+                        <SmilePlus size={18} />
                     </Button>
 
                     {showPicker ? (
@@ -285,7 +294,7 @@ export const Reactions = React.memo(
                             ref={pickerRef}
                         >
                             <EmojiPicker
-                                customCategories={customCategories}
+                                customCategories={pickerCategories}
                                 onCustomEmojiSelect={handleCustomEmojiSelect}
                                 onEmojiSelect={handleEmojiSelect}
                             />

@@ -10,6 +10,8 @@ import {
     FRIEND_REQUESTS_QUERY_KEY,
 } from '@/api/friends/friends.queries';
 import type { Friend } from '@/api/friends/friends.types';
+import { frequentlyUsedEmojisKeys } from '@/api/frequentlyUsedEmojis/frequentlyUsedEmojis.queries';
+import type { FrequentlyUsedEmojiEntry } from '@/api/frequentlyUsedEmojis/frequentlyUsedEmojis.types';
 import { COMMANDS_QUERY_KEYS } from '@/api/interactions/interactions.queries';
 import type {
     PingExportMessage,
@@ -937,6 +939,7 @@ export const setupGlobalWsHandlers = (
             settings?: UserSettings;
             activeMute?: User['activeMute'];
             decorationId?: string | null;
+            frequentlyUsedEmojis?: FrequentlyUsedEmojiEntry[];
         }>(WsEvents.USER_UPDATED, (payload): void => {
             if (payload.userId === currentUser?.id) {
                 queryClient.setQueryData<User>(['me'], (old) => {
@@ -974,6 +977,12 @@ export const setupGlobalWsHandlers = (
                     void queryClient.invalidateQueries({
                         queryKey: ['me'],
                     });
+                }
+                if (payload.frequentlyUsedEmojis !== undefined) {
+                    queryClient.setQueryData(
+                        frequentlyUsedEmojisKeys.all,
+                        payload.frequentlyUsedEmojis,
+                    );
                 }
                 const updatedMe = queryClient.getQueryData<User>(['me']);
                 syncSoundCache(updatedMe);

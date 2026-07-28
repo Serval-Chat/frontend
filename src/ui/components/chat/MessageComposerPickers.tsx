@@ -1,8 +1,9 @@
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback, useMemo, useRef } from 'react';
 
 import { $getRoot, $getSelection, $isRangeSelection, type LexicalEditor } from 'lexical';
 import { useClickAway } from 'react-use';
 
+import { useFrequentlyUsedEmojis } from '@/hooks/useFrequentlyUsedEmojis';
 import { $createChipNode } from '@/ui/components/chat/lexical/ChipNode';
 import { EmojiPicker, type CustomEmojiCategory } from '@/ui/components/emoji/EmojiPicker';
 import { StickerPicker, type StickerCategory } from '@/ui/components/emoji/StickerPicker';
@@ -29,6 +30,14 @@ export const MessageComposerPickers = ({
     onStickerSelected,
 }: MessageComposerPickersProps): React.ReactNode => {
     const pickerRef = useRef<HTMLDivElement>(null);
+    const { frequentlyUsedCategory, recordUsage } = useFrequentlyUsedEmojis();
+    const pickerCategories = useMemo(
+        () =>
+            frequentlyUsedCategory
+                ? [...customCategories, frequentlyUsedCategory]
+                : customCategories,
+        [customCategories, frequentlyUsedCategory],
+    );
 
     useClickAway(pickerRef, onClickAway);
 
@@ -49,8 +58,13 @@ export const MessageComposerPickers = ({
                 }
             });
             editor?.focus();
+            recordUsage({
+                emoji: emoji.name,
+                emojiType: 'custom',
+                emojiId: emoji.id,
+            });
         },
-        [editor],
+        [editor, recordUsage],
     );
 
     const handleEmojiSelect = useCallback(
@@ -67,8 +81,9 @@ export const MessageComposerPickers = ({
                 }
             });
             editor?.focus();
+            recordUsage({ emoji, emojiType: 'unicode' });
         },
-        [editor],
+        [editor, recordUsage],
     );
 
     const handleStickerSelect = useCallback(
@@ -95,7 +110,7 @@ export const MessageComposerPickers = ({
                     }
                 >
                     <EmojiPicker
-                        customCategories={customCategories}
+                        customCategories={pickerCategories}
                         onCustomEmojiSelect={handleCustomEmojiSelect}
                         onEmojiSelect={handleEmojiSelect}
                     />
