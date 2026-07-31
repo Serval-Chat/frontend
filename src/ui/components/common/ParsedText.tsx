@@ -590,7 +590,12 @@ export const ParsedText = React.memo<ParsedTextProps>(
 
                         case 'link': {
                             return (
-                                <Link href={node.url} key={idx} size={size}>
+                                <Link
+                                    href={node.url}
+                                    key={idx}
+                                    size={size}
+                                    variant={variant === 'danger' ? 'danger' : undefined}
+                                >
                                     {typeof node.text === 'string' ? (
                                         node.text || node.url
                                     ) : node.text ? (
@@ -758,7 +763,12 @@ export const ParsedText = React.memo<ParsedTextProps>(
                         case 'invite': {
                             if (condenseInvites) {
                                 return (
-                                    <Link href={node.url} key={idx} size={size}>
+                                    <Link
+                                        href={node.url}
+                                        key={idx}
+                                        size={size}
+                                        variant={variant === 'danger' ? 'danger' : undefined}
+                                    >
                                         {node.url}
                                     </Link>
                                 );

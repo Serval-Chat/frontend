@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
+import type { CSSProperties } from 'react';
 
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 
+import { colors } from '@/ui/theme';
 import { cn } from '@/utils/cn';
 
 import { ConfirmLinkModal } from './ConfirmLinkModal';
@@ -18,12 +20,15 @@ const sizeClasses: Record<LinkSize, string> = {
     '2xl': 'text-2xl leading-normal',
 };
 
+export type LinkVariant = 'default' | 'danger';
+
 export interface LinkProps extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
     href?: string;
     to?: string;
     children: React.ReactNode;
     external?: boolean;
     size?: LinkSize;
+    variant?: LinkVariant;
 }
 
 /**
@@ -36,7 +41,9 @@ export const Link = ({
     className,
     external,
     size,
+    variant,
     onClick,
+    style,
     ...props
 }: LinkProps) => {
     const sizeClass = size ? sizeClasses[size] : undefined;
@@ -46,11 +53,18 @@ export const Link = ({
     const navigate = useNavigate();
 
     const baseClass = 'text-primary hover:underline transition-all text-base';
+    // Inline color wins over the text-primary class regardless of specificity,
+    // so danger-variant links stay visually consistent with deleted-message text.
+    const variantStyle: CSSProperties | undefined =
+        variant === 'danger' ? { color: colors.danger } : undefined;
+    const mergedStyle: CSSProperties | undefined =
+        variantStyle || style ? { ...variantStyle, ...style } : undefined;
 
     if (isInternal) {
         return (
             <RouterLink
                 className={cn(baseClass, sizeClass, className)}
+                style={mergedStyle}
                 to={to}
                 onClick={onClick}
                 // eslint-disable-next-line react/jsx-props-no-spreading
@@ -121,6 +135,7 @@ export const Link = ({
                 className={cn(baseClass, sizeClass, className)}
                 href={targetUrl}
                 rel={isExternal ? 'noopener noreferrer' : undefined}
+                style={mergedStyle}
                 target={isExternal ? '_blank' : undefined}
                 onClick={handleClick}
                 {...props}
