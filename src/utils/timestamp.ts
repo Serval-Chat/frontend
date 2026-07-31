@@ -61,6 +61,44 @@ export function formatDate(date: string | Date): string {
     });
 }
 
+export function isSameDay(a: string | Date, b: string | Date): boolean {
+    const d1 = new Date(a);
+    const d2 = new Date(b);
+    return (
+        d1.getFullYear() === d2.getFullYear() &&
+        d1.getMonth() === d2.getMonth() &&
+        d1.getDate() === d2.getDate()
+    );
+}
+
+export function formatDateSeparator(date: string | Date): string {
+    const messageDate = new Date(date);
+    const now = new Date();
+
+    const msgDay = new Date(messageDate);
+    msgDay.setHours(0, 0, 0, 0);
+    const currentDay = new Date(now);
+    currentDay.setHours(0, 0, 0, 0);
+
+    const diffTime = currentDay.getTime() - msgDay.getTime();
+    const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 0) return 'Today';
+    if (diffDays === 1) return 'Yesterday';
+
+    if (diffDays < 7) {
+        return messageDate.toLocaleDateString(APP_LOCALE, {
+            weekday: 'long',
+        });
+    }
+
+    return messageDate.toLocaleDateString(APP_LOCALE, {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+    });
+}
+
 interface Message {
     senderId?: string;
     user?: {

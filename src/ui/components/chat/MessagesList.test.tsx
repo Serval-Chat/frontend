@@ -1,6 +1,6 @@
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { fireEvent, render } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import type { ProcessedChatMessage } from '@/types/chat.ui';
@@ -455,5 +455,58 @@ describe('MessagesList Scroll Behavior', (): void => {
         );
 
         expect(handleLoadMore).toHaveBeenCalled();
+    });
+
+    describe('date separators', (): void => {
+        afterEach((): void => {
+            vi.useRealTimers();
+        });
+
+        it("shows a date separator when the day changes, labeled with the second message's day", (): void => {
+            vi.setSystemTime(new Date('2024-03-20T12:00:00Z'));
+
+            const messages: ProcessedChatMessage[] = [
+                {
+                    ...mockMessages[0]!,
+                    id: 'day1-msg',
+                    createdAt: '2024-03-18T12:00:00Z',
+                },
+                {
+                    ...mockMessages[0]!,
+                    id: 'day2-msg',
+                    createdAt: '2024-03-19T12:00:00Z',
+                },
+            ];
+
+            const { getByText } = render(
+                <MessagesList hasMore={false} messages={messages} />,
+            );
+
+            expect(getByText('Yesterday')).toBeInTheDocument();
+        });
+
+        it('does not show a date separator for messages on the same day', (): void => {
+            vi.setSystemTime(new Date('2024-03-20T12:00:00Z'));
+
+            const messages: ProcessedChatMessage[] = [
+                {
+                    ...mockMessages[0]!,
+                    id: 'a',
+                    createdAt: '2024-03-20T09:00:00Z',
+                },
+                {
+                    ...mockMessages[0]!,
+                    id: 'b',
+                    createdAt: '2024-03-20T15:00:00Z',
+                },
+            ];
+
+            const { queryByText } = render(
+                <MessagesList hasMore={false} messages={messages} />,
+            );
+
+            expect(queryByText('Today')).not.toBeInTheDocument();
+            expect(queryByText('Yesterday')).not.toBeInTheDocument();
+        });
     });
 });

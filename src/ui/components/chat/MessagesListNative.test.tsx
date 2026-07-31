@@ -1,5 +1,5 @@
 import { render } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { useAppSelector } from '@/store/hooks';
 import type { ProcessedChatMessage } from '@/types/chat.ui';
@@ -93,5 +93,62 @@ describe('MessagesListNative', () => {
         expect(scroller.scrollTop).toBe(150);
 
         vi.restoreAllMocks();
+    });
+
+    describe('date separators', (): void => {
+        afterEach((): void => {
+            vi.useRealTimers();
+        });
+
+        it("shows a date separator when the day changes, labeled with the second message's day", (): void => {
+            vi.setSystemTime(new Date('2024-03-20T12:00:00Z'));
+
+            const messages = [
+                {
+                    id: 'day1-msg',
+                    text: 'Hello',
+                    senderId: 'u1',
+                    createdAt: '2024-03-18T12:00:00Z',
+                },
+                {
+                    id: 'day2-msg',
+                    text: 'World',
+                    senderId: 'u2',
+                    createdAt: '2024-03-19T12:00:00Z',
+                },
+            ] as unknown as ProcessedChatMessage[];
+
+            const { getByText } = render(
+                <MessagesListNative hasMore={false} messages={messages} />,
+            );
+
+            expect(getByText('Yesterday')).toBeInTheDocument();
+        });
+
+        it('does not show a date separator for messages on the same day', (): void => {
+            vi.setSystemTime(new Date('2024-03-20T12:00:00Z'));
+
+            const messages = [
+                {
+                    id: 'a',
+                    text: 'Hello',
+                    senderId: 'u1',
+                    createdAt: '2024-03-20T09:00:00Z',
+                },
+                {
+                    id: 'b',
+                    text: 'World',
+                    senderId: 'u2',
+                    createdAt: '2024-03-20T15:00:00Z',
+                },
+            ] as unknown as ProcessedChatMessage[];
+
+            const { queryByText } = render(
+                <MessagesListNative hasMore={false} messages={messages} />,
+            );
+
+            expect(queryByText('Today')).not.toBeInTheDocument();
+            expect(queryByText('Yesterday')).not.toBeInTheDocument();
+        });
     });
 });

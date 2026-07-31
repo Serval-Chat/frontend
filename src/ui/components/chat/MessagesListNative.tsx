@@ -21,11 +21,13 @@ import type {
     MessagesListProps,
 } from '@/ui/components/chat/MessagesList';
 import { Button } from '@/ui/components/common/Button';
+import { Divider } from '@/ui/components/common/Divider';
 import { LoadingSpinner } from '@/ui/components/common/LoadingSpinner';
 import { Text } from '@/ui/components/common/Text';
 import { Box } from '@/ui/components/layout/Box';
 import { VerticalSpacer } from '@/ui/components/layout/VerticalSpacer';
 import { jumpDebug } from '@/utils/jumpDebug';
+import { formatDateSeparator, isSameDay } from '@/utils/timestamp';
 
 import { ChatSkeleton } from './ChatSkeleton';
 
@@ -140,6 +142,7 @@ export const MessagesListNative = React.memo(
                   messages: ProcessedChatMessage[];
                   id: string;
               }
+            | { type: 'date-separator'; date: string; id: string }
             | { type: 'loader-older' }
             | { type: 'loader-newer' }
             | { type: 'spacer' };
@@ -153,6 +156,7 @@ export const MessagesListNative = React.memo(
             }
 
             let group: ProcessedChatMessage[] = [];
+            let prevMsg: ProcessedChatMessage | undefined;
             const flush = (): void => {
                 if (group.length === 0) return;
                 items.push({
@@ -178,8 +182,17 @@ export const MessagesListNative = React.memo(
                     group.push(msg);
                 } else {
                     flush();
+                    if (prevMsg && !isSameDay(prevMsg.createdAt, msg.createdAt)) {
+                        items.push({
+                            type: 'date-separator',
+                            date: msg.createdAt,
+                            id: `date-${msg.id}`,
+                        });
+                    }
                     items.push({ type: 'message', message: msg });
                 }
+
+                prevMsg = msg;
             }
             flush();
 
@@ -611,6 +624,19 @@ export const MessagesListNative = React.memo(
                                                 Load older messages
                                             </Button>
                                         )}
+                                    </Box>
+                                );
+                            }
+
+                            if (item.type === 'date-separator') {
+                                return (
+                                    <Box className="px-4 py-2" key={item.id}>
+                                        <Divider
+                                            text={formatDateSeparator(
+                                                item.date,
+                                            )}
+                                            variant="line"
+                                        />
                                     </Box>
                                 );
                             }

@@ -1,6 +1,11 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import { formatTimestamp, shouldGroupMessages } from './timestamp';
+import {
+    formatDateSeparator,
+    formatTimestamp,
+    isSameDay,
+    shouldGroupMessages,
+} from './timestamp';
 
 describe('timestamp utils', (): void => {
     describe('formatTimestamp', (): void => {
@@ -62,6 +67,66 @@ describe('timestamp utils', (): void => {
             };
             const msg2 = { user: userA, createdAt: '2024-03-20T12:01:00Z' };
             expect(shouldGroupMessages(msg1, msg2)).toBe(true);
+        });
+    });
+
+    describe('isSameDay', (): void => {
+        it('returns true for timestamps on the same calendar day', (): void => {
+            expect(
+                isSameDay(
+                    '2024-03-20T09:00:00Z',
+                    '2024-03-20T15:00:00Z',
+                ),
+            ).toBe(true);
+        });
+
+        it('returns false for timestamps on different calendar days', (): void => {
+            expect(
+                isSameDay(
+                    '2024-03-20T12:00:00Z',
+                    '2024-03-21T12:00:00Z',
+                ),
+            ).toBe(false);
+        });
+    });
+
+    describe('formatDateSeparator', (): void => {
+        const now = new Date('2024-03-20T12:00:00Z');
+
+        it('formats today as "Today"', (): void => {
+            vi.setSystemTime(now);
+            expect(formatDateSeparator('2024-03-20T10:30:00Z')).toBe(
+                'Today',
+            );
+        });
+
+        it('formats yesterday as "Yesterday"', (): void => {
+            vi.setSystemTime(now);
+            expect(formatDateSeparator('2024-03-19T10:30:00Z')).toBe(
+                'Yesterday',
+            );
+        });
+
+        it('formats a few days ago as the weekday name', (): void => {
+            vi.setSystemTime(now);
+            // 2024-03-17 is a Sunday
+            expect(formatDateSeparator('2024-03-17T10:30:00Z')).toBe(
+                'Sunday',
+            );
+        });
+
+        it('always includes the year for dates 7+ days old, even in the current year', (): void => {
+            vi.setSystemTime(now);
+            expect(formatDateSeparator('2024-02-01T10:30:00Z')).toBe(
+                'Feb 1, 2024',
+            );
+        });
+
+        it('includes the year for dates from a previous year', (): void => {
+            vi.setSystemTime(now);
+            expect(formatDateSeparator('2023-03-20T10:30:00Z')).toBe(
+                'Mar 20, 2023',
+            );
         });
     });
 });

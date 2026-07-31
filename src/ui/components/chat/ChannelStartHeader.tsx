@@ -2,6 +2,7 @@ import React from 'react';
 
 import type { Channel } from '@/api/servers/servers.types';
 import type { User } from '@/api/users/users.types';
+import { Divider } from '@/ui/components/common/Divider';
 import { Text } from '@/ui/components/common/Text';
 import { UserProfilePicture } from '@/ui/components/common/UserProfilePicture';
 import { Box } from '@/ui/components/layout/Box';
@@ -45,7 +46,7 @@ export const ChannelStartHeader = ({
                     </span>
                     .
                 </Text>
-                <hr className="mt-4 w-full border-neutral-600/50" />
+                <Divider className="mt-4" variant="line" />
             </Box>
         );
     }
@@ -81,7 +82,7 @@ export const ChannelStartHeader = ({
                         {channel.description}
                     </Box>
                 ) : null}
-                <hr className="mt-4 w-full border-neutral-600/50" />
+                <Divider className="mt-4" variant="line" />
             </Box>
         );
     }

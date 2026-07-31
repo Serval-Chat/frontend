@@ -27,10 +27,12 @@ import type { ProcessedChatMessage } from '@/types/chat.ui';
 import { ChannelStartHeader } from '@/ui/components/chat/ChannelStartHeader';
 import { MessageItem } from '@/ui/components/chat/MessageItem';
 import { Button } from '@/ui/components/common/Button';
+import { Divider } from '@/ui/components/common/Divider';
 import { LoadingSpinner } from '@/ui/components/common/LoadingSpinner';
 import { Text } from '@/ui/components/common/Text';
 import { Box } from '@/ui/components/layout/Box';
 import { VerticalSpacer } from '@/ui/components/layout/VerticalSpacer';
+import { formatDateSeparator, isSameDay } from '@/utils/timestamp';
 
 import { ChatSkeleton } from './ChatSkeleton';
 
@@ -179,6 +181,7 @@ export const MessagesList = React.memo(
                 messages: ProcessedChatMessage[];
                 id: string;
             }
+            | { type: 'date-separator'; date: string; id: string }
             | { type: 'loader-older' }
             | { type: 'loader-newer' }
             | { type: 'spacer' };
@@ -193,6 +196,7 @@ export const MessagesList = React.memo(
             }
 
             let currentBlockedGroup: ProcessedChatMessage[] = [];
+            let prevMsg: ProcessedChatMessage | undefined;
 
             const flushBlockedGroup = (): void => {
                 if (currentBlockedGroup.length === 0) return;
@@ -222,8 +226,17 @@ export const MessagesList = React.memo(
                     currentBlockedGroup.push(msg);
                 } else {
                     flushBlockedGroup();
+                    if (prevMsg && !isSameDay(prevMsg.createdAt, msg.createdAt)) {
+                        items.push({
+                            type: 'date-separator',
+                            date: msg.createdAt,
+                            id: `date-${msg.id}`,
+                        });
+                    }
                     items.push({ type: 'message', message: msg });
                 }
+
+                prevMsg = msg;
             }
 
             flushBlockedGroup();
@@ -289,6 +302,7 @@ export const MessagesList = React.memo(
                     return 60;
                 if (item.type === 'spacer') return 22;
                 if (item.type === 'blocked-group') return 40;
+                if (item.type === 'date-separator') return 36;
 
                 if (item.type === 'message') {
                     // keep estimates close to reality: over-estimating (the old
@@ -322,6 +336,7 @@ export const MessagesList = React.memo(
                     if (!item) return index;
                     if (item.type === 'message') return item.message.id;
                     if (item.type === 'blocked-group') return item.id;
+                    if (item.type === 'date-separator') return item.id;
                     return item.type;
                 },
                 [virtualItems],
@@ -1020,6 +1035,17 @@ export const MessagesList = React.memo(
                                                     Load older messages
                                                 </Button>
                                             )}
+                                        </Box>
+                                    ) : null}
+
+                                    {item.type === 'date-separator' ? (
+                                        <Box className="px-4 py-2">
+                                            <Divider
+                                                text={formatDateSeparator(
+                                                    item.date,
+                                                )}
+                                                variant="line"
+                                            />
                                         </Box>
                                     ) : null}
 
