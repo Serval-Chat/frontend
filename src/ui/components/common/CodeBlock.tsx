@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { Check, Copy, ExternalLink, Maximize } from 'lucide-react';
+import { Check, Copy, Download, ExternalLink, Maximize } from 'lucide-react';
 
 import { buildGodboltUrl, getGodboltLanguageId } from '@/lib/godbolt';
 import { addToCache, getCachedHighlight } from '@/lib/syntax-highlighter';
@@ -13,6 +13,9 @@ interface CodeBlockProps {
     content: string;
     language?: string;
     inline?: boolean;
+    filename?: string;
+    onDownload?: () => void;
+    maxLines?: number;
 }
 
 /**
@@ -22,10 +25,14 @@ export const CodeBlock = ({
     content,
     language,
     inline = false,
+    filename,
+    onDownload,
+    maxLines,
 }: CodeBlockProps) => {
     const languageKey = (language || 'text').toLowerCase();
     const [isCopied, setIsCopied] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isExpanded, setIsExpanded] = useState(false);
     const [highlightedResult, setHighlightedResult] = useState<{
         content: string;
         language: string;
@@ -117,6 +124,14 @@ export const CodeBlock = ({
         setIsModalOpen(true);
     };
 
+    const displayLines = highlightedLines || lines;
+    const isTruncatable =
+        maxLines !== undefined && displayLines.length > maxLines;
+    const visibleLines =
+        isTruncatable && !isExpanded
+            ? displayLines.slice(0, maxLines)
+            : displayLines;
+
     if (inline) {
         return (
             <code className="rounded bg-bg-secondary px-1 py-0.5 font-mono text-sm">
@@ -129,9 +144,15 @@ export const CodeBlock = ({
         <>
             <div className="group relative my-2 overflow-hidden rounded-lg border border-border-subtle bg-background shadow-sm">
                 <div className="flex items-center justify-between border-b border-border-subtle bg-bg-subtle px-3 py-2">
-                    <span className="text-[10px] font-black tracking-wider text-primary uppercase">
-                        {language || 'text'}
-                    </span>
+                    {filename ? (
+                        <span className="truncate text-xs font-bold text-foreground/80">
+                            {filename}
+                        </span>
+                    ) : (
+                        <span className="text-[10px] font-black tracking-wider text-primary uppercase">
+                            {language || 'text'}
+                        </span>
+                    )}
                     <div className="flex items-center gap-1">
                         {godboltLanguageId !== null && (
                             <>
@@ -178,6 +199,23 @@ export const CodeBlock = ({
                                 {isCopied ? 'COPIED' : 'COPY CODE'}
                             </span>
                         </Button>
+                        {onDownload ? (
+                            <>
+                                <div className="mx-1 h-3 w-[1px] bg-border-subtle" />
+                                <Button
+                                    className="flex items-center gap-3 rounded-md border-none p-1.5 text-muted-foreground shadow-none transition-all hover:bg-primary/10 hover:text-primary"
+                                    size="sm"
+                                    title="Download"
+                                    variant="ghost"
+                                    onClick={(e): void => {
+                                        e.stopPropagation();
+                                        onDownload();
+                                    }}
+                                >
+                                    <Download size={14} />
+                                </Button>
+                            </>
+                        ) : null}
                     </div>
                 </div>
                 <button
@@ -187,7 +225,7 @@ export const CodeBlock = ({
                     onClick={handleContainerClick}
                 >
                     <pre className="m-0 overflow-x-auto bg-transparent text-sm leading-6 whitespace-pre-wrap">
-                        {(highlightedLines || lines).map((line, index) => (
+                        {visibleLines.map((line, index) => (
                             <div
                                 className="flex"
                                 // eslint-disable-next-line react/no-array-index-key
@@ -212,6 +250,23 @@ export const CodeBlock = ({
                         ))}
                     </pre>
                 </button>
+                {isTruncatable ? (
+                    <div className="flex justify-center border-t border-border-subtle bg-bg-subtle px-3 py-2">
+                        <Button
+                            className="border-none bg-transparent text-[11px] font-bold text-primary shadow-none transition-colors hover:text-primary-hover"
+                            size="sm"
+                            variant="ghost"
+                            onClick={(e): void => {
+                                e.stopPropagation();
+                                setIsExpanded((prev) => !prev);
+                            }}
+                        >
+                            {isExpanded
+                                ? 'Show fewer lines'
+                                : `Show ${displayLines.length - (maxLines ?? 0)} more lines`}
+                        </Button>
+                    </div>
+                ) : null}
             </div>
 
             <CodeModal

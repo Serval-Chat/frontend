@@ -1,12 +1,7 @@
 import React from 'react';
 
-import {
-    Code,
-    Download,
-    EyeOff,
-    File as FileIcon,
-    Maximize2,
-} from 'lucide-react';
+import { Download, EyeOff, File as FileIcon } from 'lucide-react';
+import { getIcon } from 'material-file-icons';
 
 import type { MessageAttachment } from '@/api/chat/chat.types';
 import {
@@ -18,7 +13,7 @@ import {
 import type { FileMetadata, ProxyMetadata } from '@/api/files/files.types';
 import { useLimitedAnimations } from '@/providers/limitedAnimationsContext';
 import { Button } from '@/ui/components/common/Button';
-import { CodeModal } from '@/ui/components/common/CodeModal';
+import { CodeBlock } from '@/ui/components/common/CodeBlock';
 import { ImageLightbox } from '@/ui/components/common/ImageLightbox';
 import { Link } from '@/ui/components/common/Link';
 import { LoadingSpinner } from '@/ui/components/common/LoadingSpinner';
@@ -38,6 +33,9 @@ interface FileEmbedProps {
 const FALLBACK_MEDIA_WIDTH = 320;
 const FALLBACK_MEDIA_HEIGHT = 180;
 const MAX_MEDIA_WIDTH = 550;
+
+const MAX_CODE_PREVIEW_BYTES = 50 * 1024;
+const CODE_PREVIEW_MAX_LINES = 30;
 
 const getMediaDimensions = (
     attachment: MessageAttachment | undefined,
@@ -286,34 +284,15 @@ export const FileEmbed = ({ url, attachment, onResize }: FileEmbedProps) => {
 
     // Text/Code rendering
     const isText =
+        attachment?.type === 'text' ||
         (isLocal && (meta as FileMetadata).isBinary === false) ||
         mimeType?.startsWith('text/') ||
-        mimeType === 'application/json' ||
-        [
-            'js',
-            'ts',
-            'tsx',
-            'css',
-            'html',
-            'md',
-            'py',
-            'go',
-            'rs',
-            'c',
-            'cpp',
-            'h',
-            'hpp',
-            'java',
-            'sh',
-            'yaml',
-            'json',
-        ].some((ext): boolean => displayName?.endsWith(`.${ext}`));
-    if (isText) {
+        mimeType === 'application/json';
+    if (isText && meta.size !== undefined && meta.size < MAX_CODE_PREVIEW_BYTES) {
         return (
             <CodeEmbed
                 filename={displayName || 'file'}
                 isLocal={isLocal}
-                size={size}
                 url={resolvedUrl}
                 onResize={onResize}
             />
@@ -321,10 +300,28 @@ export const FileEmbed = ({ url, attachment, onResize }: FileEmbedProps) => {
     }
 
     // Generic file rendering
+    const fileTypeIcon = displayName ? getIcon(displayName) : undefined;
+    const archiveExtension =
+        fileTypeIcon?.name === 'zip'
+            ? displayName?.split('.').pop()?.toUpperCase().slice(0, 4)
+            : undefined;
+
     return (
-        <Box className="my-2 flex w-[300px] items-center gap-3 rounded-lg bg-bg-secondary p-3 transition-all">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                <FileIcon size={20} />
+        <Box className="my-2 flex w-75 items-center gap-3 rounded-lg bg-bg-secondary p-3 transition-all">
+            <div className="relative flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                {fileTypeIcon ? (
+                    <div
+                        className="h-6 w-6"
+                        dangerouslySetInnerHTML={{ __html: fileTypeIcon.svg }}
+                    />
+                ) : (
+                    <FileIcon size={20} />
+                )}
+                {archiveExtension ? (
+                    <span className="absolute -right-1.5 -bottom-1.5 rounded border border-border-subtle bg-background px-1.5 py-0.5 text-[10px] leading-none font-bold whitespace-nowrap text-muted-foreground">
+                        {archiveExtension}
+                    </span>
+                ) : null}
             </div>
             <div className="flex min-w-0 flex-1 flex-col">
                 <Text className="truncate" size="sm" weight="bold">
@@ -352,23 +349,18 @@ const CodeEmbed = ({
     url,
     isLocal,
     filename,
-    size,
     onResize,
 }: {
     url: string;
     isLocal: boolean;
     filename: string;
-    size: number;
     onResize?: () => void;
 }) => {
-    const [showFull, setShowFull] = React.useState(false);
-    const isTooLarge = size > 1024 * 1024;
-
     const { data: remoteContent, isLoading: loadingRemote } = useProxyContent(
-        !isLocal && !isTooLarge ? url : null,
+        !isLocal ? url : null,
     );
     const { data: localContent, isLoading: loadingLocal } = useFileContent(
-        isLocal && !isTooLarge ? url : null,
+        isLocal ? url : null,
     );
 
     const isLoading = isLocal ? loadingLocal : loadingRemote;
@@ -377,33 +369,6 @@ const CodeEmbed = ({
     React.useEffect((): void => {
         onResize?.();
     }, [content, isLoading, onResize]);
-
-    // If it's too large, don't try to render it as code
-    if (isTooLarge) {
-        return (
-            <Box className="my-2 flex w-[300px] items-center gap-3 rounded-lg bg-bg-secondary p-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                    <Code size={20} />
-                </div>
-                <div className="flex min-w-0 flex-1 flex-col">
-                    <Text className="truncate" size="sm" weight="bold">
-                        {filename}
-                    </Text>
-                    <Text size="xs" variant="muted">
-                        File too large to preview (
-                        {(size / 1024 / 1024).toFixed(2)} MB)
-                    </Text>
-                </div>
-                <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={(): Window | null => window.open(url, '_blank')}
-                >
-                    <Download size={16} />
-                </Button>
-            </Box>
-        );
-    }
 
     if (isLoading) {
         return (
@@ -416,101 +381,15 @@ const CodeEmbed = ({
         );
     }
 
-    const lines = (content || '').split('\n');
-    const isTruncated =
-        lines.length > 20 ||
-        (content || '').length >
-            Number(import.meta.env.VITE_MAX_MESSAGE_LENGTH || 2000);
-    const previewContent = isTruncated
-        ? lines.slice(0, 20).join('\n')
-        : content;
-
     const extension = filename.split('.').pop() || 'text';
 
     return (
-        <>
-            <Box className="my-2 max-w-[600px] overflow-hidden rounded-lg border border-border-subtle/50 bg-bg-secondary">
-                <div className="flex items-center justify-between border-b border-border-subtle/50 bg-bg-primary/50 px-3 py-2">
-                    <div className="flex min-w-0 items-center gap-2">
-                        <Code className="text-muted-foreground" size={14} />
-                        <Text
-                            className="truncate text-foreground/80"
-                            size="xs"
-                            weight="bold"
-                        >
-                            {filename}
-                        </Text>
-                    </div>
-                    <div className="flex items-center gap-1">
-                        <Button
-                            className="h-7 w-7 p-0 hover:bg-white/5"
-                            size="sm"
-                            variant="ghost"
-                            onClick={(): void => {
-                                setShowFull(true);
-                            }}
-                        >
-                            <Maximize2
-                                className="text-muted-foreground"
-                                size={14}
-                            />
-                        </Button>
-                        <Button
-                            className="h-7 w-7 p-0 hover:bg-white/5"
-                            size="sm"
-                            variant="ghost"
-                            onClick={(): Window | null =>
-                                window.open(url, '_blank')
-                            }
-                        >
-                            <Download
-                                className="text-muted-foreground"
-                                size={14}
-                            />
-                        </Button>
-                    </div>
-                </div>
-
-                <div className="relative">
-                    <pre
-                        className="scrollbar-none overflow-x-auto bg-bg-secondary/30 p-4 font-mono text-xs"
-                        style={{ minHeight: '1.6em' }}
-                    >
-                        <code className="text-foreground/90">
-                            {previewContent || 'No content'}
-                        </code>
-                    </pre>
-
-                    {isTruncated ? (
-                        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-bg-secondary to-transparent" />
-                    ) : null}
-                </div>
-
-                {isTruncated ? (
-                    <div className="flex justify-center border-t border-border-subtle/30 bg-bg-primary/30 px-3 py-2">
-                        <Button
-                            className="flex items-center gap-1.5 border-none bg-transparent text-[11px] font-bold text-primary shadow-none transition-colors hover:text-primary-hover"
-                            size="sm"
-                            variant="ghost"
-                            onClick={(): void => {
-                                setShowFull(true);
-                            }}
-                        >
-                            <Maximize2 size={12} />
-                            Show whole
-                        </Button>
-                    </div>
-                ) : null}
-            </Box>
-
-            <CodeModal
-                content={content || ''}
-                isOpen={showFull}
-                language={extension}
-                onClose={(): void => {
-                    setShowFull(false);
-                }}
-            />
-        </>
+        <CodeBlock
+            content={content || ''}
+            filename={filename}
+            language={extension}
+            maxLines={CODE_PREVIEW_MAX_LINES}
+            onDownload={(): Window | null => window.open(url, '_blank')}
+        />
     );
 };
