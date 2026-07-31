@@ -1,10 +1,13 @@
 import React, { useMemo } from 'react';
 
 import { Check, Eye, EyeOff, X } from 'lucide-react';
+import { getIcon } from 'material-file-icons';
 
 import type { QueuedFile } from '@/hooks/chat/useFileQueue';
+import { formatFileSize } from '@/lib/autosizer';
 import { Button } from '@/ui/components/common/Button';
 import { Text } from '@/ui/components/common/Text';
+import { Tooltip } from '@/ui/components/common/Tooltip';
 import { Box } from '@/ui/components/layout/Box';
 
 interface FileQueueProps {
@@ -52,6 +55,11 @@ const FileQueueItem = ({
         if (!isImage) return null;
         return URL.createObjectURL(file.file);
     }, [file.file, isImage]);
+    const fileTypeIcon = useMemo(
+        (): ReturnType<typeof getIcon> | undefined =>
+            isImage ? undefined : getIcon(file.file.name),
+        [file.file.name, isImage],
+    );
 
     React.useEffect(
         (): (() => void) => (): void => {
@@ -72,40 +80,56 @@ const FileQueueItem = ({
                 />
             ) : (
                 <div
-                    className={`flex h-full w-full flex-col items-center justify-center p-1 text-center ${
+                    className={`flex h-full w-full flex-col items-center justify-center gap-1 p-1 text-center ${
                         file.status === 'uploading' ? 'opacity-50' : ''
                     }`}
                 >
-                    <Text className="w-full truncate text-[10px]" size="xs">
-                        {file.file.name}
-                    </Text>
+                    {fileTypeIcon ? (
+                        <div
+                            className="h-8 w-8 shrink-0"
+                            dangerouslySetInnerHTML={{
+                                __html: fileTypeIcon.svg,
+                            }}
+                        />
+                    ) : null}
+                    <Tooltip fullWidth content={file.file.name} position="top">
+                        <Text
+                            className="w-full truncate text-[10px]"
+                            size="xs"
+                        >
+                            {file.file.name}
+                        </Text>
+                    </Tooltip>
                     <Text size="xs" variant="muted">
-                        {(file.file.size / 1024).toFixed(1)} KB
+                        {formatFileSize(file.file.size)}
                     </Text>
                 </div>
             )}
 
-            {file.status === 'idle' ? (
-                <div className="absolute inset-0 flex items-center justify-center gap-1 bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
-                    {isImage ? (
-                        <Button
-                            className="h-8 w-8 border-none bg-black/60 p-0 hover:bg-black/80"
-                            size="sm"
-                            variant="ghost"
-                            onClick={(e): void => {
-                                e.stopPropagation();
-                                onToggleSpoiler();
-                            }}
-                        >
-                            {file.isSpoiler ? (
-                                <EyeOff size={14} />
-                            ) : (
-                                <Eye size={14} />
-                            )}
-                        </Button>
-                    ) : null}
+            {file.status === 'idle' && isImage ? (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
                     <Button
-                        className="h-8 w-8 border-none bg-black/60 p-0 text-red-400 hover:bg-black/80 hover:text-red-300"
+                        className="h-8 w-8 border-none bg-black/60 p-0 hover:bg-black/80"
+                        size="sm"
+                        variant="ghost"
+                        onClick={(e): void => {
+                            e.stopPropagation();
+                            onToggleSpoiler();
+                        }}
+                    >
+                        {file.isSpoiler ? (
+                            <EyeOff size={14} />
+                        ) : (
+                            <Eye size={14} />
+                        )}
+                    </Button>
+                </div>
+            ) : null}
+
+            {file.status === 'idle' ? (
+                <div className="absolute top-1 right-1">
+                    <Button
+                        className="h-6 w-6 rounded-full border-none bg-black/60 p-0 text-white hover:bg-black/80"
                         size="sm"
                         variant="ghost"
                         onClick={(e): void => {
@@ -113,7 +137,7 @@ const FileQueueItem = ({
                             onRemove();
                         }}
                     >
-                        <X size={14} />
+                        <X size={12} />
                     </Button>
                 </div>
             ) : null}

@@ -36,6 +36,7 @@ export interface MessageAttachment {
     width?: number;
     height?: number;
     spoiler?: boolean;
+    content?: string;
 }
 
 export interface MessagePollOption {

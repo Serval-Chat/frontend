@@ -62,7 +62,13 @@ export const chatApi = {
         after?: string,
     ): Promise<ChatMessage[]> => {
         const response = await apiClient.get<unknown>('/api/v1/messages', {
-            params: { userId, limit, before, after },
+            params: {
+                userId,
+                limit,
+                before,
+                after,
+                includeAttachmentContent: true,
+            },
         });
         return unwrapMessages(response.data);
     },
@@ -81,7 +87,13 @@ export const chatApi = {
         const response = await apiClient.get<unknown>(
             `/api/v1/servers/${serverId}/channels/${channelId}/messages`,
             {
-                params: { limit, before, around, after },
+                params: {
+                    limit,
+                    before,
+                    around,
+                    after,
+                    includeAttachmentContent: true,
+                },
             },
         );
         return unwrapMessages(response.data);

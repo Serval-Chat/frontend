@@ -11,6 +11,7 @@ import {
     useProxyMetadata,
 } from '@/api/files/files.queries';
 import type { FileMetadata, ProxyMetadata } from '@/api/files/files.types';
+import { formatFileSize } from '@/lib/autosizer';
 import { useLimitedAnimations } from '@/providers/limitedAnimationsContext';
 import { Button } from '@/ui/components/common/Button';
 import { CodeBlock } from '@/ui/components/common/CodeBlock';
@@ -291,6 +292,7 @@ export const FileEmbed = ({ url, attachment, onResize }: FileEmbedProps) => {
     if (isText && meta.size !== undefined && meta.size < MAX_CODE_PREVIEW_BYTES) {
         return (
             <CodeEmbed
+                content={attachment?.content}
                 filename={displayName || 'file'}
                 isLocal={isLocal}
                 url={resolvedUrl}
@@ -328,8 +330,8 @@ export const FileEmbed = ({ url, attachment, onResize }: FileEmbedProps) => {
                     {displayName}
                 </Text>
                 <Text size="xs" variant="muted">
-                    {(size / 1024 / 1024).toFixed(2)} MB •{' '}
-                    {mimeType?.split('/')[1]?.toUpperCase() || 'FILE'}
+                    {formatFileSize(size)} •{' '}
+                    {displayName?.split('.').pop()?.toUpperCase() || 'FILE'}
                 </Text>
             </div>
             <Button
@@ -349,22 +351,33 @@ const CodeEmbed = ({
     url,
     isLocal,
     filename,
+    content: embeddedContent,
     onResize,
 }: {
     url: string;
     isLocal: boolean;
     filename: string;
+    content?: string;
     onResize?: () => void;
 }) => {
+    const hasEmbeddedContent = embeddedContent !== undefined;
     const { data: remoteContent, isLoading: loadingRemote } = useProxyContent(
-        !isLocal ? url : null,
+        !isLocal && !hasEmbeddedContent ? url : null,
     );
     const { data: localContent, isLoading: loadingLocal } = useFileContent(
-        isLocal ? url : null,
+        isLocal && !hasEmbeddedContent ? url : null,
     );
 
-    const isLoading = isLocal ? loadingLocal : loadingRemote;
-    const content = isLocal ? localContent : remoteContent;
+    const isLoading = hasEmbeddedContent
+        ? false
+        : isLocal
+          ? loadingLocal
+          : loadingRemote;
+    const content = hasEmbeddedContent
+        ? embeddedContent
+        : isLocal
+          ? localContent
+          : remoteContent;
 
     React.useEffect((): void => {
         onResize?.();
