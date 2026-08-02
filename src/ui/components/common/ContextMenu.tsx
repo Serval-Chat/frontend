@@ -200,6 +200,12 @@ export const ContextMenu = ({
                                       '0 10px 30px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 190, 0, 0.1)',
                               }}
                               transition={{ duration: 0.15, ease: 'easeOut' }}
+                              onClick={(e): void => {
+                                  e.stopPropagation();
+                              }}
+                              onMouseDown={(e): void => {
+                                  e.stopPropagation();
+                              }}
                           >
                               {filteredItems.map((item, index) => (
                                   <ContextMenuItemRenderer
@@ -461,6 +467,12 @@ const SubMenu = ({
                 left: position.x,
                 boxShadow:
                     '0 10px 30px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 190, 0, 0.1)',
+            }}
+            onClick={(e): void => {
+                e.stopPropagation();
+            }}
+            onMouseDown={(e): void => {
+                e.stopPropagation();
             }}
             onMouseEnter={onMouseEnter}
             onMouseLeave={onMouseLeave}

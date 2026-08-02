@@ -86,6 +86,12 @@ export const Popover = ({
                         left: coords.x,
                     }}
                     transition={{ duration: 0.2, ease: 'easeOut' }}
+                    onClick={(e): void => {
+                        e.stopPropagation();
+                    }}
+                    onMouseDown={(e): void => {
+                        e.stopPropagation();
+                    }}
                 >
                     {children}
                 </m.div>

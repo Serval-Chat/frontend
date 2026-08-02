@@ -11,6 +11,7 @@ export interface KlipyGif {
         xs?: { gif?: { url?: string } };
     };
     contentType?: 'gif' | 'sticker';
+    tagIds?: string[];
 }
 
 export interface KlipyFavorite {
@@ -21,6 +22,7 @@ export interface KlipyFavorite {
     width: number;
     height: number;
     contentType: 'gif' | 'sticker';
+    tagIds?: string[];
 }
 
 export interface KlipyApiResponse<T> {
