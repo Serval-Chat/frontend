@@ -66,12 +66,14 @@ const toggleTagInExpression = (expression: string, tagName: string): string => {
     const trimmed = expression.trim();
 
     if (!isTagActive(trimmed, tagName)) {
-        return trimmed === '' ? tagName : `${trimmed} && ${tagName}`;
+        return trimmed === '' ? tagName : `${trimmed} & ${tagName}`;
     }
 
-    const tokens = trimmed.split(/\s*(&&|\|\|)\s*/).filter((t) => t !== '');
+    const tokens = trimmed.split(/\s*(&{1,2}|\|{1,2}|\^)\s*/).filter((t) => t !== '');
     const termIndex = tokens.findIndex(
-        (t, i) => i % 2 === 0 && t.toLowerCase() === tagName.toLowerCase(),
+        (t, i) =>
+            i % 2 === 0 &&
+            t.replace(/^!+/, '').toLowerCase() === tagName.toLowerCase(),
     );
     if (termIndex === -1) return trimmed;
 
@@ -597,7 +599,7 @@ export const GifPicker = ({ onSelect, onClose }: GifPickerProps) => {
                         icon={<Search size={14} />}
                         placeholder={
                             tab === 'favorites'
-                                ? 'Filter by tags (e.g. funny && cats)...'
+                                ? 'Filter by tags (e.g. funny & cats)...'
                                 : 'Search Klipy...'
                         }
                         value={search}
