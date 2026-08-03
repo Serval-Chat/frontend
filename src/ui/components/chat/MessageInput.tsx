@@ -26,7 +26,7 @@ import { MessageComposerOverlays } from './MessageComposerOverlays';
 import { ReplyBanner } from './ReplyBanner';
 import { TokenWarningPopover } from './TokenWarningPopover';
 import { getSlashPreview } from './messageInputSlashPreview';
-import { detectTokensInText } from '@/lib/tokenDetector';
+import { detectTokensInText, type TokenType } from '@/lib/tokenDetector';
 
 interface MessageInputProps {
     fileQueueResult: {
@@ -68,6 +68,7 @@ interface MessageInputUiState {
     hasText: boolean;
     currentInputText: string;
     showTokenWarning: boolean;
+    detectedTokenType?: TokenType;
     slashChipState: {
         commandName: string;
         commandId?: string;
@@ -107,6 +108,7 @@ export const MessageInput = ({
         hasText,
         currentInputText,
         showTokenWarning,
+        detectedTokenType,
         slashChipState,
     } = ui;
     const showEmojiPicker = activePanel === 'emoji';
@@ -215,11 +217,14 @@ export const MessageInput = ({
             if (!bypassTokenWarning) {
                 const tokenResult = detectTokensInText(text);
                 if (tokenResult.containsToken) {
-                    patchUi({ showTokenWarning: true });
+                    patchUi({
+                        showTokenWarning: true,
+                        detectedTokenType: tokenResult.tokenType,
+                    });
                     return false;
                 }
             }
-            patchUi({ showTokenWarning: false });
+            patchUi({ showTokenWarning: false, detectedTokenType: undefined });
             return handleSendMessage(text, bypassTokenWarning);
         },
         [handleSendMessage],
@@ -292,6 +297,7 @@ export const MessageInput = ({
         >
             {showTokenWarning ? (
                 <TokenWarningPopover
+                    tokenType={detectedTokenType}
                     onCancel={(): void => {
                         patchUi({ showTokenWarning: false });
                     }}

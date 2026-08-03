@@ -2,16 +2,19 @@ import React from 'react';
 
 import { ShieldAlert } from 'lucide-react';
 
+import type { TokenType } from '@/lib/tokenDetector';
 import { Button } from '@/ui/components/common/Button';
 import { Text } from '@/ui/components/common/Text';
 import { Box } from '@/ui/components/layout/Box';
 
 interface TokenWarningPopoverProps {
+    tokenType?: TokenType;
     onConfirm: () => void;
     onCancel: () => void;
 }
 
 export const TokenWarningPopover = ({
+    tokenType = 'user',
     onConfirm,
     onCancel,
 }: TokenWarningPopoverProps): React.ReactNode => (
@@ -26,7 +29,9 @@ export const TokenWarningPopover = ({
                         Hold on!
                     </Text>
                     <Text as="p" className="mt-1 text-sm text-muted-foreground">
-                        Your message contains a sensitive token. Anyone with it can log into your account without a password and without 2FA!
+                        {tokenType === 'bot'
+                            ? 'Your message contains a sensitive bot token. Anyone with it can take control of your bot and perform actions on its behalf!'
+                            : 'Your message contains a sensitive token. Anyone with it can log into your account without a password and without 2FA!'}
                     </Text>
                     <div className="mt-3 flex items-center gap-2">
                         <Button
