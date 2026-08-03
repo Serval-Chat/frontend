@@ -10,6 +10,14 @@ import { Text } from '@/ui/components/common/Text';
 import { Box } from '@/ui/components/layout/Box';
 import { ParserPresets, parseText } from '@/utils/textParser/parser';
 
+const MAX_REPLY_PREVIEW_CHARS = 120;
+
+const truncateReplyText = (text: string): string => {
+    const firstLine = text.split('\n').find((l) => l.trim() !== '') ?? '';
+    if (firstLine.length <= MAX_REPLY_PREVIEW_CHARS) return firstLine;
+    return `${firstLine.slice(0, MAX_REPLY_PREVIEW_CHARS).trimEnd()}\u2026`;
+};
+
 interface ReplyBannerProps {
     replyingTo: ProcessedChatMessage;
     replyingUser: User;
@@ -65,7 +73,7 @@ export const ReplyBanner = ({
                     condenseFiles
                     condenseInvites
                     nodes={parseText(
-                        replyingTo.text || '',
+                        truncateReplyText(replyingTo.text || ''),
                         ParserPresets.REPLY_PREVIEW,
                     )}
                     size="xs"
