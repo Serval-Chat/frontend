@@ -2,6 +2,7 @@ import { useState } from 'react';
 
 import { ChevronLeft, Shield } from 'lucide-react';
 
+import { serversApi } from '@/api/servers/servers.api';
 import {
     useCreateRole,
     useDeleteRole,
@@ -13,16 +14,22 @@ import {
 import type { Role, RolePermissions } from '@/api/servers/servers.types';
 import { LoadingSpinner } from '@/ui/components/common/LoadingSpinner';
 import { Text } from '@/ui/components/common/Text';
+import { useToast } from '@/ui/components/common/Toast';
 import { cn } from '@/utils/cn';
 
 import { RoleEditor } from './roles/RoleEditor';
-import { RoleNavbar } from './roles/RoleNavbar';
+import {
+    RoleNavbar,
+    type RoleImportResult,
+    type RoleListImportResult,
+} from './roles/RoleNavbar';
 
 interface ServerRoleSettingsProps {
     serverId: string;
 }
 
 export const ServerRoleSettings = ({ serverId }: ServerRoleSettingsProps) => {
+    const { showToast } = useToast();
     const { data: server } = useServerDetails(serverId);
     const { data: roles, isLoading } = useRoles(serverId);
     const [selectedRoleId, setSelectedRoleId] = useState<string | null>(null);
@@ -88,6 +95,76 @@ export const ServerRoleSettings = ({ serverId }: ServerRoleSettingsProps) => {
         reorderRolesMutation.mutate(positions);
     };
 
+    const handleImportRole = (result: RoleImportResult): void => {
+        createRoleMutation.mutate(
+            {
+                name: result.role.name,
+                color: result.role.color ?? undefined,
+                permissions: result.role.permissions,
+                ...result.role,
+            },
+            {
+                onSuccess: (newRole): void => {
+                    const { name: _n, permissions: _p, color: _c, ...rest } =
+                        result.role;
+                    if (Object.keys(rest).length > 0) {
+                        updateRoleMutation.mutate({
+                            roleId: newRole.id,
+                            updates: rest as Partial<Role>,
+                        });
+                    }
+                    setSelectedRoleId(newRole.id);
+                    setIsMobileListOpen(false);
+                },
+            },
+        );
+    };
+
+    const handleImportRoleList = async (
+        result: RoleListImportResult,
+    ): Promise<void> => {
+        if (!result.roles.length) return;
+        const rolesToImport = [...result.roles].reverse();
+        const createdRoleIds: string[] = [];
+
+        for (const roleData of rolesToImport) {
+            try {
+                const createdRole = await serversApi.createRole(serverId, {
+                    name: roleData.name,
+                    color: roleData.color ?? undefined,
+                    permissions: roleData.permissions,
+                });
+                createdRoleIds.push(createdRole.id);
+
+                const { name: _n, permissions: _p, color: _c, ...rest } =
+                    roleData;
+                if (Object.keys(rest).length > 0) {
+                    await serversApi.updateRole(serverId, createdRole.id, rest as Partial<Role>);
+                }
+            } catch {
+                showToast(`Failed to import role "${roleData.name}"`, 'error');
+            }
+        }
+
+        if (createdRoleIds.length > 0) {
+            const maxExistingPos = Math.max(...(roles?.map((r) => r.position) ?? [0]), 0);
+            const topFirstCreatedIds = [...createdRoleIds].reverse();
+            const rolePositions = topFirstCreatedIds.map((id, idx) => ({
+                roleId: id,
+                position: maxExistingPos + (topFirstCreatedIds.length - idx),
+            }));
+
+            reorderRolesMutation.mutate(rolePositions, {
+                onSuccess: (): void => {
+                    showToast(
+                        `Successfully imported ${createdRoleIds.length} role(s)`,
+                        'success',
+                    );
+                },
+            });
+        }
+    };
+
     if (isLoading) {
         return (
             <div className="flex h-full items-center justify-center">
@@ -124,6 +201,8 @@ export const ServerRoleSettings = ({ serverId }: ServerRoleSettingsProps) => {
                     selectedRoleId={effectiveSelectedId}
                     onAddRole={handleAddRole}
                     onDeleteRole={handleDeleteRole}
+                    onImportRole={handleImportRole}
+                    onImportRoleList={handleImportRoleList}
                     onReorderRoles={handleReorderRoles}
                     onSelectRole={(id): void => {
                         setSelectedRoleId(id);

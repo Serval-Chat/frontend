@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
 import { Reorder, useDragControls } from 'framer-motion';
-import { Copy, GripVertical, Plus, Trash2 } from 'lucide-react';
+import { Copy, Download, GripVertical, Plus, Trash2, Upload } from 'lucide-react';
 
 import type { Role } from '@/api/servers/servers.types';
 import {
@@ -13,7 +13,16 @@ import { RoleDot } from '@/ui/components/common/RoleDot';
 import { SettingsFloatingBar } from '@/ui/components/common/SettingsFloatingBar';
 import { Text } from '@/ui/components/common/Text';
 import { useToast } from '@/ui/components/common/Toast';
+import { exportRole, exportRoleList, isBotRole } from '@/utils/roleExport';
 import { getRoleStyle } from '@/utils/roleColor';
+
+import {
+    RoleImportModal,
+    type RoleImportResult,
+    type RoleListImportResult,
+} from './RoleImportModal';
+
+export type { RoleImportResult, RoleListImportResult };
 
 interface RoleNavbarProps {
     roles: Role[];
@@ -22,6 +31,8 @@ interface RoleNavbarProps {
     onAddRole: () => void;
     onDeleteRole: (roleId: string) => void;
     onReorderRoles: (newRoles: Role[]) => void;
+    onImportRole?: (result: RoleImportResult) => void;
+    onImportRoleList?: (result: RoleListImportResult) => void;
 }
 
 export const RoleNavbar = ({
@@ -31,7 +42,11 @@ export const RoleNavbar = ({
     onAddRole,
     onDeleteRole,
     onReorderRoles,
+    onImportRole,
+    onImportRoleList,
 }: RoleNavbarProps) => {
+    const { showToast } = useToast();
+    const [isImportOpen, setIsImportOpen] = useState(false);
     const [localRoles, setLocalRoles] = useState((): Role[] =>
         roles.toSorted((a, b): number => b.position - a.position),
     );
@@ -65,20 +80,47 @@ export const RoleNavbar = ({
         );
     };
 
+    const handleExportList = (): void => {
+        const sorted = roles.toSorted((a, b) => b.position - a.position);
+        void exportRoleList(sorted).then((code) => {
+            void navigator.clipboard.writeText(code);
+            showToast('Role list exported to clipboard', 'success');
+        });
+    };
+
     return (
+        <>
         <div className="flex h-full w-full shrink-0 flex-col overflow-hidden border-l border-border-subtle bg-bg-subtle md:w-64">
             <div className="flex items-center justify-between border-b border-border-subtle p-3">
                 <Text size="sm" weight="bold">
                     Roles
                 </Text>
-                <IconButton
-                    className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground"
-                    icon={Plus}
-                    iconSize={16}
-                    title="Add Role"
-                    variant="ghost"
-                    onClick={onAddRole}
-                />
+                <div className="flex items-center gap-0.5">
+                    <IconButton
+                        className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground"
+                        icon={Upload}
+                        iconSize={14}
+                        title="Import role or role list"
+                        variant="ghost"
+                        onClick={(): void => setIsImportOpen(true)}
+                    />
+                    <IconButton
+                        className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground"
+                        icon={Download}
+                        iconSize={14}
+                        title="Export all roles to clipboard"
+                        variant="ghost"
+                        onClick={handleExportList}
+                    />
+                    <IconButton
+                        className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground"
+                        icon={Plus}
+                        iconSize={16}
+                        title="Add Role"
+                        variant="ghost"
+                        onClick={onAddRole}
+                    />
+                </div>
             </div>
             <div className="flex-1 overflow-y-auto p-2">
                 <Reorder.Group
@@ -112,6 +154,13 @@ export const RoleNavbar = ({
                 onSave={handleSave}
             />
         </div>
+        <RoleImportModal
+            isOpen={isImportOpen}
+            onClose={(): void => setIsImportOpen(false)}
+            onImportRole={onImportRole}
+            onImportRoleList={onImportRoleList}
+        />
+        </>
     );
 };
 
@@ -140,6 +189,13 @@ const RoleItem = ({
         showToast('Role ID copied to clipboard', 'success');
     };
 
+    const handleExportRole = (): void => {
+        void exportRole(role).then((code) => {
+            void navigator.clipboard.writeText(code);
+            showToast('Role exported to clipboard', 'success');
+        });
+    };
+
     const contextItems: ContextMenuItem[] = [
         {
             label: 'Copy Role ID',
@@ -147,6 +203,14 @@ const RoleItem = ({
             onClick: handleCopyRoleId,
         },
     ];
+
+    if (!isBotRole(role)) {
+        contextItems.push({
+            label: 'Export Role',
+            icon: Download,
+            onClick: handleExportRole,
+        });
+    }
 
     if (!isEveryone) {
         contextItems.push({

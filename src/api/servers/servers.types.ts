@@ -156,6 +156,8 @@ export interface Role {
     description?: string;
     icon?: string;
     glowEnabled?: boolean;
+    isBot?: boolean;
+    managed?: boolean;
     permissions?: RolePermissions;
 }
 

@@ -13,6 +13,7 @@ interface TooltipProps {
     triggerClassName?: string;
     fullWidth?: boolean;
     delay?: number;
+    multiline?: boolean;
 }
 
 const TOOLTIP_MEDIA_QUERY =
@@ -132,6 +133,7 @@ export const Tooltip = ({
     triggerClassName,
     fullWidth = false,
     delay = 100,
+    multiline = false,
 }: TooltipProps) => {
     const tooltipsEnabled = useTooltipsEnabled();
     const [isVisible, setIsVisible] = useState(false);
@@ -232,7 +234,10 @@ export const Tooltip = ({
                                       ]
                                   }
                                   className={cn(
-                                      'pointer-events-none fixed z-[var(--z-index-tooltip)] rounded-lg bg-[#111214] px-3 py-1.5 text-[13px] font-bold whitespace-nowrap text-[#f2f3f5] shadow-2xl',
+                                      'pointer-events-none fixed z-[var(--z-index-tooltip)] rounded-lg bg-[#111214] px-3 py-1.5 text-[13px] font-bold text-[#f2f3f5] shadow-2xl',
+                                      multiline
+                                          ? 'max-w-xs whitespace-pre-wrap leading-tight'
+                                          : 'whitespace-nowrap',
                                       'before:absolute before:border-[6px] before:border-transparent before:content-[""]',
                                       effectivePosition === 'right' &&
                                           'before:top-1/2 before:right-full before:-mr-[1px] before:-translate-y-1/2 before:border-r-[#111214]',
