@@ -31,7 +31,7 @@ import {
     useGifTags,
 } from '@/api/gifTags/gifTags.queries';
 import { klipyApi } from '@/api/klipy/klipy.api';
-import type { KlipyGif } from '@/api/klipy/klipy.types';
+import type { KlipyFavorite, KlipyGif } from '@/api/klipy/klipy.types';
 import { useDebounce } from '@/hooks/useDebounce';
 import { GifStarButton } from '@/ui/components/chat/GifStarButton';
 import { GifTagButton } from '@/ui/components/chat/GifTagButton';
@@ -293,10 +293,17 @@ export const GifPicker = ({ onSelect, onClose }: GifPickerProps) => {
 
     const {
         data: gifs = [],
-        isFetching: loading,
+        isLoading: loading,
         error: gifsError,
     } = useQuery({
-        queryKey: ['gif-picker', tab, debouncedSearch],
+        queryKey: [
+            tab === 'favorites' && debouncedSearch === ''
+                ? 'klipy'
+                : 'gif-picker',
+            tab === 'favorites' && debouncedSearch === '' ? 'favorites' : tab,
+            tab,
+            debouncedSearch,
+        ],
         queryFn: async (): Promise<KlipyGif[]> => {
             if (tab === 'favorites') {
                 if (debouncedSearch !== '') {
@@ -400,7 +407,7 @@ export const GifPicker = ({ onSelect, onClose }: GifPickerProps) => {
     );
 
     const { data: favoritesList = [] } = useQuery({
-        queryKey: ['gif-picker-favorites'],
+        queryKey: ['klipy', 'favorites'],
         queryFn: klipyApi.getFavorites,
         enabled: tab !== 'favorites',
     });
@@ -420,8 +427,19 @@ export const GifPicker = ({ onSelect, onClose }: GifPickerProps) => {
                 setRandomFavorite(null);
                 return;
             }
-            const index = Math.floor(Math.random() * favoritesList.length);
-            setRandomFavorite(favoritesList[index] ?? null);
+            setRandomFavorite((current) => {
+                if (
+                    current &&
+                    favoritesList.some(
+                        (f): boolean =>
+                            String(f.klipyId) === String(current.klipyId),
+                    )
+                ) {
+                    return current;
+                }
+                const index = Math.floor(Math.random() * favoritesList.length);
+                return favoritesList[index] ?? null;
+            });
         }, 0);
 
         return (): void => {
@@ -454,7 +472,7 @@ export const GifPicker = ({ onSelect, onClose }: GifPickerProps) => {
         const height = gif.height || gif.file?.sm?.gif?.height || 150;
 
         try {
-            await klipyApi.toggleFavorite({
+            const { favorited } = await klipyApi.toggleFavorite({
                 klipyId,
                 slug,
                 url,
@@ -464,11 +482,46 @@ export const GifPicker = ({ onSelect, onClose }: GifPickerProps) => {
                 contentType,
             });
 
+            queryClient.setQueriesData<KlipyFavorite[]>(
+                { queryKey: ['klipy', 'favorites'] },
+                (old = []): KlipyFavorite[] => {
+                    const existing = old.some(
+                        (f): boolean => String(f.klipyId) === String(klipyId),
+                    );
+
+                    if (favorited && !existing) {
+                        return [
+                            ...old,
+                            {
+                                klipyId: String(klipyId),
+                                slug,
+                                url,
+                                previewUrl,
+                                width,
+                                height,
+                                contentType,
+                                tagIds: gif.tagIds ?? [],
+                            },
+                        ];
+                    }
+
+                    if (!favorited && existing) {
+                        return old.filter(
+                            (f): boolean =>
+                                String(f.klipyId) !== String(klipyId),
+                        );
+                    }
+
+                    return old;
+                },
+            );
+
             void queryClient.invalidateQueries({
-                queryKey: ['gif-picker-favorites'],
+                queryKey: ['klipy', 'favorites'],
             });
+
             void queryClient.invalidateQueries({
-                queryKey: ['gif-picker'],
+                queryKey: ['gif-picker', 'favorites'],
             });
         } catch (error) {
             console.error('Failed to toggle favorite:', error);

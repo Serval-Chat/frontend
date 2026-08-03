@@ -65,8 +65,8 @@ export const GifPlayer = ({ klipyId, url, onResize }: GifPlayerProps) => {
         onSuccess: ({ favorited }): void => {
             if (!metadata) return;
 
-            queryClient.setQueryData<KlipyFavorite[]>(
-                ['klipy', 'favorites'],
+            queryClient.setQueriesData<KlipyFavorite[]>(
+                { queryKey: ['klipy', 'favorites'] },
                 (old = []): KlipyFavorite[] => {
                     const existing = old.some(
                         (f): boolean => String(f.klipyId) === klipyId,
@@ -85,6 +85,13 @@ export const GifPlayer = ({ klipyId, url, onResize }: GifPlayerProps) => {
                     return old;
                 },
             );
+
+            void queryClient.invalidateQueries({
+                queryKey: ['klipy', 'favorites'],
+            });
+            void queryClient.invalidateQueries({
+                queryKey: ['gif-picker', 'favorites'],
+            });
         },
         onError: (err): void => {
             console.error('Failed to toggle favorite:', err);

@@ -18,7 +18,7 @@ export const GifStarButton = ({
 }: GifStarButtonProps) => (
     <Button
         className={cn(
-            'h-8 w-8 rounded-full bg-black/50 p-0 backdrop-blur-sm transition-all hover:scale-110 hover:bg-black/70 active:scale-95',
+            'h-8 w-8 rounded-full bg-black/70 p-0 transition-all hover:scale-110 hover:bg-black/90 active:scale-95',
             isFavorited ? 'text-yellow-400' : 'text-white',
             className,
         )}

@@ -68,6 +68,9 @@ export const useDeleteGifTag = (): UseMutationResult<void, Error, string> => {
             void queryClient.invalidateQueries({
                 queryKey: GIF_TAG_QUERY_KEYS.list,
             });
+            void queryClient.invalidateQueries({
+                queryKey: ['klipy', 'favorites'],
+            });
             void queryClient.invalidateQueries({ queryKey: ['gif-picker'] });
         },
         onError: (error: Error): void => {
@@ -96,7 +99,19 @@ export const useAddTagsToGif = (): UseMutationResult<
             tagIds: string[];
         }): Promise<KlipyFavorite> =>
             gifTagsApi.addTagsToGif(klipyId, tagIds),
-        onSuccess: (): void => {
+        onSuccess: (updatedFav): void => {
+            queryClient.setQueriesData<KlipyFavorite[]>(
+                { queryKey: ['klipy', 'favorites'] },
+                (old = []): KlipyFavorite[] =>
+                    old.map((f): KlipyFavorite =>
+                        String(f.klipyId) === String(updatedFav.klipyId)
+                            ? { ...f, tagIds: updatedFav.tagIds ?? [] }
+                            : f,
+                    ),
+            );
+            void queryClient.invalidateQueries({
+                queryKey: ['klipy', 'favorites'],
+            });
             void queryClient.invalidateQueries({ queryKey: ['gif-picker'] });
         },
         onError: (error: Error): void => {
@@ -125,7 +140,19 @@ export const useRemoveTagsFromGif = (): UseMutationResult<
             tagIds: string[];
         }): Promise<KlipyFavorite> =>
             gifTagsApi.removeTagsFromGif(klipyId, tagIds),
-        onSuccess: (): void => {
+        onSuccess: (updatedFav): void => {
+            queryClient.setQueriesData<KlipyFavorite[]>(
+                { queryKey: ['klipy', 'favorites'] },
+                (old = []): KlipyFavorite[] =>
+                    old.map((f): KlipyFavorite =>
+                        String(f.klipyId) === String(updatedFav.klipyId)
+                            ? { ...f, tagIds: updatedFav.tagIds ?? [] }
+                            : f,
+                    ),
+            );
+            void queryClient.invalidateQueries({
+                queryKey: ['klipy', 'favorites'],
+            });
             void queryClient.invalidateQueries({ queryKey: ['gif-picker'] });
         },
         onError: (error: Error): void => {
