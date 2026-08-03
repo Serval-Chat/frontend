@@ -67,6 +67,8 @@ export interface MessagesListProps {
     fullMemberMap?: Map<string, ServerMember>;
     userRolesMap?: Map<string, Role[]>;
     roleMap?: Map<string, Role>;
+    retryMessage?: (localId: string) => void;
+    discardMessage?: (localId: string) => void;
 }
 
 export const MessagesList = React.memo(
@@ -97,6 +99,8 @@ export const MessagesList = React.memo(
         fullMemberMap,
         userRolesMap,
         roleMap,
+        retryMessage,
+        discardMessage,
     }: MessagesListProps) => {
         const blocks = useAppSelector(
             (state): Record<string, number> => state.blocking.blocks,
@@ -1059,6 +1063,7 @@ export const MessagesList = React.memo(
                                             disableGlowAndColors={
                                                 disableGlowAndColors
                                             }
+                                            discardMessage={discardMessage}
                                             fullMemberMap={fullMemberMap}
                                             hasPermission={hasPermission}
                                             iconRole={item.message.iconRole}
@@ -1073,6 +1078,7 @@ export const MessagesList = React.memo(
                                                     ? prevItem.message
                                                     : undefined
                                             }
+                                            retryMessage={retryMessage}
                                             role={item.message.role}
                                             roleMap={roleMap}
                                             senderMember={fullMemberMap?.get(
@@ -1087,6 +1093,7 @@ export const MessagesList = React.memo(
                                             onResize={requestMeasure}
                                         />
                                     ) : null}
+
 
                                     {item.type === 'blocked-group' ? (
                                         <Box className="my-1 px-4 py-2">

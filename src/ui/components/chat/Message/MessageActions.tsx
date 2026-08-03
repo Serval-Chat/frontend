@@ -4,6 +4,7 @@ import {
     CornerUpLeft,
     Edit,
     Pin,
+    RefreshCw,
     SmilePlus,
     StickyNote,
     Trash2,
@@ -39,6 +40,8 @@ interface MessageActionsProps {
     onTogglePin: () => void;
     onToggleSticky: () => void;
     reactRef: React.RefObject<HTMLButtonElement | null>;
+    onRetry?: () => void;
+    onDiscard?: () => void;
 }
 
 export const MessageActions = React.memo(
@@ -57,8 +60,43 @@ export const MessageActions = React.memo(
         onTogglePin,
         onToggleSticky,
         reactRef,
-    }: MessageActionsProps) => (
-        <Box className="flex items-center gap-1 rounded border border-white/5 bg-background px-1 py-1 shadow-xl max-md:hidden">
+        onRetry,
+        onDiscard,
+    }: MessageActionsProps) => {
+        if (message._pending === 'failed') {
+            return (
+                <Box className="flex items-center gap-1 rounded border border-white/5 bg-background px-1 py-1 shadow-xl">
+                    {onRetry ? (
+                        <Tooltip content="Try again" position="top">
+                            <Button
+                                className="h-8 w-8 rounded p-1.5 text-muted-foreground transition-colors hover:bg-white/5 hover:text-foreground"
+                                size="sm"
+                                title="Try again"
+                                variant="ghost"
+                                onClick={onRetry}
+                            >
+                                <RefreshCw size={18} />
+                            </Button>
+                        </Tooltip>
+                    ) : null}
+                    {onDiscard || onDelete ? (
+                        <Tooltip content="Delete message" position="top">
+                            <Button
+                                className="h-8 w-8 rounded p-1.5 text-danger transition-colors hover:bg-danger/20 hover:text-danger"
+                                size="sm"
+                                variant="ghost"
+                                onClick={onDiscard || onDelete}
+                            >
+                                <Trash2 size={16} />
+                            </Button>
+                        </Tooltip>
+                    ) : null}
+                </Box>
+            );
+        }
+
+        return (
+            <Box className="flex items-center gap-1 rounded border border-white/5 bg-background px-1 py-1 shadow-xl max-md:hidden">
             {quickReactions && quickReactions.length > 0
                 ? quickReactions.map((quickReaction) => (
                       <Tooltip
@@ -193,7 +231,7 @@ export const MessageActions = React.memo(
                 </Button>
             ) : null}
         </Box>
-    ),
-);
+    );
+});
 
 MessageActions.displayName = 'MessageActions';

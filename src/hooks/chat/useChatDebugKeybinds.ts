@@ -5,6 +5,7 @@ import type { QueryClient } from '@tanstack/react-query';
 import type { User } from '@/api/users/users.types';
 import type { KeybindManager } from '@/keybinds/KeybindManager';
 import type { Theme } from '@/providers/ThemeProvider';
+import { armInterceptor } from '@/hooks/ws/debugSendInterceptor';
 import { showInAppNotification } from '@/ui/notifications/inAppNotifications';
 import { WsEvents, wsClient } from '@/ws';
 
@@ -29,11 +30,6 @@ interface UseChatDebugKeybindsArgs {
     onAdjustTypingCount: (delta: number) => void;
 }
 
-/**
- * registers the debug-only keybinds used during development (cycle themes,
- * fake typing indicators, simulate DM/mention notifications). Extracted from
- * MainChat purely to keep that component focused on real chat wiring.
- */
 export const useChatDebugKeybinds = ({
     keybindManager,
     theme,
@@ -155,6 +151,28 @@ export const useChatDebugKeybinds = ({
                         poll: null,
                         senderIsBot: false,
                     },
+                });
+            }
+            if (keybindManager.matches('debug.send.delay', e)) {
+                e.preventDefault();
+                e.stopPropagation();
+                armInterceptor('delay', 2000);
+                showInAppNotification({
+                    title: 'Debug: Send Delay Armed',
+                    message:
+                        'Next message will be delayed by 2 s before being sent.',
+                    type: 'info',
+                });
+            }
+            if (keybindManager.matches('debug.send.drop', e)) {
+                e.preventDefault();
+                e.stopPropagation();
+                armInterceptor('drop');
+                showInAppNotification({
+                    title: 'Debug: Send Drop Armed',
+                    message:
+                        'Next message will be silently dropped (simulates a failed send).',
+                    type: 'error',
                 });
             }
         };

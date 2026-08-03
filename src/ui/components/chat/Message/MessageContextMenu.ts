@@ -7,12 +7,14 @@ import {
     Edit,
     ListTree,
     Pin,
+    RefreshCw,
     Shield,
     SmilePlus,
     StickyNote,
     Trash2,
     UserMinus,
     UserPlus,
+    X,
 } from 'lucide-react';
 
 import type { Friend } from '@/api/friends/friends.types';
@@ -48,6 +50,8 @@ interface ContextMenuParams {
     myHighestRolePosition?: number;
     onAddRole?: (roleId: string) => void;
     onRemoveRole?: (roleId: string) => void;
+    onRetryMessage?: () => void;
+    onDiscardMessage?: () => void;
 }
 
 function buildContextMenuItems({
@@ -75,8 +79,29 @@ function buildContextMenuItems({
     myHighestRolePosition,
     onAddRole,
     onRemoveRole,
+    onRetryMessage,
+    onDiscardMessage,
 }: ContextMenuParams): ContextMenuItem[] {
     const items: ContextMenuItem[] = [];
+
+    if (onRetryMessage || onDiscardMessage) {
+        if (onRetryMessage) {
+            items.push({
+                label: 'Retry Sending',
+                icon: RefreshCw,
+                onClick: onRetryMessage,
+            });
+        }
+        if (onDiscardMessage) {
+            items.push({
+                label: 'Discard Message',
+                icon: X,
+                variant: 'danger',
+                onClick: onDiscardMessage,
+            });
+        }
+        items.push({ type: 'divider' });
+    }
 
     if (message.serverId && message.channelId) {
         items.push(
@@ -302,6 +327,8 @@ export function useMessageContextMenu(
         myHighestRolePosition,
         onAddRole,
         onRemoveRole,
+        onRetryMessage,
+        onDiscardMessage,
     } = params;
 
     return React.useMemo(
@@ -331,6 +358,8 @@ export function useMessageContextMenu(
                 myHighestRolePosition,
                 onAddRole,
                 onRemoveRole,
+                onRetryMessage,
+                onDiscardMessage,
             }),
 
         [
@@ -358,6 +387,8 @@ export function useMessageContextMenu(
             myHighestRolePosition,
             onAddRole,
             onRemoveRole,
+            onRetryMessage,
+            onDiscardMessage,
         ],
     );
 }

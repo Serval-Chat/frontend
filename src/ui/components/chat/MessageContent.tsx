@@ -46,6 +46,7 @@ interface MessageContentProps {
     senderMember?: ServerMember;
     senderRoles?: Role[];
     isEphemeral?: boolean;
+    isFailed?: boolean;
     invocationId?: string;
     onResize?: () => void;
 }
@@ -68,6 +69,7 @@ export const MessageContent = React.memo(
         senderMember,
         senderRoles,
         isEphemeral,
+        isFailed,
         invocationId,
         onResize,
     }: MessageContentProps) => {
@@ -150,7 +152,7 @@ export const MessageContent = React.memo(
             <Box
                 className={cn(
                     'text-sm leading-relaxed break-words whitespace-pre-wrap',
-                    isDeleted ? 'text-danger' : 'text-foreground',
+                    isDeleted || isFailed ? 'text-danger' : 'text-foreground',
                 )}
             >
                 {text ? (
@@ -159,7 +161,7 @@ export const MessageContent = React.memo(
                             largeEmojis={isEmojiOnly}
                             nodes={nodes}
                             serverId={serverId}
-                            variant={isDeleted ? 'danger' : 'default'}
+                            variant={isDeleted || isFailed ? 'danger' : 'default'}
                             wrap="preWrap"
                             onResize={onResize}
                         />

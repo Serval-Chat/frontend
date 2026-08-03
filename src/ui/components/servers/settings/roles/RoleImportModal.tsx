@@ -118,7 +118,7 @@ function RoleEntryPreview({
             {onRemove && (
                 <Tooltip content="Remove from import" position="top">
                     <button
-                        className="opacity-0 group-hover:opacity-100 transition-opacity p-1 text-muted-foreground hover:text-red-400 rounded"
+                        className="rounded p-1 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 hover:text-red-400"
                         type="button"
                         onClick={onRemove}
                     >
@@ -191,12 +191,12 @@ export const RoleImportModal = ({
 
     return (
         <Modal
-            className="max-w-xl max-h-[75vh] flex flex-col"
+            className="flex max-h-[75vh] max-w-xl flex-col"
             isOpen={isOpen}
             title="Import Role"
             onClose={handleClose}
         >
-            <div className="flex flex-col max-h-full overflow-hidden px-1">
+            <div className="flex max-h-full flex-col overflow-hidden px-1">
                 {!parsed && (
                     <div className="flex flex-col gap-4">
                         <p className="text-sm text-muted-foreground">
@@ -211,7 +211,7 @@ export const RoleImportModal = ({
                                 Export code
                             </label>
                             <textarea
-                                className="custom-scrollbar min-h-[100px] w-full resize-y rounded-md border border-border-subtle bg-bg-subtle px-3 py-2 font-mono text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                                className="custom-scrollbar min-h-[100px] w-full resize-y rounded-md border border-border-subtle bg-bg-subtle px-3 py-2 font-mono text-xs text-foreground placeholder:text-muted-foreground focus:ring-1 focus:ring-primary focus:outline-none"
                                 id="role-import-code"
                                 placeholder="Paste export code here…"
                                 spellCheck={false}
@@ -236,7 +236,7 @@ export const RoleImportModal = ({
 
                 {/* Preview */}
                 {parsed && (
-                    <div className="flex flex-col gap-2 min-h-0">
+                    <div className="flex min-h-0 flex-col gap-2">
                         <div className="flex items-center gap-2 text-sm font-semibold text-green-400">
                             <CheckCircle2 size={14} />
                             {isList
@@ -244,14 +244,14 @@ export const RoleImportModal = ({
                                 : 'Single role'}
                         </div>
 
-                        <div className="custom-scrollbar max-h-[50vh] overflow-y-auto flex flex-col gap-1.5 pr-1">
+                        <div className="custom-scrollbar flex max-h-[50vh] flex-col gap-1.5 overflow-y-auto pr-1">
                             {isList ? (
                                 roleList?.length ? (
                                     roleList.map((entry, i) => (
                                         <RoleEntryPreview
                                             entry={entry}
                                             index={i}
-                                            key={i}
+                                            key={entry.name ? `${entry.name}-${i}` : `role-${i}`}
                                             onRemove={(): void =>
                                                 handleRemoveRole(i)
                                             }
@@ -270,7 +270,7 @@ export const RoleImportModal = ({
                         </div>
 
                         {isList && !!roleList?.length && (
-                            <p className="shrink-0 text-xs text-muted-foreground pt-1">
+                            <p className="shrink-0 pt-1 text-xs text-muted-foreground">
                                 Importing a role list will create{' '}
                                 <strong>{roleList?.length}</strong> new roles in
                                 the order shown above. Existing roles will not

@@ -115,6 +115,8 @@ interface ChatMainColumnProps {
     replyingTo: ProcessedChatMessage | null;
     sendMessage: ChatData['sendMessage'];
     sendTyping: ChatData['sendTyping'];
+    retryMessage: ChatData['retryMessage'];
+    discardMessage: ChatData['discardMessage'];
     isDragging: boolean;
     onAtBottomChange: (isAtBottom: boolean) => void;
     onJumpToLatest: () => void;
@@ -155,6 +157,8 @@ const ChatMainColumn = ({
     replyingTo,
     sendMessage,
     sendTyping,
+    retryMessage,
+    discardMessage,
     isDragging,
     onAtBottomChange,
     onJumpToLatest,
@@ -210,6 +214,7 @@ const ChatMainColumn = ({
                         disableGlowAndColors={
                             usernameStyle.disableGlowAndColors
                         }
+                        discardMessage={discardMessage}
                         friendUser={friendUser}
                         fullMemberMap={memberMaps.fullMemberMap}
                         hasMore={hasNextPage}
@@ -222,6 +227,7 @@ const ChatMainColumn = ({
                         me={me}
                         messages={messages}
                         ref={messagesListRef}
+                        retryMessage={retryMessage}
                         roleMap={memberMaps.roleMap}
                         selectedChannel={selectedChannel}
                         serverDetails={serverDetails}
@@ -446,6 +452,8 @@ export const MainChat = ({
         hasNextPage,
         isFetchingNextPage,
         isViewingOlderMessages,
+        retryMessage,
+        discardMessage,
         sendMessage,
         sendTyping,
         typingUsers,
@@ -616,6 +624,7 @@ export const MainChat = ({
                     canSendMessages={canSendMessages}
                     chatContainerRef={chatContainerRef}
                     cooldown={cooldown}
+                    discardMessage={discardMessage}
                     fileQueueResult={fileQueueResult}
                     friendUser={friendUser}
                     hasNextPage={hasNextPage}
@@ -633,6 +642,7 @@ export const MainChat = ({
                     messagesListRef={messagesListRef}
                     replyingTo={replyingTo}
                     resolvedTypingUsers={resolvedTypingUsers}
+                    retryMessage={retryMessage}
                     selectedChannel={selectedChannel}
                     selectedChannelId={selectedChannelId}
                     selectedFriendId={selectedFriendId}

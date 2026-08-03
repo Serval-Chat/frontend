@@ -118,7 +118,7 @@ export const useMainChatData = ({
         memberMaps.iconRoleMap,
     );
 
-    const { sendMessage, sendTyping, typingUsers } = useChatWS(
+    const { sendMessage, sendTyping, typingUsers, retryMessage, discardMessage } = useChatWS(
         selectedFriendId ?? undefined,
         selectedServerId ?? undefined,
         selectedChannelId ?? undefined,
@@ -152,6 +152,8 @@ export const useMainChatData = ({
         sendMessage,
         sendTyping,
         typingUsers,
+        retryMessage,
+        discardMessage,
         canBypassSlowMode,
         cooldown,
         setCooldown,

@@ -30,6 +30,8 @@ export interface MessageProps {
     disableGlow?: boolean;
     disableActions?: boolean;
     onResize?: () => void;
+    retryMessage?: (localId: string) => void;
+    discardMessage?: (localId: string) => void;
 }
 
 export {

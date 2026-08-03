@@ -32,6 +32,8 @@ interface MessageItemProps {
     fullMemberMap?: Map<string, ServerMember>;
     roleMap?: Map<string, Role>;
     onResize?: () => void;
+    retryMessage?: (localId: string) => void;
+    discardMessage?: (localId: string) => void;
 }
 
 export const MessageItem = React.memo(
@@ -56,6 +58,8 @@ export const MessageItem = React.memo(
         fullMemberMap,
         roleMap,
         onResize,
+        retryMessage,
+        discardMessage,
     }: MessageItemProps) => {
         const isGroupStart =
             !prevMessage ||
@@ -72,6 +76,7 @@ export const MessageItem = React.memo(
                 disableCustomFonts={disableCustomFonts}
                 disableGlow={disableGlow}
                 disableGlowAndColors={disableGlowAndColors}
+                discardMessage={discardMessage}
                 fullMemberMap={fullMemberMap}
                 hasPermission={hasPermission}
                 iconRole={iconRole || message.iconRole}
@@ -80,6 +85,7 @@ export const MessageItem = React.memo(
                 isOwner={isOwner}
                 me={me}
                 message={message}
+                retryMessage={retryMessage}
                 role={role || message.role}
                 roleMap={roleMap}
                 senderMember={senderMember}

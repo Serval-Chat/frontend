@@ -101,16 +101,17 @@ export const ServerRoleSettings = ({ serverId }: ServerRoleSettingsProps) => {
                 name: result.role.name,
                 color: result.role.color ?? undefined,
                 permissions: result.role.permissions,
-                ...result.role,
             },
             {
                 onSuccess: (newRole): void => {
-                    const { name: _n, permissions: _p, color: _c, ...rest } =
-                        result.role;
+                    const rest = { ...result.role } as Partial<Role>;
+                    delete rest.name;
+                    delete rest.permissions;
+                    delete rest.color;
                     if (Object.keys(rest).length > 0) {
                         updateRoleMutation.mutate({
                             roleId: newRole.id,
-                            updates: rest as Partial<Role>,
+                            updates: rest,
                         });
                     }
                     setSelectedRoleId(newRole.id);
@@ -136,10 +137,12 @@ export const ServerRoleSettings = ({ serverId }: ServerRoleSettingsProps) => {
                 });
                 createdRoleIds.push(createdRole.id);
 
-                const { name: _n, permissions: _p, color: _c, ...rest } =
-                    roleData;
+                const rest = { ...roleData } as Partial<Role>;
+                delete rest.name;
+                delete rest.permissions;
+                delete rest.color;
                 if (Object.keys(rest).length > 0) {
-                    await serversApi.updateRole(serverId, createdRole.id, rest as Partial<Role>);
+                    await serversApi.updateRole(serverId, createdRole.id, rest);
                 }
             } catch {
                 showToast(`Failed to import role "${roleData.name}"`, 'error');
@@ -202,7 +205,9 @@ export const ServerRoleSettings = ({ serverId }: ServerRoleSettingsProps) => {
                     onAddRole={handleAddRole}
                     onDeleteRole={handleDeleteRole}
                     onImportRole={handleImportRole}
-                    onImportRoleList={handleImportRoleList}
+                    onImportRoleList={(res): void => {
+                        void handleImportRoleList(res);
+                    }}
                     onReorderRoles={handleReorderRoles}
                     onSelectRole={(id): void => {
                         setSelectedRoleId(id);

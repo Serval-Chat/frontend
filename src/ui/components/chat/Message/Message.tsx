@@ -70,6 +70,8 @@ export const Message = React.memo(
         isOwner: passedIsOwner,
         fullMemberMap,
         roleMap,
+        retryMessage,
+        discardMessage,
     }: MessageProps) => {
         const {
             user,
@@ -403,7 +405,27 @@ export const Message = React.memo(
             onRemoveRole: (roleId): void => {
                 removeRole({ userId: message.senderId, roleId });
             },
+            onRetryMessage:
+                message._pending === 'failed' && message._localId && retryMessage
+                    ? (): void => retryMessage(message._localId!)
+                    : undefined,
+            onDiscardMessage:
+                message._pending != null && message._localId && discardMessage
+                    ? (): void => discardMessage(message._localId!)
+                    : undefined,
         });
+
+        const handleRetry = React.useCallback((): void => {
+            if (message._localId && retryMessage) {
+                retryMessage(message._localId);
+            }
+        }, [message._localId, retryMessage]);
+
+        const handleDiscard = React.useCallback((): void => {
+            if (message._localId && discardMessage) {
+                discardMessage(message._localId);
+            }
+        }, [message._localId, discardMessage]);
 
         const isMobile = React.useMemo(
             (): boolean =>
@@ -526,6 +548,7 @@ export const Message = React.memo(
                                 isDeleted={!!message.deletedAt}
                                 isEdited={message.isEdited && !isGroupStart}
                                 isEphemeral={message.isEphemeral}
+                                isFailed={message._pending === 'failed'}
                                 messageId={message.id}
                                 poll={message.poll}
                                 senderId={message.senderId}
@@ -569,9 +592,11 @@ export const Message = React.memo(
                             reactRef={reactRef}
                             showPicker={showPicker}
                             onDelete={handleDelete}
+                            onDiscard={handleDiscard}
                             onEdit={handleEdit}
                             onQuickReact={handleQuickReact}
                             onReplyToMessage={onReplyToMessage}
+                            onRetry={handleRetry}
                             onTogglePicker={handleTogglePicker}
                             onTogglePin={handleTogglePin}
                             onToggleSticky={handleToggleSticky}
@@ -601,6 +626,7 @@ export const Message = React.memo(
                     isHighlighted &&
                         'border-l-2 border-[var(--primary)] bg-[var(--primary-muted)]',
                     mentionsMe && 'border-l-2 border-[var(--caution)]',
+                    message._pending === 'sending' && 'opacity-50',
                 )}
                 id={`message-${message.id}`}
                 onDoubleClick={handleDoubleClick}

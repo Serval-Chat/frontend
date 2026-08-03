@@ -236,7 +236,7 @@ export const Tooltip = ({
                                   className={cn(
                                       'pointer-events-none fixed z-[var(--z-index-tooltip)] rounded-lg bg-[#111214] px-3 py-1.5 text-[13px] font-bold text-[#f2f3f5] shadow-2xl',
                                       multiline
-                                          ? 'max-w-xs whitespace-pre-wrap leading-tight'
+                                          ? 'max-w-xs leading-tight whitespace-pre-wrap'
                                           : 'whitespace-nowrap',
                                       'before:absolute before:border-[6px] before:border-transparent before:content-[""]',
                                       effectivePosition === 'right' &&

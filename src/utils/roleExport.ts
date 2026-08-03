@@ -52,7 +52,7 @@ async function compress(data: string): Promise<Uint8Array> {
 async function decompress(bytes: Uint8Array): Promise<string> {
     const stream = new DecompressionStream('deflate-raw');
     const writer = stream.writable.getWriter();
-    void writer.write(bytes);
+    void writer.write(bytes as unknown as BufferSource);
     void writer.close();
     const chunks: Uint8Array[] = [];
     const reader = stream.readable.getReader();

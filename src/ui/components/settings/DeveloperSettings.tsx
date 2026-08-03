@@ -95,7 +95,7 @@ export const DeveloperSettings = () => {
                             readOnly
                             aria-label="User token (censored)"
                             className="min-w-0 flex-1 rounded-md border border-border-subtle bg-background px-3 py-2 font-mono text-xs text-foreground"
-                            value={token !== null ? censorToken(token) : '—'}
+                            value={token !== null ? censorToken(token) : '-'}
                         />
                         <Button
                             className="aspect-square self-stretch"

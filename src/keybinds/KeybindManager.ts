@@ -8,7 +8,9 @@ export type KeybindActionId =
     | 'debug.theme.next'
     | 'debug.notification.example'
     | 'debug.notification.dm'
-    | 'debug.notification.mention';
+    | 'debug.notification.mention'
+    | 'debug.send.delay'
+    | 'debug.send.drop';
 
 export interface KeybindAction {
     id: KeybindActionId;
@@ -74,6 +76,22 @@ export const KEYBIND_ACTIONS: KeybindAction[] = [
         description: 'Show an example mention in-app notification.',
         category: 'Developer',
         defaultBinding: { code: 'Digit7', alt: true },
+    },
+    {
+        id: 'debug.send.delay',
+        label: 'Debug: Delay Next Send',
+        description:
+            'One-shot: artificially delays the next outgoing message by 2 s to test the optimistic pending state.',
+        category: 'Developer',
+        defaultBinding: { code: 'Digit8', alt: true },
+    },
+    {
+        id: 'debug.send.drop',
+        label: 'Debug: Drop Next Send',
+        description:
+            'One-shot: silently drops the next outgoing message so it times out and enters the failed state.',
+        category: 'Developer',
+        defaultBinding: { code: 'Digit9', alt: true },
     },
 ];
 

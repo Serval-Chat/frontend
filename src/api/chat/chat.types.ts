@@ -118,6 +118,8 @@ export interface MessageSearchResponse {
 
 export interface ChatMessage {
     id: string;
+    _pending?: 'sending' | 'failed';
+    _localId?: string;
     text: string;
     createdAt: string;
     senderId: string;

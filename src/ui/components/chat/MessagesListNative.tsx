@@ -62,6 +62,8 @@ export const MessagesListNative = React.memo(
         fullMemberMap,
         userRolesMap,
         roleMap,
+        retryMessage,
+        discardMessage,
     }: MessagesListProps) => {
         const blocks = useAppSelector(
             (state): Record<string, number> => state.blocking.blocks,
@@ -562,6 +564,7 @@ export const MessagesListNative = React.memo(
                 disableCustomFonts={disableCustomFonts}
                 disableGlow={disableGlow}
                 disableGlowAndColors={disableGlowAndColors}
+                discardMessage={discardMessage}
                 fullMemberMap={fullMemberMap}
                 hasPermission={hasPermission}
                 iconRole={msg.iconRole}
@@ -570,6 +573,7 @@ export const MessagesListNative = React.memo(
                 me={me}
                 message={msg}
                 prevMessage={prev}
+                retryMessage={retryMessage}
                 role={msg.role}
                 roleMap={roleMap}
                 senderMember={fullMemberMap?.get(msg.senderId)}
