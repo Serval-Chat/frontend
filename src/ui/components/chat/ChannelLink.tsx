@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 
-import { Hash, Volume2 } from 'lucide-react';
+import { Hash, MessageSquare, Volume2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 import { useChannels, useServerDetails } from '@/api/servers/servers.queries';
@@ -42,7 +42,7 @@ export const ChannelLink = ({
     const isLoading = serverLoading || channelsLoading;
     const displayName =
         channel?.name ?? (isLoading ? '...' : 'unknown channel');
-    const displayText = isCrossingServers
+    const baseText = isCrossingServers
         ? `${server?.name ?? '...'} > ${displayName}`
         : displayName;
     const channelType = channel?.type ?? 'text';
@@ -71,10 +71,14 @@ export const ChannelLink = ({
             className="inline-flex cursor-pointer items-center rounded bg-primary/10 px-1.5 py-[4px] font-medium text-primary transition-colors select-none hover:bg-primary/20"
             onClick={handleClick}
         >
-            <Icon className="mr-1" size="14" />
+            <Icon className="mr-1 shrink-0" size={14} />
             <Text as="span" className="leading-none" size="sm" variant="muted">
-                {displayText}
+                {baseText}
+                {messageId ? ' >' : ''}
             </Text>
+            {messageId ? (
+                <MessageSquare className="ml-1 shrink-0" size={13} />
+            ) : null}
         </Box>
     );
 };
