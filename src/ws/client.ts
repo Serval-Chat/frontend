@@ -271,7 +271,10 @@ class WsClient {
 
             if (type === 'error') {
                 const errorPayload = payload as unknown as IWsErrorPayload;
-                if (errorPayload.code === 'UNAUTHORIZED') {
+                if (
+                    errorPayload.code === 'UNAUTHORIZED' &&
+                    !this.isAuthenticated
+                ) {
                     console.error(
                         '[WS] Authentication failed, clearing token...',
                     );

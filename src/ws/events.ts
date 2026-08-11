@@ -69,8 +69,7 @@ export interface IWsAuthenticatedEvent {
  */
 export interface IWsErrorEvent {
     code: string;
-    message: string;
-    details?: JsonValue;
+    details?: { message?: string; [key: string]: JsonValue | undefined };
 }
 
 /**

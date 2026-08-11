@@ -617,7 +617,11 @@ export const setupGlobalWsHandlers = (
 
     cleanups.push(
         wsClient.on<IWsErrorEvent>(WsEvents.ERROR, (payload): void => {
-            console.error('[WS] Global Error:', payload.message);
+            console.error(
+                '[WS] Global Error:',
+                payload.code,
+                payload.details?.message,
+            );
         }),
     );
 
