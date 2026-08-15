@@ -10,6 +10,7 @@ import { m } from 'framer-motion';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 
 import { useMe } from '@/api/users/users.queries';
+import { useResizable } from '@/hooks/useResizable';
 import { useSwipeGesture } from '@/hooks/useSwipeGesture';
 import { useAppDispatch, useAppShallowSelector } from '@/store/hooks';
 import {
@@ -38,11 +39,17 @@ const DesktopChatLayout = ({
     showDesktopMemberList,
     selectedFriendId,
     selectedServerId,
+    memberListWidth,
+    isMemberListResizing,
+    onMemberListResizeStart,
 }: {
     isSplitViewActive: boolean;
     showDesktopMemberList: boolean;
     selectedFriendId: string | null;
     selectedServerId: string | null;
+    memberListWidth: number;
+    isMemberListResizing: boolean;
+    onMemberListResizeStart: (e: React.MouseEvent) => void;
 }) => (
     <Box className="chat-background fixed inset-0 flex w-full overflow-hidden overscroll-none">
         <Outlet />
@@ -54,21 +61,23 @@ const DesktopChatLayout = ({
             showDesktopMemberList &&
             !!(selectedFriendId || selectedServerId) ? (
                 <m.div
-                    animate={{
-                        width: Number.parseInt(
-                            localStorage.getItem('tertiary-sidebar-width') ??
-                                '240',
-                            10,
-                        ),
-                        opacity: 1,
-                    }}
+                    animate={{ width: memberListWidth, opacity: 1 }}
                     className="h-full overflow-hidden"
                     exit={{ width: 0, opacity: 0 }}
                     initial={{ width: 0, opacity: 0 }}
                     key="desktop-member-list"
-                    transition={transitions.sidebar}
+                    transition={{
+                        width: isMemberListResizing
+                            ? { duration: 0 }
+                            : transitions.sidebar,
+                        opacity: transitions.sidebar,
+                    }}
                 >
-                    <TertiarySidebar />
+                    <TertiarySidebar
+                        isResizing={isMemberListResizing}
+                        width={memberListWidth}
+                        onResizeMouseDown={onMemberListResizeStart}
+                    />
                 </m.div>
             ) : null}
         </AnimatePresence>
@@ -151,6 +160,17 @@ export const Chat = () => {
     }));
 
     const [isMobile, setIsMobile] = useState(isMobileViewport);
+    const {
+        width: memberListWidth,
+        isResizing: isMemberListResizing,
+        handleMouseDown: onMemberListResizeStart,
+    } = useResizable({
+        initialWidth: 240,
+        minWidth: 200,
+        maxWidth: 480,
+        storageKey: 'tertiary-sidebar-width',
+        side: 'right',
+    });
     const [visualViewportBounds, setVisualViewportBounds] = useState({
         top: 0,
         height:
@@ -359,10 +379,13 @@ export const Chat = () => {
         return (
             <>
                 <DesktopChatLayout
+                    isMemberListResizing={isMemberListResizing}
                     isSplitViewActive={isSplitViewActive}
+                    memberListWidth={memberListWidth}
                     selectedFriendId={selectedFriendId}
                     selectedServerId={selectedServerId}
                     showDesktopMemberList={showDesktopMemberList}
+                    onMemberListResizeStart={onMemberListResizeStart}
                 />
                 <UnacknowledgedWarningModal />
             </>

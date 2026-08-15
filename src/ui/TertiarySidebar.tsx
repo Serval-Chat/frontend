@@ -22,6 +22,9 @@ interface TertiarySidebarProps {
     selectedServerId?: null | string;
     ignoreUrlMatch?: boolean;
     onMobileClose?: () => void;
+    width?: number;
+    isResizing?: boolean;
+    onResizeMouseDown?: (e: React.MouseEvent) => void;
 }
 
 export const TertiarySidebar = ({
@@ -29,6 +32,9 @@ export const TertiarySidebar = ({
     selectedServerId: selectedServerIdOverride,
     ignoreUrlMatch,
     onMobileClose,
+    width: widthOverride,
+    isResizing: isResizingOverride,
+    onResizeMouseDown,
 }: TertiarySidebarProps) => {
     const {
         selectedFriendId,
@@ -74,6 +80,14 @@ export const TertiarySidebar = ({
         side: 'right',
     });
 
+    const isControlled = widthOverride !== undefined;
+    const effectiveWidth = isControlled ? widthOverride : width;
+    const effectiveIsResizing = isControlled
+        ? (isResizingOverride ?? false)
+        : isResizing;
+    const effectiveHandleMouseDown =
+        onResizeMouseDown ?? handleMouseDown;
+
     const scrollContainerRef = useRef<HTMLDivElement>(null);
 
     if (!selectedFriendId && !selectedServerId) {
@@ -86,22 +100,26 @@ export const TertiarySidebar = ({
             className={cn(
                 'pride-glass relative flex h-full shrink-0 flex-col border-l border-(--member-list-border,var(--border-subtle)) bg-(--member-list-bg,var(--tertiary-bg))',
                 'pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]',
-                'max-md:fixed max-md:inset-y-0 max-md:right-0 max-md:z-top max-md:w-64 max-md:shadow-2xl',
+                'max-md:fixed max-md:inset-y-0 max-md:right-0 max-md:z-top max-md:!w-64 max-md:shadow-2xl',
                 'max-md:transition-transform max-md:duration-300 max-md:ease-[cubic-bezier(0.25,0.46,0.45,0.94)]',
                 showMobileMemberList
                     ? 'max-md:translate-x-0'
                     : 'max-md:translate-x-full',
             )}
-            style={{
-                width: `${width}px`,
-                minWidth: '200px',
-                maxWidth: '480px',
-            }}
+            style={
+                isControlled
+                    ? { minWidth: '200px', maxWidth: '480px', width: '100%' }
+                    : {
+                          width: `${effectiveWidth}px`,
+                          minWidth: '200px',
+                          maxWidth: '480px',
+                      }
+            }
         >
             <Resizer
-                isResizing={isResizing}
+                isResizing={effectiveIsResizing}
                 side="left"
-                onMouseDown={handleMouseDown}
+                onMouseDown={effectiveHandleMouseDown}
             />
 
             <Box
