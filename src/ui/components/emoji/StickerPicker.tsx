@@ -2,7 +2,6 @@ import React, { useCallback, useMemo, useRef, useState } from 'react';
 
 import { m } from 'framer-motion';
 import { Search } from 'lucide-react';
-import { useLockBodyScroll } from 'react-use';
 import { List } from 'react-window';
 import type { ListImperativeAPI, RowComponentProps } from 'react-window';
 
@@ -148,11 +147,7 @@ const StickerPickerRow = ({
             style={style}
         >
             {row.stickers.map((sticker) => (
-                <Tooltip
-                    content={sticker.name}
-                    key={sticker.id}
-                    position="top"
-                >
+                <Tooltip content={sticker.name} key={sticker.id} position="top">
                     <Button
                         className="group relative flex shrink-0 items-center justify-center rounded-lg p-2 transition-colors hover:bg-bg-subtle"
                         style={{
@@ -355,7 +350,7 @@ const StickerPickerContent = ({
             {/* Sticker picker sidebar: renders server icons */}
             <Box
                 className={cn(
-                    'scrollbar-hide flex flex-shrink-0 flex-col items-center overflow-y-auto border-r border-divider/50 bg-bg-subtle/50 shadow-inner',
+                    'scrollbar-hide flex flex-shrink-0 flex-col items-center overflow-y-auto overscroll-contain border-r border-divider/50 bg-bg-subtle/50 shadow-inner',
                     SIDEBAR_CATEGORY_GAP,
                     SIDEBAR_PADDING_Y,
                 )}
@@ -425,7 +420,7 @@ const StickerPickerContent = ({
 
                 {flatRows.length > 0 ? (
                     <List
-                        className="scrollbar-thin scrollbar-thumb-divider hover:scrollbar-thumb-muted-foreground/30 scrollbar-track-transparent pr-1"
+                        className="scrollbar-thin scrollbar-thumb-divider hover:scrollbar-thumb-muted-foreground/30 scrollbar-track-transparent overscroll-contain pr-1"
                         listRef={listRef}
                         rowComponent={Row}
                         rowCount={flatRows.length}
@@ -471,22 +466,15 @@ export const StickerPicker = ({
         typeof window !== 'undefined' ? window.innerWidth : 1024,
     );
 
-    useLockBodyScroll(true);
-
     React.useEffect((): (() => void) => {
         const handleResize = (): void => setWindowWidth(window.innerWidth);
         window.addEventListener('resize', handleResize);
-        document.body.classList.add('picker-open');
         return (): void => {
             window.removeEventListener('resize', handleResize);
-            document.body.classList.remove('picker-open');
         };
     }, []);
 
-    const width = Math.min(
-        PICKER_WIDTH,
-        Math.max(300, windowWidth - 24),
-    );
+    const width = Math.min(PICKER_WIDTH, Math.max(300, windowWidth - 24));
     const height = PICKER_HEIGHT;
 
     return (
@@ -512,4 +500,3 @@ export const StickerPicker = ({
         </m.div>
     );
 };
-

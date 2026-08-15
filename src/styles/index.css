@@ -426,10 +426,6 @@
         1px 0;
 }
 
-body.picker-open .custom-scrollbar {
-    overflow: hidden !important;
-}
-
 .curly-underline {
     position: relative;
     display: inline;

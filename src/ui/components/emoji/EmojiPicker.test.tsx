@@ -38,6 +38,13 @@ describe('EmojiPicker mobile bottom sheet', (): void => {
         expect(document.querySelector('.rounded-t-2xl')).toBeNull();
     });
 
+    it('does not lock body scroll or tag the body as picker-open', (): void => {
+        renderPicker();
+
+        expect(document.body.classList.contains('picker-open')).toBe(false);
+        expect(document.body.style.overflow).not.toBe('hidden');
+    });
+
     it('renders a full-width half-height sheet at the bottom on mobile', (): void => {
         act((): void => {
             setMatchMedia(true);

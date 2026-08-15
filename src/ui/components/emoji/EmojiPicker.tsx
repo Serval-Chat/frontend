@@ -3,13 +3,12 @@ import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { m } from 'framer-motion';
 import { Search, Star } from 'lucide-react';
 import { createPortal } from 'react-dom';
-import { useLockBodyScroll } from 'react-use';
 import { List } from 'react-window';
 import type { ListImperativeAPI, RowComponentProps } from 'react-window';
 
-import { useIsMobile } from '@/hooks/useIsMobile';
-import { FREQUENTLY_USED_CATEGORY_ID } from '@/hooks/useFrequentlyUsedEmojis';
 import { useEmojiInfoBox } from '@/hooks/useEmojiInfoBox';
+import { FREQUENTLY_USED_CATEGORY_ID } from '@/hooks/useFrequentlyUsedEmojis';
+import { useIsMobile } from '@/hooks/useIsMobile';
 import { Button } from '@/ui/components/common/Button';
 import { Input } from '@/ui/components/common/Input';
 import { ParsedUnicodeEmoji } from '@/ui/components/common/ParsedUnicodeEmoji';
@@ -556,7 +555,7 @@ const EmojiPickerContent = ({
             {/* Emoji picker sidebar: renders custom server icons and standard category emoji buttons */}
             <Box
                 className={cn(
-                    'scrollbar-hide flex flex-shrink-0 flex-col items-center overflow-y-auto border-r border-divider/50 bg-bg-subtle/50 shadow-inner',
+                    'scrollbar-hide flex flex-shrink-0 flex-col items-center overflow-y-auto overscroll-contain border-r border-divider/50 bg-bg-subtle/50 shadow-inner',
                     SIDEBAR_CATEGORY_GAP,
                     SIDEBAR_PADDING_Y,
                 )}
@@ -711,7 +710,7 @@ const EmojiPickerContent = ({
                 </Box>
 
                 <List
-                    className="scrollbar-thin scrollbar-thumb-divider hover:scrollbar-thumb-muted-foreground/30 scrollbar-track-transparent pr-1"
+                    className="scrollbar-thin scrollbar-thumb-divider hover:scrollbar-thumb-muted-foreground/30 scrollbar-track-transparent overscroll-contain pr-1"
                     listRef={listRef}
                     rowComponent={Row}
                     rowCount={flatRows.length}
@@ -768,15 +767,11 @@ export const EmojiPicker = ({
         bottomOffset: 0,
     }));
 
-    useLockBodyScroll(true);
-
     React.useEffect((): (() => void) => {
         const handleResize = (): void => setWindowWidth(window.innerWidth);
         window.addEventListener('resize', handleResize);
-        document.body.classList.add('picker-open');
         return (): void => {
             window.removeEventListener('resize', handleResize);
-            document.body.classList.remove('picker-open');
         };
     }, []);
 
