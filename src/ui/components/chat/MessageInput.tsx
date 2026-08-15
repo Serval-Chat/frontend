@@ -1,4 +1,10 @@
-import React, { useCallback, useMemo, useReducer, useRef } from 'react';
+import React, {
+    useCallback,
+    useEffect,
+    useMemo,
+    useReducer,
+    useRef,
+} from 'react';
 
 import type { LexicalEditor } from 'lexical';
 import { Plus } from 'lucide-react';
@@ -11,6 +17,7 @@ import { useMessageInputData } from '@/hooks/chat/useMessageInputData';
 import { useMessageInputEffects } from '@/hooks/chat/useMessageInputEffects';
 import { useMessageSend } from '@/hooks/chat/useMessageSend';
 import { useKeybindManager } from '@/keybinds/useKeybindManager';
+import { type TokenType, detectTokensInText } from '@/lib/tokenDetector';
 import { useAppSelector } from '@/store/hooks';
 import type { ProcessedChatMessage } from '@/types/chat.ui';
 import { Button } from '@/ui/components/common/Button';
@@ -26,7 +33,6 @@ import { MessageComposerOverlays } from './MessageComposerOverlays';
 import { ReplyBanner } from './ReplyBanner';
 import { TokenWarningPopover } from './TokenWarningPopover';
 import { getSlashPreview } from './messageInputSlashPreview';
-import { detectTokensInText, type TokenType } from '@/lib/tokenDetector';
 
 interface MessageInputProps {
     fileQueueResult: {
@@ -127,12 +133,12 @@ export const MessageInput = ({
         patchUiRef.current = patchUi;
     }, [patchUi]);
 
-    const handleEditorChange = useCallback((nextEditor: LexicalEditor): void => {
-        patchUiRef.current({ editor: nextEditor });
-    }, []);
-
-    const { data: me } = useMe();
-    const keybindManager = useKeybindManager(me?.settings?.keybinds);
+    const handleEditorChange = useCallback(
+        (nextEditor: LexicalEditor): void => {
+            patchUiRef.current({ editor: nextEditor });
+        },
+        [],
+    );
 
     const {
         files,
@@ -143,6 +149,15 @@ export const MessageInput = ({
         updateFileStatus,
         clearQueue,
     } = fileQueueResult;
+
+    useEffect((): void => {
+        if (isMobile && (hasText || files.length > 0) && activePanel !== null) {
+            patchUi({ activePanel: null });
+        }
+    }, [activePanel, files.length, hasText, isMobile, patchUi]);
+
+    const { data: me } = useMe();
+    const keybindManager = useKeybindManager(me?.settings?.keybinds);
 
     const selectedFriendId = useAppSelector(
         (state): string | null => state.nav.selectedFriendId,
@@ -303,10 +318,17 @@ export const MessageInput = ({
                     }}
                     onConfirm={(): void => {
                         void (async (): Promise<void> => {
-                            const sent = await interceptedSendMessage(currentInputText, true);
+                            const sent = await interceptedSendMessage(
+                                currentInputText,
+                                true,
+                            );
                             if (sent && editor) {
-                                const { CLEAR_EDITOR_COMMAND } = await import('lexical');
-                                editor.dispatchCommand(CLEAR_EDITOR_COMMAND, undefined);
+                                const { CLEAR_EDITOR_COMMAND } =
+                                    await import('lexical');
+                                editor.dispatchCommand(
+                                    CLEAR_EDITOR_COMMAND,
+                                    undefined,
+                                );
                                 editor.focus();
                             }
                         })();
