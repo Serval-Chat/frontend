@@ -406,7 +406,9 @@ export const Message = React.memo(
                 removeRole({ userId: message.senderId, roleId });
             },
             onRetryMessage:
-                message._pending === 'failed' && message._localId && retryMessage
+                message._pending === 'failed' &&
+                message._localId &&
+                retryMessage
                     ? (): void => retryMessage(message._localId!)
                     : undefined,
             onDiscardMessage:
@@ -433,6 +435,11 @@ export const Message = React.memo(
                 globalThis.matchMedia('(pointer: coarse)').matches,
             [],
         );
+
+        useClickAway(pickerRef, (): void => {
+            if (isMobile) return;
+            setShowPicker(false);
+        });
 
         const timeLabel = React.useMemo(
             (): string =>
@@ -605,7 +612,6 @@ export const Message = React.memo(
                         <MessageEmojiPicker
                             coords={pickerCoords}
                             customCategories={pickerCategories}
-                            isMobile={isMobile}
                             isOpen={showPicker}
                             pickerRef={pickerRef}
                             onClose={handleClosePicker}

@@ -1,12 +1,24 @@
 import React, { useCallback, useMemo, useRef } from 'react';
 
-import { $getRoot, $getSelection, $isRangeSelection, type LexicalEditor } from 'lexical';
+import {
+    $getRoot,
+    $getSelection,
+    $isRangeSelection,
+    type LexicalEditor,
+} from 'lexical';
 import { useClickAway } from 'react-use';
 
 import { useFrequentlyUsedEmojis } from '@/hooks/useFrequentlyUsedEmojis';
+import { useIsMobile } from '@/hooks/useIsMobile';
 import { $createChipNode } from '@/ui/components/chat/lexical/ChipNode';
-import { EmojiPicker, type CustomEmojiCategory } from '@/ui/components/emoji/EmojiPicker';
-import { StickerPicker, type StickerCategory } from '@/ui/components/emoji/StickerPicker';
+import {
+    type CustomEmojiCategory,
+    EmojiPicker,
+} from '@/ui/components/emoji/EmojiPicker';
+import {
+    type StickerCategory,
+    StickerPicker,
+} from '@/ui/components/emoji/StickerPicker';
 
 interface MessageComposerPickersProps {
     editor: LexicalEditor | null;
@@ -30,6 +42,7 @@ export const MessageComposerPickers = ({
     onStickerSelected,
 }: MessageComposerPickersProps): React.ReactNode => {
     const pickerRef = useRef<HTMLDivElement>(null);
+    const isMobile = useIsMobile();
     const { frequentlyUsedCategory, recordUsage } = useFrequentlyUsedEmojis();
     const pickerCategories = useMemo(
         () =>
@@ -39,7 +52,10 @@ export const MessageComposerPickers = ({
         [customCategories, frequentlyUsedCategory],
     );
 
-    useClickAway(pickerRef, onClickAway);
+    useClickAway(
+        pickerRef,
+        isMobile && showEmojiPicker ? (): void => {} : onClickAway,
+    );
 
     const handleCustomEmojiSelect = useCallback(
         (emoji: { id: string; name: string; url: string }): void => {
@@ -57,14 +73,14 @@ export const MessageComposerPickers = ({
                     selection.insertNodes([chip]);
                 }
             });
-            editor?.focus();
+            if (!isMobile) editor?.focus();
             recordUsage({
                 emoji: emoji.name,
                 emojiType: 'custom',
                 emojiId: emoji.id,
             });
         },
-        [editor, recordUsage],
+        [editor, isMobile, recordUsage],
     );
 
     const handleEmojiSelect = useCallback(
@@ -80,10 +96,10 @@ export const MessageComposerPickers = ({
                     ]);
                 }
             });
-            editor?.focus();
+            if (!isMobile) editor?.focus();
             recordUsage({ emoji, emojiType: 'unicode' });
         },
-        [editor, recordUsage],
+        [editor, isMobile, recordUsage],
     );
 
     const handleStickerSelect = useCallback(
@@ -111,6 +127,7 @@ export const MessageComposerPickers = ({
                 >
                     <EmojiPicker
                         customCategories={pickerCategories}
+                        onClickAway={onClickAway}
                         onCustomEmojiSelect={handleCustomEmojiSelect}
                         onEmojiSelect={handleEmojiSelect}
                     />

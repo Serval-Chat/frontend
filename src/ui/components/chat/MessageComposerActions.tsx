@@ -59,7 +59,12 @@ export const MessageComposerActions = ({
                 )}
                 size="sm"
                 variant="ghost"
-                onClick={onToggleEmoji}
+                onClick={(): void => {
+                    onToggleEmoji();
+                    if (isMobile && editor) {
+                        editor.blur();
+                    }
+                }}
             >
                 <Smile size={20} />
             </Button>

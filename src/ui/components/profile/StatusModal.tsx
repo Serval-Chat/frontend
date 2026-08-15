@@ -6,6 +6,7 @@ import { useClickAway } from 'react-use';
 
 import { useUpdateStatus } from '@/api/users/users.queries';
 import { useCustomEmojis } from '@/hooks/useCustomEmojis';
+import { useIsMobile } from '@/hooks/useIsMobile';
 import { useSmartPosition } from '@/hooks/useSmartPosition';
 import { Button } from '@/ui/components/common/Button';
 import { Input } from '@/ui/components/common/Input';
@@ -54,6 +55,7 @@ export const StatusModal = ({
     const [statusText, setStatusText] = useState(initialText);
     const [statusEmoji, setStatusEmoji] = useState(initialEmoji);
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+    const isMobile = useIsMobile();
     const emojiPickerRef = useRef<HTMLDivElement>(null);
     const triggerRef = useRef<HTMLButtonElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
@@ -61,6 +63,7 @@ export const StatusModal = ({
     const { mutate: updateStatus, isPending } = useUpdateStatus();
 
     useClickAway(emojiPickerRef, (e): void => {
+        if (isMobile) return;
         if (triggerRef.current?.contains(e.target as Node)) {
             return;
         }
@@ -157,6 +160,9 @@ export const StatusModal = ({
                                   >
                                       <EmojiPicker
                                           customCategories={customCategories}
+                                          onClickAway={(): void =>
+                                              setShowEmojiPicker(false)
+                                          }
                                           onCustomEmojiSelect={
                                               handleCustomEmojiSelect
                                           }

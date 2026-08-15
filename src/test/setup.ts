@@ -1,5 +1,6 @@
-import '@testing-library/jest-dom';
 import React from 'react';
+
+import '@testing-library/jest-dom';
 import { beforeEach, vi } from 'vitest';
 
 const createStorageMock = (): Partial<Storage> & {
@@ -37,9 +38,42 @@ if (globalThis.window !== undefined) {
     vi.stubGlobal('localStorage', localStorageMock);
     vi.stubGlobal('sessionStorage', sessionStorageMock);
 
+    let matchMediaMatches = false;
+    const matchMediaListeners = new Set<(e: { matches: boolean }) => void>();
+    const matchMediaStub = vi.fn((_query: string) => ({
+        get matches() {
+            return matchMediaMatches;
+        },
+        media: _query,
+        onchange: null,
+        addEventListener: (_type: string, listener: () => void): void => {
+            matchMediaListeners.add(listener);
+        },
+        removeEventListener: (_type: string, listener: () => void): void => {
+            matchMediaListeners.delete(listener);
+        },
+        addListener: (_listener: () => void): void => {},
+        removeListener: (_listener: () => void): void => {},
+        dispatchEvent: (): boolean => false,
+    })) as ReturnType<typeof vi.fn> & {
+        __setMatches: (matches: boolean) => void;
+    };
+    matchMediaStub.__setMatches = (matches: boolean): void => {
+        matchMediaMatches = matches;
+        matchMediaListeners.forEach((listener): void => {
+            listener({ matches });
+        });
+    };
+    vi.stubGlobal('matchMedia', matchMediaStub);
+
     beforeEach((): void => {
         localStorageMock.clear();
         sessionStorageMock.clear();
+    });
+
+    afterEach((): void => {
+        matchMediaListeners.clear();
+        matchMediaMatches = false;
     });
 }
 
@@ -63,11 +97,10 @@ vi.mock('idb-keyval', () => {
 });
 
 vi.mock('@marsidev/react-turnstile', () => ({
-        Turnstile: ({ onSuccess }: { onSuccess?: (token: string) => void }) => {
-            React.useEffect(() => {
-                if (onSuccess) onSuccess('mock-turnstile-token');
-            }, [onSuccess]);
-            return React.createElement('div', { id: 'cf-turnstile' });
-        },
-    }));
-
+    Turnstile: ({ onSuccess }: { onSuccess?: (token: string) => void }) => {
+        React.useEffect(() => {
+            if (onSuccess) onSuccess('mock-turnstile-token');
+        }, [onSuccess]);
+        return React.createElement('div', { id: 'cf-turnstile' });
+    },
+}));

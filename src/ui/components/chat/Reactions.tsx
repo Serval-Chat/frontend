@@ -10,6 +10,7 @@ import {
 import { useMe } from '@/api/users/users.queries';
 import { useCustomEmojis } from '@/hooks/useCustomEmojis';
 import { useFrequentlyUsedEmojis } from '@/hooks/useFrequentlyUsedEmojis';
+import { useIsMobile } from '@/hooks/useIsMobile';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useAppSelector } from '@/store/hooks';
 import { BlockFlags } from '@/types/blocks';
@@ -49,6 +50,7 @@ export const Reactions = React.memo(
         >();
 
         const pickerRef = React.useRef<HTMLDivElement>(null);
+        const isMobile = useIsMobile();
         const { customCategories } = useCustomEmojis({ enabled: showPicker });
         const { frequentlyUsedCategory } = useFrequentlyUsedEmojis();
         const pickerCategories = React.useMemo(
@@ -69,6 +71,7 @@ export const Reactions = React.memo(
             if (!showPicker) return;
 
             const handleClickOutside = (event: MouseEvent): void => {
+                if (isMobile) return;
                 if (
                     pickerRef.current &&
                     !pickerRef.current.contains(event.target as Node)
@@ -81,7 +84,7 @@ export const Reactions = React.memo(
             return (): void => {
                 document.removeEventListener('mousedown', handleClickOutside);
             };
-        }, [showPicker]);
+        }, [isMobile, showPicker]);
 
         const handleEmojiSelect = React.useCallback(
             (emoji: string): void => {
@@ -295,6 +298,7 @@ export const Reactions = React.memo(
                         >
                             <EmojiPicker
                                 customCategories={pickerCategories}
+                                onClickAway={(): void => setShowPicker(false)}
                                 onCustomEmojiSelect={handleCustomEmojiSelect}
                                 onEmojiSelect={handleEmojiSelect}
                             />

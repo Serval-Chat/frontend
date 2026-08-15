@@ -2,11 +2,13 @@ import React, { useCallback, useMemo, useRef, useState } from 'react';
 
 import { m } from 'framer-motion';
 import { Search } from 'lucide-react';
+import { createPortal } from 'react-dom';
 import { useLockBodyScroll } from 'react-use';
 import { List } from 'react-window';
 import type { ListImperativeAPI, RowComponentProps } from 'react-window';
 
 import { useEmojiInfoBox } from '@/hooks/useEmojiInfoBox';
+import { useIsMobile } from '@/hooks/useIsMobile';
 import { Button } from '@/ui/components/common/Button';
 import { Input } from '@/ui/components/common/Input';
 import { ParsedUnicodeEmoji } from '@/ui/components/common/ParsedUnicodeEmoji';
@@ -54,6 +56,7 @@ interface EmojiPickerProps {
     }) => void;
     customCategories?: CustomEmojiCategory[];
     className?: string;
+    onClickAway?: () => void;
 }
 
 const PICKER_WIDTH = 620;
@@ -74,19 +77,19 @@ const HEADER_PADDING_Y = 'py-1';
 
 type RowItem =
     | {
-        type: 'header';
-        id: string;
-        name: string;
-        icon?: string;
-        isCustom: boolean;
-        standardIcon?: EmojiData;
-    }
+          type: 'header';
+          id: string;
+          name: string;
+          icon?: string;
+          isCustom: boolean;
+          standardIcon?: EmojiData;
+      }
     | {
-        type: 'row';
-        emojis: (EmojiData | { id: string; name: string; url: string })[];
-        isCustom: boolean;
-        id: string;
-    };
+          type: 'row';
+          emojis: (EmojiData | { id: string; name: string; url: string })[];
+          isCustom: boolean;
+          id: string;
+      };
 
 const buildEmojiRows = ({
     customCategories,
@@ -109,8 +112,8 @@ const buildEmojiRows = ({
     for (const cat of [...customCategories].reverse()) {
         const emojis = normalizedQuery
             ? cat.emojis.filter((e): boolean =>
-                e.name.toLowerCase().includes(normalizedQuery),
-            )
+                  e.name.toLowerCase().includes(normalizedQuery),
+              )
             : cat.emojis;
 
         if (emojis.length === 0) continue;
@@ -137,17 +140,17 @@ const buildEmojiRows = ({
         const emojis = groupedEmojis[catId] || [];
         const filteredEmojis = normalizedQuery
             ? emojis.filter((e): boolean => {
-                const matchName = e.name
-                    ?.toLowerCase()
-                    .includes(normalizedQuery);
-                const matchShortName = e.short_name
-                    ?.toLowerCase()
-                    .includes(normalizedQuery);
-                const matchShortNames = e.short_names?.some((sn): boolean =>
-                    sn.toLowerCase().includes(normalizedQuery),
-                );
-                return matchName || matchShortName || matchShortNames;
-            })
+                  const matchName = e.name
+                      ?.toLowerCase()
+                      .includes(normalizedQuery);
+                  const matchShortName = e.short_name
+                      ?.toLowerCase()
+                      .includes(normalizedQuery);
+                  const matchShortNames = e.short_names?.some((sn): boolean =>
+                      sn.toLowerCase().includes(normalizedQuery),
+                  );
+                  return matchName || matchShortName || matchShortNames;
+              })
             : emojis;
 
         if (filteredEmojis.length === 0) continue;
@@ -368,7 +371,10 @@ const EmojiPickerContent = ({
     const listAreaWidth = width - SIDEBAR_WIDTH;
     const columnCount = useMemo((): number => {
         if (width <= 0) return 1;
-        return Math.max(1, Math.floor((listAreaWidth - 16) / EMOJI_BUTTON_SIZE));
+        return Math.max(
+            1,
+            Math.floor((listAreaWidth - 16) / EMOJI_BUTTON_SIZE),
+        );
     }, [listAreaWidth, width]);
 
     const flatRows = useMemo(
@@ -491,7 +497,9 @@ const EmojiPickerContent = ({
 
     const handleSkinToneRequest = useCallback(
         (emoji: EmojiData, e: React.MouseEvent | React.TouchEvent): void => {
-            const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+            const rect = (
+                e.currentTarget as HTMLElement
+            ).getBoundingClientRect();
             setSkinToneTarget({
                 emoji,
                 position: { x: rect.left, y: rect.top },
@@ -516,7 +524,13 @@ const EmojiPickerContent = ({
                 />
             );
         },
-        [flatRows, onEmojiSelect, onCustomEmojiSelect, showEmojiInfo, handleSkinToneRequest],
+        [
+            flatRows,
+            onEmojiSelect,
+            onCustomEmojiSelect,
+            showEmojiInfo,
+            handleSkinToneRequest,
+        ],
     );
 
     const onRowsRendered = useCallback(
@@ -576,7 +590,9 @@ const EmojiPickerContent = ({
                             {isActive ? (
                                 <div
                                     className="absolute top-1/2 -left-3.5 w-1.5 -translate-y-1/2 rounded-full bg-primary shadow-[0_0_8px_rgba(var(--primary),0.5)]"
-                                    style={{ height: SIDEBAR_CATEGORY_SIZE * 0.75 }}
+                                    style={{
+                                        height: SIDEBAR_CATEGORY_SIZE * 0.75,
+                                    }}
                                 />
                             ) : null}
                         </Box>
@@ -632,7 +648,9 @@ const EmojiPickerContent = ({
                             {isActive ? (
                                 <div
                                     className="absolute top-1/2 -left-3.5 w-1.5 -translate-y-1/2 rounded-full bg-primary shadow-[0_0_8px_rgba(var(--primary),0.5)]"
-                                    style={{ height: SIDEBAR_CATEGORY_SIZE * 0.75 }}
+                                    style={{
+                                        height: SIDEBAR_CATEGORY_SIZE * 0.75,
+                                    }}
                                 />
                             ) : null}
                         </Box>
@@ -699,10 +717,19 @@ export const EmojiPicker = ({
     onCustomEmojiSelect,
     customCategories = EMPTY_CUSTOM_CATEGORIES,
     className,
+    onClickAway,
 }: EmojiPickerProps) => {
     const [windowWidth, setWindowWidth] = useState<number>(
         typeof window !== 'undefined' ? window.innerWidth : 1024,
     );
+    const isMobile = useIsMobile();
+    const [visualViewport, setVisualViewport] = useState<{
+        height: number;
+        bottomOffset: number;
+    }>(() => ({
+        height: typeof window !== 'undefined' ? window.innerHeight : 1024,
+        bottomOffset: 0,
+    }));
 
     useLockBodyScroll(true);
 
@@ -716,10 +743,64 @@ export const EmojiPicker = ({
         };
     }, []);
 
-    const width = Math.min(
-        PICKER_WIDTH,
-        Math.max(300, windowWidth - 24),
-    );
+    React.useEffect((): (() => void) => {
+        const vv = window.visualViewport;
+        const update = (): void => {
+            setVisualViewport({
+                height: vv?.height ?? window.innerHeight,
+                bottomOffset:
+                    window.innerHeight -
+                    ((vv?.offsetTop ?? 0) + (vv?.height ?? window.innerHeight)),
+            });
+        };
+        update();
+        vv?.addEventListener('resize', update);
+        vv?.addEventListener('scroll', update, { passive: true });
+        window.addEventListener('resize', update);
+        return (): void => {
+            vv?.removeEventListener('resize', update);
+            vv?.removeEventListener('scroll', update);
+            window.removeEventListener('resize', update);
+        };
+    }, []);
+
+    if (isMobile) {
+        const height = Math.round(visualViewport.height / 2);
+        return createPortal(
+            <>
+                <button
+                    aria-label="Close emoji picker"
+                    className="fixed inset-0 z-[var(--z-index-top)] cursor-default border-0 bg-transparent p-0 text-left"
+                    type="button"
+                    onClick={onClickAway}
+                />
+                <m.div
+                    animate={{ opacity: 1, y: 0 }}
+                    className={cn(
+                        'fixed right-0 left-0 z-[var(--z-index-top)] overflow-hidden rounded-t-2xl border-t border-divider bg-background pb-[env(safe-area-inset-bottom)] shadow-2xl',
+                        className,
+                    )}
+                    initial={{ opacity: 0, y: 120 }}
+                    style={{
+                        bottom: visualViewport.bottomOffset,
+                        height,
+                    }}
+                    transition={{ duration: 0.25, ease: 'easeOut' }}
+                >
+                    <EmojiPickerContent
+                        customCategories={customCategories}
+                        height={height}
+                        width={windowWidth}
+                        onCustomEmojiSelect={onCustomEmojiSelect}
+                        onEmojiSelect={onEmojiSelect}
+                    />
+                </m.div>
+            </>,
+            document.body,
+        );
+    }
+
+    const width = Math.min(PICKER_WIDTH, Math.max(300, windowWidth - 24));
     const height = PICKER_HEIGHT;
 
     return (

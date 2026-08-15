@@ -10,6 +10,7 @@ import {
 } from '@/api/servers/servers.queries';
 import type { Channel } from '@/api/servers/servers.types';
 import { useCustomEmojis } from '@/hooks/useCustomEmojis';
+import { useIsMobile } from '@/hooks/useIsMobile';
 import { usePermissions } from '@/hooks/usePermissions';
 import { Button } from '@/ui/components/common/Button';
 import { Heading } from '@/ui/components/common/Heading';
@@ -271,202 +272,210 @@ const ChannelFieldsSection = ({
     dispatchForm: React.Dispatch<Parameters<typeof channelFormReducer>[1]>;
     onToggleEmojiPicker: () => void;
     onCloseEmojiPicker: () => void;
-}) => (
-    <div className="space-y-8">
-        <div className="space-y-2">
-            <label
-                className="text-xs font-bold tracking-wider text-muted-foreground uppercase"
-                htmlFor="channel-name"
-            >
-                Channel Name
-            </label>
-            <Input
-                id="channel-name"
-                placeholder="new-channel"
-                value={name}
-                onChange={(e): void => {
-                    dispatchForm({ type: 'setName', value: e.target.value });
-                }}
-            />
-        </div>
-
-        <div className="space-y-2">
-            <label
-                className="text-xs font-bold tracking-wider text-muted-foreground uppercase"
-                htmlFor="channel-description"
-            >
-                Description
-            </label>
-            <Input
-                id="channel-description"
-                placeholder="What's this channel about?"
-                value={description}
-                onChange={(e): void => {
-                    dispatchForm({
-                        type: 'setDescription',
-                        value: e.target.value,
-                    });
-                }}
-            />
-        </div>
-
-        {channelType === 'link' ? (
+}) => {
+    const isMobile = useIsMobile();
+    return (
+        <div className="space-y-8">
             <div className="space-y-2">
                 <label
                     className="text-xs font-bold tracking-wider text-muted-foreground uppercase"
-                    htmlFor="channel-link"
+                    htmlFor="channel-name"
                 >
-                    Channel URL
+                    Channel Name
                 </label>
                 <Input
-                    id="channel-link"
-                    placeholder="https://example.com"
-                    value={linkUrl}
+                    id="channel-name"
+                    placeholder="new-channel"
+                    value={name}
                     onChange={(e): void => {
                         dispatchForm({
-                            type: 'setLinkUrl',
+                            type: 'setName',
                             value: e.target.value,
                         });
                     }}
                 />
-                {error ? (
-                    <Text size="xs" variant="danger">
-                        {error}
-                    </Text>
-                ) : null}
             </div>
-        ) : null}
 
-        <div className="space-y-2">
-            <label
-                className="text-xs font-bold tracking-wider text-muted-foreground uppercase"
-                htmlFor="channel-icons"
-            >
-                Channel Icon
-            </label>
-            <div
-                className="custom-scrollbar grid max-h-48 grid-cols-6 gap-2 overflow-y-auto rounded-md border border-border-subtle bg-bg-secondary p-3 md:grid-cols-10"
-                id="channel-icons"
-            >
-                <Button
-                    className={cn(
-                        'h-auto border p-2 text-muted-foreground transition-all hover:text-foreground',
-                        !selectedIcon && !emoji
-                            ? 'border-primary bg-primary/20 text-primary'
-                            : 'border-transparent',
-                    )}
-                    title="None"
-                    variant="ghost"
-                    onClick={(): void => {
-                        dispatchForm({ type: 'selectIcon', icon: '' });
-                    }}
+            <div className="space-y-2">
+                <label
+                    className="text-xs font-bold tracking-wider text-muted-foreground uppercase"
+                    htmlFor="channel-description"
                 >
-                    None
-                </Button>
-                {Object.entries(ICON_MAP).map(([key, IconComponent]) => (
+                    Description
+                </label>
+                <Input
+                    id="channel-description"
+                    placeholder="What's this channel about?"
+                    value={description}
+                    onChange={(e): void => {
+                        dispatchForm({
+                            type: 'setDescription',
+                            value: e.target.value,
+                        });
+                    }}
+                />
+            </div>
+
+            {channelType === 'link' ? (
+                <div className="space-y-2">
+                    <label
+                        className="text-xs font-bold tracking-wider text-muted-foreground uppercase"
+                        htmlFor="channel-link"
+                    >
+                        Channel URL
+                    </label>
+                    <Input
+                        id="channel-link"
+                        placeholder="https://example.com"
+                        value={linkUrl}
+                        onChange={(e): void => {
+                            dispatchForm({
+                                type: 'setLinkUrl',
+                                value: e.target.value,
+                            });
+                        }}
+                    />
+                    {error ? (
+                        <Text size="xs" variant="danger">
+                            {error}
+                        </Text>
+                    ) : null}
+                </div>
+            ) : null}
+
+            <div className="space-y-2">
+                <label
+                    className="text-xs font-bold tracking-wider text-muted-foreground uppercase"
+                    htmlFor="channel-icons"
+                >
+                    Channel Icon
+                </label>
+                <div
+                    className="custom-scrollbar grid max-h-48 grid-cols-6 gap-2 overflow-y-auto rounded-md border border-border-subtle bg-bg-secondary p-3 md:grid-cols-10"
+                    id="channel-icons"
+                >
                     <Button
                         className={cn(
                             'h-auto border p-2 text-muted-foreground transition-all hover:text-foreground',
-                            selectedIcon === key
+                            !selectedIcon && !emoji
                                 ? 'border-primary bg-primary/20 text-primary'
                                 : 'border-transparent',
                         )}
-                        key={key}
-                        title={key}
+                        title="None"
                         variant="ghost"
                         onClick={(): void => {
-                            dispatchForm({ type: 'selectIcon', icon: key });
+                            dispatchForm({ type: 'selectIcon', icon: '' });
                         }}
                     >
-                        <IconComponent size={20} />
+                        None
                     </Button>
-                ))}
-            </div>
-        </div>
-
-        <div className="space-y-2">
-            <label
-                className="text-xs font-bold tracking-wider text-muted-foreground uppercase"
-                htmlFor="channel-emoji"
-            >
-                Or choose an Emoji
-            </label>
-            <div className="flex items-center gap-4">
-                <Button
-                    className="h-20 w-20 border border-dashed border-border-subtle bg-bg-secondary hover:bg-white/5"
-                    id="channel-emoji"
-                    ref={emojiTriggerRef}
-                    variant="ghost"
-                    onClick={onToggleEmojiPicker}
-                >
-                    {emoji && emojiType ? (
-                        <div className="h-12 w-12">
-                            {emojiType === 'custom' ? (
-                                <ParsedEmoji
-                                    className="h-full w-full"
-                                    emojiId={emoji}
-                                />
-                            ) : (
-                                <ParsedUnicodeEmoji
-                                    className="h-full w-full text-4xl"
-                                    content={emoji}
-                                />
+                    {Object.entries(ICON_MAP).map(([key, IconComponent]) => (
+                        <Button
+                            className={cn(
+                                'h-auto border p-2 text-muted-foreground transition-all hover:text-foreground',
+                                selectedIcon === key
+                                    ? 'border-primary bg-primary/20 text-primary'
+                                    : 'border-transparent',
                             )}
-                        </div>
-                    ) : (
-                        <Text size="xs" variant="muted">
-                            Select Emoji
-                        </Text>
-                    )}
-                </Button>
-                {emoji ? (
-                    <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={(): void => {
-                            dispatchForm({ type: 'clearEmoji' });
-                        }}
-                    >
-                        Clear Emoji
-                    </Button>
-                ) : null}
+                            key={key}
+                            title={key}
+                            variant="ghost"
+                            onClick={(): void => {
+                                dispatchForm({ type: 'selectIcon', icon: key });
+                            }}
+                        >
+                            <IconComponent size={20} />
+                        </Button>
+                    ))}
+                </div>
             </div>
 
-            <Popover
-                isOpen={isEmojiPickerOpen}
-                triggerRef={emojiTriggerRef}
-                onClose={onCloseEmojiPicker}
-            >
-                <EmojiPicker
-                    customCategories={customCategories}
-                    onCustomEmojiSelect={(e): void => {
-                        dispatchForm({
-                            type: 'selectEmoji',
-                            emoji: e.id,
-                            emojiType: 'custom',
-                        });
-                        onCloseEmojiPicker();
-                    }}
-                    onEmojiSelect={(e): void => {
-                        dispatchForm({
-                            type: 'selectEmoji',
-                            emoji: e,
-                            emojiType: 'unicode',
-                        });
-                        onCloseEmojiPicker();
-                    }}
-                />
-            </Popover>
-        </div>
+            <div className="space-y-2">
+                <label
+                    className="text-xs font-bold tracking-wider text-muted-foreground uppercase"
+                    htmlFor="channel-emoji"
+                >
+                    Or choose an Emoji
+                </label>
+                <div className="flex items-center gap-4">
+                    <Button
+                        className="h-20 w-20 border border-dashed border-border-subtle bg-bg-secondary hover:bg-white/5"
+                        id="channel-emoji"
+                        ref={emojiTriggerRef}
+                        variant="ghost"
+                        onClick={onToggleEmojiPicker}
+                    >
+                        {emoji && emojiType ? (
+                            <div className="h-12 w-12">
+                                {emojiType === 'custom' ? (
+                                    <ParsedEmoji
+                                        className="h-full w-full"
+                                        emojiId={emoji}
+                                    />
+                                ) : (
+                                    <ParsedUnicodeEmoji
+                                        className="h-full w-full text-4xl"
+                                        content={emoji}
+                                    />
+                                )}
+                            </div>
+                        ) : (
+                            <Text size="xs" variant="muted">
+                                Select Emoji
+                            </Text>
+                        )}
+                    </Button>
+                    {emoji ? (
+                        <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={(): void => {
+                                dispatchForm({ type: 'clearEmoji' });
+                            }}
+                        >
+                            Clear Emoji
+                        </Button>
+                    ) : null}
+                </div>
 
-        {channelType === 'text' ? (
-            <ChannelSlowModeControl
-                dispatchForm={dispatchForm}
-                slowMode={slowMode}
-            />
-        ) : null}
-    </div>
-);
+                <Popover
+                    disableClickOutside={isMobile}
+                    isOpen={isEmojiPickerOpen}
+                    triggerRef={emojiTriggerRef}
+                    onClose={onCloseEmojiPicker}
+                >
+                    <EmojiPicker
+                        customCategories={customCategories}
+                        onClickAway={onCloseEmojiPicker}
+                        onCustomEmojiSelect={(e): void => {
+                            dispatchForm({
+                                type: 'selectEmoji',
+                                emoji: e.id,
+                                emojiType: 'custom',
+                            });
+                            onCloseEmojiPicker();
+                        }}
+                        onEmojiSelect={(e): void => {
+                            dispatchForm({
+                                type: 'selectEmoji',
+                                emoji: e,
+                                emojiType: 'unicode',
+                            });
+                            onCloseEmojiPicker();
+                        }}
+                    />
+                </Popover>
+            </div>
+
+            {channelType === 'text' ? (
+                <ChannelSlowModeControl
+                    dispatchForm={dispatchForm}
+                    slowMode={slowMode}
+                />
+            ) : null}
+        </div>
+    );
+};
 
 const ChannelDeleteModal = ({
     isOpen,

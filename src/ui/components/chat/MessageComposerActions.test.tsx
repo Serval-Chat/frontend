@@ -1,4 +1,5 @@
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
+import type { LexicalEditor } from 'lexical';
 import { describe, expect, it, vi } from 'vitest';
 
 import { MessageComposerActions } from './MessageComposerActions';
@@ -16,7 +17,7 @@ vi.mock('./GifPicker', () => ({
 }));
 
 const baseProps = {
-    editor: null,
+    editor: null as LexicalEditor | null,
     showEmojiPicker: false,
     showStickerPicker: false,
     showGifPicker: false,
@@ -131,5 +132,33 @@ describe('MessageComposerActions', (): void => {
         });
         expect(await screen.findByText('gif-picker-mock')).toBeTruthy();
         expect(iconIn(container, 'lucide-file-image')).toBe(true);
+    });
+
+    const clickEmojiButton = (container: HTMLElement): void => {
+        const button = container
+            .querySelector('.lucide-smile')
+            ?.closest('button');
+        fireEvent.click(button!);
+    };
+
+    it('blurs the editor when the emoji button is toggled on mobile', (): void => {
+        const blur = vi.fn();
+        const { container } = renderActions({
+            isMobile: true,
+            editor: { blur } as unknown as LexicalEditor,
+        });
+
+        clickEmojiButton(container);
+        expect(blur).toHaveBeenCalled();
+    });
+
+    it('does not blur the editor when the emoji button is toggled on desktop', (): void => {
+        const blur = vi.fn();
+        const { container } = renderActions({
+            editor: { blur } as unknown as LexicalEditor,
+        });
+
+        clickEmojiButton(container);
+        expect(blur).not.toHaveBeenCalled();
     });
 });

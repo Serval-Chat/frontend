@@ -1,37 +1,55 @@
 import { act, fireEvent, render, screen } from '@testing-library/react';
+import type * as LexicalModule from 'lexical';
+import type { LexicalEditor } from 'lexical';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { MessageComposerPickers } from './MessageComposerPickers';
+
+const emojiPickerPropsMock = vi.fn();
 vi.mock('@/ui/components/emoji/EmojiPicker', () => {
     const EmojiPicker = ({
         onEmojiSelect,
         onCustomEmojiSelect,
+        onClickAway,
     }: {
         onEmojiSelect: (emoji: string) => void;
-        onCustomEmojiSelect?: (emoji: { id: string; name: string; url: string }) => void;
-    }) => (
-        <>
-            <button
-                data-testid="pick-unicode"
-                type="button"
-                onClick={() => onEmojiSelect('😀')}
-            >
-                pick-emoji
-            </button>
-            <button
-                data-testid="pick-custom"
-                type="button"
-                onClick={() =>
-                    onCustomEmojiSelect?.({
-                        id: 'custom1',
-                        name: 'parrot',
-                        url: '/parrot.gif',
-                    })
-                }
-            >
-                pick-custom
-            </button>
-        </>
-    );
+        onCustomEmojiSelect?: (emoji: {
+            id: string;
+            name: string;
+            url: string;
+        }) => void;
+        onClickAway?: () => void;
+    }) => {
+        emojiPickerPropsMock({
+            onEmojiSelect,
+            onCustomEmojiSelect,
+            onClickAway,
+        });
+        return (
+            <>
+                <button
+                    data-testid="pick-unicode"
+                    type="button"
+                    onClick={() => onEmojiSelect('😀')}
+                >
+                    pick-emoji
+                </button>
+                <button
+                    data-testid="pick-custom"
+                    type="button"
+                    onClick={() =>
+                        onCustomEmojiSelect?.({
+                            id: 'custom1',
+                            name: 'parrot',
+                            url: '/parrot.gif',
+                        })
+                    }
+                >
+                    pick-custom
+                </button>
+            </>
+        );
+    };
     return { EmojiPicker };
 });
 
@@ -48,9 +66,12 @@ vi.mock('@/hooks/useFrequentlyUsedEmojis', () => ({
     }),
 }));
 
-const $createChipNodeMock = vi.fn((..._args: unknown[]) => ({ __type: 'chip-mock' }));
+const $createChipNodeMock = vi.fn((..._args: unknown[]) => ({
+    __type: 'chip-mock',
+}));
 vi.mock('@/ui/components/chat/lexical/ChipNode', () => ({
-    $createChipNode: (type: unknown, data: unknown) => $createChipNodeMock(type, data),
+    $createChipNode: (type: unknown, data: unknown) =>
+        $createChipNodeMock(type, data),
 }));
 
 const mockInsertNodes = vi.fn();
@@ -62,15 +83,16 @@ const mockRangeSelection = {
     insertText: mockInsertText,
 };
 
-import type * as LexicalModule from 'lexical';
-
 vi.mock('lexical', async (importOriginal) => {
     const actual = await importOriginal<typeof LexicalModule>();
     return {
         ...actual,
         $getSelection: vi.fn(() => mockRangeSelection),
-        $isRangeSelection: vi.fn((s: unknown) =>
-            s !== null && typeof s === 'object' && '__isRangeSelection' in (s as object),
+        $isRangeSelection: vi.fn(
+            (s: unknown) =>
+                s !== null &&
+                typeof s === 'object' &&
+                '__isRangeSelection' in (s as object),
         ),
     };
 });
@@ -86,9 +108,6 @@ function makeMockEditor() {
         })),
     };
 }
-
-import { MessageComposerPickers } from './MessageComposerPickers';
-import type { LexicalEditor } from 'lexical';
 
 function renderPickers(editor: LexicalEditor) {
     return render(
@@ -114,6 +133,45 @@ describe('MessageComposerPickers – emoji insertion focus bug', () => {
         return screen.findByTestId(testId, {}, { timeout: 3000 });
     }
 
+    it('passes onClickAway to the emoji picker on mobile', async () => {
+        act(() => {
+            (
+                globalThis.matchMedia as ReturnType<typeof vi.fn> & {
+                    __setMatches: (matches: boolean) => void;
+                }
+            ).__setMatches(true);
+        });
+        const editor = makeMockEditor();
+        renderPickers(editor as unknown as LexicalEditor);
+
+        expect(emojiPickerPropsMock).toHaveBeenCalledWith(
+            expect.objectContaining({
+                onClickAway: expect.any(Function),
+            }),
+        );
+    });
+
+    it('does not refocus the editor after inserting an emoji on mobile', async () => {
+        act(() => {
+            (
+                globalThis.matchMedia as ReturnType<typeof vi.fn> & {
+                    __setMatches: (matches: boolean) => void;
+                }
+            ).__setMatches(true);
+        });
+        const editor = makeMockEditor();
+        renderPickers(editor as unknown as LexicalEditor);
+
+        await act(async () => {
+            fireEvent.click(await findPickButton('pick-unicode'));
+        });
+
+        expect(editor.focus).not.toHaveBeenCalled();
+        expect($createChipNodeMock).toHaveBeenCalledWith('unicode-emoji', {
+            id: '😀',
+        });
+    });
+
     it('inserts a unicode emoji when the editor was NEVER focused before (no prior selection)', async () => {
         const editor = makeMockEditor();
         renderPickers(editor as unknown as LexicalEditor);
@@ -126,7 +184,9 @@ describe('MessageComposerPickers – emoji insertion focus bug', () => {
 
         expect(editor.focus).toHaveBeenCalled();
 
-        expect($createChipNodeMock).toHaveBeenCalledWith('unicode-emoji', { id: '😀' });
+        expect($createChipNodeMock).toHaveBeenCalledWith('unicode-emoji', {
+            id: '😀',
+        });
         expect(mockInsertNodes).toHaveBeenCalled();
         expect(recordUsageMock).toHaveBeenCalledWith({
             emoji: '😀',
@@ -143,7 +203,9 @@ describe('MessageComposerPickers – emoji insertion focus bug', () => {
         });
 
         expect(editor.focus).toHaveBeenCalled();
-        expect($createChipNodeMock).toHaveBeenCalledWith('unicode-emoji', { id: '😀' });
+        expect($createChipNodeMock).toHaveBeenCalledWith('unicode-emoji', {
+            id: '😀',
+        });
         expect(mockInsertNodes).toHaveBeenCalled();
     });
 
@@ -184,7 +246,7 @@ describe('MessageComposerPickers – emoji insertion focus bug', () => {
             imageUrl: '/parrot.gif',
         });
         expect(mockInsertNodes).toHaveBeenCalled();
-    })
+    });
     it('does nothing gracefully when editor is null', async () => {
         renderPickers(null as unknown as LexicalEditor);
 

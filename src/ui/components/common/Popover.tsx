@@ -14,6 +14,7 @@ interface PopoverProps {
     className?: string;
     offset?: number;
     padding?: number;
+    disableClickOutside?: boolean;
 }
 
 export const Popover = ({
@@ -24,6 +25,7 @@ export const Popover = ({
     className,
     offset = 12,
     padding = 16,
+    disableClickOutside = false,
 }: PopoverProps): React.ReactPortal => {
     const popoverRef = useRef<HTMLDivElement>(null);
     const onCloseRef = useRef(onClose);
@@ -41,6 +43,7 @@ export const Popover = ({
 
     useEffect((): (() => void) => {
         const handleClickOutside = (event: MouseEvent): void => {
+            if (disableClickOutside) return;
             if (
                 isOpen &&
                 popoverRef.current &&
@@ -67,7 +70,7 @@ export const Popover = ({
             document.removeEventListener('mousedown', handleClickOutside);
             document.removeEventListener('keydown', handleKeyDown);
         };
-    }, [isOpen, triggerRef]);
+    }, [isOpen, triggerRef, disableClickOutside]);
 
     return createPortal(
         <AnimatePresence>

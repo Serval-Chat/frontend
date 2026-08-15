@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom';
 import { useClickAway } from 'react-use';
 
 import { useCustomEmojis } from '@/hooks/useCustomEmojis';
+import { useIsMobile } from '@/hooks/useIsMobile';
 import { Button } from '@/ui/components/common/Button';
 import { Input } from '@/ui/components/common/Input';
 import { Modal } from '@/ui/components/common/Modal';
@@ -167,6 +168,9 @@ const PollOptionsEditor = ({
                           >
                               <EmojiPicker
                                   customCategories={customCategories}
+                                  onClickAway={(): void =>
+                                      onSetActiveEmojiOption(null)
+                                  }
                                   onCustomEmojiSelect={(emoji): void => {
                                       onEmojiSelect(
                                           activeEmojiOption,
@@ -297,6 +301,7 @@ export const CreatePollModal = ({
 }: CreatePollModalProps) => {
     // Already reset via the isOpen-transition guard below on every reopen
     const [syncedIsOpen, setSyncedIsOpen] = useState(isOpen);
+    const isMobile = useIsMobile();
     interface PollForm {
         title: string;
         options: PollOptionInput[];
@@ -432,6 +437,7 @@ export const CreatePollModal = ({
     });
 
     useClickAway(emojiPickerRef, (): void => {
+        if (isMobile) return;
         setActiveEmojiOption(null);
     });
 

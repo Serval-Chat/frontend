@@ -2,7 +2,6 @@ import React from 'react';
 
 import { createPortal } from 'react-dom';
 
-import { Modal } from '@/ui/components/common/Modal';
 import type { CustomEmojiCategory } from '@/ui/components/emoji/EmojiPicker';
 import { Box } from '@/ui/components/layout/Box';
 
@@ -14,7 +13,6 @@ const EmojiPicker = React.lazy(() =>
 
 interface MessageEmojiPickerProps {
     isOpen: boolean;
-    isMobile: boolean;
     coords: { x: number; y: number };
     pickerRef: React.RefObject<HTMLDivElement | null>;
     customCategories?: CustomEmojiCategory[];
@@ -27,7 +25,6 @@ interface MessageEmojiPickerProps {
 export const MessageEmojiPicker = React.memo(
     ({
         isOpen,
-        isMobile,
         coords,
         pickerRef,
         customCategories,
@@ -36,33 +33,6 @@ export const MessageEmojiPicker = React.memo(
         onClose,
     }: MessageEmojiPickerProps) => {
         if (!isOpen) return null;
-
-        if (isMobile) {
-            return (
-                <Modal
-                    fullScreen
-                    noPadding
-                    isOpen={isOpen}
-                    title="Add Reaction"
-                    onClose={onClose}
-                >
-                    <React.Suspense
-                        fallback={
-                            <div className="flex h-full items-center justify-center p-4">
-                                Loading emojis...
-                            </div>
-                        }
-                    >
-                        <EmojiPicker
-                            className="h-full !max-h-none w-full !max-w-none rounded-none border-none shadow-none"
-                            customCategories={customCategories}
-                            onCustomEmojiSelect={onCustomSelect}
-                            onEmojiSelect={onSelect}
-                        />
-                    </React.Suspense>
-                </Modal>
-            );
-        }
 
         return createPortal(
             <Box
@@ -83,6 +53,7 @@ export const MessageEmojiPicker = React.memo(
                 >
                     <EmojiPicker
                         customCategories={customCategories}
+                        onClickAway={onClose}
                         onCustomEmojiSelect={onCustomSelect}
                         onEmojiSelect={onSelect}
                     />

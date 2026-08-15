@@ -5,6 +5,7 @@ import { Hash, Link, Volume2 } from 'lucide-react';
 import { serversApi } from '@/api/servers/servers.api';
 import type { ChannelType } from '@/api/servers/servers.types';
 import { useCustomEmojis } from '@/hooks/useCustomEmojis';
+import { useIsMobile } from '@/hooks/useIsMobile';
 import { Button } from '@/ui/components/common/Button';
 import { Input } from '@/ui/components/common/Input';
 import { Modal } from '@/ui/components/common/Modal';
@@ -121,6 +122,7 @@ export const CreateChannelModal = ({
     const { name, channelType, linkUrl, emoji, emojiType, error } = form;
     const [isEmojiPickerOpen, setIsEmojiPickerOpen] = useState(false);
     const emojiTriggerRef = React.useRef<HTMLButtonElement>(null);
+    const isMobile = useIsMobile();
     const [isLoading, setIsLoading] = useState(false);
 
     const { customCategories } = useCustomEmojis();
@@ -351,6 +353,7 @@ export const CreateChannelModal = ({
                     </div>
 
                     <Popover
+                        disableClickOutside={isMobile}
                         isOpen={isEmojiPickerOpen}
                         triggerRef={emojiTriggerRef}
                         onClose={(): void => {
@@ -359,6 +362,9 @@ export const CreateChannelModal = ({
                     >
                         <EmojiPicker
                             customCategories={customCategories}
+                            onClickAway={(): void =>
+                                setIsEmojiPickerOpen(false)
+                            }
                             onCustomEmojiSelect={(e): void => {
                                 dispatchForm({
                                     type: 'setEmoji',
