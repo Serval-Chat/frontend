@@ -1,4 +1,4 @@
-importScripts('https://cdn.jsdelivr.net/npm/idb-keyval@6/dist/umd.js');
+importScripts('/vendor/idb-keyval.umd.js');
 
 self.addEventListener('push', (event) => {
     if (!event.data) return;
