@@ -35,7 +35,7 @@ interface UseFrequentlyUsedEmojisResult {
 }
 
 const PERSIST_DEBOUNCE_MS = 1500;
-const FREQUENTLY_USED_CATEGORY_ID = '__frequently_used__';
+export const FREQUENTLY_USED_CATEGORY_ID = '__frequently_used__';
 
 export const useFrequentlyUsedEmojis = (): UseFrequentlyUsedEmojisResult => {
     const { data: me } = useMe();
@@ -120,29 +120,30 @@ export const useFrequentlyUsedEmojis = (): UseFrequentlyUsedEmojisResult => {
         [resolved],
     );
 
-    const frequentlyUsedCategory = React.useMemo(():
-        | CustomEmojiCategory
-        | null => {
-        if (resolved.length === 0) return null;
+    const frequentlyUsedCategory =
+        React.useMemo((): CustomEmojiCategory | null => {
+            if (resolved.length === 0) return null;
 
-        const emojis = resolved
-            .map((e) =>
-                e.emojiType === 'unicode'
-                    ? emojiMap.get(e.emoji)
-                    : { id: e.emojiId as string, name: e.name as string, url: e.imageUrl as string },
-            )
-            .filter(
-                (e): e is NonNullable<typeof e> => e !== undefined,
-            );
+            const emojis = resolved
+                .map((e) =>
+                    e.emojiType === 'unicode'
+                        ? emojiMap.get(e.emoji)
+                        : {
+                              id: e.emojiId as string,
+                              name: e.name as string,
+                              url: e.imageUrl as string,
+                          },
+                )
+                .filter((e): e is NonNullable<typeof e> => e !== undefined);
 
-        if (emojis.length === 0) return null;
+            if (emojis.length === 0) return null;
 
-        return {
-            id: FREQUENTLY_USED_CATEGORY_ID,
-            name: 'Frequently Used',
-            emojis,
-        };
-    }, [resolved]);
+            return {
+                id: FREQUENTLY_USED_CATEGORY_ID,
+                name: 'Frequently Used',
+                emojis,
+            };
+        }, [resolved]);
 
     return { quickReactions, frequentlyUsedCategory, recordUsage };
 };

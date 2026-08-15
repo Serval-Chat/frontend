@@ -1,14 +1,15 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 
 import { m } from 'framer-motion';
-import { Search } from 'lucide-react';
+import { Search, Star } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import { useLockBodyScroll } from 'react-use';
 import { List } from 'react-window';
 import type { ListImperativeAPI, RowComponentProps } from 'react-window';
 
-import { useEmojiInfoBox } from '@/hooks/useEmojiInfoBox';
 import { useIsMobile } from '@/hooks/useIsMobile';
+import { FREQUENTLY_USED_CATEGORY_ID } from '@/hooks/useFrequentlyUsedEmojis';
+import { useEmojiInfoBox } from '@/hooks/useEmojiInfoBox';
 import { Button } from '@/ui/components/common/Button';
 import { Input } from '@/ui/components/common/Input';
 import { ParsedUnicodeEmoji } from '@/ui/components/common/ParsedUnicodeEmoji';
@@ -200,6 +201,10 @@ const EmojiPickerRow = ({
         e: React.MouseEvent | React.TouchEvent,
     ) => void;
 }) => {
+    const isFrequentlyUsed = row.id === FREQUENTLY_USED_CATEGORY_ID;
+    const categoryIcon = isFrequentlyUsed ? (
+        <Star className="h-4 w-4 fill-current text-caution" />
+    ) : null;
     if (row.type === 'header') {
         return (
             <Box
@@ -210,11 +215,15 @@ const EmojiPickerRow = ({
                 style={style}
             >
                 {row.isCustom ? (
-                    <ServerIcon
-                        className="!cursor-default !rounded-sm"
-                        server={{ name: row.name, icon: row.icon }}
-                        size="xs"
-                    />
+                    isFrequentlyUsed ? (
+                        categoryIcon
+                    ) : (
+                        <ServerIcon
+                            className="!cursor-default !rounded-sm"
+                            server={{ name: row.name, icon: row.icon }}
+                            size="xs"
+                        />
+                    )
                 ) : (
                     <div className="flex h-4 w-4 items-center justify-center">
                         {row.standardIcon ? (
@@ -555,6 +564,8 @@ const EmojiPickerContent = ({
             >
                 {displayCategories.map((cat) => {
                     const isActive = resolvedActiveCategoryId === cat.id;
+                    const isFrequentlyUsed =
+                        cat.id === FREQUENTLY_USED_CATEGORY_ID;
                     return cat.type === 'custom' ? (
                         <Box
                             className="relative flex flex-shrink-0 items-center justify-center"
@@ -564,29 +575,55 @@ const EmojiPickerContent = ({
                                 height: SIDEBAR_CATEGORY_SIZE,
                             }}
                         >
-                            <ServerIcon
-                                className={cn(
-                                    '!rounded-lg transition-transform',
-                                    isActive ? 'scale-110' : 'hover:scale-105',
-                                )}
-                                isActive={isActive}
-                                server={
-                                    {
-                                        name: cat.name,
-                                        icon: cat.icon,
-                                    } as Parameters<
-                                        typeof ServerIcon
-                                    >[0]['server']
-                                }
-                                size="xs"
-                                style={{
-                                    width: SIDEBAR_CATEGORY_SIZE,
-                                    height: SIDEBAR_CATEGORY_SIZE,
-                                }}
-                                onClick={(): void => {
-                                    handleCategoryClick(cat.id);
-                                }}
-                            />
+                            {isFrequentlyUsed ? (
+                                <Button
+                                    className={cn(
+                                        'group relative flex-shrink-0 !bg-transparent p-0 transition-transform',
+                                        isActive
+                                            ? 'scale-110 text-caution'
+                                            : 'text-caution/60 hover:scale-105 hover:text-caution',
+                                    )}
+                                    style={{
+                                        width: SIDEBAR_CATEGORY_SIZE,
+                                        height: SIDEBAR_CATEGORY_SIZE,
+                                        minWidth: 0,
+                                        minHeight: 0,
+                                    }}
+                                    title={cat.name}
+                                    variant="ghost"
+                                    onClick={(): void => {
+                                        handleCategoryClick(cat.id);
+                                    }}
+                                >
+                                    <Star className="h-[18px] w-[18px] fill-current" />
+                                </Button>
+                            ) : (
+                                <ServerIcon
+                                    className={cn(
+                                        '!rounded-lg transition-transform',
+                                        isActive
+                                            ? 'scale-110'
+                                            : 'hover:scale-105',
+                                    )}
+                                    isActive={isActive}
+                                    server={
+                                        {
+                                            name: cat.name,
+                                            icon: cat.icon,
+                                        } as Parameters<
+                                            typeof ServerIcon
+                                        >[0]['server']
+                                    }
+                                    size="xs"
+                                    style={{
+                                        width: SIDEBAR_CATEGORY_SIZE,
+                                        height: SIDEBAR_CATEGORY_SIZE,
+                                    }}
+                                    onClick={(): void => {
+                                        handleCategoryClick(cat.id);
+                                    }}
+                                />
+                            )}
                             {isActive ? (
                                 <div
                                     className="absolute top-1/2 -left-3.5 w-1.5 -translate-y-1/2 rounded-full bg-primary shadow-[0_0_8px_rgba(var(--primary),0.5)]"
