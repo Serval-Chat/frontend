@@ -1,14 +1,6 @@
 /**
  * Tests for setupGlobalWsHandlers - specifically around ping (mention)
  * deduplication and automatic ping-clearing when a message is viewed.
- *
- * Strategy
- * --------
- * We call setupGlobalWsHandlers() with a mock QueryClient and a mock Redux
- * dispatch, then simulate raw WebSocket messages (just as wsClient.test.ts
- * does) by calling the onmessage handler with a serialised WS envelope.
- * This lets us exercise the real handler logic without spinning up a full
- * React tree.
  */
 import type { Dispatch } from '@reduxjs/toolkit';
 import type { InfiniteData } from '@tanstack/react-query';

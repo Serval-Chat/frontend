@@ -36,13 +36,4 @@ export const pingsApi = {
         );
         return response.data;
     },
-
-    /**
-     * Clear all pings for the current user
-     */
-    clearAllPings: async (): Promise<DeletePingResponse> => {
-        const response =
-            await apiClient.delete<DeletePingResponse>('/api/v1/pings');
-        return response.data;
-    },
 };

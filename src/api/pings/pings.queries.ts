@@ -11,7 +11,6 @@ import { SERVERS_QUERY_KEYS } from '@/api/servers/servers.queries';
 import {
     decrementServerPing,
     setServerPingCount,
-    setUnreadServers,
 } from '@/store/slices/unreadSlice';
 import { hasAuthToken } from '@/utils/authToken';
 
@@ -132,26 +131,6 @@ export function useClearChannelPings(): UseMutationResult<
                 );
             }
 
-            void queryClient.invalidateQueries({
-                queryKey: SERVERS_QUERY_KEYS.unread(),
-            });
-        },
-    });
-}
-
-export function useClearAllPings(): UseMutationResult<
-    DeletePingResponse,
-    Error,
-    void
-> {
-    const queryClient = useQueryClient();
-    const dispatch = useDispatch();
-
-    return useMutation({
-        mutationFn: pingsApi.clearAllPings,
-        onSuccess: (): void => {
-            queryClient.setQueryData(PINGS_KEYS.all, { pings: [] });
-            dispatch(setUnreadServers({})); // Clear all unread/pings in Redux too
             void queryClient.invalidateQueries({
                 queryKey: SERVERS_QUERY_KEYS.unread(),
             });

@@ -1,10 +1,8 @@
 import React, { useReducer } from 'react';
 
-import { AnimatePresence, m } from 'framer-motion';
-import { Bell, Compass, Home, Plus, Settings, Telescope } from 'lucide-react';
+import { Compass, Home, Plus, Settings, Telescope } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
-import { usePings } from '@/api/pings/pings.queries';
 import {
     useAppDispatch,
     useAppSelector,
@@ -38,12 +36,6 @@ const ServerDiscoveryModal = React.lazy(() =>
     })),
 );
 
-const PingInbox = React.lazy(() =>
-    import('@/ui/components/pings/PingInbox').then((m) => ({
-        default: m.PingInbox,
-    })),
-);
-
 const SettingsModal = React.lazy(() =>
     import('@/ui/components/settings/SettingsModal').then((m) => ({
         default: m.SettingsModal,
@@ -62,7 +54,6 @@ interface NavOverlayState {
     showCreateServer: boolean;
     showJoinServer: boolean;
     showDiscovery: boolean;
-    showInbox: boolean;
     settingsSectionOverride: string | null;
 }
 
@@ -70,7 +61,6 @@ const INITIAL_NAV_OVERLAY: NavOverlayState = {
     showCreateServer: false,
     showJoinServer: false,
     showDiscovery: false,
-    showInbox: false,
     settingsSectionOverride: null,
 };
 
@@ -89,12 +79,10 @@ export const PrimaryNavBar = () => {
     const unreadDms = useAppSelector(
         (state): Record<string, number> => state.unread.unreadDms,
     );
-    const { data: pingsData } = usePings();
     const totalUnreadDms = Object.values(unreadDms).reduce(
         (acc, count): number => acc + (typeof count === 'number' ? count : 0),
         0,
     );
-    const pingCount = pingsData?.pings?.length || 0;
 
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
@@ -107,7 +95,6 @@ export const PrimaryNavBar = () => {
         showCreateServer,
         showJoinServer,
         showDiscovery,
-        showInbox,
         settingsSectionOverride,
     } = overlay;
     const setShowCreateServer = (v: boolean): void => {
@@ -118,9 +105,6 @@ export const PrimaryNavBar = () => {
     };
     const setShowDiscovery = (v: boolean): void => {
         patchOverlay({ showDiscovery: v });
-    };
-    const setShowInbox = (v: boolean): void => {
-        patchOverlay({ showInbox: v });
     };
     const setSettingsSectionOverride = (v: string | null): void => {
         patchOverlay({ settingsSectionOverride: v });
@@ -160,7 +144,6 @@ export const PrimaryNavBar = () => {
             as="nav"
             className={cn(
                 'relative z-50 flex h-full flex-col items-center gap-3 after:pointer-events-none after:absolute after:inset-x-0 after:bottom-0 after:hidden after:h-[env(safe-area-inset-bottom)] after:bg-[--color-background] max-md:after:block',
-                showInbox && 'z-[var(--z-index-popover)]',
                 'pt-[calc(0.75rem+env(safe-area-inset-top))] pb-[calc(0.75rem+env(safe-area-inset-bottom))]',
                 'pride-glass-strong bg-[--color-background]',
                 'w-[72px] shrink-0',
@@ -220,39 +203,6 @@ export const PrimaryNavBar = () => {
             </Box>
 
             <Divider />
-
-            <Box className="relative">
-                <Tooltip content="Inbox">
-                    <IconButton
-                        badgeCount={pingCount}
-                        icon={Bell}
-                        isActive={showInbox}
-                        onClick={(): void => {
-                            setShowInbox(!showInbox);
-                        }}
-                    />
-                </Tooltip>
-
-                <AnimatePresence>
-                    {showInbox ? (
-                        <m.div
-                            animate={{ opacity: 1, x: 0, scale: 1 }}
-                            className="absolute bottom-0 left-[calc(100%+12px)] z-[var(--z-index-popover)] origin-bottom-left"
-                            exit={{ opacity: 0, x: -10, scale: 0.95 }}
-                            initial={{ opacity: 0, x: -10, scale: 0.95 }}
-                            transition={{ duration: 0.15, ease: 'easeOut' }}
-                        >
-                            <React.Suspense fallback={null}>
-                                <PingInbox
-                                    onClose={(): void => {
-                                        setShowInbox(false);
-                                    }}
-                                />
-                            </React.Suspense>
-                        </m.div>
-                    ) : null}
-                </AnimatePresence>
-            </Box>
 
             <Box>
                 <Tooltip content="User Settings">
