@@ -52,6 +52,8 @@ export interface KeybindBinding {
 
 export type UserKeybinds = Record<string, KeybindBinding | null>;
 
+export type SessionDuration = '1d' | '7d' | '30d' | '90d';
+
 export interface UserSettings {
     muteNotifications?: boolean;
     ownMessagesAlign?: MessageAlignment;
@@ -70,6 +72,7 @@ export interface UserSettings {
     useDefaultSounds?: boolean;
     use24HourTime?: boolean;
     keybinds?: UserKeybinds;
+    sessionDuration?: SessionDuration;
 }
 
 export interface ServerFolder {
@@ -165,7 +168,6 @@ export interface User {
     deletedAt?: Date;
     deletedReason?: string;
     anonymizedUsername?: string;
-    tokenVersion?: number;
     bio?: string;
     pronouns?: string;
     badges?: Badge[];

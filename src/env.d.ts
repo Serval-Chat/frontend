@@ -8,6 +8,7 @@ interface ImportMetaEnv {
     readonly VITE_ALTERNATIVE_URLS: string[];
     readonly VITE_ENABLE_SENTRY: string;
     readonly VITE_TURNSTILE_SITE_KEY?: string;
+    readonly VITE_PROJ_LEVEL: 'release' | 'development';
 }
 
 interface ImportMeta {

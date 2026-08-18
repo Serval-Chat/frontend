@@ -63,6 +63,12 @@ const PrivacySettings = React.lazy(() =>
     import('./PrivacySettings').then((m) => ({ default: m.PrivacySettings })),
 );
 
+const ActiveSessionsSettings = React.lazy(() =>
+    import('./ActiveSessionsSettings').then((m) => ({
+        default: m.ActiveSessionsSettings,
+    })),
+);
+
 interface SettingsModalProps {
     isOpen: boolean;
     onClose: () => void;
@@ -71,6 +77,7 @@ interface SettingsModalProps {
 
 const SECTION_URL_MAP: Record<string, string> = {
     'my-account': 'account',
+    sessions: 'sessions',
     appearance: 'appearance',
     decorations: 'decorations',
     accessibility: 'accessibility',
@@ -84,6 +91,7 @@ const SECTION_URL_MAP: Record<string, string> = {
 
 const SECTION_ID_TO_URL: Record<string, string> = {
     account: 'my-account',
+    sessions: 'sessions',
     appearance: 'appearance',
     decorations: 'decorations',
     accessibility: 'accessibility',
@@ -204,6 +212,9 @@ export const SettingsModal = ({
                             >
                                 {activeSection === 'account' ? (
                                     <AccountSettings />
+                                ) : null}
+                                {activeSection === 'sessions' ? (
+                                    <ActiveSessionsSettings />
                                 ) : null}
                                 {activeSection === 'appearance' ? (
                                     <AppearanceSettings />

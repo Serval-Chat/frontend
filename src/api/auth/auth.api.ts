@@ -9,14 +9,18 @@ import type {
     ConfirmPasswordResetResponse,
     LoginRequest,
     LoginResponse,
+    LogoutResponse,
     RegisterRequest,
     RegisterResponse,
     RequestPasswordResetRequest,
     RequestPasswordResetResponse,
+    RevokeSessionsResponse,
+    SessionListResponse,
     TotpSensitiveActionRequest,
     TotpSetupConfirmRequest,
     TotpSetupConfirmResponse,
     TotpSetupResponse,
+    UpdateSessionIpResponse,
     VerifyTwoFactorRequest,
 } from './auth.types';
 
@@ -99,4 +103,37 @@ export const authApi = {
         apiClient
             .post<{ message: string }>('/api/v1/auth/2fa/disable', data)
             .then((r): { message: string } => r.data),
+
+    listSessions: (): Promise<SessionListResponse> =>
+        apiClient
+            .get<SessionListResponse>('/api/v1/auth/sessions')
+            .then((r): SessionListResponse => r.data),
+
+    revokeSession: (sessionId: string): Promise<RevokeSessionsResponse> =>
+        apiClient
+            .delete<RevokeSessionsResponse>(
+                `/api/v1/auth/sessions/${sessionId}`,
+            )
+            .then((r): RevokeSessionsResponse => r.data),
+
+    revokeOtherSessions: (): Promise<RevokeSessionsResponse> =>
+        apiClient
+            .delete<RevokeSessionsResponse>('/api/v1/auth/sessions/others')
+            .then((r): RevokeSessionsResponse => r.data),
+
+    logout: (): Promise<LogoutResponse> =>
+        apiClient
+            .post<LogoutResponse>('/api/v1/auth/logout')
+            .then((r): LogoutResponse => r.data),
+
+    updateSessionIp: (
+        sessionId: string,
+        ip: string,
+    ): Promise<UpdateSessionIpResponse> =>
+        apiClient
+            .patch<UpdateSessionIpResponse>(
+                `/api/v1/auth/sessions/${sessionId}/ip`,
+                { ip },
+            )
+            .then((r): UpdateSessionIpResponse => r.data),
 };

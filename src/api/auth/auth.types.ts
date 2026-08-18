@@ -85,3 +85,33 @@ export interface ConfirmPasswordResetResponse {
     message: string;
     requestId: string;
 }
+
+export interface LogoutResponse {
+    message: string;
+}
+
+export interface SessionEntry {
+    id: string;
+    userAgent: string;
+    ip: string;
+    location?: string;
+    ipRisk?: 'vpn' | 'datacenter';
+    createdAt: string;
+    lastSeenAt: string;
+    expiresAt: string;
+    isCurrent: boolean;
+}
+
+export interface SessionListResponse {
+    sessions: SessionEntry[];
+}
+
+export interface RevokeSessionsResponse {
+    message: string;
+    revokedCount: number;
+}
+
+export interface UpdateSessionIpResponse {
+    message: string;
+    ip: string;
+}

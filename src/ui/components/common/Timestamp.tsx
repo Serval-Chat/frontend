@@ -1,11 +1,13 @@
 import React from 'react';
 
 import { APP_LOCALE } from '@/utils/locale';
+import { cn } from '@/utils/cn';
 import type { TimestampFlag } from '@/utils/textParser/types';
 
 interface TimestampProps {
     timestamp: number;
     flag?: TimestampFlag;
+    className?: string;
 }
 
 const MS_PER_SECOND = 1000;
@@ -143,7 +145,7 @@ const formatTimestamp = (
     }
 };
 
-export const Timestamp = ({ timestamp, flag }: TimestampProps) => {
+export const Timestamp = ({ timestamp, flag, className }: TimestampProps) => {
     const [now, setNow] = React.useState((): number => Date.now());
     const date = React.useMemo(
         (): Date => new Date(timestamp * 1000),
@@ -170,7 +172,10 @@ export const Timestamp = ({ timestamp, flag }: TimestampProps) => {
 
     return (
         <time
-            className="rounded bg-bg-secondary px-1 py-0.5 text-sm font-medium text-foreground"
+            className={cn(
+                'rounded bg-bg-secondary px-1 py-0.5 text-sm font-medium text-foreground',
+                className,
+            )}
             dateTime={
                 Number.isNaN(date.getTime()) ? undefined : date.toISOString()
             }

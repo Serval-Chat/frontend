@@ -3,6 +3,7 @@ import {
     Eye,
     Keyboard,
     Lock,
+    Monitor,
     Palette,
     Shield,
     ShieldAlert,
@@ -23,6 +24,7 @@ interface SettingsSidebarProps {
 
 const SETTINGS_SECTIONS = [
     { id: 'account', label: 'My Account', icon: User },
+    { id: 'sessions', label: 'Sessions', icon: Monitor },
     { id: 'appearance', label: 'Appearance', icon: Palette },
     { id: 'decorations', label: 'Avatar Decorations', icon: Sparkles },
     { id: 'accessibility', label: 'Accessibility', icon: Eye },
