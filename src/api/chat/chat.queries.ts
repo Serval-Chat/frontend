@@ -8,6 +8,8 @@ import {
     useQueryClient,
 } from '@tanstack/react-query';
 
+import { useDmChannel } from '@/api/channels/channels.queries';
+
 import { chatApi } from './chat.api';
 import type {
     ChatMessage,
@@ -19,6 +21,7 @@ interface EditUserMessageVariables {
     messageId: string;
     content: string;
     userId?: string;
+    channelId: string;
 }
 
 export const CHAT_QUERY_KEYS = {
@@ -89,22 +92,27 @@ export const LIMIT = 50;
  */
 export const useUserMessages = (
     userId: string | null,
-): UseInfiniteQueryResult<InfiniteData<ChatMessage[]>> =>
-    useInfiniteQuery({
+): UseInfiniteQueryResult<InfiniteData<ChatMessage[]>> => {
+    const { data: channel } = useDmChannel(userId);
+    const channelId = channel?.id ?? null;
+
+    return useInfiniteQuery({
+        // eslint-disable-next-line @tanstack/query/exhaustive-deps
         queryKey: CHAT_QUERY_KEYS.userMessages(userId),
         queryFn: ({ pageParam }): Promise<ChatMessage[]> => {
-            if (userId === null) {
-                throw new Error('userId is required');
+            if (channelId === null) {
+                throw new Error('DM channel not resolved yet');
             }
-            return chatApi.getUserMessages(userId, LIMIT, pageParam);
+            return chatApi.getDmChannelMessages(channelId, LIMIT, pageParam);
         },
         initialPageParam: undefined as string | undefined,
         getNextPageParam: (lastPage): string | undefined => {
             if (lastPage.length < LIMIT) return undefined;
             return lastPage[0]?.id;
         },
-        enabled: !!userId,
+        enabled: !!userId && !!channelId,
     });
+};
 
 /**
  * @description Hook to fetch messages for a specific channel
@@ -177,10 +185,15 @@ export const useDeleteMessage = (): {
             channelId?: string;
             messageId: string;
             userId?: string;
-        }): Promise<void> =>
-            serverId && channelId
-                ? chatApi.deleteMessage(serverId, channelId, messageId)
-                : chatApi.deleteUserMessage(messageId),
+        }): Promise<void> => {
+            if (serverId && channelId) {
+                return chatApi.deleteMessage(serverId, channelId, messageId);
+            }
+            if (channelId) {
+                return chatApi.deleteDmChannelMessage(channelId, messageId);
+            }
+            throw new Error('channelId is required to delete a message');
+        },
         onMutate: async (variables): Promise<void> => {
             if (variables.serverId && variables.channelId) {
                 // cancel any outgoing refetches (so they don't overwrite our optimistic update)
@@ -378,11 +391,7 @@ export const useEditChannelMessage = (): {
  * @description Hook to edit a direct message
  */
 export const useEditUserMessage = (): {
-    mutate: (vars: {
-        messageId: string;
-        content: string;
-        userId?: string;
-    }) => void;
+    mutate: (vars: EditUserMessageVariables) => void;
     isPending: boolean;
 } => {
     const queryClient = useQueryClient();
@@ -391,8 +400,9 @@ export const useEditUserMessage = (): {
         mutationFn: ({
             messageId,
             content,
+            channelId,
         }: EditUserMessageVariables): Promise<ChatMessage> =>
-            chatApi.editUserMessage(messageId, content),
+            chatApi.editDmChannelMessage(channelId, messageId, content),
         onMutate: async (
             variables,
         ): Promise<{ userId: string | undefined }> => {
@@ -529,8 +539,14 @@ export const useMessageSearch = ({
     query: string;
     page?: number;
     filters?: SearchFilters;
-}): UseQueryResult<MessageSearchResponse> =>
-    useQuery({
+}): UseQueryResult<MessageSearchResponse> => {
+    const hasSearchIntent = query.length > 0 || hasActiveFilters(filters);
+    const { data: dmChannel } = useDmChannel(
+        mode === 'dm' && hasSearchIntent ? (otherUserId ?? null) : null,
+    );
+    const dmChannelId = dmChannel?.id ?? null;
+
+    return useQuery({
         queryKey: CHAT_QUERY_KEYS.messageSearch(
             mode,
             otherUserId ?? null,
@@ -542,11 +558,11 @@ export const useMessageSearch = ({
         ),
         queryFn: (): Promise<MessageSearchResponse> => {
             if (mode === 'dm') {
-                if (otherUserId === undefined) {
-                    throw new Error('otherUserId is required');
+                if (dmChannelId === null) {
+                    throw new Error('DM channel not resolved yet');
                 }
-                return chatApi.searchDmMessages(
-                    otherUserId,
+                return chatApi.searchDmChannelMessages(
+                    dmChannelId,
                     query,
                     SEARCH_PAGE_SIZE,
                     page * SEARCH_PAGE_SIZE,
@@ -566,10 +582,13 @@ export const useMessageSearch = ({
             );
         },
         enabled:
-            (query.length > 0 || hasActiveFilters(filters)) &&
-            (mode === 'dm' ? !!otherUserId : !!serverId && !!channelId),
+            hasSearchIntent &&
+            (mode === 'dm'
+                ? !!otherUserId && dmChannelId !== null
+                : !!serverId && !!channelId),
         staleTime: 30_000,
     });
+};
 
 /**
  * @description Hook to fetch pinned messages

@@ -4,6 +4,7 @@ import { consumeInterceptor } from './debugSendInterceptor';
 
 import { type InfiniteData, useQueryClient } from '@tanstack/react-query';
 
+import { useDmChannel } from '@/api/channels/channels.queries';
 import { chatApi } from '@/api/chat/chat.api';
 import { CHAT_QUERY_KEYS, LIMIT } from '@/api/chat/chat.queries';
 import type {
@@ -51,6 +52,7 @@ export function useChatWS(
     selectedChannelId?: string,
 ): ChatWSResult {
     const { data: user } = useMe();
+    const { data: dmChannel } = useDmChannel(selectedFriendId ?? null);
     const queryClient = useQueryClient();
     const { typingUsers, addTypingUser, hydrateTypingUsers, clearTypingUsers } =
         useTypingIndicator();
@@ -69,6 +71,7 @@ export function useChatWS(
     const convertDmToChatMessage = useCallback(
         (message: IMessageDm): ChatMessage => ({
             id: message.id,
+            channelId: message.channelId,
             text: message.text,
             createdAt: message.createdAt,
             senderId: message.senderId,
@@ -1117,7 +1120,7 @@ export function useChatWS(
                 createdAt: new Date().toISOString(),
                 senderId: user.id,
                 serverId: selectedServerId,
-                channelId: selectedChannelId,
+                channelId: selectedFriendId ? dmChannel?.id : selectedChannelId,
                 receiverId: selectedFriendId,
                 replyToId,
                 stickerId: stickerId ?? null,
@@ -1170,6 +1173,7 @@ export function useChatWS(
             selectedFriendId,
             selectedServerId,
             selectedChannelId,
+            dmChannel?.id,
             addMessageToCache,
             markMessageFailed,
             sendMessageCore,

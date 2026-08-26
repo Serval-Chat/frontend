@@ -45,6 +45,7 @@ import {
     ChipNode,
 } from '@/ui/components/chat/lexical/ChipNode';
 import { Button } from '@/ui/components/common/Button';
+import { useToast } from '@/ui/components/common/Toast';
 import { isCustomEmojiEntry } from '@/ui/components/emoji/EmojiPicker';
 import { Box } from '@/ui/components/layout/Box';
 import { cn } from '@/utils/cn';
@@ -182,6 +183,7 @@ export const MessageEdit = ({
 
     const editChannelMessage = useEditChannelMessage();
     const editUserMessage = useEditUserMessage();
+    const { showToast } = useToast();
     const { customCategories } = useCustomEmojis({ enabled: true });
     const { frequentlyUsedCategory, recordUsage } = useFrequentlyUsedEmojis();
     const pickerCategories = useMemo(
@@ -324,20 +326,25 @@ export const MessageEdit = ({
         }
 
         if (serverId && channelId) {
-            // Edit server channel message
             editChannelMessage.mutate({
                 serverId,
                 channelId,
                 messageId,
                 content: trimmedText,
             });
-        } else if (receiverId) {
-            // Edit direct message
+        } else if (receiverId && channelId) {
             editUserMessage.mutate({
                 messageId,
                 content: trimmedText,
                 userId: receiverId,
+                channelId,
             });
+        } else {
+            showToast(
+                "Can't edit this message yet — try again in a moment.",
+                'error',
+            );
+            return;
         }
 
         onSuccess?.();

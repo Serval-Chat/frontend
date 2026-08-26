@@ -38,6 +38,10 @@ import { insertSearchToken } from './lexical/searchTokenUtils';
 
 const PAGE_SIZE = 25;
 
+const EMPTY_CHANNELS: never[] = [];
+const EMPTY_CATEGORIES: never[] = [];
+const EMPTY_MEMBERS: never[] = [];
+
 const handleSearchKeyDown = (e: {
     key: string;
     preventDefault(): void;
@@ -587,13 +591,15 @@ export function MessageSearchPanel({
         return () => observer.disconnect();
     }, []);
 
-    const { data: allChannels = [] } = useChannels(serverId ?? null, {
-        enabled: mode === 'channel',
-    });
-    const { data: allCategories = [] } = useCategories(serverId ?? null, {
-        enabled: mode === 'channel',
-    });
-    const { data: members } = useMembers(serverId ?? null, {
+    const { data: allChannels = EMPTY_CHANNELS } = useChannels(
+        serverId ?? null,
+        { enabled: mode === 'channel' },
+    );
+    const { data: allCategories = EMPTY_CATEGORIES } = useCategories(
+        serverId ?? null,
+        { enabled: mode === 'channel' },
+    );
+    const { data: members = EMPTY_MEMBERS } = useMembers(serverId ?? null, {
         enabled: mode === 'channel',
     });
     const { data: roles } = useRoles(serverId ?? null, {
@@ -737,7 +743,7 @@ export function MessageSearchPanel({
                             categories={allCategories}
                             channels={allChannels}
                             editorRef={lexicalEditorRef}
-                            members={members ?? []}
+                            members={members}
                             onChange={handleSearchChange}
                         />
                     </LexicalComposer>

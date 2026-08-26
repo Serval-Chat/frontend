@@ -78,6 +78,7 @@ export interface IWsErrorEvent {
 export interface IMessageDm {
     messageId: string;
     id: string;
+    channelId: string;
     senderId: string;
     senderUsername: string;
     senderProfilePicture?: string | null;

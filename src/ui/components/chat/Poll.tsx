@@ -99,15 +99,24 @@ export const Poll = ({ poll, messageId, serverId, channelId }: PollProps) => {
     }, [isExpired, poll.options, totalVotes]);
 
     const { mutate: votePoll, isPending } = useMutation({
-        mutationFn: async (optionIds: string[]) =>
-            serverId && channelId
-                ? chatApi.votePollServer(
-                      serverId,
-                      channelId,
-                      messageId,
-                      optionIds,
-                  )
-                : chatApi.votePollDm(messageId, optionIds),
+        mutationFn: async (optionIds: string[]) => {
+            if (serverId && channelId) {
+                return chatApi.votePollServer(
+                    serverId,
+                    channelId,
+                    messageId,
+                    optionIds,
+                );
+            }
+            if (channelId) {
+                return chatApi.votePollDmChannel(
+                    channelId,
+                    messageId,
+                    optionIds,
+                );
+            }
+            throw new Error('channelId is required to vote on a poll');
+        },
         onSuccess: () => {
             void queryClient.invalidateQueries({
                 queryKey: ['chat', 'messages'],

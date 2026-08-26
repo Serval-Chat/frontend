@@ -227,12 +227,22 @@ export const useMessageSend = ({
                             messageId: findLastMyMessage.id,
                             content: corrected,
                         });
-                    } else if (findLastMyMessage.receiverId) {
+                    } else if (
+                        findLastMyMessage.receiverId &&
+                        findLastMyMessage.channelId
+                    ) {
                         editUserMessage.mutate({
                             messageId: findLastMyMessage.id,
                             content: corrected,
                             userId: findLastMyMessage.receiverId,
+                            channelId: findLastMyMessage.channelId,
                         });
+                    } else {
+                        showToast(
+                            "Can't correct that message yet — try again in a moment.",
+                            'error',
+                        );
+                        return false;
                     }
                 }
                 return true;

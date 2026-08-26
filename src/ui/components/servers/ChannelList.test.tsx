@@ -151,6 +151,20 @@ const channel2: Channel = {
     position: 1,
     categoryId: 'cat-1',
 };
+const category2: Category = {
+    id: 'cat-2',
+    name: 'Off Topic',
+    serverId: 'server-1',
+    position: 1,
+};
+const channel3: Channel = {
+    id: 'chan-3',
+    name: 'memes',
+    serverId: 'server-1',
+    type: 'text',
+    position: 0,
+    categoryId: 'cat-2',
+};
 
 const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
@@ -312,6 +326,254 @@ describe('ChannelList state cluster', (): void => {
             'reorder-item-cat-1',
             'reorder-item-chan-2',
             'reorder-item-chan-1',
+        ]);
+    });
+
+    it('lets a dragged category advance past its own channels one framer-swap at a time, instead of snapping back to its original spot', (): void => {
+        renderChannelList({
+            channels: [channel1, channel2, channel3],
+            categories: [category1, category2],
+        });
+
+        act((): void => {
+            dragHandlersById['cat-1']?.onDragStart?.();
+        });
+
+        const group = screen.getByTestId('reorder-group');
+        const orderedTestIds = (): (string | undefined)[] =>
+            [
+                ...group.querySelectorAll<HTMLElement>(
+                    '[data-testid^="reorder-item-"], [data-testid="drop-indicator"]',
+                ),
+            ].map((el) => el.dataset.testid);
+
+        act((): void => {
+            reorderState.onReorder?.([
+                { type: 'channel', id: 'chan-1', data: channel1 },
+                { type: 'category', id: 'cat-1', data: category1 },
+                { type: 'channel', id: 'chan-2', data: channel2 },
+                { type: 'category', id: 'cat-2', data: category2 },
+                { type: 'channel', id: 'chan-3', data: channel3 },
+            ]);
+        });
+
+        expect(orderedTestIds()).toEqual([
+            'reorder-item-chan-1',
+            'drop-indicator',
+            'reorder-item-cat-1',
+            'reorder-item-chan-2',
+            'reorder-item-cat-2',
+            'reorder-item-chan-3',
+        ]);
+
+        act((): void => {
+            reorderState.onReorder?.([
+                { type: 'channel', id: 'chan-1', data: channel1 },
+                { type: 'channel', id: 'chan-2', data: channel2 },
+                { type: 'category', id: 'cat-1', data: category1 },
+                { type: 'category', id: 'cat-2', data: category2 },
+                { type: 'channel', id: 'chan-3', data: channel3 },
+            ]);
+        });
+
+        expect(orderedTestIds()).toEqual([
+            'reorder-item-chan-1',
+            'reorder-item-chan-2',
+            'drop-indicator',
+            'reorder-item-cat-1',
+            'reorder-item-cat-2',
+            'reorder-item-chan-3',
+        ]);
+
+        // Only now has cat-1 cleared both its own channels and reached
+        // cat-2 - this is where the block should finally regroup.
+        act((): void => {
+            reorderState.onReorder?.([
+                { type: 'channel', id: 'chan-1', data: channel1 },
+                { type: 'channel', id: 'chan-2', data: channel2 },
+                { type: 'category', id: 'cat-2', data: category2 },
+                { type: 'category', id: 'cat-1', data: category1 },
+                { type: 'channel', id: 'chan-3', data: channel3 },
+            ]);
+        });
+
+        expect(orderedTestIds()).toEqual([
+            'reorder-item-cat-2',
+            'drop-indicator',
+            'reorder-item-cat-1',
+            'reorder-item-chan-1',
+            'reorder-item-chan-2',
+            'reorder-item-chan-3',
+        ]);
+    });
+
+    it('normalizes a category still mid-shuffle through its own channels at drop time, so they are not misassigned', async (): Promise<void> => {
+        renderChannelList({
+            channels: [channel1, channel2, channel3],
+            categories: [category1, category2],
+        });
+
+        act((): void => {
+            dragHandlersById['cat-1']?.onDragStart?.();
+        });
+
+        // Drop right after the very first framer swap - cat-1 has only
+        // cleared chan-1 so far and isn't first in its own block yet.
+        act((): void => {
+            reorderState.onReorder?.([
+                { type: 'channel', id: 'chan-1', data: channel1 },
+                { type: 'category', id: 'cat-1', data: category1 },
+                { type: 'channel', id: 'chan-2', data: channel2 },
+                { type: 'category', id: 'cat-2', data: category2 },
+                { type: 'channel', id: 'chan-3', data: channel3 },
+            ]);
+        });
+
+        await act(async (): Promise<void> => {
+            dragHandlersById['cat-1']?.onDragEnd?.();
+            await Promise.resolve();
+            await Promise.resolve();
+        });
+
+        // chan-1/chan-2 never actually left cat-1 - dropping mid-shuffle
+        // must not reassign either of them to a different category.
+        expect(serversApi.updateChannel).not.toHaveBeenCalled();
+        expect(serversApi.reorderChannels).toHaveBeenCalledWith('server-1', [
+            { channelId: 'chan-1', position: 0 },
+            { channelId: 'chan-2', position: 1 },
+            { channelId: 'chan-3', position: 2 },
+        ]);
+    });
+
+    it('grays out channels outside the dragged category while it is being dragged, and clears it once the drag ends', async (): Promise<void> => {
+        renderChannelList({
+            channels: [channel1, channel2, channel3],
+            categories: [category1, category2],
+        });
+
+        const isDimmed = (channelName: string): boolean =>
+            screen.getByText(channelName).closest('.opacity-40') !== null;
+
+        expect(isDimmed('general')).toBe(false);
+        expect(isDimmed('random')).toBe(false);
+        expect(isDimmed('memes')).toBe(false);
+
+        act((): void => {
+            dragHandlersById['cat-1']?.onDragStart?.();
+        });
+
+        // chan-1/chan-2 belong to the dragged category (cat-1) - stay normal.
+        expect(isDimmed('general')).toBe(false);
+        expect(isDimmed('random')).toBe(false);
+        // chan-3 belongs to cat-2 - gets grayed out.
+        expect(isDimmed('memes')).toBe(true);
+
+        await act(async (): Promise<void> => {
+            dragHandlersById['cat-1']?.onDragEnd?.();
+            await Promise.resolve();
+            await Promise.resolve();
+        });
+
+        expect(isDimmed('memes')).toBe(false);
+    });
+
+    it('shows a drop indicator right before the dragged item, tracking it as it moves, and hides it once the drag ends', async (): Promise<void> => {
+        renderChannelList({
+            channels: [channel1, channel2, channel3],
+            categories: [category1, category2],
+        });
+
+        expect(screen.queryByTestId('drop-indicator')).not.toBeInTheDocument();
+
+        act((): void => {
+            dragHandlersById['cat-1']?.onDragStart?.();
+        });
+
+        const group = screen.getByTestId('reorder-group');
+        const orderedTestIds = (): (string | undefined)[] =>
+            [
+                ...group.querySelectorAll<HTMLElement>(
+                    '[data-testid^="reorder-item-"], [data-testid="drop-indicator"]',
+                ),
+            ].map((el) => el.dataset.testid);
+
+        // dragStart alone fires a reorder with the unchanged order, so cat-1
+        // hasn't moved yet - the indicator should sit right above it.
+        expect(orderedTestIds()).toEqual([
+            'drop-indicator',
+            'reorder-item-cat-1',
+            'reorder-item-chan-1',
+            'reorder-item-chan-2',
+            'reorder-item-cat-2',
+            'reorder-item-chan-3',
+        ]);
+
+        // Drag cat-1 down past cat-2; the indicator should follow it to its
+        // new position, still immediately above it.
+        act((): void => {
+            reorderState.onReorder?.([
+                { type: 'channel', id: 'chan-1', data: channel1 },
+                { type: 'channel', id: 'chan-2', data: channel2 },
+                { type: 'category', id: 'cat-2', data: category2 },
+                { type: 'category', id: 'cat-1', data: category1 },
+                { type: 'channel', id: 'chan-3', data: channel3 },
+            ]);
+        });
+
+        expect(orderedTestIds()).toEqual([
+            'reorder-item-cat-2',
+            'drop-indicator',
+            'reorder-item-cat-1',
+            'reorder-item-chan-1',
+            'reorder-item-chan-2',
+            'reorder-item-chan-3',
+        ]);
+
+        await act(async (): Promise<void> => {
+            dragHandlersById['cat-1']?.onDragEnd?.();
+            await Promise.resolve();
+            await Promise.resolve();
+        });
+
+        expect(screen.queryByTestId('drop-indicator')).not.toBeInTheDocument();
+    });
+
+    it('keeps a dragged category\'s own channels attached to it, even when they were left behind by the raw drag reorder', (): void => {
+        renderChannelList({
+            channels: [channel1, channel2, channel3],
+            categories: [category1, category2],
+        });
+
+        act((): void => {
+            dragHandlersById['cat-1']?.onDragStart?.();
+        });
+
+        // framer-motion repositions only the dragged row; chan-1/chan-2 (still
+        // sitting where cat-1 used to be) are left behind ahead of it here,
+        // matching what actually comes out of dragging cat-1 down past its
+        // own channels and cat-2.
+        act((): void => {
+            reorderState.onReorder?.([
+                { type: 'channel', id: 'chan-1', data: channel1 },
+                { type: 'channel', id: 'chan-2', data: channel2 },
+                { type: 'category', id: 'cat-2', data: category2 },
+                { type: 'category', id: 'cat-1', data: category1 },
+                { type: 'channel', id: 'chan-3', data: channel3 },
+            ]);
+        });
+
+        const group = screen.getByTestId('reorder-group');
+        const order = [
+            ...group.querySelectorAll<HTMLElement>(
+                '[data-testid^="reorder-item-"]',
+            ),
+        ].map((el) => el.dataset.testid);
+
+        const cat1Index = order.indexOf('reorder-item-cat-1');
+        expect(order.slice(cat1Index, cat1Index + 3)).toEqual([
+            'reorder-item-cat-1',
+            'reorder-item-chan-1',
+            'reorder-item-chan-2',
         ]);
     });
 

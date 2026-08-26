@@ -53,23 +53,25 @@ const unwrapMessages = (data: unknown): ChatMessage[] => {
 
 export const chatApi = {
     /**
-     * @description Fetch messages for a specific user
+     * @description Fetch messages for a DM channel
      */
-    getUserMessages: async (
-        userId: string,
+    getDmChannelMessages: async (
+        channelId: string,
         limit = 50,
         before?: string,
         after?: string,
     ): Promise<ChatMessage[]> => {
-        const response = await apiClient.get<unknown>('/api/v1/messages', {
-            params: {
-                userId,
-                limit,
-                before,
-                after,
-                includeAttachmentContent: true,
+        const response = await apiClient.get<unknown>(
+            `/api/v1/channels/${channelId}/messages`,
+            {
+                params: {
+                    limit,
+                    before,
+                    after,
+                    includeAttachmentContent: true,
+                },
             },
-        });
+        );
         return unwrapMessages(response.data);
     },
 
@@ -112,10 +114,15 @@ export const chatApi = {
     },
 
     /**
-     * @description Delete a direct message
+     * @description Delete a message in a DM channel
      */
-    deleteUserMessage: async (messageId: string): Promise<void> => {
-        await apiClient.delete(`/api/v1/messages/${messageId}`);
+    deleteDmChannelMessage: async (
+        channelId: string,
+        messageId: string,
+    ): Promise<void> => {
+        await apiClient.delete(
+            `/api/v1/channels/${channelId}/messages/${messageId}`,
+        );
     },
 
     /**
@@ -135,14 +142,15 @@ export const chatApi = {
     },
 
     /**
-     * @description Edit a direct message
+     * @description Edit a message in a DM channel
      */
-    editUserMessage: async (
+    editDmChannelMessage: async (
+        channelId: string,
         messageId: string,
         content: string,
     ): Promise<ChatMessage> => {
         const response = await apiClient.patch<ChatMessage>(
-            `/api/v1/messages/${messageId}`,
+            `/api/v1/channels/${channelId}/messages/${messageId}`,
             { content },
         );
         return normalizeMessage(response.data);
@@ -200,32 +208,33 @@ export const chatApi = {
     },
 
     /**
-     * @description Vote on a DM poll
+     * @description Vote on a poll in a DM channel
      */
-    votePollDm: async (
+    votePollDmChannel: async (
+        channelId: string,
         messageId: string,
         optionIds: string[],
     ): Promise<ChatMessage> => {
         const response = await apiClient.post<ChatMessage>(
-            `/api/v1/messages/${messageId}/poll/vote`,
+            `/api/v1/channels/${channelId}/messages/${messageId}/poll/vote`,
             { optionIds },
         );
         return normalizeMessage(response.data);
     },
 
     /**
-     * @description Search messages in a DM conversation
+     * @description Search messages in a DM channel
      */
-    searchDmMessages: async (
-        otherUserId: string,
+    searchDmChannelMessages: async (
+        channelId: string,
         q: string,
         limit = 25,
         offset = 0,
         filters: SearchFilters = {},
     ): Promise<MessageSearchResponse> => {
         const response = await apiClient.get<MessageSearchResponse>(
-            '/api/v1/messages/search',
-            { params: { userId: otherUserId, q, limit, offset, ...filters } },
+            `/api/v1/channels/${channelId}/messages/search`,
+            { params: { q, limit, offset, ...filters } },
         );
         return response.data;
     },

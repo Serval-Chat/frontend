@@ -14,6 +14,10 @@ import { DMSidebarSection } from '@/ui/components/sidebar/DMSidebarSection';
 import { ServerSidebarSection } from '@/ui/components/sidebar/ServerSidebarSection';
 import { cn } from '@/utils/cn';
 
+const MEMBER_SEARCH_PLACEHOLDER_FULL =
+    'Search (supports regex /pattern/)...';
+const MEMBER_SEARCH_PLACEHOLDER_SHORT = 'Search members...';
+
 /**
  * @description Tertiary sidebar displaying DM participants or Server members.
  */
@@ -60,6 +64,10 @@ export const TertiarySidebar = ({
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const searchInputRef = useRef<HTMLInputElement>(null);
+    const searchWrapperRef = useRef<HTMLDivElement>(null);
+    const searchPlaceholderMeasureRef = useRef<HTMLSpanElement>(null);
+    const [isSearchPlaceholderTooWide, setIsSearchPlaceholderTooWide] =
+        useState(false);
 
     useEffect((): (() => void) | undefined => {
         if (isSearchOpen) {
@@ -70,6 +78,24 @@ export const TertiarySidebar = ({
                 clearTimeout(timeoutId);
             };
         }
+    }, [isSearchOpen]);
+
+    useEffect((): (() => void) | undefined => {
+        const wrapper = searchWrapperRef.current;
+        const measure = searchPlaceholderMeasureRef.current;
+        if (!wrapper || !measure) return;
+
+        const checkFit = (): void => {
+            setIsSearchPlaceholderTooWide(
+                measure.scrollWidth > wrapper.clientWidth - 16,
+            );
+        };
+
+        checkFit();
+
+        const observer = new ResizeObserver(checkFit);
+        observer.observe(wrapper);
+        return (): void => observer.disconnect();
     }, [isSearchOpen]);
 
     const { width, isResizing, handleMouseDown } = useResizable({
@@ -183,15 +209,27 @@ export const TertiarySidebar = ({
                             initial={{ height: 0, opacity: 0 }}
                         >
                             <div className="p-3">
-                                <Input
-                                    className="h-8 text-xs"
-                                    placeholder="Search (supports regex /pattern/)..."
-                                    ref={searchInputRef}
-                                    value={searchQuery}
-                                    onChange={(e): void => {
-                                        setSearchQuery(e.target.value);
-                                    }}
-                                />
+                                <div className="relative" ref={searchWrapperRef}>
+                                    <span
+                                        className="pointer-events-none invisible absolute text-xs whitespace-nowrap"
+                                        ref={searchPlaceholderMeasureRef}
+                                    >
+                                        {MEMBER_SEARCH_PLACEHOLDER_FULL}
+                                    </span>
+                                    <Input
+                                        placeholder={
+                                            isSearchPlaceholderTooWide
+                                                ? MEMBER_SEARCH_PLACEHOLDER_SHORT
+                                                : MEMBER_SEARCH_PLACEHOLDER_FULL
+                                        }
+                                        ref={searchInputRef}
+                                        size="sm"
+                                        value={searchQuery}
+                                        onChange={(e): void => {
+                                            setSearchQuery(e.target.value);
+                                        }}
+                                    />
+                                </div>
                             </div>
                         </m.div>
                     ) : null}

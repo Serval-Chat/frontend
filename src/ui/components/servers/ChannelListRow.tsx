@@ -3,7 +3,7 @@ import React from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import type { VirtualItem } from '@tanstack/react-virtual';
 import { Reorder } from 'framer-motion';
-import { ChevronDown, GripVertical, Plus, Settings } from 'lucide-react';
+import { ChevronDown, Plus, Settings } from 'lucide-react';
 
 import { chatApi } from '@/api/chat/chat.api';
 import { CHAT_QUERY_KEYS, LIMIT } from '@/api/chat/chat.queries';
@@ -191,6 +191,7 @@ interface ChannelListRowProps {
     isMobile: boolean;
     isReordering: boolean;
     collapsedCategories: Record<string, boolean>;
+    draggingCategoryId: string | null;
     existingCategoryIds: Set<string>;
     selectedChannelId: string | null;
     selectedServerId: string | null;
@@ -215,6 +216,7 @@ export const ChannelListRow = ({
     isMobile,
     isReordering,
     collapsedCategories,
+    draggingCategoryId,
     existingCategoryIds,
     selectedChannelId,
     selectedServerId,
@@ -258,9 +260,6 @@ export const ChannelListRow = ({
                                 onToggleCategory(category.id);
                             }}
                         >
-                            {canManageChannels ? (
-                                <GripVertical className="mr-0.5 h-3 w-3 shrink-0 text-muted-foreground/30 opacity-0 transition-opacity group-hover:opacity-100" />
-                            ) : null}
                             <ChevronDown
                                 className={cn(
                                     'mr-0.5 h-3 w-3 shrink-0 text-muted-foreground transition-transform duration-200',
@@ -311,6 +310,10 @@ export const ChannelListRow = ({
 
     if (isCollapsed && !isReordering) return null;
 
+    const dimmed =
+        draggingCategoryId !== null &&
+        channel.categoryId !== draggingCategoryId;
+
     return (
         <ReorderRow
             dragEnabled={dragEnabled}
@@ -320,21 +323,28 @@ export const ChannelListRow = ({
             onDragEnd={onDragEnd}
             onDragStart={onDragStart}
         >
-            <ChannelRow
-                canManageChannels={canManageChannels}
-                channel={channel}
-                channelPings={channelPings}
-                connectedUserIds={
-                    channel.type === 'voice'
-                        ? voiceParticipants[channel.id]
-                        : undefined
-                }
-                getChannelMenuItems={getChannelMenuItems}
-                handleChannelClick={onChannelClick}
-                selectedChannelId={selectedChannelId}
-                selectedServerId={selectedServerId}
-                setSettingsChannel={onEditChannel}
-            />
+            <div
+                className={cn(
+                    'transition-all duration-150',
+                    dimmed && 'opacity-40 grayscale',
+                )}
+            >
+                <ChannelRow
+                    canManageChannels={canManageChannels}
+                    channel={channel}
+                    channelPings={channelPings}
+                    connectedUserIds={
+                        channel.type === 'voice'
+                            ? voiceParticipants[channel.id]
+                            : undefined
+                    }
+                    getChannelMenuItems={getChannelMenuItems}
+                    handleChannelClick={onChannelClick}
+                    selectedChannelId={selectedChannelId}
+                    selectedServerId={selectedServerId}
+                    setSettingsChannel={onEditChannel}
+                />
+            </div>
         </ReorderRow>
     );
 };

@@ -8,7 +8,6 @@ import React, {
 
 import { serversApi } from '@/api/servers/servers.api';
 import type { Category, Channel } from '@/api/servers/servers.types';
-
 import {
     type ListItem,
     buildListItems,
@@ -25,6 +24,45 @@ interface UseChannelListReorderArgs {
     hiddenChannels: Set<string>;
     hiddenCategories: Set<string>;
 }
+
+const isBlockContiguous = (
+    orderedItems: ListItem[],
+    categoryId: string,
+    children: ListItem[],
+): boolean => {
+    const blockIds = new Set([
+        categoryId,
+        ...children.map((c): string => c.id),
+    ]);
+    const indices = orderedItems.reduce<number[]>(
+        (acc, item, index): number[] => {
+            if (blockIds.has(item.id)) acc.push(index);
+            return acc;
+        },
+        [],
+    );
+    if (indices.length === 0) return true;
+    return Math.max(...indices) - Math.min(...indices) + 1 === indices.length;
+};
+
+const regroupCategoryChildren = (
+    orderedItems: ListItem[],
+    categoryId: string,
+    children: ListItem[],
+): ListItem[] => {
+    const childIds = new Set(children.map((c): string => c.id));
+    const withoutChildren = orderedItems.filter(
+        (i): boolean => !childIds.has(i.id),
+    );
+    const categoryIndex = withoutChildren.findIndex(
+        (i): boolean => i.id === categoryId,
+    );
+    if (categoryIndex === -1) return orderedItems;
+
+    const result = [...withoutChildren];
+    result.splice(categoryIndex + 1, 0, ...children);
+    return result;
+};
 
 /**
  * owns the channel-list ordering model: the list-state reducer, the optimistic
@@ -129,21 +167,14 @@ export const useChannelListReorder = ({
                     !collapsedCategories[categoryId],
             );
 
-            if (visibleChildren.length > 0) {
-                const childIds = new Set(
-                    visibleChildren.map((c): string => c.id),
-                );
-                const newCategoryIndex = updatedVisible.findIndex(
-                    (i): boolean => i.id === categoryId,
-                );
-
-                updatedVisible = updatedVisible.filter(
-                    (i): boolean => !childIds.has(i.id),
-                );
-                updatedVisible.splice(
-                    newCategoryIndex + 1,
-                    0,
-                    ...visibleChildren,
+            if (
+                visibleChildren.length > 0 &&
+                !isBlockContiguous(updatedVisible, categoryId, visibleChildren)
+            ) {
+                updatedVisible = regroupCategoryChildren(
+                    updatedVisible,
+                    categoryId,
+                    visibleChildren,
                 );
             }
         }
@@ -172,6 +203,26 @@ export const useChannelListReorder = ({
         }
 
         try {
+            let finalItems = items;
+            const activeItem = items.find(
+                (i): boolean => i.id === activeItemId,
+            );
+            if (activeItem?.type === 'category') {
+                const children = items.filter(
+                    (i): boolean =>
+                        i.type === 'channel' &&
+                        i.data.categoryId === activeItem.id &&
+                        !collapsedCategories[activeItem.id],
+                );
+                if (children.length > 0) {
+                    finalItems = regroupCategoryChildren(
+                        items,
+                        activeItem.id,
+                        children,
+                    );
+                }
+            }
+
             const channelUpdates: {
                 id: string;
                 updates: Partial<Channel>;
@@ -187,7 +238,7 @@ export const useChannelListReorder = ({
             let channelPos = 0;
             let categoryPos = 0;
 
-            for (const item of items) {
+            for (const item of finalItems) {
                 if (item.type === 'category') {
                     currentCategoryId = item.id;
                     categoryPositions.push({
@@ -253,7 +304,13 @@ export const useChannelListReorder = ({
                 syncLockTimeoutRef.current = null;
             }, 500);
         }
-    }, [selectedServerId, canManageChannels, items]);
+    }, [
+        selectedServerId,
+        canManageChannels,
+        items,
+        activeItemId,
+        collapsedCategories,
+    ]);
 
     const handleDragStartItem = useCallback((id: string): void => {
         dispatchList({ type: 'dragStart', id });
