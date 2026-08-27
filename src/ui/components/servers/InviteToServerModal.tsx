@@ -34,9 +34,7 @@ export const InviteToServerModal = ({
     const handleInvite = (serverId: string): Promise<void> =>
         send(serverId, async () => {
             const invite = await invitesApi.createInvite(serverId, {});
-            const url = `${globalThis.location.origin}/invite/${
-                invite.customPath || invite.code
-            }`;
+            const url = `${globalThis.location.origin}/invite/${invite.code}`;
             wsMessages.sendMessageDm(userId, url);
         });
 

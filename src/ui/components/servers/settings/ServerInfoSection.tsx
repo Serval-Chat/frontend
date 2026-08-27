@@ -4,6 +4,7 @@ import { Plus, Tag, X } from 'lucide-react';
 
 import { useServerDiscoveryStatus } from '@/api/servers/servers.queries';
 import { Button } from '@/ui/components/common/Button';
+import { CalloutBox } from '@/ui/components/common/CalloutBox';
 import { Input } from '@/ui/components/common/Input';
 import { Text } from '@/ui/components/common/Text';
 import { TextArea } from '@/ui/components/common/TextArea';
@@ -195,7 +196,7 @@ export const ServerInfoSection = ({
                 </div>
             </div>
 
-            <div className="space-y-3 rounded-lg border border-border-subtle bg-bg-subtle p-4">
+            <div className="space-y-2 rounded-lg border border-border-subtle bg-bg-subtle p-4">
                 <div className="flex items-start justify-between gap-4">
                     <div className="space-y-1">
                         <Text as="p" weight="bold">
@@ -203,8 +204,7 @@ export const ServerInfoSection = ({
                         </Text>
                         <Text as="p" size="xs" variant="muted">
                             Discovery requires a description, at least one tag,
-                            verification, and a vanity invite with unlimited
-                            uses and no expiry.
+                            verification, and a vanity link.
                         </Text>
                     </div>
                     <Toggle
@@ -214,20 +214,16 @@ export const ServerInfoSection = ({
                     />
                 </div>
                 {discoveryEnabled && effectiveDiscoveryBlockers.length > 0 ? (
-                    <div className="rounded-md border border-caution/30 bg-caution/10 p-3">
-                        <Text
-                            className="mb-2 text-caution"
-                            size="xs"
-                            weight="bold"
-                        >
-                            Discovery blockers
-                        </Text>
+                    <CalloutBox
+                        className="rounded-md p-3"
+                        title="Discovery blockers"
+                    >
                         <ul className="space-y-1 text-xs text-muted-foreground">
                             {effectiveDiscoveryBlockers.map((blocker) => (
                                 <li key={blocker}>{blocker}</li>
                             ))}
                         </ul>
-                    </div>
+                    </CalloutBox>
                 ) : null}
             </div>
         </div>

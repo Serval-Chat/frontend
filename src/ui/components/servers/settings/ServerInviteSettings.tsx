@@ -1,12 +1,18 @@
 import { useState } from 'react';
 
-import { Copy, Plus, Trash2 } from 'lucide-react';
+import { Check, Copy, Plus, Trash2 } from 'lucide-react';
 
 import {
     useCreateInvite,
     useDeleteInvite,
     useServerInvites,
 } from '@/api/invites/invites.queries';
+import {
+    useDeleteVanityLink,
+    useSetVanityLink,
+    useVanityLink,
+} from '@/api/vanity/vanity.queries';
+import { usePermissions } from '@/hooks/usePermissions';
 import { Button } from '@/ui/components/common/Button';
 import { Heading } from '@/ui/components/common/Heading';
 import { Input } from '@/ui/components/common/Input';
@@ -33,6 +39,134 @@ const formatExpiry = (expiresAt?: string): string => {
     return date.toLocaleString(APP_LOCALE);
 };
 
+const buildInviteUrl = (code: string): string =>
+    `${globalThis.location.origin}/invite/${code}`;
+
+const VanityLinkSection = ({ serverId }: { serverId: string }) => {
+    const { showToast } = useToast();
+    const { isOwner } = usePermissions(serverId);
+    const { data: vanityLink, isLoading } = useVanityLink(serverId);
+    const { mutate: setVanityLink, isPending: isSaving } =
+        useSetVanityLink(serverId);
+    const { mutate: deleteVanityLink, isPending: isDeleting } =
+        useDeleteVanityLink(serverId);
+
+    const [code, setCode] = useState('');
+    const [copied, setCopied] = useState(false);
+
+    const currentCode = vanityLink?.code ?? null;
+
+    const handleSave = (): void => {
+        if (!code.trim()) return;
+        setVanityLink(
+            { code: code.trim() },
+            {
+                onSuccess: (): void => {
+                    setCode('');
+                    showToast('Vanity link set!', 'success');
+                },
+                onError: (): void => {
+                    showToast('Failed to set vanity link.', 'error');
+                },
+            },
+        );
+    };
+
+    const handleDelete = (): void => {
+        deleteVanityLink(undefined, {
+            onSuccess: (): void => {
+                showToast('Vanity link removed.', 'info');
+            },
+            onError: (): void => {
+                showToast('Failed to remove vanity link.', 'error');
+            },
+        });
+    };
+
+    const handleCopy = (): void => {
+        if (!currentCode) return;
+        void navigator.clipboard.writeText(buildInviteUrl(currentCode));
+        setCopied(true);
+        globalThis.setTimeout((): void => {
+            setCopied(false);
+        }, 1500);
+    };
+
+    if (isLoading) {
+        return null;
+    }
+
+    return (
+        <div className="space-y-4 rounded-lg border border-border-subtle bg-bg-subtle p-6">
+            <div>
+                <Heading level={3}>Vanity Link</Heading>
+                <Text size="xs" variant="muted">
+                    A single, permanent invite link for your server. Only the
+                    server owner can set or change it.
+                </Text>
+            </div>
+
+            {currentCode ? (
+                <div className="flex items-center gap-2">
+                    <Input
+                        readOnly
+                        className="font-mono"
+                        value={buildInviteUrl(currentCode)}
+                    />
+                    <Button
+                        size="sm"
+                        title="Copy Link"
+                        variant="ghost"
+                        onClick={handleCopy}
+                    >
+                        {copied ? (
+                            <Check className="h-4 w-4" />
+                        ) : (
+                            <Copy className="h-4 w-4" />
+                        )}
+                    </Button>
+                    {isOwner ? (
+                        <Button
+                            disabled={isDeleting}
+                            loading={isDeleting}
+                            size="sm"
+                            title="Remove"
+                            variant="ghost"
+                            onClick={handleDelete}
+                        >
+                            <Trash2 className="text-status-error h-4 w-4" />
+                        </Button>
+                    ) : null}
+                </div>
+            ) : !isOwner ? (
+                <Text size="sm" variant="muted">
+                    No vanity link has been set for this server.
+                </Text>
+            ) : null}
+
+            {isOwner ? (
+                <div className="flex items-center gap-2">
+                    <Input
+                        placeholder="e.g. awesome-server"
+                        value={code}
+                        onChange={(e): void => {
+                            setCode(e.target.value);
+                        }}
+                    />
+                    <Button
+                        disabled={isSaving || !code.trim()}
+                        loading={isSaving}
+                        variant="primary"
+                        onClick={handleSave}
+                    >
+                        {currentCode ? 'Change' : 'Set'}
+                    </Button>
+                </div>
+            ) : null}
+        </div>
+    );
+};
+
 export const ServerInviteSettings = ({
     serverId,
 }: ServerInviteSettingsProps) => {
@@ -42,20 +176,17 @@ export const ServerInviteSettings = ({
         useCreateInvite(serverId);
     const { mutate: deleteInvite } = useDeleteInvite(serverId);
 
-    const [customPath, setCustomPath] = useState('');
     const [maxUses, setMaxUses] = useState<number>(0);
     const [expiresIn, setExpiresIn] = useState<number>(0); // 0 = never
 
     const handleCreateInvite = (): void => {
         createInvite(
             {
-                customPath: customPath || undefined,
                 maxUses: maxUses > 0 ? maxUses : undefined,
                 expiresIn: expiresIn > 0 ? expiresIn : undefined,
             },
             {
                 onSuccess: (): void => {
-                    setCustomPath('');
                     setMaxUses(0);
                     setExpiresIn(0);
                     showToast('Invite generated successfully!', 'success');
@@ -68,8 +199,7 @@ export const ServerInviteSettings = ({
     };
 
     const handleCopy = (code: string): void => {
-        const url = `${globalThis.location.origin}/invite/${code}`;
-        void navigator.clipboard.writeText(url);
+        void navigator.clipboard.writeText(buildInviteUrl(code));
         showToast('Invite link copied to clipboard!', 'success');
     };
 
@@ -107,27 +237,7 @@ export const ServerInviteSettings = ({
             <div className="space-y-6 rounded-lg border border-border-subtle bg-bg-subtle p-6">
                 <Heading level={3}>Create New Invite</Heading>
 
-                <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-                    <div className="space-y-2">
-                        <label
-                            className="text-xs font-bold tracking-wider text-muted-foreground uppercase"
-                            htmlFor="custom-path"
-                        >
-                            Custom Path (Vanity)
-                        </label>
-                        <Input
-                            id="custom-path"
-                            placeholder="e.g. awesome-server"
-                            value={customPath}
-                            onChange={(e): void => {
-                                setCustomPath(e.target.value);
-                            }}
-                        />
-                        <Text size="xs" variant="muted">
-                            Optional. Leave empty for random code.
-                        </Text>
-                    </div>
-
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                     <div className="space-y-2">
                         <label
                             className="text-xs font-bold tracking-wider text-muted-foreground uppercase"
@@ -190,6 +300,8 @@ export const ServerInviteSettings = ({
                 </div>
             </div>
 
+            <VanityLinkSection serverId={serverId} />
+
             {/* Invites List */}
             <div className="space-y-4">
                 <Heading level={3}>Active Invites ({invites.length})</Heading>
@@ -218,7 +330,7 @@ export const ServerInviteSettings = ({
                             {invites.map((invite) => (
                                 <TableRow key={invite.id}>
                                     <TableCell monospace>
-                                        {invite.customPath || invite.code}
+                                        {invite.code}
                                     </TableCell>
                                     <TableCell muted>
                                         {invite.createdByUsername ?? 'Unknown'}
@@ -239,10 +351,7 @@ export const ServerInviteSettings = ({
                                                 title="Copy Link"
                                                 variant="ghost"
                                                 onClick={(): void => {
-                                                    handleCopy(
-                                                        invite.customPath ||
-                                                            invite.code,
-                                                    );
+                                                    handleCopy(invite.code);
                                                 }}
                                             >
                                                 <Copy className="h-4 w-4" />

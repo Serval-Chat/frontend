@@ -155,7 +155,7 @@ describe('ServerOverviewSettings', (): void => {
                 eligible: false,
                 blockers: [
                     'Server must be verified.',
-                    'Server needs a vanity invite with unlimited uses and no expiry.',
+                    'Server needs a vanity link.',
                 ],
                 hasValidVanityInvite: false,
             },
@@ -174,9 +174,7 @@ describe('ServerOverviewSettings', (): void => {
             screen.getByText('Server must be verified.'),
         ).toBeInTheDocument();
         expect(
-            screen.getByText(
-                'Server needs a vanity invite with unlimited uses and no expiry.',
-            ),
+            screen.getByText('Server needs a vanity link.'),
         ).toBeInTheDocument();
     });
 

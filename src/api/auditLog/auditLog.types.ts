@@ -30,6 +30,8 @@ export type AuditLogAction =
     | 'emoji_delete'
     | 'invite_create'
     | 'invite_delete'
+    | 'vanity_link_set'
+    | 'vanity_link_delete'
     | 'pin_message'
     | 'unpin_message'
     | 'sticky_message'

@@ -69,6 +69,16 @@ const ACTION_OPTIONS = [
 
     { value: 'invite_create', label: 'Invite Created', group: 'Invites' },
     { value: 'invite_delete', label: 'Invite Deleted', group: 'Invites' },
+    {
+        value: 'vanity_link_set',
+        label: 'Vanity Link Set',
+        group: 'Invites',
+    },
+    {
+        value: 'vanity_link_delete',
+        label: 'Vanity Link Deleted',
+        group: 'Invites',
+    },
 
     { value: 'user_ban', label: 'Ban Member', group: 'Members' },
     { value: 'user_kick', label: 'Kick Member', group: 'Members' },
@@ -151,6 +161,12 @@ const getActionIcon = (action: string): React.ReactNode | undefined => {
             return <Link className="h-4 w-4 text-green-500" />;
         }
         case 'invite_delete': {
+            return <Link className="h-4 w-4 text-red-500" />;
+        }
+        case 'vanity_link_set': {
+            return <Link className="h-4 w-4 text-green-500" />;
+        }
+        case 'vanity_link_delete': {
             return <Link className="h-4 w-4 text-red-500" />;
         }
         case 'roles_reordered': {

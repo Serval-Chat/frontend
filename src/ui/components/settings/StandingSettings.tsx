@@ -6,6 +6,7 @@ import {
     useMyWarnings,
 } from '@/api/warnings/warnings.queries';
 import { Button } from '@/ui/components/common/Button';
+import { CalloutBox } from '@/ui/components/common/CalloutBox';
 import { Heading } from '@/ui/components/common/Heading';
 import { Text } from '@/ui/components/common/Text';
 import { formatTimestamp } from '@/utils/timestamp';
@@ -33,20 +34,13 @@ export const StandingSettings = () => {
 
             {hasWarnings ? (
                 <div className="space-y-6">
-                    <div className="flex items-start gap-4 rounded-lg border border-caution/20 bg-caution/10 p-4">
-                        <ShieldAlert
-                            className="shrink-0 text-caution"
-                            size={24}
-                        />
-                        <div>
-                            <Text weight="bold">Disciplinary History</Text>
-                            <Text as="p" size="sm" variant="muted">
-                                Below is a list of warnings issued to your
-                                account. Some may require acknowledgment before
-                                they can be dismissed.
-                            </Text>
-                        </div>
-                    </div>
+                    <CalloutBox icon={ShieldAlert} title="Disciplinary History">
+                        <Text as="p" size="sm" variant="muted">
+                            Below is a list of warnings issued to your
+                            account. Some may require acknowledgment before
+                            they can be dismissed.
+                        </Text>
+                    </CalloutBox>
 
                     <div className="space-y-4">
                         {warnings?.map((warning) => (

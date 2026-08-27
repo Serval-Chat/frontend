@@ -12,6 +12,7 @@ import {
 import type { Server } from '@/api/servers/servers.types';
 import type { Warning } from '@/api/warnings/warnings.types';
 import type { AdminExtendedUser, AdminUserServer } from '@/types/admin';
+import { CalloutBox } from '@/ui/components/common/CalloutBox';
 import { Heading } from '@/ui/components/common/Heading';
 import { Text } from '@/ui/components/common/Text';
 import { ServerIcon } from '@/ui/components/servers/ServerIcon';
@@ -87,18 +88,12 @@ export const AdminAccountStatus = ({
         </div>
 
         {isCurrentlyBanned ? (
-            <div className="mt-3 rounded-lg border border-danger/20 bg-danger/10 p-4">
-                <div className="mb-2 flex items-center gap-2 text-danger">
-                    <AlertTriangle size={16} />
-                    <Text
-                        as="span"
-                        className="tracking-tight uppercase"
-                        size="xs"
-                        weight="bold"
-                    >
-                        Banned Account
-                    </Text>
-                </div>
+            <CalloutBox
+                className="mt-3"
+                icon={AlertTriangle}
+                title="Banned Account"
+                variant="danger"
+            >
                 <Text as="p" size="sm">
                     <Text as="span" variant="muted">
                         Until:
@@ -109,22 +104,11 @@ export const AdminAccountStatus = ({
                         )}
                     </Text>
                 </Text>
-            </div>
+            </CalloutBox>
         ) : null}
 
         {isCurrentlyMuted && !isCurrentlyBanned ? (
-            <div className="mt-3 rounded-lg border border-caution/20 bg-caution/10 p-4">
-                <div className="mb-2 flex items-center gap-2 text-caution">
-                    <VolumeX size={16} />
-                    <Text
-                        as="span"
-                        className="tracking-tight uppercase"
-                        size="xs"
-                        weight="bold"
-                    >
-                        Muted Account
-                    </Text>
-                </div>
+            <CalloutBox className="mt-3" icon={VolumeX} title="Muted Account">
                 <Text as="p" size="sm">
                     <Text as="span" variant="muted">
                         Until:
@@ -143,7 +127,7 @@ export const AdminAccountStatus = ({
                         </Text>
                     </Text>
                 ) : null}
-            </div>
+            </CalloutBox>
         ) : null}
     </div>
 );

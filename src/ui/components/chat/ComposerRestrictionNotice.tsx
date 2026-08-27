@@ -1,5 +1,6 @@
 import { Clock, VolumeX } from 'lucide-react';
 
+import { CalloutBox } from '@/ui/components/common/CalloutBox';
 import { Text } from '@/ui/components/common/Text';
 import { Box } from '@/ui/components/layout/Box';
 import { cn } from '@/utils/cn';
@@ -55,22 +56,25 @@ export const ComposerRestrictionNotice = (
     }
 
     return (
-        <Box className="relative mx-4 mb-4 flex items-start gap-3 overflow-hidden rounded-lg border border-caution/30 bg-caution/10 px-4 py-3 text-black">
-            <VolumeX className="mt-0.5 shrink-0" size={20} />
-            <div className="min-w-0 flex-1">
-                <Text as="div" className="font-bold text-black">
-                    You are muted.
-                </Text>
-                <Text as="div" className="mt-1 truncate text-sm text-black/80">
-                    {props.muteReason || 'No reason provided'}
-                </Text>
-                <Text
-                    as="div"
-                    className="mt-0.5 text-xs font-medium text-black/65"
-                >
-                    Until: {props.muteExpiryLabel}
-                </Text>
-            </div>
-        </Box>
+        <CalloutBox
+            className="relative mx-4 mb-4 overflow-hidden px-4 py-3"
+            icon={VolumeX}
+            title="You are muted."
+        >
+            <Text
+                as="div"
+                className="truncate text-sm opacity-80"
+                variant="caution"
+            >
+                {props.muteReason || 'No reason provided'}
+            </Text>
+            <Text
+                as="div"
+                className="mt-0.5 text-xs font-medium opacity-65"
+                variant="caution"
+            >
+                Until: {props.muteExpiryLabel}
+            </Text>
+        </CalloutBox>
     );
 };

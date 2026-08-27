@@ -18,6 +18,7 @@ export const SHOWOFF_SECTIONS = {
     userProfilePopup: 'user-profile-popup',
     pushPrompt: 'push-prompt',
     toast: 'toast-notifications',
+    calloutBox: 'callout-box',
 } as const;
 
 export const BUTTON_VARIANTS = [

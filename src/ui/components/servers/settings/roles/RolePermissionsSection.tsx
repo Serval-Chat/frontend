@@ -89,7 +89,7 @@ export const RolePermissionsSection = ({
                 }}
             />
             <PermissionToggle
-                description="Allows member to create, view, and delete all invite links, including custom vanity invites."
+                description="Allows member to create, view, and delete all invite links, and view the server's vanity link. Only the server owner can set or change the vanity link."
                 label="Manage Invites"
                 value={permissions.manageInvites || false}
                 onChange={(val): void => {

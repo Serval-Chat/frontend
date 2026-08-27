@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 
 import { Heading } from '@/ui/components/common/Heading';
 import { Animations } from '@/ui/components/showoff/Animations';
+import { CalloutBoxDemo } from '@/ui/components/showoff/CalloutBoxDemo';
 import { ChatDemo } from '@/ui/components/showoff/ChatDemo';
 import { ColorPalette } from '@/ui/components/showoff/ColorPalette';
 import { ContextMenuDemo } from '@/ui/components/showoff/ContextMenuDemo';
@@ -147,6 +148,21 @@ const sections: TOCProps['sections'] = [
         id: SHOWOFF_SECTIONS.colorPalette,
         title: 'Leptailurus Serval Color Palette',
     },
+    {
+        id: SHOWOFF_SECTIONS.calloutBox,
+        title: 'Callout Boxes',
+        children: [
+            { id: 'callout-discovery-blockers', title: 'Discovery Blockers' },
+            { id: 'callout-muted-composer', title: 'Muted Composer Notice' },
+            {
+                id: 'callout-disciplinary-history',
+                title: 'Disciplinary History',
+            },
+            { id: 'callout-banned-account', title: 'Banned Account' },
+            { id: 'callout-muted-account', title: 'Muted Account' },
+            { id: 'callout-must-sign-in', title: 'Must Sign In' },
+        ],
+    },
 ];
 
 export const Showoff = (): ReactNode => (
@@ -180,5 +196,6 @@ export const Showoff = (): ReactNode => (
         <TogglesDemo />
         <LoadingSpinnerDemo />
         <ColorPalette />
+        <CalloutBoxDemo />
     </>
 );

@@ -128,7 +128,9 @@ const getActionDetails = (
             };
         }
         case 'invite_create':
-        case 'invite_delete': {
+        case 'invite_delete':
+        case 'vanity_link_set':
+        case 'vanity_link_delete': {
             return { icon: Link, color: 'text-cyan-500', bg: 'bg-cyan-500/10' };
         }
         case 'roles_reordered': {
@@ -289,6 +291,15 @@ const getAuditTargetDisplay = ({
         return entry.metadata?.code
             ? `invite ${String(entry.metadata.code)}`
             : 'an invite';
+    }
+
+    if (
+        entry.action === 'vanity_link_set' ||
+        entry.action === 'vanity_link_delete'
+    ) {
+        return entry.metadata?.code
+            ? `vanity link ${String(entry.metadata.code)}`
+            : 'a vanity link';
     }
 
     if (entry.action === 'member_join') {

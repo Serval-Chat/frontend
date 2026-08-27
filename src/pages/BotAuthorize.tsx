@@ -17,6 +17,7 @@ import { useAuthorizeBot, usePublicBotInfo } from '@/hooks/developer/useBots';
 import { BOT_PERMISSION_KEYS } from '@/types/bot';
 import type { BotPermissionKey } from '@/types/bot';
 import { Button } from '@/ui/components/common/Button';
+import { CalloutBox } from '@/ui/components/common/CalloutBox';
 import { Divider } from '@/ui/components/common/Divider';
 import { Heading } from '@/ui/components/common/Heading';
 import { MutedText } from '@/ui/components/common/MutedText';
@@ -438,11 +439,10 @@ export const BotAuthorize = (): ReactNode => {
                                     }}
                                 />
                             ) : (
-                                <div className="flex items-start gap-2.5 rounded-lg border border-caution/20 bg-caution/5 px-3.5 py-3 text-left text-sm">
-                                    <AlertTriangle
-                                        className="mt-0.5 shrink-0 text-caution"
-                                        size={15}
-                                    />
+                                <CalloutBox
+                                    className="px-3.5 py-3 text-left text-sm"
+                                    icon={AlertTriangle}
+                                >
                                     <span className="text-muted-foreground">
                                         You must be{' '}
                                         <Link
@@ -453,7 +453,7 @@ export const BotAuthorize = (): ReactNode => {
                                         </Link>{' '}
                                         to add this bot.
                                     </span>
-                                </div>
+                                </CalloutBox>
                             )}
                         </div>
 

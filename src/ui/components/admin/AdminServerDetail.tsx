@@ -170,7 +170,7 @@ const ServerInvitesCard = ({
                         >
                             <div className="flex flex-col">
                                 <span className="font-mono text-xs leading-tight font-bold">
-                                    {invite.customPath || invite.code}
+                                    {invite.code}
                                 </span>
                                 <span className="text-[9px] font-medium text-muted-foreground uppercase">
                                     {invite.uses} / {invite.maxUses || '∞'} Uses

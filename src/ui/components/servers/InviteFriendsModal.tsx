@@ -57,9 +57,7 @@ export const InviteFriendsModal = ({
                 throw error;
             });
 
-            const url = `${globalThis.location.origin}/invite/${
-                activeInvite.customPath || activeInvite.code
-            }`;
+            const url = `${globalThis.location.origin}/invite/${activeInvite.code}`;
             wsMessages.sendMessageDm(friendId, url);
         });
 

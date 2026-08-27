@@ -25,7 +25,6 @@ export interface ServerInvite {
     id: string;
     serverId: string;
     code: string;
-    customPath?: string;
     createdByUserId: string;
     createdByUsername?: string;
     maxUses?: number;
@@ -35,7 +34,6 @@ export interface ServerInvite {
 }
 
 export interface CreateInviteData {
-    customPath?: string;
     maxUses?: number;
     expiresIn?: number; // In seconds
 }
