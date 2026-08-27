@@ -86,45 +86,70 @@ const ALL_SECTIONS: {
     label: string;
     icon: React.ComponentType<{ size?: number | string }>;
     permission: keyof RolePermissions;
+    category: string;
 }[] = [
     {
         id: 'overview',
         label: 'Overview',
         icon: Settings,
         permission: 'manageServer',
+        category: 'General',
     },
-    { id: 'roles', label: 'Roles', icon: Shield, permission: 'manageRoles' },
     {
         id: 'onboarding',
         label: 'Onboarding',
         icon: UserPlus,
         permission: 'manageServer',
-    },
-    { id: 'emojis', label: 'Emojis', icon: Smile, permission: 'manageServer' },
-    {
-        id: 'stickers',
-        label: 'Stickers',
-        icon: Sticker,
-        permission: 'manageStickers',
-    },
-    {
-        id: 'invites',
-        label: 'Invites',
-        icon: Handshake,
-        permission: 'manageInvites',
+        category: 'General',
     },
     {
         id: 'behaviour',
         label: 'Behaviour',
         icon: Zap,
         permission: 'manageServer',
+        category: 'General',
     },
-    { id: 'bans', label: 'Bans', icon: Ban, permission: 'banMembers' },
+    {
+        id: 'roles',
+        label: 'Roles',
+        icon: Shield,
+        permission: 'manageRoles',
+        category: 'Community',
+    },
+    {
+        id: 'invites',
+        label: 'Invites',
+        icon: Handshake,
+        permission: 'manageInvites',
+        category: 'Community',
+    },
+    {
+        id: 'emojis',
+        label: 'Emojis',
+        icon: Smile,
+        permission: 'manageServer',
+        category: 'Customization',
+    },
+    {
+        id: 'stickers',
+        label: 'Stickers',
+        icon: Sticker,
+        permission: 'manageStickers',
+        category: 'Customization',
+    },
+    {
+        id: 'bans',
+        label: 'Bans',
+        icon: Ban,
+        permission: 'banMembers',
+        category: 'Moderation',
+    },
     {
         id: 'audit-log',
         label: 'Audit Log',
         icon: ScrollText,
         permission: 'manageServer',
+        category: 'Moderation',
     },
 ];
 
@@ -196,7 +221,6 @@ export const ServerSettingsModal = ({
                 >
                     <SettingsSidebarLayout
                         activeSection={activeSection}
-                        headerText="Server Settings"
                         sections={sections}
                         setActiveSection={handleSetSection}
                     />
