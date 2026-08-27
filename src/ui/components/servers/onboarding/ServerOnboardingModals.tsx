@@ -331,7 +331,7 @@ export const ChannelPreferenceGroup = ({
         category !== null && hiddenCategories.has(category.id);
 
     return (
-        <div className="relative rounded-md border border-border-subtle bg-bg-secondary/40 p-2">
+        <div className="relative">
             <div className="relative" ref={stageRef}>
                 <svg
                     aria-hidden="true"
@@ -382,7 +382,7 @@ export const ChannelPreferenceGroup = ({
                         className="shrink-0 text-muted-foreground"
                         size={16}
                     />
-                    <span className="min-w-0 flex-1 truncate">
+                    <span className="min-w-0 truncate">
                         {category?.name ?? 'Uncategorized'}
                     </span>
                     {isCategoryHidden ? (
@@ -415,7 +415,7 @@ export const ChannelPreferenceGroup = ({
                                     }}
                                 >
                                     {channelIcon(channel)}
-                                    <span className="min-w-0 flex-1 truncate">
+                                    <span className="min-w-0 truncate">
                                         {channel.name}
                                     </span>
                                     {isHidden ? (

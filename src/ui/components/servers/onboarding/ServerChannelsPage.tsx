@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 
-import { Hash } from 'lucide-react';
+import { EyeOff, Hash } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import {
@@ -105,48 +105,52 @@ export const ServerChannelsPage = () => {
 
     return (
         <Box className="chat-background relative flex min-h-0 flex-1 flex-col overflow-hidden">
-            {/* Header */}
-            <Box
-                as="header"
-                className="pride-glass-strong z-50 flex shrink-0 items-center gap-3 border-b border-white/5 bg-[var(--bg-chat-header)] px-4 py-3 backdrop-blur-sm"
-            >
-                <button
-                    aria-label="Back to server"
-                    className="p-1 text-muted-foreground transition-colors hover:text-foreground md:hidden"
-                    type="button"
-                    onClick={handleBack}
-                >
-                    ←
-                </button>
-                <Hash className="h-5 w-5 shrink-0 text-muted-foreground" />
-                <Box className="flex min-w-0 flex-1 flex-col">
-                    <span className="text-[15px] leading-5 font-semibold text-foreground">
-                        Channels &amp; Categories
-                    </span>
-                    <span className="truncate text-xs text-muted-foreground">
-                        Configure which channels you want to see.
-                    </span>
-                </Box>
-            </Box>
-
             <Box className="custom-scrollbar flex-1 overflow-y-auto p-6 md:p-10">
                 {!onboarding || !channels || !categories ? (
                     <div className="flex min-h-40 items-center justify-center">
                         <LoadingSpinner />
                     </div>
                 ) : (
-                    <div className="mx-auto max-w-3xl space-y-3 pb-24">
-                        {groupedChannels.map((group) => (
-                            <ChannelPreferenceGroup
-                                category={group.category}
-                                channels={group.channels}
-                                hiddenCategories={hiddenCategories}
-                                hiddenChannels={hiddenChannels}
-                                key={group.category?.id ?? 'uncategorized'}
-                                onToggleCategory={handleToggleCategory}
-                                onToggleChannel={handleToggleChannel}
-                            />
-                        ))}
+                    <div className="max-w-3xl space-y-6 pb-24">
+                        <button
+                            aria-label="Back to server"
+                            className="flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground md:hidden"
+                            type="button"
+                            onClick={handleBack}
+                        >
+                            ← Back
+                        </button>
+                        <div className="flex items-center gap-3">
+                            <Hash className="h-6 w-6 shrink-0 text-muted-foreground" />
+                            <div className="flex min-w-0 flex-1 flex-col">
+                                <span className="text-xl leading-6 font-semibold text-foreground">
+                                    Channels &amp; Categories
+                                </span>
+                                <span className="text-sm text-muted-foreground">
+                                    Configure which channels you want to see.
+                                </span>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                            <EyeOff className="h-3.5 w-3.5 shrink-0" />
+                            <span>
+                                Click a channel or category to hide it from
+                                your sidebar.
+                            </span>
+                        </div>
+                        <div className="space-y-3">
+                            {groupedChannels.map((group) => (
+                                <ChannelPreferenceGroup
+                                    category={group.category}
+                                    channels={group.channels}
+                                    hiddenCategories={hiddenCategories}
+                                    hiddenChannels={hiddenChannels}
+                                    key={group.category?.id ?? 'uncategorized'}
+                                    onToggleCategory={handleToggleCategory}
+                                    onToggleChannel={handleToggleChannel}
+                                />
+                            ))}
+                        </div>
                     </div>
                 )}
             </Box>
