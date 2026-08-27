@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 
-import { Hash, Shield } from 'lucide-react';
+import { Hash, Tag } from 'lucide-react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 
 import {
@@ -140,10 +140,7 @@ export const ServerSection = () => {
     if (!selectedServerId) return null;
 
     return (
-        <div
-            className="custom-scrollbar flex h-full w-full flex-col overflow-y-auto"
-            ref={scrollRef}
-        >
+        <div className="flex h-full w-full flex-col overflow-hidden">
             <ServerBanner
                 banner={server?.banner}
                 loading={isLoadingServer}
@@ -155,33 +152,34 @@ export const ServerSection = () => {
             (!categories && !isPlaceholderCategories) ? (
                 <SidebarSkeleton />
             ) : (
-                <>
+                <div
+                    className="custom-scrollbar flex flex-1 flex-col overflow-y-auto"
+                    ref={scrollRef}
+                >
                     <div className="shrink-0 border-b border-border-subtle px-2 py-2">
-                        <div className="ml-3">
-                            {(onboarding?.onboarding.selfAssignableRoleIds
-                                .length ?? 0) > 0 ? (
-                                <ChannelItem
-                                    iconComponent={Shield}
-                                    name="Roles"
-                                    type="text"
-                                    onClick={(): void => {
-                                        void navigate(
-                                            `/chat/@server/${selectedServerId}/self-roles`,
-                                        );
-                                    }}
-                                />
-                            ) : null}
+                        {(onboarding?.onboarding.selfAssignableRoleIds
+                            .length ?? 0) > 0 ? (
                             <ChannelItem
-                                iconComponent={Hash}
-                                name="Channels & Categories"
+                                iconComponent={Tag}
+                                name="Self-assignable roles"
                                 type="text"
                                 onClick={(): void => {
                                     void navigate(
-                                        `/chat/@server/${selectedServerId}/channels-and-categories`,
+                                        `/chat/@server/${selectedServerId}/self-roles`,
                                     );
                                 }}
                             />
-                        </div>
+                        ) : null}
+                        <ChannelItem
+                            iconComponent={Hash}
+                            name="Channels & Categories"
+                            type="text"
+                            onClick={(): void => {
+                                void navigate(
+                                    `/chat/@server/${selectedServerId}/channels-and-categories`,
+                                );
+                            }}
+                        />
                     </div>
                     <ChannelList
                         categories={categories || []}
@@ -195,7 +193,7 @@ export const ServerSection = () => {
                         scrollRef={scrollRef}
                         selectedChannelId={selectedChannelId}
                     />
-                </>
+                </div>
             )}
 
             <React.Suspense fallback={null}>
