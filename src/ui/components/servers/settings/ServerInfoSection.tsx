@@ -154,9 +154,8 @@ export const ServerInfoSection = ({
                             }}
                         />
                         <Button
-                            className="px-4"
+                            square
                             disabled={!tagInput.trim() || tags.length >= 8}
-                            size="sm"
                             variant="primary"
                             onClick={onAddTag}
                         >
@@ -170,7 +169,7 @@ export const ServerInfoSection = ({
                                 className="group flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/10 py-1 pr-1 pl-3 text-xs font-bold text-primary"
                                 key={tag}
                             >
-                                <Tag className="opacity-60" size={10} />
+                                <Tag className="opacity-60" size={12} />
                                 {tag}
                                 <button
                                     className="rounded-full p-1 opacity-60 transition-all hover:bg-primary/20 hover:opacity-100"

@@ -5,8 +5,8 @@ import { type VariantProps, cva } from 'class-variance-authority';
 import { Box } from '@/ui/components/layout/Box';
 import { cn } from '@/utils/cn';
 
-const textAreaVariants = cva(
-    'custom-scrollbar max-h-[200px] min-h-[40px] w-full resize-none rounded-md border border-border-subtle bg-bg-subtle px-3 py-2 text-sm text-foreground transition-all duration-200 placeholder:text-placeholder focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1 focus-visible:outline-none',
+const textAreaWrapperVariants = cva(
+    'overflow-hidden rounded-md border border-border-subtle bg-bg-subtle transition-all duration-200 focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-1',
     {
         variants: {
             disabled: {
@@ -20,10 +20,13 @@ const textAreaVariants = cva(
     },
 );
 
+const textAreaVariants =
+    'custom-scrollbar block max-h-[200px] min-h-[40px] w-full resize-none border-0 bg-transparent px-3 py-2 text-sm text-foreground placeholder:text-placeholder focus:outline-none';
+
 export interface TextAreaProps
     extends
         Omit<React.TextareaHTMLAttributes<HTMLTextAreaElement>, 'disabled'>,
-        VariantProps<typeof textAreaVariants> {
+        VariantProps<typeof textAreaWrapperVariants> {
     ref?: React.Ref<HTMLTextAreaElement>;
     autoResize?: boolean;
 }
@@ -52,14 +55,18 @@ const TextArea = ({
 
     return (
         <Box
-            as="textarea"
-            className={cn(textAreaVariants({ disabled, className }))}
-            disabled={disabled || undefined}
-            ref={internalRef}
-            rows={1}
-            // eslint-disable-next-line react/jsx-props-no-spreading
-            {...props}
-        />
+            className={cn(textAreaWrapperVariants({ disabled, className }))}
+        >
+            <Box
+                as="textarea"
+                className={textAreaVariants}
+                disabled={disabled || undefined}
+                ref={internalRef}
+                rows={1}
+                // eslint-disable-next-line react/jsx-props-no-spreading
+                {...props}
+            />
+        </Box>
     );
 };
 TextArea.displayName = 'TextArea';

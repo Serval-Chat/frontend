@@ -480,18 +480,19 @@ export const ServerOnboardingSettings = ({
                         </Text>
                     </div>
                 ) : (
-                    <div className="space-y-3">
+                    <div className="divide-y divide-border-subtle overflow-hidden rounded-lg border border-border-subtle">
                         {rules.map((rule, idx) => (
                             <div
-                                className="hover:border-border flex items-center gap-3 rounded-lg border border-border-subtle bg-bg-secondary/40 p-3 transition-colors"
+                                className="flex items-center gap-3 p-3 transition-colors hover:bg-white/5"
                                 key={`rule-${rule}`}
                             >
-                                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
+                                <span className="flex h-6 w-6 shrink-0 items-center justify-center text-base font-bold text-muted-foreground">
                                     {idx + 1}
                                 </span>
                                 <div className="flex-1">
                                     <TextArea
                                         autoResize
+                                        className="border-none bg-transparent"
                                         id={`rule-input-${idx}`}
                                         placeholder={`Rule #${idx + 1} description...`}
                                         value={rule}
