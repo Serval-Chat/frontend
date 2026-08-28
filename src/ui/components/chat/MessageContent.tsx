@@ -151,7 +151,8 @@ export const MessageContent = React.memo(
         return (
             <Box
                 className={cn(
-                    'text-sm leading-relaxed break-words whitespace-pre-wrap',
+                    'text-sm break-words whitespace-pre-wrap',
+                    isEmojiOnly ? 'leading-none' : 'leading-relaxed',
                     isDeleted || isFailed ? 'text-danger' : 'text-foreground',
                 )}
             >
