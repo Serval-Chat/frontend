@@ -1,6 +1,5 @@
-import { useMemo, useReducer } from 'react';
+import { useReducer } from 'react';
 
-import { useFriends } from '@/api/friends/friends.queries';
 import {
     useUpdateBio,
     useUpdateDisplayName,
@@ -8,19 +7,11 @@ import {
     useUpdateUsername,
 } from '@/api/users/users.queries';
 import type { User } from '@/api/users/users.types';
-import { useCustomEmojis } from '@/hooks/useCustomEmojis';
 import { useSelfStatus } from '@/hooks/useSelfStatus';
 import { Heading } from '@/ui/components/common/Heading';
-import { Input } from '@/ui/components/common/Input';
 import { SettingsFloatingBar } from '@/ui/components/common/SettingsFloatingBar';
-import { Text } from '@/ui/components/common/Text';
-import { isCustomEmojiEntry } from '@/ui/components/emoji/EmojiPicker';
 import { UserProfileCard } from '@/ui/components/profile/UserProfileCard';
 import { mergeReducer } from '@/utils/mergeReducer';
-
-import { BioEditor } from './BioEditor';
-import { SecuritySettings } from './SecuritySettings';
-import { WebsiteConnectionsSettings } from './WebsiteConnectionsSettings';
 
 interface AccountProfileSectionProps {
     user: User;
@@ -52,29 +43,6 @@ export const AccountProfileSection = ({
         useUpdateDisplayName();
     const { mutate: updateUsername, isPending: isUpdatingUsername } =
         useUpdateUsername();
-
-    const { data: friendsList = [] } = useFriends();
-    const { customCategories } = useCustomEmojis({ enabled: true });
-
-    const friendUsers = useMemo(
-        (): User[] => friendsList as unknown as User[],
-        [friendsList],
-    );
-
-    const allServerEmojis = useMemo(
-        () =>
-            customCategories.flatMap((cat) =>
-                cat.emojis.filter(isCustomEmojiEntry).map((e) => ({
-                    id: e.id,
-                    name: e.name,
-                    imageUrl: e.url,
-                    serverId: cat.id,
-                    createdBy: '',
-                    createdAt: '',
-                })),
-            ),
-        [customCategories],
-    );
 
     const [fields, patch] = useReducer(mergeReducer<ProfileFieldsState>, {
         displayName: user.displayName ?? '',
@@ -159,90 +127,35 @@ export const AccountProfileSection = ({
                     Preview
                 </Heading>
                 <UserProfileCard
+                    bioValue={bio}
+                    displayNameValue={displayName}
                     presenceStatus={selfStatus}
+                    pronounsValue={pronouns}
                     user={previewUser}
+                    usernameValue={username}
                     onAvatarClick={(): void => {
                         avatarInputRef.current?.click();
                     }}
                     onBannerClick={(): void => {
                         bannerInputRef.current?.click();
                     }}
+                    onBioChange={(value): void => {
+                        patch({ bio: value });
+                    }}
+                    onDisplayNameChange={(value): void => {
+                        patch({ displayName: value });
+                    }}
+                    onPronounsChange={(value): void => {
+                        patch({ pronouns: value });
+                    }}
+                    onUsernameChange={(value): void => {
+                        patch({ username: value });
+                    }}
                 />
             </div>
 
             {/* Form Section */}
             <div className="flex-1 space-y-6">
-                <div className="space-y-2">
-                    <label
-                        className="text-sm font-bold text-muted-foreground uppercase"
-                        htmlFor="displayName"
-                    >
-                        Display Name
-                    </label>
-                    <Input
-                        id="displayName"
-                        placeholder="Display Name"
-                        type="text"
-                        value={displayName}
-                        onChange={(e): void => {
-                            patch({ displayName: e.target.value });
-                        }}
-                    />
-                </div>
-
-                <div className="space-y-2">
-                    <label
-                        className="text-sm font-bold text-muted-foreground uppercase"
-                        htmlFor="username"
-                    >
-                        Username
-                    </label>
-                    <Input
-                        id="username"
-                        placeholder="Username"
-                        type="text"
-                        value={username}
-                        onChange={(e): void => {
-                            patch({ username: e.target.value });
-                        }}
-                    />
-                    <Text as="p" size="xs" variant="muted">
-                        Changing your username might require a fresh login.
-                    </Text>
-                </div>
-
-                <div className="space-y-2">
-                    <label
-                        className="text-sm font-bold text-muted-foreground uppercase"
-                        htmlFor="pronouns"
-                    >
-                        Pronouns
-                    </label>
-                    <Input
-                        id="pronouns"
-                        placeholder="He/Him, They/Them, etc."
-                        type="text"
-                        value={pronouns}
-                        onChange={(e): void => {
-                            patch({ pronouns: e.target.value });
-                        }}
-                    />
-                </div>
-
-                <BioEditor
-                    friends={friendUsers}
-                    initialText={user.bio ?? ''}
-                    serverEmojis={allServerEmojis}
-                    value={bio}
-                    onChange={(rawText): void => {
-                        patch({ bio: rawText });
-                    }}
-                />
-
-                <WebsiteConnectionsSettings />
-
-                <SecuritySettings user={user} />
-
                 <SettingsFloatingBar
                     isFixed={false}
                     isPending={isPending}

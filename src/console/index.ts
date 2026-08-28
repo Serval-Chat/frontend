@@ -1,4 +1,5 @@
 import { ConCommandRegistry } from '@/console/ConCommandRegistry';
+import { ansitestCommand } from '@/console/commands/ansitest';
 import { clsCommand } from '@/console/commands/cls';
 import { dateCommand } from '@/console/commands/date';
 import { dotSlashCommand } from '@/console/commands/dotSlash';
@@ -46,4 +47,5 @@ registry.register(editCommand);
 registry.register(userctlCommand);
 registry.register(progressCommand);
 registry.register(snakeCommand);
+registry.register(ansitestCommand);
 registry.register(fallbackCommand);

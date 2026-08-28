@@ -150,7 +150,7 @@ export interface CreateWebsiteConnectionResponse {
 
 export interface User {
     id: string;
-    login: string;
+    login?: string;
     username: string;
     nickname?: string | null;
     isBot?: boolean;

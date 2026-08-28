@@ -60,6 +60,10 @@ export const useTwoFactor = () => {
         patch({ isBackupModalOpen: false, backupCodes: [] });
     };
 
+    const cancelSetup = (): void => {
+        patch({ setupUri: '', qrDataUrl: '', code: '' });
+    };
+
     const startSetup = async (): Promise<void> => {
         patch({ isLoading: true });
         try {
@@ -188,6 +192,7 @@ export const useTwoFactor = () => {
         setBackupCode,
         toggleDisableBackupInput,
         closeBackupModal,
+        cancelSetup,
         startSetup,
         confirmSetup,
         regenerateBackupCodes,

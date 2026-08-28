@@ -431,7 +431,7 @@ export const AvatarDecorationsSettings = () => {
 
     return (
         <div className="max-w-3xl space-y-8 pb-20">
-            <Heading level={3}>Avatar Decorations</Heading>
+            <Heading level={3}>Decoration Creator</Heading>
 
             {/* Active decoration */}
             <section className="space-y-4">

@@ -23,6 +23,7 @@ interface ProfileColorsSectionProps {
     setAccentColor: (value: string | null) => void;
     setActiveColorPicker: (value: ActivePicker) => void;
     setHexDraft: (value: string) => void;
+    headingClassName?: string;
 }
 
 export const ProfileColorsSection = ({
@@ -38,6 +39,7 @@ export const ProfileColorsSection = ({
     setAccentColor,
     setActiveColorPicker,
     setHexDraft,
+    headingClassName,
 }: ProfileColorsSectionProps): React.ReactNode => {
     const isProfilePicker =
         activeColorPicker?.type === 'profilePrimary' ||
@@ -55,13 +57,15 @@ export const ProfileColorsSection = ({
     return (
         <div className="space-y-4">
             <div className="flex items-center justify-between">
-                <Heading level={4}>Profile Colors</Heading>
+                <Heading className={headingClassName} level={4}>
+                    Profile Colors
+                </Heading>
             </div>
             <div className="rounded-lg border border-border-subtle bg-bg-subtle p-4">
                 <div className="flex flex-wrap gap-6">
                     {entries.map(({ key, label, value }) => (
                         <div className="flex items-center gap-3" key={key}>
-                            <span className="text-sm font-medium text-foreground">
+                            <span className="w-14 shrink-0 text-sm font-medium text-foreground">
                                 {label}:
                             </span>
                             <div className="flex items-center gap-2">

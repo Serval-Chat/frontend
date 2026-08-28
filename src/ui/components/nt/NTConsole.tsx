@@ -330,6 +330,10 @@ export const NTConsole = () => {
 
     if (!isOpen) return null;
 
+    const handleClose = (): void => {
+        dispatch(toggleConsole());
+    };
+
     return (
         <Window
             defaultHeight={350}
@@ -337,11 +341,14 @@ export const NTConsole = () => {
             defaultX={120}
             defaultY={120}
             icon="/icons/retro/chip.png"
+            menus={[
+                {
+                    label: '&File',
+                    items: [{ label: 'E&xit', onSelect: handleClose }],
+                },
+            ]}
             title="Command Prompt"
-            onClose={(): {
-                payload: undefined;
-                type: 'debugOptions/toggleConsole';
-            } => dispatch(toggleConsole())}
+            onClose={handleClose}
         >
             {/* false positive: can't be a real <button> - it wraps the terminal's
             actual <input> below, and interactive content (an input) isn't allowed

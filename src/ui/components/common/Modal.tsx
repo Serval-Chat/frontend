@@ -8,6 +8,10 @@ import { cn } from '@/utils/cn';
 
 import { Button } from './Button';
 
+// Tracks open Modal instances in mount order so that Escape only closes the
+// topmost one, instead of every open modal reacting to the same keypress.
+let openModalStack: symbol[] = [];
+
 interface ModalProps {
     isOpen: boolean;
     onClose: () => void;
@@ -43,21 +47,33 @@ export const Modal = ({
         onCloseRef.current = onClose;
     });
 
-    React.useEffect((): (() => void) => {
+    const idRef = React.useRef(Symbol('modal'));
+
+    React.useEffect((): (() => void) | undefined => {
+        if (!isOpen) return undefined;
+
+        const id = idRef.current;
+        openModalStack.push(id);
+        document.body.style.overflow = 'hidden';
+
         const handleKeyDown = (e: KeyboardEvent): void => {
-            if (e.key === 'Escape' && isOpen) {
+            if (
+                e.key === 'Escape' &&
+                openModalStack[openModalStack.length - 1] === id
+            ) {
                 onCloseRef.current();
             }
         };
-
-        if (isOpen) {
-            globalThis.addEventListener('keydown', handleKeyDown);
-            document.body.style.overflow = 'hidden';
-        }
+        globalThis.addEventListener('keydown', handleKeyDown);
 
         return (): void => {
+            openModalStack = openModalStack.filter(
+                (stackId): boolean => stackId !== id,
+            );
             globalThis.removeEventListener('keydown', handleKeyDown);
-            document.body.style.overflow = '';
+            if (openModalStack.length === 0) {
+                document.body.style.overflow = '';
+            }
         };
     }, [isOpen]);
 

@@ -341,7 +341,7 @@ export const MessageEdit = ({
             });
         } else {
             showToast(
-                "Can't edit this message yet — try again in a moment.",
+                "Can't edit this message yet, try again in a moment.",
                 'error',
             );
             return;

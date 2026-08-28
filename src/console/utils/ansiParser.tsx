@@ -13,25 +13,25 @@ function getStandardColor(code: number): string {
             return '#000000';
         }
         case 1: {
-            return '#ff5555';
+            return '#aa0000';
         }
         case 2: {
-            return '#55ff55';
+            return '#00aa00';
         }
         case 3: {
-            return '#ffff55';
+            return '#aa5500';
         }
         case 4: {
-            return '#5555ff';
+            return '#0000aa';
         }
         case 5: {
-            return '#ff55ff';
+            return '#aa00aa';
         }
         case 6: {
-            return '#55ffff';
+            return '#00aaaa';
         }
         case 7: {
-            return '#bbbbbb';
+            return '#aaaaaa';
         }
         default: {
             return '';
@@ -80,6 +80,7 @@ export function parseAnsi(text: string): React.ReactNode[] {
     let currentColor: string | undefined = undefined;
     let currentBgColor: string | undefined = undefined;
     let inverse = false;
+    let bold = false;
     let match;
 
     while ((match = ansiRegex.exec(text)) !== null) {
@@ -111,6 +112,7 @@ export function parseAnsi(text: string): React.ReactNode[] {
                 currentColor = undefined;
                 currentBgColor = undefined;
                 inverse = false;
+                bold = false;
             } else {
                 const parts = paramStr.split(';').map(Number);
                 let idx = 0;
@@ -125,6 +127,19 @@ export function parseAnsi(text: string): React.ReactNode[] {
                             currentColor = undefined;
                             currentBgColor = undefined;
                             inverse = false;
+                            bold = false;
+                            idx++;
+
+                            break;
+                        }
+                        case 1: {
+                            bold = true;
+                            idx++;
+
+                            break;
+                        }
+                        case 22: {
+                            bold = false;
                             idx++;
 
                             break;
@@ -164,7 +179,9 @@ export function parseAnsi(text: string): React.ReactNode[] {
                                 idx += 5;
                             } else {
                                 if (code >= 30 && code <= 37) {
-                                    currentColor = getStandardColor(code - 30);
+                                    currentColor = bold
+                                        ? getBrightColor(code - 30)
+                                        : getStandardColor(code - 30);
                                 } else if (code >= 90 && code <= 97) {
                                     currentColor = getBrightColor(code - 90);
                                 } else if (code >= 40 && code <= 47) {

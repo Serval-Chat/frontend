@@ -1,5 +1,8 @@
 import React, { useCallback, useRef, useState } from 'react';
 
+import type { NTMenuDefinition } from '@/ui/components/nt/NTMenuBar';
+import { NTMenuBar } from '@/ui/components/nt/NTMenuBar';
+
 export interface WindowProps {
     title: string;
     onClose: () => void;
@@ -11,6 +14,7 @@ export interface WindowProps {
     defaultY?: number;
     minWidth?: number;
     minHeight?: number;
+    menus?: NTMenuDefinition[];
 }
 
 const resizeHandles = [
@@ -106,6 +110,7 @@ export const Window = ({
     defaultY = 50,
     minWidth = 300,
     minHeight = 200,
+    menus,
 }: WindowProps) => {
     const [position, setPosition] = useState({ x: defaultX, y: defaultY });
     const [size, setSize] = useState({
@@ -296,6 +301,8 @@ export const Window = ({
                     </span>
                 </button>
             </div>
+
+            {menus && menus.length > 0 ? <NTMenuBar menus={menus} /> : null}
 
             <div
                 className="flex min-h-0 flex-1 flex-col overflow-hidden bg-white text-black"

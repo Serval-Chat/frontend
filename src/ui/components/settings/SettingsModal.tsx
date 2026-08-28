@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 
-import { ChevronLeft, X } from 'lucide-react';
+import { ChevronLeft } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 import { Heading } from '@/ui/components/common/Heading';
 import { IconButton } from '@/ui/components/common/IconButton';
 import { LoadingSpinner } from '@/ui/components/common/LoadingSpinner';
 import { Modal } from '@/ui/components/common/Modal';
+import { ModalCloseButton } from '@/ui/components/common/ModalCloseButton';
 import { cn } from '@/utils/cn';
 
 import { SettingsSidebar } from './SettingsSidebar';
@@ -69,6 +70,18 @@ const ActiveSessionsSettings = React.lazy(() =>
     })),
 );
 
+const WebsiteConnectionsSettings = React.lazy(() =>
+    import('./WebsiteConnectionsSettings').then((m) => ({
+        default: m.WebsiteConnectionsSettings,
+    })),
+);
+
+const SecuritySettings = React.lazy(() =>
+    import('./SecuritySettings').then((m) => ({
+        default: m.SecuritySettings,
+    })),
+);
+
 interface SettingsModalProps {
     isOpen: boolean;
     onClose: () => void;
@@ -77,6 +90,8 @@ interface SettingsModalProps {
 
 const SECTION_URL_MAP: Record<string, string> = {
     'my-account': 'account',
+    connections: 'connections',
+    security: 'security',
     sessions: 'sessions',
     appearance: 'appearance',
     decorations: 'decorations',
@@ -91,6 +106,8 @@ const SECTION_URL_MAP: Record<string, string> = {
 
 const SECTION_ID_TO_URL: Record<string, string> = {
     account: 'my-account',
+    connections: 'connections',
+    security: 'security',
     sessions: 'sessions',
     appearance: 'appearance',
     decorations: 'decorations',
@@ -145,7 +162,7 @@ export const SettingsModal = ({
         <Modal
             mobileFullScreen
             noPadding
-            className="flex flex-row overflow-hidden bg-background p-0 md:h-[92vh] md:max-h-[900px] md:w-[96%] md:max-w-[1200px]"
+            className="flex flex-row overflow-hidden bg-background p-0 md:h-[92vh] md:max-h-[900px] md:w-[98%] md:max-w-[1500px]"
             isOpen={isOpen}
             showCloseButton={false}
             onClose={onClose}
@@ -192,12 +209,7 @@ export const SettingsModal = ({
                                 Settings
                             </Heading>
                         </div>
-                        <IconButton
-                            className="border border-border-subtle text-muted-foreground hover:bg-danger-muted hover:text-danger"
-                            icon={X}
-                            iconSize={20}
-                            onClick={onClose}
-                        />
+                        <ModalCloseButton onClick={onClose} />
                     </div>
 
                     <div
@@ -212,6 +224,12 @@ export const SettingsModal = ({
                             >
                                 {activeSection === 'account' ? (
                                     <AccountSettings />
+                                ) : null}
+                                {activeSection === 'connections' ? (
+                                    <WebsiteConnectionsSettings />
+                                ) : null}
+                                {activeSection === 'security' ? (
+                                    <SecuritySettings />
                                 ) : null}
                                 {activeSection === 'sessions' ? (
                                     <ActiveSessionsSettings />

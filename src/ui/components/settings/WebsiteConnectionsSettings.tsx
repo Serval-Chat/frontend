@@ -10,6 +10,7 @@ import {
 } from '@/api/users/users.queries';
 import type { CreateWebsiteConnectionResponse } from '@/api/users/users.types';
 import { Button } from '@/ui/components/common/Button';
+import { Heading } from '@/ui/components/common/Heading';
 import { Input } from '@/ui/components/common/Input';
 import { Link } from '@/ui/components/common/Link';
 import { Text } from '@/ui/components/common/Text';
@@ -115,11 +116,12 @@ export const WebsiteConnectionsSettings = () => {
     };
 
     return (
-        <div className="space-y-4 border-t border-border-subtle pt-6">
+        <div className="max-w-3xl space-y-4">
             <div>
-                <Text weight="bold">Website Connections</Text>
-                <br />
-                <Text className="mt-1" size="xs" variant="muted">
+                <Heading className="mb-1" level={3}>
+                    Connections
+                </Heading>
+                <Text size="sm" variant="muted">
                     Add a website you own to your public profile.
                 </Text>
             </div>

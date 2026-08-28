@@ -239,7 +239,7 @@ export const useMessageSend = ({
                         });
                     } else {
                         showToast(
-                            "Can't correct that message yet — try again in a moment.",
+                            "Can't correct that message yet, try again in a moment.",
                             'error',
                         );
                         return false;

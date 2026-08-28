@@ -7,6 +7,7 @@ import {
     Globe,
     HelpCircle,
     MessageSquare,
+    Pencil,
     Plus,
     Server,
     UserMinus,
@@ -70,6 +71,14 @@ interface UserProfileCardProps {
     customStatus?: { text?: string; emoji?: string };
     onBannerClick?: () => void;
     onAvatarClick?: () => void;
+    displayNameValue?: string;
+    onDisplayNameChange?: (value: string) => void;
+    usernameValue?: string;
+    onUsernameChange?: (value: string) => void;
+    pronounsValue?: string;
+    onPronounsChange?: (value: string) => void;
+    bioValue?: string;
+    onBioChange?: (value: string) => void;
     disableCustomFonts?: boolean;
     disableGlowAndColors?: boolean;
     disableColors?: boolean;
@@ -213,6 +222,106 @@ const RoleSelector = ({
     );
 };
 
+const InlineEditableField = ({
+    value,
+    onChange,
+    inputClassName,
+    title,
+    multiline,
+    placeholder,
+    buttonClassName,
+    children,
+}: {
+    value: string;
+    onChange: (value: string) => void;
+    inputClassName: string;
+    title: string;
+    multiline?: boolean;
+    placeholder?: string;
+    buttonClassName?: string;
+    children: React.ReactNode;
+}) => {
+    const [isEditing, setIsEditing] = React.useState(false);
+    const inputRef = React.useRef<HTMLInputElement>(null);
+    const textareaRef = React.useRef<HTMLTextAreaElement>(null);
+
+    React.useEffect((): void => {
+        if (isEditing) {
+            const el = multiline ? textareaRef.current : inputRef.current;
+            el?.focus();
+            el?.select();
+        }
+    }, [isEditing, multiline]);
+
+    if (isEditing && multiline) {
+        return (
+            <textarea
+                className={inputClassName}
+                placeholder={placeholder}
+                ref={textareaRef}
+                value={value}
+                onBlur={(): void => {
+                    setIsEditing(false);
+                }}
+                onChange={(e): void => {
+                    onChange(e.target.value);
+                }}
+                onKeyDown={(e): void => {
+                    if (e.key === 'Escape') {
+                        e.preventDefault();
+                        setIsEditing(false);
+                    }
+                }}
+            />
+        );
+    }
+
+    if (isEditing) {
+        return (
+            <input
+                className={inputClassName}
+                ref={inputRef}
+                value={value}
+                onBlur={(): void => {
+                    setIsEditing(false);
+                }}
+                onChange={(e): void => {
+                    onChange(e.target.value);
+                }}
+                onKeyDown={(e): void => {
+                    if (e.key === 'Enter' || e.key === 'Escape') {
+                        e.preventDefault();
+                        setIsEditing(false);
+                    }
+                }}
+            />
+        );
+    }
+
+    return (
+        <button
+            className={cn(
+                'group/inline-edit -mx-1 inline-flex min-w-0 items-center gap-1.5 rounded px-1 text-left hover:bg-bg-subtle',
+                buttonClassName,
+            )}
+            title={title}
+            type="button"
+            onClick={(): void => {
+                setIsEditing(true);
+            }}
+        >
+            {children}
+            <Pencil
+                className={cn(
+                    'shrink-0 text-muted-foreground',
+                    multiline && 'mt-0.5',
+                )}
+                size={12}
+            />
+        </button>
+    );
+};
+
 const yiqOf = (hex: string): number => {
     const r = Number.parseInt(hex.slice(1, 3), 16);
     const g = Number.parseInt(hex.slice(3, 5), 16);
@@ -258,8 +367,6 @@ const cardTextVars = (
     const fgHex = toHex(fg);
     const fgMutedHex = toHex(fgMuted);
     const fgMutedHoverHex = onDark ? '#ffffff' : '#000000';
-    const linkHex = fgMutedHex;
-    const linkHoverHex = fgMutedHoverHex;
     const vars: Record<string, string> = {
         '--color-foreground': fgHex,
         '--color-muted-foreground': fgMutedHex,
@@ -268,8 +375,6 @@ const cardTextVars = (
         '--color-text-normal': fgHex,
         '--color-border-subtle': toRgba(neutral, 0.15),
         '--color-bg-secondary': toRgba(neutral, 0.1),
-        '--color-primary': linkHex,
-        '--color-primary-hover': linkHoverHex,
         '--foreground': fgHex,
         '--muted-foreground': fgMutedHex,
         '--muted-foreground-hover': fgMutedHoverHex,
@@ -279,8 +384,6 @@ const cardTextVars = (
         '--bg-secondary': toRgba(neutral, 0.1),
         '--divider': toRgba(neutral, 0.12),
         '--placeholder': toRgba(neutral, 0.3),
-        '--primary': linkHex,
-        '--primary-hover': linkHoverHex,
     };
     return { vars, color: fgHex };
 };
@@ -390,6 +493,8 @@ const ProfileCardDetails = ({
     finalCustomText,
     finalCustomEmoji,
     bioNodes,
+    bioValue,
+    onBioChange,
     visibleConnections,
     joinedAt,
     isWebhook,
@@ -401,6 +506,8 @@ const ProfileCardDetails = ({
     finalCustomText?: string;
     finalCustomEmoji?: string;
     bioNodes: ReturnType<typeof parseText>;
+    bioValue?: string;
+    onBioChange?: (value: string) => void;
     visibleConnections: NonNullable<User['connections']>;
     joinedAt?: string;
     isWebhook: boolean;
@@ -442,7 +549,7 @@ const ProfileCardDetails = ({
 
         {isWebhook ? null : <Box className="my-3 h-px w-full bg-divider" />}
 
-        {user?.bio ? (
+        {user?.bio || onBioChange ? (
             <Box className="mb-4">
                 <div className="mb-2 flex items-center gap-1.5">
                     <Heading
@@ -457,9 +564,35 @@ const ProfileCardDetails = ({
                         visible={ps?.hideBio === true}
                     />
                 </div>
-                <Box className="text-[10px] leading-relaxed whitespace-pre-wrap text-foreground/90">
-                    <ParsedText nodes={bioNodes} size="xs" wrap="preWrap" />
-                </Box>
+                {onBioChange ? (
+                    <InlineEditableField
+                        multiline
+                        buttonClassName="w-full items-start"
+                        inputClassName="min-h-[160px] w-full resize-none rounded-md border border-primary bg-bg-subtle px-1.5 py-1 text-[10px] leading-relaxed text-foreground focus:outline-none"
+                        placeholder="Tell us about yourself..."
+                        title="Edit bio"
+                        value={bioValue ?? user?.bio ?? ''}
+                        onChange={onBioChange}
+                    >
+                        <Box className="min-w-0 flex-1 text-[10px] leading-relaxed whitespace-pre-wrap text-foreground/90">
+                            {user?.bio ? (
+                                <ParsedText
+                                    nodes={bioNodes}
+                                    size="xs"
+                                    wrap="preWrap"
+                                />
+                            ) : (
+                                <span className="text-muted-foreground/70 italic">
+                                    Tell us about yourself...
+                                </span>
+                            )}
+                        </Box>
+                    </InlineEditableField>
+                ) : (
+                    <Box className="text-[10px] leading-relaxed whitespace-pre-wrap text-foreground/90">
+                        <ParsedText nodes={bioNodes} size="xs" wrap="preWrap" />
+                    </Box>
+                )}
             </Box>
         ) : null}
 
@@ -782,6 +915,14 @@ export const UserProfileCard = ({
     customStatus,
     onBannerClick,
     onAvatarClick,
+    displayNameValue,
+    onDisplayNameChange,
+    usernameValue,
+    onUsernameChange,
+    pronounsValue,
+    onPronounsChange,
+    bioValue,
+    onBioChange,
     disableCustomFonts,
     disableGlowAndColors,
     disableColors,
@@ -874,6 +1015,28 @@ export const UserProfileCard = ({
     // Webhook authors are synthetic (see resolveWebhookUser) and are not server
     // members, so role management does not apply to them.
     const isWebhook = isWebhookUser(user);
+
+    const displayNameContent = (
+        <StyledUserName
+            className="min-w-0 truncate text-xl leading-tight font-bold"
+            disableColors={
+                disableColors || currentUser?.settings?.disableCustomUsernameColors
+            }
+            disableCustomFonts={
+                disableCustomFonts ||
+                currentUser?.settings?.disableCustomUsernameFonts
+            }
+            disableGlow={
+                disableGlow || currentUser?.settings?.disableCustomUsernameGlow
+            }
+            disableGlowAndColors={disableGlowAndColors}
+            iconRole={iconRole}
+            role={role}
+            user={user as User}
+        >
+            {nickname || user?.displayName || user?.username}
+        </StyledUserName>
+    );
 
     return (
         <div
@@ -972,29 +1135,22 @@ export const UserProfileCard = ({
             <Box className="p-4 pt-2">
                 <Box className="mb-4">
                     <Box className="flex min-w-0 items-center gap-2">
-                        <StyledUserName
-                            className="min-w-0 truncate text-xl leading-tight font-bold"
-                            disableColors={
-                                disableColors ||
-                                currentUser?.settings
-                                    ?.disableCustomUsernameColors
-                            }
-                            disableCustomFonts={
-                                disableCustomFonts ||
-                                currentUser?.settings
-                                    ?.disableCustomUsernameFonts
-                            }
-                            disableGlow={
-                                disableGlow ||
-                                currentUser?.settings?.disableCustomUsernameGlow
-                            }
-                            disableGlowAndColors={disableGlowAndColors}
-                            iconRole={iconRole}
-                            role={role}
-                            user={user as User}
-                        >
-                            {nickname || user?.displayName || user?.username}
-                        </StyledUserName>
+                        {onDisplayNameChange ? (
+                            <InlineEditableField
+                                inputClassName="min-w-0 flex-1 rounded-md border border-primary bg-bg-subtle px-1.5 py-0.5 text-xl leading-tight font-bold text-foreground focus:outline-none"
+                                title="Edit display name"
+                                value={
+                                    displayNameValue ??
+                                    user?.displayName ??
+                                    ''
+                                }
+                                onChange={onDisplayNameChange}
+                            >
+                                {displayNameContent}
+                            </InlineEditableField>
+                        ) : (
+                            displayNameContent
+                        )}
                         {user?.isBot ? (
                             <BotTag
                                 className="ml-0 h-4"
@@ -1009,8 +1165,19 @@ export const UserProfileCard = ({
                     </Box>
 
                     <Box className="mt-1 text-sm font-medium text-muted-foreground select-text">
-                        @{user?.username}
-                        {user?.pronouns ? (
+                        {onUsernameChange ? (
+                            <InlineEditableField
+                                inputClassName="min-w-0 rounded-md border border-primary bg-bg-subtle px-1.5 py-0.5 text-sm font-medium text-foreground focus:outline-none"
+                                title="Edit username"
+                                value={usernameValue ?? user?.username ?? ''}
+                                onChange={onUsernameChange}
+                            >
+                                @{user?.username}
+                            </InlineEditableField>
+                        ) : (
+                            `@${user?.username ?? ''}`
+                        )}
+                        {user?.pronouns || onPronounsChange ? (
                             <Text
                                 as="span"
                                 className={
@@ -1020,7 +1187,22 @@ export const UserProfileCard = ({
                                 }
                             >
                                 <span>•</span>
-                                {user.pronouns}
+                                {onPronounsChange ? (
+                                    <InlineEditableField
+                                        inputClassName="min-w-0 rounded-md border border-primary bg-bg-subtle px-1.5 py-0.5 text-xs text-foreground focus:outline-none"
+                                        title="Edit pronouns"
+                                        value={
+                                            pronounsValue ??
+                                            user?.pronouns ??
+                                            ''
+                                        }
+                                        onChange={onPronounsChange}
+                                    >
+                                        {user?.pronouns || 'Add pronouns'}
+                                    </InlineEditableField>
+                                ) : (
+                                    user?.pronouns
+                                )}
                                 <PrivateFieldHint
                                     adminView={adminView}
                                     isOwnProfile={isOwnProfile}
@@ -1046,6 +1228,7 @@ export const UserProfileCard = ({
                 <ProfileCardDetails
                     adminView={adminView}
                     bioNodes={bioNodes}
+                    bioValue={bioValue}
                     finalCustomEmoji={finalCustomEmoji}
                     finalCustomText={finalCustomText}
                     isOwnProfile={isOwnProfile}
@@ -1054,6 +1237,7 @@ export const UserProfileCard = ({
                     ps={ps}
                     user={user}
                     visibleConnections={visibleConnections}
+                    onBioChange={onBioChange}
                 />
 
                 <ProfileCardRoles

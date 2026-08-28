@@ -128,9 +128,13 @@ export class Terminal {
                 if (this.cursorColumn > 0) {
                     this.cursorColumn--;
                     const line = this.currentLine();
+                    const rawIndex = Terminal.rawIndexForColumn(
+                        line.text,
+                        this.cursorColumn,
+                    );
                     line.text =
-                        line.text.slice(0, this.cursorColumn) +
-                        line.text.slice(this.cursorColumn + 1);
+                        line.text.slice(0, rawIndex) +
+                        line.text.slice(rawIndex + 1);
                 }
                 return;
             }
@@ -157,14 +161,74 @@ export class Terminal {
 
     private writePrintableChar(char: string): void {
         const line = this.currentLine();
-        if (this.cursorColumn > line.text.length) {
-            line.text = line.text.padEnd(this.cursorColumn, ' ');
+        const visible = Terminal.visibleLength(line.text);
+
+        if (this.cursorColumn >= visible) {
+            if (this.cursorColumn > visible) {
+                line.text += ' '.repeat(this.cursorColumn - visible);
+            }
+            line.text += char;
+        } else {
+            const rawIndex = Terminal.rawIndexForColumn(
+                line.text,
+                this.cursorColumn,
+            );
+            line.text =
+                line.text.slice(0, rawIndex) +
+                char +
+                line.text.slice(rawIndex + 1);
         }
-        line.text =
-            line.text.slice(0, this.cursorColumn) +
-            char +
-            line.text.slice(this.cursorColumn + 1);
         this.cursorColumn++;
+    }
+
+    private static isSgrAt(text: string, index: number): number {
+        if (
+            text.charAt(index) !== ESCAPE_SEQUENCE ||
+            text.charAt(index + 1) !== '['
+        ) {
+            return 0;
+        }
+        let j = index + 2;
+        while (j < text.length) {
+            const ch = text.charAt(j);
+            if ((ch >= '0' && ch <= '9') || ch === ';') {
+                j++;
+                continue;
+            }
+            break;
+        }
+        return text.charAt(j) === 'm' ? j - index + 1 : 0;
+    }
+
+    private static visibleLength(text: string): number {
+        let column = 0;
+        let i = 0;
+        while (i < text.length) {
+            const sgrLength = Terminal.isSgrAt(text, i);
+            if (sgrLength > 0) {
+                i += sgrLength;
+                continue;
+            }
+            column++;
+            i++;
+        }
+        return column;
+    }
+
+    private static rawIndexForColumn(text: string, column: number): number {
+        let currentColumn = 0;
+        let i = 0;
+        while (i < text.length) {
+            const sgrLength = Terminal.isSgrAt(text, i);
+            if (sgrLength > 0) {
+                i += sgrLength;
+                continue;
+            }
+            if (currentColumn === column) return i;
+            currentColumn++;
+            i++;
+        }
+        return i;
     }
 
     private createLine(text: string): TerminalLine {
@@ -187,7 +251,13 @@ export class Terminal {
 
         const sgr = SGR_PATTERN.exec(sequence);
         if (sgr) {
-            this.currentLine().text += sgr[0];
+            const line = this.currentLine();
+            const rawIndex = Terminal.rawIndexForColumn(
+                line.text,
+                this.cursorColumn,
+            );
+            line.text =
+                line.text.slice(0, rawIndex) + sgr[0] + line.text.slice(rawIndex);
             return sgr[0].length;
         }
 
@@ -243,7 +313,13 @@ export class Terminal {
                     line.text = '';
                     this.cursorColumn = 0;
                 } else {
-                    line.text = line.text.slice(0, this.cursorColumn);
+                    line.text = line.text.slice(
+                        0,
+                        Terminal.rawIndexForColumn(
+                            line.text,
+                            this.cursorColumn,
+                        ),
+                    );
                 }
                 break;
             }

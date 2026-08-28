@@ -1,7 +1,11 @@
+import { useState } from 'react';
+
 import {
     Bell,
     Eye,
+    Globe,
     Keyboard,
+    KeyRound,
     Lock,
     Monitor,
     Palette,
@@ -9,12 +13,15 @@ import {
     ShieldAlert,
     Sparkles,
     User,
-    X,
 } from 'lucide-react';
 
-import { Button } from '@/ui/components/common/Button';
-import { Heading } from '@/ui/components/common/Heading';
-import { IconButton } from '@/ui/components/common/IconButton';
+import { useMe } from '@/api/users/users.queries';
+import { useSelfStatus } from '@/hooks/useSelfStatus';
+import { StyledUserName } from '@/ui/components/common/StyledUserName';
+import { UserProfilePicture } from '@/ui/components/common/UserProfilePicture';
+
+import { GroupedSidebarNav, type GroupedNavSection } from './GroupedSidebarNav';
+import { ProfileSettingsModal } from './ProfileSettingsModal';
 
 interface SettingsSidebarProps {
     activeSection: string;
@@ -22,64 +29,130 @@ interface SettingsSidebarProps {
     setActiveSection: (section: string) => void;
 }
 
-const SETTINGS_SECTIONS = [
-    { id: 'account', label: 'My Account', icon: User },
-    { id: 'sessions', label: 'Sessions', icon: Monitor },
-    { id: 'appearance', label: 'Appearance', icon: Palette },
-    { id: 'decorations', label: 'Avatar Decorations', icon: Sparkles },
-    { id: 'accessibility', label: 'Accessibility', icon: Eye },
-    { id: 'privacy', label: 'Privacy', icon: Lock },
-    { id: 'blocking', label: 'Blocking', icon: Shield },
-    { id: 'standing', label: 'Standing', icon: ShieldAlert },
-    { id: 'notifications', label: 'Notifications', icon: Bell },
-    { id: 'keybinds', label: 'Keybinds', icon: Keyboard },
-    { id: 'developer', label: 'Developer', icon: ShieldAlert },
+const SETTINGS_SECTIONS: GroupedNavSection[] = [
+    { id: 'account', label: 'My Account', icon: User, category: 'Account' },
+    {
+        id: 'connections',
+        label: 'Connections',
+        icon: Globe,
+        category: 'Account',
+    },
+    {
+        id: 'security',
+        label: 'Authentication',
+        icon: KeyRound,
+        category: 'Account',
+    },
+    { id: 'sessions', label: 'Sessions', icon: Monitor, category: 'Account' },
+    { id: 'standing', label: 'Standing', icon: ShieldAlert, category: 'Account' },
+    {
+        id: 'privacy',
+        label: 'Privacy',
+        icon: Lock,
+        category: 'Privacy & Safety',
+    },
+    {
+        id: 'blocking',
+        label: 'Blocking',
+        icon: Shield,
+        category: 'Privacy & Safety',
+    },
+    {
+        id: 'notifications',
+        label: 'Notifications',
+        icon: Bell,
+        category: 'Privacy & Safety',
+    },
+    {
+        id: 'appearance',
+        label: 'Appearance',
+        icon: Palette,
+        category: 'Appearance',
+    },
+    {
+        id: 'decorations',
+        label: 'Decoration Creator',
+        icon: Sparkles,
+        category: 'Appearance',
+    },
+    {
+        id: 'accessibility',
+        label: 'Accessibility',
+        icon: Eye,
+        category: 'Appearance',
+    },
+    { id: 'keybinds', label: 'Keybinds', icon: Keyboard, category: 'Advanced' },
+    {
+        id: 'developer',
+        label: 'Developer',
+        icon: ShieldAlert,
+        category: 'Advanced',
+    },
 ];
 
 export const SettingsSidebar = ({
     activeSection,
     onClose,
     setActiveSection,
-}: SettingsSidebarProps) => (
-    <div className="flex h-full w-full shrink-0 flex-col gap-1 overflow-y-auto border-r border-[var(--sidebar-border,var(--border-subtle))] bg-[var(--sidebar-bg,var(--secondary-bg))] p-3 md:w-[200px]">
-        <div className="mb-2 flex items-center justify-between border-b border-[var(--sidebar-border,var(--border-subtle))] px-2 pb-3 md:hidden">
-            <Heading className="m-0" level={2} variant="section">
-                Settings
-            </Heading>
-            <IconButton
-                className="border border-border-subtle text-muted-foreground hover:bg-danger-muted hover:text-danger"
-                icon={X}
-                iconSize={20}
-                onClick={onClose}
-            />
-        </div>
+}: SettingsSidebarProps) => {
+    const { data: me } = useMe();
+    const { status: selfStatus } = useSelfStatus();
+    const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
 
-        {SETTINGS_SECTIONS.map((section) => {
-            const Icon = section.icon;
-            const isActive = activeSection === section.id;
-
-            return (
-                <Button
-                    fullWidth
-                    className={`px-3 py-2.5 text-sm transition-all duration-200
-                            ${
-                                isActive
-                                    ? 'border-transparent bg-[var(--sidebar-item-active-bg,var(--bg-subtle))] font-semibold text-[var(--sidebar-item-active-text,var(--foreground))]'
-                                    : 'text-[var(--sidebar-item-text,var(--muted-foreground))] hover:bg-[var(--sidebar-item-hover-bg,var(--bg-subtle))] hover:text-[var(--sidebar-item-hover-text,var(--foreground))]'
-                            }`}
-                    justify="start"
-                    key={section.id}
-                    variant={isActive ? 'normal' : 'ghost'}
-                    onClick={(): void => {
-                        setActiveSection(section.id);
-                    }}
-                >
-                    <span className="flex items-center gap-2.5">
-                        <Icon size={18} />
-                        {section.label}
-                    </span>
-                </Button>
-            );
-        })}
-    </div>
-);
+    return (
+        <GroupedSidebarNav
+            activeSection={activeSection}
+            footer={
+                me ? (
+                    <>
+                        <button
+                            className="flex shrink-0 items-center gap-2 border-t border-[var(--sidebar-border,var(--border-subtle))] p-3 text-left transition-colors hover:bg-[var(--sidebar-item-hover-bg,var(--bg-subtle))]"
+                            type="button"
+                            onClick={(): void => {
+                                setIsProfileModalOpen(true);
+                            }}
+                        >
+                            <UserProfilePicture
+                                decorationId={me.decorationId}
+                                size="sm"
+                                src={me.profilePicture}
+                                status={selfStatus}
+                                username={me.username}
+                            />
+                            <div className="min-w-0 flex-1">
+                                <StyledUserName
+                                    className="text-sm leading-tight font-semibold !text-[var(--sidebar-item-active-text,var(--foreground))]"
+                                    disableColors={
+                                        me.settings?.disableCustomUsernameColors
+                                    }
+                                    disableCustomFonts={
+                                        me.settings?.disableCustomUsernameFonts
+                                    }
+                                    disableGlow={
+                                        me.settings?.disableCustomUsernameGlow
+                                    }
+                                    user={me}
+                                >
+                                    {me.displayName ?? me.username}
+                                </StyledUserName>
+                                <div className="truncate text-xs text-[var(--sidebar-item-text,var(--muted-foreground))]">
+                                    @{me.username}
+                                </div>
+                            </div>
+                        </button>
+                        <ProfileSettingsModal
+                            isOpen={isProfileModalOpen}
+                            onClose={(): void => {
+                                setIsProfileModalOpen(false);
+                            }}
+                        />
+                    </>
+                ) : null
+            }
+            sections={SETTINGS_SECTIONS}
+            setActiveSection={setActiveSection}
+            title="Settings"
+            onClose={onClose}
+        />
+    );
+};

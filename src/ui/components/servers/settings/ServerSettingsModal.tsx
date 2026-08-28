@@ -10,14 +10,13 @@ import {
     Smile,
     Sticker,
     UserPlus,
-    X,
     Zap,
 } from 'lucide-react';
 
 import type { RolePermissions } from '@/api/servers/servers.types';
 import { usePermissions } from '@/hooks/usePermissions';
-import { IconButton } from '@/ui/components/common/IconButton';
 import { Modal } from '@/ui/components/common/Modal';
+import { ModalCloseButton } from '@/ui/components/common/ModalCloseButton';
 import { SettingsSidebarLayout } from '@/ui/components/common/settings/SettingsSidebarLayout';
 import { cn } from '@/utils/cn';
 
@@ -257,17 +256,7 @@ export const ServerSettingsModal = ({
                                 : 'right-6 md:right-12',
                         )}
                     >
-                        <div className="flex flex-col items-center gap-2">
-                            <IconButton
-                                className="rounded-full border-2 border-border-subtle p-2 text-muted-foreground transition-all duration-200 hover:bg-bg-subtle hover:text-foreground"
-                                icon={X}
-                                iconSize={24}
-                                onClick={onClose}
-                            />
-                            <span className="text-[10px] font-bold text-muted-foreground uppercase">
-                                Esc
-                            </span>
-                        </div>
+                        <ModalCloseButton onClick={onClose} />
                     </div>
                     <div
                         className={cn(
