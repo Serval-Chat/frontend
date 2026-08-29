@@ -34,6 +34,11 @@ const HELP_DETAILS: Record<string, string[]> = {
     run: ['Runs a file or script in the console.', '', 'RUN [filename]'],
     snake: ['Plays snake game'],
     ansitest: ['Displays all supported ANSI color and style codes.'],
+    fastfetch: [
+        'Displays a summary of system information.',
+        '',
+        'FASTFETCH [/filter:modules] [/list] [/?]',
+    ],
 };
 
 export const helpCommand: ConCommandReactor = {
@@ -91,6 +96,7 @@ export const helpCommand: ConCommandReactor = {
                 '  SNAKE    - Plays a snake game',
                 '  ANSITEST - Displays all supported ANSI codes',
                 '  USERCTL  - Queries user profiles and friend list',
+                '  FASTFETCH - Displays a summary of system information',
             ],
         };
     },

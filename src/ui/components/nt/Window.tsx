@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import type { NTMenuDefinition } from '@/ui/components/nt/NTMenuBar';
 import { NTMenuBar } from '@/ui/components/nt/NTMenuBar';
@@ -15,6 +15,7 @@ export interface WindowProps {
     minWidth?: number;
     minHeight?: number;
     menus?: NTMenuDefinition[];
+    onResize?: (size: { width: number; height: number }) => void;
 }
 
 const resizeHandles = [
@@ -88,6 +89,8 @@ const resizeHandles = [
     },
 ];
 
+const NT_WINDOW_ZOOM_FACTOR = 1.3;
+
 const windowFrameBaseStyle: React.CSSProperties = {
     overflow: 'hidden',
     backgroundColor: '#c0c0c0',
@@ -111,12 +114,17 @@ export const Window = ({
     minWidth = 300,
     minHeight = 200,
     menus,
+    onResize,
 }: WindowProps) => {
     const [position, setPosition] = useState({ x: defaultX, y: defaultY });
     const [size, setSize] = useState({
         width: defaultWidth,
         height: defaultHeight,
     });
+
+    useEffect((): void => {
+        onResize?.({ width: size.width, height: size.height });
+    }, [size.width, size.height, onResize]);
     const isDragging = useRef(false);
     const dragStart = useRef({ x: 0, y: 0 });
 
@@ -130,7 +138,53 @@ export const Window = ({
         posY: 0,
     });
 
+    const [isMaximized, setIsMaximized] = useState(false);
+    const preMaximizeBounds = useRef({
+        x: defaultX,
+        y: defaultY,
+        width: defaultWidth,
+        height: defaultHeight,
+    });
+
+    useEffect((): (() => void) | undefined => {
+        if (!isMaximized) return undefined;
+
+        const handleViewportResize = (): void => {
+            setSize({
+                width: window.innerWidth / NT_WINDOW_ZOOM_FACTOR,
+                height: window.innerHeight / NT_WINDOW_ZOOM_FACTOR,
+            });
+        };
+        window.addEventListener('resize', handleViewportResize);
+        return (): void => {
+            window.removeEventListener('resize', handleViewportResize);
+        };
+    }, [isMaximized]);
+
+    const handleTitleBarDoubleClick = (): void => {
+        if (isMaximized) {
+            const prev = preMaximizeBounds.current;
+            setPosition({ x: prev.x, y: prev.y });
+            setSize({ width: prev.width, height: prev.height });
+            setIsMaximized(false);
+        } else {
+            preMaximizeBounds.current = {
+                x: position.x,
+                y: position.y,
+                width: size.width,
+                height: size.height,
+            };
+            setPosition({ x: 0, y: 0 });
+            setSize({
+                width: window.innerWidth / NT_WINDOW_ZOOM_FACTOR,
+                height: window.innerHeight / NT_WINDOW_ZOOM_FACTOR,
+            });
+            setIsMaximized(true);
+        }
+    };
+
     const handlePointerDown = (e: React.PointerEvent): void => {
+        if (isMaximized) return;
         isDragging.current = true;
         dragStart.current = {
             x: e.clientX - position.x,
@@ -241,22 +295,24 @@ export const Window = ({
                 minHeight,
             }}
         >
-            {resizeHandles.map((handle) => (
-                <div
-                    key={handle.dir}
-                    style={{
-                        position: 'absolute',
-                        zIndex: 10,
-                        ...handle.style,
-                    }}
-                    onPointerCancel={handlePointerUp}
-                    onPointerDown={(e): void => {
-                        handleResizeDown(e, handle.dir);
-                    }}
-                    onPointerMove={handleResizeMove}
-                    onPointerUp={handlePointerUp}
-                />
-            ))}
+            {isMaximized
+                ? null
+                : resizeHandles.map((handle) => (
+                      <div
+                          key={handle.dir}
+                          style={{
+                              position: 'absolute',
+                              zIndex: 10,
+                              ...handle.style,
+                          }}
+                          onPointerCancel={handlePointerUp}
+                          onPointerDown={(e): void => {
+                              handleResizeDown(e, handle.dir);
+                          }}
+                          onPointerMove={handleResizeMove}
+                          onPointerUp={handlePointerUp}
+                      />
+                  ))}
 
             <div
                 className="flex cursor-move items-center justify-between px-1 py-0.5 select-none"
@@ -265,6 +321,7 @@ export const Window = ({
                     color: '#ffffff',
                     fontWeight: 'bold',
                 }}
+                onDoubleClick={handleTitleBarDoubleClick}
                 onPointerCancel={handlePointerUp}
                 onPointerDown={handlePointerDown}
                 onPointerMove={handlePointerMove}
@@ -287,6 +344,9 @@ export const Window = ({
                     onClick={(e): void => {
                         e.stopPropagation();
                         onClose();
+                    }}
+                    onDoubleClick={(e): void => {
+                        e.stopPropagation();
                     }}
                     onPointerDown={(e): void => {
                         e.stopPropagation();

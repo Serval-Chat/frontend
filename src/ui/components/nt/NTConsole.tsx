@@ -29,26 +29,18 @@ const useNtTerminalAutosize = (
     consoleRef: React.RefObject<HTMLDivElement | null>,
     measureRef: React.RefObject<HTMLSpanElement | null>,
     activeProgramRef: React.RefObject<ConsoleProgram | null>,
-): void => {
+): (() => void) => {
+    const updateTerminalSizeRef = useRef<() => void>(() => {});
+
     useEffect((): (() => void) | undefined => {
         if (!isOpen || !consoleRef.current) return;
 
         const updateTerminalSize = (): void => {
-            const viewport = consoleRef.current?.querySelector(
-                '.nt-scroll-area__viewport',
-            );
-            const element =
-                viewport instanceof HTMLElement ? viewport : consoleRef.current;
+            const element = consoleRef.current;
             const measure = measureRef.current;
             if (!element || !measure) return;
 
-            const style = globalThis.getComputedStyle(element);
-            const horizontalPadding =
-                Number.parseFloat(style.paddingLeft) +
-                Number.parseFloat(style.paddingRight);
-            const verticalPadding =
-                Number.parseFloat(style.paddingTop) +
-                Number.parseFloat(style.paddingBottom);
+            const elementRect = element.getBoundingClientRect();
             const measureRect = measure.getBoundingClientRect();
             const charWidth = measureRect.width / MEASURE_COLUMNS;
             const lineHeight = measureRect.height;
@@ -57,15 +49,13 @@ const useNtTerminalAutosize = (
             const columns = Math.max(
                 1,
                 Math.floor(
-                    (element.clientWidth - horizontalPadding - SIZE_GUARD_PX) /
-                        charWidth,
+                    (elementRect.width - SIZE_GUARD_PX) / charWidth,
                 ),
             );
             const rows = Math.max(
                 1,
                 Math.floor(
-                    (element.clientHeight - verticalPadding - SIZE_GUARD_PX) /
-                        lineHeight,
+                    (elementRect.height - SIZE_GUARD_PX) / lineHeight,
                 ),
             );
 
@@ -79,6 +69,8 @@ const useNtTerminalAutosize = (
             }
         };
 
+        updateTerminalSizeRef.current = updateTerminalSize;
+
         updateTerminalSize();
         const resizeObserver = new ResizeObserver(updateTerminalSize);
         resizeObserver.observe(consoleRef.current);
@@ -89,6 +81,10 @@ const useNtTerminalAutosize = (
             resizeObserver.disconnect();
         };
     }, [isOpen, terminal, consoleRef, measureRef, activeProgramRef]);
+
+    return useCallback((): void => {
+        updateTerminalSizeRef.current();
+    }, []);
 };
 
 export const NTConsole = () => {
@@ -192,7 +188,7 @@ export const NTConsole = () => {
         };
     }, [isOpen, isCommandRunning]);
 
-    useNtTerminalAutosize(
+    const recalculateTerminalSize = useNtTerminalAutosize(
         isOpen,
         terminal,
         consoleRef,
@@ -334,6 +330,14 @@ export const NTConsole = () => {
         dispatch(toggleConsole());
     };
 
+    const showPrompt = !isCommandRunning && !activeProgram;
+    const displayHistory =
+        showPrompt &&
+        history.length > 0 &&
+        history[history.length - 1].text === ''
+            ? history.slice(0, -1)
+            : history;
+
     return (
         <Window
             defaultHeight={350}
@@ -349,6 +353,7 @@ export const NTConsole = () => {
             ]}
             title="Command Prompt"
             onClose={handleClose}
+            onResize={recalculateTerminalSize}
         >
             {/* false positive: can't be a real <button> - it wraps the terminal's
             actual <input> below, and interactive content (an input) isn't allowed
@@ -373,10 +378,7 @@ export const NTConsole = () => {
                 >
                     {'M'.repeat(MEASURE_COLUMNS)}
                 </span>
-                <NTScrollArea
-                    className="min-h-0 w-full flex-1"
-                    viewportClassName="p-2"
-                >
+                <NTScrollArea className="min-h-0 w-full flex-1">
                     <style>{`
                         @keyframes nt-blink {
                             0%, 100% { opacity: 1; }
@@ -393,16 +395,16 @@ export const NTConsole = () => {
                         }
                     `}</style>
 
-                    {history.map((line) => (
+                    {displayHistory.map((line) => (
                         <div
-                            className="min-h-[1.1rem] whitespace-pre-wrap select-text"
+                            className="min-h-[13px] whitespace-pre-wrap select-text"
                             key={line.id}
                         >
                             {parseAnsi(line.text)}
                         </div>
                     ))}
 
-                    {!isCommandRunning && !activeProgram ? (
+                    {showPrompt ? (
                         <div className="flex flex-wrap items-center select-none">
                             <span>{cwd}&gt;</span>
                             <span className="whitespace-pre select-text">
