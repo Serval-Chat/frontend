@@ -29,6 +29,50 @@ describe('Terminal ANSI screen controls', (): void => {
         expect(text(terminal)).toEqual(['', 'BA', '    Z']);
     });
 
+    it('hasUsedCursorPositioning stays false for plain sequential writes', (): void => {
+        const terminal = new Terminal({ size: { columns: 10, rows: 5 } });
+        terminal.write('hello\nworld\n');
+        expect(terminal.hasUsedCursorPositioning()).toBe(false);
+    });
+
+    it('hasUsedCursorPositioning becomes true once an explicit row/col CSI H/f is used', (): void => {
+        const terminal = new Terminal({ size: { columns: 10, rows: 5 } });
+        expect(terminal.hasUsedCursorPositioning()).toBe(false);
+        terminal.write('\u001B[3;4Hx');
+        expect(terminal.hasUsedCursorPositioning()).toBe(true);
+    });
+
+    it('a bare \\u001B[H (no row/col, e.g. as part of CLS) does not count as positioning', (): void => {
+        const terminal = new Terminal({ size: { columns: 10, rows: 5 } });
+        terminal.write('\u001B[2J\u001B[H');
+        expect(terminal.hasUsedCursorPositioning()).toBe(false);
+    });
+
+    it('clear() and a full-screen \\u001B[2J reset hasUsedCursorPositioning', (): void => {
+        const terminal = new Terminal({ size: { columns: 10, rows: 5 } });
+        terminal.write('\u001B[3;4Hx');
+        expect(terminal.hasUsedCursorPositioning()).toBe(true);
+
+        terminal.clear();
+        expect(terminal.hasUsedCursorPositioning()).toBe(false);
+
+        terminal.write('\u001B[3;4Hx');
+        expect(terminal.hasUsedCursorPositioning()).toBe(true);
+        terminal.write('\u001B[2J');
+        expect(terminal.hasUsedCursorPositioning()).toBe(false);
+    });
+
+    it('resetCursorPositioning clears the flag without touching content', (): void => {
+        const terminal = new Terminal({ size: { columns: 10, rows: 5 } });
+        terminal.write('\u001B[1;1Hx');
+        expect(terminal.hasUsedCursorPositioning()).toBe(true);
+
+        terminal.resetCursorPositioning();
+
+        expect(terminal.hasUsedCursorPositioning()).toBe(false);
+        expect(text(terminal)).toEqual(['x']);
+    });
+
     it('keeps SGR color codes intact when interleaved with printable characters', (): void => {
         const terminal = new Terminal({ size: { columns: 20, rows: 5 } });
 

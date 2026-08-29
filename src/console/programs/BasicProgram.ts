@@ -153,6 +153,7 @@ export class BasicProgram implements ConsoleProgram {
         const upper = trimmed.toUpperCase();
 
         if (upper === 'SYSTEM' || upper === 'EXIT') {
+            this.terminal.resetCursorPositioning();
             this.onExit();
             return;
         }

@@ -219,6 +219,29 @@ describe('BasicProgram', (): void => {
         expect(onExit).toHaveBeenCalledTimes(1);
     });
 
+    it('SYSTEM resets cursor-positioning so the normal prompt auto-scrolls again after a LOCATE-heavy program', async (): Promise<void> => {
+        const terminal = new Terminal({ size: { columns: 80, rows: 25 } });
+        const filesystem = new DosFileSystem();
+        const program = new BasicProgram({
+            terminal,
+            filesystem,
+            onExit: vi.fn(),
+        });
+        program.start();
+
+        typeLine(program, 'LOCATE 3, 4');
+        await waitFor((): boolean => {
+            const okCount = screenText(terminal)
+                .split('\n')
+                .filter((l): boolean => l.trim() === 'Ok').length;
+            return terminal.hasUsedCursorPositioning() && okCount >= 2;
+        });
+
+        typeLine(program, 'SYSTEM');
+
+        expect(terminal.hasUsedCursorPositioning()).toBe(false);
+    });
+
     it('Ctrl+C breaks a runaway loop', async (): Promise<void> => {
         const terminal = new Terminal({ size: { columns: 80, rows: 25 } });
         const filesystem = new DosFileSystem();

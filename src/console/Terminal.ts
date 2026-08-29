@@ -26,6 +26,7 @@ export class Terminal {
     private onChange?: TerminalChangeListener;
     private cursorColumn = 0;
     private cursorRow = 0;
+    private cursorWasPositioned = false;
 
     public constructor(options?: {
         initialLines?: string[];
@@ -75,10 +76,19 @@ export class Terminal {
         }));
     }
 
+    public hasUsedCursorPositioning(): boolean {
+        return this.cursorWasPositioned;
+    }
+
+    public resetCursorPositioning(): void {
+        this.cursorWasPositioned = false;
+    }
+
     public clear(): void {
         this.lines = [];
         this.cursorColumn = 0;
         this.cursorRow = 0;
+        this.cursorWasPositioned = false;
         this.emitChange();
     }
 
@@ -297,6 +307,9 @@ export class Terminal {
                 this.cursorRow = Math.max(0, (values[0] || 1) - 1);
                 this.cursorColumn = Math.max(0, (values[1] || 1) - 1);
                 this.ensureLine(this.cursorRow);
+                if (parameters.length > 0) {
+                    this.cursorWasPositioned = true;
+                }
                 break;
             }
             case 'J': {
@@ -304,6 +317,7 @@ export class Terminal {
                     this.lines = [];
                     this.cursorRow = 0;
                     this.cursorColumn = 0;
+                    this.cursorWasPositioned = false;
                 }
                 break;
             }
