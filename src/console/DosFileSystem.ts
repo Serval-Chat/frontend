@@ -257,6 +257,13 @@ export class DosFileSystem {
         return entry;
     }
 
+    public reset(): void {
+        if (isStorageAvailable()) {
+            localStorage.removeItem(STORAGE_KEY);
+        }
+        this.seedFresh();
+    }
+
     private load(): void {
         if (isStorageAvailable()) {
             const raw = localStorage.getItem(STORAGE_KEY);
@@ -272,12 +279,38 @@ export class DosFileSystem {
             }
         }
 
+        this.seedFresh();
+    }
+
+    private seedFresh(): void {
         const root = this.createEntry(ROOT, 'directory');
         this.entries = { [ROOT]: root };
         this.cwd = ROOT;
         this.writeFile(
             'README.TXT',
-            'Serchat Console filesystem.\nUse DIR to list files.\n',
+            'Serchat Console filesystem.\nUse DIR to list files.\nTry: BASIC MATRIX.BAS\n',
+        );
+        this.writeFile(
+            'MATRIX.BAS',
+            '10 W = SCRWIDTH()\n' +
+                '20 H = SCRHEIGHT()\n' +
+                '30 DIM D(W)\n' +
+                '40 FOR I = 0 TO W - 1\n' +
+                '50 D(I) = INT(RND(1) * H) - H\n' +
+                '60 NEXT I\n' +
+                '70 CLS\n' +
+                '80 FOR I = 0 TO W - 1\n' +
+                '90 D(I) = D(I) + 1\n' +
+                '100 IF D(I) > H THEN D(I) = INT(RND(1) * H) - H\n' +
+                '110 IF D(I) < 1 THEN GOTO 170\n' +
+                '120 LOCATE D(I), I + 1\n' +
+                '130 COLOR 10\n' +
+                '140 PRINT CHR$(INT(RND(1) * 93) + 33);\n' +
+                '150 IF D(I) > 1 THEN LOCATE D(I) - 1, I + 1: COLOR 2: PRINT CHR$(INT(RND(1) * 93) + 33);\n' +
+                '160 IF D(I) > 6 THEN LOCATE D(I) - 6, I + 1: PRINT " ";\n' +
+                '170 NEXT I\n' +
+                '180 SLEEP 0.05\n' +
+                '190 GOTO 80\n',
         );
         this.save();
     }

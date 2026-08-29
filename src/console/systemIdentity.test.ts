@@ -9,6 +9,7 @@ import {
     getMemory,
     getOsProfile,
     getResolution,
+    resetSystemIdentity,
 } from '@/console/systemIdentity';
 
 describe('systemIdentity', (): void => {
@@ -101,6 +102,23 @@ describe('systemIdentity', (): void => {
             'serchat.console.systemIdentity.v2',
         );
         expect(rawAfter).toBeNull();
+
+        expect(typeof getHostname()).toBe('string');
+        expect(
+            localStorage.getItem('serchat.console.systemIdentity.v2'),
+        ).toBeTruthy();
+    });
+
+    it('resetSystemIdentity clears the stored identity so the next call regenerates it', (): void => {
+        getHostname();
+        expect(
+            localStorage.getItem('serchat.console.systemIdentity.v2'),
+        ).toBeTruthy();
+
+        resetSystemIdentity();
+        expect(
+            localStorage.getItem('serchat.console.systemIdentity.v2'),
+        ).toBeNull();
 
         expect(typeof getHostname()).toBe('string');
         expect(

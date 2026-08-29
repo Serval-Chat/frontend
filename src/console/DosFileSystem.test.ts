@@ -1,10 +1,16 @@
-import { beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import type { BasicIo } from '@/console/basic/BasicInterpreter';
+import { BasicInterpreter } from '@/console/basic/BasicInterpreter';
 import { DosFileSystem } from '@/console/DosFileSystem';
 
 describe('DosFileSystem', (): void => {
     beforeEach((): void => {
         localStorage.clear();
+    });
+
+    afterEach((): void => {
+        vi.restoreAllMocks();
     });
 
     it(
@@ -22,6 +28,65 @@ describe('DosFileSystem', (): void => {
             expect(reloaded.readFile('HELLO.TXT')).toBe('hello');
         },
     );
+
+    it('seeds a MATRIX.BAS demo on a fresh filesystem that loads as a valid BASIC program', (): void => {
+        const fs = new DosFileSystem();
+
+        const source = fs.readFile('MATRIX.BAS');
+        const interp = new BasicInterpreter();
+        expect(() => interp.loadProgram(source)).not.toThrow();
+        expect(interp.isEmpty()).toBe(false);
+    });
+
+    it('MATRIX.BAS runs end to end, respecting the given screen width and coloring output', async (): Promise<void> => {
+        vi.spyOn(Math, 'random').mockReturnValue(0.99);
+
+        const fs = new DosFileSystem();
+        const interp = new BasicInterpreter();
+        interp.loadProgram(fs.readFile('MATRIX.BAS'));
+
+        let output = '';
+        const io: BasicIo = {
+            print: (text): void => {
+                output += text;
+            },
+            input: async (): Promise<string> => '',
+            getScreenSize: (): { columns: number; rows: number } => ({
+                columns: 10,
+                rows: 25,
+            }),
+        };
+
+        const runPromise = interp.run(io);
+        setTimeout((): void => {
+            interp.requestStop();
+        }, 150);
+        await runPromise;
+
+        expect(output).toContain('Break in');
+        const esc = String.fromCharCode(27);
+        expect(output).toContain(`${esc}[2J${esc}[H`);
+        expect(new RegExp(`${esc}\\[\\d+;\\d+H`).test(output)).toBe(true);
+        expect(output).toContain(`${esc}[92m`);
+    }, 10000);
+
+    it('reset() wipes custom files and re-seeds the default fresh-install files', (): void => {
+        const fs = new DosFileSystem();
+        fs.makeDirectory('APPS');
+        fs.writeFile('CUSTOM.TXT', 'my stuff');
+        expect(fs.readFile('CUSTOM.TXT')).toBe('my stuff');
+
+        fs.reset();
+
+        expect(fs.getCwd()).toBe('C:\\');
+        expect(() => fs.readFile('CUSTOM.TXT')).toThrow();
+        expect(fs.readFile('README.TXT')).toContain('Serchat Console');
+        expect(fs.readFile('MATRIX.BAS')).toContain('SCRWIDTH()');
+
+        const reloaded = new DosFileSystem();
+        expect(() => reloaded.readFile('CUSTOM.TXT')).toThrow();
+        expect(reloaded.readFile('README.TXT')).toContain('Serchat Console');
+    });
 
     it('enforces 8.3 names', (): void => {
         const fs = new DosFileSystem();

@@ -206,3 +206,8 @@ export const getGpu = (): string => getSystemIdentity().gpu;
 export const getMemory = (): string => getSystemIdentity().memory;
 
 export const getDisk = (): string => getSystemIdentity().disk;
+
+export const resetSystemIdentity = (): void => {
+    if (!isStorageAvailable()) return;
+    localStorage.removeItem(STORAGE_KEY);
+};

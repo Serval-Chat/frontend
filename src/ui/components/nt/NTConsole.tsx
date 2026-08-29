@@ -197,13 +197,14 @@ export const NTConsole = () => {
     );
 
     useEffect((): void => {
+        if (activeProgram) return;
         const viewport = consoleRef.current?.querySelector(
             '.nt-scroll-area__viewport',
         );
         if (viewport) {
             viewport.scrollTop = viewport.scrollHeight;
         }
-    }, [history]);
+    }, [history, activeProgram]);
 
     const handleConsoleClick = (): void => {
         const selection = globalThis.getSelection();
