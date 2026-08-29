@@ -1,7 +1,12 @@
 import { useCallback, useEffect } from 'react';
 
 import { useQueryClient } from '@tanstack/react-query';
-import { CLEAR_EDITOR_COMMAND, type LexicalEditor } from 'lexical';
+import {
+    $getSelection,
+    $isRangeSelection,
+    CLEAR_EDITOR_COMMAND,
+    type LexicalEditor,
+} from 'lexical';
 
 import { SERVERS_QUERY_KEYS } from '@/api/servers/servers.queries';
 import { useWebSocket } from '@/hooks/ws/useWebSocket';
@@ -56,8 +61,17 @@ export const useMessageInputEffects = ({
 
             if (keybindManager.matches('composer.focus', e)) {
                 e.preventDefault();
-                editor?.focus();
                 onCloseFloatingPickers();
+
+                const typedChar = e.key;
+                editor?.focus((): void => {
+                    editor.update((): void => {
+                        const selection = $getSelection();
+                        if ($isRangeSelection(selection)) {
+                            selection.insertText(typedChar);
+                        }
+                    });
+                });
             }
         };
 
