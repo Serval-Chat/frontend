@@ -53,7 +53,7 @@ export const UserProfileStatusIndicator = ({
         return (
             <Box
                 className={cn(
-                    'absolute -right-[1px] -bottom-[1px] z-20 flex items-center justify-center rounded-full border-background bg-background',
+                    'absolute -right-[1px] -bottom-[1px] z-20 flex items-center justify-center rounded-full border-status-ring bg-status-ring',
                     STATUS_SIZE_CLASSES[size],
                     className,
                 )}
@@ -71,7 +71,7 @@ export const UserProfileStatusIndicator = ({
     return (
         <Box
             className={cn(
-                'absolute -right-[1px] -bottom-[1px] z-20 rounded-full border-background',
+                'absolute -right-[1px] -bottom-[1px] z-20 rounded-full border-status-ring',
                 STATUS_SIZE_CLASSES[size],
                 STATUS_COLOR_CLASSES[status],
                 className,
