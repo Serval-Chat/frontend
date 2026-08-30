@@ -16,6 +16,7 @@ export interface WindowProps {
     minHeight?: number;
     menus?: NTMenuDefinition[];
     onResize?: (size: { width: number; height: number }) => void;
+    resizable?: boolean;
 }
 
 const resizeHandles = [
@@ -115,6 +116,7 @@ export const Window = ({
     minHeight = 200,
     menus,
     onResize,
+    resizable = true,
 }: WindowProps) => {
     const [position, setPosition] = useState({ x: defaultX, y: defaultY });
     const [size, setSize] = useState({
@@ -162,6 +164,7 @@ export const Window = ({
     }, [isMaximized]);
 
     const handleTitleBarDoubleClick = (): void => {
+        if (!resizable) return;
         if (isMaximized) {
             const prev = preMaximizeBounds.current;
             setPosition({ x: prev.x, y: prev.y });
@@ -295,7 +298,7 @@ export const Window = ({
                 minHeight,
             }}
         >
-            {isMaximized
+            {isMaximized || !resizable
                 ? null
                 : resizeHandles.map((handle) => (
                       <div

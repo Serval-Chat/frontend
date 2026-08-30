@@ -14,6 +14,17 @@ export interface ConsoleProgram {
     start: () => void;
 }
 
+export interface CopyFileOptions {
+    fileName: string;
+    from: string;
+    to: string;
+    size: number;
+}
+
+export interface CopyFileResult {
+    cancelled: boolean;
+}
+
 export interface CommandContext {
     dispatch: AppDispatch;
     endProgram?: () => void;
@@ -22,6 +33,7 @@ export interface CommandContext {
     terminal?: Terminal;
     writeLine?: (text: string) => void;
     clearScreen?: () => void;
+    copyFile?: (options: CopyFileOptions) => Promise<CopyFileResult>;
 }
 
 export interface CommandResult {

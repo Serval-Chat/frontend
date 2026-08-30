@@ -6,6 +6,7 @@ import { useMe } from '@/api/users/users.queries';
 import { Button } from '@/ui/components/common/Button';
 import { Input } from '@/ui/components/common/Input';
 import { Modal } from '@/ui/components/common/Modal';
+import { PasswordInput } from '@/ui/components/common/PasswordInput';
 import { Text } from '@/ui/components/common/Text';
 import { useToast } from '@/ui/components/common/Toast';
 import { Box } from '@/ui/components/layout/Box';
@@ -125,9 +126,8 @@ export const ChangeLoginModal = ({
                         >
                             Confirm Password
                         </label>
-                        <Input
+                        <PasswordInput
                             id="password"
-                            type="password"
                             value={password}
                             onChange={(e): void => {
                                 setPassword(e.target.value);

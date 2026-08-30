@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 
 import { useChangePassword } from '@/api/auth/auth.queries';
 import { Button } from '@/ui/components/common/Button';
-import { Input } from '@/ui/components/common/Input';
 import { Modal } from '@/ui/components/common/Modal';
+import { PasswordInput } from '@/ui/components/common/PasswordInput';
 import { Text } from '@/ui/components/common/Text';
 import { useToast } from '@/ui/components/common/Toast';
 import { Box } from '@/ui/components/layout/Box';
@@ -90,11 +90,10 @@ export const ChangePasswordModal = ({
                         >
                             Current Password
                         </label>
-                        <Input
+                        <PasswordInput
                             autoComplete="current-password"
                             id="current-password"
                             name="current-password"
-                            type="password"
                             value={currentPassword}
                             onChange={(e): void => {
                                 setCurrentPassword(e.target.value);
@@ -114,11 +113,10 @@ export const ChangePasswordModal = ({
                         >
                             New Password
                         </label>
-                        <Input
+                        <PasswordInput
                             autoComplete="new-password"
                             id="new-password"
                             name="new-password"
-                            type="password"
                             value={newPassword}
                             onChange={(e): void => {
                                 setNewPassword(e.target.value);
@@ -138,11 +136,10 @@ export const ChangePasswordModal = ({
                         >
                             Confirm New Password
                         </label>
-                        <Input
+                        <PasswordInput
                             autoComplete="new-password"
                             id="confirm-password"
                             name="confirm-password"
-                            type="password"
                             value={confirmPassword}
                             onChange={(e): void => {
                                 setConfirmPassword(e.target.value);

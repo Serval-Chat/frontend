@@ -14,6 +14,7 @@ import { AdminBadgesManagement } from './AdminBadgesManagement';
 import { AdminErrorDisplay } from './AdminErrorDisplay';
 import { AdminModerationControls } from './AdminModerationControls';
 import { AdminNotesSection } from './AdminNotesSection';
+import { AdminPasswordlessReset } from './AdminPasswordlessReset';
 import {
     AdminAccountInformation,
     AdminAccountStatus,
@@ -135,6 +136,11 @@ export const AdminUserDetail = ({
                             isCurrentlyBanned={isCurrentlyBanned}
                             isCurrentlyMuted={isCurrentlyMuted}
                             muteUntilLabel={muteUntilLabel}
+                            userId={userId}
+                        />
+
+                        <AdminPasswordlessReset
+                            isPasswordless={adminData.passwordless}
                             userId={userId}
                         />
 

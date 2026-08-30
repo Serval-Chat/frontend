@@ -2,10 +2,10 @@ import type {
     Badge,
     CustomStatus,
     PrivacySettings,
+    UserConnection,
     UsernameFont,
     UsernameGlow,
     UsernameGradient,
-    UserConnection,
 } from '@/api/users/users.types';
 
 export interface AdminStats {
@@ -99,6 +99,7 @@ export interface AdminExtendedUser extends AdminUser {
     connections?: UserConnection[];
     isPrivate?: boolean;
     privacySettings?: PrivacySettings;
+    passwordless: boolean;
 }
 export interface AdminServerOwner {
     id: string;

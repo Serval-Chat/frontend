@@ -1,8 +1,6 @@
-import { useState } from 'react';
-
 import { Turnstile } from '@marsidev/react-turnstile';
 import { AnimatePresence, m } from 'framer-motion';
-import { Eye, EyeOff, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 
 import { useRegisterForm } from '@/hooks/useRegisterForm';
 import { FormContent } from '@/ui/components/auth/FormContent';
@@ -10,6 +8,7 @@ import { Button } from '@/ui/components/common/Button';
 import { Heading } from '@/ui/components/common/Heading';
 import { Input } from '@/ui/components/common/Input';
 import { InputWrapper } from '@/ui/components/common/InputWrapper';
+import { PasswordInput } from '@/ui/components/common/PasswordInput';
 import { StatusMessage } from '@/ui/components/common/StatusMessage';
 import { Text } from '@/ui/components/common/Text';
 import { Box } from '@/ui/components/layout/Box';
@@ -37,9 +36,6 @@ export const Register = () => {
         handleSubmit,
         setTurnstileToken,
     } = useRegisterForm();
-
-    const [showPassword, setShowPassword] = useState(false);
-    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
     return (
         <Box className="relative flex min-h-screen w-full flex-col items-center justify-center overflow-hidden bg-background p-md">
@@ -110,42 +106,16 @@ export const Register = () => {
                         </AnimatePresence>
                     </InputWrapper>
                     <InputWrapper>
-                        <div className="relative">
-                            <Input
-                                autoComplete="new-password"
-                                className="bg-background/50 pr-10"
-                                name="password"
-                                placeholder="Password"
-                                type={showPassword ? 'text' : 'password'}
-                                value={password}
-                                onChange={(e): void => {
-                                    setPassword(e.target.value);
-                                }}
-                            />
-                            <button
-                                aria-label={
-                                    showPassword
-                                        ? 'Hide password'
-                                        : 'Show password'
-                                }
-                                className="absolute top-1/2 right-3 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                                title={
-                                    showPassword
-                                        ? 'Hide password'
-                                        : 'Show password'
-                                }
-                                type="button"
-                                onClick={(): void => {
-                                    setShowPassword(!showPassword);
-                                }}
-                            >
-                                {showPassword ? (
-                                    <EyeOff size={18} />
-                                ) : (
-                                    <Eye size={18} />
-                                )}
-                            </button>
-                        </div>
+                        <PasswordInput
+                            autoComplete="new-password"
+                            className="bg-background/50"
+                            name="password"
+                            placeholder="Password"
+                            value={password}
+                            onChange={(e): void => {
+                                setPassword(e.target.value);
+                            }}
+                        />
                         <AnimatePresence>
                             {errors.password ? (
                                 <m.small
@@ -160,44 +130,16 @@ export const Register = () => {
                         </AnimatePresence>
                     </InputWrapper>
                     <InputWrapper>
-                        <div className="relative">
-                            <Input
-                                autoComplete="new-password"
-                                className="bg-background/50 pr-10"
-                                name="confirmPassword"
-                                placeholder="Confirm Password"
-                                type={showConfirmPassword ? 'text' : 'password'}
-                                value={confirmPassword}
-                                onChange={(e): void => {
-                                    setConfirmPassword(e.target.value);
-                                }}
-                            />
-                            <button
-                                aria-label={
-                                    showConfirmPassword
-                                        ? 'Hide password'
-                                        : 'Show password'
-                                }
-                                className="absolute top-1/2 right-3 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                                title={
-                                    showConfirmPassword
-                                        ? 'Hide password'
-                                        : 'Show password'
-                                }
-                                type="button"
-                                onClick={(): void => {
-                                    setShowConfirmPassword(
-                                        !showConfirmPassword,
-                                    );
-                                }}
-                            >
-                                {showConfirmPassword ? (
-                                    <EyeOff size={18} />
-                                ) : (
-                                    <Eye size={18} />
-                                )}
-                            </button>
-                        </div>
+                        <PasswordInput
+                            autoComplete="new-password"
+                            className="bg-background/50"
+                            name="confirmPassword"
+                            placeholder="Confirm Password"
+                            value={confirmPassword}
+                            onChange={(e): void => {
+                                setConfirmPassword(e.target.value);
+                            }}
+                        />
                         <AnimatePresence>
                             {errors.confirmPassword ? (
                                 <m.small
@@ -240,7 +182,9 @@ export const Register = () => {
                     </InputWrapper>
                     <div className="flex justify-center">
                         <Turnstile
-                            siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY || ''}
+                            siteKey={
+                                import.meta.env.VITE_TURNSTILE_SITE_KEY || ''
+                            }
                             onSuccess={setTurnstileToken}
                         />
                     </div>

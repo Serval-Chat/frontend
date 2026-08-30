@@ -180,6 +180,7 @@ export interface User {
     profileAccentColor?: string;
     serverSettings?: ServerSettings;
     totpEnabled?: boolean;
+    passwordless?: boolean;
     connections?: UserConnection[];
     activeMute?: {
         reason: string;

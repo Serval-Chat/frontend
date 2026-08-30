@@ -6,6 +6,7 @@ import { CalloutBoxDemo } from '@/ui/components/showoff/CalloutBoxDemo';
 import { ChatDemo } from '@/ui/components/showoff/ChatDemo';
 import { ColorPalette } from '@/ui/components/showoff/ColorPalette';
 import { ContextMenuDemo } from '@/ui/components/showoff/ContextMenuDemo';
+import { CopyDialogDemo } from '@/ui/components/showoff/CopyDialogDemo';
 import { DividerPresentation } from '@/ui/components/showoff/DividerPresentation';
 import { FlashButtons } from '@/ui/components/showoff/FlashButtons';
 import { InputsDemo } from '@/ui/components/showoff/InputsDemo';
@@ -149,6 +150,10 @@ const sections: TOCProps['sections'] = [
         title: 'Leptailurus Serval Color Palette',
     },
     {
+        id: SHOWOFF_SECTIONS.copyDialog,
+        title: 'Retro Copy Dialog',
+    },
+    {
         id: SHOWOFF_SECTIONS.calloutBox,
         title: 'Callout Boxes',
         children: [
@@ -196,6 +201,7 @@ export const Showoff = (): ReactNode => (
         <TogglesDemo />
         <LoadingSpinnerDemo />
         <ColorPalette />
+        <CopyDialogDemo />
         <CalloutBoxDemo />
     </>
 );

@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 
 import { Input } from '@/ui/components/common/Input';
+import { PasswordInput } from '@/ui/components/common/PasswordInput';
 import { Stack } from '@/ui/components/layout/Stack';
 
 import { DemoItem } from './DemoItem';
@@ -17,7 +18,7 @@ export const InputsDemo = (): ReactNode => (
                 <Input disabled placeholder="Can't type here..." />
             </DemoItem>
             <DemoItem id="input-password" title="Password Input">
-                <Input placeholder="Enter your secret..." type="password" />
+                <PasswordInput placeholder="Enter your secret..." />
             </DemoItem>
             <DemoItem id="input-number" title="Number Input">
                 <Input placeholder="Enter a number..." type="number" />

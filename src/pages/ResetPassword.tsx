@@ -7,8 +7,8 @@ import type { ApiError } from '@/api/types';
 import { FormContent } from '@/ui/components/auth/FormContent';
 import { Button } from '@/ui/components/common/Button';
 import { Heading } from '@/ui/components/common/Heading';
-import { Input } from '@/ui/components/common/Input';
 import { InputWrapper } from '@/ui/components/common/InputWrapper';
+import { PasswordInput } from '@/ui/components/common/PasswordInput';
 import { StatusMessage } from '@/ui/components/common/StatusMessage';
 import { Text } from '@/ui/components/common/Text';
 import { Box } from '@/ui/components/layout/Box';
@@ -114,14 +114,13 @@ export const ResetPassword = () => {
                     }}
                 >
                     <InputWrapper>
-                        <Input
+                        <PasswordInput
                             required
                             autoComplete="new-password"
                             className="bg-background/50"
                             minLength={8}
                             name="password"
                             placeholder="New Password"
-                            type="password"
                             value={newPassword}
                             onChange={(e): void => {
                                 setNewPassword(e.target.value);
@@ -129,14 +128,13 @@ export const ResetPassword = () => {
                         />
                     </InputWrapper>
                     <InputWrapper>
-                        <Input
+                        <PasswordInput
                             required
                             autoComplete="new-password"
                             className="bg-background/50"
                             minLength={8}
                             name="confirm-password"
                             placeholder="Confirm New Password"
-                            type="password"
                             value={confirmPassword}
                             onChange={(e): void => {
                                 setConfirmPassword(e.target.value);

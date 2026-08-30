@@ -7,6 +7,8 @@ import { Text } from '@/ui/components/common/Text';
 
 import { ChangeLoginModal } from './ChangeLoginModal';
 import { ChangePasswordModal } from './ChangePasswordModal';
+import { PasskeySettings } from './PasskeySettings';
+import { PasswordlessSettings } from './PasswordlessSettings';
 import { TwoFactorSettings } from './TwoFactorSettings';
 
 const maskLogin = (login: string): string => {
@@ -44,34 +46,40 @@ export const SecuritySettings = (): React.ReactNode => {
                             {maskLogin(user.login!)}
                         </Text>
                     </div>
-                    <Button
-                        size="sm"
-                        variant="normal"
-                        onClick={(): void => {
-                            setIsLoginModalOpen(true);
-                        }}
-                    >
-                        Change E-mail
-                    </Button>
+                    {user.passwordless ? null : (
+                        <Button
+                            size="sm"
+                            variant="normal"
+                            onClick={(): void => {
+                                setIsLoginModalOpen(true);
+                            }}
+                        >
+                            Change E-mail
+                        </Button>
+                    )}
                 </div>
-                <div className="flex items-center justify-between gap-4 rounded-lg border border-border-subtle bg-bg-subtle p-6">
-                    <div className="flex flex-col gap-1">
-                        <Text weight="bold">Password</Text>
-                        <Text size="xs" variant="muted">
-                            Please use a strong password (and I enforce it)
-                        </Text>
+                {user.passwordless ? null : (
+                    <div className="flex items-center justify-between gap-4 rounded-lg border border-border-subtle bg-bg-subtle p-6">
+                        <div className="flex flex-col gap-1">
+                            <Text weight="bold">Password</Text>
+                            <Text size="xs" variant="muted">
+                                Please use a strong password (and I enforce it)
+                            </Text>
+                        </div>
+                        <Button
+                            size="sm"
+                            variant="normal"
+                            onClick={(): void => {
+                                setIsPasswordModalOpen(true);
+                            }}
+                        >
+                            Change Password
+                        </Button>
                     </div>
-                    <Button
-                        size="sm"
-                        variant="normal"
-                        onClick={(): void => {
-                            setIsPasswordModalOpen(true);
-                        }}
-                    >
-                        Change Password
-                    </Button>
-                </div>
+                )}
                 <TwoFactorSettings user={user} />
+                <PasskeySettings />
+                <PasswordlessSettings user={user} />
             </div>
 
             <ChangeLoginModal

@@ -104,3 +104,29 @@ vi.mock('@marsidev/react-turnstile', () => ({
         return React.createElement('div', { id: 'cf-turnstile' });
     },
 }));
+
+class MockWebAuthnError extends Error {
+    public code: string;
+    public constructor({
+        message,
+        code,
+        cause,
+        name,
+    }: {
+        message: string;
+        code: string;
+        cause: Error;
+        name?: string;
+    }) {
+        super(message, { cause });
+        this.name = name ?? cause.name;
+        this.code = code;
+    }
+}
+
+vi.mock('@simplewebauthn/browser', () => ({
+    startRegistration: vi.fn(),
+    startAuthentication: vi.fn(),
+    browserSupportsWebAuthn: vi.fn(() => true),
+    WebAuthnError: MockWebAuthnError,
+}));

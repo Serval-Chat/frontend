@@ -4,7 +4,10 @@ import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { authApi } from '@/api/auth/auth.api';
+import { useLoginWithPasskey } from '@/hooks/useLoginWithPasskey';
+import { useLoginWithRecoveryKey } from '@/hooks/useLoginWithRecoveryKey';
 import * as authTokenModule from '@/utils/authToken';
+import { canUsePasskeys } from '@/utils/webauthn';
 
 import { Login } from './Login';
 
@@ -19,6 +22,18 @@ vi.mock('@/lib/pushClient', () => ({
     setupWebPush: vi.fn().mockResolvedValue(true),
     checkAndMigrateVapid: vi.fn().mockResolvedValue(true),
     listenForSwNavigation: vi.fn(),
+}));
+
+vi.mock('@/utils/webauthn', () => ({
+    canUsePasskeys: vi.fn(),
+}));
+
+vi.mock('@/hooks/useLoginWithPasskey', () => ({
+    useLoginWithPasskey: vi.fn(),
+}));
+
+vi.mock('@/hooks/useLoginWithRecoveryKey', () => ({
+    useLoginWithRecoveryKey: vi.fn(),
 }));
 
 const LocationDisplay = (): React.ReactElement => {
@@ -53,6 +68,28 @@ describe('Login Page Integration', (): void => {
         vi.clearAllMocks();
         localStorage.clear();
         sessionStorage.clear();
+        vi.mocked(canUsePasskeys).mockReturnValue(false);
+        vi.mocked(useLoginWithPasskey).mockReturnValue({
+            isLoading: false,
+            error: null,
+            banInfo: null,
+            resetBan: vi.fn(),
+            loginWithPasskey: vi.fn(),
+        });
+        vi.mocked(useLoginWithRecoveryKey).mockReturnValue({
+            login: '',
+            setLogin: vi.fn(),
+            recoveryKey: '',
+            setRecoveryKey: vi.fn(),
+            turnstileToken: '',
+            setTurnstileToken: vi.fn(),
+            isLoading: false,
+            error: null,
+            banInfo: null,
+            resetBan: vi.fn(),
+            isFormValid: false,
+            handleSubmit: vi.fn(),
+        });
     });
 
     it('requires both email and password to enable the submit button', async (): Promise<void> => {
@@ -175,5 +212,136 @@ describe('Login Page Integration', (): void => {
         fireEvent.click(toggleBtn);
 
         expect(passwordInput).toHaveAttribute('type', 'text');
+    });
+
+    it('shows the passkey button only when the platform supports it', (): void => {
+        vi.mocked(canUsePasskeys).mockReturnValue(true);
+        renderWithProviders();
+        expect(
+            screen.getByRole('button', { name: /Sign in with a passkey/i }),
+        ).toBeInTheDocument();
+    });
+
+    it('hides the passkey button when unsupported (e.g. inside Tauri)', (): void => {
+        vi.mocked(canUsePasskeys).mockReturnValue(false);
+        renderWithProviders();
+        expect(
+            screen.queryByRole('button', { name: /Sign in with a passkey/i }),
+        ).not.toBeInTheDocument();
+    });
+
+    it('clicking the passkey button delegates to loginWithPasskey', (): void => {
+        vi.mocked(canUsePasskeys).mockReturnValue(true);
+        const loginWithPasskey = vi.fn();
+        vi.mocked(useLoginWithPasskey).mockReturnValue({
+            isLoading: false,
+            error: null,
+            banInfo: null,
+            resetBan: vi.fn(),
+            loginWithPasskey,
+        });
+
+        renderWithProviders();
+        fireEvent.click(
+            screen.getByRole('button', { name: /Sign in with a passkey/i }),
+        );
+
+        expect(loginWithPasskey).toHaveBeenCalled();
+    });
+
+    it('renders BannedScreen when the passkey hook reports a ban', (): void => {
+        vi.mocked(canUsePasskeys).mockReturnValue(true);
+        vi.mocked(useLoginWithPasskey).mockReturnValue({
+            isLoading: false,
+            error: null,
+            banInfo: { reason: 'Spamming' },
+            resetBan: vi.fn(),
+            loginWithPasskey: vi.fn(),
+        });
+
+        renderWithProviders();
+
+        expect(screen.getByText('Spamming')).toBeInTheDocument();
+    });
+
+    it('shows the recovery-key link only when passkeys are supported', (): void => {
+        vi.mocked(canUsePasskeys).mockReturnValue(true);
+        renderWithProviders();
+        expect(screen.getByText(/Use a recovery key/i)).toBeInTheDocument();
+    });
+
+    it('hides the recovery-key link when passkeys are unsupported', (): void => {
+        vi.mocked(canUsePasskeys).mockReturnValue(false);
+        renderWithProviders();
+        expect(
+            screen.queryByText(/Use a recovery key/i),
+        ).not.toBeInTheDocument();
+    });
+
+    it('switches to the recovery-key form and back', (): void => {
+        vi.mocked(canUsePasskeys).mockReturnValue(true);
+        renderWithProviders();
+
+        fireEvent.click(screen.getByText(/Use a recovery key/i));
+
+        expect(
+            screen.getByPlaceholderText('Recovery key (XXXX-XXXX)'),
+        ).toBeInTheDocument();
+        expect(
+            screen.queryByPlaceholderText('Password'),
+        ).not.toBeInTheDocument();
+
+        fireEvent.click(screen.getByText(/Back to sign in/i));
+
+        expect(screen.getByPlaceholderText('Password')).toBeInTheDocument();
+    });
+
+    it('submitting the recovery-key form calls its handleSubmit', (): void => {
+        vi.mocked(canUsePasskeys).mockReturnValue(true);
+        const handleSubmit = vi.fn();
+        vi.mocked(useLoginWithRecoveryKey).mockReturnValue({
+            login: 'user@example.com',
+            setLogin: vi.fn(),
+            recoveryKey: 'ABCD-1234',
+            setRecoveryKey: vi.fn(),
+            turnstileToken: 'tok',
+            setTurnstileToken: vi.fn(),
+            isLoading: false,
+            error: null,
+            banInfo: null,
+            resetBan: vi.fn(),
+            isFormValid: true,
+            handleSubmit,
+        });
+
+        renderWithProviders();
+        fireEvent.click(screen.getByText(/Use a recovery key/i));
+        fireEvent.click(
+            screen.getByRole('button', { name: /Use recovery key/i }),
+        );
+
+        expect(handleSubmit).toHaveBeenCalled();
+    });
+
+    it('renders BannedScreen when the recovery-key hook reports a ban', (): void => {
+        vi.mocked(canUsePasskeys).mockReturnValue(true);
+        vi.mocked(useLoginWithRecoveryKey).mockReturnValue({
+            login: '',
+            setLogin: vi.fn(),
+            recoveryKey: '',
+            setRecoveryKey: vi.fn(),
+            turnstileToken: '',
+            setTurnstileToken: vi.fn(),
+            isLoading: false,
+            error: null,
+            banInfo: { reason: 'Recovery abuse' },
+            resetBan: vi.fn(),
+            isFormValid: false,
+            handleSubmit: vi.fn(),
+        });
+
+        renderWithProviders();
+
+        expect(screen.getByText('Recovery abuse')).toBeInTheDocument();
     });
 });

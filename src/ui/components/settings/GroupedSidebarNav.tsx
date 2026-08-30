@@ -12,6 +12,7 @@ export interface GroupedNavSection {
     label: string;
     icon: React.ComponentType<{ size?: number | string }>;
     category: string;
+    danger?: boolean;
 }
 
 interface GroupedSidebarNavProps {
@@ -87,7 +88,9 @@ export const GroupedSidebarNav = ({
                                             ${
                                                 isActive
                                                     ? 'border-transparent bg-[var(--sidebar-item-active-bg,var(--bg-subtle))] font-semibold text-[var(--sidebar-item-active-text,var(--foreground))]'
-                                                    : 'text-[var(--sidebar-item-text,var(--muted-foreground))] hover:bg-[var(--sidebar-item-hover-bg,var(--bg-subtle))] hover:text-[var(--sidebar-item-hover-text,var(--foreground))]'
+                                                    : section.danger
+                                                      ? 'text-danger hover:bg-danger-muted hover:text-danger'
+                                                      : 'text-[var(--sidebar-item-text,var(--muted-foreground))] hover:bg-[var(--sidebar-item-hover-bg,var(--bg-subtle))] hover:text-[var(--sidebar-item-hover-text,var(--foreground))]'
                                             }`}
                                     justify="start"
                                     key={section.id}

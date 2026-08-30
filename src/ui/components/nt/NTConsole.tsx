@@ -13,8 +13,10 @@ import {
     registry,
 } from '@/console';
 import { parseAnsi } from '@/console/utils/ansiParser';
+import { useCopyDialog } from '@/hooks/nt/useCopyDialog';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { toggleConsole } from '@/store/slices/debugOptionsSlice';
+import { CopyDialog } from '@/ui/components/nt/CopyDialog';
 import { NTScrollArea } from '@/ui/components/nt/NTScrollArea';
 import { Window } from '@/ui/components/nt/Window';
 import { mergeReducer } from '@/utils/mergeReducer';
@@ -48,15 +50,11 @@ const useNtTerminalAutosize = (
 
             const columns = Math.max(
                 1,
-                Math.floor(
-                    (elementRect.width - SIZE_GUARD_PX) / charWidth,
-                ),
+                Math.floor((elementRect.width - SIZE_GUARD_PX) / charWidth),
             );
             const rows = Math.max(
                 1,
-                Math.floor(
-                    (elementRect.height - SIZE_GUARD_PX) / lineHeight,
-                ),
+                Math.floor((elementRect.height - SIZE_GUARD_PX) / lineHeight),
             );
 
             const previous = terminal.getSize();
@@ -103,6 +101,7 @@ export const NTConsole = () => {
             }),
     );
     const [filesystem] = useState((): DosFileSystem => new DosFileSystem());
+    const { job: copyJob, runCopy, cancel: cancelCopy } = useCopyDialog();
 
     interface ConsoleState {
         history: ReturnType<Terminal['snapshot']>;
@@ -234,6 +233,7 @@ export const NTConsole = () => {
             );
 
             const result = await registry.execute(input, {
+                copyFile: runCopy,
                 dispatch,
                 endProgram: (): void => {
                     activeProgramRef.current = null;
@@ -314,9 +314,7 @@ export const NTConsole = () => {
                     setCurrentInput('');
                 } else {
                     historyIndexRef.current = newIndex;
-                    setCurrentInput(
-                        commandHistoryRef.current[newIndex] ?? '',
-                    );
+                    setCurrentInput(commandHistoryRef.current[newIndex] ?? '');
                 }
 
                 break;
@@ -340,95 +338,98 @@ export const NTConsole = () => {
             : history;
 
     return (
-        <Window
-            defaultHeight={350}
-            defaultWidth={600}
-            defaultX={120}
-            defaultY={120}
-            icon="/icons/retro/chip.png"
-            menus={[
-                {
-                    label: '&File',
-                    items: [{ label: 'E&xit', onSelect: handleClose }],
-                },
-            ]}
-            title="Command Prompt"
-            onClose={handleClose}
-            onResize={recalculateTerminalSize}
-        >
-            {/* false positive: can't be a real <button> - it wraps the terminal's
-            actual <input> below, and interactive content (an input) isn't allowed
-            inside a native <button> per the HTML spec. */}
-            {/* react-doctor-disable-next-line react-doctor/prefer-tag-over-role */}
-            <div
-                aria-label="Terminal console"
-                className="flex min-h-0 flex-1 flex-col bg-black font-mono text-[11px] leading-[13px] text-[#c0c0c0]"
-                ref={consoleRef}
-                role="button"
-                tabIndex={0}
-                onClick={handleConsoleClick}
-                onKeyDown={(e): void => {
-                    if (e.key === 'Enter' || e.key === ' ')
-                        handleConsoleClick();
-                }}
+        <>
+            <Window
+                defaultHeight={350}
+                defaultWidth={600}
+                defaultX={120}
+                defaultY={120}
+                icon="/icons/retro/chip.png"
+                menus={[
+                    {
+                        label: '&File',
+                        items: [{ label: 'E&xit', onSelect: handleClose }],
+                    },
+                ]}
+                title="Command Prompt"
+                onClose={handleClose}
+                onResize={recalculateTerminalSize}
             >
-                <span
-                    aria-hidden="true"
-                    className="pointer-events-none invisible absolute whitespace-pre"
-                    ref={measureRef}
+                {/* react-doctor-disable-next-line react-doctor/prefer-tag-over-role */}
+                <div
+                    aria-label="Terminal console"
+                    className="flex min-h-0 flex-1 flex-col bg-black font-mono text-[11px] leading-[13px] text-[#c0c0c0]"
+                    ref={consoleRef}
+                    role="button"
+                    tabIndex={0}
+                    onClick={handleConsoleClick}
+                    onKeyDown={(e): void => {
+                        if (e.key === 'Enter' || e.key === ' ')
+                            handleConsoleClick();
+                    }}
                 >
-                    {'M'.repeat(MEASURE_COLUMNS)}
-                </span>
-                <NTScrollArea className="min-h-0 w-full flex-1">
-                    <style>{`
-                        @keyframes nt-blink {
-                            0%, 100% { opacity: 1; }
-                            50% { opacity: 0; }
-                        }
-                        .nt-cursor {
-                            display: inline-block;
-                            width: 6px;
-                            height: 11px;
-                            background-color: #c0c0c0;
-                            animation: nt-blink 1s step-end infinite;
-                            vertical-align: middle;
-                            margin-left: 2px;
-                        }
-                    `}</style>
+                    <span
+                        aria-hidden="true"
+                        className="pointer-events-none invisible absolute whitespace-pre"
+                        ref={measureRef}
+                    >
+                        {'M'.repeat(MEASURE_COLUMNS)}
+                    </span>
+                    <NTScrollArea className="min-h-0 w-full flex-1">
+                        <style>{`
+                            @keyframes nt-blink {
+                                0%, 100% { opacity: 1; }
+                                50% { opacity: 0; }
+                            }
+                            .nt-cursor {
+                                display: inline-block;
+                                width: 6px;
+                                height: 11px;
+                                background-color: #c0c0c0;
+                                animation: nt-blink 1s step-end infinite;
+                                vertical-align: middle;
+                                margin-left: 2px;
+                            }
+                        `}</style>
 
-                    {displayHistory.map((line) => (
-                        <div
-                            className="min-h-[13px] whitespace-pre-wrap select-text"
-                            key={line.id}
-                        >
-                            {parseAnsi(line.text)}
-                        </div>
-                    ))}
+                        {displayHistory.map((line) => (
+                            <div
+                                className="min-h-[13px] whitespace-pre-wrap select-text"
+                                key={line.id}
+                            >
+                                {parseAnsi(line.text)}
+                            </div>
+                        ))}
 
-                    {showPrompt ? (
-                        <div className="flex flex-wrap items-center select-none">
-                            <span>{cwd}&gt;</span>
-                            <span className="whitespace-pre select-text">
-                                {currentInput}
-                            </span>
-                            <span className="nt-cursor" />
-                        </div>
-                    ) : null}
+                        {showPrompt ? (
+                            <div className="flex flex-wrap items-center select-none">
+                                <span>{cwd}&gt;</span>
+                                <span className="whitespace-pre select-text">
+                                    {currentInput}
+                                </span>
+                                <span className="nt-cursor" />
+                            </div>
+                        ) : null}
 
-                    <input
-                        aria-label="Terminal input"
-                        className="pointer-events-none absolute h-0 w-0 opacity-0"
-                        disabled={isCommandRunning}
-                        ref={inputRef}
-                        type="text"
-                        value={currentInput}
-                        onChange={(e): void => {
-                            setCurrentInput(e.target.value);
-                        }}
-                        onKeyDown={handleKeyDown}
-                    />
-                </NTScrollArea>
-            </div>
-        </Window>
+                        <input
+                            aria-label="Terminal input"
+                            className="pointer-events-none absolute h-0 w-0 opacity-0"
+                            disabled={isCommandRunning}
+                            ref={inputRef}
+                            type="text"
+                            value={currentInput}
+                            onChange={(e): void => {
+                                setCurrentInput(e.target.value);
+                            }}
+                            onKeyDown={handleKeyDown}
+                        />
+                    </NTScrollArea>
+                </div>
+            </Window>
+
+            {copyJob ? (
+                <CopyDialog job={copyJob} onCancel={cancelCopy} />
+            ) : null}
+        </>
     );
 };

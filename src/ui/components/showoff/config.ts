@@ -19,6 +19,7 @@ export const SHOWOFF_SECTIONS = {
     pushPrompt: 'push-prompt',
     toast: 'toast-notifications',
     calloutBox: 'callout-box',
+    copyDialog: 'copy-dialog',
 } as const;
 
 export const BUTTON_VARIANTS = [

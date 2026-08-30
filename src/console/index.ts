@@ -16,6 +16,7 @@ import { progressCommand } from '@/console/commands/progress';
 import { runCommand } from '@/console/commands/run';
 import { snakeCommand } from '@/console/commands/snake';
 import { timeCommand } from '@/console/commands/time';
+import { uploadCommand } from '@/console/commands/upload';
 import { userctlCommand } from '@/console/commands/userctl';
 import { verCommand } from '@/console/commands/ver';
 
@@ -28,6 +29,8 @@ export type {
     CommandContext,
     CommandResult,
     ConCommandReactor,
+    CopyFileOptions,
+    CopyFileResult,
 } from '@/console/ConCommandRegistry';
 export type { TerminalLine, TerminalSize } from '@/console/Terminal';
 export type { DosAttribute, DosEntry } from '@/console/DosFileSystem';
@@ -47,6 +50,7 @@ for (const command of filesystemCommands) {
     registry.register(command);
 }
 registry.register(editCommand);
+registry.register(uploadCommand);
 registry.register(userctlCommand);
 registry.register(progressCommand);
 registry.register(snakeCommand);

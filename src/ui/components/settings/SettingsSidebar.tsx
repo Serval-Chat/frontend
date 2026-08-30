@@ -4,9 +4,10 @@ import {
     Bell,
     Eye,
     Globe,
-    Keyboard,
     KeyRound,
+    Keyboard,
     Lock,
+    LogOut,
     Monitor,
     Palette,
     Shield,
@@ -20,7 +21,8 @@ import { useSelfStatus } from '@/hooks/useSelfStatus';
 import { StyledUserName } from '@/ui/components/common/StyledUserName';
 import { UserProfilePicture } from '@/ui/components/common/UserProfilePicture';
 
-import { GroupedSidebarNav, type GroupedNavSection } from './GroupedSidebarNav';
+import { type GroupedNavSection, GroupedSidebarNav } from './GroupedSidebarNav';
+import { LogoutConfirmModal } from './LogoutConfirmModal';
 import { ProfileSettingsModal } from './ProfileSettingsModal';
 
 interface SettingsSidebarProps {
@@ -28,6 +30,8 @@ interface SettingsSidebarProps {
     onClose: () => void;
     setActiveSection: (section: string) => void;
 }
+
+const SIGN_OUT_SECTION_ID = 'signout';
 
 const SETTINGS_SECTIONS: GroupedNavSection[] = [
     { id: 'account', label: 'My Account', icon: User, category: 'Account' },
@@ -44,7 +48,12 @@ const SETTINGS_SECTIONS: GroupedNavSection[] = [
         category: 'Account',
     },
     { id: 'sessions', label: 'Sessions', icon: Monitor, category: 'Account' },
-    { id: 'standing', label: 'Standing', icon: ShieldAlert, category: 'Account' },
+    {
+        id: 'standing',
+        label: 'Standing',
+        icon: ShieldAlert,
+        category: 'Account',
+    },
     {
         id: 'privacy',
         label: 'Privacy',
@@ -88,6 +97,13 @@ const SETTINGS_SECTIONS: GroupedNavSection[] = [
         icon: ShieldAlert,
         category: 'Advanced',
     },
+    {
+        id: SIGN_OUT_SECTION_ID,
+        label: 'Sign out',
+        icon: LogOut,
+        category: 'Sign out',
+        danger: true,
+    },
 ];
 
 export const SettingsSidebar = ({
@@ -98,61 +114,81 @@ export const SettingsSidebar = ({
     const { data: me } = useMe();
     const { status: selfStatus } = useSelfStatus();
     const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+    const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+
+    const handleSectionSelect = (sectionId: string): void => {
+        if (sectionId === SIGN_OUT_SECTION_ID) {
+            setIsLogoutModalOpen(true);
+            return;
+        }
+        setActiveSection(sectionId);
+    };
 
     return (
-        <GroupedSidebarNav
-            activeSection={activeSection}
-            footer={
-                me ? (
-                    <>
-                        <button
-                            className="flex shrink-0 items-center gap-2 border-t border-[var(--sidebar-border,var(--border-subtle))] p-3 text-left transition-colors hover:bg-[var(--sidebar-item-hover-bg,var(--bg-subtle))]"
-                            type="button"
-                            onClick={(): void => {
-                                setIsProfileModalOpen(true);
-                            }}
-                        >
-                            <UserProfilePicture
-                                decorationId={me.decorationId}
-                                size="sm"
-                                src={me.profilePicture}
-                                status={selfStatus}
-                                username={me.username}
-                            />
-                            <div className="min-w-0 flex-1">
-                                <StyledUserName
-                                    className="text-sm leading-tight font-semibold !text-[var(--sidebar-item-active-text,var(--foreground))]"
-                                    disableColors={
-                                        me.settings?.disableCustomUsernameColors
-                                    }
-                                    disableCustomFonts={
-                                        me.settings?.disableCustomUsernameFonts
-                                    }
-                                    disableGlow={
-                                        me.settings?.disableCustomUsernameGlow
-                                    }
-                                    user={me}
-                                >
-                                    {me.displayName ?? me.username}
-                                </StyledUserName>
-                                <div className="truncate text-xs text-[var(--sidebar-item-text,var(--muted-foreground))]">
-                                    @{me.username}
+        <>
+            <GroupedSidebarNav
+                activeSection={activeSection}
+                footer={
+                    me ? (
+                        <>
+                            <button
+                                className="flex shrink-0 items-center gap-2 border-t border-[var(--sidebar-border,var(--border-subtle))] p-3 text-left transition-colors hover:bg-[var(--sidebar-item-hover-bg,var(--bg-subtle))]"
+                                type="button"
+                                onClick={(): void => {
+                                    setIsProfileModalOpen(true);
+                                }}
+                            >
+                                <UserProfilePicture
+                                    decorationId={me.decorationId}
+                                    size="sm"
+                                    src={me.profilePicture}
+                                    status={selfStatus}
+                                    username={me.username}
+                                />
+                                <div className="min-w-0 flex-1">
+                                    <StyledUserName
+                                        className="text-sm leading-tight font-semibold !text-[var(--sidebar-item-active-text,var(--foreground))]"
+                                        disableColors={
+                                            me.settings
+                                                ?.disableCustomUsernameColors
+                                        }
+                                        disableCustomFonts={
+                                            me.settings
+                                                ?.disableCustomUsernameFonts
+                                        }
+                                        disableGlow={
+                                            me.settings
+                                                ?.disableCustomUsernameGlow
+                                        }
+                                        user={me}
+                                    >
+                                        {me.displayName ?? me.username}
+                                    </StyledUserName>
+                                    <div className="truncate text-xs text-[var(--sidebar-item-text,var(--muted-foreground))]">
+                                        @{me.username}
+                                    </div>
                                 </div>
-                            </div>
-                        </button>
-                        <ProfileSettingsModal
-                            isOpen={isProfileModalOpen}
-                            onClose={(): void => {
-                                setIsProfileModalOpen(false);
-                            }}
-                        />
-                    </>
-                ) : null
-            }
-            sections={SETTINGS_SECTIONS}
-            setActiveSection={setActiveSection}
-            title="Settings"
-            onClose={onClose}
-        />
+                            </button>
+                            <ProfileSettingsModal
+                                isOpen={isProfileModalOpen}
+                                onClose={(): void => {
+                                    setIsProfileModalOpen(false);
+                                }}
+                            />
+                        </>
+                    ) : null
+                }
+                sections={SETTINGS_SECTIONS}
+                setActiveSection={handleSectionSelect}
+                title="Settings"
+                onClose={onClose}
+            />
+            <LogoutConfirmModal
+                isOpen={isLogoutModalOpen}
+                onClose={(): void => {
+                    setIsLogoutModalOpen(false);
+                }}
+            />
+        </>
     );
 };

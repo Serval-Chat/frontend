@@ -6,13 +6,8 @@ import type { AxiosError } from 'axios';
 import { useNavigate } from 'react-router-dom';
 
 import { authApi } from '@/api/auth/auth.api';
-import {
-    checkAndMigrateVapid,
-    listenForSwNavigation,
-    setupWebPush,
-} from '@/lib/pushClient';
+import { completeLogin } from '@/hooks/completeLogin';
 import type { StatusState } from '@/ui/types';
-import { setAuthToken } from '@/utils/authToken';
 
 interface BanInfo {
     reason?: string;
@@ -104,7 +99,11 @@ export const useLoginForm = (): LoginFormResult => {
                         : { code: twoFactorCode }),
                 });
             } else {
-                data = await authApi.login({ login: loginInput, password, cfTurnstileResponse: turnstileToken });
+                data = await authApi.login({
+                    login: loginInput,
+                    password,
+                    cfTurnstileResponse: turnstileToken,
+                });
                 if (data.two_factor_required && data.temp_token) {
                     setRequiresTwoFactor(true);
                     setTempToken(data.temp_token);
@@ -126,17 +125,8 @@ export const useLoginForm = (): LoginFormResult => {
                 setIsLoading(false);
                 return;
             }
-            await setAuthToken(data.token, rememberMe);
-            await queryClient.invalidateQueries({ queryKey: ['me'] });
             resetTwoFactorState();
-
-            await setupWebPush();
-            await checkAndMigrateVapid();
-            listenForSwNavigation((url): void => {
-                void navigate(url);
-            });
-
-            void navigate('/chat/@me');
+            await completeLogin(data.token, rememberMe, navigate, queryClient);
         } catch (error: unknown) {
             let errorMessage = 'Login failed';
             if (isAxiosError(error)) {

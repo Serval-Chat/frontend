@@ -1,6 +1,11 @@
 import { cn } from '@/utils/cn';
 
-export type PillVariant = 'success' | 'caution' | 'danger' | 'primary' | 'neutral';
+export type PillVariant =
+    | 'success'
+    | 'caution'
+    | 'danger'
+    | 'primary'
+    | 'neutral';
 
 interface PillProps {
     children: React.ReactNode;
@@ -16,10 +21,14 @@ const variantStyles: Record<PillVariant, string> = {
     neutral: 'border-border-subtle bg-bg-subtle text-muted-foreground',
 };
 
-export const Pill = ({ children, variant = 'neutral', className }: PillProps) => (
+export const Pill = ({
+    children,
+    variant = 'neutral',
+    className,
+}: PillProps) => (
     <span
         className={cn(
-            'inline-flex shrink-0 items-center rounded-md border px-2 py-0.5 text-[10px] font-semibold uppercase',
+            'inline-flex shrink-0 items-center rounded-sm border px-2 py-1 text-[10px] leading-none font-semibold uppercase',
             variantStyles[variant],
             className,
         )}
