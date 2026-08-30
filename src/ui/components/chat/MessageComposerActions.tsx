@@ -50,6 +50,12 @@ export const MessageComposerActions = ({
 }: MessageComposerActionsProps): React.ReactNode => {
     const hideUtilityActions = isMobile && (hasText || hasFiles);
 
+    const stopTogglePropagation = (
+        e: React.MouseEvent | React.TouchEvent,
+    ): void => {
+        e.stopPropagation();
+    };
+
     return (
         <>
             <Button
@@ -65,6 +71,8 @@ export const MessageComposerActions = ({
                         editor.blur();
                     }
                 }}
+                onMouseDown={stopTogglePropagation}
+                onTouchStart={stopTogglePropagation}
             >
                 <Smile size={20} />
             </Button>
@@ -78,6 +86,8 @@ export const MessageComposerActions = ({
                     size="sm"
                     variant="ghost"
                     onClick={onToggleSticker}
+                    onMouseDown={stopTogglePropagation}
+                    onTouchStart={stopTogglePropagation}
                 >
                     <Sticker size={20} />
                 </Button>
@@ -93,6 +103,8 @@ export const MessageComposerActions = ({
                         size="sm"
                         variant="ghost"
                         onClick={onToggleGif}
+                        onMouseDown={stopTogglePropagation}
+                        onTouchStart={stopTogglePropagation}
                     >
                         <FileImage size={20} />
                     </Button>

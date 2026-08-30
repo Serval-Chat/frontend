@@ -161,4 +161,35 @@ describe('MessageComposerActions', (): void => {
         clickEmojiButton(container);
         expect(blur).not.toHaveBeenCalled();
     });
+
+    describe('toggle buttons do not leak mousedown to the document', (): void => {
+        const getButton = (
+            container: HTMLElement,
+            iconClass: string,
+        ): HTMLElement => {
+            const button = container
+                .querySelector(`.${iconClass}`)
+                ?.closest('button');
+            if (!button) throw new Error(`button for ${iconClass} not found`);
+            return button;
+        };
+
+        it.each([
+            ['emoji', 'lucide-smile'],
+            ['sticker', 'lucide-sticker'],
+            ['gif', 'lucide-file-image'],
+        ])(
+            'stops the %s button mousedown from reaching document listeners',
+            (_name, iconClass): void => {
+                const { container } = renderActions();
+                const documentMouseDown = vi.fn();
+                document.addEventListener('mousedown', documentMouseDown);
+
+                fireEvent.mouseDown(getButton(container, iconClass));
+
+                document.removeEventListener('mousedown', documentMouseDown);
+                expect(documentMouseDown).not.toHaveBeenCalled();
+            },
+        );
+    });
 });
