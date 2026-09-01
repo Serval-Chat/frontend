@@ -9,7 +9,12 @@ import {
 
 import { interactionsApi } from '@/api/interactions/interactions.api';
 import { useMe } from '@/api/users/users.queries';
-import type { ButtonComponent, Embed, MessagePayload } from '@/types/embed';
+import type {
+    ButtonComponent,
+    Embed,
+    EmbedMedia,
+    MessagePayload,
+} from '@/types/embed';
 import { ImageLightbox } from '@/ui/components/common/ImageLightbox';
 import { Link } from '@/ui/components/common/Link';
 import { ParsedText } from '@/ui/components/common/ParsedText';
@@ -104,6 +109,22 @@ const ParsedEmbedText = memo(
     },
 );
 ParsedEmbedText.displayName = 'ParsedEmbedText';
+
+const FALLBACK_EMBED_IMAGE_WIDTH = 400;
+const FALLBACK_EMBED_IMAGE_HEIGHT = 225;
+
+const getEmbedImageStyle = (
+    media: EmbedMedia | undefined,
+    maxWidth: number,
+): CSSProperties => {
+    const width = media?.width ?? FALLBACK_EMBED_IMAGE_WIDTH;
+    const height = media?.height ?? FALLBACK_EMBED_IMAGE_HEIGHT;
+    return {
+        aspectRatio: `${width} / ${height}`,
+        width: `min(${width}px, 100%)`,
+        maxWidth: `${Math.min(width, maxWidth)}px`,
+    };
+};
 
 interface EmbedImageProps {
     src: string | undefined;
@@ -373,11 +394,12 @@ const EmbedCard = memo(
                         playsInline
                         aria-label={embed.title ?? 'Embedded video'}
                         className={cn(
-                            'max-h-96 max-w-[520px] rounded-md',
+                            'max-h-96 max-w-[520px] rounded-md object-contain',
                             isDeleted && 'opacity-50 grayscale',
                         )}
                         preload="metadata"
                         src={embed.video.url}
+                        style={getEmbedImageStyle(embed.video, 520)}
                         onLoadedData={onResize}
                         onLoadedMetadata={onResize}
                     >
@@ -394,10 +416,11 @@ const EmbedCard = memo(
                         alt={embed.title || 'Image'}
                         className="block"
                         imageClassName={cn(
-                            'max-h-96 max-w-[520px] rounded-md',
+                            'max-h-96 max-w-[520px] rounded-md object-contain',
                             isDeleted && 'opacity-50 grayscale',
                         )}
                         src={imageUrl}
+                        style={getEmbedImageStyle(embed.image, 520)}
                         onResize={onResize}
                     />
                 </div>
@@ -674,10 +697,11 @@ const EmbedCard = memo(
                             alt={embed.title || 'Image'}
                             className="mt-3 block"
                             imageClassName={cn(
-                                'max-h-72 max-w-[488px] rounded',
+                                'max-h-72 max-w-[488px] rounded object-contain',
                                 isDeleted && 'opacity-50 grayscale',
                             )}
                             src={imageUrl}
+                            style={getEmbedImageStyle(embed.image, 488)}
                             onResize={onResize}
                         />
                     ) : null}

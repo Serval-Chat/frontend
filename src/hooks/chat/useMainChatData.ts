@@ -99,6 +99,8 @@ export const useMainChatData = ({
         fetchNextPage,
         hasNextPage,
         isFetchingNextPage,
+        fetchNewerMessages,
+        isFetchingNewerMessages,
         isViewingOlderMessages,
     } = usePaginatedMessages(
         selectedFriendId,
@@ -118,7 +120,13 @@ export const useMainChatData = ({
         memberMaps.iconRoleMap,
     );
 
-    const { sendMessage, sendTyping, typingUsers, retryMessage, discardMessage } = useChatWS(
+    const {
+        sendMessage,
+        sendTyping,
+        typingUsers,
+        retryMessage,
+        discardMessage,
+    } = useChatWS(
         selectedFriendId ?? undefined,
         selectedServerId ?? undefined,
         selectedChannelId ?? undefined,
@@ -148,6 +156,8 @@ export const useMainChatData = ({
         fetchNextPage,
         hasNextPage,
         isFetchingNextPage,
+        fetchNewerMessages,
+        isFetchingNewerMessages,
         isViewingOlderMessages,
         sendMessage,
         sendTyping,

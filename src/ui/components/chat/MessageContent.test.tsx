@@ -4,6 +4,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { interactionsApi } from '@/api/interactions/interactions.api';
+import type * as ServersQueries from '@/api/servers/servers.queries';
 import { ToastProvider } from '@/ui/components/common/Toast';
 
 import { MessageContent } from './MessageContent';
@@ -25,6 +26,37 @@ vi.mock('@/api/interactions/interactions.api', () => ({
         createComponentInteraction: vi.fn(),
     },
 }));
+
+vi.mock('@/api/servers/servers.queries', async (importOriginal) => {
+    const actual = await importOriginal<typeof ServersQueries>();
+    return {
+        ...actual,
+        useSticker: vi.fn(() => ({
+            data: {
+                id: 'sticker-1',
+                name: 'Cool Sticker',
+                imageUrl: '/uploads/stickers/sticker-1.webp',
+                serverId: 'srv-1',
+                createdBy: 'user-1',
+            },
+            isLoading: false,
+        })),
+    };
+});
+
+describe('MessageContent stickers', (): void => {
+    it('reserves a square box for the sticker image so it does not pop in during load', (): void => {
+        render(
+            <TestWrapper>
+                <MessageContent stickerId="sticker-1" text="" />
+            </TestWrapper>,
+        );
+
+        const img = screen.getByAltText('Cool Sticker');
+        expect(img).toHaveClass('aspect-square');
+        expect(img).toHaveClass('w-full');
+    });
+});
 
 describe('MessageContent embeds', (): void => {
     beforeEach((): void => {

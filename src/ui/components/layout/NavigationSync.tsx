@@ -20,9 +20,8 @@ export const NavigationSync = (): null => {
     const location = useLocation();
     const params = useParams();
 
-    const { selectedServerId, selectedChannelId } = useAppSelector(
-        (state) => state.nav,
-    );
+    const { selectedServerId, selectedChannelId, selectedFriendId } =
+        useAppSelector((state) => state.nav);
 
     useEffect((): void => {
         const path = location.pathname;
@@ -115,13 +114,17 @@ export const NavigationSync = (): null => {
                     return;
                 }
 
+                dispatch(setSelectedFriendId(params.userId));
                 dispatch(setTargetMessageId(params.messageId));
                 void navigate(`/chat/@user/${params.userId}`, {
                     replace: true,
                 });
             } else {
+                const contextChanged = selectedFriendId !== params.userId;
                 dispatch(setSelectedFriendId(params.userId));
-                dispatch(setTargetMessageId(null));
+                if (contextChanged) {
+                    dispatch(setTargetMessageId(null));
+                }
             }
         }
         // @setting routes are handled by the SettingsModal via PrimaryNavBar
@@ -135,6 +138,7 @@ export const NavigationSync = (): null => {
         params.messageId,
         selectedChannelId,
         selectedServerId,
+        selectedFriendId,
     ]);
 
     return null;

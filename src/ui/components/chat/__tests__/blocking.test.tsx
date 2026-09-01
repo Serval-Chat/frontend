@@ -1,3 +1,4 @@
+
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
@@ -50,22 +51,6 @@ vi.mock('@/ui/components/common/ParsedEmoji', () => ({
     ParsedEmoji: ({ emojiId }: { emojiId: string }) => (
         <img alt="custom emoji" data-emoji-id={emojiId} />
     ),
-}));
-
-vi.mock('@tanstack/react-virtual', () => ({
-    useVirtualizer: vi.fn().mockImplementation((options: any) => ({
-        getVirtualItems: (): { index: number; start: number; key: number }[] =>
-            Array.from({ length: options.count }).map(
-                (_, i): { index: number; start: number; key: number } => ({
-                    index: i,
-                    start: 0,
-                    key: i,
-                }),
-            ),
-        getTotalSize: (): number => options.count * 100,
-        scrollToIndex: vi.fn(),
-        measureElement: vi.fn(),
-    })),
 }));
 
 const queryClient = new QueryClient({

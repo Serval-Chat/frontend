@@ -25,7 +25,6 @@ import {
     MessagesList,
     type MessagesListHandle,
 } from '@/ui/components/chat/MessagesList';
-import { MessagesListNative } from '@/ui/components/chat/MessagesListNative';
 import { TypingIndicator } from '@/ui/components/chat/TypingIndicator';
 import { Button } from '@/ui/components/common/Button';
 import { Text } from '@/ui/components/common/Text';
@@ -55,23 +54,6 @@ interface MainChatUiState {
 
 type ChatData = ReturnType<typeof useMainChatData>;
 
-// Prototype toggle: set `localStorage.nativeMessages = '1'` and reload to
-// swap in the non-virtualized MessagesListNative. Remove once a direction
-// is chosen.
-const useNativeMessages = ((): boolean => {
-    try {
-        return (
-            typeof localStorage !== 'undefined' &&
-            localStorage.getItem('nativeMessages') === '1'
-        );
-    } catch {
-        return false;
-    }
-})();
-const MessagesListComponent = useNativeMessages
-    ? MessagesListNative
-    : MessagesList;
-
 const dragHasFiles = (dataTransfer: DataTransfer): boolean =>
     Array.from(dataTransfer.types).includes('Files');
 
@@ -99,6 +81,7 @@ interface ChatMainColumnProps {
     memberMaps: ChatData['memberMaps'];
     hasNextPage: boolean;
     isFetchingNextPage: boolean;
+    isFetchingNewerMessages: boolean;
     isLoading: boolean;
     hasPermission: ChatData['hasPermission'];
     isOwner: boolean;
@@ -121,6 +104,7 @@ interface ChatMainColumnProps {
     onAtBottomChange: (isAtBottom: boolean) => void;
     onJumpToLatest: () => void;
     onLoadMore: () => void;
+    onLoadNewer: () => void;
     onReplyClick: (messageId: string) => void;
     onReplyToMessage: (msg: ProcessedChatMessage) => void;
     onCancelReply: () => void;
@@ -143,6 +127,7 @@ const ChatMainColumn = ({
     memberMaps,
     hasNextPage,
     isFetchingNextPage,
+    isFetchingNewerMessages,
     isLoading,
     hasPermission,
     isOwner,
@@ -163,6 +148,7 @@ const ChatMainColumn = ({
     onAtBottomChange,
     onJumpToLatest,
     onLoadMore,
+    onLoadNewer,
     onReplyClick,
     onReplyToMessage,
     onCancelReply,
@@ -206,7 +192,7 @@ const ChatMainColumn = ({
                     className="relative flex min-h-0 flex-1 flex-col"
                     ref={chatContainerRef}
                 >
-                    <MessagesListComponent
+                    <MessagesList
                         activeHighlightId={targetMessageId}
                         disableColors={usernameStyle.disableColors}
                         disableCustomFonts={usernameStyle.disableCustomFonts}
@@ -222,6 +208,7 @@ const ChatMainColumn = ({
                         hasPermission={hasPermission}
                         isLoading={isLoading}
                         isLoadingMore={isFetchingNextPage}
+                        isLoadingMoreNewer={isFetchingNewerMessages}
                         isOwner={isOwner}
                         key={selectedChannelId || selectedFriendId}
                         me={me}
@@ -234,7 +221,7 @@ const ChatMainColumn = ({
                         userRolesMap={memberMaps.userRolesMap}
                         onAtBottomChange={onAtBottomChange}
                         onLoadMore={onLoadMore}
-                        onLoadMoreNewer={onJumpToLatest}
+                        onLoadMoreNewer={onLoadNewer}
                         onReplyClick={onReplyClick}
                         onReplyToMessage={onReplyToMessage}
                     />
@@ -249,10 +236,13 @@ const ChatMainColumn = ({
                                 right: '1rem',
                                 bottom: '1rem',
                                 borderRadius: '50%',
+                                zIndex: 'var(--z-index-content)',
                             }}
                             variant="normal"
                             onClick={(): void =>
-                                messagesListRef.current?.scrollToBottom()
+                                targetMessageId
+                                    ? onJumpToLatest()
+                                    : messagesListRef.current?.scrollToBottom()
                             }
                         >
                             {null}
@@ -451,6 +441,8 @@ export const MainChat = ({
         fetchNextPage,
         hasNextPage,
         isFetchingNextPage,
+        fetchNewerMessages,
+        isFetchingNewerMessages,
         isViewingOlderMessages,
         retryMessage,
         discardMessage,
@@ -512,6 +504,14 @@ export const MainChat = ({
             messages,
         });
 
+    const handleJumpToLatestSmooth = useCallback((): void => {
+        if (messagesListRef.current) {
+            messagesListRef.current.scrollToBottom(handleJumpToLatest);
+        } else {
+            handleJumpToLatest();
+        }
+    }, [handleJumpToLatest]);
+
     const handleDragOver = (e: React.DragEvent): void => {
         e.preventDefault();
         e.stopPropagation();
@@ -559,6 +559,10 @@ export const MainChat = ({
     const handleLoadMore = useCallback((): void => {
         void fetchNextPage();
     }, [fetchNextPage]);
+
+    const handleLoadNewer = useCallback((): void => {
+        void fetchNewerMessages();
+    }, [fetchNewerMessages]);
 
     if (!selectedFriendId && !selectedChannelId) {
         return (
@@ -631,6 +635,7 @@ export const MainChat = ({
                     hasPermission={hasPermission}
                     isAtBottom={isAtBottom}
                     isDragging={isDragging}
+                    isFetchingNewerMessages={isFetchingNewerMessages}
                     isFetchingNextPage={isFetchingNextPage}
                     isLoading={isLoading}
                     isOwner={isOwner}
@@ -659,8 +664,9 @@ export const MainChat = ({
                     onCancelReply={(): void => {
                         patchUi({ replyingTo: null });
                     }}
-                    onJumpToLatest={handleJumpToLatest}
+                    onJumpToLatest={handleJumpToLatestSmooth}
                     onLoadMore={handleLoadMore}
+                    onLoadNewer={handleLoadNewer}
                     onReplyClick={handleReplyClick}
                     onReplyToMessage={handleReplyToMessage}
                 />

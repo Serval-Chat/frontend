@@ -1,7 +1,6 @@
-import React from 'react';
-
 import type {
     FetchNextPageOptions,
+    FetchPreviousPageOptions,
     InfiniteData,
     InfiniteQueryObserverResult,
 } from '@tanstack/react-query';
@@ -17,6 +16,10 @@ interface PaginatedMessagesResult {
     ) => Promise<InfiniteQueryObserverResult<InfiniteData<ChatMessage[]>>>;
     hasNextPage: boolean;
     isFetchingNextPage: boolean;
+    fetchNewerMessages: (
+        options?: FetchPreviousPageOptions,
+    ) => Promise<InfiniteQueryObserverResult<InfiniteData<ChatMessage[]>>>;
+    isFetchingNewerMessages: boolean;
     isViewingOlderMessages: boolean;
 }
 
@@ -30,61 +33,24 @@ export const usePaginatedMessages = (
     selectedChannelId: string | null,
     targetMessageId: string | null = null,
 ): PaginatedMessagesResult => {
-    const userMessages = useUserMessages(selectedFriendId);
+    const userMessages = useUserMessages(selectedFriendId, targetMessageId);
     const channelMessages = useChannelMessages(
         selectedServerId,
         selectedChannelId,
         targetMessageId,
     );
 
-    const limit = 50;
-    const isViewingOlderMessages = React.useMemo((): boolean => {
-        if (!targetMessageId || !channelMessages.data) return false;
-
-        const pages = channelMessages.data.pages;
-        let targetMsg: ChatMessage | undefined;
-
-        // Find target message without flattening
-        for (const page of pages) {
-            targetMsg = page.find((m): boolean => m.id === targetMessageId);
-            if (targetMsg) break;
-        }
-
-        if (!targetMsg) return true;
-
-        const targetTime = targetMsg.createdAt;
-        let newerCount = 0;
-
-        // Count messages newer than target without flattening
-        for (const page of pages) {
-            for (const msg of page) {
-                if (msg.createdAt > targetTime) {
-                    newerCount++;
-                    if (newerCount >= limit) return true;
-                }
-            }
-        }
-
-        return false;
-    }, [targetMessageId, channelMessages.data]);
-
-    if (selectedFriendId) {
-        return {
-            rawMessagesData: userMessages.data,
-            isLoading: userMessages.isLoading,
-            fetchNextPage: userMessages.fetchNextPage,
-            hasNextPage: userMessages.hasNextPage,
-            isFetchingNextPage: userMessages.isFetchingNextPage,
-            isViewingOlderMessages: false,
-        };
-    }
+    const active = selectedFriendId ? userMessages : channelMessages;
+    const isViewingOlderMessages = !!targetMessageId && active.hasPreviousPage;
 
     return {
-        rawMessagesData: channelMessages.data,
-        isLoading: channelMessages.isLoading,
-        fetchNextPage: channelMessages.fetchNextPage,
-        hasNextPage: channelMessages.hasNextPage,
-        isFetchingNextPage: channelMessages.isFetchingNextPage,
+        rawMessagesData: active.data,
+        isLoading: active.isLoading,
+        fetchNextPage: active.fetchNextPage,
+        hasNextPage: active.hasNextPage,
+        isFetchingNextPage: active.isFetchingNextPage,
+        fetchNewerMessages: active.fetchPreviousPage,
+        isFetchingNewerMessages: active.isFetchingPreviousPage,
         isViewingOlderMessages,
     };
 };

@@ -60,6 +60,7 @@ export const chatApi = {
         limit = 50,
         before?: string,
         after?: string,
+        around?: string,
     ): Promise<ChatMessage[]> => {
         const response = await apiClient.get<unknown>(
             `/api/v1/channels/${channelId}/messages`,
@@ -68,6 +69,7 @@ export const chatApi = {
                     limit,
                     before,
                     after,
+                    around,
                     includeAttachmentContent: true,
                 },
             },

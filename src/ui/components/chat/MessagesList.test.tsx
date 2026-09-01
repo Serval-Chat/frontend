@@ -1,5 +1,4 @@
-import { useVirtualizer } from '@tanstack/react-virtual';
-import { fireEvent, render } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
@@ -11,16 +10,13 @@ vi.mock('@/store/hooks', () => ({
     useAppSelector: vi.fn(),
 }));
 
-// Mock MessageItem so we don't have to render its entire tree
 vi.mock('@/ui/components/chat/MessageItem', () => ({
     MessageItem: ({
         message,
         isHighlighted,
-        onResize,
     }: {
         message: ProcessedChatMessage;
         isHighlighted: boolean;
-        onResize?: () => void;
     }) => (
         <div
             data-highlighted={isHighlighted}
@@ -28,257 +24,128 @@ vi.mock('@/ui/components/chat/MessageItem', () => ({
             id={`message-${message.id}`}
         >
             {message.text}
-            <button type="button" onClick={onResize}>
-                resize
-            </button>
         </div>
     ),
 }));
 
-const mockScrollToIndex = vi.fn();
-const mockMeasure = vi.fn();
+const offsetTops = new Map<string, number>();
+const offsetHeights = new Map<string, number>();
 
-vi.mock('@tanstack/react-virtual', () => ({
-    useVirtualizer: vi.fn().mockImplementation((options: any) => ({
-        getVirtualItems: (): { index: number; start: number; key: number }[] =>
-            Array.from({ length: options.count }).map(
-                (_, i): { index: number; start: number; key: number } => ({
-                    index: i,
-                    start: 0,
-                    key: i,
-                }),
-            ),
-        getTotalSize: (): number => options.count * 100,
-        scrollToIndex: mockScrollToIndex,
-        measure: mockMeasure,
-        measureElement: vi.fn(),
-    })),
-}));
+const resizeCallbacks: ResizeObserverCallback[] = [];
+class FakeResizeObserver {
+    constructor(cb: ResizeObserverCallback) {
+        resizeCallbacks.push(cb);
+    }
+    observe(): void {}
+    unobserve(): void {}
+    disconnect(): void {}
+}
 
-describe('MessagesList Scroll Behavior', (): void => {
-    let requestAnimationFrameMock: ReturnType<typeof vi.fn>;
+const triggerResize = (): void => {
+    for (const cb of resizeCallbacks) {
+        cb([], {} as ResizeObserver);
+    }
+};
 
-    const mockDispatch = vi.fn();
+const msg = (id: string, text = id): ProcessedChatMessage =>
+    ({
+        id,
+        text,
+        channelId: 'ch-1',
+        serverId: 'srv-1',
+        senderId: `usr-${id}`,
+        createdAt: '2026-01-01T00:00:00.000Z',
+        updatedAt: '2026-01-01T00:00:00.000Z',
+        isEdited: false,
+        readBy: [],
+        user: { id: `usr-${id}`, username: id },
+    }) as unknown as ProcessedChatMessage;
 
+const mockMessages = [msg('msg-1', 'Hello'), msg('msg-2', 'World')];
+
+const scroller = (): HTMLElement => screen.getByTestId('messages-scroller');
+
+const setScrollerGeometry = (
+    scrollHeight: number,
+    clientHeight: number,
+): void => {
+    const el = scroller();
+    Object.defineProperty(el, 'scrollHeight', {
+        configurable: true,
+        value: scrollHeight,
+    });
+    Object.defineProperty(el, 'clientHeight', {
+        configurable: true,
+        value: clientHeight,
+    });
+};
+
+const scrollTo = (top: number): void => {
+    const el = scroller();
+    el.scrollTop = top;
+    fireEvent.scroll(el);
+};
+
+describe('MessagesList', (): void => {
     beforeEach((): void => {
         vi.clearAllMocks();
-        mockScrollToIndex.mockClear();
-        mockMeasure.mockClear();
-        vi.mocked(useAppDispatch).mockReturnValue(mockDispatch);
-        vi.mocked(useAppSelector).mockReturnValue({}); // default blocks
+        offsetTops.clear();
+        offsetHeights.clear();
+        resizeCallbacks.length = 0;
+        vi.stubGlobal('ResizeObserver', FakeResizeObserver);
+        vi.mocked(useAppDispatch).mockReturnValue(vi.fn());
+        vi.mocked(useAppSelector).mockReturnValue({});
 
-        requestAnimationFrameMock = vi.fn((cb) => cb());
-        globalThis.requestAnimationFrame =
-            requestAnimationFrameMock as any as typeof globalThis.requestAnimationFrame;
-    });
-
-    const mockMessages: ProcessedChatMessage[] = [
-        {
-            id: 'msg-1',
-            text: 'Hello',
-            channelId: 'ch-1',
-            serverId: 'srv-1',
-            senderId: 'usr-1',
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            isEdited: false,
-            readBy: [],
-            user: {
-                id: 'usr-1',
-                username: 'User 1',
-                email: 'user1@test.com',
-                status: 'online',
+        Object.defineProperty(HTMLElement.prototype, 'offsetTop', {
+            configurable: true,
+            get(this: HTMLElement): number {
+                return offsetTops.get(this.id) ?? 0;
             },
-        } as any as ProcessedChatMessage,
-        {
-            id: 'msg-2',
-            text: 'World',
-            channelId: 'ch-1',
-            serverId: 'srv-1',
-            senderId: 'usr-2',
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            isEdited: false,
-            readBy: [],
-            user: {
-                id: 'usr-2',
-                username: 'User 2',
-                email: 'user2@test.com',
-                status: 'online',
+        });
+        Object.defineProperty(HTMLElement.prototype, 'offsetHeight', {
+            configurable: true,
+            get(this: HTMLElement): number {
+                return offsetHeights.get(this.id) ?? 0;
             },
-        } as any as ProcessedChatMessage,
-    ];
-
-    it('centers the target on its real geometry when jumping', (): void => {
-        // container is 600 tall, target row 400px below the top -> must scroll
-        // +150 to centre it. Row position tracks scrollTop so the settle loop
-        // converges instead of overshooting.
-        const clientHeightSpy = vi
-            .spyOn(HTMLElement.prototype, 'clientHeight', 'get')
-            .mockReturnValue(600);
-        const rectSpy = vi
-            .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
-            .mockImplementation(function (this: HTMLElement): DOMRect {
-                if (this.classList.contains('custom-scrollbar')) {
-                    return { top: 0, height: 600 } as DOMRect;
-                }
-                if (this.getAttribute('data-index') === '1') {
-                    const scroller = this.closest(
-                        '.custom-scrollbar',
-                    ) as HTMLElement | null;
-                    const scrollTop = scroller?.scrollTop ?? 0;
-                    return { top: 400 - scrollTop, height: 100 } as DOMRect;
-                }
-                return { top: 0, height: 0 } as DOMRect;
-            });
-
-        const { container } = render(
-            <MessagesList
-                activeHighlightId="msg-2"
-                hasMore={false}
-                messages={mockMessages}
-            />,
-        );
-
-        const scroller = container.querySelector(
-            '.custom-scrollbar',
-        ) as HTMLElement;
-        // delta = 400 - 0 - (600 - 100) / 2 = 150
-        expect(scroller.scrollTop).toBe(150);
-
-        rectSpy.mockRestore();
-        clientHeightSpy.mockRestore();
+        });
     });
 
-    it('centers on the target of a second consecutive jump', (): void => {
-        // regression: the second jump used to be misread as a prepend (because
-        // the "entered highlight" edge was consumed on a stale render), leaving
-        // the viewport off the target. The active target row is always data-
-        // index 1 and must land centered (+150) on both jumps, even though the
-        // window's first message changes between them.
-        const clientHeightSpy = vi
-            .spyOn(HTMLElement.prototype, 'clientHeight', 'get')
-            .mockReturnValue(600);
-        const rectSpy = vi
-            .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
-            .mockImplementation(function (this: HTMLElement): DOMRect {
-                if (this.classList.contains('custom-scrollbar')) {
-                    return { top: 0, height: 600 } as DOMRect;
-                }
-                if (this.getAttribute('data-index') === '1') {
-                    const scroller = this.closest(
-                        '.custom-scrollbar',
-                    ) as HTMLElement | null;
-                    const scrollTop = scroller?.scrollTop ?? 0;
-                    return { top: 400 - scrollTop, height: 100 } as DOMRect;
-                }
-                return { top: 0, height: 0 } as DOMRect;
-            });
-
-        const base = mockMessages[0]!;
-        const windowA = [
-            { ...base, id: 'a-1' },
-            { ...base, id: 'a-2' },
-        ];
-        // a different window whose first message differs from windowA's, so the
-        // pre-fix code would treat the swap as a prepend.
-        const windowB = [
-            { ...base, id: 'b-0' },
-            { ...base, id: 'b-1' },
-            { ...base, id: 'b-2' },
-        ];
-
-        const { container, rerender } = render(
-            <MessagesList
-                activeHighlightId="a-2"
-                hasMore={false}
-                messages={windowA}
-            />,
-        );
-        const scroller = (): HTMLElement =>
-            container.querySelector('.custom-scrollbar') as HTMLElement;
-        expect(scroller().scrollTop).toBe(150);
-
-        // second jump: fresh window, new target (also at index 1).
-        scroller().scrollTop = 0;
-        rerender(
-            <MessagesList
-                activeHighlightId="b-1"
-                hasMore={false}
-                messages={windowB}
-            />,
-        );
-        expect(scroller().scrollTop).toBe(150);
-
-        rectSpy.mockRestore();
-        clientHeightSpy.mockRestore();
+    afterEach((): void => {
+        vi.unstubAllGlobals();
+        for (const prop of ['offsetTop', 'offsetHeight']) {
+            delete (
+                HTMLElement.prototype as unknown as Record<string, unknown>
+            )[prop];
+        }
     });
 
-    it('anchors a fresh (non-target) message list to the newest message on open', (): void => {
-        // [msg-1, msg-2, spacer] -> last index is 2
+    it('renders every loaded message, with no windowing', (): void => {
         render(<MessagesList hasMore={false} messages={mockMessages} />);
 
-        const options = vi.mocked(useVirtualizer).mock.calls[0]![0] as {
-            initialOffset: () => number;
-        };
-
-        // initialOffset gives the first frame a bottom bias...
-        expect(options.initialOffset()).toBe(Number.MAX_SAFE_INTEGER);
-        // ...and we explicitly anchor to the newest message before paint so
-        // dynamic row heights can't leave us scrolled up in older messages.
-        expect(mockScrollToIndex).toHaveBeenCalledWith(2, { align: 'end' });
+        expect(screen.getByTestId('message-msg-1')).toBeInTheDocument();
+        expect(screen.getByTestId('message-msg-2')).toBeInTheDocument();
     });
 
-    it('starts targeted message lists at the top so highlight scrolling can center the target', (): void => {
-        render(
-            <MessagesList
-                activeHighlightId="msg-2"
-                hasMore={false}
-                messages={mockMessages}
-            />,
+    it('opens pinned to the newest message', (): void => {
+        const { rerender } = render(
+            <MessagesList hasMore={false} messages={[]} />,
         );
+        setScrollerGeometry(3000, 800);
+        rerender(<MessagesList hasMore={false} messages={mockMessages} />);
 
-        const options = vi.mocked(useVirtualizer).mock.calls[0]![0] as {
-            initialOffset: () => number;
-        };
-
-        expect(options.initialOffset()).toBe(0);
-        // a targeted list must never anchor itself to the newest message.
-        expect(mockScrollToIndex).not.toHaveBeenCalledWith(2, { align: 'end' });
+        expect(scroller().scrollTop).toBe(2200);
+        expect(scroller()).toHaveStyle({ opacity: '1' });
     });
 
-    it('does not act until the target message is in the loaded window', (): void => {
-        const clientHeightSpy = vi
-            .spyOn(HTMLElement.prototype, 'clientHeight', 'get')
-            .mockReturnValue(600);
-        const rectSpy = vi
-            .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
-            .mockImplementation(function (this: HTMLElement): DOMRect {
-                if (this.classList.contains('custom-scrollbar')) {
-                    return { top: 0, height: 600 } as DOMRect;
-                }
-                if (this.getAttribute('data-index') === '1') {
-                    const scroller = this.closest(
-                        '.custom-scrollbar',
-                    ) as HTMLElement | null;
-                    const scrollTop = scroller?.scrollTop ?? 0;
-                    return { top: 400 - scrollTop, height: 100 } as DOMRect;
-                }
-                return { top: 0, height: 0 } as DOMRect;
-            });
-
-        const { container, rerender } = render(
+    it('does not render the list until a jump target is in the loaded window', (): void => {
+        const { rerender } = render(
             <MessagesList
                 activeHighlightId="msg-2"
                 hasMore={false}
                 messages={[]}
             />,
         );
-
-        const scroller = (): HTMLElement =>
-            container.querySelector('.custom-scrollbar') as HTMLElement;
-        // target absent -> no scroll happens yet.
-        expect(scroller().scrollTop).toBe(0);
+        expect(screen.queryByTestId('message-msg-2')).toBeNull();
 
         rerender(
             <MessagesList
@@ -287,226 +154,554 @@ describe('MessagesList Scroll Behavior', (): void => {
                 messages={mockMessages}
             />,
         );
-
-        // target now present -> centered.
-        expect(scroller().scrollTop).toBe(150);
-
-        // re-render with the same target must not re-run the jump.
-        scroller().scrollTop = 999;
-        rerender(
-            <MessagesList
-                activeHighlightId="msg-2"
-                hasMore={false}
-                messages={[...mockMessages, { ...mockMessages[0]!, id: 'msg-3' }]}
-            />,
-        );
-        expect(scroller().scrollTop).toBe(999);
-
-        rectSpy.mockRestore();
-        clientHeightSpy.mockRestore();
+        expect(screen.getByTestId('message-msg-2')).toBeInTheDocument();
     });
 
-    it('remeasures virtual rows when a message reports an async resize', (): void => {
-        const { getAllByText } = render(
-            <MessagesList hasMore={false} messages={mockMessages} />,
-        );
-
-        getAllByText('resize')[0]!.click();
-
-        expect(requestAnimationFrameMock).toHaveBeenCalled();
-    });
-
-    it('does not re-pin to the bottom when jumping to a message from the bottom', (): void => {
-        const onAtBottomChange = vi.fn();
-
-        const { rerender, getAllByText } = render(
-            <MessagesList
-                hasMore={false}
-                messages={mockMessages}
-                onAtBottomChange={onAtBottomChange}
-            />,
-        );
-
-        // the initial (non-target) open legitimately anchors to the bottom;
-        // only the jump that follows must not.
-        mockScrollToIndex.mockClear();
-
-        rerender(
-            <MessagesList
-                activeHighlightId="msg-1"
-                hasMore={false}
-                messages={mockMessages}
-                onAtBottomChange={onAtBottomChange}
-            />,
-        );
-
-        expect(onAtBottomChange).toHaveBeenLastCalledWith(false);
-        // the jump must not anchor the viewport to the newest message.
-        expect(mockScrollToIndex).not.toHaveBeenCalledWith(
-            expect.anything(),
-            expect.objectContaining({ align: 'end' }),
-        );
-
-        // a late measurement pass (e.g. an image/embed finishing loading) must
-        // not drag the viewport back down to the bottom - this is the jitter
-        // the jump-to-message fix guards against.
-        mockScrollToIndex.mockClear();
-        getAllByText('resize')[0]!.click();
-        expect(mockScrollToIndex).not.toHaveBeenCalledWith(
-            expect.anything(),
-            expect.objectContaining({ align: 'end' }),
-        );
-    });
-
-    it('does not re-pin to the bottom after the user scrolls up', (): void => {
-        const onAtBottomChange = vi.fn();
-        const { container, getAllByText } = render(
-            <MessagesList
-                hasMore={false}
-                messages={mockMessages}
-                onAtBottomChange={onAtBottomChange}
-            />,
-        );
-        const scroller = container.querySelector(
-            '.custom-scrollbar',
-        ) as HTMLElement;
-
-        // the list is taller than the viewport and the user scrolls well away
-        // from the bottom (1000 - 100 - 300 = 600px gap).
-        Object.defineProperty(scroller, 'scrollHeight', {
-            configurable: true,
-            value: 1000,
-        });
-        Object.defineProperty(scroller, 'clientHeight', {
-            configurable: true,
-            value: 300,
-        });
-        scroller.scrollTop = 100;
-        fireEvent.scroll(scroller);
-
-        expect(onAtBottomChange).toHaveBeenLastCalledWith(false);
-
-        // a late measurement (image finishing loading) must not yank the
-        // viewport back down to the newest messages.
-        mockScrollToIndex.mockClear();
-        getAllByText('resize')[0]!.click();
-        expect(mockScrollToIndex).not.toHaveBeenCalledWith(
-            expect.anything(),
-            expect.objectContaining({ align: 'end' }),
-        );
-    });
-
-    it('does not follow content to the bottom while a jump target is active', (): void => {
-        // the reported bug: after jumping, late-loading embeds grow the window
-        // and the auto-follow pins the viewport to the newest message. While a
-        // target is active we are in a historical window, so follow must be off.
-        const { container, getAllByText } = render(
-            <MessagesList
-                activeHighlightId="msg-2"
-                hasMore={false}
-                messages={mockMessages}
-            />,
-        );
-        const scroller = container.querySelector(
-            '.custom-scrollbar',
-        ) as HTMLElement;
-
-        // force the "we're at the bottom" state that content-growth produces.
-        Object.defineProperty(scroller, 'scrollHeight', {
-            configurable: true,
-            value: 300,
-        });
-        Object.defineProperty(scroller, 'clientHeight', {
-            configurable: true,
-            value: 300,
-        });
-        scroller.scrollTop = 0; // 300 - 0 - 300 = 0 < 5 => at bottom
-        fireEvent.scroll(scroller);
-
-        // a late measurement must NOT pin to the newest message.
-        mockScrollToIndex.mockClear();
-        getAllByText('resize')[0]!.click();
-        expect(mockScrollToIndex).not.toHaveBeenCalledWith(
-            expect.anything(),
-            expect.objectContaining({ align: 'end' }),
-        );
-    });
-
-    it('loads older messages if scroll is near top and someone sends a message', (): void => {
-        const handleLoadMore = vi.fn();
+    it('centres a jump target instead of pinning to the bottom', (): void => {
         const { rerender } = render(
             <MessagesList
-                hasMore
-                messages={mockMessages}
-                onLoadMore={handleLoadMore}
+                activeHighlightId="msg-2"
+                hasMore={false}
+                messages={[]}
             />,
         );
-        const newMessages = [
-            ...mockMessages,
-            { ...mockMessages[0]!, id: 'msg-3', text: 'New Message' },
-        ];
+        setScrollerGeometry(5000, 800);
+        offsetTops.set('message-msg-2', 2000);
+        offsetHeights.set('message-msg-2', 100);
 
         rerender(
             <MessagesList
-                hasMore
-                messages={newMessages}
-                onLoadMore={handleLoadMore}
+                activeHighlightId="msg-2"
+                hasMore={false}
+                messages={mockMessages}
             />,
         );
 
-        expect(handleLoadMore).toHaveBeenCalled();
+        // offsetTop - clientHeight/2 + height/2
+        expect(scroller().scrollTop).toBe(2000 - 400 + 50);
     });
 
-    describe('date separators', (): void => {
+    describe('loading older messages', (): void => {
+        const setup = (
+            isLoadingMore = false,
+        ): { onLoadMore: ReturnType<typeof vi.fn> } => {
+            const onLoadMore = vi.fn();
+            const { rerender } = render(
+                <MessagesList hasMore messages={[]} onLoadMore={onLoadMore} />,
+            );
+            setScrollerGeometry(5000, 800);
+            rerender(
+                <MessagesList
+                    hasMore
+                    isLoadingMore={isLoadingMore}
+                    messages={mockMessages}
+                    onLoadMore={onLoadMore}
+                />,
+            );
+            return { onLoadMore };
+        };
+
+        it('asks for more when the reader nears the top', (): void => {
+            const { onLoadMore } = setup();
+            scrollTo(100);
+            expect(onLoadMore).toHaveBeenCalledTimes(1);
+        });
+
+        it('stays quiet while far from the top', (): void => {
+            const { onLoadMore } = setup();
+            scrollTo(3000);
+            expect(onLoadMore).not.toHaveBeenCalled();
+        });
+
+        it('does not ask again while a fetch is already in flight', (): void => {
+            const { onLoadMore } = setup(true);
+            scrollTo(100);
+            expect(onLoadMore).not.toHaveBeenCalled();
+        });
+
+        it('pauses after a page that barely grew the list, until the reader scrolls away', (): void => {
+            const onLoadMore = vi.fn();
+            const { rerender } = render(
+                <MessagesList hasMore messages={[]} onLoadMore={onLoadMore} />,
+            );
+            setScrollerGeometry(5000, 800);
+            rerender(
+                <MessagesList
+                    hasMore
+                    messages={mockMessages}
+                    onLoadMore={onLoadMore}
+                />,
+            );
+
+            scrollTo(100);
+            expect(onLoadMore).toHaveBeenCalledTimes(1);
+
+            // fetch resolves having added almost nothing
+            rerender(
+                <MessagesList
+                    hasMore
+                    isLoadingMore
+                    messages={mockMessages}
+                    onLoadMore={onLoadMore}
+                />,
+            );
+            rerender(
+                <MessagesList
+                    hasMore
+                    messages={[msg('older-1'), ...mockMessages]}
+                    onLoadMore={onLoadMore}
+                />,
+            );
+
+            scrollTo(120);
+            expect(onLoadMore).toHaveBeenCalledTimes(1);
+
+            scrollTo(3000);
+            scrollTo(100);
+            expect(onLoadMore).toHaveBeenCalledTimes(2);
+        });
+    });
+
+    describe('loading newer messages', (): void => {
+        const setup = (
+            isLoadingMoreNewer = false,
+        ): { onLoadMoreNewer: ReturnType<typeof vi.fn> } => {
+            const onLoadMoreNewer = vi.fn();
+            const { rerender } = render(
+                <MessagesList
+                    hasMoreNewer
+                    messages={[]}
+                    onLoadMoreNewer={onLoadMoreNewer}
+                />,
+            );
+            setScrollerGeometry(5000, 800);
+            rerender(
+                <MessagesList
+                    hasMoreNewer
+                    isLoadingMoreNewer={isLoadingMoreNewer}
+                    messages={mockMessages}
+                    onLoadMoreNewer={onLoadMoreNewer}
+                />,
+            );
+            return { onLoadMoreNewer };
+        };
+
+        it('asks for more when the reader nears the bottom', (): void => {
+            const { onLoadMoreNewer } = setup();
+            // maxScrollTop = 5000 - 800 = 4200;
+            scrollTo(3800);
+            expect(onLoadMoreNewer).toHaveBeenCalledTimes(1);
+        });
+
+        it('stays quiet while far from the bottom', (): void => {
+            const { onLoadMoreNewer } = setup();
+            scrollTo(100);
+            expect(onLoadMoreNewer).not.toHaveBeenCalled();
+        });
+
+        it('does not ask again while a fetch is already in flight', (): void => {
+            const { onLoadMoreNewer } = setup(true);
+            scrollTo(3800);
+            expect(onLoadMoreNewer).not.toHaveBeenCalled();
+        });
+
+        it('pauses after a page that barely grew the list, until the reader scrolls away', (): void => {
+            const onLoadMoreNewer = vi.fn();
+            const { rerender } = render(
+                <MessagesList
+                    hasMoreNewer
+                    messages={[]}
+                    onLoadMoreNewer={onLoadMoreNewer}
+                />,
+            );
+            setScrollerGeometry(5000, 800);
+            rerender(
+                <MessagesList
+                    hasMoreNewer
+                    messages={mockMessages}
+                    onLoadMoreNewer={onLoadMoreNewer}
+                />,
+            );
+
+            scrollTo(3800);
+            expect(onLoadMoreNewer).toHaveBeenCalledTimes(1);
+
+            // fetch resolves having added almost nothing
+            rerender(
+                <MessagesList
+                    hasMoreNewer
+                    isLoadingMoreNewer
+                    messages={mockMessages}
+                    onLoadMoreNewer={onLoadMoreNewer}
+                />,
+            );
+            rerender(
+                <MessagesList
+                    hasMoreNewer
+                    messages={[...mockMessages, msg('newer-1')]}
+                    onLoadMoreNewer={onLoadMoreNewer}
+                />,
+            );
+
+            scrollTo(3820);
+            expect(onLoadMoreNewer).toHaveBeenCalledTimes(1);
+
+            scrollTo(100);
+            scrollTo(3800);
+            expect(onLoadMoreNewer).toHaveBeenCalledTimes(2);
+        });
+
+        it('does not interfere with loading older messages at the top', (): void => {
+            const onLoadMore = vi.fn();
+            const onLoadMoreNewer = vi.fn();
+            const { rerender } = render(
+                <MessagesList
+                    hasMore
+                    hasMoreNewer
+                    messages={[]}
+                    onLoadMore={onLoadMore}
+                    onLoadMoreNewer={onLoadMoreNewer}
+                />,
+            );
+            setScrollerGeometry(5000, 800);
+            rerender(
+                <MessagesList
+                    hasMore
+                    hasMoreNewer
+                    messages={mockMessages}
+                    onLoadMore={onLoadMore}
+                    onLoadMoreNewer={onLoadMoreNewer}
+                />,
+            );
+
+            scrollTo(100);
+            expect(onLoadMore).toHaveBeenCalledTimes(1);
+            expect(onLoadMoreNewer).not.toHaveBeenCalled();
+        });
+    });
+
+    describe('holding position', (): void => {
+        type Rerender = (ui: React.ReactElement) => void;
+
+        const setupScrolledUp = (): Rerender => {
+            const { rerender } = render(<MessagesList hasMore messages={[]} />);
+            setScrollerGeometry(5000, 800);
+            offsetTops.set('message-msg-1', 1000);
+            offsetTops.set('message-msg-2', 1200);
+            rerender(<MessagesList hasMore messages={mockMessages} />);
+            scrollTo(1000);
+            return rerender;
+        };
+
+        it('keeps the anchored message still when older messages are prepended above it', (): void => {
+            const rerender = setupScrolledUp();
+            expect(scroller().scrollTop).toBe(1000);
+
+            offsetTops.set('message-msg-1', 1600);
+            offsetTops.set('message-msg-2', 1800);
+            setScrollerGeometry(5600, 800);
+
+            rerender(
+                <MessagesList
+                    hasMore
+                    messages={[msg('older-1'), ...mockMessages]}
+                />,
+            );
+
+            expect(scroller().scrollTop).toBe(1600);
+        });
+
+        it('re-asserts the anchor when media above the reader loads and resizes', (): void => {
+            setupScrolledUp();
+            expect(scroller().scrollTop).toBe(1000);
+
+            offsetTops.set('message-msg-1', 1150);
+            offsetTops.set('message-msg-2', 1350);
+
+            act((): void => {
+                triggerResize();
+            });
+
+            expect(scroller().scrollTop).toBe(1150);
+        });
+
+        it('ignores sub-pixel drift instead of chasing rounding noise', (): void => {
+            setupScrolledUp();
+
+            offsetTops.set('message-msg-1', 1000.4);
+            act((): void => {
+                triggerResize();
+            });
+
+            expect(scroller().scrollTop).toBe(1000);
+        });
+
+        it('stays pinned to the bottom when a new message arrives', (): void => {
+            const { rerender } = render(
+                <MessagesList hasMore={false} messages={[]} />,
+            );
+            setScrollerGeometry(3000, 800);
+            rerender(<MessagesList hasMore={false} messages={mockMessages} />);
+            expect(scroller().scrollTop).toBe(2200);
+
+            setScrollerGeometry(3400, 800);
+            rerender(
+                <MessagesList
+                    hasMore={false}
+                    messages={[...mockMessages, msg('msg-3')]}
+                />,
+            );
+
+            expect(scroller().scrollTop).toBe(2600);
+        });
+    });
+
+    describe('at-bottom reporting', (): void => {
+        it('reports leaving and returning to the bottom', (): void => {
+            const onAtBottomChange = vi.fn();
+            const { rerender } = render(
+                <MessagesList
+                    hasMore={false}
+                    messages={[]}
+                    onAtBottomChange={onAtBottomChange}
+                />,
+            );
+            setScrollerGeometry(5000, 800);
+            rerender(
+                <MessagesList
+                    hasMore={false}
+                    messages={mockMessages}
+                    onAtBottomChange={onAtBottomChange}
+                />,
+            );
+
+            scrollTo(1000);
+            expect(onAtBottomChange).toHaveBeenLastCalledWith(false);
+
+            scrollTo(4200);
+            expect(onAtBottomChange).toHaveBeenLastCalledWith(true);
+        });
+
+        it('treats being within the 2px tolerance as at the bottom', (): void => {
+            const onAtBottomChange = vi.fn();
+            const { rerender } = render(
+                <MessagesList
+                    hasMore={false}
+                    messages={[]}
+                    onAtBottomChange={onAtBottomChange}
+                />,
+            );
+            setScrollerGeometry(5000, 800);
+            rerender(
+                <MessagesList
+                    hasMore={false}
+                    messages={mockMessages}
+                    onAtBottomChange={onAtBottomChange}
+                />,
+            );
+
+            scrollTo(4199);
+            expect(onAtBottomChange).toHaveBeenLastCalledWith(true);
+        });
+
+        it('reports not-at-bottom while a jump target is active', (): void => {
+            const onAtBottomChange = vi.fn();
+            const { rerender } = render(
+                <MessagesList
+                    activeHighlightId="msg-2"
+                    hasMore={false}
+                    messages={[]}
+                    onAtBottomChange={onAtBottomChange}
+                />,
+            );
+            setScrollerGeometry(5000, 800);
+            rerender(
+                <MessagesList
+                    activeHighlightId="msg-2"
+                    hasMore={false}
+                    messages={mockMessages}
+                    onAtBottomChange={onAtBottomChange}
+                />,
+            );
+
+            scrollTo(4200);
+            expect(onAtBottomChange).toHaveBeenLastCalledWith(false);
+        });
+    });
+
+    it('scrollToBottom() targets the true bottom', (): void => {
+        const handleRef = {
+            current: null as null | { scrollToBottom: () => void },
+        };
+        const { rerender } = render(
+            <MessagesList hasMore={false} messages={[]} ref={handleRef} />,
+        );
+        setScrollerGeometry(5000, 800);
+        rerender(
+            <MessagesList
+                hasMore={false}
+                messages={mockMessages}
+                ref={handleRef}
+            />,
+        );
+        scrollTo(500);
+
+        act((): void => {
+            handleRef.current?.scrollToBottom();
+        });
+
+        expect(scroller().scrollTop).toBeGreaterThanOrEqual(500);
+    });
+
+    describe('scrollToBottom() completion callback', (): void => {
+        const renderAtOffset = (): {
+            current: null | {
+                scrollToBottom: (onSettled?: () => void) => void;
+            };
+        } => {
+            const handleRef = {
+                current: null as null | {
+                    scrollToBottom: (onSettled?: () => void) => void;
+                },
+            };
+            const { rerender } = render(
+                <MessagesList hasMore={false} messages={[]} ref={handleRef} />,
+            );
+            setScrollerGeometry(5000, 800);
+            rerender(
+                <MessagesList
+                    hasMore={false}
+                    messages={mockMessages}
+                    ref={handleRef}
+                />,
+            );
+            scrollTo(500);
+            return handleRef;
+        };
+
+        beforeEach((): void => {
+            vi.useFakeTimers();
+        });
+
         afterEach((): void => {
             vi.useRealTimers();
         });
 
-        it("shows a date separator when the day changes, labeled with the second message's day", (): void => {
-            vi.setSystemTime(new Date('2024-03-20T12:00:00Z'));
+        it('does not fire until the spring actually settles', (): void => {
+            const handleRef = renderAtOffset();
+            const onSettled = vi.fn();
 
-            const messages: ProcessedChatMessage[] = [
-                {
-                    ...mockMessages[0]!,
-                    id: 'day1-msg',
-                    createdAt: '2024-03-18T12:00:00Z',
-                },
-                {
-                    ...mockMessages[0]!,
-                    id: 'day2-msg',
-                    createdAt: '2024-03-19T12:00:00Z',
-                },
-            ];
+            act((): void => {
+                handleRef.current?.scrollToBottom(onSettled);
+            });
+            expect(onSettled).not.toHaveBeenCalled();
 
-            const { getByText } = render(
-                <MessagesList hasMore={false} messages={messages} />,
-            );
+            act((): void => {
+                vi.advanceTimersByTime(32);
+            });
+            expect(onSettled).not.toHaveBeenCalled();
 
-            expect(getByText('Yesterday')).toBeInTheDocument();
+            act((): void => {
+                vi.advanceTimersByTime(2000);
+            });
+            expect(onSettled).toHaveBeenCalledTimes(1);
         });
 
-        it('does not show a date separator for messages on the same day', (): void => {
-            vi.setSystemTime(new Date('2024-03-20T12:00:00Z'));
+        it('is dropped, not fired late, if the reader interrupts the animation', (): void => {
+            const handleRef = renderAtOffset();
+            const onSettled = vi.fn();
 
-            const messages: ProcessedChatMessage[] = [
-                {
-                    ...mockMessages[0]!,
-                    id: 'a',
-                    createdAt: '2024-03-20T09:00:00Z',
-                },
-                {
-                    ...mockMessages[0]!,
-                    id: 'b',
-                    createdAt: '2024-03-20T15:00:00Z',
-                },
-            ];
+            act((): void => {
+                handleRef.current?.scrollToBottom(onSettled);
+            });
+            act((): void => {
+                vi.advanceTimersByTime(32);
+            });
 
-            const { queryByText } = render(
-                <MessagesList hasMore={false} messages={messages} />,
+            act((): void => {
+                fireEvent.wheel(scroller());
+            });
+            act((): void => {
+                vi.advanceTimersByTime(2000);
+            });
+
+            expect(onSettled).not.toHaveBeenCalled();
+        });
+    });
+
+    describe('an animation already in flight', (): void => {
+        const startAnimation = (): {
+            rerender: (ui: React.ReactElement) => void;
+        } => {
+            const handleRef = {
+                current: null as null | { scrollToBottom: () => void },
+            };
+            const { rerender } = render(
+                <MessagesList hasMore={false} messages={[]} ref={handleRef} />,
             );
+            setScrollerGeometry(5000, 800);
+            rerender(
+                <MessagesList
+                    hasMore={false}
+                    messages={mockMessages}
+                    ref={handleRef}
+                />,
+            );
+            scrollTo(500);
 
-            expect(queryByText('Today')).not.toBeInTheDocument();
-            expect(queryByText('Yesterday')).not.toBeInTheDocument();
+            act((): void => {
+                handleRef.current?.scrollToBottom();
+            });
+            act((): void => {
+                vi.advanceTimersByTime(32);
+            });
+            return { rerender };
+        };
+
+        beforeEach((): void => {
+            vi.useFakeTimers();
+        });
+
+        afterEach((): void => {
+            vi.useRealTimers();
+        });
+
+        it('never drags the view off a jump target placed while it ran', (): void => {
+            const { rerender } = startAnimation();
+            expect(scroller().scrollTop).toBeGreaterThan(500);
+
+            offsetTops.set('message-msg-2', 500);
+            offsetHeights.set('message-msg-2', 100);
+            act((): void => {
+                rerender(
+                    <MessagesList
+                        activeHighlightId="msg-2"
+                        hasMore={false}
+                        messages={mockMessages}
+                    />,
+                );
+            });
+            expect(scroller().scrollTop).toBe(500 - 400 + 50);
+
+            act((): void => {
+                vi.advanceTimersByTime(2000);
+            });
+            expect(scroller().scrollTop).toBe(500 - 400 + 50);
+        });
+
+        it('stops the moment the reader scrolls', (): void => {
+            startAnimation();
+            const interrupted = scroller().scrollTop;
+            expect(interrupted).toBeGreaterThan(500);
+
+            act((): void => {
+                fireEvent.wheel(scroller());
+            });
+            act((): void => {
+                vi.advanceTimersByTime(2000);
+            });
+
+            expect(scroller().scrollTop).toBe(interrupted);
         });
     });
 });

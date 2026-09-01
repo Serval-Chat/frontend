@@ -27,8 +27,9 @@ interface EditUserMessageVariables {
 export const CHAT_QUERY_KEYS = {
     userMessages: (
         userId: string | null,
-    ): readonly ['chat', 'messages', 'user', string | null] =>
-        ['chat', 'messages', 'user', userId] as const,
+        targetMessageId: string | null = null,
+    ): readonly ['chat', 'messages', 'user', string | null, string | null] =>
+        ['chat', 'messages', 'user', userId, targetMessageId] as const,
     channelMessages: (
         serverId: string | null,
         channelId: string | null,
@@ -92,16 +93,36 @@ export const LIMIT = 50;
  */
 export const useUserMessages = (
     userId: string | null,
+    around?: string | null,
 ): UseInfiniteQueryResult<InfiniteData<ChatMessage[]>> => {
     const { data: channel } = useDmChannel(userId);
     const channelId = channel?.id ?? null;
+    const targetAround =
+        typeof around === 'string' && around.length > 0 ? around : null;
 
     return useInfiniteQuery({
         // eslint-disable-next-line @tanstack/query/exhaustive-deps
-        queryKey: CHAT_QUERY_KEYS.userMessages(userId),
-        queryFn: ({ pageParam }): Promise<ChatMessage[]> => {
+        queryKey: CHAT_QUERY_KEYS.userMessages(userId, targetAround),
+        queryFn: ({ pageParam, direction }): Promise<ChatMessage[]> => {
             if (channelId === null) {
                 throw new Error('DM channel not resolved yet');
+            }
+            if (targetAround && !pageParam) {
+                return chatApi.getDmChannelMessages(
+                    channelId,
+                    LIMIT * 2,
+                    undefined,
+                    undefined,
+                    targetAround,
+                );
+            }
+            if (direction === 'backward') {
+                return chatApi.getDmChannelMessages(
+                    channelId,
+                    LIMIT,
+                    undefined,
+                    pageParam,
+                );
             }
             return chatApi.getDmChannelMessages(channelId, LIMIT, pageParam);
         },
@@ -110,6 +131,12 @@ export const useUserMessages = (
             if (lastPage.length < LIMIT) return undefined;
             return lastPage[0]?.id;
         },
+        getPreviousPageParam: (firstPage): string | undefined => {
+            if (firstPage.length < LIMIT) return undefined;
+            return firstPage.at(-1)?.id;
+        },
+        placeholderData: (previousData, previousQuery) =>
+            previousQuery?.queryKey[3] === userId ? previousData : undefined,
         enabled: !!userId && !!channelId,
     });
 };
@@ -130,7 +157,7 @@ export const useChannelMessages = (
             channelId,
             targetAround,
         ),
-        queryFn: ({ pageParam }): Promise<ChatMessage[]> => {
+        queryFn: ({ pageParam, direction }): Promise<ChatMessage[]> => {
             if (serverId === null || channelId === null) {
                 throw new Error('serverId and channelId are required');
             }
@@ -141,6 +168,16 @@ export const useChannelMessages = (
                     LIMIT * 2,
                     undefined,
                     targetAround,
+                );
+            }
+            if (direction === 'backward') {
+                return chatApi.getChannelMessages(
+                    serverId,
+                    channelId,
+                    LIMIT,
+                    undefined,
+                    undefined,
+                    pageParam,
                 );
             }
             return chatApi.getChannelMessages(
@@ -155,6 +192,15 @@ export const useChannelMessages = (
             if (lastPage.length < LIMIT) return undefined;
             return lastPage[0]?.id;
         },
+        getPreviousPageParam: (firstPage): string | undefined => {
+            if (firstPage.length < LIMIT) return undefined;
+            return firstPage.at(-1)?.id;
+        },
+        placeholderData: (previousData, previousQuery) =>
+            previousQuery?.queryKey[3] === serverId &&
+            previousQuery?.queryKey[4] === channelId
+                ? previousData
+                : undefined,
         enabled: !!serverId && !!channelId,
         staleTime: Infinity,
         gcTime: 30 * 60 * 1000,

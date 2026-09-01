@@ -11,9 +11,15 @@ import {
 import { useMe, useUserById } from '@/api/users/users.queries';
 import { useFileQueue } from '@/hooks/chat/useFileQueue';
 import * as Permissions from '@/hooks/usePermissions';
-import { useAppSelector } from '@/store/hooks';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
 
 import { MainChat } from './MainChat';
+
+const { mockScrollToBottom } = vi.hoisted(() => ({
+    mockScrollToBottom: vi.fn((onSettled?: () => void): void => {
+        onSettled?.();
+    }),
+}));
 
 vi.mock('@/providers/ThemeProvider', () => ({
     useTheme: vi.fn().mockReturnValue({ theme: 'dark', setTheme: vi.fn() }),
@@ -99,7 +105,30 @@ vi.mock('@/ui/components/chat/MessageInput', () => ({
     MessageInput: () => <div data-testid="message-input" />,
 }));
 vi.mock('@/ui/components/chat/MessagesList', () => ({
-    MessagesList: () => <div data-testid="messages-list" />,
+    MessagesList: ({
+        ref,
+        onAtBottomChange,
+    }: {
+        ref?: {
+            current: {
+                scrollToBottom: (onSettled?: () => void) => void;
+            } | null;
+        };
+        onAtBottomChange?: (atBottom: boolean) => void;
+    }) => {
+        if (ref) {
+            ref.current = { scrollToBottom: mockScrollToBottom };
+        }
+        return (
+            <div data-testid="messages-list">
+                <button
+                    data-testid="simulate-scrolled-up"
+                    type="button"
+                    onClick={(): void => onAtBottomChange?.(false)}
+                />
+            </div>
+        );
+    },
 }));
 vi.mock('@/ui/components/chat/TypingIndicator', () => ({
     TypingIndicator: () => <div data-testid="typing-indicator" />,
@@ -327,5 +356,116 @@ describe('drag and drop file detection', (): void => {
         });
 
         expect(addFiles).not.toHaveBeenCalled();
+    });
+});
+
+describe('the floating scroll-to-bottom button', (): void => {
+    const mockNavigate = vi.fn();
+
+    const setup = (targetMessageId: string | null): void => {
+        vi.mocked(useNavigate).mockReturnValue(mockNavigate);
+        vi.mocked(useAppDispatch).mockReturnValue(vi.fn());
+        vi.mocked(useAppSelector).mockImplementation((selector) => {
+            const state = {
+                nav: {
+                    selectedServerId: 'server1',
+                    selectedChannelId: 'ch1',
+                    targetMessageId,
+                },
+                furTweaker: {},
+            };
+            return selector(state as never);
+        });
+        vi.mocked(useMe).mockReturnValue({ data: undefined } as never);
+        vi.mocked(useUserById).mockReturnValue({
+            data: undefined,
+            isError: false,
+        } as never);
+        vi.mocked(usePings).mockReturnValue({
+            data: { pings: [] },
+        } as never);
+        vi.mocked(useClearChannelPings).mockReturnValue({
+            mutate: vi.fn(),
+        } as never);
+        vi.mocked(useDeletePing).mockReturnValue({
+            mutate: vi.fn(),
+        } as never);
+        vi.mocked(Permissions.usePermissions).mockReturnValue({
+            hasPermission: (): true => true,
+            permissions: {} as never,
+            isOwner: false,
+            isLoading: false,
+            isTimedOut: false,
+            remainingTimeoutMs: 0,
+        });
+    };
+
+    beforeEach((): void => {
+        vi.clearAllMocks();
+    });
+
+    it('returns to the live channel instead of scrolling within the jump window while a jump target is active', (): void => {
+        setup('msg-42');
+
+        render(
+            <QueryClientProvider client={queryClient}>
+                <MainChat />
+            </QueryClientProvider>,
+        );
+
+        fireEvent.click(screen.getByTestId('simulate-scrolled-up'));
+        fireEvent.click(
+            screen.getByRole('button', { name: 'Scroll to bottom' }),
+        );
+
+        expect(mockNavigate).toHaveBeenCalledWith(
+            '/chat/@server/server1/channel/ch1',
+        );
+        expect(mockScrollToBottom).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not navigate away when there is no jump target', (): void => {
+        setup(null);
+
+        render(
+            <QueryClientProvider client={queryClient}>
+                <MainChat />
+            </QueryClientProvider>,
+        );
+
+        fireEvent.click(screen.getByTestId('simulate-scrolled-up'));
+        fireEvent.click(
+            screen.getByRole('button', { name: 'Scroll to bottom' }),
+        );
+
+        expect(mockNavigate).not.toHaveBeenCalled();
+        expect(mockScrollToBottom).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not navigate until the spring settles', (): void => {
+        setup('msg-42');
+        let settle: (() => void) | undefined;
+        mockScrollToBottom.mockImplementationOnce((onSettled?: () => void) => {
+            settle = onSettled;
+        });
+
+        render(
+            <QueryClientProvider client={queryClient}>
+                <MainChat />
+            </QueryClientProvider>,
+        );
+
+        fireEvent.click(screen.getByTestId('simulate-scrolled-up'));
+        fireEvent.click(
+            screen.getByRole('button', { name: 'Scroll to bottom' }),
+        );
+
+        expect(mockNavigate).not.toHaveBeenCalled();
+
+        settle?.();
+
+        expect(mockNavigate).toHaveBeenCalledWith(
+            '/chat/@server/server1/channel/ch1',
+        );
     });
 });

@@ -5,6 +5,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import {
     setSelectedChannelId,
+    setSelectedFriendId,
     setSelectedServerId,
     setTargetMessageId,
 } from '@/store/slices/navSlice';
@@ -142,5 +143,67 @@ describe('NavigationSync', (): void => {
         );
         expect(mockDispatch).toHaveBeenCalledWith(setSelectedChannelId(null));
         expect(mockDispatch).toHaveBeenCalledWith(setTargetMessageId(null));
+    });
+
+    describe('jumping to a message in a DM', (): void => {
+        const validUserId = '0327554478565752811';
+        const validMessageId = '0327554478565752899';
+
+        it('selects the DM alongside the jump target', (): void => {
+            vi.mocked(useLocation).mockReturnValue({
+                pathname: `/chat/@user/${validUserId}/message/${validMessageId}`,
+            } as never);
+            vi.mocked(useParams).mockReturnValue({
+                messageId: validMessageId,
+                userId: validUserId,
+            });
+
+            render(<NavigationSync />);
+
+            expect(mockDispatch).toHaveBeenCalledWith(
+                setSelectedFriendId(validUserId),
+            );
+            expect(mockDispatch).toHaveBeenCalledWith(
+                setTargetMessageId(validMessageId),
+            );
+            expect(mockNavigate).toHaveBeenCalledWith(
+                `/chat/@user/${validUserId}`,
+                { replace: true },
+            );
+        });
+
+        it('keeps the target once the messageId is stripped from the url', (): void => {
+            vi.mocked(useLocation).mockReturnValue({
+                pathname: `/chat/@user/${validUserId}`,
+            } as never);
+            vi.mocked(useParams).mockReturnValue({ userId: validUserId });
+            vi.mocked(useAppSelector).mockReturnValue({
+                selectedChannelId: null,
+                selectedFriendId: validUserId,
+                selectedServerId: null,
+            } as never);
+
+            render(<NavigationSync />);
+
+            expect(mockDispatch).not.toHaveBeenCalledWith(
+                setTargetMessageId(null),
+            );
+        });
+
+        it('drops the target when a different DM is opened', (): void => {
+            vi.mocked(useLocation).mockReturnValue({
+                pathname: `/chat/@user/${validUserId}`,
+            } as never);
+            vi.mocked(useParams).mockReturnValue({ userId: validUserId });
+            vi.mocked(useAppSelector).mockReturnValue({
+                selectedChannelId: null,
+                selectedFriendId: '0327554478565752777',
+                selectedServerId: null,
+            } as never);
+
+            render(<NavigationSync />);
+
+            expect(mockDispatch).toHaveBeenCalledWith(setTargetMessageId(null));
+        });
     });
 });

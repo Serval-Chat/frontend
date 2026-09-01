@@ -6,7 +6,6 @@ import type { usePings } from '@/api/pings/pings.queries';
 import type { useAppDispatch } from '@/store/hooks';
 import { setTargetMessageId } from '@/store/slices/navSlice';
 import type { ProcessedChatMessage } from '@/types/chat.ui';
-import { jumpDebug } from '@/utils/jumpDebug';
 import { isValidSnowflakeId } from '@/utils/validation';
 import { wsMessages } from '@/ws';
 
@@ -62,13 +61,6 @@ export const useChatConversationActions = ({
             messageId: string,
             location?: { serverId?: string; channelId?: string },
         ): void => {
-            jumpDebug('nav navigateToMessage', {
-                messageId,
-                location,
-                selectedServerId,
-                selectedChannelId,
-                selectedFriendId,
-            });
             dispatch(setTargetMessageId(messageId));
             // a search hit can belong to a different channel than the one open
             // (server-wide search). Navigate to the hit's own channel so the

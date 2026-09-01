@@ -74,16 +74,16 @@ export const ParsedEmoji = ({
         enabled: inView,
     });
 
+    const sizeClasses = isLarge ? 'h-16 w-16' : 'h-[1.5em] w-[1.5em]';
+
     if (isLoading || !inView) {
         return (
             <div
-                className={
-                    className ||
-                    cn(
-                        'inline-block animate-pulse rounded bg-white/5',
-                        isLarge ? 'h-16 w-16' : 'h-5 w-5',
-                    )
-                }
+                className={cn(
+                    'inline-block animate-pulse rounded bg-white/5 align-text-bottom',
+                    sizeClasses,
+                    className,
+                )}
                 ref={containerRef as React.RefObject<HTMLDivElement>}
                 style={style}
             />
@@ -102,7 +102,7 @@ export const ParsedEmoji = ({
                 alt={emoji.name || 'emoji'}
                 className={cn(
                     'inline-block object-contain align-text-bottom',
-                    isLarge ? 'h-16 w-16' : 'h-[1.5em] w-[1.5em]',
+                    sizeClasses,
                     className,
                 )}
                 draggable="false"
@@ -123,7 +123,7 @@ export const ParsedEmoji = ({
                     as="button"
                     className={cn(
                         'inline-block cursor-pointer rounded-sm border-none bg-transparent p-0 align-text-bottom outline-none focus-visible:ring-1 focus-visible:ring-primary',
-                        isLarge ? 'h-16 w-16' : 'h-[1.5em] w-[1.5em]',
+                        sizeClasses,
                         className,
                     )}
                     onClick={(e: React.MouseEvent): void => {

@@ -208,9 +208,9 @@ export const MessageContent = React.memo(
 
                 {sticker ? (
                     <div className="mt-1 flex max-w-[240px] flex-col gap-1">
-                        <Tooltip content={sticker.name} position="top">
+                        <Tooltip fullWidth content={sticker.name} position="top">
                             <button
-                                className="cursor-pointer border-none bg-transparent p-0 transition-opacity outline-none hover:opacity-90 active:opacity-80"
+                                className="block w-full cursor-pointer border-none bg-transparent p-0 transition-opacity outline-none hover:opacity-90 active:opacity-80"
                                 type="button"
                                 onClick={(e): void => {
                                     showStickerInfo(
@@ -226,7 +226,7 @@ export const MessageContent = React.memo(
                             >
                                 <PausedAnimatedImage
                                     alt={sticker.name}
-                                    className="h-auto max-w-full select-none"
+                                    className="aspect-square w-full select-none"
                                     paused={
                                         limitedAnimations
                                             ? isAnimatedImageUrl(

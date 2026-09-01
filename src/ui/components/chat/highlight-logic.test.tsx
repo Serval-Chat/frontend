@@ -1,3 +1,4 @@
+
 import { act, render } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -69,22 +70,6 @@ vi.mock('@/ui/components/layout/VerticalSpacer', () => ({
     VerticalSpacer: () => <div />,
 }));
 
-vi.mock('@tanstack/react-virtual', () => ({
-    useVirtualizer: vi.fn().mockImplementation((options: any) => ({
-        getVirtualItems: (): { index: number; start: number; key: number }[] =>
-            Array.from({ length: options.count }).map(
-                (_, i): { index: number; start: number; key: number } => ({
-                    index: i,
-                    start: 0,
-                    key: i,
-                }),
-            ),
-        getTotalSize: (): number => options.count * 100,
-        scrollToIndex: vi.fn(),
-        measureElement: vi.fn(),
-    })),
-}));
-
 describe('MessagesList Highlight Logic', (): void => {
     const mockDispatch = vi.fn();
     const mockMessages = [
@@ -99,7 +84,8 @@ describe('MessagesList Highlight Logic', (): void => {
         vi.mocked(useAppSelector).mockReturnValue({}); // default blocks
 
         globalThis.HTMLElement.prototype.scrollIntoView = vi.fn();
-        globalThis.requestAnimationFrame = vi.fn((cb) => cb());
+        globalThis.requestAnimationFrame = vi.fn(() => 0);
+        globalThis.cancelAnimationFrame = vi.fn();
     });
 
     it('fades the highlight after the timeout but keeps the target window loaded', async (): Promise<void> => {

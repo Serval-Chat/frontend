@@ -192,4 +192,40 @@ describe('FileEmbed', (): void => {
             expect.stringContaining('/api/v1/files/download/text-2'),
         );
     });
+
+    it('reserves a skeleton sized to the file, instead of a tiny fixed spinner, while content loads', (): void => {
+        useFileContentMock.mockReturnValue({ data: null, isLoading: true });
+
+        const smallAttachment: MessageAttachment = {
+            attachmentId: 'text-small',
+            type: 'text',
+            mimeType: 'text/plain',
+            name: 'small.txt',
+            size: 80,
+        };
+        const { unmount } = render(
+            <FileEmbed attachment={smallAttachment} />,
+        );
+        const smallLineCount = screen.getAllByTestId(
+            'code-embed-skeleton-line',
+        ).length;
+        expect(smallLineCount).toBeGreaterThan(0);
+        unmount();
+
+        const largeAttachment: MessageAttachment = {
+            attachmentId: 'text-large',
+            type: 'text',
+            mimeType: 'text/plain',
+            name: 'large.txt',
+            size: 5000,
+        };
+        render(<FileEmbed attachment={largeAttachment} />);
+        const largeLineCount = screen.getAllByTestId(
+            'code-embed-skeleton-line',
+        ).length;
+
+        expect(largeLineCount).toBeGreaterThan(smallLineCount);
+
+        useFileContentMock.mockReturnValue({ data: null, isLoading: false });
+    });
 });

@@ -293,6 +293,7 @@ export const FileEmbed = ({ url, attachment, onResize }: FileEmbedProps) => {
         return (
             <CodeEmbed
                 content={attachment?.content}
+                estimatedBytes={meta.size}
                 filename={displayName || 'file'}
                 isLocal={isLocal}
                 url={resolvedUrl}
@@ -347,17 +348,31 @@ export const FileEmbed = ({ url, attachment, onResize }: FileEmbedProps) => {
     );
 };
 
+const AVG_CODE_BYTES_PER_LINE = 40;
+const MIN_PREVIEW_SKELETON_LINES = 3;
+
+const estimatePreviewLines = (bytes: number | undefined): number => {
+    if (!bytes) return MIN_PREVIEW_SKELETON_LINES;
+    const estimated = Math.round(bytes / AVG_CODE_BYTES_PER_LINE);
+    return Math.min(
+        CODE_PREVIEW_MAX_LINES,
+        Math.max(MIN_PREVIEW_SKELETON_LINES, estimated),
+    );
+};
+
 const CodeEmbed = ({
     url,
     isLocal,
     filename,
     content: embeddedContent,
+    estimatedBytes,
     onResize,
 }: {
     url: string;
     isLocal: boolean;
     filename: string;
     content?: string;
+    estimatedBytes?: number;
     onResize?: () => void;
 }) => {
     const hasEmbeddedContent = embeddedContent !== undefined;
@@ -384,13 +399,35 @@ const CodeEmbed = ({
     }, [content, isLoading, onResize]);
 
     if (isLoading) {
+        const skeletonLines = estimatePreviewLines(estimatedBytes);
         return (
-            <Box className="my-2 flex w-fit min-w-[200px] items-center gap-2 rounded-lg bg-bg-secondary p-4">
-                <LoadingSpinner size="sm" />
-                <Text size="sm" variant="muted">
-                    Loading content...
-                </Text>
-            </Box>
+            <div
+                className="my-2 overflow-hidden rounded-lg border border-border-subtle bg-background shadow-sm"
+                data-testid="code-embed-skeleton"
+            >
+                <div className="flex items-center justify-between border-b border-border-subtle bg-bg-subtle px-3 py-2">
+                    <span className="truncate text-xs font-bold text-foreground/80">
+                        {filename}
+                    </span>
+                    <LoadingSpinner size="sm" />
+                </div>
+                <div className="bg-bg-secondary/50 p-0">
+                    {Array.from({ length: skeletonLines }).map((_, i) => (
+                        <div
+                            className="flex h-6 items-center px-3"
+                            data-testid="code-embed-skeleton-line"
+                            key={`skeleton-line-${i}`}
+                        >
+                            <div
+                                className="h-3 animate-pulse rounded bg-bg-subtle"
+                                style={{
+                                    width: `${35 + ((i * 17) % 50)}%`,
+                                }}
+                            />
+                        </div>
+                    ))}
+                </div>
+            </div>
         );
     }
 
