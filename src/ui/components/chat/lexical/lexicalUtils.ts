@@ -8,6 +8,7 @@ import {
 
 import { $isChipNode } from '@/ui/components/chat/lexical/ChipNode';
 
+import { $isSpoilerChipNode } from './SpoilerChipNode';
 import {
     $isSlashArgChipNode,
     $isSlashCommandChipNode,
@@ -73,6 +74,8 @@ export function $getRawMessageText(): string {
             rawText += node.getTextContent();
         } else if ($isSlashArgChipNode(node)) {
             rawText += node.getValue();
+        } else if ($isSpoilerChipNode(node)) {
+            rawText += node.getContent();
         } else if ($isChipNode(node)) {
             const type = node.getChipType();
             const payload = node.getPayload();

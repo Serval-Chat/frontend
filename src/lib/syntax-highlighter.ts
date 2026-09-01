@@ -11,6 +11,7 @@ refractor.alias({
     yaml: ['yml'],
     markdown: ['md', 'mkd'],
     sql: ['sql', 'ddl', 'dml'],
+    rust: ['rust', 'rs']
 });
 
 const CACHE_LIMIT = 500;

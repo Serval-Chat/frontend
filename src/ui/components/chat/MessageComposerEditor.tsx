@@ -24,6 +24,7 @@ import { LexicalSlashCommandPlugin } from './lexical/LexicalSlashCommandPlugin';
 import { LexicalSubmitPlugin } from './lexical/LexicalSubmitPlugin';
 import { SlashArgChipNode } from './lexical/SlashArgChipNode';
 import { SlashCommandChipNode } from './lexical/SlashCommandChipNode';
+import { SpoilerChipNode } from './lexical/SpoilerChipNode';
 import { $getRawMessageText } from './lexical/lexicalUtils';
 import { $getSlashChipState } from './lexical/slashChipHelpers';
 
@@ -46,12 +47,13 @@ const theme = {
         italic: 'italic',
         underline: 'underline',
         strikethrough: 'line-through',
+        code: 'rounded-sm bg-bg-secondary px-0.5 font-mono',
     },
 };
 
 const messageInputInitialConfig = {
     namespace: 'MessageInput',
-    nodes: [ChipNode, SlashCommandChipNode, SlashArgChipNode],
+    nodes: [ChipNode, SlashCommandChipNode, SlashArgChipNode, SpoilerChipNode],
     onError: (error: Error): void => {
         console.error(error);
     },
