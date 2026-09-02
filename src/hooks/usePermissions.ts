@@ -161,6 +161,7 @@ export const usePermissions = (
             seeDeletedMessages: false,
             moderateMembers: false,
             manageStickers: false,
+            useExternalEmojisAndStickers: false,
         };
 
         if (!serverId || !currentUser) return perms;
@@ -261,18 +262,21 @@ export const usePermissions = (
             }
 
             // 3. Base Server Permissions
-            if (
-                userRoles.some(
+            const roleValues = [
+                ...userRoles.map(
                     (r): boolean | undefined => r.permissions?.[permKey],
-                )
-            )
-                return true;
-            if (everyoneRole?.permissions?.[permKey]) return true;
+                ),
+                everyoneRole?.permissions?.[permKey],
+            ];
+            if (roleValues.some((v): boolean => v === true)) return true;
+            if (roleValues.some((v): boolean => v !== undefined))
+                return false;
 
             if (
                 permKey === 'viewCategories' ||
                 permKey === 'viewChannels' ||
-                permKey === 'connect'
+                permKey === 'connect' ||
+                permKey === 'useExternalEmojisAndStickers'
             )
                 return true;
             return false;

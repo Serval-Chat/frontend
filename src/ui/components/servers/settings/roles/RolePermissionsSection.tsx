@@ -188,6 +188,14 @@ export const RolePermissionsSection = ({
                 }}
             />
             <PermissionToggle
+                description="Allows member to use emojis and stickers from other servers in messages and reactions."
+                label="Use External Emojis & Stickers"
+                value={permissions.useExternalEmojisAndStickers ?? true}
+                onChange={(val): void => {
+                    onChange('useExternalEmojisAndStickers', val);
+                }}
+            />
+            <PermissionToggle
                 description="Allows member to use @everyone and @here to notify all members."
                 label="Mention @everyone"
                 value={permissions.pingRolesAndEveryone || false}

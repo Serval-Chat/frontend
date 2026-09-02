@@ -26,6 +26,7 @@ interface MessageComposerPickersProps {
     showStickerPicker: boolean;
     customCategories: CustomEmojiCategory[];
     stickerCategories: StickerCategory[];
+    hasExternalEmojiPermission?: boolean;
     sendMessage: (text: string, replyToId?: string, stickerId?: string) => void;
     onClickAway: () => void;
     onStickerSelected: () => void;
@@ -37,6 +38,7 @@ export const MessageComposerPickers = ({
     showStickerPicker,
     customCategories,
     stickerCategories,
+    hasExternalEmojiPermission,
     sendMessage,
     onClickAway,
     onStickerSelected,
@@ -127,6 +129,7 @@ export const MessageComposerPickers = ({
                 >
                     <EmojiPicker
                         customCategories={pickerCategories}
+                        hasExternalEmojiPermission={hasExternalEmojiPermission}
                         onClickAway={onClickAway}
                         onCustomEmojiSelect={handleCustomEmojiSelect}
                         onEmojiSelect={handleEmojiSelect}
@@ -144,6 +147,7 @@ export const MessageComposerPickers = ({
                 >
                     <StickerPicker
                         categories={stickerCategories}
+                        hasExternalEmojiPermission={hasExternalEmojiPermission}
                         onStickerSelect={handleStickerSelect}
                     />
                 </React.Suspense>

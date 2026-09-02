@@ -128,6 +128,12 @@ const getPermissionGroups = (
                 description:
                     'Allows members to render markdown even when disallowed markdown features are configured.',
             },
+            {
+                key: 'useExternalEmojisAndStickers',
+                label: 'Use External Emojis & Stickers',
+                description:
+                    'Allows members to use emojis and stickers from other servers in messages and reactions.',
+            },
         ],
     },
     {
@@ -167,6 +173,7 @@ const VALID_PERMISSION_KEYS = new Set([
     'seeDeletedMessages',
     'moderateMembers',
     'manageStickers',
+    'useExternalEmojisAndStickers',
 ]);
 
 const stripUnknownKeys = (

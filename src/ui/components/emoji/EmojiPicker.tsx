@@ -57,6 +57,7 @@ interface EmojiPickerProps {
     customCategories?: CustomEmojiCategory[];
     className?: string;
     onClickAway?: () => void;
+    hasExternalEmojiPermission?: boolean;
 }
 
 const PICKER_WIDTH = 620;
@@ -343,6 +344,7 @@ const EmojiPickerContent = ({
     customCategories,
     onEmojiSelect,
     onCustomEmojiSelect,
+    hasExternalEmojiPermission = true,
 }: {
     width: number;
     height: number;
@@ -353,6 +355,7 @@ const EmojiPickerContent = ({
         name: string;
         url: string;
     }) => void;
+    hasExternalEmojiPermission?: boolean;
 }) => {
     const listRef = React.useRef<ListImperativeAPI>(null);
     const scrollOffsetRef = React.useRef<number>(0);
@@ -741,6 +744,20 @@ const EmojiPickerContent = ({
                         onSelect={onEmojiSelect}
                     />
                 ) : null}
+
+                {!hasExternalEmojiPermission ? (
+                    <Box className="pointer-events-none absolute right-0 bottom-0 left-0 border-t border-divider/50 bg-background/95 px-3 py-1.5 backdrop-blur-sm">
+                        <Text
+                            className="text-center"
+                            size="xs"
+                            variant="muted"
+                        >
+                            Only this server's emojis are available. Ask an
+                            admin for the &quot;Use External Emojis &amp;
+                            Stickers&quot; permission to use others.
+                        </Text>
+                    </Box>
+                ) : null}
             </Box>
         </div>
     );
@@ -754,6 +771,7 @@ export const EmojiPicker = ({
     customCategories = EMPTY_CUSTOM_CATEGORIES,
     className,
     onClickAway,
+    hasExternalEmojiPermission = true,
 }: EmojiPickerProps) => {
     const [windowWidth, setWindowWidth] = useState<number>(
         typeof window !== 'undefined' ? window.innerWidth : 1024,
@@ -821,6 +839,9 @@ export const EmojiPicker = ({
                 >
                     <EmojiPickerContent
                         customCategories={customCategories}
+                        hasExternalEmojiPermission={
+                            hasExternalEmojiPermission
+                        }
                         height={height}
                         width={windowWidth}
                         onCustomEmojiSelect={onCustomEmojiSelect}
@@ -851,6 +872,7 @@ export const EmojiPicker = ({
         >
             <EmojiPickerContent
                 customCategories={customCategories}
+                hasExternalEmojiPermission={hasExternalEmojiPermission}
                 height={height}
                 width={width}
                 onCustomEmojiSelect={onCustomEmojiSelect}

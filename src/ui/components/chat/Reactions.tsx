@@ -58,7 +58,12 @@ export const Reactions = React.memo(
 
         const pickerRef = React.useRef<HTMLDivElement>(null);
         const isMobile = useIsMobile();
-        const { customCategories } = useCustomEmojis({ enabled: showPicker });
+        const { customCategories, hasExternalEmojiPermission } =
+            useCustomEmojis({
+                enabled: showPicker,
+                serverId,
+                channelId,
+            });
         const { frequentlyUsedCategory } = useFrequentlyUsedEmojis();
         const pickerCategories = React.useMemo(
             () =>
@@ -311,6 +316,9 @@ export const Reactions = React.memo(
                             >
                                 <EmojiPicker
                                     customCategories={pickerCategories}
+                                    hasExternalEmojiPermission={
+                                        hasExternalEmojiPermission
+                                    }
                                     onClickAway={(): void => setShowPicker(false)}
                                     onCustomEmojiSelect={handleCustomEmojiSelect}
                                     onEmojiSelect={handleEmojiSelect}

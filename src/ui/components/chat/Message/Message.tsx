@@ -120,7 +120,12 @@ export const Message = React.memo(
         const { data: friends } = useFriends();
         const { mutate: sendFriendRequest } = useSendFriendRequest();
         const { mutate: removeFriend } = useRemoveFriend();
-        const { customCategories } = useCustomEmojis({ enabled: showPicker });
+        const { customCategories, hasExternalEmojiPermission } =
+            useCustomEmojis({
+                enabled: showPicker,
+                serverId: message.serverId,
+                channelId: message.channelId,
+            });
         const { quickReactions, frequentlyUsedCategory } =
             useFrequentlyUsedEmojis();
         const pickerCategories = React.useMemo(
@@ -618,6 +623,9 @@ export const Message = React.memo(
                         <MessageEmojiPicker
                             coords={pickerCoords}
                             customCategories={pickerCategories}
+                            hasExternalEmojiPermission={
+                                hasExternalEmojiPermission
+                            }
                             isOpen={showPicker}
                             pickerRef={pickerRef}
                             onClose={handleClosePicker}

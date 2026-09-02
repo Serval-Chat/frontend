@@ -140,6 +140,7 @@ export interface RolePermissions {
     seeDeletedMessages: boolean;
     moderateMembers: boolean;
     manageStickers: boolean;
+    useExternalEmojisAndStickers: boolean;
 }
 
 export interface Role {

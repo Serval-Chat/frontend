@@ -46,7 +46,6 @@ export const useMessageInputData = ({
     showStickerPicker,
 }: UseMessageInputDataArgs) => {
     const location = useLocation();
-    const { customCategories } = useCustomEmojis({ enabled: true });
 
     const isServerRoute = location.pathname.includes('/@server/');
     const serverIdFromUrl = location.pathname
@@ -56,6 +55,12 @@ export const useMessageInputData = ({
         !!selectedServerId &&
         isServerRoute &&
         selectedServerId === serverIdFromUrl;
+
+    const { customCategories, hasExternalEmojiPermission } = useCustomEmojis({
+        enabled: true,
+        serverId: isServerContextReady ? selectedServerId : null,
+        channelId: selectedChannelId,
+    });
 
     const { data: friendsList = [] } = useFriends();
     const { data: members = [] } = useMembers(selectedServerId, {
@@ -131,30 +136,35 @@ export const useMessageInputData = ({
             });
         }
 
-        const stickersByServer = new Map<string, typeof allStickers>();
-        for (const sticker of allStickers) {
-            if (selectedServerId && sticker.serverId === selectedServerId) {
-                continue;
+        if (!isServerContextReady || hasExternalEmojiPermission) {
+            const stickersByServer = new Map<string, typeof allStickers>();
+            for (const sticker of allStickers) {
+                if (
+                    selectedServerId &&
+                    sticker.serverId === selectedServerId
+                ) {
+                    continue;
+                }
+                const group = stickersByServer.get(sticker.serverId);
+                if (group) {
+                    group.push(sticker);
+                } else {
+                    stickersByServer.set(sticker.serverId, [sticker]);
+                }
             }
-            const group = stickersByServer.get(sticker.serverId);
-            if (group) {
-                group.push(sticker);
-            } else {
-                stickersByServer.set(sticker.serverId, [sticker]);
-            }
-        }
 
-        for (const [sid, serverStickers] of stickersByServer.entries()) {
-            if (serverStickers.length > 0) {
-                const serverInfo = serverList.find(
-                    (s): boolean => s.id === sid,
-                );
-                cats.push({
-                    id: sid,
-                    name: serverInfo?.name || 'Other Server',
-                    icon: serverInfo?.icon,
-                    stickers: serverStickers,
-                });
+            for (const [sid, serverStickers] of stickersByServer.entries()) {
+                if (serverStickers.length > 0) {
+                    const serverInfo = serverList.find(
+                        (s): boolean => s.id === sid,
+                    );
+                    cats.push({
+                        id: sid,
+                        name: serverInfo?.name || 'Other Server',
+                        icon: serverInfo?.icon,
+                        stickers: serverStickers,
+                    });
+                }
             }
         }
 
@@ -166,6 +176,7 @@ export const useMessageInputData = ({
         allStickers,
         selectedServerId,
         serverList,
+        hasExternalEmojiPermission,
     ]);
 
     const findLastMyMessage = useMemo(() => {
@@ -218,6 +229,7 @@ export const useMessageInputData = ({
         allServerEmojis,
         stickerCategories,
         customCategories,
+        hasExternalEmojiPermission,
         findLastMyMessage,
         editChannelMessage,
         editUserMessage,

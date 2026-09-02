@@ -183,6 +183,7 @@ export const MessageInput = ({
         allServerEmojis,
         stickerCategories,
         customCategories,
+        hasExternalEmojiPermission,
         findLastMyMessage,
         editChannelMessage,
         editUserMessage,
@@ -441,6 +442,7 @@ export const MessageInput = ({
             <MessageComposerOverlays
                 customCategories={customCategories}
                 editor={editor}
+                hasExternalEmojiPermission={hasExternalEmojiPermission}
                 sendMessage={sendMessage}
                 showEmojiPicker={showEmojiPicker}
                 showPollModal={showPollModal}

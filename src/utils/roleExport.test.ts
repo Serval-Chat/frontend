@@ -40,6 +40,7 @@ const sampleRole: Role = {
         seeDeletedMessages: true,
         moderateMembers: true,
         manageStickers: false,
+        useExternalEmojisAndStickers: true,
     },
 };
 
@@ -76,6 +77,7 @@ const sampleRole2: Role = {
         seeDeletedMessages: true,
         moderateMembers: true,
         manageStickers: true,
+        useExternalEmojisAndStickers: true,
     },
 };
 

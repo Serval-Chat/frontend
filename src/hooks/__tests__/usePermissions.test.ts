@@ -156,6 +156,112 @@ describe('usePermissions', (): void => {
         expect(result.current.hasPermission('sendMessages')).toBe(false);
     });
 
+    it('useExternalEmojisAndStickers defaults to true with no overrides', (): void => {
+        setupMocks();
+        const { result } = renderHook(() =>
+            usePermissions('server1', 'channel1'),
+        );
+        expect(
+            result.current.hasPermission('useExternalEmojisAndStickers'),
+        ).toBe(true);
+    });
+
+    it('useExternalEmojisAndStickers: role-level deny turns it off', (): void => {
+        vi.mocked(UserQueries.useMe).mockReturnValue({ data: mockMe } as never);
+        vi.mocked(ServerQueries.useServerDetails).mockReturnValue({
+            data: mockServer,
+        } as never);
+        vi.mocked(ServerQueries.useMembers).mockReturnValue({
+            data: [mockMember],
+        } as never);
+        vi.mocked(ServerQueries.useRoles).mockReturnValue({
+            data: [
+                {
+                    id: 'everyone_id',
+                    name: '@everyone',
+                    position: 0,
+                    permissions: { useExternalEmojisAndStickers: false },
+                },
+                mockRole1,
+            ],
+        } as never);
+        vi.mocked(ServerQueries.useChannels).mockReturnValue({
+            data: [],
+        } as never);
+        vi.mocked(ServerQueries.useCategories).mockReturnValue({
+            data: [],
+        } as never);
+
+        const { result } = renderHook(() =>
+            usePermissions('server1', 'channel1'),
+        );
+        expect(
+            result.current.hasPermission('useExternalEmojisAndStickers'),
+        ).toBe(false);
+    });
+
+    it('useExternalEmojisAndStickers: category override denies even when role allows it', (): void => {
+        setupMocks();
+        vi.mocked(ServerQueries.useChannels).mockReturnValue({
+            data: [
+                {
+                    id: 'channel1',
+                    categoryId: 'cat1',
+                    permissions: {},
+                } as never,
+            ],
+        } as never);
+        vi.mocked(ServerQueries.useCategories).mockReturnValue({
+            data: [
+                {
+                    id: 'cat1',
+                    permissions: {
+                        role1: { useExternalEmojisAndStickers: false },
+                    },
+                } as never,
+            ],
+        } as never);
+
+        const { result } = renderHook(() =>
+            usePermissions('server1', 'channel1'),
+        );
+        expect(
+            result.current.hasPermission('useExternalEmojisAndStickers'),
+        ).toBe(false);
+    });
+
+    it('useExternalEmojisAndStickers: channel override wins over category override', (): void => {
+        setupMocks();
+        vi.mocked(ServerQueries.useChannels).mockReturnValue({
+            data: [
+                {
+                    id: 'channel1',
+                    categoryId: 'cat1',
+                    permissions: {
+                        role1: { useExternalEmojisAndStickers: true },
+                    },
+                } as never,
+            ],
+        } as never);
+        vi.mocked(ServerQueries.useCategories).mockReturnValue({
+            data: [
+                {
+                    id: 'cat1',
+                    permissions: {
+                        role1: { useExternalEmojisAndStickers: false },
+                    },
+                } as never,
+            ],
+        } as never);
+
+        const { result } = renderHook(() =>
+            usePermissions('server1', 'channel1'),
+        );
+        expect(
+            result.current.hasPermission('useExternalEmojisAndStickers'),
+        ).toBe(true);
+    });
+
     it('category overrides act as fallback', (): void => {
         setupMocks();
         vi.mocked(ServerQueries.useChannels).mockReturnValue({

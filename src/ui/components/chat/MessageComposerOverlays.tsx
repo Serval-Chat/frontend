@@ -15,6 +15,7 @@ interface MessageComposerOverlaysProps {
     showStickerPicker: boolean;
     customCategories: CustomEmojiCategory[];
     stickerCategories: StickerCategory[];
+    hasExternalEmojiPermission?: boolean;
     sendMessage: (text: string, replyToId?: string, stickerId?: string) => void;
     slashPreview: SlashPreview | null;
     showPollModal: boolean;
@@ -29,6 +30,7 @@ export const MessageComposerOverlays = ({
     showStickerPicker,
     customCategories,
     stickerCategories,
+    hasExternalEmojiPermission,
     sendMessage,
     slashPreview,
     showPollModal,
@@ -40,6 +42,7 @@ export const MessageComposerOverlays = ({
         <MessageComposerPickers
             customCategories={customCategories}
             editor={editor}
+            hasExternalEmojiPermission={hasExternalEmojiPermission}
             sendMessage={sendMessage}
             showEmojiPicker={showEmojiPicker}
             showStickerPicker={showStickerPicker}

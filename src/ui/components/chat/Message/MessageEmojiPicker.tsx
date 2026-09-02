@@ -16,6 +16,7 @@ interface MessageEmojiPickerProps {
     coords: { x: number; y: number };
     pickerRef: React.RefObject<HTMLDivElement | null>;
     customCategories?: CustomEmojiCategory[];
+    hasExternalEmojiPermission?: boolean;
 
     onSelect: (emoji: string) => void;
     onCustomSelect: (emoji: { id: string; name: string }) => void;
@@ -28,6 +29,7 @@ export const MessageEmojiPicker = React.memo(
         coords,
         pickerRef,
         customCategories,
+        hasExternalEmojiPermission,
         onSelect,
         onCustomSelect,
         onClose,
@@ -53,6 +55,7 @@ export const MessageEmojiPicker = React.memo(
                 >
                     <EmojiPicker
                         customCategories={customCategories}
+                        hasExternalEmojiPermission={hasExternalEmojiPermission}
                         onClickAway={onClose}
                         onCustomEmojiSelect={onCustomSelect}
                         onEmojiSelect={onSelect}

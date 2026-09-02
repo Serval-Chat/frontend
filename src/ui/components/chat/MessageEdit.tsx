@@ -139,11 +139,13 @@ const MessageEditActions = ({
 const MessageEditEmojiPopup = ({
     pickerRef,
     customCategories,
+    hasExternalEmojiPermission,
     onEmojiSelect,
     onCustomEmojiSelect,
 }: {
     pickerRef: React.RefObject<HTMLDivElement | null>;
     customCategories: ReturnType<typeof useCustomEmojis>['customCategories'];
+    hasExternalEmojiPermission?: boolean;
     onEmojiSelect: (emoji: string) => void;
     onCustomEmojiSelect: (emoji: { id: string; name: string }) => void;
 }) => (
@@ -160,6 +162,7 @@ const MessageEditEmojiPopup = ({
         >
             <EmojiPicker
                 customCategories={customCategories}
+                hasExternalEmojiPermission={hasExternalEmojiPermission}
                 onCustomEmojiSelect={onCustomEmojiSelect}
                 onEmojiSelect={onEmojiSelect}
             />
@@ -184,7 +187,11 @@ export const MessageEdit = ({
     const editChannelMessage = useEditChannelMessage();
     const editUserMessage = useEditUserMessage();
     const { showToast } = useToast();
-    const { customCategories } = useCustomEmojis({ enabled: true });
+    const { customCategories, hasExternalEmojiPermission } = useCustomEmojis({
+        enabled: true,
+        serverId,
+        channelId,
+    });
     const { frequentlyUsedCategory, recordUsage } = useFrequentlyUsedEmojis();
     const pickerCategories = useMemo(
         () =>
@@ -460,6 +467,7 @@ export const MessageEdit = ({
             {showEmojiPicker ? (
                 <MessageEditEmojiPopup
                     customCategories={pickerCategories}
+                    hasExternalEmojiPermission={hasExternalEmojiPermission}
                     pickerRef={emojiPickerRef}
                     onCustomEmojiSelect={handleCustomEmojiSelect}
                     onEmojiSelect={handleEmojiSelect}
