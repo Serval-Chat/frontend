@@ -2,6 +2,7 @@ import type { KeybindBinding, UserKeybinds } from '@/api/users/users.types';
 
 export type KeybindActionId =
     | 'composer.focus'
+    | 'chat.jumpToBottom'
     | 'debug.typing.more'
     | 'debug.typing.less'
     | 'debug.theme.previous'
@@ -27,6 +28,13 @@ export const KEYBIND_ACTIONS: KeybindAction[] = [
         description: 'Focus the message composer from chat.',
         category: 'Chat',
         defaultBinding: { code: 'Printable' },
+    },
+    {
+        id: 'chat.jumpToBottom',
+        label: 'Jump to Bottom',
+        description: 'Scroll to the latest message in the conversation.',
+        category: 'Chat',
+        defaultBinding: { code: 'Escape' },
     },
     {
         id: 'debug.typing.more',

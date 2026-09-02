@@ -10,6 +10,7 @@ import { useMe } from '@/api/users/users.queries';
 import type { User } from '@/api/users/users.types';
 import { useChatConversationActions } from '@/hooks/chat/useChatConversationActions';
 import { useChatDebugKeybinds } from '@/hooks/chat/useChatDebugKeybinds';
+import { useChatNavigationKeybinds } from '@/hooks/chat/useChatNavigationKeybinds';
 import { useFileQueue } from '@/hooks/chat/useFileQueue';
 import { useMainChatData } from '@/hooks/chat/useMainChatData';
 import { useServalBackground } from '@/hooks/chat/useServalBackground';
@@ -422,6 +423,15 @@ export const MainChat = ({
                 debugTypingCount: (s.debugTypingCount + delta + 5) % 5,
             }));
         },
+    });
+
+    const handleEscapeJumpToBottom = useCallback((): void => {
+        messagesListRef.current?.scrollToBottom();
+    }, []);
+
+    useChatNavigationKeybinds({
+        keybindManager,
+        onJumpToBottom: handleEscapeJumpToBottom,
     });
 
     const {
