@@ -96,6 +96,7 @@ export const Message = React.memo(
         });
 
         const disableActions = disableActionsProp || message.isEphemeral;
+        const isDeleted = !!message.deletedAt;
 
         const [showProfile, setShowProfile] = React.useState(false);
         const [showPicker, setShowPicker] = React.useState(false);
@@ -273,7 +274,7 @@ export const Message = React.memo(
 
         const handleDoubleClick = React.useCallback(
             (event: React.MouseEvent<HTMLElement>): void => {
-                if (!onReplyToMessage || disableActions) return;
+                if (!onReplyToMessage || disableActions || isDeleted) return;
 
                 const target = event.target;
                 if (!(target instanceof Element)) return;
@@ -285,7 +286,7 @@ export const Message = React.memo(
 
                 onReplyToMessage(message);
             },
-            [disableActions, message, onReplyToMessage],
+            [disableActions, isDeleted, message, onReplyToMessage],
         );
 
         const localNickname = React.useMemo(
@@ -383,8 +384,9 @@ export const Message = React.memo(
             canEdit,
             canDelete,
             canPin,
+            canReact: !isDeleted,
             friends,
-            onReplyToMessage,
+            onReplyToMessage: isDeleted ? undefined : onReplyToMessage,
             onEdit: handleEdit,
             onDelete: handleDelete,
             onTogglePin: handleTogglePin,
@@ -570,6 +572,7 @@ export const Message = React.memo(
                         )}
                         <Reactions
                             channelId={message.channelId}
+                            isDeleted={isDeleted}
                             messageId={message.id}
                             reactions={message.reactions ?? EMPTY_REACTIONS}
                             serverId={message.serverId}
@@ -583,7 +586,7 @@ export const Message = React.memo(
                     </Box>
                 </Box>
 
-                {disableActions ? null : (
+                {disableActions || isDeleted ? null : (
                     <Box
                         className={cn(
                             'absolute top-0 right-4 z-[var(--z-index-effect-md)] -translate-y-1/2 opacity-0 transition-all group-hover:opacity-100',
@@ -594,6 +597,7 @@ export const Message = React.memo(
                             canDelete={canDelete}
                             canEdit={canEdit}
                             canPin={canPin}
+                            canReact={!isDeleted}
                             message={message}
                             quickReactions={quickReactions}
                             reactRef={reactRef}
@@ -602,7 +606,9 @@ export const Message = React.memo(
                             onDiscard={handleDiscard}
                             onEdit={handleEdit}
                             onQuickReact={handleQuickReact}
-                            onReplyToMessage={onReplyToMessage}
+                            onReplyToMessage={
+                                isDeleted ? undefined : onReplyToMessage
+                            }
                             onRetry={handleRetry}
                             onTogglePicker={handleTogglePicker}
                             onTogglePin={handleTogglePin}

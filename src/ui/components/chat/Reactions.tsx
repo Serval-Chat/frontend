@@ -32,11 +32,18 @@ interface ReactionsProps {
     reactions: MessageReaction[];
     serverId?: string;
     channelId?: string;
+    isDeleted?: boolean;
     onAddClick?: () => void;
 }
 
 export const Reactions = React.memo(
-    ({ messageId, reactions, serverId, channelId }: ReactionsProps) => {
+    ({
+        messageId,
+        reactions,
+        serverId,
+        channelId,
+        isDeleted,
+    }: ReactionsProps) => {
         const { data: me } = useMe();
         const blocks = useAppSelector(
             (state): Record<string, number> => state.blocking.blocks,
@@ -186,7 +193,8 @@ export const Reactions = React.memo(
                     const reactionElement = (
                         <Box
                             className={cn(
-                                'flex cursor-pointer items-center gap-1.5 rounded-md border px-2 py-1 transition-all select-none',
+                                'flex items-center gap-1.5 rounded-md border px-2 py-1 transition-all select-none',
+                                isDeleted ? 'cursor-default' : 'cursor-pointer',
                                 hasReacted
                                     ? 'border-primary/30 bg-primary/10 text-primary'
                                     : 'border-border-subtle bg-bg-subtle text-muted-foreground hover:border-border-subtle/80 hover:bg-bg-subtle-hover',
@@ -196,9 +204,13 @@ export const Reactions = React.memo(
                                     ? `${reaction.count} reactions`
                                     : undefined
                             }
-                            onClick={(): void => {
-                                handleReactionClick(reaction);
-                            }}
+                            onClick={
+                                isDeleted
+                                    ? undefined
+                                    : (): void => {
+                                          handleReactionClick(reaction);
+                                      }
+                            }
                         >
                             <Text className="text-base leading-none">
                                 {reaction.emojiType === 'custom' ? (
@@ -247,7 +259,7 @@ export const Reactions = React.memo(
                         },
                     ];
 
-                    if (canManageReactions && serverId && channelId) {
+                    if (canManageReactions && serverId && channelId && !isDeleted) {
                         contextMenuItems.push({
                             id: 'remove-reaction',
                             label: 'Remove Emoji',
@@ -278,33 +290,35 @@ export const Reactions = React.memo(
                     );
                 })}
 
-                <Box className="relative h-full">
-                    <Button
-                        className="h-full min-h-[32px] border border-border-subtle bg-bg-subtle text-muted-foreground hover:border-border-subtle/80 hover:bg-bg-subtle-hover"
-                        size="sm"
-                        title="Add Reaction"
-                        variant="ghost"
-                        onClick={(): void => {
-                            setShowPicker(!showPicker);
-                        }}
-                    >
-                        <SmilePlus size={18} />
-                    </Button>
-
-                    {showPicker ? (
-                        <div
-                            className="absolute bottom-full left-0 z-[var(--z-index-popover)] pb-2"
-                            ref={pickerRef}
+                {isDeleted ? null : (
+                    <Box className="relative h-full">
+                        <Button
+                            className="h-full min-h-[32px] border border-border-subtle bg-bg-subtle text-muted-foreground hover:border-border-subtle/80 hover:bg-bg-subtle-hover"
+                            size="sm"
+                            title="Add Reaction"
+                            variant="ghost"
+                            onClick={(): void => {
+                                setShowPicker(!showPicker);
+                            }}
                         >
-                            <EmojiPicker
-                                customCategories={pickerCategories}
-                                onClickAway={(): void => setShowPicker(false)}
-                                onCustomEmojiSelect={handleCustomEmojiSelect}
-                                onEmojiSelect={handleEmojiSelect}
-                            />
-                        </div>
-                    ) : null}
-                </Box>
+                            <SmilePlus size={18} />
+                        </Button>
+
+                        {showPicker ? (
+                            <div
+                                className="absolute bottom-full left-0 z-[var(--z-index-popover)] pb-2"
+                                ref={pickerRef}
+                            >
+                                <EmojiPicker
+                                    customCategories={pickerCategories}
+                                    onClickAway={(): void => setShowPicker(false)}
+                                    onCustomEmojiSelect={handleCustomEmojiSelect}
+                                    onEmojiSelect={handleEmojiSelect}
+                                />
+                            </div>
+                        ) : null}
+                    </Box>
+                )}
 
                 <ReactionVotersModal
                     initialEmoji={votersModalEmoji}

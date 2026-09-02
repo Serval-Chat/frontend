@@ -30,6 +30,7 @@ interface MessageActionsProps {
     canEdit: boolean;
     canDelete: boolean;
     canPin: boolean;
+    canReact: boolean;
     showPicker: boolean;
     quickReactions?: QuickReactionEmoji[];
     onQuickReact?: (emoji: QuickReactionEmoji) => void;
@@ -50,6 +51,7 @@ export const MessageActions = React.memo(
         canEdit,
         canDelete,
         canPin,
+        canReact,
         showPicker,
         quickReactions,
         onQuickReact,
@@ -97,7 +99,7 @@ export const MessageActions = React.memo(
 
         return (
             <Box className="flex items-center gap-1 rounded border border-white/5 bg-background px-1 py-1 shadow-xl max-md:hidden">
-            {quickReactions && quickReactions.length > 0
+            {canReact && quickReactions && quickReactions.length > 0
                 ? quickReactions.map((quickReaction) => (
                       <Tooltip
                           content={quickReactionLabel(quickReaction)}
@@ -146,19 +148,21 @@ export const MessageActions = React.memo(
                     <CornerUpLeft size={18} />
                 </Button>
             ) : null}
-            <Button
-                className={cn(
-                    'h-8 w-8 rounded p-1.5 text-muted-foreground transition-colors hover:bg-white/5 hover:text-foreground',
-                    showPicker && 'bg-white/10 text-foreground',
-                )}
-                ref={reactRef}
-                size="sm"
-                title="Add Reaction"
-                variant="ghost"
-                onClick={onTogglePicker}
-            >
-                <SmilePlus size={18} />
-            </Button>
+            {canReact ? (
+                <Button
+                    className={cn(
+                        'h-8 w-8 rounded p-1.5 text-muted-foreground transition-colors hover:bg-white/5 hover:text-foreground',
+                        showPicker && 'bg-white/10 text-foreground',
+                    )}
+                    ref={reactRef}
+                    size="sm"
+                    title="Add Reaction"
+                    variant="ghost"
+                    onClick={onTogglePicker}
+                >
+                    <SmilePlus size={18} />
+                </Button>
+            ) : null}
 
             {canEdit ? (
                 <Button

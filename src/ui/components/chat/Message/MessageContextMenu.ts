@@ -32,6 +32,7 @@ interface ContextMenuParams {
     canEdit: boolean;
     canDelete: boolean;
     canPin: boolean;
+    canReact: boolean;
     friends?: Friend[];
     onReplyToMessage?: (message: ProcessedChatMessage) => void;
     onEdit: () => void;
@@ -61,6 +62,7 @@ function buildContextMenuItems({
     canEdit,
     canDelete,
     canPin,
+    canReact,
     friends,
     onReplyToMessage,
     onEdit,
@@ -173,11 +175,13 @@ function buildContextMenuItems({
         });
     }
 
-    items.splice(onReplyToMessage ? 1 : 0, 0, {
-        label: 'Add Reaction',
-        icon: SmilePlus,
-        onClick: onShowPicker,
-    });
+    if (canReact) {
+        items.splice(onReplyToMessage ? 1 : 0, 0, {
+            label: 'Add Reaction',
+            icon: SmilePlus,
+            onClick: onShowPicker,
+        });
+    }
 
     if (showColorResolverDebug && onShowColorResolverOrder) {
         items.push(
@@ -309,6 +313,7 @@ export function useMessageContextMenu(
         canEdit,
         canDelete,
         canPin,
+        canReact,
         friends,
         onReplyToMessage,
         onEdit,
@@ -340,6 +345,7 @@ export function useMessageContextMenu(
                 canEdit,
                 canDelete,
                 canPin,
+                canReact,
                 friends,
                 onReplyToMessage,
                 onEdit: onEdit,
@@ -369,6 +375,7 @@ export function useMessageContextMenu(
             canEdit,
             canDelete,
             canPin,
+            canReact,
             friends,
             onReplyToMessage,
             onEdit,
