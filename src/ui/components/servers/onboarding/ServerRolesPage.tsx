@@ -121,7 +121,8 @@ export const ServerRolesPage = () => {
     const allowedRoleIds = onboarding?.onboarding.selfAssignableRoleIds ?? [];
     const [selectedRoleIds, setSelectedRoleIds] = useState<string[]>([]);
     const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-    const [syncedOnboarding, setSyncedOnboarding] = useState(onboarding);
+    const [syncedOnboarding, setSyncedOnboarding] =
+        useState<typeof onboarding>(undefined);
 
     if (onboarding !== syncedOnboarding) {
         setSyncedOnboarding(onboarding);

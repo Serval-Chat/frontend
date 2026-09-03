@@ -88,6 +88,7 @@ export const useChannelListReorder = ({
     const syncLockTimeoutRef = React.useRef<ReturnType<
         typeof setTimeout
     > | null>(null);
+    const prevServerIdRef = React.useRef(selectedServerId);
 
     const nextItems = useMemo(
         (): ListItem[] =>
@@ -109,7 +110,7 @@ export const useChannelListReorder = ({
     // Sync the list to freshly-built items when props change (outside a drag),
     // tracking the previous value in state per React's "adjust state during
     // render" pattern rather than a render-time ref.
-    const [prevSyncItems, setPrevSyncItems] = useState<ListItem[]>(nextItems);
+    const [prevSyncItems, setPrevSyncItems] = useState<ListItem[]>(() => []);
 
     if (nextItems !== prevSyncItems && !isReordering && !syncLock) {
         setPrevSyncItems(nextItems);
@@ -117,7 +118,11 @@ export const useChannelListReorder = ({
     }
 
     useEffect((): void => {
+        if (prevServerIdRef.current === selectedServerId) return;
+        prevServerIdRef.current = selectedServerId;
+
         dispatchList({ type: 'reset' });
+        setPrevSyncItems([]);
 
         if (syncLockTimeoutRef.current) {
             clearTimeout(syncLockTimeoutRef.current);

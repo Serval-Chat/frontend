@@ -148,53 +148,55 @@ export const ServerSection = () => {
                 verified={server?.verified}
             />
 
-            {(!channels && !isPlaceholderChannels) ||
-            (!categories && !isPlaceholderCategories) ? (
-                <SidebarSkeleton />
-            ) : (
-                <div
-                    className="custom-scrollbar flex flex-1 flex-col overflow-y-auto"
-                    ref={scrollRef}
-                >
-                    <div className="shrink-0 border-b border-border-subtle px-2 py-2">
-                        {(onboarding?.onboarding.selfAssignableRoleIds
-                            .length ?? 0) > 0 ? (
+            <div
+                className="custom-scrollbar flex flex-1 flex-col overflow-y-auto"
+                ref={scrollRef}
+            >
+                {(!channels && !isPlaceholderChannels) ||
+                (!categories && !isPlaceholderCategories) ? (
+                    <SidebarSkeleton />
+                ) : (
+                    <>
+                        <div className="shrink-0 border-b border-border-subtle px-2 py-2">
+                            {(onboarding?.onboarding.selfAssignableRoleIds
+                                .length ?? 0) > 0 ? (
+                                <ChannelItem
+                                    iconComponent={Tag}
+                                    name="Self-assignable roles"
+                                    type="text"
+                                    onClick={(): void => {
+                                        void navigate(
+                                            `/chat/@server/${selectedServerId}/self-roles`,
+                                        );
+                                    }}
+                                />
+                            ) : null}
                             <ChannelItem
-                                iconComponent={Tag}
-                                name="Self-assignable roles"
+                                iconComponent={Hash}
+                                name="Channels & Categories"
                                 type="text"
                                 onClick={(): void => {
                                     void navigate(
-                                        `/chat/@server/${selectedServerId}/self-roles`,
+                                        `/chat/@server/${selectedServerId}/channels-and-categories`,
                                     );
                                 }}
                             />
-                        ) : null}
-                        <ChannelItem
-                            iconComponent={Hash}
-                            name="Channels & Categories"
-                            type="text"
-                            onClick={(): void => {
-                                void navigate(
-                                    `/chat/@server/${selectedServerId}/channels-and-categories`,
-                                );
-                            }}
+                        </div>
+                        <ChannelList
+                            categories={categories || []}
+                            channels={channels || []}
+                            hiddenCategoryIds={
+                                onboarding?.member.hiddenCategoryIds ?? []
+                            }
+                            hiddenChannelIds={
+                                onboarding?.member.hiddenChannelIds ?? []
+                            }
+                            scrollRef={scrollRef}
+                            selectedChannelId={selectedChannelId}
                         />
-                    </div>
-                    <ChannelList
-                        categories={categories || []}
-                        channels={channels || []}
-                        hiddenCategoryIds={
-                            onboarding?.member.hiddenCategoryIds ?? []
-                        }
-                        hiddenChannelIds={
-                            onboarding?.member.hiddenChannelIds ?? []
-                        }
-                        scrollRef={scrollRef}
-                        selectedChannelId={selectedChannelId}
-                    />
-                </div>
-            )}
+                    </>
+                )}
+            </div>
 
             <React.Suspense fallback={null}>
                 <ServerOnboardingModal serverId={selectedServerId} />

@@ -1,4 +1,4 @@
-import { act } from 'react';
+import { StrictMode, act } from 'react';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen } from '@testing-library/react';
@@ -187,11 +187,6 @@ function listElement(
     );
 }
 
-// ChannelList's props always start empty (React Query's data is undefined
-// while loading) and get populated on a later render - never with real data
-// already present on mount. The item-sync effect relies on that transition
-// (see the nextItems/prevSyncItemsRef comparison in ChannelList.tsx), so
-// tests must reproduce it or items never populate.
 function renderChannelList(props: {
     channels: Channel[];
     categories: Category[];
@@ -242,6 +237,26 @@ describe('ChannelList state cluster', (): void => {
             channels: [channel1, channel2],
             categories: [category1],
         });
+
+        expect(screen.getByText('General')).toBeInTheDocument();
+        expect(screen.getByText('general')).toBeInTheDocument();
+        expect(screen.getByText('random')).toBeInTheDocument();
+    });
+
+    it('renders channels when categories/channels are already loaded on the very first render', (): void => {
+        render(listElement([category1], [channel1, channel2]));
+
+        expect(screen.getByText('General')).toBeInTheDocument();
+        expect(screen.getByText('general')).toBeInTheDocument();
+        expect(screen.getByText('random')).toBeInTheDocument();
+    });
+
+    it('keeps channels rendered under StrictMode, whose double-invoked effects must not strand the list empty', (): void => {
+        render(
+            <StrictMode>
+                {listElement([category1], [channel1, channel2])}
+            </StrictMode>,
+        );
 
         expect(screen.getByText('General')).toBeInTheDocument();
         expect(screen.getByText('general')).toBeInTheDocument();
@@ -538,7 +553,7 @@ describe('ChannelList state cluster', (): void => {
         expect(screen.queryByTestId('drop-indicator')).not.toBeInTheDocument();
     });
 
-    it('keeps a dragged category\'s own channels attached to it, even when they were left behind by the raw drag reorder', (): void => {
+    it("keeps a dragged category's own channels attached to it, even when they were left behind by the raw drag reorder", (): void => {
         renderChannelList({
             channels: [channel1, channel2, channel3],
             categories: [category1, category2],
