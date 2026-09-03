@@ -8,8 +8,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { initTauriNotifications } from '@/lib/tauriNotifications';
 import type { RootState } from '@/store';
 import { useAppDispatch } from '@/store/hooks';
+import { audioPipeline } from '@/utils/audio/AudioPipeline';
 import { getAuthToken } from '@/utils/authToken';
-import { unlockAudio } from '@/utils/notificationAudio';
 import { setupGlobalWsHandlers, wsClient } from '@/ws';
 
 interface WebSocketProviderProps {
@@ -29,7 +29,7 @@ export const WebSocketProvider = ({
 
     useEffect((): (() => void) => {
         const unlock = (): void => {
-            unlockAudio();
+            audioPipeline.unlock();
         };
         document.addEventListener('click', unlock, { once: true });
         document.addEventListener('keydown', unlock, { once: true });

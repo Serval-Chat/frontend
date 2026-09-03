@@ -51,6 +51,47 @@ export const useUploadNotificationSound = (): UseMutationResult<
     });
 };
 
+export const useUpdateNotificationSound = (): UseMutationResult<
+    NotificationSound,
+    Error,
+    { id: string; enabled?: boolean; volume?: number }
+> => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async ({
+            id,
+            ...patch
+        }: {
+            id: string;
+            enabled?: boolean;
+            volume?: number;
+        }): Promise<NotificationSound> => {
+            const response = await apiClient.patch(
+                `/api/v1/notification-sounds/${id}`,
+                patch,
+            );
+            return response.data;
+        },
+        onSuccess: (updated): void => {
+            queryClient.setQueryData<User>(['me'], (old) => {
+                if (!old) return old;
+                return {
+                    ...old,
+                    settings: {
+                        ...old.settings,
+                        notificationSounds: (
+                            old.settings?.notificationSounds || []
+                        ).map((s): NotificationSound =>
+                            s.id === updated.id ? updated : s,
+                        ),
+                    },
+                };
+            });
+        },
+    });
+};
+
 export const useDeleteNotificationSound = (): UseMutationResult<
     string,
     Error,

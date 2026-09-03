@@ -40,6 +40,8 @@ export interface NotificationSound {
     name: string;
     url: string;
     enabled: boolean;
+    volume?: number;
+    normalizationGain?: number;
 }
 
 export interface KeybindBinding {
@@ -69,6 +71,7 @@ export interface UserSettings {
     customFontUrl?: string;
     customFontFamily?: string;
     notificationSounds?: NotificationSound[];
+    notificationVolume?: number;
     useDefaultSounds?: boolean;
     use24HourTime?: boolean;
     keybinds?: UserKeybinds;

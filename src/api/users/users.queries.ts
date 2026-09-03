@@ -154,7 +154,6 @@ export const useUpdateSettings = (): UseMutationResult<
                       }
                     : old,
             );
-            void queryClient.invalidateQueries({ queryKey: ['me'] });
         },
     });
 };

@@ -504,6 +504,56 @@ describe('setupGlobalWsHandlers - ping behaviour', (): void => {
         });
     });
 
+    describe('USER_UPDATED event (self)', (): void => {
+        beforeEach((): void => {
+            queryClient.setQueryData<User>(['me'], {
+                id: 'me',
+                login: 'me@example.com',
+                username: 'me',
+                displayName: 'Old Name',
+                createdAt: new Date(),
+                settings: {
+                    muteNotifications: false,
+                    notificationVolume: 0.5,
+                } as any,
+            });
+
+            emitWsEvent(mockWs, WsEvents.AUTHENTICATED, {
+                user: { id: 'me', username: 'me' },
+                instanceId: 'instance-1',
+            });
+        });
+
+        it('merges settings from the event without discarding existing settings fields the payload omits', (): void => {
+            emitWsEvent(mockWs, WsEvents.USER_UPDATED, {
+                userId: 'me',
+                settings: { notificationVolume: 0.8 },
+            });
+
+            const me = queryClient.getQueryData<User>(['me']);
+            expect(me?.settings).toEqual(
+                expect.objectContaining({
+                    muteNotifications: false,
+                    notificationVolume: 0.8,
+                }),
+            );
+        });
+
+        it('also applies other identity fields bundled in the same event as settings, instead of dropping them', (): void => {
+            emitWsEvent(mockWs, WsEvents.USER_UPDATED, {
+                userId: 'me',
+                displayName: 'New Name',
+                settings: { notificationVolume: 0.8 },
+            });
+
+            const me = queryClient.getQueryData<User>(['me']);
+            expect(me?.displayName).toBe('New Name');
+            expect(me?.settings).toEqual(
+                expect.objectContaining({ notificationVolume: 0.8 }),
+            );
+        });
+    });
+
     describe('server ping cleared when the pinged channel is viewed', (): void => {
         const serverId = 'server-abc';
         const channelId = 'channel-xyz';

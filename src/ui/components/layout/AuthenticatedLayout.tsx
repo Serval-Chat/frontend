@@ -95,10 +95,10 @@ export const AuthenticatedLayout = (): ReactNode => {
     }, [isConnecting]);
 
     React.useEffect((): void => {
-        if (isAuthenticated && user && !isInitialDataLoading) {
+        if (isAuthenticated && user?.id && !isInitialDataLoading) {
             void syncWebPush();
         }
-    }, [isAuthenticated, user, isInitialDataLoading]);
+    }, [isAuthenticated, user?.id, isInitialDataLoading]);
 
     if (!isAuthenticated) {
         return <Navigate replace to="/login" />;

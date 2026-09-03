@@ -58,7 +58,12 @@ import {
 import type { ProcessedChatMessage } from '@/types/chat.ui';
 import { showInAppNotification } from '@/ui/notifications/inAppNotifications';
 import { getValidMessageInteraction } from '@/ui/utils/chat';
-import { playAudio } from '@/utils/notificationAudio';
+import { audioPipeline } from '@/utils/audio/AudioPipeline';
+import {
+    getDefaultSoundNormalizationGain,
+    getDefaultSoundUrl,
+} from '@/utils/audio/defaultNotificationSounds';
+import type { SoundChoice } from '@/utils/audio/NotificationSoundManager';
 import { cacheSound, pruneSoundCache } from '@/utils/soundCache';
 
 import { wsClient } from './client';
@@ -248,6 +253,17 @@ const convertServerMessageToChatMessage = (
     senderIsBot: message.senderIsBot,
 });
 
+const nextShuffledDefaultSoundIndex = (): number => {
+    if (soundQueue.length === 0) {
+        soundQueue = Array.from({ length: 12 }, (_, i): number => i + 1);
+        for (let i = soundQueue.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [soundQueue[i], soundQueue[j]] = [soundQueue[j]!, soundQueue[i]!];
+        }
+    }
+    return soundQueue.pop()!;
+};
+
 const playNotificationSound = (queryClient: QueryClient): void => {
     // Run asynchronously to allow for better stacking and prevent blocking WS handlers
     setTimeout((): void => {
@@ -260,8 +276,9 @@ const playNotificationSound = (queryClient: QueryClient): void => {
             (s): boolean => s.enabled,
         );
         const useDefault = settings?.useDefaultSounds !== false;
+        const masterVolume = settings?.notificationVolume ?? 1;
 
-        let soundUrl = '';
+        let choice: SoundChoice | null = null;
 
         if (enabledCustomSounds.length > 0) {
             const randomIndex = Math.floor(
@@ -270,51 +287,40 @@ const playNotificationSound = (queryClient: QueryClient): void => {
             );
             if (randomIndex < enabledCustomSounds.length) {
                 const sound = enabledCustomSounds[randomIndex];
-                if (sound) soundUrl = sound.url;
-            } else {
-                if (soundQueue.length === 0) {
-                    soundQueue = Array.from(
-                        { length: 12 },
-                        (_, i): number => i + 1,
-                    );
-                    for (let i = soundQueue.length - 1; i > 0; i--) {
-                        const j = Math.floor(Math.random() * (i + 1));
-                        // i and j are always valid indices here: i is the
-                        // loop counter bounded by soundQueue.length, and j is
-                        // Math.floor(random * (i + 1)) which is in [0, i].
-                        [soundQueue[i], soundQueue[j]] = [
-                            soundQueue[j]!,
-                            soundQueue[i]!,
-                        ];
-                    }
+                if (sound) {
+                    choice = {
+                        url: sound.url,
+                        normalizationGain: sound.normalizationGain ?? 1,
+                        soundVolume: sound.volume ?? 1,
+                    };
                 }
-                const soundIndex = soundQueue.pop()!;
-                soundUrl = `/sounds/${soundIndex}.wav`;
+            } else {
+                const soundIndex = nextShuffledDefaultSoundIndex();
+                choice = {
+                    url: getDefaultSoundUrl(soundIndex),
+                    normalizationGain:
+                        getDefaultSoundNormalizationGain(soundIndex),
+                    soundVolume: 1,
+                };
             }
         } else if (useDefault) {
-            if (soundQueue.length === 0) {
-                soundQueue = Array.from(
-                    { length: 12 },
-                    (_, i): number => i + 1,
-                );
-                for (let i = soundQueue.length - 1; i > 0; i--) {
-                    const j = Math.floor(Math.random() * (i + 1));
-                    // i and j are always valid indices here: i is the loop
-                    // counter bounded by soundQueue.length, and j is
-                    // Math.floor(random * (i + 1)) which is in [0, i].
-                    [soundQueue[i], soundQueue[j]] = [
-                        soundQueue[j]!,
-                        soundQueue[i]!,
-                    ];
-                }
-            }
-            const soundIndex = soundQueue.pop()!;
-            soundUrl = `/sounds/${soundIndex}.wav`;
+            const soundIndex = nextShuffledDefaultSoundIndex();
+            choice = {
+                url: getDefaultSoundUrl(soundIndex),
+                normalizationGain: getDefaultSoundNormalizationGain(soundIndex),
+                soundVolume: 1,
+            };
         } else {
             return;
         }
 
-        void playAudio(soundUrl);
+        if (!choice) return;
+        audioPipeline.play(
+            choice.url,
+            choice.normalizationGain,
+            masterVolume,
+            choice.soundVolume,
+        );
     }, 0);
 };
 
@@ -1445,7 +1451,22 @@ export const setupGlobalWsHandlers = (
                     payload.userId === currentUser?.id;
 
                 if (isMe) {
-                    void queryClient.invalidateQueries({ queryKey: ['me'] });
+                    queryClient.setQueryData<User>(['me'], (old) => {
+                        if (!old) return old;
+                        const { settings: settingsPatch, ...rest } = payload;
+                        return {
+                            ...old,
+                            ...(rest as unknown as Partial<User>),
+                            ...(settingsPatch
+                                ? {
+                                      settings: {
+                                          ...old.settings,
+                                          ...settingsPatch,
+                                      },
+                                  }
+                                : {}),
+                        };
+                    });
                 }
                 void queryClient.invalidateQueries({
                     queryKey: ['user', payload.userId],
