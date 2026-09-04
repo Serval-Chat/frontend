@@ -40,10 +40,15 @@ export const GifPlayer = ({ klipyId, url, onResize }: GifPlayerProps) => {
         staleTime: 60 * 1000,
     });
 
+    const canonicalKlipyId = metadata?.klipyId ?? klipyId;
+
     const isFavorited = useMemo(
         (): boolean =>
-            favorites.some((f): boolean => String(f.klipyId) === klipyId),
-        [favorites, klipyId],
+            favorites.some(
+                (f): boolean =>
+                    String(f.klipyId) === canonicalKlipyId || f.url === url,
+            ),
+        [favorites, canonicalKlipyId, url],
     );
 
     const toggleFavoriteMutation = useMutation({
@@ -53,7 +58,7 @@ export const GifPlayer = ({ klipyId, url, onResize }: GifPlayerProps) => {
             }
 
             return klipyApi.toggleFavorite({
-                klipyId,
+                klipyId: canonicalKlipyId,
                 slug: metadata.slug,
                 url,
                 previewUrl: metadata.previewUrl,
@@ -69,16 +74,23 @@ export const GifPlayer = ({ klipyId, url, onResize }: GifPlayerProps) => {
                 { queryKey: ['klipy', 'favorites'] },
                 (old = []): KlipyFavorite[] => {
                     const existing = old.some(
-                        (f): boolean => String(f.klipyId) === klipyId,
+                        (f): boolean =>
+                            String(f.klipyId) === canonicalKlipyId ||
+                            f.url === url,
                     );
 
                     if (favorited && !existing) {
-                        return [...old, { ...metadata, klipyId }];
+                        return [
+                            ...old,
+                            { ...metadata, klipyId: canonicalKlipyId },
+                        ];
                     }
 
                     if (!favorited && existing) {
                         return old.filter(
-                            (f): boolean => String(f.klipyId) !== klipyId,
+                            (f): boolean =>
+                                String(f.klipyId) !== canonicalKlipyId &&
+                                f.url !== url,
                         );
                     }
 
